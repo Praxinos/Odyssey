@@ -3,6 +3,7 @@
 
 #include "OdysseyAnimationTimelineTrackEditor.h"
 
+#include "ISequencerObjectChangeListener.h"
 #include "SequencerUtilities.h"
 #include "MVVM/Extensions/ITrackExtension.h"
 #include "MVVM/ViewModels/SequencerEditorViewModel.h"
@@ -24,11 +25,26 @@
 
 FOdysseyAnimationTimelineTrackEditor::~FOdysseyAnimationTimelineTrackEditor()
 {
+    if( GetSequencer() )
+    {
+        FAnimatedPropertyKey propertyKey = FAnimatedPropertyKey::FromObjectType( UOdysseyAnimation::StaticClass() );
+        GetSequencer()->GetObjectChangeListener().GetOnAnimatablePropertyChanged( propertyKey ).RemoveAll( this );
+    }
 }
 
 FOdysseyAnimationTimelineTrackEditor::FOdysseyAnimationTimelineTrackEditor( TSharedRef<ISequencer> InSequencer )
     : FMovieSceneTrackEditor( InSequencer )
 {
+    FAnimatedPropertyKey propertyKey = FAnimatedPropertyKey::FromObjectType( UOdysseyAnimation::StaticClass() );
+    // This is called when the Animation attribute of the animation component is modified in the details panel
+    // So the Animation in the current section can be update as well
+    GetSequencer()->GetObjectChangeListener().GetOnAnimatablePropertyChanged( propertyKey ).AddRaw( this, &FOdysseyAnimationTimelineTrackEditor::OnAnimatedPropertyChanged );
+}
+
+void
+FOdysseyAnimationTimelineTrackEditor::OnAnimatedPropertyChanged( const FPropertyChangedParams& PropertyChangedParams )
+{
+    FMovieSceneTrackEditor::AnimatablePropertyChanged( FOnKeyProperty::CreateRaw( this, &FOdysseyAnimationTimelineTrackEditor::UpdateAnimationInDetailsInternal, PropertyChangedParams ) );
 }
 
 TSharedRef<ISequencerTrackEditor>
@@ -121,6 +137,110 @@ FOdysseyAnimationTimelineTrackEditor::AddAnimationTrack(TArray<FGuid> ObjectBind
         return;
 
     AnimatablePropertyChanged(FOnKeyProperty::CreateRaw(this, &FOdysseyAnimationTimelineTrackEditor::AddAnimationTrackKeyInternal, ObjectBindings));
+}
+
+FKeyPropertyResult
+FOdysseyAnimationTimelineTrackEditor::UpdateAnimationInDetailsInternal( FFrameNumber iKeyTime, FPropertyChangedParams iPropertyChangedParams )
+{
+    FKeyPropertyResult keyPropertyResult;
+
+    TSharedPtr<ISequencer> SequencerPtr = GetSequencer();
+    if( !SequencerPtr.IsValid() )
+        return keyPropertyResult;
+
+    // If Binding is invalid, all other attributes MUST also BE considered as invalid
+    struct FResult
+    {
+        FGuid Binding;
+        UObject* Object;
+        UMovieSceneSequence* Sequence;
+        FFrameNumber FrameNumberInSequence;
+    };
+    auto FindBindingFromObject = [SequencerPtr]( UObject* iObject, FFrameNumber iFrameNumber ) -> FResult
+        {
+            FResult result;
+            result.Object = iObject;
+            result.Sequence = SequencerPtr->GetFocusedMovieSceneSequence();
+            check( result.Sequence );
+            result.FrameNumberInSequence = iFrameNumber;
+
+            // Try to find the corresponding binding of the object in the focused sequence
+            FGuid binding = result.Sequence->FindBindingFromObject( result.Object, SequencerPtr->GetSharedPlaybackState() );
+            if( binding.IsValid() )
+            {
+                result.Binding = binding;
+                return result;
+            }
+
+            // If the object is not in the focused sequence, try to find it in a subsequence
+            // (should be UMovieSceneCinematicBoardTrack, but UMovieSceneSubTrack is used to avoid dependencies of epos)
+            for( UMovieSceneTrack* track : result.Sequence->GetMovieScene()->GetTracks() )
+            {
+                UMovieSceneSubTrack* subtrack = Cast<UMovieSceneSubTrack>( track );
+                if( !subtrack )
+                    continue;
+
+                // Find the subsection at the current time
+                UMovieSceneSection* section = MovieSceneHelpers::FindSectionAtTime( subtrack->GetAllSections(), iFrameNumber ); // Always use the frame number of the focused sequence (as subtracks are always from the focused sequence)
+                UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
+                // get its subsequence
+                result.Sequence = subsection ? subsection->GetSequence() : nullptr;
+                if( !result.Sequence )
+                    continue;
+
+                // Convert the current time in the subsequence reference
+                result.FrameNumberInSequence = ( result.FrameNumberInSequence * subsection->OuterToInnerTransform() ).GetFrame();
+
+                // Try to find the corresponding binding of the object in the subsequence
+                binding = result.Sequence->FindBindingFromObject( result.Object, SequencerPtr->GetSharedPlaybackState() );
+                if( binding.IsValid() )
+                {
+                    result.Binding = binding;
+                    return result;
+                }
+            }
+
+            return result;
+        };
+
+    for( UObject* object : iPropertyChangedParams.ObjectsThatChanged )
+    {
+        FResult result = FindBindingFromObject( object, iKeyTime );
+
+        // If no binding at all, process the next object
+        if( !result.Binding.IsValid() )
+            continue;
+
+        // Once a binding is found, get the animation in actor
+        UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>( object );
+        UOdysseyAnimation* animation_in_actor = animationComponent ? animationComponent->GetAnimation() : nullptr;
+        if( !animation_in_actor )
+            continue;
+
+        // Find the timeline track of the binding
+        UOdysseyAnimationTimelineTrack* animationTrack = result.Sequence->GetMovieScene()->FindTrack<UOdysseyAnimationTimelineTrack>( result.Binding );
+        if( !animationTrack || !animationTrack->CanModify() )
+            continue;
+
+        // Find the section and its animation
+        UMovieSceneSection* section = MovieSceneHelpers::FindSectionAtTime( animationTrack->GetAllSections(), result.FrameNumberInSequence );
+        UOdysseyAnimationTimelineSection* animationSection = Cast<UOdysseyAnimationTimelineSection>( section );
+        UOdysseyAnimation* animation_in_section = animationSection ? animationSection->GetAnimation() : nullptr;
+        if( !animation_in_section )
+            continue;
+
+        // If animation (of the actor) and animation (of the section) is the same, nothing to do
+        if( animation_in_actor == animation_in_section )
+            continue;
+
+        // Otherwise, update the section with the new actor animation
+        animationTrack->Modify();
+        animationSection->Modify();
+        keyPropertyResult.bTrackModified = true;
+        animationSection->SetAnimation( animation_in_actor );
+    }
+
+    return keyPropertyResult;
 }
 
 FKeyPropertyResult
