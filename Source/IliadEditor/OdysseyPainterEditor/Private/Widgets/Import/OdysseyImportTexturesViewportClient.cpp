@@ -20,9 +20,11 @@ FOdysseyImportTexturesViewportClient::~FOdysseyImportTexturesViewportClient()
 {
 }
 
-FOdysseyImportTexturesViewportClient::FOdysseyImportTexturesViewportClient(uint32 iCanvasWidth, uint32 iCanvasHeight)
+FOdysseyImportTexturesViewportClient::FOdysseyImportTexturesViewportClient(uint32 iCanvasWidth, uint32 iCanvasHeight, uint32 iMaxWidth, uint32 iMaxHeight)
     : mCanvasWidth(iCanvasWidth)
     , mCanvasHeight(iCanvasHeight)
+    , mMaxWidth(iMaxWidth)
+    , mMaxHeight(iMaxHeight)
     , mHUD(MakeShared<FOdysseyHUDElement>())
 {
     const UOdysseyPainterEditorSettings& settings = *GetDefault< UOdysseyPainterEditorSettings >();
@@ -205,7 +207,10 @@ FOdysseyImportTexturesViewportClient::InitTransform(FViewport* InViewport)
     FIntRect canvasPadding(10.f, 10.f, -10.f, -10.f);
     const FIntRect& canvasRect = FIntRect(0, 0, InViewport->GetSizeXY().X, InViewport->GetSizeXY().Y) + canvasPadding;
 
-    mMinZoom = FMath::Min(float(canvasRect.Width()) / mCanvasWidth, float(canvasRect.Height()) / mCanvasHeight);
+    uint32 maxWidth = FMath::Max(mMaxWidth, mCanvasWidth);
+    uint32 maxheight = FMath::Max(mMaxHeight, mCanvasHeight);
+
+    mMinZoom = FMath::Min(float(canvasRect.Width()) / maxWidth, float(canvasRect.Height()) / maxheight);
 
     float canvasCenter_x = mCanvasWidth  / 2.f;
     float canvasCenter_y = mCanvasHeight / 2.f;

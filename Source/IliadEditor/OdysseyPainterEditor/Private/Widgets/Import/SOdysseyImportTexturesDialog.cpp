@@ -196,8 +196,16 @@ SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FOdyssey
         ]
     ];
 
+    uint32 maxWidth = 0;
+    uint32 maxHeight = 0;
+    for (UTexture2D* texture : mImportData.GetSourceTextures())
+    {
+        maxWidth = FMath::Max(maxWidth, (uint32)texture->Source.GetSizeX());
+        maxHeight = FMath::Max(maxHeight, (uint32)texture->Source.GetSizeY());
+    }
+
     //Setup Viewport
-    mViewportClient = MakeShared<FOdysseyImportTexturesViewportClient>(mImportData.GetDestinationWidth(), mImportData.GetDestinationHeight());
+    mViewportClient = MakeShared<FOdysseyImportTexturesViewportClient>(mImportData.GetDestinationWidth(), mImportData.GetDestinationHeight(), maxWidth, maxHeight);
     mSceneViewport = MakeShared<FSceneViewport>(mViewportClient.Get(), mViewportWidget);
     mViewportWidget->SetViewportInterface(mSceneViewport.ToSharedRef());
     mViewportClient->SetTexture(mPreviewRenderTarget.Get());

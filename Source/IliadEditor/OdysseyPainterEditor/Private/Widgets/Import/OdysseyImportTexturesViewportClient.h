@@ -14,7 +14,7 @@ class FOdysseyImportTexturesViewportClient
 {
 public:
     // Construction / Destruction
-    FOdysseyImportTexturesViewportClient(uint32 iCanvasWidth, uint32 iCanvasHeight);
+    FOdysseyImportTexturesViewportClient(uint32 iCanvasWidth, uint32 iCanvasHeight, uint32 iMaxWidth, uint32 iMaxHeight);
     ~FOdysseyImportTexturesViewportClient();
 
 public:
@@ -42,6 +42,8 @@ private:
     // Private Data Members
     uint32 mCanvasWidth;
     uint32 mCanvasHeight;
+    uint32 mMaxWidth;
+    uint32 mMaxHeight;
     TObjectPtr<UTexture2D> mCheckerboardTexture;
     TObjectPtr<UTexture> mTexture;
     TSharedRef<FOdysseyHUDElement> mHUD;
