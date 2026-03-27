@@ -4,6 +4,7 @@
 // Ariane headers
 #include "ArianeLayerStack.h"
 #include "ArianeLayerFolder.h"
+#include "ArianeLayerDrawing.h"
 
 UArianeLayerStack::~UArianeLayerStack()
 {
@@ -27,6 +28,8 @@ UArianeLayerStack::RemoveSelectedLayers()
     {
         Cast<UArianeLayerFolder>(Layer->GetOuter())->RemoveChild( Layer );
     }
+
+    ClearLayerSelection();
 }
 
 void
@@ -66,6 +69,8 @@ UArianeLayerStack::SelectLayer_Private( UArianeLayer* Layer, bool bRecurse )
     if( SelectedLayers.Find( Layer ) == INDEX_NONE )
     {
         SelectedLayers.Add( Layer );
+
+        Layer->SetSelected( true );
     }
 
     if( bRecurse )
@@ -87,7 +92,12 @@ UArianeLayerStack::ClearLayerSelection()
 {
     OnPreCurrentLayerChanged.Broadcast();
 
-    SelectedLayers.Empty();
+    SelectedLayers.RemoveAll([] ( UArianeLayer* Layer )
+                             {
+                                 Layer->SetSelected( false );
+
+                                 return true;
+                             });
 
     OnPostCurrentLayerChanged.Broadcast();
 }
@@ -98,24 +108,40 @@ UArianeLayerStack::GetSelectedLayers()
     return SelectedLayers;
 }
 
-UArianeLayer*
-UArianeLayerStack::CreateLayer( UArianeLayerFolder* InParentLayerFolder )
+UArianeLayerDrawing*
+UArianeLayerStack::GetFirstSelectedDrawingLayer()
+{
+    for( UArianeLayer* Layer : SelectedLayers )
+    {
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>( Layer );
+
+        if( DrawingLayer )
+        {
+            return DrawingLayer;
+        }
+    }
+
+    return nullptr;
+}
+
+UArianeLayerDrawing*
+UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder )
 {
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootLayerFolder;
-    UArianeLayer* NewLayer = NewObject<UArianeLayer>( ParentLayerFolder );
+    UArianeLayerDrawing* NewDrawingLayer = NewObject<UArianeLayerDrawing>( ParentLayerFolder );
 
     OnPreLayerStackChanged.Broadcast();
 
-    ParentLayerFolder->AddChild( NewLayer );
+    ParentLayerFolder->AddChild( NewDrawingLayer );
 
     OnPostLayerStackChanged.Broadcast();
 
-    return NewLayer;
+    return NewDrawingLayer;
 }
 
 UArianeLayerFolder*
-UArianeLayerStack::CreateLayerFolder( UArianeLayerFolder* InParentLayerFolder )
+UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder )
 {
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootLayerFolder;

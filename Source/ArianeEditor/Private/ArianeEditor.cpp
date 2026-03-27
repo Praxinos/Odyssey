@@ -29,6 +29,7 @@ FArianeEditor::FArianeEditor( FArianeEditorViewportToolkit* iToolkit )
     : Toolkit( iToolkit )
     , Name("ArianeEditor")
     , CurrentTool ( nullptr )
+    , ColorType ( EOdysseyPainterEditorColorType::Raw )
 {
     // Component selection is managed by ArianeEditor in order to emulate a Pre/Post Selection event behavior
     USelection::SelectionChangedEvent.AddRaw( this, &FArianeEditor::OnEditorSelectionChanged );
@@ -75,11 +76,11 @@ FArianeEditor::ClearPainting3DComponents()
     {
         UArianePainting3DComponent* painting3DComponent = Cast<UArianePainting3DComponent>(actor->GetComponentByClass( UArianePainting3DComponent::StaticClass() ));
 
-        if( GEditor->IsTransactionActive() )
-            painting3DComponent->Modify();
-
         if( painting3DComponent )
         {
+            if( GEditor->IsTransactionActive() )
+                painting3DComponent->Modify();
+
             painting3DComponent->ResetHierarchy();
         }
     }
@@ -399,6 +400,30 @@ FArianeEditor::FOn3DPaintingComponentSelectionChanged&
 FArianeEditor::OnPost3DPaintingComponentSelectionChangedDelegate()
 {
     return OnPost3DPaintingComponentSelectionChanged;
+}
+
+::ULIS::FColor
+FArianeEditor::GetPaintColor()
+{
+    return PaintColor;
+}
+
+void
+FArianeEditor::SetPaintColor( const ::ULIS::FColor& InPaintColor )
+{
+    PaintColor = InPaintColor;
+}
+
+EOdysseyPainterEditorColorType
+FArianeEditor::GetColorType()
+{
+    return ColorType;
+}
+
+void
+FArianeEditor::SetColorType( EOdysseyPainterEditorColorType& InColorType )
+{
+    ColorType = InColorType;
 }
 
 void

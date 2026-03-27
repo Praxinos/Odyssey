@@ -6,6 +6,8 @@
 // Unreal headers
 #include "CoreMinimal.h"
 #include "IndexTypes.h"
+#include "DynamicMeshBuilder.h"
+// Ariane Headers
 #include "ArianeVertex.h"
 #include "ArianeID.h"
 
@@ -91,14 +93,14 @@ struct ARIANE_API FArianeSegment
         const TArray<FractionStep>& GetFractionSteps();
 
         /**
-         * @brief Allocate FModelVertex cache and Index cache for building a polygonal shape
+         * @brief Allocate FDynamicMeshVertex cache and Index cache for building a polygonal shape
          * @param VertexCount number of ModelVertex requested
          * @param TriangleCount number of Triangles requested
          */
         void AllocateCache( uint32 VertexCount, uint32 TriangleCount );
 
-        /** Get the FModelVertex cache */
-        const TArray<FModelVertex>& GetModelVertexCache();
+        /** Get the FDynamicMeshVertex cache */
+        const TArray<FDynamicMeshVertex>& GetModelVertexCache();
 
         /** Get the Index cache */
         const TArray<uint32>& GetIndexCache();
@@ -158,7 +160,7 @@ struct ARIANE_API FArianeSegment
     protected:
         TArray<FractionStep> FractionSteps;
         TArray<Fraction> Fractions;
-        TArray<FModelVertex> ModelVertexCache;
+        TArray<FDynamicMeshVertex> ModelVertexCache;
         TArray<uint32> IndexCache;
         FBoxSphereBounds Bounds;
         double Length;

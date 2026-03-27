@@ -80,7 +80,7 @@ class ARIANEEDITOR_API SArianeEditorLayerStack
         void UnregisterDelegates();
         void RegisterDelegates();
         void OnPostLayerStackChanged();
-        void OnPostCurrentLayerStackChanged();
+        void OnPostCurrentLayerChanged();
 /*
         void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
         void OnSourceChanged();

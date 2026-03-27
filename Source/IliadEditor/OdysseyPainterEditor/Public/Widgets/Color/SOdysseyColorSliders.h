@@ -20,7 +20,7 @@
 
 #include "SOdysseyColorSlider.h"
 
-class SOdysseyColorSliders : public SCompoundWidget
+class ODYSSEYPAINTEREDITOR_API SOdysseyColorSliders : public SCompoundWidget
 {
     typedef SCompoundWidget tSuperClass;
 

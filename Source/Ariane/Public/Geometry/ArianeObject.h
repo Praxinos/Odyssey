@@ -12,6 +12,7 @@
 
 class UArianePainting3DComponent;
 struct FArianeObject;
+class UArianeLayerDrawing;
 
 struct ARIANE_API FArianeObjectInvalidationFlags
 {
@@ -132,6 +133,9 @@ struct ARIANE_API FArianeObject
         FArianeObject* GetParent();
         void SetParent( FArianeObject* Parent );
         void RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstancedObjects );
+        virtual bool IsVisible( bool bInHierarchical );
+        UArianeLayerDrawing* GetDrawingLayer();
+        void SetDrawingLayer( UArianeLayerDrawing* InLayer );
 
     protected:
         /**
@@ -165,6 +169,9 @@ struct ARIANE_API FArianeObject
 
         UPROPERTY( EditAnywhere )
         FVector Scaling;
+
+        UPROPERTY( EditAnywhere )
+        UArianeLayerDrawing* DrawingLayer;
 
     protected:
         TArray<FArianeObjectID> InvalidatedChildrenID;

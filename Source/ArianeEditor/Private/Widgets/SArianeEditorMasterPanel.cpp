@@ -4,6 +4,7 @@
 #include "SArianeEditorMasterPanel.h"
 #include "SArianeEditorToolPanel.h"
 #include "SArianeEditorLayerStackPanel.h"
+#include "SArianeEditorColorSelectorPanel.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -22,6 +23,11 @@ SArianeEditorMasterPanel::Construct( const FArguments& InArgs, FArianeEditor* iE
         .AutoHeight()
         [
             SNew(SArianeEditorLayerStackPanel, iEditor)
+        ]
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SArianeEditorColorSelectorPanel, iEditor)
         ]
     ];
 }

@@ -5,7 +5,7 @@
 #include "ArianeObject.h"
 #include "StructUtils/InstancedStruct.h"
 #include "ArianePainting3DComponent.h"
-
+#include "ArianeLayerDrawing.h"
 
 bool
 FArianeObjectInvalidationFlags::HasBaseClass( uint32 BaseClass ) const
@@ -88,6 +88,7 @@ FArianeObject::FArianeObject()
     , Guid ( FGuid::NewGuid() )
     , ParentID ()
     , InvalidationFlags ( new FArianeObjectInvalidationFlags() )
+    , DrawingLayer ( nullptr )
 {
 }
 
@@ -283,6 +284,29 @@ FVector
 FArianeObject::GetScaling()
 {
     return Scaling;
+}
+
+UArianeLayerDrawing*
+FArianeObject::GetDrawingLayer()
+{
+    return DrawingLayer;
+}
+
+void
+FArianeObject::SetDrawingLayer( UArianeLayerDrawing* InDrawingLayer )
+{
+    DrawingLayer = InDrawingLayer;
+}
+
+bool
+FArianeObject::IsVisible( bool bInHierarchical )
+{
+    if( bInHierarchical )
+    {
+        // Unimplemented
+    }
+
+    return ( ( DrawingLayer == nullptr ) || DrawingLayer->IsVisible( true ) == true ) ? true : false;
 }
 
 UArianePainting3DComponent*

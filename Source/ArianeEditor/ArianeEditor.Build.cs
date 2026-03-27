@@ -68,16 +68,17 @@ public class ArianeEditor : ModuleRules
                 //"OdysseyCore",
                 //"OdysseyCommonWidgets",
                 //"OdysseyHUD",
-                //"OdysseyImaging",
+                "OdysseyImaging",
                 //"OdysseyLayerStack",
                 //"OdysseyLayerStackEditor",
+                "OdysseyPainterEditor",
                 //"OdysseyRendering",
                 "Ariane",
                 "OdysseyStyle",
                 "OdysseyStylusInput",
                 //"OdysseyTexture",
                 //"OdysseyVector",
-                //"OdysseyWidgets",
+                "OdysseyWidgets",
 
                 //"blend2d"
             }
@@ -89,15 +90,18 @@ public class ArianeEditor : ModuleRules
                 "OdysseyCoreEditor",
                 //"OdysseyEditor",
                 //"OdysseyHUD",
+                "OdysseyImaging",
                 //"OdysseyMedia",
-                //"OdysseyPalette",
+                "OdysseyPalette",
+                "OdysseyPainterEditor",
                 //"OdysseyPaletteEditor",
                 //"OdysseyRendering",
                 //"OdysseyVector",
+                "OdysseyWidgets",
                 "Ariane",
                 "StylusInput",
                 "ApplicationCore",
-                //"ULIS",
+                "ULIS",
                 //"ULISLoader"
              }
         );

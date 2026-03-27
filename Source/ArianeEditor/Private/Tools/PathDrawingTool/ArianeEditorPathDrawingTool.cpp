@@ -7,6 +7,7 @@
 #include "ArianePainting3DComponent.h"
 #include "ArianePath.h"
 #include "ArianeVertex.h"
+#include "ArianeLayerStack.h"
 #include "ArianeSegmentCubic.h"
 // Odyssey
 #include "OdysseyStyle.h"
@@ -39,9 +40,14 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* iViewportClien
                                          , const FArianePointerState& PointerState
                                          , bool iRepeat )
 {
+
+
     if( iKey == EKeys::LeftMouseButton )
     {
         UEditorActorSubsystem* editorActorSubsystem = GEditor->GetEditorSubsystem<UEditorActorSubsystem>();
+        ::ULIS::FColor color = Editor->GetPaintColor();
+        ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
+        FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
 
         GEditor->BeginTransaction(FText::FromString("Draw Path"));
 
@@ -57,7 +63,10 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* iViewportClien
 
                 EditedPath = painting3DComponent->AllocPath( LineType );
 
-                painting3DComponent->RootObjectID.GetObject()->AppendChild( EditedPath );
+                EditedPath->SetColor( ueColor );
+                EditedPath->SetDrawingLayer( painting3DComponent->GetLayerStack()->GetFirstSelectedDrawingLayer() );
+
+                painting3DComponent->GetRootObject()->AppendChild( EditedPath );
 
                 //GEditor->UndoTransaction();
                 //painting3DComponent->PrintPointers();
@@ -204,6 +213,12 @@ UArianeEditorPathDrawingTool::OnMouseUp( FEditorViewportClient* iViewportClient
     }
 
     return false;
+}
+
+bool
+UArianeEditorPathDrawingTool::SupportsColorType( EOdysseyPainterEditorColorType ColorType )
+{
+    return true;
 }
 
 void

@@ -16,6 +16,8 @@
 // Ariane Headers
 #include "ArianeID.h"
 #include "ArianePath.h" // for EArianePathLineType
+// Odyssey Headers
+#include "OdysseyPalette.h"
 
 #include "ArianePainting3DComponent.generated.h"
 
@@ -28,6 +30,9 @@ struct FArianeSegment;
 class UArianeLayerFolder;
 class UArianeLayer;
 class UArianeLayerStack;
+class UOdysseyPalette;
+class UOdysseyPaletteSet;
+class UOdysseyPaletteEntryColor;
 
 class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
 {
@@ -84,6 +89,16 @@ public:
     void DeleteInstancedObject( FArianeObject* Object );
 
     UArianeLayerStack* GetLayerStack();
+    const TArray<UOdysseyPaletteSet*>& GetPaletteSets() const;
+    UOdysseyPaletteEntryColor* GetCurrentPaletteColorEntry() const;
+    void SetCurrentPaletteSet( const FGuid& InCurrentPaletteSet );
+    FGuid GetCurrentPaletteSet() const;
+    void AddPaletteSet( UOdysseyPalette* iPalette );
+    void RemovePaletteSet( UOdysseyPaletteSet* PaletteSet );
+    void SetPaletteSet( FGuid Index, UOdysseyPaletteSet* PaletteSet );
+    void SetCurrentPaletteColorEntry( UOdysseyPaletteEntryColor* Entry, FGuid Set );
+    virtual void OnRegister() override;
+    const TArray<UMaterialInterface*>& GetUsedMaterials();
 
 private:
     virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
@@ -95,18 +110,25 @@ public:
     void Update();
     FArianeObject* GetObject( const FGuid& InGuid );
 
-public:
+protected:
     UPROPERTY( EditAnywhere )
     TArray<FInstancedStruct> InstancedObjects;
 
     UPROPERTY( EditAnywhere )
     FArianeObjectID RootObjectID;
 
-    TArray<UMaterialInterface*> UsedMaterials;
-
     UPROPERTY()
     UArianeLayerStack* LayerStack;
 
+    UPROPERTY()
+    TArray<UOdysseyPaletteSet*> PaletteSets;
+
 public:
     mutable FCriticalSection InstancedObjectsAccessRW;
+
+protected:
+    UOdysseyPaletteEntryColor* CurrentPaletteColorEntry;
+    FGuid CurrentPaletteSet;
+    TArray<UMaterialInterface*> UsedMaterials;
+
 };

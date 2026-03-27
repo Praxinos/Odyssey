@@ -11,6 +11,8 @@ UArianeLayer::~UArianeLayer()
 
 UArianeLayer::UArianeLayer()
     : bVisible ( true )
+    , bLocked ( false )
+    , bSelected ( false )
 {
 /*
     PrimaryComponentTick.bCanEverTick = true;
@@ -39,11 +41,11 @@ UArianeLayer::SetVisible( bool bInVisible )
 bool
 UArianeLayer::IsVisible( bool bHierarchical )
 {
-    if( bHierarchical )
-    {
-        UArianeLayerFolder* ParentLayer = GetParent();
+    UArianeLayerFolder* ParentLayer = GetParent();
 
-        return ParentLayer ? ( ParentLayer->IsVisible( bHierarchical ) && bVisible ) : bVisible;
+    if( bHierarchical && ParentLayer )
+    {
+        return ParentLayer->IsVisible( bHierarchical ) && bVisible;
     }
 
     return bVisible;
@@ -58,12 +60,26 @@ UArianeLayer::SetLocked( bool bInLocked )
 bool
 UArianeLayer::IsLocked( bool bHierarchical )
 {
-    if( bHierarchical )
-    {
-        UArianeLayerFolder* ParentLayer = GetParent();
+    UArianeLayerFolder* ParentLayer = GetParent();
 
-        return ParentLayer ? ( ParentLayer->IsLocked( bHierarchical ) && bLocked ) : bLocked;
+    if( bHierarchical && ParentLayer )
+    {
+        return ParentLayer->IsLocked( bHierarchical ) || bLocked;
     }
 
     return bLocked;
 }
+
+#if WITH_EDITOR
+void
+UArianeLayer::SetSelected( bool bInSelected )
+{
+    bSelected = bInSelected;
+}
+
+bool
+UArianeLayer::IsSelectedInEditor() const
+{
+    return bSelected;
+}
+    #endif

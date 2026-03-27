@@ -18,7 +18,7 @@
 
 /////////////////////////////////////////////////////
 // SOdysseyAdvancedColorWheel
-class SOdysseyAdvancedColorWheel : public SOdysseyLeafWidget
+class ODYSSEYPAINTEREDITOR_API SOdysseyAdvancedColorWheel : public SOdysseyLeafWidget
 {
 public:
     DECLARE_DELEGATE_TwoParams( FOnColorChanged, eOdysseyEventState::Type, const ::ULIS::FColor& );

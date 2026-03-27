@@ -10,6 +10,7 @@
 #include "ArianeLayerStack.generated.h"
 
 class UArianeLayer;
+class UArianeLayerDrawing;
 class UArianeLayerFolder;
 
 UCLASS()
@@ -32,8 +33,9 @@ public:
     void SelectLayers( const TArray<UArianeLayer*> LayerSelection, bool bRecurse = true );
     void ClearLayerSelection();
     const TArray<UArianeLayer*>& GetSelectedLayers();
-    UArianeLayer* CreateLayer( UArianeLayerFolder* ParentLayerFolder );
-    UArianeLayerFolder* CreateLayerFolder( UArianeLayerFolder* ParentLayerFolder );
+    UArianeLayerDrawing* GetFirstSelectedDrawingLayer();
+    UArianeLayerDrawing* CreateDrawingLayer( UArianeLayerFolder* ParentLayerFolder );
+    UArianeLayerFolder* CreateFolderLayer( UArianeLayerFolder* ParentLayerFolder );
 
     FOnLayerStackChanged& OnPreLayerStackChangedDelegate();
     FOnLayerStackChanged& OnPostLayerStackChangedDelegate();

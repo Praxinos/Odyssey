@@ -56,7 +56,9 @@ public class Ariane : ModuleRules
             new string[] {
                 "Core",
                 "SlateCore",
-                "Engine"
+                "Engine",
+
+                "OdysseyPalette",
             }
         );
 
@@ -67,6 +69,8 @@ public class Ariane : ModuleRules
                 "Renderer",
                 "RHI",
                 "TypedElementRuntime",
+
+                "OdysseyPalette",
                 //"OdysseyMedia",
                 //"OdysseyRendering",
             }

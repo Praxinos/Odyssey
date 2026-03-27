@@ -32,7 +32,7 @@ UArianeEditorEraserTool::UArianeEditorEraserTool()
     , CanvasRenderTarget ( nullptr )
     , Brush( nullptr )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathDrawing64");
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser64");
 
     bHasContextMenu = true;
 }

@@ -158,6 +158,28 @@ FArianePath::Chain::IterateSegments( TFunction<bool( FArianeVertex*, FArianeSegm
     }
 }
 
+
+//--------------------- Vertex buffer
+
+void FArianePathVertexBuffer::Resize(  uint32 InVertexCount, FRHICommandListBase& RHICmdList )
+{
+    VertexBufferRHI.SafeRelease();
+
+    FRHIResourceCreateInfo ResourceInfo( TEXT( "Dynamic Vertex Buffer" ) );
+
+    VertexCount = InVertexCount;
+
+    VertexBufferRHI = RHICmdList.CreateVertexBuffer( VertexCount * sizeof( FDynamicMeshVertex )
+                                                   , BUF_Dynamic | BUF_VertexBuffer | BUF_ShaderResource
+                                                   , ERHIAccess::VertexOrIndexBuffer
+                                                   , ResourceInfo );
+}
+
+void FArianePathVertexBuffer::InitRHI(FRHICommandListBase& RHICmdList)
+{
+    Resize( VertexCount, RHICmdList );
+}
+
 //--------------------- Path
 
 FArianePath::~FArianePath()
@@ -168,6 +190,7 @@ FArianePath::FArianePath()
     : FArianeObject()
     , Geometry3D ( this )
     , LineType( EArianePathLineType::Tube )
+    , Color ( 0, 0, 0, 255 )
 {
     InvalidationFlags = new FArianePathInvalidationFlags();
 }
@@ -177,6 +200,7 @@ FArianePath::FArianePath( UArianePainting3DComponent* InPainting3DComponent
     : FArianeObject ( InPainting3DComponent )
     , Geometry3D ( this )
     , LineType ( InLineType )
+    , Color ( 0, 0, 0, 255 )
 {
     InvalidationFlags = new FArianePathInvalidationFlags();
 }
@@ -417,6 +441,26 @@ FArianePath::PostLoad()
                                               .SetVertexAddedOrRemoved() );
 }
 
+const FColor&
+FArianePath::GetColor()
+{
+    return Color;
+}
+
+void
+FArianePath::SetColor( const FColor& InColor )
+{
+    Color = InColor;
+}
+
+void
+FArianePath::ExportProperties( FArianePath* DestPath )
+{
+    Super::ExportProperties( DestPath );
+
+    DestPath->Color = Color;
+}
+
 void
 FArianePath::FindChains()
 {
@@ -490,10 +534,10 @@ FArianePathGeometry3D::~FArianePathGeometry3D()
 {
     if( VertexFactory )
     {
+        PositionBuffer.ReleaseResource();
+        StaticMeshVB.ReleaseResource();
+        ColorBuffer.ReleaseResource();
         IndexBuffer.ReleaseResource();
-        VertexBuffers.PositionVertexBuffer.ReleaseResource();
-        VertexBuffers.StaticMeshVertexBuffer.ReleaseResource();
-
         VertexFactory->ReleaseResource();
 
         delete VertexFactory;
@@ -752,7 +796,7 @@ FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
     Segment->AllocateCache( ( Segment->GetFractionCount() + 1 ) * 2
                           , ( Segment->GetFractionCount() * 2 ) );
 
-    TArray<FModelVertex>& ModelVertexCache = const_cast<TArray<FModelVertex>&>(Segment->GetModelVertexCache());
+    TArray<FDynamicMeshVertex>& ModelVertexCache = const_cast<TArray<FDynamicMeshVertex>&>(Segment->GetModelVertexCache());
     TArray<uint32>& IndexCache = const_cast<TArray<uint32>&>(Segment->GetIndexCache());
     const TArray<FArianeSegment::Fraction>& Fractions = Segment->GetFractions();
     const TArray<FArianeSegment::FractionStep>& FractionSteps = Segment->GetFractionSteps();
@@ -771,8 +815,8 @@ FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
         if( PerpendicularVector.Normalize() )
         {
             FVector UpVector = PerpendicularVector.Cross( TangentVector );
-            FModelVertex* ModelVertex0 = &ModelVertexCache[ModelVertexOffset+0];
-            FModelVertex* ModelVertex1 = &ModelVertexCache[ModelVertexOffset+1];
+            FDynamicMeshVertex* ModelVertex0 = &ModelVertexCache[ModelVertexOffset+0];
+            FDynamicMeshVertex* ModelVertex1 = &ModelVertexCache[ModelVertexOffset+1];
 
             if( UpVector.Normalize() )
             {
@@ -783,9 +827,13 @@ FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
                 ModelVertex0->Position.Y = NewPosition0.Y;
                 ModelVertex0->Position.Z = NewPosition0.Z;
 
+                ModelVertex0->Color = Path->GetColor();
+
                 ModelVertex1->Position.X = NewPosition1.X;
                 ModelVertex1->Position.Y = NewPosition1.Y;
                 ModelVertex1->Position.Z = NewPosition1.Z;
+
+                ModelVertex1->Color = Path->GetColor();
             }
         }
     }
@@ -852,7 +900,7 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
     Segment->AllocateCache( ( Segment->GetFractionCount() + 1 ) * Divisions
                           , ( Segment->GetFractionCount() * 2 ) * Divisions );
 
-    TArray<FModelVertex>& ModelVertexCache = const_cast<TArray<FModelVertex>&>(Segment->GetModelVertexCache());
+    TArray<FDynamicMeshVertex>& ModelVertexCache = const_cast<TArray<FDynamicMeshVertex>&>(Segment->GetModelVertexCache());
     TArray<uint32>& IndexCache = const_cast<TArray<uint32>&>(Segment->GetIndexCache());
     const TArray<FArianeSegment::Fraction>& Fractions = Segment->GetFractions();
     const TArray<FArianeSegment::FractionStep>& FractionSteps = Segment->GetFractionSteps();
@@ -883,12 +931,14 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
             for( uint32 j = 0; j < Divisions; j++ )
             {
                 FRotator Rotator = UKismetMathLibrary::RotatorFromAxisAndAngle( TangentVector, AngleInDegrees );
-                FModelVertex* ModelVertex = &ModelVertexCache[ModelVertexOffset+j];
+                FDynamicMeshVertex* ModelVertex = &ModelVertexCache[ModelVertexOffset+j];
                 FVector RotatedPosition = Step.Point->GetPosition() + ( Rotator.RotateVector( PerpendicularVector ) * PointRadius );
 
                 ModelVertex->Position.X = RotatedPosition.X;
                 ModelVertex->Position.Y = RotatedPosition.Y;
                 ModelVertex->Position.Z = RotatedPosition.Z;
+
+                ModelVertex->Color = Path->GetColor();
 
                 AngleInDegrees += StepAngle;
             }
@@ -940,12 +990,6 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
     }
 }
 
-const FStaticMeshVertexBuffers&
-FArianePathGeometry3D::GetVertexBuffers() const
-{
-    return VertexBuffers;
-}
-
 const FRawStaticIndexBuffer&
 FArianePathGeometry3D::GetIndexBuffer() const
 {
@@ -964,21 +1008,14 @@ FArianePathGeometry3D::GetVertexFactory()
     return VertexFactory;
 }
 
-static inline void InitOrUpdateResource( FRHICommandListImmediate& RHICmdList
-                                       , FRenderResource* Resource )
+const uint32
+FArianePathGeometry3D::GetVertexCount() const
 {
-    if (!Resource->IsInitialized())
-    {
-        Resource->InitResource( RHICmdList );
-    }
-    else
-    {
-        Resource->UpdateRHI( RHICmdList );
-    }
+    return VertexCount;
 }
 
 void
-FArianePathGeometry3D::InitVertexFactory( TArray<FModelVertex>& ModelVertices
+FArianePathGeometry3D::InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices
                                         , TArray<uint32>& Indices )
 {
     if( VertexFactory == nullptr )
@@ -988,25 +1025,46 @@ FArianePathGeometry3D::InitVertexFactory( TArray<FModelVertex>& ModelVertices
 
     ENQUEUE_RENDER_COMMAND(StaticMeshVertexBuffersLegacyInit)(
         [ this
-        , ModelVerticesAsync = MoveTemp(ModelVertices) ] ( FRHICommandListImmediate& RHICmdList )
+        ,  VerticesAsync = MoveTemp(Vertices) ] ( FRHICommandListImmediate& RHICmdList )
         {
-            VertexBuffers.InitModelBuffers( const_cast<TArray<FModelVertex>&>(ModelVerticesAsync) );
-
-            //Initialize or update the RHI vertex buffers
-            InitOrUpdateResource( RHICmdList, &VertexBuffers.PositionVertexBuffer );
-            InitOrUpdateResource( RHICmdList, &VertexBuffers.StaticMeshVertexBuffer );
-
-            //Use the RHI vertex buffers to create the needed Vertex stream components in an FDataType instance, and then set it as the data of the vertex factory
             FLocalVertexFactory::FDataType Data;
 
-            VertexBuffers.PositionVertexBuffer.BindPositionVertexBuffer( VertexFactory, Data );
-            VertexBuffers.StaticMeshVertexBuffer.BindPackedTexCoordVertexBuffer( VertexFactory, Data );
-            VertexBuffers.StaticMeshVertexBuffer.BindTangentVertexBuffer( VertexFactory, Data );
+            VertexCount = VerticesAsync.Num();
+
+            if( PositionBuffer.IsInitialized() == false ) PositionBuffer.InitResource( RHICmdList );
+            if( StaticMeshVB.IsInitialized() == false ) StaticMeshVB.InitResource( RHICmdList );
+            if( ColorBuffer.IsInitialized() == false ) ColorBuffer.InitResource( RHICmdList );
+
+            PositionBuffer.Init( VertexCount );
+            StaticMeshVB.Init( VertexCount, 1 );
+            ColorBuffer.Init( VertexCount );
+
+            for ( uint32 i = 0; i < VertexCount; ++i )
+            {
+                PositionBuffer.VertexPosition( i ) = VerticesAsync[i].Position;
+                ColorBuffer.VertexColor( i ) = VerticesAsync[i].Color;
+                StaticMeshVB.SetVertexUV( i, 0, VerticesAsync[i].TextureCoordinate[0] );
+                StaticMeshVB.SetVertexTangents( i, FVector3f( 1, 0, 0 ), FVector3f( 0, 1, 0 ), FVector3f( 0, 0, 1 ) );
+            }
+
+            // Copy RAM to VRAM
+            PositionBuffer.UpdateRHI( RHICmdList );
+            StaticMeshVB.UpdateRHI( RHICmdList );
+            ColorBuffer.UpdateRHI( RHICmdList );
+
+            PositionBuffer.BindPositionVertexBuffer( VertexFactory, Data );
+            StaticMeshVB.BindTangentVertexBuffer( VertexFactory, Data );
+            StaticMeshVB.BindPackedTexCoordVertexBuffer( VertexFactory, Data );
+            ColorBuffer.BindColorVertexBuffer( VertexFactory, Data );
 
             VertexFactory->SetData( Data );
 
-            //Initalize the vertex factory using the data that we just set, this will call the InitRHI() method that we implemented in out vertex factory
-            InitOrUpdateResource( RHICmdList, VertexFactory );
+            // Init / update the factory after SetData
+            if (!VertexFactory->IsInitialized()) {
+                VertexFactory->InitResource(RHICmdList);
+            } else {
+                VertexFactory->UpdateRHI(RHICmdList);
+            }
         } );
 
     ENQUEUE_RENDER_COMMAND(IndexBufferInit)(
@@ -1015,7 +1073,14 @@ FArianePathGeometry3D::InitVertexFactory( TArray<FModelVertex>& ModelVertices
         {
             IndexBuffer.SetIndices( IndicesAsync, EIndexBufferStride::Type::Force32Bit );
 
-            InitOrUpdateResource( RHICmdList, &IndexBuffer );
+            if( IndexBuffer.IsInitialized() )
+            {
+                IndexBuffer.UpdateRHI( RHICmdList );
+            }
+            else
+            {
+                IndexBuffer.InitResource( RHICmdList );
+            }
         } );
 }
 
@@ -1024,8 +1089,8 @@ FArianePathGeometry3D::Build()
 {
     uint32 TotalModelVertexCount = 0;
     uint32 TotalIndexCount = 0;
-    TArray<uint32> Indices;
-    TArray<FModelVertex> ModelVertices;
+    TArray<FDynamicMeshVertex> MeshVertices;
+    TArray<uint32> MeshIndices;
     FVector PreviousPerpendicularVector = Path->GetPainting3DComponent()->GetUpVector();//FVector::Zero();
 
     // TODO : update  invalidated segments only
@@ -1034,7 +1099,7 @@ FArianePathGeometry3D::Build()
         FArianeVertex* segmentVertices[2] = { Segment->GetVertex(0)
                                             , Segment->GetVertex(1) };
         uint32 SegmentIndexCount = 0;
-        FModelVertex storedVertex;
+        FDynamicMeshVertex storedVertex;
 
         Segment->Update();
 
@@ -1063,8 +1128,8 @@ FArianePathGeometry3D::Build()
         TotalIndexCount += Segment->GetIndexCache().Num();
     }
 
-    ModelVertices.SetNum( TotalModelVertexCount );
-    Indices.SetNum( TotalIndexCount );
+    MeshVertices.SetNum( TotalModelVertexCount );
+    MeshIndices.SetNum( TotalIndexCount );
 
     TotalModelVertexCount = 0;
     TotalIndexCount = 0;
@@ -1075,21 +1140,21 @@ FArianePathGeometry3D::Build()
 
         if( Segment->GetIndexCache().Num() )
         {
-            const TArray<FModelVertex>& SegmentModelVertexCache = Segment->GetModelVertexCache();
+            const TArray<FDynamicMeshVertex>& SegmentModelVertexCache = Segment->GetModelVertexCache();
             const TArray<uint32>& SegmentIndices = Segment->GetIndexCache();
 
-            memcpy( &ModelVertices[TotalModelVertexCount]
+            memcpy( &MeshVertices[TotalModelVertexCount]
                   , &SegmentModelVertexCache[0]
-                  ,  SegmentModelVertexCache.Num() * sizeof( FModelVertex ) );
+                  ,  SegmentModelVertexCache.Num() * sizeof( FDynamicMeshVertex ) );
 
-            memcpy( &Indices[TotalIndexCount]
+            memcpy( &MeshIndices[TotalIndexCount]
                   , &SegmentIndices[0]
                   ,  SegmentIndices.Num() * sizeof( uint32 ) );
 
             // renumber indices
             for( int32 i = TotalIndexCount, j = 0; j < SegmentIndices.Num(); i++, j++ )
             {
-                Indices[i] += TotalModelVertexCount;
+                MeshIndices[i] += TotalModelVertexCount;
             }
 
             TotalModelVertexCount += SegmentModelVertexCache.Num();
@@ -1102,6 +1167,9 @@ FArianePathGeometry3D::Build()
         //VertexBuffers.InitModelBuffers( ModelVertices );
         //IndexBuffer.SetIndices( Indices, EIndexBufferStride::Type::Force32Bit );
 
-        InitVertexFactory( ModelVertices, Indices );
+        if( MeshVertices.Num() )
+        {
+            InitVertexFactory( MeshVertices, MeshIndices );
+        }
     }
 }

@@ -11,7 +11,7 @@
 
 #include <ULIS>
 
-class SOdysseyColorHexadecimal : public SCompoundWidget
+class ODYSSEYPAINTEREDITOR_API SOdysseyColorHexadecimal : public SCompoundWidget
 {
     typedef SCompoundWidget tSuperClass;
 

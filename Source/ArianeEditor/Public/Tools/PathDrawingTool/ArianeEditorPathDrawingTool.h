@@ -9,6 +9,8 @@
 #include "ArianeEditorTool.h"
 #include "ArianePainting3DComponent.h" // for EArianePainting3DGeometryMode
 #include "ArianePath.h"
+// Odyssey
+#include "OdysseyPainterEditorColorType.h"
 
 #include "ArianeEditorPathDrawingTool.generated.h"
 
@@ -39,6 +41,7 @@ public:
     virtual bool OnMouseUp( FEditorViewportClient* iViewportClient
                           , const FKey& iKey
                           , const FArianePointerState& State ) override;
+    virtual bool SupportsColorType( EOdysseyPainterEditorColorType ColorType ) override;
 
 protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
