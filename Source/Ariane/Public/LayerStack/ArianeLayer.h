@@ -12,7 +12,7 @@
 
 class UArianeLayerFolder;
 
-UCLASS()
+UCLASS(Abstract)
 class ARIANE_API UArianeLayer : public UObject
 {
     GENERATED_BODY()
@@ -27,6 +27,11 @@ public:
     bool IsVisible( bool bHierarchical );
     void SetLocked( bool bInLocked );
     bool IsLocked( bool bHierarchical );
+    void SetSelected( bool bInSelected );
+
+    #if WITH_EDITOR
+    virtual bool IsSelectedInEditor() const override;
+    #endif
 
 public:
 /*
@@ -41,10 +46,15 @@ public:
         virtual void PostEditUndo() override;
         #endif
 */
+
+
 protected:
     UPROPERTY()
     bool bVisible;
 
     UPROPERTY()
     bool bLocked;
+
+    UPROPERTY()
+    bool bSelected;
 };

@@ -70,11 +70,13 @@ class ARIANEEDITOR_API SArianeEditorLayerRow
         void OnTextChanged( const FText& InText, ETextCommit::Type CommitInfo );
         bool OnVerifyTextChanged( const FText& NewText, FText& OutErrorMessage );
         virtual ESelectionMode::Type GetSelectionMode () const;
-        void OnCheckBoxStateChanged( ECheckBoxState iState );
+        void OnVisibleStateChanged( ECheckBoxState iState );
+        void OnLockedStateChanged( ECheckBoxState iState );
         ECheckBoxState IsHierarchicallyVisible() const;
-        bool IsVisible() const;
+        bool IsVisibleCheckBoxEnabled() const;
         ECheckBoxState IsHierarchicallyLocked() const;
-        bool IsLocked() const;
+        bool IsLockedCheckBoxEnabled() const;
+        bool IsLayerSelected() const;
 
     protected:
         uint32 DropZone;

@@ -806,6 +806,32 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyImportTexturePositioning.Alignment.BottomLeft", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-bottomLeft", mIcon16x16));
     Set( "OdysseyImportTexturePositioning.Alignment.Bottom", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-bottom", mIcon16x16));
     Set( "OdysseyImportTexturePositioning.Alignment.BottomRight", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-bottomRight", mIcon16x16));
+
+    // Ariane Layer Stack
+    Set("ArianeLayerStack.IsVisibleToggle", FCheckBoxStyle()
+        .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
+        .SetForegroundColor(FLinearColor(0, 0, 0, 0))
+        .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
+        .SetUncheckedImage(*FAppStyle::Get().GetBrush("Level.NotVisibleIcon16x"))
+        .SetUncheckedHoveredImage(*FAppStyle::Get().GetBrush("Level.NotVisibleIcon16x"))
+        .SetUncheckedPressedImage(*FAppStyle::Get().GetBrush("Level.NotVisibleIcon16x"))
+        //.SetCheckedImage(FSlateNoResource())
+        .SetCheckedImage(*FAppStyle::Get().GetBrush("Level.VisibleIcon16x"))
+        .SetCheckedHoveredImage(*FAppStyle::Get().GetBrush("Level.VisibleIcon16x"))
+        .SetCheckedPressedImage(*FAppStyle::Get().GetBrush("Level.VisibleIcon16x"))
+    );
+
+    Set("ArianeLayerStack.IsLockedToggle", FCheckBoxStyle()
+        .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
+        .SetForegroundColor(FLinearColor(0, 0, 0, 0))
+        .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
+        .SetUncheckedImage(*FAppStyle::Get().GetBrush("Level.UnlockedIcon16x"))
+        .SetUncheckedHoveredImage(*FAppStyle::Get().GetBrush("Level.UnlockedIcon16x"))
+        .SetUncheckedPressedImage(*FAppStyle::Get().GetBrush("Level.UnlockedIcon16x"))
+        .SetCheckedImage(*FAppStyle::Get().GetBrush("Level.LockedIcon16x"))
+        .SetCheckedHoveredImage(*FAppStyle::Get().GetBrush("Level.LockedIcon16x"))
+        .SetCheckedPressedImage(*FAppStyle::Get().GetBrush("Level.LockedIcon16x"))
+    );
 }
 
 

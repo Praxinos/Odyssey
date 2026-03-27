@@ -8,6 +8,8 @@
 #include "Framework/MultiBox/MultiBoxExtender.h"
 // Ariane
 #include "ArianePointerState.h"
+// OdysseyHeaders
+#include "OdysseyPainterEditorColorType.h"
 
 #include "ArianeEditorTool.generated.h"
 
@@ -70,6 +72,8 @@ class ARIANEEDITOR_API UArianeEditorTool : public UObject
         virtual void Load();
         /** Callback for when the tool is unloaded */
         virtual void Unload();
+
+        virtual bool SupportsColorType( EOdysseyPainterEditorColorType ColorType );
 
     protected:
         void PopupContextMenu();

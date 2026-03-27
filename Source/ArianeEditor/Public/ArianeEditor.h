@@ -5,6 +5,10 @@
 
 // Unreal
 #include "CoreMinimal.h"
+// Odyssey Headers
+#include "OdysseyPainterEditorColorType.h"
+// ULIS Headers
+#include <ULIS>
 
 class UArianeEditorTool;
 class FArianeEditorViewportToolkit;
@@ -114,6 +118,12 @@ public:
     void ExtendLevelEditorToolbar( UToolMenu* iToolbar );
     UArianePainting3DComponent* GetCurrentPainting3DComponent();
 
+    ::ULIS::FColor GetPaintColor();
+    void SetPaintColor( const ::ULIS::FColor& InPaintcolor );
+    EOdysseyPainterEditorColorType GetColorType();
+    void SetColorType( EOdysseyPainterEditorColorType& InColorType );
+
+
 protected:
     /**
      * @brief Add a tool
@@ -163,4 +173,7 @@ protected:
     TArray<TSharedPtr<FArianeEditorTab>> Tabs;
     UArianeEditorTool* CurrentTool;
     TWeakObjectPtr<UArianePainting3DComponent> CurrentPainting3DComponent;
+    ::ULIS::FColor PaintColor;
+    EOdysseyPainterEditorColorType ColorType;
+
 };

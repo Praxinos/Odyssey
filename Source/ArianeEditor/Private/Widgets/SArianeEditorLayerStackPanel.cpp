@@ -31,8 +31,8 @@ SArianeEditorLayerStackPanel::Construct(const FArguments& InArgs, FArianeEditor*
         + SVerticalBox::Slot()
         [
             SNew( SButton )
-                .Text( LOCTEXT("layer-stack-panel-add-layer","Add Layer") )
-                .OnClicked( FOnClicked::CreateSP( this, &SArianeEditorLayerStackPanel::AddLayer ) )
+                .Text( LOCTEXT("layer-stack-panel-new-layer","New Layer") )
+                .OnClicked( FOnClicked::CreateSP( this, &SArianeEditorLayerStackPanel::NewLayer ) )
         ]
         + SVerticalBox::Slot()
         .AutoHeight()
@@ -48,13 +48,13 @@ SArianeEditorLayerStackPanel::Construct(const FArguments& InArgs, FArianeEditor*
 }
 
 FReply
-SArianeEditorLayerStackPanel::AddLayer()
+SArianeEditorLayerStackPanel::NewLayer()
 {
     UArianePainting3DComponent* CurrentPainting3DComponent = Editor->GetCurrentPainting3DComponent();
 
     if( CurrentPainting3DComponent )
     {
-        CurrentPainting3DComponent->GetLayerStack()->CreateLayer( nullptr );
+        CurrentPainting3DComponent->GetLayerStack()->CreateDrawingLayer( nullptr );
     }
 
     return FReply::Handled();

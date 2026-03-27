@@ -28,7 +28,7 @@ public:
     void Construct(const FArguments& InArgs, FArianeEditor* InEditor);
 
 protected:
-    FReply AddLayer();
+    FReply NewLayer();
 
 protected:
     FArianeEditor* Editor;

@@ -329,3 +329,9 @@ UArianeEditorTool::DrawHUD ( FEditorViewportClient* ViewportClient
 {
 
 }
+
+bool
+UArianeEditorTool::SupportsColorType( EOdysseyPainterEditorColorType ColorType )
+{
+    return false;
+}

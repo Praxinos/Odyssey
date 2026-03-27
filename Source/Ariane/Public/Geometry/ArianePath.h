@@ -33,6 +33,15 @@ enum class EArianePathLineType : uint8
     Flat = 1,
 };
 
+class FArianePathVertexBuffer : public FVertexBuffer
+{
+public:
+    uint32 VertexCount = 4; // minimum default value to have a valid buffer at Init
+
+    void Resize( uint32 InBufferSize, FRHICommandListBase& RHICmdList );
+    virtual void InitRHI(FRHICommandListBase& RHICmdList) override;
+};
+
 class ARIANE_API FArianePathGeometry3D
 {
     public:
@@ -41,7 +50,7 @@ class ARIANE_API FArianePathGeometry3D
 
         void Build();
 
-        const FStaticMeshVertexBuffers& GetVertexBuffers() const;
+        const uint32 GetVertexCount() const;
         const FRawStaticIndexBuffer& GetIndexBuffer() const;
         FArianePath* GetPath();
         FLocalVertexFactory* GetVertexFactory();
@@ -52,8 +61,7 @@ class ARIANE_API FArianePathGeometry3D
         void BuildSegmentAsFlat( FArianeSegment* Segment
                                , FVector& InOutPreviousPerpendicularVector );
 
-        void InitVertexFactory( TArray<FModelVertex>& ModelVertices
-                              , TArray<uint32>& Indices );
+        void InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices, TArray<uint32>& Indices );
         FVector GetTangentVectorAt( FArianeSegment* Segment
                                   , FVector* OptionalPerpendicularVector
                                   , double T
@@ -62,7 +70,10 @@ class ARIANE_API FArianePathGeometry3D
     protected:
         FArianePath* Path;
 
-        FStaticMeshVertexBuffers VertexBuffers;
+        uint32 VertexCount;
+        FPositionVertexBuffer PositionBuffer;
+        FStaticMeshVertexBuffer StaticMeshVB;
+        FColorVertexBuffer ColorBuffer;
         FRawStaticIndexBuffer IndexBuffer;
         FLocalVertexFactory* VertexFactory;
 };
@@ -232,6 +243,10 @@ public:
     const TArray<Chain>& GetChains();
     void SetLineType( EArianePathLineType LineType );
     EArianePathLineType GetLineType();
+    const FColor& GetColor();
+    void  SetColor( const FColor& InColor );
+    virtual void ExportProperties( FArianePath* DestPath );
+
 
 protected:
     UPROPERTY( EditAnywhere )
@@ -248,6 +263,9 @@ protected:
 
     UPROPERTY( EditAnywhere )
     EArianePathLineType LineType;
+
+    UPROPERTY( EditAnywhere )
+    FColor Color;
 
 protected:
     FArianePathGeometry3D Geometry3D;

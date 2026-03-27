@@ -3,6 +3,7 @@
 
 // Ariane headers
 #include "SArianeEditorLayerStack.h"
+#include "SArianeEditorLayerStackContextMenu.h"
 #include "SArianeEditorLayerRow.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianePainting3DActor.h"
@@ -138,7 +139,7 @@ SArianeEditorLayerStack::RegisterDelegates()
         LayerStack->OnPostLayerStackChangedDelegate().AddSP( this, &SArianeEditorLayerStack::OnPostLayerStackChanged );
 
         //Painting3DComponent->OnPreCurrentLayerChangedDelegate().RemoveAll( this );
-        LayerStack->OnPostCurrentLayerChangedDelegate().AddSP( this, &SArianeEditorLayerStack::OnPostCurrentLayerStackChanged );
+        LayerStack->OnPostCurrentLayerChangedDelegate().AddSP( this, &SArianeEditorLayerStack::OnPostCurrentLayerChanged );
     }
 }
 
@@ -161,9 +162,9 @@ SArianeEditorLayerStack::OnPostLayerStackChanged()
 }
 
 void
-SArianeEditorLayerStack::OnPostCurrentLayerStackChanged()
+SArianeEditorLayerStack::OnPostCurrentLayerChanged()
 {
-    Update();
+    //Update();
 }
 
 void
@@ -184,8 +185,7 @@ SArianeEditorLayerStack::RenameSelectedItem()
 TSharedPtr<SWidget>
 SArianeEditorLayerStack::OnContextMenuOpening()
 {
-    //return SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( this );
-    return SNullWidget::NullWidget;
+    return SArianeEditorLayerStackContextMenu::CreateWidget( this );
 }
 
 FReply

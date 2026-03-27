@@ -103,7 +103,7 @@ FArianeSegment::GetFractionCount()
     return Fractions.Num();
 }
 
-const TArray<FModelVertex>&
+const TArray<FDynamicMeshVertex>&
 FArianeSegment::GetModelVertexCache()
 {
     return ModelVertexCache;

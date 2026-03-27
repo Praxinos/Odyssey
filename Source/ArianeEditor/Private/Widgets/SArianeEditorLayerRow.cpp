@@ -6,6 +6,7 @@
 #include "SArianeEditorLayerStack.h"
 #include "ArianeEditor.h"
 #include "ArianeLayer.h"
+#include "ArianeLayerDrawing.h"
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
@@ -57,27 +58,27 @@ SArianeEditorLayerRow::IsHierarchicallyVisible() const
 }
 
 bool
-SArianeEditorLayerRow::IsVisible() const
+SArianeEditorLayerRow::IsVisibleCheckBoxEnabled() const
 {
-    return Item->GetLayer()->IsVisible( true );
+    return Item->GetLayer()->GetParent() ? Item->GetLayer()->GetParent()->IsVisible( true ) : true;
 }
 
 ECheckBoxState
 SArianeEditorLayerRow::IsHierarchicallyLocked() const
 {
-    bool visibility = Item->GetLayer()->IsLocked( true );
+    bool locked = Item->GetLayer()->IsLocked( true );
 
-    return ( visibility ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return ( locked ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 bool
-SArianeEditorLayerRow::IsLocked() const
+SArianeEditorLayerRow::IsLockedCheckBoxEnabled() const
 {
-    return Item->GetLayer()->IsLocked( true );
+    return Item->GetLayer()->GetParent() ? Item->GetLayer()->GetParent()->IsLocked( true ) == false : true;
 }
 
 void
-SArianeEditorLayerRow::OnCheckBoxStateChanged( ECheckBoxState iState )
+SArianeEditorLayerRow::OnVisibleStateChanged( ECheckBoxState iState )
 {
     const TSharedPtr< SArianeEditorLayerStack > treeView = StaticCastSharedPtr<SArianeEditorLayerStack>(OwnerTablePtr.Pin());
 
@@ -89,6 +90,26 @@ SArianeEditorLayerRow::OnCheckBoxStateChanged( ECheckBoxState iState )
 
         case ECheckBoxState::Unchecked :
             Item->GetLayer()->SetVisible( false );
+        break;
+
+        default :
+        break;
+    }
+}
+
+void
+SArianeEditorLayerRow::OnLockedStateChanged( ECheckBoxState iState )
+{
+    const TSharedPtr< SArianeEditorLayerStack > treeView = StaticCastSharedPtr<SArianeEditorLayerStack>(OwnerTablePtr.Pin());
+
+    switch( iState )
+    {
+        case ECheckBoxState::Checked :
+            Item->GetLayer()->SetLocked( true );
+        break;
+
+        case ECheckBoxState::Unchecked :
+            Item->GetLayer()->SetLocked( false );
         break;
 
         default :
@@ -113,7 +134,7 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
 
     if( InColumnName == SArianeEditorLayerStack::LAYER_VISIBLE )
     {
-        const FCheckBoxStyle* isVisibleToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("VectorSceneTreeView.IsVisibleToggle");
+        const FCheckBoxStyle* isVisibleToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("ArianeLayerStack.IsVisibleToggle");
 
         return SNew(SHorizontalBox)
                + SHorizontalBox::Slot()
@@ -124,15 +145,15 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
                    SNew( SCheckBox )
                   .IsEnabled( Item.Get()->IsSensitive() )
                   .Style( isVisibleToggleStyle )
-                  .OnCheckStateChanged( this, &SArianeEditorLayerRow::OnCheckBoxStateChanged)
+                  .OnCheckStateChanged( this, &SArianeEditorLayerRow::OnVisibleStateChanged)
                   .IsChecked( this, &SArianeEditorLayerRow::IsHierarchicallyVisible)
-                  .IsEnabled( this, &SArianeEditorLayerRow::IsVisible )
+                  .IsEnabled( this, &SArianeEditorLayerRow::IsVisibleCheckBoxEnabled )
                ];
     }
 
     if( InColumnName == SArianeEditorLayerStack::LAYER_LOCKED )
     {
-        const FCheckBoxStyle* isLockedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("VectorSceneTreeView.IsLockedToggle");
+        const FCheckBoxStyle* isLockedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("ArianeLayerStack.IsLockedToggle");
 
         return SNew(SHorizontalBox)
                + SHorizontalBox::Slot()
@@ -143,9 +164,9 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
                    SNew( SCheckBox )
                   .IsEnabled( Item.Get()->IsSensitive() )
                   .Style( isLockedToggleStyle )
-                  .OnCheckStateChanged( this, &SArianeEditorLayerRow::OnCheckBoxStateChanged)
+                  .OnCheckStateChanged( this, &SArianeEditorLayerRow::OnLockedStateChanged)
                   .IsChecked( this, &SArianeEditorLayerRow::IsHierarchicallyLocked)
-                  .IsEnabled( this, &SArianeEditorLayerRow::IsLocked )
+                  .IsEnabled( this, &SArianeEditorLayerRow::IsLockedCheckBoxEnabled )
                ];
     }
 
@@ -155,12 +176,12 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
 
         if ( Cast<UArianeLayerFolder>(Layer) )
         {
-            objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Paintgroup" );
+            objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.Layers16" );
         }
         else
-        if ( Cast<UArianeLayer>(Layer) )
+        if ( Cast<UArianeLayerDrawing>(Layer) )
         {
-            objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Group" );
+            objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.Layers16" );
         }
 
         TextBlockWidget = SNew(SInlineEditableTextBlock)
@@ -171,7 +192,8 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
                                                     return FText::FromString( *Layer->GetName() );
                                                 } )
                            .OnVerifyTextChanged( this, &SArianeEditorLayerRow::OnVerifyTextChanged )
-                           .OnTextCommitted( this, &SArianeEditorLayerRow::OnTextChanged );
+                           .OnTextCommitted( this, &SArianeEditorLayerRow::OnTextChanged )
+                           .IsSelected(this, &SArianeEditorLayerRow::IsLayerSelected );
 
         TextBlockWidget.Get()->SetOverflowPolicy( TOptional<ETextOverflowPolicy>(ETextOverflowPolicy::Ellipsis) );
 
@@ -322,6 +344,14 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
     DropZone = DROPZONE_NONE;
 
     return FReply::Handled();
+}
+
+bool
+SArianeEditorLayerRow::IsLayerSelected() const
+{
+    UArianeLayer* ItemLayer = Item.Get()->GetLayer();
+
+    return ItemLayer->IsSelected();
 }
 
 int32
