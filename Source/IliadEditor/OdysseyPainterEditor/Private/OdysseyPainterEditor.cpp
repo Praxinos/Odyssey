@@ -563,7 +563,7 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 void
 FOdysseyPainterEditor::SwitchTabletAPI()
 {
-    SOdysseyTabletAPISwitcher::Open();
+    //SOdysseyTabletAPISwitcher::Open();
 }
 
 void
@@ -841,12 +841,10 @@ FOdysseyPainterEditor::OnClose()
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
         extension->Finalize();
 
-    mGUI->Finalize();
-
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     FSlateApplication::Get().UnregisterInputPreProcessor(mAnimationFlipSystem);
 
-    delete mHUDSystem;
+    mHUDSystem.Reset();
     mHUDSystem = nullptr;
     mRecentTools = nullptr;
 

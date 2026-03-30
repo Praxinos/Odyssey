@@ -96,6 +96,7 @@ public:
     template<class T> TSharedPtr<T> FindTab() const;
     const TArray<TSharedPtr<FOdysseyEditorTab>>& GetTabs() const;
     void CloseAllTabs();
+    void OnClose();
 
     void RegisterTabSpawners( const TSharedRef<FTabManager>& iTabManager );
     void UnregisterTabSpawners( const TSharedRef<FTabManager>& iTabManager );
