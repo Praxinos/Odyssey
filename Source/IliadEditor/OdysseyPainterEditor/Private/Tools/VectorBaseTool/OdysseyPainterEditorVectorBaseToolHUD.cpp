@@ -2316,8 +2316,12 @@ bool
 FOdysseyPainterEditorVectorBaseToolHUD::OnMouseDown( const FOdysseyPoint& iPointInTexture
                                                    , const FKey& iKey)
 {
+    /**
+     * Save the MaintTool to Recent Tools when clicking on a HUD
+     * because it does not go in the Tool OnMouseDown in this case.
+     */
     if (mBaseTool->GetEditor())
-        mBaseTool->GetEditor()->SaveToRecentTools(mBaseTool);
+        mBaseTool->GetEditor()->SaveMainToolToRecentTools();
 
     return mBaseTool->OnMouseDownViaHUD( iPointInTexture, iKey );
 }

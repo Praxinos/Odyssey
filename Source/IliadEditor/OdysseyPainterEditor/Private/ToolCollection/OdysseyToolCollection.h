@@ -37,6 +37,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyToolCollection : public UObject
     GENERATED_UCLASS_BODY()
 
 public:
+    /**
+     * Some Tool Collection can be transient (not saved in the asset)
+     * Example : The Recent Tools category is a transient Tool Collection
+     */
     bool IsCollectionTransient() const;
 
     UOdysseyPainterEditorToolConfiguration* AddToolConfiguration(UClass* iToolClass, TObjectPtr<UOdysseyPainterEditorTool> iTool, FIconToolConfiguration& iIconToolConfiguration, int32 iIndex = INDEX_NONE);

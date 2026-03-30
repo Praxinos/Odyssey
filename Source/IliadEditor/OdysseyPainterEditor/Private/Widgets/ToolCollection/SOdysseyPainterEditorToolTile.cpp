@@ -18,6 +18,8 @@
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Colors/SColorPicker.h"
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
 static const FVector2D kTileSize = FVector2D(24.f, 24.f);
 
 SOdysseyPainterEditorToolTile::~SOdysseyPainterEditorToolTile()
@@ -271,8 +273,18 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
     FMenuBuilder menuBuilder(true, nullptr);
 
     menuBuilder.AddMenuEntry(
-        FText::FromString(TEXT("Duplicate Tool")),
-        FText::FromString(TEXT("Create a duplicate of this tool.")),
+        LOCTEXT( "tool-collection.tool-tile.context-menu.replace-with-current-tool.name", "Replace with Current Tool" ),
+        LOCTEXT( "tool-collection.tool-tile.context-menu.replace-with-current-tool.tooltip", "Replaces this Tool with the Current Tool." ),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::OnReplaceWithCurrentTool),
+            FCanExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::CanReplaceWithCurrentTool)
+        )
+    );
+
+    menuBuilder.AddMenuEntry(
+        LOCTEXT( "tool-collection.tool-tile.context-menu.duplicate-tool.name", "Duplicate Tool" ),
+        LOCTEXT( "tool-collection.tool-tile.context-menu.duplicate-tool.tooltip", "Create a duplicate of this tool." ),
         FSlateIcon(),
         FUIAction(
             FExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::OnDuplicateTool),
@@ -281,8 +293,8 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
     );
 
     menuBuilder.AddMenuEntry(
-        FText::FromString(TEXT("Delete Tool")),
-        FText::FromString(TEXT("Remove this tool from the collection.")),
+        LOCTEXT( "tool-collection.tool-tile.context-menu.delete-tool.name", "Delete Tool" ),
+        LOCTEXT( "tool-collection.tool-tile.context-menu.delete-tool.tooltip", "Remove this tool from the collection." ),
         FSlateIcon(),
         FUIAction(
             FExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::OnDeleteTool),
@@ -291,8 +303,8 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
     );
 
     menuBuilder.AddMenuEntry(
-        FText::FromString(TEXT("Change Icon")),
-        FText::FromString(TEXT("Select a new icon for this tool")),
+        LOCTEXT( "tool-collection.tool-tile.context-menu.change-icon.name", "Change Icon" ),
+        LOCTEXT( "tool-collection.tool-tile.context-menu.change-icon.tooltip", "Select a new icon for this tool" ),
         FSlateIcon(),
         FUIAction(
             FExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::OnChangeIcon),
@@ -329,6 +341,31 @@ bool SOdysseyPainterEditorToolTile::CanDeleteTool() const
 void SOdysseyPainterEditorToolTile::OnDeleteTool()
 {
     mCollection->RemoveToolConfiguration(mToolConfig);
+}
+
+bool
+SOdysseyPainterEditorToolTile::CanReplaceWithCurrentTool() const
+{
+    if ( !mEditor || !mEditor->GetCurrentMainTool() || !mEditor->GetCurrentMainTool()->IsActivated() )
+        return false;
+
+    return (mCollection && mToolConfig && !mCollection->IsCollectionTransient());
+}
+
+void
+SOdysseyPainterEditorToolTile::OnReplaceWithCurrentTool()
+{
+    if ( !mEditor || !mEditor->GetCurrentMainTool() || !mEditor->GetCurrentMainTool()->IsActivated() )
+        return;
+
+    FIconToolConfiguration iconToolConfig;
+    iconToolConfig.mIconSource = EToolIconSource::Style;
+    iconToolConfig.mIconStyleSet = mEditor->GetCurrentTool()->mIconStyleSet;
+
+
+    int32 index = mCollection->GetIndexOfToolConfiguration(mToolConfig);
+    mCollection->RemoveToolConfiguration(mToolConfig);
+    mCollection->AddToolConfiguration( mEditor->GetCurrentTool()->GetClass(), mEditor->GetCurrentTool(), iconToolConfig, index );
 }
 
 bool SOdysseyPainterEditorToolTile::CanDuplicateTool() const
@@ -576,3 +613,5 @@ void SOdysseyPainterEditorToolTile::OnStyleIconSelected(FName iBrushStyleSet)
 
     mCollection->MarkPackageDirty();
 }
+
+#undef LOCTEXT_NAMESPACE

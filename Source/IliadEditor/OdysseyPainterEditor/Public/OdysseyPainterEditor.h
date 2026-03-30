@@ -188,7 +188,7 @@ public:
      * @brief Saves iTool to mRecentTools (if not already in it)
      * mRecentTools can't be bigger than 10 tools (most ancient tools are discarded if necessary)
      */
-    void SaveToRecentTools( UOdysseyPainterEditorTool* iTool );
+    void SaveMainToolToRecentTools();
 
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;
     virtual UOdysseyPainterEditorRasterEraserTool*                   GetRasterEraserTool() const;

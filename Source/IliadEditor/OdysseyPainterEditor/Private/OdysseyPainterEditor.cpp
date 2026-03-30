@@ -1079,8 +1079,8 @@ UOdysseyPainterEditorTool* FOdysseyPainterEditor::GetEditorToolOfClass(UClass* i
         return mVectorChartTool;
     else if( iToolClass == UOdysseyPainterEditorVectorTrajectoryTool::StaticClass() )
         return mVectorTrajectoryTool;
-    /*else if (iToolClass == UOdysseyPainterEditorAnimationOutOfPegsTool::StaticClass())
-        return mOutOfPegsTool;*/
+    else if (iToolClass == UOdysseyPainterEditorAnimationOutOfPegsTool::StaticClass())
+        return mOutOfPegsTool;
     else
         return nullptr;
 }
@@ -3630,22 +3630,22 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
     }
 }
 
-void FOdysseyPainterEditor::SaveToRecentTools( UOdysseyPainterEditorTool* iTool )
+void FOdysseyPainterEditor::SaveMainToolToRecentTools()
 {
-    if( !iTool || !GetEditorToolOfClass(iTool->GetClass() ) )
+    if (GetCurrentTool() != mCurrentMainTool)
         return;
 
-    if( mRecentTools->ContainsSimilarToolConfiguration( iTool->GetClass(), iTool ) )
+    if( mRecentTools->ContainsSimilarToolConfiguration( mCurrentMainTool->GetClass(), mCurrentMainTool ) )
         return;
 
     TObjectPtr<UOdysseyPainterEditorTool> toolSnapshot;
-    toolSnapshot = DuplicateObject< UOdysseyPainterEditorTool >(iTool, mRecentTools);
+    toolSnapshot = DuplicateObject< UOdysseyPainterEditorTool >(mCurrentMainTool, mRecentTools);
 
     FIconToolConfiguration iconToolConfig;
     iconToolConfig.mIconSource = EToolIconSource::Style;
-    iconToolConfig.mIconStyleSet = iTool->mIconStyleSet;
+    iconToolConfig.mIconStyleSet = mCurrentMainTool->mIconStyleSet;
 
-    mRecentTools->AddToolConfiguration( iTool->GetClass(), toolSnapshot, iconToolConfig );
+    mRecentTools->AddToolConfiguration( mCurrentMainTool->GetClass(), toolSnapshot, iconToolConfig );
 
     if( mRecentTools->GetToolConfigurations().Num() > 10 )
         mRecentTools->RemoveToolConfigurationAtIndex( 0 );

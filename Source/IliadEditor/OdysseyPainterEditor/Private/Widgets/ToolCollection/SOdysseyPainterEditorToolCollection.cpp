@@ -96,7 +96,9 @@ SOdysseyPainterEditorToolCollection::GetToolConfigIcon(UOdysseyPainterEditorTool
 FReply
 SOdysseyPainterEditorToolCollection::OnAddToolClicked()
 {
-    if ( !mEditor || !mEditor->GetCurrentTool() || !mEditor->GetEditorToolOfClass(mEditor->GetCurrentTool()->GetClass()) )
+
+
+    if ( !mEditor || !mEditor->GetCurrentMainTool() || !mEditor->GetCurrentMainTool()->IsActivated() )
         return FReply::Unhandled();
 
     FIconToolConfiguration iconToolConfig;
