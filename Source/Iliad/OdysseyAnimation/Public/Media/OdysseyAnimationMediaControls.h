@@ -44,6 +44,7 @@ public:
 public:
     void SetState(EMediaState iState);
     void SetTime(FTimespan iTime);
+    void SetSequenceIndex(int iSequenceIndex);
     void SetFrameToIncludeIntoDuration(int iFrame);
     void UnsetFrameToIncludeIntoDuration();
 

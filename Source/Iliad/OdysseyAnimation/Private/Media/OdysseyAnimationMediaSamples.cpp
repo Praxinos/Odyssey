@@ -82,6 +82,12 @@ FOdysseyAnimationMediaSamples::FlushSamples()
 {
     //ES:we should remove all the samples from the sample queue here
     //But we don't have a sample queue, so we do nothing
+
+    TSharedPtr<FOdysseyAnimationMediaControls> controls = mControls.Pin();
+    if ( !controls )
+        return;
+
+    controls->SetSequenceIndex(0);
 }
 
 int
@@ -214,7 +220,7 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
     //range is valid
     //check overlap of each frame with the time range
 
-    int64 resultingLoopIndex = startLoopIndex;
+    int64 resultingLoopIndex = 0;
     int64 resultingSequenceIndex = startSequenceIndex;
     int frameIndex = 0;
     //Only a single frame overlaps the range
@@ -231,24 +237,28 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
     }
     //The time range is looping enough to cover the whole animation duration,
     //so check a single time range covering the whole animation duration.
-    else if ( startTime <= endTime || endLoopIndex - startLoopIndex >= 2 )
+    else if (controls->IsLooping())
     {
-        frameIndex = INDEX_NONE;
-        FindMaxOverlapingFrame(FTimespan(0), controls->GetDuration(), &frameIndex);
-    }
-    else
-    {
-        //The time range is looping, but not enough to cover the whole animation duration
-        //so we have to check two ranges
-        //search in [0, endFrame]
-        //search in [startFrame, animation->lastFrame]
-        int frameIndex1 = INDEX_NONE;
-        int frameIndex2 = INDEX_NONE;
-        FTimespan overlap1 = FindMaxOverlapingFrame(0, endTime, &frameIndex1);
-        FTimespan overlap2 = FindMaxOverlapingFrame(startTime, controls->GetDuration(), &frameIndex2);
-        frameIndex = overlap1 > overlap2 ? frameIndex1 : frameIndex2;
-        resultingLoopIndex = overlap1 > overlap2 ? endLoopIndex : startLoopIndex;
-        resultingSequenceIndex = overlap1 > overlap2 ? endSequenceIndex : startSequenceIndex;
+        resultingLoopIndex = startLoopIndex;
+        if ( startTime <= endTime || endLoopIndex - startLoopIndex >= 2 )
+        {
+            frameIndex = INDEX_NONE;
+            FindMaxOverlapingFrame(FTimespan(0), controls->GetDuration(), &frameIndex);
+        }
+        else
+        {
+            //The time range is looping, but not enough to cover the whole animation duration
+            //so we have to check two ranges
+            //search in [0, endFrame]
+            //search in [startFrame, animation->lastFrame]
+            int frameIndex1 = INDEX_NONE;
+            int frameIndex2 = INDEX_NONE;
+            FTimespan overlap1 = FindMaxOverlapingFrame(0, endTime, &frameIndex1);
+            FTimespan overlap2 = FindMaxOverlapingFrame(startTime, controls->GetDuration(), &frameIndex2);
+            frameIndex = overlap1 > overlap2 ? frameIndex1 : frameIndex2;
+            resultingLoopIndex = overlap1 > overlap2 ? endLoopIndex : startLoopIndex;
+            resultingSequenceIndex = overlap1 > overlap2 ? endSequenceIndex : startSequenceIndex;
+        }
     }
 
     OutSample = mSample;
@@ -265,6 +275,7 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
         controls->SetState(EMediaState::Stopped);
     }
 
+    //UE_LOG(LogTemp, Warning, TEXT("FetchBestVideoSampleForTimeRange End %d %d %d"), mSample->GetTime().Time.GetTicks(), resultingSequenceIndex, resultingLoopIndex);
     return EFetchBestSampleResult::Ok;
 }
 
@@ -284,6 +295,24 @@ FOdysseyAnimationMediaSamples::PeekVideoSampleTime(FMediaTimeStamp & TimeStamp)
 
     TimeStamp.Time = controls->GetTime();
     TimeStamp.SetSequenceIndex( controls->GetSequenceIndex() );
+
+    if (controls->GetRate() >= 0.0f)
+    {
+        while(TimeStamp.Time >= controls->GetDuration())
+        {
+            TimeStamp.Time -= controls->GetDuration();
+            TimeStamp.AdjustLoopIndex(1);
+        }
+    }
+    else
+    {
+        while(TimeStamp.Time.GetTicks() < 0)
+        {
+            TimeStamp.Time += controls->GetDuration();
+            TimeStamp.AdjustLoopIndex(-1);
+        }
+    }
+
     return true;
 }
 

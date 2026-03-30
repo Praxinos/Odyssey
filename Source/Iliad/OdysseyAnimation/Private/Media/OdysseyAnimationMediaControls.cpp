@@ -175,6 +175,12 @@ FOdysseyAnimationMediaControls::SetTime(FTimespan iTime)
     mTime = iTime;
 }
 
+void
+FOdysseyAnimationMediaControls::SetSequenceIndex(int iSequenceIndex)
+{
+    mSequenceIndex = iSequenceIndex;
+}
+
 bool
 FOdysseyAnimationMediaControls::SetRate(float iRate)
 {
