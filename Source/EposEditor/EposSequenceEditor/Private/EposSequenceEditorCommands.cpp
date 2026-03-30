@@ -77,7 +77,7 @@ FEposSequenceEditorCommands::RegisterCommands()
     }
 
     UI_COMMAND( StoryboardViewportHoldToPanZoom, "Odyssey Viewport Pan/Zoom (Hold)", "Hold this key to pan (left mouse button) or zoom (right mouse button) the viewport", EUserInterfaceActionType::Button, FInputChord(EKeys::M) );
-    UI_COMMAND( StoryboardViewportHoldToRotate, "Odyssey Viewport Rotate (Hold)", "Hold this key to to rotate the viewport using the left mouse button", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::M) );
+    UI_COMMAND( StoryboardViewportHoldToRotate, "Odyssey Viewport Rotate (Hold)", "Hold this key to to rotate the viewport using the left mouse button", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::M), FInputChord(EModifierKey::Shift, EKeys::M) );
 
     //---
 
