@@ -124,7 +124,13 @@ FOdysseyPainterEditorTextureExportShortcuts::Action_ImportImages()
         return;
 
     FOdysseyPainterEditorTextureImport import;
-    import.ImportTextures(texture, importParameters);
+    TArray<UOdysseyTextureLayerImageRaster*> importedTextures = import.ImportTextures(texture, importParameters);
+    if (!importedTextures.IsEmpty())
+    {
+        UOdysseyLayerStack* layerStack = textureSource->GetLayerStack();
+        if (layerStack)
+            layerStack->SetCurrentLayer(importedTextures[0]);
+    }
 }
 
 void
@@ -166,7 +172,9 @@ FOdysseyPainterEditorTextureExportShortcuts::Action_ImportTextures()
         return;
 
     FOdysseyPainterEditorTextureImport import;
-    import.ImportTextures(currentTexture, importParameters);
+    TArray<UOdysseyTextureLayerImageRaster*> importedTextures = import.ImportTextures(currentTexture, importParameters);
+    if (!importedTextures.IsEmpty())
+        layerStack->SetCurrentLayer(importedTextures[0]);
 }
 
 #undef LOCTEXT_NAMESPACE

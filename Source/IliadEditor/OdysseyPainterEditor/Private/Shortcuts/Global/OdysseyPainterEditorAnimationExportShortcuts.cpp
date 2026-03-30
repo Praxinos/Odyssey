@@ -4,6 +4,7 @@
 #include "OdysseyPainterEditorAnimationExportShortcuts.h"
 
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
 #include "OdysseyPainterEditorAnimationFunctionLibrary.h"
@@ -153,7 +154,14 @@ FOdysseyPainterEditorAnimationExportShortcuts::Action_ImportImageSequence()
     if(!SOdysseyImportTexturesDialog::Open(LOCTEXT("animation-editor.import-textures-dialog.title", "Import Images" ), importParameters))
         return;
 
-    FOdysseyPainterEditorAnimationImport::ImportTextureSequence(animation, importParameters);
+    FOdysseyPainterEditorAnimationImportResult importResult = FOdysseyPainterEditorAnimationImport::ImportTextureSequence(animation, importParameters);
+
+    if (!importResult.mImportedLayers.IsEmpty())
+    {
+        UOdysseyLayerStack* layerStack = animation->GetLayerStack();
+        if (layerStack)
+            layerStack->SetCurrentLayer(importResult.mImportedLayers[0]);
+    }
 }
 
 void
@@ -194,7 +202,10 @@ FOdysseyPainterEditorAnimationExportShortcuts::Action_ImportTextureSequence()
     if(!SOdysseyImportTexturesDialog::Open(LOCTEXT("animation-editor.import-texture-sequence-dialog.title", "Import Texture Sequence" ), importParameters))
         return;
 
-    FOdysseyPainterEditorAnimationImport::ImportTextureSequence(animation, importParameters);
+    FOdysseyPainterEditorAnimationImportResult importResult = FOdysseyPainterEditorAnimationImport::ImportTextureSequence(animation, importParameters);
+
+    if (!importResult.mImportedLayers.IsEmpty())
+        layerStack->SetCurrentLayer(importResult.mImportedLayers[0]);
 }
 
 #undef LOCTEXT_NAMESPACE

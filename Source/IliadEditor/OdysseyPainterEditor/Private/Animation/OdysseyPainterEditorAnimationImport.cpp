@@ -41,10 +41,19 @@ FOdysseyPainterEditorAnimationImport::ImportTextureSequence(UOdysseyAnimation* A
     if ( !layerStack )
         return result;
 
+    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
+    UOdysseyLayer* parentLayer = nullptr;
+    int indexInParent = 0;
+    if (currentLayer)
+    {
+        parentLayer = currentLayer->GetParent();
+        indexInParent = currentLayer->GetIndexInParent();
+    }
+
     FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures Sequence"));
     layerStack->Modify();
 
-    UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass());
+    UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), parentLayer, indexInParent);
     UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
 
     FScopedSlowTask progressBar(iImportData.GetSourceTextures().Num(), LOCTEXT("animation-editor.import-texture-dialog.progress-bar.title", "Importing Texture Sequence"));

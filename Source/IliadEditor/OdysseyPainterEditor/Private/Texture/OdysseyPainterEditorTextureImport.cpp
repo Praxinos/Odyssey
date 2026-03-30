@@ -42,7 +42,16 @@ FOdysseyPainterEditorTextureImport::ImportTextures(UTexture2D* DestinationTextur
 
     //---
 
-    TArray<UOdysseyLayer*> layers = layerStack->AddLayers(UOdysseyTextureLayerImageRaster::StaticClass(), nullptr, INDEX_NONE, iImportData.GetSourceTextures().Num());
+    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
+    UOdysseyLayer* parentLayer = nullptr;
+    int indexInParent = 0;
+    if (currentLayer)
+    {
+        parentLayer = currentLayer->GetParent();
+        indexInParent = currentLayer->GetIndexInParent();
+    }
+
+    TArray<UOdysseyLayer*> layers = layerStack->AddLayers(UOdysseyTextureLayerImageRaster::StaticClass(), parentLayer, indexInParent, iImportData.GetSourceTextures().Num());
     TArray<UOdysseyTextureLayerImageRaster*> rasterLayers;
 
     TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(iImportData.CreateRT());
