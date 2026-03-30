@@ -329,6 +329,13 @@ FOdysseyPainterEditorColorSelectorTab::GetColorPaletteExpanderArrowImage() const
 EOdysseyPainterEditorColorType
 FOdysseyPainterEditorColorSelectorTab::GetColorType() const
 {
+    UOdysseyPainterEditorTool* tool = mEditor->GetCurrentTool();
+    if (!tool)
+        return EOdysseyPainterEditorColorType::Raw; //Only Raw Colors are displayed by default
+
+    if (!tool->SupportsColorType(mEditor->GetColorType()))
+        return EOdysseyPainterEditorColorType::Raw;
+
     return mEditor->GetColorType();
 }
 
