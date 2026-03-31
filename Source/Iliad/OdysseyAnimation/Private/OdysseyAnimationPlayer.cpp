@@ -734,6 +734,9 @@ UOdysseyAnimationPlayer::PostReinitProperties()
     }
 
     InitializeRenderTarget();
+    RenderTarget->UpdateResource();
+    RenderTarget->UpdateResourceImmediate( false );
+    UpdateTexture();
 }
 
 void
@@ -751,6 +754,9 @@ UOdysseyAnimationPlayer::PostLoad()
     }
 
     InitializeRenderTarget();
+    RenderTarget->UpdateResource();
+    RenderTarget->UpdateResourceImmediate( false );
+    UpdateTexture();
 }
 
 void
@@ -768,6 +774,9 @@ UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
     }
 
     InitializeRenderTarget();
+    RenderTarget->UpdateResource();
+    RenderTarget->UpdateResourceImmediate( false );
+    UpdateTexture();
 }
 
 void
@@ -785,6 +794,9 @@ UOdysseyAnimationPlayer::PostEditImport()
     }
 
     InitializeRenderTarget();
+    RenderTarget->UpdateResource();
+    RenderTarget->UpdateResourceImmediate( false );
+    UpdateTexture();
 }
 
 struct FOdysseyAnimationPlayerObjectVersion

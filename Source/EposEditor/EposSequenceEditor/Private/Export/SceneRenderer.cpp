@@ -16,6 +16,7 @@
 #include "MovieSceneSequence.h"
 #include "SceneViewExtension.h"
 #include "SceneViewExtensionContext.h"
+//#include "TrackEditorThumbnail/TrackThumbnailUtils.h"
 
 #include "Export/ExportStruct.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
@@ -80,9 +81,10 @@ FSceneRenderer::PreDraw()
     if( !sequencer.IsValid() )
         return;
 
+    //UE::MoveSceneTools::PreDrawThumbnailSetupSequencer( *sequencer, mCurrentPanel->GlobalFrame );
+
     sequencer->EnterSilentMode();
 
-    //SavedPlaybackStatus = sequencer->GetPlaybackStatus();
     sequencer->SetPlaybackStatus( EMovieScenePlayerStatus::Jumping );
     sequencer->SetGlobalTime( mCurrentPanel->GlobalFrame );
     sequencer->ForceEvaluate();
@@ -95,7 +97,7 @@ FSceneRenderer::PostDraw()
     if( !sequencer.IsValid() )
         return;
 
-    //Thumbnail.SetupFade( sequencer->GetSequencerWidget() );
+    //UE::MoveSceneTools::PostDrawThumbnailCleanupSequencer( *sequencer );
     sequencer->ExitSilentMode();
 }
 
