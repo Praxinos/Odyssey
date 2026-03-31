@@ -1026,17 +1026,52 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawBucket( const FOdysseyHUDElement::FD
         }
     }
 
-    iParams.mCanvas->DrawTile( bucketHUDCoords.X - FOdysseyVectorHUD::PELLET_RADIUS
-                             , bucketHUDCoords.Y - FOdysseyVectorHUD::PELLET_RADIUS
-                             , FOdysseyVectorHUD::PELLET_RADIUS * 2.0f
-                             , FOdysseyVectorHUD::PELLET_RADIUS * 2.0f
-                             , 0.0f
-                             , 0.0f
-                             , 1.0f
-                             , 1.0f
-                             , fillColor
-                             , mBucketInnerTexture->GetResource()
-                             , ESimpleElementBlendMode::SE_BLEND_Masked );
+    if (iBucket->GetColorMode() == eBucketColorMode::Transparent)
+    {
+        //As FillColor is transparent, we need something to
+        //indicate this bucket is transparent
+        //So we draw a cross in the circle
+
+        FVector2D topLeft(-1.0f, -1.0f);
+        FVector2D topRight(1.0f, -1.0f);
+        FVector2D bottomLeft(-1.0f, 1.0f);
+        FVector2D bottomRight(1.0f, 1.0f);
+
+        topLeft.Normalize();
+        topRight.Normalize();
+        bottomLeft.Normalize();
+        bottomRight.Normalize();
+
+        DrawPrimitiveLineOutlined(
+            iParams,
+            bucketHUDCoords + topLeft * FOdysseyVectorHUD::PELLET_RADIUS,
+            bucketHUDCoords + bottomRight * FOdysseyVectorHUD::PELLET_RADIUS,
+            blackColor,
+            2.0f
+        );
+
+        DrawPrimitiveLineOutlined(
+            iParams,
+            bucketHUDCoords + topRight * FOdysseyVectorHUD::PELLET_RADIUS,
+            bucketHUDCoords + bottomLeft * FOdysseyVectorHUD::PELLET_RADIUS,
+            blackColor,
+            2.0f
+        );
+    }
+    else
+    {
+        iParams.mCanvas->DrawTile( bucketHUDCoords.X - FOdysseyVectorHUD::PELLET_RADIUS
+                                , bucketHUDCoords.Y - FOdysseyVectorHUD::PELLET_RADIUS
+                                , FOdysseyVectorHUD::PELLET_RADIUS * 2.0f
+                                , FOdysseyVectorHUD::PELLET_RADIUS * 2.0f
+                                , 0.0f
+                                , 0.0f
+                                , 1.0f
+                                , 1.0f
+                                , fillColor
+                                , mBucketInnerTexture->GetResource()
+                                , ESimpleElementBlendMode::SE_BLEND_Masked );
+    }
 
     iParams.mCanvas->DrawTile( bucketHUDCoords.X - FOdysseyVectorHUD::PELLET_RADIUS
                              , bucketHUDCoords.Y - FOdysseyVectorHUD::PELLET_RADIUS
