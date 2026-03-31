@@ -29,6 +29,7 @@
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "ScopedTransaction.h"
 #include "OdysseyPainterEditorRasterDrawingToolOverrides.h"
+#include "OdysseyPainterEditorRasterDrawingToolCustomization.h"
 
 #include "OdysseyHUDElement.h"
 #include "SOdysseySinglePropertyView.h"
@@ -643,6 +644,13 @@ UOdysseyPainterEditorRasterDrawingTool::SetBaseSize(float iValue)
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
+void
+UOdysseyPainterEditorRasterDrawingTool::SetBrush(UOdysseyBrush* iBrush)
+{
+    Brush = iBrush;
+    BrushChanged();
+}
+
 UOdysseyBrush*
 UOdysseyPainterEditorRasterDrawingTool::GetBrush() const
 {
@@ -1056,6 +1064,27 @@ void
 UOdysseyPainterEditorRasterDrawingTool::SubPixelBlueprintSetter(bool Value)
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, SubPixel), Value);
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::RegisterDetailCustomization()
+{
+    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+
+    // Custom detail views
+    PropertyModule.RegisterCustomClassLayout( UOdysseyPainterEditorRasterDrawingTool::StaticClass()->GetFName()
+                                            , FOnGetDetailCustomizationInstance::CreateLambda(
+                                                  []()
+                                                  {
+                                                      return MakeShareable( new FOdysseyPainterEditorRasterDrawingToolCustomization() );
+                                                  } ) );
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::UnregisterDetailCustomization()
+{
+    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    PropertyModule.UnregisterCustomPropertyTypeLayout( UOdysseyPainterEditorRasterDrawingTool::StaticClass()->GetFName() );
 }
 
 #undef LOCTEXT_NAMESPACE

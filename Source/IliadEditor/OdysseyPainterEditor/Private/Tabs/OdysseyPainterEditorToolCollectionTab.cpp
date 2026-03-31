@@ -12,7 +12,6 @@
 #include "Widgets/Tools/SOdysseyPainterEditorToolsTileView.h"
 #include "Widgets/Tools/SOdysseyPainterEditorToolOptions.h"
 #include "SOdysseyPainterEditorToolCollection.h"
-#include "SOdysseyPainterEditorRasterDrawingToolBrushSelector.h"
 #include "OdysseyPainterEditorCommands.h"
 #include "OdysseyToolCollection.h"
 #include "Editor/PropertyEditor/Public/PropertyCustomizationHelpers.h"

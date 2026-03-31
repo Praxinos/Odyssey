@@ -6,7 +6,6 @@
 #include "OdysseyPainterEditor.h"
 #include "Widgets/Tools/SOdysseyPainterEditorToolsTileView.h"
 #include "Widgets/Tools/SOdysseyPainterEditorToolOptions.h"
-#include "SOdysseyPainterEditorRasterDrawingToolBrushSelector.h"
 
 #include "OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
@@ -84,18 +83,6 @@ SOdysseyPainterEditorTools::Construct(const FArguments& InArgs)
         + SHorizontalBox::Slot()
         [
             SNew(SScrollBox)
-            + SScrollBox::Slot()
-            .AutoSize()
-            [
-                SNew(SOdysseyPainterEditorRasterDrawingToolBrushSelector)
-                .Visibility_Lambda(
-                    [editor]()
-                    {
-                        return editor->GetCurrentTool() == editor->GetRasterDrawingTool() ? EVisibility::Visible : EVisibility::Collapsed;
-                    }
-                )
-                .Tool(editor->GetRasterDrawingTool())
-            ]
             + SScrollBox::Slot()
             .FillSize(1.0f)
             [

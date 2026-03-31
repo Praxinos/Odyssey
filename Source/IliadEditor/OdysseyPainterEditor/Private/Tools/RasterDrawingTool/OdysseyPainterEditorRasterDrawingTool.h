@@ -35,6 +35,11 @@ public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnDestroyBrushInstance, UOdysseyBrushAssetBase*);
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnCreatedBrushInstance, UOdysseyBrushAssetBase*);
     DECLARE_DELEGATE_RetVal_OneParam(TArray<FOdysseyPoint>, FAdaptShapePoints, const TArray<FOdysseyPoint>&);
+
+public:
+    static void RegisterDetailCustomization();
+    static void UnregisterDetailCustomization();
+
 public:
     // Destructor
     virtual ~UOdysseyPainterEditorRasterDrawingTool();
@@ -82,6 +87,8 @@ public:
     void RefreshBrushInstance(bool iApplyOverrides);
 
     void SetBaseSize(float iValue);
+
+    void SetBrush(UOdysseyBrush* iBrush);
 
 public:
     // Getters
@@ -188,7 +195,7 @@ public:
     UPROPERTY(meta=(ForceShowEngineContent, ForceShowPluginContent))
     TObjectPtr<UOdysseyBrush> Brush;
 
-    UPROPERTY(meta=(IgnoreToolConfiguration))
+    UPROPERTY(EditInstanceOnly, Category="Brush", meta=(EditInline, IgnoreToolConfiguration, AllowEditInlineCustomization/*, ShowInnerProperties*/))
     TObjectPtr<UOdysseyBrushAssetBase> BrushInstance;
 
     UPROPERTY(meta=(IgnoreToolConfiguration))

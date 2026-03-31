@@ -21,6 +21,7 @@
 #include "OdysseyBlendParametersOverrides.h"
 #include "OdysseyFreehandShapeOverrides.h"
 #include "OdysseyPainterEditorRasterDrawingToolOverrides.h"
+#include "OdysseyPainterEditorRasterDrawingTool.h"
 #include "OdysseyPainterEditorRasterLiquifyTool.h"
 #include "ActorFactories/ActorFactory.h"
 #include "EditorModeRegistry.h"
@@ -258,6 +259,7 @@ void
 FOdysseyPainterEditorModule::RegisterDetailCustomizations()
 {
     FOdysseyShapes::RegisterDetailCustomization();
+    UOdysseyPainterEditorRasterDrawingTool::RegisterDetailCustomization();
     UOdysseyPainterEditorRasterLiquifyTool::RegisterDetailCustomization();
 
     FOdysseyPainterEditorAnimationFlipSystem::RegisterDetailCustomization();
@@ -268,6 +270,7 @@ FOdysseyPainterEditorModule::RegisterDetailCustomizations()
 void
 FOdysseyPainterEditorModule::UnregisterDetailCustomization()
 {
+    UOdysseyPainterEditorRasterDrawingTool::UnregisterDetailCustomization();
     UOdysseyPainterEditorRasterLiquifyTool::UnregisterDetailCustomization();
     FOdysseyShapes::UnregisterDetailCustomization();
     FOdysseyPainterEditorAnimationFlipSystem::UnregisterDetailCustomization();
