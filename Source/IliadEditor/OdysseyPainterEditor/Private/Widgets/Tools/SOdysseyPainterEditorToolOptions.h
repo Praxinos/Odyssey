@@ -13,7 +13,8 @@ class UOdysseyPainterEditorTool;
 
 /////////////////////////////////////////////////////
 // SOdysseyPainterEditorToolOptions
-class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorToolOptions
+class ODYSSEYPAINTEREDITOR_API
+SOdysseyPainterEditorToolOptions
     : public SCompoundWidget
 {
     typedef SCompoundWidget         tSuperClass;
@@ -31,8 +32,13 @@ public:
     virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 
 private:
+    void ResetAllToolParameters();
+    TSharedRef<FExtender> CreateOptionsExtender();
+
+private:
     // Private data members
     TAttribute<UOdysseyPainterEditorTool*> mTool;
     UOdysseyPainterEditorTool* mDisplayedTool;
     TSharedPtr<IDetailsView> mDetailsView;
+    TSharedPtr<FExtender> mOptionsExtender;
 };

@@ -8,6 +8,8 @@
 #include "ISinglePropertyView.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
 /////////////////////////////////////////////////////
 // SOdysseyPainterEditorToolOptions
 //--------------------------------------------------------------------------------------
@@ -18,6 +20,8 @@ SOdysseyPainterEditorToolOptions::Construct( const FArguments& InArgs )
     mTool = InArgs._Tool;
     mDisplayedTool = mTool.Get();
 
+    mOptionsExtender = CreateOptionsExtender();
+
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
     // Create a details view
@@ -25,7 +29,16 @@ SOdysseyPainterEditorToolOptions::Construct( const FArguments& InArgs )
     DetailsViewArgs.DefaultsOnlyVisibility = EEditDefaultsOnlyNodeVisibility::Automatic;
     DetailsViewArgs.bUpdatesFromSelection = false;
     DetailsViewArgs.bLockable = false;
-    DetailsViewArgs.bAllowSearch = false;
+    DetailsViewArgs.bAllowSearch = true;
+    DetailsViewArgs.bShowOptions = true;
+    DetailsViewArgs.bShowModifiedPropertiesOption = true;
+    DetailsViewArgs.bShowPropertyMatrixButton = false;
+    DetailsViewArgs.bShowDifferingPropertiesOption = false;
+    DetailsViewArgs.bShowHiddenPropertiesWhilePlayingOption = false;
+    DetailsViewArgs.bShowKeyablePropertiesOption = false;
+    DetailsViewArgs.bShowAnimatedPropertiesOption = false;
+    DetailsViewArgs.bShowSectionSelector = false;
+    DetailsViewArgs.OptionsExtender = mOptionsExtender;
     DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
 
     mDetailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
@@ -38,6 +51,54 @@ SOdysseyPainterEditorToolOptions::Construct( const FArguments& InArgs )
 }
 
 void
+SOdysseyPainterEditorToolOptions::ResetAllToolParameters()
+{
+    UOdysseyPainterEditorTool* tool = mTool.Get();
+    if (!tool)
+        return;
+
+    UOdysseyPainterEditorTool* toolDefaultObject = tool->GetClass()->GetDefaultObject<UOdysseyPainterEditorTool>();
+
+    UEngine::FCopyPropertiesForUnrelatedObjectsParams copyParams;
+    copyParams.bDoDelta = false;
+    UEngine::CopyPropertiesForUnrelatedObjects(toolDefaultObject, tool, copyParams);
+
+    tool->PostEditChange();
+    mDetailsView->InvalidateCachedState(); //Makes the "ResetToDefault" buttons disappear
+}
+
+TSharedRef<FExtender>
+SOdysseyPainterEditorToolOptions::CreateOptionsExtender()
+{
+    TSharedRef<FExtender> extender = MakeShared<FExtender>();
+
+    extender->AddMenuExtension(
+        "DetailsViewCategories",
+        EExtensionHook::After,
+        MakeShared<FUICommandList>(),
+        FMenuExtensionDelegate::CreateLambda(
+            [this](FMenuBuilder& iMenuBuilder)
+            {
+                iMenuBuilder.BeginSection("Tool", LOCTEXT("tool-options.options-menu.tool-section.name", "Tool"));
+                {
+                    iMenuBuilder.AddMenuEntry(
+                        LOCTEXT("tool-options.options-menu.reset-all-parameters.name", "Reset all Parameters"),
+                        LOCTEXT("tool-options.options-menu.reset-all-parameters.name", "Resets all the current tools parameters to match their default value."),
+                        FSlateIcon(),
+                        FUIAction(
+                            FExecuteAction::CreateRaw( this, &SOdysseyPainterEditorToolOptions::ResetAllToolParameters )
+                        )
+                    );
+                }
+                iMenuBuilder.EndSection();
+            }
+        )
+    );
+
+    return extender;
+}
+
+void
 SOdysseyPainterEditorToolOptions::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
     UOdysseyPainterEditorTool* tool = mTool.Get();
@@ -47,3 +108,5 @@ SOdysseyPainterEditorToolOptions::Tick(const FGeometry& AllottedGeometry, const 
         mDetailsView->SetObject(mDisplayedTool);
     }
 }
+
+#undef LOCTEXT_NAMESPACE
