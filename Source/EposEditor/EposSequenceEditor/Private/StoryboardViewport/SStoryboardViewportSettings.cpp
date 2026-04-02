@@ -56,11 +56,12 @@ SStoryboardViewportSettings::GetMenuContent()
     auto ExecuteOverlayToolbar = [=]()
     {
         GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.OverlayToolbar = !GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.OverlayToolbar;
+        GetMutableDefault<UEposSequenceEditorSettings>()->SaveConfig();
     };
 
     auto IsOverlayToolbar = [=]() -> bool
     {
-        return GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.OverlayToolbar;
+        return GetDefault<UEposSequenceEditorSettings>()->ViewportSettings.OverlayToolbar;
     };
 
     menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.overlay-toolbar-label", "Overlay toolbar" ),
@@ -77,11 +78,12 @@ SStoryboardViewportSettings::GetMenuContent()
     auto ExecuteDisplayPlaybackTrack = [=]()
     {
         GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackTrack = !GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackTrack;
+        GetMutableDefault<UEposSequenceEditorSettings>()->SaveConfig();
     };
 
     auto IsDisplayPlaybackTrack = [=]() -> bool
     {
-        return GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackTrack;
+        return GetDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackTrack;
     };
 
     menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-playback-track-label", "Display playback track" ),
@@ -98,11 +100,12 @@ SStoryboardViewportSettings::GetMenuContent()
     auto ExecuteDisplaySequenceInfos = [=]()
     {
         GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplaySequenceInfos = !GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplaySequenceInfos;
+        GetMutableDefault<UEposSequenceEditorSettings>()->SaveConfig();
     };
 
     auto IsDisplaySequenceInfos = [=]() -> bool
     {
-        return GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplaySequenceInfos;
+        return GetDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplaySequenceInfos;
     };
 
     menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-sequence-infos-label", "Display sequence infos" ),
@@ -119,11 +122,12 @@ SStoryboardViewportSettings::GetMenuContent()
     auto ExecuteDisplayActorControls = [=]()
     {
         GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayActorControls = !GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayActorControls;
+        GetMutableDefault<UEposSequenceEditorSettings>()->SaveConfig();
     };
 
     auto IsDisplayActorControls = [=]() -> bool
     {
-        return GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayActorControls;
+        return GetDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayActorControls;
     };
 
     menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-actor-controls-label", "Display actor controls" ),
@@ -140,11 +144,12 @@ SStoryboardViewportSettings::GetMenuContent()
     auto ExecuteDisplayPlaybackControls = [=]()
     {
         GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackControls = !GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackControls;
+        GetMutableDefault<UEposSequenceEditorSettings>()->SaveConfig();
     };
 
     auto IsDisplayPlaybackControls = [=]() -> bool
     {
-        return GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackControls;
+        return GetDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackControls;
     };
 
     menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-playback-controls-label", "Display playback controls" ),
@@ -159,11 +164,12 @@ SStoryboardViewportSettings::GetMenuContent()
     auto ExecuteDisplayNoteInViewport = [=]()
     {
         GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport = !GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport;
+        GetMutableDefault<UEposSequenceEditorSettings>()->SaveConfig();
     };
 
     auto IsDisplayNoteInViewport = [=]() -> bool
     {
-        return GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport;
+        return GetDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport;
     };
 
     menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-in-viewport-label", "Display notes in viewport" ),
@@ -180,11 +186,12 @@ SStoryboardViewportSettings::GetMenuContent()
     auto ExecuteDisplayNoteAsOverlay = [=]()
     {
         GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay = !GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay;
+        GetMutableDefault<UEposSequenceEditorSettings>()->SaveConfig();
     };
 
     auto IsDisplayNoteAsOverlay = [=]() -> bool
     {
-        return GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay;
+        return GetDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay;
     };
 
     menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-as-overlay-label", "Display notes as overlay" ),
@@ -205,11 +212,12 @@ SStoryboardViewportSettings::GetMenuContent()
     auto ExecuteDisplayCameraBounds = [=]()
     {
         GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.bDisplayCameraBounds = !GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.bDisplayCameraBounds;
+        GetMutableDefault<UEposSequenceEditorSettings>()->SaveConfig();
     };
 
     auto IsDisplayCameraBounds = [=]() -> bool
     {
-        return GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.bDisplayCameraBounds;
+        return GetDefault<UEposSequenceEditorSettings>()->ViewportSettings.bDisplayCameraBounds;
     };
 
     menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-camera-bounds-label", "Display Camera Bounds" ),
@@ -238,7 +246,7 @@ SStoryboardViewportSettings::GetMenuContent()
         .Color_Lambda(
             []()
             {
-                return GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.CameraBoundsShadeColor;
+                return GetDefault<UEposSequenceEditorSettings>()->ViewportSettings.CameraBoundsShadeColor;
             }
         )
     );
@@ -269,6 +277,7 @@ SStoryboardViewportSettings::OnCameraBoundsColorBlockMouseButtonDown(const FGeom
             [](FLinearColor iColor)
             {
                 GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.CameraBoundsShadeColor = iColor;
+                GetMutableDefault<UEposSequenceEditorSettings>()->SaveConfig();
             }
         );
         PickerArgs.ParentWidget = iWidget;
