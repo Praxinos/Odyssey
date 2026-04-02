@@ -71,6 +71,15 @@ UOdysseyPainterEditorTool::OnToolContextChanged()
 } */
 
 void
+UOdysseyPainterEditorTool::Reset()
+{
+    UOdysseyPainterEditorTool* toolDefaultObject = GetClass()->GetDefaultObject<UOdysseyPainterEditorTool>();
+    UEngine::FCopyPropertiesForUnrelatedObjectsParams copyParams;
+    copyParams.bDoDelta = false;
+    UEngine::CopyPropertiesForUnrelatedObjects(toolDefaultObject, this, copyParams);
+}
+
+void
 UOdysseyPainterEditorTool::Activate()
 {
     // register IInputProcessor interface for handling global key press

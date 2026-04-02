@@ -51,6 +51,8 @@ public:
     virtual void Load();
     virtual void Unload();
 
+    virtual void Reset();
+
 public:
     //Mouse events
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey);

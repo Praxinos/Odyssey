@@ -64,6 +64,11 @@ UOdysseyPainterEditorRasterDrawingTool::UOdysseyPainterEditorRasterDrawingTool()
     Shapes.AddShapeType(EOdysseyShapeType::kBezier, CreateShape<UOdysseyBezierShape>("UOdysseyPainterEditorRasterDrawingTool::BezierShape"));
 
     Shapes.SetActiveShapeType(EOdysseyShapeType::kFreehand);
+
+    //Set Default Brush
+    UOdysseyPainterEditorSettings* settings = UOdysseyPainterEditorSettings::Get();
+    if (settings)
+        Brush = settings->BrushDefaults.DefaultBrush.LoadSynchronous();
 }
 
 template<class T>
@@ -90,15 +95,19 @@ UOdysseyPainterEditorRasterDrawingTool::Activate()
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Color), FOdysseyBrushColor(GetEditor()->PaintColor()));
 
-    //Set Default Brush
-    if(!Brush)
-    {
-        UOdysseyPainterEditorSettings* settings = UOdysseyPainterEditorSettings::Get();
-        if( settings->BrushDefaults.DefaultBrush.LoadSynchronous() )
-            FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, Brush), settings->BrushDefaults.DefaultBrush.LoadSynchronous());
-    }
+    //Create the BrushInstance to use for drawing
+    CreateBrushInstance(true);
 
     Super::Activate();
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::Inactivate()
+{
+    //Destroy the brushInstance
+    DestroyBrushInstance();
+
+    Super::Inactivate();
 }
 
 void
@@ -135,6 +144,13 @@ UOdysseyPainterEditorRasterDrawingTool::Unload()
     FCoreUObjectDelegates::OnObjectsReinstanced.RemoveAll(this);
 
     UOdysseyPainterEditorTool::Unload();
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::Reset()
+{
+    Super::Reset();
+    RefreshBrushInstance(true);
 }
 
 bool
@@ -806,9 +822,6 @@ UOdysseyPainterEditorRasterDrawingTool::BrushChanged()
 {
     //Destroy the brushInstance
     DestroyBrushInstance();
-
-    if (!Brush)
-        return;
 
     //Create the BrushInstance to use for drawing
     CreateBrushInstance(true);

@@ -54,9 +54,12 @@ public:
 public:
     //OdysseyPainterEditorTool overrides
     virtual void Activate() override;
+    virtual void Inactivate() override;
     virtual bool IsActivable() const override;
     virtual void Load() override;
     virtual void Unload() override;
+
+    virtual void Reset() override;
 
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;

@@ -57,13 +57,8 @@ SOdysseyPainterEditorToolOptions::ResetAllToolParameters()
     if (!tool)
         return;
 
-    UOdysseyPainterEditorTool* toolDefaultObject = tool->GetClass()->GetDefaultObject<UOdysseyPainterEditorTool>();
+    tool->Reset();
 
-    UEngine::FCopyPropertiesForUnrelatedObjectsParams copyParams;
-    copyParams.bDoDelta = false;
-    UEngine::CopyPropertiesForUnrelatedObjects(toolDefaultObject, tool, copyParams);
-
-    tool->PostEditChange();
     mDetailsView->InvalidateCachedState(); //Makes the "ResetToDefault" buttons disappear
 }
 
