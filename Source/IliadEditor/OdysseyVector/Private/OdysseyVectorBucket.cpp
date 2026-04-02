@@ -287,16 +287,10 @@ FOdysseyVectorBucket::GetColor()
         break;
 
         case eBucketColorMode::SolidColor:
-        {
-            return mSolidColor;
-        }
-        break;
+        return mSolidColor;
 
         case eBucketColorMode::Transparent:
-        {
-            return FColor(0,0,0,0);
-        }
-        break;
+        return FColor(0,0,0,0);
     }
 
     return FColor(0,0,0,255);

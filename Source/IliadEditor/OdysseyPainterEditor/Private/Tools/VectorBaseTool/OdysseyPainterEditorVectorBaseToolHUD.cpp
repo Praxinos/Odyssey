@@ -1032,15 +1032,13 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawBucket( const FOdysseyHUDElement::FD
         //indicate this bucket is transparent
         //So we draw a cross in the circle
 
-        FVector2D topLeft(-1.0f, -1.0f);
-        FVector2D topRight(1.0f, -1.0f);
-        FVector2D bottomLeft(-1.0f, 1.0f);
-        FVector2D bottomRight(1.0f, 1.0f);
+        static float cos45 = FMath::Cos(FMath::DegreesToRadians(45.f));
+        static float sin45 = FMath::Sin(FMath::DegreesToRadians(45.f));
 
-        topLeft.Normalize();
-        topRight.Normalize();
-        bottomLeft.Normalize();
-        bottomRight.Normalize();
+        static FVector2D topLeft(-cos45, -sin45);
+        static FVector2D topRight(cos45, -sin45);
+        static FVector2D bottomLeft(-cos45, sin45);
+        static FVector2D bottomRight(cos45, sin45);
 
         DrawPrimitiveLineOutlined(
             iParams,
