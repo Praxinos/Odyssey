@@ -9,4 +9,5 @@
 UOdysseyBrush::UOdysseyBrush(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
+    bForceFullEditor = true;
 }

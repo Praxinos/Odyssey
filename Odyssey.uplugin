@@ -180,9 +180,8 @@
         },
         {
             "Name": "OdysseyBrush",
-            "Type": "UncookedOnly",
-            "LoadingPhase": "Default",
-            "Comment": "OdysseyBrush is UncookedOnly so that its nodes can be used in FunctionLibraries"
+            "Type": "Editor",
+            "LoadingPhase": "Default"
         },
         {
             "Name": "OdysseyStyle",
@@ -272,12 +271,6 @@
             "Name": "OdysseyPainterEditor",
             "Type": "Editor",
             "LoadingPhase": "Default"
-        },
-        {
-            "Name": "OdysseyEditorBrushBlueprints",
-            "Type": "UncookedOnly",
-            "LoadingPhase": "PostDefault",
-            "Comment": "OdysseyBrush is UncookedOnly so that its nodes can be used in FunctionLibraries. And having this module avoids switching main editor modules to UncookedOnly"
         },
         {
             "Name": "OdysseyFlipbookEditor",
