@@ -21,6 +21,7 @@ enum class EPaintBucketToolColorMode : uint8
     Color = 0,
     LinearGradient = 1,
     RadialGradient = 2,
+    Transparent = 3,
 };
 
 UENUM()

@@ -501,6 +501,16 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext
                 }
                 break;
 
+                case eBucketColorMode::Transparent :
+                {
+                    FColor color = bucket->GetColor();
+                    BLRgba32 BLColor = BLRgba32( 0, 0, 0, 0 );
+
+                    iBLContext->set_stroke_style( BLColor );
+                    iBLContext->set_fill_style( BLColor );
+                }
+                break;
+
                 default:
                 {
                     FColor color = bucket->GetColor();

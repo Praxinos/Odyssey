@@ -21,21 +21,24 @@ enum class eBucketColorMode : uint8
     SolidColor = 0,
     LinearGradient = 1,
     RadialGradient = 2,
-    Palette = 3
+    Palette = 3,
+    Transparent = 4
 };
 
 UENUM()
 enum class eForegroundColorMode : uint8
 {
     SolidColor = uint8(eBucketColorMode::SolidColor),
-    Palette  = uint8(eBucketColorMode::Palette)
+    Palette  = uint8(eBucketColorMode::Palette),
+    Transparent = uint8(eBucketColorMode::Transparent)
 };
 
 UENUM()
 enum class eBackgroundColorMode : uint8
 {
     SolidColor = uint8(eBucketColorMode::SolidColor),
-    Palette  = uint8(eBucketColorMode::Palette)
+    Palette  = uint8(eBucketColorMode::Palette),
+    Transparent = uint8(eBucketColorMode::Transparent)
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint

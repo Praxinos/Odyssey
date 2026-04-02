@@ -380,6 +380,12 @@ UOdysseyPainterEditorVectorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket
         }
         break;
 
+        case EPaintBucketToolColorMode::Transparent:
+        {
+            bucketColorMode = eBucketColorMode::Transparent;
+        }
+        break;
+
         default:
         break;
     }
