@@ -153,6 +153,8 @@ void
 SArianeEditorLayerStack::OnPost3DPaintingComponentSelectionChanged()
 {
     RegisterDelegates();
+
+    Update();
 }
 
 void
@@ -216,7 +218,7 @@ SArianeEditorLayerStack::BuildTree( const TSharedPtr<FArianeEditorLayerRowItem> 
 
     Item.Get()->Children.Empty();
 
-    if( ItemLayer->GetClass() == UArianeLayerFolder::StaticClass() )
+    if( Cast<UArianeLayerFolder>(ItemLayer) )
     {
         UArianeLayerFolder* ItemLayerFolder = Cast<UArianeLayerFolder>(ItemLayer);
         const TArray<UArianeLayer*>& ChildLayers = ItemLayerFolder->GetChildren();
@@ -275,7 +277,7 @@ SArianeEditorLayerStack::Update()
 
     if( Painting3DComponent )
     {
-        RootItem = MakeShareable(new FArianeEditorLayerRowItem( Painting3DComponent->GetLayerStack()->GetRootLayerFolder(), true ) );
+        RootItem = MakeShareable(new FArianeEditorLayerRowItem( Painting3DComponent->GetLayerStack()->GetRootFolder(), true ) );
 
         BuildTree( RootItem );
 

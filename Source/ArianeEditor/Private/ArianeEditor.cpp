@@ -6,6 +6,8 @@
 #include "ArianeEditorViewportToolkit.h"
 #include "ArianeEditorToolTab.h"
 #include "ArianePainting3DComponent.h"
+#include "ArianeLayerStack.h"
+#include "ArianeLayerDrawing.h"
 #include "ArianePainting3DActor.h"
 #include "PathDrawingTool/ArianeEditorPathDrawingTool.h"
 #include "EraserTool/ArianeEditorEraserTool.h"
@@ -78,10 +80,15 @@ FArianeEditor::ClearPainting3DComponents()
 
         if( painting3DComponent )
         {
-            if( GEditor->IsTransactionActive() )
-                painting3DComponent->Modify();
+            UArianeLayerDrawing* CurrentDrawingLayer = painting3DComponent->GetLayerStack()->GetFirstSelectedDrawingLayer();
 
-            painting3DComponent->ResetHierarchy();
+            if( CurrentDrawingLayer )
+            {
+                if( GEditor->IsTransactionActive() )
+                    CurrentDrawingLayer->Modify();
+
+                CurrentDrawingLayer->ResetHierarchy();
+            }
         }
     }
 }

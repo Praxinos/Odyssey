@@ -26,6 +26,8 @@ FArianeObjectInvalidationFlags::AND( const FArianeObjectInvalidationFlags& RHS )
         Selected  &= ((FArianeObjectInvalidationFlags&)RHS).Selected;
         Altered   &= ((FArianeObjectInvalidationFlags&)RHS).Altered;
         Hierarchy &= ((FArianeObjectInvalidationFlags&)RHS).Hierarchy;
+        Color     &= ((FArianeObjectInvalidationFlags&)RHS).Color;
+        Children  &= ((FArianeObjectInvalidationFlags&)RHS).Children;
     }
 
     return *this;
@@ -39,6 +41,8 @@ FArianeObjectInvalidationFlags::OR( const FArianeObjectInvalidationFlags& RHS )
         Selected  |= ((FArianeObjectInvalidationFlags&)RHS).Selected;
         Altered   |= ((FArianeObjectInvalidationFlags&)RHS).Altered;
         Hierarchy |= ((FArianeObjectInvalidationFlags&)RHS).Hierarchy;
+        Color     |= ((FArianeObjectInvalidationFlags&)RHS).Color;
+        Children  |= ((FArianeObjectInvalidationFlags&)RHS).Children;
     }
 
     return *this;
@@ -50,6 +54,8 @@ FArianeObjectInvalidationFlags::SetAll()
     Selected  = 1;
     Altered   = 1;
     Hierarchy = 1;
+    Color     = 1;
+    Children     = 1;
 
     return *this;
 }
@@ -57,7 +63,11 @@ FArianeObjectInvalidationFlags::SetAll()
 FArianeObjectInvalidationFlags&
 FArianeObjectInvalidationFlags::Clear()
 {
-    FArianeObjectInvalidationFlags::ClearOwn( *this );
+    Selected  = 0;
+    Altered   = 0;
+    Hierarchy = 0;
+    Color     = 0;
+    Children  = 0;
 
     return *this;
 }
@@ -67,35 +77,27 @@ FArianeObjectInvalidationFlags::HasAny()
 {
     return ( Selected
           || Altered
-          || Hierarchy );
+          || Hierarchy
+          || Color
+          || Children );
 }
-
-void
-FArianeObjectInvalidationFlags::ClearOwn( FArianeObjectInvalidationFlags& Flags )
-{
-    Flags.Selected  = 0;
-    Flags.Altered   = 0;
-    Flags.Hierarchy = 0;
-}
-
 
 FArianeObject::~FArianeObject()
 {
 }
 
 FArianeObject::FArianeObject()
-    : Painting3DComponent( nullptr )
+    : DrawingLayer( nullptr )
     , Guid ( FGuid::NewGuid() )
     , ParentID ()
     , InvalidationFlags ( new FArianeObjectInvalidationFlags() )
-    , DrawingLayer ( nullptr )
 {
 }
 
-FArianeObject::FArianeObject( UArianePainting3DComponent* InPainting3DComponent )
+FArianeObject::FArianeObject( UArianeLayerDrawing* InDrawingLayer )
     : FArianeObject()
 {
-    Painting3DComponent = InPainting3DComponent;
+    DrawingLayer = InDrawingLayer;
 }
 
 void
@@ -120,7 +122,7 @@ FArianeObject::RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstan
 
     if( bRemoveFromInstancedObjects )
     {
-        Painting3DComponent->DeleteInstancedObject( ChildToRemove );
+        DrawingLayer->DeleteInstancedObject( ChildToRemove );
     }
 }
 
@@ -162,6 +164,7 @@ FArianeObject::InsertChild( FArianeObject* Child, FArianeObject* InsertAfter )
 void
 FArianeObject::InvalidateChild( FArianeObject* Child )
 {
+
     if( InvalidatedChildrenID.FindByPredicate( [Child]( const FArianeObjectID& ObjectID ) -> bool
                                                {
                                                    return ( ObjectID.Guid == Child->Guid ) ? true : false;
@@ -170,10 +173,7 @@ FArianeObject::InvalidateChild( FArianeObject* Child )
         InvalidatedChildrenID.Add( FArianeObjectID( Child ) );
     }
 
-    if( ParentID.GetObject() )
-    {
-        ParentID.GetObject()->InvalidateChild( this );
-    }
+    Invalidate( FArianeObjectInvalidationFlags().SetChildren() );
 }
 
 void
@@ -185,6 +185,8 @@ FArianeObject::Invalidate( const FArianeObjectInvalidationFlags& InInvalidationF
     }
 
     InvalidationFlags->OR( InInvalidationFlags );
+
+    OnPostInvalidated.Broadcast();
 }
 
 void
@@ -234,17 +236,20 @@ FArianeObject::Traverse( TFunction<TraversalReturnValue(FArianeObject*)> Callbac
 }
 
 bool
-FArianeObject::Update( bool Recurse )
+FArianeObject::Update( bool Recurse, bool bClearFlags )
 {
     if( Recurse )
     {
-        InvalidatedChildrenID.RemoveAll( [&Recurse](  FArianeObjectID& InvalidatedObjectID )
+        InvalidatedChildrenID.RemoveAll( [&Recurse](  FArianeObjectID& InvalidatedChildID )
             {
-                return InvalidatedObjectID.GetObject()->Update( Recurse );
+                return InvalidatedChildID.GetObject()->Update( Recurse );
             } );
     }
 
-    FArianeObjectInvalidationFlags::ClearOwn( *InvalidationFlags );
+    if( bClearFlags )
+    {
+        InvalidationFlags->Clear();
+    }
 
     return InvalidatedChildrenID.Num() ? false : true;
 }
@@ -286,6 +291,12 @@ FArianeObject::GetScaling()
     return Scaling;
 }
 
+FSimpleMulticastDelegate &
+FArianeObject::GetOnPostInvalidatedDelegate()
+{
+    return OnPostInvalidated;
+}
+
 UArianeLayerDrawing*
 FArianeObject::GetDrawingLayer()
 {
@@ -307,12 +318,6 @@ FArianeObject::IsVisible( bool bInHierarchical )
     }
 
     return ( ( DrawingLayer == nullptr ) || DrawingLayer->IsVisible( true ) == true ) ? true : false;
-}
-
-UArianePainting3DComponent*
-FArianeObject::GetPainting3DComponent()
-{
-    return Painting3DComponent;
 }
 
 const FGuid&

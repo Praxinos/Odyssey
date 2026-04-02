@@ -17,11 +17,13 @@ class UArianePainting3DComponent;
 class UCanvasRenderTarget2D;
 struct FArianeVertex;
 class FEditorViewportClient;
+class UArianeLayerDrawing;
 
 UCLASS()
 class ARIANEEDITOR_API UArianeEditorEraserTool : public UArianeEditorTool
 {
-GENERATED_BODY()
+    GENERATED_BODY()
+
     struct FWayFragment;
 
     // a waypoint is met at segment vertex or when a constrast is met
@@ -158,7 +160,7 @@ protected:
                    , UArianePainting3DComponent* Painting3DComponent );
     bool EraseChainSegments( FEditorViewportClient* ViewportClient
                            , FSceneView* View
-                           , UArianePainting3DComponent* Painting3DComponent
+                           , UArianeLayerDrawing* DrawingLayer
                            , FArianePath* Path
                            , const FArianePath::Chain& Chain
                            , const TArray<FColor>& Pixels
@@ -197,7 +199,7 @@ protected:
     static FWayFragment* GetStartFragment( FWayFragment* Fragment );
     static ESegmentAdditionFlags SegmentAdditionPolicy( FWayFragment* InFragment, bool bSplit );
     static EVertexAdditionFlags VertexAdditionPolicy( FWayPoint* WayPoint, bool bSplit );
-    void ParseChainWayPoints( UArianePainting3DComponent* Painting3DComponent
+    void ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
                             , FArianePath* ChainPath
                             , const FArianePath::Chain& Chain
                             , TArray<FWayPoint>& WayPoints

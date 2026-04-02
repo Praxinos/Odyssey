@@ -7,6 +7,8 @@
 #include "ArianePainting3DComponent.h"
 #include "ArianePath.h"
 #include "ArianeVertex.h"
+#include "ArianeLayerStack.h"
+#include "ArianeLayerDrawing.h"
 #include "ArianeSegmentCubic.h"
 // Odyssey
 #include "OdysseyStyle.h"
@@ -333,6 +335,7 @@ bool
 UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
                                    , UArianePainting3DComponent* Painting3DComponent )
 {
+    UArianeLayerDrawing* DrawingLayer = Painting3DComponent->GetLayerStack()->GetFirstSelectedDrawingLayer();
     FTextureRenderTargetResource* RTResource = CanvasRenderTarget->GameThread_GetRenderTargetResource();
     TArray<FArianePath*> AddedPaths;
     TArray<FArianeVertex*> AddedVertices;
@@ -349,63 +352,66 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
                           , FReadSurfaceDataFlags(RCM_UNorm)
                           , FIntRect( 0, 0, Width, Height ) );
 
-    Painting3DComponent->GetRootObject()->Traverse( [ this
-                                                    , ViewportClient
-                                                    , View
-                                                    , Painting3DComponent
-                                                    , Pixels
-                                                    , Width
-                                                    , &AddedPaths
-                                                    , &AddedVertices
-                                                    , &AddedSegments
-                                                    , &RemovedPaths
-                                                    , &RemovedVertices
-                                                    , &RemovedSegments ] ( FArianeObject* TravesedObject ) -> FArianeObject::TraversalReturnValue
+    if( DrawingLayer )
     {
-        if( TravesedObject->GetClass() == FArianePath::StaticClass() )
+        DrawingLayer->GetRootObject()->Traverse( [ this
+                                                 , ViewportClient
+                                                 , View
+                                                 , DrawingLayer
+                                                 , Pixels
+                                                 , Width
+                                                 , &AddedPaths
+                                                 , &AddedVertices
+                                                 , &AddedSegments
+                                                 , &RemovedPaths
+                                                 , &RemovedVertices
+                                                 , &RemovedSegments ] ( FArianeObject* TravesedObject ) -> FArianeObject::TraversalReturnValue
         {
-            FArianePath* Path = static_cast<FArianePath*>( TravesedObject );
-
-            for( const FArianePath::Chain& Chain : Path->GetChains() )
+            if( TravesedObject->GetClass() == FArianePath::StaticClass() )
             {
-                TArray<FWayPoint> WayPoints;
-                TArray<FWayFragment> WayFragments;
+                FArianePath* Path = static_cast<FArianePath*>( TravesedObject );
 
-                WayPoints.Reserve( 100 );
-                WayFragments.Reserve( 100 );
-
-                bool Hit = EraseChainSegments( ViewportClient
-                                             , View
-                                             , Painting3DComponent
-                                             , Path
-                                             , Chain
-                                             , Pixels
-                                             , WayPoints
-                                             , WayFragments );
-
-                if( Hit )
+                for( const FArianePath::Chain& Chain : Path->GetChains() )
                 {
-                    // proceed now we know we have hit anything
-                    // determine which vertices / segments will be deleted and which will be kept
-                    // it differs in SPLIT and NOSPLIT modes. SPLIT modes removes only those erased,
-                    // split removes all
-                    ParseChainWayPoints( Painting3DComponent
-                                       , Path
-                                       , Chain
-                                       , WayPoints
-                                       , WayFragments
-                                       , AddedPaths
-                                       , AddedVertices
-                                       , AddedSegments
-                                       , RemovedPaths
-                                       , RemovedVertices
-                                       , RemovedSegments );
+                    TArray<FWayPoint> WayPoints;
+                    TArray<FWayFragment> WayFragments;
+
+                    WayPoints.Reserve( 100 );
+                    WayFragments.Reserve( 100 );
+
+                    bool Hit = EraseChainSegments( ViewportClient
+                                                 , View
+                                                 , DrawingLayer
+                                                 , Path
+                                                 , Chain
+                                                 , Pixels
+                                                 , WayPoints
+                                                 , WayFragments );
+
+                    if( Hit )
+                    {
+                        // proceed now we know we have hit anything
+                        // determine which vertices / segments will be deleted and which will be kept
+                        // it differs in SPLIT and NOSPLIT modes. SPLIT modes removes only those erased,
+                        // split removes all
+                        ParseChainWayPoints( DrawingLayer
+                                           , Path
+                                           , Chain
+                                           , WayPoints
+                                           , WayFragments
+                                           , AddedPaths
+                                           , AddedVertices
+                                           , AddedSegments
+                                           , RemovedPaths
+                                           , RemovedVertices
+                                           , RemovedSegments );
+                    }
                 }
             }
-        }
 
-        return FArianeObject::TraversalReturnValue::Continue;
-    } );
+            return FArianeObject::TraversalReturnValue::Continue;
+        } );
+    }
 
     for( FArianeSegment* RemovedSegment : RemovedSegments )
     {
@@ -602,7 +608,7 @@ UArianeEditorEraserTool::AssignVertex( FArianePath* OwnerPath
 }
 
 void
-UArianeEditorEraserTool::ParseChainWayPoints( UArianePainting3DComponent* Painting3DComponent
+UArianeEditorEraserTool::ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
                                             , FArianePath* ChainPath
                                             , const FArianePath::Chain& Chain
                                             , TArray<FWayPoint>& WayPoints
@@ -650,7 +656,7 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianePainting3DComponent* Painti
 
             if( ( SegmentAdditionFlags & ESegmentAdditionFlags::CreateNewPath ) == ESegmentAdditionFlags::CreateNewPath )
             {
-                CurrentPath = Painting3DComponent->AllocPath( ChainPath->GetLineType() );
+                CurrentPath = DrawingLayer->AllocPath();
                 // for postprocessing. the path is not added to the parent yet
                 CurrentPath->SetParent( ChainPath->GetParent() );
 
@@ -690,7 +696,7 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianePainting3DComponent* Painti
 bool
 UArianeEditorEraserTool::EraseChainSegments( FEditorViewportClient* ViewportClient
                                            , FSceneView* View
-                                           , UArianePainting3DComponent* Painting3DComponent
+                                           , UArianeLayerDrawing* DrawingLayer
                                            , FArianePath* Path
                                            , const FArianePath::Chain& Chain
                                            , const TArray<FColor>& Pixels
@@ -698,6 +704,7 @@ UArianeEditorEraserTool::EraseChainSegments( FEditorViewportClient* ViewportClie
                                            , TArray<FWayFragment>& OutWayFragments )
 {
     //const FTransform& WorldTransform = Painting3DComponent->GetComponentTransform();
+    UArianePainting3DComponent* Painting3DComponent = DrawingLayer->GetLayerStack()->GetPainting3DComponent();
     const FTransform& WorldTransform = Painting3DComponent->GetOwner()->GetRootComponent()->GetComponentTransform();
 
     FArianeVertex* FirstVertex = Chain.LeadingVertex;

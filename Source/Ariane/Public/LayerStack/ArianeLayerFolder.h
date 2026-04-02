@@ -11,25 +11,41 @@
 
 #include "ArianeLayerFolder.generated.h"
 
+
 UCLASS()
 class ARIANE_API UArianeLayerFolder : public UArianeLayer
 {
     GENERATED_BODY()
 
-    public:
-        ~UArianeLayerFolder();
-        UArianeLayerFolder();
+public:
+    enum class TraversalReturnValue{ Continue, IgnoreChildren, Stop };
 
-        void SetExpanded( bool bInExpanded );
-        bool IsExpanded();
-        const TArray<UArianeLayer*>& GetChildren();
-        void AddChild( UArianeLayer* Orphan );
-        void RemoveChild( UArianeLayer* Child );
+public:
+    ~UArianeLayerFolder();
+    UArianeLayerFolder();
 
-    protected:
-        UPROPERTY()
-        TArray<UArianeLayer*> Children;
+    void SetExpanded( bool bInExpanded );
+    bool IsExpanded();
+    const TArray<UArianeLayer*>& GetChildren();
+    void AddChild( UArianeLayer* Orphan );
+    void RemoveChild( UArianeLayer* Child );
+    void InvalidateChild( UArianeLayer* Child );
+    virtual void Update() override;
 
-        UPROPERTY()
-        bool bExpanded;
+public:
+    void Traverse( TFunction<TraversalReturnValue(UArianeLayer*)> Callback );
+
+protected:
+    TraversalReturnValue Traverse_Private( TFunction<TraversalReturnValue(UArianeLayer*)> Callback );
+    void UpdateBounds();
+
+protected:
+    UPROPERTY()
+    TArray<UArianeLayer*> Children;
+
+    UPROPERTY()
+    bool bExpanded;
+
+protected:
+    TArray<UArianeLayer*> InvalidatedChildren;
 };
