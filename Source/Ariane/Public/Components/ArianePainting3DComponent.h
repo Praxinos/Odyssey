@@ -12,9 +12,7 @@
 #include "LocalVertexFactory.h"
 #include "RenderResource.h"
 #include "RawIndexBuffer.h"
-#include "StructUtils/InstancedStruct.h"
 // Ariane Headers
-#include "ArianeID.h"
 #include "ArianePath.h" // for EArianePathLineType
 // Odyssey Headers
 #include "OdysseyPalette.h"
@@ -48,6 +46,9 @@ class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
                                            , const FSceneViewFamily& ViewFamily
                                            , uint32 VisibilityMap
                                            , FMeshElementCollector& Collector) const override;
+        void GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* DrawingLayer
+                                               , FMeshElementCollector& Collector
+                                               , int32 ViewIndex ) const;
         void InitVertexFactory();
         virtual void DrawStaticElements( FStaticPrimitiveDrawInterface * PDI ) override;
 
@@ -80,12 +81,8 @@ public:
     virtual void PostEditUndo() override;
     #endif
 
-    // debug
-    void PrintPointers();
-
     void ResetHierarchy();
 
-    FArianeObject* GetRootObject();
     void DeleteInstancedObject( FArianeObject* Object );
 
     UArianeLayerStack* GetLayerStack();
@@ -104,27 +101,17 @@ private:
     virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
 
 public:
-    FArianePath* AllocPath( EArianePathLineType InLineType );
-    FArianeObject* AllocObject();
-    TArray<FInstancedStruct>& GetInstancedObjects();
     void Update();
-    FArianeObject* GetObject( const FGuid& InGuid );
 
 protected:
-    UPROPERTY( EditAnywhere )
-    TArray<FInstancedStruct> InstancedObjects;
-
-    UPROPERTY( EditAnywhere )
-    FArianeObjectID RootObjectID;
-
     UPROPERTY()
     UArianeLayerStack* LayerStack;
 
     UPROPERTY()
     TArray<UOdysseyPaletteSet*> PaletteSets;
 
-public:
-    mutable FCriticalSection InstancedObjectsAccessRW;
+    UPROPERTY()
+    int FileVersion = 1;
 
 protected:
     UOdysseyPaletteEntryColor* CurrentPaletteColorEntry;

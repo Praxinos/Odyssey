@@ -5,6 +5,7 @@
 #include "PathDrawingTool/ArianeEditorPathDrawingTool.h"
 #include "ArianeEditor.h"
 #include "ArianePainting3DComponent.h"
+#include "ArianeLayerDrawing.h"
 #include "ArianePath.h"
 #include "ArianeVertex.h"
 #include "ArianeLayerStack.h"
@@ -58,24 +59,28 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* iViewportClien
             if( painting3DComponent )
             {
                 //painting3DComponent->PrintPointers();
+                UArianeLayerDrawing* DrawingLayer = painting3DComponent->GetLayerStack()->GetFirstSelectedDrawingLayer();
 
-                painting3DComponent->Modify();
+                if( DrawingLayer )
+                {
+                    DrawingLayer->Modify();
 
-                EditedPath = painting3DComponent->AllocPath( LineType );
+                    EditedPath = DrawingLayer->AllocPath();
 
-                EditedPath->SetColor( ueColor );
-                EditedPath->SetDrawingLayer( painting3DComponent->GetLayerStack()->GetFirstSelectedDrawingLayer() );
+                    DrawingLayer->GetRootObject()->AppendChild( EditedPath );
 
-                painting3DComponent->GetRootObject()->AppendChild( EditedPath );
+                    EditedPath->SetColor( ueColor );
+                    EditedPath->SetLineType( LineType );
 
-                //GEditor->UndoTransaction();
-                //painting3DComponent->PrintPointers();
+                    //GEditor->UndoTransaction();
+                    //painting3DComponent->PrintPointers();
 
-                PlotVertex( iViewportClient, PointerState );
-                //PlotVertex( iViewportClient, iViewportX + 100, iViewportY );
-                //PlotVertex( iViewportClient, iViewportX + 200, iViewportY );
-                /*PlotVertex( iViewportClient, iViewportX + 250, iViewportY + 100 );
-                PlotVertex( iViewportClient, iViewportX + 400, iViewportY + 60 );*/
+                    PlotVertex( iViewportClient, PointerState );
+                    //PlotVertex( iViewportClient, iViewportX + 100, iViewportY );
+                    //PlotVertex( iViewportClient, iViewportX + 200, iViewportY );
+                    /*PlotVertex( iViewportClient, iViewportX + 250, iViewportY + 100 );
+                    PlotVertex( iViewportClient, iViewportX + 400, iViewportY + 60 );*/
+                }
             }
         }
 
@@ -135,48 +140,54 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
 
         if( painting3DComponent )
         {
-            const FTransform& actorWorldTransform = actor->GetRootComponent()->GetComponentTransform();
-            FVector actorWorldPosition = actorWorldTransform.TransformPosition( FVector( 0, 0, 0 ) );
-            FVector rayOrigin, rayDirection;
-            FVector4 actorWorldPlane = actorWorldTransform.TransformVector( FVector( 0, 1.0f, 0.0f ) );
-            FVector intersectAt;
+            //painting3DComponent->PrintPointers();
+            UArianeLayerDrawing* DrawingLayer = painting3DComponent->GetLayerStack()->GetFirstSelectedDrawingLayer();
 
-            FVector cameraCoords = iViewportClient->GetViewLocation();
-
-            FVector planeVector = cameraCoords - actorWorldPosition;
-
-            planeVector.Normalize();
-
-            actorWorldPlane = planeVector;
-
-            actorWorldPlane.W = - ( ( actorWorldPlane.X * actorWorldPosition.X )
-                                  + ( actorWorldPlane.Y * actorWorldPosition.Y )
-                                  + ( actorWorldPlane.Z * actorWorldPosition.Z ) );
-
-            View->DeprojectFVector2D( FVector2D( PointerState.ViewportX, PointerState.ViewportY ), rayOrigin, rayDirection );
-
-            if( Intersect( actorWorldPlane, rayOrigin, rayDirection, intersectAt  ) > 0.0f )
+            if( DrawingLayer )
             {
-                FVector localCoords = actorWorldTransform.Inverse().TransformFVector4( intersectAt );
-                FVector localNormal = actorWorldTransform.Inverse().TransformVector( planeVector );
-                FArianeVertex *Vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last().GetVertex()
-                                                                         : nullptr;
+                const FTransform& actorWorldTransform = actor->GetRootComponent()->GetComponentTransform();
+                FVector actorWorldPosition = actorWorldTransform.TransformPosition( FVector( 0, 0, 0 ) );
+                FVector rayOrigin, rayDirection;
+                FVector4 actorWorldPlane = actorWorldTransform.TransformVector( FVector( 0, 1.0f, 0.0f ) );
+                FVector intersectAt;
 
-                FArianeVertex *Vertex1 = EditedPath->AllocVertex( localCoords, localNormal, Radius );
+                FVector cameraCoords = iViewportClient->GetViewLocation();
 
-                EditedPath->AddVertex( Vertex1 );
+                FVector planeVector = cameraCoords - actorWorldPosition;
 
-                if( Vertex0 )
+                planeVector.Normalize();
+
+                actorWorldPlane = planeVector;
+
+                actorWorldPlane.W = - ( ( actorWorldPlane.X * actorWorldPosition.X )
+                                      + ( actorWorldPlane.Y * actorWorldPosition.Y )
+                                      + ( actorWorldPlane.Z * actorWorldPosition.Z ) );
+
+                View->DeprojectFVector2D( FVector2D( PointerState.ViewportX, PointerState.ViewportY ), rayOrigin, rayDirection );
+
+                if( Intersect( actorWorldPlane, rayOrigin, rayDirection, intersectAt  ) > 0.0f )
                 {
-                    FArianeSegment *Segment = EditedPath->AllocSegment( Vertex0, Vertex1 );
+                    FVector localCoords = actorWorldTransform.Inverse().TransformFVector4( intersectAt );
+                    FVector localNormal = actorWorldTransform.Inverse().TransformVector( planeVector );
+                    FArianeVertex *Vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last().GetVertex()
+                                                                             : nullptr;
 
-                    EditedPath->AddSegment( Segment );
+                    FArianeVertex *Vertex1 = EditedPath->AllocVertex( localCoords, localNormal, Radius );
+
+                    EditedPath->AddVertex( Vertex1 );
+
+                    if( Vertex0 )
+                    {
+                        FArianeSegment *Segment = EditedPath->AllocSegment( Vertex0, Vertex1 );
+
+                        EditedPath->AddSegment( Segment );
+                    }
                 }
+
+                painting3DComponent->Update( );
+
+                break;
             }
-
-            painting3DComponent->Update( );
-
-            break;
         }
     }
 }

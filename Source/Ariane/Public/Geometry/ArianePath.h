@@ -23,7 +23,7 @@
 struct FArianeSegment;
 struct FArianeVertex;
 class UMaterial;
-class UArianePainting3DComponent;
+class UArianeLayerDrawing;
 struct FArianePath;
 
 UENUM(BlueprintType)
@@ -96,9 +96,6 @@ struct ARIANE_API FArianePathInvalidationFlags : FArianeObjectInvalidationFlags
         virtual bool HasAny() override;
 
     public:
-        void ClearOwn( FArianePathInvalidationFlags& Flags );
-
-    public:
         FArianePathInvalidationFlags& SetVertexAltered()  { VertexAltered  = 1; return *this; };
         FArianePathInvalidationFlags& SetSegmentAltered() { SegmentAltered = 1; return *this; };
         FArianePathInvalidationFlags& SetVertexAddedOrRemoved()  { VertexAddedOrRemoved  = 1; return *this; };
@@ -138,7 +135,7 @@ public:
 public:
     virtual ~FArianePath();
     FArianePath();
-    FArianePath( UArianePainting3DComponent* InPainting3DComponent, EArianePathLineType InLineType );
+    FArianePath( UArianeLayerDrawing* InDrawingLayer );
 
 public:
     /**
@@ -231,7 +228,7 @@ public:
     void InvalidateAllSegments();
 
     /** overriden from ArianeObject */
-    bool Update( bool Recurse ) override;
+    virtual bool Update( bool Recurse, bool bClearFlags = true ) override;
     /** overriden from ArianeObject */
     virtual void UpdateBounds() override;
     /** overriden from ArianeObject */

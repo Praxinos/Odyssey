@@ -29,17 +29,18 @@ struct ARIANE_API FArianeObjectInvalidationFlags
         virtual bool HasAny();
 
     public:
-        static void ClearOwn( FArianeObjectInvalidationFlags& Flags );
-
-    public:
         FArianeObjectInvalidationFlags& SetAltered()  { Selected  = 1; return *this; };
         FArianeObjectInvalidationFlags& SetSelected() { Altered   = 1; return *this; };
         FArianeObjectInvalidationFlags& SetHierarchy(){ Hierarchy = 1; return *this; };
+        FArianeObjectInvalidationFlags& SetColor()    { Color     = 1; return *this; };
+        FArianeObjectInvalidationFlags& SetChildren() { Children  = 1; return *this; };
 
     public:
         uint32 Selected  : 1 = 0;
         uint32 Altered   : 1 = 0;
         uint32 Hierarchy : 1 = 0;
+        uint32 Color     : 1 = 0;
+        uint32 Children  : 1 = 0;
 };
 
 USTRUCT(BlueprintType)
@@ -68,7 +69,7 @@ struct ARIANE_API FArianeObject
         virtual ~FArianeObject();
         FArianeObject();
 
-        FArianeObject( UArianePainting3DComponent* InPainting3DComponent );
+        FArianeObject( UArianeLayerDrawing* InDrawingLayer );
 
         /**
          * @brief Add a child to this object at the end of the list of children.
@@ -106,7 +107,7 @@ struct ARIANE_API FArianeObject
          * @brief Update the object
          * @param bRecurse Update recursively
          */
-        virtual bool Update( bool bRecurse );
+        virtual bool Update( bool bRecurse, bool bClearFlags = true );
 
         /** Get the invalidation flags */
         FArianeObjectInvalidationFlags& GetInvalidationFlags();
@@ -127,7 +128,6 @@ struct ARIANE_API FArianeObject
         FVector GetTranslation();
         FVector GetRotationInDegrees();
         FVector GetScaling();
-        UArianePainting3DComponent* GetPainting3DComponent();
         const FGuid& GetGuid();
         void Traverse( TFunction<TraversalReturnValue(FArianeObject*)> Callback );
         FArianeObject* GetParent();
@@ -136,6 +136,7 @@ struct ARIANE_API FArianeObject
         virtual bool IsVisible( bool bInHierarchical );
         UArianeLayerDrawing* GetDrawingLayer();
         void SetDrawingLayer( UArianeLayerDrawing* InLayer );
+        FSimpleMulticastDelegate & GetOnPostInvalidatedDelegate();
 
     protected:
         /**
@@ -146,9 +147,6 @@ struct ARIANE_API FArianeObject
         TraversalReturnValue Traverse_Private( TFunction<TraversalReturnValue(FArianeObject*)> Callback );
 
     protected:
-        UPROPERTY( EditAnywhere )
-        UArianePainting3DComponent* Painting3DComponent;
-
         UPROPERTY( EditAnywhere )
         FName Name;
 
@@ -174,6 +172,7 @@ struct ARIANE_API FArianeObject
         UArianeLayerDrawing* DrawingLayer;
 
     protected:
+        FSimpleMulticastDelegate  OnPostInvalidated;
         TArray<FArianeObjectID> InvalidatedChildrenID;
 
         FBoxSphereBounds Bounds;

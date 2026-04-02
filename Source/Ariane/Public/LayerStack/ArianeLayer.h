@@ -9,7 +9,8 @@
 
 #include "ArianeLayer.generated.h"
 
-
+class UArianeLayerStack;
+class UArianeLayerFolder;
 class UArianeLayerFolder;
 
 UCLASS(Abstract)
@@ -28,25 +29,17 @@ public:
     void SetLocked( bool bInLocked );
     bool IsLocked( bool bHierarchical );
     void SetSelected( bool bInSelected );
+    virtual void Invalidate();
+    virtual void Update();
 
     #if WITH_EDITOR
     virtual bool IsSelectedInEditor() const override;
     #endif
-
-public:
-/*
-        virtual void TickComponent( float DeltaTime
-                                  , ELevelTick TickType
-                                  , FActorComponentTickFunction* ThisTickFunction ) override;
-        virtual void PostLoad() override;
-
-        #if WITH_EDITOR
-        virtual void PostEditChangeProperty( FPropertyChangedEvent& event ) override;
-
-        virtual void PostEditUndo() override;
-        #endif
-*/
-
+    bool IsInvalidated();
+    void SetInvalidated( bool bInInvalidate );
+    const FBoxSphereBounds& GetBounds();
+    UArianeLayerStack* GetLayerStack();
+    UArianeLayerFolder* GetRootFolder();
 
 protected:
     UPROPERTY()
@@ -57,4 +50,8 @@ protected:
 
     UPROPERTY()
     bool bSelected;
+
+protected:
+    bool bInvalidated;
+    FBoxSphereBounds Bounds;
 };

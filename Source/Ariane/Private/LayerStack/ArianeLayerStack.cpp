@@ -5,6 +5,7 @@
 #include "ArianeLayerStack.h"
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerDrawing.h"
+#include "ArianePainting3DComponent.h"
 
 UArianeLayerStack::~UArianeLayerStack()
 {
@@ -12,13 +13,24 @@ UArianeLayerStack::~UArianeLayerStack()
 
 UArianeLayerStack::UArianeLayerStack()
 {
-    RootLayerFolder = NewObject<UArianeLayerFolder>( this, "Root Layer" );
+    RootFolder = NewObject<UArianeLayerFolder>( this, "Root Folder" );
+
+    // Create a default drawing layer
+    UArianeLayerDrawing* DrawingLayer = NewObject<UArianeLayerDrawing>( RootFolder, "Drawing Layer" );
+
+    RootFolder->AddChild( DrawingLayer );
+}
+
+UArianePainting3DComponent*
+UArianeLayerStack::GetPainting3DComponent()
+{
+    return Cast<UArianePainting3DComponent>(GetOuter());
 }
 
 UArianeLayerFolder*
-UArianeLayerStack::GetRootLayerFolder()
+UArianeLayerStack::GetRootFolder()
 {
-    return RootLayerFolder;
+    return RootFolder;
 }
 
 void
@@ -37,7 +49,7 @@ UArianeLayerStack::SelectAllLayers()
 {
     SelectedLayers.Empty();
 
-    SelectLayer( RootLayerFolder, true );
+    SelectLayer( RootFolder, true );
 }
 
 void
@@ -66,22 +78,26 @@ UArianeLayerStack::SelectLayer( UArianeLayer* Layer, bool bRecurse )
 void
 UArianeLayerStack::SelectLayer_Private( UArianeLayer* Layer, bool bRecurse )
 {
-    if( SelectedLayers.Find( Layer ) == INDEX_NONE )
+    // root folder cannot be selected
+    if( Cast<UArianeLayer>(RootFolder) != Layer )
     {
-        SelectedLayers.Add( Layer );
-
-        Layer->SetSelected( true );
-    }
-
-    if( bRecurse )
-    {
-        UArianeLayerFolder* LayerFolder = Cast<UArianeLayerFolder>( Layer );
-
-        if ( LayerFolder )
+        if( SelectedLayers.Find( Layer ) == INDEX_NONE )
         {
-            for( UArianeLayer* ChildLayer : LayerFolder->GetChildren() )
+            SelectedLayers.Add( Layer );
+
+            Layer->SetSelected( true );
+        }
+
+        if( bRecurse )
+        {
+            UArianeLayerFolder* LayerFolder = Cast<UArianeLayerFolder>( Layer );
+
+            if ( LayerFolder )
             {
-                SelectLayer_Private( ChildLayer, bRecurse );
+                for( UArianeLayer* ChildLayer : LayerFolder->GetChildren() )
+                {
+                    SelectLayer_Private( ChildLayer, bRecurse );
+                }
             }
         }
     }
@@ -128,7 +144,7 @@ UArianeLayerDrawing*
 UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder )
 {
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
-                                                                : RootLayerFolder;
+                                                                : RootFolder;
     UArianeLayerDrawing* NewDrawingLayer = NewObject<UArianeLayerDrawing>( ParentLayerFolder );
 
     OnPreLayerStackChanged.Broadcast();
@@ -144,7 +160,7 @@ UArianeLayerFolder*
 UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder )
 {
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
-                                                                : RootLayerFolder;
+                                                                : RootFolder;
     UArianeLayerFolder* NewLayerFolder = NewObject<UArianeLayerFolder>( ParentLayerFolder );
 
     OnPreLayerStackChanged.Broadcast();

@@ -12,6 +12,8 @@
 class UArianeLayer;
 class UArianeLayerDrawing;
 class UArianeLayerFolder;
+class UArianeLayerFolder;
+class UArianePainting3DComponent;
 
 UCLASS()
 class ARIANE_API UArianeLayerStack : public UObject
@@ -25,7 +27,7 @@ public:
     ~UArianeLayerStack();
     UArianeLayerStack();
 
-    UArianeLayerFolder* GetRootLayerFolder();
+    UArianeLayerFolder* GetRootFolder();
 
     void RemoveSelectedLayers();
     void SelectAllLayers();
@@ -36,6 +38,7 @@ public:
     UArianeLayerDrawing* GetFirstSelectedDrawingLayer();
     UArianeLayerDrawing* CreateDrawingLayer( UArianeLayerFolder* ParentLayerFolder );
     UArianeLayerFolder* CreateFolderLayer( UArianeLayerFolder* ParentLayerFolder );
+    UArianePainting3DComponent* GetPainting3DComponent();
 
     FOnLayerStackChanged& OnPreLayerStackChangedDelegate();
     FOnLayerStackChanged& OnPostLayerStackChangedDelegate();
@@ -48,7 +51,7 @@ protected:
 
 protected:
     UPROPERTY()
-    UArianeLayerFolder* RootLayerFolder;
+    UArianeLayerFolder* RootFolder;
 
     UPROPERTY()
     TArray<UArianeLayer*> SelectedLayers;

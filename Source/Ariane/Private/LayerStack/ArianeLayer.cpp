@@ -4,6 +4,7 @@
 // Ariane headers
 #include "ArianeLayer.h"
 #include "ArianeLayerFolder.h"
+#include "ArianeLayerStack.h"
 
 UArianeLayer::~UArianeLayer()
 {
@@ -13,6 +14,8 @@ UArianeLayer::UArianeLayer()
     : bVisible ( true )
     , bLocked ( false )
     , bSelected ( false )
+    , bInvalidated ( false )
+    , Bounds ( FBoxSphereBounds(ForceInit) )
 {
 /*
     PrimaryComponentTick.bCanEverTick = true;
@@ -27,8 +30,36 @@ UArianeLayer::UArianeLayer()
 }
 
 UArianeLayerFolder*
+UArianeLayer::GetRootFolder()
+{
+    UArianeLayer* Candidate = this;
+
+    while ( Candidate )
+    {
+        if( Cast<UArianeLayerStack>(Candidate->GetOuter()) )
+        {
+            return Cast<UArianeLayerFolder>(Candidate);
+        }
+
+        Candidate = Candidate->GetParent();
+    }
+
+    return nullptr;
+}
+
+UArianeLayerStack*
+UArianeLayer::GetLayerStack()
+{
+    UArianeLayerFolder* RootFolder = GetRootFolder();
+
+    return RootFolder ? Cast<UArianeLayerStack>(RootFolder->GetOuter()) : nullptr;
+}
+
+UArianeLayerFolder*
 UArianeLayer::GetParent()
 {
+    // Note: for the root folder, this will return null due to the cast.
+    // Indeed, the Outer Object is the layer stack in that case
     return Cast<UArianeLayerFolder>(GetOuter());
 }
 
@@ -82,4 +113,38 @@ UArianeLayer::IsSelectedInEditor() const
 {
     return bSelected;
 }
-    #endif
+
+void
+UArianeLayer::Invalidate()
+{
+    UArianeLayerFolder* ParentFolder = GetParent();
+
+    if( ParentFolder )
+    {
+        ParentFolder->InvalidateChild( this );
+    }
+}
+
+bool UArianeLayer::IsInvalidated()
+{
+    return bInvalidated;
+}
+
+void UArianeLayer::SetInvalidated( bool bInInvalidated )
+{
+    bInvalidated = bInInvalidated;
+}
+
+const FBoxSphereBounds&
+UArianeLayer::GetBounds()
+{
+    return Bounds;
+}
+
+void
+UArianeLayer::Update()
+{
+    bInvalidated = false;
+}
+
+#endif

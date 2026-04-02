@@ -5,6 +5,8 @@
 #include "ArianePath.h"
 #include "ArianeVertex.h"
 #include "ArianeSegment.h"
+#include "ArianeLayerDrawing.h"
+#include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
 // Unreal headers
 #include "Engine/EngineBaseTypes.h"
@@ -71,21 +73,15 @@ FArianePathInvalidationFlags::SetAll()
     return *this;
 }
 
-void
-FArianePathInvalidationFlags::ClearOwn( FArianePathInvalidationFlags& Flags )
-{
-    Flags.VertexAltered  =
-    Flags.SegmentAltered =
-    Flags.VertexAddedOrRemoved  =
-    Flags.SegmentAddedOrRemoved = 0;
-}
-
 FArianePathInvalidationFlags&
 FArianePathInvalidationFlags::Clear()
 {
-    FArianePathInvalidationFlags::ClearOwn( *this );
-
     Super::Clear();
+
+    VertexAltered  =
+    SegmentAltered =
+    VertexAddedOrRemoved  =
+    SegmentAddedOrRemoved = 0;
 
     return *this;
 }
@@ -195,11 +191,10 @@ FArianePath::FArianePath()
     InvalidationFlags = new FArianePathInvalidationFlags();
 }
 
-FArianePath::FArianePath( UArianePainting3DComponent* InPainting3DComponent
-                        , EArianePathLineType InLineType )
-    : FArianeObject ( InPainting3DComponent )
+FArianePath::FArianePath( UArianeLayerDrawing* InDrawingLayer )
+    : FArianeObject ( InDrawingLayer )
     , Geometry3D ( this )
-    , LineType ( InLineType )
+    , LineType ( EArianePathLineType::Tube )
     , Color ( 0, 0, 0, 255 )
 {
     InvalidationFlags = new FArianePathInvalidationFlags();
@@ -451,6 +446,8 @@ void
 FArianePath::SetColor( const FColor& InColor )
 {
     Color = InColor;
+
+    Invalidate( FArianePathInvalidationFlags().SetColor() );
 }
 
 void
@@ -459,6 +456,7 @@ FArianePath::ExportProperties( FArianePath* DestPath )
     Super::ExportProperties( DestPath );
 
     DestPath->Color = Color;
+    DestPath->LineType = LineType;
 }
 
 void
@@ -483,11 +481,11 @@ FArianePath::FindChains()
 }
 
 bool
-FArianePath::Update( bool Recurse )
+FArianePath::Update( bool Recurse, bool bClearFlags )
 {
     FArianePathInvalidationFlags* PathInvalidationFlags = static_cast<FArianePathInvalidationFlags*>(InvalidationFlags);
 
-    FArianeObject::Update( Recurse );
+    FArianeObject::Update( Recurse , false );
 
     if( PathInvalidationFlags->VertexAddedOrRemoved
      || PathInvalidationFlags->SegmentAddedOrRemoved )
@@ -505,10 +503,7 @@ FArianePath::Update( bool Recurse )
         UpdateBounds();
     }
 
-      PathInvalidationFlags->VertexAltered
-    = PathInvalidationFlags->VertexAddedOrRemoved
-    = PathInvalidationFlags->SegmentAltered
-    = PathInvalidationFlags->SegmentAddedOrRemoved = 0;
+    PathInvalidationFlags->Clear();
 
     return true; // update succeeded
 }
@@ -919,7 +914,7 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
                                                   , Step.T
                                                   , false );
 
-        FVector PerpendicularVector = TangentVector.Cross( Path->GetPainting3DComponent()->GetUpVector() );
+        FVector PerpendicularVector = TangentVector.Cross( Path->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->GetUpVector() );
 
         PerpendicularVector.Normalize();
 
@@ -1020,7 +1015,7 @@ FArianePathGeometry3D::InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices
 {
     if( VertexFactory == nullptr )
     {
-        VertexFactory = new FLocalVertexFactory( Path->GetPainting3DComponent()->GetWorld()->GetFeatureLevel(), "Path Vertex Factory" );
+        VertexFactory = new FLocalVertexFactory( Path->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->GetWorld()->GetFeatureLevel(), "Path Vertex Factory" );
     }
 
     ENQUEUE_RENDER_COMMAND(StaticMeshVertexBuffersLegacyInit)(
@@ -1091,7 +1086,7 @@ FArianePathGeometry3D::Build()
     uint32 TotalIndexCount = 0;
     TArray<FDynamicMeshVertex> MeshVertices;
     TArray<uint32> MeshIndices;
-    FVector PreviousPerpendicularVector = Path->GetPainting3DComponent()->GetUpVector();//FVector::Zero();
+    FVector PreviousPerpendicularVector = Path->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->GetUpVector();//FVector::Zero();
 
     // TODO : update  invalidated segments only
     for( FArianeSegment* Segment : Path->GetInvalidatedSegments() )
