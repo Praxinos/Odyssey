@@ -63,6 +63,7 @@ public class ArianeEditor : ModuleRules
                 "UnrealEd",
                 "ViewportInteraction",
 
+                "InteractiveToolsFramework",
                 //"OdysseyAnimation",
                 //"OdysseyAnimationTracks",
                 //"OdysseyCore",

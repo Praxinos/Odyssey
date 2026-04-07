@@ -11,6 +11,7 @@
 #include "ArianePainting3DActor.h"
 #include "PathDrawingTool/ArianeEditorPathDrawingTool.h"
 #include "EraserTool/ArianeEditorEraserTool.h"
+#include "LayerTransformTool/ArianeEditorLayerTransformTool.h"
 // Unreal
 #include "Toolkits/BaseToolkit.h"
 #include "UObject/Object.h"
@@ -19,6 +20,8 @@
 #include "FileHelpers.h"
 #include "Subsystems/EditorActorSubsystem.h"
 #include "Selection.h"
+#include "EditorModeManager.h"
+#include "Tools/EdModeInteractiveToolsContext.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -30,7 +33,6 @@ FArianeEditor::~FArianeEditor()
 FArianeEditor::FArianeEditor( FArianeEditorViewportToolkit* iToolkit )
     : Toolkit( iToolkit )
     , Name("ArianeEditor")
-    , CurrentTool ( nullptr )
     , ColorType ( EOdysseyPainterEditorColorType::Raw )
 {
     // Component selection is managed by ArianeEditor in order to emulate a Pre/Post Selection event behavior
@@ -182,58 +184,77 @@ FArianeEditor::ExtendLevelEditorToolbar( UToolMenu* iToolbar )
 
 // Tools ------------------------------
 
+UArianeEditorTool*
+FArianeEditor::GetCurrentTool()
+{
+    // Note: EToolSide::Left means the mouse
+    return Cast<UArianeEditorTool>(GetToolManager()->GetActiveTool( EToolSide::Left ));
+}
+
+void
+FArianeEditor::SetCurrentTool( UArianeEditorTool* Tool )
+{
+    OnPreCurrentToolChanged.Broadcast();
+
+    // Note: EToolSide::Left means the mouse
+    GetToolManager()->SelectActiveToolType( EToolSide::Left, Tool->GetType() );
+    GetToolManager()->ActivateTool( EToolSide::Left );
+
+    OnPostCurrentToolChanged.Broadcast();
+}
+
+UInteractiveToolManager*
+FArianeEditor::GetToolManager()
+{
+    return Toolkit->GetEditorMode()->GetEditorModeTools()->GetInteractiveToolsContext()->ToolManager.Get();
+}
+
 const TArray<UArianeEditorTool*>&
 FArianeEditor::GetTools()
 {
     return Tools;
 }
 
-UArianeEditorTool*
-FArianeEditor::GetCurrentTool()
+void
+FArianeEditor::AddToolBuilder( UArianeEditorToolBuilder* ToolBuilder )
 {
-    return CurrentTool;
+    // We create the tool here and not in UArianeEditorToolBuilder::BuildTool so that
+    // the tool collection is ready for the tool selector widget
+    UArianeEditorTool* Tool = ToolBuilder->CreateTool( GetToolManager() );
+
+    Tool->Init( this );
+
+    Tools.Add( Tool );
+
+    GetToolManager()->RegisterToolType( ToolBuilder->GetType(), ToolBuilder );
 }
 
 void
-FArianeEditor::RemoveTool( UArianeEditorTool* iTool )
+FArianeEditor::RegisterTools()
 {
-    Tools.Remove( iTool );
+    AddToolBuilder( NewObject<UArianeEditorPathDrawingToolBuilder>() );
+    AddToolBuilder( NewObject<UArianeEditorEraserToolBuilder>() );
+    AddToolBuilder( NewObject<UArianeEditorLayerTransformToolBuilder>() );
 }
 
-void
-FArianeEditor::AddTool( UArianeEditorTool* iTool )
-{
-    Tools.Add( iTool );
-}
 
-void
-FArianeEditor::SetCurrentTool( UArianeEditorTool* iTool )
+void FArianeEditor::UnregisterTools()
 {
-    OnPreCurrentToolChanged.Broadcast();
+    TObjectPtr<UInteractiveToolManager> ToolManager = GetToolManager();
 
-    if( CurrentTool )
+    for( UArianeEditorTool* Tool : Tools )
     {
-        CurrentTool->Unload();
+        ToolManager->UnregisterToolType( Tool->GetType() );
     }
 
-    CurrentTool = iTool;
-
-    OnPostCurrentToolChanged.Broadcast();
-}
-
-void
-FArianeEditor::InitTools()
-{
-    AddTool( NewObject<UArianeEditorPathDrawingTool>() );
-    AddTool( NewObject<UArianeEditorEraserTool>() );
-
-    for( UArianeEditorTool* tool : Tools )
+/*
+    if (ToolManager->HasAnyActiveTool(EToolSide::Left))
     {
-        tool->Init( this );
+            ToolManager->DeactivateTool(EToolSide::Left, EToolShutdownType::Completed);
     }
+*/
 
-    // Set the first tool as the default one
-    SetCurrentTool( Tools[0] );
+
 }
 
 // --------------------- Tabs
@@ -313,7 +334,6 @@ FArianeEditor::GetId() const
 void
 FArianeEditor::Init()
 {
-    InitTools();
     InitTabs();
 }
 
@@ -436,10 +456,7 @@ FArianeEditor::SetColorType( EOdysseyPainterEditorColorType& InColorType )
 void
 FArianeEditor::AddReferencedObjects( FReferenceCollector& Collector )
 {
-    for ( TObjectPtr<UArianeEditorTool> tool : Tools )
-    {
-        Collector.AddReferencedObject(tool);
-    }
+
 }
 
 FString

@@ -422,7 +422,7 @@ void
 FArianeEditorViewportToolkit::InvokeUI()
 {
     Editor->RegisterTabSpawners();
-
+    Editor->RegisterTools();
 /* Gary
     if (GEditor)
         GEditor->OnEditorClose().AddRaw(this, &FArianeEditorViewportToolkit::OnEditorClose);
@@ -450,11 +450,13 @@ FArianeEditorViewportToolkit::ShutdownUI()
 /* Gary
     SaveOpenedTabs();
 */
+    Editor->CloseAllTabs();
+    Editor->UnregisterTabSpawners();
+    Editor->UnregisterTools();
+
     if (GEditor)
         GEditor->OnEditorClose().RemoveAll(this);
 
-    Editor->CloseAllTabs();
-    Editor->UnregisterTabSpawners();
 
 /* Gary
     LevelEditorModule.GetMenuExtensibilityManager()->RemoveExtender(LevelEditorMenuExtender);

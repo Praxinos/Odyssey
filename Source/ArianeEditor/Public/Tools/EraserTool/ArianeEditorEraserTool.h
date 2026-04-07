@@ -7,10 +7,13 @@
 #include "CoreMinimal.h"
 // Ariane
 #include "ArianeEditorTool.h"
+#include "ArianeEditorEraserToolBuilder.h" // that way only this header needs to be included by files using this tool
 #include "ArianePath.h"
 #include "ArianeSegment.h"
 #include "ArianeVertex.h"
+
 #include "ArianeEditorEraserTool.generated.h"
+
 
 class FArianeEditor;
 class UArianePainting3DComponent;
@@ -127,6 +130,10 @@ public:
     };
 
 public:
+    static FString GetStaticType() { return "ArianeEditor_EraserTool"; };
+    virtual FString GetType() override { return GetStaticType(); };
+
+public:
     // Destructor
     virtual ~UArianeEditorEraserTool();
 
@@ -141,6 +148,7 @@ public:
     virtual void OnMouseHover( FEditorViewportClient* iViewportClient
                              , const FArianePointerState& State ) override;
     virtual bool OnMouseDrag( FEditorViewportClient* iViewportClient
+                            , const FKey& iKey
                             , const FArianePointerState& State ) override;
     virtual bool OnMouseUp( FEditorViewportClient* iViewportClient
                           , const FKey& iKey
@@ -230,8 +238,12 @@ public:
 
 
 protected:
+    UPROPERTY() // prevent GC
     UCanvasRenderTarget2D* CanvasRenderTarget;
+
+    UPROPERTY() // prevent GC
     UTexture2D* Brush;
+
     FIntVector2 MouseRecords[2];
 };
 

@@ -33,5 +33,5 @@ class ARIANEEDITOR_API SArianeEditorToolSelector
 
 
     protected:
-        FArianeEditor* mEditor;
+        FArianeEditor* Editor;
 };

@@ -28,7 +28,10 @@ UArianePainting3DComponent::~UArianePainting3DComponent()
 
 UArianePainting3DComponent::UArianePainting3DComponent()
     : CurrentPaletteColorEntry ( nullptr )
+    , LayerStack ( nullptr )
 {
+    LayerStack = CreateDefaultSubobject<UArianeLayerStack>(TEXT("LayerStack"));
+
     PrimaryComponentTick.bCanEverTick = true;
     PrimaryComponentTick.bStartWithTickEnabled = true;
     PrimaryComponentTick.SetTickFunctionEnable(true);
@@ -37,8 +40,6 @@ UArianePainting3DComponent::UArianePainting3DComponent()
     bWantsInitializeComponent = true;
     bAutoActivate = true;
     bTickInEditor = true;
-
-    LayerStack = CreateDefaultSubobject<UArianeLayerStack>(TEXT("LayerStack"));
 
     //LineBatchComponent = CreateDefaultSubobject<ULineBatchComponent>(TEXT("LineBatcher"));
 }
@@ -58,11 +59,19 @@ UArianePainting3DComponent::GetUsedMaterials()
 }
 
 void
+UArianePainting3DComponent::Init()
+{
+    LayerStack->Init();
+
+    Update();
+}
+
+void
 UArianePainting3DComponent::PostLoad()
 {
     Super::PostLoad();
 
-    Update();
+    Init();
 }
 
 void
@@ -89,6 +98,14 @@ void
 UArianePainting3DComponent::BeginPlay()
 {
     Super::BeginPlay();
+}
+
+void
+UArianePainting3DComponent::OnComponentDestroyed( bool bDestroyingHierarchy )
+{
+    Super::OnComponentDestroyed( bDestroyingHierarchy );
+
+    LayerStack->OnComponentDestroyed();
 }
 
 void
@@ -308,6 +325,7 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
     DrawingLayer->InstancedObjectsAccessRW.Lock();
 
     DrawingLayer->GetRootObject()->Traverse( [ this
+                                             , DrawingLayer
                                              , MaterialInterface
                                              , ViewIndex
                                              , &Collector ]( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
@@ -342,23 +360,23 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
                 bool bOutputVelocity;
 
                 GetScene().GetPrimitiveUniformShaderParameters_RenderThread( GetPrimitiveSceneInfo()
-                                                                            , bHasPrecomputedVolumetricLightmap
-                                                                            , PreviousLocalToWorld
-                                                                            , SingleCaptureIndex
-                                                                            , bOutputVelocity );
+                                                                           , bHasPrecomputedVolumetricLightmap
+                                                                           , PreviousLocalToWorld
+                                                                           , SingleCaptureIndex
+                                                                           , bOutputVelocity );
 
                 //Alloate a temporary primitive uniform buffer, fill it with the data and set it in the batch element
                 FDynamicPrimitiveUniformBuffer& DynamicPrimitiveUniformBuffer = Collector.AllocateOneFrameResource<FDynamicPrimitiveUniformBuffer>();
 
                 DynamicPrimitiveUniformBuffer.Set( Collector.GetRHICommandList()
-                                                    , GetLocalToWorld()
-                                                    , PreviousLocalToWorld
-                                                    , GetBounds()
-                                                    , GetLocalBounds()
-                                                    , true
-                                                    , bHasPrecomputedVolumetricLightmap
+                                                 , DrawingLayer->GetComponentToWorld().ToMatrixWithScale() //GetLocalToWorld()
+                                                 , PreviousLocalToWorld
+                                                 , GetBounds()
+                                                 , GetLocalBounds()
+                                                 , true
+                                                 , bHasPrecomputedVolumetricLightmap
                                                 // , DrawsVelocity()
-                                                    , bOutputVelocity );
+                                                 , bOutputVelocity );
 
                 BatchElement.PrimitiveUniformBufferResource = &DynamicPrimitiveUniformBuffer.UniformBuffer;
                 BatchElement.PrimitiveIdMode = PrimID_DynamicPrimitiveShaderData;

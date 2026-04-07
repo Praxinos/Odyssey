@@ -26,10 +26,10 @@ public:
 
     void SetExpanded( bool bInExpanded );
     bool IsExpanded();
-    const TArray<UArianeLayer*>& GetChildren();
-    void AddChild( UArianeLayer* Orphan );
-    void RemoveChild( UArianeLayer* Child );
-    void InvalidateChild( UArianeLayer* Child );
+    const TArray<UArianeLayer*>& GetChildLayers();
+    void AddChildLayer( UArianeLayer* Orphan );
+    void RemoveChildLayer( UArianeLayer* Child );
+    void InvalidateChildLayer( UArianeLayer* Child );
     virtual void Update() override;
 
 public:
@@ -40,12 +40,14 @@ protected:
     void UpdateBounds();
 
 protected:
+    // Even though unreal has the list of attached Actors, it does not take the order into consideration.
+    // so we have to have our own list
     UPROPERTY()
-    TArray<UArianeLayer*> Children;
+    TArray<UArianeLayer*> ChildLayers;
 
     UPROPERTY()
     bool bExpanded;
 
 protected:
-    TArray<UArianeLayer*> InvalidatedChildren;
+    TArray<UArianeLayer*> InvalidatedChildLayers;
 };

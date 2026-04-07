@@ -21,6 +21,7 @@
 #include "Engine/Canvas.h"
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
+#include "InteractiveToolManager.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -904,9 +905,10 @@ UArianeEditorEraserTool::OnMouseHover( FEditorViewportClient* iViewportClient
 
 bool
 UArianeEditorEraserTool::OnMouseDrag( FEditorViewportClient* iViewportClient
+                                    , const FKey& iKey
                                     , const FArianePointerState& PointerState )
 {
-    if( iViewportClient->Viewport->KeyState( EKeys::LeftMouseButton ) )
+    if( iKey == EKeys::LeftMouseButton )
     {
         MouseRecords[1] = FIntVector2( PointerState.ViewportX, PointerState.ViewportY );
         // Will call UArianeEditorEraserTool::StampBrush()

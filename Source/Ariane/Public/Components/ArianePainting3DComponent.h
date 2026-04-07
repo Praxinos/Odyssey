@@ -82,7 +82,7 @@ public:
     #endif
 
     void ResetHierarchy();
-
+    virtual void OnComponentDestroyed( bool bDestroyingHierarchy ) override;
     void DeleteInstancedObject( FArianeObject* Object );
 
     UArianeLayerStack* GetLayerStack();
@@ -96,6 +96,7 @@ public:
     void SetCurrentPaletteColorEntry( UOdysseyPaletteEntryColor* Entry, FGuid Set );
     virtual void OnRegister() override;
     const TArray<UMaterialInterface*>& GetUsedMaterials();
+    void Init();
 
 private:
     virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;

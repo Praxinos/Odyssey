@@ -11,12 +11,14 @@ UArianeLayer::~UArianeLayer()
 }
 
 UArianeLayer::UArianeLayer()
-    : bVisible ( true )
-    , bLocked ( false )
+    : //bVisible ( true )
+      bLocked ( false )
     , bSelected ( false )
     , bInvalidated ( false )
     , Bounds ( FBoxSphereBounds(ForceInit) )
 {
+    // for Transform operations
+    SetMobility(EComponentMobility::Movable);
 /*
     PrimaryComponentTick.bCanEverTick = true;
     PrimaryComponentTick.bStartWithTickEnabled = true;
@@ -63,6 +65,7 @@ UArianeLayer::GetParent()
     return Cast<UArianeLayerFolder>(GetOuter());
 }
 
+/*
 void
 UArianeLayer::SetVisible( bool bInVisible )
 {
@@ -81,6 +84,7 @@ UArianeLayer::IsVisible( bool bHierarchical )
 
     return bVisible;
 }
+*/
 
 void
 UArianeLayer::SetLocked( bool bInLocked )
@@ -113,6 +117,7 @@ UArianeLayer::IsSelectedInEditor() const
 {
     return bSelected;
 }
+#endif
 
 void
 UArianeLayer::Invalidate()
@@ -121,7 +126,7 @@ UArianeLayer::Invalidate()
 
     if( ParentFolder )
     {
-        ParentFolder->InvalidateChild( this );
+        ParentFolder->InvalidateChildLayer( this );
     }
 }
 
@@ -145,6 +150,8 @@ void
 UArianeLayer::Update()
 {
     bInvalidated = false;
-}
 
-#endif
+    // will call CalcBounds (nb: calling UMeshComponent::UpdateBounds() does not work sometimes, especially when then
+    // path starts empty but this works.
+    UpdateComponentToWorld();
+}

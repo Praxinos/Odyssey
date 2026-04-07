@@ -361,7 +361,7 @@ FArianePath::GetVertices()
 void
 FArianePath::UpdateBounds()
 {
-    Bounds = FBoxSphereBounds();
+    Bounds = FBoxSphereBounds(ForceInit);
 
     for( FInstancedStruct& InstancedSegment : InstancedSegments )
     {

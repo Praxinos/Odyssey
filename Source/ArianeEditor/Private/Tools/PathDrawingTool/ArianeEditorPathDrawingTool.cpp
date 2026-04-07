@@ -17,6 +17,7 @@
 #include "SceneView.h"
 #include "Math/UnrealMathUtility.h"
 #include "IStylusState.h"
+#include "InteractiveToolManager.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -145,7 +146,7 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
 
             if( DrawingLayer )
             {
-                const FTransform& actorWorldTransform = actor->GetRootComponent()->GetComponentTransform();
+                const FTransform& actorWorldTransform = DrawingLayer->GetComponentTransform();
                 FVector actorWorldPosition = actorWorldTransform.TransformPosition( FVector( 0, 0, 0 ) );
                 FVector rayOrigin, rayDirection;
                 FVector4 actorWorldPlane = actorWorldTransform.TransformVector( FVector( 0, 1.0f, 0.0f ) );
@@ -194,9 +195,10 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
 
 bool
 UArianeEditorPathDrawingTool::OnMouseDrag( FEditorViewportClient* iViewportClient
+                                         , const FKey& iKey
                                          , const FArianePointerState& PointerState )
 {
-    if( iViewportClient->Viewport->KeyState( EKeys::LeftMouseButton ) )
+    if( iKey == EKeys::LeftMouseButton )
     {
         PlotVertex( iViewportClient, PointerState );
     }

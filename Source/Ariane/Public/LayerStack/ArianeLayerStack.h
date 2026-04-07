@@ -16,7 +16,7 @@ class UArianeLayerFolder;
 class UArianePainting3DComponent;
 
 UCLASS()
-class ARIANE_API UArianeLayerStack : public UObject
+class ARIANE_API UArianeLayerStack : public USceneComponent
 {
     GENERATED_BODY()
 
@@ -31,14 +31,17 @@ public:
 
     void RemoveSelectedLayers();
     void SelectAllLayers();
-    void SelectLayer( UArianeLayer* Layer, bool bRecurse = true );
-    void SelectLayers( const TArray<UArianeLayer*> LayerSelection, bool bRecurse = true );
-    void ClearLayerSelection();
+    void SelectLayer( UArianeLayer* Layer, bool bTriggerevent, bool bRecurse = true );
+    void SelectLayers( const TArray<UArianeLayer*> LayerSelection, bool bClearSelectionFirst, bool bTriggerevent, bool bRecurse = true );
+    void ClearLayerSelection( bool bTriggerEvent );
     const TArray<UArianeLayer*>& GetSelectedLayers();
     UArianeLayerDrawing* GetFirstSelectedDrawingLayer();
     UArianeLayerDrawing* CreateDrawingLayer( UArianeLayerFolder* ParentLayerFolder );
     UArianeLayerFolder* CreateFolderLayer( UArianeLayerFolder* ParentLayerFolder );
     UArianePainting3DComponent* GetPainting3DComponent();
+    void OnComponentDestroyed();
+    void GetLayers( TArray<UArianeLayer*>& Layers );
+    void Init();
 
     FOnLayerStackChanged& OnPreLayerStackChangedDelegate();
     FOnLayerStackChanged& OnPostLayerStackChangedDelegate();

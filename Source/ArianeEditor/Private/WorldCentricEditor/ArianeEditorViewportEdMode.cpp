@@ -116,6 +116,7 @@ bool FArianeEditorViewportEdMode::Select(AActor* InActor, bool bInSelected)
     return FEdMode::Select( InActor, bInSelected );
 }
 
+#ifdef unused
 void
 FArianeEditorViewportEdMode::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget
                                                  , const TArray<FStylusState>& iStates
@@ -413,6 +414,8 @@ FArianeEditorViewportEdMode::HandleClick( FEditorViewportClient* InViewportClien
                                                                              , Click.GetCursorPos().Y ) );
 }
 
+#endif
+
 bool
 FArianeEditorViewportEdMode::GetCursor( EMouseCursor::Type& OutCursor ) const
 {
@@ -458,7 +461,7 @@ FArianeEditorViewportEdMode::ListenStylusInput()
 {
     UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
 
-    inputSubsystem->AddMessageHandler(*this);
+    //inputSubsystem->AddMessageHandler(*this);
 }
 
 void
@@ -466,7 +469,14 @@ FArianeEditorViewportEdMode::IgnoreStylusInput()
 {
     UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
 
-    inputSubsystem->RemoveMessageHandler(*this);
+    //inputSubsystem->RemoveMessageHandler(*this);
+}
+
+
+FEditorModeTools*
+FArianeEditorViewportEdMode::GetEditorModeTools()
+{
+    return this->Owner;
 }
 
 void

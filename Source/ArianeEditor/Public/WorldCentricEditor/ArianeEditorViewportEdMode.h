@@ -11,12 +11,12 @@
 
 class FModeToolkit;
 class FArianeEditorViewportToolkit;
-
+class FEditorModeTools;
 
 /**
  * Odyssey paint on viewport editor mode
  */
-class ARIANEEDITOR_API FArianeEditorViewportEdMode : public FEdMode, public IStylusMessageHandler
+class ARIANEEDITOR_API FArianeEditorViewportEdMode : public FEdMode//, public IStylusMessageHandler
 {
 public:
     const static FEditorModeID EM_ArianeEditorViewportEdModeId;
@@ -55,6 +55,7 @@ public:
     /** Overriden from FEdMode. */
     virtual bool Select(AActor* InActor, bool bInSelected) override;
 
+#ifdef unused
     /** Overriden from FEdMode. */
     virtual bool MouseMove( FEditorViewportClient* iViewportClient
                           , FViewport* iViewport
@@ -77,6 +78,7 @@ public:
     virtual bool HandleClick( FEditorViewportClient* InViewportClient
                             , HHitProxy* HitProxy
                             , const FViewportClick& Click ) override;
+#endif
 
     // Overriden from FEdMode
     virtual bool AllowWidgetMove() override { return false; }
@@ -94,8 +96,10 @@ public:
     bool IsEditingEnabled() const;
 
     TSharedPtr<FArianeEditorViewportToolkit> GetArianeEditorViewportToolkit() const;
+    FEditorModeTools* GetEditorModeTools();
 
 private:
+#ifdef unused
     bool MouseMove_Private( FEditorViewportClient* iViewportClient
                           , FViewport* iViewport
                           , const FArianePointerState& State );
@@ -111,6 +115,7 @@ private:
                             , HHitProxy* HitProxy
                             , const FViewportClick& Click
                             , const FArianePointerState& State );
+#endif
 
     /** Force retrieval of the last events from the stylus input */
     void FlushStylusInput();
@@ -120,9 +125,11 @@ private:
 private:
     void OnEditorClose();
     // Implements IStylusMessageHandler::OnStylusStateChanged
-    void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget
+/**
+    virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget
                              , const TArray<FStylusState>& iStates
-                             , int32 iIndex );
+                             , int32 iIndex ) override;
+*/
 
 private:
     bool bStylusInUse;
