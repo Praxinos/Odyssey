@@ -38,26 +38,30 @@ UArianeLayerFolder::IsExpanded()
 }
 
 const TArray<UArianeLayer*>&
-UArianeLayerFolder::GetChildren()
+UArianeLayerFolder::GetChildLayers()
 {
-    return Children;
+    return ChildLayers;
 }
 
 void
-UArianeLayerFolder::AddChild( UArianeLayer* Orphan )
+UArianeLayerFolder::AddChildLayer( UArianeLayer* Orphan )
 {
     // Rename() is used to define the parent object
     Orphan->Rename( nullptr, this );
 
-    Children.Add( Orphan );
+    ChildLayers.Add( Orphan );
+
+    Orphan->AttachToComponent( this,  FAttachmentTransformRules::KeepWorldTransform );
 }
 
 void
-UArianeLayerFolder::RemoveChild( UArianeLayer* Child )
+UArianeLayerFolder::RemoveChildLayer( UArianeLayer* Child )
 {
-    Children.Remove( Child );
+    ChildLayers.Remove( Child );
 
-    InvalidatedChildren.Remove( Child );
+    InvalidatedChildLayers.Remove( Child );
+
+    Child->DetachFromComponent( FDetachmentTransformRules::KeepWorldTransform );
 
     // Rename() is used to define the parent object
     Child->Rename( nullptr, nullptr );
@@ -76,7 +80,7 @@ UArianeLayerFolder::Traverse_Private( TFunction<TraversalReturnValue(UArianeLaye
 
     if( ( Ret == TraversalReturnValue::IgnoreChildren ) == 0 )
     {
-        for( UArianeLayer* Child : Children )
+        for( UArianeLayer* Child : ChildLayers )
         {
             UArianeLayerFolder* ChildFolder = Cast<UArianeLayerFolder>(Child);
             TraversalReturnValue ChildRet = ChildFolder ? ChildFolder->Traverse_Private( Callback )
@@ -99,11 +103,11 @@ UArianeLayerFolder::Traverse( TFunction<TraversalReturnValue(UArianeLayer*)> Cal
 }
 
 void
-UArianeLayerFolder::InvalidateChild( UArianeLayer* Child )
+UArianeLayerFolder::InvalidateChildLayer( UArianeLayer* Child )
 {
     if( Child->IsInvalidated() == false )
     {
-        InvalidatedChildren.Add( Child );
+        InvalidatedChildLayers.Add( Child );
 
         Child->SetInvalidated( true );
     }
@@ -112,7 +116,7 @@ UArianeLayerFolder::InvalidateChild( UArianeLayer* Child )
 void
 UArianeLayerFolder::Update()
 {
-    InvalidatedChildren.RemoveAll( [] ( UArianeLayer* Layer ) -> bool
+    InvalidatedChildLayers.RemoveAll( [] ( UArianeLayer* Layer ) -> bool
     {
         Layer->Update();
 
@@ -130,7 +134,7 @@ UArianeLayerFolder::UpdateBounds()
     // ForceInit makes the box invalid and excludes it from the computation unitl it is valid
     Bounds = FBoxSphereBounds(ForceInit);
 
-    for( UArianeLayer* Child : Children )
+    for( UArianeLayer* Child : ChildLayers )
     {
         Bounds = Bounds + Child->GetBounds();
     }

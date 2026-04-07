@@ -221,7 +221,7 @@ SArianeEditorLayerStack::BuildTree( const TSharedPtr<FArianeEditorLayerRowItem> 
     if( Cast<UArianeLayerFolder>(ItemLayer) )
     {
         UArianeLayerFolder* ItemLayerFolder = Cast<UArianeLayerFolder>(ItemLayer);
-        const TArray<UArianeLayer*>& ChildLayers = ItemLayerFolder->GetChildren();
+        const TArray<UArianeLayer*>& ChildLayers = ItemLayerFolder->GetChildLayers();
 
         for( UArianeLayer* ChildLayer : ChildLayers )
         {
@@ -333,8 +333,7 @@ SArianeEditorLayerStack::OnSelectionChanged( TSharedPtr<FArianeEditorLayerRowIte
             if ( SelectInfo != ESelectInfo::Type::Direct )
             {
                 TArray<TSharedPtr<FArianeEditorLayerRowItem>> SelectedLayerItems = GetSelectedItems();
-
-                Painting3DComponent->GetLayerStack()->ClearLayerSelection();
+                TArray<UArianeLayer*> SelectedLayers;
 
                 for( TSharedPtr<FArianeEditorLayerRowItem> SelectedLayerItem : SelectedLayerItems )
                 {
@@ -342,9 +341,11 @@ SArianeEditorLayerStack::OnSelectionChanged( TSharedPtr<FArianeEditorLayerRowIte
 
                     if( SelectedLayer->IsSelected() == false )
                     {
-                        Painting3DComponent->GetLayerStack()->SelectLayer( SelectedLayer );
+                        SelectedLayers.Add( SelectedLayer );
                     }
                 }
+
+                Painting3DComponent->GetLayerStack()->SelectLayers( SelectedLayers, true, true, false );
             }
         }
     }

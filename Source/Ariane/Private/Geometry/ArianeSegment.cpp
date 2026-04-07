@@ -161,7 +161,7 @@ FArianeSegment::UpdateBounds()
     FVector Min = FVector (  DBL_MAX,  DBL_MAX,  DBL_MAX );
     FVector Max = FVector ( -DBL_MAX, -DBL_MAX, -DBL_MAX );
 
-    Bounds = FBoxSphereBounds();
+    Bounds = FBoxSphereBounds(ForceInit);
 
     if( Length )
     {

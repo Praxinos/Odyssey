@@ -14,7 +14,7 @@ class UArianeLayerFolder;
 class UArianeLayerFolder;
 
 UCLASS(Abstract)
-class ARIANE_API UArianeLayer : public UObject
+class ARIANE_API UArianeLayer : public USceneComponent
 {
     GENERATED_BODY()
 
@@ -24,8 +24,8 @@ public:
 
     UArianeLayerFolder* GetParent();
 
-    void SetVisible( bool bInVisible );
-    bool IsVisible( bool bHierarchical );
+    //void SetVisible( bool bInVisible );
+    //bool IsVisible( bool bHierarchical );
     void SetLocked( bool bInLocked );
     bool IsLocked( bool bHierarchical );
     void SetSelected( bool bInSelected );
@@ -42,8 +42,8 @@ public:
     UArianeLayerFolder* GetRootFolder();
 
 protected:
-    UPROPERTY()
-    bool bVisible;
+    //UPROPERTY()
+    //bool bVisible;
 
     UPROPERTY()
     bool bLocked;

@@ -52,7 +52,7 @@ SArianeEditorLayerRow::SArianeEditorLayerRow()
 ECheckBoxState
 SArianeEditorLayerRow::IsHierarchicallyVisible() const
 {
-    bool visibility = Item->GetLayer()->IsVisible( true );
+    bool visibility = Item->GetLayer()->IsVisible();
 
     return ( visibility ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
@@ -60,7 +60,7 @@ SArianeEditorLayerRow::IsHierarchicallyVisible() const
 bool
 SArianeEditorLayerRow::IsVisibleCheckBoxEnabled() const
 {
-    return Item->GetLayer()->GetParent() ? Item->GetLayer()->GetParent()->IsVisible( true ) : true;
+    return Item->GetLayer()->GetParent() ? Item->GetLayer()->GetParent()->IsVisible() : true;
 }
 
 ECheckBoxState
@@ -85,11 +85,11 @@ SArianeEditorLayerRow::OnVisibleStateChanged( ECheckBoxState iState )
     switch( iState )
     {
         case ECheckBoxState::Checked :
-            Item->GetLayer()->SetVisible( true );
+            Item->GetLayer()->SetVisibility( true );
         break;
 
         case ECheckBoxState::Unchecked :
-            Item->GetLayer()->SetVisible( false );
+            Item->GetLayer()->SetVisibility( false );
         break;
 
         default :

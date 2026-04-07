@@ -5,8 +5,10 @@
 
 // Unreal
 #include "CoreMinimal.h"
+#include "InteractiveToolBuilder.h"
 // Ariane
 #include "ArianeEditorTool.h"
+#include "ArianeEditorPathDrawingToolBuilder.h" // that way only this header needs to be included by files using this tool
 #include "ArianePainting3DComponent.h" // for EArianePainting3DGeometryMode
 #include "ArianePath.h"
 // Odyssey
@@ -23,6 +25,10 @@ class ARIANEEDITOR_API UArianeEditorPathDrawingTool : public UArianeEditorTool
 GENERATED_BODY()
 
 public:
+    static FString GetStaticType() { return "ArianeEditor_PathDrawingTool"; };
+    virtual FString GetType() override { return GetStaticType(); };
+
+public:
     // Destructor
     virtual ~UArianeEditorPathDrawingTool();
 
@@ -37,6 +43,7 @@ public:
     virtual void OnMouseHover( FEditorViewportClient* iViewportClient
                              , const FArianePointerState& State ) override;
     virtual bool OnMouseDrag( FEditorViewportClient* iViewportClient
+                            , const FKey& iKey
                             , const FArianePointerState& State ) override;
     virtual bool OnMouseUp( FEditorViewportClient* iViewportClient
                           , const FKey& iKey

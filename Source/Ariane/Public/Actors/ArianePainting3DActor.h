@@ -20,8 +20,13 @@ class ARIANE_API AArianePainting3DActor : public AActor
         ~AArianePainting3DActor();
         AArianePainting3DActor();
 
-    protected:
+
         virtual void BeginPlay() override;
+        virtual void PostActorCreated() override;
+        virtual void PostLoad() override;
+
+    protected:
+        UArianePainting3DComponent* GetPainting3DComponent();
 
     public:
         virtual void Tick(float DeltaTime) override;

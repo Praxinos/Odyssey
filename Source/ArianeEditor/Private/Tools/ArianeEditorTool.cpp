@@ -4,12 +4,13 @@
 // Ariane
 #include "ArianeEditorTool.h"
 #include "ArianeEditor.h"
-/* Gary
-#include "ArianeEditorToolInputProcessor.h"
-*/
 // Unreal
 #include "Framework/Application/SlateApplication.h"
 #include "Misc/TransactionObjectEvent.h"
+#include "InputBehavior.h"
+#include "BaseBehaviors/MouseHoverBehavior.h"
+#include "BaseBehaviors/ClickDragBehavior.h"
+#include "InteractiveToolManager.h"
 
 UArianeEditorTool::~UArianeEditorTool()
 {
@@ -18,6 +19,7 @@ UArianeEditorTool::~UArianeEditorTool()
 UArianeEditorTool::UArianeEditorTool()
     : Editor (nullptr)
     , bHasContextMenu ( false )
+    , bInited ( false )
 {
 /* Gary
     mInputProcessor = MakeShared<FArianeEditorToolInputProcessor>(this);
@@ -25,9 +27,37 @@ UArianeEditorTool::UArianeEditorTool()
 }
 
 void
-UArianeEditorTool::Init( FArianeEditor* iEditor )
+UArianeEditorTool::Setup()
 {
-    Editor = iEditor;
+    UInteractiveTool::Setup();
+
+    if( bInited == false )
+    {
+        UClickDragInputBehavior* ClickDragInputBehavior = NewObject<UClickDragInputBehavior>(this);
+        UMouseHoverBehavior* MouseHoverBehavior = NewObject<UMouseHoverBehavior>(this);
+
+        ClickDragInputBehavior->Initialize(this);
+        MouseHoverBehavior->Initialize(this);
+
+        AddInputBehavior( ClickDragInputBehavior );
+        AddInputBehavior( MouseHoverBehavior );
+
+        bInited = true;
+    }
+
+    Activate();
+}
+
+void
+UArianeEditorTool::Shutdown( EToolShutdownType ShutdownType )
+{
+    Inactivate();
+}
+
+void
+UArianeEditorTool::Init( FArianeEditor* InEditor )
+{
+    Editor = InEditor;
 }
 
 FArianeEditor*
@@ -60,8 +90,6 @@ UArianeEditorTool::Activate()
     const TSharedRef<FUICommandList> toolkitCommandList = GetEditor()->GetToolkit()->GetToolkitCommands();
     toolkitCommandList->Append(mCommandList.ToSharedRef());
 */
-
-    Load();
 }
 
 void
@@ -77,17 +105,6 @@ UArianeEditorTool::Inactivate()
 
     mCommandList = nullptr;
 */
-    Unload();
-}
-
-void
-UArianeEditorTool::Load()
-{
-}
-
-void
-UArianeEditorTool::Unload()
-{
 }
 
 bool
@@ -103,7 +120,7 @@ UArianeEditorTool::IsActivated() const
 }
 
 bool UArianeEditorTool::OnMouseDown( FEditorViewportClient* iViewportClient
-                                   , const FKey& iKey
+                                   , const FKey& Key
                                    , const FArianePointerState& State
                                    , bool iRepeat )
 {
@@ -118,6 +135,7 @@ UArianeEditorTool::OnMouseHover( FEditorViewportClient* iViewportClient
 
 bool
 UArianeEditorTool::OnMouseDrag( FEditorViewportClient* iViewportClient
+                              , const FKey& iKey
                               , const FArianePointerState& State )
 {
     return false;
@@ -125,7 +143,7 @@ UArianeEditorTool::OnMouseDrag( FEditorViewportClient* iViewportClient
 
 bool
 UArianeEditorTool::OnMouseUp( FEditorViewportClient* iViewportClient
-                            , const FKey& iKey
+                            , const FKey& Key
                             , const FArianePointerState& State )
 {
     return false;
@@ -133,10 +151,10 @@ UArianeEditorTool::OnMouseUp( FEditorViewportClient* iViewportClient
 
 bool
 UArianeEditorTool::OnMouseClick( FEditorViewportClient* iViewportClient
-                               , const FKey& iKey
+                               , const FKey& Key
                                , const FArianePointerState& State )
 {
-    if( iKey == EKeys::RightMouseButton )
+    if( Key == EKeys::RightMouseButton )
     {
         if( bHasContextMenu )
         {
@@ -157,11 +175,6 @@ UArianeEditorTool::GetSceneView( FEditorViewportClient* iViewportClient )
                                                                             , iViewportClient->EngineShowFlags )
                                                                             .SetRealtimeUpdate( iViewportClient->IsRealtime() ) );
     return iViewportClient->CalcSceneView( &ViewFamily );
-}
-
-void
-UArianeEditorTool::Tick( float iDeltaTime )
-{
 }
 
 void
@@ -334,4 +347,121 @@ bool
 UArianeEditorTool::SupportsColorType( EOdysseyPainterEditorColorType ColorType )
 {
     return false;
+}
+
+
+FEditorViewportClient*
+UArianeEditorTool::GetActiveViewportClient()
+{
+    FViewport* ActiveViewport = GEditor->GetActiveViewport();
+
+    return static_cast<FEditorViewportClient*>(ActiveViewport->GetClient());
+}
+
+// IHoverBehaviorTarget interface override
+FInputRayHit
+UArianeEditorTool::BeginHoverSequenceHitTest(const FInputDeviceRay& PressPos)
+{
+    FInputRayHit DummyHit;
+
+    DummyHit.bHit = true;
+    DummyHit.HitDepth = 1000000.0f;
+
+    return DummyHit;
+}
+
+// IHoverBehaviorTarget interface override
+void
+UArianeEditorTool::OnBeginHover( const FInputDeviceRay& DevicePos )
+{
+    //FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+}
+
+// IHoverBehaviorTarget interface override
+bool
+UArianeEditorTool::OnUpdateHover( const FInputDeviceRay& DevicePos )
+{
+    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+
+    OnMouseHover( ViewportClient
+                , FArianePointerState( DevicePos.ScreenPosition.X
+                                     , DevicePos.ScreenPosition.Y ) );
+
+    return true;
+}
+
+// IHoverBehaviorTarget interface override
+void
+UArianeEditorTool::OnEndHover()
+{
+    //FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+}
+
+// Implements IClickDragBehaviorTarget::CanBeginClickSequence
+FInputRayHit
+UArianeEditorTool::CanBeginClickDragSequence(const FInputDeviceRay& PressPos)
+{
+    FInputRayHit DummyHit;
+
+    DummyHit.bHit = true;
+    DummyHit.HitDepth = 1000000.0f;
+
+    // On mémorise quel bouton commence le drag
+    if ( FSlateApplication::Get().GetPressedMouseButtons().Contains(EKeys::LeftMouseButton))
+    {
+        PressedKey = EKeys::LeftMouseButton;
+    }
+
+    if ( FSlateApplication::Get().GetPressedMouseButtons().Contains(EKeys::MiddleMouseButton))
+    {
+        PressedKey = EKeys::MiddleMouseButton;
+    }
+
+    if (FSlateApplication::Get().GetPressedMouseButtons().Contains(EKeys::RightMouseButton))
+    {
+        PressedKey = EKeys::RightMouseButton;
+    }
+
+    return DummyHit;
+}
+
+// Implements IClickDragBehaviorTarget::OnClickPress
+void
+UArianeEditorTool::OnClickPress( const FInputDeviceRay& PressPos )
+{
+    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+
+    OnMouseDown( ViewportClient
+               , PressedKey
+               , FArianePointerState( PressPos.ScreenPosition.X
+                                    , PressPos.ScreenPosition.Y ) );
+}
+
+// Implements IClickDragBehaviorTarget::OnClickDrag
+void
+UArianeEditorTool::OnClickDrag( const FInputDeviceRay& DragPos )
+{
+    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+
+    OnMouseDrag( ViewportClient
+               , PressedKey
+               , FArianePointerState( DragPos.ScreenPosition.X
+                                    , DragPos.ScreenPosition.Y ) );
+}
+
+// Implements IClickDragBehaviorTarget::OnClickRelease
+void
+UArianeEditorTool::OnClickRelease( const FInputDeviceRay& ReleasePos )
+{
+    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+
+    OnMouseUp( ViewportClient
+             , PressedKey
+             , FArianePointerState( ReleasePos.ScreenPosition.X
+                                  , ReleasePos.ScreenPosition.Y ) );
+}
+
+void
+UArianeEditorTool::OnTerminateDragSequence()
+{
 }

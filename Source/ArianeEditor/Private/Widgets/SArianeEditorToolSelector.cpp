@@ -22,14 +22,14 @@ SArianeEditorToolSelector::SArianeEditorToolSelector()
 }
 
 void
-SArianeEditorToolSelector::Construct(const FArguments& InArgs, FArianeEditor* iEditor)
+SArianeEditorToolSelector::Construct(const FArguments& InArgs, FArianeEditor* InEditor)
 {
-    mEditor = iEditor;
+    Editor = InEditor;
 
     const FCheckBoxStyle* checkboxStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.ToggleButton");
     TSharedRef<SVerticalBox> verticalBox = SNew(SVerticalBox);
 
-    for ( UArianeEditorTool* tool : mEditor->GetTools() )
+    for ( UArianeEditorTool* tool : Editor->GetTools() )
     {
         verticalBox->AddSlot()
         .AutoHeight()
@@ -64,7 +64,7 @@ void
 SArianeEditorToolSelector::OnToolCheckStateChanged( ECheckBoxState InValue, UArianeEditorTool* iTool )
 {
     if (InValue == ECheckBoxState::Checked)
-        mEditor->SetCurrentTool( iTool );
+        Editor->SetCurrentTool( iTool );
 }
 
 EVisibility

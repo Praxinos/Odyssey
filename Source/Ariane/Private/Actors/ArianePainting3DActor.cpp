@@ -13,16 +13,38 @@ AArianePainting3DActor::~AArianePainting3DActor()
 
 AArianePainting3DActor::AArianePainting3DActor()
 {
-    UArianePainting3DComponent* painting3DComponent = CreateDefaultSubobject<UArianePainting3DComponent>(TEXT("Painting3DComponent"));
+    UArianePainting3DComponent* Painting3DComponent = CreateDefaultSubobject<UArianePainting3DComponent>(TEXT("Painting3DComponent"));
 
     PrimaryActorTick.bCanEverTick = true;
 
     RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComp"));
 
-    painting3DComponent->SetupAttachment( RootComponent );
+    Painting3DComponent->SetupAttachment( RootComponent );
 
     // Add this so that the Component show in the Outliner
-    AddInstanceComponent( painting3DComponent );
+    AddInstanceComponent( Painting3DComponent );
+}
+
+UArianePainting3DComponent*
+AArianePainting3DActor::GetPainting3DComponent()
+{
+    return Cast<UArianePainting3DComponent>(GetComponentByClass( UArianePainting3DComponent::StaticClass() ));
+}
+
+void
+AArianePainting3DActor::PostActorCreated()
+{
+    UArianePainting3DComponent* Painting3DComponent = GetPainting3DComponent();
+
+    Painting3DComponent->Init();
+}
+
+void
+AArianePainting3DActor::PostLoad()
+{
+    UArianePainting3DComponent* Painting3DComponent = GetPainting3DComponent();
+
+    Painting3DComponent->Init();
 }
 
 void

@@ -317,7 +317,7 @@ FArianeObject::IsVisible( bool bInHierarchical )
         // Unimplemented
     }
 
-    return ( ( DrawingLayer == nullptr ) || DrawingLayer->IsVisible( true ) == true ) ? true : false;
+    return ( ( DrawingLayer == nullptr ) || DrawingLayer->IsVisible() == true ) ? true : false;
 }
 
 const FGuid&

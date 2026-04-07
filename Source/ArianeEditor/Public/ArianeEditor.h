@@ -17,6 +17,8 @@ class FTabManager;
 class UWorld;
 class AArianePainting3DActor;
 class UArianePainting3DComponent;
+class UInteractiveToolManager;
+class UArianeEditorToolBuilder;
 
 /**
  * Base class for a Painting Editor
@@ -74,12 +76,6 @@ public:
     FArianeEditorViewportToolkit* GetToolkit();
 
     /**
-     * @brief Get the tools
-     * @return an array of all the tools
-     */
-    const TArray<UArianeEditorTool*>& GetTools();
-
-    /**
      * @brief Get the World
      * @return The World
      */
@@ -122,23 +118,18 @@ public:
     void SetPaintColor( const ::ULIS::FColor& InPaintcolor );
     EOdysseyPainterEditorColorType GetColorType();
     void SetColorType( EOdysseyPainterEditorColorType& InColorType );
-
+    UInteractiveToolManager* GetToolManager();
+    /** Init all tools */
+    void RegisterTools();
+    void UnregisterTools();
+    const TArray<UArianeEditorTool*>& GetTools();
 
 protected:
-    /**
-     * @brief Add a tool
-     * @param Tool the tool to add
-     */
-    void AddTool( UArianeEditorTool* Tool );
-
     /**
      * @brief Removee a tool
      * @param Tool the tool to remove
      */
-    void RemoveTool( UArianeEditorTool* Tool );
-
-    /** Init all tools */
-    void InitTools();
+    //void RemoveTool( const FString& ToolType );
 
     /**
      * @brief Add a tab
@@ -159,6 +150,8 @@ protected:
     void ExtendToolbarToolParameters( UToolMenu* iToolMenu );
     void ClearPainting3DComponents();
     void OnEditorSelectionChanged( UObject* NewSelection );
+    void AddToolBuilder( UArianeEditorToolBuilder* ToolBuilder );
+
 
 protected:
     FOnCurrentToolChanged OnPreCurrentToolChanged;
@@ -171,7 +164,7 @@ protected:
     FName Name;
     TArray<UArianeEditorTool*> Tools;
     TArray<TSharedPtr<FArianeEditorTab>> Tabs;
-    UArianeEditorTool* CurrentTool;
+    //UArianeEditorTool* CurrentTool;
     TWeakObjectPtr<UArianePainting3DComponent> CurrentPainting3DComponent;
     ::ULIS::FColor PaintColor;
     EOdysseyPainterEditorColorType ColorType;
