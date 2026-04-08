@@ -17,9 +17,10 @@ class ARIANEEDITOR_API SArianeEditorLayerStack
     SLATE_DECLARE_WIDGET(SArianeEditorLayerStack, STreeView<TSharedPtr<FArianeEditorLayerRowItem>>)
 
     public:
-        static constexpr const char* LAYER_VISIBLE = "Visible";
-        static constexpr const char* LAYER_LOCKED  = "Locked";
-        static constexpr const char* LAYER_NAME    = "Name";
+        static constexpr const char* LAYER_VISIBLE   = "Visible";
+        static constexpr const char* LAYER_LOCKED    = "Locked";
+        static constexpr const char* LAYER_NAME      = "Name";
+        static constexpr const char* LAYER_TRANSFORM = "Transform";
 
     public:
 /*

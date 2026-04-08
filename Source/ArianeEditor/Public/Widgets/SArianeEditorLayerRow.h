@@ -11,6 +11,7 @@
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 
 class UArianeLayer;
+class UArianeEditorTool;
 
 class FArianeEditorLayerRowItem
 {
@@ -77,9 +78,12 @@ class ARIANEEDITOR_API SArianeEditorLayerRow
         ECheckBoxState IsHierarchicallyLocked() const;
         bool IsLockedCheckBoxEnabled() const;
         bool IsLayerSelected() const;
+        void OnTransformStateChanged( ECheckBoxState iState );
+        ECheckBoxState IsTransforming() const;
 
     protected:
         uint32 DropZone;
         TSharedPtr<FArianeEditorLayerRowItem> Item;
         TSharedPtr<SInlineEditableTextBlock> TextBlockWidget;
+        UArianeEditorTool* PreviousTool;
 };

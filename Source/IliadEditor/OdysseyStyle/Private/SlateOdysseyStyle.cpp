@@ -808,6 +808,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyImportTexturePositioning.Alignment.BottomRight", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-bottomRight", mIcon16x16));
 
     // Ariane Layer Stack
+    Set("ArianeLayerStack.IsTransformedToggle", FCheckBoxStyle( FAppStyle::Get().GetWidgetStyle<FCheckBoxStyle>("ToggleButtonCheckbox") )
+        .SetPadding(FMargin(0)) //8 because left+right = 16 and top+bottom = 16
+    );
+
     Set("ArianeLayerStack.IsVisibleToggle", FCheckBoxStyle()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
         .SetForegroundColor(FLinearColor(0, 0, 0, 0))

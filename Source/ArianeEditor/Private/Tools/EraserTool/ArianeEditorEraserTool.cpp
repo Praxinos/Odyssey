@@ -35,7 +35,7 @@ UArianeEditorEraserTool::UArianeEditorEraserTool()
     , CanvasRenderTarget ( nullptr )
     , Brush( nullptr )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser64");
+    Icon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser64");
 
     bHasContextMenu = true;
 }
@@ -706,7 +706,7 @@ UArianeEditorEraserTool::EraseChainSegments( FEditorViewportClient* ViewportClie
 {
     //const FTransform& WorldTransform = Painting3DComponent->GetComponentTransform();
     UArianePainting3DComponent* Painting3DComponent = DrawingLayer->GetLayerStack()->GetPainting3DComponent();
-    const FTransform& WorldTransform = Painting3DComponent->GetOwner()->GetRootComponent()->GetComponentTransform();
+    const FTransform& WorldTransform = DrawingLayer->GetComponentTransform();
 
     FArianeVertex* FirstVertex = Chain.LeadingVertex;
     TArray<FMetaFragment> MetaFragmentBuffer;

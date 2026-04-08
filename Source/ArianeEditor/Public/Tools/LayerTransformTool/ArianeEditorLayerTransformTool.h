@@ -67,6 +67,9 @@ protected:
     void UnbindDelegates();
     void ClearGizmo();
     void CreateGizmo();
+    void CreateOverlayWidget();
+    FReply OnAccept();
+    FReply OnCancel();
 
 protected:
     UPROPERTY() // to prevent GC
@@ -74,4 +77,6 @@ protected:
 
     UPROPERTY() // to prevent GC
     UCombinedTransformGizmo* Gizmo;
+
+    TSharedPtr<SWidget> OverlayWidget;
 };

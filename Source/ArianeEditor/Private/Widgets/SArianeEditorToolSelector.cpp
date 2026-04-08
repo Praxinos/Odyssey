@@ -3,6 +3,7 @@
 
 #include "SArianeEditorToolSelector.h"
 #include "ArianeEditor.h"
+#include "LayerTransformTool/ArianeEditorLayerTransformTool.h"
 #include "OdysseyStyle.h"
 // Unreal
 #include "Widgets/SBoxPanel.h"
@@ -29,26 +30,29 @@ SArianeEditorToolSelector::Construct(const FArguments& InArgs, FArianeEditor* In
     const FCheckBoxStyle* checkboxStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.ToggleButton");
     TSharedRef<SVerticalBox> verticalBox = SNew(SVerticalBox);
 
-    for ( UArianeEditorTool* tool : Editor->GetTools() )
+    for ( UArianeEditorTool* Tool : Editor->GetTools() )
     {
-        verticalBox->AddSlot()
-        .AutoHeight()
-        .Padding(4)
-        [
-            SNew(SCheckBox)
-            .Style( checkboxStyle )
-            .IsFocusable(false)
-            .OnCheckStateChanged(this, &SArianeEditorToolSelector::OnToolCheckStateChanged, tool)
-            .IsChecked(this, &SArianeEditorToolSelector::IsToolChecked, tool)
-            .Visibility(this, &SArianeEditorToolSelector::ToolVisibility, tool)
-            .ToolTipText(this, &SArianeEditorToolSelector::ToolTooltip, tool)
-            .Padding(FMargin(4.f))
+        if( Tool->GetType() != UArianeEditorLayerTransformTool::GetStaticType() )
+        {
+            verticalBox->AddSlot()
+            .AutoHeight()
+            .Padding(4)
             [
-                SNew(SImage)
-                .Image(&tool->Icon)
-                .DesiredSizeOverride(FVector2D(20.f, 20.f))
-            ]
-        ];
+                SNew(SCheckBox)
+                .Style( checkboxStyle )
+                .IsFocusable(false)
+                .OnCheckStateChanged(this, &SArianeEditorToolSelector::OnToolCheckStateChanged, Tool)
+                .IsChecked(this, &SArianeEditorToolSelector::IsToolChecked, Tool)
+                .Visibility(this, &SArianeEditorToolSelector::ToolVisibility, Tool)
+                .ToolTipText(this, &SArianeEditorToolSelector::ToolTooltip, Tool)
+                .Padding(FMargin(4.f))
+                [
+                    SNew(SImage)
+                    .Image(Tool->Icon)
+                    .DesiredSizeOverride(FVector2D(20.f, 20.f))
+                ]
+            ];
+        }
     }
 
     ChildSlot
@@ -63,8 +67,10 @@ SArianeEditorToolSelector::Construct(const FArguments& InArgs, FArianeEditor* In
 void
 SArianeEditorToolSelector::OnToolCheckStateChanged( ECheckBoxState InValue, UArianeEditorTool* iTool )
 {
-    if (InValue == ECheckBoxState::Checked)
-        Editor->SetCurrentTool( iTool );
+    if ( InValue == ECheckBoxState::Checked )
+    {
+        Editor->SetCurrentTool( iTool, EToolShutdownType::Accept, true );
+    }
 }
 
 EVisibility

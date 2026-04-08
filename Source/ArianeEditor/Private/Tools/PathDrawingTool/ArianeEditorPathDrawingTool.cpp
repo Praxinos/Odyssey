@@ -31,7 +31,7 @@ UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
     , EditedPath( nullptr )
     //, LineType ( EArianePainting3DGeometryMode::Flat )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathDrawing64");
+    Icon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathDrawing64");
 
     bHasContextMenu = true;
 }
