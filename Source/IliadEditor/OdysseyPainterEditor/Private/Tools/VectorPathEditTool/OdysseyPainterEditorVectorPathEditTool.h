@@ -24,8 +24,7 @@ enum class eVectorPathEditEditionMode : uint8
     Vertex = 0,
     VertexHandle = 1,
     SegmentHandle = 2,
-    Alter = 3, // Add, Remove or cut
-    ToolRadius = 4 UMETA(Hidden)
+    Alter = 3 // Add, Remove or cut
 };
 
 // struct that stores the ratio of handleLength / segmentLength at mouseDown
@@ -96,6 +95,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
 
         virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
         virtual void BindShortcuts( TSharedPtr<FUICommandList> iCommandList ) override;
+        virtual bool HasRadius() const override;
+        virtual float GetRadius() const override;
+        virtual void SetRadius(float iRadius)override;
+        virtual EPainterEditorToolRadiusReference GetRadiusReference() const override;
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides

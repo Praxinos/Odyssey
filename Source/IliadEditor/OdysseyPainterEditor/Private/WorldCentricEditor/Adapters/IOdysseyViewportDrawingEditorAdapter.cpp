@@ -156,7 +156,7 @@ void IOdysseyViewportDrawingEditorAdapter::Paint()
     if (!mTool)
         return;
 
-    mTool->OnMouseDrag(mCurrentStrokeRay.mPoint);
+    mTool->ProcessMouseDrag(mCurrentStrokeRay.mPoint);
 }
 
 void IOdysseyViewportDrawingEditorAdapter::FinishPainting()
@@ -320,7 +320,7 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
     TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
     if( editor && editor->GetCurrentTool() )
     {
-        editor->GetCurrentTool()->OnMouseHover( mCurrentStrokeRay.mPoint );
+        editor->GetCurrentTool()->ProcessMouseHover( mCurrentStrokeRay.mPoint );
 
         mMouseCursor = editor->GetCurrentTool()->GetMouseCursor();
         mOverrideMouseCursor = true;
@@ -378,7 +378,7 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
         if (!selectedTool)
             return false;
 
-        if (selectedTool->OnMouseDoubleClick(mCurrentStrokeRay.mPoint, iKey))
+        if (selectedTool->ProcessMouseDoubleClick(mCurrentStrokeRay.mPoint, iKey))
             return true;
 
         if (mKeysPressed.Contains(iKey)) //UP
@@ -615,7 +615,7 @@ IOdysseyViewportDrawingEditorAdapter::HandleClick(FEditorViewportClient* iViewpo
 
     UOdysseyPainterEditorTool* selectedTool = editor->GetCurrentTool();
     if (selectedTool)
-        return selectedTool->OnMouseClick(mCurrentStrokeRay.mPoint, iClick.GetKey());
+        return selectedTool->ProcessMouseClick(mCurrentStrokeRay.mPoint, iClick.GetKey());
 
     return false;
 }
@@ -658,7 +658,7 @@ IOdysseyViewportDrawingEditorAdapter::MouseDown(const FOdysseyRay& iRay, const F
             brushInstance->GetStampOverrideDelegate().BindRaw(this, &IOdysseyViewportDrawingEditorAdapter::StampOverride);
     }
 
-    if (mTool && mTool->OnMouseDown(mCurrentStrokeRay.mPoint, iMouseButton))
+    if (mTool && mTool->ProcessMouseDown(mCurrentStrokeRay.mPoint, iMouseButton))
     {
         mState = eState::kCapturedByEditor;
         mMouseButton = iMouseButton;
@@ -702,7 +702,7 @@ IOdysseyViewportDrawingEditorAdapter::MouseUp(const FOdysseyRay& iRay, const FKe
         return;
     }
 
-    mTool->OnMouseUp(mCurrentStrokeRay.mPoint, mMouseButton);
+    mTool->ProcessMouseUp(mCurrentStrokeRay.mPoint, mMouseButton);
     mState = eState::kIdleReady;
     mMouseButton = FKey();
 
@@ -748,7 +748,7 @@ IOdysseyViewportDrawingEditorAdapter::KeyDown(FKey iKey)
 
     UOdysseyPainterEditorTool* selectedTool = editor->GetCurrentTool();
     if (selectedTool)
-        return selectedTool->OnKeyDown(iKey);
+        return selectedTool->ProcessKeyDown(iKey);
 
     return false;
 }
@@ -765,7 +765,7 @@ IOdysseyViewportDrawingEditorAdapter::KeyUp(FKey iKey)
 
     UOdysseyPainterEditorTool* selectedTool = editor->GetCurrentTool();
     if (selectedTool)
-        return selectedTool->OnKeyUp(iKey);
+        return selectedTool->ProcessKeyUp(iKey);
 
     return false;
 }

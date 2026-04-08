@@ -46,6 +46,24 @@ UOdysseyPainterEditorVectorPathSmoothTool::IsActivable() const
             || HUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX );
 }
 
+bool
+UOdysseyPainterEditorVectorPathSmoothTool::HasRadius() const
+{
+    return true;
+}
+
+void
+UOdysseyPainterEditorVectorPathSmoothTool::SetRadius(float iRadius)
+{
+    PickingRadius = iRadius;
+}
+
+float
+UOdysseyPainterEditorVectorPathSmoothTool::GetRadius() const
+{
+    return PickingRadius;
+}
+
 uint64
 UOdysseyPainterEditorVectorPathSmoothTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {

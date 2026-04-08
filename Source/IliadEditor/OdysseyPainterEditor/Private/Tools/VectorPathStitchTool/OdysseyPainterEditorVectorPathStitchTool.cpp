@@ -45,6 +45,24 @@ UOdysseyPainterEditorVectorPathStitchTool::IsActivable() const
             || HUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX );
 }
 
+bool
+UOdysseyPainterEditorVectorPathStitchTool::HasRadius() const
+{
+    return true;
+}
+
+void
+UOdysseyPainterEditorVectorPathStitchTool::SetRadius(float iRadius)
+{
+    PickingRadius = iRadius;
+}
+
+float
+UOdysseyPainterEditorVectorPathStitchTool::GetRadius() const
+{
+    return PickingRadius;
+}
+
 uint64
 UOdysseyPainterEditorVectorPathStitchTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {

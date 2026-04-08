@@ -71,6 +71,24 @@ void UOdysseyPainterEditorVectorPathDrawingTool::BindShortcuts(TSharedPtr<FUICom
     #undef MAP_ACTION
 }
 
+bool
+UOdysseyPainterEditorVectorPathDrawingTool::HasRadius() const
+{
+    return true;
+}
+
+void
+UOdysseyPainterEditorVectorPathDrawingTool::SetRadius(float iRadius)
+{
+    Radius = iRadius;
+}
+
+float
+UOdysseyPainterEditorVectorPathDrawingTool::GetRadius() const
+{
+    return Radius;
+}
+
 void
 UOdysseyPainterEditorVectorPathDrawingTool::AddSize(int iAmount)
 {

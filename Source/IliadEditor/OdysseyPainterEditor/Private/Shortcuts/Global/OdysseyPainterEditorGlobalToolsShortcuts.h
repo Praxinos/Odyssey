@@ -26,6 +26,7 @@ public:
     void Action_ActivatePrimitiveDrawingTool();
     void Action_ActivateEraserTool();
     void Action_ActivateWarpTool();
+    void Action_SetToolRadius();
 
     bool CanAction_ActivateTool(UOdysseyPainterEditorTool* iTool);
     bool CanAction_ActivateColorPickerTool();
@@ -36,6 +37,7 @@ public:
     bool CanAction_ActivatePrimitiveDrawingTool();
     bool CanAction_ActivateEraserTool();
     bool CanAction_ActivateWarpTool();
+    bool CanAction_SetToolRadius();
 
 public:
     //Shortcuts

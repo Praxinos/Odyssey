@@ -19,6 +19,13 @@ class FOdysseyPainterEditor;
 class FOdysseyHUDElement;
 class FOdysseyPainterEditorToolInputProcessor;
 
+UENUM()
+enum class EPainterEditorToolRadiusReference
+{
+    Texture,
+    HUD
+};
+
 UCLASS(DefaultToInstanced)
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorTool : public UObject
 {
@@ -51,9 +58,24 @@ public:
     virtual void Load();
     virtual void Unload();
 
+    UFUNCTION(BlueprintPure, Category="Tools")
+    virtual bool HasRadius() const;
+
+    UFUNCTION(BlueprintCallable, Category="Tools")
+    virtual void SetRadius(float Radius);
+
+    UFUNCTION(BlueprintPure, Category="Tools")
+    virtual float GetRadius() const;
+
+    UFUNCTION(BlueprintPure, Category="Tools")
+    virtual EPainterEditorToolRadiusReference GetRadiusReference() const;
+
+    UFUNCTION(BlueprintCallable, Category="Tools")
+    void StartRadiusInteractiveModifier();
+
     virtual void Reset();
 
-public:
+protected:
     //Mouse events
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
     virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey );
@@ -67,6 +89,7 @@ public:
     virtual bool OnKeyUpGlobal(const FKeyEvent& InKeyEvent);
     virtual bool OnKeyDownGlobal(const FKeyEvent& InKeyEvent);
 
+public:
     // Tick
     virtual void Tick(float iDeltaTime);
 
@@ -85,7 +108,6 @@ public:
     virtual void ExtendToolbar( UToolMenu* iToolMenu );
     virtual TSharedPtr<FOdysseyHUDElement> GetHUD();
     virtual EMouseCursor::Type GetMouseCursor() const;
-    virtual bool IsHUDVisible() const;
 
     virtual bool SupportsColorType(EOdysseyPainterEditorColorType iType);
 
@@ -106,6 +128,27 @@ public:
     FOdysseyPainterEditor* GetEditor() const;
     //template<class T> T* GetEditorAs() const { return static_cast<T*>(mEditor); };
 
+public:
+    /**
+     * Those functions allows the tool to handle some behaviours without having
+     * the actual tool getting in the way.
+     * Example : Set Radius shortcut
+     */
+    bool ProcessMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    bool ProcessMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+    bool ProcessMouseDoubleClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    bool ProcessMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    void ProcessMouseHover(const FOdysseyPoint& iPointInTexture);
+    void ProcessMouseDrag(const FOdysseyPoint& iPointInTexture);
+    bool ProcessKeyDown(const FKey& iKey);
+    bool ProcessKeyUp(const FKey& iKey);
+    bool ProcessKeyUpGlobal(const FKeyEvent& InKeyEvent);
+    bool ProcessKeyDownGlobal(const FKeyEvent& InKeyEvent);
+
+private:
+    void RIMOnMouseMove(const FOdysseyPoint& iPointInTexture);
+    void EndRIM();
+
 protected:
     TSharedPtr<FOdysseyPainterEditorToolInputProcessor> mInputProcessor;
     FOdysseyPainterEditor*              mEditor;
@@ -118,4 +161,13 @@ public:
     FName mIconStyleSet;
     bool mIsActivated;
     bool mIsTemporaryTool = false;
+
+private:
+    FOdysseyPoint mPreviousMousePosition;
+
+    //RIM : Radius Interactive Modifier
+    bool mIsRIMActive = false;
+    TSharedPtr<class FOdysseyHUDCircle> mRIMHUD;
+    FVector2D mRIMStartCursorPos;
+    float mRIMStartRadius;
 };

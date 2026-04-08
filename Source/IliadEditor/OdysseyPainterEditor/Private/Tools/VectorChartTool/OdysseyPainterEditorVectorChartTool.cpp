@@ -48,6 +48,24 @@ UOdysseyPainterEditorVectorChartTool::IsActivable() const
           && ( HUDFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN );
 }
 
+bool
+UOdysseyPainterEditorVectorChartTool::HasRadius() const
+{
+    return true;
+}
+
+void
+UOdysseyPainterEditorVectorChartTool::SetRadius(float iRadius)
+{
+    PickingRadius = iRadius;
+}
+
+float
+UOdysseyPainterEditorVectorChartTool::GetRadius() const
+{
+    return PickingRadius;
+}
+
 uint64
 UOdysseyPainterEditorVectorChartTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {

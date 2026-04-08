@@ -11,6 +11,12 @@
 #include "UObject/GCObject.h"
 
 
+enum EOdysseyHUDReference
+{
+    Texture,
+    HUD
+};
+
 /////////////////////////////////////////////////////
 // UOdysseyHUDElement
 class ODYSSEYHUD_API FOdysseyHUDElement
@@ -78,6 +84,13 @@ public:
     bool IsVisible() const;
     void SetIsVisible(TAttribute<bool> iIsVisible);
 
+    void SetReference(EOdysseyHUDReference iReference);
+    EOdysseyHUDReference GetReference() const;
+
+    //PATCH: see mCachedTextureToHUD
+    FVector2D TextureToHUD( double iX, double iY ) const;
+    FVector2D TextureToHUD( const FVector2D& iPosition ) const;
+
 protected:
     virtual void DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams);
     void InitDrawCustomizedLine(FCanvas* iCanvas, const FHUDCustomization& iCustomization, const FLinearColor& iDefaultColor);
@@ -97,6 +110,15 @@ private:
     /** If this element is captured by mouse or keyboard shortcut, then the associated viewport shouldn't do anything else than manipulating this HUD */
     bool mIsCaptured;
     TAttribute<bool> mIsVisible;
+
+    //PATCH: We sometimes need to transform a texture point to its corresponding HUD Point
+    //(see PathEditTool or PainterEditorTool::StartRadiusInteractiveModifier)
+    // But this solution is not ideal, we just do that because it's fast to develop
+    // A HUD can be drawn by several viewports at the same time with different TextureToHUD matrices
+    // So we just hope this one is the right one here
+    FDrawHUDParams::FTextureToHUD mCachedTextureToHUD;
+
+    EOdysseyHUDReference mReference = EOdysseyHUDReference::Texture;
 
     struct FCustomizedLinesParams
     {

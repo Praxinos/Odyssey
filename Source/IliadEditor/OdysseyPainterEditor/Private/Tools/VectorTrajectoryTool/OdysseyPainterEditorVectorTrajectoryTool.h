@@ -55,6 +55,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
         virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
 
         eVectorTrajectoryEditionMode GetEditionMode();
+        virtual bool HasRadius() const override;
+        virtual float GetRadius() const override;
+        virtual void SetRadius(float iRadius)override;
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides

@@ -181,7 +181,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         virtual EMouseCursor::Type GetMouseCursor() const override;
 
         virtual FText GetTooltip() const override;
-        uint32 GetRadius();
+        virtual bool HasRadius() const override;
+        virtual float GetRadius() const override;
+        virtual void SetRadius(float iRadius)override;
 
         static void RegisterDetailCustomization();
         static void UnregisterDetailCustomization();
