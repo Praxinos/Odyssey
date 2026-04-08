@@ -20,6 +20,7 @@ UArianeEditorTool::UArianeEditorTool()
     : Editor (nullptr)
     , bHasContextMenu ( false )
     , bInited ( false )
+    , Icon ( nullptr )
 {
 /* Gary
     mInputProcessor = MakeShared<FArianeEditorToolInputProcessor>(this);

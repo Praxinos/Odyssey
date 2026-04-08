@@ -185,6 +185,26 @@ FArianeEditor::ExtendLevelEditorToolbar( UToolMenu* iToolbar )
 // Tools ------------------------------
 
 UArianeEditorTool*
+FArianeEditor::GetTool( const FString& ToolType )
+{
+    for( UArianeEditorTool* Tool : Tools )
+    {
+        if( Tool->GetType() == ToolType )
+        {
+            return Tool;
+        }
+    }
+
+    return nullptr;
+}
+
+bool
+FArianeEditor::IsCurrentTool( const FString& ToolType )
+{
+    return ( GetCurrentTool() == GetTool( ToolType ) );
+}
+
+UArianeEditorTool*
 FArianeEditor::GetCurrentTool()
 {
     // Note: EToolSide::Left means the mouse
@@ -192,15 +212,34 @@ FArianeEditor::GetCurrentTool()
 }
 
 void
-FArianeEditor::SetCurrentTool( UArianeEditorTool* Tool )
+FArianeEditor::SetCurrentTool( const FString& ToolType
+                             , EToolShutdownType PreviousToolShutdownType
+                             , bool TriggerEvent  )
 {
-    OnPreCurrentToolChanged.Broadcast();
+    SetCurrentTool( GetTool( ToolType ), PreviousToolShutdownType, TriggerEvent );
+}
 
-    // Note: EToolSide::Left means the mouse
-    GetToolManager()->SelectActiveToolType( EToolSide::Left, Tool->GetType() );
-    GetToolManager()->ActivateTool( EToolSide::Left );
+void
+FArianeEditor::SetCurrentTool( UArianeEditorTool* Tool
+                             , EToolShutdownType PreviousToolShutdownType
+                             , bool TriggerEvent )
+{
+    if( TriggerEvent )
+        OnPreCurrentToolChanged.Broadcast();
 
-    OnPostCurrentToolChanged.Broadcast();
+    if( Tool )
+    {
+        // Note: EToolSide::Left means the mouse
+        GetToolManager()->SelectActiveToolType( EToolSide::Left, Tool->GetType() );
+        GetToolManager()->ActivateTool( EToolSide::Left );
+    }
+    else
+    {
+        GetToolManager()->DeactivateTool( EToolSide::Left, PreviousToolShutdownType );
+    }
+
+    if( TriggerEvent )
+        OnPostCurrentToolChanged.Broadcast();
 }
 
 UInteractiveToolManager*

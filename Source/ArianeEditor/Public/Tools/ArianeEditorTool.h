@@ -18,7 +18,7 @@
 class FArianeEditor;
 class FSceneView;
 class FStylusState;
-
+struct FSlateBrush;
 /* Gary
 class FArianeEditorToolInputProcessor;
 */
@@ -182,6 +182,5 @@ protected:
     FKey PressedKey;
 
 public:
-    UPROPERTY(EditDefaultsOnly, Category = "Tool")
-    FSlateBrush Icon;
+    const FSlateBrush* Icon;
 };

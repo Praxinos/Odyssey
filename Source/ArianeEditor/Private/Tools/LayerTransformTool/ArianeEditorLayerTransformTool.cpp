@@ -15,6 +15,9 @@
 #include "IStylusState.h"
 #include "BaseGizmos/TransformProxy.h"
 #include "BaseGizmos/CombinedTransformGizmo.h"
+#include "Widgets/SCompoundWidget.h"
+#include "LevelEditor.h"
+#include "Editor/Transactor.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -29,7 +32,7 @@ UArianeEditorLayerTransformTool::UArianeEditorLayerTransformTool()
     : TransformProxy ( nullptr )
     , Gizmo ( nullptr )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform64");
+    Icon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform64");
 
     bHasContextMenu = true;
 }
@@ -39,6 +42,7 @@ UArianeEditorLayerTransformTool::Init( FArianeEditor* InEditor )
 {
     Super::Init( InEditor );
 
+    CreateOverlayWidget();
 }
 
 void
@@ -81,7 +85,7 @@ UArianeEditorLayerTransformTool::CreateGizmo()
     // We create a new proxy because we cannot empty it from its components. The old one will be Garbage Collected... I guess.
     TransformProxy = NewObject<UTransformProxy>(this);
 
-    Gizmo = GizmoManager->CreateCustomTransformGizmo( ETransformGizmoSubElements::StandardTranslateRotate
+    Gizmo = GizmoManager->CreateCustomTransformGizmo( ETransformGizmoSubElements::FullTranslateRotateScale
                                                     , TransformProxy
                                                     , TEXT("ArianeLayerTransform"));
 
@@ -96,15 +100,22 @@ UArianeEditorLayerTransformTool::CreateGizmo()
 void
 UArianeEditorLayerTransformTool::Activate()
 {
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
 
     CreateGizmo();
     //TransformProxy->OnTransformChanged.AddUObject( this, &UArianeEditorLayerTransformTool::OnTransformChanged )
     BindDelegates();
+    // display the overlay widget
+    LevelEditorModule.GetFirstLevelEditor()->AddViewportOverlayWidget( OverlayWidget.ToSharedRef() );
 }
 
 void
 UArianeEditorLayerTransformTool::Inactivate()
 {
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+    // Remove the overlay widget
+    LevelEditorModule.GetFirstLevelEditor()->RemoveViewportOverlayWidget( OverlayWidget.ToSharedRef() );
+
     UnbindDelegates();
 
     ClearGizmo();
@@ -194,6 +205,79 @@ UArianeEditorLayerTransformTool::PostEditChangeProperty( FPropertyChangedEvent& 
 
     }
 */
+}
+
+void
+UArianeEditorLayerTransformTool::CreateOverlayWidget()
+{
+    static FSlateRoundedBoxBrush RoundedBrush = FSlateRoundedBoxBrush( FLinearColor(0.01f, 0.01f, 0.01f, 0.8f)
+                                                                     , 4.0f
+                                                                     , FLinearColor(0.01f, 0.01f, 0.01f, 0.8f)
+                                                                     , 1.0f );
+
+    OverlayWidget = SNew(SOverlay)
+                    +SOverlay::Slot()
+                    .VAlign( VAlign_Bottom ) // Position at the viewport's bottom
+                    .HAlign( HAlign_Center )
+                    .Padding( FMargin(0, 0, 0, 20 ) ) // 40 pixels margin to the Viewport's bottom
+                    [
+                        SNew(SBorder)
+                        .BorderImage(&RoundedBrush)
+                        //.BorderImage(FAppStyle::GetBrush("RoundedSelectionBackground"))
+                        //.BorderBackgroundColor(FLinearColor(0.02f, 0.02f, 0.02f, 0.7f))
+                        //.Padding(FMargin(12, 8))
+                        [
+                            SNew(SHorizontalBox)
+                            + SHorizontalBox::Slot()
+                            .AutoWidth()
+                            .VAlign( VAlign_Center )
+                            .Padding(5)
+                            [
+                                SNew(SImage)
+                                .Image( Icon )
+                                .DesiredSizeOverride(FVector2D(24.f, 24.f))
+                            ]
+                            + SHorizontalBox::Slot()
+                            .AutoWidth()
+                            .VAlign( VAlign_Center )
+                            .Padding(5)
+                            [
+                                SNew(STextBlock)
+                                .Text(LOCTEXT("ariane-layer-transform-tool.name", "Layer Transform Tool"))
+                            ]
+                            + SHorizontalBox::Slot()
+                            .AutoWidth()
+                            .VAlign( VAlign_Center )
+                            .Padding(5)
+                            [
+                                SNew(SButton)
+                                .Text(FText::FromString("Accept"))
+                                .OnClicked_UObject( this, &UArianeEditorLayerTransformTool::OnAccept )
+                                //.ButtonStyle( FAppStyle::Get(), "PrimaryButton")
+                            ]
+                            + SHorizontalBox::Slot()
+                            .AutoWidth()
+                            .VAlign( VAlign_Center )
+                            .Padding(5)
+                            [
+                                SNew(SButton)
+                                .Text(FText::FromString("Cancel"))
+                                .OnClicked_UObject( this, &UArianeEditorLayerTransformTool::OnCancel )
+                            ]
+                        ]
+                    ];
+}
+
+FReply
+UArianeEditorLayerTransformTool::OnAccept()
+{
+    return FReply::Handled();
+}
+
+FReply
+UArianeEditorLayerTransformTool::OnCancel()
+{
+    return FReply::Handled();
 }
 
 #undef LOCTEXT_NAMESPACE

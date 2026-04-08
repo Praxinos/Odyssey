@@ -10,6 +10,7 @@
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
+#include "LayerTransformTool/ArianeEditorLayerTransformTool.h"
 // Odyssey headers
 #include "OdysseyStyle.h"
 // Unreal headers
@@ -46,6 +47,7 @@ SArianeEditorLayerRow::~SArianeEditorLayerRow()
 
 SArianeEditorLayerRow::SArianeEditorLayerRow()
     : DropZone( DROPZONE_NONE )
+    , PreviousTool ( nullptr )
 {
 }
 
@@ -75,6 +77,52 @@ bool
 SArianeEditorLayerRow::IsLockedCheckBoxEnabled() const
 {
     return Item->GetLayer()->GetParent() ? Item->GetLayer()->GetParent()->IsLocked( true ) == false : true;
+}
+
+ECheckBoxState
+SArianeEditorLayerRow::IsTransforming() const
+{
+    const TSharedPtr< SArianeEditorLayerStack > treeView = StaticCastSharedPtr<SArianeEditorLayerStack>(OwnerTablePtr.Pin());
+    const TArray<UArianeLayer*> SelectedLayers = Item->GetLayer()->GetLayerStack()->GetSelectedLayers();
+
+    if( SelectedLayers.Num() )
+    {
+        FArianeEditor* Editor = treeView->GetEditor();
+        bool Transforming = ( Item->GetLayer() == SelectedLayers[0] )
+                         && ( Editor->IsCurrentTool( UArianeEditorLayerTransformTool::GetStaticType() ) );
+
+        return Transforming ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    }
+
+    return ECheckBoxState::Unchecked;
+}
+
+void
+SArianeEditorLayerRow::OnTransformStateChanged( ECheckBoxState iState )
+{
+    const TSharedPtr< SArianeEditorLayerStack > treeView = StaticCastSharedPtr<SArianeEditorLayerStack>(OwnerTablePtr.Pin());
+
+    treeView->SetSelection( Item );
+
+    switch( iState )
+    {
+        case ECheckBoxState::Checked :
+            PreviousTool = treeView->GetEditor()->GetCurrentTool();
+
+            treeView->GetEditor()->SetCurrentTool( UArianeEditorLayerTransformTool::GetStaticType()
+                                                 , EToolShutdownType::Accept
+                                                 , true );
+        break;
+
+        case ECheckBoxState::Unchecked :
+            treeView->GetEditor()->SetCurrentTool( PreviousTool
+                                                 , EToolShutdownType::Accept
+                                                 , true );
+        break;
+
+        default :
+        break;
+    }
 }
 
 void
@@ -130,7 +178,33 @@ SArianeEditorLayerRow::Construct( const typename STableRow<TSharedPtr<FArianeEdi
 TSharedRef<SWidget>
 SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
 {
+    const TSharedPtr< SArianeEditorLayerStack > treeView = StaticCastSharedPtr<SArianeEditorLayerStack>(OwnerTablePtr.Pin());
+    UArianeEditorLayerTransformTool* TransformTool = Cast<UArianeEditorLayerTransformTool>(treeView->GetEditor()->GetTool( UArianeEditorLayerTransformTool::GetStaticType() ));
     UArianeLayer* Layer = Item->GetLayer();
+
+    if( InColumnName == SArianeEditorLayerStack::LAYER_TRANSFORM )
+    {
+        const FCheckBoxStyle* isTransformedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("ArianeLayerStack.IsTransformedToggle");
+
+        return SNew(SHorizontalBox)
+               + SHorizontalBox::Slot()
+               .AutoWidth()
+               .HAlign( EHorizontalAlignment::HAlign_Center )
+               .VAlign( EVerticalAlignment::VAlign_Center )
+               [
+                   SNew( SCheckBox )
+                  .IsEnabled( Item.Get()->IsSensitive() )
+                  .Style( isTransformedToggleStyle )
+                  .OnCheckStateChanged( this, &SArianeEditorLayerRow::OnTransformStateChanged)
+                  .IsChecked( this, &SArianeEditorLayerRow::IsTransforming)
+                  .IsEnabled( this, &SArianeEditorLayerRow::IsLockedCheckBoxEnabled )
+                  [
+                      SNew(SImage)
+                      .Image( TransformTool ? TransformTool->Icon : nullptr )
+                      .DesiredSizeOverride(FVector2D(16.f, 16.f))
+                  ]
+               ];
+    }
 
     if( InColumnName == SArianeEditorLayerStack::LAYER_VISIBLE )
     {

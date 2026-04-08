@@ -5,6 +5,7 @@
 #include "ArianeLayer.h"
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerStack.h"
+#include "ArianePainting3DComponent.h"
 
 UArianeLayer::~UArianeLayer()
 {
@@ -128,6 +129,8 @@ UArianeLayer::Invalidate()
     {
         ParentFolder->InvalidateChildLayer( this );
     }
+
+    //GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
 }
 
 bool UArianeLayer::IsInvalidated()

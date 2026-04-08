@@ -55,6 +55,22 @@ SArianeEditorLayerStack::Construct( const FArguments& InArgs, FArianeEditor* InE
                                        .DefaultLabel(FText::FromString(LAYER_NAME))
                                        .ShouldGenerateWidget(true)
                                        .FillWidth( 1.0f )
+                                       + SHeaderRow::Column( LAYER_TRANSFORM )
+                                       .DefaultLabel(FText::FromString(LAYER_TRANSFORM))
+                                       .HAlignHeader( HAlign_Right )
+                                       .FixedWidth( 24.0f )
+                                       [
+                                           SNew(SHorizontalBox)
+                                           + SHorizontalBox::Slot()
+                                           .AutoWidth()
+                                           .HAlign( EHorizontalAlignment::HAlign_Center )
+                                           .VAlign( EVerticalAlignment::VAlign_Center )
+                                           [
+                                               SNew(SImage)
+                                               .ToolTipText( FText::FromString(LAYER_TRANSFORM))
+                                               .Image( FOdysseyStyle::Get().GetBrush("PainterEditor.ToolsTab.Transform16") )
+                                           ]
+                                       ]
                                        + SHeaderRow::Column( LAYER_VISIBLE )
                                        .DefaultLabel(FText::FromString(LAYER_VISIBLE))
                                        .HAlignHeader( HAlign_Right )
@@ -330,7 +346,7 @@ SArianeEditorLayerStack::OnSelectionChanged( TSharedPtr<FArianeEditorLayerRowIte
             UArianeLayerFolder* RootLayerFolder = Cast<UArianeLayerFolder>(RootItem.Get()->GetLayer());
 
             // only if the action is interactive (user action via GUI)
-            if ( SelectInfo != ESelectInfo::Type::Direct )
+            //if ( SelectInfo != ESelectInfo::Type::Direct )
             {
                 TArray<TSharedPtr<FArianeEditorLayerRowItem>> SelectedLayerItems = GetSelectedItems();
                 TArray<UArianeLayer*> SelectedLayers;
@@ -339,10 +355,7 @@ SArianeEditorLayerStack::OnSelectionChanged( TSharedPtr<FArianeEditorLayerRowIte
                 {
                     UArianeLayer* SelectedLayer = SelectedLayerItem.Get()->GetLayer();
 
-                    if( SelectedLayer->IsSelected() == false )
-                    {
-                        SelectedLayers.Add( SelectedLayer );
-                    }
+                    SelectedLayers.Add( SelectedLayer );
                 }
 
                 Painting3DComponent->GetLayerStack()->SelectLayers( SelectedLayers, true, true, false );

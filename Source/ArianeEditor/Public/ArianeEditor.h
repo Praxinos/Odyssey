@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 // Odyssey Headers
 #include "OdysseyPainterEditorColorType.h"
+#include "InteractiveTool.h"
 // ULIS Headers
 #include <ULIS>
 
@@ -90,9 +91,13 @@ public:
     /**
      * @brief Set the current tool
      * @param Tool the tool to set as the current tool
+     * @param PreviousToolShutdownType how to terminate the previous tool
+     * @param TriggerEvent call Pre/Post CurrentToolChanged delegate
      */
 
-    void SetCurrentTool( UArianeEditorTool* Tool );
+    void SetCurrentTool( UArianeEditorTool* Tool
+                       , EToolShutdownType PreviousToolShutdownType
+                       , bool TriggerEvent );
 
     /**
      * @brief Unregister tab spawners
@@ -123,6 +128,11 @@ public:
     void RegisterTools();
     void UnregisterTools();
     const TArray<UArianeEditorTool*>& GetTools();
+    UArianeEditorTool* GetTool( const FString& ToolType );
+    void SetCurrentTool( const FString& ToolType
+                       , EToolShutdownType PreviousToolShutdownType
+                       , bool TriggerEvent  );
+    bool IsCurrentTool( const FString& ToolType );
 
 protected:
     /**
