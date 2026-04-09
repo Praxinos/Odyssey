@@ -28,15 +28,8 @@ FOdysseyHUDCircle::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
     if (customization.mSegmentLength <= 0.f || customization.mGapLength < 0.f)
         return;
 
-    FVector2D centerPoint(0,0);
-    switch(GetReference())
-    {
-        case EOdysseyHUDReference::Texture: centerPoint = mCenterPoint; break;
-        case EOdysseyHUDReference::HUD: centerPoint = iParams.mTextureToHUD.Execute(mCenterPoint); break;
-    }
-
     ::ULIS::TArray<::ULIS::FVec2I> points;
-    ::ULIS::GenerateCirclePoints(::ULIS::FVec2I(centerPoint.X, centerPoint.Y), mRadius, points);
+    ::ULIS::GenerateCirclePoints(::ULIS::FVec2I(0, 0), mRadius, points);
 
     if (points.Size() < 2)
         return;
@@ -49,19 +42,16 @@ FOdysseyHUDCircle::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
         {
             for (int i = 1; i < points.Size(); i++)
             {
-                FVector2D startPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i - 1].x, points[i - 1].y));
-                FVector2D endPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i].x, points[i].y));
+                FVector2D startPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i - 1].x, points[i - 1].y) + mCenterPoint);
+                FVector2D endPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i].x, points[i].y) + mCenterPoint);
 
-                DrawCustomizedLine(
-                    iParams.mTextureToHUD.Execute(FVector2D(points[i - 1].x, points[i - 1].y)),
-                    iParams.mTextureToHUD.Execute(FVector2D(points[i].x, points[i].y))
-                );
+                DrawCustomizedLine(startPoint, endPoint);
             }
 
-            DrawCustomizedLine(
-                iParams.mTextureToHUD.Execute(FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y)),
-                iParams.mTextureToHUD.Execute(FVector2D(points[0].x, points[0].y))
-            );
+            FVector2D startPoint = iParams.mTextureToHUD.Execute(FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y) + mCenterPoint);
+            FVector2D endPoint = iParams.mTextureToHUD.Execute(FVector2D(points[0].x, points[0].y) + mCenterPoint);
+
+            DrawCustomizedLine(startPoint, endPoint);
         }
         break;
 
@@ -69,19 +59,16 @@ FOdysseyHUDCircle::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
         {
             for (int i = 1; i < points.Size(); i++)
             {
-                FVector2D startPoint = FVector2D(points[i - 1].x, points[i - 1].y);
-                FVector2D endPoint = FVector2D(points[i].x, points[i].y);
+                FVector2D startPoint = FVector2D(points[i - 1].x, points[i - 1].y) + mCenterPoint;
+                FVector2D endPoint = FVector2D(points[i].x, points[i].y) + mCenterPoint;
 
-                DrawCustomizedLine(
-                    FVector2D(points[i - 1].x, points[i - 1].y),
-                    FVector2D(points[i].x, points[i].y)
-                );
+                DrawCustomizedLine(startPoint, endPoint);
             }
 
-            DrawCustomizedLine(
-                FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y),
-                FVector2D(points[0].x, points[0].y)
-            );
+            FVector2D startPoint = FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y) + mCenterPoint;
+            FVector2D endPoint = FVector2D(points[0].x, points[0].y) + mCenterPoint;
+
+            DrawCustomizedLine(startPoint, endPoint);
         }
         break;
     }

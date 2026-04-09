@@ -150,6 +150,7 @@ private:
     void RIMOnMouseDrag(const FOdysseyPoint& iPointInTexture);
     void CancelRIM();
     void EndRIM();
+    FVector2D GetRIMCenter(const FVector2D& iMousePositionInTexture) const;
 
 protected:
     TSharedPtr<FOdysseyPainterEditorToolInputProcessor> mInputProcessor;
@@ -170,5 +171,7 @@ private:
     //RIM : Radius Interactive Modifier
     bool mIsRIMActive = false;
     TSharedPtr<class FOdysseyHUDCircle> mRIMHUD;
+    TSharedPtr<class FOdysseyHUDLine> mRIMHorizontalHUD;
+    TSharedPtr<class FOdysseyHUDLine> mRIMVerticalHUD;
     float mRIMStartRadius;
 };

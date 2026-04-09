@@ -4,6 +4,7 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDCircle.h"
+#include "OdysseyHUDLine.h"
 
 #include "Framework/Application/SlateApplication.h"
 #include "Misc/TransactionObjectEvent.h"
@@ -459,9 +460,16 @@ UOdysseyPainterEditorTool::StartRadiusInteractiveModifier()
     mRIMStartRadius = GetRadius();
 
     mRIMHUD = MakeShared<FOdysseyHUDCircle>(
-        FVector2D(mPreviousMousePosition) - FVector2D(mRIMStartRadius * UE_DOUBLE_INV_SQRT_2, mRIMStartRadius * UE_DOUBLE_INV_SQRT_2),
+        GetRIMCenter(mPreviousMousePosition),
         mRIMStartRadius
     );
+
+    mRIMHorizontalHUD = MakeShared<FOdysseyHUDLine>(mRIMHUD->GetCenter() + FVector2D(-mRIMHUD->GetRadius(), 0), mRIMHUD->GetCenter() + FVector2D(mRIMHUD->GetRadius(), 0));
+    mRIMVerticalHUD = MakeShared<FOdysseyHUDLine>(mRIMHUD->GetCenter() + FVector2D(0, -mRIMHUD->GetRadius()), mRIMHUD->GetCenter() + FVector2D(0, mRIMHUD->GetRadius()));
+
+    mRIMHUD->AddElement(mRIMHorizontalHUD);
+    mRIMHUD->AddElement(mRIMVerticalHUD);
+
     //We need customization to set the color, but we could do this easier
     //by removing customization and make its behaviour directly part of the HUD system
     FOdysseyHUDElement::FHUDCustomization customization;
@@ -477,12 +485,16 @@ UOdysseyPainterEditorTool::StartRadiusInteractiveModifier()
         case EPainterEditorToolRadiusReference::Texture:
         {
             mRIMHUD->SetReference(EOdysseyHUDReference::Texture);
+            mRIMHorizontalHUD->SetReference(EOdysseyHUDReference::Texture);
+            mRIMVerticalHUD->SetReference(EOdysseyHUDReference::Texture);
         }
         break;
 
         case EPainterEditorToolRadiusReference::HUD:
         {
             mRIMHUD->SetReference(EOdysseyHUDReference::HUD);
+            mRIMHorizontalHUD->SetReference(EOdysseyHUDReference::HUD);
+            mRIMVerticalHUD->SetReference(EOdysseyHUDReference::HUD);
         }
         break;
     }
@@ -504,6 +516,8 @@ UOdysseyPainterEditorTool::EndRIM()
 
     mRIMStartRadius = 0.f;
     mRIMHUD = nullptr;
+    mRIMHorizontalHUD = nullptr;
+    mRIMVerticalHUD = nullptr;
 }
 
 void
@@ -522,13 +536,15 @@ UOdysseyPainterEditorTool::CancelRIM()
 
     mRIMStartRadius = 0.f;
     mRIMHUD = nullptr;
+    mRIMHorizontalHUD = nullptr;
+    mRIMVerticalHUD = nullptr;
 }
 
-void
-UOdysseyPainterEditorTool::RIMOnMouseMove(const FOdysseyPoint& iPointInTexture)
+FVector2D
+UOdysseyPainterEditorTool::GetRIMCenter(const FVector2D& iMousePositionInTexture) const
 {
-    FVector2D delta(mRIMHUD->GetRadius() * UE_DOUBLE_INV_SQRT_2, mRIMHUD->GetRadius() * UE_DOUBLE_INV_SQRT_2);
-    FVector2D center = FVector2D(iPointInTexture);
+    FVector2D delta(GetRadius() * UE_DOUBLE_INV_SQRT_2, GetRadius() * UE_DOUBLE_INV_SQRT_2);
+    FVector2D center = FVector2D(iMousePositionInTexture);
     switch(GetRadiusReference())
     {
         case EPainterEditorToolRadiusReference::Texture:
@@ -539,14 +555,25 @@ UOdysseyPainterEditorTool::RIMOnMouseMove(const FOdysseyPoint& iPointInTexture)
 
         case EPainterEditorToolRadiusReference::HUD:
         {
-            center = mEditor->HUDSystem()->TextureToHUD( FVector2D(iPointInTexture) );
+            center = mEditor->HUDSystem()->TextureToHUD( FVector2D(iMousePositionInTexture) );
             center -= delta;
-            center = mEditor->HUDSystem()->HUDToTexture(center);
         }
         break;
     }
 
+    return center;
+}
+
+void
+UOdysseyPainterEditorTool::RIMOnMouseMove(const FOdysseyPoint& iPointInTexture)
+{
+    FVector2D center = GetRIMCenter(iPointInTexture);
+
     mRIMHUD->SetCenter(center);
+    mRIMHorizontalHUD->SetStartPoint(mRIMHUD->GetCenter() + FVector2D(-mRIMHUD->GetRadius(), 0));
+    mRIMHorizontalHUD->SetEndPoint(mRIMHUD->GetCenter() + FVector2D(mRIMHUD->GetRadius(), 0));
+    mRIMVerticalHUD->SetStartPoint(mRIMHUD->GetCenter() + FVector2D(0, -mRIMHUD->GetRadius()));
+    mRIMVerticalHUD->SetEndPoint(mRIMHUD->GetCenter() + FVector2D(0, mRIMHUD->GetRadius()));
 }
 
 void
@@ -566,7 +593,7 @@ UOdysseyPainterEditorTool::RIMOnMouseDrag(const FOdysseyPoint& iPointInTexture)
 
         case EPainterEditorToolRadiusReference::HUD:
         {
-            center =  mEditor->HUDSystem()->TextureToHUD( mRIMHUD->GetCenter() );
+            center =  mRIMHUD->GetCenter();
             mousePosition =  mEditor->HUDSystem()->TextureToHUD( iPointInTexture );
         }
         break;
@@ -575,8 +602,12 @@ UOdysseyPainterEditorTool::RIMOnMouseDrag(const FOdysseyPoint& iPointInTexture)
     float distance = FVector2D::Distance(mousePosition, center);
     float radius = distance;
 
-    //UE_LOG(LogTemp, Warning, TEXT("RIMOnMouseMove x=%f, y=%f, d=%f, r=%f", mousePosition.X, mousePosition.Y, directiondelta, radius));
-
     mRIMHUD->SetRadius(radius);
+
+    mRIMHorizontalHUD->SetStartPoint(mRIMHUD->GetCenter() + FVector2D(-mRIMHUD->GetRadius(), 0));
+    mRIMHorizontalHUD->SetEndPoint(mRIMHUD->GetCenter() + FVector2D(mRIMHUD->GetRadius(), 0));
+    mRIMVerticalHUD->SetStartPoint(mRIMHUD->GetCenter() + FVector2D(0, -mRIMHUD->GetRadius()));
+    mRIMVerticalHUD->SetEndPoint(mRIMHUD->GetCenter() + FVector2D(0, mRIMHUD->GetRadius()));
+
     SetRadius(radius);
 }
