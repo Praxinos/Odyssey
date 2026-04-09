@@ -33,16 +33,21 @@ FOdysseyHUDPolygon::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
     // Draw all polygon edges
     for (int i = 1; i < mPoints.Num(); i++)
     {
-        DrawCustomizedLine( iParams.mTextureToHUD.Execute(mPoints[i - 1]),
-                            iParams.mTextureToHUD.Execute(mPoints[i]));
+        DrawCustomizedLine(
+            iParams,
+            mPoints[i - 1],
+            mPoints[i]
+        );
     }
 
     // Close polygon if needed (continue pattern seamlessly)
     if (mClosePolygon)
     {
         DrawCustomizedLine(
-            iParams.mTextureToHUD.Execute(mPoints.Last()),
-            iParams.mTextureToHUD.Execute(mPoints[0]));
+            iParams,
+            mPoints.Last(),
+            mPoints[0]
+        );
     }
 
     FOdysseyHUDElement::DrawHUD(iParams);

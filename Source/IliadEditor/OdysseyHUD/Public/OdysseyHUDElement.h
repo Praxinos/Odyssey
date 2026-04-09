@@ -97,7 +97,7 @@ public:
 protected:
     virtual void DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams);
     void InitDrawCustomizedLine(FCanvas* iCanvas, const FHUDCustomization& iCustomization, const FLinearColor& iDefaultColor);
-    void DrawCustomizedLine(const FVector2D& iStart, const FVector2D& iEnd);
+    void DrawCustomizedLine(const FOdysseyHUDElement::FDrawHUDParams& iParams, const FVector2D& iStart, const FVector2D& iEnd);
 
 protected:
     // FGCObject implementation

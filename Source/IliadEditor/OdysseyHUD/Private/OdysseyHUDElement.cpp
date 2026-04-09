@@ -109,10 +109,28 @@ FOdysseyHUDElement::InitDrawCustomizedLine(FCanvas* iCanvas, const FHUDCustomiza
 }
 
 void
-//FOdysseyHUDElement::DrawCustomizedLine(FCanvas* iCanvas, const FVector2D& iStart, const FVector2D& iEnd, float& ioStartOffset, int& ioColorIndex, const TArray<FLinearColor>& iColors, const FHUDCustomization& iCustomization, FBatchedElements* iBatchedElements) const
-FOdysseyHUDElement::DrawCustomizedLine(const FVector2D& iStart, const FVector2D& iEnd)
+FOdysseyHUDElement::DrawCustomizedLine(const FOdysseyHUDElement::FDrawHUDParams& iParams, const FVector2D& iStart, const FVector2D& iEnd)
 {
-    FVector2D dir = iEnd - iStart;
+    FVector2D start = iStart;
+    FVector2D end = iEnd;
+    switch(GetReference())
+    {
+        case EOdysseyHUDReference::Texture:
+        {
+            start = iParams.mTextureToHUD.Execute(iStart);
+            end = iParams.mTextureToHUD.Execute(iEnd);
+        }
+        break;
+
+        case EOdysseyHUDReference::HUD:
+        {
+            start = iStart;
+            end = iEnd;
+        }
+        break;
+    }
+
+    FVector2D dir = end - start;
     float segmentLength = dir.Size();
     if (segmentLength <= 0.f)
         return;
@@ -128,8 +146,8 @@ FOdysseyHUDElement::DrawCustomizedLine(const FVector2D& iStart, const FVector2D&
         //Draw only if we're not in a gap
         if (lineSize > 0.f && mCustomizedLinesParams.mColorIndex < mCustomizedLinesParams.mColors.Num())
         {
-            FVector2D segmentStart = iStart + dir * current;
-            FVector2D segmentEnd = iStart + dir * (current + lineSize);
+            FVector2D segmentStart = start + dir * current;
+            FVector2D segmentEnd = start + dir * (current + lineSize);
 
             //UE_LOG(LogTemp, Warning, TEXT("current = %f, mCustomizedLinesParams.mColorIndex = %d"), current, mCustomizedLinesParams.mColorIndex);
 

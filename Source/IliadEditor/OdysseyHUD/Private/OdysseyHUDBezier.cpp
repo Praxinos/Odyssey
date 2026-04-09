@@ -29,9 +29,9 @@ FOdysseyHUDBezier::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
     if (customization.mSegmentLength <= 0.f || customization.mGapLength < 0.f)
         return;
 
-    FVector2D startPoint = iParams.mTextureToHUD.Execute(mStartPoint);
-    FVector2D controlPoint = iParams.mTextureToHUD.Execute(mControlPoint);
-    FVector2D endPoint = iParams.mTextureToHUD.Execute(mEndPoint);
+    FVector2D startPoint = mStartPoint;
+    FVector2D controlPoint = mControlPoint;
+    FVector2D endPoint = mEndPoint;
 
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
     ::ULIS::GenerateQuadraticBezierPoints(
@@ -49,11 +49,12 @@ FOdysseyHUDBezier::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 
     for (int i = 1; i < pointsArray.Size(); i++)
     {
-        FVector2D startBezierPoint = iParams.mTextureToHUD.Execute(FVector2D(pointsArray[i - 1].x, pointsArray[i - 1].y));
-        FVector2D endBezierPoint = iParams.mTextureToHUD.Execute(FVector2D(pointsArray[i].x, pointsArray[i].y));
+        FVector2D startBezierPoint( pointsArray[i - 1].x, pointsArray[i - 1].y);
+        FVector2D endBezierPoint( pointsArray[i].x, pointsArray[i].y);
 
         // Bezier
         DrawCustomizedLine(
+            iParams,
             startBezierPoint,
             endBezierPoint
         );
@@ -61,11 +62,13 @@ FOdysseyHUDBezier::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 
     // Control lines
     DrawCustomizedLine(
+        iParams,
         startPoint,
         controlPoint
     );
 
     DrawCustomizedLine(
+        iParams,
         controlPoint,
         endPoint
     );

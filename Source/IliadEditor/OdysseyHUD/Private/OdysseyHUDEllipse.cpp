@@ -37,19 +37,21 @@ FOdysseyHUDEllipse::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 
     for (int i = 1; i < points.Size(); i++)
     {
-        FVector2D startPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i - 1].x, points[i - 1].y));
-        FVector2D endPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i].x, points[i].y));
+        FVector2D startPoint = FVector2D(points[i - 1].x, points[i - 1].y);
+        FVector2D endPoint = FVector2D(points[i].x, points[i].y);
 
         DrawCustomizedLine(
+            iParams,
             startPoint,
             endPoint
         );
     }
 
-    FVector2D startPoint = iParams.mTextureToHUD.Execute(FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y));
-    FVector2D endPoint = iParams.mTextureToHUD.Execute(FVector2D(points[0].x, points[0].y));
+    FVector2D startPoint = FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y);
+    FVector2D endPoint = FVector2D(points[0].x, points[0].y);
 
     DrawCustomizedLine(
+        iParams,
         startPoint,
         endPoint
     );

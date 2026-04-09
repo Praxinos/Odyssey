@@ -36,42 +36,18 @@ FOdysseyHUDCircle::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 
     InitDrawCustomizedLine(iParams.mCanvas, customization, FLinearColor::Black);
 
-    switch(GetReference())
+    for (int i = 1; i < points.Size(); i++)
     {
-        case EOdysseyHUDReference::Texture:
-        {
-            for (int i = 1; i < points.Size(); i++)
-            {
-                FVector2D startPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i - 1].x, points[i - 1].y) + mCenterPoint);
-                FVector2D endPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i].x, points[i].y) + mCenterPoint);
+        FVector2D startPoint = FVector2D(points[i - 1].x, points[i - 1].y) + mCenterPoint;
+        FVector2D endPoint = FVector2D(points[i].x, points[i].y) + mCenterPoint;
 
-                DrawCustomizedLine(startPoint, endPoint);
-            }
-
-            FVector2D startPoint = iParams.mTextureToHUD.Execute(FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y) + mCenterPoint);
-            FVector2D endPoint = iParams.mTextureToHUD.Execute(FVector2D(points[0].x, points[0].y) + mCenterPoint);
-
-            DrawCustomizedLine(startPoint, endPoint);
-        }
-        break;
-
-        case EOdysseyHUDReference::HUD:
-        {
-            for (int i = 1; i < points.Size(); i++)
-            {
-                FVector2D startPoint = FVector2D(points[i - 1].x, points[i - 1].y) + mCenterPoint;
-                FVector2D endPoint = FVector2D(points[i].x, points[i].y) + mCenterPoint;
-
-                DrawCustomizedLine(startPoint, endPoint);
-            }
-
-            FVector2D startPoint = FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y) + mCenterPoint;
-            FVector2D endPoint = FVector2D(points[0].x, points[0].y) + mCenterPoint;
-
-            DrawCustomizedLine(startPoint, endPoint);
-        }
-        break;
+        DrawCustomizedLine(iParams, startPoint, endPoint);
     }
+
+    FVector2D startPoint = FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y) + mCenterPoint;
+    FVector2D endPoint = FVector2D(points[0].x, points[0].y) + mCenterPoint;
+
+    DrawCustomizedLine(iParams, startPoint, endPoint);
 
     FOdysseyHUDElement::DrawHUD(iParams);
 }
