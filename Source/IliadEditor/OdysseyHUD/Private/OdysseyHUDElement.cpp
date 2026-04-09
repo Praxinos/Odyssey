@@ -40,6 +40,7 @@ void
 FOdysseyHUDElement::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 {
     mCachedTextureToHUD = iParams.mTextureToHUD;
+    mCachedHUDToTexture = iParams.mHUDToTexture;
 }
 
 FVector2D
@@ -52,6 +53,18 @@ FVector2D
 FOdysseyHUDElement::TextureToHUD( const FVector2D& iPosition ) const
 {
     return mCachedTextureToHUD.Execute( iPosition );
+}
+
+FVector2D
+FOdysseyHUDElement::HUDToTexture( double iX, double iY ) const
+{
+    return HUDToTexture( FVector2D( iX, iY ) );
+}
+
+FVector2D
+FOdysseyHUDElement::HUDToTexture( const FVector2D& iPosition ) const
+{
+    return mCachedHUDToTexture.Execute( iPosition );
 }
 
 void

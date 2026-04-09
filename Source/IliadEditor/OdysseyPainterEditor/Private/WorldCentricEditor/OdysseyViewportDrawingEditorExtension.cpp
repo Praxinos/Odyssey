@@ -1224,12 +1224,22 @@ FOdysseyViewportDrawingEditorExtension::GetDrawHUDParams(const FSceneView* View,
 
     oParams.mCanvas = Canvas;
     oParams.mTextureToHUD = FOdysseyHUDElement::FDrawHUDParams::FTextureToHUD::CreateLambda(
-        [textureToWorld, View, scaleFactor = iScaleFactor](const FVector2D& iPosition)
+        [textureToWorld, view = *View, scaleFactor = iScaleFactor](const FVector2D& iPosition)
         {
             FVector worldPoint = textureToWorld.TransformPosition(FVector(iPosition.X, iPosition.Y, 0.f));
             FVector2D hudPoint;
-            View->WorldToPixel(worldPoint, hudPoint);
+            view.WorldToPixel(worldPoint, hudPoint);
             return hudPoint / scaleFactor;
+        }
+    );
+    oParams.mHUDToTexture = FOdysseyHUDElement::FDrawHUDParams::FTextureToHUD::CreateLambda(
+        [this, view = *View](const FVector2D& iPosition)
+        {
+            FVector2D pos;
+            if (!this->ViewportToHUD(&view, iPosition, pos))
+                return FVector2D(0, 0);
+
+            return pos;
         }
     );
     oParams.mTextureWidth = textureW;
@@ -1284,8 +1294,11 @@ FOdysseyViewportDrawingEditorExtension::GetHUDPlaneParams(FVector& oPlaneTopLeft
 }
 
 bool
-FOdysseyViewportDrawingEditorExtension::ViewportToHUD(FEditorViewportClient* iViewportClient, const FVector2D& iViewportPoint, FVector2D& oHUDPoint)
+FOdysseyViewportDrawingEditorExtension::ViewportToHUD(const FSceneView* View, const FVector2D& iViewportPoint, FVector2D& oHUDPoint)
 {
+    if (!View)
+        return false;
+
     if (!mTexture)
         return false;
 
@@ -1306,16 +1319,6 @@ FOdysseyViewportDrawingEditorExtension::ViewportToHUD(FEditorViewportClient* iVi
     if (!GetHUDPlaneParams(planeTopLeft, w, h, xAxis, yAxis))
         return false;
 
-    FSceneViewFamilyContext viewFamily(
-        FSceneViewFamily::ConstructionValues(
-            iViewportClient->Viewport,
-            iViewportClient->GetScene(),
-            iViewportClient->EngineShowFlags
-        )
-        .SetRealtimeUpdate(iViewportClient->IsRealtime())
-    );
-    FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
-
     const FVector planeTopRight = planeTopLeft + xAxis * w;
     const FVector planeBottomLeft = planeTopLeft + yAxis * h;
 
@@ -1324,7 +1327,7 @@ FOdysseyViewportDrawingEditorExtension::ViewportToHUD(FEditorViewportClient* iVi
     FVector rayOrigin;
     FVector rayDirection;
 
-    view->DeprojectFVector2D(iViewportPoint, rayOrigin, rayDirection);
+    View->DeprojectFVector2D(iViewportPoint, rayOrigin, rayDirection);
 
     FVector worldPoint = FMath::RayPlaneIntersection(rayOrigin, rayDirection, plane);
 
@@ -1351,6 +1354,22 @@ FOdysseyViewportDrawingEditorExtension::ViewportToHUD(FEditorViewportClient* iVi
     }
 
     return true;
+}
+
+bool
+FOdysseyViewportDrawingEditorExtension::ViewportToHUD(FEditorViewportClient* iViewportClient, const FVector2D& iViewportPoint, FVector2D& oHUDPoint)
+{
+    FSceneViewFamilyContext viewFamily(
+        FSceneViewFamily::ConstructionValues(
+            iViewportClient->Viewport,
+            iViewportClient->GetScene(),
+            iViewportClient->EngineShowFlags
+        )
+        .SetRealtimeUpdate(iViewportClient->IsRealtime())
+    );
+    FSceneView* view = iViewportClient->CalcSceneView(&viewFamily);
+
+    return ViewportToHUD(view, iViewportPoint, oHUDPoint);
 }
 
 bool

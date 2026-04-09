@@ -41,6 +41,7 @@ public:
 
         FCanvas* mCanvas;
         FTextureToHUD mTextureToHUD;
+        FTextureToHUD mHUDToTexture;
         int32 mTextureWidth;
         int32 mTextureHeight;
 
@@ -90,6 +91,8 @@ public:
     //PATCH: see mCachedTextureToHUD
     FVector2D TextureToHUD( double iX, double iY ) const;
     FVector2D TextureToHUD( const FVector2D& iPosition ) const;
+    FVector2D HUDToTexture( double iX, double iY ) const;
+    FVector2D HUDToTexture( const FVector2D& iPosition ) const;
 
 protected:
     virtual void DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams);
@@ -117,6 +120,7 @@ private:
     // A HUD can be drawn by several viewports at the same time with different TextureToHUD matrices
     // So we just hope this one is the right one here
     FDrawHUDParams::FTextureToHUD mCachedTextureToHUD;
+    FDrawHUDParams::FTextureToHUD mCachedHUDToTexture;
 
     EOdysseyHUDReference mReference = EOdysseyHUDReference::Texture;
 

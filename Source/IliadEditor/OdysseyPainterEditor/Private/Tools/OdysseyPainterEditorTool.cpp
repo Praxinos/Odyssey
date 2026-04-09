@@ -121,6 +121,8 @@ UOdysseyPainterEditorTool::Load()
 void
 UOdysseyPainterEditorTool::Unload()
 {
+    CancelRIM();
+
     mHUD->EmptyElements();
     mEditor->HUDSystem()->RemoveElement(mHUD);
 }
@@ -197,7 +199,10 @@ bool
 UOdysseyPainterEditorTool::ProcessMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     if (mIsRIMActive)
+    {
+        EndRIM();
         return true;
+    }
 
     return OnMouseUp(iPointInTexture, iKey);
 }
@@ -222,7 +227,7 @@ UOdysseyPainterEditorTool::ProcessMouseDrag(const FOdysseyPoint& iPointInTexture
 {
     if (mIsRIMActive)
     {
-        RIMOnMouseMove(iPointInTexture);
+        RIMOnMouseDrag(iPointInTexture);
     }
     else
     {
@@ -236,7 +241,13 @@ bool
 UOdysseyPainterEditorTool::ProcessKeyDown(const FKey& iKey)
 {
     if (mIsRIMActive)
+    {
+        if (iKey == EKeys::Escape)
+        {
+            CancelRIM();
+        }
         return true;
+    }
 
     return OnKeyDown(iKey);
 }
@@ -245,10 +256,7 @@ bool
 UOdysseyPainterEditorTool::ProcessKeyUp(const FKey& iKey)
 {
     if( mIsRIMActive )
-    {
-        EndRIM();
         return true;
-    }
 
     return OnKeyUp(iKey);
 }
@@ -258,11 +266,6 @@ UOdysseyPainterEditorTool::ProcessKeyUpGlobal(const FKeyEvent& InKeyEvent)
 {
     if( mIsRIMActive )
     {
-        //We need to manage EndRIM() here aswell as in ProcessKeyUp()
-        //otherwise, the widget having the focus (example: the tools buttons) could intercept
-        //the event before ProcessKeyUp() and the RIM would never end
-        EndRIM();
-
         //return false to let other parts of Unreal know that the key has been released
         //otherwise if we activate RIM a second time, the shortcut is not triggered
         return false;
@@ -455,13 +458,17 @@ UOdysseyPainterEditorTool::StartRadiusInteractiveModifier()
 
     mRIMStartRadius = GetRadius();
 
-    mRIMHUD = MakeShared<FOdysseyHUDCircle>(mPreviousMousePosition, mRIMStartRadius);
+    mRIMHUD = MakeShared<FOdysseyHUDCircle>(
+        FVector2D(mPreviousMousePosition) - FVector2D(mRIMStartRadius * UE_DOUBLE_INV_SQRT_2, mRIMStartRadius * UE_DOUBLE_INV_SQRT_2),
+        mRIMStartRadius
+    );
     //We need customization to set the color, but we could do this easier
     //by removing customization and make its behaviour directly part of the HUD system
     FOdysseyHUDElement::FHUDCustomization customization;
     customization.mColors.Add(FLinearColor::Red);
     mRIMHUD->SetCustomization(customization);
 
+    //Replace the HUD with the RIMHUD
     mEditor->HUDSystem()->RemoveElement(mHUD);
     mEditor->HUDSystem()->AddElement(mRIMHUD);
 
@@ -469,20 +476,18 @@ UOdysseyPainterEditorTool::StartRadiusInteractiveModifier()
     {
         case EPainterEditorToolRadiusReference::Texture:
         {
-            mRIMStartCursorPos =  mPreviousMousePosition;
             mRIMHUD->SetReference(EOdysseyHUDReference::Texture);
         }
         break;
 
         case EPainterEditorToolRadiusReference::HUD:
         {
-            mRIMStartCursorPos =  mEditor->HUDSystem()->TextureToHUD( mPreviousMousePosition.x, mPreviousMousePosition.y );
             mRIMHUD->SetReference(EOdysseyHUDReference::HUD);
         }
         break;
     }
 
-    //UE_LOG(LogTemp, Warning, TEXT("StartRadiusInteractiveModifier x=%f, y=%f", mRIMStartCursorPos.X, mRIMStartCursorPos.Y));
+    //UE_LOG(LogTemp, Warning, TEXT("StartRadiusInteractiveModifier x=%f, y=%f", mPreviousMousePosition.X, mPreviousMousePosition.Y));
 }
 
 void
@@ -493,10 +498,28 @@ UOdysseyPainterEditorTool::EndRIM()
 
     mIsRIMActive = false;
 
+    //Put the tool's HUD in place again
     mEditor->HUDSystem()->RemoveElement(mRIMHUD);
     mEditor->HUDSystem()->AddElement(mHUD);
 
-    mRIMStartCursorPos = FVector2D();
+    mRIMStartRadius = 0.f;
+    mRIMHUD = nullptr;
+}
+
+void
+UOdysseyPainterEditorTool::CancelRIM()
+{
+    if (!mIsRIMActive)
+        return;
+
+    SetRadius(mRIMStartRadius);
+
+    mIsRIMActive = false;
+
+    //Put the tool's HUD in place again
+    mEditor->HUDSystem()->RemoveElement(mRIMHUD);
+    mEditor->HUDSystem()->AddElement(mHUD);
+
     mRIMStartRadius = 0.f;
     mRIMHUD = nullptr;
 }
@@ -504,25 +527,53 @@ UOdysseyPainterEditorTool::EndRIM()
 void
 UOdysseyPainterEditorTool::RIMOnMouseMove(const FOdysseyPoint& iPointInTexture)
 {
+    FVector2D delta(mRIMHUD->GetRadius() * UE_DOUBLE_INV_SQRT_2, mRIMHUD->GetRadius() * UE_DOUBLE_INV_SQRT_2);
+    FVector2D center = FVector2D(iPointInTexture);
+    switch(GetRadiusReference())
+    {
+        case EPainterEditorToolRadiusReference::Texture:
+        {
+            center -= delta;
+        }
+        break;
+
+        case EPainterEditorToolRadiusReference::HUD:
+        {
+            center = mEditor->HUDSystem()->TextureToHUD( FVector2D(iPointInTexture) );
+            center -= delta;
+            center = mEditor->HUDSystem()->HUDToTexture(center);
+        }
+        break;
+    }
+
+    mRIMHUD->SetCenter(center);
+}
+
+void
+UOdysseyPainterEditorTool::RIMOnMouseDrag(const FOdysseyPoint& iPointInTexture)
+{
+    FVector2D center(0,0);
     FVector2D mousePosition(0,0);
 
     switch(GetRadiusReference())
     {
         case EPainterEditorToolRadiusReference::Texture:
         {
+            center =  mRIMHUD->GetCenter();
             mousePosition =  iPointInTexture;
         }
         break;
 
         case EPainterEditorToolRadiusReference::HUD:
         {
-            mousePosition =  mEditor->HUDSystem()->TextureToHUD( iPointInTexture.x, iPointInTexture.y );
+            center =  mEditor->HUDSystem()->TextureToHUD( mRIMHUD->GetCenter() );
+            mousePosition =  mEditor->HUDSystem()->TextureToHUD( iPointInTexture );
         }
         break;
     }
 
-    float directiondelta = mousePosition.X - mRIMStartCursorPos.X;
-    float radius = FMath::CeilToFloat(FMath::Abs(mRIMStartRadius + directiondelta));
+    float distance = FVector2D::Distance(mousePosition, center);
+    float radius = distance;
 
     //UE_LOG(LogTemp, Warning, TEXT("RIMOnMouseMove x=%f, y=%f, d=%f, r=%f", mousePosition.X, mousePosition.Y, directiondelta, radius));
 

@@ -147,6 +147,8 @@ public:
 
 private:
     void RIMOnMouseMove(const FOdysseyPoint& iPointInTexture);
+    void RIMOnMouseDrag(const FOdysseyPoint& iPointInTexture);
+    void CancelRIM();
     void EndRIM();
 
 protected:
@@ -168,6 +170,5 @@ private:
     //RIM : Radius Interactive Modifier
     bool mIsRIMActive = false;
     TSharedPtr<class FOdysseyHUDCircle> mRIMHUD;
-    FVector2D mRIMStartCursorPos;
     float mRIMStartRadius;
 };

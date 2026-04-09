@@ -101,6 +101,12 @@ FOdysseyImportTexturesViewportClient::Draw( FViewport* iViewport, FCanvas* ioCan
             return iPosition;
         }
     );
+    params.mHUDToTexture = FOdysseyHUDElement::FDrawHUDParams::FTextureToHUD::CreateLambda(
+        [](const FVector2D& iPosition)
+        {
+            return iPosition;
+        }
+    );
 
     mHUD->Draw(params);
 

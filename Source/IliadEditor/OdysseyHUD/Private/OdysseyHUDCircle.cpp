@@ -100,3 +100,15 @@ FOdysseyHUDCircle::SetRadius(float iRadius)
 {
     mRadius = iRadius;
 }
+
+const FVector2D&
+FOdysseyHUDCircle::GetCenter() const
+{
+    return mCenterPoint;
+}
+
+float
+FOdysseyHUDCircle::GetRadius() const
+{
+    return mRadius;
+}
