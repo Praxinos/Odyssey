@@ -26,28 +26,32 @@ FOdysseyHUDRectangle::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
     if (customization.mSegmentLength <= 0.f || customization.mGapLength < 0.f)
         return;
 
-    FVector2D topLeft = iParams.mTextureToHUD.Execute(mTopLeftPoint);
-    FVector2D topRight = iParams.mTextureToHUD.Execute(FVector2D(mBottomRightPoint.X, mTopLeftPoint.Y));
-    FVector2D bottomRight = iParams.mTextureToHUD.Execute(mBottomRightPoint);
-    FVector2D bottomLeft = iParams.mTextureToHUD.Execute(FVector2D(mTopLeftPoint.X, mBottomRightPoint.Y));
+    FVector2D topLeft = mTopLeftPoint;
+    FVector2D topRight = FVector2D(mBottomRightPoint.X, mTopLeftPoint.Y);
+    FVector2D bottomRight = mBottomRightPoint;
+    FVector2D bottomLeft = FVector2D(mTopLeftPoint.X, mBottomRightPoint.Y);
 
     InitDrawCustomizedLine(iParams.mCanvas, customization, FLinearColor::Black);
     DrawCustomizedLine(
+        iParams,
         topLeft,
         topRight
     );
 
     DrawCustomizedLine(
+        iParams,
         topRight,
         bottomRight
     );
 
     DrawCustomizedLine(
+        iParams,
         bottomRight,
         bottomLeft
     );
 
     DrawCustomizedLine(
+        iParams,
         bottomLeft,
         topLeft
     );

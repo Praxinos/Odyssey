@@ -56,6 +56,24 @@ UOdysseyPainterEditorVectorGridTool::IsActivable() const
             || HUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX );
 }
 
+bool
+UOdysseyPainterEditorVectorGridTool::HasRadius() const
+{
+    return true;
+}
+
+void
+UOdysseyPainterEditorVectorGridTool::SetRadius(float iRadius)
+{
+    PickingRadius = iRadius;
+}
+
+float
+UOdysseyPainterEditorVectorGridTool::GetRadius() const
+{
+    return PickingRadius;
+}
+
 uint64
 UOdysseyPainterEditorVectorGridTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {

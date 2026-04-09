@@ -21,6 +21,8 @@ public:
 
 public:
     //UObject overrides
+    void SetSize(float Size);
+    float GetSize() const;
 
     //Called when a simple property changes
     virtual void PostEditChangeProperty(struct FPropertyChangedEvent & PropertyChangedEvent);

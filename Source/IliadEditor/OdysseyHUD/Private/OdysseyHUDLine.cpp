@@ -27,14 +27,12 @@ FOdysseyHUDLine::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
     if (customization.mSegmentLength <= 0.f || customization.mGapLength < 0.f)
         return;
 
-    FVector2D startPoint = iParams.mTextureToHUD.Execute(mStartPoint);
-    FVector2D endPoint = iParams.mTextureToHUD.Execute(mEndPoint);
-
     InitDrawCustomizedLine(iParams.mCanvas, customization, FLinearColor::Black);
 
     DrawCustomizedLine(
-        startPoint,
-        endPoint
+        iParams,
+        mStartPoint,
+        mEndPoint
     );
 
     FOdysseyHUDElement::DrawHUD(iParams);

@@ -64,6 +64,24 @@ UOdysseyPainterEditorVectorTrajectoryTool::IsActivable() const
           && ( HUDFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN );
 }
 
+bool
+UOdysseyPainterEditorVectorTrajectoryTool::HasRadius() const
+{
+    return true;
+}
+
+void
+UOdysseyPainterEditorVectorTrajectoryTool::SetRadius(float iRadius)
+{
+    PickingRadius = iRadius;
+}
+
+float
+UOdysseyPainterEditorVectorTrajectoryTool::GetRadius() const
+{
+    return PickingRadius;
+}
+
 uint64
 UOdysseyPainterEditorVectorTrajectoryTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {

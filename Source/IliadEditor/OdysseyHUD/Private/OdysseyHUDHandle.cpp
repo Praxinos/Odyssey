@@ -46,7 +46,23 @@ FOdysseyHUDHandle::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 
     int handleSize = mIsHovered && mIsInteractable ? HANDLE_BIG_SIZE : HANDLE_SMALL_SIZE;
 
-    FVector2D origin = iParams.mTextureToHUD.Execute(mPosition) - FVector2D(handleSize / 2.f, handleSize / 2.f);
+    FVector2D position(mPosition);
+    switch(GetReference())
+    {
+        case EOdysseyHUDReference::Texture:
+        {
+            position = iParams.mTextureToHUD.Execute(mPosition);
+        }
+        break;
+
+        case EOdysseyHUDReference::HUD:
+        {
+            position = mPosition;
+        }
+        break;
+    }
+
+    FVector2D origin = position - FVector2D(handleSize / 2.f, handleSize / 2.f);
 
     iParams.mCanvas->DrawTile(origin.X, origin.Y, handleSize, handleSize, 0, 0, 1.f, 1.f, color, mHandleTexture->GetResource(), true);
 

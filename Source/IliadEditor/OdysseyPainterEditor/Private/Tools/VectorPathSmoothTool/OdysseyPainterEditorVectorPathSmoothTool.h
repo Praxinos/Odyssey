@@ -36,6 +36,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : publi
         virtual FText GetTooltip() const override;
 
         virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
+        virtual bool HasRadius() const override;
+        virtual float GetRadius() const override;
+        virtual void SetRadius(float iRadius)override;
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides

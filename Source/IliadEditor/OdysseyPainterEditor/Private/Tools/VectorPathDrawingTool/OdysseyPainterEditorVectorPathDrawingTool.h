@@ -56,6 +56,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
         virtual FText GetTooltip() const override;
         virtual void BindShortcuts(TSharedPtr<FUICommandList> iCommandList) override;
+        virtual bool HasRadius() const override;
+        virtual float GetRadius() const override;
+        virtual void SetRadius(float iRadius)override;
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides

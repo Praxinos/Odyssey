@@ -58,6 +58,31 @@ UOdysseyPainterEditorVectorPathEditTool::IsActivable() const
             || HUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX );
 }
 
+bool
+UOdysseyPainterEditorVectorPathEditTool::HasRadius() const
+{
+    return true;
+}
+
+void
+UOdysseyPainterEditorVectorPathEditTool::SetRadius(float iRadius)
+{
+    PickingRadius = iRadius;
+}
+
+float
+UOdysseyPainterEditorVectorPathEditTool::GetRadius() const
+{
+    return PickingRadius;
+}
+
+
+EPainterEditorToolRadiusReference
+UOdysseyPainterEditorVectorPathEditTool::GetRadiusReference() const
+{
+    return EPainterEditorToolRadiusReference::HUD;
+}
+
 uint64
 UOdysseyPainterEditorVectorPathEditTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
@@ -107,11 +132,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
                                        | ( InKeyEvent.IsShiftDown()   ? EModifierKey::Shift   : 0 )
                                        | ( InKeyEvent.IsAltDown()     ? EModifierKey::Alt     : 0 )
                                        , key );
-
-        if( chord == FOdysseyPainterEditorCommands::Get().SetToolRadius.Get()->GetFirstValidChord().Get() )
-        {
-            mEditionMode   = eVectorPathEditEditionMode::ToolRadius;
-        }
 
         // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
         // with the events processing in the OnKeyUpGlobalVector(), we do like that.
@@ -742,15 +762,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorGroupP
 
         switch( mEditionMode )
         {
-            case eVectorPathEditEditionMode::ToolRadius :
-            {
-                FVector2D hudMouseCoords = mPathEditHUD->TextureToHUD( iPointInTexture.x, iPointInTexture.y );
-
-                mViewport.Pin()->GetViewport().Get()->SetMouse( hudMouseCoords.X + PickingRadius
-                                                              , hudMouseCoords.Y );
-            }
-            break;
-
             case eVectorPathEditEditionMode::Alter :
             // dealt with in OnMouseUpVector
             break;
@@ -853,18 +864,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
     {
         std::vector<FOdysseyVectorPoint*> snappedPointArray;
 
-        if( mEditionMode == eVectorPathEditEditionMode::ToolRadius )
-        {
-            FVector2D downAt = mPathEditHUD->TextureToHUD( mPointInTextureAtDown.x, mPointInTextureAtDown.y );
-            FVector2D dragAt = mPathEditHUD->TextureToHUD( iPointInTexture.x      , iPointInTexture.y       );
-
-            PickingRadius = ( dragAt - downAt ).Length();
-        }
-        else
-        {
-            mPathEditHUD->SetCutLineP1( iPointInTexture.x, iPointInTexture.y );
-            mPathEditHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
-        }
+        mPathEditHUD->SetCutLineP1( iPointInTexture.x, iPointInTexture.y );
+        mPathEditHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
         /*
         // snapping

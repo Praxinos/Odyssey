@@ -49,6 +49,24 @@ UOdysseyPainterEditorVectorMatchingTool::IsActivable() const
           && ( HUDFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN );
 }
 
+bool
+UOdysseyPainterEditorVectorMatchingTool::HasRadius() const
+{
+    return true;
+}
+
+void
+UOdysseyPainterEditorVectorMatchingTool::SetRadius(float iRadius)
+{
+    PickingRadius = iRadius;
+}
+
+float
+UOdysseyPainterEditorVectorMatchingTool::GetRadius() const
+{
+    return PickingRadius;
+}
+
 uint64
 UOdysseyPainterEditorVectorMatchingTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {

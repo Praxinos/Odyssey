@@ -186,7 +186,7 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointI
 {
     UOdysseyPainterEditorTool::OnMouseDown(iPointInTexture, iKey);
 
-    uint32 radius = GetRadius();
+    float radius = GetRadius();
 
     mMouseAtDown = FVector2D( iPointInTexture.x, iPointInTexture.y );
     mPreviousPointInTexture = mMouseAtDown;
@@ -196,6 +196,9 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointI
 
     if ( iKey == EKeys::LeftMouseButton )
     {
+        if (mAlteredImageBuffer.IsEmpty())
+            return false;
+
         uint32 assetWidth = mAlteredImageBuffer[0].sourceBlockCopy->Width();
         uint32 assetHeight = mAlteredImageBuffer[0].sourceBlockCopy->Height();
         ::ULIS::FRectI screen = ::ULIS::FRectI::FromXYWH( 0, 0, assetWidth, assetHeight );
@@ -243,6 +246,8 @@ UOdysseyPainterEditorRasterLiquifyTool::FetchSourceImages()
 {
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     TSharedPtr<FOdysseyRasterBlock> srcRasterBlock = GetRasterBlockFromEditor(false);
+    if (!srcRasterBlock)
+        return;
 
     TSharedPtr<::ULIS::FBlock> maskBlock = ( rasterSelection->IsEmpty() == false ) ? rasterSelection->GetBlock() : nullptr;
 
@@ -254,6 +259,9 @@ void
 UOdysseyPainterEditorRasterLiquifyTool::MakeFlowMap()
 {
     TSharedPtr<FOdysseyRasterBlock> srcRasterBlock = GetRasterBlockFromEditor(false);
+    if (!srcRasterBlock)
+        return;
+
     TSharedPtr<::ULIS::FBlock> srcBlock = srcRasterBlock->GetBlock();
 
     mFlowMap.Empty();
@@ -264,6 +272,9 @@ void
 UOdysseyPainterEditorRasterLiquifyTool::MakeDistortionMap()
 {
     TSharedPtr<FOdysseyRasterBlock> srcRasterBlock = GetRasterBlockFromEditor(false);
+    if (!srcRasterBlock)
+        return;
+
     TSharedPtr<::ULIS::FBlock> srcBlock = srcRasterBlock->GetBlock();
 
     mDistortionMap.Empty();
@@ -276,6 +287,9 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                             , double iStrength
                                             , double iHardness )
 {
+    if (mAlteredImageBuffer.IsEmpty())
+        return;
+
     uint32 threadCount = GetThreadCount();
     FFlow motion = FFlow( iCurrCenter.X - iPrevCenter.X
                         , iCurrCenter.Y - iPrevCenter.Y );
@@ -493,10 +507,22 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
     });
 }
 
-uint32
-UOdysseyPainterEditorRasterLiquifyTool::GetRadius()
+bool
+UOdysseyPainterEditorRasterLiquifyTool::HasRadius() const
 {
-    return Size * 0.5f;
+    return Mode != EOdysseyLiquifyMode::Adjust;
+}
+
+void
+UOdysseyPainterEditorRasterLiquifyTool::SetRadius(float iRadius)
+{
+    Size = iRadius * 2.f;
+}
+
+float
+UOdysseyPainterEditorRasterLiquifyTool::GetRadius() const
+{
+    return Size / 2.f;
 }
 
 double
@@ -519,13 +545,15 @@ UOdysseyPainterEditorRasterLiquifyTool::GetEditingArea()
 
 void UOdysseyPainterEditorRasterLiquifyTool::Tick(float iDeltaTime)
 {
+    if (mAlteredImageBuffer.IsEmpty())
+        return;
 
     if( bIsMouseLeftButtonDown )
     {
         uint32 assetWidth = mAlteredImageBuffer[0].sourceBlockCopy->Width();
         uint32 assetHeight = mAlteredImageBuffer[0].sourceBlockCopy->Height();
         ::ULIS::FRectI screen = ::ULIS::FRectI::FromXYWH( 0, 0, assetWidth, assetHeight );
-        uint32 radius = GetRadius();
+        float radius = GetRadius();
         ::ULIS::FRectI roi = ::ULIS::FRectI::FromXYWH( mMousePosition.X - radius
                                                      , mMousePosition.Y - radius
                                                      , (radius*2) + 1
@@ -576,6 +604,9 @@ UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow( FAlteredImage& iAlteredImage
                                                  , const ::ULIS::FRectI& iSanitizedRegionOfInterest
                                                  , bool iBilinearFiltered )
 {
+    if (mAlteredImageBuffer.IsEmpty())
+        return;
+
     const ULIS::uint8 *srcBlockPixels = iAlteredImage.sourceBlockCopy->PixelBits(0,0);
     const ULIS::uint8 *dstBlockPixels = iAlteredImage.destinationBlock->PixelBits(0,0);
     const ULIS::uint8 *mskBlockPixels = iAlteredImage.maskBlock ? iAlteredImage.maskBlock->PixelBits(0,0) : nullptr;
@@ -770,6 +801,9 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDrag(const FOdysseyPoint& iPointI
 
     if( bIsMouseLeftButtonDown )
     {
+        if (mAlteredImageBuffer.IsEmpty())
+            return;
+
         mLiquifyHUD->SetCursorPositionInTexture( mMousePosition );
 
         // Note: deltaPointDistance stores the delta between two Flow operation
@@ -778,7 +812,7 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDrag(const FOdysseyPoint& iPointI
         // want at least 20 milliseconds between 2 calls
         if( ( deltaPointDistance >= STAMP_DISTANCE ) && ( ( currentTime - mPreviousTime ) >= 40 ) )
         {
-            uint32 radius = GetRadius();
+            float radius = GetRadius();
             uint32 assetWidth = mAlteredImageBuffer[0].sourceBlockCopy->Width();
             uint32 assetHeight = mAlteredImageBuffer[0].sourceBlockCopy->Height();
             ::ULIS::FRectI screen = ::ULIS::FRectI::FromXYWH( 0, 0, assetWidth, assetHeight );
@@ -848,8 +882,11 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseUp(const FOdysseyPoint& iPointInT
 {
     if ( iKey == EKeys::LeftMouseButton )
     {
-        uint32 assetWidth  = mAlteredImageBuffer.Num() ? mAlteredImageBuffer[0].sourceBlockCopy->Width()  : 0;
-        uint32 assetHeight = mAlteredImageBuffer.Num() ? mAlteredImageBuffer[0].sourceBlockCopy->Height() : 0;
+        if (mAlteredImageBuffer.IsEmpty())
+            return false;
+
+        uint32 assetWidth  = mAlteredImageBuffer[0].sourceBlockCopy->Width();
+        uint32 assetHeight = mAlteredImageBuffer[0].sourceBlockCopy->Height();
         ::ULIS::FRectI screen =  ::ULIS::FRectI::FromXYWH( 0, 0, assetWidth, assetHeight );
 
         // needed for valid GUndo pointer

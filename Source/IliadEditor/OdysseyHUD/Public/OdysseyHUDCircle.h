@@ -23,6 +23,9 @@ public:
     void SetCenter(const FVector2D& iCenterPoint);
     void SetRadius(float iRadius);
 
+    const FVector2D& GetCenter() const;
+    float GetRadius() const;
+
 private:
     FVector2D mCenterPoint;
     float mRadius;

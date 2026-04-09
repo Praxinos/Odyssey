@@ -248,6 +248,12 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
             return viewportWidget->ToWorld(iPosition - FVector2D(w / 2.f, h / 2.f));
         }
     );
+    params.mHUDToTexture = FOdysseyHUDElement::FDrawHUDParams::FTextureToHUD::CreateLambda(
+        [viewportWidget, w = params.mTextureWidth, h = params.mTextureHeight](const FVector2D& iPosition)
+        {
+            return viewportWidget->ToLocal(iPosition) + FVector2D(w / 2.f, h / 2.f);
+        }
+    );
 
     mOdysseyPainterEditor->HUDSystem()->Draw(params);
 }

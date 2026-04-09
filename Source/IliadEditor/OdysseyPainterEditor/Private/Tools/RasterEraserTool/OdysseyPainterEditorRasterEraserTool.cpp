@@ -76,12 +76,13 @@ UOdysseyPainterEditorRasterEraserTool::CreateShape(FName iName)
 TSharedPtr<::ULIS::FBlock>
 UOdysseyPainterEditorRasterEraserTool::CreateStampBlockMask()
 {
-    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(Size, Size, ::ULIS::Format_GAF);
+    int32 StampSize = FMath::CeilToInt32(Size);
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(StampSize, StampSize, ::ULIS::Format_GAF);
 
-    float center = Size/2.f;
-    for (int y = 0; y < Size; y++)
+    float center = StampSize/2.f;
+    for (int y = 0; y < StampSize; y++)
     {
-        for (int x = 0; x < Size; x++)
+        for (int x = 0; x < StampSize; x++)
         {
             float dist = FVector2D::Distance(FVector2D(center, center), FVector2D(x, y)) / (Size / 2.f);
             ::ULIS::FColor color = ::ULIS::FColor::FromGreyAF(0, 0);
@@ -143,6 +144,26 @@ bool
 UOdysseyPainterEditorRasterEraserTool::IsActivable() const
 {
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
+}
+
+bool
+UOdysseyPainterEditorRasterEraserTool::HasRadius() const
+{
+    return true;
+}
+
+void
+UOdysseyPainterEditorRasterEraserTool::SetRadius(float Radius)
+{
+    Size = Radius * 2.f;
+    SizeChanged();
+    mOnSizeChanged.Broadcast();
+}
+
+float
+UOdysseyPainterEditorRasterEraserTool::GetRadius() const
+{
+    return Size / 2.f;
 }
 
 TSharedPtr<FOdysseyRasterBlock>

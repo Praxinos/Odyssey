@@ -176,6 +176,11 @@ FOdysseyPainterEditorGlobalToolsShortcuts::MapActionsToCommandList(TSharedRef<FU
         FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorTransformTool())),
         FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorTransformTool()))
     );
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().SetToolRadius,
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_SetToolRadius),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_SetToolRadius)
+    );
 }
 
 void
@@ -338,6 +343,19 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateWarpTool()
     }
 }
 
+void
+FOdysseyPainterEditorGlobalToolsShortcuts::Action_SetToolRadius()
+{
+    if (!mEditor)
+        return;
+
+    UOdysseyPainterEditorTool* tool = mEditor->GetCurrentTool();
+    if (!tool)
+        return;
+
+    tool->StartRadiusInteractiveModifier();
+}
+
 
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool(UOdysseyPainterEditorTool* iTool)
@@ -468,6 +486,22 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateWarpTool()
         return true;
 
     return false;
+}
+
+bool
+FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_SetToolRadius()
+{
+    if (!mEditor)
+        return false;
+
+    UOdysseyPainterEditorTool* tool = mEditor->GetCurrentTool();
+    if (!tool)
+        return false;
+
+    if (!tool->HasRadius())
+        return false;
+
+    return true;
 }
 
 #undef LOCTEXT_NAMESPACE

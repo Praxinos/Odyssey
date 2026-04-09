@@ -98,22 +98,6 @@ UOdysseyPainterEditorRasterDrawingTool::Activate()
     //Create the BrushInstance to use for drawing
     CreateBrushInstance(true);
 
-    Super::Activate();
-}
-
-void
-UOdysseyPainterEditorRasterDrawingTool::Inactivate()
-{
-    //Destroy the brushInstance
-    DestroyBrushInstance();
-
-    Super::Inactivate();
-}
-
-void
-UOdysseyPainterEditorRasterDrawingTool::Load()
-{
-    UOdysseyPainterEditorTool::Load();
     FCoreUObjectDelegates::OnObjectsReinstanced.AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnBlueprintReinstanced);
 
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
@@ -123,10 +107,12 @@ UOdysseyPainterEditorRasterDrawingTool::Load()
 
     mHUD->AddElement(rasterSelection->GetHUD());
     mHUD->AddElement(mShapeHUD);
+
+    Super::Activate();
 }
 
 void
-UOdysseyPainterEditorRasterDrawingTool::Unload()
+UOdysseyPainterEditorRasterDrawingTool::Inactivate()
 {
     Shapes.GetActiveShape()->Abort();
 
@@ -143,7 +129,10 @@ UOdysseyPainterEditorRasterDrawingTool::Unload()
 
     FCoreUObjectDelegates::OnObjectsReinstanced.RemoveAll(this);
 
-    UOdysseyPainterEditorTool::Unload();
+    //Destroy the brushInstance
+    DestroyBrushInstance();
+
+    Super::Inactivate();
 }
 
 void
@@ -151,6 +140,24 @@ UOdysseyPainterEditorRasterDrawingTool::Reset()
 {
     Super::Reset();
     RefreshBrushInstance(true);
+}
+
+bool
+UOdysseyPainterEditorRasterDrawingTool::HasRadius() const
+{
+    return true;
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::SetRadius(float Radius)
+{
+    BrushOptions->SetSize(Radius * 2.f);
+}
+
+float
+UOdysseyPainterEditorRasterDrawingTool::GetRadius() const
+{
+    return BrushOptions->GetSize() / 2.f;
 }
 
 bool

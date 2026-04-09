@@ -76,6 +76,7 @@ public:
     bool GetHUDPlaneParams(FVector& oPlaneTopLeft, double& oW, double& oH, FVector& oXAxis, FVector& oYAxis);
     bool GetDrawHUDParams(const FSceneView* View, FCanvas* Canvas, float iScaleFactor, FOdysseyHUDElement::FDrawHUDParams& oParams);
     bool ViewportToHUD(FEditorViewportClient* iViewportClient, const FVector2D& iViewportPoint, FVector2D& oHUDPoint);
+    bool ViewportToHUD(const FSceneView* View, const FVector2D& iViewportPoint, FVector2D& oHUDPoint);
 
 public:
     //Setters

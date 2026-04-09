@@ -12,6 +12,19 @@ UOdysseyBrushOptions::UOdysseyBrushOptions(const FObjectInitializer& iObjectInit
 }
 
 void
+UOdysseyBrushOptions::SetSize(float InSize)
+{
+    Size = InSize;
+    mOnPropertyChangedDelegate.Broadcast();
+}
+
+float
+UOdysseyBrushOptions::GetSize() const
+{
+    return Size;
+}
+
+void
 UOdysseyBrushOptions::PostEditChangeProperty(struct FPropertyChangedEvent & PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);

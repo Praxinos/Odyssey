@@ -192,7 +192,7 @@ FOdysseyPainterEditorViewportTab::OnViewportMouseDown(const FOdysseyPoint& iPoin
     if (!tool)
         return false;
 
-    return tool->OnMouseDown(iPointInTexture, iKey);
+    return tool->ProcessMouseDown(iPointInTexture, iKey);
 }
 
 bool
@@ -202,7 +202,7 @@ FOdysseyPainterEditorViewportTab::OnViewportMouseClick(const FOdysseyPoint& iPoi
     if (!tool)
         return false;
 
-    return tool->OnMouseClick(iPointInTexture, iKey);
+    return tool->ProcessMouseClick(iPointInTexture, iKey);
 }
 
 bool
@@ -213,7 +213,7 @@ FOdysseyPainterEditorViewportTab::OnViewportMouseDoubleClick(const FOdysseyPoint
     if (!tool)
         return false;
 
-    return tool->OnMouseDoubleClick(iPointInTexture, iKey);
+    return tool->ProcessMouseDoubleClick(iPointInTexture, iKey);
 }
 
 bool
@@ -224,7 +224,7 @@ FOdysseyPainterEditorViewportTab::OnViewportMouseUp(const FOdysseyPoint& iPointI
     if (!tool)
         return false;
 
-    return tool->OnMouseUp(iPointInTexture, iKey);
+    return tool->ProcessMouseUp(iPointInTexture, iKey);
 }
 
 void
@@ -235,7 +235,7 @@ FOdysseyPainterEditorViewportTab::OnViewportMouseHover(const FOdysseyPoint& iPoi
     if (!tool)
         return;
 
-    tool->OnMouseHover(iPointInTexture);
+    tool->ProcessMouseHover(iPointInTexture);
 }
 
 void
@@ -246,7 +246,7 @@ FOdysseyPainterEditorViewportTab::OnViewportMouseDrag(const FOdysseyPoint& iPoin
     if (!tool)
         return;
 
-    tool->OnMouseDrag(iPointInTexture);
+    tool->ProcessMouseDrag(iPointInTexture);
 }
 
 bool
@@ -257,7 +257,7 @@ FOdysseyPainterEditorViewportTab::OnViewportKeyDown(const FKey& iKey)
     if ( !tool )
         return false;
 
-    return tool->OnKeyDown(iKey);
+    return tool->ProcessKeyDown(iKey);
 }
 
 bool
@@ -268,7 +268,7 @@ FOdysseyPainterEditorViewportTab::OnViewportKeyUp(const FKey& iKey)
     if ( !tool )
         return false;
 
-    return tool->OnKeyUp(iKey);
+    return tool->ProcessKeyUp(iKey);
 }
 
 //--------------------------------------------------------------------------------------

@@ -47,6 +47,24 @@ UOdysseyPainterEditorVectorEraserTool::IsActivable() const
             || HUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX );
 }
 
+bool
+UOdysseyPainterEditorVectorEraserTool::HasRadius() const
+{
+    return true;
+}
+
+void
+UOdysseyPainterEditorVectorEraserTool::SetRadius(float iRadius)
+{
+    Radius = iRadius;
+}
+
+float
+UOdysseyPainterEditorVectorEraserTool::GetRadius() const
+{
+    return Radius;
+}
+
 uint64
 UOdysseyPainterEditorVectorEraserTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
