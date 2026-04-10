@@ -29,8 +29,8 @@ struct ARIANE_API FArianeObjectInvalidationFlags
         virtual bool HasAny();
 
     public:
-        FArianeObjectInvalidationFlags& SetAltered()  { Selected  = 1; return *this; };
-        FArianeObjectInvalidationFlags& SetSelected() { Altered   = 1; return *this; };
+        FArianeObjectInvalidationFlags& SetAltered()  { Altered   = 1; return *this; };
+        FArianeObjectInvalidationFlags& SetSelected() { Selected  = 1; return *this; };
         FArianeObjectInvalidationFlags& SetHierarchy(){ Hierarchy = 1; return *this; };
         FArianeObjectInvalidationFlags& SetColor()    { Color     = 1; return *this; };
         FArianeObjectInvalidationFlags& SetChildren() { Children  = 1; return *this; };

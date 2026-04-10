@@ -6,6 +6,7 @@
 #include "ArianeEditor.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerDrawing.h"
+#include "ArianeLayerFolder.h"
 #include "ArianePath.h"
 #include "ArianeVertex.h"
 #include "ArianeLayerStack.h"
@@ -42,46 +43,43 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* iViewportClien
                                          , const FArianePointerState& PointerState
                                          , bool iRepeat )
 {
-
-
     if( iKey == EKeys::LeftMouseButton )
     {
-        UEditorActorSubsystem* editorActorSubsystem = GEditor->GetEditorSubsystem<UEditorActorSubsystem>();
+        UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
         ::ULIS::FColor color = Editor->GetPaintColor();
         ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
         FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
 
-        GEditor->BeginTransaction(FText::FromString("Draw Path"));
+        GetToolManager()->BeginUndoTransaction(FText::FromString("Draw Path"));
 
-        for( AActor* actor : editorActorSubsystem->GetSelectedLevelActors() )
+        if( Painting3DComponent )
         {
-            UArianePainting3DComponent* painting3DComponent = Cast<UArianePainting3DComponent>(actor->GetComponentByClass( UArianePainting3DComponent::StaticClass() ));
+            //painting3DComponent->PrintPointers();
+            UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+            UArianeLayerDrawing* DrawingLayer = LayerStack->GetFirstSelectedDrawingLayer();
 
-            if( painting3DComponent )
+            if( DrawingLayer )
             {
+                //Painting3DComponent->Modify();
+                //LayerStack->Modify();
+                //LayerStack->GetRootFolder()->Modify();
+                DrawingLayer->Modify();
+
+                EditedPath = DrawingLayer->AllocPath();
+
+                DrawingLayer->GetRootObject()->AppendChild( EditedPath );
+
+                EditedPath->SetColor( ueColor );
+                EditedPath->SetLineType( LineType );
+
+                //GEditor->UndoTransaction();
                 //painting3DComponent->PrintPointers();
-                UArianeLayerDrawing* DrawingLayer = painting3DComponent->GetLayerStack()->GetFirstSelectedDrawingLayer();
 
-                if( DrawingLayer )
-                {
-                    DrawingLayer->Modify();
-
-                    EditedPath = DrawingLayer->AllocPath();
-
-                    DrawingLayer->GetRootObject()->AppendChild( EditedPath );
-
-                    EditedPath->SetColor( ueColor );
-                    EditedPath->SetLineType( LineType );
-
-                    //GEditor->UndoTransaction();
-                    //painting3DComponent->PrintPointers();
-
-                    PlotVertex( iViewportClient, PointerState );
-                    //PlotVertex( iViewportClient, iViewportX + 100, iViewportY );
-                    //PlotVertex( iViewportClient, iViewportX + 200, iViewportY );
-                    /*PlotVertex( iViewportClient, iViewportX + 250, iViewportY + 100 );
-                    PlotVertex( iViewportClient, iViewportX + 400, iViewportY + 60 );*/
-                }
+                PlotVertex( iViewportClient, PointerState, true );
+                //PlotVertex( iViewportClient, iViewportX + 100, iViewportY );
+                //PlotVertex( iViewportClient, iViewportX + 200, iViewportY );
+                /*PlotVertex( iViewportClient, iViewportX + 250, iViewportY + 100 );
+                PlotVertex( iViewportClient, iViewportX + 400, iViewportY + 60 );*/
             }
         }
 
@@ -126,69 +124,101 @@ float Intersect ( const FVector4& iPlane
     return 0.0f;
 }
 
+
+FVector4
+UArianeEditorPathDrawingTool::GetDrawingPlane( UArianeLayerDrawing* DrawingLayer
+                                             , const FVector& CameraCoords )
+{
+    const FTransform& LayerWorldTransform = DrawingLayer->GetComponentTransform();
+    FVector LayerWorldPosition = LayerWorldTransform.TransformPosition( FVector( 0, 0, 0 ) );
+    FVector4 DrawingPlane = FVector4( 0.0f, 0.0f, 0.0f, 0.0f );
+
+    switch( DrawingLayer->GetDrawingOrientation() )
+    {
+        case EArianeLayerDrawingOrientation::LayerXY :
+            DrawingPlane = LayerWorldTransform.TransformVector( FVector( 0.0f, 0.0f, 1.0f ) );
+        break;
+
+        case EArianeLayerDrawingOrientation::LayerYZ :
+            DrawingPlane = LayerWorldTransform.TransformVector( FVector( 1.0f, 0.0f, 0.0f ) );
+        break;
+
+        case EArianeLayerDrawingOrientation::LayerZX :
+            DrawingPlane = LayerWorldTransform.TransformVector( FVector( 0.0f, 1.0f, 0.0f ) );
+        break;
+
+        default : // EArianeLayerDrawingOrientation::View
+        {
+            FVector LayerToCamera = CameraCoords - LayerWorldPosition;
+
+            if( LayerToCamera.IsNearlyZero() == false )
+            {
+                LayerToCamera.Normalize();
+
+                DrawingPlane = LayerToCamera;
+            }
+        }
+        break;
+    }
+
+/* Useless as the plane passes through the Layer's origin
+    DrawingPlane.W = - ( ( DrawingPlane.X * LayerWorldPosition.X )
+                       + ( DrawingPlane.Y * LayerWorldPosition.Y )
+                       + ( DrawingPlane.Z * LayerWorldPosition.Z ) );
+*/
+
+    return DrawingPlane;
+}
+
 void
 UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
-                                        , const FArianePointerState& PointerState )
+                                        , const FArianePointerState& PointerState
+                                        , bool bInteractive )
 {
-    UEditorActorSubsystem* editorActorSubsystem = GEditor->GetEditorSubsystem<UEditorActorSubsystem>();
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
     FSceneView* View = GetSceneView( iViewportClient );
     double Radius = bPressureSensitivity ? ( Size * 0.5f * PointerState.Pressure )
                                          : ( Size * 0.5f );
 
-    for( AActor* actor : editorActorSubsystem->GetSelectedLevelActors() )
+    if( Painting3DComponent )
     {
-        UArianePainting3DComponent* painting3DComponent = Cast<UArianePainting3DComponent>(actor->GetComponentByClass( UArianePainting3DComponent::StaticClass() ));
+        //painting3DComponent->PrintPointers();
+        UArianeLayerDrawing* DrawingLayer = Painting3DComponent->GetLayerStack()->GetFirstSelectedDrawingLayer();
 
-        if( painting3DComponent )
+        if( DrawingLayer )
         {
-            //painting3DComponent->PrintPointers();
-            UArianeLayerDrawing* DrawingLayer = painting3DComponent->GetLayerStack()->GetFirstSelectedDrawingLayer();
+            const FTransform& LayerWorldTransform = DrawingLayer->GetComponentTransform();
+            FVector CameraCoords = iViewportClient->GetViewLocation();
+            // note: we could do that at MouseDown
+            FVector4 DrawingPlane = GetDrawingPlane( DrawingLayer, CameraCoords );
+            FVector rayOrigin, rayDirection;
+            FVector intersectAt;
 
-            if( DrawingLayer )
+            View->DeprojectFVector2D( FVector2D( PointerState.ViewportX
+                                               , PointerState.ViewportY )
+                                    , rayOrigin
+                                    , rayDirection );
+
+            if( Intersect( DrawingPlane, rayOrigin, rayDirection, intersectAt  ) > 0.0f )
             {
-                const FTransform& actorWorldTransform = DrawingLayer->GetComponentTransform();
-                FVector actorWorldPosition = actorWorldTransform.TransformPosition( FVector( 0, 0, 0 ) );
-                FVector rayOrigin, rayDirection;
-                FVector4 actorWorldPlane = actorWorldTransform.TransformVector( FVector( 0, 1.0f, 0.0f ) );
-                FVector intersectAt;
+                FVector localCoords = LayerWorldTransform.Inverse().TransformFVector4( intersectAt );
+                FVector localNormal = LayerWorldTransform.Inverse().TransformVector( FVector( DrawingPlane ) );
+                FArianeVertex *Vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last().GetVertex()
+                                                                         : nullptr;
 
-                FVector cameraCoords = iViewportClient->GetViewLocation();
+                FArianeVertex *Vertex1 = EditedPath->AllocVertex( localCoords, localNormal, Radius );
 
-                FVector planeVector = cameraCoords - actorWorldPosition;
+                EditedPath->AddVertex( Vertex1 );
 
-                planeVector.Normalize();
-
-                actorWorldPlane = planeVector;
-
-                actorWorldPlane.W = - ( ( actorWorldPlane.X * actorWorldPosition.X )
-                                      + ( actorWorldPlane.Y * actorWorldPosition.Y )
-                                      + ( actorWorldPlane.Z * actorWorldPosition.Z ) );
-
-                View->DeprojectFVector2D( FVector2D( PointerState.ViewportX, PointerState.ViewportY ), rayOrigin, rayDirection );
-
-                if( Intersect( actorWorldPlane, rayOrigin, rayDirection, intersectAt  ) > 0.0f )
+                if( Vertex0 )
                 {
-                    FVector localCoords = actorWorldTransform.Inverse().TransformFVector4( intersectAt );
-                    FVector localNormal = actorWorldTransform.Inverse().TransformVector( planeVector );
-                    FArianeVertex *Vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last().GetVertex()
-                                                                             : nullptr;
+                    FArianeSegment *Segment = EditedPath->AllocSegment( Vertex0, Vertex1 );
 
-                    FArianeVertex *Vertex1 = EditedPath->AllocVertex( localCoords, localNormal, Radius );
-
-                    EditedPath->AddVertex( Vertex1 );
-
-                    if( Vertex0 )
-                    {
-                        FArianeSegment *Segment = EditedPath->AllocSegment( Vertex0, Vertex1 );
-
-                        EditedPath->AddSegment( Segment );
-                    }
+                    EditedPath->AddSegment( Segment );
                 }
-
-                painting3DComponent->Update( );
-
-                break;
             }
+
+            Painting3DComponent->Update( bInteractive );
         }
     }
 }
@@ -200,7 +230,7 @@ UArianeEditorPathDrawingTool::OnMouseDrag( FEditorViewportClient* iViewportClien
 {
     if( iKey == EKeys::LeftMouseButton )
     {
-        PlotVertex( iViewportClient, PointerState );
+        PlotVertex( iViewportClient, PointerState, true );
     }
 
     return false;
@@ -211,10 +241,16 @@ UArianeEditorPathDrawingTool::OnMouseUp( FEditorViewportClient* iViewportClient
                                        , const FKey& iKey
                                        , const FArianePointerState& PointerState )
 {
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
     if( iKey == EKeys::LeftMouseButton )
     {
-        GEditor->EndTransaction();
+        if( Painting3DComponent )
+        {
+            Painting3DComponent->Update( false );
+        }
 
+        GetToolManager()->EndUndoTransaction();
 
         return true;
     }

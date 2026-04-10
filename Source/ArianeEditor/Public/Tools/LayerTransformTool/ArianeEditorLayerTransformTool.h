@@ -20,11 +20,24 @@ class FEditorViewportClient;
 class UArianeLayerDrawing;
 class UTransformProxy;
 class UCombinedTransformGizmo;
+class UArianeLayer;
 
 UCLASS()
 class ARIANEEDITOR_API UArianeEditorLayerTransformTool : public UArianeEditorTool
 {
     GENERATED_BODY()
+
+    struct FTransformSnapshot
+    {
+        FTransformSnapshot( UArianeLayer* InLayer, const FTransform& InTransform )
+            : Layer ( InLayer )
+            , Transform ( InTransform )
+        {
+        }
+
+        UArianeLayer* Layer;
+        FTransform Transform;
+    };
 
 public:
     static FString GetStaticType() { return "ArianeEditor_LayerTransformTool"; };
@@ -60,6 +73,8 @@ public:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void Init( FArianeEditor* InEditor ) override;
 
+    void SetPreviousTool( UArianeEditorTool* InPreviousTool );
+
 protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
     void OnTransformChanged( UTransformProxy* Proxy, FTransform NewTransform );
@@ -70,6 +85,7 @@ protected:
     void CreateOverlayWidget();
     FReply OnAccept();
     FReply OnCancel();
+    void OnRootFolderUpdate( bool Interactive );
 
 protected:
     UPROPERTY() // to prevent GC
@@ -79,4 +95,7 @@ protected:
     UCombinedTransformGizmo* Gizmo;
 
     TSharedPtr<SWidget> OverlayWidget;
+    TArray<FTransformSnapshot> TransformSnapshots;
+
+    UArianeEditorTool* PreviousTool;
 };

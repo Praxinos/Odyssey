@@ -63,7 +63,7 @@ UArianePainting3DComponent::Init()
 {
     LayerStack->Init();
 
-    Update();
+    Update( false );
 }
 
 void
@@ -79,7 +79,7 @@ UArianePainting3DComponent::PostEditUndo()
 {
     Super::PostEditUndo();
 
-    Update();
+    Update( false );
 }
 
 UArianeLayerStack*
@@ -149,9 +149,9 @@ UArianePainting3DComponent::CalcBounds(const FTransform& LocalToWorld) const
 }
 
 void
-UArianePainting3DComponent::Update()
+UArianePainting3DComponent::Update( bool bInteractive )
 {
-    LayerStack->GetRootFolder()->Update();
+    LayerStack->GetRootFolder()->Update( bInteractive );
 
     // will call CalcBounds (nb: calling UMeshComponent::UpdateBounds() does not work sometimes, especially when then
     // path starts empty but this works.

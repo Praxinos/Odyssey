@@ -451,7 +451,7 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
 
     // TODO: check for empty paths
 
-    Painting3DComponent->Update();
+    Painting3DComponent->Update( false );
 
     return false;
 }

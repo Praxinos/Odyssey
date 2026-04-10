@@ -16,6 +16,22 @@
 struct FArianeObject;
 struct FArianePath;
 
+UENUM()
+enum class EArianeLayerDrawingOrigin : uint8
+{
+    Layer,
+    Surface
+};
+
+UENUM()
+enum class EArianeLayerDrawingOrientation : uint8
+{
+    LayerXY,
+    LayerYZ,
+    LayerZX,
+    View,
+};
+
 UCLASS()
 class ARIANE_API UArianeLayerDrawing : public UArianeLayer
 {
@@ -30,7 +46,7 @@ public:
     FArianePath* AllocPath();
     FArianeObject* AllocObject();
     TArray<FInstancedStruct>& GetInstancedObjects();
-    virtual void Update() override;
+    virtual void Update( bool bInteractive ) override;
     FArianeObject* GetObject( const FGuid& InGuid );
     void DeleteInstancedObject( FArianeObject* Object );
 
@@ -39,11 +55,15 @@ public:
     void PostLoad();
     void PostEditUndo();
     void ResetHierarchy();
+    EArianeLayerDrawingOrigin GetDrawingOrigin();
+    void SetDrawingOrigin( EArianeLayerDrawingOrigin InDrawingOrigin );
+    EArianeLayerDrawingOrientation GetDrawingOrientation();
+    void SetDrawingOrientation( EArianeLayerDrawingOrientation InDrawingOrientation );
 
 protected:
     void BindDelegates();
     void UnbindDelegates();
-    void OnRootInvalidated();
+    void OnRootObjectInvalidated();
     void UpdateBounds();
 
 public:
@@ -56,4 +76,10 @@ public:
 protected:
     UPROPERTY( EditAnywhere )
     FArianeObjectID RootObjectID;
+
+    UPROPERTY( EditAnywhere )
+    EArianeLayerDrawingOrigin DrawingOrigin;
+
+    UPROPERTY( EditAnywhere )
+    EArianeLayerDrawingOrientation DrawingOrientation;
 };

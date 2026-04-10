@@ -19,6 +19,7 @@ class FArianeEditor;
 class FSceneView;
 class FStylusState;
 struct FSlateBrush;
+class UArianeLayerDrawing;
 /* Gary
 class FArianeEditorToolInputProcessor;
 */
@@ -57,7 +58,6 @@ public:
     // Implements IClickDragBehaviorTarget::OnTerminateDragSequence
     virtual void OnTerminateDragSequence()override;
 
-
     // Implements IHoverBehaviorTarget::FInputRayHit
     virtual FInputRayHit BeginHoverSequenceHitTest(const FInputDeviceRay& PressPos) override;
     // Implements IHoverBehaviorTarget::OnBeginHover
@@ -67,7 +67,7 @@ public:
     // Implements IHoverBehaviorTarget::OnEndHover
     virtual void OnEndHover() override;
 
-
+    virtual void OnTick(float DeltaTime) override;
 
     //Mouse events
     virtual bool OnMouseDown( FEditorViewportClient* iViewportClient
@@ -87,9 +87,9 @@ public:
                                 , const FArianePointerState& State );
 
     virtual void DrawHUD ( FEditorViewportClient* ViewportClient
-                            , FViewport* Viewport
-                            , const FSceneView* View
-                            , FCanvas* Canvas );
+                         , FViewport* Viewport
+                         , const FSceneView* View
+                         , FCanvas* Canvas );
 
     /** Get the tool's tooltip */
     virtual FText GetTooltip() const;
@@ -113,6 +113,7 @@ protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu );
     FSceneView* GetSceneView( FEditorViewportClient* iViewportClient );
     FEditorViewportClient* GetActiveViewportClient();
+    void DrawLayerOrientationGrid( UArianeLayerDrawing* DrawingLayer );
 /* Gary
 
     virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey );
@@ -126,7 +127,6 @@ protected:
     virtual bool OnKeyDownGlobal(const FKeyEvent& InKeyEvent);
 
     // Tick
-    virtual void Tick(float iDeltaTime);
 
     //Finishes any action currently running, does not validate the action (example, ensure any drawing in queue is done)
     virtual void Flush();

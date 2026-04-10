@@ -107,11 +107,16 @@ SArianeEditorLayerRow::OnTransformStateChanged( ECheckBoxState iState )
     switch( iState )
     {
         case ECheckBoxState::Checked :
+        {
+            UArianeEditorLayerTransformTool* TransformTool = Cast<UArianeEditorLayerTransformTool>( treeView->GetEditor()->GetTool( UArianeEditorLayerTransformTool::GetStaticType() ) );
             PreviousTool = treeView->GetEditor()->GetCurrentTool();
 
-            treeView->GetEditor()->SetCurrentTool( UArianeEditorLayerTransformTool::GetStaticType()
+            TransformTool->SetPreviousTool( PreviousTool );
+
+            treeView->GetEditor()->SetCurrentTool( TransformTool
                                                  , EToolShutdownType::Accept
                                                  , true );
+        }
         break;
 
         case ECheckBoxState::Unchecked :

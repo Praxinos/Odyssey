@@ -138,7 +138,7 @@ SArianeEditorLayerStack::UnregisterDelegates()
         LayerStack->OnPostLayerStackChangedDelegate().RemoveAll( this );
 
         //Painting3DComponent->OnPreCurrentLayerChangedDelegate().RemoveAll( this );
-        LayerStack->OnPostCurrentLayerChangedDelegate().RemoveAll( this );
+        LayerStack->OnPostLayerSelectionChangedDelegate().RemoveAll( this );
     }
 }
 
@@ -155,7 +155,7 @@ SArianeEditorLayerStack::RegisterDelegates()
         LayerStack->OnPostLayerStackChangedDelegate().AddSP( this, &SArianeEditorLayerStack::OnPostLayerStackChanged );
 
         //Painting3DComponent->OnPreCurrentLayerChangedDelegate().RemoveAll( this );
-        LayerStack->OnPostCurrentLayerChangedDelegate().AddSP( this, &SArianeEditorLayerStack::OnPostCurrentLayerChanged );
+        LayerStack->OnPostLayerSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStack::OnPostCurrentLayerChanged );
     }
 }
 

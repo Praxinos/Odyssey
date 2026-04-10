@@ -11,7 +11,11 @@ UArianeLayerDrawing::~UArianeLayerDrawing()
 }
 
 UArianeLayerDrawing::UArianeLayerDrawing()
+    : DrawingOrigin ( EArianeLayerDrawingOrigin::Layer )
+    , DrawingOrientation ( EArianeLayerDrawingOrientation::View )
 {
+    InvalidationFlags = new FArianeLayerInvalidationFlags();
+
     ResetHierarchy();
 
 /*
@@ -56,7 +60,7 @@ UArianeLayerDrawing::PostLoad()
         Object->PostLoad();
     }
 
-    Update();
+    Update( false );
 }
 
 void
@@ -74,7 +78,7 @@ UArianeLayerDrawing::PostEditUndo()
         Object->PostEditUndo();
     }
 
-    Update();
+    Update( false );
 }
 
 FArianeObject*
@@ -124,19 +128,19 @@ UArianeLayerDrawing::GetInstancedObjects()
 }
 
 void
-UArianeLayerDrawing::Update()
+UArianeLayerDrawing::Update( bool bInteractive )
 {
     RootObjectID.GetObject()->Update( true );
 
     UpdateBounds();
 
-    Super::Update();
+    Super::Update( bInteractive );
 }
 
 void
-UArianeLayerDrawing::OnRootInvalidated()
+UArianeLayerDrawing::OnRootObjectInvalidated()
 {
-    Invalidate();
+    Invalidate( FArianeLayerInvalidationFlags() );
 }
 
 void
@@ -144,7 +148,7 @@ UArianeLayerDrawing::BindDelegates()
 {
     if( RootObjectID.GetObject() )
     {
-        RootObjectID.GetObject()->GetOnPostInvalidatedDelegate().AddUObject( this, &UArianeLayerDrawing::OnRootInvalidated );
+        RootObjectID.GetObject()->GetOnPostInvalidatedDelegate().AddUObject( this, &UArianeLayerDrawing::OnRootObjectInvalidated );
     }
 }
 
@@ -199,4 +203,28 @@ UArianeLayerDrawing::UpdateBounds()
             Bounds = Bounds + const_cast<FArianePath*>(Path)->GetBounds();
         }
     }
+}
+
+EArianeLayerDrawingOrigin
+UArianeLayerDrawing::GetDrawingOrigin()
+{
+    return DrawingOrigin;
+}
+
+void
+UArianeLayerDrawing::SetDrawingOrigin( EArianeLayerDrawingOrigin InDrawingOrigin )
+{
+    DrawingOrigin = InDrawingOrigin;
+}
+
+EArianeLayerDrawingOrientation
+UArianeLayerDrawing::GetDrawingOrientation()
+{
+    return DrawingOrientation;
+}
+
+void
+UArianeLayerDrawing::SetDrawingOrientation( EArianeLayerDrawingOrientation InDrawingOrientation )
+{
+    DrawingOrientation = InDrawingOrientation;
 }

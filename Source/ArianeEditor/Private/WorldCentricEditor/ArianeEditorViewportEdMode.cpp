@@ -5,6 +5,7 @@
 #include "ArianeEditorViewportEdMode.h"
 #include "ArianeEditorViewportToolkit.h"
 #include "ArianeEditorTool.h"
+#include "ArianeEditor.h"
 // Odyssey
 #include "IOdysseyStylusInputModule.h"
 // Unreal
@@ -491,6 +492,8 @@ FArianeEditorViewportEdMode::Enter()
     Toolkit->Init( Owner->GetToolkitHost() );
 
     ListenStylusInput();
+
+    GetArianeEditorViewportToolkit()->GetEditor().PostInit();
 
 /* Gary
     //checkf(mViewportDrawingEditorPainter != nullptr, TEXT("ViewportDrawingEditorPainter was not created"));

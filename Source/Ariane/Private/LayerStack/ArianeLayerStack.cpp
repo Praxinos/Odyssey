@@ -15,16 +15,15 @@ UArianeLayerStack::UArianeLayerStack()
     : RootFolder ( nullptr )
 {
     RootFolder = CreateDefaultSubobject<UArianeLayerFolder>( "Root Folder" );
+
+    //RootFolder->SetupAttachment(this);
 }
 
 void
 UArianeLayerStack::Init()
 {
     // Create a default drawing layer
-    UArianeLayerDrawing* DrawingLayer = NewObject<UArianeLayerDrawing>( this, "Drawing Layer" );
-
-    // this crashes in constructor, so we had to put it in Init
-    RootFolder->AddChildLayer( DrawingLayer );
+    CreateDrawingLayer( RootFolder );
 }
 
 UArianePainting3DComponent*
@@ -90,7 +89,7 @@ UArianeLayerStack::SelectLayers( const TArray<UArianeLayer*> LayerSelection
                                , bool bRecurse )
 {
     if( bTriggerevent )
-        OnPreCurrentLayerChanged.Broadcast();
+        OnPreLayerSelectionChanged.Broadcast();
 
     if( bClearSelectionFirst )
         ClearLayerSelection( false );
@@ -101,19 +100,19 @@ UArianeLayerStack::SelectLayers( const TArray<UArianeLayer*> LayerSelection
     }
 
     if( bTriggerevent )
-        OnPostCurrentLayerChanged.Broadcast();
+        OnPostLayerSelectionChanged.Broadcast();
 }
 
 void
 UArianeLayerStack::SelectLayer( UArianeLayer* Layer, bool bTriggerevent, bool bRecurse )
 {
     if( bTriggerevent )
-        OnPreCurrentLayerChanged.Broadcast();
+        OnPreLayerSelectionChanged.Broadcast();
 
     SelectLayer_Private( Layer, bRecurse );
 
     if( bTriggerevent )
-        OnPostCurrentLayerChanged.Broadcast();
+        OnPostLayerSelectionChanged.Broadcast();
 }
 
 void
@@ -144,11 +143,17 @@ UArianeLayerStack::SelectLayer_Private( UArianeLayer* Layer, bool bRecurse )
     }
 }
 
+UArianeLayer*
+UArianeLayerStack::GetCurrentLayer()
+{
+    return SelectedLayers.Num() ? SelectedLayers[0] : nullptr;
+}
+
 void
 UArianeLayerStack::ClearLayerSelection( bool bTriggerEvent )
 {
     if( bTriggerEvent )
-        OnPreCurrentLayerChanged.Broadcast();
+        OnPreLayerSelectionChanged.Broadcast();
 
     SelectedLayers.RemoveAll([] ( UArianeLayer* Layer )
                              {
@@ -158,7 +163,7 @@ UArianeLayerStack::ClearLayerSelection( bool bTriggerEvent )
                              });
 
     if( bTriggerEvent )
-        OnPostCurrentLayerChanged.Broadcast();
+        OnPostLayerSelectionChanged.Broadcast();
 }
 
 const TArray<UArianeLayer*>&
@@ -188,7 +193,12 @@ UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder )
 {
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
-    UArianeLayerDrawing* NewDrawingLayer = NewObject<UArianeLayerDrawing>( ParentLayerFolder );
+    UArianeLayerDrawing* NewDrawingLayer = NewObject<UArianeLayerDrawing>( ParentLayerFolder
+                                                                         , NAME_None
+                                                                         , RF_Transactional ); // for undos
+
+    //NewDrawingLayer->SetupAttachment( ParentLayerFolder );
+    //NewDrawingLayer->RegisterComponent();
 
     OnPreLayerStackChanged.Broadcast();
 
@@ -204,7 +214,13 @@ UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder )
 {
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
-    UArianeLayerFolder* NewLayerFolder = NewObject<UArianeLayerFolder>( ParentLayerFolder );
+    UArianeLayerFolder* NewLayerFolder = NewObject<UArianeLayerFolder>( ParentLayerFolder
+                                                                      , NAME_None
+                                                                      , RF_Transactional ); // for undos
+
+    // Below 2 lines are mandatory to register the component, otherwise undos won't work (RF_TRANSACTIONAL will be erased)
+    NewLayerFolder->SetupAttachment( ParentLayerFolder );
+    NewLayerFolder->RegisterComponent();
 
     OnPreLayerStackChanged.Broadcast();
 
@@ -227,14 +243,14 @@ UArianeLayerStack::OnPostLayerStackChangedDelegate()
     return OnPostLayerStackChanged;
 }
 
-UArianeLayerStack::FOnCurrentLayerChanged&
-UArianeLayerStack::OnPreCurrentLayerChangedDelegate()
+UArianeLayerStack::FOnLayerSelectionChanged&
+UArianeLayerStack::OnPreLayerSelectionChangedDelegate()
 {
-    return OnPreCurrentLayerChanged;
+    return OnPreLayerSelectionChanged;
 }
 
-UArianeLayerStack::FOnCurrentLayerChanged&
-UArianeLayerStack::OnPostCurrentLayerChangedDelegate()
+UArianeLayerStack::FOnLayerSelectionChanged&
+UArianeLayerStack::OnPostLayerSelectionChangedDelegate()
 {
-    return OnPostCurrentLayerChanged;
+    return OnPostLayerSelectionChanged;
 }
