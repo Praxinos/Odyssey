@@ -4,6 +4,9 @@
 // Ariane
 #include "ArianeEditorTool.h"
 #include "ArianeEditor.h"
+#include "ArianePainting3DComponent.h"
+#include "ArianeLayerStack.h"
+#include "ArianeLayerDrawing.h"
 // Unreal
 #include "Framework/Application/SlateApplication.h"
 #include "Misc/TransactionObjectEvent.h"
@@ -11,6 +14,10 @@
 #include "BaseBehaviors/MouseHoverBehavior.h"
 #include "BaseBehaviors/ClickDragBehavior.h"
 #include "InteractiveToolManager.h"
+#include "StylusInput.h"
+#include "CanvasTypes.h"
+#include "CanvasItem.h"
+#include "Components/LineBatchComponent.h"
 
 UArianeEditorTool::~UArianeEditorTool()
 {
@@ -336,12 +343,114 @@ UArianeEditorTool::PostTransacted( const FTransactionObjectEvent& iTransactionEv
 }
 
 void
+UArianeEditorTool::DrawLayerOrientationGrid( UArianeLayerDrawing* DrawingLayer )
+{
+    ULineBatchComponent* LineBatcher = GetWorld()->GetLineBatcher( UWorld::ELineBatcherType::World );
+    float OriX, OriY;
+    float EndX, EndY;
+    FLinearColor Color = FLinearColor::Gray.CopyWithNewOpacity( 0.25f );
+    FTransform LayerTransform = DrawingLayer->GetComponentTransform();
+    FMatrix LayerMatrix = LayerTransform.ToMatrixWithScale();;
+    FMatrix WorldMatrix;
+    float AdjustedThickness = 2.0f;
+
+    // Adjust line thickness relative to camera distance
+    IToolsContextQueriesAPI* Queries = GetToolManager()->GetContextQueriesAPI();
+    if (Queries)
+    {
+        FViewCameraState CameraState;
+
+        Queries->GetCurrentViewState( CameraState );
+
+        float Distance = FVector::Dist( CameraState.Position, DrawingLayer->GetComponentLocation() );
+
+        AdjustedThickness = ( Distance / 1000.0f ) * AdjustedThickness;
+    }
+
+    switch( DrawingLayer->GetDrawingOrientation() )
+    {
+        case EArianeLayerDrawingOrientation::LayerXY:
+            WorldMatrix = LayerMatrix;
+        break;
+
+        case EArianeLayerDrawingOrientation::LayerYZ:
+            FMatrix YZRotation = FRotationMatrix(FRotator( 0.f, 90.f, 90.f ) );
+
+            WorldMatrix = YZRotation * LayerMatrix;
+        break;
+
+        case EArianeLayerDrawingOrientation::LayerZX:
+            FMatrix ZXRotation = FRotationMatrix(FRotator( 90.f, 0.f, 0.f ) );
+
+            WorldMatrix = ZXRotation * LayerMatrix;
+        break;
+    }
+
+    // vertical lines
+    OriY = -1000;
+    EndY =  1000;
+    for ( OriX = -1000; OriX <= 1000; OriX += 100 )
+    {
+        EndX = OriX;
+
+        FVector Origin = FVector( OriX, OriY, 0.0f );
+        FVector EndPos = FVector( EndX, EndY, 0.0f );
+
+        LineBatcher->DrawLine( WorldMatrix.TransformPosition( Origin )
+                             , WorldMatrix.TransformPosition( EndPos )
+                             , Color
+                             , SDPG_World
+                             , AdjustedThickness
+                             , 0.0f ); // Lifetime 1 frame
+    }
+
+    // horizontal lines
+    OriX = -1000;
+    EndX =  1000;
+    for ( OriY = -1000; OriY <= 1000; OriY += 100 )
+    {
+        EndY = OriY;
+
+        FVector Origin = FVector( OriX, OriY, 0.0f );
+        FVector EndPos = FVector( EndX, EndY, 0.0f );
+
+        LineBatcher->DrawLine( WorldMatrix.TransformPosition( Origin )
+                             , WorldMatrix.TransformPosition( EndPos )
+                             , Color
+                             , SDPG_World
+                             , AdjustedThickness
+                             , 0.0f ); // Lifetime 1 frame
+    }
+}
+
+void
+UArianeEditorTool::OnTick(float DeltaTime)
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    Super::OnTick( DeltaTime );
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>( LayerStack->GetCurrentLayer() );
+
+        if( DrawingLayer )
+        {
+            if( DrawingLayer->GetDrawingOrientation() != EArianeLayerDrawingOrientation::View )
+            {
+                DrawLayerOrientationGrid( DrawingLayer );
+            }
+        }
+    }
+}
+
+void
 UArianeEditorTool::DrawHUD ( FEditorViewportClient* ViewportClient
                            , FViewport* Viewport
                            , const FSceneView* View
                            , FCanvas* Canvas )
 {
-
 }
 
 bool
@@ -443,6 +552,7 @@ void
 UArianeEditorTool::OnClickDrag( const FInputDeviceRay& DragPos )
 {
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+
 
     OnMouseDrag( ViewportClient
                , PressedKey

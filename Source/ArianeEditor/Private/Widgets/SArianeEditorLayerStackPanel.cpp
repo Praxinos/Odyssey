@@ -7,10 +7,10 @@
 #include "ArianeEditor.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
-/* Gary
-#include "Widgets/Tools/SArianeEditorToolPanelTileView.h"
-#include "Widgets/Tools/SArianeEditorToolOptions.h"
-*/
+#include "ArianeLayer.h"
+#include "ArianeLayerFolder.h"
+// Unreal Headers
+#include "IStructureDetailsView.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -18,12 +18,84 @@ SArianeEditorLayerStackPanel::~SArianeEditorLayerStackPanel()
 {}
 
 SArianeEditorLayerStackPanel::SArianeEditorLayerStackPanel()
-{}
+{
+}
+
+void
+SArianeEditorLayerStackPanel::OnPre3DPaintingComponentSelectionChanged()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+
+        LayerStack->OnPostLayerSelectionChangedDelegate().RemoveAll( this );
+    }
+}
+
+void
+SArianeEditorLayerStackPanel::OnPost3DPaintingComponentSelectionChanged()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+
+        LayerStack->OnPostLayerSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnLayerSelectionChanged );
+    }
+}
+
+void
+SArianeEditorLayerStackPanel::OnLayerSelectionChanged()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    LayerDetailsView->SetObject( nullptr );
+
+    UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+    const TArray<UArianeLayer*>& SelectedLayers = LayerStack->GetSelectedLayers();
+
+    for( UArianeLayer* Layer : SelectedLayers )
+    {
+        if( Layer->GetClass() == UArianeLayerDrawing::StaticClass() )
+        {
+            LayerDrawingView->ImportLayerProperties( Layer );
+            LayerDetailsView->SetObject( LayerDrawingView );
+        }
+        else
+        {
+            LayerView->ImportLayerProperties( Layer );
+            LayerDetailsView->SetObject( LayerView );
+        }
+
+        break;
+    }
+}
 
 void
 SArianeEditorLayerStackPanel::Construct(const FArguments& InArgs, FArianeEditor* InEditor)
 {
+    FPropertyEditorModule& EditorModule = FModuleManager::Get().GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    UArianePainting3DComponent* Painting3DComponent = InEditor->GetCurrentPainting3DComponent();
+    FDetailsViewArgs DetailsViewArgs;
+
     Editor = InEditor;
+
+    LayerView = NewObject<UArianeEditorLayerView>();
+    LayerDrawingView = NewObject<UArianeEditorLayerDrawingView>();
+
+    LayerView->SetEditor( Editor );
+    LayerDrawingView->SetEditor( Editor );
+
+    DetailsViewArgs.bUpdatesFromSelection = false;
+    DetailsViewArgs.bLockable = false;
+    DetailsViewArgs.bAllowSearch = false;
+    DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+
+    LayerDetailsView = EditorModule.CreateDetailView( DetailsViewArgs );
+    LayerDetailsView->SetObject( nullptr );
 
     ChildSlot
     [
@@ -44,7 +116,20 @@ SArianeEditorLayerStackPanel::Construct(const FArguments& InArgs, FArianeEditor*
                 SNew( SArianeEditorLayerStack, Editor )
             ]
         ]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            LayerDetailsView.ToSharedRef()
+        ]
     ];
+
+    Editor->OnPre3DPaintingComponentSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnPre3DPaintingComponentSelectionChanged );
+    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnPost3DPaintingComponentSelectionChanged );
+
+    if( Painting3DComponent )
+    {
+        OnLayerSelectionChanged(); // First call at Widget creation (if we are in a floating tab for example)
+    }
 }
 
 FReply

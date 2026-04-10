@@ -133,6 +133,7 @@ public:
                        , EToolShutdownType PreviousToolShutdownType
                        , bool TriggerEvent  );
     bool IsCurrentTool( const FString& ToolType );
+    void PostInit();
 
 protected:
     /**

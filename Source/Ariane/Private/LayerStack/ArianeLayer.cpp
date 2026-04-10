@@ -17,6 +17,7 @@ UArianeLayer::UArianeLayer()
     , bSelected ( false )
     , bInvalidated ( false )
     , Bounds ( FBoxSphereBounds(ForceInit) )
+    , InvalidationFlags ( nullptr )
 {
     // for Transform operations
     SetMobility(EComponentMobility::Movable);
@@ -121,7 +122,7 @@ UArianeLayer::IsSelectedInEditor() const
 #endif
 
 void
-UArianeLayer::Invalidate()
+UArianeLayer::Invalidate( const FArianeLayerInvalidationFlags& InInvalidationFlags )
 {
     UArianeLayerFolder* ParentFolder = GetParent();
 
@@ -129,6 +130,8 @@ UArianeLayer::Invalidate()
     {
         ParentFolder->InvalidateChildLayer( this );
     }
+
+    InvalidationFlags->OR( InInvalidationFlags );
 
     //GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
 }
@@ -150,11 +153,27 @@ UArianeLayer::GetBounds()
 }
 
 void
-UArianeLayer::Update()
+UArianeLayer::Update( bool Interactive )
 {
+    OnPreUpdate.Broadcast( Interactive );
+
     bInvalidated = false;
 
     // will call CalcBounds (nb: calling UMeshComponent::UpdateBounds() does not work sometimes, especially when then
     // path starts empty but this works.
     UpdateComponentToWorld();
+
+    OnPostUpdate.Broadcast( Interactive );
+}
+
+UArianeLayer::FOnUpdateDelegate&
+UArianeLayer::OnPreUpdateDelegate()
+{
+    return OnPreUpdate;
+}
+
+UArianeLayer::FOnUpdateDelegate&
+UArianeLayer::OnPostUpdateDelegate()
+{
+    return OnPostUpdate;
 }

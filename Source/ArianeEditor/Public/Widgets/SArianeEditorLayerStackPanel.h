@@ -3,7 +3,14 @@
 
 #pragma once
 
+// Unreal Headers
 #include "CoreMinimal.h"
+#include "IDetailsView.h"
+// Ariane Headers
+#include "ArianeLayer.h"
+#include "ArianeLayerDrawing.h"
+#include "ArianeEditorLayerView.h"
+#include "ArianeEditorLayerDrawingView.h"
 
 class FArianeEditor;
 class UArianeEditorTool;
@@ -29,7 +36,15 @@ public:
 
 protected:
     FReply NewLayer();
+    TSharedPtr<SWidget> CreateTransformWidget();
+    void OnTransformChanged( const FPropertyChangedEvent& PropertyChangedEvent );
+    void OnLayerSelectionChanged();
+    void OnPre3DPaintingComponentSelectionChanged();
+    void OnPost3DPaintingComponentSelectionChanged();
 
 protected:
     FArianeEditor* Editor;
+    UArianeEditorLayerView* LayerView;
+    UArianeEditorLayerDrawingView* LayerDrawingView;
+    TSharedPtr<IDetailsView> LayerDetailsView;
 };

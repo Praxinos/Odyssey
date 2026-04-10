@@ -7,6 +7,7 @@
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayerDrawing.h"
+#include "ArianeLayerFolder.h"
 // Odyssey
 #include "OdysseyStyle.h"
 // Unreal headers
@@ -31,6 +32,7 @@ UArianeEditorLayerTransformTool::~UArianeEditorLayerTransformTool()
 UArianeEditorLayerTransformTool::UArianeEditorLayerTransformTool()
     : TransformProxy ( nullptr )
     , Gizmo ( nullptr )
+    , PreviousTool ( nullptr )
 {
     Icon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform64");
 
@@ -50,8 +52,24 @@ UArianeEditorLayerTransformTool::BindDelegates()
 {
     UArianeLayerStack* LayerStack = Editor->GetCurrentPainting3DComponent()->GetLayerStack();
 
-    LayerStack->OnPreCurrentLayerChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::ClearGizmo );
-    LayerStack->OnPostCurrentLayerChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::CreateGizmo );
+    Editor->OnPre3DPaintingComponentSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::ClearGizmo );
+    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::CreateGizmo );
+
+    LayerStack->OnPreLayerSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::ClearGizmo );
+    LayerStack->OnPostLayerSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::CreateGizmo );
+
+    // Refresh the tool's Gizmo when the layer Transform is updated (e.g via a widget)
+    LayerStack->GetRootFolder()->OnPostUpdateDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::OnRootFolderUpdate );
+}
+
+void
+UArianeEditorLayerTransformTool::OnRootFolderUpdate( bool Interactive )
+{
+   if( Interactive == false )
+   {
+       ClearGizmo();
+       CreateGizmo();
+   }
 }
 
 void
@@ -59,8 +77,14 @@ UArianeEditorLayerTransformTool::UnbindDelegates()
 {
     UArianeLayerStack* LayerStack = Editor->GetCurrentPainting3DComponent()->GetLayerStack();
 
-    LayerStack->OnPreCurrentLayerChangedDelegate().RemoveAll( this );
-    LayerStack->OnPostCurrentLayerChangedDelegate().RemoveAll( this );
+    Editor->OnPre3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
+    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
+
+    LayerStack->OnPreLayerSelectionChangedDelegate().RemoveAll( this );
+    LayerStack->OnPostLayerSelectionChangedDelegate().RemoveAll( this );
+
+    LayerStack->GetRootFolder()->OnPostUpdateDelegate().RemoveAll( this );
+
 }
 
 void
@@ -74,6 +98,8 @@ UArianeEditorLayerTransformTool::ClearGizmo()
 
         Gizmo = nullptr;
     }
+
+    TransformSnapshots.Empty();
 }
 
 void
@@ -89,8 +115,12 @@ UArianeEditorLayerTransformTool::CreateGizmo()
                                                     , TransformProxy
                                                     , TEXT("ArianeLayerTransform"));
 
+    TransformSnapshots.Empty();
+    TransformSnapshots.Reserve( SelectedLayers.Num() );
+
     for( UArianeLayer* SelectedLayer : SelectedLayers )
     {
+        TransformSnapshots.Emplace( SelectedLayer, SelectedLayer->GetRelativeTransform() );
         TransformProxy->AddComponent( SelectedLayer );
     }
 
@@ -192,6 +222,11 @@ UArianeEditorLayerTransformTool::DrawHUD ( FEditorViewportClient* ViewportClient
 {
 }
 
+void UArianeEditorLayerTransformTool::SetPreviousTool( UArianeEditorTool* InPreviousTool )
+{
+    PreviousTool = InPreviousTool;
+}
+
 void
 UArianeEditorLayerTransformTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
@@ -271,12 +306,22 @@ UArianeEditorLayerTransformTool::CreateOverlayWidget()
 FReply
 UArianeEditorLayerTransformTool::OnAccept()
 {
+    Editor->SetCurrentTool( PreviousTool, EToolShutdownType::Accept, true );
+
     return FReply::Handled();
 }
 
 FReply
 UArianeEditorLayerTransformTool::OnCancel()
 {
+    // Restore Transforms
+    for( FTransformSnapshot& TransformSnapshot : TransformSnapshots )
+    {
+        TransformSnapshot.Layer->SetRelativeTransform( TransformSnapshot.Transform );
+    }
+
+    Editor->SetCurrentTool( PreviousTool, EToolShutdownType::Accept, true );
+
     return FReply::Handled();
 }
 

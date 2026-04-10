@@ -59,7 +59,9 @@ protected:
         * @param State the state of the input device (mouse or stylus)
         */
     void PlotVertex( FEditorViewportClient* ViewportClient
-                   , const FArianePointerState& State );
+                   , const FArianePointerState& State
+                   , bool bInteractive );
+    FVector4 GetDrawingPlane( UArianeLayerDrawing* DrawingLayer, const FVector& CameraCoords );
 
 public:
     UPROPERTY( EditAnywhere

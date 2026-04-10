@@ -125,6 +125,11 @@ FArianeEditorViewportToolkit::Init( const TSharedPtr<IToolkitHost>& iInitToolkit
 
     Editor->Init();
 
+    // We create the Widgets now that we can can register to some delegates that they need to refresh themselves
+    // just before Editor->Init() is called and will broadcast the delegates.
+
+    //InlineContent = SNew(SArianeEditorMasterPanel, const_cast<FArianeEditor*>( Editor.Get()) );
+
     UToolMenu* addMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolbar.AddQuickMenu");
     FToolMenuSection& arianeSection = addMenu->FindOrAddSection("Ariane 3D Painting");
 
@@ -437,6 +442,8 @@ FArianeEditorViewportToolkit::InvokeUI()
     const TSharedPtr<SWidget> Content = GetInlineContent() ;
     if ( Content && InlineContentHolder.IsValid() )
         InlineContentHolder->SetContent( Content.ToSharedRef() );
+
+    Editor->PostInit();
 }
 
 void
@@ -476,7 +483,7 @@ FArianeEditorViewportToolkit::OnEditorClose()
 TSharedPtr<SWidget>
 FArianeEditorViewportToolkit::GetInlineContent() const
 {
-    return SNew(SArianeEditorMasterPanel, const_cast<FArianeEditor*>(Editor.Get()) );
+    return SNew(SArianeEditorMasterPanel, const_cast<FArianeEditor*>( Editor.Get()) );
 }
 
 FArianeEditorViewportEdMode*

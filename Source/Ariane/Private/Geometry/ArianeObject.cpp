@@ -82,6 +82,9 @@ FArianeObjectInvalidationFlags::HasAny()
           || Children );
 }
 
+
+///---------------------------------------------------------
+
 FArianeObject::~FArianeObject()
 {
 }

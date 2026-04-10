@@ -37,9 +37,16 @@ FArianeEditor::FArianeEditor( FArianeEditorViewportToolkit* iToolkit )
 {
     // Component selection is managed by ArianeEditor in order to emulate a Pre/Post Selection event behavior
     USelection::SelectionChangedEvent.AddRaw( this, &FArianeEditor::OnEditorSelectionChanged );
+
 }
 
-
+void
+FArianeEditor::PostInit()
+{
+    // Set the CurrentPainting3DComponent
+    // It will also trigger an event which will allow our widget to refresh at start
+    OnEditorSelectionChanged( GEditor->GetSelectedActors() );
+}
 
 FArianeEditorViewportToolkit*
 FArianeEditor::GetToolkit()
@@ -274,8 +281,9 @@ FArianeEditor::RegisterTools()
     AddToolBuilder( NewObject<UArianeEditorPathDrawingToolBuilder>() );
     AddToolBuilder( NewObject<UArianeEditorEraserToolBuilder>() );
     AddToolBuilder( NewObject<UArianeEditorLayerTransformToolBuilder>() );
-}
 
+    SetCurrentTool( Tools[0], EToolShutdownType::Accept, true );
+}
 
 void FArianeEditor::UnregisterTools()
 {
@@ -404,6 +412,8 @@ FArianeEditor::OnEditorSelectionChanged( UObject* NewSelection )
     USelection* SelectionSet = Cast<USelection>(NewSelection);
 
     OnPre3DPaintingComponentSelectionChanged.Broadcast();
+
+    CurrentPainting3DComponent = nullptr;
 
     if( SelectionSet )
     {

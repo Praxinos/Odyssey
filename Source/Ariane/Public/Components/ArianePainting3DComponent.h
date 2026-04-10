@@ -102,7 +102,7 @@ private:
     virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
 
 public:
-    void Update();
+    void Update( bool bInteractive );
 
 protected:
     UPROPERTY()

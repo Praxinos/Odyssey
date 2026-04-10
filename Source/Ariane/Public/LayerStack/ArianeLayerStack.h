@@ -21,7 +21,7 @@ class ARIANE_API UArianeLayerStack : public USceneComponent
     GENERATED_BODY()
 
     DECLARE_MULTICAST_DELEGATE( FOnLayerStackChanged );
-    DECLARE_MULTICAST_DELEGATE( FOnCurrentLayerChanged );
+    DECLARE_MULTICAST_DELEGATE( FOnLayerSelectionChanged );
 
 public:
     ~UArianeLayerStack();
@@ -42,12 +42,13 @@ public:
     void OnComponentDestroyed();
     void GetLayers( TArray<UArianeLayer*>& Layers );
     void Init();
+    UArianeLayer* GetCurrentLayer();
 
     FOnLayerStackChanged& OnPreLayerStackChangedDelegate();
     FOnLayerStackChanged& OnPostLayerStackChangedDelegate();
 
-    FOnCurrentLayerChanged& OnPreCurrentLayerChangedDelegate();
-    FOnCurrentLayerChanged& OnPostCurrentLayerChangedDelegate();
+    FOnLayerSelectionChanged& OnPreLayerSelectionChangedDelegate();
+    FOnLayerSelectionChanged& OnPostLayerSelectionChangedDelegate();
 
 protected:
     void SelectLayer_Private( UArianeLayer* Layer, bool bRecurse );
@@ -63,6 +64,6 @@ protected:
     FOnLayerStackChanged OnPreLayerStackChanged;
     FOnLayerStackChanged OnPostLayerStackChanged;
 
-    FOnCurrentLayerChanged OnPreCurrentLayerChanged;
-    FOnCurrentLayerChanged OnPostCurrentLayerChanged;
+    FOnLayerSelectionChanged OnPreLayerSelectionChanged;
+    FOnLayerSelectionChanged OnPostLayerSelectionChanged;
 };

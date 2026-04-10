@@ -3,6 +3,7 @@
 
 // Ariane headers
 #include "ArianeLayerFolder.h"
+#include "ArianeLayerFolderInvalidationFlags.h"
 
 UArianeLayerFolder::~UArianeLayerFolder()
 {
@@ -11,6 +12,7 @@ UArianeLayerFolder::~UArianeLayerFolder()
 UArianeLayerFolder::UArianeLayerFolder()
     : bExpanded ( true )
 {
+    InvalidationFlags = new FArianeLayerFolderInvalidationFlags();
 /*
     ResetHierarchy();
 
@@ -46,10 +48,14 @@ UArianeLayerFolder::GetChildLayers()
 void
 UArianeLayerFolder::AddChildLayer( UArianeLayer* Orphan )
 {
+    //Orphan->SetFlags(RF_Transactional);
+
     // Rename() is used to define the parent object
     Orphan->Rename( nullptr, this );
 
     ChildLayers.Add( Orphan );
+
+    InvalidationFlags->OR( FArianeLayerFolderInvalidationFlags().SetHierarchy() );
 
     Orphan->AttachToComponent( this,  FAttachmentTransformRules::KeepWorldTransform );
 }
@@ -60,6 +66,8 @@ UArianeLayerFolder::RemoveChildLayer( UArianeLayer* Child )
     ChildLayers.Remove( Child );
 
     InvalidatedChildLayers.Remove( Child );
+
+    InvalidationFlags->OR( FArianeLayerFolderInvalidationFlags().SetHierarchy() );
 
     Child->DetachFromComponent( FDetachmentTransformRules::KeepWorldTransform );
 
@@ -114,18 +122,18 @@ UArianeLayerFolder::InvalidateChildLayer( UArianeLayer* Child )
 }
 
 void
-UArianeLayerFolder::Update()
+UArianeLayerFolder::Update( bool bInteractive )
 {
-    InvalidatedChildLayers.RemoveAll( [] ( UArianeLayer* Layer ) -> bool
+    InvalidatedChildLayers.RemoveAll( [bInteractive] ( UArianeLayer* Layer ) -> bool
     {
-        Layer->Update();
+        Layer->Update( bInteractive );
 
         return ( Layer->IsInvalidated() == false );
     } );
 
     UpdateBounds();
 
-    Super::Update();
+    Super::Update( bInteractive );
 }
 
 void

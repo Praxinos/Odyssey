@@ -11,7 +11,6 @@
 
 #include "ArianeLayerFolder.generated.h"
 
-
 UCLASS()
 class ARIANE_API UArianeLayerFolder : public UArianeLayer
 {
@@ -30,7 +29,7 @@ public:
     void AddChildLayer( UArianeLayer* Orphan );
     void RemoveChildLayer( UArianeLayer* Child );
     void InvalidateChildLayer( UArianeLayer* Child );
-    virtual void Update() override;
+    virtual void Update( bool bInteractive ) override;
 
 public:
     void Traverse( TFunction<TraversalReturnValue(UArianeLayer*)> Callback );
