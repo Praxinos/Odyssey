@@ -31,6 +31,21 @@ UOdysseyAnimation::GetHeight() const
     return mHeight;
 }
 
+int
+UOdysseyAnimation::GetWidthFromHeightKeepingRatio( int iHeight )
+{
+    float ratio = mWidth / (float)mHeight;
+
+    return int( iHeight * ratio );
+}
+int
+UOdysseyAnimation::GetHeightFromWidthKeepingRatio( int iWidth )
+{
+    float ratio = mWidth / (float)mHeight;
+
+    return int( iWidth / ratio );
+}
+
 EOdysseyAnimationFormat
 UOdysseyAnimation::GetFormat() const
 {

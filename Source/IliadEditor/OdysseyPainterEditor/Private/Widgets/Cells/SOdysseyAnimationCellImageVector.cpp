@@ -2,14 +2,30 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "SOdysseyAnimationCellImageVector.h"
+
+#include "ImageUtils.h"
+#include "ObjectTools.h"
+#include "ThumbnailRendering/ThumbnailManager.h"
+
 #include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyAnimation.h"
-#include "ThumbnailRendering/ThumbnailManager.h"
+#include "OdysseyPainterEditorSettings.h"
 
 #define THUMBNAIL_SIZE 32
 
+namespace
+{
+    static TStrongObjectPtr<UTexture2D> sCheckerboardTexture;
+    static FColor sRasterCheckerboardColorOne = FColor( EForceInit::ForceInit );
+    static FColor sRasterCheckerboardColorTwo = FColor( EForceInit::ForceInit );
+};
+
 SOdysseyAnimationCellImageVector::~SOdysseyAnimationCellImageVector()
 {
+    UOdysseyPainterEditorSettings* settings = GetMutableDefault<UOdysseyPainterEditorSettings>();
+    settings->GetOnCheckerColorChanged().RemoveAll( this );
+    settings->GetOnCheckerSizeChanged().RemoveAll( this );
+
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
 }
 
@@ -24,21 +40,29 @@ SOdysseyAnimationCellImageVector::Construct(const FArguments& iArgs, UOdysseyAni
     mCell = iCell;
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddSP(this, &SOdysseyAnimationCellImageVector::OnRenderingChanged);
 
-    UOdysseyAnimation* animation = mCell->GetAnimation();
-    float ratio = (float)animation->GetWidth() / (float)animation->GetHeight();
+    //---
 
-    mAssetThumbnail = MakeShareable(new FAssetThumbnail(mCell, (int)(ratio * THUMBNAIL_SIZE), THUMBNAIL_SIZE, UThumbnailManager::Get().GetSharedThumbnailPool()));
-    FAssetThumbnailConfig thumbnailConfig;
-    thumbnailConfig.bAllowFadeIn = false;
-    thumbnailConfig.bAllowHintText = false;
-    thumbnailConfig.bAllowRealTimeOnHovered = false;
-    thumbnailConfig.bForceGenericThumbnail = false;
-    thumbnailConfig.AllowAssetSpecificThumbnailOverlay = false;
-    thumbnailConfig.ThumbnailLabel = EThumbnailLabel::NoLabel;
-    thumbnailConfig.HighlightedText = FText::FromString("");
-    thumbnailConfig.HintColorAndOpacity = FLinearColor( 1.0, 1.0, 1.0, 1.0 );
-    thumbnailConfig.AssetTypeColorOverride = FLinearColor(1.0, 1.0, 1.0, 1.0);
-    TSharedRef<SWidget> thumbnailWidget = mAssetThumbnail->MakeThumbnailWidget(thumbnailConfig);
+    RenderTarget = TStrongObjectPtr<UTextureRenderTarget2D>( NewObject<UTextureRenderTarget2D>() );
+    RenderTarget->RenderTargetFormat = RTF_RGBA8;
+
+    RenderTarget->InitAutoFormat( mCell->GetAnimation()->GetWidthFromHeightKeepingRatio( THUMBNAIL_SIZE ), THUMBNAIL_SIZE );
+    //RenderTarget->ResizeTarget( mCell->GetAnimation()->GetWidthFromHeightKeepingRatio( THUMBNAIL_SIZE ), THUMBNAIL_SIZE );
+    //RenderTarget->UpdateResource();
+    RenderTarget->UpdateResourceImmediate();
+
+    mCellBrush = new FSlateImageBrush( RenderTarget.Get(), FVector2D( RenderTarget->GetSurfaceWidth(), RenderTarget->GetSurfaceHeight() ) );
+
+    RefreshCellRenderTarget();
+
+    //---
+
+    UOdysseyPainterEditorSettings* settings = GetMutableDefault<UOdysseyPainterEditorSettings>();
+    settings->GetOnCheckerColorChanged().AddSP( this, &SOdysseyAnimationCellImageVector::CreateCheckerboardTexture );
+    settings->GetOnCheckerSizeChanged().AddSP( this, &SOdysseyAnimationCellImageVector::CreateCheckerboardTexture );
+
+    CreateCheckerboardTexture();
+
+    //---
 
     ChildSlot
     .VAlign(VAlign_Center)
@@ -50,9 +74,48 @@ SOdysseyAnimationCellImageVector::Construct(const FArguments& iArgs, UOdysseyAni
         + SHorizontalBox::Slot()
         .AutoWidth()
         [
-            thumbnailWidget
+            SNew( SOverlay )
+            + SOverlay::Slot()
+            [
+                SNew( SImage )
+                .Image( mCheckerboardBrush )
+            ]
+            + SOverlay::Slot()
+            [
+                SNew( SImage )
+                .Image( mCellBrush )
+            ]
         ]
     ];
+}
+
+void
+SOdysseyAnimationCellImageVector::RefreshCellRenderTarget()
+{
+    FTextureRenderTargetResource* RTResource = RenderTarget->GameThread_GetRenderTargetResource();
+    ThumbnailTools::RenderThumbnail( mCell, mCell->GetAnimation()->GetWidthFromHeightKeepingRatio( THUMBNAIL_SIZE ), THUMBNAIL_SIZE, ThumbnailTools::EThumbnailTextureFlushMode::NeverFlush, RTResource );
+}
+
+void
+SOdysseyAnimationCellImageVector::CreateCheckerboardTexture()
+{
+    const UOdysseyPainterEditorSettings& settings = *GetDefault< UOdysseyPainterEditorSettings >();
+    if( !sCheckerboardTexture
+        || sRasterCheckerboardColorOne != settings.GetCheckerColorOne()
+        || sRasterCheckerboardColorTwo != settings.GetCheckerColorTwo()
+        )
+    {
+        sCheckerboardTexture = TStrongObjectPtr<UTexture2D>( FImageUtils::CreateCheckerboardTexture( settings.GetCheckerColorOne(), settings.GetCheckerColorTwo(), 16 ) );
+        sRasterCheckerboardColorOne = settings.GetCheckerColorOne();
+        sRasterCheckerboardColorTwo = settings.GetCheckerColorTwo();
+    }
+
+    //---
+
+    if( !mCheckerboardBrush )
+        mCheckerboardBrush = new FSlateImageBrush( sCheckerboardTexture.Get(), FVector2D( sCheckerboardTexture->GetSurfaceWidth(), sCheckerboardTexture->GetSurfaceHeight() ), FSlateColor( FLinearColor::White ), ESlateBrushTileType::Both );
+
+    mCheckerboardBrush->SetResourceObject( sCheckerboardTexture.Get() );
 }
 
 void
@@ -66,7 +129,7 @@ SOdysseyAnimationCellImageVector::OnRenderingChanged(const FOdysseyRenderingChan
 
     TArray<FGuid> composition = mCell->GetRenderingComposition(EOdysseyRenderingType::Render, 0);
     if (composition.Contains(iEvent.GetId()))
-        mAssetThumbnail->RefreshThumbnail();
+        RefreshCellRenderTarget();
 }
 
 EVisibility

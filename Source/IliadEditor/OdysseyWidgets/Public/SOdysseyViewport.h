@@ -10,6 +10,7 @@
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Input/SSpinBox.h"
 
+class FExtender;
 class FOdysseySceneViewport;
 class SScrollBar;
 class SViewport;
@@ -25,6 +26,7 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyViewport)
         {}
         SLATE_ATTRIBUTE(UTexture*, Texture)
+        SLATE_ARGUMENT(TSharedPtr<FExtender>, OptionExtender)
     SLATE_END_ARGS()
 
 public:

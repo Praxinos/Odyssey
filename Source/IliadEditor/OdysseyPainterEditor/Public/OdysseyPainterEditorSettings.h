@@ -43,6 +43,28 @@ public:
     TSoftObjectPtr<UOdysseyBrush> DefaultBrush;
 };
 
+USTRUCT( BlueprintType )
+struct ODYSSEYPAINTEREDITOR_API FCheckboardPreset
+{
+    GENERATED_USTRUCT_BODY()
+
+    /** The name of the preset */
+    UPROPERTY( config, EditAnywhere, Category = CheckboardPreset )
+    FString Name = TEXT( "Preset" );
+
+    /** The color one of the checkboard */
+    UPROPERTY( config, EditAnywhere, Category = CheckboardPreset )
+    FColor ColorOne = FColor( 255, 255, 255 );
+
+    /** The color two of the checkboard */
+    UPROPERTY( config, EditAnywhere, Category = CheckboardPreset )
+    FColor ColorTwo = FColor( 247, 247, 247 );
+
+    /** The size of the checkboard */
+    UPROPERTY( config, EditAnywhere, Category = CheckboardPreset )
+    int32 Size = 16;
+};
+
 /**
  * Implements the Editor's user settings.
  */
@@ -56,6 +78,52 @@ public:
     static UOdysseyPainterEditorSettings* Get();
 
 public:
+#if WITH_EDITOR
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
+#endif
+
+public:
+    void SetInteractiveMode();
+    void RemoveInteractiveMode();
+private:
+    bool bIsInteractiveMode = false;
+
+public:
+    DECLARE_MULTICAST_DELEGATE( FOnBackgroundColorChanged );
+    DECLARE_MULTICAST_DELEGATE( FOnCheckerColorChanged );
+    DECLARE_MULTICAST_DELEGATE( FOnCheckerSizeChanged );
+
+    /** Gets the current viewport background color. */
+    FColor GetBackgroundColor() const;
+    /** Sets the current viewport background color. */
+    void SetBackgroundColor( FColor BackgroundColor );
+    /** Gets the multicast delegate which is run whenever the viewport background color is changed. */
+    FOnBackgroundColorChanged& GetOnBackgroundColorChanged();
+
+    /** Gets the current (canvas) checker background color one. */
+    FColor GetCheckerColorOne() const;
+    /** Gets the current (canvas) checker background color two. */
+    FColor GetCheckerColorTwo() const;
+    /** Sets the current (canvas) checker background color one. */
+    void SetCheckerColorOne( FColor CheckerColorOne );
+    /** Sets the current (canvas) checker background color two. */
+    void SetCheckerColorTwo( FColor CheckerColorTwo );
+    /** Sets the current (canvas) checker background color one & two. */
+    void SetCheckerColor( FColor CheckerColorOne, FColor CheckerColorTwo );
+    /** Gets the multicast delegate which is run whenever the (canvas) checker background color is changed. */
+    FOnBackgroundColorChanged& GetOnCheckerColorChanged();
+
+    /** Gets the current (canvas) checker size. */
+    int32 GetCheckerSize() const;
+    /** Sets the current (canvas) checker size. */
+    void SetCheckerSize( int32 CheckerSize );
+    /** Gets the multicast delegate which is run whenever the (canvas) checker size is changed. */
+    FOnCheckerSizeChanged& GetOnCheckerSizeChanged();
+
+    /** Gets the current (canvas) checker presets. */
+    TArray<FCheckboardPreset> GetCheckerPresets() const;
+
+public:
     /** The type of background to draw in the texture editor view port. */
     UPROPERTY(config)
     TEnumAsByte<EOdysseyPainterEditorBackgrounds> Background;
@@ -64,6 +132,7 @@ public:
     UPROPERTY(config)
     TEnumAsByte<EOdysseyPainterEditorVolumeViewMode> VolumeViewMode;
 
+private:
     /** Background and foreground color used by Texture preview view ports. */
     UPROPERTY(config, EditAnywhere, Category=Background)
     FColor BackgroundColor;
@@ -76,9 +145,20 @@ public:
     UPROPERTY(config, EditAnywhere, Category=Background)
     FColor CheckerColorTwo;
 
-    /** The size of the checkered background tiles. */
-    UPROPERTY(config, EditAnywhere, Category=Background, meta=(ClampMin="2", ClampMax="4096"))
+    /** The size of the checkered background tiles.
+    *   It is a power of 2 (like 2, 4, 8, 16, 32, 64, ...)
+    */
+    UPROPERTY(config, EditAnywhere, Category=Background, meta=(ClampMin="2", ClampMax="512"))
     int32 CheckerSize;
+
+    /** A list of checkered background presets. */
+    UPROPERTY(config, EditAnywhere, Category=Background)
+    TArray<FCheckboardPreset> CheckerPresets;
+
+private:
+    FOnBackgroundColorChanged OnBackgroundColorChangedEvent;
+    FOnCheckerColorChanged OnCheckerColorChangedEvent;
+    FOnCheckerSizeChanged OnCheckerSizeChangedEvent;
 
 public:
     /** Whether the texture should scale to fit the view port. */

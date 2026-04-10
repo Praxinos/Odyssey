@@ -73,6 +73,10 @@ public:
     //Size and Format
     int GetWidth() const;
     int GetHeight() const;
+    /** Compute the width corresponding to given height and respecting the animation ratio */
+    int GetWidthFromHeightKeepingRatio( int iHeight );
+    /** Compute the height corresponding to given width and respecting the animation ratio */
+    int GetHeightFromWidthKeepingRatio( int iWidth );
     EOdysseyAnimationFormat GetFormat() const;
     float GetFramesPerSecond() const;
 

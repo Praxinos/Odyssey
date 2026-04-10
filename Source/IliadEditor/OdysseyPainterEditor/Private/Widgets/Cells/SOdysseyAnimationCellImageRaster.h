@@ -4,9 +4,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "OdysseyRenderingAbility.h"
 
 class UOdysseyAnimationCellImageRaster;
+class UTextureRenderTarget2D;
 
 class SOdysseyAnimationCellImageRaster
     : public SCompoundWidget
@@ -25,9 +27,16 @@ public:
 private:
     void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
     EVisibility GetContentVisibility() const;
+    void RefreshCellRenderTarget();
+    void CreateCheckerboardTexture();
 
 private:
-    UOdysseyAnimationCellImageRaster* mCell = nullptr;
-    TSharedPtr<FAssetThumbnail> mAssetThumbnail;
+    TObjectPtr<UOdysseyAnimationCellImageRaster> mCell;
+
+    TStrongObjectPtr<UTextureRenderTarget2D> RenderTarget;
+    FSlateImageBrush* mCellBrush;
+
+    FSlateImageBrush* mCheckerboardBrush;
+
     TAttribute<bool> mShowContent;
 };

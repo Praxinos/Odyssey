@@ -31,16 +31,9 @@ class UOdysseyAnimationCellThumbnailRenderer
     GENERATED_BODY()
 
 public:
-    virtual void PostInitProperties() override;
-
-public:
     virtual void GetThumbnailSize(UObject* Object, float Zoom, uint32& OutWidth, uint32& OutHeight) const override;
     virtual void Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* Viewport, FCanvas* Canvas, bool bAdditionalViewFamily) override;
     virtual EThumbnailRenderFrequency GetThumbnailRenderFrequency(UObject* Object) const override { return EThumbnailRenderFrequency::Realtime; }
-
-private:
-    UPROPERTY()
-    TObjectPtr<UTexture2D> mCheckerboardTexture;
 };
 /*
 class FOdysseyAnimationCellThumbnailProxy

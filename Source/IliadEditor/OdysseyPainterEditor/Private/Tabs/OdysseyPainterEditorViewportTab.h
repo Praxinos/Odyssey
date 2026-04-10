@@ -29,6 +29,15 @@ protected:
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
+    virtual void BuildOptionsMenu( FMenuBuilder& ioMenuBuilder );
+    virtual void BuildBackgroundSubMenu( FMenuBuilder& ioMenuBuilder );
+    virtual FReply OnColorBlockClicked( TSharedPtr<SButton> iWidget, FLinearColor iInitialColor, FOnLinearColorValueChanged OnColorChanged, FSimpleDelegate OnColorCommitted ) const;
+    virtual void BuildBackgroundViewportEntry( FMenuBuilder& ioMenuBuilder );
+    virtual void BuildBackgroundCheckboardColorOneEntry( FMenuBuilder& ioMenuBuilder );
+    virtual void BuildBackgroundCheckboardColorTwoEntry( FMenuBuilder& ioMenuBuilder );
+    virtual void BuildBackgroundCheckboardSizeEntry( FMenuBuilder& ioMenuBuilder );
+    virtual void BuildBackgroundCheckboardPresets( FMenuBuilder& ioMenuBuilder );
+
 public:
     // Public Setters
     void SetTexture(const TAttribute<UTexture*>& mTexture);

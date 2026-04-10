@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "SOdysseyViewport.h"
+
 #include "ObjectEditorUtils.h"
 #include "Engine/Texture.h"
 #include "Framework/Application/SlateApplication.h"
@@ -15,8 +16,8 @@
 #include "Widgets/Input/SSlider.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
+
 #include "FOdysseySceneViewport.h"
-#include "Widgets/Input/SNumericEntryBox.h"
 #include "OdysseyStyle.h"
 #include "Math/OdysseyMathUtils.h"
 
@@ -54,13 +55,15 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
 
     mAlignWithViewport = true;
 
-    FMenuBuilder ViewportMenu(true, NULL);
+    FMenuBuilder ViewportMenu(true, NULL, InArgs._OptionExtender);
+
+    ViewportMenu.BeginSection( "OptionsSection" ); // Create a section to be able to use FExtender outside this widget (mainly in FOdysseyPainterEditorViewportTab)
 
     ViewportMenu.AddSubMenu(
         FText::FromString("Zoom options"),
         FText::FromString(""),
         FNewMenuDelegate::CreateLambda([this](FMenuBuilder& ZoomMenuBuilder)
-        {
+            {
                 FUIAction Zoom25Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 0.25));
                 ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.25percent.name", "25%"), LOCTEXT("viewport.zoom.25percent.tooltip", "Show the texture at a quarter of its size."), FSlateIcon(), Zoom25Action);
 
@@ -84,7 +87,8 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
                     FIsActionChecked::CreateSP(this, &SOdysseyViewport::IsZoomMenuFitChecked)
                 );
                 ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.fit.name", "Scale To Fit"), LOCTEXT("viewport.zoom.fit.tooltip", "Scale the texture to fit the viewport."), FSlateIcon(), ZoomFitAction, NAME_None, EUserInterfaceActionType::ToggleButton);
-        })
+            })
+            //, false, FSlateIcon(), true, "ZoomMenu" // HookName doesn't seem to work when used in an entry, only in section
     );
 
     ViewportMenu.AddSubMenu(
@@ -99,8 +103,10 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
                 );
                 FlipMenuBuilder.AddMenuEntry(LOCTEXT("viewport.flip.align.name", "Align with viewport center on flip"), LOCTEXT("viewport.flip.align.tooltip", "Keep the center of the viewport at the same position when flipping it when on"), FSlateIcon(), AlignCenterOption, NAME_None, EUserInterfaceActionType::ToggleButton);
             })
+        //, false, FSlateIcon(), true, "FlipMenu" // HookName doesn't seem to work when used in an entry, only in section
     );
 
+    ViewportMenu.EndSection();
 
     TSharedPtr<SHorizontalBox> HorizontalBox;
 

@@ -53,6 +53,10 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPainterEditorViewportClient::~FOdysseyPainterEditorViewportClient( )
 {
+    UOdysseyPainterEditorSettings* settings = GetMutableDefault<UOdysseyPainterEditorSettings>();
+    settings->GetOnCheckerSizeChanged().RemoveAll( this );
+    settings->GetOnCheckerColorChanged().RemoveAll( this );
+
     InputSubsystem->RemoveMessageHandler( *this );
     DestroyCheckerboardTexture();
 }
@@ -90,6 +94,10 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
     fence.BeginFence();
     fence.Wait();
 
+    UOdysseyPainterEditorSettings* settings = GetMutableDefault<UOdysseyPainterEditorSettings>();
+    settings->GetOnCheckerColorChanged().AddRaw( this, &FOdysseyPainterEditorViewportClient::CreateCheckerboardTexture );
+    settings->GetOnCheckerSizeChanged().AddRaw( this, &FOdysseyPainterEditorViewportClient::CreateCheckerboardTexture );
+
     CreateCheckerboardTexture();
 }
 
@@ -99,7 +107,7 @@ void
 FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
     const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
-    ioCanvas->Clear(settings.BackgroundColor);
+    ioCanvas->Clear(settings.GetBackgroundColor());
 
     UTexture* texture       = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
     if (!texture)
@@ -1025,7 +1033,7 @@ FOdysseyPainterEditorViewportClient::CreateCheckerboardTexture()
     DestroyCheckerboardTexture();
 
     const UOdysseyPainterEditorSettings& settings = *GetDefault< UOdysseyPainterEditorSettings >();
-    mCheckerboardTexture = FImageUtils::CreateCheckerboardTexture( settings.CheckerColorOne, settings.CheckerColorTwo, settings.CheckerSize );
+    mCheckerboardTexture = FImageUtils::CreateCheckerboardTexture( settings.GetCheckerColorOne(), settings.GetCheckerColorTwo(), settings.GetCheckerSize() );
 }
 
 void

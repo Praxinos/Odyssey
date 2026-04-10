@@ -10,7 +10,6 @@
 #include "ImageUtils.h"
 #include "OdysseyAnimationCell.h"
 #include "OdysseyAnimation.h"
-#include "OdysseyPainterEditorSettings.h"
 #include "RHITypes.h"
 #include "TextureCompiler.h"
 #include "TextureResource.h"
@@ -25,14 +24,6 @@
 
 #define THUMBNAIL_RENDER_SIZE 64
 
-
-void
-UOdysseyAnimationCellThumbnailRenderer::PostInitProperties()
-{
-    Super::PostInitProperties();
-    const UOdysseyPainterEditorSettings& settings = *GetDefault< UOdysseyPainterEditorSettings >();
-    mCheckerboardTexture = FImageUtils::CreateCheckerboardTexture( settings.CheckerColorOne, settings.CheckerColorTwo, 16 );
-}
 
 void
 UOdysseyAnimationCellThumbnailRenderer::GetThumbnailSize(UObject* Object, float Zoom, uint32& OutWidth, uint32& OutHeight) const
@@ -80,19 +71,7 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
                 FMath::CeilLogTwo(FMath::Max(srcRect.Width(), srcRect.Height())) //NumMips
             );
 
-            FCanvasTileItem checkboardTileItem(
-                FVector2D(X, Y),
-                mCheckerboardTexture->GetResource(),
-                FVector2D( Width, Height ),
-                FVector2D( 0.f, 0.f ),
-                FVector2D( Width / mCheckerboardTexture->GetSizeX(), Height / mCheckerboardTexture->GetSizeY() ),
-                FLinearColor::White
-            );
-
-            FCanvas* canvas = FCanvas::Create(graphBuilder, destinationTexture, nullptr, FGameTime(), featureLevel);
-            checkboardTileItem.BlendMode = SE_BLEND_Opaque;
-            canvas->DrawItem( checkboardTileItem );
-            canvas->Flush_RenderThread(graphBuilder);
+            AddClearRenderTargetPass( graphBuilder, destinationTexture, FLinearColor::Transparent );
 
             FRDGTextureRef renderTexture = graphBuilder.CreateTexture(renderTextureDesc, TEXT("UOdysseyLayer::renderTexture"));
 
@@ -110,11 +89,11 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
             FOdysseyBlendShader::BlendRect(
                 graphBuilder,
                 featureLevel,
-                destinationTexture,
-                renderTexture,
-                destinationTexture,
+                destinationTexture, // Background
+                renderTexture,      // Foreground
+                destinationTexture, // Destination
                 srcRect,
-                FIntRect(X, Y, Width, Height),
+                FIntRect(X, Y, Width, Height), // destRect
                 FMatrix::Identity,
                 EOdysseyBlendingMode::kNormal,
                 EOdysseyAlphaMode::kNormal,

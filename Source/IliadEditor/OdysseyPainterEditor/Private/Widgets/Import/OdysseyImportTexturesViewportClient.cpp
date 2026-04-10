@@ -28,7 +28,7 @@ FOdysseyImportTexturesViewportClient::FOdysseyImportTexturesViewportClient(uint3
     , mHUD(MakeShared<FOdysseyHUDElement>())
 {
     const UOdysseyPainterEditorSettings& settings = *GetDefault< UOdysseyPainterEditorSettings >();
-    mCheckerboardTexture = FImageUtils::CreateCheckerboardTexture( settings.CheckerColorOne, settings.CheckerColorTwo, settings.CheckerSize );
+    mCheckerboardTexture = FImageUtils::CreateCheckerboardTexture( settings.GetCheckerColorOne(), settings.GetCheckerColorTwo(), settings.GetCheckerSize() );
 
     mNearestNeighborTexture = MakeUnique<FTexture>();
     mNearestNeighborTexture->SamplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(EOdysseyAntiAliasing::NearestNeighbor);
@@ -45,7 +45,7 @@ FOdysseyImportTexturesViewportClient::Draw( FViewport* iViewport, FCanvas* ioCan
         InitTransform(iViewport);
 
     const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
-    ioCanvas->Clear(settings.BackgroundColor);
+    ioCanvas->Clear(settings.GetBackgroundColor());
 
     ioCanvas->PushRelativeTransform(mTransform); //
 

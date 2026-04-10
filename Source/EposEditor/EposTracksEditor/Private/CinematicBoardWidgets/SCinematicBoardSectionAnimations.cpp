@@ -1082,7 +1082,7 @@ SCinematicBoardSectionAnimationTimelineKeys::Construct( const FArguments& InArgs
     mBinding = InArgs._Binding;
 
     const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
-    mCheckboardTexture = FImageUtils::CreateCheckerboardTexture( settings.CheckerColorOne, settings.CheckerColorTwo, settings.CheckerSize );
+    mCheckboardTexture = FImageUtils::CreateCheckerboardTexture( settings.GetCheckerColorOne(), settings.GetCheckerColorTwo(), settings.GetCheckerSize() );
 
     mCheckboardBrush = new FSlateBrush();
     mCheckboardBrush->Tiling = ESlateBrushTileType::Both;
