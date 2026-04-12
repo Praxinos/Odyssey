@@ -435,7 +435,7 @@ void SOdysseyViewport::SetViewportClient(TSharedPtr<class FViewportClient> InVie
     }
 
     mViewportClient  = InViewportClient;
-    mViewport        = MakeShareable(new FOdysseySceneViewport(mViewportClient.Get(), mViewportWidget));
+    mViewport        = MakeShareable(new FOdysseySceneViewport(mViewportClient.Pin().Get(), mViewportWidget));
     mViewportWidget->SetViewportInterface(mViewport.ToSharedRef());
 
     SetFitToViewport(true);

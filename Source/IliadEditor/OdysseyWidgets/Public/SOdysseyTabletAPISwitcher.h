@@ -20,19 +20,18 @@ public:
     /**
      * Constructs the about screen widgets
      */
-     /*
     void Construct( const FArguments& iArgs );
 
     static void Open();
 
-    TSharedPtr<EOdysseyStylusInputDriver>       TabletAPISelected();
+    FName       TabletAPISelected();
 
 private:
-    TSharedRef<SWidget> GenerateTabletAPIComboBoxItem( TSharedPtr<EOdysseyStylusInputDriver> iItem );
-    void ChangeSelectionTabletAPIComboBoxItem( TSharedPtr<EOdysseyStylusInputDriver> iNewSelection, ESelectInfo::Type iSelectInfo );
+    TSharedRef<SWidget> GenerateTabletAPIComboBoxItem( FName iItem );
+    void ChangeSelectionTabletAPIComboBoxItem( FName iNewSelection, ESelectInfo::Type iSelectInfo );
     FText GetComboBoxTabletAPISelectedAsText() const;
 
 private:
-    TSharedPtr<EOdysseyStylusInputDriver>       mTabletAPISelected;
-    TArray<TSharedPtr<EOdysseyStylusInputDriver>> mOptions;*/
+    FName         mTabletAPISelected;
+    TArray<FName> mOptions;
 };

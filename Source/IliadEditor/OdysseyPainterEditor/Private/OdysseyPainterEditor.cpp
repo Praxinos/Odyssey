@@ -143,17 +143,7 @@ TSharedPtr<::ULIS::FBlock> FOdysseyPainterEditor::mCopyBlock = nullptr;
 
 FOdysseyPainterEditor::~FOdysseyPainterEditor()
 {
-    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-    painterEditorModule.RemoveOpenedEditor(this);
-
-    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-    FSlateApplication::Get().UnregisterInputPreProcessor(mAnimationFlipSystem);
-
-    //Unload the source properly to ensure no tool is still processing stuff for example
-    SetSource(nullptr);
-
-    mExtensions.Empty();
-    mTabs.Empty();
+    OnClose();
 }
 
 FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
@@ -563,7 +553,7 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 void
 FOdysseyPainterEditor::SwitchTabletAPI()
 {
-    //SOdysseyTabletAPISwitcher::Open();
+    SOdysseyTabletAPISwitcher::Open();
 }
 
 void
@@ -832,9 +822,6 @@ FOdysseyPainterEditor::OnClose()
 
     //Here is where we should clean everything prior to editor destruction
     mTabs.Empty(); //ensure all tabs are destroyed, because some need the editor on destruction
-
-    //BE CAREFUL: OnClose can be called twice when quiting Unreal Engine
-    // due to a bug in Unreal code
 
     SetSource(nullptr);
 

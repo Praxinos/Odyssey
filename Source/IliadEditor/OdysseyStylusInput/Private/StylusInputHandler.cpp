@@ -7,6 +7,7 @@
 
 #include "StylusInputTabletContext.h"
 #include "Framework/Application/SlateApplication.h"
+#include "OdysseyStylusInputSettings.h"
 
 using namespace UE::StylusInput;
 
@@ -14,6 +15,7 @@ using namespace UE::StylusInput;
 
 FOdysseyStylusInputHandler::FOdysseyStylusInputHandler()
 {
+    mOnStylusInputDriverChanged = UOdysseyStylusInputSettings::OnStylusInputDriverChanged.AddRaw( this, &FOdysseyStylusInputHandler::OnStylusInputDriverChanged );
 }
 
 FOdysseyStylusInputHandler::~FOdysseyStylusInputHandler()
@@ -25,6 +27,8 @@ FOdysseyStylusInputHandler::~FOdysseyStylusInputHandler()
         StylusInputInstance = nullptr;
         StylusInputWindow = nullptr;
     }
+
+    UOdysseyStylusInputSettings::OnStylusInputDriverChanged.Remove(mOnStylusInputDriverChanged);
 }
 
 bool FOdysseyStylusInputHandler::RegisterWindow(const TSharedRef<SWidget>& Widget)
@@ -45,10 +49,39 @@ bool FOdysseyStylusInputHandler::RegisterWindow(const TSharedRef<SWidget>& Widge
 
     UE_LOG(LogTemp, Display, TEXT("Preregister"));
 
-    //IStylusInputInstance* InputInstance = CreateInstance(*Window, "Wintab", false);
-    IStylusInputInstance* InputInstance = CreateInstance(*Window);
+    const UOdysseyStylusInputSettings* settings = GetDefault<UOdysseyStylusInputSettings>();
+    FName selectedAPI = settings->StylusInputDriver;
+    IStylusInputInstance* InputInstance = CreateInstance(*Window, selectedAPI, false);
 
-    UE_LOG(LogTemp, Display, TEXT("PreInstance"))
+    UE_LOG(LogTemp, Display, TEXT("PreInstance, %s"), *(selectedAPI.ToString()))
+
+    if (!InputInstance)
+    {
+        return false;
+    }
+    UE_LOG(LogTemp, Display, TEXT("PostInstance"))
+
+
+    InputInstance->AddEventHandler(this, EEventHandlerThread::OnGameThread);
+
+    StylusInputWindow = Window;
+    StylusInputInstance = InputInstance;
+    UE_LOG(LogTemp, Display, TEXT("Postregister"))
+
+    return true;
+}
+
+bool FOdysseyStylusInputHandler::RegisterWindow(TSharedPtr<SWindow> Window)
+{
+    UnregisterWindow();
+
+    UE_LOG(LogTemp, Display, TEXT("Preregister"));
+
+    const UOdysseyStylusInputSettings* settings = GetDefault<UOdysseyStylusInputSettings>();
+    FName selectedAPI = settings->StylusInputDriver;
+    IStylusInputInstance* InputInstance = CreateInstance(*Window, selectedAPI, false);
+
+    UE_LOG(LogTemp, Display, TEXT("PreInstance, %s"), *(selectedAPI.ToString()))
 
     if (!InputInstance)
     {
@@ -122,6 +155,13 @@ const IStylusInputTabletContext* FOdysseyStylusInputHandler::GetTabletContext(IS
     }
 
     return TabletContext ? TabletContext->Get() : nullptr;
+}
+
+void FOdysseyStylusInputHandler::OnStylusInputDriverChanged(FName iStylusInputDriver)
+{
+    UE_LOG(LogTemp, Display, TEXT("STYLUS INPUT CHANGED"))
+    TSharedPtr<SWindow> Window = StylusInputWindow.Pin();
+    RegisterWindow( Window ); //Registers the previous Window with the new API
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -27,6 +27,8 @@ public:
      * @return True if the window was registered, false if the window was invalid or was previously registered.
      */
     bool RegisterWindow(const TSharedRef<SWidget>& Widget);
+    bool RegisterWindow(TSharedPtr<SWindow> Window); //Same but Window version
+
     bool UnregisterWindow();
 
     // IStylusInputEventHandler implementation
@@ -37,13 +39,18 @@ public:
 public:
     TSpscQueue<UE::StylusInput::FStylusInputPacket> PacketQueue;
 
-private:
+protected:
     void ProcessPacket(const UE::StylusInput::FStylusInputPacket& Packet, UE::StylusInput::IStylusInputInstance* Instance);
     const UE::StylusInput::IStylusInputTabletContext* GetTabletContext(UE::StylusInput::IStylusInputInstance* Instance, uint32 TabletContextID);
+
+    void OnStylusInputDriverChanged(FName iStylusInputDriver);
 
     TMap<uint32, TSharedPtr<UE::StylusInput::IStylusInputTabletContext>> TabletContexts;
     UE::StylusInput::IStylusInputInstance* StylusInputInstance = nullptr;
     TWeakPtr<SWindow> StylusInputWindow;
+
+    FDelegateHandle mOnStylusInputDriverChanged;
+
 };
 
 //#endif // ENABLE_STYLUS_SUPPORT

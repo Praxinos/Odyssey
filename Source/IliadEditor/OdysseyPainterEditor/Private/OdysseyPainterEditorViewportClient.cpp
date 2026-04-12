@@ -38,6 +38,7 @@
 #include "OdysseyPainterEditorCommands.h"
 #include "OdysseyKeyState.h"
 #include "MouseDeltaTracker.h"
+#include "StylusInputTabletContext.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 
 #include <memory>
@@ -100,7 +101,7 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
 void
 FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
-    UE_LOG(LogTemp, Display, TEXT("mIsRecordingStylus: %d"), mIsRecordingStylus);
+    //UE_LOG(LogTemp, Display, TEXT("mIsRecordingStylus: %d"), mIsRecordingStylus);
     RegisterWindow(mOdysseyPainterEditorViewportPtr.Pin().ToSharedRef());
 
     const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
@@ -438,10 +439,7 @@ FOdysseyPainterEditorViewportClient::InputKey( const FInputKeyEventArgs& iEventA
             {
                 StopStylusInputRecord();
             }
-            else
-            {
-                MouseUp(point_in_viewport);
-            }
+            MouseUp(point_in_viewport);
 
             if (mIsMouseDown && !mKeysPressed.Contains(mMouseButton))
                 mMouseButton = FKey();
@@ -606,6 +604,7 @@ FOdysseyPainterEditorViewportClient::MouseDown(const FOdysseyPoint& iPoint)
         return;
 
     mIsMouseDown = true;
+    UE_LOG(LogTemp, Display, TEXT("MOUSE DOWN"));
 
     //If we don't have a surface, then we don't interact with anything
     UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
@@ -676,6 +675,7 @@ FOdysseyPainterEditorViewportClient::MouseUp(const FOdysseyPoint& iPoint)
     if (!mIsMouseDown)
         return;
 
+    UE_LOG(LogTemp, Display, TEXT("MOUSE UP"));
     mIsMouseDown = false;
 
     //If we don't have a surface, then we don't interact with anything
@@ -857,7 +857,7 @@ FOdysseyPainterEditorViewportClient::StartStylusInputRecord()
 
     auto end_time = std::chrono::steady_clock::now();
     auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
-    if(delta > 50 )
+    if( delta > 500 )
         return;
 
     //Down
@@ -874,6 +874,7 @@ FOdysseyPainterEditorViewportClient::StopStylusInputRecord()
     ReadStylusInput();
 
     //UP
+    UE_LOG(LogTemp, Display, TEXT("StopReading"));
     mIsRecordingStylus = false;
 }
 
@@ -882,6 +883,7 @@ FOdysseyPoint FOdysseyPainterEditorViewportClient::StylusPacketToPoint(const UE:
     TSharedPtr<SOdysseyViewport> odysseyViewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
     if (!odysseyViewportWidget)
         return FOdysseyPoint();
+
 
     TSharedPtr< SViewport > viewportWidget = odysseyViewportWidget->GetViewportWidget();
     TSharedPtr<FOdysseySceneViewport> viewport = odysseyViewportWidget->GetViewport();
@@ -892,17 +894,24 @@ FOdysseyPoint FOdysseyPainterEditorViewportClient::StylusPacketToPoint(const UE:
     FVector2D position_in_viewport = viewportWidget->GetCachedGeometry().AbsoluteToLocal( FVector2D( iPacket.X, iPacket.Y ) ) * scale_dpi;
     position_in_viewport += Window->GetRectInScreen().GetTopLeft();
 
-    FOdysseyPoint point(position_in_viewport.X
-        , position_in_viewport.Y
-        , iPacket.Z
-        , iPacket.NormalPressure
-        , iPacket.TimerTick
-        , iPacket.AltitudeOrientation
-        , iPacket.AzimuthOrientation
-        , iPacket.TwistOrientation
-        , iPacket.PitchRotation
-        , iPacket.RollRotation
-        , iPacket.YawRotation);
+    const UE::StylusInput::IStylusInputTabletContext* tabletContext = GetTabletContext(StylusInputInstance, iPacket.TabletContextID);
+    FOdysseyPoint point;
+
+    if( tabletContext )
+    {
+        UE::StylusInput::ETabletSupportedProperties capabilities = tabletContext->GetSupportedProperties();
+        point.x =        EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::X) ? position_in_viewport.X : 0.f;
+        point.y =        EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::Y) ? position_in_viewport.Y : 0.f;
+        point.z =        EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::Z) ? iPacket.Z : 0.f;
+        point.pressure = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::NormalPressure) ? iPacket.NormalPressure : 1.f;
+        point.time =     EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::TimerTick) ? iPacket.TimerTick : 1.f;
+        point.altitude = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::AltitudeOrientation) ? iPacket.AltitudeOrientation : 1.f;
+        point.azimuth =  EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::AzimuthOrientation) ? iPacket.AzimuthOrientation : 1.f;
+        point.twist =    EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::TwistOrientation) ? iPacket.TwistOrientation : 1.f;
+        point.pitch =    EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::PitchRotation) ? iPacket.PitchRotation : 1.f;
+        point.roll =     EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::RollRotation) ? iPacket.RollRotation : 1.f;
+        point.yaw =      EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::YawRotation) ? iPacket.YawRotation : 1.f;
+    }
 
     TArray<FKey> pressedKeys = mKeysPressed;
     pressedKeys.AddUnique(FOdysseyKeyState::GetLastKey());
@@ -924,14 +933,14 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput()
         FOdysseyPoint point = StylusPacketToPoint(packet);
 
         //Force MouseDown when using the Right Mouse Button to allow hovered mouse clicks
-        if (!mStylusIsDown && (packet.PenStatus == UE::StylusInput::EPenStatus::CursorIsTouching))
+        if (!mStylusIsDown && (packet.Type == UE::StylusInput::EPacketType::StylusDown))
         {
             //MouseDown
             MouseDown(point);
             mStylusIsDown = true;
             mLastStylusEventIndex = packet.SerialNumber;
         }
-        else if (mStylusIsDown && packet.PenStatus != UE::StylusInput::EPenStatus::CursorIsTouching )
+        else if (mStylusIsDown && (packet.Type == UE::StylusInput::EPacketType::StylusUp))
         {
             //MouseUp
             MouseUp(point);
@@ -976,8 +985,8 @@ void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylu
 
     UE::StylusInput::FStylusInputPacket copyPacket = Packet;
 
-    if( copyPacket.PenStatus == UE::StylusInput::EPenStatus::CursorIsTouching && copyPacket.NormalPressure == 0.f )
-        copyPacket.PenStatus = UE::StylusInput::EPenStatus::None;
+    /*if( copyPacket.PenStatus == UE::StylusInput::EPenStatus::CursorIsTouching && copyPacket.NormalPressure == 0.f )
+        copyPacket.PenStatus = UE::StylusInput::EPenStatus::None;*/
 
     PacketQueue.Enqueue(copyPacket);
     mLastStylusEventIndex = 0;

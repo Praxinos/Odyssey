@@ -4,16 +4,16 @@
 #include "SOdysseyTabletAPISwitcher.h"
 
 #include "Dialog/SCustomDialog.h"
+#include "StylusInputInterface.h"
+#include "OdysseyStylusInputSettings.h"
 
 #define LOCTEXT_NAMESPACE "Widgets"
 
 //---
-/*
+
 void
 SOdysseyTabletAPISwitcher::Open()
 {
-    UOdysseyStylusInputSettings* settings = GetMutableDefault< UOdysseyStylusInputSettings >();
-
     TSharedPtr<SOdysseyTabletAPISwitcher> apiSwitcher = SNew(SOdysseyTabletAPISwitcher);
 
     TSharedPtr<SCustomDialog> customDialog;
@@ -30,10 +30,12 @@ SOdysseyTabletAPISwitcher::Open()
             apiSwitcher.ToSharedRef()
         ];
 
-    if( customDialog->ShowModal() == 0OK )
+    if( customDialog->ShowModal() == 0/*OK*/ )
     {
-        settings->StylusInputDriver = *(apiSwitcher->TabletAPISelected().Get());
-        settings->RefreshStylusInputDriver();
+        UOdysseyStylusInputSettings* settings = GetMutableDefault<UOdysseyStylusInputSettings>();
+        settings->StylusInputDriver = apiSwitcher->TabletAPISelected();
+        settings->SaveConfig();
+        UOdysseyStylusInputSettings::OnStylusInputDriverChanged.Broadcast(settings->StylusInputDriver);
     }
 }
 
@@ -42,17 +44,9 @@ SOdysseyTabletAPISwitcher::Open()
 void
 SOdysseyTabletAPISwitcher::Construct( const FArguments& iArgs )
 {
-    UOdysseyStylusInputSettings* settings = GetMutableDefault< UOdysseyStylusInputSettings >();
-    mTabletAPISelected = MakeShared<EOdysseyStylusInputDriver>(settings->StylusInputDriver);
-
-    #if PLATFORM_WINDOWS
-        mOptions.Add(MakeShared< EOdysseyStylusInputDriver >(EOdysseyStylusInputDriver::OdysseyStylusInputDriver_Ink));
-        mOptions.Add(MakeShared< EOdysseyStylusInputDriver >(EOdysseyStylusInputDriver::OdysseyStylusInputDriver_Wintab));
-    #elif PLATFORM_MAC
-        mOptions.Add(MakeShared< EOdysseyStylusInputDriver >(EOdysseyStylusInputDriver::OdysseyStylusInputDriver_NSEvent));
-    #endif
-
-    mOptions.Add(MakeShared< EOdysseyStylusInputDriver >(EOdysseyStylusInputDriver::OdysseyStylusInputDriver_None));
+    const UOdysseyStylusInputSettings* settings = GetDefault<UOdysseyStylusInputSettings>();
+    mTabletAPISelected = settings->GetStylusDriver();
+    mOptions = UE::StylusInput::GetAvailableInterfaces();
 
     ChildSlot
     [
@@ -64,7 +58,7 @@ SOdysseyTabletAPISwitcher::Construct( const FArguments& iArgs )
         ]
         + SVerticalBox::Slot()
         [
-            SNew(SComboBox<TSharedPtr<EOdysseyStylusInputDriver>>)
+            SNew(SComboBox<FName>)
             .OptionsSource(&mOptions)
             .OnGenerateWidget(this, &SOdysseyTabletAPISwitcher::GenerateTabletAPIComboBoxItem)
             .OnSelectionChanged( this, &SOdysseyTabletAPISwitcher::ChangeSelectionTabletAPIComboBoxItem )
@@ -76,21 +70,21 @@ SOdysseyTabletAPISwitcher::Construct( const FArguments& iArgs )
     ];
 }
 
-TSharedPtr<EOdysseyStylusInputDriver>
+FName
 SOdysseyTabletAPISwitcher::TabletAPISelected()
 {
     return mTabletAPISelected;
 }
 
 TSharedRef<SWidget>
-SOdysseyTabletAPISwitcher::GenerateTabletAPIComboBoxItem( TSharedPtr<EOdysseyStylusInputDriver> iItem )
+SOdysseyTabletAPISwitcher::GenerateTabletAPIComboBoxItem( FName iItem )
 {
-    return  SNew(STextBlock)
-            .Text( UOdysseyStylusInputSettings::GetFormatText( iItem ) );
+    return SNew( STextBlock )
+           .Text( FText::FromName(iItem) );
 }
 
 void
-SOdysseyTabletAPISwitcher::ChangeSelectionTabletAPIComboBoxItem( TSharedPtr<EOdysseyStylusInputDriver> iNewSelection, ESelectInfo::Type iSelectInfo )
+SOdysseyTabletAPISwitcher::ChangeSelectionTabletAPIComboBoxItem( FName iNewSelection, ESelectInfo::Type iSelectInfo )
 {
     mTabletAPISelected = iNewSelection;
 }
@@ -98,7 +92,7 @@ SOdysseyTabletAPISwitcher::ChangeSelectionTabletAPIComboBoxItem( TSharedPtr<EOdy
 FText
 SOdysseyTabletAPISwitcher::GetComboBoxTabletAPISelectedAsText() const
 {
-    return UOdysseyStylusInputSettings::GetFormatText( mTabletAPISelected );
+    return FText::FromName( mTabletAPISelected );
 }
-*/
+
 #undef LOCTEXT_NAMESPACE
