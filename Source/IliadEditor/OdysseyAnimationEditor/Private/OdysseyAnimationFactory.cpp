@@ -102,6 +102,9 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
                 return {};
             }
         );
+
+        // Must be done after all modifications
+        backgroundLayer->SetIsLocked( true );
     }
 
     return animation;

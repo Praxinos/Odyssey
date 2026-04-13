@@ -126,6 +126,9 @@ FOdysseyTextureConfiguration::CreateTexture(UObject* iParent, FName iName, EObje
             }
         );
         rasterBlockMutator.Commit();
+
+        // Must be done after all modifications
+        layer->SetIsLocked( true );
     }
 
     texture->PostEditChange();
