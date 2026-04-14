@@ -6,12 +6,14 @@
 #include "ArianeEditor.h"
 #include "ArianeEditorTab.h"
 #include "ArianeEditorLayerStackTab.h"
+#include "ArianeEditorColorSelectorTab.h"
 #include "SArianeEditorMasterPanel.h"
 
 // Unreal headers
 #include "LevelEditor.h"
 #include "Widgets/SNullWidget.h"
 #include "Toolkits/BaseToolkit.h"
+#include "Framework/Docking/LayoutExtender.h"
 
 /* Gary
 #include "OdysseyStyle.h"
@@ -426,8 +428,12 @@ FArianeEditorViewportToolkit::GetBaseToolkitName() const
 void
 FArianeEditorViewportToolkit::InvokeUI()
 {
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
+    TSharedPtr<FTabManager> TabManager = LevelEditorModule.GetLevelEditorTabManager();
+
     Editor->RegisterTabSpawners();
     Editor->RegisterTools();
+
 /* Gary
     if (GEditor)
         GEditor->OnEditorClose().AddRaw(this, &FArianeEditorViewportToolkit::OnEditorClose);
@@ -444,6 +450,8 @@ FArianeEditorViewportToolkit::InvokeUI()
         InlineContentHolder->SetContent( Content.ToSharedRef() );
 
     Editor->PostInit();
+
+    //MakeDefaultLayout();
 }
 
 void

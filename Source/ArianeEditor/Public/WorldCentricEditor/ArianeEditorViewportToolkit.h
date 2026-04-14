@@ -86,6 +86,7 @@ public:
 protected:
     void ExtendMenu ( FMenuBuilder& MenuBuilder );
     void AddActorMenuEntry( FToolMenuSection& InSection );
+    void MakeDefaultLayout();
 
 private:
     FArianeEditorViewportEdMode* EdMode;

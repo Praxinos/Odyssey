@@ -36,16 +36,16 @@ UArianeLayer::UArianeLayer()
 UArianeLayerFolder*
 UArianeLayer::GetRootFolder()
 {
-    UArianeLayer* Candidate = this;
+    UArianeLayerFolder* Candidate = this->GetParentFolder();
 
     while ( Candidate )
     {
-        if( Cast<UArianeLayerStack>(Candidate->GetOuter()) )
+        if( Candidate->GetParentFolder() == nullptr )
         {
-            return Cast<UArianeLayerFolder>(Candidate);
+            return Candidate;
         }
 
-        Candidate = Candidate->GetParent();
+        Candidate = Candidate->GetParentFolder();
     }
 
     return nullptr;
@@ -54,17 +54,7 @@ UArianeLayer::GetRootFolder()
 UArianeLayerStack*
 UArianeLayer::GetLayerStack()
 {
-    UArianeLayerFolder* RootFolder = GetRootFolder();
-
-    return RootFolder ? Cast<UArianeLayerStack>(RootFolder->GetOuter()) : nullptr;
-}
-
-UArianeLayerFolder*
-UArianeLayer::GetParent()
-{
-    // Note: for the root folder, this will return null due to the cast.
-    // Indeed, the Outer Object is the layer stack in that case
-    return Cast<UArianeLayerFolder>(GetOuter());
+    return Cast<UArianeLayerStack>(GetOuter());
 }
 
 /*
@@ -97,7 +87,7 @@ UArianeLayer::SetLocked( bool bInLocked )
 bool
 UArianeLayer::IsLocked( bool bHierarchical )
 {
-    UArianeLayerFolder* ParentLayer = GetParent();
+    UArianeLayerFolder* ParentLayer = GetParentFolder();
 
     if( bHierarchical && ParentLayer )
     {
@@ -122,10 +112,20 @@ UArianeLayer::IsSelectedInEditor() const
 #endif
 
 void
+UArianeLayer::SetParentFolder( UArianeLayerFolder* InParentFolder )
+{
+    ParentFolder = InParentFolder;
+}
+
+UArianeLayerFolder*
+UArianeLayer::GetParentFolder()
+{
+    return ParentFolder;
+}
+
+void
 UArianeLayer::Invalidate( const FArianeLayerInvalidationFlags& InInvalidationFlags )
 {
-    UArianeLayerFolder* ParentFolder = GetParent();
-
     if( ParentFolder )
     {
         ParentFolder->InvalidateChildLayer( this );

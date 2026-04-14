@@ -53,12 +53,12 @@ public:
     // debug
     void PrintPointers();
     void PostLoad();
-    void PostEditUndo();
     void ResetHierarchy();
     EArianeLayerDrawingOrigin GetDrawingOrigin();
     void SetDrawingOrigin( EArianeLayerDrawingOrigin InDrawingOrigin );
     EArianeLayerDrawingOrientation GetDrawingOrientation();
     void SetDrawingOrientation( EArianeLayerDrawingOrientation InDrawingOrientation );
+    virtual void PostEditUndo() override;
 
 protected:
     void BindDelegates();

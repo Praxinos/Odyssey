@@ -1,11 +1,13 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-// Ariane headers
+// Ariane Editor headers
 #include "ArianeEditorModule.h"
 #include "ArianeEditorCommands.h"
 #include "ArianeEditorViewportToolkit.h"
 #include "ArianeEditor.h"
+#include "ArianeEditorColorSelectorTab.h"
+// Ariane headers
 #include "ArianePainting3DActor.h"
 // Unreal headers
 #include "AssetToolsModule.h"
@@ -19,6 +21,7 @@
 #include "EditorModeRegistry.h"
 #include "Interfaces/IPluginManager.h"
 #include "EditorModeManager.h"
+#include "Framework/Docking/LayoutExtender.h"
 
 #include "OdysseyStyle.h"
 

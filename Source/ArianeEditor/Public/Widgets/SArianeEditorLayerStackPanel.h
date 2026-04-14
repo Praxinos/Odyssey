@@ -20,6 +20,7 @@ class UArianeEditorTool;
  */
 class ARIANEEDITOR_API SArianeEditorLayerStackPanel
     : public SCompoundWidget
+    , public FGCObject
 {
 public:
     SLATE_BEGIN_ARGS(SArianeEditorLayerStackPanel)
@@ -34,10 +35,14 @@ public:
 
     void Construct(const FArguments& InArgs, FArianeEditor* InEditor);
 
+public:
+    // Implements FGCObject::AddReferencedObjects
+    virtual void AddReferencedObjects( FReferenceCollector& Collector );
+    // Implements FGCObject::GetReferencerName
+    FString GetReferencerName() const;
+
 protected:
     FReply NewLayer();
-    TSharedPtr<SWidget> CreateTransformWidget();
-    void OnTransformChanged( const FPropertyChangedEvent& PropertyChangedEvent );
     void OnLayerSelectionChanged();
     void OnPre3DPaintingComponentSelectionChanged();
     void OnPost3DPaintingComponentSelectionChanged();

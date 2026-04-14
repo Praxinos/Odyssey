@@ -27,7 +27,7 @@ UArianeEditorPathDrawingTool::~UArianeEditorPathDrawingTool()
 }
 
 UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
-    : Size( 5.0f )
+    : Size( 25.0f )
     , bPressureSensitivity( false )
     , EditedPath( nullptr )
     //, LineType ( EArianePainting3DGeometryMode::Flat )
@@ -161,11 +161,9 @@ UArianeEditorPathDrawingTool::GetDrawingPlane( UArianeLayerDrawing* DrawingLayer
         break;
     }
 
-/* Useless as the plane passes through the Layer's origin
     DrawingPlane.W = - ( ( DrawingPlane.X * LayerWorldPosition.X )
                        + ( DrawingPlane.Y * LayerWorldPosition.Y )
                        + ( DrawingPlane.Z * LayerWorldPosition.Z ) );
-*/
 
     return DrawingPlane;
 }
@@ -191,17 +189,17 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
             FVector CameraCoords = iViewportClient->GetViewLocation();
             // note: we could do that at MouseDown
             FVector4 DrawingPlane = GetDrawingPlane( DrawingLayer, CameraCoords );
-            FVector rayOrigin, rayDirection;
-            FVector intersectAt;
+            FVector RayOrigin, RayDirection;
+            FVector IntersectAt;
 
             View->DeprojectFVector2D( FVector2D( PointerState.ViewportX
                                                , PointerState.ViewportY )
-                                    , rayOrigin
-                                    , rayDirection );
+                                    , RayOrigin
+                                    , RayDirection );
 
-            if( Intersect( DrawingPlane, rayOrigin, rayDirection, intersectAt  ) > 0.0f )
+            if( Intersect( DrawingPlane, RayOrigin, RayDirection, IntersectAt  ) > 0.0f )
             {
-                FVector localCoords = LayerWorldTransform.Inverse().TransformFVector4( intersectAt );
+                FVector localCoords = LayerWorldTransform.Inverse().TransformFVector4( IntersectAt );
                 FVector localNormal = LayerWorldTransform.Inverse().TransformVector( FVector( DrawingPlane ) );
                 FArianeVertex *Vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last().GetVertex()
                                                                          : nullptr;

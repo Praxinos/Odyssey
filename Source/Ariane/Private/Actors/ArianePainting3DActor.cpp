@@ -44,6 +44,8 @@ AArianePainting3DActor::PostLoad()
 {
     UArianePainting3DComponent* Painting3DComponent = GetPainting3DComponent();
 
+    Super::PostLoad();
+
     Painting3DComponent->Init();
 }
 

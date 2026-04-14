@@ -40,18 +40,22 @@ void
 UArianeEditorLayerView::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-    UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-    const TArray<UArianeLayer*>& SelectedLayers = LayerStack->GetSelectedLayers();
 
-    for( UArianeLayer* Layer : SelectedLayers )
+    if( Painting3DComponent )
     {
-        PostEditChangeLayerProperty( Layer, PropertyChangedEvent );
-    }
+        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+        const TArray<UArianeLayer*>& SelectedLayers = LayerStack->GetSelectedLayers();
 
-    // Note: this will trigger OnPreUpdateDelegate and OnPostUpdateDelegate.
-    // Any widget that has registrerd to these delegates can update itself.
-    // for example the LayerTransformTool will update its gizmo.
-    Painting3DComponent->Update( PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive );
+        for( UArianeLayer* Layer : SelectedLayers )
+        {
+            PostEditChangeLayerProperty( Layer, PropertyChangedEvent );
+        }
+
+        // Note: this will trigger OnPreUpdateDelegate and OnPostUpdateDelegate.
+        // Any widget that has registrerd to these delegates can update itself.
+        // for example the LayerTransformTool will update its gizmo.
+        Painting3DComponent->Update( PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive );
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

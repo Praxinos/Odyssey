@@ -8,15 +8,15 @@
 class FArianeEditor;
 class UArianeEditorTool;
 
-class ARIANEEDITOR_API FArianeEditorToolTab : public FArianeEditorTab
+class ARIANEEDITOR_API FArianeEditorColorSelectorTab : public FArianeEditorTab
 {
 public:
     static const FName& StaticId();
 
 public:
     // Construction / Destruction
-    virtual ~FArianeEditorToolTab();
-    FArianeEditorToolTab(FArianeEditor* InEditor);
+    virtual ~FArianeEditorColorSelectorTab();
+    FArianeEditorColorSelectorTab( FArianeEditor* InEditor );
 
 protected:
     // FOdysseyEditorTab interface
@@ -25,13 +25,8 @@ protected:
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 protected:
-    // Event Listeners
-    void OnToolSelected(UArianeEditorTool* iTool);
-
-protected:
     // Widget Getters
     int WidgetIndex() const;
-    UArianeEditorTool* GetCurrentTool() const;
 
 private:
     FArianeEditor* Editor;

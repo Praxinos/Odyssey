@@ -21,6 +21,7 @@ class FArianeEditorLayerRowItem
 
         UArianeLayer* GetLayer();
         bool IsSensitive();
+        const TArray<TSharedPtr<FArianeEditorLayerRowItem>>& GetChildren();
 
     public:
         UArianeLayer* Layer;

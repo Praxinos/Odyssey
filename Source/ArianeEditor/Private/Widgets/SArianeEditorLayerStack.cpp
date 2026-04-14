@@ -297,10 +297,14 @@ SArianeEditorLayerStack::Update()
 
         BuildTree( RootItem );
 
-        ItemsSource.Add( RootItem );
+        // We hide the root item by showing only its child items
+        for( TSharedPtr<FArianeEditorLayerRowItem> ChildItem : RootItem->GetChildren() )
+        {
+            ItemsSource.Add( ChildItem );
 
-        // Expand items if need
-        ExpandTree( RootItem );
+            // Expand items if need
+            ExpandTree( ChildItem );
+        }
     }
 }
 

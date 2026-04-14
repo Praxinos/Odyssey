@@ -31,6 +31,8 @@ SArianeEditorLayerStackPanel::OnPre3DPaintingComponentSelectionChanged()
         UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
 
         LayerStack->OnPostLayerSelectionChangedDelegate().RemoveAll( this );
+        // Refresh the details view
+        OnLayerSelectionChanged();
     }
 }
 
@@ -44,6 +46,8 @@ SArianeEditorLayerStackPanel::OnPost3DPaintingComponentSelectionChanged()
         UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
 
         LayerStack->OnPostLayerSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnLayerSelectionChanged );
+        // Refresh the details view
+        OnLayerSelectionChanged();
     }
 }
 
@@ -143,6 +147,20 @@ SArianeEditorLayerStackPanel::NewLayer()
     }
 
     return FReply::Handled();
+}
+
+void
+SArianeEditorLayerStackPanel::AddReferencedObjects( FReferenceCollector& Collector )
+{
+    // Prevent UObjects from being garbage collected
+    Collector.AddReferencedObject( LayerView );
+    Collector.AddReferencedObject( LayerDrawingView );
+}
+
+FString
+SArianeEditorLayerStackPanel::GetReferencerName() const
+{
+    return FString( "SArianeEditorLayerStackPanel" );
 }
 
 #undef LOCTEXT_NAMESPACE

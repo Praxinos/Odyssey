@@ -53,12 +53,17 @@ UArianeLayerDrawing::PostLoad()
 {
     Super::PostLoad();
 
+    // RootObjectID won't have its cache reset after Undoing, we have to force it.
+    RootObjectID.InvalidateCache();
+
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
 
         Object->PostLoad();
     }
+
+    BindDelegates();
 
     Update( false );
 }
@@ -77,6 +82,8 @@ UArianeLayerDrawing::PostEditUndo()
 
         Object->PostEditUndo();
     }
+
+    BindDelegates();
 
     Update( false );
 }
@@ -167,7 +174,7 @@ UArianeLayerDrawing::ResetHierarchy()
     UnbindDelegates( );
 
     InstancedObjects.Empty();
-    // Nb: this object will be destroyed automatically when loading from the disc, as the TArray is replaced entirely.
+
     RootObjectID = FArianeObjectID( AllocObject() );
 
     BindDelegates();

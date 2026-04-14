@@ -35,6 +35,12 @@ FArianeEditorLayerRowItem::GetLayer()
     return Layer;
 }
 
+const TArray<TSharedPtr<FArianeEditorLayerRowItem>>&
+FArianeEditorLayerRowItem::GetChildren()
+{
+    return Children;
+}
+
 bool
 FArianeEditorLayerRowItem::IsSensitive()
 {
@@ -62,7 +68,7 @@ SArianeEditorLayerRow::IsHierarchicallyVisible() const
 bool
 SArianeEditorLayerRow::IsVisibleCheckBoxEnabled() const
 {
-    return Item->GetLayer()->GetParent() ? Item->GetLayer()->GetParent()->IsVisible() : true;
+    return Item->GetLayer()->GetParentFolder() ? Item->GetLayer()->GetParentFolder()->IsVisible() : true;
 }
 
 ECheckBoxState
@@ -76,7 +82,7 @@ SArianeEditorLayerRow::IsHierarchicallyLocked() const
 bool
 SArianeEditorLayerRow::IsLockedCheckBoxEnabled() const
 {
-    return Item->GetLayer()->GetParent() ? Item->GetLayer()->GetParent()->IsLocked( true ) == false : true;
+    return Item->GetLayer()->GetParentFolder() ? Item->GetLayer()->GetParentFolder()->IsLocked( true ) == false : true;
 }
 
 ECheckBoxState
@@ -375,7 +381,7 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
             // reverse order in order to get the most forward objet on top of the hierarchy
             case DROPZONE_BELOW:
             {
-                UArianeLayerFolder* ParentFolder = ItemLayer->GetParent();
+                UArianeLayerFolder* ParentFolder = ItemLayer->GetParentFolder();
 
                 // don't drop onto the same object or else expect some infinite loop
                 if( ParentFolder != SelectedLayer )
@@ -404,7 +410,7 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
             // reverse order in order to get the most forward objet on top of the hierarchy
             case DROPZONE_ABOVE:
             {
-                UArianeLayerFolder* ParentFolder = ItemLayer->GetParent();
+                UArianeLayerFolder* ParentFolder = ItemLayer->GetParentFolder();
 
                 if( ParentFolder != SelectedLayer )
                 {
