@@ -15,6 +15,7 @@ FOdysseyPainterEditorRasterSelection::FOdysseyPainterEditorRasterSelection()
     : mHUD(MakeShared<FOdysseyHUDElement>())
 {
     mDottedSelectionCustomization.mColors.Add(FLinearColor::Black);
+    mDottedSelectionCustomization.mColors.Add(FLinearColor::White);
     mDottedSelectionCustomization.mGapLength = 5.f;
     mDottedSelectionCustomization.mSegmentLength = 10.f;
     mDottedSelectionCustomization.mSpeed = 10.f;
