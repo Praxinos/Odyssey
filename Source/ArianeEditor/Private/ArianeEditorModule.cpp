@@ -7,6 +7,7 @@
 #include "ArianeEditorViewportToolkit.h"
 #include "ArianeEditor.h"
 #include "ArianeEditorColorSelectorTab.h"
+#include "ArianeEditorLayerStackTab.h"
 // Ariane headers
 #include "ArianePainting3DActor.h"
 // Unreal headers
@@ -22,6 +23,7 @@
 #include "Interfaces/IPluginManager.h"
 #include "EditorModeManager.h"
 #include "Framework/Docking/LayoutExtender.h"
+#include "Framework/Docking/TabManager.h"
 
 #include "OdysseyStyle.h"
 
@@ -88,6 +90,22 @@ FArianeEditorModule::StartupModule()
 
     RegisterToolbarButton();
 
+
+
+
+    FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
+
+    LevelEditorModule.OnRegisterLayoutExtensions().AddLambda([](FLayoutExtender& InExtender)
+    {
+        FTabManager::FTab ColorSelectorTab = FTabManager::FTab(FTabId(FArianeEditorColorSelectorTab::StaticId()), ETabState::OpenedTab);
+
+        InExtender.ExtendLayout(
+            FTabId("LevelEditorSceneOutliner"),
+            ELayoutExtensionPosition::Below,
+            ColorSelectorTab
+        );
+    });
+
 /* Gary
     RegisterBrushOverrides(); //First thing to do, as it modifies the Brush CDO
     RegisterSettings();
@@ -114,6 +132,11 @@ FArianeEditorModule::ShutdownModule()
     UToolMenus::UnRegisterStartupCallback( this );
 
     UnregisterEditorMode();
+
+
+
+
+
 
 /* Gary
     UnregisterBrushOverrides();

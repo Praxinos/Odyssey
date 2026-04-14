@@ -16,7 +16,7 @@ class FEditorModeTools;
 /**
  * Odyssey paint on viewport editor mode
  */
-class ARIANEEDITOR_API FArianeEditorViewportEdMode : public FEdMode//, public IStylusMessageHandler
+class ARIANEEDITOR_API FArianeEditorViewportEdMode : public FEdMode
 {
 public:
     const static FEditorModeID EM_ArianeEditorViewportEdModeId;
@@ -116,11 +116,6 @@ private:
                             , const FViewportClick& Click
                             , const FArianePointerState& State );
 #endif
-
-    /** Force retrieval of the last events from the stylus input */
-    void FlushStylusInput();
-    void ListenStylusInput();
-    void IgnoreStylusInput();
 
 private:
     void OnEditorClose();

@@ -434,6 +434,8 @@ FArianeEditorViewportToolkit::InvokeUI()
     Editor->RegisterTabSpawners();
     Editor->RegisterTools();
 
+    TabManager->TryInvokeTab( FTabId( FArianeEditorColorSelectorTab::StaticId() ) );
+
 /* Gary
     if (GEditor)
         GEditor->OnEditorClose().AddRaw(this, &FArianeEditorViewportToolkit::OnEditorClose);
@@ -453,7 +455,13 @@ FArianeEditorViewportToolkit::InvokeUI()
 
     //MakeDefaultLayout();
 }
-
+/*
+void
+FArianeEditorViewportToolkit::Exit()
+{
+    Editor->UnregisterTools();
+}
+*/
 void
 FArianeEditorViewportToolkit::ShutdownUI()
 {
@@ -467,7 +475,7 @@ FArianeEditorViewportToolkit::ShutdownUI()
 */
     Editor->CloseAllTabs();
     Editor->UnregisterTabSpawners();
-    Editor->UnregisterTools();
+
 
     if (GEditor)
         GEditor->OnEditorClose().RemoveAll(this);
@@ -488,11 +496,13 @@ FArianeEditorViewportToolkit::OnEditorClose()
 }
 */
 
+
 TSharedPtr<SWidget>
 FArianeEditorViewportToolkit::GetInlineContent() const
 {
     return SNew(SArianeEditorMasterPanel, const_cast<FArianeEditor*>( Editor.Get()) );
 }
+
 
 FArianeEditorViewportEdMode*
 FArianeEditorViewportToolkit::GetEditorMode() const

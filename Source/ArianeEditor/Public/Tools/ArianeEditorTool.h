@@ -12,6 +12,7 @@
 #include "ArianePointerState.h"
 // OdysseyHeaders
 #include "OdysseyPainterEditorColorType.h"
+#include "IStylusState.h"
 
 #include "ArianeEditorTool.generated.h"
 
@@ -28,6 +29,7 @@ UCLASS(Abstract)
 class ARIANEEDITOR_API UArianeEditorTool : public UInteractiveTool
                                          , public IClickDragBehaviorTarget
                                          , public IHoverBehaviorTarget
+                                         , public IStylusMessageHandler
 {
     GENERATED_BODY()
 
@@ -108,6 +110,10 @@ public:
 
     virtual void Init( FArianeEditor* InEditor );
 
+    virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget
+                                     , const TArray<FStylusState>& NewStates
+                                     , int32 StylusIndex );
+
 protected:
     void PopupContextMenu();
     TSharedPtr<SWidget> CreateContextMenu();
@@ -164,6 +170,12 @@ protected:
     virtual void PostInitProperties() override;
     virtual void PostDuplicate(EDuplicateMode::Type DuplicateMode) override;
 
+protected:
+    // Temp
+    void FlushStylusInput();
+    void ListenStylusInput();
+    void IgnoreStylusInput();
+
 public:
     FArianeEditor* GetEditor() const;
 /* Gary
@@ -181,6 +193,8 @@ protected:
     bool bHasContextMenu;
     bool bInited;
     FKey PressedKey;
+    // Temp
+    double Pressure;
 
 public:
     const FSlateBrush* Icon;

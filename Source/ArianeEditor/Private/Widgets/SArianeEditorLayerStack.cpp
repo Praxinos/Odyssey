@@ -200,6 +200,20 @@ SArianeEditorLayerStack::RenameSelectedItem()
     }
 }
 
+void
+SArianeEditorLayerStack::DeleteSelectedItem()
+{
+    // no need to create an undo record or do anything if the selection is empty
+    for( TSharedPtr<FArianeEditorLayerRowItem> SelectedItem : SelectedItems )
+    {
+        UArianeLayer* Layer = SelectedItem->GetLayer();
+
+        Layer->GetParentFolder()->RemoveChildLayer( Layer );
+    }
+
+    Update();
+}
+
 TSharedPtr<SWidget>
 SArianeEditorLayerStack::OnContextMenuOpening()
 {

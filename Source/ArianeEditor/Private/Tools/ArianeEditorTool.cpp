@@ -7,6 +7,8 @@
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayerDrawing.h"
+// Odyssey
+#include "IOdysseyStylusInputModule.h"
 // Unreal
 #include "Framework/Application/SlateApplication.h"
 #include "Misc/TransactionObjectEvent.h"
@@ -87,6 +89,7 @@ void UArianeEditorTool::PostDuplicate(EDuplicateMode::Type DuplicateMode)
 void
 UArianeEditorTool::Activate()
 {
+    ListenStylusInput();
     // register IInputProcessor interface for handling global key press
 /* Gary
     FSlateApplication::Get().RegisterInputPreProcessor(mInputProcessor);
@@ -103,6 +106,7 @@ UArianeEditorTool::Activate()
 void
 UArianeEditorTool::Inactivate()
 {
+    IgnoreStylusInput();
     // unregister IInputProcessor interface
 /* Gary
     FSlateApplication::Get().UnregisterInputPreProcessor(mInputProcessor);
@@ -113,6 +117,47 @@ UArianeEditorTool::Inactivate()
 
     mCommandList = nullptr;
 */
+}
+
+void
+UArianeEditorTool::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget
+                                       , const TArray<FStylusState>& NewStates
+                                       , int32 StylusIndex )
+{
+    for ( const FStylusState& State : NewStates )
+    {
+        Pressure = State.GetPressure();
+    }
+}
+
+// Temp
+void
+UArianeEditorTool::FlushStylusInput()
+{
+    UOdysseyStylusInputSubsystem* InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+
+    if( InputSubsystem )
+        InputSubsystem->Flush();
+}
+
+// Temp
+void
+UArianeEditorTool::ListenStylusInput()
+{
+    UOdysseyStylusInputSubsystem* InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+
+    if( InputSubsystem )
+        InputSubsystem->AddMessageHandler( *this );
+}
+
+// Temp
+void
+UArianeEditorTool::IgnoreStylusInput()
+{
+    UOdysseyStylusInputSubsystem* InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+
+    if( InputSubsystem )
+        InputSubsystem->RemoveMessageHandler(*this);
 }
 
 bool
@@ -562,11 +607,18 @@ void
 UArianeEditorTool::OnClickPress( const FInputDeviceRay& PressPos )
 {
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+    FArianePointerState Pointerstate = FArianePointerState( PressPos.ScreenPosition.X
+                                                          , PressPos.ScreenPosition.Y );
+
+    Pressure = 1.0f;
+
+    FlushStylusInput(); // will fill Pressure if any
+
+    Pointerstate.Pressure  = Pressure;
 
     OnMouseDown( ViewportClient
                , PressedKey
-               , FArianePointerState( PressPos.ScreenPosition.X
-                                    , PressPos.ScreenPosition.Y ) );
+               , Pointerstate );
 }
 
 // Implements IClickDragBehaviorTarget::OnClickDrag
@@ -574,12 +626,18 @@ void
 UArianeEditorTool::OnClickDrag( const FInputDeviceRay& DragPos )
 {
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+    FArianePointerState Pointerstate = FArianePointerState( DragPos.ScreenPosition.X
+                                                          , DragPos.ScreenPosition.Y );
 
+    Pressure = 1.0f;
+
+    FlushStylusInput(); // will fill Pressure if any
+
+    Pointerstate.Pressure  = Pressure;
 
     OnMouseDrag( ViewportClient
                , PressedKey
-               , FArianePointerState( DragPos.ScreenPosition.X
-                                    , DragPos.ScreenPosition.Y ) );
+               , Pointerstate );
 }
 
 // Implements IClickDragBehaviorTarget::OnClickRelease
@@ -587,11 +645,18 @@ void
 UArianeEditorTool::OnClickRelease( const FInputDeviceRay& ReleasePos )
 {
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+    FArianePointerState Pointerstate = FArianePointerState( ReleasePos.ScreenPosition.X
+                                                          , ReleasePos.ScreenPosition.Y );
+
+    Pressure = 1.0f;
+
+    FlushStylusInput(); // will fill Pressure if any
+
+    Pointerstate.Pressure  = Pressure;
 
     OnMouseUp( ViewportClient
              , PressedKey
-             , FArianePointerState( ReleasePos.ScreenPosition.X
-                                  , ReleasePos.ScreenPosition.Y ) );
+             , Pointerstate );
 }
 
 void

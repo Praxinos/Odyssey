@@ -60,9 +60,6 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* iViewportClien
 
             if( DrawingLayer )
             {
-                //Painting3DComponent->Modify();
-                //LayerStack->Modify();
-                //LayerStack->GetRootFolder()->Modify();
                 DrawingLayer->Modify();
 
                 EditedPath = DrawingLayer->AllocPath();
@@ -72,14 +69,7 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* iViewportClien
                 EditedPath->SetColor( ueColor );
                 EditedPath->SetLineType( LineType );
 
-                //GEditor->UndoTransaction();
-                //painting3DComponent->PrintPointers();
-
                 PlotVertex( iViewportClient, PointerState, true );
-                //PlotVertex( iViewportClient, iViewportX + 100, iViewportY );
-                //PlotVertex( iViewportClient, iViewportX + 200, iViewportY );
-                /*PlotVertex( iViewportClient, iViewportX + 250, iViewportY + 100 );
-                PlotVertex( iViewportClient, iViewportX + 400, iViewportY + 60 );*/
             }
         }
 
