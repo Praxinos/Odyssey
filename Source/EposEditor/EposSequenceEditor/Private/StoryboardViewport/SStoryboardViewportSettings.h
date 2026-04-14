@@ -11,7 +11,10 @@
 #include "Widgets/SCompoundWidget.h"
 
 
-/** A custom widget that comprises a combo box displaying all available storyboard viewport options */
+/** A custom widget that comprises a combo box displaying all available storyboard viewport options
+*
+*   This class is not really used, only the static function is really used...
+*/
 class SStoryboardViewportSettings
     : public SCompoundWidget
 {

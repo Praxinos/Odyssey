@@ -1371,44 +1371,22 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
             ViewportWidget->GetExternalViewportToolbar().ToSharedRef()
         ];
 
-    TSharedRef<SWidget> ViewportAndToolBar = SNew(SWidgetSwitcher)
-        .WidgetIndex(this, &SStoryboardLevelViewport::GetToolbarIntegrationMode)
-
-        + SWidgetSwitcher::Slot()
-        [
+    TSharedRef<SWidget> ViewportAndToolBar =
             SNew(SVerticalBox)
 
             // Toolbar
             + SVerticalBox::Slot()
-            .Padding(5.f)
+            //.Padding(5.f)
             .AutoHeight()
             [
                 ToolBar
             ]
 
             + SVerticalBox::Slot()
-            .Padding( 5.f, 0.f )
+            //.Padding( 5.f, 0.f )
             [
                 mNoteSplitter.ToSharedRef()
-            ]
-        ]
-
-        + SWidgetSwitcher::Slot()
-        [
-            SNew(SOverlay)
-
-            + SOverlay::Slot()
-            .VAlign(VAlign_Fill)
-            [
-                mNoteSplitter.ToSharedRef()
-            ]
-
-            + SOverlay::Slot()
-            .VAlign(VAlign_Top)
-            [
-                ToolBar
-            ]
-        ];
+            ];
 
     // clang-format off
     TSharedRef<SWidget> MainViewport = SNew(SBorder)
@@ -2056,12 +2034,6 @@ SStoryboardLevelViewport::OnVerticalScrollBarScrolled( float InScrollOffsetFract
 {
     FVector2D translation = GetTranslationFromSlidersOffsets(mHorizontalScrollBar->DistanceFromTop(), InScrollOffsetFraction);
     ViewportClient->GetZoomController().SetPan(FVector2D(ViewportClient->GetZoomController().GetPan().X, translation.Y));
-}
-
-int
-SStoryboardLevelViewport::GetToolbarIntegrationMode() const
-{
-    return GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.OverlayToolbar ? 1 : 0;
 }
 
 //---

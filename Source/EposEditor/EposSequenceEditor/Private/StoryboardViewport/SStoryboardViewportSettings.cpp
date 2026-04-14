@@ -53,28 +53,6 @@ SStoryboardViewportSettings::GetMenuContent()
 
     //
 
-    auto ExecuteOverlayToolbar = [=]()
-    {
-        GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.OverlayToolbar = !GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.OverlayToolbar;
-        GetMutableDefault<UEposSequenceEditorSettings>()->SaveConfig();
-    };
-
-    auto IsOverlayToolbar = [=]() -> bool
-    {
-        return GetDefault<UEposSequenceEditorSettings>()->ViewportSettings.OverlayToolbar;
-    };
-
-    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.overlay-toolbar-label", "Overlay toolbar" ),
-                            LOCTEXT( "storyboard-viewport-settings.overlay-toolbar-tooltip", "Diplays the toolbar on top of the 3D scene." ),
-                            FSlateIcon(),
-                            FUIAction( FExecuteAction::CreateLambda( ExecuteOverlayToolbar ),
-                                        FCanExecuteAction(),
-                                        FIsActionChecked::CreateLambda( IsOverlayToolbar ) ),
-                            NAME_None,
-                            EUserInterfaceActionType::ToggleButton );
-
-    //
-
     auto ExecuteDisplayPlaybackTrack = [=]()
     {
         GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackTrack = !GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackTrack;

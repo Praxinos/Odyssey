@@ -260,8 +260,6 @@ public:
     void OnHorizontalScrollBarScrolled( float InScrollOffsetFraction );
     void OnVerticalScrollBarScrolled(float InScrollOffsetFraction);
 
-    int GetToolbarIntegrationMode() const;
-
 private:
     void CreateCommandList();
 
