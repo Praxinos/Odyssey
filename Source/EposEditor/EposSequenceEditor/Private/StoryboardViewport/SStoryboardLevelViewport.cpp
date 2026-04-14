@@ -1048,10 +1048,6 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     //---
 
-    //HACK: ue4
-    TSharedPtr<SSpinBox<float>> actorDistanceSpinBox;
-    TSharedPtr<SSpinBox<float>> cameraFocalLengthSpinBox;
-
     const UEnum* scaleActorEnum = FindObject<UEnum>( nullptr, TEXT( "/Script/EposTracksEditor.EScaleActor" ) );
 
     mNoteSplitter = SNew( SSplitter )
@@ -1192,13 +1188,15 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 + SHorizontalBox::Slot()
                                 .AutoWidth()
                                 [
-                                    SAssignNew( actorDistanceSpinBox, SSpinBox<float> )
+                                    SNew( SSpinBox<float> )
                                     .ToolTipText( LOCTEXT( "ActorDistanceTooltip", "Modify the distance between the selected actor and its parent camera." ) )
+                                    .Justification( ETextJustify::Right )
+                                    .MinDesiredWidth( 50.f )
+                                    .MinFractionalDigits( 2 )
+                                    .MaxFractionalDigits( 2 )
                                     .PreventThrottling( true ) // To refresh the viewport during value change
-                                    .LinearDeltaSensitivity( 15 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
-                                    .Delta( 1 )
-                                    .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
-                                    .SliderExponentNeutralValue( 100 )
+                                    .Delta( 1.f )
+                                    .SliderExponent( 0.8f )
                                     .Value( this, &SStoryboardLevelViewport::GetMoveAndScaleActorDistance )
                                     .OnValueChanged( this, &SStoryboardLevelViewport::SetMoveAndScaleActorDistance )
                                     .OnValueCommitted_Lambda( [this]( float iNewValue, ETextCommit::Type iType ) { SetMoveAndScaleActorDistance( iNewValue ); } )
@@ -1285,13 +1283,15 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 + SHorizontalBox::Slot()
                                 .AutoWidth()
                                 [
-                                    SAssignNew( cameraFocalLengthSpinBox, SSpinBox<float> )
+                                    SNew( SSpinBox<float> )
                                     .ToolTipText( LOCTEXT( "CameraFocalLengthTooltip", "Modify the current focal length of the camera." ) )
+                                    .Justification( ETextJustify::Right )
+                                    .MinDesiredWidth( 50.f )
+                                    .MinFractionalDigits( 0 )
+                                    .MaxFractionalDigits( 2 )
                                     .PreventThrottling( true ) // To refresh the viewport during value change
-                                    .LinearDeltaSensitivity( 15 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
-                                    .Delta( 1 )
-                                    .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
-                                    .SliderExponentNeutralValue( 100 )
+                                    .Delta( 1.f )
+                                    .SliderExponent( 0.8f )
                                     .Value( this, &SStoryboardLevelViewport::GetCameraFocalLength )
                                     .OnValueChanged( this, &SStoryboardLevelViewport::SetCameraFocalLength )
                                     .OnValueCommitted_Lambda( [this]( float iNewValue, ETextCommit::Type iType ) { SetCameraFocalLength( iNewValue ); } )
@@ -1353,14 +1353,6 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
             .Visibility_Lambda( [this]() { return ( GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport && SStoryboardLevelViewport::GetVisibleWidgetIndex() == 0 ) ? EVisibility::Visible : EVisibility::Collapsed; } )
             .ListItemsSource( &mNotes )
         ];
-
-    //TODO: HACK:
-    // UE5: MaxFractionnal digits is set correctly in UE5.
-    // UE4, we have to call SetMaxFractionnalDigits/SetMinFractionalDigits
-    actorDistanceSpinBox->SetMinFractionalDigits( 4 );
-    actorDistanceSpinBox->SetMaxFractionalDigits( 4 );
-    cameraFocalLengthSpinBox->SetMinFractionalDigits( 4 );
-    cameraFocalLengthSpinBox->SetMaxFractionalDigits( 4 );
 
     //---
 
@@ -1616,9 +1608,8 @@ SStoryboardLevelViewport::CreateRotationWidget()
                 .LinearDeltaSensitivity( 15 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
                 .Delta( 1 )
                 .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
-                .SliderExponentNeutralValue( 100 )
-                .MinFractionalDigits(2)
-                .MaxFractionalDigits(2)
+                .MinFractionalDigits( 2 )
+                .MaxFractionalDigits( 2 )
                 .OnValueCommitted_Lambda( [this] ( float Value, ETextCommit::Type) { ViewportClient->GetZoomController().SetRotation(Value); } )
                 .OnValueChanged_Lambda( [this] ( float Value) { ViewportClient->GetZoomController().SetRotation(Value); } )
                 .Value_Lambda( [this] () { return ViewportClient->GetZoomController().GetRotation(); } )
@@ -1666,9 +1657,8 @@ SStoryboardLevelViewport::CreateZoomWidget()
                 .PreventThrottling( true ) // To refresh the viewport during value change
                 .Delta( 1 )
                 .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
-                .SliderExponentNeutralValue( 100 )
-                .MinFractionalDigits(2)
-                .MaxFractionalDigits(2)
+                .MinFractionalDigits( 2 )
+                .MaxFractionalDigits( 2 )
                 .OnValueCommitted_Lambda( [this] ( float Value, ETextCommit::Type) { ViewportClient->GetZoomController().SetZoom(Value / 100.f); } )
                 .OnValueChanged_Lambda( [this] ( float Value) { ViewportClient->GetZoomController().SetZoom(Value / 100.f); } )
                 .Value_Lambda( [this] () { return ViewportClient->GetZoomController().GetZoom() * 100.f; } )
