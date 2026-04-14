@@ -54,7 +54,7 @@ UArianeEditorEraserTool::Init( FArianeEditor* InEditor )
     //CanvasRenderTarget->OnCanvasRenderTargetUpdate.AddDynamic( this, &UArianeEditorEraserTool::StampBrush );
     //CanvasRenderTarget->UpdateResource();
 
-    //ClearCanvas();
+    ClearCanvas();
 
     Brush = UTexture2D::CreateTransient( Size, Size, PF_B8G8R8A8 );
 
@@ -355,6 +355,8 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
 
     if( DrawingLayer )
     {
+        DrawingLayer->Modify();
+
         DrawingLayer->GetRootObject()->Traverse( [ this
                                                  , ViewportClient
                                                  , View
@@ -586,8 +588,6 @@ UArianeEditorEraserTool::AssignVertex( FArianePath* OwnerPath
         {
             WayPoint.AssignedVertex = OwnerPath->AllocVertex( FVector::Zero(), FVector::Zero(), 0.0f );
 
-            OwnerPath->AddVertex( WayPoint.AssignedVertex );
-
             OutAddedVertices.Add( WayPoint.AssignedVertex );
         }
 
@@ -596,10 +596,6 @@ UArianeEditorEraserTool::AssignVertex( FArianePath* OwnerPath
             //bool bHandleAligned = WayPoint.OriginalVertex->IsHandleAligned();
 
             WayPoint.AssignedVertex = OwnerPath->AllocVertex( FVector::Zero(), FVector::Zero(), 0.0f );
-
-            OwnerPath->AddVertex( WayPoint.AssignedVertex );
-
-            //WayPoint.Vertex->SetHandleAligned( bHandleAligned );
 
             OutAddedVertices.Add( WayPoint.AssignedVertex );
         }
@@ -929,27 +925,20 @@ UArianeEditorEraserTool::OnMouseUp( FEditorViewportClient* ViewportClient
 {
     if( iKey == EKeys::LeftMouseButton )
     {
-        UEditorActorSubsystem* editorActorSubsystem = GEditor->GetEditorSubsystem<UEditorActorSubsystem>();
+        UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
         MouseRecords[1] = FIntVector2( PointerState.ViewportX, PointerState.ViewportY );
         // Will call UArianeEditorEraserTool::StampBrush()
         //CanvasRenderTarget->UpdateResource();
         StampBrush();
 
-        GEditor->BeginTransaction(FText::FromString("Erase object"));
+        GetToolManager()->BeginUndoTransaction(FText::FromString("Erase object"));
 
-        for( AActor* actor : editorActorSubsystem->GetSelectedLevelActors() )
+        if( Painting3DComponent )
         {
-            UArianePainting3DComponent* painting3DComponent = Cast<UArianePainting3DComponent>(actor->GetComponentByClass( UArianePainting3DComponent::StaticClass() ));
-
-            if( painting3DComponent )
-            {
-                painting3DComponent->Modify();
-
-                ErasePaths( ViewportClient, painting3DComponent );
-            }
+            ErasePaths( ViewportClient, Painting3DComponent );
         }
-        GEditor->EndTransaction();
+        GetToolManager()->EndUndoTransaction();
 
         ClearCanvas();
 

@@ -67,7 +67,8 @@ public:
     // Implements IHoverBehaviorTarget::OnEndHover
     virtual void OnEndHover() override;
 
-    virtual void OnTick(float DeltaTime) override;
+    //virtual void OnTick(float DeltaTime) override;
+    virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
 
     //Mouse events
     virtual bool OnMouseDown( FEditorViewportClient* iViewportClient
@@ -113,7 +114,7 @@ protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu );
     FSceneView* GetSceneView( FEditorViewportClient* iViewportClient );
     FEditorViewportClient* GetActiveViewportClient();
-    void DrawLayerOrientationGrid( UArianeLayerDrawing* DrawingLayer );
+    void DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, UArianeLayerDrawing* DrawingLayer );
 /* Gary
 
     virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey );

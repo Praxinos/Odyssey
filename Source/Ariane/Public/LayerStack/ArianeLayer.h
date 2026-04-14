@@ -13,7 +13,6 @@
 
 class UArianeLayerStack;
 class UArianeLayerFolder;
-class UArianeLayerFolder;
 
 UCLASS(Abstract)
 class ARIANE_API UArianeLayer : public USceneComponent
@@ -25,8 +24,6 @@ public:
     UArianeLayer();
 
     DECLARE_MULTICAST_DELEGATE_OneParam( FOnUpdateDelegate, bool );
-
-    UArianeLayerFolder* GetParent();
 
     //void SetVisible( bool bInVisible );
     //bool IsVisible( bool bHierarchical );
@@ -46,10 +43,14 @@ public:
     UArianeLayerFolder* GetRootFolder();
     FOnUpdateDelegate& OnPreUpdateDelegate();
     FOnUpdateDelegate& OnPostUpdateDelegate();
+    void SetParentFolder( UArianeLayerFolder* InParentFolder );
+    UArianeLayerFolder* GetParentFolder();
 
 protected:
     //UPROPERTY()
     //bool bVisible;
+    UPROPERTY()
+    UArianeLayerFolder* ParentFolder;
 
     UPROPERTY()
     bool bLocked;

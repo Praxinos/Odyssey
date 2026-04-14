@@ -343,8 +343,9 @@ UArianeEditorTool::PostTransacted( const FTransactionObjectEvent& iTransactionEv
 }
 
 void
-UArianeEditorTool::DrawLayerOrientationGrid( UArianeLayerDrawing* DrawingLayer )
+UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, UArianeLayerDrawing* DrawingLayer )
 {
+    FPrimitiveDrawInterface* PDI = RenderAPI->GetPrimitiveDrawInterface();
     ULineBatchComponent* LineBatcher = GetWorld()->GetLineBatcher( UWorld::ELineBatcherType::World );
     float OriX, OriY;
     float EndX, EndY;
@@ -374,13 +375,17 @@ UArianeEditorTool::DrawLayerOrientationGrid( UArianeLayerDrawing* DrawingLayer )
         break;
 
         case EArianeLayerDrawingOrientation::LayerYZ:
-            FMatrix YZRotation = FRotationMatrix(FRotator( 0.f, 90.f, 90.f ) );
+            // Note: args are Pitch(Y) Yaw(Z) Roll(X)
+            // but rotation order is Yaw (Z) Pitch (Y) Roll (X)
+            FMatrix YZRotation = FRotationMatrix( FRotator(  0.f, 90.f, 90.f ) );
 
             WorldMatrix = YZRotation * LayerMatrix;
         break;
 
         case EArianeLayerDrawingOrientation::LayerZX:
-            FMatrix ZXRotation = FRotationMatrix(FRotator( 90.f, 0.f, 0.f ) );
+            // Note: args are Pitch(Y) Yaw(Z) Roll(X)
+            // but rotation order is Yaw (Z) Pitch (Y) Roll (X)
+            FMatrix ZXRotation = FRotationMatrix( FRotator(  0.f,  0.f, 90.f ) );
 
             WorldMatrix = ZXRotation * LayerMatrix;
         break;
@@ -396,12 +401,20 @@ UArianeEditorTool::DrawLayerOrientationGrid( UArianeLayerDrawing* DrawingLayer )
         FVector Origin = FVector( OriX, OriY, 0.0f );
         FVector EndPos = FVector( EndX, EndY, 0.0f );
 
+        PDI->DrawLine( WorldMatrix.TransformPosition( Origin )
+                     , WorldMatrix.TransformPosition( EndPos )
+                     , Color
+                     , SDPG_Foreground // SDPG_World
+                     , AdjustedThickness
+                     , 0.0f ); // Lifetime 1 frame
+/*
         LineBatcher->DrawLine( WorldMatrix.TransformPosition( Origin )
                              , WorldMatrix.TransformPosition( EndPos )
                              , Color
                              , SDPG_World
                              , AdjustedThickness
                              , 0.0f ); // Lifetime 1 frame
+*/
     }
 
     // horizontal lines
@@ -414,21 +427,30 @@ UArianeEditorTool::DrawLayerOrientationGrid( UArianeLayerDrawing* DrawingLayer )
         FVector Origin = FVector( OriX, OriY, 0.0f );
         FVector EndPos = FVector( EndX, EndY, 0.0f );
 
+        PDI->DrawLine( WorldMatrix.TransformPosition( Origin )
+                     , WorldMatrix.TransformPosition( EndPos )
+                     , Color
+                     , SDPG_Foreground // SDPG_World
+                     , AdjustedThickness
+                     , 0.0f ); // Lifetime 1 frame
+/*
         LineBatcher->DrawLine( WorldMatrix.TransformPosition( Origin )
                              , WorldMatrix.TransformPosition( EndPos )
                              , Color
                              , SDPG_World
                              , AdjustedThickness
                              , 0.0f ); // Lifetime 1 frame
+*/
     }
 }
 
 void
-UArianeEditorTool::OnTick(float DeltaTime)
+//UArianeEditorTool::OnTick(float DeltaTime)
+UArianeEditorTool::Render(IToolsContextRenderAPI* RenderAPI)
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
-    Super::OnTick( DeltaTime );
+    //Super::OnTick( DeltaTime );
 
     if( Painting3DComponent )
     {
@@ -439,7 +461,7 @@ UArianeEditorTool::OnTick(float DeltaTime)
         {
             if( DrawingLayer->GetDrawingOrientation() != EArianeLayerDrawingOrientation::View )
             {
-                DrawLayerOrientationGrid( DrawingLayer );
+                DrawLayerOrientationGrid( RenderAPI, DrawingLayer );
             }
         }
     }

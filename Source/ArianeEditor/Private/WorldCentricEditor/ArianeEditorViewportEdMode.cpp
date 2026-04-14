@@ -83,26 +83,10 @@ void FArianeEditorViewportEdMode::AddReferencedObjects(FReferenceCollector& Coll
 {
     // Call parent implementation
     FEdMode::AddReferencedObjects(Collector);
-    //if (mViewportDrawingEditorPainter)
-        //mViewportDrawingEditorPainter->AddReferencedObjects(Collector);
 }
 
 void FArianeEditorViewportEdMode::Render(const FSceneView* View,FViewport* Viewport,FPrimitiveDrawInterface* PDI)
 {
-/* Gary
-    if (!mViewportDrawingEditorExtension)
-        return;
-
-    UTexture* texture = mViewportDrawingEditorExtension->Texture();
-    if (!texture)
-        return;
-
-    IArianeViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetArianeViewportDrawingEditorAdapter();
-    if (!adapter)
-        return;
-
-    adapter->RenderInteractorWidget(View, Viewport, PDI);
-*/
 }
 
 bool FArianeEditorViewportEdMode::Select(AActor* InActor, bool bInSelected)

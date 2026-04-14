@@ -1,17 +1,20 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
+// ArianeEditor headers
 #include "ArianeEditor.h"
 #include "ArianeEditorTool.h"
 #include "ArianeEditorViewportToolkit.h"
-#include "ArianeEditorToolTab.h"
+#include "ArianeEditorColorSelectorTab.h"
+#include "ArianeEditorLayerStackTab.h"
+#include "PathDrawingTool/ArianeEditorPathDrawingTool.h"
+#include "EraserTool/ArianeEditorEraserTool.h"
+#include "LayerTransformTool/ArianeEditorLayerTransformTool.h"
+// Ariane headers
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianePainting3DActor.h"
-#include "PathDrawingTool/ArianeEditorPathDrawingTool.h"
-#include "EraserTool/ArianeEditorEraserTool.h"
-#include "LayerTransformTool/ArianeEditorLayerTransformTool.h"
 // Unreal
 #include "Toolkits/BaseToolkit.h"
 #include "UObject/Object.h"
@@ -321,7 +324,8 @@ FArianeEditor::AddTab( TSharedPtr<FArianeEditorTab> iTab)
 void
 FArianeEditor::InitTabs()
 {
-    AddTab( MakeShared<FArianeEditorToolTab>(this) );
+    AddTab( MakeShared<FArianeEditorColorSelectorTab>(this) );
+    AddTab( MakeShared<FArianeEditorLayerStackTab>(this) );
 
     for (const TSharedPtr<FArianeEditorTab> tab : Tabs)
     {

@@ -14,16 +14,14 @@ UArianeLayerStack::~UArianeLayerStack()
 UArianeLayerStack::UArianeLayerStack()
     : RootFolder ( nullptr )
 {
+    // Create the default Root folder.
     RootFolder = CreateDefaultSubobject<UArianeLayerFolder>( "Root Folder" );
+    RootFolder->SetupAttachment(this);
 
-    //RootFolder->SetupAttachment(this);
-}
+    // Create the default Drawing Layer folder.
+    UArianeLayerDrawing* NewDrawingLayer = CreateDefaultSubobject<UArianeLayerDrawing>( "Drawing Layer" );
 
-void
-UArianeLayerStack::Init()
-{
-    // Create a default drawing layer
-    CreateDrawingLayer( RootFolder );
+    RootFolder->AddChildLayer( NewDrawingLayer );
 }
 
 UArianePainting3DComponent*
@@ -193,7 +191,7 @@ UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder )
 {
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
-    UArianeLayerDrawing* NewDrawingLayer = NewObject<UArianeLayerDrawing>( ParentLayerFolder
+    UArianeLayerDrawing* NewDrawingLayer = NewObject<UArianeLayerDrawing>( this // The outer is the LayerStack
                                                                          , NAME_None
                                                                          , RF_Transactional ); // for undos
 
@@ -214,7 +212,7 @@ UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder )
 {
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
-    UArianeLayerFolder* NewLayerFolder = NewObject<UArianeLayerFolder>( ParentLayerFolder
+    UArianeLayerFolder* NewLayerFolder = NewObject<UArianeLayerFolder>( this // The outer is the LayerStack
                                                                       , NAME_None
                                                                       , RF_Transactional ); // for undos
 

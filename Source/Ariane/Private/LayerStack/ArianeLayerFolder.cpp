@@ -48,26 +48,33 @@ UArianeLayerFolder::GetChildLayers()
 void
 UArianeLayerFolder::AddChildLayer( UArianeLayer* Orphan )
 {
-    //Orphan->SetFlags(RF_Transactional);
-
-    // Rename() is used to define the parent object
-    Orphan->Rename( nullptr, this );
+    Orphan->SetParentFolder( this );
 
     ChildLayers.Add( Orphan );
 
-    InvalidationFlags->OR( FArianeLayerFolderInvalidationFlags().SetHierarchy() );
+    Invalidate( FArianeLayerFolderInvalidationFlags().SetHierarchy() );
 
-    Orphan->AttachToComponent( this,  FAttachmentTransformRules::KeepWorldTransform );
+    if ( Orphan->IsRegistered() )
+    {
+        Orphan->AttachToComponent( this,  FAttachmentTransformRules::KeepWorldTransform );
+    }
+    else
+    {
+        // Typically called when AddChildLayer is run in a constructor
+        Orphan->SetupAttachment(this);
+    }
 }
 
 void
 UArianeLayerFolder::RemoveChildLayer( UArianeLayer* Child )
 {
+    Child->SetParentFolder( nullptr );
+
     ChildLayers.Remove( Child );
 
     InvalidatedChildLayers.Remove( Child );
 
-    InvalidationFlags->OR( FArianeLayerFolderInvalidationFlags().SetHierarchy() );
+    Invalidate( FArianeLayerFolderInvalidationFlags().SetHierarchy() );
 
     Child->DetachFromComponent( FDetachmentTransformRules::KeepWorldTransform );
 

@@ -41,6 +41,12 @@ UArianePainting3DComponent::UArianePainting3DComponent()
     bAutoActivate = true;
     bTickInEditor = true;
 
+/*
+    SelectionOverrideDelegate.BindLambda([](const UPrimitiveComponent*) {
+        return false; // don't draw the outline
+    });
+*/
+
     //LineBatchComponent = CreateDefaultSubobject<ULineBatchComponent>(TEXT("LineBatcher"));
 }
 
@@ -61,7 +67,7 @@ UArianePainting3DComponent::GetUsedMaterials()
 void
 UArianePainting3DComponent::Init()
 {
-    LayerStack->Init();
+    //LayerStack->Init();
 
     Update( false );
 }
