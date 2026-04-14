@@ -19,10 +19,15 @@ SArianeEditorLayerStackContextMenu::CreateWidget( SArianeEditorLayerStack* TreeV
     menu.BeginSection("Context");
     {
         menu.AddMenuEntry(
-            LOCTEXT("vector-scene-tree-view.context-menu.rename.name", "Rename")
-          , LOCTEXT("vector-scene-tree-view.context-menu.rename.tooltip", "Rename")
+            LOCTEXT("layer-stack-tree-view.context-menu.rename.name", "Rename")
+          , LOCTEXT("layer-stack-tree-view.context-menu.rename.tooltip", "Rename")
           , FSlateIcon()
           , FUIAction(FExecuteAction::CreateRaw(TreeView, &SArianeEditorLayerStack::RenameSelectedItem)));
+        menu.AddMenuEntry(
+            LOCTEXT("layer-stack-tree-view.context-menu.delete.name", "Delete")
+          , LOCTEXT("layer-stack-tree-view.context-menu.delete.tooltip", "Delete")
+          , FSlateIcon()
+          , FUIAction(FExecuteAction::CreateRaw(TreeView, &SArianeEditorLayerStack::DeleteSelectedItem)));
     }
     menu.EndSection();
 

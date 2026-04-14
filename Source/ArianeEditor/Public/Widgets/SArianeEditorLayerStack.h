@@ -40,6 +40,7 @@ class ARIANEEDITOR_API SArianeEditorLayerStack
         void Update();
 
         void RenameSelectedItem();
+        void DeleteSelectedItem();
 
         TSharedPtr<FArianeEditorLayerRowItem> GetRootItem();
         FArianeEditor* GetEditor() const;

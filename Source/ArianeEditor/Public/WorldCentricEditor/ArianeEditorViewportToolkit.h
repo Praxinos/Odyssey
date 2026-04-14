@@ -86,7 +86,6 @@ public:
 protected:
     void ExtendMenu ( FMenuBuilder& MenuBuilder );
     void AddActorMenuEntry( FToolMenuSection& InSection );
-    void MakeDefaultLayout();
 
 private:
     FArianeEditorViewportEdMode* EdMode;
@@ -97,4 +96,7 @@ private:
     bool mTabSaved;
 */
     TSharedPtr<FExtender> LevelEditorMenuExtender;
+
+TSharedPtr<FTabManager> LocalTabManager;
+TSharedPtr<SWidget> TabStackWidget;
 };

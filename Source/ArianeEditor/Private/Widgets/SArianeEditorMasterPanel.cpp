@@ -24,11 +24,13 @@ SArianeEditorMasterPanel::Construct( const FArguments& InArgs, FArianeEditor* iE
         [
             SNew(SArianeEditorLayerStackPanel, iEditor)
         ]
+/*
         +SVerticalBox::Slot()
         .AutoHeight()
         [
             SNew(SArianeEditorColorSelectorPanel, iEditor)
         ]
+*/
     ];
 }
 

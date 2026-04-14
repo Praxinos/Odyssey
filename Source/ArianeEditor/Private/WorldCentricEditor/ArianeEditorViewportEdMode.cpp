@@ -66,14 +66,6 @@ FArianeEditorViewportEdMode::FArianeEditorViewportEdMode()
     GEditor->OnEditorClose().AddRaw(this, &FArianeEditorViewportEdMode::OnEditorClose);
 }
 
-void
-FArianeEditorViewportEdMode::FlushStylusInput()
-{
-    UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
-
-    inputSubsystem->Flush();
-}
-
 void FArianeEditorViewportEdMode::Initialize()
 {
 
@@ -441,23 +433,6 @@ FArianeEditorViewportEdMode::GetArianeEditorViewportToolkit() const
     return StaticCastSharedPtr<FArianeEditorViewportToolkit>(Toolkit);
 }
 
-void
-FArianeEditorViewportEdMode::ListenStylusInput()
-{
-    UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
-
-    //inputSubsystem->AddMessageHandler(*this);
-}
-
-void
-FArianeEditorViewportEdMode::IgnoreStylusInput()
-{
-    UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
-
-    //inputSubsystem->RemoveMessageHandler(*this);
-}
-
-
 FEditorModeTools*
 FArianeEditorViewportEdMode::GetEditorModeTools()
 {
@@ -475,7 +450,7 @@ FArianeEditorViewportEdMode::Enter()
 
     Toolkit->Init( Owner->GetToolkitHost() );
 
-    ListenStylusInput();
+    //ListenStylusInput();
 
     GetArianeEditorViewportToolkit()->GetEditor().PostInit();
 
@@ -536,7 +511,7 @@ FArianeEditorViewportEdMode::Enter()
 
 void FArianeEditorViewportEdMode::Exit()
 {
-    IgnoreStylusInput();
+    //IgnoreStylusInput();
 
 /* Gary
     // Restore selection color
