@@ -8,6 +8,7 @@
 #include <chrono>
 #include "Input/OdysseyRay.h"
 #include "OdysseyHUDElement.h"
+#include "StylusInputHandler.h"
 
 #include <ULIS>
 
@@ -17,8 +18,7 @@ class UOdysseyPainterEditorTool;
 
 /** Painting adapter for the painter. Describes the method of painting in the viewport*/
 class IOdysseyViewportDrawingEditorAdapter
-    : public IStylusMessageHandler
-
+    : public FOdysseyStylusInputHandler
 {
 public:
     enum class eState
@@ -64,10 +64,12 @@ public:
 
 private:
     /** IStylusMessageHandler Overrides */
-    virtual void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex) override;
+    virtual void OnPacket(const UE::StylusInput::FStylusInputPacket& Packet, UE::StylusInput::IStylusInputInstance* Instance) override;
+    //virtual void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex) override;
     void StartStylusInputRecord(const FKey& iMouseButton);
     void StopStylusInputRecord();
     FOdysseyRay StylusStateToRay(const FStylusState& iState);
+    FOdysseyRay StylusPacketToRay(const UE::StylusInput::FStylusInputPacket& iPacket);
     void ReadStylusInput();
     void GetRayParamsFromViewportPosition(FEditorViewportClient* iViewportClient, float iX, float iY, FVector* oOrigin, FVector* oDirection);
 

@@ -933,14 +933,14 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput()
         FOdysseyPoint point = StylusPacketToPoint(packet);
 
         //Force MouseDown when using the Right Mouse Button to allow hovered mouse clicks
-        if (!mStylusIsDown && (packet.Type == UE::StylusInput::EPacketType::StylusDown))
+        if (!mStylusIsDown && packet.Type == UE::StylusInput::EPacketType::StylusDown)
         {
             //MouseDown
             MouseDown(point);
             mStylusIsDown = true;
             mLastStylusEventIndex = packet.SerialNumber;
         }
-        else if (mStylusIsDown && (packet.Type == UE::StylusInput::EPacketType::StylusUp))
+        else if (mStylusIsDown && packet.Type == UE::StylusInput::EPacketType::StylusUp)
         {
             //MouseUp
             MouseUp(point);
@@ -971,27 +971,10 @@ void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylu
     if (!texture)
         return;
 
-    /*
-    TSharedPtr<SWidget> inWidget = iWidget.Pin();
-    if (!inWidget)
-        return;
-
-    TSharedPtr< SViewport > viewport = odysseyViewportWidget->GetViewportWidget();
-    if (inWidget != viewport)
-        return;
-    */
-
-    //---
-
-    UE::StylusInput::FStylusInputPacket copyPacket = Packet;
-
-    /*if( copyPacket.PenStatus == UE::StylusInput::EPenStatus::CursorIsTouching && copyPacket.NormalPressure == 0.f )
-        copyPacket.PenStatus = UE::StylusInput::EPenStatus::None;*/
-
-    PacketQueue.Enqueue(copyPacket);
+    PacketQueue.Enqueue(Packet);
     mLastStylusEventIndex = 0;
 
-    PrintPacket(copyPacket);
+    PrintPacket(Packet);
     ReadStylusInput();
 }
 

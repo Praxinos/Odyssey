@@ -20,14 +20,7 @@ FOdysseyStylusInputHandler::FOdysseyStylusInputHandler()
 
 FOdysseyStylusInputHandler::~FOdysseyStylusInputHandler()
 {
-    if( StylusInputInstance )
-    {
-        StylusInputInstance->RemoveEventHandler(this);
-        ReleaseInstance(StylusInputInstance);
-        StylusInputInstance = nullptr;
-        StylusInputWindow = nullptr;
-    }
-
+    UnregisterWindow();
     UOdysseyStylusInputSettings::OnStylusInputDriverChanged.Remove(mOnStylusInputDriverChanged);
 }
 
@@ -74,6 +67,12 @@ bool FOdysseyStylusInputHandler::RegisterWindow(const TSharedRef<SWidget>& Widge
 bool FOdysseyStylusInputHandler::RegisterWindow(TSharedPtr<SWindow> Window)
 {
     UnregisterWindow();
+
+    if (!Window)
+    {
+        UE_LOG(LogTemp, Display, TEXT("NoWindow"));
+        return false;
+    }
 
     UE_LOG(LogTemp, Display, TEXT("Preregister"));
 
@@ -160,6 +159,7 @@ const IStylusInputTabletContext* FOdysseyStylusInputHandler::GetTabletContext(IS
 void FOdysseyStylusInputHandler::OnStylusInputDriverChanged(FName iStylusInputDriver)
 {
     UE_LOG(LogTemp, Display, TEXT("STYLUS INPUT CHANGED"))
+
     TSharedPtr<SWindow> Window = StylusInputWindow.Pin();
     RegisterWindow( Window ); //Registers the previous Window with the new API
 }

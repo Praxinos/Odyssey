@@ -26,6 +26,7 @@
 #include "LevelEditorViewport.h"
 #include "SEditorViewport.h"
 #include "Slate/SceneViewport.h"
+#include "StylusInputTabletContext.h"
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 
 IOdysseyViewportDrawingEditorAdapter::~IOdysseyViewportDrawingEditorAdapter()
@@ -345,6 +346,10 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
 {
     if (mLastKnownViewport != iViewport)
         mLastKnownViewport = iViewport;
+
+    TSharedPtr< SViewport > viewportWidget = GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin();
+    if (viewportWidget.IsValid())
+        RegisterWindow(viewportWidget.ToSharedRef());
 
     if( iEvent == EInputEvent::IE_Pressed )
     {
@@ -891,39 +896,91 @@ IOdysseyViewportDrawingEditorAdapter::StylusStateToRay(const FStylusState& iStat
     return strokeRay;
 }
 
+FOdysseyRay
+IOdysseyViewportDrawingEditorAdapter::StylusPacketToRay(const UE::StylusInput::FStylusInputPacket& iPacket)
+{
+    FEditorViewportClient* viewportClient = (FEditorViewportClient*)mLastKnownViewport->GetClient();
+    if (!viewportClient)
+        return FOdysseyRay();
+
+    TSharedPtr< SViewport > viewportWidget = GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin();
+    if (!viewportWidget)
+        return FOdysseyRay();
+
+    //Init our StrokeRay, having all the basic info to draw
+    float scaleDPI = viewportWidget->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
+    FVector2D positionInViewport = viewportWidget->GetCachedGeometry().AbsoluteToLocal(FVector2D(iPacket.X, iPacket.Y)) * scaleDPI;
+
+    FVector2D pointPos = positionInViewport;
+    bool isTextureBased = mExtension->PaintingAdapterMethod() == EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased;
+
+    FVector2D posInTexture = pointPos;
+    bool isOutsideTexture = !ViewportCoordinatesToTextureCoordinates(pointPos, viewportClient, &posInTexture);
+    if (isTextureBased)
+        pointPos = posInTexture;
+
+    if (isOutsideTexture)
+        return FOdysseyRay();
+
+    const UE::StylusInput::IStylusInputTabletContext* tabletContext = GetTabletContext(StylusInputInstance, iPacket.TabletContextID);
+    FOdysseyRay strokeRay;
+    GetRayParamsFromViewportPosition(viewportClient, positionInViewport.X, positionInViewport.Y, &strokeRay.mRayOrigin, &strokeRay.mRayDirection);
+
+    if (tabletContext)
+    {
+        UE::StylusInput::ETabletSupportedProperties capabilities = tabletContext->GetSupportedProperties();
+        strokeRay.mPoint.x = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::X) ? pointPos.X : 0.f;
+        strokeRay.mPoint.y = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::Y) ? pointPos.Y : 0.f;
+        strokeRay.mPoint.z = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::Z) ? iPacket.Z : 0.f;
+        strokeRay.mPoint.pressure = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::NormalPressure) ? iPacket.NormalPressure : 1.f;
+        strokeRay.mPoint.time = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::TimerTick) ? iPacket.TimerTick : 1.f;
+        strokeRay.mPoint.altitude = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::AltitudeOrientation) ? iPacket.AltitudeOrientation : 1.f;
+        strokeRay.mPoint.azimuth = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::AzimuthOrientation) ? iPacket.AzimuthOrientation : 1.f;
+        strokeRay.mPoint.twist = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::TwistOrientation) ? iPacket.TwistOrientation : 1.f;
+        strokeRay.mPoint.pitch = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::PitchRotation) ? iPacket.PitchRotation : 1.f;
+        strokeRay.mPoint.roll = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::RollRotation) ? iPacket.RollRotation : 1.f;
+        strokeRay.mPoint.yaw = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::YawRotation) ? iPacket.YawRotation : 1.f;
+    }
+
+    strokeRay.mPoint.keysDown = mKeysPressed;
+    strokeRay.mPoint.ComputeRelativeParameters(mCurrentStrokeRay.mPoint);
+
+    return strokeRay;
+}
+
 void
 IOdysseyViewportDrawingEditorAdapter::ReadStylusInput()
 {
     if (!mIsRecordingStylus)
         return;
 
-    for (int i = mLastStylusEventIndex; i < mStylusStates.Num(); i++ )
+    UE::StylusInput::FStylusInputPacket packet;
+    while (PacketQueue.Dequeue(packet))
     {
-        const FStylusState& state = mStylusStates[i];
-
-        FOdysseyRay ray = StylusStateToRay(state);
+        UE_LOG(LogTemp, Display, TEXT("Dequeue"));
+        FOdysseyRay ray = StylusPacketToRay(packet);
 
         //Don't manage MouseDown when using the Right Mouse Button to allow hovered mouse clicks
-        if (!mStylusIsDown && state.IsStylusDown() && mStylusButton != EKeys::RightMouseButton)
+        if (!mStylusIsDown && packet.Type == UE::StylusInput::EPacketType::StylusDown && mStylusButton != EKeys::RightMouseButton)
         {
             //MouseDown
             MouseDown(ray, mStylusButton);
             mStylusIsDown = true;
-            mLastStylusEventIndex = i;
+            mLastStylusEventIndex = packet.SerialNumber;
         }
-        else if (mStylusIsDown && !state.IsStylusDown() && mStylusButton != EKeys::RightMouseButton)
+        else if (mStylusIsDown && packet.Type == UE::StylusInput::EPacketType::StylusUp && mStylusButton != EKeys::RightMouseButton)
         {
             //MouseUp
             MouseUp(ray, mStylusButton);
             mStylusIsDown = false;
-            mLastStylusEventIndex = i;
+            mLastStylusEventIndex = packet.SerialNumber;
         }
         //Force Right Mouse Button Drag
         else if (mStylusIsDown || mStylusButton == EKeys::RightMouseButton)
         {
             //MouseMove
             MouseDrag(ray);
-            mLastStylusEventIndex = i;
+            mLastStylusEventIndex = packet.SerialNumber;
         }
     }
 }
@@ -941,6 +998,22 @@ IOdysseyViewportDrawingEditorAdapter::ShouldEditorCaptureMouse() const
     return false;
 }
 
+void
+IOdysseyViewportDrawingEditorAdapter::OnPacket(const UE::StylusInput::FStylusInputPacket& Packet, UE::StylusInput::IStylusInputInstance* Instance)
+{
+    mStylusLastEventTime = std::chrono::steady_clock::now();
+
+    if (!IsReadyToDraw() || !mLastKnownViewport)
+        return;
+
+    PacketQueue.Enqueue(Packet);
+    mLastStylusEventIndex = 0;
+
+    PrintPacket(Packet);
+    ReadStylusInput();
+}
+
+/*
 void
 IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex )
 {
@@ -963,7 +1036,7 @@ IOdysseyViewportDrawingEditorAdapter::OnStylusStateChanged( const TWeakPtr<SWidg
     mLastStylusEventIndex = 0;
 
     ReadStylusInput();
-}
+}*/
 
 bool
 IOdysseyViewportDrawingEditorAdapter::GetCursor(EMouseCursor::Type& OutCursor) const
