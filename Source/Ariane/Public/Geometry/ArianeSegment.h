@@ -49,7 +49,7 @@ struct ARIANE_API FArianeSegment
         };
 
     public:
-        ~FArianeSegment();
+        virtual ~FArianeSegment();
         FArianeSegment();
 
         /**

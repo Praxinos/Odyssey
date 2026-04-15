@@ -351,10 +351,30 @@ SArianeEditorLayerStack::OnExpansionChanged( TSharedPtr<FArianeEditorLayerRowIte
 }
 
 void
+SArianeEditorLayerStack::ModifyLayerStackAndSelectedLayers( UArianeLayerStack* LayerStack
+                                                          , const TArray<UArianeLayer*>& OldSelectedLayers
+                                                          , const TArray<UArianeLayer*>& NewSelectedLayers )
+{
+    LayerStack->Modify();
+
+    for( UArianeLayer* Layer : OldSelectedLayers )
+    {
+        Layer->Modify();
+    }
+
+    for( UArianeLayer* Layer : NewSelectedLayers )
+    {
+        Layer->Modify();
+    }
+}
+
+void
 SArianeEditorLayerStack::OnSelectionChanged( TSharedPtr<FArianeEditorLayerRowItem> iItem
                                            , ESelectInfo::Type SelectInfo )
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    GEditor->BeginTransaction(LOCTEXT("ariane-editor-layer-stack.selection-changed","Layer Selection Changed"));
 
     if( Painting3DComponent )
     {
@@ -367,19 +387,27 @@ SArianeEditorLayerStack::OnSelectionChanged( TSharedPtr<FArianeEditorLayerRowIte
             //if ( SelectInfo != ESelectInfo::Type::Direct )
             {
                 TArray<TSharedPtr<FArianeEditorLayerRowItem>> SelectedLayerItems = GetSelectedItems();
-                TArray<UArianeLayer*> SelectedLayers;
+                TArray<UArianeLayer*> OldSelectedLayers = Painting3DComponent->GetLayerStack()->GetSelectedLayers();
+                TArray<UArianeLayer*> NewSelectedLayers;
 
                 for( TSharedPtr<FArianeEditorLayerRowItem> SelectedLayerItem : SelectedLayerItems )
                 {
                     UArianeLayer* SelectedLayer = SelectedLayerItem.Get()->GetLayer();
 
-                    SelectedLayers.Add( SelectedLayer );
+                    NewSelectedLayers.Add( SelectedLayer );
                 }
 
-                Painting3DComponent->GetLayerStack()->SelectLayers( SelectedLayers, true, true, false );
+                // Prepare transatction snapshots for all impacted UObjects
+                ModifyLayerStackAndSelectedLayers( Painting3DComponent->GetLayerStack()
+                                                 , OldSelectedLayers
+                                                 , NewSelectedLayers );
+
+                Painting3DComponent->GetLayerStack()->SelectLayers( NewSelectedLayers, true, true, false );
             }
         }
     }
+
+    GEditor->EndTransaction();
 }
 
 void

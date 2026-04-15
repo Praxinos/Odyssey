@@ -39,16 +39,18 @@ public:
     UArianeLayerDrawing* CreateDrawingLayer( UArianeLayerFolder* ParentLayerFolder );
     UArianeLayerFolder* CreateFolderLayer( UArianeLayerFolder* ParentLayerFolder );
     UArianePainting3DComponent* GetPainting3DComponent();
-    void OnComponentDestroyed();
+    virtual void OnComponentDestroyed( bool bDestroyingHierarchy ) override;
     void GetLayers( TArray<UArianeLayer*>& Layers );
     void Init();
     UArianeLayer* GetCurrentLayer();
+    virtual void PostLoad() override;
 
     FOnLayerStackChanged& OnPreLayerStackChangedDelegate();
     FOnLayerStackChanged& OnPostLayerStackChangedDelegate();
 
     FOnLayerSelectionChanged& OnPreLayerSelectionChangedDelegate();
     FOnLayerSelectionChanged& OnPostLayerSelectionChangedDelegate();
+
 
 protected:
     void SelectLayer_Private( UArianeLayer* Layer, bool bRecurse );
@@ -57,7 +59,7 @@ protected:
     UPROPERTY()
     UArianeLayerFolder* RootFolder;
 
-    UPROPERTY()
+    UPROPERTY(Transient)
     TArray<UArianeLayer*> SelectedLayers;
 
 protected:

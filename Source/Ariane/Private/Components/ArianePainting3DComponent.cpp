@@ -55,13 +55,48 @@ UArianePainting3DComponent::OnRegister()
 {
     Super::OnRegister();
 
-    UsedMaterials.Add( GEngine->VertexColorMaterial );
+    //UsedMaterials.Add( GEngine->VertexColorMaterial );
+
+    SetMaterial( 0, GEngine->VertexColorMaterial );
 }
 
-const TArray<UMaterialInterface*>&
-UArianePainting3DComponent::GetUsedMaterials()
+void
+UArianePainting3DComponent::GetUsedMaterials( TArray<UMaterialInterface*>& OutMaterials, bool bGetDebugMaterials ) const
 {
-    return UsedMaterials;
+    OutMaterials.Append( UsedMaterials );
+}
+
+int32
+UArianePainting3DComponent::GetNumMaterials() const
+{
+    return UsedMaterials.Num();
+}
+
+UMaterialInterface*
+UArianePainting3DComponent::GetMaterial(int32 ElementIndex) const
+{
+    if ( UsedMaterials.IsValidIndex( ElementIndex ) )
+    {
+        return UsedMaterials[ElementIndex];
+    }
+    return nullptr;
+}
+
+void
+UArianePainting3DComponent::SetMaterial( int32 ElementIndex, UMaterialInterface* Material )
+{
+    if (ElementIndex >= 0 )
+    {
+        if ( ElementIndex >= UsedMaterials.Num() )
+        {
+            UsedMaterials.SetNum( ElementIndex + 1 );
+        }
+
+        UsedMaterials[ElementIndex] = Material;
+
+        // This call will destroy the Proxy and create a new one with the new data (via CreateSceneProxy)
+        MarkRenderStateDirty();
+    }
 }
 
 void
@@ -111,7 +146,7 @@ UArianePainting3DComponent::OnComponentDestroyed( bool bDestroyingHierarchy )
 {
     Super::OnComponentDestroyed( bDestroyingHierarchy );
 
-    LayerStack->OnComponentDestroyed();
+    LayerStack->OnComponentDestroyed( bDestroyingHierarchy );
 }
 
 void
@@ -240,11 +275,17 @@ FArianeGeometryProxy::~FArianeGeometryProxy()
 {
 }
 
+// Note: The proxy is created via CreateSceneProxy, and will be recreated everytime MarkRenderStateDirty() is called
 FArianeGeometryProxy::FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLevel
                                           , UArianePainting3DComponent* iPainting3DComponent )
     : FPrimitiveSceneProxy ( iPainting3DComponent )
     , Painting3DComponent ( iPainting3DComponent )
 {
+    TArray<UMaterialInterface*> OutMaterials;
+
+    Painting3DComponent->GetUsedMaterials( OutMaterials );
+
+    SetUsedMaterialForVerification( OutMaterials );
 }
 
 void
@@ -418,8 +459,6 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
                                             , FMeshElementCollector& Collector ) const
 {
     UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-
-    Painting3DComponent->GetSceneProxy()->SetUsedMaterialForVerification( Painting3DComponent->GetUsedMaterials() );
 
     for( int32 ViewIndex = 0; ViewIndex < Views.Num(); ViewIndex++ )
     {

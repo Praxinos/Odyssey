@@ -82,6 +82,7 @@ public:
     void LoadOpenedTabs();
     void SaveOpenedTabs();
     void OnEditorClose();
+    void Exit();
 
 protected:
     void ExtendMenu ( FMenuBuilder& MenuBuilder );

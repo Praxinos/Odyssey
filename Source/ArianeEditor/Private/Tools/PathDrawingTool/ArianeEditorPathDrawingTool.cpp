@@ -31,6 +31,7 @@ UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
     , bPressureSensitivity( false )
     , EditedPath( nullptr )
     //, LineType ( EArianePainting3DGeometryMode::Flat )
+    , bShowGrid ( true )
 {
     Icon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathDrawing64");
 
@@ -50,7 +51,7 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* iViewportClien
         ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
         FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
 
-        GetToolManager()->BeginUndoTransaction(FText::FromString("Draw Path"));
+        GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-drawing-tool.draw-path","Draw Path"));
 
         if( Painting3DComponent )
         {
@@ -114,14 +115,29 @@ float Intersect ( const FVector4& iPlane
     return 0.0f;
 }
 
+void
+UArianeEditorPathDrawingTool::Render(IToolsContextRenderAPI* RenderAPI)
+{
+    if  ( bShowGrid )
+    {
+        Super::Render( RenderAPI );
+    }
+}
 
 FVector4
-UArianeEditorPathDrawingTool::GetDrawingPlane( UArianeLayerDrawing* DrawingLayer
-                                             , const FVector& CameraCoords )
+UArianeEditorPathDrawingTool::GetDrawingPlane( FEditorViewportClient* iViewportClient
+                                             , UArianeLayerDrawing* DrawingLayer )
 {
+    IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
     const FTransform& LayerWorldTransform = DrawingLayer->GetComponentTransform();
-    FVector LayerWorldPosition = LayerWorldTransform.TransformPosition( FVector( 0, 0, 0 ) );
+    FVector LayerWorldPosition = DrawingLayer->GetComponentLocation();
     FVector4 DrawingPlane = FVector4( 0.0f, 0.0f, 0.0f, 0.0f );
+    FViewCameraState CameraState;
+
+    QueriesAPI->GetCurrentViewState( CameraState );
+
+    FVector CameraLocation = CameraState.Position;
+    FVector CameraDirection = CameraState.Orientation.GetForwardVector();
 
     switch( DrawingLayer->GetDrawingOrientation() )
     {
@@ -139,14 +155,7 @@ UArianeEditorPathDrawingTool::GetDrawingPlane( UArianeLayerDrawing* DrawingLayer
 
         default : // EArianeLayerDrawingOrientation::View
         {
-            FVector LayerToCamera = CameraCoords - LayerWorldPosition;
-
-            if( LayerToCamera.IsNearlyZero() == false )
-            {
-                LayerToCamera.Normalize();
-
-                DrawingPlane = LayerToCamera;
-            }
+            DrawingPlane = CameraDirection;
         }
         break;
     }
@@ -176,9 +185,8 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
         if( DrawingLayer )
         {
             const FTransform& LayerWorldTransform = DrawingLayer->GetComponentTransform();
-            FVector CameraCoords = iViewportClient->GetViewLocation();
             // note: we could do that at MouseDown
-            FVector4 DrawingPlane = GetDrawingPlane( DrawingLayer, CameraCoords );
+            FVector4 DrawingPlane = GetDrawingPlane( iViewportClient, DrawingLayer );
             FVector RayOrigin, RayDirection;
             FVector IntersectAt;
 

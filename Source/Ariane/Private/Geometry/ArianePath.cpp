@@ -451,12 +451,17 @@ FArianePath::SetColor( const FColor& InColor )
 }
 
 void
-FArianePath::ExportProperties( FArianePath* DestPath )
+FArianePath::ExportProperties( FArianeObject* DestObject )
 {
-    Super::ExportProperties( DestPath );
+    Super::ExportProperties( DestObject );
 
-    DestPath->Color = Color;
-    DestPath->LineType = LineType;
+    if( DestObject->GetClass() == FArianePath::StaticClass() )
+    {
+        FArianePath* DestPath = static_cast<FArianePath*>(DestObject);
+
+        DestPath->Color = Color;
+        DestPath->LineType = LineType;
+    }
 }
 
 void

@@ -6,6 +6,7 @@
 #include "Modules/ModuleManager.h"
 
 class AArianePainting3DActor;
+class FArianeEditorViewportEdMode;
 
 /* Gary
 class FOdysseyPainterEditor;
@@ -72,6 +73,9 @@ private:
     void UnregisterPlacementFactories();
     void RegisterFactoryDelayed();
     void ReorderFactories();
+
+
+    FArianeEditorViewportEdMode* GetArianeEditorViewportEdMode();
 
 private:
     FDelegateHandle mExtendLevelEditorLayout;

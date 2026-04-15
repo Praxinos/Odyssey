@@ -19,7 +19,7 @@ struct ARIANE_API FArianeVertex : public FArianePoint
     GENERATED_BODY()
 
     public:
-        ~FArianeVertex();
+        virtual ~FArianeVertex();
         FArianeVertex(){};
 
         /**

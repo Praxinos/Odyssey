@@ -86,13 +86,10 @@ public:
                             , const FKey& iKey
                             , const FArianePointerState& State );
     virtual bool OnMouseClick( FEditorViewportClient* iViewportClient
-                                , const FKey& iKey
-                                , const FArianePointerState& State );
+                             , const FKey& iKey
+                             , const FArianePointerState& State );
 
-    virtual void DrawHUD ( FEditorViewportClient* ViewportClient
-                         , FViewport* Viewport
-                         , const FSceneView* View
-                         , FCanvas* Canvas );
+    virtual void DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
 
     /** Get the tool's tooltip */
     virtual FText GetTooltip() const;

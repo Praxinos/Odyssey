@@ -19,7 +19,7 @@ struct ARIANE_API FArianeHandleSegment : public FArianePoint
     GENERATED_BODY()
 
     public:
-        ~FArianeHandleSegment();
+        virtual ~FArianeHandleSegment();
         FArianeHandleSegment(){};
 
         /**

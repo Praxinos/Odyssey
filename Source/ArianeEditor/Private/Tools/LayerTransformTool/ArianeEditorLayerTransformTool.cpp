@@ -214,14 +214,6 @@ UArianeEditorLayerTransformTool::ExtendContextMenu( FMenuBuilder& menu )
 {
 }
 
-void
-UArianeEditorLayerTransformTool::DrawHUD ( FEditorViewportClient* ViewportClient
-                                         , FViewport* Viewport
-                                         , const FSceneView* View
-                                         , FCanvas* HUDCanvas )
-{
-}
-
 void UArianeEditorLayerTransformTool::SetPreviousTool( UArianeEditorTool* InPreviousTool )
 {
     PreviousTool = InPreviousTool;

@@ -5,11 +5,12 @@
 #include "SArianeEditorToolPanel.h"
 #include "SArianeEditorLayerStackPanel.h"
 #include "SArianeEditorColorSelectorPanel.h"
+#include "ArianeEditor.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
 void
-SArianeEditorMasterPanel::Construct( const FArguments& InArgs, FArianeEditor* iEditor )
+SArianeEditorMasterPanel::Construct( const FArguments& InArgs, FArianeEditor* InEditor )
 {
     ChildSlot
     [
@@ -17,18 +18,22 @@ SArianeEditorMasterPanel::Construct( const FArguments& InArgs, FArianeEditor* iE
         +SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew(SArianeEditorToolPanel, iEditor)
+            SNew(SArianeEditorToolPanel, InEditor)
         ]
         +SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew(SArianeEditorLayerStackPanel, iEditor)
+            SNew(SArianeEditorLayerStackPanel, InEditor)
+            .Visibility_Lambda( [InEditor]() -> EVisibility
+                {
+                    return InEditor->GetCurrentPainting3DComponent() ? EVisibility::Visible : EVisibility::Hidden;
+                } )
         ]
 /*
         +SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew(SArianeEditorColorSelectorPanel, iEditor)
+            SNew(SArianeEditorColorSelectorPanel, InEditor)
         ]
 */
     ];

@@ -144,11 +144,6 @@ FArianeEditorModule::ShutdownModule()
 
     UnregisterEditorMode();
 
-
-
-
-
-
 /* Gary
     UnregisterBrushOverrides();
     UnregisterSettings();
@@ -161,6 +156,18 @@ FArianeEditorModule::ShutdownModule()
     FOdysseyVectorBrushCustomization::Unregister();
     FOdysseyVectorObjectViewPaletteCustomization::Unregister();
 */
+}
+
+FArianeEditorViewportEdMode*
+FArianeEditorModule::GetArianeEditorViewportEdMode()
+{
+    FEditorModeTools& ModeTools = GLevelEditorModeTools();
+
+    ModeTools.ActivateMode( FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId );
+
+    FEdMode* EdMode = ModeTools.GetActiveMode( FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId );
+
+    return static_cast<FArianeEditorViewportEdMode*>( EdMode );
 }
 
 void

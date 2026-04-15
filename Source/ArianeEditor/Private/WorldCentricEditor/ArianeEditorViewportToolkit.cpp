@@ -127,6 +127,9 @@ FArianeEditorViewportToolkit::Init( const TSharedPtr<IToolkitHost>& iInitToolkit
 
     Editor->Init();
 
+    Editor->RegisterTabSpawners();
+    Editor->RegisterTools();
+
     // We create the Widgets now that we can can register to some delegates that they need to refresh themselves
     // just before Editor->Init() is called and will broadcast the delegates.
 
@@ -425,14 +428,19 @@ FArianeEditorViewportToolkit::GetBaseToolkitName() const
     return LOCTEXT("ariane-editor.name", "Ariane::Painting3D");
 }
 
+// ShutdownUI is not called when reloading a layout. But Exit() will be, as we designed it.
+void
+FArianeEditorViewportToolkit::Exit()
+{
+    Editor->UnregisterTools();
+    Editor->UnregisterTabSpawners();
+}
+
 void
 FArianeEditorViewportToolkit::InvokeUI()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
     TSharedPtr<FTabManager> TabManager = LevelEditorModule.GetLevelEditorTabManager();
-
-    Editor->RegisterTabSpawners();
-    Editor->RegisterTools();
 
     TabManager->TryInvokeTab( FTabId( FArianeEditorColorSelectorTab::StaticId() ) );
 
@@ -455,13 +463,7 @@ FArianeEditorViewportToolkit::InvokeUI()
 
     //MakeDefaultLayout();
 }
-/*
-void
-FArianeEditorViewportToolkit::Exit()
-{
-    Editor->UnregisterTools();
-}
-*/
+
 void
 FArianeEditorViewportToolkit::ShutdownUI()
 {
@@ -474,8 +476,6 @@ FArianeEditorViewportToolkit::ShutdownUI()
     SaveOpenedTabs();
 */
     Editor->CloseAllTabs();
-    Editor->UnregisterTabSpawners();
-
 
     if (GEditor)
         GEditor->OnEditorClose().RemoveAll(this);

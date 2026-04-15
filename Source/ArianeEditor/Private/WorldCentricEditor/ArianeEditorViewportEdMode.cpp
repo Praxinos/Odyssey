@@ -513,6 +513,8 @@ void FArianeEditorViewportEdMode::Exit()
 {
     //IgnoreStylusInput();
 
+    GetArianeEditorViewportToolkit()->Exit();
+
 /* Gary
     // Restore selection color
     GEngine->RestoreSelectedMaterialColor();
@@ -551,6 +553,7 @@ FArianeEditorViewportEdMode::GetEditor() const
 }
 */
 
+#ifdef unused
 void
 FArianeEditorViewportEdMode::DrawHUD ( FEditorViewportClient* ViewportClient
                                      , FViewport* Viewport
@@ -585,6 +588,6 @@ FArianeEditorViewportEdMode::DrawHUD ( FEditorViewportClient* ViewportClient
     GetEditor()->HUDSystem()->Draw(params);
 */
 }
-
+#endif
 
 #undef LOCTEXT_NAMESPACE

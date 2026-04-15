@@ -29,13 +29,14 @@ public:
     //bool IsVisible( bool bHierarchical );
     void SetLocked( bool bInLocked );
     bool IsLocked( bool bHierarchical );
-    void SetSelected( bool bInSelected );
     virtual void Invalidate( const FArianeLayerInvalidationFlags& InInvalidationFlags );
     virtual void Update( bool bInteractive );
 
-    #if WITH_EDITOR
+#if WITH_EDITORONLY_DATA
     virtual bool IsSelectedInEditor() const override;
-    #endif
+    void SetSelected( bool bInSelected );
+#endif
+
     bool IsInvalidated();
     void SetInvalidated( bool bInInvalidate );
     const FBoxSphereBounds& GetBounds();
@@ -55,8 +56,10 @@ protected:
     UPROPERTY()
     bool bLocked;
 
-    UPROPERTY()
+#if WITH_EDITORONLY_DATA
+    UPROPERTY(Transient)
     bool bSelected;
+#endif
 
 protected:
     bool bInvalidated;
