@@ -297,6 +297,15 @@ public:
     static bool AreCellsContiguous( const TArray<UOdysseyLayerCell*>& iCellsToReverse );
     static bool AreCellsContiguous( const TArray<UOdysseyLayerCell*>& iCellsToReverse
                                   , TArray<UOdysseyLayerCell*>& oSortedCells  );
+    /** Put contiguous cells together inside the same group
+    *   ...[   C1   ][ C2 ]...[C10][     C11     ]...[    C22   ]...
+    *   groups[0] = [C1, C2]
+    *   groups[1] = [C10, C11]
+    *   groups[2] = [C22]
+    *
+    *   If it returns a single group, it also means that all cells are contiguous
+    */
+    static TArray<TArray<UOdysseyLayerCell*>> GetCellsContiguousGroups( const TArray<UOdysseyLayerCell*>& iCells );
 
 public:
 #if WITH_EDITOR

@@ -644,6 +644,44 @@ UOdysseyLayer::AreCellsContiguous( const TArray<UOdysseyLayerCell*>& iCells
     return true;
 }
 
+//static
+TArray<TArray<UOdysseyLayerCell*>> UOdysseyLayer::GetCellsContiguousGroups( const TArray<UOdysseyLayerCell*>& iCells )
+{
+    TArray<UOdysseyLayerCell*> sortedCells = iCells;
+
+    sortedCells.Sort( []( const UOdysseyLayerCell& iA, const UOdysseyLayerCell& iB ) -> bool
+                      {
+                          return iA.GetIndexInLayer() < iB.GetIndexInLayer();
+                      } );
+
+    if( sortedCells.IsEmpty() )
+        return TArray<TArray<UOdysseyLayerCell*>>();
+
+    TArray<TArray<UOdysseyLayerCell*>> cellGroups;
+    cellGroups.Emplace(); // At least 1 group as sortedCells are not empty here
+    for( UOdysseyLayerCell* cell : sortedCells )
+    {
+        TArray<UOdysseyLayerCell*>& lastGroup = cellGroups.Last();
+        if( lastGroup.IsEmpty() )
+        {
+            lastGroup.Add( cell );
+            continue;
+        }
+
+        if( lastGroup.Last()->GetIndexInLayer() == cell->GetIndexInLayer() - 1 )
+        {
+            lastGroup.Add( cell );
+        }
+        else
+        {
+            cellGroups.Emplace();
+            cellGroups.Last().Add( cell );
+        }
+    }
+
+    return cellGroups;
+}
+
 bool
 UOdysseyLayer::ReverseCells( const TArray<UOdysseyLayerCell*>& iCellsToReverse )
 {

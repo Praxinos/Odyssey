@@ -39,7 +39,9 @@ public:
     TSharedPtr<FUICommandInfo> ExportAsFlipbook;
 
     //Layers Actions
-    TSharedPtr<FUICommandInfo> ConvertToStaggerCell;
+    TSharedPtr<FUICommandInfo> CreateStaggerCellLoop;
+    TSharedPtr<FUICommandInfo> CreateStaggerCellPingPong;
+    TSharedPtr<FUICommandInfo> CreateStaggerCellRandom;
     TSharedPtr<FUICommandInfo> ConvertToReferenceCells;
     TSharedPtr<FUICommandInfo> ReverseSelectedCells;
 

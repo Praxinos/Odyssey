@@ -740,7 +740,20 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
     MenuBuilder.EndSection();
 
     MenuBuilder.BeginSection("Cells", LOCTEXT("timeline-cells.context-menu.cells-section.name", "Cells"));
-        MenuBuilder.AddMenuEntry(FOdysseyPainterEditorAnimationCommands::Get().ConvertToStaggerCell, TEXT("ConvertToStagger"));
+        MenuBuilder.AddSubMenu(
+            LOCTEXT( "timeline-cells.context-menu.create-stagger-cell.name", "Stagger" ),
+            LOCTEXT( "timeline-cells.context-menu.create-stagger-cell.tooltip", "Create stagger cell from selected cells" ),
+            FNewMenuDelegate::CreateLambda( [this]( FMenuBuilder& ioMenuBuilder )
+                                            {
+                                                ioMenuBuilder.AddMenuEntry(FOdysseyPainterEditorAnimationCommands::Get().CreateStaggerCellLoop, NAME_None, LOCTEXT("timeline-cells.context-menu.stagger-cell-loop.name", "Loop"));
+                                                ioMenuBuilder.AddMenuEntry(FOdysseyPainterEditorAnimationCommands::Get().CreateStaggerCellPingPong, NAME_None, LOCTEXT("timeline-cells.context-menu.stagger-cell-pingpong.name", "Ping-Pong"));
+                                                ioMenuBuilder.AddMenuEntry(FOdysseyPainterEditorAnimationCommands::Get().CreateStaggerCellRandom, NAME_None, LOCTEXT("timeline-cells.context-menu.stagger-cell-random.name", "Random"));
+                                            } ),
+            false, // bInOpenSubMenuOnClick
+            FSlateIcon(),
+            true, // bInShouldCloseWindowAfterMenuSelection
+            "CreateStagger"
+        );
         MenuBuilder.AddMenuEntry(FOdysseyPainterEditorAnimationCommands::Get().ConvertToReferenceCells);
         MenuBuilder.AddMenuEntry(
             FOdysseyPainterEditorAnimationCommands::Get().SetCellExposure,

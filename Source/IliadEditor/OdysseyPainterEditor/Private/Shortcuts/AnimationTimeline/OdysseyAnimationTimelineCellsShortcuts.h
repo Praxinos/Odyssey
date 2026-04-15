@@ -3,6 +3,10 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
+#include "OdysseyLayerCellImageStagger.h"
+
 class UOdysseyAnimation;
 class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationTimelineCellsShortcuts
 {
@@ -27,7 +31,7 @@ public:
     void Action_Paste();
     void Action_SelectAll();
     void Action_Delete();
-    void Action_ConvertToStaggerCell();
+    void Action_CreateStaggerCell( EOdysseyLayerCellImageStaggerBehaviour iBehavior );
     void Action_IncreaseCellExposure();
     void Action_DecreaseCellExposure();
     void Action_SetCellExposure();
@@ -38,7 +42,7 @@ public:
     bool CanAction_Paste();
     bool CanAction_SelectAll();
     bool CanAction_Delete();
-    bool CanAction_ConvertToStaggerCell();
+    bool CanAction_CreateStaggerCell();
     bool CanAction_IncreaseCellExposure();
     bool CanAction_DecreaseCellExposure();
     bool CanAction_SetCellExposure();

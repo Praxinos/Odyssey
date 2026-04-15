@@ -68,9 +68,21 @@ FOdysseyAnimationTimelineCellsShortcuts::MapActionsToCommandList(TSharedRef<FUIC
     );
 
     iCommandList->MapAction(
-        FOdysseyPainterEditorAnimationCommands::Get().ConvertToStaggerCell,
-        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell)
+        FOdysseyPainterEditorAnimationCommands::Get().CreateStaggerCellLoop,
+        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_CreateStaggerCell, EOdysseyLayerCellImageStaggerBehaviour::Loop),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_CreateStaggerCell)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorAnimationCommands::Get().CreateStaggerCellPingPong,
+        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_CreateStaggerCell, EOdysseyLayerCellImageStaggerBehaviour::PingPong),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_CreateStaggerCell)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorAnimationCommands::Get().CreateStaggerCellRandom,
+        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_CreateStaggerCell, EOdysseyLayerCellImageStaggerBehaviour::Random),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_CreateStaggerCell)
     );
 
     iCommandList->MapAction(
@@ -237,7 +249,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
 
 
 void
-FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
+FOdysseyAnimationTimelineCellsShortcuts::Action_CreateStaggerCell( EOdysseyLayerCellImageStaggerBehaviour iBehavior )
 {
     UOdysseyAnimation* animation = mAnimation.Get();
     if (!animation)
@@ -274,16 +286,30 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
     if (selectedCells.IsEmpty())
         return;
 
+    TArray<TArray<UOdysseyLayerCell*>> selectedCellGroups = UOdysseyLayer::GetCellsContiguousGroups( selectedCells );
+
 #if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.create-stagger-cell", "Stagger Cell"));
 #endif
 
     mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
-    for (UOdysseyLayerCell* cell : selectedCells)
+    for( TArray<UOdysseyLayerCell*> selectedCellGroup : selectedCellGroups )
     {
-        UOdysseyLayerCell* staggerCell = layer->AddCell(UOdysseyLayerCellImageStagger::StaticClass(), cell->GetIndexInLayer());
-        staggerCell->SetExposure(cell->GetExposure());
-        layer->RemoveCell(cell);
+        int exposure = Algo::TransformAccumulate( selectedCellGroup,
+                                                []( UOdysseyLayerCell* iCell )
+                                                {
+                                                    return iCell->GetExposure();
+                                                },
+                                                0 );
+        int reach = exposure;
+
+        if( iBehavior == EOdysseyLayerCellImageStaggerBehaviour::PingPong )
+            exposure = ( exposure - 1 ) * 2; // -1 because for ping-pong the last exposure of the cell is not inside the loop (cell exposure == 10, then ping exposure == 9, ...)
+
+        UOdysseyLayerCellImageStagger* staggerCell = Cast<UOdysseyLayerCellImageStagger>( layer->AddCell(UOdysseyLayerCellImageStagger::StaticClass(), selectedCellGroup.Last()->GetIndexInLayer() + 1) );
+        staggerCell->SetExposure( exposure );
+        staggerCell->SetBehaviour( iBehavior );
+        staggerCell->SetReach( reach, false );
     }
 }
 
@@ -584,7 +610,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Delete()
 }
 
 bool
-FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell()
+FOdysseyAnimationTimelineCellsShortcuts::CanAction_CreateStaggerCell()
 {
     UOdysseyAnimation* animation = mAnimation.Get();
     if (!animation)
