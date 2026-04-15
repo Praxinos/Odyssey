@@ -438,6 +438,8 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
                                                   , Collector
                                                   , ViewIndex );
             }
+
+            return UArianeLayerFolder::TraversalReturnValue::Continue;
         } );
     }
 }
