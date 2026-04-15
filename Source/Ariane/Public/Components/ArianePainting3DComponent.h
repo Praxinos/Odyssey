@@ -95,7 +95,16 @@ public:
     void SetPaletteSet( FGuid Index, UOdysseyPaletteSet* PaletteSet );
     void SetCurrentPaletteColorEntry( UOdysseyPaletteEntryColor* Entry, FGuid Set );
     virtual void OnRegister() override;
-    const TArray<UMaterialInterface*>& GetUsedMaterials();
+    //const TArray<UMaterialInterface*>& GetUsedMaterials();
+    // overrides UMeshComponent::GetNumMaterials()
+    virtual int32 GetNumMaterials() const override;
+    // overrides UMeshComponent::GetMaterial()
+    virtual UMaterialInterface* GetMaterial(int32 ElementIndex) const override;
+    // overrides UMeshComponent::SetMaterial()
+    virtual void SetMaterial( int32 ElementIndex, UMaterialInterface* Material ) override;
+    // overrides UMeshComponent::GetUsedMaterials()
+    virtual void GetUsedMaterials(TArray<UMaterialInterface*>& OutMaterials, bool bGetDebugMaterials = false) const override;
+
     void Init();
 
 private:

@@ -14,7 +14,7 @@ struct ARIANE_API FArianePoint
     GENERATED_BODY()
 
     public:
-        ~FArianePoint();
+        virtual ~FArianePoint();
         FArianePoint(){};
 
         /**

@@ -434,6 +434,24 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
 
             WorldMatrix = ZXRotation * LayerMatrix;
         break;
+
+        case EArianeLayerDrawingOrientation::View :
+        {
+            FVector XVector = FVector( 0.0f, 0.0f, 1.0f );
+            IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
+            FViewCameraState CameraState;
+
+            QueriesAPI->GetCurrentViewState( CameraState );
+
+            FVector CameraDirection = CameraState.Orientation.GetForwardVector();
+            FQuat RotationQuat = FQuat::FindBetweenVectors( XVector, -CameraDirection );
+
+            WorldMatrix = RotationQuat.ToMatrix() * LayerMatrix ;
+        }
+        break;
+
+        default :
+        break;
     }
 
     // vertical lines
@@ -504,19 +522,13 @@ UArianeEditorTool::Render(IToolsContextRenderAPI* RenderAPI)
 
         if( DrawingLayer )
         {
-            if( DrawingLayer->GetDrawingOrientation() != EArianeLayerDrawingOrientation::View )
-            {
-                DrawLayerOrientationGrid( RenderAPI, DrawingLayer );
-            }
+            DrawLayerOrientationGrid( RenderAPI, DrawingLayer );
         }
     }
 }
 
 void
-UArianeEditorTool::DrawHUD ( FEditorViewportClient* ViewportClient
-                           , FViewport* Viewport
-                           , const FSceneView* View
-                           , FCanvas* Canvas )
+UArianeEditorTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI )
 {
 }
 

@@ -22,6 +22,8 @@ UArianeLayerStack::UArianeLayerStack()
     UArianeLayerDrawing* NewDrawingLayer = CreateDefaultSubobject<UArianeLayerDrawing>( "Drawing Layer" );
 
     RootFolder->AddChildLayer( NewDrawingLayer );
+
+    SelectLayer( NewDrawingLayer, true, false );
 }
 
 UArianePainting3DComponent*
@@ -37,10 +39,22 @@ UArianeLayerStack::GetRootFolder()
 }
 
 void
+UArianeLayerStack::PostLoad()
+{
+    Super::PostLoad();
+
+    SelectLayer( RootFolder->GetChildLayers()[0], true, false );
+}
+
+void
 UArianeLayerStack::RemoveSelectedLayers()
 {
+    Modify();
+
     for( UArianeLayer* Layer : SelectedLayers )
     {
+        Layer->Modify();
+
         Cast<UArianeLayerFolder>(Layer->GetOuter())->RemoveChildLayer( Layer );
     }
 
@@ -59,7 +73,7 @@ UArianeLayerStack::GetLayers( TArray<UArianeLayer*>& Layers )
 }
 
 void
-UArianeLayerStack::OnComponentDestroyed()
+UArianeLayerStack::OnComponentDestroyed( bool bDestroyingHierarchy )
 {
     TArray<UArianeLayer*> Layers;
 
@@ -70,6 +84,7 @@ UArianeLayerStack::OnComponentDestroyed()
         Layer->Destroy();
     }
 */
+    Super::OnComponentDestroyed( bDestroyingHierarchy );
 }
 
 void

@@ -960,10 +960,7 @@ UArianeEditorEraserTool::ExtendContextMenu( FMenuBuilder& menu )
 }
 
 void
-UArianeEditorEraserTool::DrawHUD ( FEditorViewportClient* ViewportClient
-                                 , FViewport* Viewport
-                                 , const FSceneView* View
-                                 , FCanvas* HUDCanvas )
+UArianeEditorEraserTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderAPI* RenderAPI )
 {
     HUDCanvas->DrawTile(
         0, 0,

@@ -50,6 +50,8 @@ public:
                           , const FArianePointerState& State ) override;
     virtual bool SupportsColorType( EOdysseyPainterEditorColorType ColorType ) override;
 
+    virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
+
 protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
 
@@ -61,7 +63,8 @@ protected:
     void PlotVertex( FEditorViewportClient* ViewportClient
                    , const FArianePointerState& State
                    , bool bInteractive );
-    FVector4 GetDrawingPlane( UArianeLayerDrawing* DrawingLayer, const FVector& CameraCoords );
+    FVector4 GetDrawingPlane( FEditorViewportClient* iViewportClient
+                            , UArianeLayerDrawing* DrawingLayer );
 
 public:
     UPROPERTY( EditAnywhere
@@ -78,6 +81,10 @@ public:
     UPROPERTY( EditAnywhere
              , Category = PathDrawingTool )
     EArianePathLineType LineType;
+
+    UPROPERTY( EditAnywhere
+             , Category = PathDrawingTool )
+    bool bShowGrid;
 
 protected:
     FArianePath* EditedPath;

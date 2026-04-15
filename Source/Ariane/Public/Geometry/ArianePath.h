@@ -242,7 +242,7 @@ public:
     EArianePathLineType GetLineType();
     const FColor& GetColor();
     void  SetColor( const FColor& InColor );
-    virtual void ExportProperties( FArianePath* DestPath );
+    virtual void ExportProperties( FArianeObject* DestObject ) override;
 
 
 protected:

@@ -10,6 +10,7 @@
 class UArianePainting3DComponent;
 class FArianeEditor;
 class FArianeEditorLayerRowItem;
+class UArianeLayerStack;
 
 class ARIANEEDITOR_API SArianeEditorLayerStack
     : public STreeView<TSharedPtr<FArianeEditorLayerRowItem>>
@@ -83,6 +84,10 @@ class ARIANEEDITOR_API SArianeEditorLayerStack
         void RegisterDelegates();
         void OnPostLayerStackChanged();
         void OnPostCurrentLayerChanged();
+        void ModifyLayerStackAndSelectedLayers( UArianeLayerStack* LayerStack
+                                              , const TArray<UArianeLayer*>& OldSelectedLayers
+                                              , const TArray<UArianeLayer*>& NewSelectedLayers );
+
 /*
         void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
         void OnSourceChanged();
