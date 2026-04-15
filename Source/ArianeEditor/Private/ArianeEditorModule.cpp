@@ -105,7 +105,18 @@ FArianeEditorModule::StartupModule()
             ColorSelectorTab
         );
     });
+/*
+    LevelEditorModule.OnRegisterLayoutExtensions().AddLambda([](FLayoutExtender& InExtender)
+    {
+        FTabManager::FTab ColorSelectorTab = FTabManager::FTab(FTabId(FArianeEditorColorSelectorTab::StaticId()), ETabState::OpenedTab);
 
+        InExtender.ExtendLayout(
+            FTabId("LevelEditorSceneOutliner"),
+            ELayoutExtensionPosition::Below,
+            ColorSelectorTab
+        );
+    });
+*/
 /* Gary
     RegisterBrushOverrides(); //First thing to do, as it modifies the Brush CDO
     RegisterSettings();
