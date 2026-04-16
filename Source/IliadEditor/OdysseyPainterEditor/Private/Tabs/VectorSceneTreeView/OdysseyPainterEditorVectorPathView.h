@@ -81,14 +81,20 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
                  , meta = ( ToolTip = "Width in percent"
                           , Units = "Percent"
                           , EditCondition = "bDisplayWideningOptions && ( WideningMode == EPathViewWideningMode::Percent )"
-                          , EditConditionHides ) )
+                          , EditConditionHides
+                          //TODO: no clamping at all ?!
+                          , LinearDeltaSensitivity = "15"
+                          , Delta = "1" ) )
         double PathWidthInPercent;
 
         UPROPERTY( EditAnywhere
                  , Category=Path
                  , meta = ( ToolTip = "Width in units"
                           , EditCondition = "bDisplayWideningOptions && ( WideningMode == EPathViewWideningMode::Units )"
-                          , EditConditionHides ) )
+                          , EditConditionHides
+                          //TODO: no clamping at all ?!
+                          , LinearDeltaSensitivity = "15"
+                          , Delta = "1" ) )
         double PathWidthInUnits;
 
         UPROPERTY( EditAnywhere
@@ -98,7 +104,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
 
         UPROPERTY( EditAnywhere
                  , Category=Path
-                 , meta = ( ToolTip = "Miter Limit" ) )
+                 , meta = ( ToolTip = "Miter Limit"
+                            //TODO: no clamping at all ?!
+                            , LinearDeltaSensitivity = "15"
+                            , Delta = "1" ) )
         double MiterLimit;
 
         UPROPERTY( EditAnywhere
