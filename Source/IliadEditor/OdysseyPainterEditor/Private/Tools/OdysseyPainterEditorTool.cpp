@@ -385,12 +385,6 @@ UOdysseyPainterEditorTool::OnKeyUpGlobal(const FKeyEvent& InKeyEvent)
     return false; //false means Unreal will continue as if we did nothing
 }
 
-FText
-UOdysseyPainterEditorTool::GetTooltip() const
-{
-    return FText();
-}
-
 void
 UOdysseyPainterEditorTool::PropertyChanged(const FName& iPropertyName)
 {

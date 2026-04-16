@@ -52,6 +52,8 @@ public:
 
     virtual void Tick(float iDeltaTime) override;
 
+    virtual FText GetTooltip() const override;
+
 public:
     UFUNCTION(BlueprintCallable, Category="Actions", CallInEditor)
     void Deselect();
@@ -63,6 +65,7 @@ private:
     void OnShapeAbort();
 
 protected:
+    /** The list of available shapes. */
     UPROPERTY(EditAnywhere, Category="Shape", meta = (IgnoreToolConfiguration))
     FOdysseyShapes Shapes;
 

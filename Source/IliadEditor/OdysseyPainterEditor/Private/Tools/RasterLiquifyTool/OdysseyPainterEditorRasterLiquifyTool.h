@@ -72,28 +72,16 @@ struct FStylusPressureOptions
         {
         }
 
-        UPROPERTY( EditAnywhere
-                 , Category="Options"
-                 , meta = ( DisplayName = "Size"
-                          , ToolTip = "Stylus pressure linked to size"
-                          , EditCondition = "(UseStylusPressure == true)"
-                          , EditConditionHides ) )
+        /** Stylus pressure linked to size. */
+        UPROPERTY( EditAnywhere, Category="Options",meta = ( DisplayName = "Size", EditCondition = "(UseStylusPressure == true)", EditConditionHides ) )
         bool UseSize;
 
-        UPROPERTY( EditAnywhere
-                 , Category="Options"
-                 , meta = ( DisplayName = "Strength"
-                          , ToolTip = "Stylus pressure linked to strength"
-                          , EditCondition = "(UseStylusPressure == true)"
-                          , EditConditionHides ) )
+        /** Stylus pressure linked to strength. */
+        UPROPERTY( EditAnywhere, Category="Options", meta = ( DisplayName = "Strength", EditCondition = "(UseStylusPressure == true)", EditConditionHides ) )
         bool UseStrength;
 
-        UPROPERTY( EditAnywhere
-                 , Category="Options"
-                 , meta = ( DisplayName = "Hardness"
-                          , ToolTip = "Stylus pressure linked to hardness"
-                          , EditCondition = "(UseStylusPressure == true)"
-                          , EditConditionHides ) )
+        /** Stylus pressure linked to hardness. */
+        UPROPERTY( EditAnywhere, Category="Options", meta = ( DisplayName = "Hardness", EditCondition = "(UseStylusPressure == true)", EditConditionHides ) )
         bool UseHardness;
 };
 
@@ -216,99 +204,45 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         void Init();
 
     public:
-        UPROPERTY( EditAnywhere
-                 , Category = "Liquify Tool" )
+        /** The mode. */
+        UPROPERTY( EditAnywhere, Category = "Liquify Tool" )
         EOdysseyLiquifyMode Mode;
         EOdysseyLiquifyMode mPreviousMode;
 
-        UPROPERTY( EditAnywhere
-                 , Category = "Liquify Tool"
-                 , meta = ( ToolTip = "Use Stylus Pressure"
-                          , EditCondition = "(Mode != EOdysseyLiquifyMode::Adjust)"
-                          , EditConditionHides ) )
+        /** Use Stylus Pressure. */
+        UPROPERTY( EditAnywhere, Category = "Liquify Tool", meta = ( EditCondition = "(Mode != EOdysseyLiquifyMode::Adjust)", EditConditionHides ) )
         bool UseStylusPressure;
 
-        UPROPERTY( EditAnywhere
-                 , Category = "Liquify Tool"
-                 , meta = ( ToolTip = "Stylus Pressure Options"
-                          , EditCondition = "(UseStylusPressure == true) && (Mode != EOdysseyLiquifyMode::Adjust)"
-                          , EditConditionHides ) )
+        /** Stylus Pressure Options. */
+        UPROPERTY( EditAnywhere, Category = "Liquify Tool", meta = ( EditCondition = "(UseStylusPressure == true) && (Mode != EOdysseyLiquifyMode::Adjust)", EditConditionHides ) )
         FStylusPressureOptions StylusPressureOptions;
 
-        UPROPERTY( EditAnywhere
-                 , Category = "Liquify Tool"
-                 , meta = ( ToolTip = "Size"
-                          , EditCondition = "(Mode != EOdysseyLiquifyMode::Adjust)"
-                          , EditConditionHides
-                          , ClampMin = "0"
-                          , UIMin = "0"
-                          , ClampMax = "2000"
-                          , UIMax = "2000"
-                          , LinearDeltaSensitivity = "5"
-                          , Delta = "1"
-                          , Multiple = "1" ) )
+        /** The size. */
+        UPROPERTY( EditAnywhere, Category = "Liquify Tool", meta = ( EditCondition = "(Mode != EOdysseyLiquifyMode::Adjust)", EditConditionHides, ClampMin = "0", UIMin = "0", ClampMax = "2000", UIMax = "2000" ) )
         int Size;
 
-        UPROPERTY( EditAnywhere
-                 , Category = "Liquify Tool"
-                 , meta = ( ToolTip = "Strength"
-                          , EditCondition = "(Mode != EOdysseyLiquifyMode::Adjust)"
-                          , EditConditionHides
-                          , Units = "Percent"
-                          , ClampMin = "0"
-                          , UIMin = "0"
-                          , ClampMax = "100"
-                          , UIMax = "100"
-                          , Delta = "1"
-                          , Multiple = "1" ) )
+        /** The strength. */
+        UPROPERTY( EditAnywhere, Category = "Liquify Tool", meta = ( EditCondition = "(Mode != EOdysseyLiquifyMode::Adjust)", EditConditionHides, ClampMin = "0", UIMin = "0", ClampMax = "100", UIMax = "100", Units = "Percent" ) )
         int32 Strength;
 
-        UPROPERTY( EditAnywhere
-                 , Category = "Liquify Tool"
-                 , meta = ( ToolTip = "Hardness"
-                          , EditCondition = "(Mode != EOdysseyLiquifyMode::Adjust)"
-                          , EditConditionHides
-                          , Units = "Percent"
-                          , ClampMin = "0"
-                          , UIMin = "0"
-                          , ClampMax = "100"
-                          , UIMax = "100"
-                          , Delta = "1"
-                          , Multiple = "1" ) )
+        /** The hardness. */
+        UPROPERTY( EditAnywhere, Category = "Liquify Tool", meta = ( EditCondition = "(Mode != EOdysseyLiquifyMode::Adjust)", EditConditionHides, ClampMin = "0", UIMin = "0", ClampMax = "100", UIMax = "100", Units = "Percent" ) )
         int32 Hardness;
 
-        UPROPERTY( EditAnywhere
-                 , Category = "Liquify Tool"
-                 , meta = ( DisplayName = "Strength"
-                          , ToolTip = "Increase or decrease displacement"
-                          , EditCondition = "(Mode == EOdysseyLiquifyMode::Adjust)"
-                          , EditConditionHides
-                          , Units = "Percent"
-                          , ClampMin = "0"
-                          , UIMin = "0"
-                          , ClampMax = "100"
-                          , UIMax = "100"
-                          , Delta = "1"
-                          , Multiple = "1" ) )
+        /** Increase or decrease displacement. */
+        UPROPERTY( EditAnywhere, Category = "Liquify Tool", meta = ( DisplayName = "Strength", EditCondition = "(Mode == EOdysseyLiquifyMode::Adjust)", EditConditionHides, ClampMin = "0", UIMin = "0", ClampMax = "100", UIMax = "100", Units = "Percent" ) )
         int32 AdjustmentStrength;
 
-        UPROPERTY( EditAnywhere
-                 , Category = "Liquify Tool"
-                 , meta = ( ToolTip = "Direction"
-                          , EditCondition = "(Mode == EOdysseyLiquifyMode::Push)"
-                          , EditConditionHides ) )
+        /** The direction. */
+        UPROPERTY( EditAnywhere, Category = "Liquify Tool", meta = ( EditCondition = "(Mode == EOdysseyLiquifyMode::Push)", EditConditionHides ) )
         EOdysseyLiquifyPushDirection PushDirection;
 
-        UPROPERTY( EditAnywhere
-                 , Category = "Liquify Tool"
-                 , meta = ( ToolTip = "Direction"
-                          , EditCondition = "(Mode == EOdysseyLiquifyMode::Twirl)"
-                          , EditConditionHides ) )
+        /** The direction. */
+        UPROPERTY( EditAnywhere, Category = "Liquify Tool", meta = ( EditCondition = "(Mode == EOdysseyLiquifyMode::Twirl)", EditConditionHides ) )
         EOdysseyLiquifyTwirlDirection TwirlDirection;
 
-        UPROPERTY( EditAnywhere
-                 , Category = "Liquify Tool"
-                 , meta = ( ToolTip = "Border Policy" ) )
+        /** The border policy. */
+        UPROPERTY( EditAnywhere, Category = "Liquify Tool" )
         EOdysseyLiquifyBorderPolicy BorderPolicy;
 
         void Reset();

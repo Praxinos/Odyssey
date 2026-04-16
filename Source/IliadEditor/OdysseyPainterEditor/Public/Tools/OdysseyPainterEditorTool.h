@@ -99,7 +99,7 @@ public:
     //Validates any action that finished. (example, any drawing in queue is finished and validated so that it creates an undoable state)
     virtual void Commit();
 
-    virtual FText GetTooltip() const;
+    virtual FText GetTooltip() const PURE_VIRTUAL( UOdysseyPainterEditorTool::GetTooltip, return FText::GetEmpty(); );
 
 public:
     // Interface
