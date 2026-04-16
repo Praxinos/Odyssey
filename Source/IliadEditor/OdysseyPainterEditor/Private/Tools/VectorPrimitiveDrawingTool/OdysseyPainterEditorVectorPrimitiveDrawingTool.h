@@ -81,7 +81,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
                  , Category = "Parameters"
                  , meta = ( ToolTip  = "Stroke Width"
                           , ClampMin = "0.0"
-                          , UIMin    = "0.0" ) )
+                          , UIMin    = "0.0"
+                          , LinearDeltaSensitivity = "15"
+                          , Delta = "1" ) )
         double StrokeWidth;
 
         UPROPERTY( EditAnywhere

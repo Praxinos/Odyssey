@@ -138,7 +138,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
                  , Category=TransformTool
                  , meta = ( ToolTip  = "PickingRadius"
                           , ClampMin = "0"
-                          , UIMin    = "0" ) )
+                          , UIMin    = "0"
+                          , LinearDeltaSensitivity = "15"
+                          , Delta = "1" ) )
         uint32 PickingRadius;
 
         UPROPERTY( EditAnywhere

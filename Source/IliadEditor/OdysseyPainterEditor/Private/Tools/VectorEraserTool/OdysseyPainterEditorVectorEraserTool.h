@@ -105,6 +105,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
                  , Category=EraserTool
                  , meta = ( Tooltip  = "Radius"
                           , ClampMin = "0"
-                          , UIMin    = "0" ) )
+                          , UIMin    = "0"
+                          , LinearDeltaSensitivity = "15"
+                          , Delta = "1" ) )
         uint32 Radius;
 };

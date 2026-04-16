@@ -120,7 +120,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                  , Category=PathDrawingTool
                  , meta = ( ToolTip = "Radius"
                           , ClampMin = "0.0"
-                          , UIMin = "0.0" ) )
+                          , UIMin = "0.0"
+                          , LinearDeltaSensitivity = "15"
+                          , Delta = "1" ) )
         double Radius;
         // computed based upon whether or not the pencil size is relative to the object's transformation matrix
         double mRealSize;
@@ -158,7 +160,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                  , Category=PathDrawingTool
                  , meta = ( ToolTip = "Snap/Stitching Radius"
                           , ClampMin = "0"
-                          , UIMin    = "0" ) )
+                          , UIMin    = "0"
+                          , LinearDeltaSensitivity = "15"
+                          , Delta = "1" ) )
         uint32 StitchingRadius;
 
         //UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
