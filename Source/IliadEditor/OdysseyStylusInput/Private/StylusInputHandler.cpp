@@ -132,10 +132,6 @@ void FOdysseyStylusInputHandler::PrintPacket(const UE::StylusInput::FStylusInput
     UE_LOG(LogTemp, Display, TEXT("TimerTick %d"), Packet.TimerTick)
 }
 
-void FOdysseyStylusInputHandler::ProcessPacket(const FStylusInputPacket& Packet, IStylusInputInstance* Instance)
-{
-}
-
 const IStylusInputTabletContext* FOdysseyStylusInputHandler::GetTabletContext(IStylusInputInstance* Instance, uint32 TabletContextID)
 {
     if (!Instance)

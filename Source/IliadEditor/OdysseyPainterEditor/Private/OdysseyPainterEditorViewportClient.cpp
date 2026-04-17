@@ -604,7 +604,8 @@ FOdysseyPainterEditorViewportClient::MouseDown(const FOdysseyPoint& iPoint)
         return;
 
     mIsMouseDown = true;
-    UE_LOG(LogTemp, Display, TEXT("MOUSE DOWN"));
+    static int count = 0;
+    UE_LOG(LogTemp, Display, TEXT("MOUSE DOWN %d"), count++);
 
     //If we don't have a surface, then we don't interact with anything
     UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
@@ -861,7 +862,6 @@ FOdysseyPainterEditorViewportClient::StartStylusInputRecord()
         return;
 
     //Down
-    ReadStylusInput();
     mIsRecordingStylus = true;
 }
 
@@ -871,10 +871,7 @@ FOdysseyPainterEditorViewportClient::StopStylusInputRecord()
     if (!mIsRecordingStylus)
         return;
 
-    ReadStylusInput();
-
     //UP
-    UE_LOG(LogTemp, Display, TEXT("StopReading"));
     mIsRecordingStylus = false;
 }
 
@@ -927,24 +924,22 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput()
         return;
 
     UE::StylusInput::FStylusInputPacket packet;
+    UE_LOG(LogTemp, Display, TEXT("Dequeue %d"), PacketQueue.Num());
     while (PacketQueue.Dequeue(packet))
     {
-        UE_LOG(LogTemp, Display, TEXT("Dequeue"));
         FOdysseyPoint point = StylusPacketToPoint(packet);
 
         //Force MouseDown when using the Right Mouse Button to allow hovered mouse clicks
-        if (!mStylusIsDown && packet.Type == UE::StylusInput::EPacketType::StylusDown)
+        if (packet.Type == UE::StylusInput::EPacketType::StylusDown)
         {
             //MouseDown
             MouseDown(point);
-            mStylusIsDown = true;
             mLastStylusEventIndex = packet.SerialNumber;
         }
-        else if (mStylusIsDown && packet.Type == UE::StylusInput::EPacketType::StylusUp)
+        else if (packet.Type == UE::StylusInput::EPacketType::StylusUp)
         {
             //MouseUp
             MouseUp(point);
-            mStylusIsDown = false;
             mLastStylusEventIndex = packet.SerialNumber;
         }
         else if (mStylusIsDown)
@@ -959,6 +954,13 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput()
 
 void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylusInputPacket& Packet, UE::StylusInput::IStylusInputInstance* Instance)
 {
+    /*TSharedPtr<SWindow> ActiveWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
+    if( ActiveWindow != StylusInputWindow )
+    {
+        UE_LOG(LogTemp, Display, TEXT("Not Active"));
+        return;
+    }*/
+
     //PrintPacket(Packet);
     mStylusLastEventTime = std::chrono::steady_clock::now();
 
@@ -971,11 +973,25 @@ void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylu
     if (!texture)
         return;
 
-    PacketQueue.Enqueue(Packet);
-    mLastStylusEventIndex = 0;
 
-    PrintPacket(Packet);
-    ReadStylusInput();
+    if( Packet.Type == UE::StylusInput::EPacketType::StylusDown )
+    {
+        StartStylusInputRecord();
+        mStylusIsDown = true;
+    }
+    if(mIsRecordingStylus)
+    {
+        PacketQueue.Enqueue(Packet);
+        mLastStylusEventIndex = 0;
+
+        PrintPacket(Packet);
+        ReadStylusInput();
+    }
+    if (Packet.Type == UE::StylusInput::EPacketType::StylusUp)
+    {
+        mStylusIsDown = false;
+        StopStylusInputRecord();
+    }
 }
 
 //--------------------------------------------------------------------------------------

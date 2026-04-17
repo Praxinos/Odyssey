@@ -40,7 +40,6 @@ public:
     TSpscQueue<UE::StylusInput::FStylusInputPacket> PacketQueue;
 
 protected:
-    void ProcessPacket(const UE::StylusInput::FStylusInputPacket& Packet, UE::StylusInput::IStylusInputInstance* Instance);
     const UE::StylusInput::IStylusInputTabletContext* GetTabletContext(UE::StylusInput::IStylusInputInstance* Instance, uint32 TabletContextID);
 
     void OnStylusInputDriverChanged(FName iStylusInputDriver);
