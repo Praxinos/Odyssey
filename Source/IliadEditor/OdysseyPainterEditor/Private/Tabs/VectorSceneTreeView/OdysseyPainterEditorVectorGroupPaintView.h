@@ -78,7 +78,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
                  , Category = GapDetection
                  , meta = ( ToolTip  = "Gap Tolerance"
                           , ClampMin = "0.0"
-                          , UIMin    = "0.0" ) )
+                          , UIMin    = "0.0"
+                          , LinearDeltaSensitivity = "15"
+                          , Delta = "1" ) )
         double GapTolerance;
 
         // commented out: now handled at layer level

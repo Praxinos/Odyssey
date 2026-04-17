@@ -116,37 +116,56 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
 
         UPROPERTY( EditAnywhere
                  , Category= Transform
-                 , meta = ( ToolTip = "Translation X" ) )
+                 , meta = ( ToolTip = "Translation X"
+                            , LinearDeltaSensitivity = "5"
+                            , Delta = "1" ) )
         double TranslationX;
 
         UPROPERTY( EditAnywhere
                  , Category= Transform
-                 , meta = ( ToolTip = "Translation Y" ) )
+                 , meta = ( ToolTip = "Translation Y"
+                            , LinearDeltaSensitivity = "5"
+                            , Delta = "1" ) )
         double TranslationY;
 
         UPROPERTY( EditAnywhere
                  , Category= Transform
-                 , meta = ( ToolTip = "Rotation" ) )
+                 , meta = ( ToolTip = "Rotation"
+                            , LinearDeltaSensitivity = "15"
+                            , Delta = "1"
+                            , Units = "degrees" ) )
         double Rotation;
 
         UPROPERTY( EditAnywhere
                  , Category= Transform
-                 , meta = ( ToolTip = "Scaling X" ) )
+                 , meta = ( ToolTip = "Scaling X"
+                            , LinearDeltaSensitivity = "15"
+                            , Delta = "0.01"
+                            //, Units = "degrees" //TODO: but only once the displayed value will be 0-100
+                            ) )
         double ScalingX;
 
         UPROPERTY( EditAnywhere
                  , Category= Transform
-                 , meta = ( ToolTip = "Scaling Y" ) )
+                 , meta = ( ToolTip = "Scaling Y"
+                            , LinearDeltaSensitivity = "15"
+                            , Delta = "0.01"
+                            //, Units = "degrees" //TODO: but only once the displayed value will be 0-100
+                            ) )
         double ScalingY;
 
         UPROPERTY( EditAnywhere
                  , Category= Transform
-                 , meta = ( ToolTip = "Skew X" ) )
+                 , meta = ( ToolTip = "Skew X"
+                            , LinearDeltaSensitivity = "15"
+                            , Delta = "0.01" ) )
         double SkewX;
 
         UPROPERTY( EditAnywhere
                  , Category= Transform
-                 , meta = ( ToolTip = "Skew Y" ) )
+                 , meta = ( ToolTip = "Skew Y"
+                            , LinearDeltaSensitivity = "15"
+                            , Delta = "0.01" ) )
         double SkewY;
 
         // unused for now

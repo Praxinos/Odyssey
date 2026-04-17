@@ -80,13 +80,16 @@ public:
     void ResetAll();
 
 public:
-    UPROPERTY(EditAnywhere, Category="Out Of Pegs", meta = (LinearDeltaSensitivity="1") )
+    /** The pan. */
+    UPROPERTY(EditAnywhere, Category="Out Of Pegs", meta = ( LinearDeltaSensitivity = "5", Delta = "1" ) )
     FVector2D Pan = FVector2D(0, 0);
 
-    UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( Units="Degrees", LinearDeltaSensitivity="1") )
+    /** The rotation. */
+    UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( LinearDeltaSensitivity="15", Delta = "1", Units = "Degrees" ) )
     float Rotation = 0.f;
 
-    UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( ClampMin = "0", UIMin = "0", Units="Percent") )
+    /** The zoom. */
+    UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( ClampMin = "0.1", UIMin = "0.1", LinearDeltaSensitivity = "15", Delta = "1", Units="Percent") )
     float Zoom = 100.f;
 
 private:

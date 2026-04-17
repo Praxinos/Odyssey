@@ -75,7 +75,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : publi
                  , Category=PathSmoothTool
                  , meta = ( ToolTip  = "Picking Radius"
                           , ClampMin = "0"
-                          , UIMin    = "0" ) )
+                          , UIMin    = "0"
+                          , LinearDeltaSensitivity = "15"
+                          , Delta = "1" ) )
         uint32 PickingRadius;
 
         UPROPERTY( EditAnywhere

@@ -68,18 +68,23 @@ protected:
     TSharedPtr<FScopedTransaction> mTransaction;
 
 public:
+    /** The list of available shapes. */
     UPROPERTY(EditAnywhere, Category="Shape", meta=(IgnoreToolConfiguration) )
     FOdysseyShapes Shapes;
 
-    UPROPERTY(EditAnywhere, Category="Parameters", meta=(UIMin=0, ClampMin=0, LinearDeltaSensitivity=1) )
+    /** The stroke width. */
+    UPROPERTY(EditAnywhere, Category="Parameters", meta=(UIMin="0", ClampMin="0", LinearDeltaSensitivity="15", Delta="1") )
     float StrokeWidth = 1.0f;
 
+    /** Apply the antialiasing. */
     UPROPERTY(EditAnywhere, Category="Parameters" )
     bool Antialiasing = true;
 
+    /** Use subpixel mode. */
     UPROPERTY(EditAnywhere, Category="Parameters" )
     bool SubPixel = true;
 
+    /** Fill the shape. */
     UPROPERTY(EditAnywhere, Category="Parameters" )
     bool Filled = true;
 

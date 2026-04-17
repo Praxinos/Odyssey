@@ -85,7 +85,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathPushTool : public 
                  , Category=PathPushTool
                  , meta = ( ToolTip  = "Radius"
                           , ClampMin = "0"
-                          , UIMin    = "0" ) )
+                          , UIMin    = "0"
+                          , LinearDeltaSensitivity = "15"
+                          , Delta = "1" ) )
         uint32 Radius;
 
         UPROPERTY( EditAnywhere

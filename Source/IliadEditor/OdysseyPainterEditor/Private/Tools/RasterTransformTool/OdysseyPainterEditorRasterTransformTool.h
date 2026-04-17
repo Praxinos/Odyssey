@@ -97,9 +97,13 @@ private:
     void ResetRasterSelection();
 
 public:
+    /** Use a perspective transform. */
     UPROPERTY(EditAnywhere, Category="Transform options" )
     bool Perspective = false;
 
+    /** Use a uniform transform which keeps the width/height ratio.
+    *   (while in uniform mode, remove the perspective)
+    */
     UPROPERTY(EditAnywhere, Category="Transform options" )
     bool Uniform = false;
 

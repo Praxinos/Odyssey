@@ -25,7 +25,7 @@ struct FOdysseySmoothingOptions
     EOdysseySmoothingMethod SmoothingMethod;
 
     /** Distance for Smooting computation. */
-    UPROPERTY( EditAnywhere, Category="Smoothing", meta = ( DisplayName="Strength", ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple="1" ) )
+    UPROPERTY( EditAnywhere, Category="Smoothing", meta = ( DisplayName="Strength", ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta= "1" ) )
     int32   SmoothingStrength;
 
     /** Should smoothing be real-time, meaning the first input draws directly, even though the strength is not reached yet. */

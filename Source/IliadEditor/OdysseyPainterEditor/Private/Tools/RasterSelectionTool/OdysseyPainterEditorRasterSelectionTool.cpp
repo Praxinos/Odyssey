@@ -62,6 +62,12 @@ bool UOdysseyPainterEditorRasterSelectionTool::IsActivable() const
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
 }
 
+FText
+UOdysseyPainterEditorRasterSelectionTool::GetTooltip() const
+{
+    return LOCTEXT( "raster-selection-tool.tooltip", "Selection Tool" );
+}
+
 bool UOdysseyPainterEditorRasterSelectionTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyPainterEditorTool::OnMouseDown(iPointInTexture, iKey);

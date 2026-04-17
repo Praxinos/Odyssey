@@ -63,7 +63,7 @@ public:
     EOdysseySmoothingMethod   SmoothingMethod;
 
     /** Smoothing Strength Override Value. */
-    UPROPERTY( EditAnywhere, Category="Interpolation", meta = ( ClampMin = "0", ClampMax = "200", UIMin = "0", UIMax = "200", SliderExponent = "1", editcondition = "bOverride_SmoothingStrength" ) )
+    UPROPERTY( EditAnywhere, Category="Interpolation", meta = ( ClampMin = "0", ClampMax = "200", UIMin = "0", UIMax = "200", editcondition = "bOverride_SmoothingStrength" ) )
     int32   SmoothingStrength;
 
     /** Smoothing Enabled Override Value. */
@@ -79,7 +79,7 @@ public:
     bool    SmoothingCatchUp;
 
     /** Stroke Step Override Value. */
-    UPROPERTY( EditAnywhere, Category="Interpolation", meta = ( ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200", SliderExponent = "1", editcondition = "bOverride_Step" ) )
+    UPROPERTY( EditAnywhere, Category="Interpolation", meta = ( ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200", Delta = "1", editcondition = "bOverride_Step" ) )
     float   Step;
 
     /** Stroke Size Adaptative Override Value. */

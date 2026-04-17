@@ -25,12 +25,15 @@ public:
     UPROPERTY(EditAnywhere, Category="Blending")
     bool bEraserMode;
 
+    /** The blending mode. */
     UPROPERTY( EditAnywhere, Category="Blending", meta = (EditCondition = "!bEraserMode"))
     EOdysseyBlendingMode BlendingMode;
 
+    /** The alpha mode. */
     UPROPERTY( EditAnywhere, Category="Blending", meta = (EditCondition = "!bEraserMode"))
     EOdysseyAlphaMode AlphaMode;
 
-    UPROPERTY( EditAnywhere, Category="Blending", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple = "1", Units = "Percent"))
+    /** The opacity. */
+    UPROPERTY( EditAnywhere, Category="Blending", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Units = "Percent"))
     float Opacity;
 };

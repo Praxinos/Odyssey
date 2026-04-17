@@ -119,7 +119,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
                           , ClampMin = "0.0"
                           , UIMin    = "0.0"
                           , ClampMax = "1.0"
-                          , UIMax    = "1.0" ) )
+                          , UIMax    = "1.0"
+                          //, Units    = "Percent" //TODO: but only once the displayed value will be 0-100
+                          , Delta    = "0.01" ) )
         double Opacity;
 
         UPROPERTY( EditAnywhere
@@ -138,7 +140,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
 
         UPROPERTY( EditAnywhere
                  , Category=PaintBucketTool
-                 , meta = ( ToolTip = "Picking Radius" ) )
+                 , meta = ( ToolTip = "Picking Radius"
+                            //TODO: no clamping ?!
+                            , LinearDeltaSensitivity = "15"
+                            , Delta = "1" ) )
         double PickingRadius;
 
     protected:

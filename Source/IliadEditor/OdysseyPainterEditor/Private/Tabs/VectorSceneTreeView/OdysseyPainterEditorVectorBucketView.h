@@ -84,6 +84,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UO
                  , Category = "Bucket"
                  , meta = ( ToolTip  = "Radial Radius"
                           , EditCondition = "(ColorMode == eBucketColorMode::RadialGradient)"
-                          , EditConditionHides ) )
+                          , EditConditionHides
+                          //TODO: no clamping at all ?!
+                          , LinearDeltaSensitivity = "15"
+                          , Delta = "1" ) )
         double RadialRadius; // radius in radial mode
 };

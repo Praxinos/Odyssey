@@ -197,30 +197,39 @@ private:
     void SubPixelBlueprintSetter(bool Value);
 
 public:
+    /** The brush. */
     UPROPERTY(meta=(ForceShowEngineContent, ForceShowPluginContent))
     TObjectPtr<UOdysseyBrush> Brush;
 
+    /** The brush. */
     UPROPERTY(EditInstanceOnly, Category="Brush", meta=(EditInline, IgnoreToolConfiguration, AllowEditInlineCustomization/*, ShowInnerProperties*/))
     TObjectPtr<UOdysseyBrushAssetBase> BrushInstance;
 
+    /** The brush options. */
     UPROPERTY(meta=(IgnoreToolConfiguration))
     TObjectPtr<UOdysseyBrushOptions> BrushOptions;
 
+    /** The list of available shapes. */
     UPROPERTY(EditAnywhere, Category="Shape", meta = (IgnoreToolConfiguration))
     FOdysseyShapes Shapes;
 
+    /** Use subpixel mode. */
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Shape", BlueprintSetter=SubPixelBlueprintSetter)
     bool SubPixel = true;
 
-    UPROPERTY(EditAnywhere, Category="Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1"))
+    /** The step. */
+    UPROPERTY(EditAnywhere, Category="Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1"))
     float   Step = 1.0;
 
+    /** Use adaptative step. */
     UPROPERTY( EditAnywhere, Category="Interpolation")
     bool    AdaptativeStep = false;
 
+    /** The interpolation type. */
     UPROPERTY( EditInstanceOnly, Category="Interpolation")
     EOdysseyInterpolationType InterpolationType = EOdysseyInterpolationType::kCatmullRom;
 
+    /** The blending parameters. */
     UPROPERTY(EditInstanceOnly, Category="Blending", meta=(ShowOnlyInnerProperties))
     FOdysseyBlendParameters BlendParameters;
 

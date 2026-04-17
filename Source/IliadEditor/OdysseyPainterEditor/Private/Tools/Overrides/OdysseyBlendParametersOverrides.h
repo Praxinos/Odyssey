@@ -36,7 +36,7 @@ public:
     /////////////////////////////////////////////////////
     // Overrides Values
     /** Modifier Opacity Override Value. */
-    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", SliderExponent = "1", editcondition = "bOverride_Opacity" ) )
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", editcondition = "bOverride_Opacity" ) )
     float  Opacity;
 
     /** Modifier BlendingMode Override Value. */
