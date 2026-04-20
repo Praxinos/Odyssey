@@ -36,6 +36,7 @@ public:
     static UOdysseyTextureLayerStack* CreateEmptyFromTexture(UTexture2D* iTexture, UObject* iOuter);
     static UOdysseyTextureLayerStack* CreateFromTexture(UTexture2D* iTexture, UObject* iOuter);
     static UOdysseyTextureLayerStack* CreateWithEmptyVectorLayer(UTexture2D* iTexture, UObject* iOuter);
+    static UOdysseyTextureLayerStack* CreateWithEmptyRasterLayer(UTexture2D* iTexture, UObject* iOuter);
     ~UOdysseyTextureLayerStack();
     UOdysseyTextureLayerStack();
 

@@ -89,7 +89,7 @@ FOdysseyTextureConfiguration::CreateTexture(UObject* iParent, FName iName, EObje
 
     if (defaultLayerType == EOdysseyTextureDefaultLayerType::kRaster)
     {
-        userData->InitWithDefaultLayerStack();
+        userData->InitWithEmptyRasterLayer();
     }
     else if (defaultLayerType == EOdysseyTextureDefaultLayerType::kVector)
     {
@@ -106,9 +106,6 @@ FOdysseyTextureConfiguration::CreateTexture(UObject* iParent, FName iName, EObje
     if (BackgroundColor != EOdysseyTextureBackgroundColor::kTransparent)
     {
         UOdysseyLayerStack* layerStack = userData->GetLayerStack();
-
-        //Add first layer image
-
 
         //Set the layer as Current Layer
         UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), nullptr, 1));

@@ -37,6 +37,15 @@ UOdysseyTextureLayerStackUserData::InitWithEmptyVectorLayer()
 }
 
 void
+UOdysseyTextureLayerStackUserData::InitWithEmptyRasterLayer()
+{
+    if (LayerStack)
+        return;
+
+    LayerStack = UOdysseyTextureLayerStack::CreateWithEmptyRasterLayer(GetTexture(), this);
+}
+
+void
 UOdysseyTextureLayerStackUserData::InitWithDuplicateLayerStack(UOdysseyTextureLayerStack* iLayerStack)
 {
     if ( LayerStack )

@@ -29,6 +29,7 @@ public:
     void InitWithDefaultLayerStack();
     void InitWithDuplicateLayerStack(UOdysseyTextureLayerStack* iLayerStack);
     void InitWithEmptyVectorLayer();
+    void InitWithEmptyRasterLayer();
 
 
     /**
