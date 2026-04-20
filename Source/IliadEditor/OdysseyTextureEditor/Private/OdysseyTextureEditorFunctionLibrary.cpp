@@ -65,7 +65,7 @@ UOdysseyTextureEditorTextureFunctionLibrary::CreateTextureAsset(FString AssetNam
 UOdysseyTextureLayerImageRaster*
 UOdysseyTextureEditorTextureFunctionLibrary::ImportTexture(UTexture2D* Texture, UTexture2D* TextureToImport, UOdysseyTextureLayer* ParentLayer, int IndexInLayer)
 {
-    if ( !Texture || !TextureToImport || ParentLayer->GetTexture() != Texture)
+    if ( !Texture || !TextureToImport || (ParentLayer && ParentLayer->GetTexture() != Texture) )
         return nullptr;
 
     UOdysseyTextureLayerStack* layerStack = UOdysseyTextureFunctionLibrary::GetLayerStack(Texture);
@@ -73,8 +73,10 @@ UOdysseyTextureEditorTextureFunctionLibrary::ImportTexture(UTexture2D* Texture, 
         return nullptr;
 
     UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), ParentLayer, IndexInLayer);
-    UOdysseyTextureLayerImageRaster* layerImageRaster = Cast<UOdysseyTextureLayerImageRaster>(layer);
+    if (!layer)
+        return nullptr;
 
+    UOdysseyTextureLayerImageRaster* layerImageRaster = Cast<UOdysseyTextureLayerImageRaster>(layer);
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = layerImageRaster->GetRasterBlock();
     TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(TextureToImport, rasterBlock->GetFormat()));
     FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
@@ -87,7 +89,7 @@ UOdysseyTextureEditorTextureFunctionLibrary::ImportTexture(UTexture2D* Texture, 
 UOdysseyTextureLayerImageRaster*
 UOdysseyTextureEditorTextureFunctionLibrary::ImportImage(UTexture2D* Texture, FString Path, UOdysseyTextureLayer* ParentLayer, int IndexInLayer)
 {
-    if ( Path.IsEmpty() || !Texture || ParentLayer->GetTexture() != Texture)
+    if ( Path.IsEmpty() || !Texture || (ParentLayer && ParentLayer->GetTexture() != Texture))
         return nullptr;
 
     UOdysseyTextureLayerStack* layerStack = UOdysseyTextureFunctionLibrary::GetLayerStack(Texture);
@@ -95,6 +97,8 @@ UOdysseyTextureEditorTextureFunctionLibrary::ImportImage(UTexture2D* Texture, FS
         return nullptr;
 
     UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), ParentLayer, IndexInLayer));
+    if (!layer)
+        return nullptr;
 
     ::ULIS::eFormat format = layer->GetRasterBlock()->GetFormat();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( format );
