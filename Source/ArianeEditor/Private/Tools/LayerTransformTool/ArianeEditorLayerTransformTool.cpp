@@ -50,16 +50,21 @@ UArianeEditorLayerTransformTool::Init( FArianeEditor* InEditor )
 void
 UArianeEditorLayerTransformTool::BindDelegates()
 {
-    UArianeLayerStack* LayerStack = Editor->GetCurrentPainting3DComponent()->GetLayerStack();
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
-    Editor->OnPre3DPaintingComponentSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::ClearGizmo );
-    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::CreateGizmo );
+    if( Painting3DComponent )
+    {
+        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
 
-    LayerStack->OnPreLayerSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::ClearGizmo );
-    LayerStack->OnPostLayerSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::CreateGizmo );
+        Editor->OnPre3DPaintingComponentSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::ClearGizmo );
+        Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::CreateGizmo );
 
-    // Refresh the tool's Gizmo when the layer Transform is updated (e.g via a widget)
-    LayerStack->GetRootFolder()->OnPostUpdateDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::OnRootFolderUpdate );
+        LayerStack->OnPreLayerSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::ClearGizmo );
+        LayerStack->OnPostLayerSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::CreateGizmo );
+
+        // Refresh the tool's Gizmo when the layer Transform is updated (e.g via a widget)
+        LayerStack->GetRootFolder()->OnPostUpdateDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::OnRootFolderUpdate );
+    }
 }
 
 void
@@ -75,16 +80,20 @@ UArianeEditorLayerTransformTool::OnRootFolderUpdate( bool Interactive )
 void
 UArianeEditorLayerTransformTool::UnbindDelegates()
 {
-    UArianeLayerStack* LayerStack = Editor->GetCurrentPainting3DComponent()->GetLayerStack();
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
-    Editor->OnPre3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
-    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
+    if( Painting3DComponent )
+    {
+        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
 
-    LayerStack->OnPreLayerSelectionChangedDelegate().RemoveAll( this );
-    LayerStack->OnPostLayerSelectionChangedDelegate().RemoveAll( this );
+        Editor->OnPre3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
+        Editor->OnPost3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
 
-    LayerStack->GetRootFolder()->OnPostUpdateDelegate().RemoveAll( this );
+        LayerStack->OnPreLayerSelectionChangedDelegate().RemoveAll( this );
+        LayerStack->OnPostLayerSelectionChangedDelegate().RemoveAll( this );
 
+        LayerStack->GetRootFolder()->OnPostUpdateDelegate().RemoveAll( this );
+    }
 }
 
 void
@@ -105,38 +114,49 @@ UArianeEditorLayerTransformTool::ClearGizmo()
 void
 UArianeEditorLayerTransformTool::CreateGizmo()
 {
-    const TArray<UArianeLayer*>& SelectedLayers = Editor->GetCurrentPainting3DComponent()->GetLayerStack()->GetSelectedLayers();
-    UInteractiveGizmoManager* GizmoManager = GetToolManager()->GetPairedGizmoManager();
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
-    // We create a new proxy because we cannot empty it from its components. The old one will be Garbage Collected... I guess.
-    TransformProxy = NewObject<UTransformProxy>(this);
-
-    Gizmo = GizmoManager->CreateCustomTransformGizmo( ETransformGizmoSubElements::FullTranslateRotateScale
-                                                    , TransformProxy
-                                                    , TEXT("ArianeLayerTransform"));
-
-    TransformSnapshots.Empty();
-    TransformSnapshots.Reserve( SelectedLayers.Num() );
-
-    for( UArianeLayer* SelectedLayer : SelectedLayers )
+    if( Painting3DComponent )
     {
-        TransformSnapshots.Emplace( SelectedLayer, SelectedLayer->GetRelativeTransform() );
-        TransformProxy->AddComponent( SelectedLayer );
-    }
+        const TArray<UArianeLayer*>& SelectedLayers = Painting3DComponent->GetLayerStack()->GetSelectedLayers();
+        UInteractiveGizmoManager* GizmoManager = GetToolManager()->GetPairedGizmoManager();
 
-    Gizmo->SetActiveTarget( TransformProxy );
+        // We create a new proxy because we cannot empty it from its components. The old one will be Garbage Collected... I guess.
+        TransformProxy = NewObject<UTransformProxy>(this);
+
+        Gizmo = GizmoManager->CreateCustomTransformGizmo( ETransformGizmoSubElements::FullTranslateRotateScale
+                                                        , TransformProxy
+                                                        , TEXT("ArianeLayerTransform"));
+
+        TransformSnapshots.Empty();
+        TransformSnapshots.Reserve( SelectedLayers.Num() );
+
+        for( UArianeLayer* SelectedLayer : SelectedLayers )
+        {
+            TransformSnapshots.Emplace( SelectedLayer, SelectedLayer->GetRelativeTransform() );
+            TransformProxy->AddComponent( SelectedLayer );
+        }
+
+        Gizmo->SetActiveTarget( TransformProxy );
+    }
 }
 
 void
 UArianeEditorLayerTransformTool::Activate()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+    TSharedPtr<ILevelEditor> LevelEditor = LevelEditorModule.GetFirstLevelEditor();
 
     CreateGizmo();
     //TransformProxy->OnTransformChanged.AddUObject( this, &UArianeEditorLayerTransformTool::OnTransformChanged )
     BindDelegates();
     // display the overlay widget
-    LevelEditorModule.GetFirstLevelEditor()->AddViewportOverlayWidget( OverlayWidget.ToSharedRef() );
+
+    // LevelEditor can be null when closing the editor (closing it will inactivate the tool).
+    if( LevelEditor )
+    {
+        LevelEditor->AddViewportOverlayWidget( OverlayWidget.ToSharedRef() );
+    }
 }
 
 void
@@ -144,7 +164,13 @@ UArianeEditorLayerTransformTool::Inactivate()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
     // Remove the overlay widget
-    LevelEditorModule.GetFirstLevelEditor()->RemoveViewportOverlayWidget( OverlayWidget.ToSharedRef() );
+    TSharedPtr<ILevelEditor> LevelEditor = LevelEditorModule.GetFirstLevelEditor();
+
+    // LevelEditor can be null when closing the editor (closing it will inactivate the tool).
+    if( LevelEditor )
+    {
+        LevelEditor->RemoveViewportOverlayWidget( OverlayWidget.ToSharedRef() );
+    }
 
     UnbindDelegates();
 

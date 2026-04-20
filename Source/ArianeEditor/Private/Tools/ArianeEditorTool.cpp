@@ -390,28 +390,26 @@ UArianeEditorTool::PostTransacted( const FTransactionObjectEvent& iTransactionEv
 void
 UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, UArianeLayerDrawing* DrawingLayer )
 {
+    IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
     FPrimitiveDrawInterface* PDI = RenderAPI->GetPrimitiveDrawInterface();
     ULineBatchComponent* LineBatcher = GetWorld()->GetLineBatcher( UWorld::ELineBatcherType::World );
     float OriX, OriY;
     float EndX, EndY;
-    FLinearColor Color = FLinearColor::Gray.CopyWithNewOpacity( 0.25f );
+    FLinearColor Color = FLinearColor::Gray.CopyWithNewOpacity( 0.125f );
     FTransform LayerTransform = DrawingLayer->GetComponentTransform();
     FMatrix LayerMatrix = LayerTransform.ToMatrixWithScale();;
     FMatrix WorldMatrix;
     float AdjustedThickness = 2.0f;
+    FViewCameraState CameraState;
+
+    QueriesAPI->GetCurrentViewState( CameraState );
 
     // Adjust line thickness relative to camera distance
-    IToolsContextQueriesAPI* Queries = GetToolManager()->GetContextQueriesAPI();
-    if (Queries)
-    {
-        FViewCameraState CameraState;
-
-        Queries->GetCurrentViewState( CameraState );
-
-        float Distance = FVector::Dist( CameraState.Position, DrawingLayer->GetComponentLocation() );
-
-        AdjustedThickness = ( Distance / 1000.0f ) * AdjustedThickness;
-    }
+    float Distance = FVector::Dist( CameraState.Position, DrawingLayer->GetComponentLocation() );
+    AdjustedThickness = ( Distance / 1000.0f ) * AdjustedThickness;
+    double GridRadius = 1000;
+    static uint32 StepCount = 20;
+    double Step = ( GridRadius * 2 ) / StepCount;
 
     switch( DrawingLayer->GetDrawingOrientation() )
     {
@@ -437,16 +435,35 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
 
         case EArianeLayerDrawingOrientation::View :
         {
-            FVector XVector = FVector( 0.0f, 0.0f, 1.0f );
+/*
+            FVector ZVector = FVector( 0.0f, 0.0f, 1.0f );
             IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
             FViewCameraState CameraState;
 
             QueriesAPI->GetCurrentViewState( CameraState );
 
             FVector CameraDirection = CameraState.Orientation.GetForwardVector();
-            FQuat RotationQuat = FQuat::FindBetweenVectors( XVector, -CameraDirection );
+            FQuat RotationQuat = FQuat::FindBetweenVectors( ZVector, -CameraDirection );
 
             WorldMatrix = RotationQuat.ToMatrix() * LayerMatrix ;
+
+            FVector PlaneWorldYVector = WorldMatrix.TransformVector( FVector( 0.0f, 1.0f, 0.0f ) );
+            FVector CameraRight = CameraState.Orientation.GetRightVector();
+            FQuat ZRotationQuat = FQuat::FindBetweenVectors( PlaneWorldYVector, CameraRight );
+
+            WorldMatrix = ZRotationQuat.ToMatrix() * WorldMatrix ;
+*/
+            // --- Begin this was AI generated because the code above did not work and I did not understand why.
+            FVector CamForward = CameraState.Orientation.GetForwardVector();
+            FVector CamUp = CameraState.Orientation.GetUpVector();
+            FVector CamRight = CameraState.Orientation.GetRightVector();
+            FMatrix ViewAlignedRot = FMatrix( CamUp, CamRight, -CamForward, FVector::ZeroVector );
+            FTransform LayerTranslationTransform;
+
+            LayerTranslationTransform.SetTranslation( DrawingLayer->GetComponentLocation() );
+
+            WorldMatrix = ViewAlignedRot * LayerTranslationTransform.ToMatrixNoScale();
+            // --- End
         }
         break;
 
@@ -455,9 +472,10 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
     }
 
     // vertical lines
-    OriY = -1000;
-    EndY =  1000;
-    for ( OriX = -1000; OriX <= 1000; OriX += 100 )
+    OriX = -GridRadius;
+    OriY = -GridRadius;
+    EndY =  GridRadius;
+    for ( uint32 i = 0; i <= StepCount; i++ )
     {
         EndX = OriX;
 
@@ -470,20 +488,15 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
                      , SDPG_Foreground // SDPG_World
                      , AdjustedThickness
                      , 0.0f ); // Lifetime 1 frame
-/*
-        LineBatcher->DrawLine( WorldMatrix.TransformPosition( Origin )
-                             , WorldMatrix.TransformPosition( EndPos )
-                             , Color
-                             , SDPG_World
-                             , AdjustedThickness
-                             , 0.0f ); // Lifetime 1 frame
-*/
+
+        OriX += Step;
     }
 
     // horizontal lines
-    OriX = -1000;
-    EndX =  1000;
-    for ( OriY = -1000; OriY <= 1000; OriY += 100 )
+    OriX = -GridRadius;
+    OriY = -GridRadius;
+    EndX =  GridRadius;
+    for ( uint32 i = 0; i <= StepCount; i++ )
     {
         EndY = OriY;
 
@@ -496,16 +509,43 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
                      , SDPG_Foreground // SDPG_World
                      , AdjustedThickness
                      , 0.0f ); // Lifetime 1 frame
-/*
-        LineBatcher->DrawLine( WorldMatrix.TransformPosition( Origin )
-                             , WorldMatrix.TransformPosition( EndPos )
-                             , Color
-                             , SDPG_World
-                             , AdjustedThickness
-                             , 0.0f ); // Lifetime 1 frame
-*/
+
+        OriY += Step;
     }
 }
+
+void
+UArianeEditorTool::DrawHUDCircle(  FCanvas* Canvas, double X, double Y, double Radius, uint32 Steps )
+{
+    double Point0Angle = 0.0f;
+    double AngleStep = ( 2.0f * PI ) / Steps;
+    FVector Point0 =  FVector ( X + FMath::Cos( Point0Angle ) * Radius,
+                                Y + FMath::Sin( Point0Angle ) * Radius,
+                                0.0f );
+    FSceneView* View = GetSceneView( GetActiveViewportClient() );
+    FCanvasLineItem Line;
+
+    Line.LineThickness = 1.0f;
+    Line.SetColor( FColor::Red );
+
+    for ( uint32 i = 0; i < Steps; i++ )
+    {
+        double Point1Angle = Point0Angle + AngleStep;
+        FVector Point1 =  FVector ( X + FMath::Cos( Point1Angle ) * Radius,
+                                    Y + FMath::Sin( Point1Angle ) * Radius,
+                                    0.0f );
+
+        Line.Origin = Point0;
+        Line.EndPos = Point1;
+
+        Canvas->DrawItem( Line );
+
+        Point0 = Point1;
+
+        Point0Angle = Point1Angle;
+    }
+}
+
 
 void
 //UArianeEditorTool::OnTick(float DeltaTime)

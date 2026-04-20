@@ -472,6 +472,8 @@ FArianeEditorViewportToolkit::ShutdownUI()
     //ensure the editor layout is saved, so that SaveOpenedTabs is synchronized with the editor layout
     FGlobalTabmanager::Get()->SaveAllVisualState();
 
+    Editor->SetCurrentTool( nullptr, EToolShutdownType::Accept, true );
+
 /* Gary
     SaveOpenedTabs();
 */

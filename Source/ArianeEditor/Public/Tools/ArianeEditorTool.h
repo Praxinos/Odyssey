@@ -173,6 +173,10 @@ protected:
     void ListenStylusInput();
     void IgnoreStylusInput();
 
+// HUD Primitives
+protected:
+    void DrawHUDCircle( FCanvas* Canvas, double X, double Y, double Radius, uint32 Steps );
+
 public:
     FArianeEditor* GetEditor() const;
 /* Gary
