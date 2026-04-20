@@ -336,7 +336,6 @@ bool
 UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
                                    , UArianePainting3DComponent* Painting3DComponent )
 {
-    UArianeLayerDrawing* DrawingLayer = Painting3DComponent->GetLayerStack()->GetFirstSelectedDrawingLayer();
     FTextureRenderTargetResource* RTResource = CanvasRenderTarget->GameThread_GetRenderTargetResource();
     TArray<FArianePath*> AddedPaths;
     TArray<FArianeVertex*> AddedVertices;
@@ -353,67 +352,72 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
                           , FReadSurfaceDataFlags(RCM_UNorm)
                           , FIntRect( 0, 0, Width, Height ) );
 
-    if( DrawingLayer )
+    for( UArianeLayer* SelectedLayer : Painting3DComponent->GetLayerStack()->GetSelectedLayers() )
     {
-        DrawingLayer->Modify();
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>( SelectedLayer );
 
-        DrawingLayer->GetRootObject()->Traverse( [ this
-                                                 , ViewportClient
-                                                 , View
-                                                 , DrawingLayer
-                                                 , Pixels
-                                                 , Width
-                                                 , &AddedPaths
-                                                 , &AddedVertices
-                                                 , &AddedSegments
-                                                 , &RemovedPaths
-                                                 , &RemovedVertices
-                                                 , &RemovedSegments ] ( FArianeObject* TravesedObject ) -> FArianeObject::TraversalReturnValue
+        if( DrawingLayer )
         {
-            if( TravesedObject->GetClass() == FArianePath::StaticClass() )
+            DrawingLayer->Modify();
+
+            DrawingLayer->GetRootObject()->Traverse( [ this
+                                                     , ViewportClient
+                                                     , View
+                                                     , DrawingLayer
+                                                     , Pixels
+                                                     , Width
+                                                     , &AddedPaths
+                                                     , &AddedVertices
+                                                     , &AddedSegments
+                                                     , &RemovedPaths
+                                                     , &RemovedVertices
+                                                     , &RemovedSegments ] ( FArianeObject* TravesedObject ) -> FArianeObject::TraversalReturnValue
             {
-                FArianePath* Path = static_cast<FArianePath*>( TravesedObject );
-
-                for( const FArianePath::Chain& Chain : Path->GetChains() )
+                if( TravesedObject->GetClass() == FArianePath::StaticClass() )
                 {
-                    TArray<FWayPoint> WayPoints;
-                    TArray<FWayFragment> WayFragments;
+                    FArianePath* Path = static_cast<FArianePath*>( TravesedObject );
 
-                    WayPoints.Reserve( 100 );
-                    WayFragments.Reserve( 100 );
-
-                    bool Hit = EraseChainSegments( ViewportClient
-                                                 , View
-                                                 , DrawingLayer
-                                                 , Path
-                                                 , Chain
-                                                 , Pixels
-                                                 , WayPoints
-                                                 , WayFragments );
-
-                    if( Hit )
+                    for( const FArianePath::Chain& Chain : Path->GetChains() )
                     {
-                        // proceed now we know we have hit anything
-                        // determine which vertices / segments will be deleted and which will be kept
-                        // it differs in SPLIT and NOSPLIT modes. SPLIT modes removes only those erased,
-                        // split removes all
-                        ParseChainWayPoints( DrawingLayer
-                                           , Path
-                                           , Chain
-                                           , WayPoints
-                                           , WayFragments
-                                           , AddedPaths
-                                           , AddedVertices
-                                           , AddedSegments
-                                           , RemovedPaths
-                                           , RemovedVertices
-                                           , RemovedSegments );
+                        TArray<FWayPoint> WayPoints;
+                        TArray<FWayFragment> WayFragments;
+
+                        WayPoints.Reserve( 100 );
+                        WayFragments.Reserve( 100 );
+
+                        bool Hit = EraseChainSegments( ViewportClient
+                                                     , View
+                                                     , DrawingLayer
+                                                     , Path
+                                                     , Chain
+                                                     , Pixels
+                                                     , WayPoints
+                                                     , WayFragments );
+
+                        if( Hit )
+                        {
+                            // proceed now we know we have hit anything
+                            // determine which vertices / segments will be deleted and which will be kept
+                            // it differs in SPLIT and NOSPLIT modes. SPLIT modes removes only those erased,
+                            // split removes all
+                            ParseChainWayPoints( DrawingLayer
+                                               , Path
+                                               , Chain
+                                               , WayPoints
+                                               , WayFragments
+                                               , AddedPaths
+                                               , AddedVertices
+                                               , AddedSegments
+                                               , RemovedPaths
+                                               , RemovedVertices
+                                               , RemovedSegments );
+                        }
                     }
                 }
-            }
 
-            return FArianeObject::TraversalReturnValue::Continue;
-        } );
+                return FArianeObject::TraversalReturnValue::Continue;
+            } );
+        }
     }
 
     for( FArianeSegment* RemovedSegment : RemovedSegments )
@@ -962,6 +966,9 @@ UArianeEditorEraserTool::ExtendContextMenu( FMenuBuilder& menu )
 void
 UArianeEditorEraserTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderAPI* RenderAPI )
 {
+    double X = GetActiveViewportClient()->GetCachedMouseX();
+    double Y = GetActiveViewportClient()->GetCachedMouseY();
+
     HUDCanvas->DrawTile(
         0, 0,
         CanvasRenderTarget->SizeX, CanvasRenderTarget->SizeY,
@@ -970,6 +977,8 @@ UArianeEditorEraserTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderAPI* R
         CanvasRenderTarget->GetResource(),
         true
     );
+
+    DrawHUDCircle ( HUDCanvas, X, Y, ( double ) Size * 0.5f, 32 );
 }
 
 void
@@ -999,29 +1008,26 @@ UArianeEditorEraserTool::StampBrush()
     int32 LenSq = ( DeltaMouse.X * DeltaMouse.X ) + ( DeltaMouse.Y * DeltaMouse.Y );
     int32 Len = LenSq ? sqrt( LenSq ) : 0;
     FVector2D StampAt = FVector2D( MouseRecords[0].X, MouseRecords[0].Y );
+    FVector2D Step = Len ? FVector2D( ( double ) DeltaMouse.X / Len
+                                    , ( double ) DeltaMouse.Y / Len )
+                         : FVector2D( 0.0f, 0.0f );
 
-    if( Len )
+    for( int32 i = 0; i <= Len; i++ )
     {
-        FVector2D Step = FVector2D( ( double ) DeltaMouse.X / Len
-                                  , ( double ) DeltaMouse.Y / Len );
+        FCanvasTileItem Tile = FCanvasTileItem( FVector2D( StampAt.X - ( Size * 0.5f )
+                                                         , StampAt.Y  -( Size * 0.5f ) )
+                                                , Brush->GetResource()
+                                                , FVector2D( Size, Size )
+                                                , FLinearColor::White );
 
-        for( int32 i = 0; i < Len; i++ )
-        {
-            FCanvasTileItem Tile = FCanvasTileItem( FVector2D( StampAt.X - ( Size * 0.5f )
-                                                             , StampAt.Y  -( Size * 0.5f ) )
-                                                  , Brush->GetResource()
-                                                  , FVector2D( Size, Size )
-                                                  , FLinearColor::White );
+        Tile.SetColor( FLinearColor::White );
+        Tile.BlendMode = SE_BLEND_AlphaComposite;
+        Canvas.DrawItem(Tile);
 
-            Tile.SetColor( FLinearColor::White );
-            Tile.BlendMode = SE_BLEND_AlphaComposite;
-            Canvas.DrawItem(Tile);
-
-            StampAt += Step;
-        }
-
-        Canvas.Flush_GameThread();
+        StampAt += Step;
     }
+
+    Canvas.Flush_GameThread();
 }
 
 /*

@@ -141,6 +141,10 @@ SArianeEditorLayerRow::OnVisibleStateChanged( ECheckBoxState iState )
 {
     const TSharedPtr< SArianeEditorLayerStack > treeView = StaticCastSharedPtr<SArianeEditorLayerStack>(OwnerTablePtr.Pin());
 
+    GEditor->BeginTransaction(LOCTEXT("ariane-layer-stack.layer-visibility","Layer Visibility Changed"));
+
+    Item->GetLayer()->Modify();
+
     switch( iState )
     {
         case ECheckBoxState::Checked :
@@ -154,12 +158,18 @@ SArianeEditorLayerRow::OnVisibleStateChanged( ECheckBoxState iState )
         default :
         break;
     }
+
+    GEditor->EndTransaction();
 }
 
 void
 SArianeEditorLayerRow::OnLockedStateChanged( ECheckBoxState iState )
 {
     const TSharedPtr< SArianeEditorLayerStack > treeView = StaticCastSharedPtr<SArianeEditorLayerStack>(OwnerTablePtr.Pin());
+
+    GEditor->BeginTransaction(LOCTEXT("ariane-layer-stack.layer-locking","Layer Locking Changed"));
+
+    Item->GetLayer()->Modify();
 
     switch( iState )
     {
@@ -174,6 +184,8 @@ SArianeEditorLayerRow::OnLockedStateChanged( ECheckBoxState iState )
         default :
         break;
     }
+
+    GEditor->EndTransaction();
 }
 
 void
