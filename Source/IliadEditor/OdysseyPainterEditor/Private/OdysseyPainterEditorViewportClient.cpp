@@ -605,7 +605,7 @@ FOdysseyPainterEditorViewportClient::MouseDown(const FOdysseyPoint& iPoint)
 
     mIsMouseDown = true;
     static int count = 0;
-    UE_LOG(LogTemp, Display, TEXT("MOUSE DOWN %d"), count++);
+    UE_LOG(LogTemp, Display, TEXT("MOUSE DOWN %d: %lf, %lf"), count++, iPoint.x, iPoint.y);
 
     //If we don't have a surface, then we don't interact with anything
     UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
@@ -735,6 +735,8 @@ FOdysseyPainterEditorViewportClient::MouseDrag(const FOdysseyPoint& iPoint)
 {
     if (!mIsMouseDown)
         return;
+
+    UE_LOG(LogTemp, Display, TEXT("MOUSE DRAG %lf, %lf"), iPoint.x, iPoint.y);
 
     //If we don't have a surface, then we don't interact with anything
     UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
@@ -984,7 +986,7 @@ void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylu
         PacketQueue.Enqueue(Packet);
         mLastStylusEventIndex = 0;
 
-        PrintPacket(Packet);
+        //PrintPacket(Packet);
         ReadStylusInput();
     }
     if (Packet.Type == UE::StylusInput::EPacketType::StylusUp)
