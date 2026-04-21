@@ -84,6 +84,25 @@ FOdysseyImportTexturesParameters::Init(const TArray<FString>& iFilenames, uint32
     progressBar.MakeDialog();
 
     TStrongObjectPtr<UTextureFactory> TextureFactory(NewObject<UTextureFactory>());
+
+    //Configure the Texture Factory to define how the texture should be imported
+    TextureFactory->NoCompression = 1;
+    TextureFactory->CompressionSettings = TC_EditorIcon; //Uncompressed, high memory usage, but ensures a lossless texture to avoid possible glitches
+    TextureFactory->MipGenSettings = TMGS_NoMipmaps;
+    TextureFactory->LODGroup = TEXTUREGROUP_Pixels2D;
+
+    /**
+     * We use SuppressImportOverwriteDialog() here but not to prevent any dialog
+     * Calling SuppressImportOverwriteDialog(false) also prevents the texture factory
+     * to try to figure out on its own if a texture is a normal map or not
+     * We want to force the imported texture to be considered as non-normalmap, so we need to call this
+     *
+     * Another solution would be to set all the texture's settings after it's been imported.
+     * But if the auto normalmap detection changes its behaviour we could miss some stuff in the future
+     * So let's keep this solution for now and see how it's evolving (04/2026)
+     */
+    TextureFactory->SuppressImportOverwriteDialog(false);
+
     mSourceTextures.Reserve(iFilenames.Num());
     mSourceTextureNames.Reserve(iFilenames.Num());
     for (const FString& filename : iFilenames)
@@ -94,17 +113,6 @@ FOdysseyImportTexturesParameters::Init(const TArray<FString>& iFilenames, uint32
         UTexture2D* importedTexture = Cast<UTexture2D>(importedObject);
         if (!importedTexture)
             continue;
-
-
-        //Remove any compression from the imported texture
-        //otherwise it will copy the compression artifacts
-        //in the layer
-        FTextureFormatSettings textureFormatSettings;
-        importedTexture->GetLayerFormatSettings(0, textureFormatSettings);
-        textureFormatSettings.CompressionNone = 1;
-        importedTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-        importedTexture->SetLayerFormatSettings(0, textureFormatSettings);
-        importedTexture->UpdateResource();
 
         mSourceTextures.Emplace(importedTexture);
         mSourceTextureNames.Emplace(FPaths::GetBaseFilename(filename, true));
