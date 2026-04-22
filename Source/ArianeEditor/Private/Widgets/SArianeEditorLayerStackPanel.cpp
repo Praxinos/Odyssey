@@ -15,9 +15,11 @@
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
 SArianeEditorLayerStackPanel::~SArianeEditorLayerStackPanel()
-{}
+{
+}
 
 SArianeEditorLayerStackPanel::SArianeEditorLayerStackPanel()
+    : CurrentView ( nullptr )
 {
 }
 
@@ -30,9 +32,8 @@ SArianeEditorLayerStackPanel::OnPre3DPaintingComponentSelectionChanged()
     {
         UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
 
+        LayerStack->OnPreLayerSelectionChangedDelegate().RemoveAll( this );
         LayerStack->OnPostLayerSelectionChangedDelegate().RemoveAll( this );
-        // Refresh the details view
-        OnLayerSelectionChanged();
     }
 }
 
@@ -45,37 +46,77 @@ SArianeEditorLayerStackPanel::OnPost3DPaintingComponentSelectionChanged()
     {
         UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
 
-        LayerStack->OnPostLayerSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnLayerSelectionChanged );
+        LayerStack->OnPreLayerSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnPreLayerSelectionChanged );
+        LayerStack->OnPostLayerSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnPostLayerSelectionChanged );
         // Refresh the details view
-        OnLayerSelectionChanged();
+        OnPostLayerSelectionChanged();
     }
 }
 
 void
-SArianeEditorLayerStackPanel::OnLayerSelectionChanged()
+SArianeEditorLayerStackPanel::OnPreLayerSelectionChanged()
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-
-    LayerDetailsView->SetObject( nullptr );
-
     UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
     const TArray<UArianeLayer*>& SelectedLayers = LayerStack->GetSelectedLayers();
 
     for( UArianeLayer* Layer : SelectedLayers )
     {
-        if( Layer->GetClass() == UArianeLayerDrawing::StaticClass() )
-        {
-            LayerDrawingView->ImportLayerProperties( Layer );
-            LayerDetailsView->SetObject( LayerDrawingView );
-        }
-        else
-        {
-            LayerView->ImportLayerProperties( Layer );
-            LayerDetailsView->SetObject( LayerView );
-        }
-
-        break;
+        Layer->GetOnTransformChangedDelegate().RemoveAll( this );
     }
+}
+
+UArianeLayer*
+SArianeEditorLayerStackPanel::GetEditedLayer()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+        const TArray<UArianeLayer*>& SelectedLayers = LayerStack->GetSelectedLayers();
+
+        for( UArianeLayer* Layer : SelectedLayers )
+        {
+            return Layer;
+        }
+    }
+
+    return nullptr;
+}
+
+void
+SArianeEditorLayerStackPanel::OnTransformChanged()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if( CurrentView )
+    {
+        CurrentView->ImportLayerProperties( GetEditedLayer() );
+    }
+}
+
+void
+SArianeEditorLayerStackPanel::OnPostLayerSelectionChanged()
+{
+    UArianeLayer* EditedLayer =  GetEditedLayer();
+
+    CurrentView = nullptr;
+    LayerDetailsView->SetObject( nullptr );
+
+    EditedLayer->GetOnTransformChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnTransformChanged );
+
+    if( EditedLayer->GetClass() == UArianeLayerDrawing::StaticClass() )
+    {
+        CurrentView = LayerDrawingView;
+    }
+    else
+    {
+        CurrentView = LayerView;
+    }
+
+    CurrentView->ImportLayerProperties( EditedLayer );
+    LayerDetailsView->SetObject( CurrentView );
 }
 
 void
@@ -132,7 +173,7 @@ SArianeEditorLayerStackPanel::Construct(const FArguments& InArgs, FArianeEditor*
 
     if( Painting3DComponent )
     {
-        OnLayerSelectionChanged(); // First call at Widget creation (if we are in a floating tab for example)
+        OnPostLayerSelectionChanged(); // First call at Widget creation (if we are in a floating tab for example)
     }
 }
 

@@ -443,6 +443,10 @@ FArianeEditorViewportToolkit::InvokeUI()
     TSharedPtr<FTabManager> TabManager = LevelEditorModule.GetLevelEditorTabManager();
 
     TabManager->TryInvokeTab( FTabId( FArianeEditorColorSelectorTab::StaticId() ) );
+    TabManager->TryInvokeTab( FTabId( FArianeEditorLayerStackTab::StaticId() ) );
+
+
+
 
 /* Gary
     if (GEditor)
@@ -460,6 +464,15 @@ FArianeEditorViewportToolkit::InvokeUI()
         InlineContentHolder->SetContent( Content.ToSharedRef() );
 
     Editor->PostInit();
+
+/*
+TSharedPtr<FTabManager::FLayout> CurrentLayout = TabManager->PersistLayout();
+if (CurrentLayout.IsValid())
+{
+    FString LayoutString = CurrentLayout->ToString();
+    UE_LOG(LogTemp, Warning, TEXT("LAYOUT DUMP: %s"), *LayoutString);
+}
+*/
 
     //MakeDefaultLayout();
 }

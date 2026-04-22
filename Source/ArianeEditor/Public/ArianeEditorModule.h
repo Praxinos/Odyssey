@@ -44,8 +44,8 @@ private:
     void RegisterLevelEditorLayoutExtensions();
     void UnregisterLevelEditorLayoutExtensions();
 
-    void RegisterDetailCustomizations();
-    void UnregisterDetailCustomization();
+    void RegisterCustomizations();
+    void UnregisterCustomization();
     //Editor Mode
     void RegisterEditorMode();
     void UnregisterEditorMode();

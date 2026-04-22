@@ -25,14 +25,19 @@ public:
 
     DECLARE_MULTICAST_DELEGATE_OneParam( FOnUpdateDelegate, bool );
 
+#if WITH_EDITOR
+    DECLARE_MULTICAST_DELEGATE( FOnTransformChanged );
+#endif
+
     //void SetVisible( bool bInVisible );
     //bool IsVisible( bool bHierarchical );
     void SetLocked( bool bInLocked );
     bool IsLocked( bool bHierarchical );
     virtual void Invalidate( const FArianeLayerInvalidationFlags& InInvalidationFlags );
     virtual void Update( bool bInteractive );
+    virtual void OnUpdateTransform(EUpdateTransformFlags Flags, ETeleportType Teleport) override;
 
-#if WITH_EDITORONLY_DATA
+#if WITH_EDITOR
     virtual bool IsSelectedInEditor() const override;
     void SetSelected( bool bInSelected );
 #endif
@@ -46,6 +51,7 @@ public:
     FOnUpdateDelegate& OnPostUpdateDelegate();
     void SetParentFolder( UArianeLayerFolder* InParentFolder );
     UArianeLayerFolder* GetParentFolder();
+    UArianeLayer::FOnTransformChanged& GetOnTransformChangedDelegate();
 
 protected:
     //UPROPERTY()
@@ -67,4 +73,8 @@ protected:
     FArianeLayerInvalidationFlags* InvalidationFlags;
     FOnUpdateDelegate OnPreUpdate;
     FOnUpdateDelegate OnPostUpdate;
+
+#if WITH_EDITORONLY_DATA
+    FOnTransformChanged OnTransformChanged;
+#endif
 };

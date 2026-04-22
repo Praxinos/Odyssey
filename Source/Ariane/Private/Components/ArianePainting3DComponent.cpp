@@ -268,7 +268,6 @@ UArianePainting3DComponent::SetCurrentPaletteColorEntry( UOdysseyPaletteEntryCol
 {
 }
 
-
 //--------------------------------------------------------------------------------------------------
 
 FArianeGeometryProxy::~FArianeGeometryProxy()
