@@ -31,7 +31,8 @@ void SOdysseyLayerRow::Construct(const FArguments& InArgs, const TSharedRef<SOdy
 {
     ensure(iLayer);
 
-    mLayerStackGlobalShortcuts = MakeShared<FOdysseyLayerStackGlobalShortcuts>(TAttribute<UOdysseyLayerStack*>::CreateSP( this, &SOdysseyLayerRow::GetLayerStack ) );
+    mLayerStackGlobalShortcuts = MakeShared<FOdysseyLayerStackGlobalShortcuts>( TAttribute<UOdysseyLayerStack*>::CreateSP( this, &SOdysseyLayerRow::GetLayerStack ),
+                                                                                TAttribute<UOdysseyLayer*>::CreateSP( this, &SOdysseyLayerRow::GetLayer ) );
 
     SOdysseyLayerRowBase::Construct(
         InArgs,
@@ -162,7 +163,23 @@ SOdysseyLayerRow::CreateBlendModesMenu()
     //Create a new command, so that we can add context menu specific entries
     TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
 
-    GetLayer()->GetLayerStack()->SetCurrentLayer( GetLayer() );
+    // Set the current layer here will deselect all selected layers (delegate bound in SOdysseyLayerStackTreeView)
+    // This function should only be called when the current layer is NOT inside the selected layer list
+    // and only be called when a layer is changed ouside the selection to set only it current
+    // (Take care of every delegates bound to SetCurrentLayer())
+    //
+    // If this behavior is adopted, it could/should be extended to other options in layer:
+    // - FOdysseyLayerStackGlobalShortcuts::Action_OpenFolderLayer()
+    // - FOdysseyLayerStackGlobalShortcuts::Action_CloseFolderLayer()
+    // - SOdysseyLayerRow::OnIsActivatedCheckBoxStateChanged()
+    // - SOdysseyLayerRow::OnDisplayOptionsCheckBoxStateChanged()
+    // - SOdysseyLayerRow::OnOpacityValueCommitted()
+    // - SOdysseyLayerRow::OnOpacityValueChanged()
+    // - SOdysseyLayerStackTreeView::OnExpansionChanged()
+    // - FOdysseyPainterEditorGlobalLayersShortcuts::Action_ChangeLayerOpacity()
+    // - SOdysseyAnimationLayerRow::OnLighttableCheckStateChanged()
+    // - SOdysseyAnimationLayerRow::OnCellNamesCheckStateChanged()
+    //GetLayer()->GetLayerStack()->SetCurrentLayer( GetLayer() );
 
     // global shortcuts
     mLayerStackGlobalShortcuts->MapActionsToCommandList( commandList );
@@ -275,8 +292,34 @@ SOdysseyLayerRow::GenerateMainRowIsLockedWidget()
 void
 SOdysseyLayerRow::OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState)
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-is-activated", "Change Layer Active"));
-    GetLayer()->SetIsActivated(iState == ECheckBoxState::Checked);
+    TSet<UOdysseyLayer*> selected_layers;
+    UOdysseyLayerStack* layerStack = GetLayer()->GetLayerStack();
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        if( layerStack->IsLayerSelected( layer ) )
+            selected_layers.Add( layer );
+    }
+    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
+    // But too much interrogations to fix it (as many callbacks can be called.
+    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
+    // So, at least for now, just always add it.
+    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
+    selected_layers.Add( layerStack->GetCurrentLayer() );
+
+    // If the focused layer is outside the selection, just change it
+    UOdysseyLayer* focusedLayer = GetLayer();
+    if( !selected_layers.Contains( focusedLayer ) )
+    {
+        selected_layers.Empty();
+        selected_layers.Add( focusedLayer );
+    }
+
+    FScopedTransaction ScopedTransaction( LOCTEXT( "layer.transaction.set-is-activated", "Change Layer Active" ) );
+
+    for( UOdysseyLayer* layer : selected_layers )
+    {
+        layer->SetIsActivated( iState == ECheckBoxState::Checked );
+    }
 }
 
 ECheckBoxState
@@ -393,7 +436,32 @@ SOdysseyLayerRow::OnRowDragDetected(const FGeometry& iGeometry, const FPointerEv
 void
 SOdysseyLayerRow::OnDisplayOptionsCheckBoxStateChanged(ECheckBoxState iState)
 {
-    GetLayer()->SetDisplayOptions(iState == ECheckBoxState::Checked);
+    TSet<UOdysseyLayer*> selected_layers;
+    UOdysseyLayerStack* layerStack = GetLayer()->GetLayerStack();
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        if( layerStack->IsLayerSelected( layer ) )
+            selected_layers.Add( layer );
+    }
+    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
+    // But too much interrogations to fix it (as many callbacks can be called.
+    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
+    // So, at least for now, just always add it.
+    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
+    selected_layers.Add( layerStack->GetCurrentLayer() );
+
+    // If the focused layer is outside the selection, just change it
+    UOdysseyLayer* focusedLayer = GetLayer();
+    if( !selected_layers.Contains( focusedLayer ) )
+    {
+        selected_layers.Empty();
+        selected_layers.Add( focusedLayer );
+    }
+
+    for( UOdysseyLayer* layer : selected_layers )
+    {
+        layer->SetDisplayOptions( iState == ECheckBoxState::Checked );
+    }
 }
 
 ECheckBoxState
@@ -416,21 +484,124 @@ SOdysseyLayerRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSe
 void
 SOdysseyLayerRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
-    if ( !GetLayer()->IsEditable() )
+    UOdysseyLayer* focusedLayer = GetLayer();
+    if( !focusedLayer->IsEditable() )
         return;
 
+    TSet<UOdysseyLayer*> selected_layers;
+    UOdysseyLayerStack* layerStack = focusedLayer->GetLayerStack();
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        if( layerStack->IsLayerSelected( layer ) )
+            selected_layers.Add( layer );
+    }
+    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
+    // But too much interrogations to fix it (as many callbacks can be called.
+    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
+    // So, at least for now, just always add it.
+    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
+    selected_layers.Add( layerStack->GetCurrentLayer() );
+
+    // If the focused layer is outside the selection, just change it
+    if( !selected_layers.Contains( focusedLayer ) )
+    {
+        selected_layers.Empty();
+        selected_layers.Add( focusedLayer );
+    }
+
+    //---
+
     //Creating a transaction here manages entering a value using keyboard
-    FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
-    GetLayer()->SetOpacity(iValue / 100.f);
+    FScopedTransaction ScopedTransaction( mSetOpacityTransactionName );
+
+    // The reference offset from the focused layer
+    int referenceOffsetAsInt = iValue - int( focusedLayer->GetOpacity() * 100.f + .5f );
+
+    for( UOdysseyLayer* layer : selected_layers )
+    {
+        // Always process the focused layer with the given value as-is (to avoid any conversion)
+        if( layer == focusedLayer )
+        {
+            layer->SetOpacity( iValue / 100.f );
+        }
+        else
+        {
+            // If CONTROL is down, just set all opacities of all other layers as the focused layer one
+            if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
+            {
+                layer->SetOpacity( iValue / 100.f );
+            }
+            // Otherwise, apply the offset to all other layers
+            else
+            {
+                // Make all computations as int:
+                // - to try to avoid approximation of float
+                // - the spin box stores int value
+                int opacityAsInt = int( layer->GetOpacity() * 100.f + .5f );
+                layer->SetOpacity( ( opacityAsInt + referenceOffsetAsInt ) / 100.f );
+            }
+        }
+    }
 }
 
 void
 SOdysseyLayerRow::OnOpacityValueChanged(int iValue)
 {
-    if ( !GetLayer()->IsEditable() )
+    UOdysseyLayer* focusedLayer = GetLayer();
+    if( !focusedLayer->IsEditable() )
         return;
 
-    GetLayer()->SetOpacityInteractive(iValue / 100.f);
+    TSet<UOdysseyLayer*> selected_layers;
+    UOdysseyLayerStack* layerStack = focusedLayer->GetLayerStack();
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        if( layerStack->IsLayerSelected( layer ) )
+            selected_layers.Add( layer );
+    }
+    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
+    // But too much interrogations to fix it (as many callbacks can be called.
+    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
+    // So, at least for now, just always add it.
+    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
+    selected_layers.Add( layerStack->GetCurrentLayer() );
+
+    // If the focused layer is outside the selection, just change it
+    if( !selected_layers.Contains( focusedLayer ) )
+    {
+        selected_layers.Empty();
+        selected_layers.Add( focusedLayer );
+    }
+
+    //---
+
+    // The reference offset from the focused layer
+    int referenceOffsetAsInt = iValue - int( focusedLayer->GetOpacity() * 100.f + .5f );
+
+    for( UOdysseyLayer* layer : selected_layers )
+    {
+        // Always process the focused layer with the given value as-is (to avoid any conversion)
+        if( layer == focusedLayer )
+        {
+            layer->SetOpacityInteractive( iValue / 100.f );
+        }
+        else
+        {
+            // If CONTROL is down, just set all opacities as the focused layer one
+            if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
+            {
+                layer->SetOpacityInteractive( iValue / 100.f );
+            }
+            // Otherwise, apply the offset to all other layers
+            else
+            {
+                // Make all computations as int:
+                // - to try to avoid approximation of float
+                // - the spin box stores int value
+                int opacityAsInt = int( layer->GetOpacity() * 100.f + .5f );
+                layer->SetOpacityInteractive( ( opacityAsInt + referenceOffsetAsInt ) / 100.f );
+            }
+        }
+    }
 }
 
 void

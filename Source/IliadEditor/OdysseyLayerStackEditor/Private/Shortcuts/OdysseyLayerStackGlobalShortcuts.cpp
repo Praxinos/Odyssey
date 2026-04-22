@@ -9,8 +9,9 @@
 
 #define LOCTEXT_NAMESPACE "LayerStackEditor"
 
-FOdysseyLayerStackGlobalShortcuts::FOdysseyLayerStackGlobalShortcuts(TAttribute<UOdysseyLayerStack*> iLayerStack)
+FOdysseyLayerStackGlobalShortcuts::FOdysseyLayerStackGlobalShortcuts(TAttribute<UOdysseyLayerStack*> iLayerStack, TAttribute<UOdysseyLayer*> iLayer)
     : mLayerStack(iLayerStack)
+    , mFocusedLayer( iLayer )
 {
 }
 
@@ -150,7 +151,23 @@ FOdysseyLayerStackGlobalShortcuts::Action_OpenFolderLayer()
     if (currentLayer->GetChildren().Num() <= 0)
         return;
 
-    currentLayer->SetDisplayChildren(true);
+    TSet<UOdysseyLayer*> selected_layers;
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        if( layerStack->IsLayerSelected( layer ) )
+            selected_layers.Add( layer );
+    }
+    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
+    // But too much interrogations to fix it (as many callbacks can be called.
+    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
+    // So, at least for now, just always add it.
+    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
+    selected_layers.Add( layerStack->GetCurrentLayer() );
+
+    for( UOdysseyLayer* layer : selected_layers )
+    {
+        layer->SetDisplayChildren( true );
+    }
 }
 
 void
@@ -167,55 +184,123 @@ FOdysseyLayerStackGlobalShortcuts::Action_CloseFolderLayer()
     if (currentLayer->GetChildren().Num() <= 0)
         return;
 
-    currentLayer->SetDisplayChildren(false);
+    TSet<UOdysseyLayer*> selected_layers;
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        if( layerStack->IsLayerSelected( layer ) )
+            selected_layers.Add( layer );
+    }
+    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
+    // But too much interrogations to fix it (as many callbacks can be called.
+    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
+    // So, at least for now, just always add it.
+    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
+    selected_layers.Add( layerStack->GetCurrentLayer() );
+
+    for( UOdysseyLayer* layer : selected_layers )
+    {
+        layer->SetDisplayChildren( false );
+    }
 }
 
 void
 FOdysseyLayerStackGlobalShortcuts::Action_SetCurrentLayerBlendModeToNextBlendMode()
 {
     UOdysseyLayerStack* layerStack = mLayerStack.Get();
-
     if ( !layerStack )
         return;
 
+    // For the moment, mFocusedLayer should not be used in Prev/Next blend mode as it is not used in the blend mode popup
+    // But it's already done if it is the case one day
+    UOdysseyLayer* currentLayer = mFocusedLayer.IsBound() ? mFocusedLayer.Get() : layerStack->GetCurrentLayer();
     if ( !layerStack->GetCurrentLayer() )
         return;
 
     if ( !layerStack->GetCurrentLayer()->IsEditable() )
         return;
 
-    EOdysseyBlendingMode currentBlendMode = layerStack->GetCurrentLayer()->GetBlendMode();
-    int8 nextBlendingModeInt = ( static_cast<int8>(currentBlendMode) + 1 ) % static_cast<int8>(EOdysseyBlendingMode::kBlendingMode_Count);
-    EOdysseyBlendingMode nextBlendMode = static_cast<EOdysseyBlendingMode>(nextBlendingModeInt);
+    TSet<UOdysseyLayer*> selected_layers;
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        if( layerStack->IsLayerSelected( layer ) )
+            selected_layers.Add( layer );
+    }
+    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
+    // But too much interrogations to fix it (as many callbacks can be called.
+    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
+    // So, at least for now, just always add it.
+    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
+    selected_layers.Add( layerStack->GetCurrentLayer() );
 
-#if WITH_EDITOR
+    // If the currentLayer is not in the selected layer list, just use it
+    // - if currentLayer == GetCurrentLayer(): always inside the list so never go there
+    // - if currentLayer == mFocusedLayer: if outside the selection, only modify it
+    if( !selected_layers.Contains( currentLayer ) )
+    {
+        selected_layers.Empty();
+        selected_layers.Add( currentLayer );
+    }
+
     FScopedTransaction ScopedTransaction(LOCTEXT("global-layers-shortcuts.transaction.set-current-layer-blend-mode-to-next-blend-mode", "Set Current Layer Blend Mode To Next Blend Mode"));
-#endif
-    layerStack->GetCurrentLayer()->SetBlendMode( nextBlendMode );
+
+    for( UOdysseyLayer* layer : selected_layers )
+    {
+        EOdysseyBlendingMode currentBlendMode = layer->GetBlendMode();
+        int8 nextBlendingModeInt = ( static_cast<int8>( currentBlendMode ) + 1 ) % static_cast<int8>( EOdysseyBlendingMode::kBlendingMode_Count );
+        EOdysseyBlendingMode nextBlendMode = static_cast<EOdysseyBlendingMode>( nextBlendingModeInt );
+
+        layer->SetBlendMode( nextBlendMode );
+    }
 }
 
 void
 FOdysseyLayerStackGlobalShortcuts::Action_SetCurrentLayerBlendModeToPreviousBlendMode()
 {
     UOdysseyLayerStack* layerStack = mLayerStack.Get();
-
     if ( !layerStack )
         return;
 
-    if ( !layerStack->GetCurrentLayer() )
+    // For the moment, mFocusedLayer should not be used in Prev/Next blend mode as it is not used in the blend mode popup
+    // But it's already done if it is the case one day
+    UOdysseyLayer* currentLayer = mFocusedLayer.IsBound() ? mFocusedLayer.Get() : layerStack->GetCurrentLayer();
+    if ( !currentLayer )
         return;
 
-    if ( !layerStack->GetCurrentLayer()->IsEditable() )
+    if ( !currentLayer->IsEditable() )
         return;
 
-    EOdysseyBlendingMode currentBlendMode = layerStack->GetCurrentLayer()->GetBlendMode();
-    int8 prevBlendingModeInt = ( static_cast<int8>(currentBlendMode) - 1 + static_cast<int8>(EOdysseyBlendingMode::kBlendingMode_Count) ) % static_cast<int8>(EOdysseyBlendingMode::kBlendingMode_Count);
-    EOdysseyBlendingMode prevBlendMode = static_cast<EOdysseyBlendingMode>(prevBlendingModeInt);
+    TSet<UOdysseyLayer*> selected_layers;
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        if( layerStack->IsLayerSelected( layer ) )
+            selected_layers.Add( layer );
+    }
+    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
+    // But too much interrogations to fix it (as many callbacks can be called.
+    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
+    // So, at least for now, just always add it.
+    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
+    selected_layers.Add( layerStack->GetCurrentLayer() );
 
-#if WITH_EDITOR
+    // If the currentLayer is not in the selected layer list, just use it
+    // - if currentLayer == GetCurrentLayer(): always inside the list so never go there
+    // - if currentLayer == mFocusedLayer: if outside the selection, only modify it
+    if( !selected_layers.Contains( currentLayer ) )
+    {
+        selected_layers.Empty();
+        selected_layers.Add( currentLayer );
+    }
+
     FScopedTransaction ScopedTransaction(LOCTEXT("global-layers-shortcuts.transaction.set-current-layer-blend-mode-to-previous-blend-mode", "Set Current Layer Blend Mode To Previous Blend Mode"));
-#endif
-    layerStack->GetCurrentLayer()->SetBlendMode( prevBlendMode );
+
+    for( UOdysseyLayer* layer : selected_layers )
+    {
+        EOdysseyBlendingMode currentBlendMode = layer->GetBlendMode();
+        int8 prevBlendingModeInt = ( static_cast<int8>( currentBlendMode ) - 1 + static_cast<int8>( EOdysseyBlendingMode::kBlendingMode_Count ) ) % static_cast<int8>( EOdysseyBlendingMode::kBlendingMode_Count );
+        EOdysseyBlendingMode prevBlendMode = static_cast<EOdysseyBlendingMode>( prevBlendingModeInt );
+
+        layer->SetBlendMode( prevBlendMode );
+    }
 }
 
 void
@@ -225,17 +310,41 @@ FOdysseyLayerStackGlobalShortcuts::Action_SetCurrentLayerBlendMode(EOdysseyBlend
     if ( !layerStack )
         return;
 
-    if ( !layerStack->GetCurrentLayer() )
+    UOdysseyLayer* currentLayer = mFocusedLayer.IsBound() ? mFocusedLayer.Get() : layerStack->GetCurrentLayer();
+    if ( !currentLayer )
         return;
 
-    if ( !layerStack->GetCurrentLayer()->IsEditable() )
+    if ( !currentLayer->IsEditable() )
         return;
 
+    TSet<UOdysseyLayer*> selected_layers;
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        if( layerStack->IsLayerSelected( layer ) )
+            selected_layers.Add( layer );
+    }
+    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
+    // But too much interrogations to fix it (as many callbacks can be called.
+    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
+    // So, at least for now, just always add it.
+    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
+    selected_layers.Add( layerStack->GetCurrentLayer() );
 
-#if WITH_EDITOR
+    // If the currentLayer is not in the selected layer list, just use it
+    // - if currentLayer == GetCurrentLayer(): always inside the list so never go there
+    // - if currentLayer == mFocusedLayer: if outside the selection, only modify it
+    if( !selected_layers.Contains( currentLayer ) )
+    {
+        selected_layers.Empty();
+        selected_layers.Add( currentLayer );
+    }
+
     FScopedTransaction ScopedTransaction(LOCTEXT("global-layers-shortcuts.transaction.set-current-layer-blend-mode", "Set Current Layer Blend Mode"));
-#endif
-    layerStack->GetCurrentLayer()->SetBlendMode( iBlendMode );
+
+    for( UOdysseyLayer* layer : selected_layers )
+    {
+        layer->SetBlendMode( iBlendMode );
+    }
 }
 
 bool
@@ -245,10 +354,11 @@ FOdysseyLayerStackGlobalShortcuts::CanAction_AlterLayer()
     if ( !layerStack )
         return false;
 
-    if ( !layerStack->GetCurrentLayer() )
+    UOdysseyLayer* currentLayer = mFocusedLayer.IsBound() ? mFocusedLayer.Get() : layerStack->GetCurrentLayer();
+    if ( !currentLayer )
         return false;
 
-    return layerStack->GetCurrentLayer()->IsEditable() ? true : false;
+    return currentLayer->IsEditable() ? true : false;
 }
 
 #undef LOCTEXT_NAMESPACE

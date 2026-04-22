@@ -5,6 +5,7 @@
 #include "OdysseyEditorShortcuts.h"
 #include "OdysseyBlendingMode.h"
 
+class UOdysseyLayer;
 class UOdysseyLayerStack;
 
 class ODYSSEYLAYERSTACKEDITOR_API FOdysseyLayerStackGlobalShortcuts
@@ -13,7 +14,7 @@ class ODYSSEYLAYERSTACKEDITOR_API FOdysseyLayerStackGlobalShortcuts
 {
 public:
     virtual ~FOdysseyLayerStackGlobalShortcuts() {}
-    FOdysseyLayerStackGlobalShortcuts(TAttribute<UOdysseyLayerStack*> iLayerStack);
+    FOdysseyLayerStackGlobalShortcuts(TAttribute<UOdysseyLayerStack*> iLayerStack, TAttribute<UOdysseyLayer*> iLayer=TAttribute<UOdysseyLayer*>());
 
 public:
     //Common Shortcuts
@@ -34,4 +35,7 @@ public:
 
 private:
     TAttribute<UOdysseyLayerStack*> mLayerStack;
+    // It's not necessary the current layer (when modifying a parameter of a layer which is NOT selected/current)
+    // Only "really" used by Action_SetCurrentLayerBlendMode() as this shortcut is called from the layer popup
+    TAttribute<UOdysseyLayer*> mFocusedLayer;
 };

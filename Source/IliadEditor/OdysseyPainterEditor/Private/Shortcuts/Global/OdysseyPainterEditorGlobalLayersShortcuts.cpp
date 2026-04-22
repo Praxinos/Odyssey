@@ -55,9 +55,8 @@ FOdysseyPainterEditorGlobalLayersShortcuts::Action_CreateNewLayer()
 
     UOdysseyLayer* layer = nullptr;
     {
-    #if WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("global-layers-shortcuts.transaction.create-new-layer", "Add Layer"));
-    #endif
+
         layerStack->Modify();
 
         UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
@@ -119,11 +118,25 @@ FOdysseyPainterEditorGlobalLayersShortcuts::Action_ChangeLayerOpacity(float iOpa
     if ( !layerStack->GetCurrentLayer()->IsEditable() )
         return;
 
+    TSet<UOdysseyLayer*> selected_layers;
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        if( layerStack->IsLayerSelected( layer ) )
+            selected_layers.Add( layer );
+    }
+    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
+    // But too much interrogations to fix it (as many callbacks can be called.
+    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
+    // So, at least for now, just always add it.
+    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
+    selected_layers.Add( layerStack->GetCurrentLayer() );
 
-#if WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("global-layers-shortcuts.transaction.set-layer-opacity", "Change Layer Opacity"));
-#endif
-    layerStack->GetCurrentLayer()->SetOpacity(FMath::Clamp(iOpacity, 0.f, 1.f));
+    FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.set-layer-opacity", "Change Layer Opacity" ) );
+
+    for( UOdysseyLayer* layer : selected_layers )
+    {
+        layer->SetOpacity( iOpacity );
+    }
 }
 
 bool

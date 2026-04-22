@@ -1196,27 +1196,27 @@ UOdysseyLayer::SetBlendMode(EOdysseyBlendingMode Value)
 }
 
 void
-UOdysseyLayer::SetOpacity(float Value)
+UOdysseyLayer::SetOpacity(float iValue)
 {
     if( !IsEditable() )
         return;
 
     Modify();
 
-    Opacity = Value;
+    Opacity = FMath::Clamp( iValue, 0.f, 1.f );
     RenderingChanged();
 }
 
 #if WITH_EDITOR
 void
-UOdysseyLayer::SetOpacityInteractive(float Value)
+UOdysseyLayer::SetOpacityInteractive(float iValue)
 {
     if( !IsEditable() )
         return;
 
     Modify();
 
-    Opacity = Value;
+    Opacity = FMath::Clamp( iValue, 0.f, 1.f );
     RenderingChanged(true);
 }
 

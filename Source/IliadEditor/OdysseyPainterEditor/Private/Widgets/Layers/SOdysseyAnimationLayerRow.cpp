@@ -126,9 +126,35 @@ SOdysseyAnimationLayerRow::GetLighttableIsChecked() const
 void
 SOdysseyAnimationLayerRow::OnLighttableCheckStateChanged(ECheckBoxState iState)
 {
-    FOdysseyLighttable lighttable = mLayer->GetLighttable();
-    lighttable.bIsActivated = iState == ECheckBoxState::Checked;
-    mLayer->SetLighttable(lighttable);
+    TSet<UOdysseyLayer*> selected_layers;
+    UOdysseyLayerStack* layerStack = GetLayer()->GetLayerStack();
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        if( layerStack->IsLayerSelected( layer ) )
+            selected_layers.Add( layer );
+    }
+    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
+    // But too much interrogations to fix it (as many callbacks can be called.
+    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
+    // So, at least for now, just always add it.
+    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
+    selected_layers.Add( layerStack->GetCurrentLayer() );
+
+    // If the focused layer is outside the selection, just change it
+    UOdysseyLayer* focusedLayer = GetLayer();
+    if( !selected_layers.Contains( focusedLayer ) )
+    {
+        selected_layers.Empty();
+        selected_layers.Add( focusedLayer );
+    }
+
+    for( UOdysseyLayer* layer : selected_layers )
+    {
+        FOdysseyLighttable lighttable = layer->GetLighttable();
+        lighttable.bIsActivated = iState == ECheckBoxState::Checked;
+        layer->SetLighttable( lighttable );
+    }
+
     GetTreeView()->RequestTreeRefresh(); //needed to display layers previously hidden
 }
 
@@ -141,7 +167,32 @@ SOdysseyAnimationLayerRow::GetCellNamesIsChecked() const
 void
 SOdysseyAnimationLayerRow::OnCellNamesCheckStateChanged(ECheckBoxState iState)
 {
-    mLayer->SetDisplayCellNames(iState == ECheckBoxState::Checked);
+    TSet<UOdysseyLayer*> selected_layers;
+    UOdysseyLayerStack* layerStack = GetLayer()->GetLayerStack();
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        if( layerStack->IsLayerSelected( layer ) )
+            selected_layers.Add( layer );
+    }
+    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
+    // But too much interrogations to fix it (as many callbacks can be called.
+    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
+    // So, at least for now, just always add it.
+    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
+    selected_layers.Add( layerStack->GetCurrentLayer() );
+
+    // If the focused layer is outside the selection, just change it
+    UOdysseyLayer* focusedLayer = GetLayer();
+    if( !selected_layers.Contains( focusedLayer ) )
+    {
+        selected_layers.Empty();
+        selected_layers.Add( focusedLayer );
+    }
+
+    for( UOdysseyLayer* layer : selected_layers )
+    {
+        layer->SetDisplayCellNames( iState == ECheckBoxState::Checked );
+    }
 
     GetTreeView()->RequestTreeRefresh(); //needed to display layers previously hidden
 }
