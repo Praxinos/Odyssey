@@ -43,12 +43,16 @@ public:
 
 protected:
     FReply NewLayer();
-    void OnLayerSelectionChanged();
+    void OnPreLayerSelectionChanged();
+    void OnPostLayerSelectionChanged();
     void OnPre3DPaintingComponentSelectionChanged();
     void OnPost3DPaintingComponentSelectionChanged();
+    void OnTransformChanged();
+    UArianeLayer* GetEditedLayer();
 
 protected:
     FArianeEditor* Editor;
+    UArianeEditorLayerView* CurrentView;;
     UArianeEditorLayerView* LayerView;
     UArianeEditorLayerDrawingView* LayerDrawingView;
     TSharedPtr<IDetailsView> LayerDetailsView;

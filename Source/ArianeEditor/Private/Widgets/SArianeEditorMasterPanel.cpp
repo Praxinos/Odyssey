@@ -20,6 +20,7 @@ SArianeEditorMasterPanel::Construct( const FArguments& InArgs, FArianeEditor* In
         [
             SNew(SArianeEditorToolPanel, InEditor)
         ]
+/*
         +SVerticalBox::Slot()
         .AutoHeight()
         [
@@ -29,7 +30,6 @@ SArianeEditorMasterPanel::Construct( const FArguments& InArgs, FArianeEditor* In
                     return InEditor->GetCurrentPainting3DComponent() ? EVisibility::Visible : EVisibility::Hidden;
                 } )
         ]
-/*
         +SVerticalBox::Slot()
         .AutoHeight()
         [

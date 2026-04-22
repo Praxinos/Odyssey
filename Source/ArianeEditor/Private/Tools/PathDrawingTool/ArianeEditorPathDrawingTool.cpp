@@ -116,11 +116,25 @@ float Intersect ( const FVector4& iPlane
 }
 
 void
+//UArianeEditorTool::OnTick(float DeltaTime)
 UArianeEditorPathDrawingTool::Render(IToolsContextRenderAPI* RenderAPI)
 {
     if  ( bShowGrid )
     {
-        Super::Render( RenderAPI );
+        UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+        //Super::OnTick( DeltaTime );
+
+        if( Painting3DComponent )
+        {
+            UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>( LayerStack->GetCurrentLayer() );
+
+            if( DrawingLayer )
+            {
+                DrawLayerOrientationGrid( RenderAPI, DrawingLayer );
+            }
+        }
     }
 }
 

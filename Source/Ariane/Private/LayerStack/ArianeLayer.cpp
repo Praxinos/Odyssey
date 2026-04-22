@@ -21,6 +21,8 @@ UArianeLayer::UArianeLayer()
 {
     // for Transform operations
     SetMobility(EComponentMobility::Movable);
+
+    bWantsOnUpdateTransform = true;
 /*
     PrimaryComponentTick.bCanEverTick = true;
     PrimaryComponentTick.bStartWithTickEnabled = true;
@@ -176,4 +178,17 @@ UArianeLayer::FOnUpdateDelegate&
 UArianeLayer::OnPostUpdateDelegate()
 {
     return OnPostUpdate;
+}
+
+
+UArianeLayer::FOnTransformChanged&
+UArianeLayer::GetOnTransformChangedDelegate()
+{
+    return OnTransformChanged;
+}
+
+void
+UArianeLayer::OnUpdateTransform(EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport)
+{
+    OnTransformChanged.Broadcast();
 }

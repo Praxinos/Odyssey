@@ -13,7 +13,7 @@ AArianePainting3DActor::~AArianePainting3DActor()
 
 AArianePainting3DActor::AArianePainting3DActor()
 {
-    UArianePainting3DComponent* Painting3DComponent = CreateDefaultSubobject<UArianePainting3DComponent>(TEXT("Painting3DComponent"));
+    Painting3DComponent = CreateDefaultSubobject<UArianePainting3DComponent>(TEXT("Painting3DComponent"));
 
     PrimaryActorTick.bCanEverTick = true;
 
@@ -28,22 +28,18 @@ AArianePainting3DActor::AArianePainting3DActor()
 UArianePainting3DComponent*
 AArianePainting3DActor::GetPainting3DComponent()
 {
-    return Cast<UArianePainting3DComponent>(GetComponentByClass( UArianePainting3DComponent::StaticClass() ));
+    return Painting3DComponent;
 }
 
 void
 AArianePainting3DActor::PostActorCreated()
 {
-    UArianePainting3DComponent* Painting3DComponent = GetPainting3DComponent();
-
     Painting3DComponent->Init();
 }
 
 void
 AArianePainting3DActor::PostLoad()
 {
-    UArianePainting3DComponent* Painting3DComponent = GetPainting3DComponent();
-
     Super::PostLoad();
 
     Painting3DComponent->Init();

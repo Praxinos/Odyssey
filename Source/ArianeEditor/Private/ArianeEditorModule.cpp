@@ -8,8 +8,10 @@
 #include "ArianeEditor.h"
 #include "ArianeEditorColorSelectorTab.h"
 #include "ArianeEditorLayerStackTab.h"
+#include "ArianePainting3DComponentCustomization.h"
 // Ariane headers
 #include "ArianePainting3DActor.h"
+#include "ArianePainting3DComponent.h"
 // Unreal headers
 #include "AssetToolsModule.h"
 #include "CoreMinimal.h"
@@ -89,9 +91,7 @@ FArianeEditorModule::StartupModule()
     //FCoreDelegates::OnPostEngineInit.AddRaw(this, &FArianeEditorModule::OnEngineInit );
 
     RegisterToolbarButton();
-
-
-
+    RegisterCustomizations();
 
     FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
@@ -105,18 +105,18 @@ FArianeEditorModule::StartupModule()
             ColorSelectorTab
         );
     });
-/*
+
     LevelEditorModule.OnRegisterLayoutExtensions().AddLambda([](FLayoutExtender& InExtender)
     {
-        FTabManager::FTab ColorSelectorTab = FTabManager::FTab(FTabId(FArianeEditorColorSelectorTab::StaticId()), ETabState::OpenedTab);
+        FTabManager::FTab LayerStackTab = FTabManager::FTab(FTabId(FArianeEditorLayerStackTab::StaticId()), ETabState::OpenedTab);
 
         InExtender.ExtendLayout(
-            FTabId("LevelEditorSceneOutliner"),
+            FTabId("TopLeftModeTab"),
             ELayoutExtensionPosition::Below,
-            ColorSelectorTab
+            LayerStackTab
         );
     });
-*/
+
 /* Gary
     RegisterBrushOverrides(); //First thing to do, as it modifies the Brush CDO
     RegisterSettings();
@@ -142,6 +142,7 @@ FArianeEditorModule::ShutdownModule()
 {
     UToolMenus::UnRegisterStartupCallback( this );
 
+    UnregisterCustomization();
     UnregisterEditorMode();
 
 /* Gary
@@ -409,26 +410,22 @@ FArianeEditorModule::UnregisterLevelEditorLayoutExtensions()
 }
 
 void
-FArianeEditorModule::RegisterDetailCustomizations()
+FArianeEditorModule::RegisterCustomizations()
 {
-/* Gary
-    FOdysseyShapes::RegisterDetailCustomization();
-    UOdysseyPainterEditorRasterLiquifyTool::RegisterDetailCustomization();
-
-    FOdysseyPainterEditorAnimationFlipSystem::RegisterDetailCustomization();
     FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    PropertyModule.RegisterCustomClassLayout(UOdysseyPainterEditorAnimationOutOfPegsTool::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&FOdysseyPainterEditorAnimationOutOfPegsToolDetails::MakeInstance));
-*/
+
+    PropertyModule.RegisterCustomClassLayout(
+        UArianePainting3DComponent::StaticClass()->GetFName(),
+        FOnGetDetailCustomizationInstance::CreateStatic(&FArianePainting3DComponentCustomization::MakeInstance)
+    );
 }
 
 void
-FArianeEditorModule::UnregisterDetailCustomization()
+FArianeEditorModule::UnregisterCustomization()
 {
-/* Gary
-    UOdysseyPainterEditorRasterLiquifyTool::UnregisterDetailCustomization();
-    FOdysseyShapes::UnregisterDetailCustomization();
-    FOdysseyPainterEditorAnimationFlipSystem::UnregisterDetailCustomization();
-*/
+    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+
+    PropertyModule.UnregisterCustomPropertyTypeLayout( UArianePainting3DComponent::StaticClass()->GetFName() );
 }
 
 IMPLEMENT_MODULE( FArianeEditorModule, ArianeEditor );

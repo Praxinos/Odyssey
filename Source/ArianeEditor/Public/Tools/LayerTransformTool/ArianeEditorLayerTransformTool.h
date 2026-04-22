@@ -74,14 +74,16 @@ public:
 protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
     void OnTransformChanged( UTransformProxy* Proxy, FTransform NewTransform );
-    void BindDelegates();
-    void UnbindDelegates();
+    void BindComponentDelegates();
+    void UnbindComponentDelegates();
     void ClearGizmo();
     void CreateGizmo();
     void CreateOverlayWidget();
     FReply OnAccept();
     FReply OnCancel();
     void OnRootFolderUpdate( bool Interactive );
+    void OnPre3DPaintingComponentSelection();
+    void OnPost3DPaintingComponentSelection();
 
 protected:
     UPROPERTY() // to prevent GC
