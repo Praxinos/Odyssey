@@ -33,7 +33,7 @@ UOdysseyTextureLayerImageRaster::~UOdysseyTextureLayerImageRaster()
 
 UOdysseyTextureLayerImageRaster::UOdysseyTextureLayerImageRaster()
 {
-    LayerTypeName = LOCTEXT("layer-image-raster.type", "Raster Image Layer");
+    LayerTypeName = LOCTEXT("layer-image-raster.type", "Raster Layer");
     Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerBitmap16");
 }
 

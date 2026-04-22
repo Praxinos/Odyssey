@@ -36,7 +36,7 @@ UOdysseyAnimationLayerImageRaster::PostInitProperties()
 {
     Super::PostInitProperties();
 
-    LayerTypeName = LOCTEXT("layer-image-raster.type", "Raster Image Layer");
+    LayerTypeName = LOCTEXT("layer-image-raster.type", "Raster Layer");
 #if WITH_EDITOR
     Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerBitmap16");
 #endif

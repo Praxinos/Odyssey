@@ -47,7 +47,7 @@ UOdysseyTextureLayerImageVector::~UOdysseyTextureLayerImageVector()
 UOdysseyTextureLayerImageVector::UOdysseyTextureLayerImageVector()
     : mVectorLayer( MakeShared<FOdysseyVectorLayer>(this) )
 {
-    LayerTypeName = LOCTEXT("layer-image-vector.type", "Vector Image Layer");
+    LayerTypeName = LOCTEXT("layer-image-vector.type", "Vector Layer");
     Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerVector16");
 }
 

@@ -46,7 +46,7 @@ UOdysseyAnimationLayerImageVector::PostInitProperties()
 {
     Super::PostInitProperties();
 
-    LayerTypeName = LOCTEXT("layer-image-vector.type", "Vector Image Layer");
+    LayerTypeName = LOCTEXT("layer-image-vector.type", "Vector Layer");
 #if WITH_EDITOR
     Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerVector16");
 #endif
