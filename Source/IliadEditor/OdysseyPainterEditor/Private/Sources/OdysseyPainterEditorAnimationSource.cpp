@@ -49,6 +49,7 @@ FOdysseyPainterEditorAnimationSource::FOdysseyPainterEditorAnimationSource(UOdys
     , mEditor( nullptr )
 {
     mPlayer->SetIgnorePrePostBehaviour(true);
+    mPlayer->SetRewindOnStop(true);
 }
 
 const FGuid&

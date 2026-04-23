@@ -117,7 +117,18 @@ UOdysseyAnimationPlayer::Stop()
     }
 
     Status = EOdysseyAnimationPlayerStatus::Stopped;
-    SeekToFrame(mCurrentFrame);
+
+    if (bRewindOnStop)
+    {
+        SeekToFrame(mCurrentFrame);
+    }
+    else if (mCurrentFrame != mDisplayedFrame)
+    {
+        //ensure CurrentFrame is correctly set
+        mCurrentFrame = mDisplayedFrame;
+        mOnCurrentFrameChanged.Broadcast();
+    }
+
     mOnStatusChanged.Broadcast();
     BP_OnStatusChanged.Broadcast();
 }
@@ -361,24 +372,14 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
 
     if (Status == EOdysseyAnimationPlayerStatus::Playing)
     {
-        FFrameTime leftBound;
-        FFrameTime rightBound;
-        switch(PlayRange)
+        FFrameTime leftBound = FFrameTime(Animation->GetFrameRange().GetLowerBoundValue());;
+        FFrameTime rightBound = FFrameTime(Animation->GetFrameRange().GetUpperBoundValue());;
+        if(PlayRange == EOdysseyAnimationPlayerPlayRange::Custom)
         {
-            case EOdysseyAnimationPlayerPlayRange::AnimationBounds:
-            {
-                leftBound = FFrameTime(Animation->GetFrameRange().GetLowerBoundValue());
-                rightBound = FFrameTime(Animation->GetFrameRange().GetUpperBoundValue());
-            }
-            break;
-
-            case EOdysseyAnimationPlayerPlayRange::Custom:
-            {
-                leftBound = CustomPlayRangeStartFrame;
-                rightBound = CustomPlayRangeEndFrame;
-            }
-            break;
+            leftBound = CustomPlayRangeStartFrame;
+            rightBound = CustomPlayRangeEndFrame;
         }
+
         FFrameTime duration = rightBound - leftBound + FFrameTime(1);
 
         bool bStop = false;
@@ -387,22 +388,19 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
         {
             newFrame -= FFrameTime::FromDecimal(iDeltaTime * PlayRate * Animation->GetFramesPerSecond());
 
-            if (PlayRange != EOdysseyAnimationPlayerPlayRange::Infinite)
+            if (newFrame < leftBound)
             {
-                if (newFrame < leftBound)
+                if ( IsLoopingInPlayRange )
                 {
-                    if ( IsLoopingInPlayRange )
+                    while ( newFrame < leftBound )
                     {
-                        while ( newFrame < leftBound )
-                        {
-                            newFrame += duration;
-                        }
+                        newFrame += duration;
                     }
-                    else
-                    {
-                        newFrame = leftBound;
-                        bStop = true;
-                    }
+                }
+                else if (PlayRange != EOdysseyAnimationPlayerPlayRange::Infinite)
+                {
+                    newFrame = leftBound;
+                    bStop = true;
                 }
             }
         }
@@ -410,22 +408,19 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
         {
             newFrame += FFrameTime::FromDecimal(iDeltaTime * PlayRate * Animation->GetFramesPerSecond());
 
-            if (PlayRange != EOdysseyAnimationPlayerPlayRange::Infinite)
+            if (newFrame >= rightBound + FFrameTime(1))
             {
-                if (newFrame >= rightBound + FFrameTime(1))
+                if ( IsLoopingInPlayRange )
                 {
-                    if ( IsLoopingInPlayRange )
+                    while ( newFrame >= rightBound + FFrameTime(1) )
                     {
-                        while ( newFrame >= rightBound + FFrameTime(1) )
-                        {
-                            newFrame -= duration;
-                        }
+                        newFrame -= duration;
                     }
-                    else
-                    {
-                        newFrame = rightBound;
-                        bStop = true;
-                    }
+                }
+                else if (PlayRange != EOdysseyAnimationPlayerPlayRange::Infinite)
+                {
+                    newFrame = rightBound;
+                    bStop = true;
                 }
             }
         }
@@ -598,6 +593,18 @@ UOdysseyAnimationPlayer::GetCustomPlayRange(FFrameNumber& StartFrame, FFrameNumb
 {
     StartFrame = CustomPlayRangeStartFrame;
     EndFrame = CustomPlayRangeEndFrame;
+}
+
+void
+UOdysseyAnimationPlayer::SetRewindOnStop(bool Rewind)
+{
+    bRewindOnStop = Rewind;
+}
+
+bool
+UOdysseyAnimationPlayer::GetRewindOnStop() const
+{
+    return bRewindOnStop;
 }
 
 #if WITH_EDITOR

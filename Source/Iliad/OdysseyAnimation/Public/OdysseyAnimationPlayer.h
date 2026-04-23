@@ -146,10 +146,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void EndScrub();
 
-    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer", meta = (DisplayName = "Set IsLooping"))
     void SetIsLoopingInPlayRange(bool IsLooping);
 
-    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
+    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer", meta = (DisplayName = "Get IsLooping"))
     bool GetIsLoopingInPlayRange() const;
 
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
@@ -163,6 +163,12 @@ public:
 
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     void GetCustomPlayRange(FFrameNumber& StartFrame, FFrameNumber& EndFrame);
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
+    void SetRewindOnStop(bool Rewind);
+
+    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
+    bool GetRewindOnStop() const;
 
     void SetLODGroup(enum TextureGroup iTextureGroup);
     enum TextureGroup GetLODGroup() const;
@@ -187,41 +193,92 @@ private:
     void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
 
 private:
+    /**
+     * The animation to play
+     */
     UPROPERTY( EditAnywhere, Category="Animation" )
     TObjectPtr<UOdysseyAnimation> Animation;
 
+    /*
+    * Are we looping ?
+    * If PlayRange is EOdysseyAnimationPlayerPlayRange::Custom, loop between the defined custom start and end frame
+    * Otherwise, loop between the animation bounds (even if PlayRange is EOdysseyAnimationPlayerPlayRange::Infinite)
+    */
     UPROPERTY( EditAnywhere, Category="Animation" )
     bool IsLoopingInPlayRange = false;
 
+    /**
+     * Defines the frame Range to play
+     */
     UPROPERTY( EditAnywhere, Category="Animation" )
     EOdysseyAnimationPlayerPlayRange PlayRange = EOdysseyAnimationPlayerPlayRange::AnimationBounds; //Infinite, Custom
 
+    /**
+     * If PlayRange is EOdysseyAnimationPlayerPlayRange::Custom
+     * defines the frame the Play should start at
+     */
     UPROPERTY( EditAnywhere, Category="Animation", meta=(EditConditionHides, EditCondition="PlayRange==EOdysseyAnimationPlayerPlayRange::Custom") )
     FFrameNumber CustomPlayRangeStartFrame;
 
+    /**
+     * If PlayRange is EOdysseyAnimationPlayerPlayRange::Custom
+     * defines the end frame the Play should end at
+     */
     UPROPERTY( EditAnywhere, Category="Animation", meta=(EditConditionHides, EditCondition="PlayRange==EOdysseyAnimationPlayerPlayRange::Custom") )
     FFrameNumber CustomPlayRangeEndFrame;
 
+    /**
+     * If PlayRange is not AnimationBound
+     * Defines the behaviour to use when playing before the start of the Animation's bounds
+     */
     UPROPERTY( EditAnywhere, Category="Animation" )
     EOdysseyAnimationPlayerPostBehaviour PreBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
 
+    /**
+     * If PlayRange is not AnimationBound
+     * Defines the behaviour to use when playing after the end of the Animation's bounds
+     */
     UPROPERTY( EditAnywhere, Category="Animation" )
     EOdysseyAnimationPlayerPostBehaviour PostBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
 
+    /**
+     * The LODGroup to use for the RenderTarget in which the animation is Rendered
+     */
     UPROPERTY( EditAnywhere, Category="Animation", meta=(DisplayName="Texture Group"), AssetRegistrySearchable )
     TEnumAsByte<enum TextureGroup> LODGroup = TEXTUREGROUP_Pixels2D;
 
+    /**
+     * If true, when Play stops or Stop() is called, automatically seeks to the frame on which the Play started
+     */
+    UPROPERTY( EditAnywhere, Category="Animation" )
+    bool bRewindOnStop = false;
+
 public:
+    /**
+     * Defines the speed of the animation in percentage of the animation framerate
+     * 1.0 = 100% speed
+     */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation" )
     float PlayRate = 1.0f; //1.0f means 100% of the animation framepersecond
 
+    /**
+     * The RenderTarget in which the animation is Rendered
+     */
     UPROPERTY( Transient, DuplicateTransient )
     TObjectPtr<UTextureRenderTarget2D> RenderTarget;
+
 public:
     //Blueprint Events
+
+    /**
+     * Fired when the player current frame changes (ex: when seeking or when playing)
+     */
     UPROPERTY(BlueprintAssignable, Category = Events, meta = (DisplayName = "On Frame Changed"))
     FSimpleDynamicMulticastDelegate BP_OnFrameChanged;
 
+    /**
+     * Fired when the player status changes (ex: when paused or when stopped)
+     */
     UPROPERTY(BlueprintAssignable, Category = Events, meta = (DisplayName = "On Status Changed"))
     FSimpleDynamicMulticastDelegate BP_OnStatusChanged;
 
