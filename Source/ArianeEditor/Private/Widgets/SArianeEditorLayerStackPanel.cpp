@@ -146,6 +146,7 @@ SArianeEditorLayerStackPanel::Construct(const FArguments& InArgs, FArianeEditor*
     [
         SNew(SVerticalBox)
         + SVerticalBox::Slot()
+        .AutoHeight()
         [
             SNew( SButton )
                 .Text( LOCTEXT("layer-stack-panel-new-layer","New Layer") )

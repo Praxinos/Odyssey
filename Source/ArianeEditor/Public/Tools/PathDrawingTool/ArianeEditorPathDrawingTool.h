@@ -52,6 +52,9 @@ public:
 
     virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
 
+    void Activate();
+    void Inactivate();
+
 protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
 

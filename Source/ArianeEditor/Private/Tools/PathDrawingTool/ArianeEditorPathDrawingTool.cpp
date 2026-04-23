@@ -38,6 +38,38 @@ UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
     bHasContextMenu = true;
 }
 
+void
+UArianeEditorPathDrawingTool::Activate()
+{
+    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+
+    Super::Activate();
+
+    if( ViewportClient )
+    {
+        ViewportClient->EngineShowFlags.SetSelectionOutline(false);
+        ViewportClient->Invalidate();
+
+        GEditor->RedrawAllViewports();
+    }
+}
+
+void
+UArianeEditorPathDrawingTool::Inactivate()
+{
+    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+
+    if( ViewportClient )
+    {
+        ViewportClient->EngineShowFlags.SetSelectionOutline(true);
+        ViewportClient->Invalidate();
+
+        GEditor->RedrawAllViewports();
+    }
+
+    Super::Inactivate();
+}
+
 bool
 UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* iViewportClient
                                          , const FKey& iKey
