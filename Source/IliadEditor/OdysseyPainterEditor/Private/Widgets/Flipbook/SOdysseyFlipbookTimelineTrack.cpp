@@ -26,13 +26,13 @@
 
 #define LOCTEXT_NAMESPACE "FlipbookEditor"
 
-#define THUMBNAIL_SIZE 64
+#define THUMBNAIL_SIZE_FLIPBOOK 64
 
 namespace
 {
-    static TStrongObjectPtr<UTexture2D> sCheckerboardTexture;
-    static FColor sRasterCheckerboardColorOne = FColor( EForceInit::ForceInit );
-    static FColor sRasterCheckerboardColorTwo = FColor( EForceInit::ForceInit );
+    static TStrongObjectPtr<UTexture2D> sFlipbookCheckerboardTexture;
+    static FColor sFlipbookCheckerboardColorOne = FColor( EForceInit::ForceInit );
+    static FColor sFlipbookCheckerboardColorTwo = FColor( EForceInit::ForceInit );
 };
 
 SOdysseyFlipbookTimelineTrack::~SOdysseyFlipbookTimelineTrack()
@@ -133,22 +133,22 @@ void
 SOdysseyFlipbookTimelineTrack::CreateCheckerboardTexture()
 {
     const UOdysseyPainterEditorSettings& settings = *GetDefault< UOdysseyPainterEditorSettings >();
-    if( !sCheckerboardTexture
-        || sRasterCheckerboardColorOne != settings.GetCheckerColorOne()
-        || sRasterCheckerboardColorTwo != settings.GetCheckerColorTwo()
+    if( !sFlipbookCheckerboardTexture
+        || sFlipbookCheckerboardColorOne != settings.GetCheckerColorOne()
+        || sFlipbookCheckerboardColorTwo != settings.GetCheckerColorTwo()
         )
     {
-        sCheckerboardTexture = TStrongObjectPtr<UTexture2D>( FImageUtils::CreateCheckerboardTexture( settings.GetCheckerColorOne(), settings.GetCheckerColorTwo(), 16 ) );
-        sRasterCheckerboardColorOne = settings.GetCheckerColorOne();
-        sRasterCheckerboardColorTwo = settings.GetCheckerColorTwo();
+        sFlipbookCheckerboardTexture = TStrongObjectPtr<UTexture2D>( FImageUtils::CreateCheckerboardTexture( settings.GetCheckerColorOne(), settings.GetCheckerColorTwo(), 16 ) );
+        sFlipbookCheckerboardColorOne = settings.GetCheckerColorOne();
+        sFlipbookCheckerboardColorTwo = settings.GetCheckerColorTwo();
     }
 
     //---
 
     if( !mCheckerboardBrush )
-        mCheckerboardBrush = new FSlateImageBrush( sCheckerboardTexture.Get(), FVector2f( sCheckerboardTexture->GetSurfaceWidth(), sCheckerboardTexture->GetSurfaceHeight() ), FSlateColor( FLinearColor::White ), ESlateBrushTileType::Both );
+        mCheckerboardBrush = new FSlateImageBrush( sFlipbookCheckerboardTexture.Get(), FVector2f( sFlipbookCheckerboardTexture->GetSurfaceWidth(), sFlipbookCheckerboardTexture->GetSurfaceHeight() ), FSlateColor( FLinearColor::White ), ESlateBrushTileType::Both );
 
-    mCheckerboardBrush->SetResourceObject( sCheckerboardTexture.Get() );
+    mCheckerboardBrush->SetResourceObject( sFlipbookCheckerboardTexture.Get() );
 }
 
 void
@@ -239,14 +239,14 @@ SOdysseyFlipbookTimelineTrack::CreateFrameContent(UTexture2D* iTexture)
         float h = iTexture->Source.GetSizeY();
         if (w > h)
         {
-            float ratio = 64.f / w;
-            w = 64.f;
+            float ratio = THUMBNAIL_SIZE_FLIPBOOK / w;
+            w = THUMBNAIL_SIZE_FLIPBOOK;
             h *= ratio;
         }
         else
         {
-            float ratio = 64.f / h;
-            h = 64.f;
+            float ratio = THUMBNAIL_SIZE_FLIPBOOK / h;
+            h = THUMBNAIL_SIZE_FLIPBOOK;
             w *= ratio;
         }
 

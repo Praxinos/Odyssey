@@ -11,13 +11,13 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyPainterEditorSettings.h"
 
-#define THUMBNAIL_SIZE 32
+#define THUMBNAIL_SIZE_VECTOR 32
 
 namespace
 {
-    static TStrongObjectPtr<UTexture2D> sCheckerboardTexture;
-    static FColor sRasterCheckerboardColorOne = FColor( EForceInit::ForceInit );
-    static FColor sRasterCheckerboardColorTwo = FColor( EForceInit::ForceInit );
+    static TStrongObjectPtr<UTexture2D> sVectorCheckerboardTexture;
+    static FColor sVectorCheckerboardColorOne = FColor( EForceInit::ForceInit );
+    static FColor sVectorCheckerboardColorTwo = FColor( EForceInit::ForceInit );
 };
 
 SOdysseyAnimationCellImageVector::~SOdysseyAnimationCellImageVector()
@@ -45,8 +45,8 @@ SOdysseyAnimationCellImageVector::Construct(const FArguments& iArgs, UOdysseyAni
     RenderTarget = TStrongObjectPtr<UTextureRenderTarget2D>( NewObject<UTextureRenderTarget2D>() );
     RenderTarget->RenderTargetFormat = RTF_RGBA8;
 
-    RenderTarget->InitAutoFormat( mCell->GetAnimation()->GetWidthFromHeightKeepingRatio( THUMBNAIL_SIZE ), THUMBNAIL_SIZE );
-    //RenderTarget->ResizeTarget( mCell->GetAnimation()->GetWidthFromHeightKeepingRatio( THUMBNAIL_SIZE ), THUMBNAIL_SIZE );
+    RenderTarget->InitAutoFormat( mCell->GetAnimation()->GetWidthFromHeightKeepingRatio( THUMBNAIL_SIZE_VECTOR ), THUMBNAIL_SIZE_VECTOR );
+    //RenderTarget->ResizeTarget( mCell->GetAnimation()->GetWidthFromHeightKeepingRatio( THUMBNAIL_SIZE_VECTOR ), THUMBNAIL_SIZE_VECTOR );
     //RenderTarget->UpdateResource();
     RenderTarget->UpdateResourceImmediate();
 
@@ -93,29 +93,29 @@ void
 SOdysseyAnimationCellImageVector::RefreshCellRenderTarget()
 {
     FTextureRenderTargetResource* RTResource = RenderTarget->GameThread_GetRenderTargetResource();
-    ThumbnailTools::RenderThumbnail( mCell, mCell->GetAnimation()->GetWidthFromHeightKeepingRatio( THUMBNAIL_SIZE ), THUMBNAIL_SIZE, ThumbnailTools::EThumbnailTextureFlushMode::NeverFlush, RTResource );
+    ThumbnailTools::RenderThumbnail( mCell, mCell->GetAnimation()->GetWidthFromHeightKeepingRatio( THUMBNAIL_SIZE_VECTOR ), THUMBNAIL_SIZE_VECTOR, ThumbnailTools::EThumbnailTextureFlushMode::NeverFlush, RTResource );
 }
 
 void
 SOdysseyAnimationCellImageVector::CreateCheckerboardTexture()
 {
     const UOdysseyPainterEditorSettings& settings = *GetDefault< UOdysseyPainterEditorSettings >();
-    if( !sCheckerboardTexture
-        || sRasterCheckerboardColorOne != settings.GetCheckerColorOne()
-        || sRasterCheckerboardColorTwo != settings.GetCheckerColorTwo()
+    if( !sVectorCheckerboardTexture
+        || sVectorCheckerboardColorOne != settings.GetCheckerColorOne()
+        || sVectorCheckerboardColorTwo != settings.GetCheckerColorTwo()
         )
     {
-        sCheckerboardTexture = TStrongObjectPtr<UTexture2D>( FImageUtils::CreateCheckerboardTexture( settings.GetCheckerColorOne(), settings.GetCheckerColorTwo(), 16 ) );
-        sRasterCheckerboardColorOne = settings.GetCheckerColorOne();
-        sRasterCheckerboardColorTwo = settings.GetCheckerColorTwo();
+        sVectorCheckerboardTexture = TStrongObjectPtr<UTexture2D>( FImageUtils::CreateCheckerboardTexture( settings.GetCheckerColorOne(), settings.GetCheckerColorTwo(), 16 ) );
+        sVectorCheckerboardColorOne = settings.GetCheckerColorOne();
+        sVectorCheckerboardColorTwo = settings.GetCheckerColorTwo();
     }
 
     //---
 
     if( !mCheckerboardBrush )
-        mCheckerboardBrush = new FSlateImageBrush( sCheckerboardTexture.Get(), FVector2D( sCheckerboardTexture->GetSurfaceWidth(), sCheckerboardTexture->GetSurfaceHeight() ), FSlateColor( FLinearColor::White ), ESlateBrushTileType::Both );
+        mCheckerboardBrush = new FSlateImageBrush( sVectorCheckerboardTexture.Get(), FVector2D( sVectorCheckerboardTexture->GetSurfaceWidth(), sVectorCheckerboardTexture->GetSurfaceHeight() ), FSlateColor( FLinearColor::White ), ESlateBrushTileType::Both );
 
-    mCheckerboardBrush->SetResourceObject( sCheckerboardTexture.Get() );
+    mCheckerboardBrush->SetResourceObject( sVectorCheckerboardTexture.Get() );
 }
 
 void

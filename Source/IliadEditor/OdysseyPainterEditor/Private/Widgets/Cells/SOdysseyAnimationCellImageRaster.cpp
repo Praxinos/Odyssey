@@ -10,11 +10,11 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyPainterEditorSettings.h"
 
-#define THUMBNAIL_SIZE 32
+#define THUMBNAIL_SIZE_RASTER 32
 
 namespace
 {
-    static TStrongObjectPtr<UTexture2D> sCheckerboardTexture;
+    static TStrongObjectPtr<UTexture2D> sRasterCheckerboardTexture;
     static FColor sRasterCheckerboardColorOne = FColor( EForceInit::ForceInit );
     static FColor sRasterCheckerboardColorTwo = FColor( EForceInit::ForceInit );
 };
@@ -44,8 +44,8 @@ SOdysseyAnimationCellImageRaster::Construct(const FArguments& iArgs, UOdysseyAni
     RenderTarget = TStrongObjectPtr<UTextureRenderTarget2D>( NewObject<UTextureRenderTarget2D>() );
     RenderTarget->RenderTargetFormat = RTF_RGBA8;
 
-    RenderTarget->InitAutoFormat( mCell->GetAnimation()->GetWidthFromHeightKeepingRatio( THUMBNAIL_SIZE ), THUMBNAIL_SIZE );
-    //RenderTarget->ResizeTarget( mCell->GetAnimation()->GetWidthFromHeightKeepingRatio( THUMBNAIL_SIZE ), THUMBNAIL_SIZE );
+    RenderTarget->InitAutoFormat( mCell->GetAnimation()->GetWidthFromHeightKeepingRatio( THUMBNAIL_SIZE_RASTER ), THUMBNAIL_SIZE_RASTER );
+    //RenderTarget->ResizeTarget( mCell->GetAnimation()->GetWidthFromHeightKeepingRatio( THUMBNAIL_SIZE_RASTER ), THUMBNAIL_SIZE_RASTER );
     //RenderTarget->UpdateResource();
     RenderTarget->UpdateResourceImmediate();
 
@@ -92,19 +92,19 @@ void
 SOdysseyAnimationCellImageRaster::RefreshCellRenderTarget()
 {
     FTextureRenderTargetResource* RTResource = RenderTarget->GameThread_GetRenderTargetResource();
-    ThumbnailTools::RenderThumbnail( mCell, mCell->GetAnimation()->GetWidthFromHeightKeepingRatio( THUMBNAIL_SIZE ), THUMBNAIL_SIZE, ThumbnailTools::EThumbnailTextureFlushMode::NeverFlush, RTResource );
+    ThumbnailTools::RenderThumbnail( mCell, mCell->GetAnimation()->GetWidthFromHeightKeepingRatio( THUMBNAIL_SIZE_RASTER ), THUMBNAIL_SIZE_RASTER, ThumbnailTools::EThumbnailTextureFlushMode::NeverFlush, RTResource );
 }
 
 void
 SOdysseyAnimationCellImageRaster::CreateCheckerboardTexture()
 {
     const UOdysseyPainterEditorSettings& settings = *GetDefault< UOdysseyPainterEditorSettings >();
-    if( !sCheckerboardTexture
+    if( !sRasterCheckerboardTexture
         || sRasterCheckerboardColorOne != settings.GetCheckerColorOne()
         || sRasterCheckerboardColorTwo != settings.GetCheckerColorTwo()
         )
     {
-        sCheckerboardTexture = TStrongObjectPtr<UTexture2D>( FImageUtils::CreateCheckerboardTexture( settings.GetCheckerColorOne(), settings.GetCheckerColorTwo(), 16 ) );
+        sRasterCheckerboardTexture = TStrongObjectPtr<UTexture2D>( FImageUtils::CreateCheckerboardTexture( settings.GetCheckerColorOne(), settings.GetCheckerColorTwo(), 16 ) );
         sRasterCheckerboardColorOne = settings.GetCheckerColorOne();
         sRasterCheckerboardColorTwo = settings.GetCheckerColorTwo();
     }
@@ -112,9 +112,9 @@ SOdysseyAnimationCellImageRaster::CreateCheckerboardTexture()
     //---
 
     if( !mCheckerboardBrush )
-        mCheckerboardBrush = new FSlateImageBrush( sCheckerboardTexture.Get(), FVector2D( sCheckerboardTexture->GetSurfaceWidth(), sCheckerboardTexture->GetSurfaceHeight() ), FSlateColor( FLinearColor::White ), ESlateBrushTileType::Both );
+        mCheckerboardBrush = new FSlateImageBrush( sRasterCheckerboardTexture.Get(), FVector2D( sRasterCheckerboardTexture->GetSurfaceWidth(), sRasterCheckerboardTexture->GetSurfaceHeight() ), FSlateColor( FLinearColor::White ), ESlateBrushTileType::Both );
 
-    mCheckerboardBrush->SetResourceObject( sCheckerboardTexture.Get() );
+    mCheckerboardBrush->SetResourceObject( sRasterCheckerboardTexture.Get() );
 }
 
 void
