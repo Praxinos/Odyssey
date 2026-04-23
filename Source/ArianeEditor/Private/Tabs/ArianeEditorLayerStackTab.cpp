@@ -3,7 +3,7 @@
 
 // Ariane headers
 #include "ArianeEditorLayerStackTab.h"
-#include "SArianeEditorLayerStack.h"
+#include "SArianeEditorLayerStackPanel.h"
 #include "ArianeEditor.h"
 #include "ArianeEditorCommands.h"
 // Odyssey headers
@@ -42,7 +42,7 @@ FArianeEditorLayerStackTab::GetId() const
 TSharedPtr<SWidget>
 FArianeEditorLayerStackTab::CreateWidget()
 {
-    return SNew(SArianeEditorLayerStack, Editor );
+    return SNew(SArianeEditorLayerStackPanel, Editor );
 }
 
 void
