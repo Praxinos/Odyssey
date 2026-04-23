@@ -3,25 +3,45 @@
 
 #include "SOdysseyFlipbookTimelineTrack.h"
 
-#include "IAssetTools.h"
 #include "Fonts/FontMeasure.h"
+#include "Framework/Commands/GenericCommands.h"
+#include "IAssetTools.h"
+#include "ImageUtils.h"
+#include "ObjectTools.h"
+#include "PaperImporterSettings.h"
+#include "PaperSprite.h"
+#include "PropertyCustomizationHelpers.h"
+#include "RenderGraphUtils.h"
+#include "ScreenPass.h"
+#include "Widgets/Layout/SScaleBox.h"
+
 #include "SOdysseyFlipbookTimelineFrameList.h"
 #include "SOdysseyFlipbookTimelineFrame.h"
 #include "OdysseyPainterEditorFlipbookCommands.h"
-
-#include "Widgets/Layout/SScaleBox.h"
-#include "PaperImporterSettings.h"
-#include "PaperSprite.h"
-#include "Framework/Commands/GenericCommands.h"
-#include "PropertyCustomizationHelpers.h"
 #include "OdysseyPainterEditorFlipbookListener.h"
 #include "OdysseyPainterEditorFlipbookUtils.h"
+#include "OdysseyPainterEditorSettings.h"
 #include "OdysseyStyle.h"
+#include "OdysseyTextureLayerStackUserData.h"
 
 #define LOCTEXT_NAMESPACE "FlipbookEditor"
 
+#define THUMBNAIL_SIZE 64
+
+namespace
+{
+    static TStrongObjectPtr<UTexture2D> sCheckerboardTexture;
+    static FColor sRasterCheckerboardColorOne = FColor( EForceInit::ForceInit );
+    static FColor sRasterCheckerboardColorTwo = FColor( EForceInit::ForceInit );
+};
+
 SOdysseyFlipbookTimelineTrack::~SOdysseyFlipbookTimelineTrack()
 {
+    UOdysseyPainterEditorSettings* settings = GetMutableDefault<UOdysseyPainterEditorSettings>();
+    settings->GetOnCheckerColorChanged().RemoveAll( this );
+    settings->GetOnCheckerSizeChanged().RemoveAll( this );
+
+    IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll( this );
 }
 
 void SOdysseyFlipbookTimelineTrack::Construct( const SOdysseyFlipbookTimelineTrack::FArguments& InArgs )
@@ -38,6 +58,18 @@ void SOdysseyFlipbookTimelineTrack::Construct( const SOdysseyFlipbookTimelineTra
     mListener->OnSpriteTextureChanged().AddRaw(this, &SOdysseyFlipbookTimelineTrack::OnSpriteTextureChanged);
 
     mFrameWarningBrush = FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameWarning");
+
+    //---
+
+    IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddSP( this, &SOdysseyFlipbookTimelineTrack::OnRenderingChanged );
+
+    UOdysseyPainterEditorSettings* settings = GetMutableDefault<UOdysseyPainterEditorSettings>();
+    settings->GetOnCheckerColorChanged().AddSP( this, &SOdysseyFlipbookTimelineTrack::CreateCheckerboardTexture );
+    settings->GetOnCheckerSizeChanged().AddSP( this, &SOdysseyFlipbookTimelineTrack::CreateCheckerboardTexture );
+
+    CreateCheckerboardTexture();
+
+    //---
 
     ChildSlot
     [
@@ -56,13 +88,112 @@ void SOdysseyFlipbookTimelineTrack::Construct( const SOdysseyFlipbookTimelineTra
 }
 
 void
+SOdysseyFlipbookTimelineTrack::RefreshTextureRenderTarget( UTexture2D* iTexture, UTextureRenderTarget2D* iRenderTarget )
+{
+    // It doesn't work and I don't know why because the FObjectThumbnail seems to be filled with the right pixels and they come from the RTResource
+    // Until someone found why, fill the render target with ENQUEUE_RENDER_COMMAND()
+
+    //FObjectThumbnail t;
+    //FTextureRenderTargetResource* RTResource = iRenderTarget->GameThread_GetRenderTargetResource();
+    //ThumbnailTools::RenderThumbnail( iTexture, iRenderTarget->GetSurfaceWidth(), iRenderTarget->GetSurfaceHeight(), ThumbnailTools::EThumbnailTextureFlushMode::NeverFlush, RTResource, &t );
+
+    //OR
+
+    FIntRect iDstRect( 0, 0, iRenderTarget->GetSurfaceWidth(), iRenderTarget->GetSurfaceHeight() );
+    FIntRect iSrcRect( 0, 0, iTexture->GetSurfaceWidth(), iTexture->GetSurfaceHeight() );
+
+    ENQUEUE_RENDER_COMMAND( IOdysseyTextureRenderingAbility_RenderRectAtRect )(
+        [this, iRenderTarget, iTexture, iSrcRect, iDstRect]( FRHICommandListImmediate& RHICmdList )
+        {
+            FRDGBuilder graphBuilder( RHICmdList );
+
+            FRDGTextureRef destinationTexture = iRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+
+            //AddClearRenderTargetPass( graphBuilder, destinationTexture, FLinearColor::Blue, iDstRect );
+
+            FRDGTextureRef sourceTexture = graphBuilder.RegisterExternalTexture( CreateRenderTarget( iTexture->GetResource()->TextureRHI, TEXT( "SOdysseyImportTexturesDialog_Render::sourceTexture" ) ) );
+
+            AddDrawTexturePass(
+                graphBuilder,
+                FScreenPassViewInfo(),
+                sourceTexture,
+                destinationTexture,
+                iSrcRect.Min,
+                iSrcRect.Size(),
+                iDstRect.Min,
+                iDstRect.Size()
+            );
+
+            graphBuilder.Execute();
+        }
+        );
+}
+
+void
+SOdysseyFlipbookTimelineTrack::CreateCheckerboardTexture()
+{
+    const UOdysseyPainterEditorSettings& settings = *GetDefault< UOdysseyPainterEditorSettings >();
+    if( !sCheckerboardTexture
+        || sRasterCheckerboardColorOne != settings.GetCheckerColorOne()
+        || sRasterCheckerboardColorTwo != settings.GetCheckerColorTwo()
+        )
+    {
+        sCheckerboardTexture = TStrongObjectPtr<UTexture2D>( FImageUtils::CreateCheckerboardTexture( settings.GetCheckerColorOne(), settings.GetCheckerColorTwo(), 16 ) );
+        sRasterCheckerboardColorOne = settings.GetCheckerColorOne();
+        sRasterCheckerboardColorTwo = settings.GetCheckerColorTwo();
+    }
+
+    //---
+
+    if( !mCheckerboardBrush )
+        mCheckerboardBrush = new FSlateImageBrush( sCheckerboardTexture.Get(), FVector2f( sCheckerboardTexture->GetSurfaceWidth(), sCheckerboardTexture->GetSurfaceHeight() ), FSlateColor( FLinearColor::White ), ESlateBrushTileType::Both );
+
+    mCheckerboardBrush->SetResourceObject( sCheckerboardTexture.Get() );
+}
+
+void
+SOdysseyFlipbookTimelineTrack::OnRenderingChanged( const FOdysseyRenderingChangedEvent& iEvent )
+{
+    if( !mFlipbook )
+        return;
+
+    if( iEvent.IsInteractive() )
+        return;
+
+    for( int32 index = 0; index < mFlipbook->GetNumKeyFrames(); ++index )
+    {
+        const FPaperFlipbookKeyFrame& keyframe = mFlipbook->GetKeyFrameChecked( index );
+        UTexture2D* texture = OdysseyPainterEditorFlipbookUtils::GetKeyframeTexture( mFlipbook, index );
+        if( !texture )
+            continue;
+
+        TStrongObjectPtr<UTextureRenderTarget2D>* renderTargetPtr = mRenderTargets.Find( texture );
+        if( !renderTargetPtr )
+            continue;
+
+        UOdysseyTextureLayerStackUserData* userData = texture->GetAssetUserData<UOdysseyTextureLayerStackUserData>();
+        if( !userData )
+            continue;
+
+        UOdysseyTextureLayerStack* layerStack = userData->LayerStack;
+        if( !layerStack )
+            continue;
+
+        TArray<FGuid> composition = layerStack->GetRenderingComposition( EOdysseyRenderingType::Render, 0 );
+        if( composition.Contains( iEvent.GetId() ) )
+        {
+            RefreshTextureRenderTarget( texture, mRenderTargets.FindChecked( texture ).Get() );
+        }
+    }
+}
+
+void
 SOdysseyFlipbookTimelineTrack::Rebuild()
 {
     if (!mFlipbook)
         return;
 
     mFrameList->RemoveAllFrames();
-    mAssetThumbnailPool = MakeShareable( new FAssetThumbnailPool(1024, true) );
 
     for (int32 index = 0; index < mFlipbook->GetNumKeyFrames(); ++index)
     {
@@ -119,17 +250,53 @@ SOdysseyFlipbookTimelineTrack::CreateFrameContent(UTexture2D* iTexture)
             w *= ratio;
         }
 
-        TSharedPtr<FAssetThumbnail> AssetThumbnail = MakeShareable( new FAssetThumbnail( iTexture, w, h, mAssetThumbnailPool ) );
-        FAssetThumbnailConfig ThumbnailConfig;
-        ThumbnailConfig.bAllowFadeIn = true;
-        ThumbnailConfig.bAllowHintText = false;
-        ThumbnailConfig.bForceGenericThumbnail = false;
-        ThumbnailConfig.AllowAssetSpecificThumbnailOverlay = false;
-        ThumbnailConfig.ThumbnailLabel = EThumbnailLabel::NoLabel;
-        ThumbnailConfig.HighlightedText = FText::FromString("");
-        ThumbnailConfig.HintColorAndOpacity = FLinearColor( 1.0, 1.0, 1.0, 1.0 );
-        ThumbnailConfig.AssetTypeColorOverride = FLinearColor(0.0, 0.0, 0.0, 0.0);
-        TSharedPtr<SWidget> thumbnailWidget = AssetThumbnail->MakeThumbnailWidget(ThumbnailConfig);
+        //-
+
+        // Create or get the corresponding render target of the texture
+        TStrongObjectPtr<UTextureRenderTarget2D>* renderTargetPtr = mRenderTargets.Find( iTexture );
+        if( !renderTargetPtr )
+        {
+            TStrongObjectPtr<UTextureRenderTarget2D> renderTarget( NewObject<UTextureRenderTarget2D>() );
+            renderTarget->RenderTargetFormat = RTF_RGBA8;
+
+            renderTarget->ClearColor = FLinearColor::Red;
+
+            renderTarget->InitAutoFormat( w, h );
+            renderTarget->UpdateResourceImmediate();
+
+            mRenderTargets.Add( iTexture, renderTarget );
+        }
+        else
+        {
+            TStrongObjectPtr<UTextureRenderTarget2D> renderTarget = *renderTargetPtr;
+
+            renderTarget->ResizeTarget( w, h );
+            renderTarget->UpdateResource();
+            renderTarget->UpdateResourceImmediate();
+        }
+
+        TStrongObjectPtr<UTextureRenderTarget2D> renderTarget = mRenderTargets.FindChecked( iTexture );
+
+        RefreshTextureRenderTarget( iTexture, renderTarget.Get() );
+
+        //-
+
+        // Create or get the corresponding brush of the texture (initialized with the corresponding render target)
+        FSlateImageBrush** textureBrushPtr = mTextureBrushes.Find( iTexture );
+        if( !textureBrushPtr )
+        {
+            FSlateImageBrush* textureBrush = new FSlateImageBrush( renderTarget.Get(), FVector2f( renderTarget->GetSurfaceWidth(), renderTarget->GetSurfaceHeight() ) );
+
+            mTextureBrushes.Add( iTexture, textureBrush );
+        }
+        else
+        {
+            FSlateImageBrush* textureBrush = *textureBrushPtr;
+
+            textureBrush->SetImageSize( FVector2f( renderTarget->GetSurfaceWidth(), renderTarget->GetSurfaceHeight() ) );
+        }
+
+        FSlateImageBrush* textureBrush = mTextureBrushes.FindChecked( iTexture );
 
         contentWidget = SNew(SScaleBox)
             .HAlign(HAlign_Left)
@@ -141,7 +308,17 @@ SOdysseyFlipbookTimelineTrack::CreateFrameContent(UTexture2D* iTexture)
                 .WidthOverride(w)
                 .HeightOverride(h)
                 [
-                    thumbnailWidget.ToSharedRef()
+                    SNew( SOverlay )
+                    + SOverlay::Slot()
+                    [
+                        SNew( SImage )
+                        .Image( mCheckerboardBrush )
+                    ]
+                    + SOverlay::Slot()
+                    [
+                        SNew( SImage )
+                        .Image( textureBrush )
+                    ]
                 ]
             ];
     }

@@ -5,11 +5,14 @@
 
 #include "SOdysseyFlipbookTimelineTrackEvents.h"
 #include "PaperFlipbook.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "OdysseyRenderingAbility.h"
 
 class SOdysseyFlipbookTimelineFrameList;
 class SOdysseyFlipbookTimelineFrame;
 class FOdysseyPainterEditorFlipbookListener;
 class UPaperFlipbook;
+struct FSlateImageBrush;
 
 class SOdysseyFlipbookTimelineTrack : public SCompoundWidget
 {
@@ -79,13 +82,19 @@ private:
     void OnAssetSelected(const FAssetData& AssetData, int32 iFrameIndex);
     void OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture);
 
+    void OnRenderingChanged( const FOdysseyRenderingChangedEvent& iEvent );
+    void RefreshTextureRenderTarget( UTexture2D* iTexture, UTextureRenderTarget2D* iRenderTarget );
+    void CreateCheckerboardTexture();
+
 private:
     UPaperFlipbook* mFlipbook;
     TUniquePtr<FOdysseyPainterEditorFlipbookListener> mListener;
     TAttribute<float>     mFrameSize;
     TAttribute<FOdysseyTextureConfiguration> mTextureConfiguration;
     TSharedPtr<SOdysseyFlipbookTimelineFrameList> mFrameList;
-    TSharedPtr<FAssetThumbnailPool> mAssetThumbnailPool;
+    TMap<UTexture2D*, TStrongObjectPtr<UTextureRenderTarget2D>> mRenderTargets;
+    TMap<UTexture2D*, FSlateImageBrush*> mTextureBrushes;
+    FSlateImageBrush* mCheckerboardBrush;
     TSharedPtr<FUICommandList> mFrameCommandList; //List of commands we can use on a frame
     /* FOnStructureChanged mOnStructureChanged; */
     FOnFlipbookChanged mOnFlipbookChanged;
