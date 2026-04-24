@@ -37,6 +37,8 @@ UArianeEditorLayerDrawingView::PostEditChangeLayerProperty( UArianeLayer* Layer
 
     if( DrawingLayer )
     {
+        DrawingLayer->Modify();
+
         if( PropertyName == GET_MEMBER_NAME_CHECKED( UArianeEditorLayerDrawingView, DrawingOrigin ) )
         {
             DrawingLayer->SetDrawingOrigin( DrawingOrigin );

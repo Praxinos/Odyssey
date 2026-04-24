@@ -570,7 +570,8 @@ UArianeEditorTool::GetActiveViewportClient()
 {
     FViewport* ActiveViewport = GEditor->GetActiveViewport();
 
-    return static_cast<FEditorViewportClient*>(ActiveViewport->GetClient());
+    // ActiveViewport can be nullptr when closing the editor
+    return ActiveViewport ? static_cast<FEditorViewportClient*>(ActiveViewport->GetClient()) : nullptr;
 }
 
 // IHoverBehaviorTarget interface override
