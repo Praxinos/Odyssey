@@ -24,76 +24,62 @@ FOdysseyStylusInputHandler::~FOdysseyStylusInputHandler()
     UOdysseyStylusInputSettings::OnStylusInputDriverChanged.Remove(mOnStylusInputDriverChanged);
 }
 
-bool FOdysseyStylusInputHandler::RegisterWindow(const TSharedRef<SWidget>& Widget)
+bool FOdysseyStylusInputHandler::RegisterWindow(const TSharedRef<SWidget>& iWidget)
 {
-    TSharedPtr<SWindow> Window = FSlateApplication::Get().FindWidgetWindow(Widget);
-    if (!Window)
+    TSharedPtr<SWindow> window = FSlateApplication::Get().FindWidgetWindow(iWidget);
+    if ( !window )
     {
-        UE_LOG(LogTemp, Display, TEXT("NoWindow"));
         return false;
     }
 
-    if( StylusInputWindow.Pin().Get() == Window.Get() )
+    if( mStylusInputWindow.Pin().Get() == window.Get() )
     {
         return false;
     }
 
     UnregisterWindow();
 
-    UE_LOG(LogTemp, Display, TEXT("Preregister"));
-
     const UOdysseyStylusInputSettings* settings = GetDefault<UOdysseyStylusInputSettings>();
     FName selectedAPI = settings->StylusInputDriver;
-    IStylusInputInstance* InputInstance = CreateInstance(*Window, selectedAPI, false);
+    IStylusInputInstance* inputInstance = CreateInstance(*window, selectedAPI, false);
 
-    UE_LOG(LogTemp, Display, TEXT("PreInstance, %s"), *(selectedAPI.ToString()))
+    //UE_LOG(LogTemp, Display, TEXT("PreInstance, %s"), *(selectedAPI.ToString()))
 
-    if (!InputInstance)
+    if (!inputInstance)
     {
         return false;
     }
-    UE_LOG(LogTemp, Display, TEXT("PostInstance"))
 
+    inputInstance->AddEventHandler(this, EEventHandlerThread::OnGameThread);
 
-    InputInstance->AddEventHandler(this, EEventHandlerThread::OnGameThread);
-
-    StylusInputWindow = Window;
-    StylusInputInstance = InputInstance;
-    UE_LOG(LogTemp, Display, TEXT("Postregister"))
+    mStylusInputWindow = window;
+    mStylusInputInstance = inputInstance;
 
     return true;
 }
 
-bool FOdysseyStylusInputHandler::RegisterWindow(TSharedPtr<SWindow> Window)
+bool FOdysseyStylusInputHandler::RegisterWindow(TSharedPtr<SWindow> iWindow)
 {
     UnregisterWindow();
 
-    if (!Window)
+    if (!iWindow)
     {
-        UE_LOG(LogTemp, Display, TEXT("NoWindow"));
         return false;
     }
-
-    UE_LOG(LogTemp, Display, TEXT("Preregister"));
 
     const UOdysseyStylusInputSettings* settings = GetDefault<UOdysseyStylusInputSettings>();
     FName selectedAPI = settings->StylusInputDriver;
-    IStylusInputInstance* InputInstance = CreateInstance(*Window, selectedAPI, false);
+    IStylusInputInstance* inputInstance = CreateInstance(*iWindow, selectedAPI, false);
 
-    UE_LOG(LogTemp, Display, TEXT("PreInstance, %s"), *(selectedAPI.ToString()))
-
-    if (!InputInstance)
+    if (!inputInstance)
     {
         return false;
     }
-    UE_LOG(LogTemp, Display, TEXT("PostInstance"))
 
+    inputInstance->AddEventHandler(this, EEventHandlerThread::OnGameThread);
 
-    InputInstance->AddEventHandler(this, EEventHandlerThread::OnGameThread);
-
-    StylusInputWindow = Window;
-    StylusInputInstance = InputInstance;
-    UE_LOG(LogTemp, Display, TEXT("Postregister"))
+    mStylusInputWindow = iWindow;
+    mStylusInputInstance = inputInstance;
 
     return true;
 }
@@ -101,13 +87,12 @@ bool FOdysseyStylusInputHandler::RegisterWindow(TSharedPtr<SWindow> Window)
 
 bool FOdysseyStylusInputHandler::UnregisterWindow()
 {
-    if (StylusInputInstance || StylusInputWindow.IsValid())
+    if (mStylusInputInstance || mStylusInputWindow.IsValid())
     {
-        StylusInputInstance->RemoveEventHandler(this);
-        ReleaseInstance(StylusInputInstance);
-        StylusInputInstance = nullptr;
-        StylusInputWindow = nullptr;
-        UE_LOG(LogTemp, Display, TEXT("Unregister"))
+        mStylusInputInstance->RemoveEventHandler(this);
+        ReleaseInstance(mStylusInputInstance);
+        mStylusInputInstance = nullptr;
+        mStylusInputWindow = nullptr;
         return true;
     }
     return false;
@@ -118,46 +103,36 @@ FString FOdysseyStylusInputHandler::GetName()
     return "OdysseyStylusInputHandler";
 }
 
-void FOdysseyStylusInputHandler::PrintPacket(const UE::StylusInput::FStylusInputPacket& Packet)
+void FOdysseyStylusInputHandler::PrintPacket(const UE::StylusInput::FStylusInputPacket& iPacket)
 {
     UE_LOG(LogTemp, Display, TEXT("-------------------"))
-    UE_LOG(LogTemp, Display, TEXT("TabletContextID %d"), Packet.TabletContextID)
-    UE_LOG(LogTemp, Display, TEXT("CursorID %d"), Packet.CursorID)
-    UE_LOG(LogTemp, Display, TEXT("Type %d"), Packet.Type)
-    UE_LOG(LogTemp, Display, TEXT("PenStatus %d"), Packet.PenStatus)
-    UE_LOG(LogTemp, Display, TEXT("X %lf"), Packet.X)
-    UE_LOG(LogTemp, Display, TEXT("Y %lf"), Packet.Y)
-    UE_LOG(LogTemp, Display, TEXT("Z %lf"), Packet.Z)
-    UE_LOG(LogTemp, Display, TEXT("NormalPressure %lf"), Packet.NormalPressure)
-    UE_LOG(LogTemp, Display, TEXT("TimerTick %d"), Packet.TimerTick)
+    UE_LOG(LogTemp, Display, TEXT("TabletContextID %d"), iPacket.TabletContextID)
+    UE_LOG(LogTemp, Display, TEXT("CursorID %d"), iPacket.CursorID)
+    UE_LOG(LogTemp, Display, TEXT("Type %d"), iPacket.Type)
+    UE_LOG(LogTemp, Display, TEXT("PenStatus %d"), iPacket.PenStatus)
+    UE_LOG(LogTemp, Display, TEXT("X %lf"), iPacket.X)
+    UE_LOG(LogTemp, Display, TEXT("Y %lf"), iPacket.Y)
+    UE_LOG(LogTemp, Display, TEXT("Z %lf"), iPacket.Z)
+    UE_LOG(LogTemp, Display, TEXT("NormalPressure %lf"), iPacket.NormalPressure)
+    UE_LOG(LogTemp, Display, TEXT("TimerTick %d"), iPacket.TimerTick)
 }
 
-const IStylusInputTabletContext* FOdysseyStylusInputHandler::GetTabletContext(IStylusInputInstance* Instance, uint32 TabletContextID)
+const IStylusInputTabletContext* FOdysseyStylusInputHandler::GetTabletContext(IStylusInputInstance* iInstance, uint32 iTabletContextID)
 {
-    if (!Instance)
+    if (!iInstance)
     {
         return nullptr;
     }
 
-    const TSharedPtr<IStylusInputTabletContext>* TabletContext = TabletContexts.Find(TabletContextID);
-    if (!TabletContext)
-    {
-        if (const TSharedPtr<IStylusInputTabletContext>& NewTabletContext = Instance->GetTabletContext(TabletContextID))
-        {
-            // We currently assume that TabletContextIDs are unique across all instances.
-            TabletContext = &TabletContexts.Emplace(TabletContextID, NewTabletContext);
-        }
-    }
+    const TSharedPtr<IStylusInputTabletContext> tabletContext = iInstance->GetTabletContext(iTabletContextID);
 
-    return TabletContext ? TabletContext->Get() : nullptr;
+    return tabletContext ? tabletContext.Get() : nullptr;
 }
 
 void FOdysseyStylusInputHandler::OnStylusInputDriverChanged(FName iStylusInputDriver)
 {
-    UE_LOG(LogTemp, Display, TEXT("STYLUS INPUT CHANGED"))
-
-    TSharedPtr<SWindow> Window = StylusInputWindow.Pin();
-    RegisterWindow( Window ); //Registers the previous Window with the new API
+    TSharedPtr<SWindow> window = mStylusInputWindow.Pin();
+    RegisterWindow( window ); //Registers the previous Window with the new API
 }
 
 #undef LOCTEXT_NAMESPACE

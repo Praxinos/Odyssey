@@ -922,7 +922,7 @@ IOdysseyViewportDrawingEditorAdapter::StylusPacketToRay(const UE::StylusInput::F
     if (isOutsideTexture)
         return FOdysseyRay();
 
-    const UE::StylusInput::IStylusInputTabletContext* tabletContext = GetTabletContext(StylusInputInstance, iPacket.TabletContextID);
+    const UE::StylusInput::IStylusInputTabletContext* tabletContext = GetTabletContext(mStylusInputInstance, iPacket.TabletContextID);
     FOdysseyRay strokeRay;
     GetRayParamsFromViewportPosition(viewportClient, positionInViewport.X, positionInViewport.Y, &strokeRay.mRayOrigin, &strokeRay.mRayDirection);
 

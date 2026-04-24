@@ -432,11 +432,16 @@ FOdysseyPainterEditorViewportClient::InputKey( const FInputKeyEventArgs& iEventA
             {
                 MouseDown(point_in_viewport);
             }
+            else
+            {
+                ReadStylusInput();
+            }
         }
         else if( iEventArgs.Event == EInputEvent::IE_Released)
         {
             if (mIsRecordingStylus)
             {
+                ReadStylusInput();
                 StopStylusInputRecord();
             }
             MouseUp(point_in_viewport);
@@ -466,7 +471,10 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
     //This is called when the mouse is down and moving in the viewport
     //The viewport has already captured the mouse
     if (mIsRecordingStylus)
+    {
+        ReadStylusInput();
         return;
+    }
 
     //HUD
     if (mCurrentHUDElement)
@@ -603,9 +611,10 @@ FOdysseyPainterEditorViewportClient::MouseDown(const FOdysseyPoint& iPoint)
     if (mIsMouseDown)
         return;
 
+    TSharedPtr<SWindow> ActiveWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
+    UE_LOG(LogTemp, Display, TEXT("active: %p, stylus: %p"), ActiveWindow.Get(), mStylusInputWindow.Pin().Get());
+
     mIsMouseDown = true;
-    static int count = 0;
-    UE_LOG(LogTemp, Display, TEXT("MOUSE DOWN %d: %lf, %lf"), count++, iPoint.x, iPoint.y);
 
     //If we don't have a surface, then we don't interact with anything
     UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
@@ -676,7 +685,6 @@ FOdysseyPainterEditorViewportClient::MouseUp(const FOdysseyPoint& iPoint)
     if (!mIsMouseDown)
         return;
 
-    UE_LOG(LogTemp, Display, TEXT("MOUSE UP"));
     mIsMouseDown = false;
 
     //If we don't have a surface, then we don't interact with anything
@@ -735,8 +743,6 @@ FOdysseyPainterEditorViewportClient::MouseDrag(const FOdysseyPoint& iPoint)
 {
     if (!mIsMouseDown)
         return;
-
-    UE_LOG(LogTemp, Display, TEXT("MOUSE DRAG %lf, %lf"), iPoint.x, iPoint.y);
 
     //If we don't have a surface, then we don't interact with anything
     UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
@@ -887,13 +893,17 @@ FOdysseyPoint FOdysseyPainterEditorViewportClient::StylusPacketToPoint(const UE:
     TSharedPtr< SViewport > viewportWidget = odysseyViewportWidget->GetViewportWidget();
     TSharedPtr<FOdysseySceneViewport> viewport = odysseyViewportWidget->GetViewport();
 
-    TSharedPtr<SWindow> Window = FSlateApplication::Get().FindWidgetWindow(viewportWidget->AsShared());
+
+    if( !mStylusInputWindow.IsValid() )
+        return FOdysseyPoint();
+
+    TSharedPtr<SWindow> Window = mStylusInputWindow.Pin();
 
     float scale_dpi = viewport->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
     FVector2D position_in_viewport = viewportWidget->GetCachedGeometry().AbsoluteToLocal( FVector2D( iPacket.X, iPacket.Y ) ) * scale_dpi;
     position_in_viewport += Window->GetRectInScreen().GetTopLeft();
 
-    const UE::StylusInput::IStylusInputTabletContext* tabletContext = GetTabletContext(StylusInputInstance, iPacket.TabletContextID);
+    const UE::StylusInput::IStylusInputTabletContext* tabletContext = GetTabletContext(mStylusInputInstance, iPacket.TabletContextID);
     FOdysseyPoint point;
 
     if( tabletContext )
@@ -926,7 +936,6 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput()
         return;
 
     UE::StylusInput::FStylusInputPacket packet;
-    UE_LOG(LogTemp, Display, TEXT("Dequeue %d"), PacketQueue.Num());
     while (PacketQueue.Dequeue(packet))
     {
         FOdysseyPoint point = StylusPacketToPoint(packet);
@@ -949,21 +958,13 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput()
             //MouseMove
             MouseDrag(point);
             mLastStylusEventIndex = packet.SerialNumber;
-            //CapturedMouseMoveWithStrokePoint( point );
         }
     }
 }
 
-void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylusInputPacket& Packet, UE::StylusInput::IStylusInputInstance* Instance)
+void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylusInputPacket& iPacket, UE::StylusInput::IStylusInputInstance* iInstance)
 {
-    /*TSharedPtr<SWindow> ActiveWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
-    if( ActiveWindow != StylusInputWindow )
-    {
-        UE_LOG(LogTemp, Display, TEXT("Not Active"));
-        return;
-    }*/
-
-    //PrintPacket(Packet);
+    //PrintPacket(iPacket);
     mStylusLastEventTime = std::chrono::steady_clock::now();
 
     TSharedPtr<SOdysseyViewport> odysseyViewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
@@ -976,20 +977,19 @@ void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylu
         return;
 
 
-    if( Packet.Type == UE::StylusInput::EPacketType::StylusDown )
+    if( iPacket.Type == UE::StylusInput::EPacketType::StylusDown )
     {
         StartStylusInputRecord();
         mStylusIsDown = true;
     }
     if(mIsRecordingStylus)
     {
-        PacketQueue.Enqueue(Packet);
+        PacketQueue.Enqueue(iPacket);
         mLastStylusEventIndex = 0;
-
         //PrintPacket(Packet);
-        ReadStylusInput();
+        //ReadStylusInput();
     }
-    if (Packet.Type == UE::StylusInput::EPacketType::StylusUp)
+    if (iPacket.Type == UE::StylusInput::EPacketType::StylusUp)
     {
         mStylusIsDown = false;
         StopStylusInputRecord();

@@ -1061,7 +1061,6 @@ UOdysseyPainterEditorRasterDrawingTool::InterpolateTo(const FOdysseyPoint& iPoin
         mLastPoint = newPoints[i];
     }
 
-    UE_LOG(LogTemp, Display, TEXT("newPoints: %d"), newPoints.Num());
     return newPoints;
 }
 

@@ -26,27 +26,26 @@ public:
      * @param Widget The widget whose window is to be registered.
      * @return True if the window was registered, false if the window was invalid or was previously registered.
      */
-    bool RegisterWindow(const TSharedRef<SWidget>& Widget);
-    bool RegisterWindow(TSharedPtr<SWindow> Window); //Same but Window version
+    bool RegisterWindow(const TSharedRef<SWidget>& iWidget);
+    bool RegisterWindow(TSharedPtr<SWindow> iWindow); //Same but Window version
 
     bool UnregisterWindow();
 
     // IStylusInputEventHandler implementation
     virtual FString GetName() override;
 
-    void PrintPacket(const UE::StylusInput::FStylusInputPacket& Packet);
+    void PrintPacket(const UE::StylusInput::FStylusInputPacket& iPacket);
 
 public:
     TSpscQueue<UE::StylusInput::FStylusInputPacket> PacketQueue;
 
 protected:
-    const UE::StylusInput::IStylusInputTabletContext* GetTabletContext(UE::StylusInput::IStylusInputInstance* Instance, uint32 TabletContextID);
+    const UE::StylusInput::IStylusInputTabletContext* GetTabletContext(UE::StylusInput::IStylusInputInstance* iInstance, uint32 iTabletContextID);
 
     void OnStylusInputDriverChanged(FName iStylusInputDriver);
 
-    TMap<uint32, TSharedPtr<UE::StylusInput::IStylusInputTabletContext>> TabletContexts;
-    UE::StylusInput::IStylusInputInstance* StylusInputInstance = nullptr;
-    TWeakPtr<SWindow> StylusInputWindow;
+    UE::StylusInput::IStylusInputInstance* mStylusInputInstance = nullptr;
+    TWeakPtr<SWindow> mStylusInputWindow;
 
     FDelegateHandle mOnStylusInputDriverChanged;
 
