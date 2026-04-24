@@ -145,6 +145,10 @@ SArianeEditorLayerStackPanel::Construct(const FArguments& InArgs, FArianeEditor*
     ChildSlot
     [
         SNew(SVerticalBox)
+        .Visibility_Lambda( [InEditor]() -> EVisibility
+            {
+                return InEditor->GetCurrentPainting3DComponent() ? EVisibility::Visible : EVisibility::Hidden;
+            } )
         + SVerticalBox::Slot()
         .AutoHeight()
         [

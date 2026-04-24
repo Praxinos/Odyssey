@@ -45,6 +45,7 @@ UArianeEditorPathDrawingTool::Activate()
 
     Super::Activate();
 
+    // ViewportClient can be nullptr when closing the editor
     if( ViewportClient )
     {
         ViewportClient->EngineShowFlags.SetSelectionOutline(false);
@@ -59,6 +60,7 @@ UArianeEditorPathDrawingTool::Inactivate()
 {
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
 
+    // ViewportClient can be nullptr when closing the editor
     if( ViewportClient )
     {
         ViewportClient->EngineShowFlags.SetSelectionOutline(true);
