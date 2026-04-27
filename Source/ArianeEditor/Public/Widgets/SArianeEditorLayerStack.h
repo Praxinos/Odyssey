@@ -80,8 +80,8 @@ class ARIANEEDITOR_API SArianeEditorLayerStack
         //void OnPainting3DComponentChanged();
         void OnPre3DPaintingComponentSelectionChanged();
         void OnPost3DPaintingComponentSelectionChanged();
-        void UnregisterDelegates();
-        void RegisterDelegates();
+        void UnbindDelegates();
+        void BindDelegates();
         void OnPostLayerStackChanged();
         void OnPostCurrentLayerChanged();
         void ModifyLayerStackAndSelectedLayers( UArianeLayerStack* LayerStack

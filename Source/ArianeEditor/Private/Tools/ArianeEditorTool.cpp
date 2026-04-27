@@ -220,6 +220,7 @@ UArianeEditorTool::OnMouseClick( FEditorViewportClient* iViewportClient
     return false;
 }
 
+/* commented out: FSceneView is not an allocated pointer, thus should be used on scope only.
 FSceneView*
 UArianeEditorTool::GetSceneView( FEditorViewportClient* iViewportClient )
 {
@@ -229,6 +230,7 @@ UArianeEditorTool::GetSceneView( FEditorViewportClient* iViewportClient )
                                                                             .SetRealtimeUpdate( iViewportClient->IsRealtime() ) );
     return iViewportClient->CalcSceneView( &ViewFamily );
 }
+*/
 
 void
 UArianeEditorTool::PopupContextMenu()
@@ -390,6 +392,7 @@ UArianeEditorTool::PostTransacted( const FTransactionObjectEvent& iTransactionEv
 void
 UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, UArianeLayerDrawing* DrawingLayer )
 {
+    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
     IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
     FPrimitiveDrawInterface* PDI = RenderAPI->GetPrimitiveDrawInterface();
     ULineBatchComponent* LineBatcher = GetWorld()->GetLineBatcher( UWorld::ELineBatcherType::World );
@@ -435,28 +438,28 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
 
         case EArianeLayerDrawingOrientation::View :
         {
-/*
-            FVector ZVector = FVector( 0.0f, 0.0f, 1.0f );
-            IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
-            FViewCameraState CameraState;
 
-            QueriesAPI->GetCurrentViewState( CameraState );
-
-            FVector CameraDirection = CameraState.Orientation.GetForwardVector();
-            FQuat RotationQuat = FQuat::FindBetweenVectors( ZVector, -CameraDirection );
-
-            WorldMatrix = RotationQuat.ToMatrix() * LayerMatrix ;
-
-            FVector PlaneWorldYVector = WorldMatrix.TransformVector( FVector( 0.0f, 1.0f, 0.0f ) );
-            FVector CameraRight = CameraState.Orientation.GetRightVector();
-            FQuat ZRotationQuat = FQuat::FindBetweenVectors( PlaneWorldYVector, CameraRight );
-
-            WorldMatrix = ZRotationQuat.ToMatrix() * WorldMatrix ;
-*/
-            // --- Begin this was AI generated because the code above did not work and I did not understand why.
+/* Commented out: CameraState isn't up to date at first. We need to click at least once in the viewport, which is not
+ * what we want. we use FSceneView instead
             FVector CamForward = CameraState.Orientation.GetForwardVector();
             FVector CamUp = CameraState.Orientation.GetUpVector();
             FVector CamRight = CameraState.Orientation.GetRightVector();
+            FMatrix ViewAlignedRot = FMatrix( CamUp, CamRight, -CamForward, FVector::ZeroVector );
+            FTransform LayerTranslationTransform;
+
+            LayerTranslationTransform.SetTranslation( DrawingLayer->GetComponentLocation() );
+
+            WorldMatrix = ViewAlignedRot * LayerTranslationTransform.ToMatrixNoScale();
+*/
+            FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
+                                                                                    , ViewportClient->GetScene()
+                                                                                    , ViewportClient->EngineShowFlags ) );
+            // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
+            FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
+
+            FVector CamForward = View->GetViewDirection();
+            FVector CamUp = View->GetViewUp();
+            FVector CamRight = View->GetViewRight();
             FMatrix ViewAlignedRot = FMatrix( CamUp, CamRight, -CamForward, FVector::ZeroVector );
             FTransform LayerTranslationTransform;
 
@@ -522,7 +525,6 @@ UArianeEditorTool::DrawHUDCircle(  FCanvas* Canvas, double X, double Y, double R
     FVector Point0 =  FVector ( X + FMath::Cos( Point0Angle ) * Radius,
                                 Y + FMath::Sin( Point0Angle ) * Radius,
                                 0.0f );
-    FSceneView* View = GetSceneView( GetActiveViewportClient() );
     FCanvasLineItem Line;
 
     Line.LineThickness = 1.0f;

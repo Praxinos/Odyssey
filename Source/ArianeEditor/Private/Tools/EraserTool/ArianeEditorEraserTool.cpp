@@ -192,6 +192,10 @@ UArianeEditorEraserTool::VertexToWaypoint( FEditorViewportClient* ViewportClient
 
     if( AlphaValue == 0 ) // vertex in dark zone, keep it
     {
+        ScreenCoords = ProjectWorldToScreen( ViewportClient
+                                           , View
+                                           , WorldTransform.TransformPosition( Vertex->GetPosition() ) );
+
         OutWayPoints.Emplace( Vertex
                             , FWayPoint::OutsideErasureArea
                             | FWayPoint::Original );
@@ -346,7 +350,13 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
     TArray<FColor> Pixels;
     uint32 Width = CanvasRenderTarget->SizeX;
     uint32 Height = CanvasRenderTarget->SizeY;
-    FSceneView* View = GetSceneView( ViewportClient );
+    //FSceneView* View = GetSceneView( ViewportClient );
+
+    FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
+                                                                            , ViewportClient->GetScene()
+                                                                            , ViewportClient->EngineShowFlags )
+                                                                            /*.SetRealtimeUpdate( iViewportClient->IsRealtime() )*/ );
+    FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
 
     RTResource->ReadPixels( Pixels
                           , FReadSurfaceDataFlags(RCM_UNorm)

@@ -104,19 +104,22 @@ SArianeEditorLayerStackPanel::OnPostLayerSelectionChanged()
     CurrentView = nullptr;
     LayerDetailsView->SetObject( nullptr );
 
-    EditedLayer->GetOnTransformChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnTransformChanged );
-
-    if( EditedLayer->GetClass() == UArianeLayerDrawing::StaticClass() )
+    if( EditedLayer )
     {
-        CurrentView = LayerDrawingView;
-    }
-    else
-    {
-        CurrentView = LayerView;
-    }
+        EditedLayer->GetOnTransformChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnTransformChanged );
 
-    CurrentView->ImportLayerProperties( EditedLayer );
-    LayerDetailsView->SetObject( CurrentView );
+        if( EditedLayer->GetClass() == UArianeLayerDrawing::StaticClass() )
+        {
+            CurrentView = LayerDrawingView;
+        }
+        else
+        {
+            CurrentView = LayerView;
+        }
+
+        CurrentView->ImportLayerProperties( EditedLayer );
+        LayerDetailsView->SetObject( CurrentView );
+    }
 }
 
 void
@@ -189,7 +192,17 @@ SArianeEditorLayerStackPanel::NewLayer()
 
     if( CurrentPainting3DComponent )
     {
-        CurrentPainting3DComponent->GetLayerStack()->CreateDrawingLayer( nullptr );
+        GEditor->BeginTransaction(LOCTEXT("ariane-layer-stack-panel.new-layer","New Layer"));
+
+        CurrentPainting3DComponent->GetLayerStack()->Modify();
+        CurrentPainting3DComponent->GetLayerStack()->GetRootFolder()->Modify();
+
+        UArianeLayerDrawing* DrawingLayer = CurrentPainting3DComponent->GetLayerStack()->CreateDrawingLayer( nullptr, true );
+
+        CurrentPainting3DComponent->GetLayerStack()->ClearLayerSelection( false );
+        CurrentPainting3DComponent->GetLayerStack()->SelectLayer( DrawingLayer, true, false );
+
+        GEditor->EndTransaction();
     }
 
     return FReply::Handled();

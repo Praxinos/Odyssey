@@ -38,6 +38,26 @@ UArianeLayerStack::GetRootFolder()
     return RootFolder;
 }
 
+#if WITH_EDITOR
+void
+UArianeLayerStack::PreEditUndo()
+{
+    // trigger an event
+    OnPreLayerStackChanged.Broadcast();
+
+    Super::PreEditUndo();
+}
+
+void
+UArianeLayerStack::PostEditUndo()
+{
+    Super::PostEditUndo();
+
+    // trigger an event
+    OnPostLayerStackChanged.Broadcast();
+}
+#endif
+
 void
 UArianeLayerStack::PostLoad()
 {
@@ -202,7 +222,7 @@ UArianeLayerStack::GetFirstSelectedDrawingLayer()
 }
 
 UArianeLayerDrawing*
-UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder )
+UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder, bool bTriggerEvent )
 {
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
@@ -212,18 +232,19 @@ UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder )
 
     //NewDrawingLayer->SetupAttachment( ParentLayerFolder );
     //NewDrawingLayer->RegisterComponent();
-
-    OnPreLayerStackChanged.Broadcast();
+    if( bTriggerEvent )
+        OnPreLayerStackChanged.Broadcast();
 
     ParentLayerFolder->AddChildLayer( NewDrawingLayer );
 
-    OnPostLayerStackChanged.Broadcast();
+    if( bTriggerEvent )
+        OnPostLayerStackChanged.Broadcast();
 
     return NewDrawingLayer;
 }
 
 UArianeLayerFolder*
-UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder )
+UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder, bool bTriggerEvent )
 {
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
@@ -235,11 +256,13 @@ UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder )
     NewLayerFolder->SetupAttachment( ParentLayerFolder );
     NewLayerFolder->RegisterComponent();
 
-    OnPreLayerStackChanged.Broadcast();
+    if( bTriggerEvent )
+        OnPreLayerStackChanged.Broadcast();
 
     ParentLayerFolder->AddChildLayer( NewLayerFolder );
 
-    OnPostLayerStackChanged.Broadcast();
+    if( bTriggerEvent )
+        OnPostLayerStackChanged.Broadcast();
 
     return NewLayerFolder;
 }
