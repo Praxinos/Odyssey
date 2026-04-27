@@ -84,6 +84,9 @@ public:
 
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
     FLinearColor CameraBoundsShadeColor = FLinearColor(0.0, 0.0, 0.0, 0.8);
+
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
+    bool bDisplayPilotingCameraHUD { true };
 };
 
 //---

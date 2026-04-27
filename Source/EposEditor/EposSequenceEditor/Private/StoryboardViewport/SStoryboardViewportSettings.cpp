@@ -51,27 +51,7 @@ SStoryboardViewportSettings::GetMenuContent()
 {
     FMenuBuilder menuBuilder( true, nullptr );
 
-    //
-
-    auto ExecuteDisplayPlaybackTrack = [=]()
-    {
-        GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackTrack = !GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackTrack;
-        GetMutableDefault<UEposSequenceEditorSettings>()->SaveConfig();
-    };
-
-    auto IsDisplayPlaybackTrack = [=]() -> bool
-    {
-        return GetDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackTrack;
-    };
-
-    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-playback-track-label", "Display playback track" ),
-                            LOCTEXT( "storyboard-viewport-settings.display-playback-track-tooltip", "Diplays the playback track under the 3D scene." ),
-                            FSlateIcon(),
-                            FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayPlaybackTrack ),
-                                        FCanExecuteAction(),
-                                        FIsActionChecked::CreateLambda( IsDisplayPlaybackTrack ) ),
-                            NAME_None,
-                            EUserInterfaceActionType::ToggleButton );
+    menuBuilder.BeginSection( NAME_None, LOCTEXT( "storyboard-viewport-settings.section.display.label", "Display" ) );
 
     //
 
@@ -86,7 +66,7 @@ SStoryboardViewportSettings::GetMenuContent()
         return GetDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplaySequenceInfos;
     };
 
-    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-sequence-infos-label", "Display sequence infos" ),
+    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-sequence-infos-label", "Sequence Infos" ),
                             LOCTEXT( "storyboard-viewport-settings.display-sequence-infos-tooltip", "Diplays the sequence infos under the 3D scene." ),
                             FSlateIcon(),
                             FUIAction( FExecuteAction::CreateLambda( ExecuteDisplaySequenceInfos ),
@@ -108,12 +88,34 @@ SStoryboardViewportSettings::GetMenuContent()
         return GetDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayActorControls;
     };
 
-    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-actor-controls-label", "Display actor controls" ),
+    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-actor-controls-label", "Actor Controls" ),
                             LOCTEXT( "storyboard-viewport-settings.display-actor-controls-tooltip", "Diplays the actor controls under the 3D scene." ),
                             FSlateIcon(),
                             FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayActorControls ),
                                         FCanExecuteAction(),
                                         FIsActionChecked::CreateLambda( IsDisplayActorControls ) ),
+                            NAME_None,
+                            EUserInterfaceActionType::ToggleButton );
+
+    //
+
+    auto ExecuteDisplayPlaybackTrack = [=]()
+    {
+        GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackTrack = !GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackTrack;
+        GetMutableDefault<UEposSequenceEditorSettings>()->SaveConfig();
+    };
+
+    auto IsDisplayPlaybackTrack = [=]() -> bool
+    {
+        return GetDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackTrack;
+    };
+
+    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-playback-track-label", "Playback Track" ),
+                            LOCTEXT( "storyboard-viewport-settings.display-playback-track-tooltip", "Diplays the playback track under the 3D scene." ),
+                            FSlateIcon(),
+                            FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayPlaybackTrack ),
+                                        FCanExecuteAction(),
+                                        FIsActionChecked::CreateLambda( IsDisplayPlaybackTrack ) ),
                             NAME_None,
                             EUserInterfaceActionType::ToggleButton );
 
@@ -130,7 +132,7 @@ SStoryboardViewportSettings::GetMenuContent()
         return GetDefault<UEposSequenceEditorSettings>()->ViewportSettings.DisplayPlaybackControls;
     };
 
-    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-playback-controls-label", "Display playback controls" ),
+    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-playback-controls-label", "Playback Controls" ),
                             LOCTEXT( "storyboard-viewport-settings.display-playback-controls-tooltip", "Diplays the playback controls under the 3D scene." ),
                             FSlateIcon(),
                             FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayPlaybackControls ),
@@ -150,7 +152,7 @@ SStoryboardViewportSettings::GetMenuContent()
         return GetDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport;
     };
 
-    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-in-viewport-label", "Display notes in viewport" ),
+    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-in-viewport-label", "Notes in Viewport" ),
                             LOCTEXT( "storyboard-viewport-settings.display-in-viewport-tooltip", "Display the notes at the current frame under the 3D scene." ),
                             FSlateIcon(),
                             FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayNoteInViewport ),
@@ -172,7 +174,7 @@ SStoryboardViewportSettings::GetMenuContent()
         return GetDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay;
     };
 
-    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-as-overlay-label", "Display notes as overlay" ),
+    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-as-overlay-label", "Notes as Overlay" ),
                             LOCTEXT( "storyboard-viewport-settings.display-as-overlay-tooltip", "Display the notes at the current frame on the 3D scene." ),
                             FSlateIcon(),
                             FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayNoteAsOverlay ),
@@ -181,11 +183,13 @@ SStoryboardViewportSettings::GetMenuContent()
                             NAME_None,
                             EUserInterfaceActionType::ToggleButton );
 
+    //---
 
+    menuBuilder.EndSection();
 
+    menuBuilder.BeginSection( NAME_None, LOCTEXT( "storyboard-viewport-settings.section.camera-bounds.label", "Camera" ) );
 
-    /* bool bDisplayCameraBounds { true };
-    FLinearColor CameraBoundsShadeColor = FLinearColor(0.0, 0.0, 0.0, 0.8);*/
+    //---
 
     auto ExecuteDisplayCameraBounds = [=]()
     {
@@ -198,7 +202,7 @@ SStoryboardViewportSettings::GetMenuContent()
         return GetDefault<UEposSequenceEditorSettings>()->ViewportSettings.bDisplayCameraBounds;
     };
 
-    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-camera-bounds-label", "Display Camera Bounds" ),
+    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-camera-bounds-label", "Camera Bounds" ),
                             LOCTEXT( "storyboard-viewport-settings.display-camera-bounds-tooltip", "Display current camera bounds on the 3D scene." ),
                             FSlateIcon(),
                             FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayCameraBounds ),
@@ -207,9 +211,7 @@ SStoryboardViewportSettings::GetMenuContent()
                             NAME_None,
                             EUserInterfaceActionType::ToggleButton );
 
-    /*UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
-    FLinearColor CameraBoundsShadeColor = FLinearColor(0.0, 0.0, 0.0, 0.8);*/
-
+    //-
 
     TSharedPtr<SBox> boxWidget = SNew(SBox);
 
@@ -231,11 +233,37 @@ SStoryboardViewportSettings::GetMenuContent()
 
     menuBuilder.AddWidget(
         boxWidget.ToSharedRef(),
-        LOCTEXT( "storyboard-viewport-settings.camera-bounds-color-label", "Display Camera Bounds" ),
+        LOCTEXT( "storyboard-viewport-settings.camera-bounds-color-label", "Camera Bounds" ),
         false,
         true,
-        LOCTEXT( "storyboard-viewport-settings.camera-bounds-color-tooltip", "Display current camera bounds on the 3D scene." )
+        LOCTEXT( "storyboard-viewport-settings.camera-bounds-color-tooltip", "Modify the color of the current camera bounds on the 3D scene." )
     );
+
+    //-
+
+    auto ExecuteDisplayPilotingCameraHUD = [=]()
+    {
+        GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.bDisplayPilotingCameraHUD = !GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.bDisplayPilotingCameraHUD;
+        GetMutableDefault<UEposSequenceEditorSettings>()->SaveConfig();
+    };
+
+    auto IsDisplayPilotingCameraHUD = [=]() -> bool
+    {
+        return GetDefault<UEposSequenceEditorSettings>()->ViewportSettings.bDisplayPilotingCameraHUD;
+    };
+
+    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-camera-piloting-label", "Camera Piloting" ),
+                            LOCTEXT( "storyboard-viewport-settings.display-camera-piloting-tooltip", "Display camera piloting indication." ),
+                            FSlateIcon(),
+                            FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayPilotingCameraHUD ),
+                                        FCanExecuteAction(),
+                                        FIsActionChecked::CreateLambda( IsDisplayPilotingCameraHUD ) ),
+                            NAME_None,
+                            EUserInterfaceActionType::ToggleButton );
+
+    //---
+
+    menuBuilder.EndSection();
 
     return menuBuilder.MakeWidget();
 }

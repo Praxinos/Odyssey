@@ -78,6 +78,8 @@ public:
 
     FStoryboardViewportZoomController& GetZoomController();
 
+    bool IsPerspectiveViewportCameraCutEnabled() const;
+
 private:
     TWeakPtr<class SStoryboardLevelViewport> StoryboardViewportWidget;
     FStoryboardViewportGeometry ViewportGeometry;
@@ -186,6 +188,8 @@ private:
     void OnSequencerChanged();
 
 private:
+
+    friend FStoryboardLevelViewportClient;
 
     /** Get the sequencer ptr from our current toolkit, if set */
     ISequencer* GetSequencer() const;

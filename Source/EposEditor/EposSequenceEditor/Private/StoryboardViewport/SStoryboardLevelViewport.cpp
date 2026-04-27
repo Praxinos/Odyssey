@@ -351,6 +351,21 @@ FStoryboardLevelViewportClient::FStoryboardLevelViewportClient()
 
 }
 
+
+bool
+FStoryboardLevelViewportClient::IsPerspectiveViewportCameraCutEnabled() const
+{
+    if( !StoryboardViewportWidget.IsValid() )
+        return false;
+
+    ISequencer* sequencer = StoryboardViewportWidget.Pin()->GetSequencer();
+    if( !sequencer )
+        return false;
+
+    return sequencer->IsPerspectiveViewportCameraCutEnabled();
+}
+
+
 FStoryboardViewportZoomController&
 FStoryboardLevelViewportClient::GetZoomController()
 {
