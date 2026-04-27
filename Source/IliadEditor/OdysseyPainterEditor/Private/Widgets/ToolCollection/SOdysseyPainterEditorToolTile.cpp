@@ -443,6 +443,11 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildIconPicker( TSharedRef<S
         }
     }
 
+    filteredBrushesStyleSet.Sort([](const FName& iA, const FName& iB)
+    {
+        return iA.LexicalLess(iB);
+    });
+
     // Wrap box for icon tiles
     TSharedRef<SWrapBox> iconWrapBox =
         SNew(SWrapBox)
