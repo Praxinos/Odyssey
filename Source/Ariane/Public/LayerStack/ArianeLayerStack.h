@@ -36,8 +36,8 @@ public:
     void ClearLayerSelection( bool bTriggerEvent );
     const TArray<UArianeLayer*>& GetSelectedLayers();
     UArianeLayerDrawing* GetFirstSelectedDrawingLayer();
-    UArianeLayerDrawing* CreateDrawingLayer( UArianeLayerFolder* ParentLayerFolder );
-    UArianeLayerFolder* CreateFolderLayer( UArianeLayerFolder* ParentLayerFolder );
+    UArianeLayerDrawing* CreateDrawingLayer( UArianeLayerFolder* ParentLayerFolder, bool bTriggerEvent );
+    UArianeLayerFolder* CreateFolderLayer( UArianeLayerFolder* ParentLayerFolder, bool bTriggerEvent );
     UArianePainting3DComponent* GetPainting3DComponent();
     virtual void OnComponentDestroyed( bool bDestroyingHierarchy ) override;
     void GetLayers( TArray<UArianeLayer*>& Layers );
@@ -51,6 +51,10 @@ public:
     FOnLayerSelectionChanged& OnPreLayerSelectionChangedDelegate();
     FOnLayerSelectionChanged& OnPostLayerSelectionChangedDelegate();
 
+#if WITH_EDITOR
+    void PreEditUndo();
+    void PostEditUndo();
+#endif
 
 protected:
     void SelectLayer_Private( UArianeLayer* Layer, bool bRecurse );

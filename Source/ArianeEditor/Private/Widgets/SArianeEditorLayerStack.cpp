@@ -126,7 +126,7 @@ SArianeEditorLayerStack::Construct( const FArguments& InArgs, FArianeEditor* InE
 }
 
 void
-SArianeEditorLayerStack::UnregisterDelegates()
+SArianeEditorLayerStack::UnbindDelegates()
 {
     UArianePainting3DComponent* CurrentPainting3DComponent = Editor->GetCurrentPainting3DComponent();
 
@@ -143,7 +143,7 @@ SArianeEditorLayerStack::UnregisterDelegates()
 }
 
 void
-SArianeEditorLayerStack::RegisterDelegates()
+SArianeEditorLayerStack::BindDelegates()
 {
     UArianePainting3DComponent* CurrentPainting3DComponent = Editor->GetCurrentPainting3DComponent();
 
@@ -162,13 +162,13 @@ SArianeEditorLayerStack::RegisterDelegates()
 void
 SArianeEditorLayerStack::OnPre3DPaintingComponentSelectionChanged()
 {
-    UnregisterDelegates();
+    UnbindDelegates();
 }
 
 void
 SArianeEditorLayerStack::OnPost3DPaintingComponentSelectionChanged()
 {
-    RegisterDelegates();
+    BindDelegates();
 
     Update();
 }
@@ -182,7 +182,7 @@ SArianeEditorLayerStack::OnPostLayerStackChanged()
 void
 SArianeEditorLayerStack::OnPostCurrentLayerChanged()
 {
-    //Update();
+    Update();
 }
 
 void
@@ -203,15 +203,29 @@ SArianeEditorLayerStack::RenameSelectedItem()
 void
 SArianeEditorLayerStack::DeleteSelectedItem()
 {
-    // no need to create an undo record or do anything if the selection is empty
-    for( TSharedPtr<FArianeEditorLayerRowItem> SelectedItem : SelectedItems )
+    UArianePainting3DComponent* CurrentPainting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if( CurrentPainting3DComponent )
     {
-        UArianeLayer* Layer = SelectedItem->GetLayer();
+        UArianeLayerStack* LayerStack = CurrentPainting3DComponent->GetLayerStack();
 
-        Layer->GetParentFolder()->RemoveChildLayer( Layer );
+        GEditor->BeginTransaction(LOCTEXT("ariane-layer-stack.delete-layer","Delete Layer"));
+
+        LayerStack->Modify();
+
+        // no need to create an undo record or do anything if the selection is empty
+        for( TSharedPtr<FArianeEditorLayerRowItem> SelectedItem : SelectedItems )
+        {
+            UArianeLayer* Layer = SelectedItem->GetLayer();
+
+            Layer->GetParentFolder()->Modify();
+            Layer->GetParentFolder()->RemoveChildLayer( Layer );
+        }
+
+        GEditor->EndTransaction();
+
+        Update();
     }
-
-    Update();
 }
 
 TSharedPtr<SWidget>
@@ -402,7 +416,9 @@ SArianeEditorLayerStack::OnSelectionChanged( TSharedPtr<FArianeEditorLayerRowIte
                                                  , OldSelectedLayers
                                                  , NewSelectedLayers );
 
+                UnbindDelegates();
                 Painting3DComponent->GetLayerStack()->SelectLayers( NewSelectedLayers, true, true, false );
+                BindDelegates();
             }
         }
     }

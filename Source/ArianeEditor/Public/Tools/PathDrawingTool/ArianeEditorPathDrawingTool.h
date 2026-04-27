@@ -68,6 +68,10 @@ protected:
                    , bool bInteractive );
     FVector4 GetDrawingPlane( FEditorViewportClient* iViewportClient
                             , UArianeLayerDrawing* DrawingLayer );
+    void DeprojectFVector2D( FEditorViewportClient* ViewportClient
+                           , const FVector2D& PointerCoods
+                           , FVector& OutOrigin
+                           , FVector& OutDirection );
 
 public:
     UPROPERTY( EditAnywhere

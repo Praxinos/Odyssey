@@ -73,7 +73,7 @@ UArianeEditorPathDrawingTool::Inactivate()
 }
 
 bool
-UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* iViewportClient
+UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
                                          , const FKey& iKey
                                          , const FArianePointerState& PointerState
                                          , bool iRepeat )
@@ -104,7 +104,7 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* iViewportClien
                 EditedPath->SetColor( ueColor );
                 EditedPath->SetLineType( LineType );
 
-                PlotVertex( iViewportClient, PointerState, true );
+                PlotVertex( ViewportClient, PointerState, true );
             }
         }
 
@@ -115,7 +115,7 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* iViewportClien
 }
 
 void
-UArianeEditorPathDrawingTool::OnMouseHover( FEditorViewportClient* iViewportClient
+UArianeEditorPathDrawingTool::OnMouseHover( FEditorViewportClient* ViewportClient
                                           , const FArianePointerState& State )
 {
 
@@ -173,7 +173,7 @@ UArianeEditorPathDrawingTool::Render(IToolsContextRenderAPI* RenderAPI)
 }
 
 FVector4
-UArianeEditorPathDrawingTool::GetDrawingPlane( FEditorViewportClient* iViewportClient
+UArianeEditorPathDrawingTool::GetDrawingPlane( FEditorViewportClient* ViewportClient
                                              , UArianeLayerDrawing* DrawingLayer )
 {
     IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
@@ -216,12 +216,16 @@ UArianeEditorPathDrawingTool::GetDrawingPlane( FEditorViewportClient* iViewportC
 }
 
 void
-UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
+UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* ViewportClient
                                         , const FArianePointerState& PointerState
                                         , bool bInteractive )
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-    FSceneView* View = GetSceneView( iViewportClient );
+    FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
+                                                                            , ViewportClient->GetScene()
+                                                                            , ViewportClient->EngineShowFlags ) );
+    // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
+    FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
     double Radius = bPressureSensitivity ? ( Size * 0.5f * PointerState.Pressure )
                                          : ( Size * 0.5f );
 
@@ -234,10 +238,17 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
         {
             const FTransform& LayerWorldTransform = DrawingLayer->GetComponentTransform();
             // note: we could do that at MouseDown
-            FVector4 DrawingPlane = GetDrawingPlane( iViewportClient, DrawingLayer );
+            FVector4 DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
             FVector RayOrigin, RayDirection;
             FVector IntersectAt;
 
+/*
+            DeprojectFVector2D( ViewportClient
+                              , FVector2D( PointerState.ViewportX
+                                          , PointerState.ViewportY )
+                              , RayOrigin
+                              , RayDirection );
+*/
             View->DeprojectFVector2D( FVector2D( PointerState.ViewportX
                                                , PointerState.ViewportY )
                                     , RayOrigin
@@ -268,20 +279,20 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
 }
 
 bool
-UArianeEditorPathDrawingTool::OnMouseDrag( FEditorViewportClient* iViewportClient
+UArianeEditorPathDrawingTool::OnMouseDrag( FEditorViewportClient* ViewportClient
                                          , const FKey& iKey
                                          , const FArianePointerState& PointerState )
 {
     if( iKey == EKeys::LeftMouseButton )
     {
-        PlotVertex( iViewportClient, PointerState, true );
+        PlotVertex( ViewportClient, PointerState, true );
     }
 
     return false;
 }
 
 bool
-UArianeEditorPathDrawingTool::OnMouseUp( FEditorViewportClient* iViewportClient
+UArianeEditorPathDrawingTool::OnMouseUp( FEditorViewportClient* ViewportClient
                                        , const FKey& iKey
                                        , const FArianePointerState& PointerState )
 {

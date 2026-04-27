@@ -115,7 +115,7 @@ protected:
     void PopupContextMenu();
     TSharedPtr<SWidget> CreateContextMenu();
     virtual void ExtendContextMenu( FMenuBuilder& menu );
-    FSceneView* GetSceneView( FEditorViewportClient* iViewportClient );
+    //GetSceneViewFSceneView* GetSceneView( FEditorViewportClient* iViewportClient );
     FEditorViewportClient* GetActiveViewportClient();
     void DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, UArianeLayerDrawing* DrawingLayer );
 /* Gary
