@@ -113,12 +113,10 @@ FOdysseyEditorTab::GetTabManager() const
 
 void FOdysseyEditorTab::OnTabClosed(TSharedRef<SDockTab> iDockTab)
 {
-    UE_LOG(LogTemp, Display, TEXT("Close Tab"))
 }
 
 void FOdysseyEditorTab::CloseTab()
 {
-    UE_LOG(LogTemp, Display, TEXT("Close Tab"))
 }
 
 void
