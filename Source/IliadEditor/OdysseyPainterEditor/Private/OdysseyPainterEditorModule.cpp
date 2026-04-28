@@ -166,17 +166,17 @@ FOdysseyPainterEditorModule::RegisterSettings()
         return;
 
     settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyPainterEditor"
-        , LOCTEXT( "user-settings.painter-editor.name", "Odyssey Painter Editor" )
+        , LOCTEXT( "user-settings.painter-editor.name", "Odyssey - Painter Editor" )
         , LOCTEXT( "user-settings.painter-editor.tooltip", "Configure the look and feel of the Odyssey Editor." )
         , GetMutableDefault<UOdysseyPainterEditorSettings>() );
 
     settingsModule->RegisterSettings( "Project", "Plugins", "OdysseyAnimationEditor"
-        , LOCTEXT( "project-settings.2d-animation-editor.name", "2D Animation Editor" )
+        , LOCTEXT( "project-settings.2d-animation-editor.name", "Odyssey - 2D Animation" )
         , LOCTEXT( "project-settings.2d-animation-editor.tooltip", "Configure the look and feel of the 2D Animation Editor." )
         , GetMutableDefault<UOdysseyPainterEditorAnimationProjectSettings>() );
 
     settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyPainterEditorAnimationUserSettings"
-        , LOCTEXT( "user-settings.2d-animation-editor.name", "2D Animation Editor" )
+        , LOCTEXT( "user-settings.2d-animation-editor.name", "Odyssey - 2D Animation Editor" )
         , LOCTEXT( "user-settings.2d-animation-editor.tooltip", "Configure the look and feel of the 2D Animation Editor." )
         , GetMutableDefault<UOdysseyPainterEditorAnimationUserSettings>() );
 }

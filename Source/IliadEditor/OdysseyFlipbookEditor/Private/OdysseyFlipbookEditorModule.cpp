@@ -87,7 +87,7 @@ FOdysseyFlipbookEditorModule::RegisterSettings()
         return;
 
     settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyFlipbookEditor"
-        , LOCTEXT( "settings.name", "Odyssey Flipbook Editor" )
+        , LOCTEXT( "settings.name", "Odyssey - Flipbook Editor" )
         , LOCTEXT( "settings.tooltip", "Configure the look and feel of the Odyssey Editor." )
         , GetMutableDefault<UOdysseyFlipbookEditorSettings>() );
 }

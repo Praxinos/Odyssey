@@ -40,7 +40,7 @@ public:
         if (settingsModule)
         {
             settingsModule->RegisterSettings("Editor", "Plugins", "OdysseyStylusInput"
-                , LOCTEXT("settings.name", "Odyssey Stylus Input")
+                , LOCTEXT("settings.name", "Odyssey - Stylus Input")
                 , LOCTEXT("settings.tooltip", "Configure the behaviour of stylus inputs in Odyssey.")
                 , GetMutableDefault<UOdysseyStylusInputSettings>());
         }

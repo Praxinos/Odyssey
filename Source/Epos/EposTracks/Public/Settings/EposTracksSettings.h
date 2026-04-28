@@ -29,7 +29,7 @@ public:
 /**
  * Epos Tracks settings.
  */
-UCLASS(config=Odyssey, meta=(DisplayName="Epos Tracks"))
+UCLASS(config=Odyssey, meta=(DisplayName="Odyssey - Storyboard Tracks"))
 class EPOSTRACKS_API UEposTracksSettings
     : public UDeveloperSettings
 {

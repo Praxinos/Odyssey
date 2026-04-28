@@ -81,7 +81,7 @@ FOdysseyTextureEditorModule::RegisterSettings()
         return;
 
     settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyTexture2DEditor"
-        , LOCTEXT( "settings.name", "Odyssey Texture2D Editor" )
+        , LOCTEXT( "settings.name", "Odyssey - Texture2D Editor" )
         , LOCTEXT( "settings.tooltip", "Configure the look and feel of the Odyssey Editor." )
         , GetMutableDefault<UOdysseyTextureEditorSettings>() );
 }
