@@ -559,7 +559,7 @@ FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
     FVector SegmentVector =  Segment->GetVertex(1)->GetPosition() - Segment->GetVertex(0)->GetPosition();
     FVector TangentVector = FVector::Zero();
 
-    if( ( T == 0.0f ) || ( T == 1.0f ) )
+    if( ( T == 0.0f ) || /*FMath::IsNearlyEqual( T, 1.0f, KINDA_SMALL_NUMBER ) */( T == 1.0f ) )
     {
         FArianeVertex* Vertex = Segment->GetVertex( static_cast<uint32>(T) );
         FVector AverageVector = FVector::Zero();
@@ -575,7 +575,7 @@ FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
 
             AverageVector /= Vertex->GetSegments().Num();
 
-            if( AverageVector.IsNearlyZero() == false )
+            //if( AverageVector.IsNearlyZero() == false )
             {
                 FVector Perpendicular = OptionalPerpendicularVector ? *OptionalPerpendicularVector
                                                                     : AverageVector.Cross( SegmentVector );
@@ -603,181 +603,6 @@ FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
 
     return TangentVector;
 }
-
-/*
-*
-// Scheme when valence equals 2
-// Vertex        = V
-// CloserVertex  = CV
-// FurtherVertex = FV
-//
-// FV   V    FV
-// °    °    °
-//  \  / \  /
-//   \/   \/
-//   °     °
-//   CV   CV
-
-FVector
-FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
-                                         , const FVector& PerpendicularVector
-                                         , double T
-                                         , bool bNormalize )
-{
-    FVector SegmentVector =  Segment->GetVertex(1)->GetPosition() - Segment->GetVertex(0)->GetPosition();
-    FVector TangentVector = FVector::Zero();
-
-    if( ( T == 0.0f ) || ( T == 1.0f ) )
-    {
-        FArianeVertex* Vertex = Segment->GetVertex( static_cast<uint32>(T) );
-        FVector AverageVector = FVector::Zero();
-
-        if( Vertex->GetSegments().Num() == 2 )
-        {
-            for( FArianeSegment* ConnectedSegment : Vertex->GetSegments() )
-            {
-                FVector ConnectedSegmentVector = ConnectedSegment->GetVectorLeavingFromVertex( Vertex, true );
-
-                AverageVector += ConnectedSegmentVector;
-            }
-
-            AverageVector /= Vertex->GetSegments().Num();
-
-            TangentVector = AverageVector.Cross( PerpendicularVector );
-        }
-        else
-        {
-            TangentVector = SegmentVector;
-        }
-    }
-
-    if( TangentVector.IsZero() )
-    {
-        TangentVector = SegmentVector;
-    }
-
-    // Let's go in the same direction as the segment
-    if( TangentVector.Dot( SegmentVector ) < 0.0f )
-    {
-        TangentVector = -TangentVector;
-    }
-
-    if( bNormalize )
-    {
-        TangentVector.Normalize();
-    }
-
-    return TangentVector;
-}
-*/
-
-/*
-FVector
-FArianePathGeometry3D::GetPerpendicularVector( FArianeVertex* Vertex
-                                             , FVector& InOutPreviousPerpendicularVector
-                                             , bool bNormalize )
-{
-    FVector PerpendicularVector = InOutPreviousPerpendicularVector; // default if none is found
-
-    if( Vertex->GetSegments().Num() <= 2 )
-    {
-        FArianeVertex *NeighbourVertices[5] = { nullptr
-                                              , nullptr
-                                              , Vertex
-                                              , nullptr
-                                              , nullptr };
-        FArianeVertex* CloserVertices[2] = { nullptr, nullptr };
-        FArianeVertex* FurtherVertices[2] = { nullptr, nullptr };
-        static uint32 TriangleIndices[3][3] = { { 0, 1, 2 }, {  2, 1, 3 }, { 3, 4, 2 } };
-        FVector SumVector = FVector( 0.0f, 0.0f, 0.0f );
-        uint32 CloserVertexCount = 0;
-        uint32 CrossCount = 0;
-
-        for( FArianeSegment* Segment : Vertex->GetSegments() )
-        {
-            FArianeVertex *CloserVertex = Segment->GetOtherVertex( Vertex );
-
-            CloserVertices[CloserVertexCount] = CloserVertex;
-
-            if( CloserVertex->GetSegments().Num() <= 2 )
-            {
-                for( FArianeSegment* OtherSegment : CloserVertex->GetSegments() )
-                {
-                    if( OtherSegment != Segment )
-                    {
-                        FArianeVertex *FurtherVertex = OtherSegment->GetOtherVertex( CloserVertex );
-
-                        FurtherVertices[CloserVertexCount] = FurtherVertex;
-
-                        break;
-                    }
-                }
-            }
-
-            CloserVertexCount++;
-        }
-
-        if( CloserVertices[0] )
-        {
-            NeighbourVertices[0] = FurtherVertices[0];
-            NeighbourVertices[1] = CloserVertices[0];
-        }
-
-        if( CloserVertices[1] )
-        {
-            NeighbourVertices[3] = CloserVertices[1];
-            NeighbourVertices[4] = FurtherVertices[1];
-        }
-
-        for( uint32 i = 0; i < 3; i++ )
-        {
-            uint32 TriVertexIndex0 = TriangleIndices[i][0];
-            uint32 TriVertexIndex1 = TriangleIndices[i][1];
-            uint32 TriVertexIndex2 = TriangleIndices[i][2];
-            FArianeVertex* TriVertex0 = NeighbourVertices[TriVertexIndex0];
-            FArianeVertex* TriVertex1 = NeighbourVertices[TriVertexIndex1];
-            FArianeVertex* TriVertex2 = NeighbourVertices[TriVertexIndex2];
-
-            if(  TriVertex0 && TriVertex1 && TriVertex2 )
-            {
-                FVector V0V1 = TriVertex1->GetPosition() - TriVertex0->GetPosition();
-                FVector V0V2 = TriVertex2->GetPosition() - TriVertex0->GetPosition();
-                FVector CrossVector = V0V1.Cross( V0V2 );
-
-                if( CrossVector.Normalize() )
-                {
-                    if( ( InOutPreviousPerpendicularVector.IsZero() == false )
-                     && ( InOutPreviousPerpendicularVector.Dot( CrossVector ) < 0.0f ) )
-                    {
-                        CrossVector = -CrossVector;
-                    }
-
-                    SumVector += CrossVector;
-
-                    CrossCount++;
-
-                    if( CrossVector.IsZero() == false )
-                    {
-                        InOutPreviousPerpendicularVector = CrossVector;
-                    }
-                }
-            }
-        }
-
-        if( CrossCount )
-        {
-            PerpendicularVector = SumVector / CrossCount;
-
-            if( bNormalize )
-            {
-                PerpendicularVector.Normalize();
-            }
-        }
-    }
-
-    return PerpendicularVector;
-}
-*/
 
 void
 FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment

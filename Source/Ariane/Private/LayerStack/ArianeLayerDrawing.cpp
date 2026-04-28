@@ -56,14 +56,14 @@ UArianeLayerDrawing::PostLoad()
     // RootObjectID won't have its cache reset after Undoing, we have to force it.
     RootObjectID.InvalidateCache();
 
+    BindDelegates();
+
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
 
         Object->PostLoad();
     }
-
-    BindDelegates();
 
     Update( false );
 }
@@ -76,14 +76,14 @@ UArianeLayerDrawing::PostEditUndo()
     // RootObjectID won't have its cache reset after Undoing, we have to force it.
     RootObjectID.InvalidateCache();
 
+    BindDelegates();
+
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
 
         Object->PostEditUndo();
     }
-
-    BindDelegates();
 
     Update( false );
 }

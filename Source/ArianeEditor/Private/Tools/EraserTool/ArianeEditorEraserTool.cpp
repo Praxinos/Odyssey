@@ -469,6 +469,9 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
 
     Painting3DComponent->Update( false );
 
+    // although the component is not directly modified, we need PostEditUndo to be called after undoing, so we set it as modified.
+    Painting3DComponent->Modify();
+
     return false;
 }
 

@@ -26,7 +26,6 @@ public:
     virtual void PostLoad() override;
     virtual void Tick(float DeltaTime) override;
 
-protected:
     UArianePainting3DComponent* GetPainting3DComponent();
 
 protected:
