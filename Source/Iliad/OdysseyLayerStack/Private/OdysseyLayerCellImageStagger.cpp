@@ -199,7 +199,7 @@ UOdysseyLayerCellImageStagger::UpdateRandomIntegers( int iLimitValue ) const
             do
             {
                 randomRelativeIndex = rand() % iLimitValue;
-            } while( randomRelativeIndex == previousRandomRelativeIndex );
+            } while( randomRelativeIndex == previousRandomRelativeIndex && iLimitValue != 1 ); // Also check the iLimitValue, otherwise if it is equal to 1, there is an infinite loop (as "%1" always returns 0)
 
             mRandomIntegers.Push( randomRelativeIndex );
 

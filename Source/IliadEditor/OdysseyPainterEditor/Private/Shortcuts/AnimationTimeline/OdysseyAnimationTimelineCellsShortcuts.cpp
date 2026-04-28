@@ -304,7 +304,9 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_CreateStaggerCell( EOdysseyLayer
         int reach = exposure;
 
         if( iBehavior == EOdysseyLayerCellImageStaggerBehaviour::PingPong )
-            exposure = ( exposure - 1 ) * 2; // -1 because for ping-pong the last exposure of the cell is not inside the loop (cell exposure == 10, then ping exposure == 9, ...)
+            // -1 because for ping-pong the last exposure of the cell is not inside the loop (cell exposure == 10, then ping exposure == 9, ...)
+            // Max( 1, ...) because exposure can be 0 (if exposure == 1 and due to -1 before) and so to display something in ping-pong, set exposure to 1
+            exposure = FMath::Max( 1, ( exposure - 1 ) * 2 );
 
         UOdysseyLayerCellImageStagger* staggerCell = Cast<UOdysseyLayerCellImageStagger>( layer->AddCell(UOdysseyLayerCellImageStagger::StaticClass(), selectedCellGroup.Last()->GetIndexInLayer() + 1) );
         staggerCell->SetExposure( exposure );
