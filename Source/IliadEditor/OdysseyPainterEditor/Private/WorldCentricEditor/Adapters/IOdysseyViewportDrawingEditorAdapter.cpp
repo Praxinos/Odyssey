@@ -955,7 +955,7 @@ IOdysseyViewportDrawingEditorAdapter::ReadStylusInput()
         return;
 
     UE::StylusInput::FStylusInputPacket packet;
-    while (PacketQueue.Dequeue(packet))
+    while (mPacketQueue.Dequeue(packet))
     {
         UE_LOG(LogTemp, Display, TEXT("Dequeue"));
         FOdysseyRay ray = StylusPacketToRay(packet);
@@ -1006,7 +1006,7 @@ IOdysseyViewportDrawingEditorAdapter::OnPacket(const UE::StylusInput::FStylusInp
     if (!IsReadyToDraw() || !mLastKnownViewport)
         return;
 
-    PacketQueue.Enqueue(Packet);
+    mPacketQueue.Enqueue(Packet);
     mLastStylusEventIndex = 0;
 
     PrintPacket(Packet);

@@ -35,6 +35,7 @@ class FOdysseyPainterEditorViewportClient
     : public FViewportClient
     , public FGCObject
     , public FOdysseyStylusInputHandler
+    , public FTickableEditorObject
 {
 public:
     DECLARE_DELEGATE_TwoParams(FOnPickColor, eOdysseyEventState::Type, const FVector2D&)
@@ -90,6 +91,11 @@ public:
     // FGCObject API
     virtual void AddReferencedObjects( FReferenceCollector& ioCollector ) override;
     virtual FString GetReferencerName() const override;
+
+public:
+    // FTickableEditorObject
+    virtual void Tick(float DeltaTime) override;
+    virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(StylusInput_DebugEventHandlerAsynchronous, STATGROUP_Tickables); }
 
 public:
     // Public API
@@ -171,6 +177,7 @@ private:
     bool mIsRecordingStylus = false;
     int mLastStylusEventIndex = 0;
     bool mStylusIsDown = false;
+    bool mIsFocused = false;
 
     FOdysseyPoint mCurrentHUDPoint;
     TSharedPtr<FOdysseyHUDElement> mCurrentHUDElement;

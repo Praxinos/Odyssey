@@ -37,7 +37,7 @@ public:
     void PrintPacket(const UE::StylusInput::FStylusInputPacket& iPacket);
 
 public:
-    TSpscQueue<UE::StylusInput::FStylusInputPacket> PacketQueue;
+    TSpscQueue<UE::StylusInput::FStylusInputPacket> mPacketQueue;
 
 protected:
     const UE::StylusInput::IStylusInputTabletContext* GetTabletContext(UE::StylusInput::IStylusInputInstance* iInstance, uint32 iTabletContextID);

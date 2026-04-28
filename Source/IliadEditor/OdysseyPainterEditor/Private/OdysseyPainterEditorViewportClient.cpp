@@ -468,14 +468,6 @@ FOdysseyPainterEditorViewportClient::InputKey( const FInputKeyEventArgs& iEventA
 void
 FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY )
 {
-    //This is called when the mouse is down and moving in the viewport
-    //The viewport has already captured the mouse
-    if (mIsRecordingStylus)
-    {
-        ReadStylusInput();
-        return;
-    }
-
     //HUD
     if (mCurrentHUDElement)
     {
@@ -498,6 +490,9 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
         return;
     }
 
+    if (mIsRecordingStylus)
+        return;
+
     FOdysseyPoint point_in_viewport( FOdysseyPoint::DefaultPoint() );
     point_in_viewport.x = iX;
     point_in_viewport.y = iY;
@@ -510,6 +505,7 @@ FOdysseyPainterEditorViewportClient::MouseEnter( FViewport* iViewport, int32 iX,
     if( mIsMouseDown )
         return;
 
+    mIsFocused = true;
     mCurrentToolState = eState::kIdle;
 }
 
@@ -519,6 +515,7 @@ FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* iViewport )
     if( mIsMouseDown )
         return;
 
+    mIsFocused = false;
     mCurrentToolState = eState::kIdle;
 }
 
@@ -526,6 +523,8 @@ FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* iViewport )
 void
 FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
+    mIsFocused = true;
+
     //This is called when the mouse hovers the viewport (really not the best name for that function)
 
     //If we don't have a surface, then we don't interact with anything
@@ -609,10 +608,16 @@ void
 FOdysseyPainterEditorViewportClient::MouseDown(const FOdysseyPoint& iPoint)
 {
     if (mIsMouseDown)
+    {
+        UE_LOG(LogTemp, Display, TEXT("DOWN error"));
         return;
+    }
 
-    TSharedPtr<SWindow> ActiveWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
-    UE_LOG(LogTemp, Display, TEXT("active: %p, stylus: %p"), ActiveWindow.Get(), mStylusInputWindow.Pin().Get());
+    UE_LOG(LogTemp, Display, TEXT("DOWN"));
+
+
+    //TSharedPtr<SWindow> ActiveWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
+    //UE_LOG(LogTemp, Display, TEXT("active: %p, stylus: %p"), ActiveWindow.Get(), mStylusInputWindow.Pin().Get());
 
     mIsMouseDown = true;
 
@@ -683,8 +688,12 @@ void
 FOdysseyPainterEditorViewportClient::MouseUp(const FOdysseyPoint& iPoint)
 {
     if (!mIsMouseDown)
+    {
+        UE_LOG(LogTemp, Display, TEXT("ErrorUP"));
         return;
+    }
 
+    UE_LOG(LogTemp, Display, TEXT("UP"));
     mIsMouseDown = false;
 
     //If we don't have a surface, then we don't interact with anything
@@ -741,6 +750,8 @@ FOdysseyPainterEditorViewportClient::MouseUp(const FOdysseyPoint& iPoint)
 void
 FOdysseyPainterEditorViewportClient::MouseDrag(const FOdysseyPoint& iPoint)
 {
+    //UE_LOG(LogTemp, Display, TEXT("DRAG"));
+
     if (!mIsMouseDown)
         return;
 
@@ -932,11 +943,14 @@ FOdysseyPoint FOdysseyPainterEditorViewportClient::StylusPacketToPoint(const UE:
 void
 FOdysseyPainterEditorViewportClient::ReadStylusInput()
 {
-    if (!mIsRecordingStylus)
+    if (!mIsRecordingStylus || !mIsFocused)
+    {
+        while (mPacketQueue.Dequeue()) {}
         return;
+    }
 
     UE::StylusInput::FStylusInputPacket packet;
-    while (PacketQueue.Dequeue(packet))
+    while (mPacketQueue.Dequeue(packet))
     {
         FOdysseyPoint point = StylusPacketToPoint(packet);
 
@@ -946,12 +960,14 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput()
             //MouseDown
             MouseDown(point);
             mLastStylusEventIndex = packet.SerialNumber;
+            UE_LOG(LogTemp, Display, TEXT("Styluss down"))
         }
         else if (packet.Type == UE::StylusInput::EPacketType::StylusUp)
         {
             //MouseUp
             MouseUp(point);
             mLastStylusEventIndex = packet.SerialNumber;
+            break;
         }
         else if (mStylusIsDown)
         {
@@ -967,30 +983,19 @@ void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylu
     //PrintPacket(iPacket);
     mStylusLastEventTime = std::chrono::steady_clock::now();
 
-    TSharedPtr<SOdysseyViewport> odysseyViewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
-    if (!odysseyViewportWidget)
-        return;
-
-    //If we don't have a surface, then we don't interact with anything
-    UTexture* texture = odysseyViewportWidget->GetTexture();
-    if (!texture)
-        return;
-
-
     if( iPacket.Type == UE::StylusInput::EPacketType::StylusDown )
     {
         StartStylusInputRecord();
         mStylusIsDown = true;
+        UE_LOG(LogTemp, Display, TEXT("Stylus down"))
     }
-    if(mIsRecordingStylus)
+    if( mIsRecordingStylus )
     {
-        PacketQueue.Enqueue(iPacket);
-        mLastStylusEventIndex = 0;
-        //PrintPacket(Packet);
-        //ReadStylusInput();
+        mPacketQueue.Enqueue(iPacket);
     }
     if (iPacket.Type == UE::StylusInput::EPacketType::StylusUp)
     {
+        UE_LOG(LogTemp, Display, TEXT("Stylus up"))
         mStylusIsDown = false;
         StopStylusInputRecord();
     }
@@ -1041,6 +1046,13 @@ FOdysseyPainterEditorViewportClient::AddReferencedObjects( FReferenceCollector& 
 FString FOdysseyPainterEditorViewportClient::GetReferencerName() const
 {
     return TEXT("FOdysseyPainterEditorViewportClient");
+}
+
+void FOdysseyPainterEditorViewportClient::Tick(float DeltaTime)
+{
+    ReadStylusInput();
+    UE_LOG(LogTemp, Display, TEXT("Focus: %d"), mIsFocused);
+    UE_LOG(LogTemp, Display, TEXT("stylus down: %d. mIsRecordingStylus: %d, mIsMouseDown: %d: packet queue: %d"), mStylusIsDown, mIsRecordingStylus, mIsMouseDown, mPacketQueue.Num())
 }
 
 //--------------------------------------------------------------------------------------
