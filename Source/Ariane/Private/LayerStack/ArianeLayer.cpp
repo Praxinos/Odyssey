@@ -6,6 +6,7 @@
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
+#include "ArianePainting3DActor.h"
 
 UArianeLayer::~UArianeLayer()
 {
@@ -56,7 +57,10 @@ UArianeLayer::GetRootFolder()
 UArianeLayerStack*
 UArianeLayer::GetLayerStack()
 {
-    return Cast<UArianeLayerStack>(GetOuter());
+    AArianePainting3DActor* Painting3DActor = Cast<AArianePainting3DActor>(GetOwner());
+
+    return Painting3DActor->GetPainting3DComponent()->GetLayerStack();
+    //return Cast<UArianeLayerStack>(GetOuter());
 }
 
 /*

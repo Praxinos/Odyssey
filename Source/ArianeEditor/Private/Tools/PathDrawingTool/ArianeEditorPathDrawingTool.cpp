@@ -261,15 +261,20 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* ViewportClient
                 FArianeVertex *Vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last().GetVertex()
                                                                          : nullptr;
 
-                FArianeVertex *Vertex1 = EditedPath->AllocVertex( localCoords, localNormal, Radius );
-
-                EditedPath->AddVertex( Vertex1 );
-
-                if( Vertex0 )
+                                          // if both points are at the same location, the segment will have length 0
+                                          // which will result in a broken continuity (angled continuity). Quick-fix to prevent this
+                if( Vertex0 == nullptr || ( localCoords != Vertex0->GetPosition() ) )
                 {
-                    FArianeSegment *Segment = EditedPath->AllocSegment( Vertex0, Vertex1 );
+                    FArianeVertex *Vertex1 = EditedPath->AllocVertex( localCoords, localNormal, Radius );
 
-                    EditedPath->AddSegment( Segment );
+                    EditedPath->AddVertex( Vertex1 );
+
+                    if( Vertex0 )
+                    {
+                        FArianeSegment *Segment = EditedPath->AllocSegment( Vertex0, Vertex1 );
+
+                        EditedPath->AddSegment( Segment );
+                    }
                 }
             }
 

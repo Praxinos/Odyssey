@@ -226,12 +226,15 @@ UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder, 
 {
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
-    UArianeLayerDrawing* NewDrawingLayer = NewObject<UArianeLayerDrawing>( this // The outer is the LayerStack
+                                                                           // The outer must be the AActor or else the TEDS system could crash
+    UArianeLayerDrawing* NewDrawingLayer = NewObject<UArianeLayerDrawing>( GetPainting3DComponent()->GetOwner()
                                                                          , NAME_None
                                                                          , RF_Transactional ); // for undos
 
-    //NewDrawingLayer->SetupAttachment( ParentLayerFolder );
-    //NewDrawingLayer->RegisterComponent();
+    // Below 2 lines are mandatory to register the component, otherwise undos won't work (RF_TRANSACTIONAL will be erased)
+    NewDrawingLayer->SetupAttachment( ParentLayerFolder );
+    NewDrawingLayer->RegisterComponent();
+
     if( bTriggerEvent )
         OnPreLayerStackChanged.Broadcast();
 
@@ -248,7 +251,8 @@ UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder, b
 {
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
-    UArianeLayerFolder* NewLayerFolder = NewObject<UArianeLayerFolder>( this // The outer is the LayerStack
+                                                                        // The outer must be the AActor or else the TEDS system could crash
+    UArianeLayerFolder* NewLayerFolder = NewObject<UArianeLayerFolder>( GetPainting3DComponent()->GetOwner()
                                                                       , NAME_None
                                                                       , RF_Transactional ); // for undos
 
