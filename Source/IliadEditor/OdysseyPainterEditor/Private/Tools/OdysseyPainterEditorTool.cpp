@@ -593,7 +593,7 @@ UOdysseyPainterEditorTool::RIMOnMouseDrag(const FOdysseyPoint& iPointInTexture)
         break;
     }
 
-    float distance = FVector2D::Distance(mousePosition, center);
+    float distance = FMath::CeilToFloat( FVector2D::Distance(mousePosition, center) );
     float radius = distance;
 
     mRIMHUD->SetRadius(radius);
