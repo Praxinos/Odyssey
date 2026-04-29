@@ -112,7 +112,7 @@ protected:
     //Scan Cleaner
     bool mIsScanCleanerActivated = false;
     TObjectPtr<UCurveFloat> mScanCleanerCurve;
-    TObjectPtr<UTexture2D> mScanCleanerCurveTexture;
+    TObjectPtr<UTextureRenderTarget2D> mScanCleanerCurveTexture;
     float mScanCleanerColorSaturation = 1.f;
     float mScanCleanerColorValue = 1.f;
 

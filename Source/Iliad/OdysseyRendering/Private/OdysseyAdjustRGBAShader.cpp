@@ -12,6 +12,7 @@
 #include "ScreenPass.h"
 #include "MeshPassProcessor.h"
 #include "PixelShaderUtils.h"
+#include "Engine/TextureRenderTarget2D.h"
 
 class FOdysseyAdjustRGBAShaderPS : public FGlobalShader
 {
@@ -87,29 +88,48 @@ void FOdysseyAdjustRGBAShader::AdjustRGBA(
 
 void
 FOdysseyAdjustRGBAShader::InitTextureFromCurves(
-    UTexture2D* iTexture,
+    UTextureRenderTarget2D* iRenderTarget,
     const FRealCurve& iCurveR,
     const FRealCurve& iCurveG,
     const FRealCurve& iCurveB,
     const FRealCurve& iCurveA
 )
 {
-    iTexture->SRGB = false;
-    iTexture->Source.Init(1024, 1, 1, 1, TSF_RGBA32F, nullptr);
-    FLinearColor* MipData = reinterpret_cast<FLinearColor*>(iTexture->Source.LockMip(0));
+    iRenderTarget->RenderTargetFormat = RTF_RGBA32f;
+    iRenderTarget->ClearColor = FLinearColor::Transparent;
+    iRenderTarget->bForceLinearGamma = true;
+    iRenderTarget->bAutoGenerateMips = false;
+    iRenderTarget->InitAutoFormat(1024,1);
+    iRenderTarget->UpdateResourceImmediate(true);
 
-    //R Curve
+
+    FTextureRenderTargetResource* RTResource = iRenderTarget->GameThread_GetRenderTargetResource();
+
+    TArray<FLinearColor> PixelData;
+    PixelData.Reserve(1024);
     for (int i = 0; i < 1024; i++)
     {
         float pos = i/1024.f;
 
-        FLinearColor& destPixel = MipData[i];
+        FLinearColor& destPixel = PixelData[i];
         destPixel.R = iCurveR.Eval(pos);
         destPixel.G = iCurveG.Eval(pos);
         destPixel.B = iCurveB.Eval(pos);
         destPixel.A = iCurveA.Eval(pos);
     }
 
-    iTexture->Source.UnlockMip(0);
-    iTexture->UpdateResource();
+    FUpdateTextureRegion2D Region(0, 0, 0, 0, 1024, 1);
+
+    ENQUEUE_RENDER_COMMAND(UpdateRTCommand)(
+        [RTResource, PixelData, Region](FRHICommandListImmediate& RHICmdList)
+        {
+            RHIUpdateTexture2D(
+                RTResource->GetRenderTargetTexture(),
+                0,
+                Region,
+                Region.Width * sizeof(FLinearColor),
+                (uint8*)PixelData.GetData()
+            );
+        }
+    );
 }

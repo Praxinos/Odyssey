@@ -58,7 +58,6 @@ public:
     FSimpleMulticastDelegate& OnCellsChanged();
 
 public:
-#if WITH_EDITOR
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     bool IsEditable() const;
 
@@ -71,6 +70,7 @@ public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool IsLockedRecursively() const;
 
+#if WITH_EDITOR
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool ShouldDisplayChildren() const;
 
@@ -372,9 +372,6 @@ protected:
 //Instance properties
 
 #if WITH_EDITORONLY_DATA
-    UPROPERTY()
-    bool bIsLocked = false;
-
     UPROPERTY(NonTransactional)
     bool bDisplayChildren = true;
 
@@ -396,6 +393,9 @@ protected:
 
     UPROPERTY()
     bool bIsActivated = true;
+
+    UPROPERTY()
+    bool bIsLocked = false;
 
     UPROPERTY()
     EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;

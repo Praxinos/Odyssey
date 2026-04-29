@@ -52,7 +52,7 @@ FOdysseyImportTexturesParameters::FOdysseyImportTexturesParameters()
     mScanCleanerCurve->FloatCurve.AddKey(1.f, 1.f);
     mScanCleanerCurve->OnUpdateCurve.AddRaw(this, &FOdysseyImportTexturesParameters::OnUpdateCurve);
 
-    mScanCleanerCurveTexture = NewObject<UTexture2D>();
+    mScanCleanerCurveTexture = NewObject<UTextureRenderTarget2D>();
 
     UpdateScanCleanerCurveTextures();
 }
@@ -264,10 +264,7 @@ FOdysseyImportTexturesParameters::Render(UTextureRenderTarget2D* oRenderTarget, 
     sourceTexture->SetForceMipLevelsToBeResident( 30.0f );
     sourceTexture->WaitForStreaming();
 
-    UTexture2D* scanCleanerCurveTextureR = mScanCleanerCurveTexture;
-    scanCleanerCurveTextureR->BlockOnAnyAsyncBuild();
-    scanCleanerCurveTextureR->SetForceMipLevelsToBeResident( 30.0f );
-    scanCleanerCurveTextureR->WaitForStreaming();
+    UTextureRenderTarget2D* scanCleanerCurveTextureR = mScanCleanerCurveTexture;
 
     FTextureRenderTargetResource* renderTargetResource = oRenderTarget->GameThread_GetRenderTargetResource();
 

@@ -77,9 +77,11 @@ UOdysseyLayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
     // See comment (REALLY) in ...\Plugins\Odyssey\Source\Iliad\OdysseyLayerStack\Private\OdysseyLayerStack.cpp#590: CopyLayerInternal()
 
     //PATCH---------------------------
+#if WITH_EDITOR
     FText old_current_layer;
     if( IsA<UOdysseyLayerRoot>() )
         old_current_layer = GetLayerStack()->GetCurrentLayer()->GetLayerName();
+#endif
     //--------------------------------
 
     TArray<UOdysseyLayer*> children = GetChildren();
@@ -101,6 +103,7 @@ UOdysseyLayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
         child->Parent = this;
 
     //PATCH---------------------------
+#if WITH_EDITOR
     if( IsA<UOdysseyLayerRoot>() )
     {
         TArray<UOdysseyLayer*> layers = GetLayerStack()->GetLayers();
@@ -110,6 +113,7 @@ UOdysseyLayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
                 GetLayerStack()->SetCurrentLayer( layer ); // Call delegate ?! or make a new function ?
         }
     }
+#endif
     //--------------------------------
 }
 
@@ -846,8 +850,6 @@ UOdysseyLayer::IsActivatedRecursively() const
 
     return true;
 }
-
-#if WITH_EDITOR
 bool
 UOdysseyLayer::IsEditable() const
 {
@@ -873,6 +875,8 @@ UOdysseyLayer::IsLockedRecursively() const
 
     return false;
 }
+
+#if WITH_EDITOR
 
 bool
 UOdysseyLayer::ShouldDisplayChildren() const
@@ -1141,13 +1145,14 @@ UOdysseyLayer::SetIsActivated(bool Value)
         Parent->RenderingCompositionChanged();
 }
 
-#if WITH_EDITOR
 void
 UOdysseyLayer::SetIsLocked(bool Value)
 {
     Modify();
     bIsLocked = Value;
 }
+
+#if WITH_EDITOR
 
 const FSlateIcon&
 UOdysseyLayer::GetIcon() const

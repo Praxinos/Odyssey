@@ -442,7 +442,9 @@ UOdysseyAnimationComponent::UpdateMaterialInstance()
     if (materialInstance->Parent != Material)
     {
         materialInstance->Parent = Material;
+#if WITH_EDITOR
         materialInstance->PostEditChange();
+#endif
     }
 
     UOdysseyAnimationPlayer* player = GetPlayer();

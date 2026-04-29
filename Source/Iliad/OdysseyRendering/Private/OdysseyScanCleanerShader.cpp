@@ -12,6 +12,7 @@
 #include "ScreenPass.h"
 #include "MeshPassProcessor.h"
 #include "PixelShaderUtils.h"
+#include "Engine/TextureRenderTarget2D.h"
 
 class FOdysseyScanCleanerShaderPS : public FGlobalShader
 {
@@ -91,26 +92,42 @@ void FOdysseyScanCleanerShader::ScanCleaner(
 
 void
 FOdysseyScanCleanerShader::InitTextureFromCurves(
-    UTexture2D* iTexture,
+    UTextureRenderTarget2D* iRenderTarget,
     const FRealCurve& iCurve
 )
 {
-    iTexture->SRGB = false;
-    iTexture->Source.Init(1024, 1, 1, 1, TSF_RGBA32F, nullptr);
-    FLinearColor* MipData = reinterpret_cast<FLinearColor*>(iTexture->Source.LockMip(0));
+    iRenderTarget->RenderTargetFormat = RTF_R32f;
+    iRenderTarget->ClearColor = FLinearColor::Transparent;
+    iRenderTarget->bForceLinearGamma = true;
+    iRenderTarget->bAutoGenerateMips = false;
+    iRenderTarget->InitAutoFormat(1024,1);
+    iRenderTarget->UpdateResourceImmediate(true);
 
-    //R Curve
+
+    FTextureRenderTargetResource* RTResource = iRenderTarget->GameThread_GetRenderTargetResource();
+
+    TArray<float> PixelData;
+    PixelData.AddUninitialized(1024);
     for (int i = 0; i < 1024; i++)
     {
         float pos = i/1024.f;
 
-        FLinearColor& destPixel = MipData[i];
-        destPixel.R = iCurve.Eval(pos);
-        destPixel.G = iCurve.Eval(pos);
-        destPixel.B = iCurve.Eval(pos);
-        destPixel.A = iCurve.Eval(pos);
+        float& destPixel = PixelData[i];
+        destPixel = iCurve.Eval(pos);
     }
 
-    iTexture->Source.UnlockMip(0);
-    iTexture->UpdateResource();
+    FUpdateTextureRegion2D Region(0, 0, 0, 0, 1024, 1);
+
+    ENQUEUE_RENDER_COMMAND(UpdateRTCommand)(
+        [RTResource, PixelData, Region](FRHICommandListImmediate& RHICmdList)
+        {
+            RHIUpdateTexture2D(
+                RTResource->GetRenderTargetTexture(),
+                0,
+                Region,
+                Region.Width * sizeof(FLinearColor),
+                (uint8*)PixelData.GetData()
+            );
+        }
+    );
 }

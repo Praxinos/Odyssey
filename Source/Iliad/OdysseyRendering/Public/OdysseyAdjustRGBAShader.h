@@ -33,7 +33,7 @@ public:
     );
 
     static void InitTextureFromCurves(
-        UTexture2D* iTexture,
+        UTextureRenderTarget2D* iRenderTarget,
         const FRealCurve& iCurveR,
         const FRealCurve& iCurveG,
         const FRealCurve& iCurveB,

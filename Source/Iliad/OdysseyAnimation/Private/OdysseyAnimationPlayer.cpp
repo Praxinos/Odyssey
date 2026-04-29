@@ -607,6 +607,19 @@ UOdysseyAnimationPlayer::GetRewindOnStop() const
     return bRewindOnStop;
 }
 
+void
+UOdysseyAnimationPlayer::SetLODGroup(enum TextureGroup iTextureGroup)
+{
+    LODGroup = iTextureGroup;
+    LODGroupChanged();
+}
+
+enum TextureGroup
+UOdysseyAnimationPlayer::GetLODGroup() const
+{
+    return LODGroup;
+}
+
 #if WITH_EDITOR
 
 void
@@ -631,19 +644,6 @@ bool
 UOdysseyAnimationPlayer::GetIgnorePrePostBehaviour() const
 {
     return mIgnorePrePostBehaviour;
-}
-
-void
-UOdysseyAnimationPlayer::SetLODGroup(enum TextureGroup iTextureGroup)
-{
-    LODGroup = iTextureGroup;
-    LODGroupChanged();
-}
-
-enum TextureGroup
-UOdysseyAnimationPlayer::GetLODGroup() const
-{
-    return LODGroup;
 }
 
 void
@@ -786,6 +786,7 @@ UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
     UpdateTexture();
 }
 
+#if WITH_EDITOR
 void
 UOdysseyAnimationPlayer::PostEditImport()
 {
@@ -805,7 +806,7 @@ UOdysseyAnimationPlayer::PostEditImport()
     RenderTarget->UpdateResourceImmediate( false );
     UpdateTexture();
 }
-
+#endif
 struct FOdysseyAnimationPlayerObjectVersion
 {
     enum Type
