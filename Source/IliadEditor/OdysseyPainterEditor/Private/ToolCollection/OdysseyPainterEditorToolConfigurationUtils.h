@@ -13,7 +13,7 @@ struct FToolEnumValue
     GENERATED_BODY()
 
     UPROPERTY()
-    uint64 Value; // Generally, it's stored as a uint8, but just to be sure we use a bigger size
+    uint64 Value = 0; // Generally, it's stored as a uint8, but just to be sure we use a bigger size
 };
 
 USTRUCT()
@@ -22,7 +22,7 @@ struct FToolBoolValue
     GENERATED_BODY()
 
     UPROPERTY()
-    bool Value;
+    bool Value = false;
 };
 
 USTRUCT()
@@ -31,7 +31,7 @@ struct FToolIntValue
     GENERATED_BODY()
 
     UPROPERTY()
-    int64 Value;
+    int64 Value = 0;
 };
 
 USTRUCT()
@@ -40,7 +40,7 @@ struct FToolFloatValue
     GENERATED_BODY()
 
     UPROPERTY()
-    float Value;
+    float Value = 0.f;
 };
 
 USTRUCT()
@@ -49,7 +49,7 @@ struct FToolDoubleValue
     GENERATED_BODY()
 
     UPROPERTY()
-    double Value;
+    double Value = 0.lf;
 };
 
 USTRUCT()
