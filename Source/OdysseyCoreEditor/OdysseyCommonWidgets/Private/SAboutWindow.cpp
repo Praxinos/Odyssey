@@ -197,6 +197,26 @@ SAboutWindow::Construct( const FArguments& iArgs )
                     .Justification( ETextJustify::Center )
                     .TextStyle(FOdysseyStyle::Get(), "Odyssey.About.SmallSubduedText" )
                 ]
+
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .Padding( FMargin( 0.f, 5.f ) )
+                [
+                    SNew( STextBlock )
+                    .Text( LOCTEXT( "copyright.special-thanks-label", "Special Thanks: " ) )
+                    .Justification( ETextJustify::Center )
+                    .TextStyle(FOdysseyStyle::Get(), "Odyssey.About.UnderlineSubduedText" )
+                ]
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .Padding( FMargin( 0.f, 1.f ) )
+                [
+                    SNew( STextBlock )
+                    .Text( LOCTEXT( "copyright.special-tranks.inria-bordeaux-manoa-team", "Inria Bordeaux - Manao Team" ) )
+                    .Justification( ETextJustify::Center )
+                    .TextStyle(FOdysseyStyle::Get(), "Odyssey.About.SmallSubduedText" )
+                ]
+
                 + SVerticalBox::Slot()
                 .AutoHeight()
                 .Padding( FMargin( 0.f, 5.f ) )
