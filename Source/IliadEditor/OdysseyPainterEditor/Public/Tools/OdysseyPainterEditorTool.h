@@ -58,6 +58,40 @@ public:
     virtual void Load();
     virtual void Unload();
 
+    /**
+     * Starts an interactive operation
+     *
+     * Every call between BeginInteractiveMode() and EndInteractiveMode()
+     * is considered as interactive, meaning the value which is set is not guaranteed
+     * to the definitive value the user wants (example : we are dragging a slider)
+     *
+     * Also, it is recommended to not do any heavy computation and limit callback calls while in Interactive Mode
+     * to avoid lag while dragging sliders for example.
+     *
+     * This system is NOT meant to replace the interactive system in PostEditPropertyChanged
+     * PostEditPropertyChanged() is specific to modifications made in the DetailsViews (most of the time)
+     *
+     * This system is meant to be used in other C++ functions (usually setters)
+     */
+    virtual void BeginInteractiveMode();
+
+    /**
+     * End the Interactive Mode
+     *
+     * If you want callbacks to be called please call your setters again after this function
+     * as InteractiveMode does not track function calls or modified properties.
+     *
+     * example: when releaseing an opacity slider call
+     *   tool->EndInteractiveMode();
+     *   tool->SetOpacity(tool->GetOpacity());
+     */
+    virtual void EndInteractiveMode();
+
+    /**
+     * Returns wether Interactive Mode is active or not
+     */
+    bool IsInInteractiveMode() const;
+
     UFUNCTION(BlueprintPure, Category="Tools")
     virtual bool HasRadius() const;
 
@@ -167,6 +201,7 @@ public:
 
 private:
     FOdysseyPoint mPreviousMousePosition;
+    bool mIsInInteractiveMode = false;
 
     //RIM : Radius Interactive Modifier
     bool mIsRIMActive = false;

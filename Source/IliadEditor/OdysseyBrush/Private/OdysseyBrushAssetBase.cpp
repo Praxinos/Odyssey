@@ -609,19 +609,19 @@ UOdysseyBrushAssetBase::GetKeysDown()
 FOdysseyBrushColor
 UOdysseyBrushAssetBase::GetColor()
 {
-    return  BrushOptions->Color;
+    return  BrushOptions->GetColor();
 }
 
 float
 UOdysseyBrushAssetBase::GetSizeModifier()
 {
-    return  BrushOptions->Size;
+    return  BrushOptions->GetSize();
 }
 
 float
 UOdysseyBrushAssetBase::GetFlowModifier()
 {
-    return  BrushOptions->Flow / 100.f;
+    return  BrushOptions->GetFlow() / 100.f;
 }
 
 

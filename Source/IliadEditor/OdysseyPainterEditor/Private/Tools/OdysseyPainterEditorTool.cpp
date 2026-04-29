@@ -140,6 +140,24 @@ UOdysseyPainterEditorTool::IsActivated() const
     return mIsActivated;
 }
 
+void
+UOdysseyPainterEditorTool::BeginInteractiveMode()
+{
+    mIsInInteractiveMode = true;
+}
+
+void
+UOdysseyPainterEditorTool::EndInteractiveMode()
+{
+    mIsInInteractiveMode = false;
+}
+
+bool
+UOdysseyPainterEditorTool::IsInInteractiveMode() const
+{
+    return mIsInInteractiveMode;
+}
+
 bool
 UOdysseyPainterEditorTool::HasRadius() const
 {
@@ -493,6 +511,8 @@ UOdysseyPainterEditorTool::StartRadiusInteractiveModifier()
         break;
     }
 
+    BeginInteractiveMode();
+
     //UE_LOG(LogTemp, Warning, TEXT("StartRadiusInteractiveModifier x=%f, y=%f", mPreviousMousePosition.X, mPreviousMousePosition.Y));
 }
 
@@ -501,6 +521,9 @@ UOdysseyPainterEditorTool::EndRIM()
 {
     if (!mIsRIMActive)
         return;
+
+    EndInteractiveMode();
+    SetRadius(GetRadius()); //Force a non interactive call to validate the Radius
 
     mIsRIMActive = false;
 
@@ -520,7 +543,9 @@ UOdysseyPainterEditorTool::CancelRIM()
     if (!mIsRIMActive)
         return;
 
-    SetRadius(mRIMStartRadius);
+    SetRadius(mRIMStartRadius); //Cancel by setting mRIMStartRadius again
+    EndInteractiveMode();
+
 
     mIsRIMActive = false;
 

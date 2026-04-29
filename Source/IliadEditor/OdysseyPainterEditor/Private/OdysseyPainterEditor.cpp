@@ -1455,7 +1455,7 @@ FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor, bool iIsComm
 
     //PATCH: should be automatic in the new drawing Tool, fix it asap
     if (iIsCommit)
-        FOdysseyObjectEditorUtils::SetPropertyValue(GetRasterDrawingTool()->GetBrushOptions(), GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Color), iColor);
+        GetRasterDrawingTool()->GetBrushOptions()->SetColor(iColor);
 }
 
 TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition>
@@ -3555,7 +3555,7 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
         mPaintColor = ulisColor;
 
         //PATCH: should be automatic in the new drawing Tool, fix it asap
-        FOdysseyObjectEditorUtils::SetPropertyValue(GetRasterDrawingTool()->GetBrushOptions(), GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Color), mPaintColor);
+        GetRasterDrawingTool()->GetBrushOptions()->SetColor(mPaintColor);
     }
 
     mCurrentPaletteEntryColor = iEntry;

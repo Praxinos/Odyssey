@@ -156,8 +156,11 @@ void
 UOdysseyPainterEditorRasterEraserTool::SetRadius(float Radius)
 {
     Size = Radius * 2.f;
-    SizeChanged();
-    mOnSizeChanged.Broadcast();
+    if (!IsInInteractiveMode())
+    {
+        SizeChanged();
+        mOnSizeChanged.Broadcast();
+    }
 }
 
 float

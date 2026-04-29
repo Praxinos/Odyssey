@@ -93,7 +93,7 @@ UOdysseyPainterEditorRasterDrawingTool::CreateShape(FName iName)
 void
 UOdysseyPainterEditorRasterDrawingTool::Activate()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Color), FOdysseyBrushColor(GetEditor()->PaintColor()));
+    BrushOptions->SetColor(FOdysseyBrushColor(GetEditor()->PaintColor()));
 
     //Create the BrushInstance to use for drawing
     CreateBrushInstance(true);
@@ -140,6 +140,18 @@ UOdysseyPainterEditorRasterDrawingTool::Reset()
 {
     Super::Reset();
     RefreshBrushInstance(true);
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::BeginInteractiveMode()
+{
+    BrushOptions->BeginInteractiveMode();
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::EndInteractiveMode()
+{
+    BrushOptions->EndInteractiveMode();
 }
 
 bool
@@ -434,7 +446,7 @@ UOdysseyPainterEditorRasterDrawingTool::ExtendToolbar( UToolMenu* iToolMenu )
             SNew(SBox)
             .Padding(10.f, 0.f, 10.f, 0.f)
             [
-                SNew(SOdysseySinglePropertyView, BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Size), FSinglePropertyParams())
+                SNew(SOdysseySinglePropertyView, BrushOptions, UOdysseyBrushOptions::GetSizePropertyName(), FSinglePropertyParams())
                 .InnerPadding(10.f)
                 .ValueWidthOverride(100.f)
             ],
@@ -468,7 +480,7 @@ UOdysseyPainterEditorRasterDrawingTool::ExtendToolbar( UToolMenu* iToolMenu )
             SNew(SBox)
             .Padding(10.f, 0.f, 10.f, 0.f)
             [
-                SNew(SOdysseySinglePropertyView, BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Flow), FSinglePropertyParams())
+                SNew(SOdysseySinglePropertyView, BrushOptions, UOdysseyBrushOptions::GetFlowPropertyName(), FSinglePropertyParams())
                 .InnerPadding(10.f)
                 .ValueWidthOverride(100.f)
             ],
@@ -614,7 +626,7 @@ UOdysseyPainterEditorRasterDrawingTool::StrokeEnd()
 float
 UOdysseyPainterEditorRasterDrawingTool::AdaptShapeStep(float iStep)
 {
-    return (iStep / 100.f) * BrushOptions->Size;
+    return (iStep / 100.f) * BrushOptions->GetSize();
 }
 
 //--------------------------------------------------------------------------------------
@@ -637,8 +649,8 @@ UOdysseyPainterEditorRasterDrawingTool::RefreshBrushInstance(bool iApplyOverride
 void
 UOdysseyPainterEditorRasterDrawingTool::AddSize(int iAmount)
 {
-    float value = FMath::Max(BrushOptions->Size + iAmount, 0.f);
-    FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Size), value);
+    float value = FMath::Max(BrushOptions->GetSize() + iAmount, 0.f);
+    BrushOptions->SetSize(value);
 }
 
 void
@@ -786,9 +798,9 @@ UOdysseyPainterEditorRasterDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* i
     if (brushOptionsOverrides)
     {
         if (brushOptionsOverrides->bOverride_Size)
-            FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Size), brushOptionsOverrides->Size);
+            BrushOptions->SetSize(brushOptionsOverrides->Size);
         if (brushOptionsOverrides->bOverride_Flow)
-            FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Flow), brushOptionsOverrides->Flow);
+            BrushOptions->SetFlow(brushOptionsOverrides->Flow);
     }
 
     UOdysseyPainterEditorRasterDrawingToolOverrides* toolOverrides = Cast<UOdysseyPainterEditorRasterDrawingToolOverrides>(iBrushInstance->EditorOverrides[UOdysseyPainterEditorRasterDrawingToolOverrides::StaticClass()]);

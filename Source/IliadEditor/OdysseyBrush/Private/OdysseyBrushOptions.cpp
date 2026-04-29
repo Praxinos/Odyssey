@@ -12,16 +12,66 @@ UOdysseyBrushOptions::UOdysseyBrushOptions(const FObjectInitializer& iObjectInit
 }
 
 void
+UOdysseyBrushOptions::BeginInteractiveMode()
+{
+    mIsInInteractiveMode = true;
+}
+
+void
+UOdysseyBrushOptions::EndInteractiveMode()
+{
+    mIsInInteractiveMode = false;
+}
+
+bool
+UOdysseyBrushOptions::IsInInteractiveMode() const
+{
+    return mIsInInteractiveMode;
+}
+
+void
 UOdysseyBrushOptions::SetSize(float InSize)
 {
     Size = InSize;
-    mOnPropertyChangedDelegate.Broadcast();
+
+    if (!IsInInteractiveMode())
+        mOnPropertyChangedDelegate.Broadcast();
 }
 
 float
 UOdysseyBrushOptions::GetSize() const
 {
     return Size;
+}
+
+void
+UOdysseyBrushOptions::SetFlow(float InFlow)
+{
+    Flow = InFlow;
+
+    if (!IsInInteractiveMode())
+        mOnPropertyChangedDelegate.Broadcast();
+}
+
+float
+UOdysseyBrushOptions::GetFlow() const
+{
+    return Flow;
+}
+
+void
+UOdysseyBrushOptions::SetColor(FOdysseyBrushColor InColor)
+{
+    Color = InColor;
+
+    if (!IsInInteractiveMode())
+        mOnPropertyChangedDelegate.Broadcast();
+}
+
+FOdysseyBrushColor
+UOdysseyBrushOptions::GetColor() const
+{
+    return Color;
 }
 
 void

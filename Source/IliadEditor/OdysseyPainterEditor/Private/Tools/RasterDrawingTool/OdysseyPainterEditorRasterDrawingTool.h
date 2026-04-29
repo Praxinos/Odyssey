@@ -59,8 +59,11 @@ public:
 
     virtual void Reset() override;
 
+    virtual void BeginInteractiveMode();
+    virtual void EndInteractiveMode();
+
     virtual bool HasRadius() const override;
-    virtual void SetRadius(float Radius) override;
+    virtual void SetRadius(float Radius = false) override;
     virtual float GetRadius() const override;
 
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
