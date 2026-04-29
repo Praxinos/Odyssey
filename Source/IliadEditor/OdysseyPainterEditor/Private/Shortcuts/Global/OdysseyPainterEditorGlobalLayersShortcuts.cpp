@@ -40,7 +40,7 @@ FOdysseyPainterEditorGlobalLayersShortcuts::MapActionsToCommandList(TSharedRef<F
     {
         iCommandList->MapAction(
             FOdysseyPainterEditorCommands::Get().ChangeLayerOpacity[i],
-            FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalLayersShortcuts::Action_ChangeLayerOpacity, i * 10.f),
+            FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalLayersShortcuts::Action_ChangeLayerOpacity, i / 10.f),
             FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalLayersShortcuts::CanAction_ChangeLayerOpacity)
         );
     }
