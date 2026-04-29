@@ -57,6 +57,7 @@ namespace UnrealBuildTool.Rules
                     "SlateCore",
                     "RHI",
                     "RenderCore",
+                    "UnrealEd",
 
                     "OdysseyCore",
                     "OdysseyCoreEditor",

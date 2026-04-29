@@ -15,9 +15,23 @@ class FOdysseyAnimationMediaControls;
 class UOdysseyAnimation;
 class UTextureRenderTarget2D;
 
+#if WITH_EDITOR
+    /*
+    * Allows us to react to Tick events at runtime
+    *
+    * We expplicitely use FTickableEditorObject here because
+    * using only FTickableEditorObject and setting IsTickableInEditor()
+    * would prevent ticking while dragging sliders or while in a blocking window
+    */
+    using FOdysseyTickClass = FTickableEditorObject;
+#else
+    //Allows us to react to Tick events at runtime
+    using FOdysseyTickClass = FTickableGameObject;
+#endif
+
 class ODYSSEYANIMATION_API FOdysseyAnimationMediaSamples
     : public IMediaSamples
-    , public FTickableGameObject //Allows us to react to Tick events
+    , public FOdysseyTickClass //Allows us to react to Tick events
 {
 public:
     FOdysseyAnimationMediaSamples();
@@ -46,7 +60,6 @@ public:
 
 protected:
     // FTickableGameObject implementation
-    virtual bool IsTickableInEditor() const override { return true; }
     virtual void Tick(float DeltaTime) override;
     virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(FOdysseyAnimationMediaTextureSample, STATGROUP_Tickables); }
 

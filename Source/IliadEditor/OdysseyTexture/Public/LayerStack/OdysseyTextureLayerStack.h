@@ -5,7 +5,7 @@
 
 #include "OdysseyLayerStack.h"
 #include "OdysseySurfaceTexture2DEditable.h"
-#include "Tickable.h"
+#include "TickableEditorObject.h"
 #include "OdysseyInvalidTileMap.h"
 #include "OdysseyRenderingAbility.h"
 
@@ -28,7 +28,7 @@ enum class EOdysseyTextureLayerStackTextureUpdateMode
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerStack
     : public UOdysseyLayerStack
-    , public FTickableGameObject
+    , public FTickableEditorObject //Allows us to react to Tick events
 {
     GENERATED_BODY()
 
@@ -104,9 +104,8 @@ public:
     virtual FIntRect GetDefaultRenderRect() const override;
 
 private:
-    virtual bool IsTickableInEditor() const override { return true; }
-    virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( UOdysseyTextureLayerStack, STATGROUP_Tickables); }
     virtual void Tick(float DeltaTime) override;
+    virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( UOdysseyTextureLayerStack, STATGROUP_Tickables); }
 
 private:
     void CreateRenderTarget();
