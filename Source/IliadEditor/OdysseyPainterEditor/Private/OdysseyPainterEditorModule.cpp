@@ -128,7 +128,7 @@ FOdysseyPainterEditorModule::RegisterEditorMode()
         FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId,
         LOCTEXT("editor-mode.name", "Odyssey"),
         FSlateIcon(FOdysseyStyle::GetStyleSetName(), "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40", "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16"),
-        true, 200 );
+        true );
 }
 
 void
