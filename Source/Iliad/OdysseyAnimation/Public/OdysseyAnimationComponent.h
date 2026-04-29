@@ -18,16 +18,28 @@ enum class EOdysseyAnimationComponentMode
 };
 
 UENUM()
-enum class EOdysseyAnimationComponentScaling
+enum class EOdysseyAnimationComponentMeasurement
 {
-    AdjustWidth,
-    AdjustHeight
+    Height,
+    Width
+};
+
+USTRUCT(BlueprintType)
+struct FOdysseyAnimationComponentForceRatio
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, Category="Transform")
+    float BaseSize = 100.f;
+
+    UPROPERTY(EditAnywhere, Category="Transform")
+    EOdysseyAnimationComponentMeasurement BaseMeasurement = EOdysseyAnimationComponentMeasurement::Height;
 };
 
 /**
  * A component containing an animation to attach to an actor
  */
-UCLASS(Blueprintable, ClassGroup=(Animation), HideCategories=(Materials), editinlinenew, meta=(BlueprintSpawnableComponent, PrioritizeCategories="Actions"))
+UCLASS(Blueprintable, ClassGroup=(Animation), HideCategories=(Materials), editinlinenew, meta=(BlueprintSpawnableComponent, PrioritizeCategories="Animation"))
 class ODYSSEYANIMATION_API UOdysseyAnimationComponent : public UStaticMeshComponent
 {
     GENERATED_UCLASS_BODY()
@@ -52,13 +64,10 @@ public:
     UMaterialInterface* GetAnimationMaterial() const;
 
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationComponent")
-    bool GetAutoScale() const;
+    bool GetForceAnimationRatio() const;
 
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationComponent")
-    float GetAutoScaleSize() const;
-
-    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationComponent")
-    EOdysseyAnimationComponentScaling GetAutoScaleMode() const;
+    FOdysseyAnimationComponentForceRatio GetForceAnimationRatioParameters() const;
 
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
     void SetAnimation(UOdysseyAnimation* Animation);
@@ -73,13 +82,10 @@ public:
     void SetAnimationMaterial(UMaterialInterface* Material);
 
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
-    void SetAutoScale(bool Value);
+    void SetForceAnimationRatio(bool ForceRatio);
 
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
-    void SetAutoScaleSize(float Size);
-
-    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
-    void SetAutoScaleMode(EOdysseyAnimationComponentScaling Mode);
+    void SetForceAnimationRatioParameters(FOdysseyAnimationComponentForceRatio Parameters);
 
 public:
     virtual void PostLoad() override;
@@ -99,7 +105,7 @@ protected:
     void PlayerChanged();
     void LODGroupChanged();
     void MaterialChanged();
-    void AutoScaleChanged();
+    void ForceAnimationRatioChanged();
 
     void OnPlayerAnimationChanged();
     void RescaleToMatchAnimation(UOdysseyAnimation* iAnimation);
@@ -128,14 +134,11 @@ protected:
     UPROPERTY( EditAnywhere, Category="Animation", meta=(DisplayName="Texture Group"), AssetRegistrySearchable )
     TEnumAsByte<enum TextureGroup> LODGroup = TEXTUREGROUP_Pixels2D;
 
-    UPROPERTY(EditAnywhere, Category="Animation")
-    bool AutoScale = true;
+    UPROPERTY(EditAnywhere, Category="Animation", meta=(InlineEditConditionToggle))
+    bool bForceAnimationRatio = true;
 
-    UPROPERTY(EditAnywhere, Category="Animation", meta=(EditCondition = "AutoScale", EditConditionHides))
-    float AutoScaleSize = 100.f;
-
-    UPROPERTY(EditAnywhere, Category="Animation", meta=(EditCondition = "AutoScale", EditConditionHides))
-    EOdysseyAnimationComponentScaling AutoScaleMode = EOdysseyAnimationComponentScaling::AdjustWidth;
+    UPROPERTY(EditAnywhere, Category="Animation", meta=(EditCondition = "bForceAnimationRatio"))
+    FOdysseyAnimationComponentForceRatio ForceAnimationRatio;
 
 private:
     UPROPERTY(Instanced)
@@ -232,12 +235,9 @@ public:
     UPROPERTY()
     TObjectPtr<UOdysseyAnimationPlayer> DefaultPlayer;
 
-    UPROPERTY(EditAnywhere, Category="Animation")
-    bool AutoScale = true;
+    UPROPERTY()
+    bool bForceAnimationRatio = true;
 
-    UPROPERTY(EditAnywhere, Category="Animation")
-    float AutoScaleSize = 100.f;
-
-    UPROPERTY(EditAnywhere, Category="Animation")
-    EOdysseyAnimationComponentScaling AutoScaleMode = EOdysseyAnimationComponentScaling::AdjustWidth;
+    UPROPERTY()
+    FOdysseyAnimationComponentForceRatio ForceAnimationRatio;
 };

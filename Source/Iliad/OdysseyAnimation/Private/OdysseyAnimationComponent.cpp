@@ -207,10 +207,8 @@ UOdysseyAnimationComponent::ApplyComponentInstanceData(FOdysseyAnimationComponen
     Player = ComponentInstanceData->Player;
     Animation = ComponentInstanceData->Animation;
     LODGroup = ComponentInstanceData->LODGroup;
-    AutoScale = ComponentInstanceData->AutoScale;
-    AutoScaleSize = ComponentInstanceData->AutoScaleSize;
-    AutoScaleMode = ComponentInstanceData->AutoScaleMode;
-
+    bForceAnimationRatio = ComponentInstanceData->bForceAnimationRatio;
+    ForceAnimationRatio = ComponentInstanceData->ForceAnimationRatio;
     //Here we don't call AnimationChanged() and similar "*Changed()" functions
     //to avoid calling RescaleToMatchAnimation()
     //The correct Transform is already applied by UStaticMeshComponent::ApplyComponentInstanceData()
@@ -247,24 +245,24 @@ UOdysseyAnimationComponent::RescaleToMatchAnimation(UOdysseyAnimation* iAnimatio
     if (!iAnimation)
         return;
 
-    if (!AutoScale)
+    if (!bForceAnimationRatio)
         return;
 
     float scale = 1.0f;
     FVector scaleVector(1.0f, 1.0f, 1.0f);
-    switch (AutoScaleMode)
+    switch (ForceAnimationRatio.BaseMeasurement)
     {
-        case EOdysseyAnimationComponentScaling::AdjustWidth:
+        case EOdysseyAnimationComponentMeasurement::Height:
         {
             scale = (float)iAnimation->GetWidth() / (float)iAnimation->GetHeight();
-            scaleVector = FVector(scale * AutoScaleSize, AutoScaleSize, AutoScaleSize);
+            scaleVector = FVector(scale * ForceAnimationRatio.BaseSize, ForceAnimationRatio.BaseSize, ForceAnimationRatio.BaseSize);
         }
         break;
 
-        case EOdysseyAnimationComponentScaling::AdjustHeight:
+        case EOdysseyAnimationComponentMeasurement::Width:
         {
             scale = (float)iAnimation->GetHeight() / (float)iAnimation->GetWidth();
-            scaleVector = FVector(AutoScaleSize, scale *AutoScaleSize, AutoScaleSize);
+            scaleVector = FVector(ForceAnimationRatio.BaseSize, scale *ForceAnimationRatio.BaseSize, ForceAnimationRatio.BaseSize);
         }
         break;
     }
@@ -311,48 +309,33 @@ UOdysseyAnimationComponent::PlayerChanged()
 }
 
 bool
-UOdysseyAnimationComponent::GetAutoScale() const
+UOdysseyAnimationComponent::GetForceAnimationRatio() const
 {
-    return AutoScale;
+    return bForceAnimationRatio;
 }
 
-float
-UOdysseyAnimationComponent::GetAutoScaleSize() const
+FOdysseyAnimationComponentForceRatio
+UOdysseyAnimationComponent::GetForceAnimationRatioParameters() const
 {
-    return AutoScaleSize;
-}
-
-EOdysseyAnimationComponentScaling
-UOdysseyAnimationComponent::GetAutoScaleMode() const
-{
-    return AutoScaleMode;
+    return ForceAnimationRatio;
 }
 
 void
-UOdysseyAnimationComponent::SetAutoScale(bool Value)
+UOdysseyAnimationComponent::SetForceAnimationRatio(bool ForceRatio)
 {
     Modify();
 
-    AutoScale = Value;
-    AutoScaleChanged();
+    bForceAnimationRatio = ForceRatio;
+    ForceAnimationRatioChanged();
 }
 
 void
-UOdysseyAnimationComponent::SetAutoScaleSize(float Size)
+UOdysseyAnimationComponent::SetForceAnimationRatioParameters(FOdysseyAnimationComponentForceRatio Parameters)
 {
     Modify();
 
-    AutoScaleSize = Size;
-    AutoScaleChanged();
-}
-
-void
-UOdysseyAnimationComponent::SetAutoScaleMode(EOdysseyAnimationComponentScaling iMode)
-{
-    Modify();
-
-    AutoScaleMode = iMode;
-    AutoScaleChanged();
+    ForceAnimationRatio = Parameters;
+    ForceAnimationRatioChanged();
 }
 
 void
@@ -368,7 +351,7 @@ UOdysseyAnimationComponent::LODGroupChanged()
 }
 
 void
-UOdysseyAnimationComponent::AutoScaleChanged()
+UOdysseyAnimationComponent::ForceAnimationRatioChanged()
 {
     RescaleToMatchAnimation(Animation);
 }
@@ -391,11 +374,12 @@ UOdysseyAnimationComponent::PropertyChanged(const FName& iPropertyName, bool iIs
             LODGroupChanged();
     }
 
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, AutoScale) ||
-        iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, AutoScaleSize) ||
-        iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, AutoScaleMode)
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, bForceAnimationRatio) ||
+        iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, ForceAnimationRatio) ||
+        iPropertyName == GET_MEMBER_NAME_CHECKED(FOdysseyAnimationComponentForceRatio, BaseSize) ||
+        iPropertyName == GET_MEMBER_NAME_CHECKED(FOdysseyAnimationComponentForceRatio, BaseMeasurement)
         )
-        AutoScaleChanged();
+        ForceAnimationRatioChanged();
 }
 
 void
@@ -636,7 +620,6 @@ FOdysseyAnimationComponentInstanceData::FOdysseyAnimationComponentInstanceData(c
     Player = SourceComponent->Player;
     LODGroup = SourceComponent->LODGroup;
     DefaultPlayer = SourceComponent->DefaultPlayer;
-    AutoScale = SourceComponent->AutoScale;
-    AutoScaleSize = SourceComponent->AutoScaleSize;
-    AutoScaleMode = SourceComponent->AutoScaleMode;
+    bForceAnimationRatio = SourceComponent->bForceAnimationRatio;
+    ForceAnimationRatio = SourceComponent->ForceAnimationRatio;
 }
