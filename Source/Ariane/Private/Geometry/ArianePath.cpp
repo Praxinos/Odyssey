@@ -575,7 +575,9 @@ FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
 
             AverageVector /= Vertex->GetSegments().Num();
 
-            //if( AverageVector.IsNearlyZero() == false )
+            AverageVector.Normalize();
+
+            if( AverageVector.IsNearlyZero() == false )
             {
                 FVector Perpendicular = OptionalPerpendicularVector ? *OptionalPerpendicularVector
                                                                     : AverageVector.Cross( SegmentVector );
@@ -585,7 +587,7 @@ FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
         }
     }
 
-    if( TangentVector.IsNearlyZero() )
+    if( TangentVector.IsNearlyZero(0.001f) )
     {
         TangentVector = SegmentVector;
     }
