@@ -55,7 +55,9 @@ BoardSequenceTools::CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& i
     {
         FNotificationInfo Info( LOCTEXT( "cant-create-take-in-locked-level", "The requested operation could not be completed because the level is locked." ) );
         Info.ExpireDuration = 5.0f;
-        FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
+        TSharedPtr<SNotificationItem> notification = FSlateNotificationManager::Get().AddNotification( Info );
+        if (notification)
+            notification->SetCompletionState( SNotificationItem::CS_Fail );
         return nullptr;
     }
 

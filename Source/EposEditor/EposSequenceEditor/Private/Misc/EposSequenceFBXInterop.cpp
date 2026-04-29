@@ -262,13 +262,17 @@ void FEposSequenceFBXInterop::ExportFBXInternal(const FString& ExportFilename, c
                 Info.Hyperlink = FSimpleDelegate::CreateStatic([](FString InFilename) { FPlatformProcess::ExploreFolder(*InFilename); }, ExportFilename);
                 Info.HyperlinkText = FText::FromString(ExportFilename);
                 Info.ExpireDuration = 5.0f;
-                FSlateNotificationManager::Get().AddNotification(Info)->SetCompletionState(SNotificationItem::CS_Success);
+                TSharedPtr<SNotificationItem> notification = FSlateNotificationManager::Get().AddNotification(Info);
+                if (notification)
+                    notification->SetCompletionState(SNotificationItem::CS_Success);
             }
             else
             {
                 FNotificationInfo Info(NSLOCTEXT("Sequencer", "ExportFBXFailed", "FBX Export Failed."));
                 Info.ExpireDuration = 5.0f;
-                FSlateNotificationManager::Get().AddNotification(Info)->SetCompletionState(SNotificationItem::CS_Fail);
+                TSharedPtr<SNotificationItem> notification = FSlateNotificationManager::Get().AddNotification(Info);
+                if (notification)
+                    notification->SetCompletionState(SNotificationItem::CS_Fail);
             }
         }
 

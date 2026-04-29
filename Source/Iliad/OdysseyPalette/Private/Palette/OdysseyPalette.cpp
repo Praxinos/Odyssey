@@ -658,7 +658,9 @@ void UOdysseyPalette::RefreshReferencedAssets()
 
     FNotificationInfo Info(confirmText);
     Info.ExpireDuration = 5.0f;
-    FSlateNotificationManager::Get().AddNotification(Info)->SetCompletionState(SNotificationItem::CS_Success);
+    TSharedPtr<SNotificationItem> notification = FSlateNotificationManager::Get().AddNotification(Info);
+    if (notification)
+        notification->SetCompletionState(SNotificationItem::CS_Success);
 }
 
 TArray<FName>

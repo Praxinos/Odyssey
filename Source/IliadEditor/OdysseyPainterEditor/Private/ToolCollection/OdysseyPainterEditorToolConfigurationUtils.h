@@ -49,7 +49,7 @@ struct FToolDoubleValue
     GENERATED_BODY()
 
     UPROPERTY()
-    double Value = 0.lf;
+    double Value = 0.f;
 };
 
 USTRUCT()

@@ -305,7 +305,9 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
                                              {
                                                  FNotificationInfo Info( LOCTEXT( "multiple-animations", "There are multiple animations. Select one of them." ) );
                                                  Info.ExpireDuration = 5.0f;
-                                                 FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
+                                                 TSharedPtr<SNotificationItem> notification = FSlateNotificationManager::Get().AddNotification( Info );
+                                                 if (notification)
+                                                    notification->SetCompletionState( SNotificationItem::CS_Fail );
                                              }
                                              if( animation_count != 1 )
                                                  return false;
@@ -347,7 +349,9 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
                                              {
                                                  FNotificationInfo Info( LOCTEXT( "multiple-animations", "There are multiple animations. Select one of them." ) );
                                                  Info.ExpireDuration = 5.0f;
-                                                 FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
+                                                 TSharedPtr<SNotificationItem> notification = FSlateNotificationManager::Get().AddNotification( Info );
+                                                 if (notification)
+                                                    notification->SetCompletionState( SNotificationItem::CS_Fail );
                                              }
                                              if( animation_count != 1 )
                                                  return false;
