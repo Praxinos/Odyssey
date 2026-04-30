@@ -18,10 +18,10 @@ struct FOdysseyPainterEditorAnimationImportResult
 {
     GENERATED_BODY()
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Import")
     TArray<UOdysseyAnimationLayerImageRaster*> mImportedLayers;
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Import")
     TArray<UOdysseyAnimationCellImageRaster*> mImportedCells;
 };
 

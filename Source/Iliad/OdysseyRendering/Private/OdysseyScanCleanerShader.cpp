@@ -13,6 +13,7 @@
 #include "MeshPassProcessor.h"
 #include "PixelShaderUtils.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "TextureResource.h"
 
 class FOdysseyScanCleanerShaderPS : public FGlobalShader
 {

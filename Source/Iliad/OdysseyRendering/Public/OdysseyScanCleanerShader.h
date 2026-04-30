@@ -8,7 +8,9 @@
 #include "OdysseyBlendingMode.h"
 #include "OdysseyAntiAliasing.h"
 #include "ShaderParameterMacros.h"
+#include "Curves/RealCurve.h"
 
+class UTextureRenderTarget2D;
 class FRDGBuilder;
 
 BEGIN_SHADER_PARAMETER_STRUCT(FOdysseyScanCleanerShaderParameters, )

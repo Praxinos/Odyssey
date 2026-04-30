@@ -100,13 +100,13 @@ private:
 
 protected:
     //Positioning
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Import")
     EOdysseyImportTextureAlignment mAlignment = EOdysseyImportTextureAlignment::Center;
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Import")
     EOdysseyImportTextureScaling mScaling = EOdysseyImportTextureScaling::None;
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Import")
     EOdysseyAntiAliasing mResamplingMethod = EOdysseyAntiAliasing::Bilinear;
 
     //Scan Cleaner

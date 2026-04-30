@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Components/StaticMeshComponent.h"
+#include "Engine/TextureDefines.h"
 #include "OdysseyAnimationComponent.generated.h"
 
 class UOdysseyAnimation;

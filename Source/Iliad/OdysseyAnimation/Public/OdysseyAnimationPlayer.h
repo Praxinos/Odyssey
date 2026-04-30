@@ -10,6 +10,7 @@
 #include "OdysseyRenderingAbility.h"
 #include "Misc/Attribute.h"
 #include "Misc/FrameTime.h"
+#include "Engine/TextureDefines.h"
 
 #include "OdysseyAnimationPlayer.generated.h"
 
