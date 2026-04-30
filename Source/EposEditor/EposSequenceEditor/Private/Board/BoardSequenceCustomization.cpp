@@ -27,6 +27,7 @@
 #include "EposSequenceHelpers.h"
 #include "EposSequenceToolbarHelpers.h"
 #include "EposTracksModule.h"
+#include "Misc/EposSequenceEditorSpawnRegister.h"
 #include "Misc/EposSequenceFBXInterop.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyViewportDrawingEditorEdMode.h"
@@ -1582,6 +1583,13 @@ FBoardSequenceCustomization::OnGlobalTimeChanged()
                 sequencer->ExitSilentMode();
             }
         }
+    }
+    else
+    {
+        TSharedPtr<FEposSequenceEditorSpawnRegister> spawnRegister = StaticCastSharedPtr<FEposSequenceEditorSpawnRegister>( sequencer->GetSpawnRegister().AsShared().ToSharedPtr() );
+        check( spawnRegister );
+
+        spawnRegister->ResetCameraLock();
     }
 }
 
