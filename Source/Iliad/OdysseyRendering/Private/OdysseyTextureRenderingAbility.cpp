@@ -88,6 +88,9 @@ IOdysseyTextureRenderingAbility::Render_GameThread(UTextureRenderTarget2D* iRend
         return;
     }
 
+    checkf(iRenderTarget, TEXT( "Render_GameThread::iRenderTarget is Null" ))
+    checkf(iRenderTarget->GameThread_GetRenderTargetResource(), TEXT( "Render_GameThread::GetRenderTargetResource is Null" ))
+
     ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(
         [this, renderFunction, iRenderTarget, featureLevel, iSrcRect, iDstRect](FRHICommandListImmediate& RHICmdList)
         {

@@ -568,6 +568,9 @@ UOdysseyAnimation::PreSave(FObjectPreSaveContext SaveContext)
     if ( SaveContext.IsCooking() )
         return;
 
+    if( !FApp::CanEverRender() ) //Returns false while packaging a Game, in which case any rendering is forbidden and Render_GameThread would fail
+        return;
+
     Frames.Empty();
 
     if ( PreserveLayerStackAtRuntime )
@@ -641,8 +644,17 @@ UOdysseyAnimation::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags 
 void
 UOdysseyAnimation::OnRefreshReferencedPalette(UOdysseyPalette* iPalette)
 {
+    //CanEverRender() returns false while packaging a Game, in which case any rendering is forbidden
+    //Refreshing cells palette, leads to rendering, so we don't want that
+    //Also if this function is called during Palette's PreSave
+    //And we ABSOLUTELY don't want SavePackage() to be called at this moment
+    //because it leads to assets file handles to be locked on windows, preventing any Game Packaging to succeed
+    if( !FApp::CanEverRender() )
+        return;
+
     //Save the animation before applying the palette, because all these refresh only affect the "on disk" version of the asset, not the dirty "on memory" one.
     //Therefore, if the palette is freshly added to the (then dirtied) animation, the refresh won't apply to it
+
     UPackage* package = GetOutermost();
     FSavePackageArgs saveArgs;
     saveArgs.TopLevelFlags = RF_Standalone;
