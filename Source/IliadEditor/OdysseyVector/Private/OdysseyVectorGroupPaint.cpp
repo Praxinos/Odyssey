@@ -2123,7 +2123,9 @@ FOdysseyVectorGroupPaint::MakeExtendedSegments( FOdysseyVectorVertex* iVertex
         // Note: bbox could be computed from the above polygon processing thing
         SetSegmentBBox( &extendedSegment, iConversionMatrix );
 
-        static_cast<FOdysseyVectorPath*>(vertexOwner)->AddSegment( &extendedSegment );
+        // note: pass false as the last argument. These segments should not be invalidated as they are created in the Update function()
+        // They would populate the mInvalidatedSegment list and would also keep the whole object tree invalidated event AFTER the update.
+        static_cast<FOdysseyVectorPath*>(vertexOwner)->AddSegment( &extendedSegment, false );
     }
 }
 

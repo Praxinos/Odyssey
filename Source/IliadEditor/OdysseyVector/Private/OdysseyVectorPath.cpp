@@ -572,7 +572,7 @@ FOdysseyVectorPath::RemoveAllVertices()
 }
 
 void
-FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
+FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment, bool bInvalidate )
 {
     mSegmentList.push_back( iSegment );
 
@@ -581,14 +581,17 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
     iSegment->GetVertex(0)->AddSegment( iSegment );
     iSegment->GetVertex(1)->AddSegment( iSegment );
 
-    InvalidateSegment( iSegment );
+    if( bInvalidate )
+    {
+        InvalidateSegment( iSegment );
 
-    // Invalidate vertices as well (for handle alignement e.g
-    iSegment->GetVertex(0)->Invalidate();
-    iSegment->GetVertex(1)->Invalidate();
+        // Invalidate vertices as well (for handle alignement e.g
+        iSegment->GetVertex(0)->Invalidate();
+        iSegment->GetVertex(1)->Invalidate();
 
-    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE)
-                                                       .Set(FOdysseyVectorObjectInvalidationFlags::TOPOLOGY) );
+        Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE)
+                                                           .Set(FOdysseyVectorObjectInvalidationFlags::TOPOLOGY) );
+    }
 }
 
 void

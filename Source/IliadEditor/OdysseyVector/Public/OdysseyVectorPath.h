@@ -94,7 +94,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @brief Add a segment to this path.
          * @param iSegment a pointer to the segment to add.
          */
-        void AddSegment( FOdysseyVectorSegment* iSegment );
+        void AddSegment( FOdysseyVectorSegment* iSegment, bool bInvalidate = true );
 
         /**
          * @brief Add a vertex to this path.
