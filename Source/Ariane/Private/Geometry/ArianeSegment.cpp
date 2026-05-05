@@ -15,6 +15,7 @@ FArianeSegment::FArianeSegment( )
     : Guid( FGuid::NewGuid() )
     , OwnerID()
     , Length ( 0.0f )
+    , bInvalidated ( false )
 {
 }
 
@@ -23,6 +24,7 @@ FArianeSegment::FArianeSegment( FArianeObject* Owner, FArianeVertex* iVertex0, F
     , OwnerID( Owner )
     , Vertices { iVertex0, iVertex1 }
     , Length ( 0.0f )
+    , bInvalidated ( false )
 {
     Init();
 }
@@ -198,18 +200,29 @@ FArianeSegment::Update()
     Length = ( GetVertex(1)->GetPosition() - GetVertex(0)->GetPosition() ).Length();
 
     UpdateBounds();
+
+    bInvalidated = false;
 }
+
+bool
+FArianeSegment::IsInvalidated()
+{
+    return bInvalidated;
+}
+
 
 void
 FArianeSegment::Invalidate()
 {
-    if( OwnerID.GetObject() )
+    if( OwnerID.GetObject() && ( bInvalidated == false ) )
     {
         if( OwnerID.GetObject()->GetClass() == FArianePath::StaticClass() )
         {
             FArianePath* Path = static_cast<FArianePath*>( OwnerID.GetObject() );
 
             Path->InvalidateSegment( this );
+
+            bInvalidated = true;
         }
     }
 }
