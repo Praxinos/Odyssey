@@ -48,7 +48,7 @@
 FOdysseyViewportDrawingEditorExtension::~FOdysseyViewportDrawingEditorExtension()
 {
     SetActor(nullptr);
-    mPaintingAdapter->SetTexture(nullptr);
+    mPaintingAdapter->Finalize();
     FCoreUObjectDelegates::OnObjectPropertyChanged.RemoveAll(this);
 
     CleanSourceTexture();

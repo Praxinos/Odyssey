@@ -249,16 +249,21 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     params.mTextureWidth = texture->GetSurfaceWidth();
     params.mTextureHeight = texture->GetSurfaceHeight();
 
-    TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
     params.mTextureToHUD = FOdysseyHUDElement::FDrawHUDParams::FTextureToHUD::CreateLambda(
-        [viewportWidget, w = params.mTextureWidth, h = params.mTextureHeight](const FVector2D& iPosition)
+        [this, w = params.mTextureWidth, h = params.mTextureHeight](const FVector2D& iPosition)
         {
+            TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
+            if (!viewportWidget)
+                return FVector2D(0, 0);
             return viewportWidget->ToWorld(iPosition - FVector2D(w / 2.f, h / 2.f));
         }
     );
     params.mHUDToTexture = FOdysseyHUDElement::FDrawHUDParams::FTextureToHUD::CreateLambda(
-        [viewportWidget, w = params.mTextureWidth, h = params.mTextureHeight](const FVector2D& iPosition)
+        [this, w = params.mTextureWidth, h = params.mTextureHeight](const FVector2D& iPosition)
         {
+            TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
+            if (!viewportWidget)
+                return FVector2D(0, 0);
             return viewportWidget->ToLocal(iPosition) + FVector2D(w / 2.f, h / 2.f);
         }
     );

@@ -151,6 +151,8 @@ FOdysseyPainterEditor::~FOdysseyPainterEditor()
 
     //Unload the source properly to ensure no tool is still processing stuff for example
     SetSource(nullptr);
+
+    mExtensions.Empty();
     mTabs.Empty();
 }
 
