@@ -546,7 +546,7 @@ UOdysseyTextureLayerImageVector::PreSave(FObjectPreSaveContext SaveContext)
     //If some drawing flags are needed
     //As UpdateDrawingFlags() will return true and enforce Texture redraw.
     mDrawingFlags = 0;
-    CopyVectorBlockInRenderTexture(FIntRect(0, 0, mVectorBlock->GetWidth(), mVectorBlock->GetHeight()));
+    InitTexture();
 }
 
 #if WITH_EDITOR

@@ -365,8 +365,6 @@ UOdysseyAnimationCellImageVector::PreSave(FObjectPreSaveContext SaveContext)
 {
     Super::PreSave(SaveContext);
 
-    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mVectorBlock->GetWidth(), mVectorBlock->GetHeight(), mVectorBlock->GetFormat());
-
     //Setting mDrawingFlags here ensures the Texture will update correctly on the next call to BuildTextureRenderer()
     //If some drawing flags are needed
     //As UpdateDrawingFlags() will return true and enforce Texture redraw.
