@@ -105,6 +105,7 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
                 EditedPath->SetLineType( LineType );
 
                 PlotVertex( ViewportClient, PointerState, true );
+                //PlotVertex( ViewportClient, FArianePointerState( PointerState.ViewportX + 100, PointerState.ViewportY + 100 ), true );
             }
         }
 

@@ -3,6 +3,8 @@
 
 // Ariane headers
 #include "ArianeLayerDrawing.h"
+#include "ArianeLayerStack.h"
+#include "ArianePainting3DComponent.h"
 #include "ArianePath.h"
 
 UArianeLayerDrawing::~UArianeLayerDrawing()
@@ -66,6 +68,9 @@ UArianeLayerDrawing::PostLoad()
     }
 
     Update( false );
+
+    // recompute the bounding volumes or else nothing will draw
+    GetLayerStack()->GetPainting3DComponent()->UpdateComponentToWorld();
 }
 
 void
@@ -86,6 +91,9 @@ UArianeLayerDrawing::PostEditUndo()
     }
 
     Update( false );
+
+    // recompute the bounding volumes or else nothing will draw
+    GetLayerStack()->GetPainting3DComponent()->UpdateComponentToWorld();
 }
 
 FArianeObject*

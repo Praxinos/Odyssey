@@ -63,9 +63,10 @@ class ARIANE_API FArianePathGeometry3D
 
         void InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices, TArray<uint32>& Indices );
         FVector GetTangentVectorAt( FArianeSegment* Segment
-                                  , FVector* OptionalPerpendicularVector
                                   , double T
                                   , bool bNormalize );
+        FVector GetLeavingVectorAt( FArianeSegment* Segment
+                                  , double T );
 
     protected:
         FArianePath* Path;

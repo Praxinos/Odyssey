@@ -32,6 +32,8 @@ UArianePainting3DComponent::UArianePainting3DComponent()
 {
     LayerStack = CreateDefaultSubobject<UArianeLayerStack>(TEXT("LayerStack"));
 
+    LayerStack->SetupAttachment( this );
+
     PrimaryComponentTick.bCanEverTick = true;
     PrimaryComponentTick.bStartWithTickEnabled = true;
     PrimaryComponentTick.SetTickFunctionEnable(true);
@@ -382,11 +384,11 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
             FArianePathGeometry3D& Mesh = Path->GetGeometry3D();
 
             if( MaterialInterface
-                && MaterialInterface->GetRenderProxy()
-                && Path->IsVisible( true )
-                && Mesh.GetVertexCount()
-                && Mesh.GetIndexBuffer().GetNumIndices()
-                && Mesh.GetIndexBuffer().IsInitialized() )
+             && MaterialInterface->GetRenderProxy()
+             && Path->IsVisible( true )
+             && Path->GetSegments().Num()
+             && Mesh.GetIndexBuffer().GetNumIndices()
+             && Mesh.GetIndexBuffer().IsInitialized() )
             {
                 // Allocate a mesh batch and get a ref to the first element
                 FMeshBatch& MeshBatch = Collector.AllocateMesh();

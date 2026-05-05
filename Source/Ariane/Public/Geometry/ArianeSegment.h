@@ -129,6 +129,7 @@ struct ARIANE_API FArianeSegment
 
         /** Invalidate the segment */
         void Invalidate();
+        bool IsInvalidated();
 
         const FGuid& GetGuid();
 
@@ -164,4 +165,5 @@ struct ARIANE_API FArianeSegment
         TArray<uint32> IndexCache;
         FBoxSphereBounds Bounds;
         double Length;
+        bool bInvalidated;
 };

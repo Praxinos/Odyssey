@@ -27,6 +27,16 @@ class ARIANEEDITOR_API UArianeEditorEraserTool : public UArianeEditorTool
 {
     GENERATED_BODY()
 
+    struct PathProcessor
+    {
+        bool bRemove;
+        TArray<FArianePath*> AddedPaths;
+        TArray<FArianeVertex*> AddedVertices;
+        TArray<FArianeSegment*> AddedSegments;
+        TArray<FArianeVertex*> RemovedVertices;
+        TArray<FArianeSegment*> RemovedSegments;
+    };
+
     struct FWayFragment;
 
     // a waypoint is met at segment vertex or when a constrast is met
@@ -124,9 +134,10 @@ public:
     enum class EVertexAdditionFlags : uint8
     {
         None                 =        0  ,
-        RemoveOriginalVertex = ( 1 << 0 ),
-        CreateDerivedVertex  = ( 1 << 1 ),
-        CreateBoundaryVertex = ( 1 << 2 )
+        KeepOriginalVertex   = ( 1 << 0 ),
+        RemoveOriginalVertex = ( 1 << 1 ),
+        CreateDerivedVertex  = ( 1 << 2 ),
+        CreateBoundaryVertex = ( 1 << 3 )
     };
 
 public:
@@ -204,7 +215,7 @@ protected:
     static FWayFragment* GetStartFragment( FWayFragment* Fragment );
     static ESegmentAdditionFlags SegmentAdditionPolicy( FWayFragment* InFragment, bool bSplit );
     static EVertexAdditionFlags VertexAdditionPolicy( FWayPoint* WayPoint, bool bSplit );
-    void ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
+    bool ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
                             , FArianePath* ChainPath
                             , const FArianePath::Chain& Chain
                             , TArray<FWayPoint>& WayPoints
@@ -212,7 +223,6 @@ protected:
                             , TArray<FArianePath*>& OutAddedPaths
                             , TArray<FArianeVertex*>& OutAddedVertices
                             , TArray<FArianeSegment*>& OutAddedSegments
-                            , TArray<FArianePath*>& OutRemovedPaths
                             , TArray<FArianeVertex*>& OutRemovedVertices
                             , TArray<FArianeSegment*>& OutRemovedSegments );
     static FArianeVertex* AssignVertex( FArianePath* OwnerPath

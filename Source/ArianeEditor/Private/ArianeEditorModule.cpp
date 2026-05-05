@@ -264,7 +264,7 @@ FArianeEditorModule::RegisterEditorMode()
         FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId,
         LOCTEXT("ariane-editor-mode.name", "Ariane"),
         FSlateIcon(FOdysseyStyle::GetStyleSetName(), "ArianeViewportDrawingEditMode.ArianeViewportDrawingIcon40", "ArianeViewportDrawingEditMode.ArianeViewportDrawingIcon16"),
-        true, 200 );
+        true );
 }
 
 void
