@@ -475,10 +475,23 @@ FArianePath::FindChains()
         VertexID.GetVertex()->SetChained( false );
     }
 
-    // Mark
+    // Mark Vertices with valence 1 in priority
     for( FArianeVertexID& VertexID : Vertices )
     {
-        if( VertexID.GetVertex()->IsChained() == false )
+        FArianeVertex* Vertex = VertexID.GetVertex();
+
+        if( ( Vertex->IsChained() == false ) && ( Vertex->GetSegments().Num() == 1 ) )
+        {
+            Chains.Emplace( this, VertexID.GetVertex() );
+        }
+    }
+
+    // if there are still some unmarked vertices, this normally means there are in a loop
+    for( FArianeVertexID& VertexID : Vertices )
+    {
+        FArianeVertex* Vertex = VertexID.GetVertex();
+
+        if( ( Vertex->IsChained() == false ) && ( Vertex->GetSegments().Num() == 2 ) )
         {
             Chains.Emplace( this, VertexID.GetVertex() );
         }
