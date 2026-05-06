@@ -517,6 +517,8 @@ UArianeEditorEraserTool::SegmentAdditionPolicy( FWayFragment* Fragment, bool bSp
             {
                 retFlags |= ESegmentAdditionFlags::CreateNewPath;
             }
+
+            retFlags |= ESegmentAdditionFlags::CreateDerivedSegment;
         }
     }
     else
@@ -525,11 +527,14 @@ UArianeEditorEraserTool::SegmentAdditionPolicy( FWayFragment* Fragment, bool bSp
         {
             retFlags |= ESegmentAdditionFlags::RemoveOriginalSegment;
         }
-    }
-
-    if( Fragment->bErased == false )
-    {
-        retFlags |= ESegmentAdditionFlags::CreateDerivedSegment;
+        else
+        {
+            if( ( ( Fragment->WayPoint0->Flags & FWayPoint::Original ) ==  0 )
+             || ( ( Fragment->WayPoint1->Flags & FWayPoint::Original ) ==  0 ) )
+            {
+                retFlags |= ESegmentAdditionFlags::CreateDerivedSegment;
+            }
+        }
     }
 
     return retFlags;
@@ -659,11 +664,6 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
         FWayFragment *StartFragment = GetStartFragment( FirstFragment );
         FWayFragment *CurrFragment = StartFragment;
 
-        if( bSplit )
-        {
-            bRemovePath = true;
-        }
-
         while( CurrFragment )
         {
             FWayPoint* WayPoint0 = CurrFragment->WayPoint0;
@@ -707,6 +707,9 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
                 ChainPath->ExportProperties( CurrentPath );
 
                 OutAddedPaths.Add( CurrentPath );
+
+                // Note: this if statement is met only if bSplit == true, no need to check again.
+                bRemovePath = true;
             }
 
             if( ( SegmentAdditionFlags & ESegmentAdditionFlags::CreateDerivedSegment ) == ESegmentAdditionFlags::CreateDerivedSegment )
@@ -736,7 +739,9 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
 
         if( bSplit == false )
         {
-            if( OutAddedPaths.Num() )
+            // If no segment or vertex is going to survive the erasing, we mark the path for future deletion.
+            if( ( OutRemovedVertices.Num() == ChainPath->GetVertices().Num() )
+             && ( OutRemovedSegments.Num() == ChainPath->GetSegments().Num() ) )
             {
                 bRemovePath = true;
             }
