@@ -30,8 +30,9 @@ private:
     TSharedRef<SWidget> GenerateTabletAPIComboBoxItem( FName iItem );
     void ChangeSelectionTabletAPIComboBoxItem( FName iNewSelection, ESelectInfo::Type iSelectInfo );
     FText GetComboBoxTabletAPISelectedAsText() const;
+    void OnSettingsChanged(FName iNewDriver);
 
 private:
-    FName         mTabletAPISelected;
-    TArray<FName> mOptions;
+    FName                        mTabletAPISelected;
+    TArray<FName>                mOptions;
 };

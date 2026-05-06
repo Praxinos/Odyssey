@@ -42,9 +42,10 @@ namespace UnrealBuildTool.Rules
                 new string[]
                 {
                     "CoreUObject",
-                    "EditorSubsystem",
+                    "DeveloperSettings",
                     "Engine",
                     "UnrealEd",
+                    "InputCore",
                     "StylusInput"
                     // ... add other public dependencies that you statically link with here ...
                 }

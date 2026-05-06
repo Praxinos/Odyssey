@@ -4,6 +4,8 @@
 #include "IOdysseyStylusInputModule.h"
 
 #include "CoreMinimal.h"
+#include "ISettingsModule.h"
+#include "OdysseyStylusInputSettings.h"
 
 #define LOCTEXT_NAMESPACE "StylusInput"
 
@@ -17,25 +19,24 @@ class FOdysseyStylusInputModule
 public:
     virtual void StartupModule() override
     {
-        // register settings
-        ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings");
-        if (settingsModule)
-        {
-            settingsModule->RegisterSettings("Editor", "Plugins", "OdysseyStylusInput"
-                , LOCTEXT("settings.name", "Odyssey - Stylus Input")
-                , LOCTEXT("settings.tooltip", "Configure the behaviour of stylus inputs in Odyssey.")
-                , GetMutableDefault<UOdysseyStylusInputSettings>());
-        }
+        // register customizations
+        FPropertyEditorModule& propertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+
+        propertyModule.RegisterCustomClassLayout(
+            "OdysseyStylusInputSettings",
+            FOnGetDetailCustomizationInstance::CreateStatic(&FOdysseyStylusInputSettingsCustomization::MakeInstance)
+        );
     }
 
     virtual void ShutdownModule() override
     {
-        // unregister settings
-        ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings");
-
-        if (settingsModule)
+        // unregister customizations
+        if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
         {
-            settingsModule->UnregisterSettings("Editor", "Plugins", "OdysseyStylusInput");
+            FPropertyEditorModule& PropertyModule =
+                FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+
+            PropertyModule.UnregisterCustomClassLayout("OdysseyStylusInputSettings");
         }
     }
 };

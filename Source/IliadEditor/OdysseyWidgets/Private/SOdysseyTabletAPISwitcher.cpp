@@ -46,6 +46,7 @@ SOdysseyTabletAPISwitcher::Construct( const FArguments& iArgs )
 {
     const UOdysseyStylusInputSettings* settings = GetDefault<UOdysseyStylusInputSettings>();
     mTabletAPISelected = settings->GetStylusDriver();
+
     mOptions = UE::StylusInput::GetAvailableInterfaces();
 
     ChildSlot
@@ -80,7 +81,7 @@ TSharedRef<SWidget>
 SOdysseyTabletAPISwitcher::GenerateTabletAPIComboBoxItem( FName iItem )
 {
     return SNew( STextBlock )
-           .Text( FText::FromName(iItem) );
+           .Text( UOdysseyStylusInputSettings::GetFormatText(iItem) );
 }
 
 void
@@ -92,7 +93,7 @@ SOdysseyTabletAPISwitcher::ChangeSelectionTabletAPIComboBoxItem( FName iNewSelec
 FText
 SOdysseyTabletAPISwitcher::GetComboBoxTabletAPISelectedAsText() const
 {
-    return FText::FromName( mTabletAPISelected );
+    return UOdysseyStylusInputSettings::GetFormatText(mTabletAPISelected);
 }
 
 #undef LOCTEXT_NAMESPACE

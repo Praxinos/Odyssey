@@ -6,9 +6,66 @@
 #include "Editor.h"
 #include "Editor/EditorEngine.h"
 
+#include "DetailCategoryBuilder.h"
+#include "DetailLayoutBuilder.h"
+#include "DetailWidgetRow.h"
+#include "Widgets/Input/SComboBox.h"
+#include "Widgets/Text/STextBlock.h"
+
 #include "IOdysseyStylusInputModule.h"
+#include "StylusInputInterface.h"
 
 #define LOCTEXT_NAMESPACE "StylusInput"
+
+void
+FOdysseyStylusInputSettingsCustomization::CustomizeDetails(IDetailLayoutBuilder& iDetailBuilder)
+{
+    mStylusAPIProperty = iDetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UOdysseyStylusInputSettings, StylusInputDriver));
+
+    for (const FName& interfaceName : UE::StylusInput::GetAvailableInterfaces())
+    {
+        mStylusAPIs.Add(MakeShared<FName>(interfaceName));
+
+        mStylusAPIsLabels.Add(interfaceName, UOdysseyStylusInputSettings::GetFormatText(interfaceName));
+    }
+
+    iDetailBuilder.EditDefaultProperty(mStylusAPIProperty)->CustomWidget()
+        .NameContent()
+        [
+            mStylusAPIProperty->CreatePropertyNameWidget()
+        ]
+        .ValueContent()
+        .MinDesiredWidth(250.f)
+        [
+            SNew(SComboBox<TSharedPtr<FName>>)
+                .OptionsSource(&mStylusAPIs)
+                .OnGenerateWidget_Lambda([this](TSharedPtr<FName> item)
+                    {
+                        return SNew(STextBlock)
+                            .Text(mStylusAPIsLabels[*item]);
+                    })
+                .OnSelectionChanged_Lambda([this](TSharedPtr<FName> newValue, ESelectInfo::Type)
+                    {
+                        if (newValue.IsValid())
+                        {
+                            mStylusAPIProperty->SetValue(*newValue);
+                        }
+                    })
+                .Content()
+                [
+                    SNew(STextBlock)
+                        .Text_Lambda([this]()
+                            {
+                                FName currentValue;
+                                mStylusAPIProperty->GetValue(currentValue);
+
+                                return mStylusAPIsLabels.Contains(currentValue)
+                                    ? mStylusAPIsLabels[currentValue]
+                                    : FText::FromName(currentValue);
+                            })
+                ]
+        ];
+}
 
 FOnStylusInputDriverChanged UOdysseyStylusInputSettings::OnStylusInputDriverChanged;
 
@@ -32,9 +89,37 @@ UOdysseyStylusInputSettings::GetStylusDriver() const
 
 //static
 FText
-UOdysseyStylusInputSettings::GetFormatText( FName iStylusInputDriver )
+UOdysseyStylusInputSettings::GetFormatText(FName InStylusInputDriver)
 {
-    return FText::FromName( iStylusInputDriver );
+    static const TMap<FName, FText> DriverLabels =
+    {
+        { "WinTab",      FText::FromString("Wintab") },
+        { "RealTimeStylus",  FText::FromString("Windows Ink") },
+        { "NSEvent", FText::FromString("NSEvent") }
+    };
+
+    if (const FText* Found = DriverLabels.Find(InStylusInputDriver))
+    {
+        return *Found;
+    }
+
+    return FText::FromName(InStylusInputDriver);
+}
+
+TArray<FName>
+UOdysseyStylusInputSettings::GetAvailableStylusDrivers()
+{
+    return UE::StylusInput::GetAvailableInterfaces();
+}
+
+FName UOdysseyStylusInputSettings::GetContainerName() const
+{
+    return TEXT("Editor");
+}
+
+FName UOdysseyStylusInputSettings::GetCategoryName() const
+{
+    return TEXT("Plugins");
 }
 
 #undef LOCTEXT_NAMESPACE
