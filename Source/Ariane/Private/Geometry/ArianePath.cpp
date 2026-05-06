@@ -545,6 +545,9 @@ FArianePath::GetGeometry3D()
 
 FArianePathGeometry3D::~FArianePathGeometry3D()
 {
+    // Some rendering commands use the vertex factory, flush them first
+    FlushRenderingCommands();
+
     if( VertexFactory )
     {
         PositionBuffer.ReleaseResource();

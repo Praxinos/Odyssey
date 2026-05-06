@@ -27,16 +27,6 @@ class ARIANEEDITOR_API UArianeEditorEraserTool : public UArianeEditorTool
 {
     GENERATED_BODY()
 
-    struct PathProcessor
-    {
-        bool bRemove;
-        TArray<FArianePath*> AddedPaths;
-        TArray<FArianeVertex*> AddedVertices;
-        TArray<FArianeSegment*> AddedSegments;
-        TArray<FArianeVertex*> RemovedVertices;
-        TArray<FArianeSegment*> RemovedSegments;
-    };
-
     struct FWayFragment;
 
     // a waypoint is met at segment vertex or when a constrast is met
@@ -119,6 +109,17 @@ class ARIANEEDITOR_API UArianeEditorEraserTool : public UArianeEditorTool
 
         FWayFragment* GetNext();
         FWayFragment* GetPrev();
+    };
+
+    struct ChainProcessor
+    {
+        TArray<FArianePath*> AddedPaths;
+        TArray<FArianeVertex*> AddedVertices;
+        TArray<FArianeSegment*> AddedSegments;
+        TArray<FArianeVertex*> RemovedVertices;
+        TArray<FArianeSegment*> RemovedSegments;
+        TArray<FWayPoint> WayPoints;
+        TArray<FWayFragment> WayFragments;
     };
 
 public:
@@ -215,9 +216,8 @@ protected:
     static FWayFragment* GetStartFragment( FWayFragment* Fragment );
     static ESegmentAdditionFlags SegmentAdditionPolicy( FWayFragment* InFragment, bool bSplit );
     static EVertexAdditionFlags VertexAdditionPolicy( FWayPoint* WayPoint, bool bSplit );
-    bool ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
+    void ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
                             , FArianePath* ChainPath
-                            , const FArianePath::Chain& Chain
                             , TArray<FWayPoint>& WayPoints
                             , TArray<FWayFragment>& WayFragments
                             , TArray<FArianePath*>& OutAddedPaths
@@ -230,6 +230,8 @@ protected:
                                       , TArray<FArianeVertex*>& OutAddedVertices
                                       , TArray<FArianeVertex*>& OutRemovedVertices
                                       , bool bSplit );
+    FBox2D GetPathBoundingArea( FEditorViewportClient* ViewportClient, FSceneView* View, FArianePath* Path );
+    FBox2D GetErasureBoundingArea( FSceneView* View );
 
 public:
     UPROPERTY( EditAnywhere
@@ -251,6 +253,8 @@ protected:
     UPROPERTY() // prevent GC
     UTexture2D* Brush;
 
+    FVector2D MouseAtDown;
+    FVector2D MouseAtUp;
     FIntVector2 MouseRecords[2];
 };
 

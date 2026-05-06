@@ -336,6 +336,46 @@ UArianeEditorEraserTool::TraceLine( FArianePath* Path
     }
 }
 
+FBox2D
+UArianeEditorEraserTool::GetErasureBoundingArea( FSceneView* View )
+{
+    double EraserRadius = Size * 0.5f;
+    double XMin = FMath::Min( MouseAtDown.X, MouseAtUp.X ) - EraserRadius;
+    double YMin = FMath::Min( MouseAtDown.Y, MouseAtUp.Y ) - EraserRadius;
+    double XMax = FMath::Max( MouseAtDown.X, MouseAtUp.X ) + EraserRadius;
+    double YMax = FMath::Max( MouseAtDown.Y, MouseAtUp.Y ) + EraserRadius;
+
+    return ( XMin < XMax ) ? FBox2D( FVector2D( XMin, YMin ), FVector2D( XMax, YMax ) ) : FBox2D();
+}
+
+FBox2D
+UArianeEditorEraserTool::GetPathBoundingArea( FEditorViewportClient* ViewportClient, FSceneView* View, FArianePath* Path )
+{
+    const FBox& PathBox = Path->GetBounds().GetBox();
+    FVector P[8] = { PathBox.Min
+                   , FVector( PathBox.Min.X, PathBox.Min.Y, PathBox.Max.Z )
+                   , FVector( PathBox.Min.X, PathBox.Max.Y, PathBox.Min.Z )
+                   , FVector( PathBox.Min.X, PathBox.Max.Y, PathBox.Max.Z )
+                   , FVector( PathBox.Max.X, PathBox.Min.Y, PathBox.Min.Z )
+                   , FVector( PathBox.Max.X, PathBox.Min.Y, PathBox.Max.Z )
+                   , FVector( PathBox.Max.X, PathBox.Max.Y, PathBox.Min.Z )
+                   , PathBox.Max };
+    FTransform PathTransform = Path->GetDrawingLayer()->GetComponentTransform();
+    double XMin = DBL_MAX, YMin = DBL_MAX, XMax = -DBL_MAX, YMax = -DBL_MAX;
+
+    for( uint32 i = 0; i < 8; i++ )
+    {
+        FVector2D ScreenP = ProjectWorldToScreen( ViewportClient, View, PathTransform.TransformPosition( P[i] ) );
+
+        if( ScreenP.X < XMin ) XMin = ScreenP.X;
+        if( ScreenP.Y < YMin ) YMin = ScreenP.Y;
+        if( ScreenP.X > XMax ) XMax = ScreenP.X;
+        if( ScreenP.Y > YMax ) YMax = ScreenP.Y;
+    }
+
+    return ( XMin < XMax ) ? FBox2D( FVector2D( XMin, YMin ), FVector2D( XMax, YMax ) ) : FBox2D();
+}
+
 bool
 UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
                                    , UArianePainting3DComponent* Painting3DComponent )
@@ -344,13 +384,12 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
     TArray<FColor> Pixels;
     uint32 Width = CanvasRenderTarget->SizeX;
     uint32 Height = CanvasRenderTarget->SizeY;
-    //FSceneView* View = GetSceneView( ViewportClient );
-
     FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
                                                                             , ViewportClient->GetScene()
                                                                             , ViewportClient->EngineShowFlags )
                                                                             /*.SetRealtimeUpdate( iViewportClient->IsRealtime() )*/ );
     FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
+    FBox2D ErasureArea = GetErasureBoundingArea( View );
 
     RTResource->ReadPixels( Pixels
                           , FReadSurfaceDataFlags(RCM_UNorm)
@@ -370,6 +409,7 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
             DrawingLayer->GetRootObject()->Traverse( [ this
                                                      , ViewportClient
                                                      , View
+                                                     , ErasureArea
                                                      , DrawingLayer
                                                      , Pixels
                                                      , Width
@@ -379,75 +419,90 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
                 if( TravesedObject->GetClass() == FArianePath::StaticClass() )
                 {
                     FArianePath* Path = static_cast<FArianePath*>( TravesedObject );
-                    TArray<FArianeVertex*> AddedVertices;
-                    TArray<FArianeSegment*> AddedSegments;
-                    TArray<FArianeVertex*> RemovedVertices;
-                    TArray<FArianeSegment*> RemovedSegments;
-                    bool bRemovePath = false;
+                    FBox2D PathBox = GetPathBoundingArea( ViewportClient, View, Path );
 
-                    for( const FArianePath::Chain& Chain : Path->GetChains() )
+                    if( ErasureArea.Intersect( PathBox ) )
                     {
-                        TArray<FWayPoint> WayPoints;
-                        TArray<FWayFragment> WayFragments;
+                        TArray<ChainProcessor> ChainProcessors;
+                        bool bPathHit = false;
 
-                        WayPoints.Reserve( 100 );
-                        WayFragments.Reserve( 100 );
+                        ChainProcessors.Reserve( Path->GetChains().Num() );
 
-                        bool Hit = EraseChainSegments( ViewportClient
-                                                     , View
-                                                     , DrawingLayer
-                                                     , Path
-                                                     , Chain
-                                                     , Pixels
-                                                     , WayPoints
-                                                     , WayFragments );
-
-                        if( Hit )
+                        for( const FArianePath::Chain& Chain : Path->GetChains() )
                         {
-                            // proceed now we know we have hit anything
-                            // determine which vertices / segments will be deleted and which will be kept
-                            // it differs in SPLIT and NOSPLIT modes. SPLIT modes removes only those erased,
-                            // split removes all
-                            bRemovePath = ParseChainWayPoints( DrawingLayer
-                                                             , Path
-                                                             , Chain
-                                                             , WayPoints
-                                                             , WayFragments
-                                                             , AddedPaths
-                                                             , AddedVertices
-                                                             , AddedSegments
-                                                             , RemovedVertices
-                                                             , RemovedSegments ) ? true : bRemovePath;
+                            ChainProcessor& ChainProcessor = ChainProcessors.Emplace_GetRef();
+
+                            ChainProcessor.WayPoints.Reserve( 100 );
+                            ChainProcessor.WayFragments.Reserve( 100 );
+
+                            bPathHit = EraseChainSegments( ViewportClient
+                                                         , View
+                                                         , DrawingLayer
+                                                         , Path
+                                                         , Chain
+                                                         , Pixels
+                                                         , ChainProcessor.WayPoints
+                                                         , ChainProcessor.WayFragments ) ? true : bPathHit;
                         }
-                    }
 
-                    if( bRemovePath )
-                    {
-                        RemovedPaths.Add( Path );
-                    }
+                        if( bPathHit )
+                        {
+                            for( ChainProcessor& ChainProcessor : ChainProcessors )
+                            {
+                                // proceed now we know we have hit anything
+                                // determine which vertices / segments will be deleted and which will be kept
+                                // it differs in SPLIT and NOSPLIT modes. SPLIT modes removes only those erased,
+                                // split removes all
+                                ParseChainWayPoints( DrawingLayer
+                                                   , Path
+                                                   , ChainProcessor.WayPoints
+                                                   , ChainProcessor.WayFragments
+                                                   , AddedPaths
+                                                   , ChainProcessor.AddedVertices
+                                                   , ChainProcessor.AddedSegments
+                                                   , ChainProcessor.RemovedVertices
+                                                   , ChainProcessor.RemovedSegments );
 
-                    for( FArianeSegment* RemovedSegment : RemovedSegments )
-                    {
-                        // Remove and Free
-                        static_cast<FArianePath*>(RemovedSegment->GetOwner())->RemoveSegment( RemovedSegment, true );
-                    }
+                                for( FArianeSegment* RemovedSegment : ChainProcessor.RemovedSegments )
+                                {
+                                    // Remove and Free
+                                    static_cast<FArianePath*>(RemovedSegment->GetOwner())->RemoveSegment( RemovedSegment, true );
+                                }
 
-                    for( FArianeVertex* RemovedVertex : RemovedVertices )
-                    {
-                        // Remove and Free
-                        static_cast<FArianePath*>(RemovedVertex->GetOwner())->RemoveVertex( RemovedVertex, true );
-                    }
+                                for( FArianeVertex* RemovedVertex : ChainProcessor.RemovedVertices )
+                                {
+                                    // Remove and Free
+                                    static_cast<FArianePath*>(RemovedVertex->GetOwner())->RemoveVertex( RemovedVertex, true );
+                                }
 
-                    for( FArianeVertex* AddedVertex : AddedVertices )
-                    {
-                        // Add
-                        static_cast<FArianePath*>(AddedVertex->GetOwner())->AddVertex( AddedVertex );
-                    }
+                                for( FArianeVertex* AddedVertex : ChainProcessor.AddedVertices )
+                                {
+                                    // Add
+                                    static_cast<FArianePath*>(AddedVertex->GetOwner())->AddVertex( AddedVertex );
+                                }
 
-                    for( FArianeSegment* AddedSegment : AddedSegments )
-                    {
-                        // Add
-                        static_cast<FArianePath*>(AddedSegment->GetOwner())->AddSegment( AddedSegment );
+                                for( FArianeSegment* AddedSegment : ChainProcessor.AddedSegments )
+                                {
+                                    // Add
+                                    static_cast<FArianePath*>(AddedSegment->GetOwner())->AddSegment( AddedSegment );
+                                }
+                            }
+
+                            if( bSplit )
+                            {
+                                if( bPathHit )
+                                {
+                                    RemovedPaths.Add( Path );
+                                }
+                            }
+                            else // bSplit == false
+                            {
+                                if( ( Path->GetSegments().Num() == 0 ) && ( Path->GetVertices().Num() == 0 ) )
+                                {
+                                    RemovedPaths.Add( Path );
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -550,15 +605,6 @@ UArianeEditorEraserTool::VertexAdditionPolicy( FWayPoint* WayPoint, bool bSplit 
     {
         if( WayPoint->Flags & FWayPoint::Original )
         {
-/*
-            if( WayPoint->Flags & FWayPoint::BordersErasureArea )
-            {
-                if( WayPoint->Vertex->GetSegmentCount() == 2 )
-                {
-                    retFlags |= ( EVertexAdditionFlags::CreateDerivedVertex );
-                }
-            }
-*/
             if( WayPoint->Flags & FWayPoint::OutsideErasureArea )
             {
                 retFlags |= ( EVertexAdditionFlags::CreateDerivedVertex );
@@ -641,10 +687,9 @@ UArianeEditorEraserTool::AssignVertex( FArianePath* OwnerPath
     return WayPoint.AssignedVertex;
 }
 
-bool
+void
 UArianeEditorEraserTool::ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
                                             , FArianePath* ChainPath
-                                            , const FArianePath::Chain& Chain
                                             , TArray<FWayPoint>& WayPoints
                                             , TArray<FWayFragment>& WayFragments
                                             , TArray<FArianePath*>& OutAddedPaths
@@ -655,7 +700,6 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
 {
     uint32 addedSegmentCountBeforeAlter = OutAddedSegments.Num();
     FArianePath* CurrentPath = ChainPath;
-    bool bRemovePath = false;
 
     if( WayPoints.Num() )
     {
@@ -707,9 +751,6 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
                 ChainPath->ExportProperties( CurrentPath );
 
                 OutAddedPaths.Add( CurrentPath );
-
-                // Note: this if statement is met only if bSplit == true, no need to check again.
-                bRemovePath = true;
             }
 
             if( ( SegmentAdditionFlags & ESegmentAdditionFlags::CreateDerivedSegment ) == ESegmentAdditionFlags::CreateDerivedSegment )
@@ -736,19 +777,7 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
 
             CurrFragment = ( NextFragment == StartFragment ) ? nullptr : NextFragment;
         }
-
-        if( bSplit == false )
-        {
-            // If no segment or vertex is going to survive the erasing, we mark the path for future deletion.
-            if( ( OutRemovedVertices.Num() == ChainPath->GetVertices().Num() )
-             && ( OutRemovedSegments.Num() == ChainPath->GetSegments().Num() ) )
-            {
-                bRemovePath = true;
-            }
-        }
     }
-
-    return bRemovePath;
 }
 
 
@@ -943,6 +972,7 @@ UArianeEditorEraserTool::OnMouseDown( FEditorViewportClient* iViewportClient
 
     if( iKey == EKeys::LeftMouseButton )
     {
+        MouseAtDown = FVector2D( PointerState.ViewportX, PointerState.ViewportY );
         MouseRecords[0] = MouseRecords[1] = FIntVector2( PointerState.ViewportX, PointerState.ViewportY );
         // Will call UArianeEditorEraserTool::StampBrush()
         //CanvasRenderTarget->UpdateResource();
@@ -989,6 +1019,7 @@ UArianeEditorEraserTool::OnMouseUp( FEditorViewportClient* ViewportClient
     {
         UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
+        MouseAtUp = FVector2D( PointerState.ViewportX, PointerState.ViewportY );
         MouseRecords[1] = FIntVector2( PointerState.ViewportX, PointerState.ViewportY );
         // Will call UArianeEditorEraserTool::StampBrush()
         //CanvasRenderTarget->UpdateResource();
