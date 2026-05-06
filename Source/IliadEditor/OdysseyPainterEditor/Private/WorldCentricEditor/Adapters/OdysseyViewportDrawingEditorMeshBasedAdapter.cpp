@@ -667,6 +667,8 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::BindStampBrushInstance(UOdys
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::Tick(float iDelta)
 {
+    IOdysseyViewportDrawingEditorAdapter::Tick( iDelta );
+
     if (!mTexture)
         return;
 

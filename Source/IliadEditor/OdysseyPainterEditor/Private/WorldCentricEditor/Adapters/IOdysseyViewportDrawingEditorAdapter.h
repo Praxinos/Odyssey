@@ -19,6 +19,7 @@ class UOdysseyPainterEditorTool;
 /** Painting adapter for the painter. Describes the method of painting in the viewport*/
 class IOdysseyViewportDrawingEditorAdapter
     : public FOdysseyStylusInputHandler
+    , public FTickableEditorObject
 {
 public:
     enum class eState
@@ -26,6 +27,14 @@ public:
         kIdle, //Idle, but preparations are not made yet
         kIdleReady, //Idle, but we're now ready to paint
         kCapturedByEditor
+    };
+
+public:
+    enum class eStylusEventFence
+    {
+        kNone,
+        kStylusUp,
+        kStylusDown,
     };
 
 public:
@@ -52,6 +61,11 @@ public:
     bool ViewportCoordinatesToTextureCoordinates( FVector2D iPositionInViewport, FEditorViewportClient* iViewportClient, FVector2D* oPositionInTexture);
 
 public:
+    // FTickableEditorObject
+    virtual void Tick(float DeltaTime) override;
+    virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(OdysseyViewportDrawingEditorAdapter, STATGROUP_Tickables); }
+
+public:
     bool IsReadyToDraw();
 
 public:
@@ -64,13 +78,12 @@ public:
 
 private:
     /** IStylusMessageHandler Overrides */
-    virtual void OnPacket(const UE::StylusInput::FStylusInputPacket& Packet, UE::StylusInput::IStylusInputInstance* Instance) override;
+    virtual void OnPacket(const UE::StylusInput::FStylusInputPacket& iPacket, UE::StylusInput::IStylusInputInstance* iInstance) override;
     //virtual void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex) override;
     void StartStylusInputRecord(const FKey& iMouseButton);
     void StopStylusInputRecord();
-    FOdysseyRay StylusStateToRay(const FStylusState& iState);
     FOdysseyRay StylusPacketToRay(const UE::StylusInput::FStylusInputPacket& iPacket);
-    void ReadStylusInput();
+    void ReadStylusInput(eStylusEventFence iUntilEventType = eStylusEventFence::kNone);
     void GetRayParamsFromViewportPosition(FEditorViewportClient* iViewportClient, float iX, float iY, FVector* oOrigin, FVector* oDirection);
 
 protected:

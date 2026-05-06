@@ -60,6 +60,14 @@ public:
     };
 
 public:
+    enum class eStylusEventFence
+    {
+        kNone,
+        kStylusUp,
+        kStylusDown,
+    };
+
+public:
     // Construction / Destruction
     FOdysseyPainterEditorViewportClient(FOdysseyPainterEditor* iEditor, TWeakPtr< SOdysseyViewport > iTextureEditorViewport, FOdysseyMeshSelector* iMeshSelector);
     ~FOdysseyPainterEditorViewportClient();
@@ -83,7 +91,7 @@ public:
     void StopStylusInputRecord();
     FOdysseyPoint StylusPacketToPoint(const UE::StylusInput::FStylusInputPacket& iPacket);
 
-    void ReadStylusInput();
+    void ReadStylusInput(eStylusEventFence iUntilEventType = eStylusEventFence::kNone);
 
     virtual EMouseCaptureMode GetMouseCaptureMode() const override;
 
@@ -95,7 +103,7 @@ public:
 public:
     // FTickableEditorObject
     virtual void Tick(float DeltaTime) override;
-    virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(StylusInput_DebugEventHandlerAsynchronous, STATGROUP_Tickables); }
+    virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(OdysseyPainterEditorViewportClient, STATGROUP_Tickables); }
 
 public:
     // Public API

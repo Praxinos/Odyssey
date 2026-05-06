@@ -101,7 +101,6 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
 void
 FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
-    //UE_LOG(LogTemp, Display, TEXT("mIsRecordingStylus: %d"), mIsRecordingStylus);
     RegisterWindow(mOdysseyPainterEditorViewportPtr.Pin().ToSharedRef());
 
     const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
@@ -439,15 +438,14 @@ FOdysseyPainterEditorViewportClient::InputKey( const FInputKeyEventArgs& iEventA
         }
         else if( iEventArgs.Event == EInputEvent::IE_Released)
         {
-            if (mIsRecordingStylus)
+            if (!mIsRecordingStylus)
             {
-                ReadStylusInput();
-                StopStylusInputRecord();
+                MouseUp(point_in_viewport);
             }
-            MouseUp(point_in_viewport);
-
-            if (mIsMouseDown && !mKeysPressed.Contains(mMouseButton))
-                mMouseButton = FKey();
+            else
+            {
+                ReadStylusInput( eStylusEventFence::kStylusUp );
+            }
         }
     }
     else
@@ -493,10 +491,10 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
     if (mIsRecordingStylus)
         return;
 
-    FOdysseyPoint point_in_viewport( FOdysseyPoint::DefaultPoint() );
+    FOdysseyPoint point_in_viewport(FOdysseyPoint::DefaultPoint());
     point_in_viewport.x = iX;
     point_in_viewport.y = iY;
-    MouseDrag( point_in_viewport );
+    MouseDrag(point_in_viewport);
 }
 
 void
@@ -506,6 +504,7 @@ FOdysseyPainterEditorViewportClient::MouseEnter( FViewport* iViewport, int32 iX,
         return;
 
     mIsFocused = true;
+    while(mPacketQueue.Dequeue());
     mCurrentToolState = eState::kIdle;
 }
 
@@ -608,16 +607,7 @@ void
 FOdysseyPainterEditorViewportClient::MouseDown(const FOdysseyPoint& iPoint)
 {
     if (mIsMouseDown)
-    {
-        UE_LOG(LogTemp, Display, TEXT("DOWN error"));
         return;
-    }
-
-    UE_LOG(LogTemp, Display, TEXT("DOWN"));
-
-
-    //TSharedPtr<SWindow> ActiveWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
-    //UE_LOG(LogTemp, Display, TEXT("active: %p, stylus: %p"), ActiveWindow.Get(), mStylusInputWindow.Pin().Get());
 
     mIsMouseDown = true;
 
@@ -688,12 +678,8 @@ void
 FOdysseyPainterEditorViewportClient::MouseUp(const FOdysseyPoint& iPoint)
 {
     if (!mIsMouseDown)
-    {
-        UE_LOG(LogTemp, Display, TEXT("ErrorUP"));
         return;
-    }
 
-    UE_LOG(LogTemp, Display, TEXT("UP"));
     mIsMouseDown = false;
 
     //If we don't have a surface, then we don't interact with anything
@@ -745,13 +731,14 @@ FOdysseyPainterEditorViewportClient::MouseUp(const FOdysseyPoint& iPoint)
         FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y);
         mOnPickColor.ExecuteIfBound(eOdysseyEventState::kSet, position_in_texture);
     }
+
+    if (!mKeysPressed.Contains(mMouseButton))
+        mMouseButton = FKey();
 }
 
 void
 FOdysseyPainterEditorViewportClient::MouseDrag(const FOdysseyPoint& iPoint)
 {
-    //UE_LOG(LogTemp, Display, TEXT("DRAG"));
-
     if (!mIsMouseDown)
         return;
 
@@ -876,11 +863,10 @@ FOdysseyPainterEditorViewportClient::StartStylusInputRecord()
         return;
 
     auto end_time = std::chrono::steady_clock::now();
-    auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
-    if( delta > 500 )
+    auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - mStylusLastEventTime).count();
+    if (delta > 500)
         return;
 
-    //Down
     mIsRecordingStylus = true;
 }
 
@@ -890,7 +876,8 @@ FOdysseyPainterEditorViewportClient::StopStylusInputRecord()
     if (!mIsRecordingStylus)
         return;
 
-    //UP
+    while( mPacketQueue.Dequeue() ) {}
+
     mIsRecordingStylus = false;
 }
 
@@ -941,38 +928,50 @@ FOdysseyPoint FOdysseyPainterEditorViewportClient::StylusPacketToPoint(const UE:
 }
 
 void
-FOdysseyPainterEditorViewportClient::ReadStylusInput()
+FOdysseyPainterEditorViewportClient::ReadStylusInput(eStylusEventFence iUntilEventType)
 {
-    if (!mIsRecordingStylus || !mIsFocused)
+    if (!mIsFocused || mPacketQueue.Num() == 0)
     {
         while (mPacketQueue.Dequeue()) {}
         return;
     }
 
     UE::StylusInput::FStylusInputPacket packet;
+
     while (mPacketQueue.Dequeue(packet))
     {
         FOdysseyPoint point = StylusPacketToPoint(packet);
 
-        //Force MouseDown when using the Right Mouse Button to allow hovered mouse clicks
         if (packet.Type == UE::StylusInput::EPacketType::StylusDown)
         {
             //MouseDown
+            mStylusIsDown = true;
             MouseDown(point);
+
             mLastStylusEventIndex = packet.SerialNumber;
-            UE_LOG(LogTemp, Display, TEXT("Styluss down"))
+
+            if( iUntilEventType == eStylusEventFence::kStylusDown )
+                return;
         }
         else if (packet.Type == UE::StylusInput::EPacketType::StylusUp)
         {
             //MouseUp
             MouseUp(point);
+            mStylusIsDown = false;
+
             mLastStylusEventIndex = packet.SerialNumber;
-            break;
+
+            if ( iUntilEventType == eStylusEventFence::kStylusUp )
+            {
+                StopStylusInputRecord();
+                return;
+            }
         }
         else if (mStylusIsDown)
         {
             //MouseMove
             MouseDrag(point);
+
             mLastStylusEventIndex = packet.SerialNumber;
         }
     }
@@ -980,25 +979,8 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput()
 
 void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylusInputPacket& iPacket, UE::StylusInput::IStylusInputInstance* iInstance)
 {
-    //PrintPacket(iPacket);
     mStylusLastEventTime = std::chrono::steady_clock::now();
-
-    if( iPacket.Type == UE::StylusInput::EPacketType::StylusDown )
-    {
-        StartStylusInputRecord();
-        mStylusIsDown = true;
-        UE_LOG(LogTemp, Display, TEXT("Stylus down"))
-    }
-    if( mIsRecordingStylus )
-    {
-        mPacketQueue.Enqueue(iPacket);
-    }
-    if (iPacket.Type == UE::StylusInput::EPacketType::StylusUp)
-    {
-        UE_LOG(LogTemp, Display, TEXT("Stylus up"))
-        mStylusIsDown = false;
-        StopStylusInputRecord();
-    }
+    mPacketQueue.Enqueue(iPacket);
 }
 
 //--------------------------------------------------------------------------------------
@@ -1050,9 +1032,8 @@ FString FOdysseyPainterEditorViewportClient::GetReferencerName() const
 
 void FOdysseyPainterEditorViewportClient::Tick(float DeltaTime)
 {
-    ReadStylusInput();
-    UE_LOG(LogTemp, Display, TEXT("Focus: %d"), mIsFocused);
-    UE_LOG(LogTemp, Display, TEXT("stylus down: %d. mIsRecordingStylus: %d, mIsMouseDown: %d: packet queue: %d"), mStylusIsDown, mIsRecordingStylus, mIsMouseDown, mPacketQueue.Num())
+    if( mIsRecordingStylus )
+        ReadStylusInput(eStylusEventFence::kStylusUp);
 }
 
 //--------------------------------------------------------------------------------------
