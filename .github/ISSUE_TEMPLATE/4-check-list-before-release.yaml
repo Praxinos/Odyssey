@@ -12,7 +12,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        # ${\color{FFFF00}\textnormal{Version 1.0 du 16/01/2026}}$
+        # ${\color{FFFF00}\textnormal{Version 2.0 du 07/05/2026}}$
 
   - type: markdown
     attributes:
@@ -416,6 +416,7 @@ body:
         - label: "Basculer d'ILIAD à toute autre manipulation dans le viewport"
         - label: "Animer en 2D dans un contexte 3D"
         - label: "Se déplacer autour de l'objet avec Alt, Clic droit, clic gauche, clic milieu"
+        - label: "Dessiner sur un Mesh puis quitter l'Odyssey Mode, revenir dessus et dessiner, quitter l'Odyssey Mode ... plusieurs fois de suite"
 
   - type: markdown
     attributes:
