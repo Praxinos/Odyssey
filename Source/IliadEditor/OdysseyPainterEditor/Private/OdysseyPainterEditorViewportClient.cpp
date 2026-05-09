@@ -980,6 +980,44 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput(eStylusEventFence iUntilEve
 void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylusInputPacket& iPacket, UE::StylusInput::IStylusInputInstance* iInstance)
 {
     mStylusLastEventTime = std::chrono::steady_clock::now();
+
+// FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
+#if PLATFORM_MAC
+    UE::StylusInput::FStylusInputPacket packetCopy = iPacket;
+
+    static UE::StylusInput::EPenStatus currentPenStatus = UE::StylusInput::EPenStatus::None;
+    static UE::StylusInput::EPacketType currentPacketType = UE::StylusInput::EPacketType::Invalid;
+
+    if (iPacket.NormalPressure == 0)
+    {
+        currentPenStatus = currentPenStatus & ~UE::StylusInput::EPenStatus::CursorIsTouching;
+        if (currentPacketType == UE::StylusInput::EPacketType::OnDigitizer)
+            currentPacketType = UE::StylusInput::EPacketType::StylusUp;
+        else
+            currentPacketType = UE::StylusInput::EPacketType::AboveDigitizer;
+    }
+
+    if (iPacket.NormalPressure != 0)
+    {
+        currentPenStatus = currentPenStatus | UE::StylusInput::EPenStatus::CursorIsTouching;
+        if (currentPacketType != UE::StylusInput::EPacketType::OnDigitizer && currentPacketType != UE::StylusInput::EPacketType::StylusDown)
+            currentPacketType = UE::StylusInput::EPacketType::StylusDown;
+        else
+            currentPacketType = UE::StylusInput::EPacketType::OnDigitizer;
+    }
+    else
+    {
+        currentPenStatus = currentPenStatus & ~UE::StylusInput::EPenStatus::CursorIsTouching;
+    }
+
+    packetCopy.PenStatus = currentPenStatus;
+    packetCopy.Type = currentPacketType;
+
+    mPacketQueue.Enqueue(packetCopy);
+    return;
+#endif
+// FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
+
     mPacketQueue.Enqueue(iPacket);
 }
 
