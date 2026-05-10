@@ -84,7 +84,14 @@ UOdysseyStylusInputSettings::PostEditChangeProperty( struct FPropertyChangedEven
 FName
 UOdysseyStylusInputSettings::GetStylusDriver() const
 {
-    return StylusInputDriver;
+    if (StylusInputDriver != "None")
+    {
+        return StylusInputDriver;
+    }
+
+    TArray<FName> Interfaces = UE::StylusInput::GetAvailableInterfaces();
+
+    return Interfaces.Num() > 0 ? Interfaces[0] : "None";
 }
 
 //static
