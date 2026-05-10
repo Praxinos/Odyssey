@@ -860,9 +860,12 @@ IOdysseyViewportDrawingEditorAdapter::StylusPacketToRay(const UE::StylusInput::F
     if (!viewportWidget)
         return FOdysseyRay();
 
+    TSharedPtr<SWindow> Window = mStylusInputWindow.Pin();
+
     //Init our StrokeRay, having all the basic info to draw
     float scaleDPI = viewportWidget->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
     FVector2D positionInViewport = viewportWidget->GetCachedGeometry().AbsoluteToLocal(FVector2D(iPacket.X, iPacket.Y)) * scaleDPI;
+    positionInViewport += Window->GetRectInScreen().GetTopLeft();
 
     FVector2D pointPos = positionInViewport;
     bool isTextureBased = mExtension->PaintingAdapterMethod() == EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased;
