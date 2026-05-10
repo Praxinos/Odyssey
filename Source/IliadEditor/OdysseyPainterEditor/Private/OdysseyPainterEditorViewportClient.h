@@ -181,9 +181,7 @@ private:
     FOdysseyPoint                           mMouseDownReference;
     FVector2D                               mHUDMouseDownReference;
 
-
     bool mIsRecordingStylus = false;
-    int mLastStylusEventIndex = 0;
     bool mStylusIsDown = false;
     bool mIsFocused = false;
 

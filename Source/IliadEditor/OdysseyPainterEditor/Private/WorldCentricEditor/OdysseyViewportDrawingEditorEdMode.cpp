@@ -102,6 +102,24 @@ bool FOdysseyViewportDrawingEditorEdMode::Select(AActor* InActor, bool bInSelect
     return FEdMode::Select(InActor, bInSelected);
 }
 
+bool FOdysseyViewportDrawingEditorEdMode::MouseEnter(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY)
+{
+    IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
+    if (!adapter)
+        return false;
+
+    return adapter->MouseEnter(iViewportClient, iViewport, iMouseX, iMouseY);
+}
+
+bool FOdysseyViewportDrawingEditorEdMode::MouseLeave(FEditorViewportClient* iViewportClient, FViewport* iViewport)
+{
+    IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
+    if (!adapter)
+        return false;
+
+    return adapter->MouseLeave(iViewportClient, iViewport);
+}
+
 bool FOdysseyViewportDrawingEditorEdMode::MouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY)
 {
     IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
@@ -139,13 +157,13 @@ bool FOdysseyViewportDrawingEditorEdMode::CapturedMouseMove(FEditorViewportClien
 }
 
 bool
-FOdysseyViewportDrawingEditorEdMode::HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click)
+FOdysseyViewportDrawingEditorEdMode::HandleClick(FEditorViewportClient* iViewportClient, HHitProxy* iHitProxy, const FViewportClick& iClick)
 {
     IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
     if (!adapter)
         return false;
 
-    return adapter->HandleClick(InViewportClient, HitProxy, Click);
+    return adapter->HandleClick(iViewportClient, iHitProxy, iClick);
 }
 
 bool

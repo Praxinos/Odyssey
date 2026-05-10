@@ -948,8 +948,6 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput(eStylusEventFence iUntilEve
             mStylusIsDown = true;
             MouseDown(point);
 
-            mLastStylusEventIndex = packet.SerialNumber;
-
             if( iUntilEventType == eStylusEventFence::kStylusDown )
                 return;
         }
@@ -958,8 +956,6 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput(eStylusEventFence iUntilEve
             //MouseUp
             MouseUp(point);
             mStylusIsDown = false;
-
-            mLastStylusEventIndex = packet.SerialNumber;
 
             if ( iUntilEventType == eStylusEventFence::kStylusUp )
             {
@@ -971,8 +967,6 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput(eStylusEventFence iUntilEve
         {
             //MouseMove
             MouseDrag(point);
-
-            mLastStylusEventIndex = packet.SerialNumber;
         }
     }
 }

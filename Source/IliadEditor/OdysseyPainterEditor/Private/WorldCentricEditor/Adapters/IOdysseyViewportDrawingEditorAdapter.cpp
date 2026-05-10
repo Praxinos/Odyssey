@@ -36,9 +36,10 @@ IOdysseyViewportDrawingEditorAdapter::~IOdysseyViewportDrawingEditorAdapter()
 IOdysseyViewportDrawingEditorAdapter::IOdysseyViewportDrawingEditorAdapter(FOdysseyViewportDrawingEditorExtension* iExtension) :
     mTexture(nullptr),
     mExtension(iExtension),
-    mState( eState::kIdle ),
+    mAdapterState( eAdapterState::kNotReadyToUse ),
     mLastKnownViewport(nullptr),
-    mTool(nullptr)
+    mTool(nullptr),
+    mIsMouseDown(false)
 {
 }
 
@@ -57,13 +58,13 @@ IOdysseyViewportDrawingEditorAdapter::Initialize()
 
     SetTool(editor->GetCurrentTool());
 
-    mState = eState::kIdleReady;
+    mAdapterState = eAdapterState::kReadyToUse;
 }
 
 void
 IOdysseyViewportDrawingEditorAdapter::Finalize()
 {
-    mState = eState::kIdle;
+    mAdapterState = eAdapterState::kNotReadyToUse;
     SetTexture(nullptr);
     SetTool(nullptr);
 
@@ -80,7 +81,7 @@ void
 IOdysseyViewportDrawingEditorAdapter::SetTexture(UTexture* iTexture)
 {
     mTexture = iTexture;
-    mState = mTexture ? eState::kIdleReady : eState::kIdle;
+    mAdapterState = mTexture ? eAdapterState::kReadyToUse : eAdapterState::kNotReadyToUse;
 }
 
 UTexture*
@@ -242,11 +243,35 @@ bool IOdysseyViewportDrawingEditorAdapter::IsReadyToDraw()
         return false;
     }
 
-    return mState != eState::kIdle;
+    return mAdapterState != eAdapterState::kNotReadyToUse;
+}
+
+bool IOdysseyViewportDrawingEditorAdapter::MouseEnter(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 x, int32 y)
+{
+    if (mIsMouseDown)
+        return false;
+
+    mIsFocused = true;
+    while (mPacketQueue.Dequeue());
+    mAdapterState = eAdapterState::kReadyToUse;
+
+    return true;
+}
+
+bool IOdysseyViewportDrawingEditorAdapter::MouseLeave(FEditorViewportClient* ViewportClient, FViewport* Viewport)
+{
+    if (mIsMouseDown)
+        return false;
+
+    mIsFocused = false;
+    mAdapterState = eAdapterState::kReadyToUse;
+
+    return true;
 }
 
 bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iX, int32 iY)
 {
+    mIsFocused = true;
     mOverrideMouseCursor = false;
 
     if (!IsReadyToDraw())
@@ -481,7 +506,7 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     // - Rotation around mesh
     //and disallow (return true) left click camera movement
     bool isMouseEvent = iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton;
-    if (mState != eState::kCapturedByEditor && !mIsRecordingStylus && isOutsideTexture && isMouseEvent)
+    if (mAdapterState != eAdapterState::kUsedByEditor && !mIsRecordingStylus && isOutsideTexture && isMouseEvent)
     {
         /*GEditor->GetActiveViewport()
         GEngine->GameViewport->SetMouseCaptureMode(EMouseCaptureMode::NoCapture);
@@ -652,10 +677,15 @@ IOdysseyViewportDrawingEditorAdapter::MouseDown(const FOdysseyRay& iRay, const F
     if(!IsReadyToDraw())
         return;
 
+    if (mIsMouseDown)
+        return;
+
+    mIsMouseDown = true;
+
     mLastStrokeRay = mCurrentStrokeRay;
     mCurrentStrokeRay = iRay;
 
-    if (mState != eState::kIdleReady)
+    if (mAdapterState != eAdapterState::kReadyToUse)
         return;
 
     if (iMouseButton != EKeys::LeftMouseButton && iMouseButton != EKeys::RightMouseButton)
@@ -663,7 +693,7 @@ IOdysseyViewportDrawingEditorAdapter::MouseDown(const FOdysseyRay& iRay, const F
 
     if (mIsPickingColor)
     {
-        mState = eState::kCapturedByEditor;
+        mAdapterState = eAdapterState::kUsedByEditor;
         mMouseButton = iMouseButton;
         editor->GetColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint);
         return;
@@ -679,7 +709,7 @@ IOdysseyViewportDrawingEditorAdapter::MouseDown(const FOdysseyRay& iRay, const F
 
     if (mTool && mTool->ProcessMouseDown(mCurrentStrokeRay.mPoint, iMouseButton))
     {
-        mState = eState::kCapturedByEditor;
+        mAdapterState = eAdapterState::kUsedByEditor;
         mMouseButton = iMouseButton;
     }
 
@@ -696,11 +726,16 @@ IOdysseyViewportDrawingEditorAdapter::MouseUp(const FOdysseyRay& iRay, const FKe
     if(!IsReadyToDraw())
         return;
 
+    if (!mIsMouseDown)
+        return;
+
+    mIsMouseDown = false;
+
     mLastStrokeRay = mCurrentStrokeRay;
     mCurrentStrokeRay = iRay;
 
 
-    if (mState != eState::kCapturedByEditor)
+    if (mAdapterState != eAdapterState::kUsedByEditor)
         return;
 
     if (iMouseButton != EKeys::LeftMouseButton && iMouseButton != EKeys::RightMouseButton)
@@ -708,7 +743,7 @@ IOdysseyViewportDrawingEditorAdapter::MouseUp(const FOdysseyRay& iRay, const FKe
 
     if (mIsPickingColor)
     {
-        mState = eState::kIdleReady;
+        mAdapterState = eAdapterState::kReadyToUse;
         mMouseButton = FKey();
         editor->GetColorPickerTool()->PickColorUp(mCurrentStrokeRay.mPoint);
         return;
@@ -716,13 +751,13 @@ IOdysseyViewportDrawingEditorAdapter::MouseUp(const FOdysseyRay& iRay, const FKe
 
     if (!mTool)
     {
-        mState = eState::kIdleReady;
+        mAdapterState = eAdapterState::kReadyToUse;
         mMouseButton = FKey();
         return;
     }
 
     mTool->ProcessMouseUp(mCurrentStrokeRay.mPoint, mMouseButton);
-    mState = eState::kIdleReady;
+    mAdapterState = eAdapterState::kReadyToUse;
     mMouseButton = FKey();
 
     UOdysseyPainterEditorRasterDrawingTool* rasterDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mTool.Get());
@@ -742,10 +777,13 @@ IOdysseyViewportDrawingEditorAdapter::MouseDrag(const FOdysseyRay& iRay)
     if(!IsReadyToDraw())
         return;
 
+    if (!mIsMouseDown)
+        return;
+
     mLastStrokeRay = mCurrentStrokeRay;
     mCurrentStrokeRay = iRay;
 
-    if (mState != eState::kCapturedByEditor)
+    if (mAdapterState != eAdapterState::kUsedByEditor)
         return;
 
     bool hasMoved = !FMath::IsNearlyEqual(mCurrentStrokeRay.mPoint.x - mLastStrokeRay.mPoint.x, 0.f) || !FMath::IsNearlyEqual(mCurrentStrokeRay.mPoint.y - mLastStrokeRay.mPoint.y, 0.f);
@@ -907,11 +945,11 @@ IOdysseyViewportDrawingEditorAdapter::StylusPacketToRay(const UE::StylusInput::F
 void
 IOdysseyViewportDrawingEditorAdapter::ReadStylusInput(eStylusEventFence iUntilEventType)
 {
-    /*if (!mIsFocused || mPacketQueue.Num() == 0)
+    if (!mIsFocused || mPacketQueue.Num() == 0)
     {
         while (mPacketQueue.Dequeue()) {}
         return;
-    }*/
+    }
 
     UE::StylusInput::FStylusInputPacket packet;
 
@@ -920,24 +958,20 @@ IOdysseyViewportDrawingEditorAdapter::ReadStylusInput(eStylusEventFence iUntilEv
         FOdysseyRay ray = StylusPacketToRay(packet);
 
         //Don't manage MouseDown when using the Right Mouse Button to allow hovered mouse clicks
-        if (!mStylusIsDown && packet.Type == UE::StylusInput::EPacketType::StylusDown && mStylusButton != EKeys::RightMouseButton)
+        if (packet.Type == UE::StylusInput::EPacketType::StylusDown)
         {
             //MouseDown
             mStylusIsDown = true;
             MouseDown(ray, mStylusButton);
 
-            mLastStylusEventIndex = packet.SerialNumber;
-
             if (iUntilEventType == eStylusEventFence::kStylusDown)
                 return;
         }
-        else if (mStylusIsDown && packet.Type == UE::StylusInput::EPacketType::StylusUp && mStylusButton != EKeys::RightMouseButton)
+        else if (packet.Type == UE::StylusInput::EPacketType::StylusUp)
         {
             //MouseUp
             MouseUp(ray, mStylusButton);
             mStylusIsDown = false;
-
-            mLastStylusEventIndex = packet.SerialNumber;
 
             if (iUntilEventType == eStylusEventFence::kStylusUp)
             {
@@ -946,12 +980,10 @@ IOdysseyViewportDrawingEditorAdapter::ReadStylusInput(eStylusEventFence iUntilEv
             }
         }
         //Force Right Mouse Button Drag
-        else if (mStylusIsDown || mStylusButton == EKeys::RightMouseButton)
+        else if (mStylusIsDown)
         {
             //MouseMove
             MouseDrag(ray);
-
-            mLastStylusEventIndex = packet.SerialNumber;
         }
     }
 }
@@ -960,7 +992,7 @@ IOdysseyViewportDrawingEditorAdapter::ReadStylusInput(eStylusEventFence iUntilEv
 bool
 IOdysseyViewportDrawingEditorAdapter::ShouldEditorCaptureMouse() const
 {
-    if (mState == eState::kCapturedByEditor)
+    if (mAdapterState == eAdapterState::kUsedByEditor)
         return true;
 
     if (mIsRecordingStylus && mStylusButton != EKeys::RightMouseButton)

@@ -40,7 +40,7 @@ void
 FOdysseyViewportDrawingEditorMeshBasedAdapter::Initialize()
 {
     IOdysseyViewportDrawingEditorAdapter::Initialize();
-    mState = eState::kIdleReady;
+    mAdapterState = eAdapterState::kReadyToUse;
 }
 
 void
