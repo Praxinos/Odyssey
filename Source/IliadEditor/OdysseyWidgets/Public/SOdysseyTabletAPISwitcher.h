@@ -4,7 +4,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyStylusInputDriver.h"
 
 /**
  * About screen contents widget
@@ -25,14 +24,15 @@ public:
 
     static void Open();
 
-    TSharedPtr<EOdysseyStylusInputDriver>       TabletAPISelected();
+    FName       TabletAPISelected();
 
 private:
-    TSharedRef<SWidget> GenerateTabletAPIComboBoxItem( TSharedPtr<EOdysseyStylusInputDriver> iItem );
-    void ChangeSelectionTabletAPIComboBoxItem( TSharedPtr<EOdysseyStylusInputDriver> iNewSelection, ESelectInfo::Type iSelectInfo );
+    TSharedRef<SWidget> GenerateTabletAPIComboBoxItem( FName iItem );
+    void ChangeSelectionTabletAPIComboBoxItem( FName iNewSelection, ESelectInfo::Type iSelectInfo );
     FText GetComboBoxTabletAPISelectedAsText() const;
+    void OnSettingsChanged(FName iNewDriver);
 
 private:
-    TSharedPtr<EOdysseyStylusInputDriver>       mTabletAPISelected;
-    TArray<TSharedPtr<EOdysseyStylusInputDriver>> mOptions;
+    FName                        mTabletAPISelected;
+    TArray<FName>                mOptions;
 };

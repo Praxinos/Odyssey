@@ -28,7 +28,7 @@ FOdysseyInterpolationCatmullRom::IsReady() const
 int
 FOdysseyInterpolationCatmullRom::MinimumRequiredPoints() const
 {
-    //The line starts at the second point in Catmul-Rom
+    //The line starts at the second point in Catmull-Rom
     return 2;
 }
 

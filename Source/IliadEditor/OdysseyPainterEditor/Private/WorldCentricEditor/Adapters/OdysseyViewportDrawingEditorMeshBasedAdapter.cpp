@@ -40,7 +40,7 @@ void
 FOdysseyViewportDrawingEditorMeshBasedAdapter::Initialize()
 {
     IOdysseyViewportDrawingEditorAdapter::Initialize();
-    mState = eState::kIdleReady;
+    mAdapterState = eAdapterState::kReadyToUse;
 }
 
 void
@@ -667,6 +667,8 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::BindStampBrushInstance(UOdys
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::Tick(float iDelta)
 {
+    IOdysseyViewportDrawingEditorAdapter::Tick( iDelta );
+
     if (!mTexture)
         return;
 

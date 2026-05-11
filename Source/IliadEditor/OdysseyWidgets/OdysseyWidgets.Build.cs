@@ -48,6 +48,7 @@ public class OdysseyWidgets : ModuleRules
                 "OdysseyStylusInput",
                 "OdysseyTexture",
                 "RenderCore",
+                "StylusInput",
                 "KismetWidgets",
                 "ToolWidgets",
             }

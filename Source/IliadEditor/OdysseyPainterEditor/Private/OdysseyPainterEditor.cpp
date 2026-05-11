@@ -143,17 +143,7 @@ TSharedPtr<::ULIS::FBlock> FOdysseyPainterEditor::mCopyBlock = nullptr;
 
 FOdysseyPainterEditor::~FOdysseyPainterEditor()
 {
-    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-    painterEditorModule.RemoveOpenedEditor(this);
-
-    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-    FSlateApplication::Get().UnregisterInputPreProcessor(mAnimationFlipSystem);
-
-    //Unload the source properly to ensure no tool is still processing stuff for example
-    SetSource(nullptr);
-
-    mExtensions.Empty();
-    mTabs.Empty();
+    OnClose();
 }
 
 FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
@@ -822,6 +812,31 @@ FOdysseyPainterEditor::ExtendToolbarToolParameters(UToolMenu* iToolMenu)
     {
         currentTool->ExtendToolbar(iToolMenu);
     }
+}
+
+void
+FOdysseyPainterEditor::OnClose()
+{
+    for(TSharedPtr<FOdysseyEditorTab> tab : mTabs )
+        tab->CloseTab();
+
+    //Here is where we should clean everything prior to editor destruction
+    mTabs.Empty(); //ensure all tabs are destroyed, because some need the editor on destruction
+
+    SetSource(nullptr);
+
+    for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
+        extension->Finalize();
+
+    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+    FSlateApplication::Get().UnregisterInputPreProcessor(mAnimationFlipSystem);
+
+    mHUDSystem.Reset();
+    mHUDSystem = nullptr;
+    mRecentTools = nullptr;
+
+    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+    painterEditorModule.RemoveOpenedEditor(this);
 }
 
 FSimpleMulticastDelegate&

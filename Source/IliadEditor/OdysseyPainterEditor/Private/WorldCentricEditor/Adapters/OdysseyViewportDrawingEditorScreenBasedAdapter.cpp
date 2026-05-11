@@ -38,7 +38,7 @@ FOdysseyViewportDrawingEditorScreenBasedAdapter::FOdysseyViewportDrawingEditorSc
 void FOdysseyViewportDrawingEditorScreenBasedAdapter::Initialize()
 {
     IOdysseyViewportDrawingEditorAdapter::Initialize();
-    mState = eState::kIdleReady;
+    mAdapterState = eAdapterState::kReadyToUse;
 }
 
 void FOdysseyViewportDrawingEditorScreenBasedAdapter::SetTool(UOdysseyPainterEditorTool* iTool)
@@ -648,6 +648,8 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::BindStampBrushInstance(UOd
 
 void FOdysseyViewportDrawingEditorScreenBasedAdapter::Tick(float iDelta)
 {
+    IOdysseyViewportDrawingEditorAdapter::Tick( iDelta );
+
     if (!mTexture)
         return;
 

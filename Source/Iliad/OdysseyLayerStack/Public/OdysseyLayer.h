@@ -88,11 +88,9 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetLighttable(FOdysseyLighttable Value);
-#endif
 
 public:
     //Setters
-
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void AddChild(UOdysseyLayer* Layer, int IndexInParent = -1);
 
@@ -125,6 +123,7 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetPostBehaviour(EOdysseyLayerImagePostBehaviour Value);
+#endif
 
 public:
     //Getters

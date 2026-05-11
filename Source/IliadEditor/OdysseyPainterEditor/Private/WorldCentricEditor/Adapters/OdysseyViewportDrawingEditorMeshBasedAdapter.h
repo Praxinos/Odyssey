@@ -53,7 +53,6 @@ public:
 /** Painting adapter for the painter. Describes the method of mesh based painting in the viewport*/
 class FOdysseyViewportDrawingEditorMeshBasedAdapter
     : public IOdysseyViewportDrawingEditorAdapter
-    , public FTickableEditorObject //Allows us to react to Tick events
 {
 public:
     /** destructor */
@@ -84,7 +83,7 @@ public:
 private:
     // FTickableEditorObject implementation
     virtual void Tick(float DeltaTime) override;
-    virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( FOdysseyViewportDrawingEditorMeshBasedAdapter, STATGROUP_Tickables); }
+    virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( OdysseyViewportDrawingEditorMeshBasedAdapter, STATGROUP_Tickables); }
 
 private:
     //A multiplier to the size of the brush so that we keep a good resolution for the stamp in cases where the size of the texture and the size of the mesh are pretty different

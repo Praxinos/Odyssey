@@ -218,7 +218,7 @@ private:
 private:
     // Private Member Data
     TAttribute<UTexture*>               mTexture;
-    TSharedPtr<FViewportClient>         mViewportClient;
+    TWeakPtr<FViewportClient>           mViewportClient;
     TSharedPtr<FOdysseySceneViewport>   mViewport;
     TSharedPtr<SViewport>               mViewportWidget;
     TSharedPtr<SScrollBar>              mVerticalScrollBar;

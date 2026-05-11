@@ -34,6 +34,8 @@ public:
 
     void SetTabManager(TSharedPtr< FTabManager > iTabManager);
     TSharedPtr< FTabManager > GetTabManager() const;
+    virtual void OnTabClosed(TSharedRef<SDockTab> iDockTab); //Called by delegate when using the X on a tab
+    virtual void CloseTab(); //Called in the code manually when closing the whole editor
     void Register(TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef);
     void Unregister();
 
@@ -47,4 +49,5 @@ private:
     FSlateIcon mIcon;
     TSharedPtr<SWidget> mWidget;
     TWeakPtr< FTabManager > mTabManager;
+    TSharedPtr< SDockTab > mTab;
 };

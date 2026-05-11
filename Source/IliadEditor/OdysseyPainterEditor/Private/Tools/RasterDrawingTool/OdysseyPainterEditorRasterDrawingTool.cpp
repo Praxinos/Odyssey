@@ -555,7 +555,7 @@ UOdysseyPainterEditorRasterDrawingTool::ExtendToolbar( UToolMenu* iToolMenu )
 //---------------------------------------------------------------------- Shape Callbacks
 
 void
-UOdysseyPainterEditorRasterDrawingTool::BeginStroke( const FOdysseyPoint& iPoint )
+UOdysseyPainterEditorRasterDrawingTool::BeginStroke()
 {
     if (!BrushInstance)
     {
@@ -568,20 +568,6 @@ UOdysseyPainterEditorRasterDrawingTool::BeginStroke( const FOdysseyPoint& iPoint
     {
         UE_LOG(LogTemp, Warning, TEXT("Failed to call UOdysseyBrushAssetBase::StrokeBegin() from StrokeEngine"));
         return;
-    }
-
-    TArray<FOdysseyPoint> points = { iPoint };
-    if (mAdaptShapePointsDelegate.IsBound())
-        points = mAdaptShapePointsDelegate.Execute({iPoint});
-
-    TArray<UOdysseyBrushAssetBase::FStep> steps = BrushInstance->StepsTo(points);
-    for (int i = 0; i < steps.Num(); i++)
-    {
-        mWorker.Push([this, step = steps[i]]()
-        {
-            if (!BrushInstance->StrokeStep(step))
-                UE_LOG(LogTemp, Warning, TEXT("Failed to call UOdysseyBrushAssetBase::StrokeStep() from StrokeEngine"));
-        });
     }
 }
 
@@ -947,8 +933,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapeInteractive(const TArray<FOdyssey
 
         if (mIsFirstPoint)
         {
-            BeginStroke( interpolatedPoints[0] );
-            interpolatedPoints.RemoveAt(0);
+            BeginStroke();
             mIsFirstPoint = false;
         }
 
@@ -988,8 +973,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapeCommit(const TArray<FOdysseyPoint
 
             if ( mIsFirstPoint )
             {
-                BeginStroke(interpolatedPoints[0]);
-                interpolatedPoints.RemoveAt(0);
+                BeginStroke();
                 mIsFirstPoint = false;
             }
 
@@ -1067,12 +1051,7 @@ UOdysseyPainterEditorRasterDrawingTool::InterpolateTo(const FOdysseyPoint& iPoin
         return { iPoint };
     }
 
-    //If the Interpolator is ready to produce points do it, otherwise.... don't (Thanks Captain Obvious)
-    while( !mInterpolator->IsReady() )
-    {
-        //Add Point to Interpolator
-        mInterpolator->AddPoint( iPoint );
-    }
+    mInterpolator->AddPoint( iPoint );
 
     TArray<FOdysseyPoint> newPoints = mInterpolator->ComputePoints();
 

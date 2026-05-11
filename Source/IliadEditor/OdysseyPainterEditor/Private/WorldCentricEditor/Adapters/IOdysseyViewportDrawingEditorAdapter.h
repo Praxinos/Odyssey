@@ -8,6 +8,7 @@
 #include <chrono>
 #include "Input/OdysseyRay.h"
 #include "OdysseyHUDElement.h"
+#include "StylusInputHandler.h"
 
 #include <ULIS>
 
@@ -17,15 +18,23 @@ class UOdysseyPainterEditorTool;
 
 /** Painting adapter for the painter. Describes the method of painting in the viewport*/
 class IOdysseyViewportDrawingEditorAdapter
-    : public IStylusMessageHandler
-
+    : public FOdysseyStylusInputHandler
+    , public FTickableEditorObject
 {
 public:
-    enum class eState
+    enum class eAdapterState
     {
-        kIdle, //Idle, but preparations are not made yet
-        kIdleReady, //Idle, but we're now ready to paint
-        kCapturedByEditor
+        kNotReadyToUse, //Preparations need to be made before it's ready to be used (can't paint)
+        kReadyToUse, //Now ready for use (can paint)
+        kUsedByEditor //Being used (painting, moving camera, ect)
+    };
+
+public:
+    enum class eStylusEventFence
+    {
+        kNone,
+        kStylusUp,
+        kStylusDown,
     };
 
 public:
@@ -52,10 +61,17 @@ public:
     bool ViewportCoordinatesToTextureCoordinates( FVector2D iPositionInViewport, FEditorViewportClient* iViewportClient, FVector2D* oPositionInTexture);
 
 public:
+    // FTickableEditorObject
+    virtual void Tick(float DeltaTime) override;
+    virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(OdysseyViewportDrawingEditorAdapter, STATGROUP_Tickables); }
+
+public:
     bool IsReadyToDraw();
 
 public:
     /** Viewport Client methods */
+    virtual bool MouseEnter(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 x, int32 y);
+    virtual bool MouseLeave(FEditorViewportClient* ViewportClient, FViewport* Viewport);
     virtual bool MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 x, int32 y);
     virtual bool InputKey(FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent);
     virtual bool CapturedMouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY);
@@ -64,11 +80,11 @@ public:
 
 private:
     /** IStylusMessageHandler Overrides */
-    virtual void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex) override;
+    virtual void OnPacket(const UE::StylusInput::FStylusInputPacket& iPacket, UE::StylusInput::IStylusInputInstance* iInstance) override;
     void StartStylusInputRecord(const FKey& iMouseButton);
     void StopStylusInputRecord();
-    FOdysseyRay StylusStateToRay(const FStylusState& iState);
-    void ReadStylusInput();
+    FOdysseyRay StylusPacketToRay(const UE::StylusInput::FStylusInputPacket& iPacket);
+    void ReadStylusInput(eStylusEventFence iUntilEventType = eStylusEventFence::kNone);
     void GetRayParamsFromViewportPosition(FEditorViewportClient* iViewportClient, float iX, float iY, FVector* oOrigin, FVector* oDirection);
 
 protected:
@@ -100,8 +116,8 @@ protected:
     /** The list of currently pressed keys */
     TArray<FKey> mKeysPressed;
 
-    /** The state of the adapter: Are we currently drawing ? Are we idle ? Are the preparations to draw ready ?*/
-    eState mState;
+    /** The state of the adapter: Are we ready to be used ? Are we still preparing the adapter ? (creating the shaders and such)*/
+    eAdapterState mAdapterState;
 
     /** The main information about the last ray. Useful for the begin stroke of the paint engine */
     FOdysseyRay mLastStrokeRay;
@@ -127,11 +143,13 @@ protected:
     /** Are we using the stylus or not */
     bool mIsRecordingStylus = false;
 
-    /** Indicates the next stylus state to read in mStylusStates */
-    int mLastStylusEventIndex = 0;
+    /** Are we focused on the viewport */
+    bool mIsFocused = false;
 
     /** Indicates if the stylus is considered as touching the tablet or not */
     bool mStylusIsDown = false;
+    bool mIsMouseDown = false;
+
     FKey mStylusButton;
 
     bool mOverrideMouseCursor = false;

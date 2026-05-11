@@ -172,7 +172,7 @@ private:
 private:
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlockFromEditor(bool iCreate) const;
 
-    void BeginStroke(const FOdysseyPoint& iPoint);
+    void BeginStroke();
     void StrokeTo(const TArray<FOdysseyPoint>& iPoints);
     void StrokeEnd();
 

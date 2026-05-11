@@ -17,8 +17,8 @@
 
 #include <chrono>
 #include <ULIS>
+#include "StylusInputHandler.h"
 
-class UOdysseyStylusInputSubsystem;
 class FCanvas;
 class UTexture2D;
 
@@ -34,7 +34,8 @@ class FOdysseyHUDElement;
 class FOdysseyPainterEditorViewportClient
     : public FViewportClient
     , public FGCObject
-    , public IStylusMessageHandler
+    , public FOdysseyStylusInputHandler
+    , public FTickableEditorObject
 {
 public:
     DECLARE_DELEGATE_TwoParams(FOnPickColor, eOdysseyEventState::Type, const FVector2D&)
@@ -59,6 +60,14 @@ public:
     };
 
 public:
+    enum class eStylusEventFence
+    {
+        kNone,
+        kStylusUp,
+        kStylusDown,
+    };
+
+public:
     // Construction / Destruction
     FOdysseyPainterEditorViewportClient(FOdysseyPainterEditor* iEditor, TWeakPtr< SOdysseyViewport > iTextureEditorViewport, FOdysseyMeshSelector* iMeshSelector);
     ~FOdysseyPainterEditorViewportClient();
@@ -76,11 +85,13 @@ public:
     virtual EMouseCursor::Type                  GetCursor( FViewport* iViewport, int32 iX, int32 iY ) override;
     virtual TOptional< TSharedRef< SWidget > >  MapCursor( FViewport* iViewport, const FCursorReply& iCursorReply ) override;
 
-    virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex ) override;
+    virtual void OnPacket(const UE::StylusInput::FStylusInputPacket& Packet, UE::StylusInput::IStylusInputInstance* Instance) override;
+
     void StartStylusInputRecord();
     void StopStylusInputRecord();
-    FOdysseyPoint StylusStateToPoint(const FStylusState& iState);
-    void ReadStylusInput();
+    FOdysseyPoint StylusPacketToPoint(const UE::StylusInput::FStylusInputPacket& iPacket);
+
+    void ReadStylusInput(eStylusEventFence iUntilEventType = eStylusEventFence::kNone);
 
     virtual EMouseCaptureMode GetMouseCaptureMode() const override;
 
@@ -88,6 +99,11 @@ public:
     // FGCObject API
     virtual void AddReferencedObjects( FReferenceCollector& ioCollector ) override;
     virtual FString GetReferencerName() const override;
+
+public:
+    // FTickableEditorObject
+    virtual void Tick(float DeltaTime) override;
+    virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(OdysseyPainterEditorViewportClient, STATGROUP_Tickables); }
 
 public:
     // Public API
@@ -128,7 +144,6 @@ private:
 
 private:
     // Private Data Members
-    UOdysseyStylusInputSubsystem*           InputSubsystem;
     FOdysseyPainterEditor*                    mOdysseyPainterEditor;
     TWeakPtr<SOdysseyViewport>              mOdysseyPainterEditorViewportPtr;
     FOdysseyMeshSelector*                   mMeshSelector;
@@ -164,13 +179,11 @@ private:
     bool                                    mIsMouseDown = false;
     FKey                                    mMouseButton;
     FOdysseyPoint                           mMouseDownReference;
-    FVector2D                           mHUDMouseDownReference;
+    FVector2D                               mHUDMouseDownReference;
 
-
-    TArray<FStylusState> mStylusStates;
     bool mIsRecordingStylus = false;
-    int mLastStylusEventIndex = 0;
     bool mStylusIsDown = false;
+    bool mIsFocused = false;
 
     FOdysseyPoint mCurrentHUDPoint;
     TSharedPtr<FOdysseyHUDElement> mCurrentHUDElement;
