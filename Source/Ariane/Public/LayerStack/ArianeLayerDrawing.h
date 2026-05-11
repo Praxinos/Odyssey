@@ -15,6 +15,7 @@
 
 struct FArianeObject;
 struct FArianePath;
+class UMaterialInterface;
 
 UENUM()
 enum class EArianeLayerDrawingOrigin : uint8
@@ -43,7 +44,7 @@ public:
 
     FArianeObject* GetRootObject();
 
-    FArianePath* AllocPath();
+    FArianePath* AllocPath( UMaterialInterface* MaterialInterface );
     FArianeObject* AllocObject();
     TArray<FInstancedStruct>& GetInstancedObjects();
     virtual void Update( bool bInteractive ) override;
@@ -59,6 +60,10 @@ public:
     EArianeLayerDrawingOrientation GetDrawingOrientation();
     void SetDrawingOrientation( EArianeLayerDrawingOrientation InDrawingOrientation );
     virtual void PostEditUndo() override;
+
+    void IncrementMaterial( UMaterialInterface* MaterialInterface );
+    void DecrementMaterial( UMaterialInterface* MaterialInterface );
+    const TMap<UMaterialInterface*, uint32>& GetUsedMaterials();
 
 protected:
     void BindDelegates();
@@ -82,4 +87,7 @@ protected:
 
     UPROPERTY( EditAnywhere )
     EArianeLayerDrawingOrientation DrawingOrientation;
+
+protected:
+    TMap<UMaterialInterface*, uint32> UsedMaterials;
 };

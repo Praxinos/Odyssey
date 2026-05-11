@@ -127,5 +127,4 @@ protected:
     UOdysseyPaletteEntryColor* CurrentPaletteColorEntry;
     FGuid CurrentPaletteSet;
     TArray<UMaterialInterface*> UsedMaterials;
-
 };

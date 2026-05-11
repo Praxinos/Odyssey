@@ -154,7 +154,6 @@ FArianePath::Chain::IterateSegments( TFunction<bool( FArianeVertex*, FArianeSegm
     }
 }
 
-
 //--------------------- Vertex buffer
 
 void FArianePathVertexBuffer::Resize(  uint32 InVertexCount, FRHICommandListBase& RHICmdList )
@@ -187,8 +186,12 @@ FArianePath::FArianePath()
     , Geometry3D ( this )
     , LineType( EArianePathLineType::Tube )
     , Color ( 0, 0, 0, 255 )
+    , MaterialInterface ( nullptr )
 {
     InvalidationFlags = new FArianePathInvalidationFlags();
+
+    // Default material interface. color only
+    //MaterialInterface = GEngine->VertexColorMaterial;
 }
 
 FArianePath::FArianePath( UArianeLayerDrawing* InDrawingLayer )
@@ -196,8 +199,12 @@ FArianePath::FArianePath( UArianeLayerDrawing* InDrawingLayer )
     , Geometry3D ( this )
     , LineType ( EArianePathLineType::Tube )
     , Color ( 0, 0, 0, 255 )
+    , MaterialInterface ( nullptr )
 {
     InvalidationFlags = new FArianePathInvalidationFlags();
+
+    // Default material interface. color only
+    //MaterialInterface = GEngine->VertexColorMaterial;
 }
 
 /*
@@ -214,6 +221,48 @@ FArianePath::PostLoad()
     }
 }
 */
+
+void
+FArianePath::Added()
+{
+    if( MaterialInterface )
+    {
+        DrawingLayer->IncrementMaterial( MaterialInterface );
+    }
+}
+
+void
+FArianePath::Removed()
+{
+    if( MaterialInterface )
+    {
+        DrawingLayer->DecrementMaterial( MaterialInterface );
+    }
+}
+
+UMaterialInterface*
+FArianePath::GetMaterial()
+{
+    return MaterialInterface;
+}
+
+void
+FArianePath::SetMaterial( UMaterialInterface* InMaterialInterface )
+{
+    // remove the current material from the used material list
+    if( MaterialInterface )
+    {
+        DrawingLayer->DecrementMaterial( MaterialInterface );
+    }
+
+    // add the new material to the used material list
+    if( InMaterialInterface )
+    {
+        DrawingLayer->IncrementMaterial( InMaterialInterface );
+    }
+
+    MaterialInterface = InMaterialInterface;
+}
 
 const TArray<FArianePath::Chain>&
 FArianePath::GetChains()
@@ -411,6 +460,12 @@ FArianePath::PostEditUndo()
         Segment->Link();
     }
 
+    if( MaterialInterface == nullptr )
+        MaterialInterface = GEngine->VertexColorMaterial;
+
+    //if( MaterialInterface )
+        DrawingLayer->IncrementMaterial( MaterialInterface );
+
     Invalidate( FArianePathInvalidationFlags().SetSegmentAltered()
                                               .SetSegmentAddedOrRemoved()
                                               .SetVertexAltered()
@@ -429,6 +484,12 @@ FArianePath::PostLoad()
         Segment->PostLoad();
         Segment->Link();
     }
+
+    if( MaterialInterface == nullptr )
+        MaterialInterface = GEngine->VertexColorMaterial;
+
+    //if( MaterialInterface )
+        DrawingLayer->IncrementMaterial( MaterialInterface );
 
     Invalidate( FArianePathInvalidationFlags().SetSegmentAltered()
                                               .SetSegmentAddedOrRemoved()

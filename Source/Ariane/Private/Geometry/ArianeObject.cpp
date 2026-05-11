@@ -122,6 +122,7 @@ FArianeObject::RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstan
     ChildToRemove->Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
     // update now because the child won't be recursively updatable from a parent object
     ChildToRemove->Update( true );
+    ChildToRemove->Removed();
 
     if( bRemoveFromInstancedObjects )
     {
@@ -135,6 +136,7 @@ FArianeObject::AppendChild( FArianeObject* Child )
     ChildrenID.Add( FArianeObjectID( Child ) );
 
     Child->SetParent( this );
+    Child->Added();
 
     Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 }
@@ -145,6 +147,7 @@ FArianeObject::PrependChild( FArianeObject* Child )
     ChildrenID.Insert( FArianeObjectID( Child ), 0 );
 
     Child->SetParent( this );
+    Child->Added();
 
     Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 }
@@ -160,6 +163,7 @@ FArianeObject::InsertChild( FArianeObject* Child, FArianeObject* InsertAfter )
     ChildrenID.Insert( FArianeObjectID( Child ), FoundObjectIndex + 1 );
 
     Child->SetParent( this );
+    Child->Added();
 
     Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 }
