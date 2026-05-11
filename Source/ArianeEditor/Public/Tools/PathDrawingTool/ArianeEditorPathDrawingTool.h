@@ -93,6 +93,9 @@ public:
              , Category = PathDrawingTool )
     bool bShowGrid;
 
+    UPROPERTY( EditAnywhere )
+    UMaterialInterface* MaterialInterface;
+
 protected:
     FArianePath* EditedPath;
 };

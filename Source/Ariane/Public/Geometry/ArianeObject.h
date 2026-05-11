@@ -137,6 +137,8 @@ struct ARIANE_API FArianeObject
         UArianeLayerDrawing* GetDrawingLayer();
         void SetDrawingLayer( UArianeLayerDrawing* InLayer );
         FSimpleMulticastDelegate & GetOnPostInvalidatedDelegate();
+        virtual void Added(){};
+        virtual void Removed(){};
 
     protected:
         /**

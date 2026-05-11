@@ -59,13 +59,30 @@ UArianePainting3DComponent::OnRegister()
 
     //UsedMaterials.Add( GEngine->VertexColorMaterial );
 
-    SetMaterial( 0, GEngine->VertexColorMaterial );
+    //SetMaterial( 0, GEngine->VertexColorMaterial );
 }
 
 void
 UArianePainting3DComponent::GetUsedMaterials( TArray<UMaterialInterface*>& OutMaterials, bool bGetDebugMaterials ) const
 {
-    OutMaterials.Append( UsedMaterials );
+    //OutMaterials.Append( UsedMaterials );
+
+    LayerStack->GetRootFolder()->Traverse( [ &OutMaterials ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::TraversalReturnValue
+        {
+            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Layer);
+
+            if( DrawingLayer )
+            {
+                const TMap<UMaterialInterface*,uint32>& DrawingLayerUsedMaterials = DrawingLayer->GetUsedMaterials();
+                TArray<UMaterialInterface*> DrawingLayerMaterialInterfaces;
+
+                DrawingLayerUsedMaterials.GetKeys( DrawingLayerMaterialInterfaces );
+
+                OutMaterials.Append( DrawingLayerMaterialInterfaces );
+            }
+
+            return UArianeLayerFolder::TraversalReturnValue::Continue;
+        } );
 }
 
 int32
@@ -368,13 +385,13 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
                                                         , FMeshElementCollector& Collector
                                                         , int32 ViewIndex ) const
 {
-    UMaterialInterface* MaterialInterface = GEngine->VertexColorMaterial;
+    //UMaterialInterface* MaterialInterface = GEngine->VertexColorMaterial;
 
     DrawingLayer->InstancedObjectsAccessRW.Lock();
 
     DrawingLayer->GetRootObject()->Traverse( [ this
                                              , DrawingLayer
-                                             , MaterialInterface
+                                             //, MaterialInterface
                                              , ViewIndex
                                              , &Collector ]( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
     {
@@ -382,6 +399,7 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
         {
             FArianePath* Path = static_cast<FArianePath*>(Object);
             FArianePathGeometry3D& Mesh = Path->GetGeometry3D();
+            UMaterialInterface* MaterialInterface = Path->GetMaterial();
 
             if( MaterialInterface
              && MaterialInterface->GetRenderProxy()

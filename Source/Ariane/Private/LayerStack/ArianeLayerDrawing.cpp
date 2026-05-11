@@ -60,6 +60,9 @@ UArianeLayerDrawing::PostLoad()
 
     BindDelegates();
 
+    // Empty the map before reloading. Each path will populate or increment the attached value.
+    UsedMaterials.Empty();
+
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
@@ -82,6 +85,9 @@ UArianeLayerDrawing::PostEditUndo()
     RootObjectID.InvalidateCache();
 
     BindDelegates();
+
+    // Empty the map before reloading. Each path will populate or increment the attached value.
+    UsedMaterials.Empty();
 
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
@@ -125,7 +131,7 @@ UArianeLayerDrawing::AllocObject()
 }
 
 FArianePath*
-UArianeLayerDrawing::AllocPath()
+UArianeLayerDrawing::AllocPath( UMaterialInterface* MaterialInterface )
 {
     InstancedObjectsAccessRW.Lock();
     InstancedObjects.Add( FInstancedStruct::Make<FArianePath>( this ) );
@@ -133,7 +139,40 @@ UArianeLayerDrawing::AllocPath()
 
     FArianePath* NewPath = InstancedObjects.Last().GetMutablePtr<FArianePath>();
 
+    NewPath->SetMaterial( MaterialInterface ? MaterialInterface
+                                            : GEngine->VertexColorMaterial );
+
+    // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
+    GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
+
     return NewPath;
+}
+
+const TMap<UMaterialInterface*, uint32>&
+UArianeLayerDrawing::GetUsedMaterials()
+{
+    return UsedMaterials;
+}
+
+void
+UArianeLayerDrawing::IncrementMaterial( UMaterialInterface* MaterialInterface )
+{
+    UsedMaterials.FindOrAdd( MaterialInterface )++;
+}
+
+void
+UArianeLayerDrawing::DecrementMaterial( UMaterialInterface* MaterialInterface )
+{
+    uint32* value = UsedMaterials.Find( MaterialInterface );
+
+    // Note: We don't check the ptr because what is decremented must have been incremented first.
+    // Or else there is a bug somewhere else.
+    *value--;
+
+    if( *value == 0 )
+    {
+        UsedMaterials.Remove( MaterialInterface );
+    }
 }
 
 TArray<FInstancedStruct>&

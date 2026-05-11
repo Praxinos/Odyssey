@@ -744,7 +744,7 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
 
             if( ( SegmentAdditionFlags & ESegmentAdditionFlags::CreateNewPath ) == ESegmentAdditionFlags::CreateNewPath )
             {
-                CurrentPath = DrawingLayer->AllocPath();
+                CurrentPath = DrawingLayer->AllocPath( ChainPath->GetMaterial() );
                 // for postprocessing. the path is not added to the parent yet
                 CurrentPath->SetParent( ChainPath->GetParent() );
 

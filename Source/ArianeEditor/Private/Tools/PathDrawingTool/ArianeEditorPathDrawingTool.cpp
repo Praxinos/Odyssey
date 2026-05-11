@@ -32,6 +32,7 @@ UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
     , EditedPath( nullptr )
     //, LineType ( EArianePainting3DGeometryMode::Flat )
     , bShowGrid ( true )
+    , MaterialInterface ( nullptr )
 {
     Icon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathDrawing64");
 
@@ -97,7 +98,7 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
             {
                 DrawingLayer->Modify();
 
-                EditedPath = DrawingLayer->AllocPath();
+                EditedPath = DrawingLayer->AllocPath( MaterialInterface );
 
                 DrawingLayer->GetRootObject()->AppendChild( EditedPath );
 

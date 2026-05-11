@@ -25,6 +25,7 @@ struct FArianeVertex;
 class UMaterial;
 class UArianeLayerDrawing;
 struct FArianePath;
+class UMaterialInterface;
 
 UENUM(BlueprintType)
 enum class EArianePathLineType : uint8
@@ -244,7 +245,10 @@ public:
     const FColor& GetColor();
     void  SetColor( const FColor& InColor );
     virtual void ExportProperties( FArianeObject* DestObject ) override;
-
+    virtual void Added() override;
+    virtual void Removed() override;
+    void SetMaterial( UMaterialInterface* InMaterialInterface );
+    UMaterialInterface* GetMaterial();
 
 protected:
     UPROPERTY( EditAnywhere )
@@ -264,6 +268,9 @@ protected:
 
     UPROPERTY( EditAnywhere )
     FColor Color;
+
+    UPROPERTY( EditAnywhere )
+    UMaterialInterface* MaterialInterface;
 
 protected:
     FArianePathGeometry3D Geometry3D;
