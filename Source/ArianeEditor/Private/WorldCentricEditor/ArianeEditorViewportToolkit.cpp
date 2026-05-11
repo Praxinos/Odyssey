@@ -1,6 +1,7 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
+// Ariane Editor headers
 #include "ArianeEditorViewportToolkit.h"
 #include "ArianeEditorViewportEdMode.h"
 #include "ArianeEditor.h"
@@ -8,6 +9,8 @@
 #include "ArianeEditorLayerStackTab.h"
 #include "ArianeEditorColorSelectorTab.h"
 #include "SArianeEditorMasterPanel.h"
+// Ariane headers
+#include "ArianePainting3DActor.h"
 
 // Unreal headers
 #include "LevelEditor.h"
@@ -115,7 +118,14 @@ FArianeEditorViewportToolkit::AddActorMenuEntry( FToolMenuSection& InSection )
         , FSlateIcon()
         , FUIAction( FExecuteAction::CreateLambda( [this]()
                                                    {
-                                                       Editor->FArianeEditor::AddPainting3DActor();
+                                                       AArianePainting3DActor* Painting3DActor = Editor->AddPainting3DActor();
+
+                                                       if( Painting3DActor )
+                                                       {
+                                                           // Select the actor
+                                                           GEditor->SelectNone( true, true );
+                                                           GEditor->SelectActor( Painting3DActor, true, true );
+                                                       }
                                                    } ) ) );
 }
 

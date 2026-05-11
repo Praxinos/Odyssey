@@ -4,6 +4,7 @@
 // ArianeEditor headers
 #include "ArianeEditor.h"
 #include "ArianeEditorTool.h"
+#include "ArianeEditorSettings.h"
 #include "ArianeEditorViewportToolkit.h"
 #include "ArianeEditorColorSelectorTab.h"
 #include "ArianeEditorLayerStackTab.h"
@@ -88,11 +89,11 @@ FArianeEditor::ClearPainting3DComponents()
 
     for( AActor* actor : editorActorSubsystem->GetSelectedLevelActors() )
     {
-        UArianePainting3DComponent* painting3DComponent = Cast<UArianePainting3DComponent>(actor->GetComponentByClass( UArianePainting3DComponent::StaticClass() ));
+        UArianePainting3DComponent* Painting3DComponent = Cast<UArianePainting3DComponent>(actor->GetComponentByClass( UArianePainting3DComponent::StaticClass() ));
 
-        if( painting3DComponent )
+        if( Painting3DComponent )
         {
-            UArianeLayerDrawing* CurrentDrawingLayer = painting3DComponent->GetLayerStack()->GetFirstSelectedDrawingLayer();
+            UArianeLayerDrawing* CurrentDrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
             if( CurrentDrawingLayer )
             {
@@ -383,6 +384,33 @@ FArianeEditor::GetId() const
 }
 
 void
+FArianeEditor::Tick( float DeltaTime )
+{
+    UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
+    uint64 UniqueKey = (uint64)this;
+
+    if ( Painting3DComponent == nullptr )
+    {
+        GEngine->AddOnScreenDebugMessage ( UniqueKey // use the pointer as the ID
+                                         , 0.1f // Short duration
+                                         , FColor::Red
+                                         , LOCTEXT("ariane-editor.no-actor-selected","No Painting3D Actor selected").ToString() );
+    }
+    else
+    {
+        UArianeLayer* CurrentLayer = Painting3DComponent->GetLayerStack()->GetCurrentLayer();
+
+        if( CurrentLayer && CurrentLayer->IsLocked( true ) )
+        {
+            GEngine->AddOnScreenDebugMessage ( UniqueKey // use the pointer as the ID
+                                             , 0.1f // Short duration
+                                             , FColor::Red
+                                             , LOCTEXT("ariane-editor.layer-locked","The selected layer is locked").ToString() );
+        }
+    }
+}
+
+void
 FArianeEditor::Init()
 {
     InitTabs();
@@ -397,7 +425,17 @@ FArianeEditor::GetWorld()
 AArianePainting3DActor*
 FArianeEditor::AddPainting3DActor()
 {
-    return Cast<AArianePainting3DActor>(GetWorld()->SpawnActor( AArianePainting3DActor::StaticClass() ));
+    const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
+    FEditorViewportClient* ViewportClient = static_cast<FEditorViewportClient*>(GEditor->GetActiveViewport()->GetClient());
+    FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
+                                                                            , ViewportClient->GetScene()
+                                                                            , ViewportClient->EngineShowFlags ) );
+    // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
+    FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
+    FVector Location = View ? View->ViewLocation + ( View->GetViewDirection() * Settings->GetDistanceToNewActor() )
+                            : FVector();
+
+    return Cast<AArianePainting3DActor>(GetWorld()->SpawnActor( AArianePainting3DActor::StaticClass(), &Location ) );
 }
 
 void

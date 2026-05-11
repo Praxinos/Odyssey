@@ -4,6 +4,7 @@
 // Ariane
 #include "ArianeEditorTool.h"
 #include "ArianeEditor.h"
+#include "ArianeEditorSettings.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayerDrawing.h"
@@ -43,13 +44,18 @@ UArianeEditorTool::Setup()
 
     if( bInited == false )
     {
-        UClickDragInputBehavior* ClickDragInputBehavior = NewObject<UClickDragInputBehavior>(this);
+        UClickDragInputBehavior* LeftClickDragInputBehavior = NewObject<UClickDragInputBehavior>(this);
+        //UClickDragInputBehavior* RightClickDragInputBehavior = NewObject<UClickDragInputBehavior>(this);
         UMouseHoverBehavior* MouseHoverBehavior = NewObject<UMouseHoverBehavior>(this);
 
-        ClickDragInputBehavior->Initialize(this);
+        LeftClickDragInputBehavior->Initialize(this);
+        //RightClickDragInputBehavior->Initialize(this);
         MouseHoverBehavior->Initialize(this);
 
-        AddInputBehavior( ClickDragInputBehavior );
+        //RightClickDragInputBehavior->SetUseRightMouseButton();
+
+        AddInputBehavior( LeftClickDragInputBehavior );
+        //AddInputBehavior( RightClickDragInputBehavior );
         AddInputBehavior( MouseHoverBehavior );
 
         bInited = true;
@@ -392,27 +398,35 @@ UArianeEditorTool::PostTransacted( const FTransactionObjectEvent& iTransactionEv
 void
 UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, UArianeLayerDrawing* DrawingLayer )
 {
+    const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
+    double GridSize = Settings->GetGridSize();
+    double GridOpacity = Settings->GetGridOpacity();
+    FLinearColor GridColor = Settings->GetGridColor().CopyWithNewOpacity( GridOpacity );
+    FLinearColor GridXAxisColor = Settings->GetGridXAxisColor().CopyWithNewOpacity( GridOpacity );
+    FLinearColor GridYAxisColor = Settings->GetGridYAxisColor().CopyWithNewOpacity( GridOpacity );
+
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
     IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
     FPrimitiveDrawInterface* PDI = RenderAPI->GetPrimitiveDrawInterface();
     ULineBatchComponent* LineBatcher = GetWorld()->GetLineBatcher( UWorld::ELineBatcherType::World );
-    float OriX, OriY;
-    float EndX, EndY;
-    FLinearColor Color = FLinearColor::Gray.CopyWithNewOpacity( 0.125f );
     FTransform LayerTransform = DrawingLayer->GetComponentTransform();
     FMatrix LayerMatrix = LayerTransform.ToMatrixWithScale();;
     FMatrix WorldMatrix;
     float AdjustedThickness = 2.0f;
     FViewCameraState CameraState;
+    float OriX, OriY;
+    float EndX, EndY;
 
     QueriesAPI->GetCurrentViewState( CameraState );
 
     // Adjust line thickness relative to camera distance
     float Distance = FVector::Dist( CameraState.Position, DrawingLayer->GetComponentLocation() );
+
+    double GridRadius = GridSize * 0.5f;
+    static uint32 StepCount = 20, StepCountHalf = StepCount / 2;
+    double Step = ( GridSize ) / StepCount;
+
     AdjustedThickness = ( Distance / 1000.0f ) * AdjustedThickness;
-    double GridRadius = 1000;
-    static uint32 StepCount = 20;
-    double Step = ( GridRadius * 2 ) / StepCount;
 
     switch( DrawingLayer->GetDrawingOrientation() )
     {
@@ -487,7 +501,7 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
 
         PDI->DrawLine( WorldMatrix.TransformPosition( Origin )
                      , WorldMatrix.TransformPosition( EndPos )
-                     , Color
+                     , ( i == StepCountHalf ) ? GridXAxisColor : GridColor
                      , SDPG_Foreground // SDPG_World
                      , AdjustedThickness
                      , 0.0f ); // Lifetime 1 frame
@@ -508,7 +522,7 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
 
         PDI->DrawLine( WorldMatrix.TransformPosition( Origin )
                      , WorldMatrix.TransformPosition( EndPos )
-                     , Color
+                     , ( i == StepCountHalf ) ? GridYAxisColor : GridColor
                      , SDPG_Foreground // SDPG_World
                      , AdjustedThickness
                      , 0.0f ); // Lifetime 1 frame

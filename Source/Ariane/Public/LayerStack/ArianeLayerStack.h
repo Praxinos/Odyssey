@@ -35,14 +35,13 @@ public:
     void SelectLayers( const TArray<UArianeLayer*> LayerSelection, bool bClearSelectionFirst, bool bTriggerevent, bool bRecurse = true );
     void ClearLayerSelection( bool bTriggerEvent );
     const TArray<UArianeLayer*>& GetSelectedLayers();
-    UArianeLayerDrawing* GetFirstSelectedDrawingLayer();
+    UArianeLayer* GetCurrentLayer();
     UArianeLayerDrawing* CreateDrawingLayer( UArianeLayerFolder* ParentLayerFolder, bool bTriggerEvent );
     UArianeLayerFolder* CreateFolderLayer( UArianeLayerFolder* ParentLayerFolder, bool bTriggerEvent );
     UArianePainting3DComponent* GetPainting3DComponent();
     virtual void OnComponentDestroyed( bool bDestroyingHierarchy ) override;
     void GetLayers( TArray<UArianeLayer*>& Layers );
     void Init();
-    UArianeLayer* GetCurrentLayer();
     virtual void PostLoad() override;
 
     FOnLayerStackChanged& OnPreLayerStackChangedDelegate();

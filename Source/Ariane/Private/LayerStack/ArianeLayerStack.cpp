@@ -179,7 +179,7 @@ UArianeLayerStack::SelectLayer_Private( UArianeLayer* Layer, bool bRecurse )
 UArianeLayer*
 UArianeLayerStack::GetCurrentLayer()
 {
-    return SelectedLayers.Num() ? SelectedLayers[0] : nullptr;
+    return SelectedLayers.Num() ? SelectedLayers.Last() : nullptr;
 }
 
 void
@@ -203,22 +203,6 @@ const TArray<UArianeLayer*>&
 UArianeLayerStack::GetSelectedLayers()
 {
     return SelectedLayers;
-}
-
-UArianeLayerDrawing*
-UArianeLayerStack::GetFirstSelectedDrawingLayer()
-{
-    for( UArianeLayer* Layer : SelectedLayers )
-    {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>( Layer );
-
-        if( DrawingLayer )
-        {
-            return DrawingLayer;
-        }
-    }
-
-    return nullptr;
 }
 
 UArianeLayerDrawing*

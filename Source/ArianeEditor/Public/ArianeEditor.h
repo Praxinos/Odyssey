@@ -134,6 +134,7 @@ public:
                        , bool TriggerEvent  );
     bool IsCurrentTool( const FString& ToolType );
     void PostInit();
+    void Tick( float DeltaTime );
 
 protected:
     /**
