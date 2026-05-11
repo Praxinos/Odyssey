@@ -38,6 +38,7 @@ public:
     virtual void ExtendMenu(TSharedRef<FExtender> iExtender) override;
     virtual void ExtendContextMenu( FMenuBuilder& menu, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
     virtual void BindShortcuts( TSharedPtr<FUICommandList> iCommandList ) override;
+    virtual bool UsesRasterSelection() const override;
 
 protected:
     void SelectAll();

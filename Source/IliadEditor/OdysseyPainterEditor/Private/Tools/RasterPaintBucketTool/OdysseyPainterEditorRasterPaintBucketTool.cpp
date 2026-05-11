@@ -56,7 +56,6 @@ UOdysseyPainterEditorRasterPaintBucketTool::Load()
     rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterPaintBucketTool::OnRasterSelectionChanged);
     if (!rasterSelection->IsEmpty())
         mPaintEngine.SetMaskBlock(rasterSelection->GetBlock());
-    mHUD->AddElement(rasterSelection->GetHUD());
 
     bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
     if( hasRaster )
@@ -80,7 +79,6 @@ UOdysseyPainterEditorRasterPaintBucketTool::Unload()
 
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->OnChanged().RemoveAll(this);
-    mHUD->RemoveElement(rasterSelection->GetHUD());
 
     UOdysseyPainterEditorTool::Unload();
 }

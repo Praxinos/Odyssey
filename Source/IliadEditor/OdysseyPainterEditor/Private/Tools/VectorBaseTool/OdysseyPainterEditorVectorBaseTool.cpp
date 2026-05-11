@@ -52,6 +52,8 @@ UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( TShare
     , mWorkingCell( nullptr )
     , mWorkingLayer( nullptr )
 {
+    // 3D HUD
+    mHUD->AddElement( mBaseHUD );
 }
 
 void
@@ -327,8 +329,6 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
             mBaseHUD->Unload();
             // 2D HUD
             mWorkingLayer->RemoveHUD( mBaseHUD.Get() );
-            // 3D HUD
-            mHUD->RemoveElement( mBaseHUD );
         }
     }
 }
@@ -376,9 +376,6 @@ UOdysseyPainterEditorVectorBaseTool::Load()
                 mBaseHUD->Load();
                 // 2D HUD
                 mWorkingCell->GetLayer()->AddHUD( mBaseHUD.Get() );
-                // 3D HUD
-                mHUD->AddElement( mBaseHUD );
-
                 mWorkingCell->GetLayer()->ResetHUD( mWorkingCell->GetScene() );
             }
 

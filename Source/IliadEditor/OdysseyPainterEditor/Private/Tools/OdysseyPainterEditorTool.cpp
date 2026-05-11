@@ -23,8 +23,18 @@ UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
     : mEditor (nullptr)
     , mIsActivated(false)
 {
+    mRootHUD = MakeShared<FOdysseyHUDElement>();
     mHUD = MakeShared<FOdysseyHUDElement>();
+
+    mRootHUD->AddElement(mHUD);
+
     mInputProcessor = MakeShared<FOdysseyPainterEditorToolInputProcessor>(this);
+}
+
+bool
+UOdysseyPainterEditorTool::UsesRasterSelection() const
+{
+    return false;
 }
 
 bool
@@ -116,16 +126,12 @@ UOdysseyPainterEditorTool::Inactivate()
 void
 UOdysseyPainterEditorTool::Load()
 {
-    mEditor->HUDSystem()->AddElement(mHUD);
 }
 
 void
 UOdysseyPainterEditorTool::Unload()
 {
     CancelRIM();
-
-    mHUD->EmptyElements();
-    mEditor->HUDSystem()->RemoveElement(mHUD);
 }
 
 bool
@@ -383,7 +389,7 @@ UOdysseyPainterEditorTool::ExtendToolbar( UToolMenu* iToolMenu )
 
 TSharedPtr<FOdysseyHUDElement> UOdysseyPainterEditorTool::GetHUD()
 {
-    return mHUD;
+    return mRootHUD;
 }
 
 EMouseCursor::Type UOdysseyPainterEditorTool::GetMouseCursor() const
@@ -489,8 +495,8 @@ UOdysseyPainterEditorTool::StartRadiusInteractiveModifier()
     mRIMHUD->SetCustomization(customization);
 
     //Replace the HUD with the RIMHUD
-    mEditor->HUDSystem()->RemoveElement(mHUD);
-    mEditor->HUDSystem()->AddElement(mRIMHUD);
+    mRootHUD->RemoveElement(mHUD);
+    mRootHUD->AddElement(mRIMHUD);
 
     switch(GetRadiusReference())
     {
@@ -528,8 +534,8 @@ UOdysseyPainterEditorTool::EndRIM()
     mIsRIMActive = false;
 
     //Put the tool's HUD in place again
-    mEditor->HUDSystem()->RemoveElement(mRIMHUD);
-    mEditor->HUDSystem()->AddElement(mHUD);
+    mRootHUD->RemoveElement(mRIMHUD);
+    mRootHUD->AddElement(mHUD);
 
     mRIMStartRadius = 0.f;
     mRIMHUD = nullptr;
@@ -550,8 +556,8 @@ UOdysseyPainterEditorTool::CancelRIM()
     mIsRIMActive = false;
 
     //Put the tool's HUD in place again
-    mEditor->HUDSystem()->RemoveElement(mRIMHUD);
-    mEditor->HUDSystem()->AddElement(mHUD);
+    mRootHUD->RemoveElement(mRIMHUD);
+    mRootHUD->AddElement(mHUD);
 
     mRIMStartRadius = 0.f;
     mRIMHUD = nullptr;
@@ -574,7 +580,7 @@ UOdysseyPainterEditorTool::GetRIMCenter(const FVector2D& iMousePositionInTexture
 
         case EPainterEditorToolRadiusReference::HUD:
         {
-            center = mEditor->HUDSystem()->TextureToHUD( FVector2D(iMousePositionInTexture) );
+            center = mRootHUD->TextureToHUD( FVector2D(iMousePositionInTexture) );
             center -= delta;
         }
         break;
@@ -613,7 +619,7 @@ UOdysseyPainterEditorTool::RIMOnMouseDrag(const FOdysseyPoint& iPointInTexture)
         case EPainterEditorToolRadiusReference::HUD:
         {
             center =  mRIMHUD->GetCenter();
-            mousePosition =  mEditor->HUDSystem()->TextureToHUD( iPointInTexture );
+            mousePosition =  mRootHUD->TextureToHUD( iPointInTexture );
         }
         break;
     }

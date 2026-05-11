@@ -142,7 +142,7 @@ public:
     virtual void ExtendToolbar( UToolMenu* iToolMenu );
     virtual TSharedPtr<FOdysseyHUDElement> GetHUD();
     virtual EMouseCursor::Type GetMouseCursor() const;
-
+    virtual bool UsesRasterSelection() const;
     virtual bool SupportsColorType(EOdysseyPainterEditorColorType iType);
 
 protected:
@@ -189,6 +189,7 @@ private:
 protected:
     TSharedPtr<FOdysseyPainterEditorToolInputProcessor> mInputProcessor;
     FOdysseyPainterEditor*              mEditor;
+    TSharedPtr<FOdysseyHUDElement>      mRootHUD;
     TSharedPtr<FOdysseyHUDElement>      mHUD;
 
     TSharedPtr<FUICommandList>          mCommandList;

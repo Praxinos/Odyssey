@@ -156,6 +156,8 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
     , mVectorHUDFlags(FOdysseyVectorHUD::HUD_MODE_OBJECT)
     , mVectorDrawingFlags(0)
     , mHUDSystem(MakeShared<FOdysseyHUDElement>())
+    , mToolsHUD(MakeShared<FOdysseyHUDElement>())
+    , mRasterSelectionHUD(MakeShared<FOdysseyHUDElement>())
     , mRasterSelection(MakeShared< FOdysseyPainterEditorRasterSelection >())
     , mBrushContexts()
     , mPaintColor(::ULIS::FColor::Black)
@@ -199,7 +201,7 @@ FOdysseyPainterEditor::Initialize()
     FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
     painterEditorModule.AddOpenedEditor(this);
 
-    //Init Tools
+    InitHUD();
     InitTools();
     InitTabs();
     InitShortcuts();
@@ -210,6 +212,16 @@ FOdysseyPainterEditor::Initialize()
     //Init the extensions
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
         extension->Initialize();
+}
+
+void
+FOdysseyPainterEditor::InitHUD()
+{
+    mToolsHUD->SetIsVisible(MakeAttributeSP(this, &FOdysseyPainterEditor::IsToolsHUDVisible));
+    mRasterSelectionHUD->SetIsVisible(MakeAttributeSP(this, &FOdysseyPainterEditor::IsRasterSelectionHUDVisible));
+    mRasterSelectionHUD->AddElement(mRasterSelection->GetHUD());
+    mHUDSystem->AddElement(mRasterSelectionHUD);
+    mHUDSystem->AddElement(mToolsHUD);
 }
 
 void
@@ -831,8 +843,9 @@ FOdysseyPainterEditor::OnClose()
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     FSlateApplication::Get().UnregisterInputPreProcessor(mAnimationFlipSystem);
 
-    mHUDSystem.Reset();
     mHUDSystem = nullptr;
+    mToolsHUD = nullptr;
+    mRasterSelectionHUD = nullptr;
     mRecentTools = nullptr;
 
     FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
@@ -1040,6 +1053,56 @@ FOdysseyPainterEditor::HUDSystem() const
     return mHUDSystem;
 }
 
+TSharedPtr<FOdysseyHUDElement>
+FOdysseyPainterEditor::GetToolsHUD() const
+{
+    return mToolsHUD;
+}
+
+TSharedPtr<FOdysseyHUDElement>
+FOdysseyPainterEditor::GetRasterSelectionHUD() const
+{
+    return mRasterSelectionHUD;
+}
+
+bool
+FOdysseyPainterEditor::IsToolsHUDVisible() const
+{
+    UOdysseyAnimationPlayer* player = GetAnimationPlayer();
+    if (!player)
+        return true;
+
+    return player->GetStatus() == EOdysseyAnimationPlayerStatus::Stopped;
+}
+
+bool
+FOdysseyPainterEditor::IsRasterSelectionHUDVisible() const
+{
+    UOdysseyPainterEditorTool* tool = GetCurrentTool();
+    if (!tool)
+    {
+        //Don't display Raster Selection when no tool is active
+        return false;
+    }
+
+    if (!tool->UsesRasterSelection())
+    {
+        //Don't display Raster Selection if the current tool does not need it
+        return false;
+    }
+
+    UOdysseyAnimationPlayer* player = GetAnimationPlayer();
+    if (!player)
+    {
+        //Always display Raster Selection if there is no animation player
+        //(eg. we are editing a texture)
+        return true;
+    }
+
+    //Don't display Raster Selection if the animation is being played or scrubbed
+    return player->GetStatus() == EOdysseyAnimationPlayerStatus::Stopped;
+}
+
 const FOdysseyBrushColor&
 FOdysseyPainterEditor::PaintColor() const
 {
@@ -1183,6 +1246,7 @@ FOdysseyPainterEditor::InactivateAllTools()
 
     if (mCurrentTemporaryTool)
     {
+        mToolsHUD->EmptyElements();
         mCurrentTemporaryTool->Inactivate();
         mCurrentTemporaryTool = nullptr;
         mOnCurrentTemporaryToolChanged.Broadcast();
@@ -1190,6 +1254,7 @@ FOdysseyPainterEditor::InactivateAllTools()
 
     if (mCurrentMainTool)
     {
+        mToolsHUD->EmptyElements();
         mCurrentMainTool->Inactivate();
         mCurrentMainTool = nullptr;
         mOnCurrentMainToolChanged.Broadcast();
@@ -1204,6 +1269,7 @@ FOdysseyPainterEditor::InactivateMainTool()
 {
     if (mCurrentMainTool)
     {
+        mToolsHUD->EmptyElements();
         mCurrentMainTool->Inactivate();
         mCurrentMainTool = nullptr;
         mOnCurrentMainToolChanged.Broadcast();
@@ -1220,6 +1286,7 @@ FOdysseyPainterEditor::ActivateMainTool( UOdysseyPainterEditorTool* iTool )
 
     if (mCurrentTemporaryTool && mCurrentTemporaryTool->IsActivated())
     {
+        mToolsHUD->EmptyElements();
         mCurrentTemporaryTool->Inactivate();
         mCurrentTemporaryTool = nullptr;
         mOnCurrentTemporaryToolChanged.Broadcast();
@@ -1227,6 +1294,7 @@ FOdysseyPainterEditor::ActivateMainTool( UOdysseyPainterEditorTool* iTool )
 
     if (mCurrentMainTool && mCurrentMainTool != iTool && mCurrentMainTool->IsActivated())
     {
+        mToolsHUD->EmptyElements();
         mCurrentMainTool->Inactivate();
         mCurrentMainTool = nullptr;
     }
@@ -1241,6 +1309,7 @@ FOdysseyPainterEditor::ActivateMainTool( UOdysseyPainterEditorTool* iTool )
 
     mCurrentMainTool = iTool;
     mCurrentMainTool->Activate();
+    mToolsHUD->AddElement(mCurrentMainTool->GetHUD());
 
     if (LayerStack())
     {
@@ -1266,6 +1335,7 @@ FOdysseyPainterEditor::InactivateTemporaryTool()
     if (!mCurrentTemporaryTool)
         return;
 
+    mToolsHUD->EmptyElements();
     mCurrentTemporaryTool->Inactivate();
     mCurrentTemporaryTool = nullptr;
     mOnCurrentTemporaryToolChanged.Broadcast();
@@ -1273,6 +1343,7 @@ FOdysseyPainterEditor::InactivateTemporaryTool()
     if (mCurrentMainTool && mCurrentMainTool->IsActivable())
     {
         mCurrentMainTool->Activate();
+        mToolsHUD->AddElement(mCurrentMainTool->GetHUD());
     }
     mOnCurrentToolChanged.Broadcast();
     UToolMenus::Get()->RefreshMenuWidget(mToolbarMenuName);
@@ -1286,17 +1357,20 @@ FOdysseyPainterEditor::ActivateTemporaryTool( UOdysseyPainterEditorTool* iTool )
 
     if (mCurrentTemporaryTool && mCurrentTemporaryTool->IsActivated())
     {
+        mToolsHUD->EmptyElements();
         mCurrentTemporaryTool->Inactivate();
         mCurrentTemporaryTool = nullptr;
     }
 
     if (mCurrentMainTool && mCurrentMainTool->IsActivated())
     {
+        mToolsHUD->EmptyElements();
         mCurrentMainTool->Inactivate();
     }
 
     mCurrentTemporaryTool = iTool;
     mCurrentTemporaryTool->Activate();
+    mToolsHUD->AddElement(mCurrentTemporaryTool->GetHUD());
 
     mOnCurrentTemporaryToolChanged.Broadcast();
     mOnCurrentToolChanged.Broadcast();

@@ -31,6 +31,7 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::UOdysseyPainterEditorRasterPrim
     , mShapeHUD(MakeShared<FOdysseyHUDElement>())
 {
     mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Shapes64"));
+    mHUD->AddElement(mShapeHUD);
 
     UOdysseyFreehandShape* freehandShape = CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::FreehandShape");
     freehandShape->DisplayHUD(true);
@@ -207,9 +208,6 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Load()
     rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnRasterSelectionChanged);
     if (!rasterSelection->IsEmpty())
         mPaintEngine.SetMaskBlock(rasterSelection->GetBlock());
-
-    mHUD->AddElement(rasterSelection->GetHUD());
-    mHUD->AddElement(mShapeHUD);
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Unload()
@@ -221,9 +219,6 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Unload()
 
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->OnChanged().RemoveAll(this);
-
-    mHUD->AddElement(rasterSelection->GetHUD());
-    mHUD->RemoveElement(mShapeHUD);
 }
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Flush()

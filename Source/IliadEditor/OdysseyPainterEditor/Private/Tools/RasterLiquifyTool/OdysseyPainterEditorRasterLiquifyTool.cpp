@@ -96,6 +96,8 @@ UOdysseyPainterEditorRasterLiquifyTool::UOdysseyPainterEditorRasterLiquifyTool()
     , mPressure ( 1.0f )
 {
     mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Liquify64"));
+
+    mHUD->AddElement( mLiquifyHUD );
 }
 
 //--------------------------------------------------------------------------------------
@@ -116,9 +118,6 @@ UOdysseyPainterEditorRasterLiquifyTool::Load()
 
     rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterLiquifyTool::OnRasterSelectionChanged);
 
-    mHUD->AddElement( rasterSelection->GetHUD() );
-    mHUD->AddElement( mLiquifyHUD );
-
     Init();
 }
 
@@ -132,9 +131,6 @@ UOdysseyPainterEditorRasterLiquifyTool::Unload()
     mAlteredImageBuffer.Empty();
 
     rasterSelection->OnChanged().RemoveAll(this);
-
-    mHUD->RemoveElement( mLiquifyHUD );
-    mHUD->RemoveElement( rasterSelection->GetHUD() );
 
     UOdysseyPainterEditorTool::Unload();
 }

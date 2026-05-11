@@ -230,6 +230,8 @@ public:
     template<class T> TSharedPtr<T> GetSourceTyped() const;
 
     virtual TSharedPtr<FOdysseyHUDElement>                              HUDSystem() const;
+    TSharedPtr<FOdysseyHUDElement> GetToolsHUD() const;
+    TSharedPtr<FOdysseyHUDElement> GetRasterSelectionHUD() const;
     virtual const FOdysseyBrushColor&                        PaintColor() const;
 
     UOdysseyAnimation*                                       GetAnimation() const;
@@ -361,6 +363,7 @@ protected:
     void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
 
 private:
+    void InitHUD();
     void InitTools();
     void InitTabs();
     void InitShortcuts();
@@ -369,6 +372,9 @@ private:
     void SwitchTabletAPI();
     void ClearCurrentLayerOrSelection();
     void ToggleEraserButton();
+
+    bool IsToolsHUDVisible() const;
+    bool IsRasterSelectionHUDVisible() const;
 
     UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
 
@@ -404,6 +410,8 @@ protected:
     uint64                          mVectorDrawingFlags;
 
     TSharedPtr<FOdysseyHUDElement>  mHUDSystem;
+    TSharedPtr<FOdysseyHUDElement>  mToolsHUD;
+    TSharedPtr<FOdysseyHUDElement>  mRasterSelectionHUD;
     TSharedPtr<FOdysseyPainterEditorRasterSelection> mRasterSelection;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;

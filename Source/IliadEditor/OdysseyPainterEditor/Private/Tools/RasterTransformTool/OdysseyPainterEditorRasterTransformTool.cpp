@@ -52,6 +52,8 @@ UOdysseyPainterEditorRasterTransformTool::UOdysseyPainterEditorRasterTransformTo
     , mIndexTransaction(0)
 {
     mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Transform64"));
+
+    mHUD->AddElement(mTransformToolHUD);
 }
 
 bool
@@ -296,8 +298,6 @@ void UOdysseyPainterEditorRasterTransformTool::Load()
 
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnRasterSelectionChanged);
-    mHUD->AddElement(rasterSelection->GetHUD());
-    mHUD->AddElement(mTransformToolHUD);
 
     UpdateRasterSelection( true ); //Create new selection if empty
 
@@ -311,8 +311,6 @@ void UOdysseyPainterEditorRasterTransformTool::Unload()
 
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->OnChanged().RemoveAll(this);
-    mHUD->RemoveElement(rasterSelection->GetHUD());
-    mHUD->RemoveElement(mTransformToolHUD);
 
     CommitTransform();
 

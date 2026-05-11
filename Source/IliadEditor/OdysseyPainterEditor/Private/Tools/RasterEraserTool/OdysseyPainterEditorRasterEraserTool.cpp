@@ -44,6 +44,7 @@ UOdysseyPainterEditorRasterEraserTool::UOdysseyPainterEditorRasterEraserTool()
 {
     mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Eraser64"));
 
+    mHUD->AddElement(mShapeHUD);
 
     Shapes.AddShapeType(EOdysseyShapeType::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterEraserTool::FreehandShape"));
     Shapes.AddShapeType(EOdysseyShapeType::kLine, CreateShape<UOdysseyLineShape>("UOdysseyPainterEditorRasterEraserTool::LineShape"));
@@ -119,9 +120,6 @@ UOdysseyPainterEditorRasterEraserTool::Load()
     rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterEraserTool::OnRasterSelectionChanged);
     if (!rasterSelection->IsEmpty())
         mPaintEngine.SetMaskBlock(rasterSelection->GetBlock());
-
-    mHUD->AddElement(rasterSelection->GetHUD());
-    mHUD->AddElement(mShapeHUD);
 }
 
 void
@@ -134,8 +132,6 @@ UOdysseyPainterEditorRasterEraserTool::Unload()
 
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->OnChanged().RemoveAll(this);
-    mHUD->RemoveElement(rasterSelection->GetHUD());
-    mHUD->RemoveElement(mShapeHUD);
 
     UOdysseyPainterEditorTool::Unload();
 }

@@ -30,6 +30,8 @@ UOdysseyPainterEditorRasterSelectionTool::UOdysseyPainterEditorRasterSelectionTo
 {
     mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Lasso64"));
 
+    mHUD->AddElement(mShapeHUD);
+
     UOdysseyFreehandShape* freehandShape = CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterSelectionTool::FreehandShape");
     freehandShape->DisplayHUD(true);
 
@@ -133,20 +135,11 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnKeyUp(const FKey& iKey)
 void UOdysseyPainterEditorRasterSelectionTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
-
-    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
-    mHUD->AddElement(rasterSelection->GetHUD());
-    mHUD->AddElement(mShapeHUD);
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::Unload()
 {
     Shapes.GetActiveShape()->Abort();
-
-    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
-    mHUD->RemoveElement(rasterSelection->GetHUD());
-    mHUD->RemoveElement(mShapeHUD);
-
     UOdysseyPainterEditorTool::Unload();
 }
 

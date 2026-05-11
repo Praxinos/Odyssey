@@ -331,6 +331,12 @@ void UOdysseyPainterEditorRasterBaseTool::BindShortcuts(TSharedPtr<FUICommandLis
     );
 }
 
+bool
+UOdysseyPainterEditorRasterBaseTool::UsesRasterSelection() const
+{
+    return true;
+}
+
 void UOdysseyPainterEditorRasterBaseTool::SelectAll()
 {
     if (mEditor)

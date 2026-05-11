@@ -56,6 +56,8 @@ UOdysseyPainterEditorRasterDrawingTool::UOdysseyPainterEditorRasterDrawingTool()
 {
     mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.DrawingTool64"));
 
+    mHUD->AddElement(mShapeHUD);
+
     Shapes.AddShapeType(EOdysseyShapeType::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterDrawingTool::FreehandShape"));
     Shapes.AddShapeType(EOdysseyShapeType::kLine, CreateShape<UOdysseyLineShape>("UOdysseyPainterEditorRasterDrawingTool::LineShape"));
     Shapes.AddShapeType(EOdysseyShapeType::kRectangle, CreateShape<UOdysseyRectangleShape>("UOdysseyPainterEditorRasterDrawingTool::RectangleShape"));
@@ -105,9 +107,6 @@ UOdysseyPainterEditorRasterDrawingTool::Activate()
     if (!rasterSelection->IsEmpty())
         mPaintEngine.SetMaskBlock(rasterSelection->GetBlock());
 
-    mHUD->AddElement(rasterSelection->GetHUD());
-    mHUD->AddElement(mShapeHUD);
-
     Super::Activate();
 }
 
@@ -121,8 +120,6 @@ UOdysseyPainterEditorRasterDrawingTool::Inactivate()
 
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->OnChanged().RemoveAll(this);
-    mHUD->RemoveElement(rasterSelection->GetHUD());
-    mHUD->RemoveElement(mShapeHUD);
 
     if ( BrushInstance )
         BrushInstance->SetBlock(nullptr);
