@@ -77,6 +77,16 @@ void FArianeEditorViewportEdMode::AddReferencedObjects(FReferenceCollector& Coll
     FEdMode::AddReferencedObjects(Collector);
 }
 
+void
+FArianeEditorViewportEdMode::Tick( FEditorViewportClient* ViewportClient, float DeltaTime )
+{
+    TSharedPtr<FArianeEditorViewportToolkit> ViewportToolkit = GetArianeEditorViewportToolkit();
+
+    FEdMode::Tick(ViewportClient, DeltaTime);
+
+    ViewportToolkit->GetEditor().Tick( DeltaTime );
+}
+
 void FArianeEditorViewportEdMode::Render(const FSceneView* View,FViewport* Viewport,FPrimitiveDrawInterface* PDI)
 {
 }

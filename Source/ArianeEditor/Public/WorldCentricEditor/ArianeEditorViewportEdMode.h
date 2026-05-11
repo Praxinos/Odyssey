@@ -92,6 +92,8 @@ public:
     // Overriden from FEdMode
     virtual bool GetCursor(EMouseCursor::Type& OutCursor) const override;
 
+    // Overriden from FEdMode
+    virtual void Tick( FEditorViewportClient* ViewportClient, float DeltaTime ) override;
 
     bool IsEditingEnabled() const;
 

@@ -6,6 +6,7 @@
 #include "ArianeEditorCommands.h"
 #include "ArianeEditorViewportToolkit.h"
 #include "ArianeEditor.h"
+#include "ArianeEditorSettings.h"
 #include "ArianeEditorColorSelectorTab.h"
 #include "ArianeEditorLayerStackTab.h"
 #include "ArianePainting3DComponentCustomization.h"
@@ -117,9 +118,10 @@ FArianeEditorModule::StartupModule()
         );
     });
 
+    RegisterSettings();
+
 /* Gary
     RegisterBrushOverrides(); //First thing to do, as it modifies the Brush CDO
-    RegisterSettings();
     RegisterCommands();
     RegisterLevelEditorLayoutExtensions();
     RegisterDetailCustomizations();
@@ -144,10 +146,10 @@ FArianeEditorModule::ShutdownModule()
 
     UnregisterCustomization();
     UnregisterEditorMode();
+    UnregisterSettings();
 
 /* Gary
     UnregisterBrushOverrides();
-    UnregisterSettings();
     UnregisterCommands();
     UnregisterLevelEditorLayoutExtensions();
     UnregisterDetailCustomization();
@@ -216,7 +218,7 @@ FArianeEditorModule::RegisterToolbarButton()
 
     if( ToolbarSection )
     {
-        FToolMenuEntry ArianeLauncherEntry = FToolMenuEntry::InitToolBarButton( TEXT("MyCustomButtonName")
+        FToolMenuEntry ArianeLauncherEntry = FToolMenuEntry::InitToolBarButton( TEXT("Launch Ariane")
                                                                               , FExecuteAction::CreateLambda( [this]()
                                                                               {
                                                                                   ActivateEdMode( nullptr );
@@ -305,22 +307,11 @@ FArianeEditorModule::RegisterSettings()
     if( !settingsModule )
         return;
 
-/* Gary
-    settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyPainterEditor"
-        , LOCTEXT( "user-settings.painter-editor.name", "Odyssey Painter Editor" )
-        , LOCTEXT( "user-settings.painter-editor.tooltip", "Configure the look and feel of the Odyssey Editor." )
-        , GetMutableDefault<UOdysseyPainterEditorSettings>() );
 
-    settingsModule->RegisterSettings( "Project", "Plugins", "OdysseyAnimationEditor"
-        , LOCTEXT( "project-settings.2d-animation-editor.name", "2D Animation Editor" )
-        , LOCTEXT( "project-settings.2d-animation-editor.tooltip", "Configure the look and feel of the 2D Animation Editor." )
-        , GetMutableDefault<UOdysseyPainterEditorAnimationProjectSettings>() );
-
-    settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyPainterEditorAnimationUserSettings"
-        , LOCTEXT( "user-settings.2d-animation-editor.name", "2D Animation Editor" )
-        , LOCTEXT( "user-settings.2d-animation-editor.tooltip", "Configure the look and feel of the 2D Animation Editor." )
-        , GetMutableDefault<UOdysseyPainterEditorAnimationUserSettings>() );
-*/
+    settingsModule->RegisterSettings( "Editor", "Plugins", "ArianeEditor"
+        , LOCTEXT( "user-settings.ariane-editor.name", "Ariane Editor" )
+        , LOCTEXT( "user-settings.ariane-editor.tooltip", "Configure the look and feel of the Ariane Editor." )
+        , GetMutableDefault<UArianeEditorSettings>() );
 }
 
 void
@@ -331,11 +322,7 @@ FArianeEditorModule::UnregisterSettings()
     if( !settingsModule )
         return;
 
-/* Gary
-    settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyPainterEditor" );
-    settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditor" );
-    settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyPainterEditorAnimationUserSettings" );
-*/
+    settingsModule->UnregisterSettings( "Editor", "Plugins", "ArianeEditor" );
 }
 
 void

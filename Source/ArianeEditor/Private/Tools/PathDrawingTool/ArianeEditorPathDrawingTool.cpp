@@ -91,7 +91,7 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
         {
             //painting3DComponent->PrintPointers();
             UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-            UArianeLayerDrawing* DrawingLayer = LayerStack->GetFirstSelectedDrawingLayer();
+            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
 
             if( DrawingLayer )
             {
@@ -233,7 +233,7 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* ViewportClient
     if( Painting3DComponent )
     {
         //painting3DComponent->PrintPointers();
-        UArianeLayerDrawing* DrawingLayer = Painting3DComponent->GetLayerStack()->GetFirstSelectedDrawingLayer();
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
         if( DrawingLayer )
         {
