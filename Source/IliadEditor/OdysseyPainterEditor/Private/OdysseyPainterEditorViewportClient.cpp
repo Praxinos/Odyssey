@@ -1083,7 +1083,8 @@ FOdysseyPainterEditorViewportClient::CreateCheckerboardTexture()
 void
 FOdysseyPainterEditorViewportClient::DestroyCheckerboardTexture()
 {
-    if( mCheckerboardTexture )
+    // Must use GetValid(), to not go here if mCheckerboardTexture is not null BUT it is already garbage collected
+    if( GetValid( mCheckerboardTexture ) )
     {
         if( mCheckerboardTexture->GetResource() )
         {
