@@ -140,6 +140,7 @@ struct ARIANE_API FArianeSegment
                                        , float T0
                                        , FArianeVertex* NewSegmentVertex1
                                        , float T1 );
+        virtual double GetLength();
 
     protected:
         /** Update the segment's bounds */

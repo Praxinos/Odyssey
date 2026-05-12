@@ -241,6 +241,12 @@ FArianeSegment::Init()
     Invalidate();
 }
 
+double
+FArianeSegment::GetLength()
+{
+    return ( Vertices[1].GetVertex()->GetPosition() - Vertices[0].GetVertex()->GetPosition() ).Length();
+}
+
 const FGuid&
 FArianeSegment::GetGuid()
 {

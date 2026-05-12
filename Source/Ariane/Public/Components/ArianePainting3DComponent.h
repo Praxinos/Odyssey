@@ -51,9 +51,11 @@ class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
                                                , int32 ViewIndex ) const;
         void InitVertexFactory();
         virtual void DrawStaticElements( FStaticPrimitiveDrawInterface * PDI ) override;
+        FMaterialRelevance GetLayerStackMaterialRelevance() const;
 
     protected:
         UArianePainting3DComponent* Painting3DComponent;
+        FMaterialRelevance MaterialRelevance;
 };
 
 UCLASS()

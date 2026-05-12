@@ -201,9 +201,10 @@ UArianePainting3DComponent::TickComponent( float DeltaTime
 FBoxSphereBounds
 UArianePainting3DComponent::CalcBounds(const FTransform& LocalToWorld) const
 {
-    FBoxSphereBounds RetBounds = Super::CalcBounds( FTransform::Identity );
+    //FBoxSphereBounds RetBounds = Super::CalcBounds( FTransform::Identity );
+    FBoxSphereBounds RetBounds = FBoxSphereBounds(ForceInit);
 
-    RetBounds = RetBounds + LayerStack->GetRootFolder()->GetBounds();
+    RetBounds = /*RetBounds +*/ LayerStack->GetRootFolder()->GetBounds();
 
     return RetBounds.TransformBy( LocalToWorld );
 }
@@ -216,6 +217,9 @@ UArianePainting3DComponent::Update( bool bInteractive )
     // will call CalcBounds (nb: calling UMeshComponent::UpdateBounds() does not work sometimes, especially when then
     // path starts empty but this works.
     UpdateComponentToWorld();
+
+//UpdateBounds();
+//MarkRenderTransformDirty();
 }
 
 void
@@ -299,11 +303,17 @@ FArianeGeometryProxy::FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLeve
     : FPrimitiveSceneProxy ( iPainting3DComponent )
     , Painting3DComponent ( iPainting3DComponent )
 {
-    TArray<UMaterialInterface*> OutMaterials;
+    TArray<UMaterialInterface*> MaterialInterfaces;
 
-    Painting3DComponent->GetUsedMaterials( OutMaterials );
+    Painting3DComponent->GetUsedMaterials( MaterialInterfaces );
 
-    SetUsedMaterialForVerification( OutMaterials );
+    // MaterialRelevance is used by GetViewRelevance and is necessary to render all kinds of materials
+    for( UMaterialInterface* MaterialInterface : MaterialInterfaces )
+    {
+        MaterialRelevance |=  MaterialInterface->GetRelevance_Concurrent( InFeatureLevel );
+    }
+
+    SetUsedMaterialForVerification( MaterialInterfaces );
 }
 
 void
@@ -499,6 +509,17 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
 
             return UArianeLayerFolder::TraversalReturnValue::Continue;
         } );
+
+        // Render bounds manually because it's a bit complicated to render them when using custom proxies like this one.
+        if ( ViewFamily.EngineShowFlags.Bounds )
+        {
+            RenderBounds(
+                Collector.GetPDI(ViewIndex),
+                ViewFamily.EngineShowFlags,
+                GetBounds(),
+                true
+            );
+        }
     }
 }
 
@@ -506,18 +527,20 @@ FPrimitiveViewRelevance
 FArianeGeometryProxy::GetViewRelevance( const FSceneView* View ) const
 {
     FPrimitiveViewRelevance Result;
+
     Result.bDrawRelevance = IsShown( View );
     Result.bShadowRelevance = IsShadowCast( View );
 
     Result.bDynamicRelevance = true;
     Result.bStaticRelevance = false;
+    Result.bOpaque = true;
 
     Result.bRenderInMainPass = ShouldRenderInMainPass();
     Result.bUsesLightingChannels = GetLightingChannelMask() != GetDefaultLightingChannelMask();
     Result.bRenderCustomDepth = ShouldRenderCustomDepth();
     Result.bTranslucentSelfShadow = bCastVolumetricTranslucentShadow;
 
-    //MaterialRelevance.SetPrimitiveViewRelevance(Result);
+    MaterialRelevance.SetPrimitiveViewRelevance( Result );
 
     Result.bVelocityRelevance = IsMovable() && Result.bOpaque && Result.bRenderInMainPass;
 

@@ -108,6 +108,7 @@ FArianePath::Chain::Chain( FArianePath* Path, FArianeVertex* UnchainedVertex )
 
     Segments.Reserve( Path->GetSegments().Num() );
 
+    Length = 0;
     LeadingVertex = CurrentVertex;
 
     CurrentVertex->SetChained( true );
@@ -117,6 +118,8 @@ FArianePath::Chain::Chain( FArianePath* Path, FArianeVertex* UnchainedVertex )
         FArianeVertex* nextVertex = CurrentSegment->GetOtherVertex( CurrentVertex );
 
         Segments.Push( CurrentSegment );
+
+        Length += CurrentSegment->GetLength();
 
         if( nextVertex->IsChained() == false )
         {
@@ -133,6 +136,12 @@ FArianePath::Chain::Chain( FArianePath* Path, FArianeVertex* UnchainedVertex )
             CurrentSegment = nullptr;
         }
     }
+}
+
+double
+FArianePath::Chain::GetLength()
+{
+    return Length;
 }
 
 // callback must return false to keep iterating
@@ -792,15 +801,18 @@ FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
 
 void
 FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
+                                         , double SegmentT0
+                                         , double SegmentT1
                                          , FVector& InOutPreviousPerpendicularVector )
 {
     FArianeVertex* SegmentVertices[2] = { Segment->GetVertex(0)
                                         , Segment->GetVertex(1) };
     FVector SegmentVector = SegmentVertices[1]->GetPosition()
                           - SegmentVertices[0]->GetPosition();
-    double Radius0 = SegmentVertices[0]->GetRadius();
-    double Radius1 = SegmentVertices[1]->GetRadius();
-    double DeltaRadius = Radius1 - Radius0;
+    double SegmentRadius0 = SegmentVertices[0]->GetRadius();
+    double SegmentRadius1 = SegmentVertices[1]->GetRadius();
+    double SegmentDeltaRadius = SegmentRadius1 - SegmentRadius0;
+    double SegmentDeltaT = SegmentT1 - SegmentT0;
     uint32 Divisions = 12;
 
     Segment->AllocateCache( ( Segment->GetFractionCount() + 1 ) * Divisions
@@ -813,8 +825,20 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
 
     if( InOutPreviousPerpendicularVector.IsZero() )
     {
-        InOutPreviousPerpendicularVector = SegmentVector.Cross( Path->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->GetUpVector() );
-        InOutPreviousPerpendicularVector.Normalize();
+        FVector UpVector = Path->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->GetUpVector();
+
+        if( SegmentVector.Dot( UpVector ) )
+        {
+            InOutPreviousPerpendicularVector = SegmentVector.Cross( UpVector );
+            InOutPreviousPerpendicularVector.Normalize();
+        }
+        else
+        {
+            FVector RightVector = Path->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->GetRightVector();
+
+            InOutPreviousPerpendicularVector = SegmentVector.Cross( RightVector );
+            InOutPreviousPerpendicularVector.Normalize();
+        }
     }
 
     SegmentVertices[0]->SetNormal( InOutPreviousPerpendicularVector );
@@ -823,10 +847,11 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
     {
         const FArianeSegment::FractionStep& Step = FractionSteps[FractionStepIndex];
         uint32 ModelVertexOffset = FractionStepIndex * Divisions;
-        double PointRadius = Radius0 + ( DeltaRadius * Step.T );
+        double PointRadius = SegmentRadius0 + ( SegmentDeltaRadius * Step.T );
         FVector TangentVector = GetTangentVectorAt( Segment
                                                   , Step.T
                                                   , true );
+        double VertexU = (double) FractionStepIndex / ( FractionSteps.Num() - 1 );
         //FVector LeadingVector = GetLeavingVectorAt( Segment
         //                                          , Step.T );
         //FVector TangentVector = SegmentVector.GetSafeNormal();
@@ -850,21 +875,26 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
             float AngleInDegrees = 0.0f;
             float StepAngle = ( float ) 360 / Divisions;
             //FVector PerpendicularAverage = ( InOutPreviousPerpendicularVector + PerpendicularVector ) * 0.5f;
-            FVector PerpendicularAverage = PerpendicularVector;
-
-            PerpendicularAverage.Normalize();
 
             for( uint32 j = 0; j < Divisions; j++ )
             {
                 FRotator Rotator = UKismetMathLibrary::RotatorFromAxisAndAngle( TangentVector, AngleInDegrees );
                 FDynamicMeshVertex* ModelVertex = &ModelVertexCache[ModelVertexOffset+j];
-                FVector RotatedPosition = Step.Point->GetPosition() + ( Rotator.RotateVector( PerpendicularAverage ) * PointRadius );
+                FVector StepPosition = Step.Point->GetPosition();
+                FVector RotatedPosition = StepPosition + ( Rotator.RotateVector( PerpendicularVector ) * PointRadius );
 
                 ModelVertex->Position.X = RotatedPosition.X;
                 ModelVertex->Position.Y = RotatedPosition.Y;
                 ModelVertex->Position.Z = RotatedPosition.Z;
 
                 ModelVertex->Color = Path->GetColor();
+
+                ModelVertex->TextureCoordinate[0].X = SegmentT0 + ( VertexU * SegmentDeltaT );
+                ModelVertex->TextureCoordinate[0].Y = (double) j / Divisions;
+
+                FVector NormalVector = ( RotatedPosition - StepPosition ).GetSafeNormal();
+                ModelVertex->TangentX = TangentVector;
+                ModelVertex->TangentZ = NormalVector;
 
                 AngleInDegrees += StepAngle;
             }
@@ -973,10 +1003,13 @@ FArianePathGeometry3D::InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices
 
                 for ( uint32 i = 0; i < VertexCount; ++i )
                 {
+                    FVector3f TangentX = VerticesAsync[i].TangentX.ToFVector3f();
+                    FVector3f TangentZ = VerticesAsync[i].TangentZ.ToFVector3f();
+
                     PositionBuffer.VertexPosition( i ) = VerticesAsync[i].Position;
                     ColorBuffer.VertexColor( i ) = VerticesAsync[i].Color;
                     StaticMeshVB.SetVertexUV( i, 0, VerticesAsync[i].TextureCoordinate[0] );
-                    StaticMeshVB.SetVertexTangents( i, FVector3f( 1, 0, 0 ), FVector3f( 0, 1, 0 ), FVector3f( 0, 0, 1 ) );
+                    StaticMeshVB.SetVertexTangents( i, TangentX, TangentX.Cross( TangentZ ), TangentZ );
                 }
 
                 // Copy RAM to VRAM
@@ -1070,27 +1103,42 @@ FArianePathGeometry3D::Build()
     {
         case EArianePathLineType::Tube :
         {
-            bool bForceRebuild = false;
-
             // however for tubes,  a segment perpendicular vector depends on the previous segment perpendicular vector
             // so we must be sur of the order of the update.
-            for( FArianeSegmentID& SegmentID : Path->GetSegments() )
+            for( const FArianePath::Chain& Chain : Path->GetChains() )
             {
-                FArianeSegment* Segment = SegmentID.GetSegment();
+                bool bForceRebuild = false;
+                double T0 = 0.0f, T1 = 0.1f;
 
-                if( Segment->IsInvalidated() )
+                Chain.IterateSegments( [ this
+                                       , &Chain
+                                       , &bForceRebuild
+                                       , &PreviousPerpendicularVector
+                                       , &T0 ] ( FArianeVertex* Vertex, FArianeSegment* Segment ) -> bool
                 {
-                    Segment->Update();
+                    FArianeVertex* OtherVertex = Segment->GetOtherVertex( Vertex );
+                    double AverageRadius = ( OtherVertex->GetRadius() + Vertex->GetRadius() ) * 0.5f;
+                    // We multiply by 2 because we take the diameter to estimate T1
+                    double T1 = AverageRadius ? T0 + ( Segment->GetLength() / ( AverageRadius * 2 * PI ) ) : 0.0f;
 
-                    bForceRebuild = true;
+                    if( Segment->IsInvalidated() )
+                    {
+                        Segment->Update();
 
-                    PreviousPerpendicularVector = Segment->GetVertex(0)->GetNormal();
-                }
+                        bForceRebuild = true;
 
-                if( bForceRebuild )
-                {
-                    BuildSegmentAsTube( Segment, PreviousPerpendicularVector );
-                }
+                        PreviousPerpendicularVector = Segment->GetVertex(0)->GetNormal();
+                    }
+
+                    if( bForceRebuild )
+                    {
+                        BuildSegmentAsTube( Segment, T0, T1,  PreviousPerpendicularVector );
+                    }
+
+                    T0 = T1;
+
+                    return false; // continue
+                } );
             }
         }
         break;
