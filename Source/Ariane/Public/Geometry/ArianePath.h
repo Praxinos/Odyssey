@@ -58,6 +58,8 @@ class ARIANE_API FArianePathGeometry3D
 
     protected:
         void BuildSegmentAsTube( FArianeSegment* Segment
+                               , double T0
+                               , double T1
                                , FVector& InOutPreviousPerpendicularVector );
         void BuildSegmentAsFlat( FArianeSegment* Segment
                                , FVector& InOutPreviousPerpendicularVector );
@@ -127,10 +129,12 @@ public:
         Chain( FArianePath* Path, FArianeVertex* UnchainedVertex );
 
         void IterateSegments( TFunction<bool( FArianeVertex*, FArianeSegment*)> Callback ) const;
+        double GetLength();
 
     public:
         FArianeVertex* LeadingVertex;
         TArray<FArianeSegment*> Segments;
+        double Length;
         //::ULIS::FRectD mBBox;
     };
 
