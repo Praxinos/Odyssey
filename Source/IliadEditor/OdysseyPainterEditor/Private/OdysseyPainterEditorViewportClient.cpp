@@ -38,6 +38,7 @@
 #include "OdysseyPainterEditorCommands.h"
 #include "OdysseyKeyState.h"
 #include "MouseDeltaTracker.h"
+#include "OdysseyStylusInputSettings.h"
 #include "StylusInputTabletContext.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 
@@ -975,9 +976,23 @@ void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylu
 {
     mStylusLastEventTime = std::chrono::steady_clock::now();
 
+// FIX: MOVE WINTAB COORDINATES WHEN MAIN SCREEN IS NOT ON THE (TOP) LEFT OF USER PHYSICAL DESKTOP - AWAITING FOR EPIC PULL REQUEST VALIDATION
+#if PLATFORM_WINDOWS
+    const UOdysseyStylusInputSettings* settings = GetDefault<UOdysseyStylusInputSettings>();
+    FName selectedAPI = settings->StylusInputDriver;
+    if( selectedAPI == "Wintab" )
+    {
+        UE::StylusInput::FStylusInputPacket packetCopyWin = iPacket;
+        ConvertWintabToWindowCoordinates(packetCopyWin.X, packetCopyWin.Y);
+        mPacketQueue.Enqueue(packetCopyWin);
+        return;
+    }
+#endif
+// FIX: MOVE WINTAB COORDINATES WHEN MAIN SCREEN IS NOT ON THE (TOP) LEFT OF USER PHYSICAL DESKTOP - AWAITING FOR EPIC PULL REQUEST VALIDATION
+
 // FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
 #if PLATFORM_MAC
-    UE::StylusInput::FStylusInputPacket packetCopy = iPacket;
+    UE::StylusInput::FStylusInputPacket packetCopyMac = iPacket;
 
     static UE::StylusInput::EPenStatus currentPenStatus = UE::StylusInput::EPenStatus::None;
     static UE::StylusInput::EPacketType currentPacketType = UE::StylusInput::EPacketType::Invalid;
@@ -1004,10 +1019,10 @@ void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylu
         currentPenStatus = currentPenStatus & ~UE::StylusInput::EPenStatus::CursorIsTouching;
     }
 
-    packetCopy.PenStatus = currentPenStatus;
-    packetCopy.Type = currentPacketType;
+    packetCopyMac.PenStatus = currentPenStatus;
+    packetCopyMac.Type = currentPacketType;
 
-    mPacketQueue.Enqueue(packetCopy);
+    mPacketQueue.Enqueue(packetCopyMac);
     return;
 #endif
 // FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST

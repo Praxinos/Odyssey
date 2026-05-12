@@ -135,6 +135,14 @@ void FOdysseyStylusInputHandler::OnStylusInputDriverChanged(FName iStylusInputDr
     RegisterWindow( window ); //Registers the previous Window with the new API
 }
 
+#if PLATFORM_WINDOWS
+void FOdysseyStylusInputHandler::ConvertWintabToWindowCoordinates( float& ioX, float& ioY )
+{
+    ioX += GetSystemMetrics(SM_XVIRTUALSCREEN);
+    ioY += GetSystemMetrics(SM_YVIRTUALSCREEN);
+}
+#endif
+
 #undef LOCTEXT_NAMESPACE
 
 //#endif // ENABLE_STYLUS_SUPPORT

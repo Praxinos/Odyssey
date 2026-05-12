@@ -13,6 +13,11 @@
 #include "Widgets/SWidget.h"
 #include "Containers/SpscQueue.h"
 
+#if PLATFORM_WINDOWS
+#include "Windows/WindowsHWrapper.h"
+#include <windef.h>
+#endif
+
 class ODYSSEYSTYLUSINPUT_API FOdysseyStylusInputHandler : public UE::StylusInput::IStylusInputEventHandler
 {
 public:
@@ -44,6 +49,9 @@ protected:
 
     void OnStylusInputDriverChanged(FName iStylusInputDriver);
 
+#if PLATFORM_WINDOWS
+    void ConvertWintabToWindowCoordinates(float& ioX, float& ioY);
+#endif
     UE::StylusInput::IStylusInputInstance* mStylusInputInstance = nullptr;
     TWeakPtr<SWindow> mStylusInputWindow;
 

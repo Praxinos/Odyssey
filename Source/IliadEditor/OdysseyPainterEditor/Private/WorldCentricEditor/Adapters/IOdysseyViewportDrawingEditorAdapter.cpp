@@ -23,6 +23,7 @@
 #include "OdysseyPainterEditorCommands.h"
 #include "OdysseyViewportDrawingEditorExtension.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyStylusInputSettings.h"
 #include "LevelEditorViewport.h"
 #include "SEditorViewport.h"
 #include "Slate/SceneViewport.h"
@@ -1005,6 +1006,20 @@ void
 IOdysseyViewportDrawingEditorAdapter::OnPacket(const UE::StylusInput::FStylusInputPacket& iPacket, UE::StylusInput::IStylusInputInstance* iInstance)
 {
     mStylusLastEventTime = std::chrono::steady_clock::now();
+
+// FIX: MOVE WINTAB COORDINATES WHEN MAIN SCREEN IS NOT ON THE (TOP) LEFT OF USER PHYSICAL DESKTOP - AWAITING FOR EPIC PULL REQUEST VALIDATION
+#if PLATFORM_WINDOWS
+    const UOdysseyStylusInputSettings* settings = GetDefault<UOdysseyStylusInputSettings>();
+    FName selectedAPI = settings->StylusInputDriver;
+    if (selectedAPI == "Wintab")
+    {
+        UE::StylusInput::FStylusInputPacket packetCopyWin = iPacket;
+        ConvertWintabToWindowCoordinates(packetCopyWin.X, packetCopyWin.Y);
+        mPacketQueue.Enqueue(packetCopyWin);
+        return;
+    }
+#endif
+// FIX: MOVE WINTAB COORDINATES WHEN MAIN SCREEN IS NOT ON THE (TOP) LEFT OF USER PHYSICAL DESKTOP - AWAITING FOR EPIC PULL REQUEST VALIDATION
 
 // FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
 #if PLATFORM_MAC
