@@ -264,6 +264,11 @@ public:
     void OnHorizontalScrollBarScrolled( float InScrollOffsetFraction );
     void OnVerticalScrollBarScrolled(float InScrollOffsetFraction);
 
+    // Same as in FCinematicBoardTrackEditor
+    ECheckBoxState AreCameraViewLocked() const;
+    void OnLockCameraViewClicked( ECheckBoxState iCheckBoxState );
+    FText GetLockCameraViewToolTip() const;
+
 private:
     void CreateCommandList();
 
