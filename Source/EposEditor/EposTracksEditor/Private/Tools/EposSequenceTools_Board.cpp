@@ -946,7 +946,7 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
 
     FString cloned_camera_path;
     FString cloned_camera_name;
-    NamingConvention::GenerateCameraActorPathName( *iSequencer, *epos_sequence, iSequenceID, cloned_camera_path, cloned_camera_name );
+    NamingConvention::GenerateCameraActorPathName( *iSequencer, *epos_sequence, iSequenceID, !bIsSpawnable, cloned_camera_path, cloned_camera_name );
     // We don't keep the same name as the original camera (like animation), to be able to increment the (global) index or to use the new shot name
 
     cloned_camera->SetFolderPath( *cloned_camera_path );
@@ -1136,7 +1136,7 @@ ShotSequenceTools::CloneInnerAnimation( ISequencer* iSequencer, UMovieSceneSeque
 
     FString cloned_animation_path;
     FString cloned_animation_name;
-    NamingConvention::GenerateAnimationActorPathName( *iSequencer, *epos_sequence, iSequenceID, cloned_animation_path, cloned_animation_name );
+    NamingConvention::GenerateAnimationActorPathName( *iSequencer, *epos_sequence, iSequenceID, !iIsSpawnable, cloned_animation_path, cloned_animation_name );
     cloned_animation_name = animation_actor_to_clone->GetActorLabel(); // As the animation actor is cloned, just keep the same name (let see when shot/camera name are a part of the animation name...)
 
     cloned_animation->SetFolderPath( *cloned_animation_path );

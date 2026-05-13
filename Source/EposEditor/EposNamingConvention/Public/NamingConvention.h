@@ -21,8 +21,8 @@ struct FShotNameElements;
 class EPOSNAMINGCONVENTION_API NamingConvention
 {
 public:
-    static FString GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPathName, FString& oName );
-    static FString GenerateAnimationActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPathName, FString& oName );
+    static FString GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, bool iCreateSubpath, FString& oPathName, FString& oName );
+    static FString GenerateAnimationActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, bool iCreateSubpath, FString& oPathName, FString& oName );
 
     static FString GenerateCameraTrackName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, ACineCameraActor* iCamera );
     static FString GenerateAnimationTrackName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, AOdysseyAnimationActor* iAnimation );

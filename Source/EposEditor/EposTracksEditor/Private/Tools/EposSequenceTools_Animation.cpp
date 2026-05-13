@@ -216,7 +216,7 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
 
     FString animation_path;
     FString animation_name;
-    NamingConvention::GenerateAnimationActorPathName( iSequencer, *epos_sequence, iSequenceID, animation_path, animation_name );
+    NamingConvention::GenerateAnimationActorPathName( iSequencer, *epos_sequence, iSequenceID, !iAnimationArgs.mSpawnable, animation_path, animation_name );
 
     if( !iAnimationArgs.mName.IsEmpty() )
         animation_name = iAnimationArgs.mName;

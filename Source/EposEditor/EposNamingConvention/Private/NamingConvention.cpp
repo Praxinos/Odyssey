@@ -344,7 +344,7 @@ NamingConvention::GetRootPath( const IMovieScenePlayer& iPlayer, const UMovieSce
 
 //static
 FString
-NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPath, FString& oName )
+NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, bool iCreateSubpath, FString& oPath, FString& oName )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
 
@@ -355,7 +355,9 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer,
     FString current_sequence_name = FPackageName::GetShortName( iSequence.GetDisplayName().ToString() );
     //FString current_sequence_name = FPackageName::GetShortName( iSequence->GetPackage()->GetName() );
 
-    FString camera_path = ( epos_root_sequence != &iSequence ) ? root_sequence_name / current_sequence_name : root_sequence_name;
+    FString camera_path = root_sequence_name;
+    if( iCreateSubpath )
+        camera_path = ( epos_root_sequence != &iSequence ) ? root_sequence_name / current_sequence_name : root_sequence_name;
 
     //--- Find all camera track names
 
@@ -444,7 +446,7 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer,
 
 //static
 FString
-NamingConvention::GenerateAnimationActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPath, FString& oName )
+NamingConvention::GenerateAnimationActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, bool iCreateSubpath, FString& oPath, FString& oName )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllAnimations()/GetAllDrawings() will use it to find cache
 
@@ -469,7 +471,7 @@ NamingConvention::GenerateAnimationActorPathName( const IMovieScenePlayer& iPlay
     if( animation_path.IsEmpty() )
     {
         FString camera_path;
-        GenerateCameraActorPathName( iPlayer, iSequence, iSequenceID, camera_path, camera_name );
+        GenerateCameraActorPathName( iPlayer, iSequence, iSequenceID, iCreateSubpath, camera_path, camera_name );
 
         animation_path = camera_path;
     }

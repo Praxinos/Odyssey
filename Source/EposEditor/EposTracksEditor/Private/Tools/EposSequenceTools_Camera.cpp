@@ -245,7 +245,7 @@ ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequen
 
     FString camera_path;
     FString camera_name;
-    NamingConvention::GenerateCameraActorPathName( iSequencer, *epos_sequence, iSequenceID, camera_path, camera_name );
+    NamingConvention::GenerateCameraActorPathName( iSequencer, *epos_sequence, iSequenceID, !iCameraArgs.mSpawnable, camera_path, camera_name );
 
     if( !iCameraArgs.mName.IsEmpty() )
         camera_name = iCameraArgs.mName;

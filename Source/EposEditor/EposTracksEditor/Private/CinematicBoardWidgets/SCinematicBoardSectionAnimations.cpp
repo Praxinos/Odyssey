@@ -3243,9 +3243,9 @@ SCinematicBoardSectionAnimations::MakeCreateAnimationMenu()
     UEposMovieSceneSequence* inner_epos_sequence = Cast<UEposMovieSceneSequence>( result.mInnerSequence );
     check( inner_epos_sequence );
 
-    FString animation_path;
+    FString animation_path_not_used;
     TSharedRef<FString> animation_name = MakeShared<FString>();
-    NamingConvention::GenerateAnimationActorPathName( *sequencer, *inner_epos_sequence, result.mInnerSequenceId, animation_path, *animation_name );
+    NamingConvention::GenerateAnimationActorPathName( *sequencer, *inner_epos_sequence, result.mInnerSequenceId, true /* Whatever as path is not used */, animation_path_not_used, *animation_name );
 
     //---
 
