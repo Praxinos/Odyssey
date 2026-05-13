@@ -346,6 +346,8 @@ SArianeEditorLayerStack::OnGetChildren( TSharedPtr<FArianeEditorLayerRowItem> Pa
 TSharedRef<ITableRow>
 SArianeEditorLayerStack::OnGenerateRow( TSharedPtr<FArianeEditorLayerRowItem> iItem, const TSharedRef<STableViewBase>& iOwnerTable )
 {
+    UArianeLayer* Layer = iItem->GetLayer();
+
     return SNew( SArianeEditorLayerRow, iOwnerTable, iItem );
 }
 

@@ -701,6 +701,8 @@ FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
 
 void
 FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
+                                         , double SegmentT0
+                                         , double SegmentT1
                                          , FVector& InOutPreviousPerpendicularVector )
 {
     FArianeVertex* SegmentVertices[2] = { Segment->GetVertex(0)
@@ -712,6 +714,7 @@ FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
     FVector Normal1 = SegmentVertices[1]->GetNormal();
     FVector DeltaNormal = Normal1 - Normal0;
     FVector SegmentVector = SegmentVertices[1]->GetPosition() - SegmentVertices[0]->GetPosition();
+    double SegmentDeltaT = SegmentT1 - SegmentT0;
 
     Segment->AllocateCache( ( Segment->GetFractionCount() + 1 ) * 2
                           , ( Segment->GetFractionCount() * 2 ) );
@@ -730,6 +733,7 @@ FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
         FVector TangentVector = GetTangentVectorAt( Segment
                                                   , Step.T
                                                   , true );
+        double VertexU = (double) FractionStepIndex / ( FractionSteps.Num() - 1 );
 
         if( PerpendicularVector.Normalize() )
         {
@@ -748,11 +752,23 @@ FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
 
                 ModelVertex0->Color = Path->GetColor();
 
+                ModelVertex0->TextureCoordinate[0].X = SegmentT0 + ( VertexU * SegmentDeltaT );
+                ModelVertex0->TextureCoordinate[0].Y = 1.0f;
+
+                ModelVertex0->TangentX = TangentVector;
+                ModelVertex0->TangentZ = PerpendicularVector;
+
                 ModelVertex1->Position.X = NewPosition1.X;
                 ModelVertex1->Position.Y = NewPosition1.Y;
                 ModelVertex1->Position.Z = NewPosition1.Z;
 
                 ModelVertex1->Color = Path->GetColor();
+
+                ModelVertex1->TextureCoordinate[0].X = SegmentT0 + ( VertexU * SegmentDeltaT );
+                ModelVertex1->TextureCoordinate[0].Y = 0.0f;
+
+                ModelVertex1->TangentX = TangentVector;
+                ModelVertex1->TangentZ = PerpendicularVector;
             }
         }
     }
@@ -813,10 +829,13 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
     double SegmentRadius1 = SegmentVertices[1]->GetRadius();
     double SegmentDeltaRadius = SegmentRadius1 - SegmentRadius0;
     double SegmentDeltaT = SegmentT1 - SegmentT0;
-    uint32 Divisions = 12;
+    uint32 QuadDivisions = 12;
+    uint32 VertexDivisions = QuadDivisions + 1;
 
-    Segment->AllocateCache( ( Segment->GetFractionCount() + 1 ) * Divisions
-                          , ( Segment->GetFractionCount() * 2 ) * Divisions );
+    // Nb: The tube is not a closed one we duplicate the vertex at seam, this is required for proper UV coords
+    // That's why we create "Divisions + 1" vertices for each ring
+    Segment->AllocateCache( ( Segment->GetFractionCount() + 1 ) * VertexDivisions
+                          , ( Segment->GetFractionCount() * 2 ) * QuadDivisions );
 
     TArray<FDynamicMeshVertex>& ModelVertexCache = const_cast<TArray<FDynamicMeshVertex>&>(Segment->GetModelVertexCache());
     TArray<uint32>& IndexCache = const_cast<TArray<uint32>&>(Segment->GetIndexCache());
@@ -846,7 +865,7 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
     for( int32 FractionStepIndex = 0; FractionStepIndex < FractionSteps.Num(); FractionStepIndex++ )
     {
         const FArianeSegment::FractionStep& Step = FractionSteps[FractionStepIndex];
-        uint32 ModelVertexOffset = FractionStepIndex * Divisions;
+        uint32 ModelVertexOffset = FractionStepIndex * VertexDivisions;
         double PointRadius = SegmentRadius0 + ( SegmentDeltaRadius * Step.T );
         FVector TangentVector = GetTangentVectorAt( Segment
                                                   , Step.T
@@ -873,10 +892,10 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
         if( PerpendicularVector.IsZero() == false )
         {
             float AngleInDegrees = 0.0f;
-            float StepAngle = ( float ) 360 / Divisions;
+            float StepAngle = ( float ) 360 / QuadDivisions;
             //FVector PerpendicularAverage = ( InOutPreviousPerpendicularVector + PerpendicularVector ) * 0.5f;
 
-            for( uint32 j = 0; j < Divisions; j++ )
+            for( uint32 j = 0; j < VertexDivisions; j++ )
             {
                 FRotator Rotator = UKismetMathLibrary::RotatorFromAxisAndAngle( TangentVector, AngleInDegrees );
                 FDynamicMeshVertex* ModelVertex = &ModelVertexCache[ModelVertexOffset+j];
@@ -890,7 +909,7 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
                 ModelVertex->Color = Path->GetColor();
 
                 ModelVertex->TextureCoordinate[0].X = SegmentT0 + ( VertexU * SegmentDeltaT );
-                ModelVertex->TextureCoordinate[0].Y = (double) j / Divisions;
+                ModelVertex->TextureCoordinate[0].Y = (double) j / QuadDivisions;
 
                 FVector NormalVector = ( RotatedPosition - StepPosition ).GetSafeNormal();
                 ModelVertex->TangentX = TangentVector;
@@ -908,8 +927,8 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
     for( int32 FractionIndex = 0; FractionIndex < Fractions.Num(); FractionIndex++ )
     {
         const FArianeSegment::Fraction& SegmentFraction = Fractions[FractionIndex];
-        uint32 ModelVertexOffset0 =   FractionIndex       * Divisions;
-        uint32 ModelVertexOffset1 = ( FractionIndex + 1 ) * Divisions;
+        uint32 ModelVertexOffset0 =   FractionIndex       * VertexDivisions;
+        uint32 ModelVertexOffset1 = ( FractionIndex + 1 ) * VertexDivisions;
         FVector3f SampleVec0 = ModelVertexCache[ModelVertexOffset0 + 1].Position
                              - ModelVertexCache[ModelVertexOffset0 + 0].Position;
         FVector3f SampleVec1 = ModelVertexCache[ModelVertexOffset1 + 1].Position
@@ -917,35 +936,38 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
 
         bool Twisted = ( SampleVec0.Dot( SampleVec1 ) < 0.0f ) ? true : false;
 
-        for( uint32 i = 0, j = ( Divisions * 2 ) - 1; i < Divisions; i++, j-- )
+        // for( uint32 i = 0, j = ( Divisions * 2 ) - 1; i < Divisions; i++, j-- ) // commented-out: version with twist-detection.
+        for( uint32 i = 0; i < QuadDivisions; i++ )
         {
-            uint32 Triangle0Index = ( FractionIndex * Divisions * 2 * 3 ) + ( i * 2 * 3 ); // 2 triangles per quad, 3 indexes per tirangle
+            uint32 Triangle0Index = ( FractionIndex * QuadDivisions * 2 * 3 ) + ( i * 2 * 3 ); // 2 triangles per quad, 3 indexes per tirangle
             uint32 Triangle1Index = Triangle0Index + 3;
 
             if( Twisted == false )
             {
                 // first triangle
-                IndexCache[Triangle0Index+0] = ModelVertexOffset1 + ( ( i + 1 ) % Divisions );
-                IndexCache[Triangle0Index+1] = ModelVertexOffset0 + ( ( i + 1 ) % Divisions );
-                IndexCache[Triangle0Index+2] = ModelVertexOffset0 + ( ( i     ) % Divisions );
+                IndexCache[Triangle0Index+0] = ModelVertexOffset1 + ( ( i + 1 ) );
+                IndexCache[Triangle0Index+1] = ModelVertexOffset0 + ( ( i + 1 ) );
+                IndexCache[Triangle0Index+2] = ModelVertexOffset0 + ( ( i     ) );
 
                 // second triangle
-                IndexCache[Triangle1Index+0] = ModelVertexOffset0 + ( ( i     ) % Divisions );
-                IndexCache[Triangle1Index+1] = ModelVertexOffset1 + ( ( i     ) % Divisions );
-                IndexCache[Triangle1Index+2] = ModelVertexOffset1 + ( ( i + 1 ) % Divisions );
+                IndexCache[Triangle1Index+0] = ModelVertexOffset0 + ( ( i     ) );
+                IndexCache[Triangle1Index+1] = ModelVertexOffset1 + ( ( i     ) );
+                IndexCache[Triangle1Index+2] = ModelVertexOffset1 + ( ( i + 1 ) );
             }
+/* there should be no twisting with the Parallel Transport method
             else
             {
                 // first triangle
-                IndexCache[Triangle0Index+0] = ModelVertexOffset1 + ( ( j - 1 ) % Divisions );
-                IndexCache[Triangle0Index+1] = ModelVertexOffset0 + ( ( i + 1 ) % Divisions );
-                IndexCache[Triangle0Index+2] = ModelVertexOffset0 + ( ( i     ) % Divisions );
+                IndexCache[Triangle0Index+0] = ModelVertexOffset1 + ( ( j - 1 ) );
+                IndexCache[Triangle0Index+1] = ModelVertexOffset0 + ( ( i + 1 ) );
+                IndexCache[Triangle0Index+2] = ModelVertexOffset0 + ( ( i     ) );
 
                 // second triangle
-                IndexCache[Triangle1Index+0] = ModelVertexOffset0 + ( ( i     ) % Divisions );
-                IndexCache[Triangle1Index+1] = ModelVertexOffset1 + ( ( j     ) % Divisions );
-                IndexCache[Triangle1Index+2] = ModelVertexOffset1 + ( ( j - 1 ) % Divisions );
+                IndexCache[Triangle1Index+0] = ModelVertexOffset0 + ( ( i     ) );
+                IndexCache[Triangle1Index+1] = ModelVertexOffset1 + ( ( j     ) );
+                IndexCache[Triangle1Index+2] = ModelVertexOffset1 + ( ( j - 1 ) );
             }
+*/
         }
     }
 }
@@ -1077,71 +1099,68 @@ FArianePathGeometry3D::Build()
     TArray<uint32> MeshIndices;
     FVector PreviousPerpendicularVector = FVector::Zero();
 
-    // TODO : update  invalidated segments only
-    for( FArianeSegment* Segment : Path->GetInvalidatedSegments() )
+    for( const FArianePath::Chain& Chain : Path->GetChains() )
     {
-        FArianeVertex* segmentVertices[2] = { Segment->GetVertex(0)
-                                            , Segment->GetVertex(1) };
-        uint32 SegmentIndexCount = 0;
-        FDynamicMeshVertex storedVertex;
+        bool bForceRebuild = false;
+        double T0 = 0.0f;
 
-        switch( Path->GetLineType() )
+        Chain.IterateSegments( [ this
+                                , &Chain
+                                , &bForceRebuild
+                                , &PreviousPerpendicularVector
+                                , &T0 ] ( FArianeVertex* Vertex, FArianeSegment* Segment ) -> bool
         {
-            case EArianePathLineType::Flat :
-                Segment->Update();
-                // for flat paths, the perpendicular vector is independent, related to the initial drawing plane (for now)
-                // so we can update only segments that are invalidated
-                BuildSegmentAsFlat( Segment, PreviousPerpendicularVector );
-            break;
+            FArianeVertex* OtherVertex = Segment->GetOtherVertex( Vertex );
+            double AverageRadius = ( OtherVertex->GetRadius() + Vertex->GetRadius() ) * 0.5f;
+            // We multiply by 2 because we take the diameter to estimate T1
+            double T1 = T0;
 
-            default:
-            break;
-        }
-    }
-
-    switch( Path->GetLineType() )
-    {
-        case EArianePathLineType::Tube :
-        {
-            // however for tubes,  a segment perpendicular vector depends on the previous segment perpendicular vector
-            // so we must be sur of the order of the update.
-            for( const FArianePath::Chain& Chain : Path->GetChains() )
+            if( Segment->IsInvalidated() )
             {
-                bool bForceRebuild = false;
-                double T0 = 0.0f, T1 = 0.1f;
+                Segment->Update();
 
-                Chain.IterateSegments( [ this
-                                       , &Chain
-                                       , &bForceRebuild
-                                       , &PreviousPerpendicularVector
-                                       , &T0 ] ( FArianeVertex* Vertex, FArianeSegment* Segment ) -> bool
+                bForceRebuild = true;
+
+                PreviousPerpendicularVector = Segment->GetVertex(0)->GetNormal();
+            }
+
+            switch( Path->GetLineType() )
+            {
+                case EArianePathLineType::Flat :
                 {
-                    FArianeVertex* OtherVertex = Segment->GetOtherVertex( Vertex );
-                    double AverageRadius = ( OtherVertex->GetRadius() + Vertex->GetRadius() ) * 0.5f;
-                    // We multiply by 2 because we take the diameter to estimate T1
-                    double T1 = AverageRadius ? T0 + ( Segment->GetLength() / ( AverageRadius * 2 * PI ) ) : 0.0f;
+                    T1 = AverageRadius ? T0 + ( Segment->GetLength() / ( AverageRadius * 2 ) ) : 0.0f;
 
-                    if( Segment->IsInvalidated() )
+                    if( bForceRebuild )
                     {
-                        Segment->Update();
-
-                        bForceRebuild = true;
-
-                        PreviousPerpendicularVector = Segment->GetVertex(0)->GetNormal();
+                        BuildSegmentAsFlat( Segment, T0, T1, PreviousPerpendicularVector );
+                        // for flat paths, the perpendicular vector is independent, related to the initial drawing plane (for now)
+                        // so we can update only segments that are invalidated (but for simplicity we still iterate on all segments).
+                        bForceRebuild = false;
                     }
+                }
+                break;
+
+                case EArianePathLineType::Tube :
+                {
+                    T1 = AverageRadius ? T0 + ( Segment->GetLength() / ( AverageRadius * 2 * PI ) ) : 0.0f;
 
                     if( bForceRebuild )
                     {
                         BuildSegmentAsTube( Segment, T0, T1,  PreviousPerpendicularVector );
+                        // however for tubes,  a segment perpendicular vector depends on the previous segment perpendicular vector
+                        // bForceRebuild = true; // commented-out because useless, but left for clarity
                     }
+                }
+                break;
 
-                    T0 = T1;
-
-                    return false; // continue
-                } );
+                default:
+                break;
             }
-        }
-        break;
+
+            T0 = T1;
+
+            return false; // continue
+        } );
     }
 
     Path->GetInvalidatedSegments().Empty();

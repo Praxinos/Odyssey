@@ -20,6 +20,7 @@ class FArianeEditor;
 class FSceneView;
 class FStylusState;
 struct FSlateBrush;
+class UArianeLayer;
 class UArianeLayerDrawing;
 /* Gary
 class FArianeEditorToolInputProcessor;
@@ -118,6 +119,8 @@ protected:
     //GetSceneViewFSceneView* GetSceneView( FEditorViewportClient* iViewportClient );
     FEditorViewportClient* GetActiveViewportClient();
     void DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, UArianeLayerDrawing* DrawingLayer );
+    UArianeLayer* GetCurrentLayer();
+    virtual bool CanDraw();
 /* Gary
 
     virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey );

@@ -17,10 +17,15 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "RawIndexBuffer.h"
 #include "Materials/MaterialRenderProxy.h"
+#include "HAL/IConsoleManager.h"
 
 // testing
 #include "Components/LineBatchComponent.h"
 
+// for debugging purpose
+static TAutoConsoleVariable<bool> CVarShowArianeNormals( TEXT("r.Ariane.ShowNormals")
+                                                       , 0
+                                                       , TEXT("Show Ariane mesh normals") );
 
 UArianePainting3DComponent::~UArianePainting3DComponent()
 {
@@ -410,6 +415,7 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
             FArianePath* Path = static_cast<FArianePath*>(Object);
             FArianePathGeometry3D& Mesh = Path->GetGeometry3D();
             UMaterialInterface* MaterialInterface = Path->GetMaterial();
+            FPrimitiveDrawInterface* PDI = Collector.GetPDI(ViewIndex);
 
             if( MaterialInterface
              && MaterialInterface->GetRenderProxy()
@@ -472,6 +478,25 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
 
                 //Add the batch to the collector
                 Collector.AddMesh( ViewIndex, MeshBatch );
+
+                // for debugging purpose (flag "r.Ariane.ShowNormals")
+                if ( CVarShowArianeNormals.GetValueOnRenderThread() )
+                {
+                    const FTransform& DrawingLayerTransform = DrawingLayer->GetComponentTransform();
+
+                    for ( FArianeVertexID& VertexID : Path->GetVertices() )
+                    {
+                        FArianeVertex* Vertex = VertexID.GetVertex();
+                        FVector VertexWorldPosition = DrawingLayerTransform.TransformPosition( Vertex->GetPosition() );
+                        FVector VertexWorldNormal = DrawingLayerTransform.TransformVector( Vertex->GetNormal() );
+
+                        PDI->DrawLine( VertexWorldPosition
+                                     , VertexWorldPosition + ( VertexWorldNormal * 200.0f )
+                                     , FLinearColor::Green
+                                     , SDPG_World
+                                     , 1.0f );
+                    }
+                }
             }
         }
 

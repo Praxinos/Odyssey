@@ -204,67 +204,68 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
     const TSharedPtr< SArianeEditorLayerStack > treeView = StaticCastSharedPtr<SArianeEditorLayerStack>(OwnerTablePtr.Pin());
     UArianeEditorLayerTransformTool* TransformTool = Cast<UArianeEditorLayerTransformTool>(treeView->GetEditor()->GetTool( UArianeEditorLayerTransformTool::GetStaticType() ));
     UArianeLayer* Layer = Item->GetLayer();
+    TSharedPtr<SWidget> ColumnWidget = SNullWidget::NullWidget;
 
     if( InColumnName == SArianeEditorLayerStack::LAYER_TRANSFORM )
     {
         const FCheckBoxStyle* isTransformedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("ArianeLayerStack.IsTransformedToggle");
 
-        return SNew(SHorizontalBox)
-               + SHorizontalBox::Slot()
-               .AutoWidth()
-               .HAlign( EHorizontalAlignment::HAlign_Center )
-               .VAlign( EVerticalAlignment::VAlign_Center )
-               [
-                   SNew( SCheckBox )
-                  .IsEnabled( Item.Get()->IsSensitive() )
-                  .Style( isTransformedToggleStyle )
-                  .OnCheckStateChanged( this, &SArianeEditorLayerRow::OnTransformStateChanged)
-                  .IsChecked( this, &SArianeEditorLayerRow::IsTransforming)
-                  .IsEnabled( this, &SArianeEditorLayerRow::IsLockedCheckBoxEnabled )
-                  [
-                      SNew(SImage)
-                      .Image( TransformTool ? TransformTool->Icon : nullptr )
-                      .DesiredSizeOverride(FVector2D(16.f, 16.f))
-                  ]
-               ];
+        ColumnWidget = SNew(SHorizontalBox)
+                       + SHorizontalBox::Slot()
+                       .AutoWidth()
+                       .HAlign( EHorizontalAlignment::HAlign_Center )
+                       .VAlign( EVerticalAlignment::VAlign_Center )
+                       [
+                           SNew( SCheckBox )
+                          .IsEnabled( Item.Get()->IsSensitive() )
+                          .Style( isTransformedToggleStyle )
+                          .OnCheckStateChanged( this, &SArianeEditorLayerRow::OnTransformStateChanged)
+                          .IsChecked( this, &SArianeEditorLayerRow::IsTransforming)
+                          .IsEnabled( this, &SArianeEditorLayerRow::IsLockedCheckBoxEnabled )
+                          [
+                              SNew(SImage)
+                              .Image( TransformTool ? TransformTool->Icon : nullptr )
+                              .DesiredSizeOverride(FVector2D(16.f, 16.f))
+                          ]
+                       ];
     }
 
     if( InColumnName == SArianeEditorLayerStack::LAYER_VISIBLE )
     {
         const FCheckBoxStyle* isVisibleToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("ArianeLayerStack.IsVisibleToggle");
 
-        return SNew(SHorizontalBox)
-               + SHorizontalBox::Slot()
-               .AutoWidth()
-               .HAlign( EHorizontalAlignment::HAlign_Center )
-               .VAlign( EVerticalAlignment::VAlign_Center )
-               [
-                   SNew( SCheckBox )
-                  .IsEnabled( Item.Get()->IsSensitive() )
-                  .Style( isVisibleToggleStyle )
-                  .OnCheckStateChanged( this, &SArianeEditorLayerRow::OnVisibleStateChanged)
-                  .IsChecked( this, &SArianeEditorLayerRow::IsHierarchicallyVisible)
-                  .IsEnabled( this, &SArianeEditorLayerRow::IsVisibleCheckBoxEnabled )
-               ];
+        ColumnWidget = SNew(SHorizontalBox)
+                       + SHorizontalBox::Slot()
+                       .AutoWidth()
+                       .HAlign( EHorizontalAlignment::HAlign_Center )
+                       .VAlign( EVerticalAlignment::VAlign_Center )
+                       [
+                           SNew( SCheckBox )
+                          .IsEnabled( Item.Get()->IsSensitive() )
+                          .Style( isVisibleToggleStyle )
+                          .OnCheckStateChanged( this, &SArianeEditorLayerRow::OnVisibleStateChanged)
+                          .IsChecked( this, &SArianeEditorLayerRow::IsHierarchicallyVisible)
+                          .IsEnabled( this, &SArianeEditorLayerRow::IsVisibleCheckBoxEnabled )
+                       ];
     }
 
     if( InColumnName == SArianeEditorLayerStack::LAYER_LOCKED )
     {
         const FCheckBoxStyle* isLockedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("ArianeLayerStack.IsLockedToggle");
 
-        return SNew(SHorizontalBox)
-               + SHorizontalBox::Slot()
-               .AutoWidth()
-               .HAlign( EHorizontalAlignment::HAlign_Center )
-               .VAlign( EVerticalAlignment::VAlign_Center )
-               [
-                   SNew( SCheckBox )
-                  .IsEnabled( Item.Get()->IsSensitive() )
-                  .Style( isLockedToggleStyle )
-                  .OnCheckStateChanged( this, &SArianeEditorLayerRow::OnLockedStateChanged)
-                  .IsChecked( this, &SArianeEditorLayerRow::IsHierarchicallyLocked)
-                  .IsEnabled( this, &SArianeEditorLayerRow::IsLockedCheckBoxEnabled )
-               ];
+        ColumnWidget = SNew(SHorizontalBox)
+                       + SHorizontalBox::Slot()
+                       .AutoWidth()
+                       .HAlign( EHorizontalAlignment::HAlign_Center )
+                       .VAlign( EVerticalAlignment::VAlign_Center )
+                       [
+                           SNew( SCheckBox )
+                          .IsEnabled( Item.Get()->IsSensitive() )
+                          .Style( isLockedToggleStyle )
+                          .OnCheckStateChanged( this, &SArianeEditorLayerRow::OnLockedStateChanged)
+                          .IsChecked( this, &SArianeEditorLayerRow::IsHierarchicallyLocked)
+                          .IsEnabled( this, &SArianeEditorLayerRow::IsLockedCheckBoxEnabled )
+                       ];
     }
 
     if( InColumnName == SArianeEditorLayerStack::LAYER_NAME )
@@ -294,31 +295,40 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
 
         TextBlockWidget.Get()->SetOverflowPolicy( TOptional<ETextOverflowPolicy>(ETextOverflowPolicy::Ellipsis) );
 
-        return SNew(SHorizontalBox)
-               .IsEnabled( Item.Get()->IsSensitive() )
-               +SHorizontalBox::Slot()
-               .AutoWidth()
-               .Padding(6.f, 0.f, 0.f, 0.f)
-               [
-                   SNew( SExpanderArrow, SharedThis(this) ).IndentAmount(12)
-               ]
-               + SHorizontalBox::Slot()
-               .AutoWidth()
-               .VAlign( EVerticalAlignment::VAlign_Center )
-               .HAlign( EHorizontalAlignment::HAlign_Center )
-               [
-                   SNew( SImage )
-                   .Image( objectIcon )
-               ]
-               + SHorizontalBox::Slot()
-               .Padding( 2, 0 )
-               .AutoWidth()
-               [
-                   TextBlockWidget.ToSharedRef()
-               ];
+        ColumnWidget = SNew(SHorizontalBox)
+                       .IsEnabled( Item.Get()->IsSensitive() )
+                       +SHorizontalBox::Slot()
+                       .AutoWidth()
+                       .Padding(6.f, 0.f, 0.f, 0.f)
+                       [
+                           SNew( SExpanderArrow, SharedThis(this) ).IndentAmount(12)
+                       ]
+                       + SHorizontalBox::Slot()
+                       .AutoWidth()
+                       .VAlign( EVerticalAlignment::VAlign_Center )
+                       .HAlign( EHorizontalAlignment::HAlign_Center )
+                       [
+                           SNew( SImage )
+                           .Image( objectIcon )
+                       ]
+                       + SHorizontalBox::Slot()
+                       .Padding( 2, 0 )
+                       .AutoWidth()
+                       [
+                           TextBlockWidget.ToSharedRef()
+                       ];
     }
 
-    return SNullWidget::NullWidget;
+    // Grey-out all columns but the locking one
+    if( InColumnName != SArianeEditorLayerStack::LAYER_LOCKED )
+    {
+           ColumnWidget->SetEnabled( TAttribute<bool>::Create( TAttribute<bool>::FGetter::CreateLambda( [ Layer ] () -> bool
+               {
+                   return ( Layer->IsLocked( true ) == false ) ? true : false;
+               } ) ) );
+    }
+
+    return ColumnWidget.ToSharedRef();
 }
 
 FReply

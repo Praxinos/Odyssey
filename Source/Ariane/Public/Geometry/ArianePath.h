@@ -62,6 +62,8 @@ class ARIANE_API FArianePathGeometry3D
                                , double T1
                                , FVector& InOutPreviousPerpendicularVector );
         void BuildSegmentAsFlat( FArianeSegment* Segment
+                               , double SegmentT0
+                               , double SegmentT1
                                , FVector& InOutPreviousPerpendicularVector );
 
         void InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices, TArray<uint32>& Indices );
