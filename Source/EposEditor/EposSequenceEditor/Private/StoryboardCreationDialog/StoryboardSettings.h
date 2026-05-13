@@ -45,7 +45,7 @@ public:
 
     /** New level destination. */
     UPROPERTY( config, EditAnywhere, Category = "Level", DisplayName = "Destination" )
-    ELevelDestination LevelDestination = ELevelDestination::NewLevel;
+    ELevelDestination LevelDestination = ELevelDestination::CurrentLevel;
 
     /** New level name. */
     UPROPERTY( config, EditAnywhere, Category = "Level", DisplayName = "Name" )
