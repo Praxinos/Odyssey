@@ -657,6 +657,28 @@ UArianeEditorTool::CanBeginClickDragSequence(const FInputDeviceRay& PressPos)
     return DummyHit;
 }
 
+// Helper function
+UArianeLayer*
+UArianeEditorTool::GetCurrentLayer()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+    UArianeLayerStack* LayerStack = Painting3DComponent ? Painting3DComponent->GetLayerStack()
+                                                        : nullptr;
+    UArianeLayer* CurrentLayer = LayerStack ? LayerStack->GetCurrentLayer()
+                                            : nullptr;
+
+    return CurrentLayer;
+}
+
+bool
+UArianeEditorTool::CanDraw()
+{
+    UArianeLayer* CurrentLayer = GetCurrentLayer();
+
+    return ( CurrentLayer && ( CurrentLayer->IsLocked( true ) == false ) ) ? true
+                                                                           : false;
+};
+
 // Implements IClickDragBehaviorTarget::OnClickPress
 void
 UArianeEditorTool::OnClickPress( const FInputDeviceRay& PressPos )
@@ -665,15 +687,17 @@ UArianeEditorTool::OnClickPress( const FInputDeviceRay& PressPos )
     FArianePointerState Pointerstate = FArianePointerState( PressPos.ScreenPosition.X
                                                           , PressPos.ScreenPosition.Y );
 
+
     Pressure = 1.0f;
 
     FlushStylusInput(); // will fill Pressure if any
 
     Pointerstate.Pressure  = Pressure;
 
-    OnMouseDown( ViewportClient
-               , PressedKey
-               , Pointerstate );
+    if( CanDraw() )
+        OnMouseDown( ViewportClient
+                   , PressedKey
+                   , Pointerstate );
 }
 
 // Implements IClickDragBehaviorTarget::OnClickDrag
@@ -683,6 +707,7 @@ UArianeEditorTool::OnClickDrag( const FInputDeviceRay& DragPos )
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
     FArianePointerState Pointerstate = FArianePointerState( DragPos.ScreenPosition.X
                                                           , DragPos.ScreenPosition.Y );
+    UArianeLayer* CurrentLayer = GetCurrentLayer();
 
     Pressure = 1.0f;
 
@@ -690,9 +715,10 @@ UArianeEditorTool::OnClickDrag( const FInputDeviceRay& DragPos )
 
     Pointerstate.Pressure  = Pressure;
 
-    OnMouseDrag( ViewportClient
-               , PressedKey
-               , Pointerstate );
+    if( CanDraw() )
+        OnMouseDrag( ViewportClient
+                   , PressedKey
+                   , Pointerstate );
 }
 
 // Implements IClickDragBehaviorTarget::OnClickRelease
@@ -702,6 +728,7 @@ UArianeEditorTool::OnClickRelease( const FInputDeviceRay& ReleasePos )
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
     FArianePointerState Pointerstate = FArianePointerState( ReleasePos.ScreenPosition.X
                                                           , ReleasePos.ScreenPosition.Y );
+    UArianeLayer* CurrentLayer = GetCurrentLayer();
 
     Pressure = 1.0f;
 
@@ -709,9 +736,10 @@ UArianeEditorTool::OnClickRelease( const FInputDeviceRay& ReleasePos )
 
     Pointerstate.Pressure  = Pressure;
 
-    OnMouseUp( ViewportClient
-             , PressedKey
-             , Pointerstate );
+    if( CanDraw() )
+        OnMouseUp( ViewportClient
+                 , PressedKey
+                 , Pointerstate );
 }
 
 void

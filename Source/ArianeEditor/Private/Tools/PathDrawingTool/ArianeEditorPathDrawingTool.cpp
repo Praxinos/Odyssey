@@ -205,7 +205,7 @@ UArianeEditorPathDrawingTool::GetDrawingPlane( FEditorViewportClient* ViewportCl
 
         default : // EArianeLayerDrawingOrientation::View
         {
-            DrawingPlane = CameraDirection;
+            DrawingPlane = -CameraDirection;
         }
         break;
     }
