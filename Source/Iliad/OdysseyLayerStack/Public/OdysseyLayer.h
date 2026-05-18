@@ -88,6 +88,7 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetLighttable(FOdysseyLighttable Value);
+#endif
 
 public:
     //Setters
@@ -123,7 +124,6 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetPostBehaviour(EOdysseyLayerImagePostBehaviour Value);
-#endif
 
 public:
     //Getters

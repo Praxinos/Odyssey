@@ -66,26 +66,6 @@ public class OdysseyRendering : ModuleRules
              }
         );
 
-
-        //---
-        /* if (Target.Type == TargetType.Editor)
-        {
-            PublicDependencyModuleNames.AddRange(
-                new string[] {
-                    "ULIS",//--- Link to ULIS only if TargetType is Editor
-                    "ULISLoader"//--- Link to ULIS only if TargetType is Editor
-                }
-            );
-
-            PrivateDependencyModuleNames.AddRange(
-                new string[] {
-                    "blend2d",
-                    "OdysseyFile", //Needed to load VectorBlock and RasterBlock
-                    "OdysseyVector", //Needed to load VectorBlock and RasterBlock
-                }
-            );
-        } */
-
         //--- WIBU
 
         string enable_wibu_encryption = Environment.GetEnvironmentVariable("ENABLE_WIBU_ENCRYPTION");
