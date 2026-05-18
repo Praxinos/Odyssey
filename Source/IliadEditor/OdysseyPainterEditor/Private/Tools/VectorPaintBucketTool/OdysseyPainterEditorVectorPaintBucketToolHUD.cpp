@@ -54,6 +54,9 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::UpdateWorkingPaintgroupList()
 {
     mWorkingPaintgroupList.clear();
 
+    if (!mPaintBucketTool->GetWorkingCell() || !mPaintBucketTool->GetWorkingCell()->GetScene())
+        return;
+
     FOdysseyVectorObject::Traverse
     ( mPaintBucketTool->GetWorkingCell()->GetScene()
     , 0
@@ -207,6 +210,9 @@ void
 FOdysseyPainterEditorVectorPaintBucketToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     mCurrentHUDParams = iParams;
+
+    if (!mBaseTool->GetWorkingCell() || !mBaseTool->GetWorkingCell()->GetScene())
+        return;
 
     FOdysseyVectorGroupPaint* scene = mBaseTool->GetWorkingCell()->GetScene();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
