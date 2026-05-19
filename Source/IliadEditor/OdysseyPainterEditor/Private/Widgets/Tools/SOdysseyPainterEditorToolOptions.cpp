@@ -78,7 +78,7 @@ SOdysseyPainterEditorToolOptions::CreateOptionsExtender()
                 {
                     iMenuBuilder.AddMenuEntry(
                         LOCTEXT("tool-options.options-menu.reset-all-parameters.name", "Reset all Parameters"),
-                        LOCTEXT("tool-options.options-menu.reset-all-parameters.name", "Resets all the current tools parameters to match their default value."),
+                        LOCTEXT("tool-options.options-menu.reset-all-parameters.tooltip", "Resets all the current tools parameters to match their default value."),
                         FSlateIcon(),
                         FUIAction(
                             FExecuteAction::CreateRaw( this, &SOdysseyPainterEditorToolOptions::ResetAllToolParameters )
