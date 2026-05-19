@@ -154,7 +154,7 @@ FOdysseyEditorTab::Unregister()
 TSharedRef< SDockTab >
 FOdysseyEditorTab::SpawnTab( const FSpawnTabArgs& iArgs )
 {
-    return SAssignNew( mTab, SDockTab )
+    return SNew( SDockTab )
         .Label( mDisplayName )
         .OnTabClosed( this, &FOdysseyEditorTab::OnTabClosed)
         [

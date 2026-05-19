@@ -49,5 +49,4 @@ private:
     FSlateIcon mIcon;
     TSharedPtr<SWidget> mWidget;
     TWeakPtr< FTabManager > mTabManager;
-    TSharedPtr< SDockTab > mTab;
 };
