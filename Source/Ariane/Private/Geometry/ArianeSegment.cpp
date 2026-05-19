@@ -14,6 +14,7 @@ FArianeSegment::~FArianeSegment()
 FArianeSegment::FArianeSegment( )
     : Guid( FGuid::NewGuid() )
     , OwnerID()
+    , Vertices { FArianeVertexID(), FArianeVertexID() }
     , Length ( 0.0f )
     , bInvalidated ( false )
 {

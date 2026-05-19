@@ -383,6 +383,19 @@ FArianeEditor::GetId() const
     return Name;
 }
 
+bool
+FArianeEditor::GetCursor( EMouseCursor::Type& OutCursor )
+{
+    UArianeEditorTool* CurrentTool = GetCurrentTool();
+
+    if( CurrentTool )
+    {
+        return CurrentTool->GetCursor( OutCursor );
+    }
+
+    return false;
+}
+
 void
 FArianeEditor::Tick( float DeltaTime )
 {

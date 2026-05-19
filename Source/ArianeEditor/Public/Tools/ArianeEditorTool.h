@@ -111,6 +111,7 @@ public:
     virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget
                                      , const TArray<FStylusState>& NewStates
                                      , int32 StylusIndex );
+    virtual bool GetCursor( EMouseCursor::Type& OutCursor );
 
 protected:
     void PopupContextMenu();
@@ -121,6 +122,8 @@ protected:
     void DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, UArianeLayerDrawing* DrawingLayer );
     UArianeLayer* GetCurrentLayer();
     virtual bool CanDraw();
+    FVector2D ScreenToHUD( const FVector2D& ScreenPosition );
+
 /* Gary
 
     virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey );
@@ -199,6 +202,7 @@ protected:
     FKey PressedKey;
     // Temp
     double Pressure;
+    FVector2D MousePosition;
 
 public:
     const FSlateBrush* Icon;

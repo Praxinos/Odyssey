@@ -55,6 +55,12 @@ public:
     /** Overriden from FEdMode. */
     virtual bool Select(AActor* InActor, bool bInSelected) override;
 
+
+    // Overriden from FEdMode
+    virtual bool HandleClick( FEditorViewportClient* InViewportClient
+                            , HHitProxy* HitProxy
+                            , const FViewportClick& Click ) override;
+
 #ifdef unused
     /** Overriden from FEdMode. */
     virtual bool MouseMove( FEditorViewportClient* iViewportClient
@@ -62,11 +68,16 @@ public:
                           , int32 iMouseX
                           , int32 iMouseY ) override;
 
+
+
     // Overriden from FEdMode
     virtual bool InputKey( FEditorViewportClient* iViewportClient
                          , FViewport* iViewport
                          , FKey iKey
                          , EInputEvent iEvent) override;
+
+
+
 
     // Override from FEdMode
     virtual bool CapturedMouseMove( FEditorViewportClient* iViewportClient
@@ -74,10 +85,6 @@ public:
                                   , int32 iMouseX
                                   , int32 iMouseY ) override;
 
-    // Overriden from FEdMode
-    virtual bool HandleClick( FEditorViewportClient* InViewportClient
-                            , HHitProxy* HitProxy
-                            , const FViewportClick& Click ) override;
 #endif
 
     // Overriden from FEdMode
@@ -103,17 +110,20 @@ public:
 
 private:
 #ifdef unused
-    bool MouseMove_Private( FEditorViewportClient* iViewportClient
-                          , FViewport* iViewport
-                          , const FArianePointerState& State );
     bool InputKey_Private( FEditorViewportClient* iViewportClient
                          , FViewport* iViewport
                          , FKey iKey
                          , const FArianePointerState& State
                          , EInputEvent iEvent );
+
+    bool MouseMove_Private( FEditorViewportClient* iViewportClient
+                          , FViewport* iViewport
+                          , const FArianePointerState& State );
+
     bool CapturedMouseMove_Private( FEditorViewportClient* iViewportClient
                                   , FViewport* iViewport
                                   , const FArianePointerState& State );
+
     bool HandleClick_Private( FEditorViewportClient* InViewportClient
                             , HHitProxy* HitProxy
                             , const FViewportClick& Click

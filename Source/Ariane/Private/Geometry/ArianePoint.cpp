@@ -8,6 +8,11 @@ FArianePoint::~FArianePoint()
 {
 }
 
+FArianePoint::FArianePoint()
+    : Position( 0.0f, 0.0f, 0.0f )
+{
+}
+
 FArianePoint::FArianePoint( double X, double Y, double Z )
     : Position( X, Y, Z )
 {

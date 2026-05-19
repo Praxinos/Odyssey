@@ -20,7 +20,7 @@ struct ARIANE_API FArianeVertex : public FArianePoint
 
     public:
         virtual ~FArianeVertex();
-        FArianeVertex(){};
+        FArianeVertex();
 
         /**
          * @brief Constructor

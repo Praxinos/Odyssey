@@ -15,7 +15,7 @@ struct ARIANE_API FArianePoint
 
     public:
         virtual ~FArianePoint();
-        FArianePoint(){};
+        FArianePoint();
 
         /**
          * @brief Constructor

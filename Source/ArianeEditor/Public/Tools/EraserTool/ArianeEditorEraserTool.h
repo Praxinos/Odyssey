@@ -202,9 +202,9 @@ protected:
                   , TArray<FWayPoint>& OutWayPointBuffer
                   , TArray<FMetaFragment>& OutMetaFragmentBuffer
                   , bool iRevert );
-    static FVector2D ProjectWorldToScreen( FEditorViewportClient* ViewportClient
-                                         , FSceneView* View
-                                         , const FVector& WorldPosition );
+    FVector2D ProjectWorldToHUD( FEditorViewportClient* ViewportClient
+                               , FSceneView* View
+                               , const FVector& WorldPosition );
     static bool CheckContrast( uint8 iAlphaValue0, uint8 iAlphaValue1 );
     void ResizeCanvas( uint32 Width, uint32 Height );
     void UpdateBrush();
@@ -253,6 +253,7 @@ protected:
     UPROPERTY() // prevent GC
     UTexture2D* Brush;
 
+    FVector2D MousePosition;
     FVector2D MouseAtDown;
     FVector2D MouseAtUp;
     FIntVector2 MouseRecords[2];
