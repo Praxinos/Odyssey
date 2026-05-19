@@ -438,7 +438,25 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
     // No cycles picked, we create an orphan bucket
     else
     {
-        for( FOdysseyVectorGroupPaint* paintGroup : mBucketHUD->GetWorkingPaintgroupList() )
+        FOdysseyVectorCell* cell = GetWorkingCell();
+        if (!cell)
+            return;
+
+        std::list<FOdysseyVectorObject*>& selectedObjectList = cell->GetSelectedObjectList();
+        std::list<FOdysseyVectorGroupPaint*> selectedPaintGroupList;
+        for (FOdysseyVectorObject* vectorObject : selectedObjectList)
+        {
+            if(vectorObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ))
+            {
+                FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(vectorObject);
+                selectedPaintGroupList.push_back(paintGroup);
+            }
+        }
+
+        if (selectedPaintGroupList.size() == 0)
+            selectedPaintGroupList.push_back(iScene);
+
+        for( FOdysseyVectorGroupPaint* paintGroup : selectedPaintGroupList )
         {
             BLMatrix2D& inverseWorldMatrix = paintGroup->GetInverseWorldMatrix();
             BLPoint localCoords = inverseWorldMatrix.map_point( iPointInTexture.x, iPointInTexture.y );
