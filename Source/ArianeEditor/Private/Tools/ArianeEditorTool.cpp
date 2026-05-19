@@ -562,7 +562,6 @@ UArianeEditorTool::DrawHUDCircle(  FCanvas* Canvas, double X, double Y, double R
     }
 }
 
-
 void
 //UArianeEditorTool::OnTick(float DeltaTime)
 UArianeEditorTool::Render(IToolsContextRenderAPI* RenderAPI)
@@ -580,6 +579,18 @@ UArianeEditorTool::SupportsColorType( EOdysseyPainterEditorColorType ColorType )
     return false;
 }
 
+bool
+UArianeEditorTool::GetCursor( EMouseCursor::Type& OutCursor )
+{
+    if( CanDraw() == false )
+    {
+        OutCursor = EMouseCursor::Type::SlashedCircle;
+
+        return true;
+    }
+
+    return false;
+}
 
 FEditorViewportClient*
 UArianeEditorTool::GetActiveViewportClient()
@@ -719,6 +730,17 @@ UArianeEditorTool::OnClickDrag( const FInputDeviceRay& DragPos )
         OnMouseDrag( ViewportClient
                    , PressedKey
                    , Pointerstate );
+}
+
+FVector2D
+UArianeEditorTool::ScreenToHUD( const FVector2D& ScreenPosition )
+{
+    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+    float DPIScale = ViewportClient->GetDPIScale();
+    double X = ScreenPosition.X / DPIScale;
+    double Y = ScreenPosition.Y / DPIScale;
+
+    return FVector2D( X, Y );
 }
 
 // Implements IClickDragBehaviorTarget::OnClickRelease

@@ -103,7 +103,62 @@ bool FArianeEditorViewportEdMode::Select(AActor* InActor, bool bInSelected)
     return FEdMode::Select( InActor, bInSelected );
 }
 
+bool
+FArianeEditorViewportEdMode::HandleClick( FEditorViewportClient* InViewportClient
+                                        , HHitProxy* HitProxy
+                                        , const FViewportClick& Click )
+{
+    if( Click.GetKey() == EKeys::RightMouseButton )
+    {
+        return true; // intercept right clicks for now to prevent object selection
+    }
+
+/*
+    return ( bStylusInUse ) ? true : HandleClick_Private( InViewportClient
+                                                        , HitProxy
+                                                        , Click
+                                                        , FArianePointerState( Click.GetCursorPos().X
+                                                                             , Click.GetCursorPos().Y ) );
+*/
+    return false;
+}
+
+
 #ifdef unused
+
+
+bool
+FArianeEditorViewportEdMode::InputKey( FEditorViewportClient* iViewportClient
+                                     , FViewport* iViewport
+                                     , FKey iKey
+                                     , EInputEvent iEvent )
+{
+    TSharedPtr<FArianeEditorViewportToolkit> ViewportToolkit = GetArianeEditorViewportToolkit();
+
+    if( iKey == EKeys::RightMouseButton )
+    {
+        switch( iEvent )
+        {
+            case IE_Pressed :
+                return true; // intercept right clicks for now
+            break;
+
+            case IE_Released :
+                return true; // intercept right clicks for now
+            break;
+        }
+    }
+
+/*
+    return ( bStylusInUse ) ? true : InputKey_Private( iViewportClient
+                                                     , iViewport
+                                                     , iKey
+                                                     , FArianePointerState( iViewport->GetMouseX(), iViewport->GetMouseY() )
+                                                     , iEvent );
+*/
+    return false;
+}
+
 void
 FArianeEditorViewportEdMode::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget
                                                  , const TArray<FStylusState>& iStates
@@ -308,19 +363,6 @@ FArianeEditorViewportEdMode::InputKey_Private( FEditorViewportClient* iViewportC
     return false;
 }
 
-bool
-FArianeEditorViewportEdMode::InputKey( FEditorViewportClient* iViewportClient
-                                     , FViewport* iViewport
-                                     , FKey iKey
-                                     , EInputEvent iEvent )
-{
-    return ( bStylusInUse ) ? true : InputKey_Private( iViewportClient
-                                                     , iViewport
-                                                     , iKey
-                                                     , FArianePointerState( iViewport->GetMouseX(), iViewport->GetMouseY() )
-                                                     , iEvent );
-}
-
 bool FArianeEditorViewportEdMode::CapturedMouseMove_Private( FEditorViewportClient* iViewportClient
                                                            , FViewport* iViewport
                                                            , const FArianePointerState& State )
@@ -389,6 +431,7 @@ FArianeEditorViewportEdMode::HandleClick_Private( FEditorViewportClient* InViewp
     return false;
 }
 
+
 bool
 FArianeEditorViewportEdMode::HandleClick( FEditorViewportClient* InViewportClient
                                         , HHitProxy* HitProxy
@@ -406,14 +449,9 @@ FArianeEditorViewportEdMode::HandleClick( FEditorViewportClient* InViewportClien
 bool
 FArianeEditorViewportEdMode::GetCursor( EMouseCursor::Type& OutCursor ) const
 {
-/*
-    IArianeViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetArianeViewportDrawingEditorAdapter();
-    if (!adapter)
-        return false;
+    TSharedPtr<FArianeEditorViewportToolkit> ViewportToolkit = GetArianeEditorViewportToolkit();
 
-    return adapter->GetCursor(OutCursor);
-*/
-    return false;
+    return ViewportToolkit->GetEditor().GetCursor( OutCursor );
 }
 
 bool FArianeEditorViewportEdMode::IsEditingEnabled() const

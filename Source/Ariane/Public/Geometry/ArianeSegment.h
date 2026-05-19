@@ -150,14 +150,14 @@ struct ARIANE_API FArianeSegment
         void Init();
 
     public:
-        UPROPERTY( EditAnywhere )
-        FArianeVertexID Vertices[2];
-
-        UPROPERTY( EditAnywhere )
+        UPROPERTY( EditAnywhere, meta = (IgnoreForMemberInitializationTest) )
         FGuid Guid;
 
         UPROPERTY( EditAnywhere )
         FArianeObjectID OwnerID;
+
+        UPROPERTY( EditAnywhere )
+        FArianeVertexID Vertices[2];
 
     protected:
         TArray<FractionStep> FractionSteps;

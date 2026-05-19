@@ -160,9 +160,9 @@ UArianeEditorEraserTool::FWayFragment::GetPrev()
 }
 
 FVector2D
-UArianeEditorEraserTool::ProjectWorldToScreen( FEditorViewportClient* ViewportClient
-                                             , FSceneView* View
-                                             , const FVector& WorldPosition )
+UArianeEditorEraserTool::ProjectWorldToHUD( FEditorViewportClient* ViewportClient
+                                          , FSceneView* View
+                                          , const FVector& WorldPosition )
 {
     FVector2D ScreenCoords;
     FIntRect Rect = FIntRect( 0, 0, ViewportClient->Viewport->GetSizeXY().X, ViewportClient->Viewport->GetSizeXY().Y );
@@ -173,7 +173,7 @@ UArianeEditorEraserTool::ProjectWorldToScreen( FEditorViewportClient* ViewportCl
                               , ScreenCoords
                               , true ); // calc outside view position
 
-    return ScreenCoords;
+    return ScreenToHUD( ScreenCoords );
 }
 
 void
@@ -184,17 +184,17 @@ UArianeEditorEraserTool::VertexToWaypoint( FEditorViewportClient* ViewportClient
                                          , const TArray<FColor>& Pixels
                                          , TArray<FWayPoint>& OutWayPoints )
 {
-    FVector2D ScreenCoords = ProjectWorldToScreen( ViewportClient
-                                                 , View
-                                                 , WorldTransform.TransformPosition( Vertex->GetPosition() ) );
+    FVector2D HUDCoords = ProjectWorldToHUD( ViewportClient
+                                           , View
+                                           , WorldTransform.TransformPosition( Vertex->GetPosition() ) );
 
-    uint8 AlphaValue = GetAlpha( ScreenCoords.X, ScreenCoords.Y, Pixels );
+    uint8 AlphaValue = GetAlpha( HUDCoords.X, HUDCoords.Y, Pixels );
 
     if( AlphaValue == 0 ) // vertex in dark zone, keep it
     {
-        ScreenCoords = ProjectWorldToScreen( ViewportClient
-                                           , View
-                                           , WorldTransform.TransformPosition( Vertex->GetPosition() ) );
+        HUDCoords = ProjectWorldToHUD( ViewportClient
+                                     , View
+                                     , WorldTransform.TransformPosition( Vertex->GetPosition() ) );
 
         OutWayPoints.Emplace( Vertex
                             , FWayPoint::OutsideErasureArea
@@ -339,11 +339,13 @@ UArianeEditorEraserTool::TraceLine( FArianePath* Path
 FBox2D
 UArianeEditorEraserTool::GetErasureBoundingArea( FSceneView* View )
 {
+    FVector2D HUDMouseAtDown = ScreenToHUD( MouseAtDown );
+    FVector2D HUDMouseAtUp = ScreenToHUD( MouseAtUp );
     double EraserRadius = Size * 0.5f;
-    double XMin = FMath::Min( MouseAtDown.X, MouseAtUp.X ) - EraserRadius;
-    double YMin = FMath::Min( MouseAtDown.Y, MouseAtUp.Y ) - EraserRadius;
-    double XMax = FMath::Max( MouseAtDown.X, MouseAtUp.X ) + EraserRadius;
-    double YMax = FMath::Max( MouseAtDown.Y, MouseAtUp.Y ) + EraserRadius;
+    double XMin = FMath::Min( HUDMouseAtDown.X, HUDMouseAtUp.X ) - EraserRadius;
+    double YMin = FMath::Min( HUDMouseAtDown.Y, HUDMouseAtUp.Y ) - EraserRadius;
+    double XMax = FMath::Max( HUDMouseAtDown.X, HUDMouseAtUp.X ) + EraserRadius;
+    double YMax = FMath::Max( HUDMouseAtDown.Y, HUDMouseAtUp.Y ) + EraserRadius;
 
     return ( XMin < XMax ) ? FBox2D( FVector2D( XMin, YMin ), FVector2D( XMax, YMax ) ) : FBox2D();
 }
@@ -365,12 +367,12 @@ UArianeEditorEraserTool::GetPathBoundingArea( FEditorViewportClient* ViewportCli
 
     for( uint32 i = 0; i < 8; i++ )
     {
-        FVector2D ScreenP = ProjectWorldToScreen( ViewportClient, View, PathTransform.TransformPosition( P[i] ) );
+        FVector2D HUDPosition = ProjectWorldToHUD( ViewportClient, View, PathTransform.TransformPosition( P[i] ) );
 
-        if( ScreenP.X < XMin ) XMin = ScreenP.X;
-        if( ScreenP.Y < YMin ) YMin = ScreenP.Y;
-        if( ScreenP.X > XMax ) XMax = ScreenP.X;
-        if( ScreenP.Y > YMax ) YMax = ScreenP.Y;
+        if( HUDPosition.X < XMin ) XMin = HUDPosition.X;
+        if( HUDPosition.Y < YMin ) YMin = HUDPosition.Y;
+        if( HUDPosition.X > XMax ) XMax = HUDPosition.X;
+        if( HUDPosition.Y > YMax ) YMax = HUDPosition.Y;
     }
 
     return ( XMin < XMax ) ? FBox2D( FVector2D( XMin, YMin ), FVector2D( XMax, YMax ) ) : FBox2D();
@@ -842,17 +844,17 @@ UArianeEditorEraserTool::EraseChainSegments( FEditorViewportClient* ViewportClie
                     const FArianeSegment::FractionStep* Step1 = Fraction.Steps[1];
                     FVector WorlCoords0 = WorldTransform.TransformPosition( Step0->Point->GetPosition() ) ;
                     FVector WorlCoords1 = WorldTransform.TransformPosition( Step1->Point->GetPosition() ) ;
-                    FVector2D ScreenCoords0 = ProjectWorldToScreen( ViewportClient, View, WorlCoords0 );
-                    FVector2D ScreenCoords1 = ProjectWorldToScreen( ViewportClient, View, WorlCoords1 );
+                    FVector2D HUDCoords0 = ProjectWorldToHUD( ViewportClient, View, WorlCoords0 );
+                    FVector2D HUDCoords1 = ProjectWorldToHUD( ViewportClient, View, WorlCoords1 );
 
                     TraceLine( Path
                              , Segment
                              , Step0
-                             , ScreenCoords0.X
-                             , ScreenCoords0.Y
+                             , HUDCoords0.X
+                             , HUDCoords0.Y
                              , Step1
-                             , ScreenCoords1.X
-                             , ScreenCoords1.Y
+                             , HUDCoords1.X
+                             , HUDCoords1.Y
                              , Pixels
                              , OutWayPoints
                              , MetaFragmentBuffer
@@ -868,17 +870,17 @@ UArianeEditorEraserTool::EraseChainSegments( FEditorViewportClient* ViewportClie
                     const FArianeSegment::FractionStep* Step1 = Fraction.Steps[1];
                     FVector WorlCoords0 = WorldTransform.TransformPosition( Step0->Point->GetPosition() ) ;
                     FVector WorlCoords1 = WorldTransform.TransformPosition( Step1->Point->GetPosition() ) ;
-                    FVector2D ScreenCoords0 = ProjectWorldToScreen( ViewportClient, View, WorlCoords0 );
-                    FVector2D ScreenCoords1 = ProjectWorldToScreen( ViewportClient, View, WorlCoords1 );
+                    FVector2D HUDCoords0 = ProjectWorldToHUD( ViewportClient, View, WorlCoords0 );
+                    FVector2D HUDCoords1 = ProjectWorldToHUD( ViewportClient, View, WorlCoords1 );
 
                     TraceLine( Path
                              , Segment
                              , Step1
-                             , ScreenCoords1.X
-                             , ScreenCoords1.Y
+                             , HUDCoords1.X
+                             , HUDCoords1.Y
                              , Step0
-                             , ScreenCoords0.X
-                             , ScreenCoords0.Y
+                             , HUDCoords0.X
+                             , HUDCoords0.Y
                              , Pixels
                              , OutWayPoints
                              , MetaFragmentBuffer
@@ -986,9 +988,9 @@ UArianeEditorEraserTool::OnMouseDown( FEditorViewportClient* iViewportClient
 
 void
 UArianeEditorEraserTool::OnMouseHover( FEditorViewportClient* iViewportClient
-                                     , const FArianePointerState& State )
+                                     , const FArianePointerState& PointerState )
 {
-
+    MousePosition = FVector2D( PointerState.ViewportX, PointerState.ViewportY ) ;
 }
 
 bool
@@ -996,6 +998,8 @@ UArianeEditorEraserTool::OnMouseDrag( FEditorViewportClient* iViewportClient
                                     , const FKey& iKey
                                     , const FArianePointerState& PointerState )
 {
+    MousePosition = FVector2D( PointerState.ViewportX, PointerState.ViewportY ) ;
+
     if( iKey == EKeys::LeftMouseButton )
     {
         MouseRecords[1] = FIntVector2( PointerState.ViewportX, PointerState.ViewportY );
@@ -1055,8 +1059,7 @@ UArianeEditorEraserTool::ExtendContextMenu( FMenuBuilder& menu )
 void
 UArianeEditorEraserTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderAPI* RenderAPI )
 {
-    double X = GetActiveViewportClient()->GetCachedMouseX();
-    double Y = GetActiveViewportClient()->GetCachedMouseY();
+    FVector2D HUDPosition = ScreenToHUD( MousePosition );
 
     HUDCanvas->DrawTile(
         0, 0,
@@ -1067,7 +1070,7 @@ UArianeEditorEraserTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderAPI* R
         true
     );
 
-    DrawHUDCircle ( HUDCanvas, X, Y, ( double ) Size * 0.5f, 32 );
+    DrawHUDCircle ( HUDCanvas, HUDPosition.X, HUDPosition.Y, ( double ) Size * 0.5f, 32 );
 }
 
 void
@@ -1092,22 +1095,23 @@ UArianeEditorEraserTool::StampBrush()
 {
     FTextureRenderTargetResource* RTResource = CanvasRenderTarget->GameThread_GetRenderTargetResource();
     FCanvas Canvas(RTResource, nullptr, GetWorld(), GMaxRHIFeatureLevel);
-
-    FIntVector2 DeltaMouse = MouseRecords[1] - MouseRecords[0];
-    int32 LenSq = ( DeltaMouse.X * DeltaMouse.X ) + ( DeltaMouse.Y * DeltaMouse.Y );
+    FVector2D HUDMouseRecord0 = ScreenToHUD( FVector2D( MouseRecords[0] ) );
+    FVector2D HUDMouseRecord1 = ScreenToHUD( FVector2D( MouseRecords[1] ) );
+    FVector2D DeltaHUDMouse = HUDMouseRecord1 - HUDMouseRecord0;
+    int32 LenSq = ( DeltaHUDMouse.X * DeltaHUDMouse.X ) + ( DeltaHUDMouse.Y * DeltaHUDMouse.Y );
     int32 Len = LenSq ? sqrt( LenSq ) : 0;
-    FVector2D StampAt = FVector2D( MouseRecords[0].X, MouseRecords[0].Y );
-    FVector2D Step = Len ? FVector2D( ( double ) DeltaMouse.X / Len
-                                    , ( double ) DeltaMouse.Y / Len )
+    FVector2D StampAt = HUDMouseRecord0;
+    FVector2D Step = Len ? FVector2D( ( double ) DeltaHUDMouse.X / Len
+                                    , ( double ) DeltaHUDMouse.Y / Len )
                          : FVector2D( 0.0f, 0.0f );
 
     for( int32 i = 0; i <= Len; i++ )
     {
         FCanvasTileItem Tile = FCanvasTileItem( FVector2D( StampAt.X - ( Size * 0.5f )
-                                                         , StampAt.Y  -( Size * 0.5f ) )
-                                                , Brush->GetResource()
-                                                , FVector2D( Size, Size )
-                                                , FLinearColor::White );
+                                                         , StampAt.Y - ( Size * 0.5f ) )
+                                              , Brush->GetResource()
+                                              , FVector2D( Size, Size )
+                                              , FLinearColor::White );
 
         Tile.SetColor( FLinearColor::White );
         Tile.BlendMode = SE_BLEND_AlphaComposite;

@@ -11,6 +11,12 @@ FArianeVertex::~FArianeVertex()
 {
 }
 
+FArianeVertex::FArianeVertex()
+    : Radius( 0.0f )
+    , Normal ( FVector::Zero() )
+{
+}
+
 FArianeVertex::FArianeVertex( FArianeObject* Owner, const FVector& iPosition, const FVector& InNormal, double InRadius )
     : FArianePoint( iPosition )
     , Guid( FGuid::NewGuid() )

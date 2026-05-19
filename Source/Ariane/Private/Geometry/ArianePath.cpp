@@ -192,10 +192,10 @@ FArianePath::~FArianePath()
 
 FArianePath::FArianePath()
     : FArianeObject()
-    , Geometry3D ( this )
     , LineType( EArianePathLineType::Tube )
     , Color ( 0, 0, 0, 255 )
     , MaterialInterface ( nullptr )
+    , Geometry3D ( this )
 {
     InvalidationFlags = new FArianePathInvalidationFlags();
 
@@ -741,35 +741,33 @@ FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
             FDynamicMeshVertex* ModelVertex0 = &ModelVertexCache[ModelVertexOffset+0];
             FDynamicMeshVertex* ModelVertex1 = &ModelVertexCache[ModelVertexOffset+1];
 
-            if( UpVector.Normalize() )
-            {
-                FVector NewPosition0 = Step.Point->GetPosition() + ( UpVector * PointRadius );
-                FVector NewPosition1 = Step.Point->GetPosition() - ( UpVector * PointRadius );
+            // We do not check that UpVector's has a length. In case it does not, that way all vertices will be located at Step's position
+            FVector NewPosition0 = Step.Point->GetPosition() + ( UpVector * PointRadius );
+            FVector NewPosition1 = Step.Point->GetPosition() - ( UpVector * PointRadius );
 
-                ModelVertex0->Position.X = NewPosition0.X;
-                ModelVertex0->Position.Y = NewPosition0.Y;
-                ModelVertex0->Position.Z = NewPosition0.Z;
+            ModelVertex0->Position.X = NewPosition0.X;
+            ModelVertex0->Position.Y = NewPosition0.Y;
+            ModelVertex0->Position.Z = NewPosition0.Z;
 
-                ModelVertex0->Color = Path->GetColor();
+            ModelVertex0->Color = Path->GetColor();
 
-                ModelVertex0->TextureCoordinate[0].X = SegmentT0 + ( VertexU * SegmentDeltaT );
-                ModelVertex0->TextureCoordinate[0].Y = 1.0f;
+            ModelVertex0->TextureCoordinate[0].X = SegmentT0 + ( VertexU * SegmentDeltaT );
+            ModelVertex0->TextureCoordinate[0].Y = 1.0f;
 
-                ModelVertex0->TangentX = TangentVector;
-                ModelVertex0->TangentZ = PerpendicularVector;
+            ModelVertex0->TangentX = TangentVector;
+            ModelVertex0->TangentZ = PerpendicularVector;
 
-                ModelVertex1->Position.X = NewPosition1.X;
-                ModelVertex1->Position.Y = NewPosition1.Y;
-                ModelVertex1->Position.Z = NewPosition1.Z;
+            ModelVertex1->Position.X = NewPosition1.X;
+            ModelVertex1->Position.Y = NewPosition1.Y;
+            ModelVertex1->Position.Z = NewPosition1.Z;
 
-                ModelVertex1->Color = Path->GetColor();
+            ModelVertex1->Color = Path->GetColor();
 
-                ModelVertex1->TextureCoordinate[0].X = SegmentT0 + ( VertexU * SegmentDeltaT );
-                ModelVertex1->TextureCoordinate[0].Y = 0.0f;
+            ModelVertex1->TextureCoordinate[0].X = SegmentT0 + ( VertexU * SegmentDeltaT );
+            ModelVertex1->TextureCoordinate[0].Y = 0.0f;
 
-                ModelVertex1->TangentX = TangentVector;
-                ModelVertex1->TangentZ = PerpendicularVector;
-            }
+            ModelVertex1->TangentX = TangentVector;
+            ModelVertex1->TangentZ = PerpendicularVector;
         }
     }
 
@@ -1101,6 +1099,7 @@ FArianePathGeometry3D::Build()
 
     for( const FArianePath::Chain& Chain : Path->GetChains() )
     {
+        FArianeSegment* FirstSegment = Chain.Segments[0];
         bool bForceRebuild = false;
         double T0 = 0.0f;
 
@@ -1132,7 +1131,10 @@ FArianePathGeometry3D::Build()
 
                     if( bForceRebuild )
                     {
-                        BuildSegmentAsFlat( Segment, T0, T1, PreviousPerpendicularVector );
+                        BuildSegmentAsFlat( Segment
+                                          , T0
+                                          , T1
+                                          , PreviousPerpendicularVector );
                         // for flat paths, the perpendicular vector is independent, related to the initial drawing plane (for now)
                         // so we can update only segments that are invalidated (but for simplicity we still iterate on all segments).
                         bForceRebuild = false;
@@ -1146,7 +1148,10 @@ FArianePathGeometry3D::Build()
 
                     if( bForceRebuild )
                     {
-                        BuildSegmentAsTube( Segment, T0, T1,  PreviousPerpendicularVector );
+                        BuildSegmentAsTube( Segment
+                                          , T0
+                                          , T1
+                                          , PreviousPerpendicularVector );
                         // however for tubes,  a segment perpendicular vector depends on the previous segment perpendicular vector
                         // bForceRebuild = true; // commented-out because useless, but left for clarity
                     }

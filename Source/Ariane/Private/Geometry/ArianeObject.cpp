@@ -90,9 +90,13 @@ FArianeObject::~FArianeObject()
 }
 
 FArianeObject::FArianeObject()
-    : DrawingLayer( nullptr )
+    : Name ( FName( "Ariane Object" ) )
     , Guid ( FGuid::NewGuid() )
-    , ParentID ()
+    , ParentID ( FArianeObjectID() )
+    , Translation ( 0.0f, 0.0f, 0.0f )
+    , RotationInDegrees( 0.0f )
+    , Scaling( 1.0f, 1.0f, 1.0f )
+    , DrawingLayer( nullptr )
     , InvalidationFlags ( new FArianeObjectInvalidationFlags() )
 {
 }
@@ -352,4 +356,22 @@ void
 FArianeObject::SetParent( FArianeObject* Parent )
 {
     ParentID = FArianeObjectID( Parent );
+}
+
+void
+FArianeObject::PostEditUndo()
+{
+    if( ParentID.GetObject() )
+    {
+        ParentID.GetObject()->AppendChild( this );
+    }
+}
+
+void
+FArianeObject::PostLoad()
+{
+    if( ParentID.GetObject() )
+    {
+        ParentID.GetObject()->AppendChild( this );
+    }
 }

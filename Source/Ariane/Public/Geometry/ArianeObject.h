@@ -119,10 +119,10 @@ struct ARIANE_API FArianeObject
         virtual void UpdateBounds();
 
         /** Run any object-specific task required immediately after loading an object */
-        virtual void PostLoad(){};
+        virtual void PostLoad();
 
         /** Run any object-specific task required immediately after undoing / redoing */
-        virtual void PostEditUndo(){};
+        virtual void PostEditUndo();
 
         virtual void ExportProperties( FArianeObject* DestObject );
         FVector GetTranslation();
@@ -152,11 +152,8 @@ struct ARIANE_API FArianeObject
         UPROPERTY( EditAnywhere )
         FName Name;
 
-        UPROPERTY( EditAnywhere )
+        UPROPERTY( EditAnywhere, meta = (IgnoreForMemberInitializationTest) )
         FGuid Guid;
-
-        UPROPERTY( EditAnywhere )
-        TArray<FArianeObjectID> ChildrenID;
 
         UPROPERTY( EditAnywhere )
         FArianeObjectID ParentID;
@@ -176,7 +173,7 @@ struct ARIANE_API FArianeObject
     protected:
         FSimpleMulticastDelegate  OnPostInvalidated;
         TArray<FArianeObjectID> InvalidatedChildrenID;
-
+        TArray<FArianeObjectID> ChildrenID;
         FBoxSphereBounds Bounds;
         FArianeObjectInvalidationFlags* InvalidationFlags;
 };
