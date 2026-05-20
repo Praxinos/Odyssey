@@ -244,13 +244,6 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* ViewportClient
             FVector RayOrigin, RayDirection;
             FVector IntersectAt;
 
-/*
-            DeprojectFVector2D( ViewportClient
-                              , FVector2D( PointerState.ViewportX
-                                          , PointerState.ViewportY )
-                              , RayOrigin
-                              , RayDirection );
-*/
             View->DeprojectFVector2D( FVector2D( PointerState.ViewportX
                                                , PointerState.ViewportY )
                                     , RayOrigin

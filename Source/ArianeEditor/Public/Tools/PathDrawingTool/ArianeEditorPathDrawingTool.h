@@ -59,19 +59,21 @@ protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
 
     /**
-        * @brief Add a new vertex to the current Path. Create a segment between this vertex and the previously created one.
-        * @param ViewportClient
-        * @param State the state of the input device (mouse or stylus)
-        */
+     * @brief Add a new vertex to the current Path. Create a segment between this vertex and the previously created one.
+     * @param ViewportClient
+     * @param State the state of the input device (mouse or stylus)
+     */
     void PlotVertex( FEditorViewportClient* ViewportClient
                    , const FArianePointerState& State
                    , bool bInteractive );
-    FVector4 GetDrawingPlane( FEditorViewportClient* iViewportClient
+
+    /**
+     * @brief Get a layer's drawing plane
+     * @param ViewportClient
+     * @param DrawingLayer the layer from get the plane from
+     */
+    FVector4 GetDrawingPlane( FEditorViewportClient* ViewportClient
                             , UArianeLayerDrawing* DrawingLayer );
-    void DeprojectFVector2D( FEditorViewportClient* ViewportClient
-                           , const FVector2D& PointerCoods
-                           , FVector& OutOrigin
-                           , FVector& OutDirection );
 
 public:
     UPROPERTY( EditAnywhere

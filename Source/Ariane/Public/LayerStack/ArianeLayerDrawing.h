@@ -42,24 +42,73 @@ public:
     ~UArianeLayerDrawing();
     UArianeLayerDrawing();
 
+    /**
+     * @brief Get the top-most vector object
+     * @return the top-most vector object
+     */
     FArianeObject* GetRootObject();
 
-    FArianePath* AllocPath( UMaterialInterface* MaterialInterface );
+    /**
+     * @brief Allocate a new path (in a FInstancedStruct)
+     * @param InMaterialInterface a material interface or nullptr to use the default one
+     * @return the new path
+     */
+    FArianePath* AllocPath( UMaterialInterface* InMaterialInterface );
+
+    /**
+     * @brief Allocate a new basic object (in a FInstancedStruct)
+     * @return the new object
+     */
     FArianeObject* AllocObject();
-    TArray<FInstancedStruct>& GetInstancedObjects();
-    virtual void Update( bool bInteractive ) override;
+
+    /**
+     * @brief Get all instanced objects
+     * @return an array of all instanced objects
+     */
+    const TArray<FInstancedStruct>& GetInstancedObjects();
+
+    /**
+     * @brief Get an instanced object by its ID
+     * @return the desired object
+     */
     FArianeObject* GetObject( const FGuid& InGuid );
+
+    /**
+     * @brief Delete (deallocate) an instanced object
+     * @param the object to deallocate
+     */
     void DeleteInstancedObject( FArianeObject* Object );
+
+    /** Empty the whole object tree and create a new one **/
+    void ResetHierarchy();
+
+    // Overrides
+    virtual void Update( bool bInteractive ) override;
+    virtual void PostEditUndo() override;
+    virtual void PostLoad() override;
 
     // debug
     void PrintPointers();
-    void PostLoad();
-    void ResetHierarchy();
+
+    /**
+     * @brief Get the drawing origin
+     * @return the drawing origin
+     */
     EArianeLayerDrawingOrigin GetDrawingOrigin();
+
+    /**
+     * @brief Set the drawing origin
+     * @param the drawing origin type
+     */
     void SetDrawingOrigin( EArianeLayerDrawingOrigin InDrawingOrigin );
+
+    /**
+     * @brief Get the drawing orientation
+     * @return the drawing orientation
+     */
     EArianeLayerDrawingOrientation GetDrawingOrientation();
+
     void SetDrawingOrientation( EArianeLayerDrawingOrientation InDrawingOrientation );
-    virtual void PostEditUndo() override;
 
     void IncrementMaterial( UMaterialInterface* MaterialInterface );
     void DecrementMaterial( UMaterialInterface* MaterialInterface );

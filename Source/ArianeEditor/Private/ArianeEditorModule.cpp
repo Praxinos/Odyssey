@@ -225,25 +225,8 @@ FArianeEditorModule::RegisterToolbarButton()
                                                                                   //GetModeManager()->ActivateMode( EM_ArianeEditorViewportEdModeId );
                                                                               } ) );
 
-        // Add after the Unreal's "Add Actor" button
-        //ArianeLauncherEntry.InsertPosition = FToolMenuInsert( "AddQuick", EToolMenuInsertType::Before );
-
         ToolbarSection->AddEntry( ArianeLauncherEntry );
     }
-
-/*
-    FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
-    TSharedPtr<FExtender> Extenders = LevelEditorModule.GetToolBarExtensibilityManager()->GetAllExtenders();
-
-    TSharedPtr<FExtender> MyExtender = MakeShareable(new FExtender);
-    MyExtender->AddToolBarExtension( "Settings"
-                                   , EExtensionHook::After
-                                   , NULL
-                                   , FToolBarExtensionDelegate::CreateRaw( this
-                                                                         , &FArianeEditorModule::AddToolbarButton ) );
-
-    LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender( MyExtender );
-*/
 }
 
 void
@@ -278,37 +261,22 @@ FArianeEditorModule::UnregisterEditorMode()
 void
 FArianeEditorModule::RegisterPropertyModuleCustomizations()
 {
-    /** Register detail/property customization */
-/* Gary
-    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FModuleManager::Get().LoadModule("MeshPaint");
-*/
 }
 
 void
 FArianeEditorModule::UnregisterPropertyModuleCustomizations()
 {
-/* Gary
-    // De-register detail/property customization
-    FPropertyEditorModule* PropertyModule = FModuleManager::GetModulePtr<FPropertyEditorModule>("PropertyEditor");
-    if (PropertyModule)
-    {
-        PropertyModule->UnregisterCustomClassLayout("OdysseyViewportDrawingEditorSettings");
-        PropertyModule->UnregisterCustomPropertyTypeLayout("OdysseyViewportDrawingEditorTexturePaintSettings");
-    }
-*/
 }
 
 void
 FArianeEditorModule::RegisterSettings()
 {
-    ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
+    ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
 
-    if( !settingsModule )
+    if( !SettingsModule )
         return;
 
-
-    settingsModule->RegisterSettings( "Editor", "Plugins", "ArianeEditor"
+    SettingsModule->RegisterSettings( "Editor", "Plugins", "ArianeEditor"
         , LOCTEXT( "user-settings.ariane-editor.name", "Ariane Editor" )
         , LOCTEXT( "user-settings.ariane-editor.tooltip", "Configure the look and feel of the Ariane Editor." )
         , GetMutableDefault<UArianeEditorSettings>() );
@@ -317,12 +285,12 @@ FArianeEditorModule::RegisterSettings()
 void
 FArianeEditorModule::UnregisterSettings()
 {
-    ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
+    ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
 
-    if( !settingsModule )
+    if( !SettingsModule )
         return;
 
-    settingsModule->UnregisterSettings( "Editor", "Plugins", "ArianeEditor" );
+    SettingsModule->UnregisterSettings( "Editor", "Plugins", "ArianeEditor" );
 }
 
 void
@@ -359,23 +327,6 @@ void
 FArianeEditorModule::UnregisterThumbnailRenderers()
 {
     //UThumbnailManager::Get().UnregisterCustomRenderer(UOdysseyAnimationCellImageRaster::StaticClass());
-}
-
-void
-FArianeEditorModule::RegisterBrushOverrides()
-{
-/* Gary
-    FOdysseyBrushOverride::Register(UOdysseyBrushOptionsOverrides::StaticClass());
-    FOdysseyBrushOverride::Register(UOdysseyBlendParametersOverrides::StaticClass());
-    FOdysseyBrushOverride::Register(UOdysseyFreehandShapeOverrides::StaticClass());
-    FOdysseyBrushOverride::Register(UOdysseyPainterEditorRasterDrawingToolOverrides::StaticClass());
-*/
-}
-
-void
-FArianeEditorModule::UnregisterBrushOverrides()
-{
-
 }
 
 void

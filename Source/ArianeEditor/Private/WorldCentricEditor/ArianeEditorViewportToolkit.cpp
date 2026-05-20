@@ -146,9 +146,9 @@ FArianeEditorViewportToolkit::Init( const TSharedPtr<IToolkitHost>& iInitToolkit
     //InlineContent = SNew(SArianeEditorMasterPanel, const_cast<FArianeEditor*>( Editor.Get()) );
 
     UToolMenu* addMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolbar.AddQuickMenu");
-    FToolMenuSection& arianeSection = addMenu->FindOrAddSection("Ariane 3D Painting");
+    FToolMenuSection& ArianeSection = addMenu->FindOrAddSection("Ariane 3D Painting");
 
-    FToolMenuEntry& Entry = arianeSection.AddDynamicEntry( "3D Painting Actor"
+    FToolMenuEntry& Entry = ArianeSection.AddDynamicEntry( "3D Painting Actor"
                                                          , FNewToolMenuSectionDelegate::CreateRaw( this, &FArianeEditorViewportToolkit::AddActorMenuEntry ) );
 
 /*
