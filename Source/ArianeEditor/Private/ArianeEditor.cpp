@@ -218,7 +218,7 @@ FArianeEditor::IsCurrentTool( const FString& ToolType )
 UArianeEditorTool*
 FArianeEditor::GetCurrentTool()
 {
-    // Note: EToolSide::Left means the mouse
+    // Note: EToolSide::Left means "the mouse"
     return Cast<UArianeEditorTool>(GetToolManager()->GetActiveTool( EToolSide::Left ));
 }
 
@@ -269,7 +269,8 @@ void
 FArianeEditor::AddToolBuilder( UArianeEditorToolBuilder* ToolBuilder )
 {
     // We create the tool here and not in UArianeEditorToolBuilder::BuildTool so that
-    // the tool collection is ready for the tool selector widget
+    // the tool collection is ready for the tool selector widget because GetToolManager()->RegisterToolType
+    // does not create the tool right away
     UArianeEditorTool* Tool = ToolBuilder->CreateTool( GetToolManager() );
 
     Tool->Init( this );
@@ -404,6 +405,7 @@ FArianeEditor::Tick( float DeltaTime )
 
     if ( Painting3DComponent == nullptr )
     {
+        // Display an error message on the viewport
         GEngine->AddOnScreenDebugMessage ( UniqueKey // use the pointer as the ID
                                          , 0.1f // Short duration
                                          , FColor::Red
@@ -415,6 +417,7 @@ FArianeEditor::Tick( float DeltaTime )
 
         if( CurrentLayer && CurrentLayer->IsLocked( true ) )
         {
+            // Display an error message on the viewport
             GEngine->AddOnScreenDebugMessage ( UniqueKey // use the pointer as the ID
                                              , 0.1f // Short duration
                                              , FColor::Red
@@ -445,6 +448,7 @@ FArianeEditor::AddPainting3DActor()
                                                                             , ViewportClient->EngineShowFlags ) );
     // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
     FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
+    // Create the actor at some distance away from the camera
     FVector Location = View ? View->ViewLocation + ( View->GetViewDirection() * Settings->GetDistanceToNewActor() )
                             : FVector();
 

@@ -131,7 +131,7 @@ UArianeLayerDrawing::AllocObject()
 }
 
 FArianePath*
-UArianeLayerDrawing::AllocPath( UMaterialInterface* MaterialInterface )
+UArianeLayerDrawing::AllocPath( UMaterialInterface* InMaterialInterface )
 {
     InstancedObjectsAccessRW.Lock();
     InstancedObjects.Add( FInstancedStruct::Make<FArianePath>( this ) );
@@ -139,8 +139,8 @@ UArianeLayerDrawing::AllocPath( UMaterialInterface* MaterialInterface )
 
     FArianePath* NewPath = InstancedObjects.Last().GetMutablePtr<FArianePath>();
 
-    NewPath->SetMaterial( MaterialInterface ? MaterialInterface
-                                            : GEngine->VertexColorMaterial );
+    NewPath->SetMaterial( InMaterialInterface ? InMaterialInterface
+                                              : GEngine->VertexColorMaterial );
 
     // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
     GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
@@ -175,6 +175,7 @@ UArianeLayerDrawing::DecrementMaterial( UMaterialInterface* MaterialInterface )
     }
 }
 
+const
 TArray<FInstancedStruct>&
 UArianeLayerDrawing::GetInstancedObjects()
 {
@@ -221,6 +222,7 @@ UArianeLayerDrawing::ResetHierarchy()
     UnbindDelegates( );
 
     InstancedObjects.Empty();
+    UsedMaterials.Empty();
 
     RootObjectID = FArianeObjectID( AllocObject() );
 

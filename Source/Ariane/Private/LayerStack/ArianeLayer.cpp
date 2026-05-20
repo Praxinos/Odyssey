@@ -184,7 +184,6 @@ UArianeLayer::OnPostUpdateDelegate()
     return OnPostUpdate;
 }
 
-
 UArianeLayer::FOnTransformChanged&
 UArianeLayer::GetOnTransformChangedDelegate()
 {

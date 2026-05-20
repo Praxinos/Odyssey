@@ -70,7 +70,7 @@ public:
     // Implements IHoverBehaviorTarget::OnEndHover
     virtual void OnEndHover() override;
 
-    //virtual void OnTick(float DeltaTime) override;
+    // Implements UInteractiveTool::Render for rendering in 3D space
     virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
 
     //Mouse events
@@ -90,6 +90,7 @@ public:
                              , const FKey& iKey
                              , const FArianePointerState& State );
 
+    // Implements UInteractiveTool::DrawHUD for overlay drawing in 2D space
     virtual void DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
 
     /** Get the tool's tooltip */
@@ -106,59 +107,75 @@ public:
 
     virtual bool SupportsColorType( EOdysseyPainterEditorColorType ColorType );
 
+    /**
+     * @brief Set the editor
+     * @param InEditor
+     */
     virtual void Init( FArianeEditor* InEditor );
 
     virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget
                                      , const TArray<FStylusState>& NewStates
                                      , int32 StylusIndex );
+
+    /**
+     * @brief Get the current mouse cursor to display
+     * @return the current mouse cursor to display
+     */
     virtual bool GetCursor( EMouseCursor::Type& OutCursor );
 
 protected:
     void PopupContextMenu();
     TSharedPtr<SWidget> CreateContextMenu();
     virtual void ExtendContextMenu( FMenuBuilder& menu );
-    //GetSceneViewFSceneView* GetSceneView( FEditorViewportClient* iViewportClient );
+
+    /**
+     * @brief Get the active viewport client
+     * @return the active viewport client
+     */
     FEditorViewportClient* GetActiveViewportClient();
+
+    /**
+     * @brief Draw the layer orientation grid
+     * @param RenderAPI
+     * @param DrawingLayer
+     */
     void DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, UArianeLayerDrawing* DrawingLayer );
+
+    /**
+     * @brief Get the current layer
+     * @return the current layer if any Painting3DActor and a layer are selected
+     */
     UArianeLayer* GetCurrentLayer();
+
+    /** Is the tool allowed to act on the viewport ? */
     virtual bool CanDraw();
+
+   /**
+     * @brief converts screen position to HUD position (i.e with DPI scaling)
+     * @param ScreenPosition
+     */
     FVector2D ScreenToHUD( const FVector2D& ScreenPosition );
 
 /* Gary
 
     virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey );
     virtual bool OnMouseDoubleClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
-
-
     virtual bool OnKeyDown(const FKey& iKey);
     virtual bool OnKeyUp(const FKey& iKey);
     // For global key press events
     virtual bool OnKeyUpGlobal(const FKeyEvent& InKeyEvent);
     virtual bool OnKeyDownGlobal(const FKeyEvent& InKeyEvent);
-
-    // Tick
-
-    //Finishes any action currently running, does not validate the action (example, ensure any drawing in queue is done)
-    virtual void Flush();
-
-    //Validates any action that finished. (example, any drawing in queue is finished and validated so that it creates an undoable state)
-    virtual void Commit();
 */
 
-
-
 public:
-    // Interface
-    virtual EMouseCursor::Type GetMouseCursor() const;
+
+
+
 /* Gary
     virtual void BindShortcuts(TSharedPtr<FUICommandList> iCommandList);
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender );
     virtual void ExtendToolbar( UToolMenu* iToolMenu );
     virtual TSharedPtr<FOdysseyHUDElement> GetHUD();
-
-    virtual bool IsHUDVisible() const;
-
-    virtual bool SupportsColorType(EArianeEditorColorType iType);
 */
 
 protected:
@@ -185,15 +202,10 @@ protected:
 
 public:
     FArianeEditor* GetEditor() const;
-/* Gary
-    //template<class T> T* GetEditorAs() const { return static_cast<T*>(mEditor); };
-*/
 
 protected:
 /*
     TSharedPtr<FArianeEditorToolInputProcessor> mInputProcessor;
-    TSharedPtr<FOdysseyHUDElement>      mHUD;
-
 */
     FArianeEditor* Editor;
     TSharedPtr<FUICommandList> CommandList;

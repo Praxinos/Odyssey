@@ -45,17 +45,12 @@ UArianeEditorTool::Setup()
     if( bInited == false )
     {
         UClickDragInputBehavior* LeftClickDragInputBehavior = NewObject<UClickDragInputBehavior>(this);
-        //UClickDragInputBehavior* RightClickDragInputBehavior = NewObject<UClickDragInputBehavior>(this);
         UMouseHoverBehavior* MouseHoverBehavior = NewObject<UMouseHoverBehavior>(this);
 
         LeftClickDragInputBehavior->Initialize(this);
-        //RightClickDragInputBehavior->Initialize(this);
         MouseHoverBehavior->Initialize(this);
 
-        //RightClickDragInputBehavior->SetUseRightMouseButton();
-
         AddInputBehavior( LeftClickDragInputBehavior );
-        //AddInputBehavior( RightClickDragInputBehavior );
         AddInputBehavior( MouseHoverBehavior );
 
         bInited = true;
@@ -226,18 +221,6 @@ UArianeEditorTool::OnMouseClick( FEditorViewportClient* iViewportClient
     return false;
 }
 
-/* commented out: FSceneView is not an allocated pointer, thus should be used on scope only.
-FSceneView*
-UArianeEditorTool::GetSceneView( FEditorViewportClient* iViewportClient )
-{
-    FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( iViewportClient->Viewport
-                                                                            , iViewportClient->GetScene()
-                                                                            , iViewportClient->EngineShowFlags )
-                                                                            .SetRealtimeUpdate( iViewportClient->IsRealtime() ) );
-    return iViewportClient->CalcSceneView( &ViewFamily );
-}
-*/
-
 void
 UArianeEditorTool::PopupContextMenu()
 {
@@ -271,66 +254,6 @@ void
 UArianeEditorTool::ExtendContextMenu( FMenuBuilder& menu )
 {
 }
-
-/* Gary
-
-bool
-UArianeEditorTool::OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey )
-{
-    return false;
-}
-
-bool
-UArianeEditorTool::OnMouseDoubleClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    return false;
-}
-
-bool
-UArianeEditorTool::OnKeyDown(const FKey& iKey)
-{
-    return false;
-}
-
-bool
-UArianeEditorTool::OnKeyUp(const FKey& iKey)
-{
-    return false;
-}
-
-bool
-UArianeEditorTool::OnKeyDownGlobal(const FKeyEvent& InKeyEvent)
-{
-    return false; //false means Unreal will continue as if we did nothing
-}
-
-bool
-UArianeEditorTool::OnKeyUpGlobal(const FKeyEvent& InKeyEvent)
-{
-    return false; //false means Unreal will continue as if we did nothing
-}
-
-void UArianeEditorTool::BindShortcuts(TSharedPtr<FUICommandList> iCommandList)
-{
-}
-
-void
-UArianeEditorTool::ExtendMenu( TSharedRef<FExtender> iExtender )
-{
-
-}
-
-void
-UArianeEditorTool::ExtendToolbar( UToolMenu* iToolMenu )
-{
-}
-*/
-
-EMouseCursor::Type UArianeEditorTool::GetMouseCursor() const
-{
-    return EMouseCursor::Crosshairs;
-}
-
 
 FText
 UArianeEditorTool::GetTooltip() const
@@ -563,7 +486,6 @@ UArianeEditorTool::DrawHUDCircle(  FCanvas* Canvas, double X, double Y, double R
 }
 
 void
-//UArianeEditorTool::OnTick(float DeltaTime)
 UArianeEditorTool::Render(IToolsContextRenderAPI* RenderAPI)
 {
 }

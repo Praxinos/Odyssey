@@ -29,12 +29,12 @@ public:
     DECLARE_MULTICAST_DELEGATE( FOnTransformChanged );
 #endif
 
-    //void SetVisible( bool bInVisible );
-    //bool IsVisible( bool bHierarchical );
     void SetLocked( bool bInLocked );
     bool IsLocked( bool bHierarchical );
     virtual void Invalidate( const FArianeLayerInvalidationFlags& InInvalidationFlags );
     virtual void Update( bool bInteractive );
+
+    // Overriden from USceneComponent::OnUpdateTransform
     virtual void OnUpdateTransform(EUpdateTransformFlags Flags, ETeleportType Teleport) override;
 
 #if WITH_EDITOR
@@ -44,18 +44,47 @@ public:
 
     bool IsInvalidated();
     void SetInvalidated( bool bInInvalidate );
+
+    /**
+     * @brief Get the boundaries of the layer (i.e its content)
+     * @return the boundaries
+     */
     const FBoxSphereBounds& GetBounds();
+
+    /**
+     * @brief Get the layer stack associated to this layer
+     * @return the layer stack
+     */
     UArianeLayerStack* GetLayerStack();
+
+    /**
+     * @brief Get the root folder, i.e the top-level folder
+     * @return the root folder
+     */
     UArianeLayerFolder* GetRootFolder();
+
+    /** The delegate run just before the update **/
     FOnUpdateDelegate& OnPreUpdateDelegate();
+
+    /** The delegate run right after the update **/
     FOnUpdateDelegate& OnPostUpdateDelegate();
+
+    /**
+     * @brief Set the parent folder
+     * @param InParentFolder the parent folder
+     */
     void SetParentFolder( UArianeLayerFolder* InParentFolder );
+
+    /**
+     * @brief Get the parent folder
+     * @return the parent folder
+     */
     UArianeLayerFolder* GetParentFolder();
+
+    /** The delegate run when the transform is changed **/
     UArianeLayer::FOnTransformChanged& GetOnTransformChangedDelegate();
 
 protected:
-    //UPROPERTY()
-    //bool bVisible;
     UPROPERTY()
     UArianeLayerFolder* ParentFolder;
 

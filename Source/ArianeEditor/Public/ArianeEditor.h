@@ -57,18 +57,54 @@ public:
     void Init();
 
     /**
-     * @brief Get the currentl tool
+     * @brief Get the color type
+     * @return the color type, either Raw or Indexed
+     */
+    EOdysseyPainterEditorColorType GetColorType();
+
+    /**
+     * @brief Get the current tool
      * @return the current tool
      */
     UArianeEditorTool* GetCurrentTool();
 
+    /**
+     * @brief Get the current mouse cursor to display
+     * @return the current mouse cursor to display
+     */
+    bool GetCursor( EMouseCursor::Type& OutCursor );
+
     const FName& GetId() const;
+
+    /**
+     * @brief Get the current paint color
+     * @return the current paint color
+     */
+    ::ULIS::FColor GetPaintColor();
+
+    /**
+     * @brief Get a tool by type
+     * @return the tool matching the type
+     */
+    UArianeEditorTool* GetTool( const FString& ToolType );
+
+    /**
+     * @brief Get all tools
+     * @return an array of all the tools
+     */
+    const TArray<UArianeEditorTool*>& GetTools();
 
     /**
      * @brief Get all tabs
      * @return an array of tabs
      */
     const TArray<TSharedPtr<FArianeEditorTab>>& GetTabs() const;
+
+    /**
+     * @brief Get the Tool Manager
+     * @return the Tool Manager
+     */
+    UInteractiveToolManager* GetToolManager();
 
     /**
      * @brief Get the toolkit
@@ -83,10 +119,25 @@ public:
     UWorld* GetWorld();
 
     /**
+     * @brief Check if the current tool is of the type passed as an argument
+     * @param ToolType the tool type
+     */
+    bool IsCurrentTool( const FString& ToolType );
+
+    /** Called once the UI is inited **/
+    void PostInit();
+
+    /**
      * @brief Register tab spawners
      * @param TabManager the tab manager
      */
     void RegisterTabSpawners();
+
+    /**
+     * @brief Set the color type
+     * @param InColorType the color type, either Raw or Indexed
+     */
+    void SetColorType( EOdysseyPainterEditorColorType& InColorType );
 
     /**
      * @brief Set the current tool
@@ -94,17 +145,37 @@ public:
      * @param PreviousToolShutdownType how to terminate the previous tool
      * @param TriggerEvent call Pre/Post CurrentToolChanged delegate
      */
-
     void SetCurrentTool( UArianeEditorTool* Tool
                        , EToolShutdownType PreviousToolShutdownType
                        , bool TriggerEvent );
+
+    /**
+     * @brief Set the current tool
+     * @param ToolType the tool type to set as the current tool
+     * @param PreviousToolShutdownType how to terminate the previous tool
+     * @param TriggerEvent call Pre/Post CurrentToolChanged delegate
+     */
+    void SetCurrentTool( const FString& ToolType
+                       , EToolShutdownType PreviousToolShutdownType
+                       , bool TriggerEvent  );
+
+    /**
+     * @brief Set the current paint color
+     * @param InPaintcolor the paint color to use as the current
+     */
+    void SetPaintColor( const ::ULIS::FColor& InPaintcolor );
+
+    /**
+     * @brief Ticks
+     * @param DeltaTime the time that has passed since the last call
+     */
+    void Tick( float DeltaTime );
 
     /**
      * @brief Unregister tab spawners
      * @param TabManager the tab manager
      */
     void UnregisterTabSpawners();
-
 
     // FGCObject overrides
     virtual void AddReferencedObjects( FReferenceCollector& Collector ) override;
@@ -119,31 +190,12 @@ public:
     void ExtendLevelEditorToolbar( UToolMenu* iToolbar );
     UArianePainting3DComponent* GetCurrentPainting3DComponent();
 
-    ::ULIS::FColor GetPaintColor();
-    void SetPaintColor( const ::ULIS::FColor& InPaintcolor );
-    EOdysseyPainterEditorColorType GetColorType();
-    void SetColorType( EOdysseyPainterEditorColorType& InColorType );
-    UInteractiveToolManager* GetToolManager();
-    /** Init all tools */
+    /** Register all tools */
     void RegisterTools();
+    /** Unresgister all tools */
     void UnregisterTools();
-    const TArray<UArianeEditorTool*>& GetTools();
-    UArianeEditorTool* GetTool( const FString& ToolType );
-    void SetCurrentTool( const FString& ToolType
-                       , EToolShutdownType PreviousToolShutdownType
-                       , bool TriggerEvent  );
-    bool IsCurrentTool( const FString& ToolType );
-    void PostInit();
-    void Tick( float DeltaTime );
-    bool GetCursor( EMouseCursor::Type& OutCursor );
 
 protected:
-    /**
-     * @brief Removee a tool
-     * @param Tool the tool to remove
-     */
-    //void RemoveTool( const FString& ToolType );
-
     /**
      * @brief Add a tab
      * @param Tab the tab to add
