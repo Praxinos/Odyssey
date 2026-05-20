@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 #include "IPropertyTypeCustomization.h"
 
+#include "OdysseyAnimationSettingsCustomization.generated.h"
+
 //---
 
 class FDetailWidgetRow;

@@ -11,7 +11,7 @@
 class FOdysseySceneViewport : public FSceneViewport
 {
 public:
-    ODYSSEYWIDGETS_API FOdysseySceneViewport( FViewportClient* InViewportClient, TSharedPtr<SViewport> InViewportWidget );
+    ODYSSEYWIDGETS_API FOdysseySceneViewport( TSharedPtr<FViewportClient> InViewportClient, TSharedPtr<SViewport> InViewportWidget );
 protected:
     ODYSSEYWIDGETS_API virtual FReply OnMouseButtonDown( const FGeometry& InGeometry, const FPointerEvent& MouseEvent ) override;
     ODYSSEYWIDGETS_API virtual FReply OnMouseButtonUp( const FGeometry& InGeometry, const FPointerEvent& MouseEvent ) override;

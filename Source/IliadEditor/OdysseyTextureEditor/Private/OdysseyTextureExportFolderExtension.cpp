@@ -214,7 +214,7 @@ void FOdysseyTextureExportFolderExtension::PerformExportFolder(TArray<FName> iPa
     }
 }
 
-void FOdysseyTextureExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAsByte<EExportImageFormat> iExportImageFormat, TSharedPtr<TArray<ReportPackageData>> iPackageDataToExport, FString iDestinationFolder )
+void FOdysseyTextureExportFolderExtension::ExportFolder_ReportConfirmed( EExportImageFormat iExportImageFormat, TSharedPtr<TArray<ReportPackageData>> iPackageDataToExport, FString iDestinationFolder )
 {
     // Check if destination directory is empty
     TArray<FString> foundFiles;

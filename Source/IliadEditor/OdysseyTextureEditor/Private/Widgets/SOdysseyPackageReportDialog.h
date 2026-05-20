@@ -17,7 +17,7 @@
 #include "SOdysseyPackageReportDialog.generated.h"
 
 UENUM()
-enum EExportImageFormat
+enum class EExportImageFormat : uint8
 {
     ExportImageFormat_PNG UMETA(DisplayName="PNG       Portable Network Graphics"),
     ExportImageFormat_BMP UMETA(DisplayName="BMP       Windows bitmap"),
@@ -74,7 +74,7 @@ private:
 class SOdysseyPackageReportDialog : public SCompoundWidget
 {
 public:
-    DECLARE_DELEGATE_OneParam( FOnReportConfirmed, TEnumAsByte<EExportImageFormat> )
+    DECLARE_DELEGATE_OneParam( FOnReportConfirmed, EExportImageFormat )
 
     SLATE_BEGIN_ARGS( SOdysseyPackageReportDialog ){}
 
@@ -89,7 +89,7 @@ public:
     /** Closes the dialog. */
     void CloseDialog();
 
-    static FString GetExtensionFromExportImageFormat( TEnumAsByte<EExportImageFormat> iExportImageFormat );
+    static FString GetExtensionFromExportImageFormat( EExportImageFormat iExportImageFormat );
 
 private:
     /** Recursively sets the checked/active state of every child of this node in the tree when a checkbox is toggled. */
@@ -126,7 +126,7 @@ private:
     FOnReportConfirmed                                          mOnReportConfirmed;
     FPackageReportNode                                          mPackageReportRootNode;
     TSharedPtr<PackageReportTree>                               mReportTreeView;
-    TEnumAsByte<EExportImageFormat>                             mExportFormat;
+    EExportImageFormat                                          mExportFormat;
     TSharedPtr<SEnumComboBox>                                   mExportFormatComboBox;
 
     /** Brushes for the different node states */
