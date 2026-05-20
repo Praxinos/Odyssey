@@ -149,6 +149,7 @@ FEposSequenceEditorStyle::InitViewport()
 
     Set( "Viewport.ResetTransform", new IMAGE_BRUSH_SVG( "StoryboardViewport/viewport-reset-transform", Icon24x24 ) );
     Set( "Viewport.FitToCameraView", new IMAGE_BRUSH_SVG( "StoryboardViewport/viewport-fit-to-camera-view", Icon16x16 ) );
+    Set( "Viewport.CameraView", new IMAGE_BRUSH_SVG( "StoryboardViewport/viewport-camera-view", Icon16x16 ) );
 
     //-
 

@@ -238,25 +238,30 @@ FindAllAnimationPaths( const IMovieScenePlayer& iPlayer, FRelevantPathMap& oPare
         UMovieSceneSequence* sequence = pair.Value;
         FMovieSceneSequenceID sequence_id = pair.Key;
 
-        TArray<AOdysseyAnimationActor*> animation_actors;
-        ShotSequenceHelpers::GetAllAnimations( player, sequence, sequence_id, EGetAnimation::kAll, &animation_actors, nullptr );
+        if( !sequence->IsA<UShotSequence>() )
+            continue;
 
-        for( auto animation_actor : animation_actors )
+        TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( player, sequence, sequence_id );
+        for( FGuid animation_binding : animation_bindings )
         {
-            const UOdysseyAnimation* animation = animation_actor->GetAnimationComponent() ? animation_actor->GetAnimationComponent()->GetAnimation() : nullptr;
-            if( !animation )
-                continue;
+            TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( player, sequence, sequence_id, animation_binding );
+            for( AOdysseyAnimationActor* animation_actor : animation_actors )
+            {
+                const UOdysseyAnimation* animation = animation_actor->GetAnimationComponent() ? animation_actor->GetAnimationComponent()->GetAnimation() : nullptr;
+                if( !animation )
+                    continue;
 
-            //-
+                //-
 
-            FString animation_pathname = animation->GetPackage()->GetName();
-            FString animation_path = FPackageName::GetLongPackagePath( animation_pathname );
+                FString animation_pathname = animation->GetPackage()->GetName();
+                FString animation_path = FPackageName::GetLongPackagePath( animation_pathname );
 
-            int32* count = map_path_to_count.Find( animation_path );
-            if( count )
-                *count = *count + 1;
-            else
-                map_path_to_count.Add( animation_path, 1 );
+                int32* count = map_path_to_count.Find( animation_path );
+                if( count )
+                    *count = *count + 1;
+                else
+                    map_path_to_count.Add( animation_path, 1 );
+            }
         }
     }
 
@@ -339,7 +344,7 @@ NamingConvention::GetRootPath( const IMovieScenePlayer& iPlayer, const UMovieSce
 
 //static
 FString
-NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPath, FString& oName )
+NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, bool iCreateSubpath, FString& oPath, FString& oName )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
 
@@ -350,7 +355,9 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer,
     FString current_sequence_name = FPackageName::GetShortName( iSequence.GetDisplayName().ToString() );
     //FString current_sequence_name = FPackageName::GetShortName( iSequence->GetPackage()->GetName() );
 
-    FString camera_path = ( epos_root_sequence != &iSequence ) ? root_sequence_name / current_sequence_name : root_sequence_name;
+    FString camera_path = root_sequence_name;
+    if( iCreateSubpath )
+        camera_path = ( epos_root_sequence != &iSequence ) ? root_sequence_name / current_sequence_name : root_sequence_name;
 
     //--- Find all camera track names
 
@@ -365,10 +372,11 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer,
             UMovieSceneSequence* sequence = pair.Value.GetSequence();
             FMovieSceneSequenceID sequence_id = pair.Key;
 
-            if( !Cast<UEposMovieSceneSequence>( sequence ) )
+            if( !sequence->IsA<UShotSequence>() )
                 continue;
 
-            ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *player, sequence, sequence_id );
+            FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *player, sequence, sequence_id );
+            ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawnedOrTemplate( *player, sequence, sequence_id, camera_binding );
             if( !camera )
                 continue;
 
@@ -438,7 +446,7 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer,
 
 //static
 FString
-NamingConvention::GenerateAnimationActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPath, FString& oName )
+NamingConvention::GenerateAnimationActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, bool iCreateSubpath, FString& oPath, FString& oName )
 {
     IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllAnimations()/GetAllDrawings() will use it to find cache
 
@@ -452,7 +460,8 @@ NamingConvention::GenerateAnimationActorPathName( const IMovieScenePlayer& iPlay
     FString animation_path;
     FString camera_name;
 
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *player, current_sequence, iSequenceID );
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *player, current_sequence, iSequenceID );
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawnedOrTemplate( *player, current_sequence, iSequenceID, camera_binding );
     if( camera )
     {
         animation_path = camera->GetFolderPath().ToString();
@@ -462,7 +471,7 @@ NamingConvention::GenerateAnimationActorPathName( const IMovieScenePlayer& iPlay
     if( animation_path.IsEmpty() )
     {
         FString camera_path;
-        GenerateCameraActorPathName( iPlayer, iSequence, iSequenceID, camera_path, camera_name );
+        GenerateCameraActorPathName( iPlayer, iSequence, iSequenceID, iCreateSubpath, camera_path, camera_name );
 
         animation_path = camera_path;
     }

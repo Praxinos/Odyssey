@@ -12,9 +12,13 @@
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneTimeHelpers.h"
+#include "Sections/MovieSceneSubSection.h"
+#include "Tracks/MovieScene3DAttachTrack.h"
+#include "Tracks/MovieScene3DTransformTrack.h"
 
 #include "ActorHelpers.h"
 #include "Board/BoardSequence.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceHelpers.h"
 #include "OdysseyAnimationActor.h"
 #include "ScalingComponent.h"
@@ -162,24 +166,62 @@ ShotSequenceTools::RenameBinding( ISequencer& iSequencer, UMovieSceneSequence* i
 
 //---
 
-TArray<TWeakObjectPtr<AActor>> ShotSequenceTools::mDirectActorsSelectedHistory;
+TArray<ShotSequenceTools::FBindingAndActorClass> ShotSequenceTools::mDirectBindingsSelectedHistory;
 
 //static
 void
-BoardSequenceTools::AddSelectedActorToHistory( AActor* iActor )
+BoardSequenceTools::AddSelectedActorToHistory( ISequencer* iSequencer, AActor* iActor )
 {
-    ShotSequenceTools::AddSelectedActorToHistory( iActor );
+    ShotSequenceTools::AddSelectedActorToHistory( iSequencer, iActor );
 }
 
 //static
 void
-ShotSequenceTools::AddSelectedActorToHistory( AActor* iActor )
+ShotSequenceTools::AddSelectedActorToHistory( ISequencer* iSequencer, AActor* iActor )
 {
     if( !iActor )
         return;
 
-    mDirectActorsSelectedHistory.Remove( iActor );
-    mDirectActorsSelectedHistory.Add( iActor );
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    FMovieSceneSequenceID sequenceId = iSequencer->GetFocusedTemplateID();
+
+    if( sequence->IsA<UBoardSequence>() )
+    {
+        UMovieScene* moviescene = sequence->GetMovieScene();
+        UMovieSceneCinematicBoardTrack* board_track = moviescene ? moviescene->FindTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
+        TArray<UMovieSceneSection*> sections = board_track ? board_track->GetAllSections() : TArray<UMovieSceneSection*>();
+        for( UMovieSceneSection* section : sections )
+        {
+            UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
+            if( !subsection )
+                continue;
+
+            FGuid binding = iSequencer->FindCachedObjectId( *iActor, subsection->GetSequenceID() );
+            if( binding.IsValid() )
+            {
+                FBindingAndActorClass entry = { binding, subsection->GetSequenceID(), iActor->GetClass() };
+                mDirectBindingsSelectedHistory.RemoveAll( [entry]( const FBindingAndActorClass& iEntry )
+                                                          {
+                                                              return iEntry.Guid == entry.Guid && iEntry.SequenceId == entry.SequenceId;
+                                                          } );
+                mDirectBindingsSelectedHistory.Add( entry );
+            }
+        }
+    }
+    else if( sequence->IsA<UShotSequence>() )
+    {
+        FGuid binding = iSequencer->FindCachedObjectId( *iActor, sequenceId );
+        if( binding.IsValid() )
+        {
+            FBindingAndActorClass entry = { binding, sequenceId, iActor->GetClass() };
+            mDirectBindingsSelectedHistory.RemoveAll( [entry]( const FBindingAndActorClass& iEntry )
+                                                      {
+                                                          return iEntry.Guid == entry.Guid && iEntry.SequenceId == entry.SequenceId;
+                                                      } );
+            mDirectBindingsSelectedHistory.Add( entry );
+        }
+    }
+
 }
 
 //static
@@ -238,29 +280,29 @@ ShotSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequen
     // - drag on some shots (to select some animations)
     // - open another map
     // - actors in the cache are all invalid
-    mDirectActorsSelectedHistory.RemoveAll( []( TWeakObjectPtr<AActor> iActor )
-                                                               {
-                                                                   return !iActor.IsValid();
-                                                               } );
+    mDirectBindingsSelectedHistory.RemoveAll( []( FBindingAndActorClass iEntry )
+                                              {
+                                                  return !iEntry.Guid.IsValid() || iEntry.SequenceId == MovieSceneSequenceID::Invalid;
+                                              } );
 
     // Auto-select camera if it's the last actor type directly selected by the user
-    if( mDirectActorsSelectedHistory.Num()
-        && mDirectActorsSelectedHistory.Last()->IsA<ACineCameraActor>() )
+    if( mDirectBindingsSelectedHistory.Num()
+        && mDirectBindingsSelectedHistory.Last().ActorClass == ACineCameraActor::StaticClass() )
     //if( actors.Num() )
     {
-        UMovieSceneSequence* sequence = nullptr;
-        FMovieSceneSequenceID sequenceId = MovieSceneSequenceID::Invalid;
         if( iSequence->IsA<UBoardSequence>() )
         {
-            ACineCameraActor* camera = BoardSequenceHelpers::GetCameraRecursive( *iSequencer, iSequence, iSequenceId, iFrameNumber, nullptr, &sequence, &sequenceId );
+            UMovieSceneSequence* sequence = nullptr;
+            FMovieSceneSequenceID sequenceId = MovieSceneSequenceID::Invalid;
+            FGuid camera_binding = BoardSequenceHelpers::GetCameraBindingRecursive( *iSequencer, iSequence, iSequenceId, iFrameNumber, &sequence, &sequenceId );
+            ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawned( *iSequencer, sequence, sequenceId, camera_binding );
 
             return camera;
         }
         else if( iSequence->IsA<UShotSequence>() )
         {
-            sequence = iSequence;
-            sequenceId = iSequenceId;
-            ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, iSequence, iSequenceId, nullptr );
+            FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, iSequence, iSequenceId );
+            ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawned( *iSequencer, iSequence, iSequenceId, camera_binding );
 
             return camera;
         }
@@ -278,37 +320,38 @@ ShotSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequen
     //    && ShotSequenceTools::mDirectActorsSelectedHistory.Last()->IsA<AOdysseyAnimationActor>() )
     //if( actors.Num() )
     {
-        TArray<AOdysseyAnimationActor*> animations;
         TArray<FGuid> unordered_bindings;
         UMovieSceneSequence* sequence = nullptr;
         FMovieSceneSequenceID sequenceId = MovieSceneSequenceID::Invalid;
         if( iSequence->IsA<UBoardSequence>() )
         {
-            BoardSequenceHelpers::GetAllAnimationsRecursive( *iSequencer, iSequence, iSequenceId, EGetAnimation::kAll, iFrameNumber, &animations, &unordered_bindings, &sequence, &sequenceId );
+            unordered_bindings = BoardSequenceHelpers::GetAnimationBindingsRecursive( *iSequencer, iSequence, iSequenceId, iFrameNumber, &sequence, &sequenceId );
         }
         else if( iSequence->IsA<UShotSequence>() )
         {
             sequence = iSequence;
             sequenceId = iSequenceId;
-            ShotSequenceHelpers::GetAllAnimations( *iSequencer, iSequence, iSequenceId, EGetAnimation::kAll, &animations, &unordered_bindings );
-        }
 
+            unordered_bindings = ShotSequenceHelpers::GetAnimationBindings( *iSequencer, iSequence, iSequenceId );
+        }
 
         // Animation not found AND no sequence (shot) found, so nothing can be guess
         if( !sequence )
             return nullptr;
 
-        TArray<AOdysseyAnimationActor*> ordered_animations;
         TArray<FGuid> ordered_bindings;
-        ShotSequenceTools::SortBindings( animations, unordered_bindings, sequence->GetMovieScene(), &ordered_animations, &ordered_bindings );
+        ShotSequenceTools::SortBindings( unordered_bindings, sequence->GetMovieScene(), &ordered_bindings );
 
-        if( ordered_animations.Num() )
+        if( ordered_bindings.Num() )
         {
             int32 max_preferred_index = INDEX_NONE;
-            for( AActor* animation : ordered_animations )
+            for( FGuid binding : ordered_bindings )
             {
-                int32 current_index;
-                if( mDirectActorsSelectedHistory.FindLast( animation, current_index ) )
+                int32 current_index = mDirectBindingsSelectedHistory.FindLastByPredicate( [binding, sequenceId]( const FBindingAndActorClass& iEntry )
+                                                                                          {
+                                                                                              return iEntry.Guid == binding && iEntry.SequenceId == sequenceId;
+                                                                                          } );
+                if( current_index != INDEX_NONE )
                 {
                     if( current_index > max_preferred_index )
                         max_preferred_index = current_index;
@@ -316,13 +359,26 @@ ShotSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequen
             }
 
             AActor* preferred_animation = nullptr;
-            if( mDirectActorsSelectedHistory.IsValidIndex( max_preferred_index ) )
-                preferred_animation = mDirectActorsSelectedHistory[max_preferred_index].Get();
+            if( mDirectBindingsSelectedHistory.IsValidIndex( max_preferred_index ) )
+            {
+                TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawned( *iSequencer, nullptr /* TODO: must also be stored in historic ... */ , mDirectBindingsSelectedHistory[max_preferred_index].SequenceId, mDirectBindingsSelectedHistory[max_preferred_index].Guid );
+                if( animation_actors.Num() )
+                    preferred_animation = animation_actors[0];
+            }
 
             if( !preferred_animation )
             {
-                preferred_animation = ordered_animations[0];
-                mDirectActorsSelectedHistory.Add( preferred_animation );
+                TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawned( *iSequencer, sequence, sequenceId, ordered_bindings[0] );
+                if( animation_actors.Num() )
+                {
+                    preferred_animation = animation_actors[0];
+
+                    if( preferred_animation )
+                    {
+                        FBindingAndActorClass entry = { ordered_bindings[0], sequenceId, preferred_animation->GetClass() };
+                        mDirectBindingsSelectedHistory.Add( entry );
+                    }
+                }
             }
 
             return preferred_animation;
@@ -338,45 +394,321 @@ ShotSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequen
 
 //static
 void
-ShotSequenceTools::SortBindings( TArray<AOdysseyAnimationActor*> iAnimationActors, TArray<FGuid> iBindings, UMovieScene* iMovieScene, TArray<AOdysseyAnimationActor*>* oOrderedAnimationActors, TArray<FGuid>* oOrderedBindings )
+ShotSequenceTools::SortBindings( TArray<FGuid> iBindings, UMovieScene* iMovieScene, TArray<FGuid>* oOrderedBindings )
 {
-    check( iAnimationActors.Num() == iBindings.Num() );
-
-    struct FBindingAndAnimationActor
-    {
-        FMovieSceneBinding* Binding;
-        AOdysseyAnimationActor* AnimationActor;
-    };
-
     // Find their corresponding scene binding
-    TArray<FBindingAndAnimationActor> binding_and_animation_actors;
+    TArray<FMovieSceneBinding*> bindings;
     for( int i = 0; i < iBindings.Num(); i++ )
     {
-        binding_and_animation_actors.Add( { iMovieScene->FindBinding( iBindings[i] ), iAnimationActors[i] } );
+        bindings.Add( iMovieScene->FindBinding( iBindings[i] ) );
     }
 
     // Sort scene bindings by their sorting order/name
     // (This should match the native sorting of tracks inside shot)
-    Algo::StableSort( binding_and_animation_actors, [iMovieScene]( const FBindingAndAnimationActor& iA, const FBindingAndAnimationActor& iB )
+    Algo::StableSort( bindings, [iMovieScene]( const FMovieSceneBinding* iA, const FMovieSceneBinding* iB )
                       {
                           // If at least one of the binding was not already sorted (by drag'n drop in shot), use the name to sort both
-                          if( iA.Binding->GetSortingOrder() == -1 || iB.Binding->GetSortingOrder() == -1 )
+                          if( iA->GetSortingOrder() == -1 || iB->GetSortingOrder() == -1 )
                           {
-                              FString nameA = iMovieScene->GetObjectDisplayName( iA.Binding->GetObjectGuid() ).ToString();
-                              FString nameB = iMovieScene->GetObjectDisplayName( iB.Binding->GetObjectGuid() ).ToString();
+                              FString nameA = iMovieScene->GetObjectDisplayName( iA->GetObjectGuid() ).ToString();
+                              FString nameB = iMovieScene->GetObjectDisplayName( iB->GetObjectGuid() ).ToString();
 
                               return nameA < nameB;
                           }
                           // Otherwise just use the set sorting order
                           else
-                              return iA.Binding->GetSortingOrder() < iB.Binding->GetSortingOrder();
+                              return iA->GetSortingOrder() < iB->GetSortingOrder();
                       } );
 
     // Get all animations in the gui order
-    for( auto ordered_binding_and_animation_actor : binding_and_animation_actors )
+    for( FMovieSceneBinding* ordered_binding : bindings )
     {
-        oOrderedBindings->Add( ordered_binding_and_animation_actor.Binding->GetObjectGuid() );
-        oOrderedAnimationActors->Add( ordered_binding_and_animation_actor.AnimationActor );
+        oOrderedBindings->Add( ordered_binding->GetObjectGuid() );
+    }
+}
+
+//---
+//---
+//---
+
+static
+float
+UnwindChannel( const float& OldValue, float NewValue )
+{
+    while( NewValue - OldValue > 180.0f )
+    {
+        NewValue -= 360.0f;
+    }
+    while( NewValue - OldValue < -180.0f )
+    {
+        NewValue += 360.0f;
+    }
+    return NewValue;
+}
+static
+FRotator
+UnwindRotator( const FRotator& InOld, const FRotator& InNew )
+{
+    FRotator Result;
+    Result.Pitch = UnwindChannel( InOld.Pitch, InNew.Pitch );
+    Result.Yaw = UnwindChannel( InOld.Yaw, InNew.Yaw );
+    Result.Roll = UnwindChannel( InOld.Roll, InNew.Roll );
+    return Result;
+}
+
+// From ...\UE_4.26\Engine\Source\Editor\MovieSceneTools\Private\TrackEditors\TransformTrackEditor.cpp
+//static
+void
+ShotSequenceTools::GetTransformKeys( ISequencer& iSequencer, const TOptional<FTransformData>& LastTransform, const FTransformData& CurrentTransform, EMovieSceneTransformChannel ChannelsToKey, UObject* Object, UMovieSceneSection* Section, FGeneratedTrackKeys& OutGeneratedKeys )
+{
+    UMovieScene3DTransformSection* TransformSection = Cast<UMovieScene3DTransformSection>( Section );
+    EMovieSceneTransformChannel TransformMask = TransformSection->GetMask().GetChannels();
+
+    using namespace UE::MovieScene;
+
+    bool bLastVectorIsValid = LastTransform.IsSet();
+
+    // If key all is enabled, for a key on all the channels
+    if( iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyAll )
+    {
+        bLastVectorIsValid = false;
+        ChannelsToKey = EMovieSceneTransformChannel::All;
+    }
+
+    //FBuiltInComponentTypes* BuiltInComponents = FBuiltInComponentTypes::Get();
+
+    //FTransformData RecomposedTransform = RecomposeTransform( CurrentTransform, Object, Section );
+
+    // Set translation keys/defaults
+    {
+        bool bKeyX = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::TranslationX );
+        bool bKeyY = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::TranslationY );
+        bool bKeyZ = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::TranslationZ );
+
+        if( bLastVectorIsValid )
+        {
+            bKeyX &= !FMath::IsNearlyEqual( LastTransform->Translation.X, CurrentTransform.Translation.X );
+            bKeyY &= !FMath::IsNearlyEqual( LastTransform->Translation.Y, CurrentTransform.Translation.Y );
+            bKeyZ &= !FMath::IsNearlyEqual( LastTransform->Translation.Z, CurrentTransform.Translation.Z );
+        }
+
+        if( iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyGroup && ( bKeyX || bKeyY || bKeyZ ) )
+        {
+            bKeyX = bKeyY = bKeyZ = true;
+        }
+
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::TranslationX ) )
+        {
+            bKeyX = false;
+        }
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::TranslationY ) )
+        {
+            bKeyY = false;
+        }
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::TranslationZ ) )
+        {
+            bKeyZ = false;
+        }
+
+        FVector KeyVector = CurrentTransform.Translation;
+        //FVector KeyVector = RecomposedTransform.Translation;
+
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 0, KeyVector.X, bKeyX ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 1, KeyVector.Y, bKeyY ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 2, KeyVector.Z, bKeyZ ) );
+    }
+
+    // Set rotation keys/defaults
+    {
+        bool bKeyX = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::RotationX );
+        bool bKeyY = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::RotationY );
+        bool bKeyZ = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::RotationZ );
+
+        FRotator KeyRotator = CurrentTransform.Rotation;
+        if( bLastVectorIsValid )
+        {
+            KeyRotator = UnwindRotator( LastTransform->Rotation, CurrentTransform.Rotation );
+
+            bKeyX &= !FMath::IsNearlyEqual( LastTransform->Rotation.Roll, KeyRotator.Roll );
+            bKeyY &= !FMath::IsNearlyEqual( LastTransform->Rotation.Pitch, KeyRotator.Pitch );
+            bKeyZ &= !FMath::IsNearlyEqual( LastTransform->Rotation.Yaw, KeyRotator.Yaw );
+        }
+
+        if( iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyGroup && ( bKeyX || bKeyY || bKeyZ ) )
+        {
+            bKeyX = bKeyY = bKeyZ = true;
+        }
+
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::RotationX ) )
+        {
+            bKeyX = false;
+        }
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::RotationY ) )
+        {
+            bKeyY = false;
+        }
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::RotationZ ) )
+        {
+            bKeyZ = false;
+        }
+
+        // Do we need to unwind re-composed rotations?
+        //KeyRotator = UnwindRotator( CurrentTransform.Rotation, RecomposedTransform.Rotation );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 3, KeyRotator.Roll, bKeyX ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 4, KeyRotator.Pitch, bKeyY ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 5, KeyRotator.Yaw, bKeyZ ) );
+
+    }
+
+    // Set scale keys/defaults
+    {
+        bool bKeyX = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::ScaleX );
+        bool bKeyY = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::ScaleY );
+        bool bKeyZ = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::ScaleZ );
+
+        if( bLastVectorIsValid )
+        {
+            bKeyX &= !FMath::IsNearlyEqual( LastTransform->Scale.X, CurrentTransform.Scale.X );
+            bKeyY &= !FMath::IsNearlyEqual( LastTransform->Scale.Y, CurrentTransform.Scale.Y );
+            bKeyZ &= !FMath::IsNearlyEqual( LastTransform->Scale.Z, CurrentTransform.Scale.Z );
+        }
+
+        if( iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyGroup && ( bKeyX || bKeyY || bKeyZ ) )
+        {
+            bKeyX = bKeyY = bKeyZ = true;
+        }
+
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::ScaleX ) )
+        {
+            bKeyX = false;
+        }
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::ScaleY ) )
+        {
+            bKeyY = false;
+        }
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::ScaleZ ) )
+        {
+            bKeyZ = false;
+        }
+
+        FVector KeyVector = CurrentTransform.Scale;
+        //FVector KeyVector = RecomposedTransform.Scale;
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 6, KeyVector.X, bKeyX ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 7, KeyVector.Y, bKeyY ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 8, KeyVector.Z, bKeyZ ) );
+    }
+}
+
+// From ...\UE_4.26\Engine\Source\Editor\MovieSceneTools\Public\KeyframeTrackEditor.h
+//static
+bool
+ShotSequenceTools::AddKeysToSection( ISequencer& iSequencer, UMovieSceneSection* Section, FFrameNumber KeyTime, const FGeneratedTrackKeys& Keys, ESequencerKeyMode KeyMode, EKeyFrameTrackEditorSetDefault SetDefault )
+{
+    EAutoChangeMode AutoChangeMode = iSequencer.GetAutoChangeMode();
+
+    FMovieSceneChannelProxy& Proxy = Section->GetChannelProxy();
+
+    const bool bSetDefaults = iSequencer.GetAutoSetTrackDefaults() && ( SetDefault != EKeyFrameTrackEditorSetDefault::DoNotSetDefault );
+
+    // The default value is a value for the channel when there are no keyframes. For example, if you add keys and
+    // then delete them all, the default value is the value of the channel. In the implementation of ApplyDefault,
+    // all the setters check that the default value is only set when there are NO keyframes. So, ApplyDefault needs
+    // to be called here in AddKeysToSection BEFORE any keys are added.
+    if( bSetDefaults )
+    {
+        for( const FMovieSceneChannelValueSetter& GeneratedKey : Keys )
+        {
+            GeneratedKey->ApplyDefault( Section, Proxy, SetDefault );
+        }
+    }
+
+    bool key_created = false;
+
+    if( KeyMode != ESequencerKeyMode::AutoKey || AutoChangeMode == EAutoChangeMode::AutoKey || AutoChangeMode == EAutoChangeMode::All )
+    {
+        EMovieSceneKeyInterpolation InterpolationMode = iSequencer.GetKeyInterpolation();
+
+        const bool bKeyEvenIfUnchanged =
+            KeyMode == ESequencerKeyMode::ManualKeyForced ||
+            iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyAll ||
+            iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyGroup;
+
+        const bool bKeyEvenIfEmpty =
+            ( KeyMode == ESequencerKeyMode::AutoKey && AutoChangeMode == EAutoChangeMode::All ) ||
+            KeyMode == ESequencerKeyMode::ManualKeyForced;
+
+        for( const FMovieSceneChannelValueSetter& GeneratedKey : Keys )
+        {
+            key_created |= GeneratedKey->Apply( Section, Proxy, KeyTime, InterpolationMode, bKeyEvenIfUnchanged, bKeyEvenIfEmpty );
+        }
+    }
+
+    return key_created;
+}
+
+//static
+void
+ShotSequenceTools::UpdateChannel( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const ACineCameraActor* iCamera, EMovieSceneTransformChannel iChannelsToApply )
+{
+    if( !iSequencer.IsValid() )
+        return;
+
+    ISequencer* sequencer = iSequencer.Get();
+    UMovieSceneSequence* sequence = sequencer->GetFocusedMovieSceneSequence();
+    FMovieSceneSequenceID sequence_id = sequencer->GetFocusedTemplateID();
+    FFrameNumber frame = sequencer->GetLocalTime().Time.GetFrame();
+
+    if( sequence->IsA<UBoardSequence>() )
+    {
+        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequence, sequence_id, frame );
+        sequence = result.mInnerSequence;
+        sequence_id = result.mInnerSequenceId;
+        frame = result.mInnerTime.GetFrame();
+    }
+
+    FGuid binding = sequencer->FindObjectId( *iActor, sequence_id );
+
+    // Update the default transform channel to take care of the attach track
+    UMovieScene3DTransformTrack* transformTrack = Cast<UMovieScene3DTransformTrack>( sequence->GetMovieScene()->FindTrack<UMovieScene3DTransformTrack>( binding ) );
+    if( transformTrack )
+    {
+        if( transformTrack->GetAllSections().Num() )
+        {
+            UMovieScene3DTransformSection* transformSection = Cast<UMovieScene3DTransformSection>( transformTrack->GetAllSections()[0] );
+
+            // Set to EKeyGroupMode::KeyGroup, otherwise it will be overwritten by EMovieSceneTransformChannel::All
+            // in GetTransformKeys() as (certainly) iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyAll
+            EKeyGroupMode backup_groupmode = sequencer->GetKeyGroupMode();
+            sequencer->SetKeyGroupMode( EKeyGroupMode::KeyGroup );
+
+            FTransformData newTransformData( iActor->GetActorTransform() );
+
+            UMovieScene3DAttachTrack* attachTrack = sequence->GetMovieScene()->FindTrack<UMovieScene3DAttachTrack>( binding );
+            if( attachTrack && EnumHasAnyFlags( iChannelsToApply, EMovieSceneTransformChannel::Translation ) )
+            {
+                FTransform world_actor_transform = iActor->GetActorTransform();
+                FTransform relative_transform = world_actor_transform.GetRelativeTransform( iCamera->GetActorTransform() );
+
+                newTransformData = relative_transform;
+            }
+
+            FGeneratedTrackKeys generated_keys;
+            ShotSequenceTools::GetTransformKeys( *sequencer, TOptional<FTransformData>(), newTransformData, iChannelsToApply, iActor, transformSection, generated_keys );
+
+            // For now, just update the default values of channels
+            // The problem with creating new keys is:
+            // - camera has NO keys for its focal length (so a unique default value for all frames)
+            // - on frame X, the focal length changes -> new scale for the animation -> create a new key
+            // - on frame X+n, the focal length changes -> new scale for the animation -> create a new key
+            // BUT the key on frame X won't be relevant anymore as the focal length of the camera is also changed on frame X
+            for( const FMovieSceneChannelValueSetter& generated_key : generated_keys )
+            {
+                generated_key->ApplyDefault( transformSection, transformSection->GetChannelProxy(), EKeyFrameTrackEditorSetDefault::SetDefaultOnAddKeys );
+            }
+            //bool key_created = ShotSequenceTools::AddKeysToSection( *sequencer, transformSection, sequencer->GetLocalTime().Time.GetFrame(), generated_keys, ESequencerKeyMode::AutoKey, EKeyFrameTrackEditorSetDefault::SetDefaultOnAddKeys );
+
+            sequencer->SetKeyGroupMode( backup_groupmode );
+        }
     }
 }
 
@@ -417,7 +749,7 @@ ShotSequenceTools::CanMoveAndScaleActor( const AActor* iActor, const ACineCamera
 
 //static
 bool
-ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* iCamera, float iNewDistance, EScaleActor iScaleType )
+ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* iCamera, float iNewDistance, EScaleActor iScaleType, TSharedPtr<ISequencer> iSequencer )
 {
     if( !ShotSequenceTools::CanMoveAndScaleActor( ioActor, iCamera ) )
         return false;
@@ -442,6 +774,8 @@ ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* i
     FVector new_animation_location = iCamera->GetActorLocation() + ( ioActor->GetActorLocation() - iCamera->GetActorLocation() ).GetSafeNormal() * iNewDistance;
     ioActor->SetActorLocation( new_animation_location );
 
+    bool update_channels = false;
+
     switch( iScaleType )
     {
         // Until EScaleActor::kFitToCamera will be removed
@@ -454,6 +788,8 @@ ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* i
             FVector new_actor_scale = old_parameter.mActorScale * ratio;
 
             ioActor->SetActorScale3D( new_actor_scale );
+
+            update_channels = true;
         }
         break;
 
@@ -463,6 +799,10 @@ ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* i
 
         default: checkNoEntry();
     }
+
+    UpdateChannel( iSequencer, ioActor, iCamera, EMovieSceneTransformChannel::Translation );
+    if( update_channels )
+        UpdateChannel( iSequencer, ioActor, iCamera, EMovieSceneTransformChannel::Scale );
 
     return true;
 }
@@ -476,7 +816,7 @@ ShotSequenceTools::CanFitActorToCameraView( const AActor* iActor, const ACineCam
 
 //static
 bool
-ShotSequenceTools::FitActorToCameraView( AActor* ioActor, const ACineCameraActor* iCamera )
+ShotSequenceTools::FitActorToCameraView( AActor* ioActor, const ACineCameraActor* iCamera, TSharedPtr<ISequencer> iSequencer )
 {
     if( !CanFitActorToCameraView( ioActor, iCamera ) )
         return false;
@@ -490,6 +830,8 @@ ShotSequenceTools::FitActorToCameraView( AActor* ioActor, const ACineCameraActor
         scale = scaling_component->ComputeScaleWithScaleAndMargin( new_camera_view_size );
 
     ioActor->SetActorScale3D( scale );
+
+    UpdateChannel( iSequencer, ioActor, iCamera, EMovieSceneTransformChannel::Scale );
 
     return true;
 }

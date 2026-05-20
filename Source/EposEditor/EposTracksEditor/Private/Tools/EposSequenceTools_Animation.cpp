@@ -3,6 +3,7 @@
 
 #include "Tools/EposSequenceTools.h"
 
+#include "Bindings/MovieSceneSpawnableActorBinding.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneFloatChannel.h"
 #include "CineCameraActor.h"
@@ -25,9 +26,15 @@
 #include "MovieScene.h"
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
+#include "Sections/MovieScene3DAttachSection.h"
 #include "Sections/MovieSceneBoolSection.h"
 #include "Sections/MovieSceneSubSection.h"
+#include "Selection.h"
+#include "SequencerUtilities.h"
+#include "Tracks/MovieScene3DAttachTrack.h"
 #include "Widgets/Notifications/SNotificationList.h"
+#include "Tracks/MovieScene3DTransformTrack.h"
+#include "Sections/MovieScene3DTransformSection.h"
 
 #include "ActorHelpers.h"
 #include "Board/BoardSequence.h"
@@ -88,8 +95,6 @@ ShotSequenceTools::SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, fl
     AOdysseyAnimationActor* animation = iWorld->SpawnActor<AOdysseyAnimationActor>( SpawnParams );
     if( !animation )
         return nullptr;
-
-    animation->SetActorHiddenInGame( true );
 
 #if UE_BUILD_DEBUG
     if( UMaterialInstanceConstant* material = Cast<UMaterialInstanceConstant>( animation->GetAnimationComponent()->GetMaterial( 0 ) ) )
@@ -203,14 +208,15 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
 
     //-
 
-    GEditor->ParentActors( iCamera, animation, NAME_None );
+    if( !iAnimationArgs.mSpawnable )
+        GEditor->ParentActors( iCamera, animation, NAME_None );
 
     UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
     check( epos_sequence );
 
     FString animation_path;
     FString animation_name;
-    NamingConvention::GenerateAnimationActorPathName( iSequencer, *epos_sequence, iSequenceID, animation_path, animation_name );
+    NamingConvention::GenerateAnimationActorPathName( iSequencer, *epos_sequence, iSequenceID, !iAnimationArgs.mSpawnable, animation_path, animation_name );
 
     if( !iAnimationArgs.mName.IsEmpty() )
         animation_name = iAnimationArgs.mName;
@@ -220,7 +226,98 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
 
     animation_name = NamingConvention::GenerateAnimationTrackName( iSequencer, *epos_sequence, iSequenceID, animation );
 
-    FGuid animationGuid = iSequencer.CreateBinding( *animation, animation_name );
+    UE::Sequencer::FCreateBindingParams BindingParams;
+    BindingParams.BindingNameOverride = animation_name;
+    BindingParams.bAllowCustomBinding = true;
+    FGuid animationGuid = iSequencer.CreateBinding( *animation, BindingParams );
+
+    //---
+
+    if( iAnimationArgs.mSpawnable )
+    {
+        TSubclassOf<UMovieSceneCustomBinding> CustomBindingClass = UMovieSceneSpawnableActorBinding::StaticClass();
+
+        const FMovieSceneBindingReferences* BindingReferences = iSequence->GetBindingReferences();
+
+        if( BindingReferences )
+        {
+            for( const FMovieSceneBindingReference& Reference : BindingReferences->GetReferences( animationGuid ) )
+            {
+                for( const TSubclassOf<UMovieSceneCustomBinding>& SupportedCustomBindingType : iSequencer.GetSupportedCustomBindingTypes() )
+                {
+                    if( SupportedCustomBindingType && SupportedCustomBindingType->IsChildOf( CustomBindingClass ) &&
+                        SupportedCustomBindingType->GetDefaultObject<UMovieSceneCustomBinding>()->SupportsConversionFromBinding( Reference, animation ) )
+                    {
+                        FMovieScenePossessable* NewPossessable = FSequencerUtilities::ConvertToCustomBinding( iSequencer.AsShared(), animationGuid, CustomBindingClass );
+
+                        if( NewPossessable )
+                        {
+                            for( TWeakObjectPtr<> WeakObject : iSequencer.FindBoundObjects( NewPossessable->GetGuid(), iSequenceID ) )
+                            {
+                                AOdysseyAnimationActor* SpawnedActor = Cast<AOdysseyAnimationActor>( WeakObject.Get() );
+                                if( SpawnedActor )
+                                {
+                                    animation = SpawnedActor;
+                                }
+                            }
+
+                            animationGuid = NewPossessable->GetGuid();
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        //---
+
+        //check( iSequencer.GetFocusedTemplateID() == iSequenceID );
+        FGuid newCameraGuid = iSequencer.FindObjectId( *iCamera, iSequenceID );
+        FMovieSceneObjectBindingID attachBindingID = UE::MovieScene::FRelativeObjectBindingID( newCameraGuid );
+
+        UMovieScene3DAttachTrack* attachTrack = iSequence->GetMovieScene()->AddTrack<UMovieScene3DAttachTrack>( animationGuid );
+
+        // Add a placeholder range which will be modified right after to have an infinite range
+        UMovieScene3DAttachSection* attachSection = Cast<UMovieScene3DAttachSection>( attachTrack->AddConstraint( 0, 1, NAME_None, NAME_None, attachBindingID ) );
+        attachSection->SetRange( TRange<FFrameNumber>::All() );
+        //attachSection->AttachmentLocationRule = EAttachmentRule::KeepWorld;
+        //attachSection->AttachmentRotationRule = EAttachmentRule::KeepWorld;
+        //attachSection->AttachmentScaleRule = EAttachmentRule::KeepWorld;
+        //attachSection->DetachmentLocationRule = EDetachmentRule::KeepWorld;
+        //attachSection->DetachmentRotationRule = EDetachmentRule::KeepWorld;
+        //attachSection->DetachmentScaleRule = EDetachmentRule::KeepWorld;
+        attachSection->Modify();
+
+        attachTrack->Modify();
+
+        // Update the default transform channel to take care of the attach track
+        UMovieScene3DTransformTrack* transformTrack = Cast<UMovieScene3DTransformTrack>( iSequence->GetMovieScene()->FindTrack( UMovieScene3DTransformTrack::StaticClass(), animationGuid ) );
+        if( transformTrack )
+        {
+            if( transformTrack->GetAllSections().Num() )
+            {
+                FTransform world_actor_transform = animation->GetActorTransform();
+                FTransform relative_transform = world_actor_transform.GetRelativeTransform( iCamera->GetActorTransform() );
+
+                UMovieScene3DTransformSection* TransformSection = Cast<UMovieScene3DTransformSection>( transformTrack->GetAllSections()[0] );
+
+                TArrayView<FMovieSceneDoubleChannel*> DoubleChannels = TransformSection->GetChannelProxy().GetChannels<FMovieSceneDoubleChannel>();
+                DoubleChannels[0]->SetDefault( relative_transform.GetLocation().X );
+                DoubleChannels[1]->SetDefault( relative_transform.GetLocation().Y );
+                DoubleChannels[2]->SetDefault( relative_transform.GetLocation().Z );
+
+                DoubleChannels[3]->SetDefault( relative_transform.GetRotation().Euler().X );
+                DoubleChannels[4]->SetDefault( relative_transform.GetRotation().Euler().Y );
+                DoubleChannels[5]->SetDefault( relative_transform.GetRotation().Euler().Z );
+
+                DoubleChannels[6]->SetDefault( relative_transform.GetScale3D().X );
+                DoubleChannels[7]->SetDefault( relative_transform.GetScale3D().Y );
+                DoubleChannels[8]->SetDefault( relative_transform.GetScale3D().Z );
+            }
+        }
+    }
+
+    //---
 
     //iSequencer.OnActorAddedToSequencer().Broadcast( animation, animationGuid ); // Already called when creating the binding for animation
 
@@ -288,8 +385,8 @@ BoardSequenceTools::CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFr
     if( result.mInnerSequence->IsA<UBoardSequence>() )
         return false;
 
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
-    if( !camera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    if( !camera_binding.IsValid() )
         return false;
 
     return true;
@@ -311,8 +408,8 @@ ShotSequenceTools::CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFra
     if( !sequence )
         return false;
 
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, sequence, sequence_id );
-    if( !camera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, sequence, sequence_id );
+    if( !camera_binding.IsValid() )
         return false;
 
     return true;
@@ -322,10 +419,9 @@ ShotSequenceTools::CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFra
 void
 ShotSequenceTools::CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs )
 {
-    FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID, &camera_guid );
-
-    if( !camera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( iSequencer, iSequence, iSequenceID );
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawned( iSequencer, iSequence, iSequenceID, camera_binding );
+    if( !ensureMsgf(camera, TEXT( "In case of a spawnable, it means it is not spawned, the sequence is not the focused one by the sequencer" ) ) )
         return;
 
     ULevelEditorSubsystem* levelEditorSubsystem = GEditor->GetEditorSubsystem<ULevelEditorSubsystem>();
@@ -351,7 +447,7 @@ ShotSequenceTools::CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence*
 
         //---
 
-        animation_actor = ShotSequenceTools::SpawnAndBindAnimation( iSequencer, iSequence, iSequenceID, camera_guid, camera, iFrameNumber, iAnimationArgs, nullptr );
+        animation_actor = ShotSequenceTools::SpawnAndBindAnimation( iSequencer, iSequence, iSequenceID, camera_binding, camera, iFrameNumber, iAnimationArgs, nullptr );
 
         //---
 
@@ -376,23 +472,98 @@ ShotSequenceTools::CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence*
 
 //static
 int32
-BoardSequenceTools::GetAllAnimations( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
+ShotSequenceTools::FilterSelectedAnimations( TArray<AOdysseyAnimationActor*> iAnimationActors, TArray<AOdysseyAnimationActor*>* oSelectedAnimations )
 {
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
-    if( !result.mInnerSequence )
-        return 0;
+    if( oSelectedAnimations )
+        oSelectedAnimations->Empty();
 
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
-        return 0;
+    int32 animation_count = iAnimationActors.Num();
 
-    return ShotSequenceHelpers::GetAllAnimations( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kSelectedOrAll, oAnimations, oAnimationBindings );
+    USelection* selection = GEditor->GetSelectedActors();
+
+    int32 animation_selected_count = 0;
+    for( int i = 0; i < animation_count; i++ )
+    {
+        if( !selection->IsSelected( iAnimationActors[i] ) )
+            continue;
+
+        if( oSelectedAnimations )
+            oSelectedAnimations->Add( iAnimationActors[i] );
+
+        animation_selected_count++;
+    }
+
+    return animation_selected_count;
 }
 
 //static
 int32
-ShotSequenceTools::GetAllAnimations( ISequencer* iSequencer, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
+ShotSequenceTools::FilterSelectedAnimationsOrAllAnimations( TArray<AOdysseyAnimationActor*> iAnimationActors, TArray<AOdysseyAnimationActor*>* oSelectedAnimations )
 {
-    return ShotSequenceHelpers::GetAllAnimations( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetAnimation::kSelectedOrAll, oAnimations, oAnimationBindings );
+    if( oSelectedAnimations )
+        oSelectedAnimations->Empty();
+
+    int32 animation_selected_count = FilterSelectedAnimations( iAnimationActors, oSelectedAnimations );
+    if( animation_selected_count )
+        return animation_selected_count;
+
+    if( oSelectedAnimations )
+        *oSelectedAnimations = iAnimationActors;
+
+    return iAnimationActors.Num();
+}
+
+//static
+int32
+ShotSequenceTools::FilterSelectedAnimations( TArray<AOdysseyAnimationActor*> iAnimationActors, TArray<FGuid> iAnimationBindings, TArray<AOdysseyAnimationActor*>* oSelectedAnimations, TArray<FGuid>* oSelectedAnimationBindings )
+{
+    check( iAnimationActors.Num() == iAnimationBindings.Num() );
+
+    if( oSelectedAnimations )
+        oSelectedAnimations->Empty();
+    if( oSelectedAnimationBindings )
+        oSelectedAnimationBindings->Empty();
+
+    int32 animation_count = iAnimationActors.Num();
+
+    USelection* selection = GEditor->GetSelectedActors();
+
+    int32 animation_selected_count = 0;
+    for( int i = 0; i < animation_count; i++ )
+    {
+        if( !selection->IsSelected( iAnimationActors[i] ) )
+            continue;
+
+        if( oSelectedAnimations )
+            oSelectedAnimations->Add( iAnimationActors[i] );
+        if( oSelectedAnimationBindings )
+            oSelectedAnimationBindings->Add( iAnimationBindings[i] );
+
+        animation_selected_count++;
+    }
+
+    return animation_selected_count;
+}
+
+//static
+int32
+ShotSequenceTools::FilterSelectedAnimationsOrAllAnimations( TArray<AOdysseyAnimationActor*> iAnimationActors, TArray<FGuid> iAnimationBindings, TArray<AOdysseyAnimationActor*>* oSelectedAnimations, TArray<FGuid>* oSelectedAnimationBindings )
+{
+    if( oSelectedAnimations )
+        oSelectedAnimations->Empty();
+    if( oSelectedAnimationBindings )
+        oSelectedAnimationBindings->Empty();
+
+    int32 animation_selected_count = FilterSelectedAnimations( iAnimationActors, iAnimationBindings, oSelectedAnimations, oSelectedAnimationBindings );
+    if( animation_selected_count )
+        return animation_selected_count;
+
+    if( oSelectedAnimations )
+        *oSelectedAnimations = iAnimationActors;
+    if( oSelectedAnimationBindings )
+        *oSelectedAnimationBindings = iAnimationBindings;
+
+    return iAnimationActors.Num();
 }
 
 //---
@@ -428,25 +599,43 @@ ShotSequenceTools::CanDetachAnimation( ISequencer* iSequencer, FGuid iAnimationB
 bool
 ShotSequenceTools::CanDetachAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBindings )
 {
-    TArray<AOdysseyAnimationActor*> animations;
-    for( auto animation_binding : iAnimationBindings )
+    TSet<ACineCameraActor*> cameras;
+    for( FGuid animation_binding : iAnimationBindings )
     {
-        for( auto object : iSequencer.FindBoundObjects( animation_binding, iSequenceID ) )
+        ShotSequenceHelpers::FFindOrCreateAnimationAttachResult attach_result = ShotSequenceHelpers::FindAnimationAttachTrackAndSections( iSequencer, iSequence, iSequenceID, animation_binding );
+        for( TWeakObjectPtr<UMovieScene3DAttachSection> weak_attach_section : attach_result.mSections )
         {
-            AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( object );
-            // It seems it can happen (animation == nullptr) when actors are moved from one (sub)level to another (sub)level in the Levels panel
-            // During the move (maybe):
-            // - the actor is removed from a level
-            // - then the binding is invalid
-            // - a tick occurs (which calls all CanExecute() of every commands)
-            // - then try to resolve the binding which are still invalid
-            if( animation )
-                animations.Add( animation );
+            const FMovieSceneObjectBindingID& attach_object_binding = weak_attach_section->GetConstraintBindingID();
+            TArrayView<TWeakObjectPtr<>> weak_attached_objects = attach_object_binding.ResolveBoundObjects( iSequenceID, iSequencer );
+            for( TWeakObjectPtr<> weak_attached_object : weak_attached_objects )
+                cameras.Add( Cast<ACineCameraActor>( weak_attached_object ) );
         }
     }
 
+    cameras.Remove( nullptr );
+
+    if( cameras.Num() )
+        return true;
+
+    //---
+
+    TSet<AOdysseyAnimationActor*> animations;
+    for( FGuid animation_binding : iAnimationBindings )
+    {
+        for( TWeakObjectPtr<> object : iSequencer.FindBoundObjects( animation_binding, iSequenceID ) )
+            animations.Add( Cast<AOdysseyAnimationActor>( object ) );
+    }
+
+    // It seems it can happen (FindBoundObjects() == nullptr) when actors are moved from one (sub)level to another (sub)level in the Levels panel
+    // During the move (maybe):
+    // - the actor is removed from a level
+    // - then the binding is invalid
+    // - a tick occurs (which calls all CanExecute() of every commands)
+    // - then try to resolve the binding which are still invalid
+    animations.Remove( nullptr );
+
     bool can_detach = false;
-    for( auto animation : animations )
+    for( AOdysseyAnimationActor* animation : animations )
     {
         USceneComponent* RootComp = animation->GetRootComponent();
         if( !RootComp || !RootComp->GetAttachParent() )
@@ -518,54 +707,89 @@ ShotSequenceTools::DetachAnimation( ISequencer* iSequencer, FGuid iAnimationBind
 void
 ShotSequenceTools::DetachAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBindings )
 {
-    TArray<AOdysseyAnimationActor*> animations;
+    const FScopedTransaction transaction( LOCTEXT( "DetachAnimation", "Detach Animation" ) );
 
-    for( auto animation_binding : iAnimationBindings )
+    TSet<FGuid> animation_bindings_to_transform;
+
+    for( FGuid animation_binding : iAnimationBindings )
     {
-        for( auto object : iSequencer.FindBoundObjects( animation_binding, iSequenceID ) )
-            animations.Add( Cast<AOdysseyAnimationActor>( object ) );
+        ShotSequenceHelpers::FFindOrCreateAnimationAttachResult attach_result = ShotSequenceHelpers::FindAnimationAttachTrackAndSections( iSequencer, iSequence, iSequenceID, animation_binding );
+        if( attach_result.mTrack.IsValid() )
+        {
+            iSequence->GetMovieScene()->RemoveTrack( *attach_result.mTrack );
+
+            animation_bindings_to_transform.Add( animation_binding );
+        }
     }
 
     //---
 
-    const FScopedTransaction transaction( LOCTEXT( "DetachAnimation", "Detach Animation" ) );
+    TSet<AOdysseyAnimationActor*> animations;
 
-    //---
+    for( FGuid animation_binding : iAnimationBindings )
+    {
+        for( TWeakObjectPtr<> object : iSequencer.FindBoundObjects( animation_binding, iSequenceID ) )
+        {
+            animations.Add( Cast<AOdysseyAnimationActor>( object ) );
+
+            animation_bindings_to_transform.Add( animation_binding );
+        }
+    }
 
     GEditor->SelectNone( true, true );
     // It's certainly safe to not check if CanDetachAnimation() is ok (like CreateOpacity()/CreateAnimation)
     // as DetachSelectedActors() does the check
-    for( auto animation : animations )
+    for( AOdysseyAnimationActor* animation : animations )
         GEditor->SelectActor( animation, true /* bInSelected */, true /* bNotify */, true /* bSelectEvenIfHidden */ );
 
     GEditor->DetachSelectedActors();
 
     //---
 
+    for( FGuid animation_binding : animation_bindings_to_transform )
+    {
+        //ACineCameraActor* camera = nullptr;
+        //for( TWeakObjectPtr<UMovieScene3DAttachSection> weak_attach_section : attach_result.mSections )
+        //{
+        //    const FMovieSceneObjectBindingID& attach_object_binding = weak_attach_section->GetConstraintBindingID();
+        //    TArrayView<TWeakObjectPtr<>> weak_attached_objects = attach_object_binding.ResolveBoundObjects( iSequenceID, iSequencer );
+        //    for( TWeakObjectPtr<> weak_attached_object : weak_attached_objects )
+        //        camera =  Cast<ACineCameraActor>( weak_attached_object );
+        //}
+
+        // Update the default transform channel to take care of the no more existing attach track
+        UMovieScene3DTransformTrack* transformTrack = Cast<UMovieScene3DTransformTrack>( iSequence->GetMovieScene()->FindTrack( UMovieScene3DTransformTrack::StaticClass(), animation_binding ) );
+        if( transformTrack )
+        {
+            TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( iSequencer, iSequence, iSequenceID, animation_binding );
+            AOdysseyAnimationActor* animation_actor = animation_actors[0];
+
+            if( transformTrack->GetAllSections().Num() )
+            {
+                FTransform world_actor_transform = animation_actor->GetActorTransform();
+                //FTransform relative_transform = world_actor_transform.GetRelativeTransform( camera->GetActorTransform() );
+
+                UMovieScene3DTransformSection* TransformSection = Cast<UMovieScene3DTransformSection>( transformTrack->GetAllSections()[0] );
+
+                TArrayView<FMovieSceneDoubleChannel*> DoubleChannels = TransformSection->GetChannelProxy().GetChannels<FMovieSceneDoubleChannel>();
+                DoubleChannels[0]->SetDefault( world_actor_transform.GetLocation().X );
+                DoubleChannels[1]->SetDefault( world_actor_transform.GetLocation().Y );
+                DoubleChannels[2]->SetDefault( world_actor_transform.GetLocation().Z );
+
+                DoubleChannels[3]->SetDefault( world_actor_transform.GetRotation().Euler().X );
+                DoubleChannels[4]->SetDefault( world_actor_transform.GetRotation().Euler().Y );
+                DoubleChannels[5]->SetDefault( world_actor_transform.GetRotation().Euler().Z );
+
+                DoubleChannels[6]->SetDefault( world_actor_transform.GetScale3D().X );
+                DoubleChannels[7]->SetDefault( world_actor_transform.GetScale3D().Y );
+                DoubleChannels[8]->SetDefault( world_actor_transform.GetScale3D().Z );
+            }
+        }
+    }
+
+    //---
+
     //iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
-}
-
-//---
-
-//static
-int32
-BoardSequenceTools::GetAttachedAnimations( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
-{
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
-    if( !result.mInnerSequence )
-        return 0;
-
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
-        return 0;
-
-    return ShotSequenceHelpers::GetAttachedAnimations( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kSelectedOrAll, oAnimations, oAnimationBindings );
-}
-
-//static
-int32
-ShotSequenceTools::GetAttachedAnimations( ISequencer* iSequencer, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
-{
-    return ShotSequenceHelpers::GetAttachedAnimations( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetAnimation::kSelectedOrAll, oAnimations, oAnimationBindings );
 }
 
 //---
@@ -728,8 +952,7 @@ BoardSequenceTools::IsAnimationInEditionMode( ISequencer* iSequencer, const UMov
 
     bool is_edited = false;
 
-    TArray<FGuid> animation_bindings;
-    ShotSequenceHelpers::GetAllAnimations( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kAll, nullptr, &animation_bindings );
+    TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
 
     for( FGuid animation_binding : animation_bindings )
     {
@@ -790,18 +1013,10 @@ ShotSequenceTools::IsAnimationVisible( ISequencer* iSequencer, FGuid iAnimationB
 bool
 ShotSequenceTools::IsAnimationVisible( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding )
 {
-    ShotSequenceHelpers::FFindOrCreateAnimationVisibilityResult animation_visibility_result = ShotSequenceHelpers::FindAnimationVisibilityTrackAndSections( iSequencer, iSequence, iSequenceID, iAnimationBinding );
+    TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( iSequencer, iSequence, iSequenceID, iAnimationBinding );
+    AOdysseyAnimationActor* animation_actor = animation_actors[0];
 
-    if( !animation_visibility_result.mTrack.IsValid() )
-        return false;
-
-    if( animation_visibility_result.mSections.Num() == 0 )
-        return false;
-
-    for( auto section : animation_visibility_result.mSections )
-        return section->GetChannel().GetDefault().Get( false );
-
-    return false;
+    return animation_actor->GetRootComponent()->IsVisible();
 }
 
 //---
@@ -863,15 +1078,8 @@ ShotSequenceTools::ToggleAnimationVisibility( ISequencer& iSequencer, UMovieScen
 
     for( auto animation_binding : iAnimationBindings )
     {
-        ShotSequenceHelpers::FFindOrCreateAnimationVisibilityResult animation_visibility_result = ShotSequenceHelpers::FindAnimationVisibilityTrackAndSections( iSequencer, iSequence, iSequenceID, animation_binding );
-
-        if( !animation_visibility_result.mTrack.IsValid() )
-            continue;
-
-        if( animation_visibility_result.mSections.Num() == 0 )
-            continue;
-
-        //---
+        TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( iSequencer, iSequence, iSequenceID, animation_binding );
+        AOdysseyAnimationActor* animation_actor = animation_actors[0];
 
         // Invert the visibility of the animation
         bool new_animation_visibility = !IsAnimationVisible( iSequencer, iSequence, iSequenceID, animation_binding );
@@ -879,15 +1087,27 @@ ShotSequenceTools::ToggleAnimationVisibility( ISequencer& iSequencer, UMovieScen
         if( iAnimationReference.IsSet() )
             new_animation_visibility = !reference_animation_visibility;
 
-        for( auto section : animation_visibility_result.mSections )
-        {
-            section->Modify();
+        // With this function, when the spawnable is destroyed and respawned (scrubbing outside the section), this value is not stored
+        //animation_actor->GetRootComponent()->SetVisibility( new_animation_visibility );
 
-            section->GetChannel().SetDefault( new_animation_visibility );
+        // When using this way, it works like when the property is clicked on the details panel
+        // (But I don't know why)
+        USceneComponent* component = animation_actor->GetRootComponent();
+        if( component != nullptr )
+        {
+            FProperty* ChangedProperty = FindFProperty<FProperty>( USceneComponent::StaticClass(), component->GetVisiblePropertyName() );
+            component->PreEditChange( ChangedProperty );
+
+            component->SetVisibleFlag( new_animation_visibility );
+
+            FPropertyChangedEvent PropertyChangedEvent( ChangedProperty );
+            //component->PostEditChangeProperty( PropertyChangedEvent );
+            FEditPropertyChain PropertyChain;
+            PropertyChain.AddHead( ChangedProperty );
+            FPropertyChangedChainEvent PropertyChainEvent( PropertyChain, PropertyChangedEvent );
+            component->PostEditChangeChainProperty( PropertyChainEvent );
         }
     }
-
-    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
 //---
@@ -907,6 +1127,16 @@ BoardSequenceTools::SelectSingleAnimation( ISequencer* iSequencer, UMovieSceneSu
 void
 ShotSequenceTools::SelectSingleAnimation( ISequencer& iSequencer, UMovieSceneSubSection* iParentSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding )
 {
+    // Section selection must be done first, to call our callback in toolkit helpers which change the current frame (when section selection changed)
+    // otherwise spawnable won't be loaded and so not found
+
+    // To unselect section(s)
+    iSequencer.EmptySelection();
+    // And then select the current one
+    iSequencer.SelectSection( iParentSection );
+
+    //---
+
     auto objects = iSequencer.FindBoundObjects( iAnimationBinding, iSequenceID );
 
     // Get the animation(s) corresponding to the one(s) on the current clicked row
@@ -914,11 +1144,6 @@ ShotSequenceTools::SelectSingleAnimation( ISequencer& iSequencer, UMovieSceneSub
     TArray<AOdysseyAnimationActor*> animations;
     for( auto object : objects )
         animations.Add( Cast<AOdysseyAnimationActor>( object ) );
-
-    // To unselect section(s)
-    iSequencer.EmptySelection();
-    // And then select the current one
-    iSequencer.SelectSection( iParentSection );
 
     // To unselect all actors
     GEditor->SelectNone( true, true );
@@ -944,37 +1169,55 @@ BoardSequenceTools::SelectMultiAnimation( ISequencer* iSequencer, UMovieSceneSub
 void
 ShotSequenceTools::SelectMultiAnimation( ISequencer& iSequencer, UMovieSceneSubSection* iParentSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding )
 {
-    auto objects = iSequencer.FindBoundObjects( iAnimationBinding, iSequenceID );
-
-    // Get the animation(s) corresponding to the one(s) on the current clicked row
-    // It's an array, but generally it should always be only 1 entry
-    TArray<AOdysseyAnimationActor*> animations_self;
-    for( auto object : objects )
-        animations_self.Add( Cast<AOdysseyAnimationActor>( object ) );
+    // Selection must done before empty it
+    // Otherwise the filter will always return empty arrays
 
     // Get all the currently selected animations inside the whole current shot
-    TArray<AOdysseyAnimationActor*> animations_selected;
-    ShotSequenceHelpers::GetAllAnimations( iSequencer, iSequence, iSequenceID, EGetAnimation::kSelectedOnly, &animations_selected, nullptr );
-
-    // Add the self animation to the selection
-    // or remove it from the selection if it was already selected
-    for( auto animation_self : animations_self )
+    TSet<AOdysseyAnimationActor*> animation_actors_selected;
+    TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( iSequencer, iSequence, iSequenceID );
+    for( FGuid animation_binding : animation_bindings )
     {
-        if( animations_selected.Contains( animation_self ) )
-            animations_selected.Remove( animation_self );
-        else
-            animations_selected.Add( animation_self );
+        TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawned( iSequencer, iSequence, iSequenceID, animation_binding );
+
+        TArray<AOdysseyAnimationActor*> current_animation_actors_selected;
+        ShotSequenceTools::FilterSelectedAnimations( animation_actors, &current_animation_actors_selected );
+        animation_actors_selected.Append( current_animation_actors_selected );
     }
+
+    //---
+
+    // Section selection must be done first, to call our callback in toolkit helpers which change the current frame (when section selection changed)
+    // otherwise spawnable won't be loaded and so not found
 
     // To unselect section(s)
     iSequencer.EmptySelection();
     // And then select the current one
     iSequencer.SelectSection( iParentSection );
 
+    //---
+
+    TArrayView<TWeakObjectPtr<>> objects = iSequencer.FindBoundObjects( iAnimationBinding, iSequenceID );
+
+    // Get the animation(s) corresponding to the one(s) on the current clicked row
+    // It's an array, but generally it should always be only 1 entry
+    TArray<AOdysseyAnimationActor*> animations_self;
+    for( TWeakObjectPtr<> object : objects )
+        animations_self.Add( Cast<AOdysseyAnimationActor>( object ) );
+
+    // Add the self animation to the selection
+    // or remove it from the selection if it was already selected
+    for( AOdysseyAnimationActor* animation_self : animations_self )
+    {
+        if( animation_actors_selected.Contains( animation_self ) )
+            animation_actors_selected.Remove( animation_self );
+        else
+            animation_actors_selected.Add( animation_self );
+    }
+
     // To unselect all actors
     GEditor->SelectNone( true, true );
     // And then select the current one(s)
-    for( auto animation_selected : animations_selected )
+    for( AOdysseyAnimationActor* animation_selected : animation_actors_selected )
         GEditor->SelectActor( animation_selected, true /* bInSelected */, true /* bNotify */, true /* bSelectEvenIfHidden */ );
 }
 

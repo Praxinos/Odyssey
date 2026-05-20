@@ -48,6 +48,7 @@
 #include "ToolMenus.h"
 #include "ViewportToolbar/UnrealEdViewportToolbar.h"
 #include "Engine/StaticMeshActor.h"
+#include "SequencerSettings.h"
 
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
@@ -58,6 +59,7 @@
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "OdysseyAnimationActor.h"
 #include "ScalingComponent.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrackInstance.h"
 #include "StoryNote.h"
 #include "StoryboardViewport/StoryboardLevelViewportToolbarContext.h"
 #include "StoryboardViewport/FilmOverlays.h"
@@ -1006,7 +1008,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
         .OnActorSelected( FOnActorSelected::CreateSP( this, &SStoryboardLevelViewport::OnActorSelectedForActorDistance ) );
 
 
-    //---
+    //-
 
     mActorPickerComboList = SNew( SComboButton )
         .ButtonStyle( FAppStyle::Get(), "PropertyEditor.AssetComboStyle" )
@@ -1035,6 +1037,23 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
         //    ]
         //]
         ;
+
+    //---
+
+    TSharedRef<SCheckBox> viewportCameraViewWidget = SNew( SCheckBox )
+        .Style( FAppStyle::Get(), "ToggleButtonCheckbox" )
+        .Type( ESlateCheckBoxType::ToggleButton )
+        .IsChecked( this, &SStoryboardLevelViewport::AreCameraViewLocked )
+        .OnCheckStateChanged( this, &SStoryboardLevelViewport::OnLockCameraViewClicked )
+        .ToolTipText( this, &SStoryboardLevelViewport::GetLockCameraViewToolTip )
+        [
+            SNew( SBox )
+            .VAlign( VAlign_Center ) // Only to not stretch the image inside the SCheckBox
+            [
+                SNew( SImage )
+                .Image( FEposSequenceEditorStyle::Get().GetBrush( "Viewport.CameraView" ) )
+            ]
+        ];
 
     //---
 
@@ -1279,6 +1298,21 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                         .Image( FEposSequenceEditorStyle::Get().GetBrush( "Viewport.FitToCameraView" ) )
                                     ]
                                 ]
+
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                .VAlign( VAlign_Center )
+                                .Padding( 10, 0 )
+                                [
+                                    SNew(SSeparator)
+                                    .Orientation( EOrientation::Orient_Vertical )
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                [
+                                    viewportCameraViewWidget
+                                ]
                             ]
 
                             + SWidgetSwitcher::Slot()
@@ -1354,6 +1388,21 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                         SNew( SImage )
                                         .Image( FEposSequenceEditorStyle::Get().GetBrush( "Viewport.FitToCameraView" ) )
                                     ]
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                .VAlign( VAlign_Center )
+                                .Padding( 10, 0 )
+                                [
+                                    SNew(SSeparator)
+                                    .Orientation( EOrientation::Orient_Vertical )
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                [
+                                    viewportCameraViewWidget
                                 ]
                             ]
                         ]
@@ -2087,7 +2136,7 @@ SStoryboardLevelViewport::SetMoveAndScaleActorDistance( float iDistance )
 
     ACineCameraActor* camera = Cast<ACineCameraActor>( mActorToMove->GetAttachParentActor() );
 
-    ShotSequenceTools::MoveAndScaleActor( mActorToMove.Get(), camera, iDistance, mScaleActorType );
+    ShotSequenceTools::MoveAndScaleActor( mActorToMove.Get(), camera, iDistance, mScaleActorType, mCurrentSquencer.Pin() );
 }
 
 void
@@ -2193,7 +2242,7 @@ SStoryboardLevelViewport::OnActorSelectedForActorDistance( AActor* ioActor )
     }
 
     // Select the closest distance from the camera to move the "plane to move"
-    ShotSequenceTools::MoveAndScaleActor( mActorToMove.Get(), camera, FMath::Min( distances ), mScaleActorType );
+    ShotSequenceTools::MoveAndScaleActor( mActorToMove.Get(), camera, FMath::Min( distances ), mScaleActorType, mCurrentSquencer.Pin() );
 }
 
 static
@@ -2388,7 +2437,7 @@ SStoryboardLevelViewport::OnFitActorToCameraView()
     {
         ACineCameraActor* camera = Cast<ACineCameraActor>( mActorToMove->GetAttachParentActor() );
 
-        ShotSequenceTools::FitActorToCameraView( mActorToMove.Get(), camera );
+        ShotSequenceTools::FitActorToCameraView( mActorToMove.Get(), camera, mCurrentSquencer.Pin() );
     }
 
     if( mCameraToFocalLength.IsValid() )
@@ -2406,7 +2455,7 @@ SStoryboardLevelViewport::OnFitActorToCameraView()
 
         for( TWeakObjectPtr<AActor> actor : actors )
         {
-            ShotSequenceTools::FitActorToCameraView( actor.Get(), mCameraToFocalLength.Get() );
+            ShotSequenceTools::FitActorToCameraView( actor.Get(), mCameraToFocalLength.Get(), mCurrentSquencer.Pin() );
         }
     }
 
@@ -2449,7 +2498,50 @@ SStoryboardLevelViewport::SetCameraFocalLength( float iFocalLength )
             actors.Add( child );
     }
 
-    ShotSequenceTools::SetCameraFocalLengthAndScaleActor( actors, mCameraToFocalLength.Get(), iFocalLength, mScaleActorType );
+    ShotSequenceTools::SetCameraFocalLengthAndScaleActor( actors, mCameraToFocalLength.Get(), iFocalLength, mScaleActorType, mCurrentSquencer.Pin() );
+}
+
+ECheckBoxState
+SStoryboardLevelViewport::AreCameraViewLocked() const
+{
+    if( GetSequencer() && GetSequencer()->IsPerspectiveViewportCameraCutEnabled() )
+    {
+        return ECheckBoxState::Checked;
+    }
+    else
+    {
+        return ECheckBoxState::Unchecked;
+    }
+}
+
+void
+SStoryboardLevelViewport::OnLockCameraViewClicked( ECheckBoxState iCheckBoxState )
+{
+    ISequencer* sequencer = GetSequencer();
+    if( !sequencer )
+        return;
+
+    const bool bEnableCameraCuts = ( iCheckBoxState == ECheckBoxState::Checked );
+    sequencer->SetPerspectiveViewportCameraCutEnabled( bEnableCameraCuts );
+
+    bool bNeedsRestoreViewport = true;
+    if( const USequencerSettings* SequencerSettings = sequencer->GetSequencerSettings() )
+    {
+        bNeedsRestoreViewport = SequencerSettings->GetRestoreOriginalViewportOnCameraCutUnlock();
+    }
+
+    UMovieSceneEntitySystemLinker* Linker = sequencer->GetEvaluationTemplate().GetEntitySystemLinker();
+    UMovieSceneSingleCameraCutTrackInstance::ToggleCameraCutLock( Linker, bEnableCameraCuts, bNeedsRestoreViewport );
+
+    sequencer->ForceEvaluate();
+}
+
+FText
+SStoryboardLevelViewport::GetLockCameraViewToolTip() const
+{
+    return AreCameraViewLocked() == ECheckBoxState::Checked ?
+        LOCTEXT( "CameraView.Unlock", "Unlock Viewport from Camera View" ) :
+        LOCTEXT( "CameraView.Lock", "Lock Viewport to Camera View" );
 }
 
 //---

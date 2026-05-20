@@ -256,12 +256,14 @@ SCinematicBoardSectionCameraTitle::OnMouseButtonUp( const FGeometry& MyGeometry,
         UMovieSceneSection* section_object = board_section->GetSectionObject();
         ISequencer* sequencer = board_section->GetSequencer().Get();
 
-        ACineCameraActor* camera = BoardSequenceHelpers::GetCamera( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
-
+        // Must be done first to spawn all actors in this section (via the delegate on section selection in the toolkit)
         // To unselect section(s)
         sequencer->EmptySelection();
         // And then select the current one
         sequencer->SelectSection( section_object );
+
+        FGuid camera_binding = BoardSequenceHelpers::GetCameraBinding( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+        ACineCameraActor* camera = BoardSequenceHelpers::GetCameraSpawned( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), camera_binding );
 
         // To unselect all actors
         GEditor->SelectNone( true, true );
@@ -281,8 +283,7 @@ SCinematicBoardSectionCameraTitle::HandleTitleText() const
     UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
-    FGuid camera_binding;
-    BoardSequenceHelpers::GetCamera( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), &camera_binding );
+    FGuid camera_binding = BoardSequenceHelpers::GetCameraBinding( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
 
     UMovieSceneSequence* sequence = subsection_object->GetSequence();
     UMovieScene* movie_scene = sequence ? sequence->GetMovieScene() : nullptr;
@@ -300,8 +301,7 @@ SCinematicBoardSectionCameraTitle::HandleTitleTextOnCommited( const FText& iText
     UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
-    FGuid camera_binding;
-    BoardSequenceHelpers::GetCamera( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), &camera_binding );
+    FGuid camera_binding = BoardSequenceHelpers::GetCameraBinding( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
 
     BoardSequenceTools::RenameBinding( sequencer, *subsection_object, camera_binding, iText.ToString() );
 }
@@ -313,7 +313,8 @@ SCinematicBoardSectionCameraTitle::GetBackgroundTint() const
     const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
-    ACineCameraActor* camera = BoardSequenceHelpers::GetCamera( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+    FGuid camera_binding = BoardSequenceHelpers::GetCameraBinding( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+    ACineCameraActor* camera = BoardSequenceHelpers::GetCameraSpawned( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), camera_binding );
 
     // Same as in ...\Engine\Source\Editor\Sequencer\Private\SAnimationOutlinerTreeNode.cpp::GetNodeBackgroundTint()
     if( camera && camera->IsSelected() )
@@ -438,8 +439,7 @@ SCinematicBoardSectionCameraTransform::BuildKeyContextMenu( FMenuBuilder& ioMenu
     UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
-    FGuid camera_binding;
-    BoardSequenceTools::GetCamera( sequencer, subsection, &camera_binding );
+    FGuid camera_binding = BoardSequenceHelpers::GetCameraBinding( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
 
     FText camera_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( camera_binding ) : FText::GetEmpty();
 
@@ -471,8 +471,7 @@ SCinematicBoardSectionCameraTransform::GetAreaTooltipText() const //override
     UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
-    FGuid camera_binding;
-    ACineCameraActor* camera = BoardSequenceTools::GetCamera( sequencer, subsection, &camera_binding );
+    FGuid camera_binding = BoardSequenceHelpers::GetCameraBinding( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
 
     FText camera_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( camera_binding ) : FText::GetEmpty();
 

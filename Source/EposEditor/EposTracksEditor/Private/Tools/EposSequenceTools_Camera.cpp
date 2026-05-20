@@ -3,6 +3,7 @@
 
 #include "Tools/EposSequenceTools.h"
 
+#include "Bindings/MovieSceneSpawnableActorBinding.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneFloatChannel.h"
 #include "CineCameraActor.h"
@@ -18,6 +19,7 @@
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
+#include "SequencerUtilities.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Widgets/Notifications/SNotificationList.h"
 
@@ -35,39 +37,6 @@
 
 #define LOCTEXT_NAMESPACE "EposSequenceTools_Camera"
 
-//static
-ACineCameraActor*
-BoardSequenceTools::GetCamera( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid* oCameraBinding )
-{
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
-    if( !result.mInnerSequence )
-        return nullptr;
-
-    return ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, oCameraBinding );
-}
-
-//static
-ACineCameraActor*
-BoardSequenceTools::GetCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid* oCameraBinding )
-{
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
-    if( !result.mInnerSequence )
-        return nullptr;
-
-    return ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, oCameraBinding );
-}
-
-//---
-
-//static
-ACineCameraActor*
-ShotSequenceTools::GetCamera( ISequencer* iSequencer, FGuid* oCameraBinding )
-{
-    return ShotSequenceHelpers::GetCamera( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), oCameraBinding );
-}
-
-//---
-//---
 //---
 
 //static
@@ -110,8 +79,8 @@ BoardSequenceTools::CanCreateCamera( ISequencer* iSequencer, FFrameNumber iFrame
     if( result.mInnerSequence->IsA<UBoardSequence>() )
         return false;
 
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
-    if( camera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    if( camera_binding.IsValid() )
         return false;
 
     return true;
@@ -133,8 +102,8 @@ ShotSequenceTools::CanCreateCamera( ISequencer* iSequencer )
     if( !sequence )
         return false;
 
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, sequence, sequence_id );
-    if( camera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, sequence, sequence_id );
+    if( camera_binding.IsValid() )
         return false;
 
     return true;
@@ -154,8 +123,8 @@ ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iS
         return;
     }
 
-    ACineCameraActor* ExistingCamera = ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID );
-    if( ExistingCamera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( iSequencer, iSequence, iSequenceID );
+    if( camera_binding.IsValid() )
         return;
 
     ULevelEditorSubsystem* levelEditorSubsystem = GEditor->GetEditorSubsystem<ULevelEditorSubsystem>();
@@ -276,7 +245,7 @@ ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequen
 
     FString camera_path;
     FString camera_name;
-    NamingConvention::GenerateCameraActorPathName( iSequencer, *epos_sequence, iSequenceID, camera_path, camera_name );
+    NamingConvention::GenerateCameraActorPathName( iSequencer, *epos_sequence, iSequenceID, !iCameraArgs.mSpawnable, camera_path, camera_name );
 
     if( !iCameraArgs.mName.IsEmpty() )
         camera_name = iCameraArgs.mName;
@@ -286,9 +255,53 @@ ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequen
 
     camera_name = NamingConvention::GenerateCameraTrackName( iSequencer, *epos_sequence, iSequenceID, camera );
 
-    FGuid CameraGuid = iSequencer.CreateBinding( *camera, camera_name );
+    UE::Sequencer::FCreateBindingParams BindingParams;
+    BindingParams.BindingNameOverride = camera_name;
+    BindingParams.bAllowCustomBinding = true;
+    FGuid CameraGuid = iSequencer.CreateBinding( *camera, BindingParams );
     if( !CameraGuid.IsValid() )
         return nullptr;
+
+    //---
+
+    if( iCameraArgs.mSpawnable )
+    {
+        TSubclassOf<UMovieSceneCustomBinding> CustomBindingClass = UMovieSceneSpawnableActorBinding::StaticClass();
+
+        const FMovieSceneBindingReferences* BindingReferences = iSequence->GetBindingReferences();
+
+        if( BindingReferences )
+        {
+            for( const FMovieSceneBindingReference& Reference : BindingReferences->GetReferences( CameraGuid ) )
+            {
+                for( const TSubclassOf<UMovieSceneCustomBinding>& SupportedCustomBindingType : iSequencer.GetSupportedCustomBindingTypes() )
+                {
+                    if( SupportedCustomBindingType && SupportedCustomBindingType->IsChildOf( CustomBindingClass ) &&
+                        SupportedCustomBindingType->GetDefaultObject<UMovieSceneCustomBinding>()->SupportsConversionFromBinding( Reference, camera ) )
+                    {
+                        FMovieScenePossessable* NewPossessable = FSequencerUtilities::ConvertToCustomBinding( iSequencer.AsShared(), CameraGuid, CustomBindingClass );
+
+                        if( NewPossessable )
+                        {
+                            for( TWeakObjectPtr<> WeakObject : iSequencer.FindBoundObjects( NewPossessable->GetGuid(), iSequenceID ) )
+                            {
+                                ACineCameraActor* SpawnedActor = Cast<ACineCameraActor>( WeakObject.Get() );
+                                if( SpawnedActor )
+                                {
+                                    camera = SpawnedActor;
+                                }
+                            }
+
+                            CameraGuid = NewPossessable->GetGuid();
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    //---
 
     iSequencer.OnActorAddedToSequencer().Broadcast( camera, CameraGuid );
 
@@ -391,13 +404,12 @@ BoardSequenceTools::SnapCameraToViewport( ISequencer* iSequencer, const UMovieSc
     if( !iSubSection.GetTrueRange().Contains( iFrameNumber ) )
         return;
 
-    FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, &camera_guid );
-    if( !camera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    if( !camera_binding.IsValid() )
         return;
 
     FFrameTime inner_frame = iFrameNumber * iSubSection.OuterToInnerTransform();
-    ShotSequenceTools::SnapCameraToViewport( *iSequencer, result.mInnerSequence, camera, camera_guid, inner_frame.GetFrame() );
+    ShotSequenceTools::SnapCameraToViewport( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, camera_binding, inner_frame.GetFrame() );
 }
 
 //static
@@ -414,9 +426,8 @@ BoardSequenceTools::CanSnapCameraToViewport( ISequencer* iSequencer, const UMovi
     if( !iSubSection.GetTrueRange().Contains( iFrameNumber ) )
         return false;
 
-    FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, &camera_guid );
-    if( !camera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    if( !camera_binding.IsValid() )
         return false;
 
     return true;
@@ -430,12 +441,11 @@ BoardSequenceTools::SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber i
     if( !result.mInnerSequence )
         return;
 
-    FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, &camera_guid );
-    if( !camera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    if( !camera_binding.IsValid() )
         return;
 
-    ShotSequenceTools::SnapCameraToViewport( *iSequencer, result.mInnerSequence, camera, camera_guid, result.mInnerTime.GetFrame() );
+    ShotSequenceTools::SnapCameraToViewport( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, camera_binding, result.mInnerTime.GetFrame() );
 }
 
 //static
@@ -449,8 +459,8 @@ BoardSequenceTools::CanSnapCameraToViewport( ISequencer* iSequencer, FFrameNumbe
     if( result.mInnerSequence->IsA<UBoardSequence>() )
         return false;
 
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
-    if( !camera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    if( !camera_binding.IsValid() )
         return false;
 
     return true;
@@ -465,12 +475,11 @@ ShotSequenceTools::SnapCameraToViewport( ISequencer* iSequencer, FFrameNumber iF
     if( !sequence )
         return;
 
-    FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, sequence, sequence_id, &camera_guid );
-    if( !camera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, sequence, sequence_id );
+    if( !camera_binding.IsValid() )
         return;
 
-    SnapCameraToViewport( *iSequencer, sequence, camera, camera_guid, iFrameNumber );
+    SnapCameraToViewport( *iSequencer, sequence, sequence_id, camera_binding, iFrameNumber );
 }
 
 //static
@@ -482,8 +491,8 @@ ShotSequenceTools::CanSnapCameraToViewport( ISequencer* iSequencer, FFrameNumber
     if( !sequence )
         return false;
 
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, sequence, sequence_id );
-    if( !camera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, sequence, sequence_id );
+    if( !camera_binding.IsValid() )
         return false;
 
     return true;
@@ -491,7 +500,7 @@ ShotSequenceTools::CanSnapCameraToViewport( ISequencer* iSequencer, FFrameNumber
 
 //static
 void
-ShotSequenceTools::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber )
+ShotSequenceTools::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, FGuid iCameraGuid, FFrameNumber iFrameNumber )
 {
     if( !GCurrentLevelEditingViewportClient )
         return;
@@ -499,18 +508,19 @@ ShotSequenceTools::SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequ
     const FScopedTransaction transaction( LOCTEXT( "transaction.snap-storycamera-to-viewport", "Snap Storyboard Camera To Viewport" ) );
 
     FTransform transform( GCurrentLevelEditingViewportClient->GetViewTransform().GetRotation(), GCurrentLevelEditingViewportClient->GetViewTransform().GetLocation() );
-    bool snapped = SnapCameraToViewport( iSequencer, iSequence, ioCamera, iCameraGuid, iFrameNumber, transform, iSequencer.GetKeyInterpolation() );
+    bool snapped = SnapCameraToViewport( iSequencer, iSequence, iSequenceId, iCameraGuid, iFrameNumber, transform, iSequencer.GetKeyInterpolation() );
     if( !snapped )
         return;
 
-    MovieSceneToolHelpers::LockCameraActorToViewport( iSequencer.AsShared(), ioCamera );
+    ACineCameraActor* camera_actor = ShotSequenceHelpers::GetCameraSpawned( iSequencer, iSequence, iSequenceId, iCameraGuid );
+    MovieSceneToolHelpers::LockCameraActorToViewport( iSequencer.AsShared(), camera_actor );
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
 //static
 bool
-ShotSequenceTools::SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber, const FTransform& iNewTransform, EMovieSceneKeyInterpolation iInterpolation )
+ShotSequenceTools::SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, FGuid iCameraGuid, FFrameNumber iFrameNumber, const FTransform& iNewTransform, EMovieSceneKeyInterpolation iInterpolation )
 {
     UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !movieScene || movieScene->IsReadOnly() )
@@ -518,6 +528,10 @@ ShotSequenceTools::SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieScene
         //ShowReadOnlyError();
         return false;
     }
+
+    ACineCameraActor* camera_actor = ShotSequenceHelpers::GetCameraSpawned( iPlayer, iSequence, iSequenceId, iCameraGuid );
+    if( !ensureMsgf(camera_actor, TEXT("In case of a spawnable, it means it is not spawned, the sequence is not the focused one by the sequencer")) )
+        return false;
 
     UMovieSceneTrack* track = movieScene->FindTrack<UMovieScene3DTransformTrack>( iCameraGuid );
     UMovieSceneSection* section = track ? MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrameNumber ) : nullptr;
@@ -528,7 +542,7 @@ ShotSequenceTools::SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieScene
 
     //---
 
-    ioCamera->SetActorTransform( iNewTransform );
+    camera_actor->SetActorTransform( iNewTransform );
 
 //TODO: set all (?) animations ?
 
@@ -540,31 +554,31 @@ ShotSequenceTools::SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieScene
 
 //TODO: maybe use the same object as StopPilotingCamera() ???
 
-    AddKeyToChannel( DoubleChannels[0], iFrameNumber, ioCamera->GetActorLocation().X, iInterpolation );
-    AddKeyToChannel( DoubleChannels[1], iFrameNumber, ioCamera->GetActorLocation().Y, iInterpolation );
-    AddKeyToChannel( DoubleChannels[2], iFrameNumber, ioCamera->GetActorLocation().Z, iInterpolation );
+    AddKeyToChannel( DoubleChannels[0], iFrameNumber, camera_actor->GetActorLocation().X, iInterpolation );
+    AddKeyToChannel( DoubleChannels[1], iFrameNumber, camera_actor->GetActorLocation().Y, iInterpolation );
+    AddKeyToChannel( DoubleChannels[2], iFrameNumber, camera_actor->GetActorLocation().Z, iInterpolation );
 
-    AddKeyToChannel( DoubleChannels[3], iFrameNumber, ioCamera->GetActorRotation().Euler().X, iInterpolation );
-    AddKeyToChannel( DoubleChannels[4], iFrameNumber, ioCamera->GetActorRotation().Euler().Y, iInterpolation );
-    AddKeyToChannel( DoubleChannels[5], iFrameNumber, ioCamera->GetActorRotation().Euler().Z, iInterpolation );
+    AddKeyToChannel( DoubleChannels[3], iFrameNumber, camera_actor->GetActorRotation().Euler().X, iInterpolation );
+    AddKeyToChannel( DoubleChannels[4], iFrameNumber, camera_actor->GetActorRotation().Euler().Y, iInterpolation );
+    AddKeyToChannel( DoubleChannels[5], iFrameNumber, camera_actor->GetActorRotation().Euler().Z, iInterpolation );
 
     //AddKeyToChannel( DoubleChannels[6], iFrameNumber, Scale.X, iInterpolation );
     //AddKeyToChannel( DoubleChannels[7], iFrameNumber, Scale.Y, iInterpolation );
     //AddKeyToChannel( DoubleChannels[8], iFrameNumber, Scale.Z, iInterpolation );
 
     if( DoubleChannels[0]->GetNumKeys() <= 1 )
-        DoubleChannels[0]->SetDefault( ioCamera->GetActorLocation().X );
+        DoubleChannels[0]->SetDefault( camera_actor->GetActorLocation().X );
     if( DoubleChannels[1]->GetNumKeys() <= 1 )
-        DoubleChannels[1]->SetDefault( ioCamera->GetActorLocation().Y );
+        DoubleChannels[1]->SetDefault( camera_actor->GetActorLocation().Y );
     if( DoubleChannels[2]->GetNumKeys() <= 1 )
-        DoubleChannels[2]->SetDefault( ioCamera->GetActorLocation().Z );
+        DoubleChannels[2]->SetDefault( camera_actor->GetActorLocation().Z );
 
     if( DoubleChannels[3]->GetNumKeys() <= 1 )
-        DoubleChannels[3]->SetDefault( ioCamera->GetActorRotation().Euler().X );
+        DoubleChannels[3]->SetDefault( camera_actor->GetActorRotation().Euler().X );
     if( DoubleChannels[4]->GetNumKeys() <= 1 )
-        DoubleChannels[4]->SetDefault( ioCamera->GetActorRotation().Euler().Y );
+        DoubleChannels[4]->SetDefault( camera_actor->GetActorRotation().Euler().Y );
     if( DoubleChannels[5]->GetNumKeys() <= 1 )
-        DoubleChannels[5]->SetDefault( ioCamera->GetActorRotation().Euler().Z );
+        DoubleChannels[5]->SetDefault( camera_actor->GetActorRotation().Euler().Z );
 
     //DoubleChannels[6]->SetDefault( Scale.X );
     //DoubleChannels[7]->SetDefault( Scale.Y );
@@ -683,8 +697,8 @@ ShotSequenceTools::IsPilotingCamera( ISequencer* iSequencer, UMovieSceneSequence
 {
     check( iSequence->IsA<UShotSequence>() );
 
-    FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, iSequence, iSequenceID, &camera_guid );
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, iSequence, iSequenceID );
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawned( *iSequencer, iSequence, iSequenceID, camera_binding );
     if( !camera )
         return false;
 
@@ -745,9 +759,9 @@ ShotSequenceTools::PilotCamera( ISequencer* iSequencer, UMovieSceneSequence* iSe
 {
     check( iSequence->IsA<UShotSequence>() );
 
-    FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, iSequence, iSequenceID, &camera_guid );
-    if( !camera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, iSequence, iSequenceID );
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawned( *iSequencer, iSequence, iSequenceID, camera_binding );
+    if( !ensureMsgf(camera, TEXT("In case of a spawnable, it means it is not spawned, the sequence is not the focused one by the sequencer")) )
         return;
 
     if( GCurrentLevelEditingViewportClient && GCurrentLevelEditingViewportClient->GetViewMode() != VMI_Unknown && GCurrentLevelEditingViewportClient->AllowsCinematicControl() )
@@ -807,8 +821,8 @@ ShotSequenceTools::CanPilotCamera( ISequencer* iSequencer, UMovieSceneSequence* 
 {
     check( iSequence->IsA<UShotSequence>() );
 
-    FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, iSequence, iSequenceID, &camera_guid );
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, iSequence, iSequenceID );
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawned( *iSequencer, iSequence, iSequenceID, camera_binding );
     if( !camera )
         return false;
 
@@ -866,9 +880,9 @@ ShotSequenceTools::EjectCamera( ISequencer* iSequencer, UMovieSceneSequence* iSe
 {
     check( iSequence->IsA<UShotSequence>() );
 
-    FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, iSequence, iSequenceID, &camera_guid );
-    if( !camera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, iSequence, iSequenceID );
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawned( *iSequencer, iSequence, iSequenceID, camera_binding );
+    if( !ensureMsgf(camera, TEXT("In case of a spawnable, it means it is not spawned, the sequence is not the focused one by the sequencer")) )
         return;
 
     if( GCurrentLevelEditingViewportClient && GCurrentLevelEditingViewportClient->GetViewMode() != VMI_Unknown && GCurrentLevelEditingViewportClient->AllowsCinematicControl() )
@@ -934,231 +948,12 @@ ShotSequenceTools::CanEjectCamera( ISequencer* iSequencer, UMovieSceneSequence* 
 {
     check( iSequence->IsA<UShotSequence>() );
 
-    FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, iSequence, iSequenceID, &camera_guid );
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, iSequence, iSequenceID );
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawned( *iSequencer, iSequence, iSequenceID, camera_binding );
     if( !camera )
         return false;
 
     return true;
-}
-
-//---
-//---
-//---
-
-static
-float
-UnwindChannel( const float& OldValue, float NewValue )
-{
-    while( NewValue - OldValue > 180.0f )
-    {
-        NewValue -= 360.0f;
-    }
-    while( NewValue - OldValue < -180.0f )
-    {
-        NewValue += 360.0f;
-    }
-    return NewValue;
-}
-static
-FRotator
-UnwindRotator( const FRotator& InOld, const FRotator& InNew )
-{
-    FRotator Result;
-    Result.Pitch = UnwindChannel( InOld.Pitch, InNew.Pitch );
-    Result.Yaw = UnwindChannel( InOld.Yaw, InNew.Yaw );
-    Result.Roll = UnwindChannel( InOld.Roll, InNew.Roll );
-    return Result;
-}
-
-// From ...\UE_4.26\Engine\Source\Editor\MovieSceneTools\Private\TrackEditors\TransformTrackEditor.cpp
-static
-void
-GetTransformKeys( ISequencer& iSequencer, const TOptional<FTransformData>& LastTransform, const FTransformData& CurrentTransform, EMovieSceneTransformChannel ChannelsToKey, UObject* Object, UMovieSceneSection* Section, FGeneratedTrackKeys& OutGeneratedKeys )
-{
-    UMovieScene3DTransformSection* TransformSection = Cast<UMovieScene3DTransformSection>( Section );
-    EMovieSceneTransformChannel TransformMask = TransformSection->GetMask().GetChannels();
-
-    using namespace UE::MovieScene;
-
-    bool bLastVectorIsValid = LastTransform.IsSet();
-
-    // If key all is enabled, for a key on all the channels
-    if( iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyAll )
-    {
-        bLastVectorIsValid = false;
-        ChannelsToKey = EMovieSceneTransformChannel::All;
-    }
-
-    //FBuiltInComponentTypes* BuiltInComponents = FBuiltInComponentTypes::Get();
-
-    //FTransformData RecomposedTransform = RecomposeTransform( CurrentTransform, Object, Section );
-
-    // Set translation keys/defaults
-    {
-        bool bKeyX = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::TranslationX );
-        bool bKeyY = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::TranslationY );
-        bool bKeyZ = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::TranslationZ );
-
-        if( bLastVectorIsValid )
-        {
-            bKeyX &= !FMath::IsNearlyEqual( LastTransform->Translation.X, CurrentTransform.Translation.X );
-            bKeyY &= !FMath::IsNearlyEqual( LastTransform->Translation.Y, CurrentTransform.Translation.Y );
-            bKeyZ &= !FMath::IsNearlyEqual( LastTransform->Translation.Z, CurrentTransform.Translation.Z );
-        }
-
-        if( iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyGroup && ( bKeyX || bKeyY || bKeyZ ) )
-        {
-            bKeyX = bKeyY = bKeyZ = true;
-        }
-
-        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::TranslationX ) )
-        {
-            bKeyX = false;
-        }
-        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::TranslationY ) )
-        {
-            bKeyY = false;
-        }
-        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::TranslationZ ) )
-        {
-            bKeyZ = false;
-        }
-
-        FVector KeyVector = CurrentTransform.Translation;
-        //FVector KeyVector = RecomposedTransform.Translation;
-
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 0, KeyVector.X, bKeyX ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 1, KeyVector.Y, bKeyY ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 2, KeyVector.Z, bKeyZ ) );
-    }
-
-    // Set rotation keys/defaults
-    {
-        bool bKeyX = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::RotationX );
-        bool bKeyY = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::RotationY );
-        bool bKeyZ = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::RotationZ );
-
-        FRotator KeyRotator = CurrentTransform.Rotation;
-        if( bLastVectorIsValid )
-        {
-            KeyRotator = UnwindRotator( LastTransform->Rotation, CurrentTransform.Rotation );
-
-            bKeyX &= !FMath::IsNearlyEqual( LastTransform->Rotation.Roll, KeyRotator.Roll );
-            bKeyY &= !FMath::IsNearlyEqual( LastTransform->Rotation.Pitch, KeyRotator.Pitch );
-            bKeyZ &= !FMath::IsNearlyEqual( LastTransform->Rotation.Yaw, KeyRotator.Yaw );
-        }
-
-        if( iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyGroup && ( bKeyX || bKeyY || bKeyZ ) )
-        {
-            bKeyX = bKeyY = bKeyZ = true;
-        }
-
-        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::RotationX ) )
-        {
-            bKeyX = false;
-        }
-        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::RotationY ) )
-        {
-            bKeyY = false;
-        }
-        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::RotationZ ) )
-        {
-            bKeyZ = false;
-        }
-
-        // Do we need to unwind re-composed rotations?
-        //KeyRotator = UnwindRotator( CurrentTransform.Rotation, RecomposedTransform.Rotation );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 3, KeyRotator.Roll, bKeyX ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 4, KeyRotator.Pitch, bKeyY ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 5, KeyRotator.Yaw, bKeyZ ) );
-
-    }
-
-    // Set scale keys/defaults
-    {
-        bool bKeyX = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::ScaleX );
-        bool bKeyY = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::ScaleY );
-        bool bKeyZ = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::ScaleZ );
-
-        if( bLastVectorIsValid )
-        {
-            bKeyX &= !FMath::IsNearlyEqual( LastTransform->Scale.X, CurrentTransform.Scale.X );
-            bKeyY &= !FMath::IsNearlyEqual( LastTransform->Scale.Y, CurrentTransform.Scale.Y );
-            bKeyZ &= !FMath::IsNearlyEqual( LastTransform->Scale.Z, CurrentTransform.Scale.Z );
-        }
-
-        if( iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyGroup && ( bKeyX || bKeyY || bKeyZ ) )
-        {
-            bKeyX = bKeyY = bKeyZ = true;
-        }
-
-        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::ScaleX ) )
-        {
-            bKeyX = false;
-        }
-        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::ScaleY ) )
-        {
-            bKeyY = false;
-        }
-        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::ScaleZ ) )
-        {
-            bKeyZ = false;
-        }
-
-        FVector KeyVector = CurrentTransform.Scale;
-        //FVector KeyVector = RecomposedTransform.Scale;
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 6, KeyVector.X, bKeyX ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 7, KeyVector.Y, bKeyY ) );
-        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 8, KeyVector.Z, bKeyZ ) );
-    }
-}
-
-// From ...\UE_4.26\Engine\Source\Editor\MovieSceneTools\Public\KeyframeTrackEditor.h
-static
-bool
-AddKeysToSection( ISequencer& iSequencer, UMovieSceneSection* Section, FFrameNumber KeyTime, const FGeneratedTrackKeys& Keys, ESequencerKeyMode KeyMode, EKeyFrameTrackEditorSetDefault SetDefault = EKeyFrameTrackEditorSetDefault::SetDefault )
-{
-    EAutoChangeMode AutoChangeMode = iSequencer.GetAutoChangeMode();
-
-    FMovieSceneChannelProxy& Proxy = Section->GetChannelProxy();
-
-    const bool bSetDefaults = iSequencer.GetAutoSetTrackDefaults() && ( SetDefault != EKeyFrameTrackEditorSetDefault::DoNotSetDefault );
-
-    // The default value is a value for the channel when there are no keyframes. For example, if you add keys and
-    // then delete them all, the default value is the value of the channel. In the implementation of ApplyDefault,
-    // all the setters check that the default value is only set when there are NO keyframes. So, ApplyDefault needs
-    // to be called here in AddKeysToSection BEFORE any keys are added.
-    if( bSetDefaults )
-    {
-        for( const FMovieSceneChannelValueSetter& GeneratedKey : Keys )
-        {
-            GeneratedKey->ApplyDefault( Section, Proxy, SetDefault );
-        }
-    }
-
-    bool key_created = false;
-
-    if( KeyMode != ESequencerKeyMode::AutoKey || AutoChangeMode == EAutoChangeMode::AutoKey || AutoChangeMode == EAutoChangeMode::All )
-    {
-        EMovieSceneKeyInterpolation InterpolationMode = iSequencer.GetKeyInterpolation();
-
-        const bool bKeyEvenIfUnchanged =
-            KeyMode == ESequencerKeyMode::ManualKeyForced ||
-            iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyAll ||
-            iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyGroup;
-
-        const bool bKeyEvenIfEmpty =
-            ( KeyMode == ESequencerKeyMode::AutoKey && AutoChangeMode == EAutoChangeMode::All ) ||
-            KeyMode == ESequencerKeyMode::ManualKeyForced;
-
-        for( const FMovieSceneChannelValueSetter& GeneratedKey : Keys )
-        {
-            key_created |= GeneratedKey->Apply( Section, Proxy, KeyTime, InterpolationMode, bKeyEvenIfUnchanged, bKeyEvenIfEmpty );
-        }
-    }
-
-    return key_created;
 }
 
 //static
@@ -1221,7 +1016,7 @@ ShotSequenceTools::StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequen
 
     //---
 
-    bool key_created = AddKeysToSection( iSequencer, section, iFrameNumber, generated_keys, ESequencerKeyMode::AutoKey );
+    bool key_created = AddKeysToSection( iSequencer, section, iFrameNumber, generated_keys, ESequencerKeyMode::AutoKey, EKeyFrameTrackEditorSetDefault::SetDefault );
 
 //TODO: set all (?) key animations ?
 
@@ -1397,8 +1192,12 @@ ShotSequenceTools::GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSe
 
 //static
 bool
-ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AActor>> ioActors, ACineCameraActor* ioCamera, float iNewFocalLength, EScaleActor iScaleType )
+ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AActor>> ioActors, ACineCameraActor* ioCamera, float iNewFocalLength, EScaleActor iScaleType, TSharedPtr<ISequencer> iSequencer )
 {
+    //const FScopedTransaction transaction( LOCTEXT( "transaction.set-camera-focal-length-and-scale-actor", "Set Camera Focal Length and Scale Actor" ) );
+
+    //---
+
     struct FParameterCache
     {
         TWeakObjectPtr<AActor> mActor;
@@ -1430,6 +1229,8 @@ ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AAct
 
         FVector new_camera_view_size = ActorHelpers::ComputeSizeOfCameraView( ioCamera, old_parameter.mCurrentDistance );
 
+        bool update_channels = false;
+
         switch( iScaleType )
         {
             // Until EScaleActor::kFitToCamera will be removed
@@ -1443,6 +1244,8 @@ ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AAct
                 FVector new_actor_scale = old_parameter.mActorScale * ratio;
 
                 old_parameter.mActor->SetActorScale3D( new_actor_scale );
+
+                update_channels = true;
             }
             break;
 
@@ -1452,6 +1255,9 @@ ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AAct
 
             default: checkNoEntry();
         }
+
+        if( update_channels )
+            UpdateChannel( iSequencer, old_parameter.mActor.Get(), ioCamera, EMovieSceneTransformChannel::Scale );
     }
 
     return true;

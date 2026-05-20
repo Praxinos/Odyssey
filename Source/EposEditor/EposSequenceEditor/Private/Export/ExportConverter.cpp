@@ -82,16 +82,12 @@ FExportConverter::ProcessAnimationCuts( UShotSequence& iShotSequence, FMovieScen
 {
     ISequencer* sequencer = mSequencer.Pin().Get();
 
-    TArray<AOdysseyAnimationActor*> animation_actors;
-    TArray<FGuid> animation_bindings;
-    /*int32 num_animations =*/ ShotSequenceHelpers::GetAllAnimations( *sequencer, &iShotSequence, iSequenceId, EGetAnimation::kAll, &animation_actors, &animation_bindings );
+    TArray<FGuid> animation_bindings =  ShotSequenceHelpers::GetAnimationBindings( *sequencer, &iShotSequence, iSequenceId );
 
     for( FGuid animation_binding : animation_bindings )
     {
-        AOdysseyAnimationActor* animation_actor = animation_actors[animation_bindings.IndexOfByKey( animation_binding )];
-        check( animation_actor );
         ShotSequenceHelpers::FFindOrCreateTimelineResult result = ShotSequenceHelpers::FindTimelineTrackAndSections( *sequencer, &iShotSequence, iSequenceId, animation_binding );
-        check( animation_actors.Contains( result.mAnimationActor.Get() ) );
+        //check( animation_actors.Contains( result.mAnimationActor.Get() ) );
 
         for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result.mSections )
         {

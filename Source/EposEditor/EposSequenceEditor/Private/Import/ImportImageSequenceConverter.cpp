@@ -30,9 +30,10 @@
 
 //---
 
-FImportImageSequenceConverter::FImportImageSequenceConverter( const FImportImageSequenceStruct* iImageSequenceStruct, TWeakPtr<ISequencer> iSequencer, UBoardSequence* ioBoardSequence )
+FImportImageSequenceConverter::FImportImageSequenceConverter( const FImportImageSequenceStruct* iImageSequenceStruct, bool iSpawnable, TWeakPtr<ISequencer> iSequencer, UBoardSequence* ioBoardSequence )
     : mSequencer( iSequencer )
     , mImageSequenceStruct( iImageSequenceStruct )
+    , mSpawnable( iSpawnable )
     , mBoardSequence( ioBoardSequence )
 {
     check( iSequencer.Pin()->GetFocusedMovieSceneSequence() == ioBoardSequence );
@@ -245,9 +246,11 @@ FImportImageSequenceConverter::CreateAnimation( const TArray<FImportImageSequenc
 
     {
         FCameraArgs camera_args;
+        camera_args.mSpawnable = mSpawnable;
         FAnimationArgs animation_args;
         animation_args.mMargin = 0.f;
         animation_args.mAnimation = new_animation;
+        animation_args.mSpawnable = mSpawnable;
         BoardSequenceTools::CreateCameraWithAnimation( sequencer, iSubSection->GetTrueRange().GetLowerBoundValue(), camera_args, animation_args );
     }
 

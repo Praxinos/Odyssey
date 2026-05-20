@@ -110,7 +110,7 @@ public:
      * Create a camera in a subsection at the given frame
      */
     UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board" )
-    static void CreateCameraWithAnimation( UMovieSceneSubSection* SubSection );
+    static void CreateCameraWithAnimation( UMovieSceneSubSection* SubSection, bool iSpawnable = true );
 
 public:
 
@@ -118,7 +118,7 @@ public:
      * Create a animation in a subsection at the given frame
      */
     UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board" )
-    static void CreateAnimation( UMovieSceneSubSection* SubSection );
+    static void CreateAnimation( UMovieSceneSubSection* SubSection, bool iSpawnable = true );
 
     /**
      * Collapse animation's keys area
@@ -268,7 +268,7 @@ public:
      * Create a camera in a shot at the given frame
      */
     UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Shot" )
-    static void CreateCameraWithAnimation();
+    static void CreateCameraWithAnimation( bool iSpawnable = true );
 
 public:
 
@@ -276,7 +276,7 @@ public:
      * Create a animation in a shot at the given frame
      */
     UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Shot" )
-    static void CreateAnimation();
+    static void CreateAnimation( bool iSpawnable = true );
 
     /**
      * Activate the lighttable on the plane

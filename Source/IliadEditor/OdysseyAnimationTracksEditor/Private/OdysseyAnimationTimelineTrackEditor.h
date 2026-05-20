@@ -34,4 +34,9 @@ private:
     void AddAnimationTrack(TArray<FGuid> ObjectBindings);
     FKeyPropertyResult AddAnimationTrackKeyInternal(FFrameNumber KeyTime, TArray<FGuid> ObjectBindings);
     FReply OnAddButtonClicked(FGuid iObjectBinding);
+
+private:
+    virtual void OnAnimatedPropertyChanged( const FPropertyChangedParams& PropertyChangedParams );
+
+    FKeyPropertyResult UpdateAnimationInDetailsInternal( FFrameNumber KeyTime, FPropertyChangedParams PropertyChangedParams );
 };

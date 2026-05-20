@@ -287,8 +287,19 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
 
         BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *section_object, sequencer->GetFocusedTemplateID() );
-        TArray<FGuid> animation_bindings;
-        ShotSequenceHelpers::GetAllAnimations( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kSelectedOnly, nullptr, &animation_bindings );
+
+        TSet<FGuid> animation_bindings_selected;
+        TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( *sequencer, result.mInnerSequence, result.mInnerSequenceId );
+        for( FGuid animation_binding : animation_bindings )
+        {
+            TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawned( *sequencer, result.mInnerSequence, result.mInnerSequenceId, animation_binding );
+
+            TArray<AOdysseyAnimationActor*> animation_actors_selected;
+            ShotSequenceTools::FilterSelectedAnimations( animation_actors, &animation_actors_selected );
+            if( animation_actors_selected.Num() )
+                animation_bindings_selected.Add( animation_binding );
+        }
+        animation_bindings = animation_bindings_selected.Array();
 
         if( animation_bindings.Contains( mBinding.GetGuid() ) )
             ::ToggleKeysAreaVisibility5( section_object, animation_bindings, mBinding.GetGuid() );
@@ -384,8 +395,19 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
 
         BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection_object, sequencer->GetFocusedTemplateID() );
-        TArray<FGuid> animation_bindings;
-        ShotSequenceHelpers::GetAllAnimations( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kSelectedOnly, nullptr, &animation_bindings );
+
+        TSet<FGuid> animation_bindings_selected;
+        TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( *sequencer, result.mInnerSequence, result.mInnerSequenceId );
+        for( FGuid animation_binding : animation_bindings )
+        {
+            TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawned( *sequencer, result.mInnerSequence, result.mInnerSequenceId, animation_binding );
+
+            TArray<AOdysseyAnimationActor*> animation_actors_selected;
+            ShotSequenceTools::FilterSelectedAnimations( animation_actors, &animation_actors_selected );
+            if( animation_actors_selected.Num() )
+                animation_bindings_selected.Add( animation_binding );
+        }
+        animation_bindings = animation_bindings_selected.Array();
 
         if( animation_bindings.Contains( mBinding.GetGuid() ) )
             BoardSequenceTools::DetachAnimation( sequencer, subsection_object, animation_bindings );
@@ -439,8 +461,19 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
         FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
 
         BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection_object, sequencer->GetFocusedTemplateID() );
-        TArray<FGuid> animation_bindings;
-        ShotSequenceHelpers::GetAllAnimations( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kSelectedOnly, nullptr, &animation_bindings );
+
+        TSet<FGuid> animation_bindings_selected;
+        TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( *sequencer, result.mInnerSequence, result.mInnerSequenceId );
+        for( FGuid animation_binding : animation_bindings )
+        {
+            TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawned( *sequencer, result.mInnerSequence, result.mInnerSequenceId, animation_binding );
+
+            TArray<AOdysseyAnimationActor*> animation_actors_selected;
+            ShotSequenceTools::FilterSelectedAnimations( animation_actors, &animation_actors_selected );
+            if( animation_actors_selected.Num() )
+                animation_bindings_selected.Add( animation_binding );
+        }
+        animation_bindings = animation_bindings_selected.Array();
 
         if( animation_bindings.Contains( mBinding.GetGuid() ) )
             BoardSequenceTools::CreateAnimationCut( sequencer, subsection_object, local_frame, animation_bindings );
@@ -567,56 +600,60 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
 
     //---
 
-    auto IsWarning = [this]() -> bool
-    {
-        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
-        ISequencer* sequencer = board_section->GetSequencer().Get();
+    // This code is kept as an example to display a warning button in the animation titlebar
+    // - to indicate a mismatch of sections length
+    // - ...
 
-        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+    //auto IsWarning = [this]() -> bool
+    //{
+    //    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    //    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    //    ISequencer* sequencer = board_section->GetSequencer().Get();
 
-        //-
+    //    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
 
-        ShotSequenceHelpers::FFindOrCreateAnimationVisibilityResult animation_visibility_result = ShotSequenceHelpers::FindAnimationVisibilityTrackAndSections( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+    //    //-
 
-        if( !animation_visibility_result.mTrack.IsValid() )
-            return false;
+    //    ShotSequenceHelpers::FFindOrCreateAnimationVisibilityResult animation_visibility_result = ShotSequenceHelpers::FindAnimationVisibilityTrackAndSections( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
 
-        if( animation_visibility_result.mSections.Num() == 0 )
-            return false;
+    //    if( !animation_visibility_result.mTrack.IsValid() )
+    //        return false;
 
-        TRange<FFrameNumber> full_range( TRange<FFrameNumber>::Empty() );
-        for( auto section : animation_visibility_result.mSections )
-            full_range = TRange<FFrameNumber>::Hull( full_range, section->GetTrueRange() );
+    //    if( animation_visibility_result.mSections.Num() == 0 )
+    //        return false;
 
-        return full_range != result.mInnerMovieScene->GetPlaybackRange();
-    };
+    //    TRange<FFrameNumber> full_range( TRange<FFrameNumber>::Empty() );
+    //    for( auto section : animation_visibility_result.mSections )
+    //        full_range = TRange<FFrameNumber>::Hull( full_range, section->GetTrueRange() );
 
-    auto GetWarningTooltip = [this]() -> FText
-    {
-        return LOCTEXT( "warning-tooltip", "Warning: the animation visibility track doesn't match the shot length, set it maually" );
-    };
+    //    return full_range != result.mInnerMovieScene->GetPlaybackRange();
+    //};
 
-    resize_params.ClippingPriority = int32(ePriority::VeryLow) + 10;
+    //auto GetWarningTooltip = [this]() -> FText
+    //{
+    //    return LOCTEXT( "warning-tooltip", "Warning: the animation visibility track doesn't match the shot length, set it maually" );
+    //};
 
-    LeftToolbarBuilder.AddToolBarButton(
-        FUIAction(
-            FExecuteAction(),
-            FCanExecuteAction(),
-            FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( IsWarning )
-        ),
-        NAME_None,
-        FText::GetEmpty(),
-        MakeAttributeLambda( GetWarningTooltip ),
-        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Icons.Warning" ),
-        EUserInterfaceActionType::Button,
-        NAME_None,
-        TAttribute<EVisibility>(),
-        //mOptionalWidgetsVisibility,
-        TAttribute<FText>(),
-        resize_params
-    );
+    //resize_params.ClippingPriority = int32(ePriority::VeryLow) + 10;
+
+    //LeftToolbarBuilder.AddToolBarButton(
+    //    FUIAction(
+    //        FExecuteAction(),
+    //        FCanExecuteAction(),
+    //        FGetActionCheckState(),
+    //        FIsActionButtonVisible::CreateLambda( IsWarning )
+    //    ),
+    //    NAME_None,
+    //    FText::GetEmpty(),
+    //    MakeAttributeLambda( GetWarningTooltip ),
+    //    FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Icons.Warning" ),
+    //    EUserInterfaceActionType::Button,
+    //    NAME_None,
+    //    TAttribute<EVisibility>(),
+    //    //mOptionalWidgetsVisibility,
+    //    TAttribute<FText>(),
+    //    resize_params
+    //);
 
     //---
 
@@ -769,8 +806,19 @@ SCinematicBoardSectionAnimationTitle::ToggleAnimationVisibility()
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
-    TArray<FGuid> animation_bindings;
-    ShotSequenceHelpers::GetAllAnimations( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kSelectedOnly, nullptr, &animation_bindings );
+
+    TSet<FGuid> animation_bindings_selected;
+    TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( *sequencer, result.mInnerSequence, result.mInnerSequenceId );
+    for( FGuid animation_binding : animation_bindings )
+    {
+        TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawned( *sequencer, result.mInnerSequence, result.mInnerSequenceId, animation_binding );
+
+        TArray<AOdysseyAnimationActor*> animation_actors_selected;
+        ShotSequenceTools::FilterSelectedAnimations( animation_actors, &animation_actors_selected );
+        if( animation_actors_selected.Num() )
+            animation_bindings_selected.Add( animation_binding );
+    }
+    animation_bindings = animation_bindings_selected.Array();
 
     if( animation_bindings.Contains( mBinding.GetGuid() ) )
         BoardSequenceTools::ToggleAnimationVisibility( sequencer, *subsection_object, animation_bindings, mBinding.GetGuid() );
@@ -798,8 +846,19 @@ SCinematicBoardSectionAnimationTitle::ToggleLighttable()
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
-    TArray<FGuid> animation_bindings;
-    ShotSequenceHelpers::GetAllAnimations( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kSelectedOnly, nullptr, &animation_bindings );
+
+    TSet<FGuid> animation_bindings_selected;
+    TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( *sequencer, result.mInnerSequence, result.mInnerSequenceId );
+    for( FGuid animation_binding : animation_bindings )
+    {
+        TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawned( *sequencer, result.mInnerSequence, result.mInnerSequenceId, animation_binding );
+
+        TArray<AOdysseyAnimationActor*> animation_actors_selected;
+        ShotSequenceTools::FilterSelectedAnimations( animation_actors, &animation_actors_selected );
+        if( animation_actors_selected.Num() )
+            animation_bindings_selected.Add( animation_binding );
+    }
+    animation_bindings = animation_bindings_selected.Array();
 
     // This is the current animation which is the reference state
     bool is_reference_on = LighttableTools::IsOn( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
@@ -2882,8 +2941,19 @@ SCinematicBoardSectionAnimation::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
     //---
 
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *board_section_object, sequencer->GetFocusedTemplateID() );
-    TArray<FGuid> animation_bindings;
-    ShotSequenceHelpers::GetAllAnimations( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kSelectedOnly, nullptr, &animation_bindings );
+
+    TSet<FGuid> animation_bindings_selected;
+    TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( *sequencer, result.mInnerSequence, result.mInnerSequenceId );
+    for( FGuid animation_binding : animation_bindings )
+    {
+        TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawned( *sequencer, result.mInnerSequence, result.mInnerSequenceId, animation_binding );
+
+        TArray<AOdysseyAnimationActor*> animation_actors_selected;
+        ShotSequenceTools::FilterSelectedAnimations( animation_actors, &animation_actors_selected );
+        if( animation_actors_selected.Num() )
+            animation_bindings_selected.Add( animation_binding );
+    }
+    animation_bindings = animation_bindings_selected.Array();
 
     if( !animation_bindings.Contains( mBinding.GetGuid() ) )
     {
@@ -3150,8 +3220,12 @@ SCinematicBoardSectionAnimations::CreateAnimation( TSharedRef<FString> iAnimatio
 
     ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
     UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+
+    sequencer->SetLocalTimeDirectly( section_object->GetInclusiveStartFrame() );
+
     FAnimationArgs animation_args;
     animation_args.mName = *iAnimationName;
+    animation_args.mSpawnable = GetDefault<UEposTracksEditorSettings>()->bSpawnable;
     BoardSequenceTools::CreateAnimation( sequencer, section_object->GetInclusiveStartFrame(), animation_args );
 }
 
@@ -3169,9 +3243,9 @@ SCinematicBoardSectionAnimations::MakeCreateAnimationMenu()
     UEposMovieSceneSequence* inner_epos_sequence = Cast<UEposMovieSceneSequence>( result.mInnerSequence );
     check( inner_epos_sequence );
 
-    FString animation_path;
+    FString animation_path_not_used;
     TSharedRef<FString> animation_name = MakeShared<FString>();
-    NamingConvention::GenerateAnimationActorPathName( *sequencer, *inner_epos_sequence, result.mInnerSequenceId, animation_path, *animation_name );
+    NamingConvention::GenerateAnimationActorPathName( *sequencer, *inner_epos_sequence, result.mInnerSequenceId, true /* Whatever as path is not used */, animation_path_not_used, *animation_name );
 
     //---
 
@@ -3351,12 +3425,8 @@ SCinematicBoardSectionAnimations::RebuildAnimationList()
 
     //---
 
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *mSequencer.Pin().Get(), subsection, mSequencer.Pin()->GetFocusedTemplateID() );
-    check( inner_sequence == result.mInnerSequence ); // Just to test
-
     // Get all unordered animations
-    TArray<FGuid> unordered_animation_bindings;
-    int animation_count = ShotSequenceHelpers::GetAllAnimations( *mSequencer.Pin().Get(), result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kAll, nullptr, &unordered_animation_bindings );
+    TArray<FGuid> unordered_animation_bindings = BoardSequenceHelpers::GetAnimationBindings( *mSequencer.Pin().Get(), subsection, mSequencer.Pin()->GetFocusedTemplateID() );
 
     // Find their corresponding scene binding
     TArray<FMovieSceneBinding*> ordered_scene_bindings;
@@ -3427,7 +3497,7 @@ SCinematicBoardSectionAnimations::RebuildAnimationList()
     //    mPossessables.Add( MakeShared<FMovieScenePossessable>( possessable ) );
     //}
 
-    for( int i = 0; i < animation_count; i++ )
+    for( int i = 0; i < unordered_animation_bindings.Num(); i++ )
     {
         FMovieScenePossessable possessable = *inner_moviescene->FindPossessable( ordered_animation_bindings[i] );
 

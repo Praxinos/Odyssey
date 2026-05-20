@@ -49,6 +49,10 @@ public:
     /** The duration to override all panels. */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ImportImageSequenceOptions, meta=(EditCondition=bShouldOverrideDuration) )
     int32 OverrideDuration = 64;
+
+    /** Actors created are spawnables (otherwise possessables). */
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ImportImageSequenceOptions )
+    bool bSpawnable = true;
 };
 
 //---

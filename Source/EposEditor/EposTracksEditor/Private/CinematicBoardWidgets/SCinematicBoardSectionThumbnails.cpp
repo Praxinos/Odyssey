@@ -201,8 +201,10 @@ SCinematicBoardSectionThumbnails::CreateCameraWithAnimation( TSharedRef<FString>
     UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
     FCameraArgs camera_args;
     camera_args.mName = *iCameraName;
+    camera_args.mSpawnable = GetDefault<UEposTracksEditorSettings>()->bSpawnable;
     FAnimationArgs animation_args;
     animation_args.mName = *iAnimationName;
+    animation_args.mSpawnable = GetDefault<UEposTracksEditorSettings>()->bSpawnable;
     BoardSequenceTools::CreateCameraWithAnimation( sequencer, section_object->GetInclusiveStartFrame(), camera_args, animation_args );
 }
 
@@ -220,13 +222,13 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
     UEposMovieSceneSequence* inner_epos_sequence = Cast<UEposMovieSceneSequence>( result.mInnerSequence );
     check( inner_epos_sequence );
 
-    FString camera_path;
+    FString camera_path_not_used;
     TSharedRef<FString> camera_name = MakeShared<FString>();
-    NamingConvention::GenerateCameraActorPathName( *sequencer, *inner_epos_sequence, result.mInnerSequenceId, camera_path, *camera_name );
+    NamingConvention::GenerateCameraActorPathName( *sequencer, *inner_epos_sequence, result.mInnerSequenceId, true /* Whatever as path is not used */, camera_path_not_used, *camera_name );
 
-    FString animation_path;
+    FString animation_path_not_used;
     TSharedRef<FString> animation_name = MakeShared<FString>();
-    NamingConvention::GenerateAnimationActorPathName( *sequencer, *inner_epos_sequence, result.mInnerSequenceId, animation_path, *animation_name );
+    NamingConvention::GenerateAnimationActorPathName( *sequencer, *inner_epos_sequence, result.mInnerSequenceId, true /* Whatever as path is not used */, animation_path_not_used, *animation_name );
 
     auto CanCreateCamera = [this]() -> bool
         {

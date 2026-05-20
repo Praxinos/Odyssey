@@ -33,12 +33,18 @@ public:
     virtual void BindPossessableObject( const FGuid& ObjectId, UObject& PossessedObject, UObject* Context ) override;
     virtual bool CanPossessObject( UObject& Object, UObject* InPlaybackContext ) const override;
     virtual bool CanRebindPossessable( const FMovieScenePossessable& InPossessable ) const override;
-    virtual void LocateBoundObjects( const FGuid& ObjectId, UObject* Context, TArray<UObject*, TInlineAllocator<1>>& OutObjects ) const override;
+    virtual FGuid FindBindingFromObject( UObject* InObject, TSharedRef<const FSharedPlaybackState> SharedPlaybackState ) const override;
+    virtual void GatherExpiredObjects( const FMovieSceneObjectCache& InObjectCache, TArray<FGuid>& OutInvalidIDs ) const override;
     virtual UMovieScene* GetMovieScene() const override;
     virtual UObject* GetParentObject( UObject* Object ) const override;
     virtual void UnbindPossessableObjects( const FGuid& ObjectId ) override;
     virtual void UnbindObjects( const FGuid& ObjectId, const TArray<UObject*>& InObjects, UObject* Context ) override;
     virtual void UnbindInvalidObjects( const FGuid& ObjectId, UObject* Context ) override;
+
+    virtual bool AllowsSpawnableObjects() const override;
+    virtual bool AllowsCustomBindings() const override;
+
+    virtual UObject* MakeSpawnableTemplateFromInstance( UObject& InSourceObject, FName ObjectName ) override;
 
     virtual const FMovieSceneBindingReferences* GetBindingReferences() const override;
 
@@ -63,7 +69,7 @@ public:
 protected:
 #if WITH_EDITOR
     virtual FGuid CreatePossessable( UObject* ObjectToPossess ) override;
-    //virtual FGuid CreateSpawnable( UObject* ObjectToSpawn ) override;
+    virtual FGuid CreateSpawnable( UObject* ObjectToSpawn ) override;
 
     FGuid FindOrAddBinding( UObject* ObjectToPossess );
 #endif
@@ -74,13 +80,15 @@ public:
 
     // The list should only contain one root cinecamera actor and its multiple components
     UPROPERTY()
-    FShotSequenceBindingReferences CameraBindingReferences;
+    FShotSequenceBindingReferences CameraBindingReferences_DEPRECATED;
     UPROPERTY()
     FShotSequenceBindingReferences PlanesBindingReferences_DEPRECATED;
     UPROPERTY()
-    FShotSequenceBindingReferences AnimationsBindingReferences;
+    FShotSequenceBindingReferences AnimationsBindingReferences_DEPRECATED;
     UPROPERTY()
-    FShotSequenceBindingReferences ActorsBindingReferences;
+    FShotSequenceBindingReferences ActorsBindingReferences_DEPRECATED;
+    UPROPERTY()
+    FShotSequenceBindingReferences BindingReferences;
 
     UPROPERTY()
     TMap< FGuid, FLevelSequenceBindingReference > CameraBindingIdToReferences_DEPRECATED;

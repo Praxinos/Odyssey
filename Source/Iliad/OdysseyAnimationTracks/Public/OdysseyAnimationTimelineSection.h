@@ -30,6 +30,8 @@ public:
 public:
     UOdysseyAnimationTimelineSection(const FObjectInitializer& ObjInitializer);
 
+    virtual void SetRange( const TRange<FFrameNumber>& iNewRange );
+
 public:
     UOdysseyAnimation* GetAnimation() const;
     EOdysseyAnimationPlayerPostBehaviour GetPreBehaviour() const;
