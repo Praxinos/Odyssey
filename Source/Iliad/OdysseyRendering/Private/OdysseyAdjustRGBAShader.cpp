@@ -124,7 +124,7 @@ FOdysseyAdjustRGBAShader::InitTextureFromCurves(
     ENQUEUE_RENDER_COMMAND(UpdateRTCommand)(
         [RTResource, PixelData, Region](FRHICommandListImmediate& RHICmdList)
         {
-            RHIUpdateTexture2D(
+            RHICmdList.UpdateTexture2D(
                 RTResource->GetRenderTargetTexture(),
                 0,
                 Region,

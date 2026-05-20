@@ -211,7 +211,7 @@ SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FOdyssey
 
     //Setup Viewport
     mViewportClient = MakeShared<FOdysseyImportTexturesViewportClient>(mImportData.GetDestinationWidth(), mImportData.GetDestinationHeight(), maxWidth, maxHeight);
-    mSceneViewport = MakeShared<FSceneViewport>(mViewportClient.Get(), mViewportWidget);
+    mSceneViewport = MakeShared<FSceneViewport>(mViewportClient, mViewportWidget);
     mViewportWidget->SetViewportInterface(mSceneViewport.ToSharedRef());
     mViewportClient->SetTexture(mPreviewRenderTarget.Get());
 

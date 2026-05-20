@@ -347,25 +347,25 @@ FReply SOdysseyPackageReportDialog::CancelClicked()
 void
 SOdysseyPackageReportDialog::HandleOnFormatChanged( int32 iSelection, ESelectInfo::Type iSelectInfo )
 {
-    mExportFormat = TEnumAsByte<EExportImageFormat>( iSelection );
+    mExportFormat = EExportImageFormat( iSelection );
 }
 
 int32
 SOdysseyPackageReportDialog::GetSelectedExportImageFormat() const
 {
-    return mExportFormat;
+    return static_cast<int32>(mExportFormat);
 }
 
 FString
-SOdysseyPackageReportDialog::GetExtensionFromExportImageFormat( TEnumAsByte<EExportImageFormat> iExportImageFormat )
+SOdysseyPackageReportDialog::GetExtensionFromExportImageFormat( EExportImageFormat iExportImageFormat )
 {
     switch( iExportImageFormat )
     {
-        case ExportImageFormat_PNG:          return TEXT( "png" );
-        case ExportImageFormat_BMP:          return TEXT( "bmp" );
-        case ExportImageFormat_TGA:          return TEXT( "tga" );
-        case ExportImageFormat_JPG:          return TEXT( "jpg" );
-        case ExportImageFormat_HDR:          return TEXT( "hdr" );
+        case EExportImageFormat::ExportImageFormat_PNG:          return TEXT( "png" );
+        case EExportImageFormat::ExportImageFormat_BMP:          return TEXT( "bmp" );
+        case EExportImageFormat::ExportImageFormat_TGA:          return TEXT( "tga" );
+        case EExportImageFormat::ExportImageFormat_JPG:          return TEXT( "jpg" );
+        case EExportImageFormat::ExportImageFormat_HDR:          return TEXT( "hdr" );
         default: return TEXT( "png" );
     }
 }
