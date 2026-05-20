@@ -200,8 +200,8 @@ FEposSequenceEditorModule::RegisterSettings()
     //~
 
     SettingsModule->RegisterSettings( "Editor", "ContentEditors", "EposSequencerEditor" /* Name used inside toolkit UniqueName */,
-                                        LOCTEXT( "EposSequencerEditorSettingsName", "Epos Sequencer Editor" ),
-                                        LOCTEXT( "EposSequencerEditorSettingsDescription", "Configure the look and feel of the Epos Sequencer Editor." ),
+                                        LOCTEXT( "EposSequencerEditorSettingsName", "Odyssey - Storyboard Sequencer Editor" ),
+                                        LOCTEXT( "EposSequencerEditorSettingsDescription", "Configure the look and feel of the Odyssey Storyboard Sequencer Editor." ),
                                         mSequencerSettings );
 }
 
