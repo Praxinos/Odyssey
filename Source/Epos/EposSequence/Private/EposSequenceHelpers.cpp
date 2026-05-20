@@ -949,7 +949,7 @@ TArray<FFrameNumber>
 BoardSequenceHelpers::GetAllAnimationCutTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber )
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
+    if( !result.mInnerSequence || result.mInnerSequence->IsA<UBoardSequence>() )
         return TArray<FFrameNumber>();
 
     return ShotSequenceHelpers::GetAllAnimationCutTimes( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
@@ -1485,7 +1485,7 @@ BoardSequenceHelpers::BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlay
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
 
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
+    if( !result.mInnerSequence || result.mInnerSequence->IsA<UBoardSequence>() )
         return FChannelProxyBySectionMap();
 
     return ShotSequenceHelpers::BuildCameraTransformChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
@@ -1547,7 +1547,7 @@ BoardSequenceHelpers::BuildAnimationsTransformChannelProxy( IMovieScenePlayer& i
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
 
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
+    if( !result.mInnerSequence || result.mInnerSequence->IsA<UBoardSequence>() )
         return TMap<FGuid, FChannelProxyBySectionMap>();
 
     return ShotSequenceHelpers::BuildAnimationsTransformChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
@@ -1616,7 +1616,7 @@ BoardSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iP
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
 
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
+    if( !result.mInnerSequence || result.mInnerSequence->IsA<UBoardSequence>() )
         return TMap<FGuid, FChannelProxyBySectionMap>();
 
     return ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
@@ -1674,7 +1674,7 @@ BoardSequenceHelpers::BuildAnimationsOpacityChannelProxy( IMovieScenePlayer& iPl
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
 
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
+    if( !result.mInnerSequence || result.mInnerSequence->IsA<UBoardSequence>() )
         return TMap<FGuid, FChannelProxyBySectionMap>();
 
     return ShotSequenceHelpers::BuildAnimationsOpacityChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
