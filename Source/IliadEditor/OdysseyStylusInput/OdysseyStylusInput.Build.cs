@@ -38,14 +38,6 @@ namespace UnrealBuildTool.Rules
             }
             // bAddDefaultIncludePaths = true;
 
-
-            PublicIncludePaths.AddRange(
-                new string[] {
-                    Path.Combine(ModuleDirectory, "Public", "Settings")
-                    // ... add public include paths required here ...
-                }
-                );
-
             PrivateIncludePaths.AddRange(
                 new string[] {
                     // ... add other private include paths required here ...
