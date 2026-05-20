@@ -184,7 +184,7 @@ FCinematicBoardTrackEditor::BuildOutlinerColumnWidget( const FBuildColumnWidgetP
     {
         return UE::Sequencer::MakeAddButton(
             LOCTEXT( "CreateBoardShotText", "Shot/Board" ),
-            FOnGetContent::CreateSP( this, &FCinematicBoardTrackEditor::HandleAddSubSequenceComboButtonGetMenuContent, Params.TrackModel.AsWeak() ),
+            FOnGetContent::CreateSP( this, &FCinematicBoardTrackEditor::HandleAddSubSequenceComboButtonGetMenuContent, Params.ViewModel.AsWeak() ),
             Params.ViewModel );
     }
 
@@ -242,7 +242,7 @@ FCinematicBoardTrackEditor::BuildOutlinerColumnWidget( const FBuildColumnWidgetP
 }
 
 TSharedRef<SWidget>
-FCinematicBoardTrackEditor::HandleAddSubSequenceComboButtonGetMenuContent( UE::Sequencer::TWeakViewModelPtr<UE::Sequencer::ITrackExtension> WeakTrackModel )
+FCinematicBoardTrackEditor::HandleAddSubSequenceComboButtonGetMenuContent( UE::Sequencer::TWeakViewModelPtr<UE::Sequencer::FViewModel> WeakViewModel )
 {
     FMenuBuilder menuBuilder( true, GetSequencer()->GetCommandBindings() );
 

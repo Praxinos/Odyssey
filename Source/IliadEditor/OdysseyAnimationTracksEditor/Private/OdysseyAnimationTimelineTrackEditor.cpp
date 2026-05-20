@@ -8,6 +8,8 @@
 #include "MVVM/Extensions/ITrackExtension.h"
 #include "MVVM/ViewModels/SequencerEditorViewModel.h"
 #include "MVVM/ViewModels/OutlinerColumns/OutlinerColumnTypes.h"
+#include "MVVM/ViewModels/ViewModel.h"
+#include "MVVM/ViewModels/ViewModelIterators.h"
 #include "MVVM/Views/ViewUtilities.h"
 
 #include "OdysseyAnimation.h"
@@ -312,7 +314,19 @@ FOdysseyAnimationTimelineTrackEditor::AddAnimationTrackKeyInternal(FFrameNumber 
 TSharedPtr<SWidget>
 FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColumnWidgetParams& iParams, const FName& iColumnName)
 {
-    UOdysseyAnimationTimelineTrack* track = Cast<UOdysseyAnimationTimelineTrack>(iParams.TrackModel->GetTrack());
+    using namespace UE::Sequencer;
+
+    ::UE::Sequencer::TViewModelPtr<::UE::Sequencer::FViewModel> ViewModel = iParams.ViewModel;
+    if( !ViewModel )
+        return SNullWidget::NullWidget;
+
+    ::UE::Sequencer::TViewModelPtr<::UE::Sequencer::ITrackExtension> TrackModel = ViewModel->FindAncestorOfType<::UE::Sequencer::ITrackExtension>( true );
+    if( !TrackModel )
+        return SNullWidget::NullWidget;
+
+    UMovieSceneTrack* Track = TrackModel->GetTrack();
+
+    UOdysseyAnimationTimelineTrack* track = Cast<UOdysseyAnimationTimelineTrack>( Track );
     ::UE::Sequencer::TViewModelPtr< ::UE::Sequencer::FSequencerEditorViewModel > editorViewModel = iParams.Editor->CastThisShared< ::UE::Sequencer::FSequencerEditorViewModel >();
     ::UE::Sequencer::TViewModelPtr<::UE::Sequencer::IOutlinerExtension> outlinerExtension = iParams.ViewModel.ImplicitCast();
     if (!track || !editorViewModel || !outlinerExtension)

@@ -156,7 +156,7 @@ protected:
     UMovieSceneSubTrack* FindOrCreateSubTrack( UMovieScene* MovieScene, UMovieSceneTrack* Track ) const;
 
     /** Callback for generating the menu of the "Add Sequence" combo button. */
-    TSharedRef<SWidget> HandleAddSubSequenceComboButtonGetMenuContent( UE::Sequencer::TWeakViewModelPtr<UE::Sequencer::ITrackExtension> WeakTrackModel );
+    TSharedRef<SWidget> HandleAddSubSequenceComboButtonGetMenuContent( UE::Sequencer::TWeakViewModelPtr<UE::Sequencer::FViewModel> WeakViewModel );
 
 private:
 

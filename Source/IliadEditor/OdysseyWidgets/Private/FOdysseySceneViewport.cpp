@@ -5,7 +5,7 @@
 
 #include "Widgets/SViewport.h"
 
-FOdysseySceneViewport::FOdysseySceneViewport( FViewportClient* InViewportClient, TSharedPtr<SViewport> InViewportWidget )
+FOdysseySceneViewport::FOdysseySceneViewport( TSharedPtr<FViewportClient> InViewportClient, TSharedPtr<SViewport> InViewportWidget )
     : FSceneViewport(InViewportClient, InViewportWidget)
 {
 

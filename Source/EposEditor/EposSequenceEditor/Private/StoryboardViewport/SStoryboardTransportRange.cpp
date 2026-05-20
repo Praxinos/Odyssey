@@ -90,10 +90,10 @@ void SStoryboardTransportRange::SetTime(const FGeometry& MyGeometry, const FPoin
         FFrameTime ScrubTime = NewTimeSeconds * TickResolution;
 
         // Clamp first, snap to frame last
-        if (Sequencer->GetSequencerSettings()->ShouldKeepCursorInPlayRangeWhileScrubbing())
+        TRange<FFrameNumber> PlayheadScrubbingRange = Sequencer->GetSequencerSettings()->GetPlayheadScrubbingRange( WeakSequencer );
+        if( !PlayheadScrubbingRange.IsEmpty() )
         {
-            TRange<FFrameNumber> PlaybackRange = Sequencer->GetSubSequenceRange().Get( Sequencer->GetRootMovieSceneSequence()->GetMovieScene()->GetPlaybackRange() );
-            ScrubTime = UE::MovieScene::ClampToDiscreteRange(ScrubTime, PlaybackRange);
+            ScrubTime = UE::MovieScene::ClampToDiscreteRange( ScrubTime, PlayheadScrubbingRange );
         }
 
         ENearestKeyOption NearestKeyOption = ENearestKeyOption::NKO_None;

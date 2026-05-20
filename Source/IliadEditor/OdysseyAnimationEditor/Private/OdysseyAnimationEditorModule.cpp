@@ -71,13 +71,13 @@ void
 FOdysseyAnimationEditorModule::RegisterPlacementFactories()
 {
     // This assumes that this delegate is called AFTER the one registered in UPlacementSubsystem::Initialize()
-    FCoreDelegates::OnPostEngineInit.AddRaw( this, &FOdysseyAnimationEditorModule::RegisterFactoryDelayed );
+    FCoreDelegates::GetOnPostEngineInit().AddRaw( this, &FOdysseyAnimationEditorModule::RegisterFactoryDelayed );
 }
 
 void
 FOdysseyAnimationEditorModule::UnregisterPlacementFactories()
 {
-    FCoreDelegates::OnPostEngineInit.RemoveAll( this );
+    FCoreDelegates::GetOnPostEngineInit().RemoveAll( this );
 
     //check( GEditor );
     //UPlacementSubsystem* placementSubsystem = GEditor->GetEditorSubsystem<UPlacementSubsystem>();
