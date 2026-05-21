@@ -30,7 +30,7 @@ UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
     : Size( 25.0f )
     , bPressureSensitivity( false )
     , EditedPath( nullptr )
-    //, LineType ( EArianePainting3DGeometryMode::Flat )
+    , LineType ( EArianePathLineType::Tube )
     , bShowGrid ( true )
     , MaterialInterface ( nullptr )
 {

@@ -16,7 +16,7 @@ UArianeLayer::UArianeLayer()
     : //bVisible ( true )
       bLocked ( false )
     , bSelected ( false )
-    , bInvalidated ( false )
+    , bInvalidatedInParentFolder ( false )
     , Bounds ( FBoxSphereBounds(ForceInit) )
     , InvalidationFlags ( nullptr )
 {
@@ -132,9 +132,11 @@ UArianeLayer::GetParentFolder()
 void
 UArianeLayer::Invalidate( const FArianeLayerInvalidationFlags& InInvalidationFlags )
 {
-    if( ParentFolder )
+    if( ParentFolder && ( bInvalidatedInParentFolder == false ) )
     {
         ParentFolder->InvalidateChildLayer( this );
+
+        bInvalidatedInParentFolder = true;
     }
 
     InvalidationFlags->OR( InInvalidationFlags );
@@ -142,14 +144,15 @@ UArianeLayer::Invalidate( const FArianeLayerInvalidationFlags& InInvalidationFla
     //GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
 }
 
-bool UArianeLayer::IsInvalidated()
+void UArianeLayer::SetInvalidatedInParentFolder( bool bInInvalidatedInParentFolder )
 {
-    return bInvalidated;
+    bInvalidatedInParentFolder = bInInvalidatedInParentFolder;
 }
 
-void UArianeLayer::SetInvalidated( bool bInInvalidated )
+FArianeLayerInvalidationFlags*
+UArianeLayer::GetInvalidationFlags()
 {
-    bInvalidated = bInInvalidated;
+    return InvalidationFlags;
 }
 
 const FBoxSphereBounds&
@@ -162,8 +165,6 @@ void
 UArianeLayer::Update( bool Interactive )
 {
     OnPreUpdate.Broadcast( Interactive );
-
-    bInvalidated = false;
 
     // will call CalcBounds (nb: calling UMeshComponent::UpdateBounds() does not work sometimes, especially when then
     // path starts empty but this works.

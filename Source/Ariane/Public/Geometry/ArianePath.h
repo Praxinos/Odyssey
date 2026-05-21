@@ -146,6 +146,18 @@ public:
     FArianePath( UArianeLayerDrawing* InDrawingLayer );
 
 public:
+    /** overriden from ArianeObject */
+    virtual bool Update( bool Recurse, bool bClearFlags = true ) override;
+    /** overriden from ArianeObject */
+    virtual void UpdateBounds() override;
+    /** overriden from ArianeObject */
+    virtual void PostLoad() override;
+    /** overriden from ArianeObject */
+    virtual void PostEditUndo() override;
+    virtual void ExportProperties( FArianeObject* DestObject ) override;
+    virtual void Added() override;
+    virtual void Removed() override;
+
     /**
         * @brief Alloc a vertex. Nb: the vertex is a allocated inside a FInstancedStruct,
         * hence supports the unreal reflection system.
@@ -235,26 +247,29 @@ public:
     /** Invalidate all segments */
     void InvalidateAllSegments();
 
-    /** overriden from ArianeObject */
-    virtual bool Update( bool Recurse, bool bClearFlags = true ) override;
-    /** overriden from ArianeObject */
-    virtual void UpdateBounds() override;
-    /** overriden from ArianeObject */
-    virtual void PostLoad() override;
-    /** overriden from ArianeObject */
-    virtual void PostEditUndo() override;
-
-    void FindChains();
+    /** Get all chains (i.e all continguous sets of segments) */
     const TArray<Chain>& GetChains();
+
+    /** Set Line Type **/
     void SetLineType( EArianePathLineType LineType );
+
+    /** Get Line Type **/
     EArianePathLineType GetLineType();
+
+    /** Get Path Color **/
     const FColor& GetColor();
+
+    /** Set Path Color **/
     void  SetColor( const FColor& InColor );
-    virtual void ExportProperties( FArianeObject* DestObject ) override;
-    virtual void Added() override;
-    virtual void Removed() override;
+
+    /** Set Path Material **/
     void SetMaterial( UMaterialInterface* InMaterialInterface );
+
+    /** Get Path Material **/
     UMaterialInterface* GetMaterial();
+
+protected:
+    void FindChains();
 
 protected:
     UPROPERTY( EditAnywhere )

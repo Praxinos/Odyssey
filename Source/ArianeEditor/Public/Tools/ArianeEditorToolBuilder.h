@@ -36,7 +36,6 @@ protected:
 protected:
     UPROPERTY() // prevent GC
     mutable UArianeEditorTool* Tool;
-
     FArianeEditor* Editor;
     FString Type;
 };

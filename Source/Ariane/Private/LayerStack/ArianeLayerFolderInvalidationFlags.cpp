@@ -16,7 +16,7 @@ FArianeLayerFolderInvalidationFlags::HasBaseClass( uint32 BaseClass ) const
 }
 
 FArianeLayerFolderInvalidationFlags&
-FArianeLayerFolderInvalidationFlags::AND( const FArianeLayerFolderInvalidationFlags& RHS )
+FArianeLayerFolderInvalidationFlags::AND( const FArianeLayerInvalidationFlags& RHS )
 {
     Super::AND( RHS );
 
@@ -29,7 +29,7 @@ FArianeLayerFolderInvalidationFlags::AND( const FArianeLayerFolderInvalidationFl
 }
 
 FArianeLayerFolderInvalidationFlags&
-FArianeLayerFolderInvalidationFlags::OR( const FArianeLayerFolderInvalidationFlags& RHS )
+FArianeLayerFolderInvalidationFlags::OR( const FArianeLayerInvalidationFlags& RHS )
 {
     Super::OR( RHS );
 

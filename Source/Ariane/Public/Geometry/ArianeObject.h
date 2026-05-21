@@ -124,20 +124,64 @@ struct ARIANE_API FArianeObject
         /** Run any object-specific task required immediately after undoing / redoing */
         virtual void PostEditUndo();
 
+        /**
+         * @brief Export object's properties to another object
+         * @param DestObject the object that will receive the properties
+         */
         virtual void ExportProperties( FArianeObject* DestObject );
+
+        /** Get object's translation */
         FVector GetTranslation();
+
+        /** Get object's rotation */
         FVector GetRotationInDegrees();
+
+        /** Get object's scaling */
         FVector GetScaling();
+
+        /** Get object's Guid */
         const FGuid& GetGuid();
+
+        /**
+         * @brief Run a function to each object of the object tree
+         * @param Callback the function to run
+         */
         void Traverse( TFunction<TraversalReturnValue(FArianeObject*)> Callback );
+
+        /** Get object's parent object */
         FArianeObject* GetParent();
+
+        /**
+         * @brief Set this objects' parent object
+         * @param Parent the parent
+         */
         void SetParent( FArianeObject* Parent );
+
+        /**
+         * @brief Remove a child object from this object
+         * @param bRemoveFromInstancedObjects true to also unallocate the child.
+         */
         void RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstancedObjects );
+
+        /**
+         * @brief Get the object's visibility
+         * @param bInHierarchical true if it should consider the whole chain of parent objects as well, false otherwise
+         * @return true or false
+         */
         virtual bool IsVisible( bool bInHierarchical );
+
+        /** Get the drawing layer this object belongs to */
         UArianeLayerDrawing* GetDrawingLayer();
+
+        /** Set the drawing layer this object belongs to */
         void SetDrawingLayer( UArianeLayerDrawing* InLayer );
+
         FSimpleMulticastDelegate & GetOnPostInvalidatedDelegate();
+
+        /** Called when the object is added to a parent object */
         virtual void Added(){};
+
+        /** Called when the object is removed from a parent object */
         virtual void Removed(){};
 
     protected:
@@ -146,6 +190,8 @@ struct ARIANE_API FArianeObject
          * @param Child the child to invalidate.
          */
         void InvalidateChild( FArianeObject* Child );
+
+
         TraversalReturnValue Traverse_Private( TFunction<TraversalReturnValue(FArianeObject*)> Callback );
 
     protected:

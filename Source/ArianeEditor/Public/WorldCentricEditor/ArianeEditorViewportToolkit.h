@@ -82,6 +82,8 @@ public:
     void LoadOpenedTabs();
     void SaveOpenedTabs();
     void OnEditorClose();
+
+    // ShutdownUI is not called when reloading a layout. But Exit() will be, called by FArianeEditorViewportEdMode::Exit()
     void Exit();
 
 protected:

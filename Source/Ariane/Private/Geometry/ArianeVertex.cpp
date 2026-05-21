@@ -118,10 +118,16 @@ FArianeVertex::GetFirstSegment()
     return Segments.Num() ? Segments.Last() : nullptr;
 }
 
-uint32
+int32
 FArianeVertex::GetIndex( FArianeSegment* Segment )
 {
-    return ( this == Segment->GetVertex( 0 ) ) ? 0 : 1;
+    if( this == Segment->GetVertex( 0 ) )
+        return 0;
+
+    if( this == Segment->GetVertex( 1 ) )
+        return 1;
+
+    return -1;
 }
 
 void

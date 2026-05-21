@@ -42,6 +42,10 @@ public:
     ~UArianeLayerDrawing();
     UArianeLayerDrawing();
 
+    virtual void Update( bool bInteractive ) override;
+    virtual void PostEditUndo() override;
+    virtual void PostLoad() override;
+
     /**
      * @brief Get the top-most vector object
      * @return the top-most vector object
@@ -82,11 +86,6 @@ public:
     /** Empty the whole object tree and create a new one **/
     void ResetHierarchy();
 
-    // Overrides
-    virtual void Update( bool bInteractive ) override;
-    virtual void PostEditUndo() override;
-    virtual void PostLoad() override;
-
     // debug
     void PrintPointers();
 
@@ -108,11 +107,21 @@ public:
      */
     EArianeLayerDrawingOrientation GetDrawingOrientation();
 
+    /**
+     * @brief Set the drawing orientation
+     * @param InDrawingOrientation the drawing orientation
+     */
     void SetDrawingOrientation( EArianeLayerDrawingOrientation InDrawingOrientation );
 
     void IncrementMaterial( UMaterialInterface* MaterialInterface );
     void DecrementMaterial( UMaterialInterface* MaterialInterface );
-    const TMap<UMaterialInterface*, uint32>& GetUsedMaterials();
+
+    /**
+     * @brief Get used materials
+     * @OutUsedMaterials output array
+     * @bEmptyFirst empty the output array first.
+     */
+    void GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials, bool bEmptyFirst );
 
 protected:
     void BindDelegates();

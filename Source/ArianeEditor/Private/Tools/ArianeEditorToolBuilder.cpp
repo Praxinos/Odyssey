@@ -14,8 +14,8 @@ UArianeEditorToolBuilder::~UArianeEditorToolBuilder()
 }
 
 UArianeEditorToolBuilder::UArianeEditorToolBuilder()
-    : Editor ( nullptr )
-    , Tool ( nullptr )
+    : Tool ( nullptr )
+    , Editor ( nullptr )
 {
 }
 
