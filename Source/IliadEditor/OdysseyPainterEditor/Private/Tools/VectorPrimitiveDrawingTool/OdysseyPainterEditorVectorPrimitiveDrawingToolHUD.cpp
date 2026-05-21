@@ -4,6 +4,7 @@
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingToolHUD.h"
 #include "OdysseyPainterEditor.h"
 // Vector engine
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorGroupPaint.h"
 //

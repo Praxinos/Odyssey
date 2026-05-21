@@ -6,6 +6,7 @@
 #include "OdysseyPainterEditor.h"
 // Vector engine
 #include "OdysseyVector.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTagInbetweener.h"
