@@ -1059,18 +1059,21 @@ UArianeEditorEraserTool::ExtendContextMenu( FMenuBuilder& menu )
 void
 UArianeEditorEraserTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderAPI* RenderAPI )
 {
-    FVector2D HUDPosition = ScreenToHUD( MousePosition );
+    if( CanDraw() )
+    {
+        FVector2D HUDPosition = ScreenToHUD( MousePosition );
 
-    HUDCanvas->DrawTile(
-        0, 0,
-        CanvasRenderTarget->SizeX, CanvasRenderTarget->SizeY,
-        0.0f, 0.0f, 1.0f, 1.0f, // UVs
-        FLinearColor::White,
-        CanvasRenderTarget->GetResource(),
-        true
-    );
+        HUDCanvas->DrawTile(
+            0, 0,
+            CanvasRenderTarget->SizeX, CanvasRenderTarget->SizeY,
+            0.0f, 0.0f, 1.0f, 1.0f, // UVs
+            FLinearColor::White,
+            CanvasRenderTarget->GetResource(),
+            true
+        );
 
-    DrawHUDCircle ( HUDCanvas, HUDPosition.X, HUDPosition.Y, ( double ) Size * 0.5f, 32 );
+        DrawHUDCircle ( HUDCanvas, HUDPosition.X, HUDPosition.Y, ( double ) Size * 0.5f, 32 );
+    }
 }
 
 void
