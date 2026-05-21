@@ -19,10 +19,10 @@
 	"ClassTypes": "",
 	"Category": "CodeFeature",
 	"FocusAsset": "",
-	"Thumbnail": "TP_2D_FPSBP.png",
+	"Thumbnail": "TP_2D_FirstPersonBP.png",
 	"Screenshots":
 	[
-		"TP_2D_FPSBP_Preview.png"
+		"TP_2D_FirstPersonBP_Preview.png"
 	],
 	"SortKey": "_21",
 	"AdditionalFeaturePacks": []
