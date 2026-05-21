@@ -41,6 +41,12 @@ FOdysseyVectorBlock::Init(const FGuid& iId, TSharedPtr<FOdysseyVectorCell> iRoot
     mBLImage = MakeShared<BLImage>(mWidth, mHeight, BL_FORMAT_PRGB32);
     mBLContext = MakeShared<BLContext>();
 
+    /**
+     * Remove block from cache to ensure the block is first retrieved from disk
+     */
+    FOdysseyDiskCache cache(FOdysseyVectorBlock_CACHE_NAME, FOdysseyVectorBlock_CACHE_VERSION);
+    cache.Remove(mId.ToString());
+
     mVectorCell->OnRequestRedrawDelegate().AddRaw( this, &FOdysseyVectorBlock::OnVectorRootRequestRedraw );
 }
 
