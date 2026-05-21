@@ -113,6 +113,9 @@ FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUDElement::F
 {
     mCurrentHUDParams = iParams;
 
+    if (!mBaseTool->GetWorkingCell() || !mBaseTool->GetWorkingCell()->GetScene())
+        return;
+
     FOdysseyVectorGroupPaint* scene = mBaseTool->GetWorkingCell()->GetScene();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();

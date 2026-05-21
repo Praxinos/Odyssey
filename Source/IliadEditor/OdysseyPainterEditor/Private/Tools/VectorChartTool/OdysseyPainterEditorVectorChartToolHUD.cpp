@@ -298,6 +298,9 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawHUD( const FOdysseyHUDElement::FDra
 {
     mCurrentHUDParams = iParams;
 
+    if (!mBaseTool->GetWorkingCell() || !mBaseTool->GetWorkingCell()->GetScene())
+        return;
+
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();

@@ -58,6 +58,9 @@ FOdysseyPainterEditorVectorEraserToolHUD::DrawHUD( const FOdysseyHUDElement::FDr
 {
     mCurrentHUDParams = iParams;
 
+    if (!mBaseTool->GetWorkingCell() || !mBaseTool->GetWorkingCell()->GetScene())
+        return;
+
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
     FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );

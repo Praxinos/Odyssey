@@ -81,6 +81,9 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawHUD( const FOdysseyHUDElement::
 {
     mCurrentHUDParams = iParams;
 
+    if (!mBaseTool->GetWorkingCell() || !mBaseTool->GetWorkingCell()->GetScene())
+        return;
+
     FOdysseyVectorGroupPaint* scene = mBaseTool->GetWorkingCell()->GetScene();
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );

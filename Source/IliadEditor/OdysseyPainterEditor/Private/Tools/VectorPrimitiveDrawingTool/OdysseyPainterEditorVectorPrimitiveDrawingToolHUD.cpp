@@ -52,6 +52,9 @@ FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD::DrawHUD( const FOdysseyHUDEl
 {
     mCurrentHUDParams = iParams;
 
+    if (!mBaseTool->GetWorkingCell() || !mBaseTool->GetWorkingCell()->GetScene())
+        return;
+
     // invisible plane will get mouse events
     DrawDummyPlane( iParams );
 

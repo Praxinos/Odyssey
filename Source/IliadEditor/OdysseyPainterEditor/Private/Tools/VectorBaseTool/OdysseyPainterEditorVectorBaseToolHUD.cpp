@@ -1199,6 +1199,9 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawHierarchy( const FOdysseyHUDElement:
 void
 FOdysseyPainterEditorVectorBaseToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
+    if (!mBaseTool->GetWorkingCell() || !mBaseTool->GetWorkingCell()->GetScene())
+        return;
+
     FOdysseyVectorGroupPaint* scene = mBaseTool->GetWorkingCell()->GetScene();
     FLinearColor fg = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bg = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
