@@ -1,0 +1,4 @@
+../../../Templates/TP_2D_FPSBP/manifest.json
+../../../Templates/TP_2D_FPSBP/Config/config.ini
+../../../Templates/TP_2D_FPSBP/Media/TP_2D_FPSBP.png
+../../../Templates/TP_2D_FPSBP/Media/TP_2D_FPSBP_Preview.png
