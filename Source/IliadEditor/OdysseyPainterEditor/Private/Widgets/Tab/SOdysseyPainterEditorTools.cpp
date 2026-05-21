@@ -49,27 +49,50 @@ SOdysseyPainterEditorTools::Construct(const FArguments& InArgs)
         return;
 
     TArray<UOdysseyPainterEditorTool*> tools = {
+
+        // Drawing Tools
         editor->GetRasterDrawingTool(),
-        editor->GetRasterEraserTool(),
-        editor->GetRasterSelectionTool(),
-        editor->GetRasterTransformTool(),
-        editor->GetRasterPrimitiveDrawingTool(),
-        editor->GetRasterLiquifyTool(),
-        editor->GetRasterPaintBucketTool(),
         editor->GetVectorPathDrawingTool(),
-        editor->GetVectorPathEditTool(),
+
+        // Primitive Tools
+        editor->GetRasterPrimitiveDrawingTool(),
         editor->GetVectorPrimitiveDrawingTool(),
-        editor->GetVectorSelectionTool(),
-        editor->GetVectorCutTool(),
-        editor->GetVectorTransformTool(),
-        editor->GetVectorScenePanTool(),
-        editor->GetVectorPathPushTool(),
-        editor->GetVectorPathSmoothTool(),
-        editor->GetVectorPathStitchTool(),
+
+        // Eraser Tools
+        editor->GetRasterEraserTool(),
         editor->GetVectorEraserTool(),
-        editor->GetVectorPaintBucketTool(),
+
+        // Color Picker Tools
         editor->GetColorPickerTool(),
+
+        // Paint Bucket Tools
+        editor->GetRasterPaintBucketTool(),
+        editor->GetVectorPaintBucketTool(),
+
+        // Selection Tools
+        editor->GetRasterSelectionTool(),
+        editor->GetVectorSelectionTool(),
+
+        // Transform Tools
+        editor->GetRasterTransformTool(),
+        editor->GetVectorTransformTool(),
+
+        // Raster Specific Tools
+        editor->GetRasterLiquifyTool(),
+
+        //Vector Specific Tools
+        //Vector Transformation Tools
+        editor->GetVectorScenePanTool(),
         editor->GetVectorGridTool(),
+        editor->GetVectorPathPushTool(),
+
+        //Vetcor Path editing tools
+        editor->GetVectorPathEditTool(),
+        editor->GetVectorPathSmoothTool(),
+        editor->GetVectorCutTool(),
+        editor->GetVectorPathStitchTool(),
+
+        //Out Of Pegs Tools
         editor->GetVectorMatchingTool(),
         editor->GetVectorChartTool(),
         editor->GetVectorTrajectoryTool()
