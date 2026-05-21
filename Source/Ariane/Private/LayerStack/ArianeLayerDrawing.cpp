@@ -148,10 +148,20 @@ UArianeLayerDrawing::AllocPath( UMaterialInterface* InMaterialInterface )
     return NewPath;
 }
 
-const TMap<UMaterialInterface*, uint32>&
-UArianeLayerDrawing::GetUsedMaterials()
+void
+UArianeLayerDrawing::GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials, bool bEmtpyFirst )
 {
-    return UsedMaterials;
+    if( bEmtpyFirst )
+    {
+        OutUsedMaterials.Empty();
+    }
+
+    OutUsedMaterials.Reserve( OutUsedMaterials.Num() + UsedMaterials.Num() );
+
+    for( auto Pair : UsedMaterials )
+    {
+        OutUsedMaterials.Add( Pair.Key );
+    }
 }
 
 void

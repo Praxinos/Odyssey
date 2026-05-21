@@ -168,15 +168,27 @@ FArianePath::Chain::IterateSegments( TFunction<bool( FArianeVertex*, FArianeSegm
 void FArianePathVertexBuffer::Resize(  uint32 InVertexCount, FRHICommandListBase& RHICmdList )
 {
     VertexBufferRHI.SafeRelease();
-
-    FRHIResourceCreateInfo ResourceInfo( TEXT( "Dynamic Vertex Buffer" ) );
+    FRHIBufferCreateDesc CreateBufferDesc = FRHIBufferCreateDesc( TEXT( "Dynamic Vertex Buffer" )
+                                                                , VertexCount * sizeof( FDynamicMeshVertex )
+                                                                , 0
+                                                                , EBufferUsageFlags::Dynamic
+                                                                | EBufferUsageFlags::VertexBuffer
+                                                                | EBufferUsageFlags::ShaderResource );
 
     VertexCount = InVertexCount;
+
+    VertexBufferRHI = RHICmdList.CreateBuffer( CreateBufferDesc );
+
+/* FRHIResourceCreateInfo will be deprecated soon
+    FRHIResourceCreateInfo ResourceInfo( TEXT( "Dynamic Vertex Buffer" ) );
+
+
 
     VertexBufferRHI = RHICmdList.CreateVertexBuffer( VertexCount * sizeof( FDynamicMeshVertex )
                                                    , BUF_Dynamic | BUF_VertexBuffer | BUF_ShaderResource
                                                    , ERHIAccess::VertexOrIndexBuffer
                                                    , ResourceInfo );
+*/
 }
 
 void FArianePathVertexBuffer::InitRHI(FRHICommandListBase& RHICmdList)
@@ -205,10 +217,10 @@ FArianePath::FArianePath()
 
 FArianePath::FArianePath( UArianeLayerDrawing* InDrawingLayer )
     : FArianeObject ( InDrawingLayer )
-    , Geometry3D ( this )
     , LineType ( EArianePathLineType::Tube )
     , Color ( 0, 0, 0, 255 )
     , MaterialInterface ( nullptr )
+    , Geometry3D ( this )
 {
     InvalidationFlags = new FArianePathInvalidationFlags();
 
@@ -1042,7 +1054,7 @@ FArianePathGeometry3D::InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices
                 StaticMeshVB.BindPackedTexCoordVertexBuffer( VertexFactory, Data );
                 ColorBuffer.BindColorVertexBuffer( VertexFactory, Data );
 
-                VertexFactory->SetData( Data );
+                VertexFactory->SetData( RHICmdList, Data );
 
                 // Init / update the factory after SetData
                 if (!VertexFactory->IsInitialized()) {

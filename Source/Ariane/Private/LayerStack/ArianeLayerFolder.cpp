@@ -120,12 +120,7 @@ UArianeLayerFolder::Traverse( TFunction<TraversalReturnValue(UArianeLayer*)> Cal
 void
 UArianeLayerFolder::InvalidateChildLayer( UArianeLayer* Child )
 {
-    if( Child->IsInvalidated() == false )
-    {
-        InvalidatedChildLayers.Add( Child );
-
-        Child->SetInvalidated( true );
-    }
+    InvalidatedChildLayers.Add( Child );
 }
 
 void
@@ -135,7 +130,11 @@ UArianeLayerFolder::Update( bool bInteractive )
     {
         Layer->Update( bInteractive );
 
-        return ( Layer->IsInvalidated() == false );
+        bool bHasAnyFlags = Layer->GetInvalidationFlags()->HasAny();
+        // if the layer has any flag, it will remain in the list of invalidated layers
+        Layer->SetInvalidatedInParentFolder( bHasAnyFlags );
+
+        return bHasAnyFlags ? false : true;
     } );
 
     UpdateBounds();

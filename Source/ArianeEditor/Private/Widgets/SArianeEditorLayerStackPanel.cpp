@@ -200,7 +200,7 @@ SArianeEditorLayerStackPanel::NewLayer()
         UArianeLayerDrawing* DrawingLayer = CurrentPainting3DComponent->GetLayerStack()->CreateDrawingLayer( nullptr, true );
 
         CurrentPainting3DComponent->GetLayerStack()->ClearLayerSelection( false );
-        CurrentPainting3DComponent->GetLayerStack()->SelectLayer( DrawingLayer, true, false );
+        CurrentPainting3DComponent->GetLayerStack()->SelectLayer( DrawingLayer, true );
 
         GEditor->EndTransaction();
     }

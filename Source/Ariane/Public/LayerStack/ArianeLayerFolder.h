@@ -23,19 +23,47 @@ public:
     ~UArianeLayerFolder();
     UArianeLayerFolder();
 
-    void SetExpanded( bool bInExpanded );
-    bool IsExpanded();
-    const TArray<UArianeLayer*>& GetChildLayers();
-    void AddChildLayer( UArianeLayer* Orphan );
-    void RemoveChildLayer( UArianeLayer* Child );
-    void InvalidateChildLayer( UArianeLayer* Child );
     virtual void Update( bool bInteractive ) override;
 
-public:
+    /**
+     * @brief Set the expansion status of the folder's tree
+     * @param bInExpanded true for expanded, false otherwise
+     */
+    void SetExpanded( bool bInExpanded );
+
+    /** Get the expansion status of the folder's tree **/
+    bool IsExpanded();
+
+    /** Get child layers **/
+    const TArray<UArianeLayer*>& GetChildLayers();
+
+    /**
+     * @brief Add a child layer to this folder
+     * @param Orphan the child layer
+     */
+    void AddChildLayer( UArianeLayer* Orphan );
+
+    /**
+     * @brief Remove a child layer from this folder
+     * @param Child the child layer
+     */
+    void RemoveChildLayer( UArianeLayer* Child );
+
+    /**
+     * @brief Invalidate a child layer
+     * @param Child the child layer
+     */
+    void InvalidateChildLayer( UArianeLayer* Child );
+
+    /**
+     * @brief Recursively execute a function
+     * @param Callback the function to run
+     */
     void Traverse( TFunction<TraversalReturnValue(UArianeLayer*)> Callback );
 
 protected:
     TraversalReturnValue Traverse_Private( TFunction<TraversalReturnValue(UArianeLayer*)> Callback );
+
     void UpdateBounds();
 
 protected:

@@ -27,22 +27,80 @@ public:
     ~UArianeLayerStack();
     UArianeLayerStack();
 
+    // overrides
+    virtual void OnComponentDestroyed( bool bDestroyingHierarchy ) override;
+    virtual void PostLoad() override;
+
+    /**
+    * @brief Get the top-most (root) folder
+    * @return the top-most (root) folder
+    */
     UArianeLayerFolder* GetRootFolder();
 
+    /** Remove selected layers **/
     void RemoveSelectedLayers();
+
+    /** Select all layers **/
     void SelectAllLayers();
-    void SelectLayer( UArianeLayer* Layer, bool bTriggerevent, bool bRecurse = true );
-    void SelectLayers( const TArray<UArianeLayer*> LayerSelection, bool bClearSelectionFirst, bool bTriggerevent, bool bRecurse = true );
+
+    /**
+    * @brief Select a layer
+    * @param bTriggerevent trigger selection changed delegates
+    */
+    void SelectLayer( UArianeLayer* Layer, bool bTriggerevent );
+
+    /**
+    * @brief Select a layer
+    * @param bClearSelectionFirst true to clear the selection first, flase otherwise
+    * @param bTriggerevent trigger selection changed delegates
+    */
+    void SelectLayers( const TArray<UArianeLayer*> LayerSelection, bool bClearSelectionFirst, bool bTriggerevent );
+
+    /**
+    * @brief Clears the layer selection
+    * @param bTriggerevent trigger selection changed delegates
+    */
     void ClearLayerSelection( bool bTriggerEvent );
+
+    /**
+    * @brief Get all selected layers
+    * @return an array of selected layers
+    */
     const TArray<UArianeLayer*>& GetSelectedLayers();
+
+    /**
+    * @brief Get the current layer (i.e the last selected layer)
+    * @return the current layer
+    */
     UArianeLayer* GetCurrentLayer();
+
+    /**
+    * @brief Create a new drawing layer
+    * @param ParentLayerFolder the parent folder
+    * @param bTriggerEvent trigger layer stack changed event
+    * @return the newly created layer
+    */
     UArianeLayerDrawing* CreateDrawingLayer( UArianeLayerFolder* ParentLayerFolder, bool bTriggerEvent );
+
+    /**
+    * @brief Create a new folder layer
+    * @param ParentLayerFolder the parent folder
+    * @param bTriggerEvent trigger layer stack changed event
+    * @return the newly created layer
+    */
     UArianeLayerFolder* CreateFolderLayer( UArianeLayerFolder* ParentLayerFolder, bool bTriggerEvent );
+
+    /**
+    * @brief Get the Painting3D Component
+    * @return the Painting3D Component
+    */
     UArianePainting3DComponent* GetPainting3DComponent();
-    virtual void OnComponentDestroyed( bool bDestroyingHierarchy ) override;
-    void GetLayers( TArray<UArianeLayer*>& Layers );
-    void Init();
-    virtual void PostLoad() override;
+
+    /**
+    * @brief Get all layers of all type
+    * @param the Painting3D Component
+    */
+    void GetLayers( TArray<UArianeLayer*>& OutLayers );
 
     FOnLayerStackChanged& OnPreLayerStackChangedDelegate();
     FOnLayerStackChanged& OnPostLayerStackChangedDelegate();
@@ -56,7 +114,7 @@ public:
 #endif
 
 protected:
-    void SelectLayer_Private( UArianeLayer* Layer, bool bRecurse );
+    void SelectLayer_Private( UArianeLayer* Layer );
 
 protected:
     UPROPERTY()

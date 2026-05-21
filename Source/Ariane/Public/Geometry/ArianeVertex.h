@@ -66,15 +66,38 @@ struct ARIANE_API FArianeVertex : public FArianePoint
         /** Get this vertex's normal vector */
         const FVector& GetNormal();
 
+        /** Get this vertex's Guid */
         const FGuid& GetGuid();
+
+        /**
+         * @brief Get a segment connected to this vertex and that is NOT the one passed as a parameter
+         * @param Segment the segment that should not be returned
+         */
         FArianeSegment* GetOtherSegment( FArianeSegment* Segment );
 
+        /** Check the vertex belongs to a chain */
         bool IsChained() { return bChained; };
+
+        /** Check if the vertex belongs to a chain */
         void SetChained( bool bInChained ) { bChained = bInChained; };
+
+        /** Get the first segment attached to this vertex **/
         FArianeSegment* GetFirstSegment();
-        uint32 GetIndex( FArianeSegment* Segment );
+
+        /**
+         * @brief Get the index of this vertex on the segment passed as a parameter
+         * @param Segment
+         * @result either 0, 1 or -1 if the vertex does not belong to the segment
+         */
+        int32 GetIndex( FArianeSegment* Segment );
+
+        /** Set the vertex ID. Differs from the Guid. For algorithmic use only: if you need to store an index in an array, for example **/
         void SetID( uint32 InID );
+
+        /** Set the vertex ID. For algorithmic use only **/
         uint32 GetID();
+
+        /** Set the vertex's radius **/
         void SetRadius( double InRadius );
 
     public:

@@ -22,8 +22,8 @@ struct ARIANE_API FArianeLayerFolderInvalidationFlags : public FArianeLayerInval
         virtual bool HasBaseClass( uint32 BaseClass ) const;
 
     public:
-        virtual FArianeLayerFolderInvalidationFlags& AND( const FArianeLayerFolderInvalidationFlags& RHS );
-        virtual FArianeLayerFolderInvalidationFlags& OR( const FArianeLayerFolderInvalidationFlags& RHS );
+        virtual FArianeLayerFolderInvalidationFlags& AND( const FArianeLayerInvalidationFlags& RHS ) override;
+        virtual FArianeLayerFolderInvalidationFlags& OR( const FArianeLayerInvalidationFlags& RHS ) override;
         virtual FArianeLayerFolderInvalidationFlags& SetAll();
         virtual FArianeLayerFolderInvalidationFlags& Clear();
         virtual bool HasAny();

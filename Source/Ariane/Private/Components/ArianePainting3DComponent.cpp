@@ -32,8 +32,8 @@ UArianePainting3DComponent::~UArianePainting3DComponent()
 }
 
 UArianePainting3DComponent::UArianePainting3DComponent()
-    : CurrentPaletteColorEntry ( nullptr )
-    , LayerStack ( nullptr )
+    : LayerStack ( nullptr )
+    , CurrentPaletteColorEntry ( nullptr )
 {
     LayerStack = CreateDefaultSubobject<UArianeLayerStack>(TEXT("LayerStack"));
 
@@ -78,12 +78,11 @@ UArianePainting3DComponent::GetUsedMaterials( TArray<UMaterialInterface*>& OutMa
 
             if( DrawingLayer )
             {
-                const TMap<UMaterialInterface*,uint32>& DrawingLayerUsedMaterials = DrawingLayer->GetUsedMaterials();
-                TArray<UMaterialInterface*> DrawingLayerMaterialInterfaces;
+                TArray<UMaterialInterface*> DrawingLayerUsedMaterials;
 
-                DrawingLayerUsedMaterials.GetKeys( DrawingLayerMaterialInterfaces );
+                DrawingLayer->GetUsedMaterials( DrawingLayerUsedMaterials, false );
 
-                OutMaterials.Append( DrawingLayerMaterialInterfaces );
+                OutMaterials.Append( DrawingLayerUsedMaterials );
             }
 
             return UArianeLayerFolder::TraversalReturnValue::Continue;
@@ -308,6 +307,7 @@ FArianeGeometryProxy::FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLeve
     : FPrimitiveSceneProxy ( iPainting3DComponent )
     , Painting3DComponent ( iPainting3DComponent )
 {
+    EShaderPlatform ShaderPlatform = GetFeatureLevelShaderPlatform_Checked( InFeatureLevel );
     TArray<UMaterialInterface*> MaterialInterfaces;
 
     Painting3DComponent->GetUsedMaterials( MaterialInterfaces );
@@ -315,7 +315,7 @@ FArianeGeometryProxy::FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLeve
     // MaterialRelevance is used by GetViewRelevance and is necessary to render all kinds of materials
     for( UMaterialInterface* MaterialInterface : MaterialInterfaces )
     {
-        MaterialRelevance |=  MaterialInterface->GetRelevance_Concurrent( InFeatureLevel );
+        MaterialRelevance |=  MaterialInterface->GetRelevance_Concurrent( ShaderPlatform );
     }
 
     SetUsedMaterialForVerification( MaterialInterfaces );

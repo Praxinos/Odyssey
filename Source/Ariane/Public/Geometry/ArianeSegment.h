@@ -129,17 +129,43 @@ struct ARIANE_API FArianeSegment
 
         /** Invalidate the segment */
         void Invalidate();
+
+        /** Get the segment's invalidation status */
         bool IsInvalidated();
 
+        /** Get the segment's Guid */
         const FGuid& GetGuid();
 
-        FVector GetPointAt( double T );
-        FVector GetNormalAt( double T );
+        /**
+         * @brief Get the point at parameter T
+         * @param T must be on interval 0.0 - 1.0
+         * @return the position of the point
+         */
+        virtual FVector GetPointAt( double T );
+
+        /**
+         * @brief Get the normal at parameter T, interpolated from both endpoints
+         * @param T must be on interval 0.0 - 1.0
+         * @return the normal of the point
+         */
+        virtual FVector GetNormalAt( double T );
+
+        /**
+         * @brief extract a smaller segment from this segment
+         * @param NewSegmentOwner the owner for the new segment
+         * @param NewSegmentVertex0 the vertex 0 to attach to the new segment
+         * @param T0 parametric value for the endpoint 0
+         * @param NewSegmentVertex1 the vertex 1 to attach to the new segment
+         * @param T0 parametric value for the endpoint 1
+         * @return the newly created segment
+         */
         virtual FArianeSegment* Extract( FArianeObject* NewSegmentOwner
                                        , FArianeVertex* NewSegmentVertex0
                                        , float T0
                                        , FArianeVertex* NewSegmentVertex1
                                        , float T1 );
+
+        /** Get segment length **/
         virtual double GetLength();
 
     protected:

@@ -419,7 +419,7 @@ SArianeEditorLayerStack::OnSelectionChanged( TSharedPtr<FArianeEditorLayerRowIte
                                                  , NewSelectedLayers );
 
                 UnbindDelegates();
-                Painting3DComponent->GetLayerStack()->SelectLayers( NewSelectedLayers, true, true, false );
+                Painting3DComponent->GetLayerStack()->SelectLayers( NewSelectedLayers, true, true );
                 BindDelegates();
             }
         }

@@ -29,9 +29,29 @@ public:
     DECLARE_MULTICAST_DELEGATE( FOnTransformChanged );
 #endif
 
+    /**
+     * @brief Set the layer as locked or unlocked
+     * @param bInLocked true for locking, false otherwise
+     */
     void SetLocked( bool bInLocked );
+
+    /**
+     * @brief Get the locking status of the layer
+     * @param bHierarchical true if checking the whole hierarchical chain is needed, false otherwise
+     * @return true or false
+     */
     bool IsLocked( bool bHierarchical );
+
+    /**
+     * @brief Invalidate the layer
+     * @param InInvalidationFlags invalidation flags
+     */
     virtual void Invalidate( const FArianeLayerInvalidationFlags& InInvalidationFlags );
+
+    /**
+     * @brief Update the layer
+     * @param bInteractive is the update interactive (during a mouse drag)
+     */
     virtual void Update( bool bInteractive );
 
     // Overriden from USceneComponent::OnUpdateTransform
@@ -42,8 +62,11 @@ public:
     void SetSelected( bool bInSelected );
 #endif
 
-    bool IsInvalidated();
-    void SetInvalidated( bool bInInvalidate );
+    /**
+     * @brief Set the invalidation status of the layer
+     * @return true or false
+     */
+    void SetInvalidatedInParentFolder( bool bInInvalidatedInParentFolder );
 
     /**
      * @brief Get the boundaries of the layer (i.e its content)
@@ -84,6 +107,8 @@ public:
     /** The delegate run when the transform is changed **/
     UArianeLayer::FOnTransformChanged& GetOnTransformChangedDelegate();
 
+    FArianeLayerInvalidationFlags* GetInvalidationFlags();
+
 protected:
     UPROPERTY()
     UArianeLayerFolder* ParentFolder;
@@ -97,7 +122,7 @@ protected:
 #endif
 
 protected:
-    bool bInvalidated;
+    bool bInvalidatedInParentFolder;
     FBoxSphereBounds Bounds;
     FArianeLayerInvalidationFlags* InvalidationFlags;
     FOnUpdateDelegate OnPreUpdate;

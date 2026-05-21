@@ -23,7 +23,7 @@ UArianeLayerStack::UArianeLayerStack()
 
     RootFolder->AddChildLayer( NewDrawingLayer );
 
-    SelectLayer( NewDrawingLayer, true, false );
+    SelectLayer( NewDrawingLayer, true );
 }
 
 UArianePainting3DComponent*
@@ -63,7 +63,7 @@ UArianeLayerStack::PostLoad()
 {
     Super::PostLoad();
 
-    SelectLayer( RootFolder->GetChildLayers()[0], true, false );
+    SelectLayer( RootFolder->GetChildLayers()[0], true );
 }
 
 void
@@ -75,18 +75,18 @@ UArianeLayerStack::RemoveSelectedLayers()
     {
         Layer->Modify();
 
-        Cast<UArianeLayerFolder>(Layer->GetOuter())->RemoveChildLayer( Layer );
+        Layer->GetParentFolder()->RemoveChildLayer( Layer );
     }
 
     ClearLayerSelection( true );
 }
 
 void
-UArianeLayerStack::GetLayers( TArray<UArianeLayer*>& Layers )
+UArianeLayerStack::GetLayers( TArray<UArianeLayer*>& OutLayers )
 {
-    RootFolder->Traverse( [ &Layers ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::TraversalReturnValue
+    RootFolder->Traverse( [ &OutLayers ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::TraversalReturnValue
     {
-        Layers.Add( Layer );
+        OutLayers.Add( Layer );
 
         return UArianeLayerFolder::TraversalReturnValue::Continue;
     } );
@@ -118,8 +118,7 @@ UArianeLayerStack::SelectAllLayers()
 void
 UArianeLayerStack::SelectLayers( const TArray<UArianeLayer*> LayerSelection
                                , bool bClearSelectionFirst
-                               , bool bTriggerevent
-                               , bool bRecurse )
+                               , bool bTriggerevent )
 {
     if( bTriggerevent )
         OnPreLayerSelectionChanged.Broadcast();
@@ -129,7 +128,7 @@ UArianeLayerStack::SelectLayers( const TArray<UArianeLayer*> LayerSelection
 
     for( UArianeLayer* Layer : LayerSelection )
     {
-        SelectLayer_Private( Layer, bRecurse );
+        SelectLayer_Private( Layer );
     }
 
     if( bTriggerevent )
@@ -137,19 +136,19 @@ UArianeLayerStack::SelectLayers( const TArray<UArianeLayer*> LayerSelection
 }
 
 void
-UArianeLayerStack::SelectLayer( UArianeLayer* Layer, bool bTriggerevent, bool bRecurse )
+UArianeLayerStack::SelectLayer( UArianeLayer* Layer, bool bTriggerevent )
 {
     if( bTriggerevent )
         OnPreLayerSelectionChanged.Broadcast();
 
-    SelectLayer_Private( Layer, bRecurse );
+    SelectLayer_Private( Layer );
 
     if( bTriggerevent )
         OnPostLayerSelectionChanged.Broadcast();
 }
 
 void
-UArianeLayerStack::SelectLayer_Private( UArianeLayer* Layer, bool bRecurse )
+UArianeLayerStack::SelectLayer_Private( UArianeLayer* Layer )
 {
     // root folder cannot be selected
     //if( Cast<UArianeLayer>(RootFolder) != Layer )
@@ -159,19 +158,6 @@ UArianeLayerStack::SelectLayer_Private( UArianeLayer* Layer, bool bRecurse )
             SelectedLayers.Add( Layer );
 
             Layer->SetSelected( true );
-        }
-
-        if( bRecurse )
-        {
-            UArianeLayerFolder* LayerFolder = Cast<UArianeLayerFolder>( Layer );
-
-            if ( LayerFolder )
-            {
-                for( UArianeLayer* ChildLayer : LayerFolder->GetChildLayers() )
-                {
-                    SelectLayer_Private( ChildLayer, bRecurse );
-                }
-            }
         }
     }
 }
