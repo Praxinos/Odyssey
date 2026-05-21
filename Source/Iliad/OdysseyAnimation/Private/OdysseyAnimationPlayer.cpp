@@ -702,6 +702,18 @@ UOdysseyAnimationPlayer::PostTransacted(const FTransactionObjectEvent& iTransact
         return;
 
     const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
+    if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Animation)))
+    {
+        if (!IsValid(Animation))
+            Animation = nullptr; //ensure Animation is nullptr here to avoid relying on an invalid animation and crash
+    }
+
+    if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, RenderTarget)))
+    {
+        if (!IsValid(RenderTarget))
+            RenderTarget = nullptr; //ensure RenderTarget is nullptr here to avoid relying on an invalid RenderTarget and crash
+    }
+
     for ( const FName& propertyName : changedPropertyNames )
     {
         PropertyChanged(propertyName);
