@@ -1256,8 +1256,11 @@ ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AAct
             default: checkNoEntry();
         }
 
-        if( update_channels )
-            UpdateChannel( iSequencer, old_parameter.mActor.Get(), ioCamera, EMovieSceneTransformChannel::Scale );
+        if( iSequencer )
+        {
+            if( update_channels )
+                UpdateChannel( iSequencer, old_parameter.mActor.Get(), ioCamera, EMovieSceneTransformChannel::Scale );
+        }
     }
 
     return true;

@@ -226,7 +226,7 @@ public:
     EVisibility GetMoveAndScaleActorVisibility() const;
 
     float GetMoveAndScaleActorDistance() const;
-    void SetMoveAndScaleActorDistance( float iDistance );
+    void SetMoveAndScaleActorDistance( float iDistance, bool iInteractive );
 
     template<typename T> void HideAllActors();
     template<typename T> void ShowAllActors();
@@ -246,7 +246,7 @@ public:
     EVisibility GetCameraFocalLengthVisibility() const;
 
     float GetCameraFocalLength() const;
-    void SetCameraFocalLength( float iFocalLength );
+    void SetCameraFocalLength( float iFocalLength, bool iInteractive );
 
     void AddViewportRotation( float iDeltaRotation ); // in degrees
 

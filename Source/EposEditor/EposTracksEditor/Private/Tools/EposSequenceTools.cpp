@@ -800,9 +800,12 @@ ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* i
         default: checkNoEntry();
     }
 
-    UpdateChannel( iSequencer, ioActor, iCamera, EMovieSceneTransformChannel::Translation );
-    if( update_channels )
-        UpdateChannel( iSequencer, ioActor, iCamera, EMovieSceneTransformChannel::Scale );
+    if( iSequencer )
+    {
+        UpdateChannel( iSequencer, ioActor, iCamera, EMovieSceneTransformChannel::Translation );
+        if( update_channels )
+            UpdateChannel( iSequencer, ioActor, iCamera, EMovieSceneTransformChannel::Scale );
+    }
 
     return true;
 }

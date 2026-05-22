@@ -1233,8 +1233,8 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                     .Delta( 1.f )
                                     .SliderExponent( 0.8f )
                                     .Value( this, &SStoryboardLevelViewport::GetMoveAndScaleActorDistance )
-                                    .OnValueChanged( this, &SStoryboardLevelViewport::SetMoveAndScaleActorDistance )
-                                    .OnValueCommitted_Lambda( [this]( float iNewValue, ETextCommit::Type iType ) { SetMoveAndScaleActorDistance( iNewValue ); } )
+                                    .OnValueChanged( this, &SStoryboardLevelViewport::SetMoveAndScaleActorDistance, true )
+                                    .OnValueCommitted_Lambda( [this]( float iNewValue, ETextCommit::Type iType ) { SetMoveAndScaleActorDistance( iNewValue, false ); } )
                                 ]
 
                                 //+ SHorizontalBox::Slot()
@@ -1343,8 +1343,8 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                     .Delta( 1.f )
                                     .SliderExponent( 0.8f )
                                     .Value( this, &SStoryboardLevelViewport::GetCameraFocalLength )
-                                    .OnValueChanged( this, &SStoryboardLevelViewport::SetCameraFocalLength )
-                                    .OnValueCommitted_Lambda( [this]( float iNewValue, ETextCommit::Type iType ) { SetCameraFocalLength( iNewValue ); } )
+                                    .OnValueChanged( this, &SStoryboardLevelViewport::SetCameraFocalLength, true )
+                                    .OnValueCommitted_Lambda( [this]( float iNewValue, ETextCommit::Type iType ) { SetCameraFocalLength( iNewValue, false ); } )
                                 ]
 
                                 + SHorizontalBox::Slot()
@@ -2129,14 +2129,14 @@ SStoryboardLevelViewport::GetMoveAndScaleActorDistance() const
     return distance;
 }
 void
-SStoryboardLevelViewport::SetMoveAndScaleActorDistance( float iDistance )
+SStoryboardLevelViewport::SetMoveAndScaleActorDistance( float iDistance, bool iInteractive )
 {
     if( !mActorToMove.IsValid() )
         return;
 
     ACineCameraActor* camera = Cast<ACineCameraActor>( mActorToMove->GetAttachParentActor() );
 
-    ShotSequenceTools::MoveAndScaleActor( mActorToMove.Get(), camera, iDistance, mScaleActorType, mCurrentSquencer.Pin() );
+    ShotSequenceTools::MoveAndScaleActor( mActorToMove.Get(), camera, iDistance, mScaleActorType, iInteractive ? nullptr : mCurrentSquencer.Pin() );
 }
 
 void
@@ -2482,7 +2482,7 @@ SStoryboardLevelViewport::GetCameraFocalLength() const
     return focal_length;
 }
 void
-SStoryboardLevelViewport::SetCameraFocalLength( float iFocalLength )
+SStoryboardLevelViewport::SetCameraFocalLength( float iFocalLength, bool iInteractive )
 {
     if( !mCameraToFocalLength.IsValid() )
         return;
@@ -2498,7 +2498,7 @@ SStoryboardLevelViewport::SetCameraFocalLength( float iFocalLength )
             actors.Add( child );
     }
 
-    ShotSequenceTools::SetCameraFocalLengthAndScaleActor( actors, mCameraToFocalLength.Get(), iFocalLength, mScaleActorType, mCurrentSquencer.Pin() );
+    ShotSequenceTools::SetCameraFocalLengthAndScaleActor( actors, mCameraToFocalLength.Get(), iFocalLength, mScaleActorType, iInteractive ? nullptr : mCurrentSquencer.Pin() );
 }
 
 ECheckBoxState

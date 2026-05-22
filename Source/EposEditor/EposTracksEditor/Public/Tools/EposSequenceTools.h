@@ -737,6 +737,15 @@ public:
     static void SortBindings( TArray<FGuid> iBindings, UMovieScene* iMovieScene, TArray<FGuid>* oOrderedBindings );
 
 public:
+    /**
+    *  Move and scale an actor relative to the given camera
+    *
+    * @param AActor*                    ioActor to move and scale.
+    * @param const ACineCameraActor*    iCamera is the reference actor.
+    * @param float                      iNewDistance between actor and camera.
+    * @param EScaleActor                iScaleType manages the way to scale the actor.
+    * @param TSharedPtr<ISequencer>     iSequencer to update the channels (it is also used to know if it's an interactive modification when it is nullptr).
+    */
     static bool MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* iCamera, float iNewDistance, EScaleActor iScaleType, TSharedPtr<ISequencer> iSequencer );
     static bool CanMoveAndScaleActor( const AActor* iActor, const ACineCameraActor* iCamera );
 
@@ -831,6 +840,15 @@ private:
     static void GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
 
 public:
+    /**
+    *  Set the camera focal length and update the "linked" actors
+    *
+    * @param TArray<TWeakObjectPtr<AActor>> ioActors to scale depending of the new camera focal length.
+    * @param ACineCameraActor*              ioCamera to change its focal length.
+    * @param float                          iNewFocalLength of the camera.
+    * @param EScaleActor                    iScaleType manages the way to scale the actor.
+    * @param TSharedPtr<ISequencer>         iSequencer to update the channels (it is also used to know if it's an interactive modification when it is nullptr).
+    */
     static bool SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AActor>> ioActors, ACineCameraActor* ioCamera, float iNewFocalLength, EScaleActor iScaleType, TSharedPtr<ISequencer> iSequencer );
 
 // Inside EposSequenceTools_Animation
