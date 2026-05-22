@@ -7,6 +7,7 @@
 #include "Bindings/MovieSceneSpawnableBinding.h"
 #include "CineCameraActor.h"
 #include "Components/ActorComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Engine/StaticMeshActor.h"
 #include "GameFramework/Actor.h"
 #include "MediaPlate.h"

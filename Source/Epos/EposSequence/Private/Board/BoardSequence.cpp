@@ -6,6 +6,7 @@
 #include "Animation/SkeletalMeshActor.h"
 #include "Bindings/MovieSceneSpawnableBinding.h"
 #include "Components/ActorComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Engine/StaticMeshActor.h"
 #include "GameFramework/Actor.h"
 #include "MediaPlate.h"
