@@ -48,7 +48,7 @@ private:
 
     void RegisterToolbarButton();
     void UnregisterToolbarButton();
-    void AddToolbarButton( FToolBarBuilder &builder );
+    //void AddToolbarButton( FToolBarBuilder &builder );
     void OnEngineInit();
     void ActivateEdMode( AArianePainting3DActor* Painting3DActor );
 

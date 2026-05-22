@@ -172,7 +172,7 @@ FArianeEditorModule::GetArianeEditorViewportEdMode()
 
     return static_cast<FArianeEditorViewportEdMode*>( EdMode );
 }
-
+/*
 void
 FArianeEditorModule::AddToolbarButton( FToolBarBuilder &builder )
 {
@@ -182,30 +182,35 @@ FArianeEditorModule::AddToolbarButton( FToolBarBuilder &builder )
                             , LOCTEXT("WorldProperties_ToolTipOverride", "Click me to display a message")
                             , TAttribute<FSlateIcon>(), "LevelToolbarWorldSettings" );
 }
+*/
 
 void
 FArianeEditorModule::ActivateEdMode( AArianePainting3DActor* Painting3DActor )
 {
     FEditorModeTools& ModeTools = GLevelEditorModeTools();
+    FEdMode* CurrentEdMode = ModeTools.GetActiveMode( FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId );
 
-    ModeTools.ActivateMode( FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId );
-
-    FEdMode* EdMode = ModeTools.GetActiveMode( FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId );
-
-    if( EdMode )
+    if( CurrentEdMode == nullptr )
     {
-        FArianeEditorViewportEdMode* ArianeEdMode = static_cast<FArianeEditorViewportEdMode*>(EdMode);
-        TSharedPtr<FModeToolkit> Toolkit = ArianeEdMode->GetToolkit();
-        TSharedPtr<FArianeEditorViewportToolkit> ArianeToolkit = StaticCastSharedPtr<FArianeEditorViewportToolkit>(Toolkit);
+        ModeTools.ActivateMode( FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId );
 
-        if( Painting3DActor == nullptr )
+        CurrentEdMode = ModeTools.GetActiveMode( FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId );
+
+        if( CurrentEdMode )
         {
-            Painting3DActor = ArianeToolkit->GetEditor().AddPainting3DActor();
-        }
+            FArianeEditorViewportEdMode* ArianeEdMode = static_cast<FArianeEditorViewportEdMode*>( CurrentEdMode );
+            TSharedPtr<FModeToolkit> Toolkit = ArianeEdMode->GetToolkit();
+            TSharedPtr<FArianeEditorViewportToolkit> ArianeToolkit = StaticCastSharedPtr<FArianeEditorViewportToolkit>(Toolkit);
 
-        // Select the actor
-        GEditor->SelectNone( true, true );
-        GEditor->SelectActor( Painting3DActor, true, true );
+            if( Painting3DActor == nullptr )
+            {
+                Painting3DActor = ArianeToolkit->GetEditor().AddPainting3DActor();
+            }
+
+            // Select the actor
+            GEditor->SelectNone( true, true );
+            GEditor->SelectActor( Painting3DActor, true, true );
+        }
     }
 }
 
