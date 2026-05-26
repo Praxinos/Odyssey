@@ -3,9 +3,10 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include <ULIS>
 #include <blend2d.h>
-#include <Core/Core.h>
 #include <Image/Block.h>
 
 #include "Export/v2/OdysseyVectorExport.h"
@@ -89,5 +90,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorImportV2
     private:
         FOdysseyVectorGroupPaint* mScene;
         std::vector<FOdysseyVectorObject*> mObjectArray;
-        std::multimap<UTexture2D*,FOdysseyVectorBrush*> mBrushTextureMultiMap;
+        std::multimap<class UTexture2D*,FOdysseyVectorBrush*> mBrushTextureMultiMap;
 };

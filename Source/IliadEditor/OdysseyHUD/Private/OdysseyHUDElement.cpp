@@ -2,6 +2,8 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyHUDElement.h"
+
+#include "BatchedElements.h"
 #include "CanvasTypes.h"
 
 IMPLEMENT_HIT_PROXY(HOdysseyHUDElementHitProxy, HHitProxy)

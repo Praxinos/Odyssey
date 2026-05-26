@@ -5,7 +5,7 @@
 #include "OdysseyLayer.h"
 
 #include "CoreMinimal.h"
-#include "Widgets/Views/STableRow.h"
+#include "Widgets/Views/SListView.h"
 
 class SOdysseyLayerStackTreeView;
 

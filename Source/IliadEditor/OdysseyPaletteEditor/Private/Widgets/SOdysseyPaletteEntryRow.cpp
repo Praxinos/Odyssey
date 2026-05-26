@@ -2,11 +2,14 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "SOdysseyPaletteEntryRow.h"
+
+#include "ScopedTransaction.h"
+#include "Widgets/Input/SCheckBox.h"
+
 #include "OdysseyPaletteDragDropOperation.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyStyle.h"
 #include "OdysseyPalette.h"
-#include "Widgets/Input/SCheckBox.h"
 #include "OdysseyPaletteEntryColor.h"
 #include "Widgets/SOdysseyPaletteTreeView.h"
 

@@ -2,14 +2,22 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyImportTexturesParameters.h"
+
+#include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "CanvasItem.h"
 #include "CanvasRender.h"
 #include "CanvasTypes.h"
+#include "Curves/CurveFloat.h"
+#include "Factories/TextureFactory.h"
+#include "Misc/ScopedSlowTask.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
 #include "ScreenPass.h"
-#include "Factories/TextureFactory.h"
+#include "TextureResource.h"
+#include "UObject/Package.h"
+#include "UnrealClient.h"
+
 #include "OdysseyScanCleanerShader.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"

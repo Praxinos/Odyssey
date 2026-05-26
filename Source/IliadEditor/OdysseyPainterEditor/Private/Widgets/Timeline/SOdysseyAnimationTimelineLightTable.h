@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
+
 #include "OdysseyRenderingAbility.h"
 #include "SOdysseyAnimationTimelineLighttableKey.h"
 

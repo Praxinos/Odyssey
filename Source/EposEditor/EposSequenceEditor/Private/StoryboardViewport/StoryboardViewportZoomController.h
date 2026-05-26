@@ -3,7 +3,8 @@
 
 #pragma once
 
-#include "Math/MathFwd.h"
+#include "CoreMinimal.h"
+#include "Rendering/SlateRenderTransform.h"
 
 class FStoryboardLevelViewportClient;
 class FStoryboardViewportZoomController

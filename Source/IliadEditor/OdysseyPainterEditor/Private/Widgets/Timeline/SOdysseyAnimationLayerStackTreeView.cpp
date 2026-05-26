@@ -3,6 +3,10 @@
 
 #include "SOdysseyAnimationLayerStackTreeView.h"
 
+#include "Framework/Commands/UICommandList.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "ScopedTransaction.h"
+
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineShortcuts.h"
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyAnimationLayerStack.h"
@@ -16,7 +20,6 @@
 #include "OdysseyAnimationLayerImageVector.h"
 #include "SOdysseyAnimationLayerImageVectorRow.h"
 #include "OdysseyLayerCellSelection.h"
-#include "ScopedTransaction.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

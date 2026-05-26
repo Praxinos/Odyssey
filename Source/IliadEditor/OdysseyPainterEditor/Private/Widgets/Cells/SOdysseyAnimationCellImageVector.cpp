@@ -3,9 +3,14 @@
 
 #include "SOdysseyAnimationCellImageVector.h"
 
+#include "Brushes/SlateImageBrush.h"
+#include "Engine/Texture2D.h"
 #include "ImageUtils.h"
 #include "ObjectTools.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
+#include "Widgets/Images/SImage.h"
+#include "Widgets/SBoxPanel.h"
+#include "Widgets/SOverlay.h"
 
 #include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyAnimation.h"

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputCoreTypes.h"
 #include "Framework/Application/IInputProcessor.h"
 
 class ODYSSEYWIDGETS_API FOdysseyKeyState

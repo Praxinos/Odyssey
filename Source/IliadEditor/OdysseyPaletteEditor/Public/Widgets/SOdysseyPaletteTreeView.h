@@ -12,6 +12,8 @@
 class UOdysseyPalette;
 class UOdysseyPaletteEntryColor;
 class FOdysseyVectorCell;
+class FExtender;
+class FUICommandList;
 
 /**
  * Implements the Palette widget

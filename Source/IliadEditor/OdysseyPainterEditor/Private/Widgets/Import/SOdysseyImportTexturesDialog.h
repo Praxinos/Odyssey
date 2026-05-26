@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
+
 #include "OdysseyImportTexturesParameters.h"
 
 class FOdysseyImportTexturesViewportClient;
@@ -62,8 +64,8 @@ private:
 
     TStrongObjectPtr<UTextureRenderTarget2D> mPreviewRenderTarget;
 
-    TSharedPtr<SViewport> mViewportWidget;
+    TSharedPtr<class SViewport> mViewportWidget;
     TSharedPtr<FOdysseyImportTexturesViewportClient> mViewportClient;
-    TSharedPtr<FSceneViewport> mSceneViewport;
+    TSharedPtr<class FSceneViewport> mSceneViewport;
     TSharedPtr<FOdysseyHUDRectangle> mTextureOutlineHUD;
 };

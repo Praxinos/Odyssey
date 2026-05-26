@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/Interface.h"
 
 #include <blend2d.h>
 #include <Core/Core.h>

@@ -16,6 +16,7 @@
 #include "OdysseyLayerStack.generated.h"
 
 class UOdysseyAnimation;
+class UTexture2D;
 
 UCLASS(Abstract, HideDropdown, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYLAYERSTACK_API UOdysseyLayerStack

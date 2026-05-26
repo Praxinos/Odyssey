@@ -4,6 +4,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Containers/ObservableArray.h"
+#include "Widgets/Views/STreeView.h"
+
 #include "OdysseyPainterEditorColorType.h"
 #include "Palette/OdysseyPalette.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
@@ -57,7 +60,7 @@ private:
     void OnCurrentColorEntryChanged();
 
     TSharedRef<SWidget> OnGetAddPaletteMenuContent();
-    TSharedRef<ITableRow> OnGenerateRow( TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
+    TSharedRef<class ITableRow> OnGenerateRow( TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem> iItem, const TSharedRef<class STableViewBase>& iOwnerTable );
     void OnGetChildren(TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem> iParent, TArray<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>>& oChildren) const;
     void OnSelectionChanged(TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem> iItem, ESelectInfo::Type iSelectInfo);
 

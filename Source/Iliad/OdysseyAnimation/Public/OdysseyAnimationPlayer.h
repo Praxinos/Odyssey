@@ -3,14 +3,15 @@
 
 #pragma once
 
-//#include "OdysseyAnimation.h"
 #include "CoreMinimal.h"
-#include "Tickable.h"
-#include "OdysseyInvalidTileMap.h"
-#include "OdysseyRenderingAbility.h"
+#include "Engine/TextureDefines.h"
 #include "Misc/Attribute.h"
 #include "Misc/FrameTime.h"
-#include "Engine/TextureDefines.h"
+#include "Tickable.h"
+#include "TickableEditorObject.h"
+
+#include "OdysseyInvalidTileMap.h"
+#include "OdysseyRenderingAbility.h"
 
 #include "OdysseyAnimationPlayer.generated.h"
 

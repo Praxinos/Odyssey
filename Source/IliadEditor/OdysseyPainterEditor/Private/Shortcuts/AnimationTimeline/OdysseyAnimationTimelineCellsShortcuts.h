@@ -4,10 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Misc/Attribute.h"
 
 #include "OdysseyLayerCellImageStagger.h"
 
 class UOdysseyAnimation;
+class FUICommandList;
+
 class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationTimelineCellsShortcuts
 {
 public:

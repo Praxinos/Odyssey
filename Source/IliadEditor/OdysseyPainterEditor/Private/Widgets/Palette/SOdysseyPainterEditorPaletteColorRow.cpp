@@ -4,6 +4,8 @@
 #include "Widgets/Palette/SOdysseyPainterEditorPaletteColorRow.h"
 
 #include "Widgets/Colors/SColorBlock.h"
+#include "Widgets/Text/STextBlock.h"
+
 #include "Palette/OdysseyPaletteEntryColor.h"
 #include "OdysseyStyle.h"
 

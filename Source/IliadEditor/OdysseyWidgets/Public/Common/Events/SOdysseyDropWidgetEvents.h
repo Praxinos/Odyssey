@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Input/DragAndDrop.h"
 
 DECLARE_DELEGATE_TwoParams(FOnDragEnter, const FGeometry&, const FDragDropEvent&)
 DECLARE_DELEGATE_OneParam(FOnDragLeave, const FDragDropEvent&)

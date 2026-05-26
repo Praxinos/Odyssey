@@ -2,10 +2,16 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyPainterEditorRasterDrawingTool.h"
+
+#include "OdysseyBrushAssetBase.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyBlendParametersOverrides.h"
 #include "OdysseyBrushOptionsOverrides.h"
+
+#include "PropertyHandle.h"
 #include "Toolkits/BaseToolkit.h"
+#include "ToolMenu.h"
+#include "UObject/Package.h"
 
 #include "OdysseyFreehandShape.h"
 #include "OdysseyLineShape.h"

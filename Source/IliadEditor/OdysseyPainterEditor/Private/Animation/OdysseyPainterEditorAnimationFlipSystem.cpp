@@ -3,20 +3,23 @@
 
 #include "OdysseyPainterEditorAnimationFlipSystem.h"
 
-#include "OdysseyPainterEditorAnimationCommands.h"
-#include "OdysseyPainterEditorAnimationProjectSettings.h"
 #include "DetailWidgetRow.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "IDetailChildrenBuilder.h"
+#include "Modules/ModuleManager.h"
+#include "Widgets/Images/SImage.h"
+#include "Widgets/Input/SComboButton.h"
+
 #include "OdysseyAnimationCell.h"
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimation.h"
-#include "OdysseyPainterEditorAnimationUserSettings.h"
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
+#include "OdysseyPainterEditorAnimationProjectSettings.h"
+#include "OdysseyPainterEditorAnimationUserSettings.h"
 #include "OdysseyStyle.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "Widgets/Images/SImage.h"
-#include "Widgets/Input/SComboButton.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

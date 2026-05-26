@@ -2,6 +2,9 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "SOdysseyAnimationLayerRow.h"
+
+#include "Widgets/Input/SCheckBox.h"
+
 #include "SOdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationLayer.h"
 #include "SOdysseyAnimationTimelineLighttableHeader.h"

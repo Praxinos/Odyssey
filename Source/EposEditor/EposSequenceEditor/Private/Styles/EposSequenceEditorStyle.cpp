@@ -10,8 +10,11 @@
 #include "Interfaces/IPluginManager.h"
 #include "Layout/Margin.h"
 #include "Misc/Paths.h"
+#include "Styling/AppStyle.h"
+#include "Styling/CoreStyle.h"
 #include "Styling/SlateStyleRegistry.h"
 #include "Styling/SlateStyleMacros.h"
+#include "Styling/SlateTypes.h"
 #include "Styling/StyleColors.h"
 
 namespace

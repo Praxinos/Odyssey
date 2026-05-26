@@ -3,6 +3,9 @@
 
 #include "OdysseyToolCollectionDragDropOp.h"
 
+#include "Widgets/Images/SImage.h"
+#include "Widgets/Layout/SBorder.h"
+
 #include "OdysseyPainterEditor.h"
 #include "OdysseyToolCollection.h"
 #include "OdysseyPainterEditorToolConfiguration.h"

@@ -3,14 +3,16 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include <ULIS>
 #include <blend2d.h>
 
 namespace FOdysseyVector
 {
-    void ODYSSEYVECTOR_API PrintMatrix( char* name, BLMatrix2D& matrix );
-    void ODYSSEYVECTOR_API MatrixMultiply( const BLMatrix2D& iA, const BLMatrix2D& iB, BLMatrix2D& oOut );
-    void ODYSSEYVECTOR_API ExtractTransformations( const BLMatrix2D &iMatrix
+    ODYSSEYVECTOR_API void PrintMatrix( char* name, BLMatrix2D& matrix );
+    ODYSSEYVECTOR_API void MatrixMultiply( const BLMatrix2D& iA, const BLMatrix2D& iB, BLMatrix2D& oOut );
+    ODYSSEYVECTOR_API void ExtractTransformations( const BLMatrix2D &iMatrix
                                                  , double* iTranslationX
                                                  , double* iTranslationY
                                                  , double* iRotation
@@ -20,26 +22,26 @@ namespace FOdysseyVector
                                                  , double* iSkewY
                                                  , bool iDegree );
 
-    bool ODYSSEYVECTOR_API IntersectSegment( const ::ULIS::FVec2D& line0p0
+    ODYSSEYVECTOR_API bool IntersectSegment( const ::ULIS::FVec2D& line0p0
                                                    , const ::ULIS::FVec2D& line0p1
                                                    , const ::ULIS::FVec2D& line1p0
                                                    , const ::ULIS::FVec2D& line1p1
                                                    , double* line0t
                                                    , double* line1t );
 
-    double ODYSSEYVECTOR_API Cross2D( const ::ULIS::FVec2D& iA, const ::ULIS::FVec2D &iB );
+    ODYSSEYVECTOR_API double Cross2D( const ::ULIS::FVec2D& iA, const ::ULIS::FVec2D &iB );
 
-    double ODYSSEYVECTOR_API DistanceToSegment( const ::ULIS::FVec2D& iPt
+    ODYSSEYVECTOR_API double DistanceToSegment( const ::ULIS::FVec2D& iPt
                                               , const ::ULIS::FVec2D& iSegmentP0
                                               , const ::ULIS::FVec2D& iSegmentP1
                                               , double& oDistance );
 
-    void ODYSSEYVECTOR_API ChordLengthParameterize( const std::vector<::ULIS::FVec2D>& iPointBuffer
+    ODYSSEYVECTOR_API void ChordLengthParameterize( const std::vector<::ULIS::FVec2D>& iPointBuffer
                                                   , const ::ULIS::FVec2D* iFirstRecord
                                                   , const ::ULIS::FVec2D* iLastRecord
                                                   , std::vector<double>& oUBuffer );
 
-    void ODYSSEYVECTOR_API GenerateBezier( const std::vector<::ULIS::FVec2D>& iPointBuffer
+    ODYSSEYVECTOR_API void GenerateBezier( const std::vector<::ULIS::FVec2D>& iPointBuffer
                                          , const ::ULIS::FVec2D* iFirstRecord
                                          , const ::ULIS::FVec2D* iLastRecord
                                          , const std::vector<double>& uPrime
@@ -56,25 +58,25 @@ namespace FOdysseyVector
     // 1______________0   x (proj. point will also be at t = 0.0,
     //                       even though it is outside the segment)
     //
-    double ODYSSEYVECTOR_API DistanceToSegmentConstrained( const ::ULIS::FVec2D& iPt
+    ODYSSEYVECTOR_API double DistanceToSegmentConstrained( const ::ULIS::FVec2D& iPt
                                                          , const ::ULIS::FVec2D& iSegmentP0
                                                          , const ::ULIS::FVec2D& iSegmentP1
                                                          , double&         oDistance );
-    double ODYSSEYVECTOR_API CubicBezierHitTest( const ::ULIS::FVec2D& iPt
+    ODYSSEYVECTOR_API double CubicBezierHitTest( const ::ULIS::FVec2D& iPt
                                                , const ::ULIS::FVec2D& iBezier0
                                                , const ::ULIS::FVec2D& iBezier1
                                                , const ::ULIS::FVec2D& iBezier2
                                                , const ::ULIS::FVec2D& iBezier3
                                                , uint32 iDivisions
                                                , double iMinDistance );
-    double ODYSSEYVECTOR_API QuadraticBezierHitTest( const ::ULIS::FVec2D& iPt
+    ODYSSEYVECTOR_API double QuadraticBezierHitTest( const ::ULIS::FVec2D& iPt
                                                    , const ::ULIS::FVec2D& iBezier0
                                                    , const ::ULIS::FVec2D& iBezier1
                                                    , const ::ULIS::FVec2D& iBezier2
                                                    , uint32 iDivisions
                                                    , double iMinDistance );
 
-    void ODYSSEYVECTOR_API BezierExtract( const ::ULIS::FVec2D& iP0
+    ODYSSEYVECTOR_API void BezierExtract( const ::ULIS::FVec2D& iP0
                                         , const ::ULIS::FVec2D& iP1
                                         , const ::ULIS::FVec2D& iP2
                                         , const ::ULIS::FVec2D& iP3
@@ -85,34 +87,34 @@ namespace FOdysseyVector
                                         , ::ULIS::FVec2D& oP2
                                         , ::ULIS::FVec2D& oP3 );
 
-    bool ODYSSEYVECTOR_API PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
+    ODYSSEYVECTOR_API bool PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
                                      , const ::ULIS::FRectD& iMaskRect
                                      , const uint8* iPixelData
                                      , uint32 iStride );
 
-    double ODYSSEYVECTOR_API GetCubicBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
+    ODYSSEYVECTOR_API double GetCubicBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
                                                        , uint32 iDivisions );
 
-    double ODYSSEYVECTOR_API GetCubicBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
+    ODYSSEYVECTOR_API double GetCubicBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
                                                             , uint32 iDivisions
                                                             , std::vector<double>* oDivisionLengthBuffer );
-    double ODYSSEYVECTOR_API GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
+    ODYSSEYVECTOR_API double GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
                                                                 , uint32 iDivisions );
 
-    double ODYSSEYVECTOR_API GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
+    ODYSSEYVECTOR_API double GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
                                                                 , uint32 iDivisions
                                                                 , std::vector<double>* oDivisionLengthBuffer
                                                                 , std::vector<::ULIS::FVec2D>* oDivisionPointBuffer );
 
 
-    ::ULIS::FVec2D ODYSSEYVECTOR_API MapPoint( const BLMatrix2D& iMatrix
+    ODYSSEYVECTOR_API ::ULIS::FVec2D MapPoint( const BLMatrix2D& iMatrix
                                              , const ::ULIS::FVec2D& iPoint );
-    ::ULIS::FVec2D ODYSSEYVECTOR_API MapPoint( const BLMatrix2D& iMatrix
+    ODYSSEYVECTOR_API ::ULIS::FVec2D MapPoint( const BLMatrix2D& iMatrix
                                              , double iX
                                              , double iY );
-    ::ULIS::FVec2D ODYSSEYVECTOR_API MapVector( const BLMatrix2D& iMatrix
+    ODYSSEYVECTOR_API ::ULIS::FVec2D MapVector( const BLMatrix2D& iMatrix
                                               , const ::ULIS::FVec2D& iPoint );
-    ::ULIS::FRectD ODYSSEYVECTOR_API MapRect( const BLMatrix2D& iMatrix
+    ODYSSEYVECTOR_API ::ULIS::FRectD MapRect( const BLMatrix2D& iMatrix
                                             , const ::ULIS::FRectD& iRect );
     bool ProjectPoint( const ::ULIS::FVec2D& iPt
                      , const ::ULIS::FVec2D& iSegmentP0
@@ -170,13 +172,13 @@ namespace FOdysseyVector
         oMax.y = ::ULIS::FMath::Max( y1, y2 );
     }
 
-    void ODYSSEYVECTOR_API FitCurve( const std::vector<::ULIS::FVec2D>& iPointBuffer
+    ODYSSEYVECTOR_API void FitCurve( const std::vector<::ULIS::FVec2D>& iPointBuffer
                                    , double iError
                                    , std::function<void ( const std::vector<::ULIS::FVec2D>&
                                                         , double
                                                         , double )> iFunction );
 
-    //bool ODYSSEYVECTOR_API IntersectRegions( const ::ULIS::FRectI& iRegion0, const ::ULIS::FRectI& iRegion1, ::ULIS::FRectI &oRegionOut );
+    //ODYSSEYVECTOR_API bool IntersectRegions( const ::ULIS::FRectI& iRegion0, const ::ULIS::FRectI& iRegion1, ::ULIS::FRectI &oRegionOut );
 }
 
 /*

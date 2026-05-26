@@ -2,18 +2,24 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
+
+#include "Editor.h"
+#include "ISinglePropertyView.h"
+#include "Styling/StyleColors.h"
+#include "ToolMenu.h"
+#include "Widgets/Input/SSegmentedControl.h"
+#include "Widgets/Layout/SBox.h"
+
 #include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartToolHUD.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerChartAlter.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
-#include "ISinglePropertyView.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "SOdysseySinglePropertyView.h"
-#include "Widgets/Input/SSegmentedControl.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

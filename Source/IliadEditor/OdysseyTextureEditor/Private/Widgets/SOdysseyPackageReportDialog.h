@@ -11,7 +11,6 @@
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Views/STableViewBase.h"
-#include "Widgets/Views/STableRow.h"
 #include "Widgets/Views/STreeView.h"
 #include "SEnumCombo.h"
 #include <ULIS>

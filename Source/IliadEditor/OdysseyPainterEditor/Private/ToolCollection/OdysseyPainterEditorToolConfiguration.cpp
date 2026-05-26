@@ -4,6 +4,7 @@
 #include "OdysseyPainterEditorToolConfiguration.h"
 
 #include "CoreMinimal.h"
+#include "Engine/Texture2D.h"
 #include "Styling/SlateStyleRegistry.h"
 
 static const FVector2D kIconSize = FVector2D(24.f, 24.f);

@@ -2,6 +2,11 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
+
+#include "Editor.h"
+#include "Framework/Commands/GenericCommands.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+
 #include "SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow.h"
 #include "SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
 #include "OdysseyAnimation.h"
@@ -32,8 +37,6 @@
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "OdysseyAnimationCell.h"
-
-#include "Framework/Commands/GenericCommands.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

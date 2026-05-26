@@ -49,6 +49,8 @@ SOdysseyTextureExportAsTextureDialog::Construct(const FArguments& InArgs, UTextu
 {
     mExporter.mTexture = iTexture;
 
+    const UEnum* sourceEnum = StaticEnum<EOdysseyTextureExportAsTextureSource>();
+
     ChildSlot
     [
         SNew(SGridPanel)
@@ -59,7 +61,7 @@ SOdysseyTextureExportAsTextureDialog::Construct(const FArguments& InArgs, UTextu
         ]
         + SGridPanel::Slot(1, 0)
         [
-            SNew(SEnumComboBox, StaticEnum<EOdysseyTextureExportAsTextureSource>())
+            SNew(SEnumComboBox, sourceEnum)
             .ContentPadding(FMargin(0))
             .CurrentValue_Lambda([this](){ return (int32)mExporter.mSource;})
             .OnEnumSelectionChanged_Lambda([this](int32 iValue, ESelectInfo::Type iSelectInfo){ mExporter.mSource = (EOdysseyTextureExportAsTextureSource)iValue;})

@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/GCObject.h"
+#include "Widgets/SCompoundWidget.h"
 
 #include "MovieSceneSequenceID.h"
 

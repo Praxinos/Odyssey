@@ -3,6 +3,9 @@
 
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageRasterShortcuts.h"
 
+#include "Misc/ScopedSlowTask.h"
+#include "TextureResource.h"
+
 #include "SOdysseyAnimationCellImageStagger.h"
 #include "SOdysseyAnimationCellImageRaster.h"
 #include "OdysseyAnimationLayerImageRaster.h"

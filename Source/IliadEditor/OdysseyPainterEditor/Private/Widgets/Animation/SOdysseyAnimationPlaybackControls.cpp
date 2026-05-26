@@ -2,6 +2,9 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Widgets/Animation/SOdysseyAnimationPlaybackControls.h"
+
+#include "Widgets/SBoxPanel.h"
+
 #include "OdysseyStyle.h"
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimation.h"

@@ -3,8 +3,11 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include "OdysseyTextureRenderingAbility.h"
 #include <ULIS>
+
 #include "OdysseyExportImage.generated.h"
 
 UENUM(BlueprintType)
@@ -17,6 +20,7 @@ enum class EOdysseyExportImageFormat : uint8
 };
 
 class UPaperFlipbook;
+class UTexture2D;
 
 namespace Odyssey
 {

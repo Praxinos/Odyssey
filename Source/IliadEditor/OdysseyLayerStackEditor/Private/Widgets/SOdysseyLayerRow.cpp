@@ -2,22 +2,25 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Widgets/SOdysseyLayerRow.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyStyle.h"
-#include "Widgets/Text/SInlineEditableTextBlock.h"
+
+#include "Editor.h"
 #include "Framework/Commands/GenericCommands.h"
-#include "Widgets/SOdysseyLayerStackTreeView.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Math/UnitConversion.h"
+#include "ScopedTransaction.h"
+#include "SEnumCombo.h"
+#include "Widgets/Input/SNumericEntryBox.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Widgets/Layout/SWidgetSwitcher.h"
+#include "Widgets/Text/SInlineEditableTextBlock.h"
+
 #include "OdysseyLayerStack.h"
 #include "OdysseyLayerStackEditorCommands.h"
 #include "OdysseyLayerStackShortcuts.h"
+#include "OdysseyStyle.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/SOdysseyLayerExpanderArrow.h"
-#include "Widgets/Input/SNumericEntryBox.h"
-#include "OdysseyLayerStack.h"
-#include "Math/UnitConversion.h"
-#include "SEnumCombo.h"
-#include "Widgets/Input/NumericUnitTypeInterface.inl"
-#include "Editor.h"
+#include "Widgets/SOdysseyLayerStackTreeView.h"
 
 #define LOCTEXT_NAMESPACE "LayerStackEditor"
 

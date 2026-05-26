@@ -4,7 +4,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ViewportClient.h"
+
 #include "OdysseyHUDElement.h"
+
+class UTexture;
+class UTexture2D;
 
 /////////////////////////////////////////////////////
 // FOdysseyImportTexturesViewportClient
@@ -48,8 +53,8 @@ private:
     TObjectPtr<UTexture> mTexture;
     TSharedRef<FOdysseyHUDElement> mHUD;
 
-    TUniquePtr<FTexture> mNearestNeighborTexture;
-    TUniquePtr<FTexture> mBilinearTexture;
+    TUniquePtr<class FTexture> mNearestNeighborTexture;
+    TUniquePtr<class FTexture> mBilinearTexture;
 
     bool mTranformInitialized = false;
     FMatrix mTransform;

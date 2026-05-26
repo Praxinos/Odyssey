@@ -2,13 +2,18 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
+
+#include "Editor.h"
+#include "ISinglePropertyView.h"
+#include "ToolMenu.h"
+#include "Widgets/Layout/SBox.h"
+
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushToolHUD.h"
 #include "Undo/OdysseyVectorUndoSegmentReshape.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
-#include "ISinglePropertyView.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorLayer.h"

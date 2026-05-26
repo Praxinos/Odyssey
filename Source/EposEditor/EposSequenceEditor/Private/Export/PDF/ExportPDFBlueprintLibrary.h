@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Engine/EngineBaseTypes.h"
 #include "Export/ExportStruct.h"
 #include "SequenceNameElements.h"
 

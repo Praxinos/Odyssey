@@ -9,12 +9,13 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorLayer.h"
-#include "Interfaces/IPluginManager.h"
 #include "OdysseyVector.h"
 // for 3D HUDs
+
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
-
+#include "Engine/Engine.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Fonts/FontMeasure.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -33,8 +34,6 @@ FOdysseyPainterEditorVectorChartToolHUD::FOdysseyPainterEditorVectorChartToolHUD
     , mChartTool( iChartTool )
     , mChartRect( 200.0f, 40, 400.0f, 40 )
 {
-    //FString fontPath = IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources/OdysseyAssetResources/Font/LoveStruck.ttf" );
-
     if (GEngine)
         mChartFontInfo = FSlateFontInfo( GEngine->GetSmallFont(), FONT_SIZE );
     /*mChartFontInfo = FSlateFontInfo( LoadObject<UFont>( nullptr, TEXT("/Odyssey/Fonts/LoveStruck_Font") ), FONT_SIZE );*/

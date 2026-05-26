@@ -14,8 +14,10 @@
 #include "LegacyScreenPercentageDriver.h"
 #include "MovieSceneCommonHelpers.h"
 #include "MovieSceneSequence.h"
+#include "SceneView.h"
 #include "SceneViewExtension.h"
 #include "SceneViewExtensionContext.h"
+#include "TextureResource.h"
 //#include "TrackEditorThumbnail/TrackThumbnailUtils.h"
 
 #include "Export/ExportStruct.h"

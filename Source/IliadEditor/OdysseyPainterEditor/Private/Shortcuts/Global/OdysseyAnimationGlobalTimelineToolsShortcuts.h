@@ -2,6 +2,8 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include "OdysseyEditorShortcuts.h"
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationGlobalTimelineToolsShortcuts

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Framework/Docking/LayoutExtender.h"
 
 class FOdysseyPainterEditorLevelEditorLayout
 {

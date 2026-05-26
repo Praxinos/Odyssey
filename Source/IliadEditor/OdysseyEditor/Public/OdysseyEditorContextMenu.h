@@ -3,7 +3,10 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
+
+class FBaseToolkit;
 
 class ODYSSEYEDITOR_API FOdysseyEditorContextMenu :
     public TSharedFromThis<FOdysseyEditorContextMenu>

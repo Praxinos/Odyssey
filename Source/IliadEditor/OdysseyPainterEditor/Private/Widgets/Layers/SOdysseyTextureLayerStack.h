@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
+
 class SOdysseyTextureLayerStackTreeView;
 class UOdysseyLayerStack;
 class UOdysseyLayer;
@@ -31,7 +34,7 @@ public:
     void Construct(const FArguments& InArgs);
 
 private:
-    TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
+    TSharedRef<class ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<class STableViewBase>& iOwnerTable);
     void RebuildWidgets();
 
 private:

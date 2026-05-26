@@ -3,14 +3,18 @@
 
 #pragma once
 
-#include <ULIS>
+#include "CoreMinimal.h"
+
 #include "OdysseyEditorTab.h"
 #include "OdysseyEventState.h"
 #include "OdysseyPainterEditor.h"
 #include "Palette/OdysseyPalette.h"
 
+#include <ULIS>
+
 class FOdysseyPainterEditor;
 class UOdysseyPalette;
+class SButton;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorColorSelectorTab :
     public FOdysseyEditorTab

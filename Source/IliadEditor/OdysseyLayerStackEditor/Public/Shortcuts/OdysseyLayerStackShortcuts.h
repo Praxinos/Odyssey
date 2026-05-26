@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 class SOdysseyLayerStackTreeView;
 class UOdysseyLayerStack;
 class FUICommandList;

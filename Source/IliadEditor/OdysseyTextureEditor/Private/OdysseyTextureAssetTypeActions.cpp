@@ -4,11 +4,13 @@
 #include "OdysseyTextureAssetTypeActions.h"
 
 #include "ContentBrowserModule.h"
+#include "Engine/texture2D.h"
 #include "IContentBrowserSingleton.h"
 #include "Interfaces/ITextureEditorModule.h"
+
 #include "OdysseyPainterEditorModule.h"
-#include "OdysseyTextureEditorSettings.h"
 #include "OdysseyStyle.h"
+#include "OdysseyTextureEditorSettings.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 

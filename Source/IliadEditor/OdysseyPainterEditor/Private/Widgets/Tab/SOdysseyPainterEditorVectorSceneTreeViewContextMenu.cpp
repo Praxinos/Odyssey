@@ -2,6 +2,10 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewContextMenu.h"
+
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Dialogs/Dialogs.h"
+
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.h"
 #include "OdysseyPainterEditor.h"
 // module OdysseyVector
@@ -10,7 +14,6 @@
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorCell.h"
-#include "Dialogs/Dialogs.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"

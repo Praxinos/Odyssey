@@ -3,6 +3,8 @@
 
 #include "OdysseyPainterEditorLayerStackTab.h"
 
+#include "Toolkits/BaseToolkit.h"
+
 #include "SOdysseyTextureLayerStack.h"
 #include "ToolMenus.h"
 #include "DesktopPlatformModule.h"

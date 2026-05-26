@@ -2,6 +2,13 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "SOdysseyAnimationCell.h"
+
+#include "Styling/StyleColors.h"
+#include "Widgets/Layout/SBorder.h"
+#include "Widgets/SOverlay.h"
+#include "Widgets/Text/SInlineEditableTextBlock.h"
+#include "Widgets/Text/STextBlock.h"
+
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyLayerCell.h"
 #include "OdysseyPainterEditorAnimationProjectSettings.h"
@@ -9,7 +16,6 @@
 #include "OdysseyAnimationLayerStack.h"
 #include "OdysseyLayerCellSelection.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
-#include "Widgets/Text/SInlineEditableTextBlock.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

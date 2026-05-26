@@ -3,6 +3,8 @@
 
 #include "SOdysseyFlipbookPlaybackControls.h"
 
+#include "Widgets/SBoxPanel.h"
+
 #include "OdysseyStyle.h"
 
 

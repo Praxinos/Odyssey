@@ -9,6 +9,7 @@
 #include "MovieScene.h"
 #include "MVVM/ViewModels/SequencerEditorViewModel.h"
 #include "MVVM/ViewModels/TrackAreaViewModel.h"
+#include "ScopedTransaction.h"
 #include "SEnumCombo.h"
 #include "Widgets/Colors/SColorBlock.h"
 

@@ -2,6 +2,10 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
+
+#include "Engine/Texture.h"
+#include "RenderCommandFence.h"
+
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyMediaRaster.h"

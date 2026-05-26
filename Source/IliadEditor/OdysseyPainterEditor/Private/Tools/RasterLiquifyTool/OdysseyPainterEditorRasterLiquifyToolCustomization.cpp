@@ -5,12 +5,14 @@
 #include "OdysseyPainterEditorRasterLiquifyTool.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailCategoryBuilder.h"
+#include "Modules/ModuleManager.h"
 #include "Widgets/Input/SSegmentedControl.h"
 #include "OdysseyStyle.h"
 #include "DetailWidgetRow.h"
 #include "IPropertyRowGenerator.h"
 #include "IPropertyTable.h"
 #include "Misc/Attribute.h"
+#include "Widgets/Input/SButton.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

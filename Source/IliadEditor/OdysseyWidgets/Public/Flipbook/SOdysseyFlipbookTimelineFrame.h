@@ -3,6 +3,10 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+#include "Framework/SlateDelegates.h"
+#include "Widgets/SCompoundWidget.h"
+
 #include "SOdysseyFlipbookTimelineFrameEvents.h"
 
 class ODYSSEYWIDGETS_API SOdysseyFlipbookTimelineFrame : public SCompoundWidget
@@ -55,7 +59,7 @@ public:
     TSharedPtr<SWidget> Content() const;
 
 private:
-    TSharedPtr<SBorder> mContentContainer;
+    TSharedPtr<class SBorder> mContentContainer;
     TAttribute<float>     mFrameSize;
     int32 mLength;
     int32 mMinLength;

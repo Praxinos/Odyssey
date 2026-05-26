@@ -3,10 +3,9 @@
 
 #include "Widgets/Tab/SOdysseyPainterEditorTools.h"
 
-#include "OdysseyPainterEditor.h"
-#include "Widgets/Tools/SOdysseyPainterEditorToolsTileView.h"
-#include "Widgets/Tools/SOdysseyPainterEditorToolOptions.h"
+#include "Widgets/Layout/SScrollBox.h"
 
+#include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
 #include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
@@ -31,6 +30,8 @@
 #include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.h"
 #include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
 #include "Tools/VectorTrajectoryTool/OdysseyPainterEditorVectorTrajectoryTool.h"
+#include "Widgets/Tools/SOdysseyPainterEditorToolsTileView.h"
+#include "Widgets/Tools/SOdysseyPainterEditorToolOptions.h"
 
 SOdysseyPainterEditorTools::~SOdysseyPainterEditorTools()
 {}

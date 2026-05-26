@@ -3,6 +3,8 @@
 
 #include "Render/EposSequencePipelineRenderer.h"
 
+#include "Editor.h"
+#include "Framework/Docking/TabManager.h"
 #include "IMovieRenderPipelineEditorModule.h"
 #include "LevelSequence.h"
 #include "MoviePipelineEditorBlueprintLibrary.h"
@@ -10,6 +12,7 @@
 #include "MoviePipelineQueueSubsystem.h"
 #include "MovieRenderPipelineCoreModule.h"
 #include "MovieRenderPipelineSettings.h"
+#include "Widgets/SWindow.h"
 
 #include "EposMovieSceneSequence.h"
 #include "Render/EposSequenceRenderHelpers.h"

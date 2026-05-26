@@ -3,6 +3,10 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+#include "Framework/SlateDelegates.h"
+#include "Widgets/SCompoundWidget.h"
+
 #include "SOdysseyDropWidgetEvents.h"
 
 class ODYSSEYWIDGETS_API SOdysseyDropWidget : public SCompoundWidget

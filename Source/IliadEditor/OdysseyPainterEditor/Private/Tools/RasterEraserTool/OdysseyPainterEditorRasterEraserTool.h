@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ScopedTransaction.h"
+
 #include "OdysseyPainterEditorRasterBaseTool.h"
 #include "OdysseyShape.h"
 #include "OdysseyPaintEngine.h"

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "OdysseyLayerStack.h"
 
 #include "OdysseyAnimationLayerStack.generated.h"

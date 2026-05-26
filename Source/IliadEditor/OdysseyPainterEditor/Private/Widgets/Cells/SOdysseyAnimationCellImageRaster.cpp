@@ -3,8 +3,13 @@
 
 #include "SOdysseyAnimationCellImageRaster.h"
 
+#include "Brushes/SlateImageBrush.h"
+#include "Engine/Texture2D.h"
 #include "ImageUtils.h"
 #include "ObjectTools.h"
+#include "Widgets/Images/SImage.h"
+#include "Widgets/SBoxPanel.h"
+#include "Widgets/SOverlay.h"
 
 #include "OdysseyAnimationCellImageRaster.h"
 #include "OdysseyAnimation.h"

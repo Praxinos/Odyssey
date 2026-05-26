@@ -3,6 +3,10 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+#include "TickableEditorObject.h"
+#include "ToolMenuContext.h"
+
 #include "OdysseyHUDElement.h"
 #include "OdysseyEditorTab.h"
 #include "OdysseyEditorShortcuts.h"
@@ -63,6 +67,8 @@ class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
 class UOdysseyPainterEditorAnimationOutOfPegsTool;
 class FOdysseyPainterEditorAnimationFlipSystem;
+
+class UToolMenu;
 
 /**
  * Base class for a Painting Editor
@@ -394,7 +400,6 @@ protected:
     FOdysseyEditorShortcuts mShortcuts;
     TSharedPtr<FTabManager::FLayout>         mLayout;
     static TSharedPtr<::ULIS::FBlock>        mCopyBlock; // Pixel block in clipboard (ctrl + c, ctrl + v)
-    FRenderCommandFence mPixelFence;
 
     //Tools
     TSharedPtr<FOdysseyPainterEditorSource>  mSource;

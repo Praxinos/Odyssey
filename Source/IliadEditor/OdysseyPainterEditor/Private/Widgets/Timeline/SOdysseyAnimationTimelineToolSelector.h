@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
+
 #include "TimelineTools/OdysseyAnimationTimelineTools.h"
 
 class SOdysseyAnimationTimelineToolSelector

@@ -3,8 +3,14 @@
 
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
 
+#include "Editor.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "ImageUtils.h"
+#include "PropertyHandle.h"
+#include "ToolMenu.h"
+#include "Widgets/Layout/SBox.h"
+
 #include "OdysseyRasterBlock.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPainterEditor.h"

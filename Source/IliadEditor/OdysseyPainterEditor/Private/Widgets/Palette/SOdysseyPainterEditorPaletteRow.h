@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Widgets/Views/SListView.h"
+
 #include "Widgets/Palette/SOdysseyPainterEditorPaletteSetList.h"
 
 /**

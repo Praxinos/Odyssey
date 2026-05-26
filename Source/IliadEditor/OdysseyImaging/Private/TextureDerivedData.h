@@ -10,6 +10,7 @@
 #include "Engine/Texture2DArray.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Engine/VolumeTexture.h"
+#include "EngineLogs.h"
 #include "GlobalRenderResources.h"
 #include "ImageCore.h"
 #include "ImageCoreUtils.h"

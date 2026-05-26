@@ -2,6 +2,8 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyHUDUtils.h"
+
+#include "BatchedElements.h"
 #include "CanvasTypes.h"
 
 void FOdysseyHUDUtils::DrawCustomizedLine(const FVector2D& iA, const FVector2D& iB, const FOdysseyHUDElement::FHUDCustomization& iCustomization, const FOdysseyHUDElement::FDrawHUDParams& iParams, FBatchedElements* iBatchedElements)

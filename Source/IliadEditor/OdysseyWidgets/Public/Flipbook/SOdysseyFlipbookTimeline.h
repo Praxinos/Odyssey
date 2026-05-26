@@ -3,9 +3,10 @@
 
 #pragma once
 
-#include "SOdysseyFlipbookTimelineEvents.h"
-
+#include "CoreMinimal.h"
 #include "Widgets/Layout/SScrollBox.h"
+
+#include "SOdysseyFlipbookTimelineEvents.h"
 
 class SOdysseyScrubWidget;
 

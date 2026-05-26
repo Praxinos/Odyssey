@@ -3,19 +3,20 @@
 
 #include "Widgets/SOdysseyAnimationTimelineTrack.h"
 
+#include "EditorModeManager.h"
+#include "ScopedTransaction.h"
 #include "SOdysseyAnimationLayerStackTreeView.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
 #include "TrackEditors/SubTrackEditorBase.h"
-#include "OdysseyAnimationTimelineSectionEditor.h"
-#include "OdysseyAnimationComponent.h"
+#include "Widgets/Input/SCheckBox.h"
+
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationTimelineSection.h"
+#include "OdysseyAnimationTimelineSectionEditor.h"
 #include "OdysseyAnimationTimelineTrack.h"
 #include "OdysseyViewportDrawingEditorEdMode.h"
-#include "EditorModeManager.h"
 #include "OdysseyViewportDrawingEditorToolkit.h"
-#include "Widgets/Input/SCheckBox.h"
-#include "OdysseyAnimationTimelineSection.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

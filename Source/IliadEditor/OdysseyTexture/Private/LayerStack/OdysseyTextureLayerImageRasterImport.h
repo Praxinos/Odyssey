@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <Core/Core.h>
+#include "CoreMinimal.h"
 
 class UOdysseyTextureLayerImageRaster;
 

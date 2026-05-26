@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 //Called when zooming occurs
 DECLARE_DELEGATE( FOnScrubStarted)
 DECLARE_DELEGATE_OneParam( FOnScrubPositionChanged, float) //iOldValue

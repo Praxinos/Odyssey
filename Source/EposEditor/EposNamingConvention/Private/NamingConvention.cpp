@@ -16,6 +16,8 @@
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
 #include "MovieSceneToolsProjectSettings.h"
+#include "Templates/Greater.h"
+
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"

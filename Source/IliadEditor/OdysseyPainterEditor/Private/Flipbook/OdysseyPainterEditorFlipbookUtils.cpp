@@ -5,11 +5,14 @@
 
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
-#include "OdysseyTextureLayerStackUserData.h"
+#include "Editor.h"
+#include "Subsystems/AssetEditorSubsystem.h"
 #include "PaperFlipbook.h"
 #include "PaperImporterSettings.h"
 #include "PaperSprite.h"
 #include "UObject/SavePackage.h"
+
+#include "OdysseyTextureLayerStackUserData.h"
 
 namespace OdysseyPainterEditorFlipbookUtils
 {

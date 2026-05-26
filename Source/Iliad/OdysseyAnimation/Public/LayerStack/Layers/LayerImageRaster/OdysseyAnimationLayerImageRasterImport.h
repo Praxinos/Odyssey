@@ -4,7 +4,7 @@
 #pragma once
 
 #if WITH_EDITOR
-#include <Core/Core.h>
+#include "CoreMinimal.h"
 
 class UOdysseyAnimationLayerImageRaster;
 
@@ -17,7 +17,7 @@ public:
      * @param iAnimationLayerImageRaster
      * @param Ar
      */
-    static bool ODYSSEYANIMATION_API Read( UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
+    ODYSSEYANIMATION_API static bool Read( UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
                                   , FArchive &Ar );
 
 private:

@@ -10,6 +10,7 @@
 #include "Widgets/SWidget.h"
 #include "Widgets/SCompoundWidget.h"
 
+class SBox;
 
 /** A custom widget that comprises a combo box displaying all available storyboard viewport options
 *

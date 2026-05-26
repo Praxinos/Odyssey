@@ -3,10 +3,15 @@
 
 #include "OdysseyTextureLayerImageRaster.h"
 
+#include "Engine/TextureRenderTarget2D.h"
+#include "ImageUtils.h"
+#include "ScreenPass.h"
+#include "TextureCompiler.h"
+#include "TextureResource.h"
+#include "UObject/ObjectSaveContext.h"
+
+#include "OdysseyBlendShader.h"
 #include "OdysseyPixelFormat.h"
-#include "ULISEventBuilder.h"
-#include "ULISLoaderModule.h"
-#include "ULISUtils.h"
 #include "OdysseyStyle.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyRasterBlock.h"
@@ -18,12 +23,10 @@
 #include "OdysseyTextureLayerImageRasterExport.h"
 #include "OdysseyTextureLayerStack.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "TextureCompiler.h"
-#include "Engine/TextureRenderTarget2D.h"
-#include "ImageUtils.h"
-#include "OdysseyBlendShader.h"
-#include "ScreenPass.h"
-#include "UObject/ObjectSaveContext.h"
+
+#include "ULISEventBuilder.h"
+#include "ULISLoaderModule.h"
+#include "ULISUtils.h"
 
 #define LOCTEXT_NAMESPACE "Texture"
 

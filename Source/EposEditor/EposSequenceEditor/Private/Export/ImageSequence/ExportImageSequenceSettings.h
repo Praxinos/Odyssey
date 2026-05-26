@@ -5,9 +5,9 @@
 
 #include "CoreMinimal.h"
 
-#include "IImageWrapper.h"
-
+#include "Engine/EngineBaseTypes.h"
 #include "Export/ExportSettings.h"
+#include "IImageWrapper.h"
 #include "PatternKeywordList.h"
 
 #include "ExportImageSequenceSettings.generated.h"

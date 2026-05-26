@@ -2,12 +2,16 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
-#include "SOdysseyAnimationTimelineInbetweeningHeader.h"
 
+#include "Editor.h"
+#include "Styling/StyleColors.h"
+#include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Text/SInlineEditableTextBlock.h"
+
+#include "SOdysseyAnimationTimelineInbetweeningHeader.h"
 #include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyLayerStack.h"
 
-#include "Widgets/Text/SInlineEditableTextBlock.h"
 #include "OdysseyStyle.h"
 // from module OdysseyVector
 #include "OdysseyVector.h"

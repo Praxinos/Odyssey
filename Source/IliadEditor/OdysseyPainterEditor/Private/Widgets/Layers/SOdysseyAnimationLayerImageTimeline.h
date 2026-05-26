@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyLayerCell.h"
 #include "SOdysseyAnimationTimelineOutOfPegsKey.h"
@@ -19,6 +20,7 @@ class FOdysseyPainterEditor;
 class SOdysseyPainterEditorVectorMassModifierView;
 class FOdysseyVectorGroupPaint;
 class SOdysseyEvents;
+class FUICommandList;
 
 /**
  * Implements a layer row widget

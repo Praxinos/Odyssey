@@ -2,6 +2,9 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyRasterBlockExport.h"
+
+#include "Compression/OodleDataCompression.h"
+
 #include "OdysseyRasterBlock.h"
 #include "OdysseyFile.h"
 

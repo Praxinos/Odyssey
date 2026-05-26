@@ -2,7 +2,12 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "StoryboardViewport/SStoryboardViewportSettings.h"
+
+#include "EditorStyleSet.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Framework/MultiBox/MultiBoxExtender.h"
 #include "Styling/SlateTypes.h"
+#include "Textures/SlateIcon.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Layout/SBox.h"
@@ -14,7 +19,6 @@
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Colors/SColorPicker.h"
 #include "Widgets/Input/SCheckBox.h"
-#include "EditorStyleSet.h"
 
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Styles/EposSequenceEditorStyle.h"

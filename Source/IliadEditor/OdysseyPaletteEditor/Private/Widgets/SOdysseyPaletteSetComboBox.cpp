@@ -3,8 +3,11 @@
 
 #include "Widgets/SOdysseyPaletteSetComboBox.h"
 
-#include "OdysseyPalette.h"
 #include "Dialogs/Dialogs.h"
+#include "ScopedTransaction.h"
+#include "Widgets/Input/SEditableTextBox.h"
+
+#include "OdysseyPalette.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "Palette"

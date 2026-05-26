@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include "OdysseyEditorTab.h"
 #include "OdysseyPainterEditorAnimationExportShortcuts.h"
 
@@ -12,6 +14,7 @@ class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
 class UOdysseyLayerCell;
 class FOdysseyPainterEditorAnimationTimelinePosition;
+class FExtender;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorAnimationTimelineTab :
     public FOdysseyEditorTab

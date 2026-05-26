@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Input/Reply.h"
+#include "Input/DragAndDrop.h"
 
 DECLARE_DELEGATE_RetVal_TwoParams(FReply, FOnGenerateContextMenu, const FGeometry&, const FPointerEvent&)
 DECLARE_DELEGATE_TwoParams(FOnDragEnter, const FGeometry&, const FDragDropEvent&)

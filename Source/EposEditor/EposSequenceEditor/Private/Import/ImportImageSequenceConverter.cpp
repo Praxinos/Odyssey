@@ -4,6 +4,7 @@
 #include "Import/ImportImageSequenceConverter.h"
 
 #include "AssetToolsModule.h"
+#include "Engine/Texture2D.h"
 #include "Factories/TextureFactory.h"
 #include "ImageUtils.h"
 #include "ISequencer.h"

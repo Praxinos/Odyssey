@@ -6,6 +6,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
 #include "CineCameraActor.h"
+#include "Editor.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "IAssetTools.h"
 #include "LevelEditorSubsystem.h"

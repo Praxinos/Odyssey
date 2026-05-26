@@ -3,12 +3,17 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+#include "Widgets/Views/SListView.h"
+
 #include "OdysseyEditorTab.h"
 #include <ULIS>
 
 class FOdysseyPainterEditor;
 class UOdysseyPainterEditorTool;
 class UOdysseyToolCollection;
+class ITableRow;
+class STableViewBase;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorToolCollectionTab :
     public FOdysseyEditorTab

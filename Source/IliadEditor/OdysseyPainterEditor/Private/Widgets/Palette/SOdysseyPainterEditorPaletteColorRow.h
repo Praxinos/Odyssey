@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "OdysseyPainterEditorColorType.h"
 #include "Widgets/Palette/SOdysseyPainterEditorPaletteEntryRow.h"
 

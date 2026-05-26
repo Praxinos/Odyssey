@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #pragma once
+#include "CoreMinimal.h"
 #include "Input/DragAndDrop.h"
 
 class UOdysseyPaletteEntry;
@@ -48,7 +49,7 @@ public:
 
 private:
     FText GetText() const;
-    const FSlateBrush* GetIcon() const;
+    const struct FSlateBrush* GetIcon() const;
 
 private:
     UOdysseyPalette* mPalette;

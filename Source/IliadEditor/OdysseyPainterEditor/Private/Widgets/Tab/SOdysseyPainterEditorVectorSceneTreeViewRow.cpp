@@ -2,7 +2,14 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.h"
+
+#include "Editor.h"
+#include "Dialogs/Dialogs.h"
+#include "Widgets/Colors/SColorBlock.h"
+#include "Widgets/Colors/SColorPicker.h"
+#include "Widgets/Input/SCheckBox.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
+
 #include "OdysseyStyle.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorTagInbetweener.h"
@@ -13,9 +20,6 @@
 #include "Undo/OdysseyVectorUndoObjectParam.h"
 #include "OdysseyPainterEditorSource.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.h"
-#include "Widgets/Colors/SColorBlock.h"
-#include "Widgets/Colors/SColorPicker.h"
-#include "Dialogs/Dialogs.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

@@ -3,6 +3,8 @@
 
 #include "Widgets/Palette/SOdysseyPainterEditorPaletteRow.h"
 
+#include "Widgets/Input/SButton.h"
+
 #include "OdysseyStyle.h"
 #include "OdysseyPalette.h"
 #include "Widgets/SOdysseyPaletteSetComboBox.h"

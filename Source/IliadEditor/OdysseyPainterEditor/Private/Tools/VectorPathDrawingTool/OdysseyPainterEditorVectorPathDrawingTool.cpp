@@ -2,6 +2,15 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
+
+#include "Editor.h"
+#include "Framework/Application/SlateApplication.h"
+#include "GenericPlatform/GenericPlatformTime.h"
+#include "ISinglePropertyView.h"
+#include "Toolkits/BaseToolkit.h"
+#include "ToolMenu.h"
+#include "Widgets/Layout/SWrapBox.h"
+
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingToolHUD.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
@@ -9,15 +18,11 @@
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyMediaVector.h"
-#include "ISinglePropertyView.h"
-#include "Framework/Application/SlateApplication.h"
-#include "Widgets/Layout/SWrapBox.h"
 #include "OdysseyPainterEditorSource.h"
-#include "GenericPlatform/GenericPlatformTime.h"
 #include "OdysseyPainterEditorCommands.h"
-#include "Toolkits/BaseToolkit.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "SOdysseySinglePropertyView.h"
+
 #include <chrono>
 
 #define LOCTEXT_NAMESPACE "PainterEditor"

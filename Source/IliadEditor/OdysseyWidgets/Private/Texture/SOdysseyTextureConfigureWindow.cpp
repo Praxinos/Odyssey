@@ -3,19 +3,22 @@
 
 #include "Texture/SOdysseyTextureConfigureWindow.h"
 
+#include "IStructureDetailsView.h"
+#include "PropertyEditorModule.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Layout/SBorder.h"
-#include "Widgets/Layout/SUniformGridPanel.h"
 #include "Widgets/Layout/SSeparator.h"
-#include "IStructureDetailsView.h"
+#include "Widgets/Layout/SUniformGridPanel.h"
+
 #include "OdysseyPixelFormat.h"
-#include "ULISLoaderModule.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyRasterBlockMutator.h"
+
 #include <ULIS>
+#include "ULISLoaderModule.h"
 
 /////////////////////////////////////////////////////
 // Defines

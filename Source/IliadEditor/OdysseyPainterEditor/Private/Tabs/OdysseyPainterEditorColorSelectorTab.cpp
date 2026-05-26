@@ -3,6 +3,8 @@
 
 #include "OdysseyPainterEditorColorSelectorTab.h"
 
+#include "Widgets/Input/SButton.h"
+
 #include "OdysseyPainterEditor.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/Input/SSegmentedControl.h"

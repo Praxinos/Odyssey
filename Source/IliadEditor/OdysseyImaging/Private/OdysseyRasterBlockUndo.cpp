@@ -3,15 +3,19 @@
 
 #include "OdysseyRasterBlockUndo.h"
 
-#include "OdysseyRasterBlock.h"
-#include "OdysseyRasterBlockMutator.h"
-#include "ULISLoaderModule.h"
+#include "CoreTypes.h"
 #include "DerivedDataCacheInterface.h"
 #include "DerivedDataValue.h"
 #include "DerivedDataRequestTypes.h"
 #include "DerivedDataRequestOwner.h"
 #include "DerivedDataCache.h"
-#include "CoreTypes.h"
+#include "Misc/ITransaction.h"
+#include "Serialization/BufferReader.h"
+#include "Serialization/MemoryWriter.h"
+
+#include "OdysseyRasterBlock.h"
+#include "OdysseyRasterBlockMutator.h"
+#include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 
 #define FOdysseyRasterBlockUndo_CACHE_NAME TEXT("OdysseyRasterBlockUndo")

@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include <Brush/OdysseyVectorBrushObject.h>
 #include <Brush/OdysseyVectorBrushSegment.h>
 #include <blend2d.h>

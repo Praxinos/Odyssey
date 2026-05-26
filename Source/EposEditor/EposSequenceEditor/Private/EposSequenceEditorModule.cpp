@@ -8,6 +8,7 @@
 #include "ISequencerModule.h"
 #include "ISettingsModule.h"
 #include "LevelEditor.h"
+#include "Misc/ConfigCacheIni.h"
 #include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
 #include "Sequencer/EditModeAnimationUtil.h"

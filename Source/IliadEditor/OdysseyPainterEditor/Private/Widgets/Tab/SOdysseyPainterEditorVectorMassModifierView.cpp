@@ -3,6 +3,15 @@
 
 #include "Widgets/Tab/SOdysseyPainterEditorVectorMassModifierView.h"
 
+#include "Editor.h"
+#include "DetailLayoutBuilder.h"
+#include "DetailWidgetRow.h"
+#include "IDetailPropertyRow.h"
+#include "Modules/ModuleManager.h"
+#include "PropertyEditorModule.h"
+#include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Text/STextBlock.h"
+
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyPainterEditor.h"
@@ -14,10 +23,6 @@
 #include "OdysseyAnimationLayerImageVector.h"
 #include "OdysseyTextureLayerImageVector.h"
 #include "Undo/OdysseyVectorUndoMassModifier.h"
-
-#include "IDetailPropertyRow.h"
-#include "DetailWidgetRow.h"
-#include "DetailLayoutBuilder.h"
 
 #include "HUD/OdysseyVectorHUD.h"
 

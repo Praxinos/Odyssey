@@ -3,6 +3,9 @@
 
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
 
+#include "ScopedTransaction.h"
+#include "Misc/ScopedSlowTask.h"
+
 #include "SOdysseyAnimationCellImageStagger.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationCommands.h"

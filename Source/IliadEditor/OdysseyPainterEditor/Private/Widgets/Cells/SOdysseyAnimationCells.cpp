@@ -2,18 +2,25 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "SOdysseyAnimationCells.h"
+
+#include "Editor.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Framework/Commands/GenericCommands.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "ScopedTransaction.h"
+#include "Widgets/Input/SComboButton.h"
+#include "Widgets/Layout/SMissingWidget.h"
+#include "Widgets/SBoxPanel.h"
+
 #include "SOdysseyAnimationCell.h"
 #include "SOdysseyAnimationTimelineSection.h"
-#include "Widgets/Layout/SMissingWidget.h"
 #include "OdysseyStyle.h"
 #include "OdysseyAnimationCell.h"
 #include "SOdysseyHandle.h"
-#include "Widgets/Input/SComboButton.h"
 #include "TimelineTools/OdysseyAnimationTimelineTool.h"
 #include "TimelineTools/OdysseyAnimationTimelineTools.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "Framework/Commands/GenericCommands.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
 #include "OdysseyPainterEditorAnimationProjectSettings.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellsShortcuts.h"

@@ -3,6 +3,9 @@
 
 #include "SOdysseyTextureLayerStackTreeView.h"
 
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "ScopedTransaction.h"
+
 #include "OdysseyPainterEditor.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerStack.h"

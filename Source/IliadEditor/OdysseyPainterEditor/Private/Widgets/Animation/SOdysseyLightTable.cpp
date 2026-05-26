@@ -3,10 +3,14 @@
 
 #include "Widgets/Animation/SOdysseyLighttable.h"
 
-#include "OdysseyAnimationLayer.h"
-#include "OdysseyLighttable.h"
+#include "Widgets/Input/SCheckBox.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SSlider.h"
+#include "Widgets/SBoxPanel.h"
+#include "Widgets/Text/STextBlock.h"
+
+#include "OdysseyAnimationLayer.h"
+#include "OdysseyLighttable.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyAnimationLayerStack.h"
 

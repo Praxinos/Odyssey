@@ -6,6 +6,7 @@
 #include "AssetToolsModule.h"
 #include "Editor/ContentBrowser/Public/IContentBrowserSingleton.h"
 #include "Editor/ContentBrowser/Public/ContentBrowserModule.h"
+#include "Engine/Engine.h"
 #include "Engine/Texture2D.h"
 #include "IAssetTools.h"
 #include "OdysseyToolCollection.h"

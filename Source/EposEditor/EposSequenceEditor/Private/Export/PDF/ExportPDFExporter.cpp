@@ -3,6 +3,7 @@
 
 #include "Export/PDF/ExportPDFExporter.h"
 
+#include "Editor.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "HAL/FileManager.h"
 #include "ImageUtils.h"

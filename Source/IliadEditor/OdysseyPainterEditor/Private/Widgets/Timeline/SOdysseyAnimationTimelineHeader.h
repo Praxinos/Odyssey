@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Widgets/SCompoundWidget.h"
 
 class UOdysseyAnimation;
 class FOdysseyPainterEditorAnimationTimelinePosition;
@@ -46,7 +48,7 @@ private:
     void OnRightHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnRightHandleStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void BuildContextMenu(FMenuBuilder& iMenuBuilder);
-    void MapContextMenuActions(TSharedPtr<FUICommandList> iCommandList);
+    void MapContextMenuActions(TSharedPtr<class FUICommandList> iCommandList);
 
     void OnAnimationLeftBoundValueCommitted(int iValue, ETextCommit::Type iType);
     void OnAnimationLeftBoundValueChanged(int iValue);

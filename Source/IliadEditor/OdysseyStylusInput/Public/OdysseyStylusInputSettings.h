@@ -26,7 +26,7 @@ private:
     TArray<TSharedPtr<FName>> mStylusAPIs;
     TMap<FName, FText> mStylusAPIsLabels;
 
-    TSharedPtr<IPropertyHandle> mStylusAPIProperty;
+    TSharedPtr<class IPropertyHandle> mStylusAPIProperty;
 };
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStylusInputDriverChanged, FName);

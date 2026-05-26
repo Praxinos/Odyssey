@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <Core/Core.h>
+#include "CoreMinimal.h"
 
 class FOdysseyRasterBlock;
 
@@ -16,7 +16,7 @@ public:
      * @param iRasterBlock
      * @param Ar
      */
-    static bool ODYSSEYIMAGING_API Read( FOdysseyRasterBlock* iRasterBlock
+    ODYSSEYIMAGING_API static bool Read( FOdysseyRasterBlock* iRasterBlock
                                   , FArchive &Ar );
 
 private:

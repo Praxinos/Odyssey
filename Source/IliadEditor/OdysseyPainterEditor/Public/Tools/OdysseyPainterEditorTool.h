@@ -4,17 +4,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Framework/MultiBox/MultiBoxExtender.h"
-#include "Input/OdysseyPoint.h"
-#include "OdysseyStyle.h"
-#include "OdysseyHUDElement.h"
 #include "ToolMenuOwner.h"
 #include "Widgets/SWidget.h"
 
+#include "Input/OdysseyPoint.h"
+#include "OdysseyHUDElement.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyStyle.h"
 
 #include "OdysseyPainterEditorTool.generated.h"
 
+class FExtender;
+class UToolMenu;
 class FOdysseyPainterEditor;
 class FOdysseyHUDElement;
 class FOdysseyPainterEditorToolInputProcessor;

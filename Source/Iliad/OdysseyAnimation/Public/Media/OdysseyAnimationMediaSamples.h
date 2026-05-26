@@ -5,9 +5,11 @@
 
 #include "CoreMinimal.h"
 #include "IMediaSamples.h"
-#include "OdysseyRenderingAbility.h"
 #include "Tickable.h"
+#include "TickableEditorObject.h"
 #include "UObject/StrongObjectPtr.h"
+
+#include "OdysseyRenderingAbility.h"
 #include "OdysseyInvalidTileMap.h"
 
 class FOdysseyAnimationMediaPlayer;

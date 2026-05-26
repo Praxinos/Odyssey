@@ -4,6 +4,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Types/SlateStructs.h"
+#include "UObject/GCObject.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Widgets/SBoxPanel.h"
 
 #include "MovieSceneSequenceID.h"
 

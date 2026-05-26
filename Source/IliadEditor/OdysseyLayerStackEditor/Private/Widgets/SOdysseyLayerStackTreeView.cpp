@@ -2,14 +2,19 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Widgets/SOdysseyLayerStackTreeView.h"
-#include "OdysseyStyle.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
-#include "ToolMenus.h"
+
+#include "Editor.h"
 #include "Framework/Commands/GenericCommands.h"
+#include "ScopedTransaction.h"
+#include "Selection.h"
+#include "ToolMenus.h"
+
 #include "Commands/OdysseyLayerStackEditorCommands.h"
-#include "Shortcuts/OdysseyLayerStackShortcuts.h"
-#include "OdysseyLayerStackFunctionLibrary.h"
 #include "OdysseyLayerStack.h"
+#include "OdysseyLayerStackFunctionLibrary.h"
+#include "OdysseyStyle.h"
+#include "Shortcuts/OdysseyLayerStackShortcuts.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/SOdysseyLayerRow.h"
 
 #define LOCTEXT_NAMESPACE "LayerStackEditor"

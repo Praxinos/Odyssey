@@ -2,22 +2,28 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
-#include "OdysseyVector.h"
-#include "OdysseyVectorEngine.h"
-#include "OdysseyVectorLayer.h"
-#include "OdysseyVectorCell.h"
-#include "OdysseyPainterEditor.h"
-#include "OdysseyVectorTagInbetweener.h"
-#include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorCycle.h"
-#include "OdysseyVector.h"
-// for 3D HUDs
+
+#include "BatchedElements.h"
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
+#include "Engine/Engine.h"
+#include "Framework/Application/SlateApplication.h"
+#include "GlobalRenderResources.h"
 #include "HitProxies.h"
 #include "Misc/Optional.h"
-#include "OdysseyPainterEditorCommands.h"
+#include "TextureResource.h"
+#include "UnrealClient.h"
+
 #include "OdysseyKeyState.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorCommands.h"
+#include "OdysseyVector.h"
+#include "OdysseyVectorCell.h"
+#include "OdysseyVectorCycle.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorLayer.h"
+#include "OdysseyVectorTagInbetweener.h"
 
 FPointQuadTree::~FPointQuadTree()
 {

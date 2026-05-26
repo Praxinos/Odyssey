@@ -2,6 +2,14 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
+
+#include "Brushes/SlateColorBrush.h"
+#include "Editor.h"
+#include "ISinglePropertyView.h"
+#include "Styling/StyleColors.h"
+#include "ToolMenu.h"
+#include "Widgets/Layout/SBox.h"
+
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformToolHUD.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
@@ -9,7 +17,6 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditorSource.h"
-#include "ISinglePropertyView.h"
 #include "SOdysseySinglePropertyView.h"
 // Vector engine
 #include "OdysseyVector.h"

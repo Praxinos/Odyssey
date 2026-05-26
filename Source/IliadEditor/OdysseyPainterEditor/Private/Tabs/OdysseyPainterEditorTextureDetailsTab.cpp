@@ -3,6 +3,8 @@
 
 #include "OdysseyPainterEditorTextureDetailsTab.h"
 
+#include "Toolkits/BaseToolkit.h"
+
 #include "SOdysseyTextureDetails.h"
 #include "OdysseyPainterEditorTextureSource.h"
 #include "OdysseyPainterEditor.h"

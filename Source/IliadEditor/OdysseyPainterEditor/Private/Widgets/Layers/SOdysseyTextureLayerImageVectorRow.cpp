@@ -2,14 +2,17 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "SOdysseyTextureLayerImageVectorRow.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyStyle.h"
-#include "OdysseyTextureLayerImageVector.h"
+
+#include "Math/UnitConversion.h"
+#include "ScopedTransaction.h"
+#include "SEnumCombo.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Widgets/Input/SNumericEntryBox.h"
-#include "Math/UnitConversion.h"
-#include "SEnumCombo.h"
+
+#include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyStyle.h"
+#include "OdysseyTextureLayerImageVector.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 

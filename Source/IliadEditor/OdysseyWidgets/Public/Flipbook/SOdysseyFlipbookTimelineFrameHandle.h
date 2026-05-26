@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
+
 #include "SOdysseyFlipbookTimelineFrameHandleEvents.h"
 
 class ODYSSEYWIDGETS_API SOdysseyFlipbookTimelineFrameHandle : public SCompoundWidget

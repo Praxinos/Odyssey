@@ -2,6 +2,17 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.h"
+
+#include "Brushes/SlateColorBrush.h"
+#include "Editor.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "ISinglePropertyView.h"
+#include "Modules/ModuleManager.h"
+#include "PropertyEditorModule.h"
+#include "Styling/StyleColors.h"
+#include "ToolMenu.h"
+#include "Widgets/Input/SSegmentedControl.h"
+
 #include "Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketToolHUD.h"
 
 #include "OdysseyMediaVector.h"
@@ -9,10 +20,10 @@
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditorVectorBucketView.h"
 #include "OdysseyPainterEditor.h"
-#include "ISinglePropertyView.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyPalette.h"
 #include "OdysseyPaletteEntry.h"
+#include "SOdysseySinglePropertyView.h"
 
 #include "OdysseyVector.h"
 #include "OdysseyVectorCycle.h"
@@ -25,9 +36,6 @@
 #include "Undo/OdysseyVectorUndoBucketAdd.h"
 #include "Undo/OdysseyVectorUndoBucketRemove.h"
 #include "Undo/OdysseyVectorUndoBucketParam.h"
-
-#include "SOdysseySinglePropertyView.h"
-#include "Widgets/Input/SSegmentedControl.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

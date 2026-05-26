@@ -2,26 +2,30 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyViewportDrawingEditorScreenBasedAdapter.h"
-#include "MeshPaintHelpers.h"
+
+#include "CanvasItem.h"
+#include "CanvasTypes.h"
+#include "Engine/Canvas.h"
+#include "IMeshPaintGeometryAdapter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetRenderingLibrary.h"
-#include "CanvasTypes.h"
-#include "CanvasItem.h"
-#include "TextureResource.h"
-#include "Engine/Canvas.h"
-#include "OdysseyViewportDrawingEditorUtils.h"
-#include <ULIS>
-#include "ULISLoaderModule.h"
-#include "ULISUtils.h"
-#include "ULISEventBuilder.h"
-#include "OdysseyViewportDrawingEditorExtension.h"
-#include "OdysseyPainterEditor.h"
-#include "IMeshPaintGeometryAdapter.h"
 #include "LevelEditorViewport.h"
+#include "MeshPaintHelpers.h"
+#include "SceneView.h"
 #include "SEditorViewport.h"
 #include "Slate/SceneViewport.h"
-#include "OdysseySurfaceTexture2DEditable.h"
+#include "TextureResource.h"
+
+#include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorRasterDrawingTool.h"
+#include "OdysseySurfaceTexture2DEditable.h"
+#include "OdysseyViewportDrawingEditorExtension.h"
+#include "OdysseyViewportDrawingEditorUtils.h"
+
+#include <ULIS>
+#include "ULISEventBuilder.h"
+#include "ULISLoaderModule.h"
+#include "ULISUtils.h"
 
 FOdysseyViewportDrawingEditorScreenBasedAdapter::~FOdysseyViewportDrawingEditorScreenBasedAdapter()
 {

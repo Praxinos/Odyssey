@@ -5,10 +5,13 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
+#include "UObject/GCObject.h"
+#include "UObject/ObjectPtr.h"
 
 class FBoardSequenceActions;
 class FExtender;
 class FShotSequenceActions;
+class FUICommandList;
 class USequencerSettings;
 
 class FEposSequenceEditorModule

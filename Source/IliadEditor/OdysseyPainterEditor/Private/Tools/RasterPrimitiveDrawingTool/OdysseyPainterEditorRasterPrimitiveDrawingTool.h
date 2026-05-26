@@ -4,9 +4,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ScopedTransaction.h"
+
 #include "OdysseyShape.h"
 #include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
 #include "OdysseyPaintEngine.h"
+
 #include "OdysseyPainterEditorRasterPrimitiveDrawingTool.generated.h"
 
 UCLASS()

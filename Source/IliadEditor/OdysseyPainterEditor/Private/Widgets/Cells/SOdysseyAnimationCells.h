@@ -4,6 +4,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Widgets/Input/SComboButton.h"
+
 #include "OdysseyAnimationLayer.h"
 
 class FOdysseyAnimationCellsMutator;
@@ -11,6 +14,7 @@ class FOdysseyAnimationTimelineTool;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 class FOdysseyAnimationTimelineCellsShortcuts;
 class FOdysseyAnimationTimelineCellImageStaggerShortcuts;
+class SHorizontalBox;
 
 /**
  * Implements a layer row widget

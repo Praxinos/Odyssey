@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Input/Reply.h"
+
 #include "SOdysseyFlipbookTimelineFrameEvents.h"
 #include "SOdysseyFlipbookTimelineFrameHandleEvents.h"
 

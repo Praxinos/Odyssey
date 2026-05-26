@@ -2,15 +2,19 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "SOdysseyAnimationTimelineInbetweeningHeader.h"
+
+#include "Editor.h"
+#include "Framework/Commands/GenericCommands.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Math/UnitConversion.h"
+#include "Widgets/Input/NumericTypeInterface.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
+#include "Widgets/Input/SNumericEntryBox.h"
+
 #include "SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationLayerImageVector.h"
-
-#include "Widgets/Input/NumericTypeInterface.h"
-#include "Widgets/Input/NumericUnitTypeInterface.inl"
-#include "Widgets/Input/SNumericEntryBox.h"
-#include "Math/UnitConversion.h"
 #include "OdysseyStyle.h"
 
 // from module OdysseyPainterEditor
@@ -27,8 +31,6 @@
 #include "OdysseyVectorCell.h"
 #include "Undo/OdysseyVectorUndoTagRemove.h"
 #include "Undo/OdysseyVectorUndoSelectObject.h"
-
-#include "Framework/Commands/GenericCommands.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

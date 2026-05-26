@@ -7,8 +7,8 @@
 #include "ScreenPass.h"
 
 #if WITH_EDITOR
+#include "Editor.h"
 #include "TextureCompiler.h"
-
 #include "OdysseyAnimationCellImageVectorExport.h"
 #include "OdysseyAnimationCellImageVectorImport.h"
 #include "OdysseyAnimationLayerImageVector.h"
@@ -28,6 +28,7 @@
 #include "UObject/ObjectSaveContext.h"
 #include "Undo/OdysseyVectorUndo.h"
 #include "Undo/OdysseyVectorUndoSceneClear.h"
+#include "ScopedTransaction.h"
 #endif
 
 #define LOCTEXT_NAMESPACE "Animation"

@@ -3,6 +3,9 @@
 
 #include "OdysseyPainterEditorTextureImport.h"
 
+#include "Misc/ScopedSlowTask.h"
+#include "ScopedTransaction.h"
+
 #include "OdysseyTextureLayer.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerStackUserData.h"

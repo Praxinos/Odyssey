@@ -11,6 +11,7 @@
 #include "SOdysseyTextureExportAsImageDialog.generated.h"
 
 class IOdysseyRenderingAbility;
+class UTexture2D;
 
 UENUM()
 enum class EOdysseyTextureExportAsImageSource : uint8

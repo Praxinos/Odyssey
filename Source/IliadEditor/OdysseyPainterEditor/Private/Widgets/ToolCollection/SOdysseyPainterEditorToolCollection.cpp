@@ -3,12 +3,14 @@
 
 #include "SOdysseyPainterEditorToolCollection.h"
 
+#include "SPositiveActionButton.h"
+#include "UObject/Package.h"
+#include "Widgets/Layout/SExpandableArea.h"
+
 #include "OdysseyPainterEditor.h"
 #include "OdysseyToolCollection.h"
-#include "Widgets/Layout/SExpandableArea.h"
 #include "OdysseyToolCollectionDragDropOp.h"
 #include "SOdysseyPainterEditorToolTile.h"
-#include "SPositiveActionButton.h"
 
 
 SOdysseyPainterEditorToolCollection::~SOdysseyPainterEditorToolCollection()

@@ -2,6 +2,9 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyPainterEditorTextureSource.h"
+
+#include "Editor.h"
+
 #include "OdysseyTextureLayerStack.h"
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyTextureLayerImageRaster.h"

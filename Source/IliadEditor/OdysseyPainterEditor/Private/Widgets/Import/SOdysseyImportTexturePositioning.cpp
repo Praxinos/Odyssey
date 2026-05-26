@@ -3,8 +3,12 @@
 
 #include "SOdysseyImportTexturePositioning.h"
 
-#include "OdysseyStyle.h"
 #include "SEnumCombo.h"
+#include "Widgets/Images/SImage.h"
+#include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Layout/SGridPanel.h"
+
+#include "OdysseyStyle.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

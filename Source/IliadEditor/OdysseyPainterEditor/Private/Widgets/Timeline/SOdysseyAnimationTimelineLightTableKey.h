@@ -4,6 +4,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Widgets/SLeafWidget.h"
+
 #include "OdysseyLighttable.h"
 
 class UOdysseyAnimationLayer;

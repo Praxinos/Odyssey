@@ -4,7 +4,7 @@
 #pragma once
 
 #if WITH_EDITOR
-#include <Core/Core.h>
+#include "CoreMinimal.h"
 
 class UOdysseyAnimationCellImageVector;
 
@@ -17,7 +17,7 @@ public:
      * @param iAnimationCellImageVector
      * @param Ar
      */
-    static bool ODYSSEYANIMATION_API Read( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
+    ODYSSEYANIMATION_API static bool Read( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                   , FArchive &Ar );
 
 private:

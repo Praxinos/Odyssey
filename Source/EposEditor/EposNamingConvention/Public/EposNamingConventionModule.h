@@ -5,6 +5,8 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
+#include "UObject/GCObject.h"
+#include "UObject/ObjectPtr.h"
 
 class UDefaultNamingFormatterBoard;
 class UDefaultNamingFormatterShot;

@@ -5,12 +5,12 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyLayerStackDragDropOperation.h"
-#include "Framework/MultiBox/MultiBoxExtender.h"
 #include "OdysseyLayer.h"
 #include "Widgets/Views/STreeView.h"
 
 class UOdysseyLayerStack;
 class FOdysseyLayerStackShortcuts;
+class FExtender;
 
 /**
  * Implements the Layer stack widget

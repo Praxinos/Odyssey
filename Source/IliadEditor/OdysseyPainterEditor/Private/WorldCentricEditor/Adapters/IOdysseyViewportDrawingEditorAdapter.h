@@ -3,18 +3,26 @@
 
 #pragma once
 
-#include "OdysseyBrushAssetBase.h"
+#include "CoreMinimal.h"
 #include "IStylusState.h"
-#include <chrono>
+#include "StylusInputHandler.h"
+#include "EditorViewportClient.h"
+
+#include "OdysseyBrushAssetBase.h"
 #include "Input/OdysseyRay.h"
 #include "OdysseyHUDElement.h"
-#include "StylusInputHandler.h"
 
+#include <chrono>
 #include <ULIS>
 
 class UOdysseyPainterEditorRasterDrawingTool;
 class FOdysseyViewportDrawingEditorExtension;
 class UOdysseyPainterEditorTool;
+class UTexture;
+class FSceneView;
+class FViewport;
+class FEditorViewportClient;
+class FPrimitiveDrawInterface;
 
 /** Painting adapter for the painter. Describes the method of painting in the viewport*/
 class IOdysseyViewportDrawingEditorAdapter

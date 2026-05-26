@@ -2,14 +2,18 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyPalette.h"
-#include "OdysseyPaletteEntryFolder.h"
-#include "Widgets/Colors/SColorBlock.h"
+
+#include "AssetRegistry/AssetData.h"
+#include "AssetRegistry/AssetRegistryModule.h"
+#include "Framework/Notifications/NotificationManager.h"
+#include "Misc/PackageName.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "UObject/ObjectSaveContext.h"
-#include "OdysseyPaletteReferencer.h"
+#include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Notifications/SNotificationList.h"
-#include "Framework/Notifications/NotificationManager.h"
-#include "AssetRegistry/AssetRegistryModule.h"
+
+#include "OdysseyPaletteEntryFolder.h"
+#include "OdysseyPaletteReferencer.h"
 
 UOdysseyPalette::UOdysseyPalette()
 {

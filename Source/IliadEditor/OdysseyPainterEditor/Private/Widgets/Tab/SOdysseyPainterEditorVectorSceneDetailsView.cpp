@@ -3,6 +3,12 @@
 
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneDetailsView.h"
 
+#include "Editor.h"
+#include "IDetailPropertyRow.h"
+#include "DetailWidgetRow.h"
+#include "Modules/ModuleManager.h"
+#include "PropertyEditorModule.h"
+
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyPainterEditor.h"
@@ -16,9 +22,6 @@
 #include "Undo/OdysseyVectorUndoObjectParam.h"
 #include "OdysseyAnimationLayerImageVector.h"
 #include "OdysseyTextureLayerImageVector.h"
-
-#include "IDetailPropertyRow.h"
-#include "DetailWidgetRow.h"
 
 #include "HUD/OdysseyVectorHUD.h"
 

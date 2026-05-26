@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Rendering/RenderingCommon.h"
+#include "Slate/SlateTextures.h"
 
 //---
 

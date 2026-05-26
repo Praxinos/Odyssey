@@ -20,9 +20,11 @@
 #include "Interpolation/OdysseyInterpolationCatmullRom.h"
 #include "Interpolation/OdysseyInterpolationLine.h"
 #include "OdysseyPainterEditorRasterSelection.h"
-
-#include "UObject/OdysseyObjectEditorUtils.h"
 #include "SOdysseySinglePropertyView.h"
+
+#include "ToolMenu.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
+#include "Widgets/Layout/SBox.h"
 
 
 #define LOCTEXT_NAMESPACE "PainterEditor"

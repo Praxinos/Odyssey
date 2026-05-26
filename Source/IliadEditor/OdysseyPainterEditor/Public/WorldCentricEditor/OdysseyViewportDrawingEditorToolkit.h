@@ -3,8 +3,11 @@
 
 #pragma once
 
-#include "OdysseyPainterEditor.h"
+#include "CoreMinimal.h"
+#include "Subsystems/AssetEditorSubsystem.h"
 #include "Toolkits/BaseToolkit.h"
+
+#include "OdysseyPainterEditor.h"
 
 class FOdysseyViewportDrawingEditor;
 class FOdysseyViewportDrawingEditorExtension;

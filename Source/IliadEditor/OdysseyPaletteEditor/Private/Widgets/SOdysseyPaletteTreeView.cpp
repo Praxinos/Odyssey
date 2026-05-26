@@ -3,34 +3,34 @@
 
 #include "Widgets/SOdysseyPaletteTreeView.h"
 
-#include "OdysseyStyle.h"
-
-#include "OdysseyPalette.h"
-#include "OdysseyPaletteEntryColor.h"
-#include "OdysseyPaletteEntryFolder.h"
-
-#include "SOdysseyPaletteEntryRow.h"
-#include "SOdysseyPaletteFolderRow.h"
-#include "SOdysseyPaletteColorRow.h"
-
-#include "OdysseyAnimation.h"
-#include "OdysseyAnimationLayerImageVector.h"
-#include "OdysseyLayer.h"
-#include "OdysseyTextureLayerImageVector.h"
-#include "OdysseyTextureLayerStackUserData.h"
-#include "OdysseyVectorCell.h"
-#include "OdysseyVectorObject.h"
-
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetRegistry/IAssetRegistry.h"
+#include "Editor.h"
 #include "Framework/Commands/GenericCommands.h"
+#include "ISinglePropertyView.h"
+#include "Misc/ITransaction.h"
+#include "ScopedTransaction.h"
 #include "ToolMenuContext.h"
 #include "ToolMenus.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "UObject/UObjectGlobals.h"
 #include "UObject/SavePackage.h"
-#include "ISinglePropertyView.h"
+
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationLayerImageVector.h"
+#include "OdysseyLayer.h"
+#include "OdysseyPalette.h"
+#include "OdysseyPaletteEntryColor.h"
+#include "OdysseyPaletteEntryFolder.h"
 #include "OdysseyPaletteUndoRemovePaletteEntry.h"
+#include "OdysseyStyle.h"
+#include "OdysseyTextureLayerImageVector.h"
+#include "OdysseyTextureLayerStackUserData.h"
+#include "OdysseyVectorCell.h"
+#include "OdysseyVectorObject.h"
+#include "SOdysseyPaletteEntryRow.h"
+#include "SOdysseyPaletteFolderRow.h"
+#include "SOdysseyPaletteColorRow.h"
 
 
 #define LOCTEXT_NAMESPACE "Palette"

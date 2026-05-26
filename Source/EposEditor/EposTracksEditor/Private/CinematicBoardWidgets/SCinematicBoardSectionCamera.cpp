@@ -11,6 +11,7 @@
 #include "SequencerSettings.h"
 #include "Styling/StyleColors.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
+#include "Widgets/Layout/SSpacer.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"

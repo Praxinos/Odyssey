@@ -3,6 +3,8 @@
 
 #include "OdysseyKeyState.h"
 
+#include "Framework/Application/SlateApplication.h"
+
 const FKey&
 FOdysseyKeyState::GetLastKey()
 {

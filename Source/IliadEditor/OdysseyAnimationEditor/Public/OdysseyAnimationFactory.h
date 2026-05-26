@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Factories/Factory.h"
+#include "Misc/FrameRate.h"
 
 #include "OdysseyAnimation.h"
 

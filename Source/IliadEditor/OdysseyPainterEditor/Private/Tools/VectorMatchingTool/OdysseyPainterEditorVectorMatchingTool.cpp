@@ -2,10 +2,16 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.h"
+
+#include "Editor.h"
+#include "ISinglePropertyView.h"
+#include "PropertyEditorModule.h"
+#include "ToolMenu.h"
+#include "Widgets/Layout/SBox.h"
+
 #include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingToolHUD.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
-#include "ISinglePropertyView.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTagInbetweener.h"
@@ -13,7 +19,9 @@
 #include "OdysseyVectorCell.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerMatching.h"
 #include "SOdysseySinglePropertyView.h"
+
 #include <chrono>
+
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------

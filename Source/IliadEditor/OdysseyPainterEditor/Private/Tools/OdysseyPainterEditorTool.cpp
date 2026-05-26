@@ -2,16 +2,19 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/OdysseyPainterEditorTool.h"
+
+#include "Engine/Engine.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Framework/Commands/UICommandList.h"
+#include "Misc/TransactionObjectEvent.h"
+#include "Toolkits/BaseToolkit.h"
+
+#include "Misc/OdysseyUndoDelegates.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorToolInputProcessor.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDCircle.h"
 #include "OdysseyHUDLine.h"
-
-#include "Framework/Application/SlateApplication.h"
-#include "Misc/TransactionObjectEvent.h"
-#include "OdysseyPainterEditor.h"
-#include "Misc/OdysseyUndoDelegates.h"
-#include "OdysseyPainterEditorToolInputProcessor.h"
-#include "OdysseyAnimationPlayer.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

@@ -3,7 +3,8 @@
 
 #include "Widgets/SInfoBar.h"
 
-//#include "Brushes/SlateColorBrush.h"
+#include "Widgets/Layout/SBox.h"
+#include "Widgets/Text/STextBlock.h"
 
 #include "Styles/EposSequenceEditorStyle.h"
 

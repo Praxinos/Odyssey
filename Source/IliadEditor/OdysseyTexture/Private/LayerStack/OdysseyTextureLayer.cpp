@@ -3,11 +3,12 @@
 
 #include "OdysseyTextureLayer.h"
 
-#include "OdysseyTextureLayerStack.h"
-#include "ScreenPass.h"
-#include "OdysseyBlendShader.h"
-#include "TextureCompiler.h"
 #include "AssetToolsModule.h"
+#include "ScreenPass.h"
+#include "TextureCompiler.h"
+#include "TextureResource.h"
+#include "OdysseyTextureLayerStack.h"
+#include "OdysseyBlendShader.h"
 
 UTexture2D*
 UOdysseyTextureLayer::GetTexture() const

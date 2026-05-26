@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/ListView.h"
+
 #include <list>
 
 //#include "OdysseyLighttable.h"
@@ -16,6 +18,7 @@ class FOdysseyPainterEditorAnimationTimelinePosition;
 class FOdysseyPainterEditor;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorLayer;
+class FUICommandList;
 struct FOdysseyVectorObjectInvalidationFlags;
 
 //////////////////////////////////////////////////////////////////////////

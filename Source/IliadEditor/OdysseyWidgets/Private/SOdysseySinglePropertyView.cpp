@@ -4,6 +4,10 @@
 #include "SOdysseySinglePropertyView.h"
 
 #include "ISinglePropertyView.h"
+#include "Modules/ModuleManager.h"
+#include "PropertyEditorModule.h"
+#include "PropertyHandle.h"
+#include "Widgets/Layout/SBox.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

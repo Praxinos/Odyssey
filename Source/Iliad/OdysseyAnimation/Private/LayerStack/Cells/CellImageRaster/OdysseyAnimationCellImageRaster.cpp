@@ -23,6 +23,7 @@
 #include "TextureCompiler.h"
 #include "UObject/ObjectSaveContext.h"
 #include "OdysseyRasterBlockMutator.h"
+#include "ScopedTransaction.h"
 
 #endif
 

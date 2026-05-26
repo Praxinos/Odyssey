@@ -5,6 +5,9 @@
 
 #include "CoreMinimal.h"
 #include "ISettingsModule.h"
+#include "PropertyEditorDelegates.h"
+#include "PropertyEditorModule.h"
+
 #include "OdysseyStylusInputSettings.h"
 
 #define LOCTEXT_NAMESPACE "StylusInput"

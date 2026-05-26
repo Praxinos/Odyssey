@@ -3,6 +3,8 @@
 
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellsShortcuts.h"
 
+#include "Algo/Accumulate.h"
+
 #include "OdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationCell.h"

@@ -3,12 +3,13 @@
 
 #pragma once
 
-#include <ULIS>
 #include "CoreMinimal.h"
-#include "UObject/UObjectGlobals.h"
 #include "InputCoreTypes.h"
+#include "UObject/UObjectGlobals.h"
+
 #include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
 #include "OdysseyRasterBlockMutator.h"
+#include <ULIS>
 
 #include "OdysseyPainterEditorRasterLiquifyTool.generated.h"
 

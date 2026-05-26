@@ -2,6 +2,9 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Shortcuts/OdysseyLayerStackGlobalShortcuts.h"
+
+#include "ScopedTransaction.h"
+
 #include "Commands/OdysseyLayerStackEditorCommands.h"
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"

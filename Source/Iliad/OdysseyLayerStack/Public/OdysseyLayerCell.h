@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include "OdysseyTextureRenderingAbility.h"
 #include "OdysseyMediaProvider.h"
 #include "OdysseyBlendingMode.h"

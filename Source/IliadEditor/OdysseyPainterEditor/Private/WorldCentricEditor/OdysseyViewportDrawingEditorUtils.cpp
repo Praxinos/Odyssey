@@ -2,17 +2,22 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyViewportDrawingEditorUtils.h"
-#include "Materials/MaterialExpressionTextureCoordinate.h"
-#include "Materials/MaterialExpressionTextureBase.h"
-#include "Materials/MaterialExpressionTextureSample.h"
-#include "Materials/MaterialExpressionTextureSampleParameter.h"
-#include "Engine/TextureRenderTarget2D.h"
+
 #include "CanvasItem.h"
 #include "CanvasTypes.h"
 #include "Components/StaticMeshComponent.h"
-#include "Materials/Material.h"
+#include "Editor.h"
+#include "Engine/StaticMesh.h"
 #include "Engine/StaticMeshActor.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "Materials/Material.h"
+#include "Materials/MaterialExpressionTextureBase.h"
+#include "Materials/MaterialExpressionTextureCoordinate.h"
+#include "Materials/MaterialExpressionTextureSample.h"
+#include "Materials/MaterialExpressionTextureSampleParameter.h"
+#include "MaterialShared.h"
 #include "StaticMeshResources.h"
+#include "TextureResource.h"
 
 void FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(UTexture* SourceTexture, UTextureRenderTarget2D* RenderTargetTexture, ERHIFeatureLevel::Type FeatureLevel)
 {

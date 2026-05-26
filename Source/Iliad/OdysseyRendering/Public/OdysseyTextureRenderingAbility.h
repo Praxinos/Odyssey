@@ -3,13 +3,16 @@
 
 #pragma once
 
-#include "OdysseyRenderingAbility.h"
+#include "CoreMinimal.h"
 #include "RenderGraphFwd.h"
 #include "RHI.h"
+
+#include "OdysseyRenderingAbility.h"
 
 #include "OdysseyTextureRenderingAbility.generated.h"
 
 class FRDGBuilder;
+class UTexture2D;
 class UTextureRenderTarget2D;
 
 UINTERFACE(BlueprintType)

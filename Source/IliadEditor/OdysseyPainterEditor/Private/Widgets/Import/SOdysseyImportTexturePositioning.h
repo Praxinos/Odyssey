@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
+
 #include "OdysseyImportTexturesParameters.h"
 class SOdysseyImportTexturePositioning : public SCompoundWidget
 {

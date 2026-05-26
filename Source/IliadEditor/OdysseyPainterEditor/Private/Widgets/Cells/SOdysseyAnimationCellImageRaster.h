@@ -4,7 +4,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
 #include "Engine/TextureRenderTarget2D.h"
+
 #include "OdysseyRenderingAbility.h"
 
 class UOdysseyAnimationCellImageRaster;
@@ -32,11 +34,10 @@ private:
 
 private:
     TObjectPtr<UOdysseyAnimationCellImageRaster> mCell;
-
     TStrongObjectPtr<UTextureRenderTarget2D> RenderTarget;
-    FSlateImageBrush* mCellBrush;
 
-    FSlateImageBrush* mCheckerboardBrush;
+    struct FSlateImageBrush* mCellBrush;
+    struct FSlateImageBrush* mCheckerboardBrush;
 
     TAttribute<bool> mShowContent;
 };

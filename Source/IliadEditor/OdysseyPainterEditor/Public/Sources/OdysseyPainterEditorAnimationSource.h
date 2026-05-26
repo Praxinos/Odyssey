@@ -3,11 +3,14 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyAnimationLayerStack.h"
 
 //class UOdysseyAnimationTexture;
 class UOdysseyAnimationPlayer;
+class UTexture;
 
 /**
  * Base class for an Editor Source

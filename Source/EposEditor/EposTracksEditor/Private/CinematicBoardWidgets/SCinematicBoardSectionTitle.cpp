@@ -4,6 +4,7 @@
 #include "CinematicBoardWidgets/SCinematicBoardSectionTitle.h"
 
 #include "Brushes/SlateColorBrush.h"
+#include "Widgets/Layout/SSpacer.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"

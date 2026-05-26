@@ -3,13 +3,16 @@
 
 #pragma once
 
-#include "IOdysseyViewportDrawingEditorAdapter.h"
-
-#include "OdysseyMeshPaintRendering.h"
-#include "OdysseySeamsPaintRendering.h"
+#include "CoreMinimal.h"
 #include "MeshPaintTypes.h"
 #include "TexturePaintHelpers.h"
+
+#include "IOdysseyViewportDrawingEditorAdapter.h"
+#include "OdysseyMeshPaintRendering.h"
+#include "OdysseySeamsPaintRendering.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+
+class UTexture;
 
 /* -------------------------------------------------------------------  */
 

@@ -10,6 +10,7 @@ public class ULISLoader : ModuleRules
 {
     public ULISLoader( ReadOnlyTargetRules Target ) : base( Target )
     {
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
         /**
         * Sometimes Unreal can compile Editor modules even if it builds Game only modules
         * It happens when an editor module is defined as a dependency in a non editor module
@@ -28,9 +29,10 @@ public class ULISLoader : ModuleRules
         //Inactivate Code Optimization in Debug configurations
         //Because Engine modules and Engine Plugin Modules are always optimized by default
         //and we don't want that
-        if (Target.Configuration == UnrealTargetConfiguration.Debug)
+        if (Target.Configuration == UnrealTargetConfiguration.Debug || Target.Configuration == UnrealTargetConfiguration.DebugGame)
         {
             bMergeUnityFiles = false;
+            PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
             bUseUnity = false;
             OptimizeCode = CodeOptimization.Never;
         }

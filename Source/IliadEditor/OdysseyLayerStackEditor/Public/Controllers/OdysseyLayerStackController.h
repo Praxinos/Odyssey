@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 class UOdysseyLayerStack;
 
 class ODYSSEYLAYERSTACKEDITOR_API FOdysseyLayerStackController

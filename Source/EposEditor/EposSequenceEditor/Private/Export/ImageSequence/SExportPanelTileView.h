@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-#include "Widgets/Views/STableRow.h"
+#include "Widgets/Views/SListView.h"
 
 #include "Export/ImageSequence/PanelThumbnail.h"
 #include "Export/ExportStruct.h"

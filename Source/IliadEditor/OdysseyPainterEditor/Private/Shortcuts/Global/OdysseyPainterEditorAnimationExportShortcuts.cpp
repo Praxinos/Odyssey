@@ -3,6 +3,13 @@
 
 #include "OdysseyPainterEditorAnimationExportShortcuts.h"
 
+#include "ContentBrowserModule.h"
+#include "DesktopPlatformModule.h"
+#include "Engine/Texture2D.h"
+#include "Factories/TextureFactory.h"
+#include "IContentBrowserSingleton.h"
+#include "PaperFlipbook.h"
+
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyPainterEditor.h"
@@ -14,11 +21,6 @@
 #include "SOdysseyAnimationExportTextureSequenceDialog.h"
 #include "SOdysseyImportTexturesDialog.h"
 
-#include "ContentBrowserModule.h"
-#include "DesktopPlatformModule.h"
-#include "Factories/TextureFactory.h"
-#include "IContentBrowserSingleton.h"
-#include "PaperFlipbook.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

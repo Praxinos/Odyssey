@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+#include "Widgets/Input/SButton.h"
+
 #include "SOdysseyViewport.h"
 #include "OdysseyEditorTab.h"
 #include "OdysseyEventState.h"

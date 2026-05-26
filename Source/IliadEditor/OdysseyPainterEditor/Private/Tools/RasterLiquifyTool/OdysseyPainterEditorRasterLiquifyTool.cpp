@@ -7,6 +7,8 @@
 #include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyToolUndo.h"
 #include "OdysseyMediaRaster.h"
 #include "Toolkits/BaseToolkit.h"
+#include "Async/ParallelFor.h"
+#include "Editor.h"
 
 #include "ISinglePropertyView.h"
 #include "UObject/OdysseyObjectEditorUtils.h"

@@ -29,9 +29,10 @@ public class EposTracksEditor : ModuleRules
         //Inactivate Code Optimization in Debug configurations
         //Because Engine modules and Engine Plugin Modules are always optimized by default
         //and we don't want that
-        if (Target.Configuration == UnrealTargetConfiguration.Debug)
+        if (Target.Configuration == UnrealTargetConfiguration.Debug || Target.Configuration == UnrealTargetConfiguration.DebugGame)
         {
             bMergeUnityFiles = false;
+            PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
             bUseUnity = false;
             OptimizeCode = CodeOptimization.Never;
         }
@@ -112,16 +113,5 @@ public class EposTracksEditor : ModuleRules
                 // ... add any modules that your module loads dynamically here ...
             }
             );
-
-        //--- WIBU
-
-        string enable_wibu_encryption = Environment.GetEnvironmentVariable("ENABLE_WIBU_ENCRYPTION");
-        if( enable_wibu_encryption != null )
-        {
-            PCHUsage = PCHUsageMode.NoPCHs;
-            PublicDefinitions.Add("USE_WIBU_CTP");
-
-            PublicAdditionalLibraries.Add("/usr/local/lib/libcpsrt.dylib");
-        }
     }
 }

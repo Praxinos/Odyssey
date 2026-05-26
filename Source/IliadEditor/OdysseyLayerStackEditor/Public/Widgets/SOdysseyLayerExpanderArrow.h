@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+#include "Styling/CoreStyle.h"
+#include "Widgets/Input/SButton.h"
 #include "Widgets/SCompoundWidget.h"
 
 /**

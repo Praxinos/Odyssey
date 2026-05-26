@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 template<class T>
 class ODYSSEYLAYERSTACKEDITOR_API TOdysseyLayerController
 {

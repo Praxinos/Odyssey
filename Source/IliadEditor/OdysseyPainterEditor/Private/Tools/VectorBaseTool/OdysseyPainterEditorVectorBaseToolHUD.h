@@ -4,11 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include <blend2d.h>
-#include <ULIS>
+
 #include "HUD/OdysseyVectorHUD.h"
 #include "OdysseyHUDElement.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
+
+#include <blend2d.h>
+#include <ULIS>
 
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorCycle;
@@ -17,6 +19,7 @@ class FOdysseyVectorPath;
 class FOdysseyVectorSegment;
 class FOdysseyVectorSegmentCubic;
 class FOdysseyVectorSection;
+class UTexture;
 
 typedef struct _FSelectionBox
 {

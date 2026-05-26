@@ -3,13 +3,15 @@
 
 #pragma once
 
-#include <blend2d.h>
-#include <Core/Core.h>
-#include <Image/Block.h>
+#include "CoreMinimal.h"
+#include "UObject/ObjectMacros.h"
 
 #include "OdysseyVectorJoint.h"
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorSection.h"
+
+#include <blend2d.h>
+#include <Image/Block.h>
 
 class FOdysseyVectorSegment;
 class FOdysseyVectorPath;

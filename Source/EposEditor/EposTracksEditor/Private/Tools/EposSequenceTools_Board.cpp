@@ -8,6 +8,8 @@
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "CineCameraActor.h"
 #include "Components/StaticMeshComponent.h"
+#include "Editor.h"
+#include "Editor/EditorEngine.h"
 #include "Factories/Factory.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "IAssetTools.h"

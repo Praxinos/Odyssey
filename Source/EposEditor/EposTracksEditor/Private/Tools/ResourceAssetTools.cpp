@@ -18,6 +18,8 @@
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneSequence.h"
 #include "ObjectTools.h"
+#include "UObject/Class.h"
+#include "UObject/UObjectIterator.h"
 
 #include "EposMovieSceneSequence.h"
 #include "NamingConvention.h"
@@ -103,6 +105,7 @@ ProjectAssetTools::CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iSeq
 
     auto FindNoteFactory = []() -> UFactory*
         {
+            TObjectIterator<UClass> iterator;
             for( TObjectIterator<UClass> it; it; ++it )
             {
                 UClass* currentClass = *it;

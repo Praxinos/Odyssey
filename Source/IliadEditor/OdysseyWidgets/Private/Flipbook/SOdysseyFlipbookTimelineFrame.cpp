@@ -5,6 +5,8 @@
 
 #include "Fonts/FontMeasure.h"
 #include "Framework/Commands/GenericCommands.h"
+#include "Widgets/Layout/SBox.h"
+#include "Widgets/Layout/SBorder.h"
 
 #include "SOdysseyFlipbookTimelineFrameHandle.h"
 #include "OdysseyStyle.h"

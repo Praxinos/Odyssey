@@ -3,11 +3,14 @@
 
 #include "SOdysseyAnimationTimelineCellNamesHeader.h"
 
-#include "OdysseyAnimationLayer.h"
-#include "OdysseyStyle.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Widgets/Input/SComboButton.h"
+#include "Widgets/Input/SNumericEntryBox.h"
 //#include "Widgets/Input/NumericTypeInterface.h"
 //#include "Widgets/Input/NumericUnitTypeInterface.inl"
-#include "Widgets/Input/SNumericEntryBox.h"
+
+#include "OdysseyAnimationLayer.h"
+#include "OdysseyStyle.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

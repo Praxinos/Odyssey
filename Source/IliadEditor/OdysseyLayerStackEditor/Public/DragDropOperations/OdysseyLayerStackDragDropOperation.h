@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "Input/DragAndDrop.h"
 
 class UOdysseyLayer;
@@ -49,7 +50,7 @@ public:
 
 private:
     FText GetText() const;
-    const FSlateBrush* GetIcon() const;
+    const struct FSlateBrush* GetIcon() const;
 
 private:
     UOdysseyLayerStack* mLayerStack;

@@ -2,22 +2,25 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyExportImage.h"
-#include "OdysseyPixelFormat.h"
-#include "IAssetTools.h"
+
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "Factories/Texture2dFactoryNew.h"
+#include "HAL/PlatformFileManager.h"
+#include "IAssetTools.h"
+#include "ImageUtils.h"
+#include "Materials/MaterialInterface.h"
+#include "PaperFlipbook.h"
+#include "PaperFlipbookFactory.h"
+#include "PaperSprite.h"
+#include "PaperSpriteFactory.h"
+
+#include "OdysseyPixelFormat.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-#include "OdysseySurfaceTexture2DEditable.h"
-#include "PaperFlipbook.h"
-#include "PaperSprite.h"
-#include "PaperFlipbookFactory.h"
-#include "PaperSpriteFactory.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "ImageUtils.h"
-#include "Engine/TextureRenderTarget2D.h"
-#include "AssetRegistry/AssetRegistryModule.h"
-
-#include "Factories/Texture2dFactoryNew.h"
 
 #define LOCTEXT_NAMESPACE "Imaging"
 

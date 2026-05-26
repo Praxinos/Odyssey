@@ -3,6 +3,8 @@
 
 #include "OdysseyPainterEditorAnimationDetailsTab.h"
 
+#include "Toolkits/BaseToolkit.h"
+
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationSource.h"
 #include "OdysseyPainterEditor.h"

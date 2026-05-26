@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "Input/Reply.h"
 #include "Widgets/Views/STableViewBase.h"
-#include "Widgets/Views/STableRow.h"
 #include "Widgets/Views/STreeView.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 

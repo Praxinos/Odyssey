@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "OdysseyViewportDrawingEditorExtension.h"
 
 class FOdysseyViewportDrawingEditorExtension;
@@ -69,6 +70,6 @@ private:
     TSharedPtr<SComboButton> mMeshSelectComboButton;
     TArray<TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod>> mOptions;
 
-    TSharedPtr<FAssetThumbnailPool> mThumbnailPool;
+    TSharedPtr<class FAssetThumbnailPool> mThumbnailPool;
     EOdysseyViewportModeTool mModeTool = EOdysseyViewportModeTool::Paint;
 };

@@ -2,6 +2,10 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Widgets/Palette/SOdysseyPainterEditorPaletteEntryRow.h"
+
+#include "Widgets/Images/SImage.h"
+#include "Widgets/Text/STextBlock.h"
+
 #include "Palette/OdysseyPaletteEntry.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"

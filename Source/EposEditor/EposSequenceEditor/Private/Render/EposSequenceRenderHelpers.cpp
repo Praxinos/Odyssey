@@ -12,6 +12,8 @@
 #include "MovieSceneTimeHelpers.h"
 #include "Sections/MovieSceneCinematicShotSection.h"
 #include "Tracks/MovieSceneCinematicShotTrack.h"
+#include "UObject/Class.h"
+#include "UObject/UObjectIterator.h"
 
 #include "EposMovieSceneSequence.h"
 #include "Render/EposSequencePipelineRenderer.h"

@@ -8,6 +8,7 @@
 #include "MVVM/ViewModels/SectionModel.h"
 #include "SequencerSectionPainter.h"
 #include "Widgets/Input/SSpinBox.h"
+#include "Widgets/Layout/SSpacer.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"

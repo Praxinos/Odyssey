@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 class FUICommandList;
 
 class IOdysseyEditorShortcuts

@@ -3,9 +3,12 @@
 
 #include "EposTracksToolbarHelpers.h"
 
+#include "Framework/Application/SlateApplication.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "IDetailsView.h"
 #include "IStructureDetailsView.h"
+#include "Layout/WidgetPath.h"
+#include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
 #include "Widgets/Input/SEditableTextBox.h"
 

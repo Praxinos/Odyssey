@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Widgets/SPanel.h"
 
 class SOdysseyAnimationTimelineScrollPanel;
 class FOdysseyPainterEditorAnimationTimelinePosition;

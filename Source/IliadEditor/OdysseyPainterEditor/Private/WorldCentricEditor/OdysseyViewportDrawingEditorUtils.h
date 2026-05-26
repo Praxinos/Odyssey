@@ -3,7 +3,10 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "MeshPaintTypes.h"
+
+class UMeshComponent;
 
 class FOdysseyViewportDrawingEditorUtils
 {

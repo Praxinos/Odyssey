@@ -3,23 +3,28 @@
 // Fyi : Original code is here : C:\Program Files\Epic Games\UE_4.27\Engine\Source\Developer\AssetTools\Private\AssetTools.cpp
 
 #include "OdysseyTextureExportFolderExtension.h"
-#include "Widgets/SOdysseyDiscoveringAssetsDialog.h"
-#include "OdysseyScopedTextureSettings.h"
+
+#include "AssetRegistry/ARFilter.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
+#include "DesktopPlatformModule.h"
+#include "EditorDirectories.h"
 #include "FileHelpers.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "HAL/FileManager.h"
+#include "HAL/PlatformFileManager.h"
+#include "IDesktopPlatform.h"
 #include "ImageUtils.h"
 #include "Misc/MessageDialog.h"
-#include "Misc/ScopedSlowTask.h"
-#include "AssetRegistry/ARFilter.h"
-#include "Framework/Application/SlateApplication.h"
-#include "HAL/FileManager.h"
-#include "IDesktopPlatform.h"
-#include "DesktopPlatformModule.h"
-#include "OdysseySurfaceTexture2DEditable.h"
-#include "OdysseyPixelFormat.h"
-#include "EditorDirectories.h"
 #include "Misc/Paths.h"
+#include "Misc/ScopedSlowTask.h"
+
+#include "OdysseyPixelFormat.h"
+#include "OdysseyScopedTextureSettings.h"
+#include "OdysseySurfaceTexture2DEditable.h"
+#include "Widgets/SOdysseyDiscoveringAssetsDialog.h"
+
 #include <string>
 
 #define LOCTEXT_NAMESPACE "ContentBrowserExtension"

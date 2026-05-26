@@ -3,10 +3,12 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "Framework/Docking/TabManager.h"
 #include "Textures/SlateIcon.h"
 
 class FBaseToolkit;
+class FExtender;
 
 class ODYSSEYEDITOR_API FOdysseyEditorTab :
     public TSharedFromThis<FOdysseyEditorTab>

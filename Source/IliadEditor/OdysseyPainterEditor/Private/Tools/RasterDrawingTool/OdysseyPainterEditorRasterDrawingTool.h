@@ -22,7 +22,7 @@ class UOdysseyBrushAssetBase;
 class FOdysseyPaintEngine;
 class FOdysseyStrokeEngineBrushOptions;
 class IOdysseyInterpolation;
-
+class FScopedTransaction;
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterDrawingTool : public UOdysseyPainterEditorRasterBaseTool
 {

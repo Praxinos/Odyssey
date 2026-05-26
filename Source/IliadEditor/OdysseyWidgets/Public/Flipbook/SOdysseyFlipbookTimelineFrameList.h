@@ -3,6 +3,10 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+#include "Types/ISlateMetaData.h"
+#include "Widgets/SCompoundWidget.h"
+
 #include "SOdysseyFlipbookTimelineFrameListEvents.h"
 
 class SOdysseyFlipbookTimelineFrame;
@@ -126,7 +130,7 @@ private:
     TAttribute<float> mFrameSize;
 
     //Widgets
-    TSharedPtr<SHorizontalBox> mFramesContainer;
+    TSharedPtr<class SHorizontalBox> mFramesContainer;
 
     //Events
     FOnFramesMoved mOnFramesMoved;

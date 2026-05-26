@@ -3,8 +3,10 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "Channels/MovieSceneChannelHandle.h"
 #include "Channels/MovieSceneFloatChannel.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Widgets/SCompoundWidget.h"
 
 //---

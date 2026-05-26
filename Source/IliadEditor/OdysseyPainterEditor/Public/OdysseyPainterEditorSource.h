@@ -3,12 +3,15 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+#include "UObject/GCObject.h"
+
 #include "OdysseyMediaProvider.h"
 
 namespace ULIS { class FBlock; }
 class UOdysseyLayerStack;
-
 class FOdysseyPainterEditor;
+class UTexture;
 
 /**
  * Base class for an Editor Source

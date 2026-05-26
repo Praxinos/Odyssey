@@ -3,6 +3,7 @@
 
 #include "Export/ImageSequence/PanelThumbnail.h"
 
+#include "Editor.h"
 #include "Slate/SlateTextures.h"
 
 #include "Board/BoardSequence.h"

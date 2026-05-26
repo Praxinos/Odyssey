@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Framework/Commands/InputChord.h"
+
 #include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
 #include "OdysseyPaintEngine.h"
 #include "RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"

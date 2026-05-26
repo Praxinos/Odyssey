@@ -4,6 +4,7 @@
 #include "SOdysseyFlipbookTimelineTrack.h"
 
 #include "Fonts/FontMeasure.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "IAssetTools.h"
 #include "ImageUtils.h"
@@ -13,6 +14,8 @@
 #include "PropertyCustomizationHelpers.h"
 #include "RenderGraphUtils.h"
 #include "ScreenPass.h"
+#include "TextureResource.h"
+#include "Widgets/Images/SImage.h"
 #include "Widgets/Layout/SScaleBox.h"
 
 #include "SOdysseyFlipbookTimelineFrameList.h"

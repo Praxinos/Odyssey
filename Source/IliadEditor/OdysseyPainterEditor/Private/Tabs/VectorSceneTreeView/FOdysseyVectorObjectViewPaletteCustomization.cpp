@@ -3,6 +3,8 @@
 
 #include "FOdysseyVectorObjectViewPaletteCustomization.h"
 
+#include "Modules/ModuleManager.h"
+
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorVectorBucketView.h"
 #include "OdysseyPainterEditorVectorObjectView.h"

@@ -2,6 +2,17 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
+
+#include "Brushes/SlateColorBrush.h"
+#include "Editor.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "ISinglePropertyView.h"
+#include "Styling/StyleColors.h"
+#include "ToolMenu.h"
+#include "Widgets/Input/SSegmentedControl.h"
+#include "Widgets/Layout/SBox.h"
+#include "Widgets/Layout/SWrapBox.h"
+
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditToolHUD.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorCommands.h"
@@ -15,13 +26,10 @@
 #include "Undo/OdysseyVectorUndoPathAlter.h"
 #include "Undo/OdysseyVectorUndoPathEdit.h"
 #include "Undo/OdysseyVectorUndoVertexAlignment.h"
-#include "ISinglePropertyView.h"
-#include "Widgets/Layout/SWrapBox.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyMediaProvider.h"
 #include "OdysseyPainterEditorSource.h"
 #include "SOdysseySinglePropertyView.h"
-#include "Widgets/Input/SSegmentedControl.h"
 #include "FOdysseySceneViewport.h"
 #include "SOdysseyViewport.h"
 

@@ -3,9 +3,12 @@
 
 #include "Widgets/Tools/SOdysseyPainterEditorToolOptions.h"
 
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "ISinglePropertyView.h"
+#include "Modules/ModuleManager.h"
 #include "ObjectEditorUtils.h"
 #include "PropertyEditorModule.h"
-#include "ISinglePropertyView.h"
+
 #include "Tools/OdysseyPainterEditorTool.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"

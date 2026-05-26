@@ -5,6 +5,9 @@
 
 #include "Dialog/SCustomDialog.h"
 #include "StylusInputInterface.h"
+#include "Widgets/Text/STextBlock.h"
+#include "Widgets/Input/SComboBox.h"
+
 #include "OdysseyStylusInputSettings.h"
 
 #define LOCTEXT_NAMESPACE "Widgets"

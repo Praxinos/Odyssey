@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 class UOdysseyAnimation;
 class UOdysseyLayerStack;
 class UOdysseyLayer;

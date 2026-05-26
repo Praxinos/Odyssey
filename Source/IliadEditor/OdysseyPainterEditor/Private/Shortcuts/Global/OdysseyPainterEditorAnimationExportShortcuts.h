@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include "OdysseyEditorShortcuts.h"
 
 class FOdysseyPainterEditor;

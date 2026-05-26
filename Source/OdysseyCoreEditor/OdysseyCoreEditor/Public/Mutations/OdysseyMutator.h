@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 class FOdysseyRootMutation;
 
 class ODYSSEYCOREEDITOR_API IOdysseyMutation

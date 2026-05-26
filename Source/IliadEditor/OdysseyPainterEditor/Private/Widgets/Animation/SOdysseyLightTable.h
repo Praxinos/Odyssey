@@ -50,7 +50,7 @@ private:
     TSharedRef<SWidget> GenerateNextKeyWidget(int iKeyIndex);
 
 private:
-    TSharedPtr<SHorizontalBox> mSlidersBox;
+    TSharedPtr<class SHorizontalBox> mSlidersBox;
     bool mRebuildRequested;
     TSlateAttribute<UOdysseyAnimationLayerStack*> mLayerStack;
 };

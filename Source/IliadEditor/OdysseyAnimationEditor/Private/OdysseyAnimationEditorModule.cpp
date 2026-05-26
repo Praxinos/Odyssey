@@ -4,6 +4,7 @@
 #include "OdysseyAnimationEditorModule.h"
 
 #include "AssetToolsModule.h"
+#include "PropertyEditorModule.h"
 #include "Subsystems/PlacementSubsystem.h"
 
 #include "OdysseyAnimation.h"

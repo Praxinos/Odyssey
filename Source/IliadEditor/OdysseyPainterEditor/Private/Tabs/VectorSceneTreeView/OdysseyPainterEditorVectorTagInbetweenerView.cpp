@@ -2,6 +2,9 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyPainterEditorVectorTagInbetweenerView.h"
+
+#include "Editor.h"
+
 #include "Undo/OdysseyVectorUndoTagInbetweenerParam.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorCell.h"

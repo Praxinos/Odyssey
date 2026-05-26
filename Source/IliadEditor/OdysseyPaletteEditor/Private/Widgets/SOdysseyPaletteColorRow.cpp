@@ -3,17 +3,21 @@
 
 #include "SOdysseyPaletteColorRow.h"
 
+#include "Editor.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Layout/WidgetPath.h"
+#include "Misc/ITransaction.h"
+#include "ScopedTransaction.h"
+#include "Widgets/Colors/SColorBlock.h"
+#include "Widgets/Colors/SColorPicker.h"
+
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorLayer.h"
 #include "OdysseyStyle.h"
 #include "SOdysseyPaletteEntryRow.h"
 #include "SOdysseyPaletteTreeView.h"
-#include "Widgets/Colors/SColorPicker.h"
 #include "OdysseyPaletteEntryColor.h"
-#include "Widgets/Colors/SColorBlock.h"
 #include "OdysseyPaletteUndoAlterPaletteEntry.h"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow

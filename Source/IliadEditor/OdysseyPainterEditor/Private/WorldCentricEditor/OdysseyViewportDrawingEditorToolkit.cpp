@@ -2,14 +2,17 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyViewportDrawingEditorToolkit.h"
+
+#include "Interfaces/IMainFrameModule.h"
+#include "LevelEditor.h"
+#include "Misc/FileHelper.h"
+#include "Serialization/JsonSerializer.h"
+#include "Toolkits/AssetEditorModeUILayer.h"
+
 #include "OdysseyStyle.h"
 #include "OdysseyEditorTab.h"
 #include "OdysseyPainterEditorModule.h"
-#include "LevelEditor.h"
-#include "Widgets/SOdysseyViewportDrawingEditorMasterTab.h"
-#include "Interfaces/IMainFrameModule.h"
 #include "OdysseyViewportDrawingEditorExtension.h"
-#include "Toolkits/AssetEditorModeUILayer.h"
 #include "OdysseyPainterEditorToolsTab.h"
 #include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
 #include "OdysseyPainterEditorAnimationDetailsTab.h"
@@ -17,7 +20,7 @@
 #include "OdysseyPainterEditorAnimationTimelineTab.h"
 #include "OdysseyPainterEditorColorSelectorTab.h"
 #include "OdysseyPainterEditorLayerStackTab.h"
-#include "Serialization/JsonSerializer.h"
+#include "Widgets/SOdysseyViewportDrawingEditorMasterTab.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 

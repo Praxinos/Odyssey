@@ -3,6 +3,7 @@
 
 #include "SlateOdysseyStyle.h"
 
+#include "HAL/FileManager.h"
 #include "Misc/CommandLine.h"
 #include "Styling/CoreStyle.h"
 #include "Styling/SegmentedControlStyle.h"

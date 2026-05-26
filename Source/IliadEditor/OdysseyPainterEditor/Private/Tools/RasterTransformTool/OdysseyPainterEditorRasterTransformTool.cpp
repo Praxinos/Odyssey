@@ -2,21 +2,26 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
-#include "OdysseyPainterEditor.h"
-#include "OdysseyPainterEditorCommands.h"
-#include "OdysseyMediaRaster.h"
-#include "OdysseyHUDElement.h"
-#include "OdysseyHUDPolygon.h"
-#include "OdysseyHUDHandle.h"
-#include "OdysseyBrushTransform.h"
-#include "OdysseyRasterBlock.h"
-#include "GeomTools.h"
-#include "OdysseyPainterEditorSource.h"
-#include "OdysseyPainterEditorRasterSelection.h"
+
+#include "Editor.h"
 #include "Editor/Transactor.h"
 #include "Framework/Commands/GenericCommands.h"
-#include "ULISEventBuilder.h"
+#include "GeomTools.h"
+#include "ToolMenu.h"
+
+#include "OdysseyBrushTransform.h"
+#include "OdysseyHUDElement.h"
+#include "OdysseyHUDHandle.h"
+#include "OdysseyHUDPolygon.h"
+#include "OdysseyMediaRaster.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorCommands.h"
 #include "OdysseyPainterEditorRasterDrawingTool.h"
+#include "OdysseyPainterEditorRasterSelection.h"
+#include "OdysseyPainterEditorSource.h"
+#include "OdysseyRasterBlock.h"
+
+#include "ULISEventBuilder.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+#include "Misc/Attribute.h"
+
 #include "OdysseyAnimationCell.h"
 #include "OdysseyEditorShortcuts.h"
 

@@ -7,9 +7,11 @@
 #include "EditorFontGlyphs.h"
 #include "Engine/Blueprint.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
-#include "OdysseyLayerStack.h"
-#include "OdysseyLayer.h"
+#include "ScopedTransaction.h"
 #include "SPositiveActionButton.h"
+
+#include "OdysseyLayer.h"
+#include "OdysseyLayerStack.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "LayerStackEditor"

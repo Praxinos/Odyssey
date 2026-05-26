@@ -13,9 +13,10 @@
 #include "Widgets/SToolTip.h"
 #include "Widgets/Input/SComboButton.h"
 #include "Widgets/SViewport.h"
-#include "Widgets/Input/SSlider.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
+#include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Input/SSlider.h"
 
 #include "FOdysseySceneViewport.h"
 #include "OdysseyStyle.h"

@@ -7,6 +7,7 @@
 #include "Evaluation/MovieSceneRootOverridePath.h"
 #include "ISequencer.h"
 #include "MovieSceneSequenceVisitor.h"
+#include "Templates/Greater.h"
 
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 

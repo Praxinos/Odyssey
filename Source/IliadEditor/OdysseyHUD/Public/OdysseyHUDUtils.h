@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 #include "OdysseyHUDElement.h"
 
+class FBatchedElements;
+
 struct ODYSSEYHUD_API FOdysseyHUDUtils
 {
     static void DrawCustomizedLine(const FVector2D& A, const FVector2D& B, const FOdysseyHUDElement::FHUDCustomization& iCustomization, const FOdysseyHUDElement::FDrawHUDParams& iParams, FBatchedElements* batchedElements);

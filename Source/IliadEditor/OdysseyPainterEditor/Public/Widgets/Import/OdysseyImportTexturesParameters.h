@@ -4,9 +4,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyAntiAliasing.h"
+#include "UObject/GCObject.h"
 
+#include "OdysseyAntiAliasing.h"
 #include "OdysseyImportTexturesParameters.generated.h"
+
+class UCurveBase;
+class UCurveFloat;
+class UTexture2D;
+class UTextureRenderTarget2D;
 
 UENUM()
 enum class EOdysseyImportTextureScaling : uint8

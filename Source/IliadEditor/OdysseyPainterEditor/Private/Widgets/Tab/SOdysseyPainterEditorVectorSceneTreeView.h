@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Widgets/Views/STreeView.h"
+
 #include <list>
 
 class FOdysseyPainterEditor;
@@ -12,6 +14,7 @@ class FVectorSceneTreeViewItem;
 class FOdysseyVectorLayer;
 class UOdysseyLayerStack;
 class FOdysseyVectorObject;
+class FUICommandList;
 struct FOdysseyVectorObjectInvalidationFlags;
 
 

@@ -3,10 +3,12 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "SOdysseyAnimationLayerImageTimeline.h"
 
 class UOdysseyAnimationLayerImageRaster;
 class FOdysseyAnimationTimelineCellImageRasterShortcuts;
+class FUICommandList;
 
 /**
  * Implements a layer row widget

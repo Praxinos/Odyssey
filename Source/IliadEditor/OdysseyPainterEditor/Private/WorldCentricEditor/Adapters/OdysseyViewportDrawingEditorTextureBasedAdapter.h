@@ -3,7 +3,12 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "IOdysseyViewportDrawingEditorAdapter.h"
+
+class FSceneView;
+class FViewport;
+class FPrimitiveDrawInterface;
 
 /** Painting adapter for the painter. Describes the method of texture based painting in the viewport*/
 class FOdysseyViewportDrawingEditorTextureBasedAdapter : public IOdysseyViewportDrawingEditorAdapter

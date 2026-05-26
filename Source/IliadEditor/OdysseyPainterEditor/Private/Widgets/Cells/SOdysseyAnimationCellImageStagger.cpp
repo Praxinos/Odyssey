@@ -2,13 +2,17 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "SOdysseyAnimationCellImageStagger.h"
+
+#include "Editor.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "ScopedTransaction.h"
+#include "Widgets/Input/SComboButton.h"
 #include "Widgets/Input/SSpinBox.h"
+
 #include "OdysseyStyle.h"
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "ScopedTransaction.h"
-#include "Widgets/Input/SComboButton.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

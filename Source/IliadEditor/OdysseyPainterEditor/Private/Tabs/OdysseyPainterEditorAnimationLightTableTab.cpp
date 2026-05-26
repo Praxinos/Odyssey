@@ -3,6 +3,8 @@
 
 #include "OdysseyPainterEditorAnimationLighttableTab.h"
 
+#include "Toolkits/BaseToolkit.h"
+
 #include "Widgets/Animation/SOdysseyLighttable.h"
 #include "OdysseyAnimationLayerStack.h"
 #include "OdysseyPainterEditor.h"

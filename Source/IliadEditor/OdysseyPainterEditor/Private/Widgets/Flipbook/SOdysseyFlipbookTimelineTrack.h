@@ -3,9 +3,12 @@
 
 #pragma once
 
-#include "SOdysseyFlipbookTimelineTrackEvents.h"
+#include "CoreMinimal.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "PaperFlipbook.h"
 #include "Engine/TextureRenderTarget2D.h"
+
+#include "SOdysseyFlipbookTimelineTrackEvents.h"
 #include "OdysseyRenderingAbility.h"
 
 class SOdysseyFlipbookTimelineFrameList;
@@ -95,7 +98,7 @@ private:
     TMap<UTexture2D*, TStrongObjectPtr<UTextureRenderTarget2D>> mRenderTargets;
     TMap<UTexture2D*, FSlateImageBrush*> mTextureBrushes;
     FSlateImageBrush* mCheckerboardBrush;
-    TSharedPtr<FUICommandList> mFrameCommandList; //List of commands we can use on a frame
+    TSharedPtr<class FUICommandList> mFrameCommandList; //List of commands we can use on a frame
     /* FOnStructureChanged mOnStructureChanged; */
     FOnFlipbookChanged mOnFlipbookChanged;
     FOnKeyframeRemoved mOnKeyframeRemoved;

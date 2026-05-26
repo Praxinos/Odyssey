@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Widgets/Input/NumericTypeInterface.h"
 
 class FOdysseyPainterEditorAnimationTimelinePosition;
 class UOdysseyAnimationLayer;

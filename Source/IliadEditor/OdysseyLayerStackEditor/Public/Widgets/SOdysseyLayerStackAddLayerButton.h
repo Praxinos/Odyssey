@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AssetRegistry/AssetData.h"
+#include "Widgets/SCompoundWidget.h"
 
 class UOdysseyLayerStack;
 class UOdysseyLayer;

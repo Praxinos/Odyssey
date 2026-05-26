@@ -4,10 +4,10 @@
 #pragma once
 
 #include "OdysseyEditorLayoutBuilder.h"
-#include "Framework/MultiBox/MultiBoxExtender.h"
 
 class FOdysseyPainterEditor;
 class FBaseToolkit;
+class FExtender;
 
 /**
  * Base class for an Editor Extension

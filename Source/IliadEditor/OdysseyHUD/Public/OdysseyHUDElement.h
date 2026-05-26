@@ -10,6 +10,8 @@
 #include "OdysseyHUDElement.h"
 #include "UObject/GCObject.h"
 
+class FCanvas;
+class FBatchedElements;
 
 enum EOdysseyHUDReference
 {

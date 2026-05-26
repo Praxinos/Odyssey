@@ -11,9 +11,10 @@
 #include "SOdysseyTextureExportAsTextureDialog.generated.h"
 
 class IOdysseyRenderingAbility;
+class UTexture2D;
 
 UENUM()
-enum class EOdysseyTextureExportAsTextureSource : uint8
+enum class EOdysseyTextureExportAsTextureSource: uint8
 {
     AllLayers,
     CurrentLayer,

@@ -2,23 +2,28 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "SOdysseyImportTexturesDialog.h"
-#include "SOdysseyImportTexturePositioning.h"
-#include "SOdysseyImportTextureScanCleaner.h"
+
+#include "CanvasItem.h"
+#include "CanvasTypes.h"
 #include "Dialog/SCustomDialog.h"
+#include "Engine/Texture2D.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "RenderGraphBuilder.h"
+#include "RenderGraphUtils.h"
+#include "Slate/SceneViewport.h"
 #include "Widgets/SViewport.h"
+#include "Widgets/Input/SNumericEntryBox.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Widgets/Input/SSegmentedControl.h"
 #include "Widgets/Input/SSlider.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
+
+
 #include "OdysseyImportTexturesViewportClient.h"
-#include "Slate/SceneViewport.h"
-#include "Engine/TextureRenderTarget2D.h"
-#include "CanvasItem.h"
-#include "CanvasTypes.h"
-#include "RenderGraphBuilder.h"
-#include "RenderGraphUtils.h"
+#include "SOdysseyImportTexturePositioning.h"
+#include "SOdysseyImportTextureScanCleaner.h"
+
 #include "OdysseyHUDRectangle.h"
-#include "Widgets/Input/SNumericEntryBox.h"
-#include "Widgets/Input/NumericUnitTypeInterface.inl"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

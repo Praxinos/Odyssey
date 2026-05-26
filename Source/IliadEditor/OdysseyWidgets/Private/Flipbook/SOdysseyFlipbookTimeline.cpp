@@ -4,6 +4,8 @@
 #include "SOdysseyFlipbookTimeline.h"
 
 #include "Fonts/FontMeasure.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SGridPanel.h"
 #include "OdysseyStyle.h"
 

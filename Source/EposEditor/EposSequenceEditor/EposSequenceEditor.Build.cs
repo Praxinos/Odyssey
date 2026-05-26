@@ -31,9 +31,10 @@ public class EposSequenceEditor : ModuleRules
         //Inactivate Code Optimization in Debug configurations
         //Because Engine modules and Engine Plugin Modules are always optimized by default
         //and we don't want that
-        if (Target.Configuration == UnrealTargetConfiguration.Debug)
+        if (Target.Configuration == UnrealTargetConfiguration.Debug || Target.Configuration == UnrealTargetConfiguration.DebugGame)
         {
             bMergeUnityFiles = false;
+            PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
             bUseUnity = false;
             OptimizeCode = CodeOptimization.Never;
         }
@@ -144,51 +145,5 @@ public class EposSequenceEditor : ModuleRules
         AddEngineThirdPartyPrivateStaticDependencies(Target,
             "FBX"
         );
-
-        //--- WIBU
-
-        /*
-        PCHUsage = PCHUsageMode.NoPCHs;
-
-        if (Target.Platform.IsInGroup(UnrealPlatformGroup.Windows))
-        {
-            //string AxProtectorSDKPath = Environment.GetEnvironmentVariable("AXPROTECTOR_SDK");
-
-            //PublicSystemIncludePaths.Add(Path.Combine(AxProtectorSDKPath, "bin", "ctp", "pass", "include"));
-        }
-        else if (Target.Platform == UnrealTargetPlatform.Mac)
-        {
-            //string AxProtectorSDKPath = "/Applications/WIBU-SYSTEMS Devkit/AxProtector";
-
-            //PublicSystemIncludePaths.Add(Path.Combine(AxProtectorSDKPath, "ctp", "pass", "include"));
-
-            PublicDefinitions.Add("USE_WIBU_CTP");
-        }
-
-        string pathfile_to_protection_specification = Path.Combine(PluginDirectory, "Wibu", "ProtectionSpecification.yaml");
-        // WIBU_CTP_YAML_PATH is only valid directly on command line or in environment variable
-        // As compilation is done via .rsp, we can't use PublicDefinitions because it adds WIBU_CTP_YAML_PATH in the .rsp
-        // So we must use the environment variable
-        // (See Wibu Ticket T-165355)
-        Environment.SetEnvironmentVariable("WIBU_CTP_YAML_PATH", pathfile_to_protection_specification);
-        //PublicDefinitions.Add($"WIBU_CTP_YAML_PATH=\"{pathfile_to_protection_specification}\"");
-        */
-
-        string enable_wibu_encryption = Environment.GetEnvironmentVariable("ENABLE_WIBU_ENCRYPTION");
-        if( enable_wibu_encryption != null )
-        {
-            PCHUsage = PCHUsageMode.NoPCHs;
-            PublicDefinitions.Add("USE_WIBU_CTP");
-
-            // Should be used in CLangToolChain.cs, but doesn't work: "-l/usr/local/lib/libcpsrt.dylib: 'linker' input unused [-Werror,-Wunused-command-line-argument]"
-            // Post to UDN soon
-            PublicAdditionalLibraries.Add("/usr/local/lib/libcpsrt.dylib");
-        }
-
-        // For XCode -> To generate environment variable at build time:
-        // Right click the project on the left
-        // Add new config file
-        // Write the environment variables inside said config file
-        // Left click on project, info, Configurations -> Add config file to wanted deployment target
     }
 }

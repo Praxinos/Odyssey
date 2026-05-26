@@ -3,6 +3,8 @@
 
 #include "FOdysseyFlipbookTimelineFrameDragDropOperation.h"
 
+#include "Widgets/SWindow.h"
+
 #define LOCTEXT_NAMESPACE "Widgets"
 
 FOdysseyFlipbookTimelineFrameDragDropOperation::FOdysseyFlipbookTimelineFrameDragDropOperation(TSharedPtr<SOdysseyFlipbookTimelineFrame> iFrame, TSharedPtr<SOdysseyFlipbookTimelineFrameList> iFrameList)

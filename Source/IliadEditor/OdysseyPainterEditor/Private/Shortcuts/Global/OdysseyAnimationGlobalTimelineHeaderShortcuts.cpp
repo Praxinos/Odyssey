@@ -2,8 +2,11 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Shortcuts/Global/OdysseyAnimationGlobalTimelineHeaderShortcuts.h"
-#include "OdysseyPainterEditorAnimationCommands.h"
+
+#include "ScopedTransaction.h"
+
 #include "OdysseyAnimation.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

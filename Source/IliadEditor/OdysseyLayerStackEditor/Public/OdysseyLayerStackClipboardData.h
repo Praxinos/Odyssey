@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyClipboard.h"
+#include "UObject/GCObject.h"
 
 class UOdysseyLayer;
 class UOdysseyLayerStack;

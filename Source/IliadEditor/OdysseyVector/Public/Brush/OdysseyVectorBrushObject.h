@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include <blend2d.h>
 #include <ULIS>
 

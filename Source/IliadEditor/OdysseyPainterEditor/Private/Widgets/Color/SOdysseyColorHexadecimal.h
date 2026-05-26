@@ -4,6 +4,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Widgets/Input/SEditableTextBox.h"
+
 #include "OdysseyEventState.h"
 
 #include <ULIS>

@@ -6,18 +6,12 @@
 #include "AssetRegistry/IAssetRegistry.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Framework/Notifications/NotificationManager.h"
-#include "Widgets/Notifications/SNotificationList.h"
-
-#include "Palette/OdysseyPalette.h"
-#include "Palette/OdysseyPaletteEntryColor.h"
-#include "Palette/OdysseyPaletteEntryFolder.h"
-
-#include "PaletteEditor/OdysseyPaletteEditorToolMenuContext.h"
-
+#include "ScopedTransaction.h"
+#include "ToolMenu.h"
+#include "ToolMenus.h"
 #include "UObject/SavePackage.h"
-
-#include "Widgets/SOdysseyPaletteTreeView.h"
-#include "Widgets/SOdysseyPaletteSetComboBox.h"
+#include "Widgets/Docking/SDockTab.h"
+#include "Widgets/Notifications/SNotificationList.h"
 
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCellImageVector.h"
@@ -29,6 +23,12 @@
 #include "OdysseyMediaVector.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorLayer.h"
+#include "Palette/OdysseyPalette.h"
+#include "Palette/OdysseyPaletteEntryColor.h"
+#include "Palette/OdysseyPaletteEntryFolder.h"
+#include "PaletteEditor/OdysseyPaletteEditorToolMenuContext.h"
+#include "Widgets/SOdysseyPaletteTreeView.h"
+#include "Widgets/SOdysseyPaletteSetComboBox.h"
 
 #define LOCTEXT_NAMESPACE "PaletteEditor"
 

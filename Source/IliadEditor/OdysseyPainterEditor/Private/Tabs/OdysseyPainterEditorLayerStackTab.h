@@ -3,11 +3,14 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include "OdysseyEditorTab.h"
 #include "OdysseyPainterEditorTextureExportShortcuts.h"
 
 class FOdysseyPainterEditor;
 class UOdysseyLayerStack;
+class FExtender;
 
 class FOdysseyPainterEditorLayerStackTab :
     public FOdysseyEditorTab

@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "SOdysseyTextureDetails.h"
+
 #include "Engine/Texture.h"
 #include "Engine/VolumeTexture.h"
 #include "Engine/TextureRenderTarget2D.h"
@@ -11,6 +12,10 @@
 #include "Engine/TextureCube.h"
 #include "Engine/Texture2DDynamic.h"
 #include "Engine/Texture2DArray.h"
+#include "Modules/ModuleManager.h"
+#include "PropertyEditorModule.h"
+#include "Widgets/SBoxPanel.h"
+#include "Widgets/Text/STextBlock.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 

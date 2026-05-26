@@ -3,10 +3,12 @@
 
 #include "OdysseyPainterEditorViewportTab.h"
 
+#include "Engine/Texture2D.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "ISettingsModule.h"
 #include "Modules/ModuleManager.h"
 #include "Widgets/Layout/SBox.h"
+#include "Widgets/Layout/SSpacer.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Colors/SColorPicker.h"
 #include "Widgets/Input/STextComboBox.h"
