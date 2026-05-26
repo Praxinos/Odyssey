@@ -39,7 +39,7 @@ public:
     FSingleCameraCutTrackEditor(TSharedRef<ISequencer> InSequencer);
 
     /** Virtual destructor. */
-    virtual ~FSingleCameraCutTrackEditor() { }
+    virtual ~FSingleCameraCutTrackEditor() = default;
 
     /**
      * Creates an instance of this class.  Called by a sequencer .

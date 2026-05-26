@@ -131,6 +131,7 @@ struct FBlendedCameraCut
 
     float PreviewBlendFactor = -1.f;
     bool bCanBlend = false;
+    bool bSavePreAnimatedValue = false;
 
     FBlendedCameraCut()
     {}
@@ -235,11 +236,17 @@ public:
 
         // Save pre-animated state only now, because we don't want to start tracking this camera cut
         // unless we know it actually resolves to a camera actor (see above) and will actually do something.
-        FScopedPreAnimatedCaptureSource CaptureSource(Linker, Params.Input);
-        FCameraCutGameHandler::CachePreAnimatedValue(Linker, SequenceInstance);
+        if( Params.bSavePreAnimatedValue )
+        {
+            FScopedPreAnimatedCaptureSource CaptureSource( Linker, Params.Input );
+            if( Linker->PreAnimatedState.IsCapturingGlobalState() || CaptureSource.WantsRestoreState() )
+            {
+                FCameraCutGameHandler::CachePreAnimatedValue( Linker, SequenceInstance );
 #if WITH_EDITOR
-        FCameraCutEditorHandler::CachePreAnimatedValue(Linker, SequenceInstance);
+                FCameraCutEditorHandler::CachePreAnimatedValue( Linker, SequenceInstance );
 #endif
+            }
+        }
 
         FMovieSceneCameraCutParams CameraCutParams;
         CameraCutParams.bJumpCut = Context.HasJumped();
@@ -436,6 +443,7 @@ void UMovieSceneSingleCameraCutTrackInstance::OnAnimate()
             FBlendedCameraCut Params(Input, CameraBindingID, SequenceInstance.GetSequenceID());
             Params.LocalDirection = Context.GetDirection();
             Params.bCanBlend = false; // Track->bCanBlend; //????????????????????????????
+            Params.bSavePreAnimatedValue = InputInfo.bSavePreAnimatedValue;
 
             // Get start/current/end time.
             Params.LocalContextTime = Context.GetTime();
@@ -570,6 +578,8 @@ void UMovieSceneSingleCameraCutTrackInstance::OnAnimate()
             // Fully active.
             FinalCameraCut = PriorityCameraCut;
         }
+
+        FinalCameraCut.bSavePreAnimatedValue = ( CameraCutParams[0].bSavePreAnimatedValue || CameraCutParams[1].bSavePreAnimatedValue );
     }
     else if (CameraCutParams.Num() == 1)
     {
@@ -596,6 +606,12 @@ void UMovieSceneSingleCameraCutTrackInstance::OnAnimate()
     {
         const FSequenceInstance& SequenceInstance = InstanceRegistry->GetInstance(FinalCameraCut.Input.InstanceHandle);
         Animator.AnimateBlendedCameraCut(FinalCameraCut, Linker, SequenceInstance);
+    }
+
+    // Mark all existing inputs as not needing to have their pre-animated state saved anymore.
+    for( FCameraCutInputInfo& InputInfo : SortedInputInfos )
+    {
+        InputInfo.bSavePreAnimatedValue = false;
     }
 }
 
@@ -637,6 +653,9 @@ void UMovieSceneSingleCameraCutTrackInstance::OnEndUpdateInputs()
                     InputInfo.GlobalStartTime = WorldTime;
                 }
             }
+
+            // This is a new input, we may need to save its pre-animated state.
+            InputInfo.bSavePreAnimatedValue = true;
         }
 
         SortedInputInfos.Add(InputInfo);

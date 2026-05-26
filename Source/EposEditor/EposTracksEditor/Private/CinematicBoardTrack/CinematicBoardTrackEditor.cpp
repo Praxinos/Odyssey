@@ -188,7 +188,9 @@ FCinematicBoardTrackEditor::BuildOutlinerColumnWidget( const FBuildColumnWidgetP
             Params.ViewModel );
     }
 
-    if( !Params.ViewModel->IsA<FTrackRowModel>() )
+    // Only show camera lock on track-level models, not on rows or layers
+    ITrackRowExtension* TrackRowExt = Params.ViewModel->CastThis<ITrackRowExtension>();
+    if( !TrackRowExt )
     {
         bool bAddCameraLock = false;
         if( ColumnName == FCommonOutlinerNames::Nav )
@@ -479,7 +481,16 @@ FCinematicBoardTrackEditor::Tick( float iDeltaTime ) //override
 
     EMovieScenePlayerStatus::Type playbackState = sequencerPin->GetPlaybackStatus();
 
-    if( FSlateThrottleManager::Get().IsAllowingExpensiveTasks() && playbackState != EMovieScenePlayerStatus::Playing && playbackState != EMovieScenePlayerStatus::Scrubbing )
+    UObject* playbackContext = sequencerPin->GetSharedPlaybackState()->GetPlaybackContext();
+    UWorld* world = playbackContext ? playbackContext->GetWorld() : nullptr;
+
+    const bool bIsInPIEOrSimulate = GEditor->PlayWorld != NULL || GEditor->bIsSimulatingInEditor;
+
+    // Render thumbnails if allow expensive tasks and playback state is not playing or scrubbing and if in a PIE world, the sequence must be bound to it
+    if( FSlateThrottleManager::Get().IsAllowingExpensiveTasks()
+        && playbackState != EMovieScenePlayerStatus::Playing
+        && playbackState != EMovieScenePlayerStatus::Scrubbing
+        && ( !bIsInPIEOrSimulate || ( bIsInPIEOrSimulate && GEditor->PlayWorld == world ) ) )
     {
         sequencerPin->EnterSilentMode();
 

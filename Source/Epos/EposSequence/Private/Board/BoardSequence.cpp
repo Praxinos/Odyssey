@@ -160,10 +160,25 @@ void UBoardSequence::GatherExpiredObjects( const FMovieSceneObjectCache& InObjec
 
         if( Reference.Locator.GetLastFragmentTypeHandle() == FAnimInstanceLocatorFragment::FragmentType )
         {
+            // Get anim instance fragment to determine type.
+            EAnimInstanceLocatorFragmentType LocatorType = EAnimInstanceLocatorFragmentType::AnimInstance;
+            if( const FAnimInstanceLocatorFragment* AnimFragment = Reference.Locator.GetLastFragment()->GetPayloadAs( FAnimInstanceLocatorFragment::FragmentType ) )
+            {
+                LocatorType = AnimFragment->Type;
+            }
+
             for( TWeakObjectPtr<> WeakObject : InObjectCache.IterateBoundObjects( Reference.ID ) )
             {
                 UAnimInstance* AnimInstance = Cast<UAnimInstance>( WeakObject.Get() );
-                if( !AnimInstance || !AnimInstance->GetOwningComponent() || AnimInstance->GetOwningComponent()->GetAnimInstance() != AnimInstance )
+                UAnimInstance* AnimInstanceToTest = nullptr;
+                if( AnimInstance && AnimInstance->GetOwningComponent() )
+                {
+                    //Check if we're a regular or post-process anim instance and if the owning component's anim instance has changed.
+                    AnimInstanceToTest = LocatorType == EAnimInstanceLocatorFragmentType::PostProcessAnimInstance ?
+                        AnimInstance->GetOwningComponent()->GetPostProcessInstance() :
+                        AnimInstance->GetOwningComponent()->GetAnimInstance();
+                }
+                if( !AnimInstance || !AnimInstance->GetOwningComponent() || AnimInstanceToTest != AnimInstance )
                 {
                     OutInvalidIDs.Add( Reference.ID );
                 }

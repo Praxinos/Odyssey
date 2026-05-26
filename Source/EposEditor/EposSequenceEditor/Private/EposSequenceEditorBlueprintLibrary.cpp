@@ -1255,7 +1255,7 @@ void UEposSequenceEditorBlueprintLibrary::SelectKeys( const FSequencerChannelPro
             TSharedPtr<FSectionModel> SectionHandle = SectionModelStorage->FindModelForSection( Section );
             if( SectionHandle )
             {
-                TParentFirstChildIterator<FChannelGroupModel> KeyAreaNodes = SectionHandle->GetParentTrackModel().AsModel()->GetDescendantsOfType<FChannelGroupModel>();
+                TParentFirstChildIterator<FChannelGroupModel> KeyAreaNodes = SectionHandle->GetParentSectionOwnerModel().AsModel()->GetDescendantsOfType<FChannelGroupModel>();
                 for( const TViewModelPtr<FChannelGroupModel>& KeyAreaNode : KeyAreaNodes )
                 {
                     if( KeyAreaNode->GetChannelName() == ChannelProxy.ChannelName )

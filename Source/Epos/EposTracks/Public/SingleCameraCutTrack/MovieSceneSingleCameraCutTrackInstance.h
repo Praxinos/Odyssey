@@ -89,6 +89,7 @@ private:
     {
         FMovieSceneTrackInstanceInput Input;
         float GlobalStartTime = 0.f;
+        bool bSavePreAnimatedValue = false;
     };
 
     FCameraCutCache CameraCutCache;

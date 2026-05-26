@@ -148,8 +148,6 @@ private:
 
     TSharedPtr<ISequencer> GetActiveSequencer();
 
-    void AddConvertBindingsMenu( FMenuBuilder& MenuBuilder );
-
     //...
 
 public:
@@ -166,14 +164,5 @@ private:
     TArray<TWeakPtr<ISequencer>> Sequencers;
 
     //...
-
-    TSharedPtr<FUICommandList> CommandList;
-
-    //TSharedPtr<FExtender> TransformMenuExtender;
-    TSharedPtr<FExtender> FixActorReferencesMenuExtender;
-
-    //...
-
-    TSharedPtr<FExtender> BindingPropertiesMenuExtender;
 
 };

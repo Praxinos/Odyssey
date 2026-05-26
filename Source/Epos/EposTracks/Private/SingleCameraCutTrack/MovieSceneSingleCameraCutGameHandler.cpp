@@ -26,7 +26,14 @@ namespace UE::EposMovieScene
 
 using namespace UE::MovieScene;
 
-const APlayerController* GetPlaybackController( const UObject* PlaybackContext )
+static bool bSingleCameraCutSetViewTargetThroughPlayerController = true;
+FAutoConsoleVariableRef CVarSingleCameraCutSetViewTargetThroughPlayerController(
+    TEXT( "Sequencer.SingleCameraCutSetViewTargetThroughPlayerController" ),
+    bSingleCameraCutSetViewTargetThroughPlayerController,
+    TEXT( "When true (default), camera cut tracks will call SetViewTarget on the affected player controller instead of that controller's camera manager.\n" )
+);
+
+APlayerController* GetPlaybackController( const UObject* PlaybackContext )
 {
     UWorld* World = PlaybackContext ? PlaybackContext->GetWorld() : nullptr;
     if( World == nullptr || World->GetGameInstance() == nullptr )
@@ -36,7 +43,7 @@ const APlayerController* GetPlaybackController( const UObject* PlaybackContext )
 
     if( const AActor* PlaybackContextActor = Cast<AActor>( PlaybackContext ) )
     {
-        if( const APlayerController* OwnerController = Cast<APlayerController>( PlaybackContextActor->GetOwner() ) )
+        if( APlayerController* OwnerController = Cast<APlayerController>( PlaybackContextActor->GetOwner() ) )
         {
             return OwnerController;
         }
@@ -100,25 +107,36 @@ void FPreAnimatedCameraCutTraits::RestorePreAnimatedValue(
     }
 
     APlayerController* PC = nullptr;
-    if( ULocalPlayer* PreviousViewTarget = Cast<ULocalPlayer>( CachedValue.LastLocalPlayer.ResolveObjectPtr() ) )
+    if( ULocalPlayer* PreviousLocalPlayer = Cast<ULocalPlayer>( CachedValue.LastLocalPlayer.ResolveObjectPtr() ) )
     {
-        if( APlayerController* OwnerController = Cast<APlayerController>( PreviousViewTarget->GetPlayerController( World ) ) )
+        if( APlayerController* OwnerController = Cast<APlayerController>( PreviousLocalPlayer->GetPlayerController( World ) ) )
         {
             PC = OwnerController;
         }
     }
 
-    APlayerCameraManager* CameraManager = (PC != nullptr) ? PC->PlayerCameraManager.Get() : nullptr;
-
     // Restore previous view target.
     // If the previous view target is not valid anymore, we still set it on the camera manger. This will by
     // default fall back to using the player controller as the view target.
-    if (CameraManager)
+    if (PC)
     {
         AActor* PreviousViewTarget = Cast<AActor>(CachedValue.LastViewTarget.ResolveObjectPtr());
-        CameraManager->SetViewTarget(PreviousViewTarget);
-        // TODO james.fleming ideally we would cache this before, just in case it had been set true (which is not usual, but could be possible)
-        CameraManager->bClientSimulatingViewTarget = false;
+
+        if( bSingleCameraCutSetViewTargetThroughPlayerController )
+        {
+            PC->SetViewTarget( PreviousViewTarget );
+        }
+
+        if( APlayerCameraManager* CameraManager = PC->PlayerCameraManager.Get() )
+        {
+            if( !bSingleCameraCutSetViewTargetThroughPlayerController )
+            {
+                CameraManager->SetViewTarget( PreviousViewTarget );
+            }
+
+            // TODO james.fleming ideally we would cache this before, just in case it had been set true (which is not usual, but could be possible)
+            CameraManager->bClientSimulatingViewTarget = false;
+        }
     }
 
     // Restore previous aspect ratio axis constraint. Use the cached local player if there's no local player
@@ -255,7 +273,7 @@ void FCameraCutGameHandler::SetCameraCut(
     }
 
     CA_SUPPRESS(6011);
-    const APlayerController* PC = GetPlaybackController( PlaybackContext );
+    APlayerController* PC = GetPlaybackController( PlaybackContext );
     APlayerCameraManager* CameraManager = (PC != nullptr) ? PC->PlayerCameraManager.Get() : nullptr;
 
     // If the player controller is missing, there is no camera manager for us to manage the view target
@@ -296,7 +314,7 @@ void FCameraCutGameHandler::SetCameraCut(
     if (CameraObject == nullptr)
     {
         TSharedPtr<FPreAnimatedCameraCutStorage> PreAnimatedStorage = Linker->PreAnimatedState.FindStorage(FPreAnimatedCameraCutStorage::StorageID);
-        FPreAnimatedStorageIndex StorageIndex = PreAnimatedStorage->FindStorageIndex(0);
+        FPreAnimatedStorageIndex StorageIndex = PreAnimatedStorage ? PreAnimatedStorage->FindStorageIndex( 0 ) : FPreAnimatedStorageIndex();
         if (ensureMsgf(StorageIndex.IsValid(), TEXT("Blending camera back to gameplay but can't find pre-animated camera info!")))
         {
             FPreAnimatedCameraCutState CachedValue = PreAnimatedStorage->GetCachedValue(StorageIndex);
@@ -343,7 +361,7 @@ void FCameraCutGameHandler::SetCameraCut(
     FViewTargetTransitionParams TransitionParams;
     if (CameraCutParams.BlendType.IsSet())
     {
-        UE_LOG(LogMovieScene, Verbose, TEXT("Blending into new camera cut: '%s' -> '%s' (blend time: %f)"),
+        UE_LOGF(LogMovieScene, Verbose, "Blending into new camera cut: '%ls' -> '%ls' (blend time: %f)",
             (ViewTarget ? *ViewTarget->GetName() : TEXT("None")),
             (CameraActor ? *CameraActor->GetName() : TEXT("None")),
             TransitionParams.BlendTime);
@@ -365,18 +383,31 @@ void FCameraCutGameHandler::SetCameraCut(
         const AActor* PendingViewTarget = CameraManager->PendingViewTarget.Target;
         if (CameraActor != nullptr && PendingViewTarget == CameraActor)
         {
-            UE_LOG(LogMovieScene, Verbose, TEXT("Camera transition aborted, we are already blending towards the intended camera"));
+            UE_LOGF(LogMovieScene, Verbose, "Camera transition aborted, we are already blending towards the intended camera");
             bDoSetViewTarget = false;
         }
     }
     else
     {
-        UE_LOG(LogMovieScene, Verbose, TEXT("Starting new camera cut: '%s'"),
+        UE_LOGF(LogMovieScene, Verbose, "Starting new camera cut: '%ls'",
             (CameraActor ? *CameraActor->GetName() : TEXT("None")));
     }
-    if (bDoSetViewTarget && ensureMsgf(CameraManager, TEXT("Can't set view target when there is no player controller!")))
+    if (bDoSetViewTarget)
     {
-        CameraManager->SetViewTarget(CameraActor, TransitionParams);
+        if (bSingleCameraCutSetViewTargetThroughPlayerController)
+        {
+            if (ensureMsgf(PC, TEXT("Can't set view target when there is no player controller!")))
+            {
+                PC->SetViewTarget(CameraActor, TransitionParams);
+            }
+        }
+        else
+        {
+            if (ensureMsgf(CameraManager, TEXT("Can't set view target when there is no camera manager!")))
+            {
+                CameraManager->SetViewTarget(CameraActor, TransitionParams);
+            }
+        }
     }
 
     // Override the aspect ratio constraint if this sequence requires it.
