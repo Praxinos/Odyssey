@@ -56,6 +56,7 @@
 #include "EposSequenceEditorCommands.h"
 #include "EposSequenceEditorToolkit.h"
 #include "EposSequenceHelpers.h"
+#include "FilmOverlayToolkit2.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "OdysseyAnimationActor.h"
 #include "ScalingComponent.h"
@@ -135,11 +136,6 @@ namespace UE::StoryboardViewport::Private
                     {
                         TSharedRef<SFilmOverlayOptions> FilmOverlayOptions =
                             SNew( SFilmOverlayOptions, StoryboardLevelViewportPinned->GetOverlayWidget() ).IsComboButton( false );
-
-                        if( TSharedPtr<FUICommandList> CommandList = StoryboardLevelViewportPinned->GetCommandList() )
-                        {
-                            FilmOverlayOptions->BindCommands( CommandList.ToSharedRef() );
-                        }
 
                         Submenu->AddMenuEntry(
                             "FilmOverlay", FToolMenuEntry::InitWidget( "FilmOverlay", FilmOverlayOptions, FText() )
@@ -940,6 +936,49 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
     FEposSequenceEditorCommands::Register();
 
     OverlayWidget = SNew( SFilmOverlay ).Visibility( EVisibility::HitTestInvisible );
+
+    // Register default overlays and bind overlay shortcuts to persistent objects so the shortcuts
+    // continue to work after toolbar refreshes (e.g. after Save All) destroy transient SFilmOverlayOptions.
+    SFilmOverlayOptions::RegisterDefaultOverlays();
+    {
+        const FStoryboardViewportCommands& Commands = FStoryboardViewportCommands::Get();
+        TWeakPtr<SFilmOverlay> WeakOverlay = OverlayWidget;
+
+        auto MakePrimaryAction = [WeakOverlay]( FName OverlayName ) -> FExecuteAction
+            {
+                return FExecuteAction::CreateLambda( [WeakOverlay, OverlayName]
+                                                     {
+                                                         if( TSharedPtr<SFilmOverlay> Pinned = WeakOverlay.Pin() )
+                                                         {
+                                                             Pinned->SetPrimaryFilmOverlay( OverlayName );
+                                                         }
+                                                     } );
+            };
+
+        auto MakeToggleAction = []( FName OverlayName ) -> FExecuteAction
+            {
+                return FExecuteAction::CreateLambda( [OverlayName]
+                                                     {
+                                                         if( const TSharedPtr<IFilmOverlay>* Overlay = UFilmOverlayToolkit2::GetToggleableFilmOverlays().Find( OverlayName ) )
+                                                         {
+                                                             if( Overlay->IsValid() )
+                                                             {
+                                                                 ( *Overlay )->SetEnabled( !( *Overlay )->IsEnabled() );
+                                                             }
+                                                         }
+                                                     } );
+            };
+
+        CommandList->MapAction( Commands.Disabled, MakePrimaryAction( NAME_None ) );
+        CommandList->MapAction( Commands.Grid3x3, MakePrimaryAction( FName( "Grid3x3" ) ) );
+        CommandList->MapAction( Commands.Grid2x2, MakePrimaryAction( FName( "Grid2x2" ) ) );
+        CommandList->MapAction( Commands.Crosshair, MakePrimaryAction( FName( "Crosshair" ) ) );
+        CommandList->MapAction( Commands.Rabatment, MakePrimaryAction( FName( "Rabatment" ) ) );
+        CommandList->MapAction( Commands.ActionSafe, MakeToggleAction( FName( "ActionSafe" ) ) );
+        CommandList->MapAction( Commands.TitleSafe, MakeToggleAction( FName( "TitleSafe" ) ) );
+        CommandList->MapAction( Commands.CustomSafe, MakeToggleAction( FName( "CustomSafe" ) ) );
+        CommandList->MapAction( Commands.Letterbox, MakeToggleAction( FName( "LetterBox" ) ) );
+    }
 
     ViewportClient->GetModeTools()->OnEditorModeIDChanged().AddSP( this, &SStoryboardLevelViewport::OnPickEditorModeChanged );
 
@@ -1897,10 +1936,10 @@ void SStoryboardLevelViewport::CacheDesiredViewportSize(const FGeometry& Allotte
     FVector2D AllowableSpace = AllottedGeometry.GetLocalSize();
     AllowableSpace.Y -= ViewportControls->GetVisibility().IsVisible() ? ViewportControls->GetDesiredSize().Y : 0.f;
 
-    if (ViewportClient->IsAspectRatioConstrained())
+    if (ViewportClient->IsAspectRatioConstrained() && ViewportClient->AspectRatio > 0)
     {
-        const float MinSize = FMath::TruncToFloat(FMath::Min(AllowableSpace.X / ViewportClient->AspectRatio, AllowableSpace.Y));
-        DesiredViewportSize = FVector2D(FMath::TruncToFloat(ViewportClient->AspectRatio * MinSize), MinSize);
+        const double MinSize = FMath::Min( AllowableSpace.X / (double)ViewportClient->AspectRatio, AllowableSpace.Y );
+        DesiredViewportSize = FVector2D( (double)ViewportClient->AspectRatio * MinSize, MinSize );
     }
     else
     {

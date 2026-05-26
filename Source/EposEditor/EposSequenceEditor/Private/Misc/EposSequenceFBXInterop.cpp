@@ -238,7 +238,8 @@ void FEposSequenceFBXInterop::ExportFBXInternal(const FString& ExportFilename, c
         UMovieSceneSequence* MovieSceneSequence = Sequencer->GetFocusedMovieSceneSequence();
         UMovieSceneSequence* RootMovieSceneSequence = Sequencer->GetRootMovieSceneSequence();
         UMovieScene* MovieScene = MovieSceneSequence->GetMovieScene();
-        UWorld* World = Sequencer->GetPlaybackContext()->GetWorld();
+        UObject* PlaybackContext = Sequencer->GetPlaybackContext();
+        UWorld* World = PlaybackContext ? PlaybackContext->GetWorld() : nullptr;
         FMovieSceneSequenceIDRef Template = Sequencer->GetFocusedTemplateID();
         UnFbx::FFbxExporter::FLevelSequenceNodeNameAdapter NodeNameAdapter(MovieScene, Sequencer.Get(), Template);
 

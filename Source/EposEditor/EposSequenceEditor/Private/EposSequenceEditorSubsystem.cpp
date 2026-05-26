@@ -7,12 +7,9 @@
 
 //#include "Evaluation/MovieScenePlayback.h"
 #include "ISequencerModule.h"
-#include "Framework/Commands/UICommandList.h"
 #include "EposMovieSceneSequence.h" //#include "LevelSequence.h"
 //#include "ISceneOutliner.h"
-#include "EposSequenceEditorCommands.h" //#include "LevelSequenceEditorCommands.h"
 //#include "MovieScenePossessable.h"
-//#include "SequencerSettings.h"
 //#include "MovieScene.h"
 //#include "MovieSceneSpawnable.h"
 #include "SequencerUtilities.h"
@@ -23,7 +20,6 @@
 //#include "Tracks/MovieScene3DConstraintTrack.h"
 //#include "Tracks/MovieSceneCameraShakeTrack.h"
 
-//#include "ActorTreeItem.h"
 //#include "Editor.h"
 //#include "PropertyEditorModule.h"
 //#include "Widgets/SWindow.h"
@@ -40,7 +36,6 @@
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Modules/ModuleManager.h"
-//#include "SceneOutlinerModule.h"
 #include "ScopedTransaction.h"
 #include "Widgets/Notifications/SNotificationList.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
@@ -66,57 +61,18 @@ DEFINE_LOG_CATEGORY(LogEposSequenceEditor);
 
 void UEposSequenceEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-    UE_LOG(LogEposSequenceEditor, Log, TEXT("EposSequenceEditor subsystem initialized."));
+    UE_LOGF( LogEposSequenceEditor, Log, "LevelSequenceEditor subsystem initialized." );
 
     ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>("Sequencer");
     OnSequencerCreatedHandle = SequencerModule.RegisterOnSequencerCreated(FOnSequencerCreated::FDelegate::CreateUObject(this, &UEposSequenceEditorSubsystem::OnSequencerCreated));
 
     //...
 
-    /* Commands for this subsystem */
-    CommandList = MakeShareable(new FUICommandList);
-
-    //...
-
-    CommandList->MapAction(FEposSequenceEditorCommands::Get().FixActorReferences,
-        FExecuteAction::CreateUObject(this, &UEposSequenceEditorSubsystem::FixActorReferences)
-    );
-
-    //...
-
-    FixActorReferencesMenuExtender = MakeShareable(new FExtender);
-    FixActorReferencesMenuExtender->AddMenuExtension("Bindings", EExtensionHook::First, CommandList, FMenuExtensionDelegate::CreateLambda([this](FMenuBuilder& MenuBuilder) {
-        // Only add menu entries where the focused sequence is a UEposMovieSceneSequence
-        if (!GetActiveSequencer())
-        {
-            return;
-        }
-
-        MenuBuilder.AddMenuEntry(FEposSequenceEditorCommands::Get().FixActorReferences);
-        }));
-
-    SequencerModule.GetActionsMenuExtensibilityManager()->AddExtender(FixActorReferencesMenuExtender);
-
-    //...
-
-    // For now we have the binding properties being a separate menu. When the UX is worked out we will likely merge the AssignActor menu away.
-    BindingPropertiesMenuExtender = MakeShareable( new FExtender );
-
-    //...
-
-    BindingPropertiesMenuExtender->AddMenuExtension( "EposConvertBinding", EExtensionHook::First, CommandList, FMenuExtensionDelegate::CreateLambda( [this]( FMenuBuilder& MenuBuilder )
-                                                                                                                                                  {
-                                                                                                                                                      AddConvertBindingsMenu( MenuBuilder );
-                                                                                                                                                  } ) );
-
-    SequencerModule.GetObjectBindingContextMenuExtensibilityManager()->AddExtender( BindingPropertiesMenuExtender );
-
-    //...
 }
 
 void UEposSequenceEditorSubsystem::Deinitialize()
 {
-    UE_LOG(LogEposSequenceEditor, Log, TEXT("EposSequenceEditor subsystem deinitialized."));
+    UE_LOGF( LogEposSequenceEditor, Log, "EposSequenceEditor subsystem deinitialized." );
 
     ISequencerModule* SequencerModulePtr = FModuleManager::Get().GetModulePtr<ISequencerModule>("Sequencer");
     if (SequencerModulePtr)
@@ -129,7 +85,7 @@ void UEposSequenceEditorSubsystem::Deinitialize()
 
 void UEposSequenceEditorSubsystem::OnSequencerCreated(TSharedRef<ISequencer> InSequencer)
 {
-    UE_LOG(LogEposSequenceEditor, VeryVerbose, TEXT("UEposSequenceEditorSubsystem::OnSequencerCreated"));
+    UE_LOGF( LogEposSequenceEditor, VeryVerbose, "UEposSequenceEditorSubsystem::OnSequencerCreated" );
 
     Sequencers.Add(TWeakPtr<ISequencer>(InSequencer));
     InSequencer->OnCloseEvent().AddUObject(this, &UEposSequenceEditorSubsystem::OnSequencerClosed);
@@ -196,7 +152,7 @@ bool UEposSequenceEditorSubsystem::PasteFolders(const FString& InTextToImport, F
     {
         for (FNotificationInfo PasteError : PasteErrors)
         {
-            UE_LOG(LogEposSequenceEditor, Error, TEXT("%s"), *PasteError.Text.Get().ToString());
+            UE_LOGF( LogEposSequenceEditor, Error, "%ls", *PasteError.Text.Get().ToString() );
         }
         return false;
     }
@@ -224,7 +180,7 @@ bool UEposSequenceEditorSubsystem::PasteSections(const FString& InTextToImport, 
     {
         for (FNotificationInfo PasteError : PasteErrors)
         {
-            UE_LOG(LogEposSequenceEditor, Error, TEXT("%s"), *PasteError.Text.Get().ToString());
+            UE_LOGF( LogEposSequenceEditor, Error, "%ls", *PasteError.Text.Get().ToString() );
         }
         return false;
     }
@@ -252,7 +208,7 @@ bool UEposSequenceEditorSubsystem::PasteTracks(const FString& InTextToImport, FM
     {
         for (FNotificationInfo PasteError : PasteErrors)
         {
-            UE_LOG(LogEposSequenceEditor, Error, TEXT("%s"), *PasteError.Text.Get().ToString());
+            UE_LOGF( LogEposSequenceEditor, Error, "%ls", *PasteError.Text.Get().ToString() );
         }
         return false;
     }
@@ -292,7 +248,7 @@ bool UEposSequenceEditorSubsystem::PasteBindings(const FString& InTextToImport, 
     {
         for (FNotificationInfo PasteError : PasteErrors)
         {
-            UE_LOG(LogEposSequenceEditor, Error, TEXT("%s"), *PasteError.Text.Get().ToString());
+            UE_LOGF( LogEposSequenceEditor, Error, "%ls", *PasteError.Text.Get().ToString() );
         }
         return false;
     }
@@ -304,132 +260,12 @@ bool UEposSequenceEditorSubsystem::PasteBindings(const FString& InTextToImport, 
 
 void UEposSequenceEditorSubsystem::FixActorReferences()
 {
-    TSharedPtr<ISequencer> Sequencer = GetActiveSequencer();
-    if (Sequencer == nullptr)
+    if( TSharedPtr<ISequencer> Sequencer = GetActiveSequencer() )
     {
-        return;
+        FSequencerUtilities::FixActorReferences( Sequencer.ToSharedRef() );
     }
-
-    UWorld* PlaybackContext = Sequencer->GetPlaybackContext()->GetWorld();
-    if (!PlaybackContext)
-    {
-        return;
-    }
-
-    UMovieScene* FocusedMovieScene = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene();
-    if (!FocusedMovieScene)
-    {
-        return;
-    }
-
-    if (FocusedMovieScene->IsReadOnly())
-    {
-        FSequencerUtilities::ShowReadOnlyError();
-        return;
-    }
-
-    FScopedTransaction FixActorReferencesTransaction(LOCTEXT("FixActorReferences", "Fix Actor References"));
-
-    TMap<FString, AActor*> ActorNameToActorMap;
-
-    for (TActorIterator<AActor> ActorItr(PlaybackContext); ActorItr; ++ActorItr)
-    {
-        // Same as with the Object Iterator, access the subclass instance with the * or -> operators.
-        AActor* Actor = *ActorItr;
-        ActorNameToActorMap.Add(Actor->GetActorLabel(), Actor);
-    }
-
-    // Cache the possessables to fix up first since the bindings will change as the fix ups happen.
-    TArray<FMovieScenePossessable> ActorsPossessablesToFix;
-    for (int32 i = 0; i < FocusedMovieScene->GetPossessableCount(); i++)
-    {
-        FMovieScenePossessable& Possessable = FocusedMovieScene->GetPossessable(i);
-        // Possessables with parents are components so ignore them.
-        if (Possessable.GetParent().IsValid() == false)
-        {
-            if (Sequencer->FindBoundObjects(Possessable.GetGuid(), Sequencer->GetFocusedTemplateID()).Num() == 0)
-            {
-                ActorsPossessablesToFix.Add(Possessable);
-            }
-        }
-    }
-
-    // For the possessables to fix, look up the actors by name and reassign them if found.
-    TMap<FGuid, FGuid> OldGuidToNewGuidMap;
-    for (const FMovieScenePossessable& ActorPossessableToFix : ActorsPossessablesToFix)
-    {
-        AActor* ActorPtr = ActorNameToActorMap.FindRef(ActorPossessableToFix.GetName());
-        if (ActorPtr != nullptr)
-        {
-            FGuid OldGuid = ActorPossessableToFix.GetGuid();
-
-            // The actor might have an existing guid while the possessable with the same name might not.
-            // In that case, make sure we also replace the existing guid with the new guid
-            FGuid ExistingGuid = Sequencer->FindObjectId(*ActorPtr, Sequencer->GetFocusedTemplateID());
-
-            FGuid NewGuid = FSequencerUtilities::AssignActor(Sequencer.ToSharedRef(), ActorPtr, ActorPossessableToFix.GetGuid());
-
-            OldGuidToNewGuidMap.Add(OldGuid, NewGuid);
-
-            if (ExistingGuid.IsValid())
-            {
-                OldGuidToNewGuidMap.Add(ExistingGuid, NewGuid);
-            }
-        }
-    }
-
-    for (TPair<FGuid, FGuid> GuidPair : OldGuidToNewGuidMap)
-    {
-        FSequencerUtilities::UpdateBindingIDs(Sequencer.ToSharedRef(), GuidPair.Key, GuidPair.Value);
-    }
-
-    Sequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
 }
 
 //...
-
-void UEposSequenceEditorSubsystem::AddConvertBindingsMenu( FMenuBuilder& MenuBuilder )
-{
-    // Binding conversion
-
-    MenuBuilder.AddSubMenu(
-        LOCTEXT( "ConvertBindingLabel", "Convert Selected Binding(s) To..." ),
-        LOCTEXT( "ConvertBindingLabelTooltip", "Convert selected bindings into another binding type" ),
-        FNewMenuDelegate::CreateLambda( [this]( FMenuBuilder& MenuBuilder )
-                                        {
-                                            TSharedPtr<ISequencer> Sequencer = GetActiveSequencer();
-                                            if( Sequencer == nullptr )
-                                            {
-                                                return;
-                                            }
-
-                                            UMovieSceneSequence* const Sequence = Sequencer->GetFocusedMovieSceneSequence();
-                                            if( !IsValid( Sequence ) )
-                                            {
-                                                return;
-                                            }
-
-                                            TArray<FGuid> ObjectBindings;
-                                            Sequencer->GetSelectedObjects( ObjectBindings );
-                                            if( ObjectBindings.Num() == 0 )
-                                            {
-                                                return;
-                                            }
-
-                                            TArray<FSequencerChangeBindingInfo> Bindings;
-                                            const FMovieSceneBindingReferences* BindingReferences = Sequence->GetBindingReferences();
-                                            for( FGuid ObjectGuid : ObjectBindings )
-                                            {
-                                                int32 BindingIndex = 0;
-                                                for( const FMovieSceneBindingReference& Reference : BindingReferences->GetReferences( ObjectGuid ) )
-                                                {
-                                                    Bindings.Add( { Reference.ID, BindingIndex++ } );
-                                                }
-                                            }
-
-                                            ULevelSequenceEditorSubsystem* subsystem = GEditor->GetEditorSubsystem<ULevelSequenceEditorSubsystem>();
-                                            subsystem->AddChangeBindingTypeMenu( MenuBuilder, Sequencer.ToSharedRef(), Bindings, true, TFunction<void()>() );
-                                        } ) );
-}
 
 #undef LOCTEXT_NAMESPACE

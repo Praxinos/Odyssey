@@ -78,35 +78,7 @@ FToolMenuEntry CreateToggleViewportSelectionEntry( TWeakPtr<ISequencer> InWeakSe
                     FSequencerCommands::Get().ToggleLimitViewportSelection, CommandList
                 );
                 Entry.InsertPosition.Position = EToolMenuInsertType::Last;
-
-                if( UUnrealEdViewportToolbarContext* ViewportToolbarContext =
-                    InDynamicSection.FindContext<UUnrealEdViewportToolbarContext>() )
-                {
-                    // Show the entry in the top-level toolbar if we're in Animation Mode (EditMode.ControlRig). Otherwise it will be in the Transform submenu.
-                    Entry.SetShowInToolbarTopLevel( TAttribute<bool>::CreateLambda(
-                        [WeakViewport = ViewportToolbarContext->Viewport]() -> bool
-                        {
-                            if( TSharedPtr<SEditorViewport> Viewport = WeakViewport.Pin() )
-                            {
-                                if( TSharedPtr<FEditorViewportClient> Client = Viewport->GetViewportClient() )
-                                {
-                                    if( FEditorModeTools* ModeTools = Client->GetModeTools() )
-                                    {
-                                        // Hard-code the mode name instead of using FControlRigEditMode::ModeName to avoid adding a dependency on ControlRigEditor.
-                                        const FName ControlRigModeName = "EditMode.ControlRig";
-
-                                        if( ModeTools->GetActiveMode( ControlRigModeName ) )
-                                        {
-                                            return true;
-                                        }
-                                    }
-                                }
-                            }
-
-                            return false;
-                        }
-                    ) );
-                }
+                Entry.SetShowInToolbarTopLevel( true );
             }
         )
     );

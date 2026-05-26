@@ -491,46 +491,64 @@ void SFilmOverlay::Construct(const FArguments& InArgs)
 
 int32 SFilmOverlay::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
-    TArray<IFilmOverlay*> Overlays = FilmOverlays.Get();
-    for (IFilmOverlay* Overlay : Overlays)
+    if( !PrimaryFilmOverlay.IsNone() )
     {
-        Overlay->Paint(AllottedGeometry, MyCullingRect, OutDrawElements, LayerId);
-        ++LayerId;
+        if( const TSharedPtr<IFilmOverlay>* Found = UFilmOverlayToolkit2::GetPrimaryFilmOverlays().Find( PrimaryFilmOverlay ) )
+        {
+            if( Found->IsValid() )
+            {
+                ( *Found )->Paint( AllottedGeometry, MyCullingRect, OutDrawElements, LayerId );
+                ++LayerId;
+            }
+        }
+    }
+
+    for( const TPair<FName, TSharedPtr<IFilmOverlay>>& Pair : UFilmOverlayToolkit2::GetToggleableFilmOverlays() )
+    {
+        if( Pair.Value.IsValid() && Pair.Value->IsEnabled() )
+        {
+            Pair.Value->Paint( AllottedGeometry, MyCullingRect, OutDrawElements, LayerId );
+            ++LayerId;
+        }
     }
 
     return LayerId;
 }
 
-void SFilmOverlayOptions::Construct(const FArguments& InArgs, TSharedPtr<SFilmOverlay> InFilmOverlay)
+// static
+void SFilmOverlayOptions::RegisterDefaultOverlays()
 {
-    PrimaryColorTint = FLinearColor(1.f, 1.f, 1.f, .5f);
+    auto& ExistingPrimaryOverlays = UFilmOverlayToolkit2::GetPrimaryFilmOverlays();
 
-    PrimaryOverlays.Add(MakeShareable(new FFilmOverlay_None));
-    UFilmOverlayToolkit2::RegisterPrimaryFilmOverlay(NAME_None, PrimaryOverlays.Last());
+#define PREPARE_PRIMARY_OVERLAY(Name, Construct) { TSharedPtr<IFilmOverlay> Overlay = ExistingPrimaryOverlays.FindRef(Name); \
+    if (!Overlay) { UFilmOverlayToolkit2::RegisterPrimaryFilmOverlay(Name, Construct); }}
 
-    PrimaryOverlays.Add(MakeShareable(new FFilmOverlay_Grid(3, 3)));
-    UFilmOverlayToolkit2::RegisterPrimaryFilmOverlay("Grid3x3", PrimaryOverlays.Last());
+    PREPARE_PRIMARY_OVERLAY( NAME_None, MakeShared<FFilmOverlay_None>() );
+    PREPARE_PRIMARY_OVERLAY( "Grid3x3", MakeShared<FFilmOverlay_Grid>( 3, 3 ) );
+    PREPARE_PRIMARY_OVERLAY( "Grid2x2", MakeShared<FFilmOverlay_Grid>( 2, 2 ) );
+    PREPARE_PRIMARY_OVERLAY( "Crosshair", MakeShared<FFilmOverlay_Crosshair>() );
+    PREPARE_PRIMARY_OVERLAY( "Rabatment", MakeShared<FFilmOverlay_Rabatment>() );
 
-    PrimaryOverlays.Add(MakeShareable(new FFilmOverlay_Grid(2, 2)));
-    UFilmOverlayToolkit2::RegisterPrimaryFilmOverlay("Grid2x2", PrimaryOverlays.Last());
+#undef PREPARE_PRIMARY_OVERLAY
 
-    PrimaryOverlays.Add(MakeShareable(new FFilmOverlay_Crosshair));
-    UFilmOverlayToolkit2::RegisterPrimaryFilmOverlay("Crosshair", PrimaryOverlays.Last());
+    auto& ExistingToggleableOverlays = UFilmOverlayToolkit2::GetToggleableFilmOverlays();
 
-    PrimaryOverlays.Add(MakeShareable(new FFilmOverlay_Rabatment));
-    UFilmOverlayToolkit2::RegisterPrimaryFilmOverlay("Rabatment", PrimaryOverlays.Last());
+#define PREPARE_TOGGLEABLE_OVERLAY(Name, Construct) { TSharedPtr<IFilmOverlay> Overlay = ExistingToggleableOverlays.FindRef(Name); \
+    if (!Overlay) { UFilmOverlayToolkit2::RegisterToggleableFilmOverlay(Name, Construct); }}
 
-    ToggleableOverlays.Add(MakeShareable(new FFilmOverlay_SafeFrame(LOCTEXT("ActionSafe", "Action Safe"), 95.f, FLinearColor::Red)));
-    UFilmOverlayToolkit2::RegisterToggleableFilmOverlay("ActionSafe", ToggleableOverlays.Last());
+    PREPARE_TOGGLEABLE_OVERLAY( "ActionSafe", MakeShared<FFilmOverlay_SafeFrame>( LOCTEXT( "ActionSafe", "Action Safe" ), 95.f, FLinearColor::Red ) );
+    PREPARE_TOGGLEABLE_OVERLAY( "TitleSafe", MakeShared<FFilmOverlay_SafeFrame>( LOCTEXT( "TitleSafe", "Title Safe" ), 90.f, FLinearColor::Yellow ) );
+    PREPARE_TOGGLEABLE_OVERLAY( "CustomSafe", MakeShared<FFilmOverlay_SafeFrame>( LOCTEXT( "CustomSafe", "Custom Safe" ), 85.f, FLinearColor::Green ) );
+    PREPARE_TOGGLEABLE_OVERLAY( "LetterBox", MakeShared<FFilmOverlay_LetterBox>() );
 
-    ToggleableOverlays.Add(MakeShareable(new FFilmOverlay_SafeFrame(LOCTEXT("TitleSafe", "Title Safe"), 90.f, FLinearColor::Yellow)));
-    UFilmOverlayToolkit2::RegisterToggleableFilmOverlay("TitleSafe", ToggleableOverlays.Last());
+#undef PREPARE_TOGGLEABLE_OVERLAY
+}
 
-    ToggleableOverlays.Add(MakeShareable(new FFilmOverlay_SafeFrame(LOCTEXT("CustomSafe", "Custom Safe"), 85.f, FLinearColor::Green)));
-    UFilmOverlayToolkit2::RegisterToggleableFilmOverlay("CustomSafe", ToggleableOverlays.Last());
+void SFilmOverlayOptions::Construct( const FArguments& InArgs, TSharedPtr<SFilmOverlay> InFilmOverlay )
+{
+    PrimaryColorTint = FLinearColor( 1.f, 1.f, 1.f, .5f );
 
-    ToggleableOverlays.Add(MakeShareable(new FFilmOverlay_LetterBox));
-    UFilmOverlayToolkit2::RegisterToggleableFilmOverlay("LetterBox", ToggleableOverlays.Last());
+    RegisterDefaultOverlays();
 
     // used to choose between creating the whole button + menu widget, or just the menu widget
     // e.g. Old toolbar uses the combo button, while the new one does not
@@ -570,8 +588,6 @@ void SFilmOverlayOptions::Construct(const FArguments& InArgs, TSharedPtr<SFilmOv
     OverlayWidget = InFilmOverlay;
     if( TSharedPtr<SFilmOverlay> OverlayWidgetPinned = OverlayWidget.Pin() )
     {
-        OverlayWidgetPinned->SetFilmOverlays( TAttribute<TArray<IFilmOverlay*>>::CreateSP( this, &SFilmOverlayOptions::GetActiveFilmOverlays ) );
-
         // CurrentPrimaryOverlay (and therefore Thumbnail) resets for non button version of this widget every time we create it, so let's keep it up to date
         if( !bIsComboButton )
         {
@@ -791,7 +807,6 @@ FReply SFilmOverlayOptions::SetPrimaryFilmOverlay(FName InName)
 {
     if( TSharedPtr<SFilmOverlay> OverlayWidgetPinned = OverlayWidget.Pin() )
     {
-        OverlayWidgetPinned->SetFilmOverlays( TAttribute<TArray<IFilmOverlay*>>::CreateSP( this, &SFilmOverlayOptions::GetActiveFilmOverlays ) );
         OverlayWidgetPinned->SetPrimaryFilmOverlay( InName );
     }
 
@@ -847,10 +862,22 @@ TArray<IFilmOverlay*> SFilmOverlayOptions::GetActiveFilmOverlays() const
 
 const FSlateBrush* SFilmOverlayOptions::GetCurrentThumbnail() const
 {
-    FName PrimaryOverlay = GetFilmOverlayWidget()->GetPrimaryFilmOverlay();
-    if (!PrimaryOverlay.IsNone())
+    TSharedPtr<SFilmOverlay> Widget = GetFilmOverlayWidget();
+    if( !Widget.IsValid() )
     {
-        return UFilmOverlayToolkit2::GetPrimaryFilmOverlays()[PrimaryOverlay].Get()->GetThumbnail();
+        return FEposSequenceEditorStyle::Get().GetBrush( "FilmOverlay.DefaultThumbnail" );
+    }
+
+    FName PrimaryOverlay = Widget->GetPrimaryFilmOverlay();
+    if( !PrimaryOverlay.IsNone() )
+    {
+        if( const TSharedPtr<IFilmOverlay>* Found = UFilmOverlayToolkit2::GetPrimaryFilmOverlays().Find( PrimaryOverlay ) )
+        {
+            if( Found->IsValid() )
+            {
+                return Found->Get()->GetThumbnail();
+            }
+        }
     }
     return FEposSequenceEditorStyle::Get().GetBrush("FilmOverlay.DefaultThumbnail");
 }
@@ -878,93 +905,121 @@ void SFilmOverlayOptions::BindCommands( TSharedRef<FUICommandList> Bindings )
     TArray<FName> ToggleableOverlayNames;
     UFilmOverlayToolkit2::GetToggleableFilmOverlays().GenerateKeyArray( ToggleableOverlayNames );
 
+    // Use a weak pointer so that if this widget is destroyed (e.g. when the submenu closes
+    // but SCinematicLevelViewport's CommandList still holds these bindings), invoking the
+    // shortcut does not crash via a dangling raw 'this' pointer.
+    TWeakPtr<SFilmOverlayOptions> WeakThis = StaticCastSharedRef<SFilmOverlayOptions>( AsShared() );
+
     Bindings->MapAction(
         Commands.Disabled,
-        FExecuteAction::CreateLambda( [this]
+        FExecuteAction::CreateLambda( [WeakThis]
                                       {
-                                          SetPrimaryFilmOverlay( NAME_None );
+                                          if( TSharedPtr<SFilmOverlayOptions> Pinned = WeakThis.Pin() )
+                                          {
+                                              Pinned->SetPrimaryFilmOverlay( NAME_None );
+                                          }
                                       } ) );
 
     for( int32 OverlayIndex = 0; OverlayIndex < PrimaryOverlayNames.Num(); ++OverlayIndex )
     {
-        IFilmOverlay& Overlay = *UFilmOverlayToolkit2::GetPrimaryFilmOverlays()[PrimaryOverlayNames[OverlayIndex]].Get();
-
         if( Commands.Grid2x2.Get()->GetCommandName() == PrimaryOverlayNames[OverlayIndex] )
         {
             Bindings->MapAction(
                 Commands.Grid2x2,
-                FExecuteAction::CreateLambda( [this, OverlayName = PrimaryOverlayNames[OverlayIndex]]
+                FExecuteAction::CreateLambda( [WeakThis, OverlayName = PrimaryOverlayNames[OverlayIndex]]
                                               {
-                                                  SetPrimaryFilmOverlay( OverlayName );
+                                                  if( TSharedPtr<SFilmOverlayOptions> Pinned = WeakThis.Pin() )
+                                                  {
+                                                      Pinned->SetPrimaryFilmOverlay( OverlayName );
+                                                  }
                                               } ) );
         }
         else if( Commands.Grid3x3.Get()->GetCommandName() == PrimaryOverlayNames[OverlayIndex] )
         {
             Bindings->MapAction(
                 Commands.Grid3x3,
-                FExecuteAction::CreateLambda( [this, OverlayName = PrimaryOverlayNames[OverlayIndex]]
+                FExecuteAction::CreateLambda( [WeakThis, OverlayName = PrimaryOverlayNames[OverlayIndex]]
                                               {
-                                                  SetPrimaryFilmOverlay( OverlayName );
+                                                  if( TSharedPtr<SFilmOverlayOptions> Pinned = WeakThis.Pin() )
+                                                  {
+                                                      Pinned->SetPrimaryFilmOverlay( OverlayName );
+                                                  }
                                               } ) );
         }
         else if( Commands.Crosshair.Get()->GetCommandName() == PrimaryOverlayNames[OverlayIndex] )
         {
             Bindings->MapAction(
                 Commands.Crosshair,
-                FExecuteAction::CreateLambda( [this, OverlayName = PrimaryOverlayNames[OverlayIndex]]
+                FExecuteAction::CreateLambda( [WeakThis, OverlayName = PrimaryOverlayNames[OverlayIndex]]
                                               {
-                                                  SetPrimaryFilmOverlay( OverlayName );
+                                                  if( TSharedPtr<SFilmOverlayOptions> Pinned = WeakThis.Pin() )
+                                                  {
+                                                      Pinned->SetPrimaryFilmOverlay( OverlayName );
+                                                  }
                                               } ) );
         }
         else if( Commands.Rabatment.Get()->GetCommandName() == PrimaryOverlayNames[OverlayIndex] )
         {
             Bindings->MapAction(
                 Commands.Rabatment,
-                FExecuteAction::CreateLambda( [this, OverlayName = PrimaryOverlayNames[OverlayIndex]]
+                FExecuteAction::CreateLambda( [WeakThis, OverlayName = PrimaryOverlayNames[OverlayIndex]]
                                               {
-                                                  SetPrimaryFilmOverlay( OverlayName );
+                                                  if( TSharedPtr<SFilmOverlayOptions> Pinned = WeakThis.Pin() )
+                                                  {
+                                                      Pinned->SetPrimaryFilmOverlay( OverlayName );
+                                                  }
                                               } ) );
         }
     }
 
     for( int32 OverlayIndex = 0; OverlayIndex < ToggleableOverlayNames.Num(); ++OverlayIndex )
     {
-        IFilmOverlay& Overlay = *UFilmOverlayToolkit2::GetToggleableFilmOverlays()[ToggleableOverlayNames[OverlayIndex]].Get();
-
         if( Commands.ActionSafe.Get()->GetCommandName() == ToggleableOverlayNames[OverlayIndex] )
         {
             Bindings->MapAction(
                 Commands.ActionSafe,
-                FExecuteAction::CreateLambda( [this, OverlayName = ToggleableOverlayNames[OverlayIndex]]
+                FExecuteAction::CreateLambda( [WeakThis, OverlayName = ToggleableOverlayNames[OverlayIndex]]
                                               {
-                                                  ToggleFilmOverlay( OverlayName );
+                                                  if( TSharedPtr<SFilmOverlayOptions> Pinned = WeakThis.Pin() )
+                                                  {
+                                                      Pinned->ToggleFilmOverlay( OverlayName );
+                                                  }
                                               } ) );
         }
         else if( Commands.TitleSafe.Get()->GetCommandName() == ToggleableOverlayNames[OverlayIndex] )
         {
             Bindings->MapAction(
                 Commands.TitleSafe,
-                FExecuteAction::CreateLambda( [this, OverlayName = ToggleableOverlayNames[OverlayIndex]]
+                FExecuteAction::CreateLambda( [WeakThis, OverlayName = ToggleableOverlayNames[OverlayIndex]]
                                               {
-                                                  ToggleFilmOverlay( OverlayName );
+                                                  if( TSharedPtr<SFilmOverlayOptions> Pinned = WeakThis.Pin() )
+                                                  {
+                                                      Pinned->ToggleFilmOverlay( OverlayName );
+                                                  }
                                               } ) );
         }
         else if( Commands.CustomSafe.Get()->GetCommandName() == ToggleableOverlayNames[OverlayIndex] )
         {
             Bindings->MapAction(
                 Commands.CustomSafe,
-                FExecuteAction::CreateLambda( [this, OverlayName = ToggleableOverlayNames[OverlayIndex]]
+                FExecuteAction::CreateLambda( [WeakThis, OverlayName = ToggleableOverlayNames[OverlayIndex]]
                                               {
-                                                  ToggleFilmOverlay( OverlayName );
+                                                  if( TSharedPtr<SFilmOverlayOptions> Pinned = WeakThis.Pin() )
+                                                  {
+                                                      Pinned->ToggleFilmOverlay( OverlayName );
+                                                  }
                                               } ) );
         }
         else if( Commands.Letterbox.Get()->GetCommandName() == ToggleableOverlayNames[OverlayIndex] )
         {
             Bindings->MapAction(
                 Commands.Letterbox,
-                FExecuteAction::CreateLambda( [this, OverlayName = ToggleableOverlayNames[OverlayIndex]]
+                FExecuteAction::CreateLambda( [WeakThis, OverlayName = ToggleableOverlayNames[OverlayIndex]]
                                               {
-                                                  ToggleFilmOverlay( OverlayName );
+                                                  if( TSharedPtr<SFilmOverlayOptions> Pinned = WeakThis.Pin() )
+                                                  {
+                                                      Pinned->ToggleFilmOverlay( OverlayName );
+                                                  }
                                               } ) );
         }
     }

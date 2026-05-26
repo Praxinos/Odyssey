@@ -5,59 +5,100 @@
 
 #include "Templates/SharedPointer.h"
 #include "UObject/WeakObjectPtr.h"
+#include "UObject/WeakInterfacePtr.h"
 
+class IMovieScenePlaybackClient;
 class UEposMovieSceneSequence;
 
+#define UE_API EPOSSEQUENCEEDITOR_API
+
 /**
- * Class that manages the current UWorld context that a level-sequence editor should use for playback
+ * Class that manages the current UWorld context that an epos-sequence editor should use for playback
  */
 class FEposSequenceEditorPlaybackContext
     : public TSharedFromThis<FEposSequenceEditorPlaybackContext>
 {
 public:
 
-    FEposSequenceEditorPlaybackContext( UEposMovieSceneSequence* iEposSequence );
-    ~FEposSequenceEditorPlaybackContext();
+    UE_API FEposSequenceEditorPlaybackContext( UEposMovieSceneSequence* iEposSequence );
+    UE_API ~FEposSequenceEditorPlaybackContext();
 
     /**
      * Gets the level sequence for which we are trying to find the context.
      */
-    UEposMovieSceneSequence* GetEposSequence() const;
+    UE_API UEposMovieSceneSequence* GetEposSequence() const;
+
+    /**
+     * Build a world picker widget that allows the user to choose a world, and exit the auto-bind settings
+     */
+    //UE_API TSharedRef<SWidget> BuildWorldPickerCombo();
 
     /**
      * Resolve the current world context pointer. Can never be nullptr.
      */
-    UObject* GetPlaybackContext() const;
+    UE_API UObject* GetPlaybackContext() const;
 
     /**
      * Returns GetPlaybackContext as a plain object.
      */
-    UObject* GetPlaybackContextAsObject() const;
+    UE_API UObject* GetPlaybackContextAsObject() const;
+
+    /**
+     * Resolve the current playback client. May be nullptr.
+     */
+    UE_API UObject* GetPlaybackClientAsUObject() const;
+
+    /**
+     * Returns GetPlaybackClient as an interface pointer.
+     */
+    UE_API IMovieScenePlaybackClient* GetPlaybackClientAsInterface() const;
+
+    /**
+     * Retrieve all the event contexts for the current world
+     */
+    //UE_API TArray<UObject*> GetEventContexts() const;
+
+    /**
+     * Specify a new world to use as the context. Persists until the next PIE or map change event.
+     * May be null, in which case the context will be recomputed automatically
+     */
+    //UE_API void OverrideWith( UWorld* InNewContext, IMovieScenePlaybackClient* InNewClient );
 
 private:
 
-    using FContextAndClient = TTuple<UWorld*, void*>;
-    //using FContextAndClient = TTuple<UWorld*, ALevelSequenceActor*>;
+    using FContextAndClient = TTuple<UWorld*, IMovieScenePlaybackClient*>;
 
     /**
      * Compute the new playback context based on the user's current auto-bind settings.
      * Will use the first encountered PIE or Simulate world if possible, else the Editor world as a fallback
      */
-    static FContextAndClient ComputePlaybackContextAndClient( const UEposMovieSceneSequence* InLevelSequence );
+    static UE_API FContextAndClient ComputePlaybackContextAndClient( const UEposMovieSceneSequence* iEposSequence );
 
     /**
      * Update the cached context and client pointers if needed.
      */
-    void UpdateCachedContextAndClient() const;
+    UE_API void UpdateCachedContextAndClient() const;
+
+    /**
+     * Gets both the context and client.
+     */
+     //TTuple<UWorld*, IMovieScenePlaybackClient*>
+    UE_API FContextAndClient GetPlaybackContextAndClient() const;
+
+    UE_API void OnPieEvent( bool );
+    UE_API void OnMapChange( uint32 );
+    UE_API void OnWorldListChanged( UWorld* );
 
 private:
 
     /** Level sequence that we should find a context for */
-    TWeakObjectPtr<UEposMovieSceneSequence> mEposSequence;
+    TWeakObjectPtr<UEposMovieSceneSequence> EposSequence;
 
     /** Mutable cached context pointer */
-    mutable TWeakObjectPtr<UWorld> mWeakCurrentContext;
+    mutable TWeakObjectPtr<UWorld> WeakCurrentContext;
 
     /** Mutable cached client pointer */
-    //mutable TWeakObjectPtr<ALevelSequenceActor> mWeakCurrentClient;
+    mutable TWeakInterfacePtr<IMovieScenePlaybackClient> WeakCurrentClient;
 };
+
+#undef UE_API

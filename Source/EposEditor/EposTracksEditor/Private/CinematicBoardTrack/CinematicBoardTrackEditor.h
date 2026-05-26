@@ -39,9 +39,7 @@ public:
     FCinematicBoardTrackEditor( TSharedRef<ISequencer> iSequencer );
 
     /** Virtual destructor. */
-    virtual ~FCinematicBoardTrackEditor()
-    {
-    }
+    virtual ~FCinematicBoardTrackEditor() = default;
 
     /**
      * Creates an instance of this class.  Called by a sequencer .

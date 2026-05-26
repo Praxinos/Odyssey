@@ -12,12 +12,16 @@
 #include "ILevelEditor.h"
 #include "LevelEditor.h"
 #include "LevelEditorViewport.h"
+#include "LevelSequenceEditorSubsystem.h"
+#include "MovieSceneBindingReferences.h"
 #include "MovieSceneTimeHelpers.h"
+#include "MVVM/Extensions/IObjectBindingExtension.h"
+#include "MVVM/Selection/Selection.h"
+#include "MVVM/ViewModels/ObjectBindingModel.h"
+#include "MVVM/ViewModels/SequencerEditorViewModel.h"
 #include "Sections/MovieSceneSubSection.h"
 #include "SequencerUtilities.h"
 #include "Widgets/Notifications/SNotificationList.h"
-#include "MVVM/ViewModels/ObjectBindingModel.h"
-#include "MVVM/ViewModels/SequencerEditorViewModel.h"
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
@@ -83,6 +87,7 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
     ToolbarExtender->AddToolBarExtension( "CurveEditor", EExtensionHook::After, nullptr, FToolBarExtensionDelegate::CreateRaw( this, &FBoardSequenceCustomization::ExtendSequencerToolbar ) );
     customization.ToolbarExtender = ToolbarExtender;
 
+    customization.ActionsMenuExtender = CreateActionsMenuExtender();
     customization.OnBuildObjectBindingContextMenu = FOnGetSequencerMenuExtender::CreateRaw(this, &FBoardSequenceCustomization::CreateObjectBindingContextMenuExtender);
     //customization.OnBuildSidebarMenu = FOnGetSequencerMenuExtender::CreateRaw( this, &FBoardSequenceCustomization::CreateObjectBindingSidebarMenuExtender );
 
@@ -249,6 +254,12 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
     //      TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>( "LevelEditor" ).GetFirstLevelEditor();
     //      levelEditor->AppendCommands( CommandList.ToSharedRef() );
     FEposSequenceEditorActionCallbacks::MapActions( ioCommandList );
+
+    //---
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().FixActorReferences,
+        FExecuteAction::CreateRaw( this, &FBoardSequenceCustomization::FixActorReferences ) );
 
     //---
 
@@ -516,6 +527,47 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
                                           LighttableTools::Deactivate( sequencer.Get() );
                                       } )
     );
+}
+
+TSharedPtr<FExtender>
+FBoardSequenceCustomization::CreateActionsMenuExtender()
+{
+    TSharedPtr<FExtender> ActionsMenuExtender = MakeShared<FExtender>();
+
+    //ActionsMenuExtender->AddMenuExtension(
+    //    "SequenceOptions", EExtensionHook::First, CommandList,
+    //    FMenuExtensionDelegate::CreateLambda( []( FMenuBuilder& MenuBuilder )
+    //                                          {
+    //                                              MenuBuilder.AddMenuEntry( FLevelSequenceEditorCommands::Get().BakeTransform );
+    //                                              MenuBuilder.AddMenuEntry( FLevelSequenceEditorCommands::Get().ImportFBX );
+    //                                              MenuBuilder.AddMenuEntry( FLevelSequenceEditorCommands::Get().ExportFBX );
+    //                                          } ) );
+
+    //ActionsMenuExtender->AddMenuExtension(
+    //    "Transform", EExtensionHook::After, CommandList,
+    //    FMenuExtensionDelegate::CreateLambda( []( FMenuBuilder& MenuBuilder )
+    //                                          {
+    //                                              MenuBuilder.AddMenuEntry( FLevelSequenceEditorCommands::Get().SnapSectionsToTimelineUsingSourceTimecode );
+    //                                              MenuBuilder.AddMenuEntry( FLevelSequenceEditorCommands::Get().SyncSectionsUsingSourceTimecode );
+    //                                          } ) );
+
+    ActionsMenuExtender->AddMenuExtension(
+        "Bindings", EExtensionHook::First, mBoardCommandList,
+        FMenuExtensionDelegate::CreateLambda( [this]( FMenuBuilder& MenuBuilder )
+                                              {
+                                                  MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().FixActorReferences );
+                                              } ) );
+
+    return ActionsMenuExtender;
+}
+
+void
+FBoardSequenceCustomization::FixActorReferences()
+{
+    if( const TSharedPtr<ISequencer> Sequencer = mWeakSequencer.Pin() )
+    {
+        FSequencerUtilities::FixActorReferences( Sequencer.ToSharedRef() );
+    }
 }
 
 //---
@@ -1214,7 +1266,7 @@ FBoardSequenceCustomization::CreateObjectBindingContextMenuExtender(UE::Sequence
     TSharedRef<FExtender> Extender = MakeShared<FExtender>();
     TSharedPtr<UE::Sequencer::FObjectBindingModel> ObjectBindingModel = InViewModel->CastThisShared<UE::Sequencer::FObjectBindingModel>();
     Extender->AddMenuExtension(
-        "ObjectBindingActions", EExtensionHook::Before, nullptr,
+        "ObjectBindingActions", EExtensionHook::Before, mBoardCommandList,
         FMenuExtensionDelegate::CreateRaw(this, &FBoardSequenceCustomization::ExtendObjectBindingContextMenu, ObjectBindingModel));
     return Extender.ToSharedPtr();
 }
@@ -1289,69 +1341,124 @@ FBoardSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBu
             }
         }
 
+        //MenuBuilder.AddSubMenu(
+        //    LOCTEXT( "BindingProperties", "Binding Properties" ),
+        //    LOCTEXT( "BindingPropertiesTooltip", "Modify the actor and object bindings for this track" ),
+        //    FNewMenuDelegate::CreateRaw( this, &FBoardSequenceCustomization::AddBindingPropertiesSubMenu ) );
+
         // Regular possessable
         if( !bCustomBinding )
         {
-            //// Regular possessable
-            //// We don't add anything here, but the extension will
-            //MenuBuilder.BeginSection( "EposPossessable" );
-            //MenuBuilder.EndSection();
+            MenuBuilder.BeginSection( "EposPossessable" );
+
+            //if( IsSelectedBindingRootPossessable() )
+            //{
+            //    MenuBuilder.AddSubMenu(
+            //        LOCTEXT( "AssignActor", "Assign Actor" ),
+            //        LOCTEXT( "AssignActorTooltip", "Assign an actor to this track" ),
+            //        FNewMenuDelegate::CreateRaw( this, &FBoardSequenceCustomization::AddAssignActorSubMenu ) );
+            //}
+
+            MenuBuilder.EndSection();
         }
         else
         {
-            // IObjectBindingExtension is not accessible as not exported as UE_API
+            MenuBuilder.BeginSection( "EposCustomBinding" );
+            bool bCustomSpawnable = MovieSceneHelpers::SupportsObjectTemplate( Sequence, ObjectBindingID, Sequencer->GetSharedPlaybackState() );
 
-            //MenuBuilder.BeginSection( "EposCustomBinding" );
-            //bool bCustomSpawnable = MovieSceneHelpers::SupportsObjectTemplate( Sequence, ObjectBindingID, Sequencer->GetSharedPlaybackState() );
-            //// Check for custom binding types
+            // Check for custom binding types
+            if( bCustomSpawnable )
+            {
+                //MenuBuilder.AddMenuEntry( FSequencerCommands::Get().SaveCurrentSpawnableState );
 
-            //if( bCustomSpawnable )
-            //{
-            //    MenuBuilder.AddMenuEntry( FSequencerCommands::Get().SaveCurrentSpawnableState );
+                //if( !bMultipleBindings )
+                //{
+                //    MenuBuilder.AddSubMenu(
+                //        LOCTEXT( "ChangeClassLabel", "Change Class" ),
+                //        LOCTEXT( "ChangeClassTooltip", "Change the class (object template) that this spawns from" ),
+                //        FNewMenuDelegate::CreateLambda( [this]( FMenuBuilder& MenuBuilder )
+                //                                        {
+                //                                            const TSharedPtr<ISequencer> Sequencer = mWeakSequencer.Pin();
+                //                                            if( !Sequencer.IsValid() )
+                //                                            {
+                //                                                return;
+                //                                            }
 
-            //    if( !bMultipleBindings )
-            //    {
-            //        MenuBuilder.AddSubMenu(
-            //            LOCTEXT( "ChangeClassLabel", "Change Class" ),
-            //            LOCTEXT( "ChangeClassTooltip", "Change the class (object template) that this spawns from" ),
-            //            FNewMenuDelegate::CreateLambda( [this]( FMenuBuilder& MenuBuilder )
-            //                                            {
-            //                                                const TSharedPtr<ISequencer> Sequencer = mWeakSequencer.Pin();
-            //                                                if( !Sequencer.IsValid() )
-            //                                                {
-            //                                                    return;
-            //                                                }
+                //                                            UMovieSceneSequence* Sequence = Sequencer->GetFocusedMovieSceneSequence();
 
-            //                                                UMovieSceneSequence* Sequence = Sequencer->GetFocusedMovieSceneSequence();
+                //                                            TArray<FSequencerChangeBindingInfo> Bindings;
+                //                                            const FMovieSceneBindingReferences* BindingReferences = Sequence->GetBindingReferences();
+                //                                            for( UE::Sequencer::TViewModelPtr<UE::Sequencer::IObjectBindingExtension> ObjectBindingNode : Sequencer->GetViewModel()->GetSelection()->Outliner.Filter<UE::Sequencer::IObjectBindingExtension>() )
+                //                                            {
+                //                                                int32 BindingIndex = 0;
+                //                                                for( const FMovieSceneBindingReference& Reference : BindingReferences->GetReferences( ObjectBindingNode->GetObjectGuid() ) )
+                //                                                {
+                //                                                    Bindings.Add( { Reference.ID, BindingIndex++ } );
+                //                                                }
+                //                                            }
 
-            //                                                TArray<FSequencerChangeBindingInfo> Bindings;
-            //                                                const FMovieSceneBindingReferences* BindingReferences = Sequence->GetBindingReferences();
-            //                                                for( TViewModelPtr<IObjectBindingExtension> ObjectBindingNode : Sequencer->GetViewModel()->GetSelection()->Outliner.Filter<IObjectBindingExtension>() )
-            //                                                {
-            //                                                    int32 BindingIndex = 0;
-            //                                                    for( const FMovieSceneBindingReference& Reference : BindingReferences->GetReferences( ObjectBindingNode->GetObjectGuid() ) )
-            //                                                    {
-            //                                                        Bindings.Add( { Reference.ID, BindingIndex++ } );
-            //                                                    }
-            //                                                }
+                //                                            FSequencerUtilities::AddChangeClassMenu( MenuBuilder, Sequencer.ToSharedRef(), Bindings, TFunction<void()>() );
+                //                                        } ) );
+                //}
+            }
 
-            //                                                FSequencerUtilities::AddChangeClassMenu( MenuBuilder, Sequencer.ToSharedRef(), Bindings, TFunction<void()>() );
-            //                                            } ) );
-            //    }
-            //}
-
-            //MenuBuilder.EndSection();
+            MenuBuilder.EndSection();
         }
     }
 
     if( bShowConvert )
     {
-        // We don't add anything here, but the extension will
         MenuBuilder.BeginSection( "EposConvertBinding" );
+
+        MenuBuilder.AddSubMenu(
+            LOCTEXT( "ConvertBindingLabel", "Convert Selected Binding(s) To..." ),
+            LOCTEXT( "ConvertBindingLabelTooltip", "Convert selected bindings into another binding type" ),
+            FNewMenuDelegate::CreateLambda( [this]( FMenuBuilder& MenuBuilder )
+                                            {
+                                                const TSharedPtr<ISequencer> Sequencer = mWeakSequencer.Pin();
+                                                if( !Sequencer )
+                                                {
+                                                    return;
+                                                }
+
+                                                UMovieSceneSequence* const Sequence = Sequencer->GetFocusedMovieSceneSequence();
+                                                if( !Sequence )
+                                                {
+                                                    return;
+                                                }
+
+                                                const FMovieSceneBindingReferences* BindingReferences = Sequence->GetBindingReferences();
+                                                if( !BindingReferences )
+                                                {
+                                                    return;
+                                                }
+
+                                                TArray<FGuid> ObjectBindings;
+                                                Sequencer->GetSelectedObjects( ObjectBindings );
+                                                if( ObjectBindings.IsEmpty() )
+                                                {
+                                                    return;
+                                                }
+
+                                                TArray<FSequencerChangeBindingInfo> Bindings;
+                                                for( FGuid ObjectGuid : ObjectBindings )
+                                                {
+                                                    int32 BindingIndex = 0;
+                                                    for( const FMovieSceneBindingReference& Reference : BindingReferences->GetReferences( ObjectGuid ) )
+                                                    {
+                                                        Bindings.Add( { Reference.ID, BindingIndex++ } );
+                                                    }
+                                                }
+
+                                                GEditor->GetEditorSubsystem<ULevelSequenceEditorSubsystem>()->AddChangeBindingTypeMenu( MenuBuilder, Sequencer.ToSharedRef(), Bindings, true, TFunction<void()>() );
+                                            } ) );
+
         MenuBuilder.EndSection();
     }
 
     MenuBuilder.BeginSection("Import/Export", LOCTEXT("ImportExportMenuSectionName", "Import/Export"));
+
+    //MenuBuilder.AddMenuEntry( FBoardSequenceEditorCommands::Get().BakeTransform );
 
     MenuBuilder.AddMenuEntry(
         LOCTEXT( "ImportFBX", "Import..." ),
@@ -1406,7 +1513,31 @@ FBoardSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBu
 //
 //void FBoardSequenceCustomization::ExtendObjectBindingSidebarMenu( FMenuBuilder& MenuBuilder, TSharedPtr<FObjectBindingModel> ObjectBindingModel )
 //{
-//    ExtendObjectBindingContextMenu( MenuBuilder, ObjectBindingModel );
+    //TSharedPtr<ISequencer> Sequencer = WeakSequencer.Pin();
+    //if( !Sequencer )
+    //{
+    //    return;
+    //}
+
+    //UMovieSceneSequence* Sequence = Sequencer->GetFocusedMovieSceneSequence();
+    //if( !Sequence )
+    //{
+    //    return;
+    //}
+
+    //UMovieScene* MovieScene = Sequence->GetMovieScene();
+
+    //FGuid ObjectBindingID = ObjectBindingModel->GetObjectGuid();
+
+    //if( !MovieScene || !ObjectBindingID.IsValid() )
+    //{
+    //    return;
+    //}
+
+    //if( FMovieScenePossessable* Possessable = MovieScene->FindPossessable( ObjectBindingID ) )
+    //{
+    //    AddBindingPropertiesSubMenu( MenuBuilder );
+    //}
 //}
 
 //---

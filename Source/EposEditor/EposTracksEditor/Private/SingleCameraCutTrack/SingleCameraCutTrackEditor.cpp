@@ -291,7 +291,16 @@ void FSingleCameraCutTrackEditor::Tick(float DeltaTime)
 
     EMovieScenePlayerStatus::Type PlaybackState = SequencerPin->GetPlaybackStatus();
 
-    if (FSlateThrottleManager::Get().IsAllowingExpensiveTasks() && PlaybackState != EMovieScenePlayerStatus::Playing && PlaybackState != EMovieScenePlayerStatus::Scrubbing)
+    UObject* PlaybackContext = SequencerPin->GetSharedPlaybackState()->GetPlaybackContext();
+    UWorld* World = PlaybackContext ? PlaybackContext->GetWorld() : nullptr;
+
+    const bool bIsInPIEOrSimulate = GEditor->PlayWorld != NULL || GEditor->bIsSimulatingInEditor;
+
+    // Render thumbnails if allow expensive tasks and playback state is not playing or scrubbing and if in a PIE world, the sequence must be bound to it
+    if( FSlateThrottleManager::Get().IsAllowingExpensiveTasks()
+        && PlaybackState != EMovieScenePlayerStatus::Playing
+        && PlaybackState != EMovieScenePlayerStatus::Scrubbing
+        && ( !bIsInPIEOrSimulate || ( bIsInPIEOrSimulate && GEditor->PlayWorld == World ) ) )
     {
         SequencerPin->EnterSilentMode();
 
