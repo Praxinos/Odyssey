@@ -184,6 +184,8 @@ struct ARIANE_API FArianeObject
         /** Called when the object is removed from a parent object */
         virtual void Removed(){};
 
+        const FTransform& GetTransform();
+
     protected:
         /**
          * @brief Invalidate a child. It will also invalidate the whole chain of parents.

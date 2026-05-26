@@ -5,6 +5,7 @@
 #include "ArianePath.h"
 #include "ArianeVertex.h"
 #include "ArianeSegment.h"
+#include "ArianeSegmentCubic.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
@@ -360,6 +361,48 @@ FArianePath::AllocSegment( FArianeVertex* Vertex0, FArianeVertex* Vertex1 )
     FArianeSegment* NewSegment = InstancedSegments.Last().GetMutablePtr<FArianeSegment>();
 
     return NewSegment;
+}
+
+
+FArianeSegmentCubic*
+FArianePath::AllocCubicSegment( FArianeVertex* Vertex0
+                              , const FVector& Handle0
+                              , const FVector& Handle1
+                              , FArianeVertex* Vertex1 )
+{
+    return AllocCubicSegment( Vertex0
+                            , Handle0.X
+                            , Handle0.Y
+                            , Handle0.Z
+                            , Handle1.X
+                            , Handle1.Y
+                            , Handle1.Z
+                            , Vertex1 );
+}
+
+FArianeSegmentCubic*
+FArianePath::AllocCubicSegment( FArianeVertex* Vertex0
+                              , double Handle0X
+                              , double Handle0Y
+                              , double Handle0Z
+                              , double Handle1X
+                              , double Handle1Y
+                              , double Handle1Z
+                              , FArianeVertex* Vertex1 )
+{
+    InstancedSegments.Push( FInstancedStruct::Make<FArianeSegmentCubic>( this
+                                                                       , Vertex0
+                                                                       , Handle0X
+                                                                       , Handle0Y
+                                                                       , Handle0Z
+                                                                       , Handle1X
+                                                                       , Handle1Y
+                                                                       , Handle1Z
+                                                                       , Vertex1 ) );
+
+    FArianeSegmentCubic* NewCubicSegment = InstancedSegments.Last().GetMutablePtr<FArianeSegmentCubic>();
+
+    return NewCubicSegment;
 }
 
 void

@@ -24,6 +24,7 @@ FArianeVertex::FArianeVertex( FArianeObject* Owner, const FVector& iPosition, co
     , Radius( InRadius )
     , Normal ( InNormal )
     , bChained( false )
+    , bHandleAligned( true )
 {
 }
 

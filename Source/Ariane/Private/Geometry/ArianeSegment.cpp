@@ -68,19 +68,6 @@ FArianeSegment::GetVertex( uint32 Index )
     return Vertices[Index].GetVertex();
 }
 
-FVector
-FArianeSegment::GetTangentVectorAt( double T, bool bNormalize )
-{
-    FVector RetVector = ( Vertices[1].GetVertex()->GetPosition() - Vertices[0].GetVertex()->GetPosition() );
-
-    if( bNormalize && ( RetVector.SquaredLength() != 0.0f ) )
-    {
-        RetVector.Normalize();
-    }
-
-    return RetVector;
-}
-
 void
 FArianeSegment::AllocateCache( uint32 VertexCount, uint32 TriangleCount )
 {
@@ -116,29 +103,6 @@ const TArray<uint32>&
 FArianeSegment::GetIndexCache()
 {
     return IndexCache;
-}
-
-FVector
-FArianeSegment::GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormalize )
-{
-    FVector RetVector;
-
-    if( Vertex == Vertices[0].GetVertex() )
-    {
-        RetVector = Vertices[1].GetVertex()->GetPosition() - Vertices[0].GetVertex()->GetPosition();
-    }
-
-    if( Vertex == Vertices[1].GetVertex() )
-    {
-        RetVector = Vertices[0].GetVertex()->GetPosition() - Vertices[1].GetVertex()->GetPosition();
-    }
-
-    if( bNormalize && ( RetVector.SquaredLength() != 0.0f ) )
-    {
-        RetVector.Normalize();
-    }
-
-    return RetVector;
 }
 
 FArianeVertex*
@@ -211,7 +175,6 @@ FArianeSegment::IsInvalidated()
     return bInvalidated;
 }
 
-
 void
 FArianeSegment::Invalidate()
 {
@@ -245,7 +208,7 @@ FArianeSegment::Init()
 double
 FArianeSegment::GetLength()
 {
-    return ( Vertices[1].GetVertex()->GetPosition() - Vertices[0].GetVertex()->GetPosition() ).Length();
+    return Length;
 }
 
 const FGuid&
@@ -299,4 +262,40 @@ FArianeSegment::Extract( FArianeObject* NewSegmentOwner
     }
 
     return nullptr;
+}
+
+FVector
+FArianeSegment::GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormalize )
+{
+    FVector RetVector;
+
+    if( Vertex == Vertices[0].GetVertex() )
+    {
+        RetVector = Vertices[1].GetVertex()->GetPosition() - Vertices[0].GetVertex()->GetPosition();
+    }
+
+    if( Vertex == Vertices[1].GetVertex() )
+    {
+        RetVector = Vertices[0].GetVertex()->GetPosition() - Vertices[1].GetVertex()->GetPosition();
+    }
+
+    if( bNormalize && ( RetVector.SquaredLength() != 0.0f ) )
+    {
+        RetVector.Normalize();
+    }
+
+    return RetVector;
+}
+
+FVector
+FArianeSegment::GetTangentVectorAt( double T, bool bNormalize )
+{
+    FVector RetVector = ( Vertices[1].GetVertex()->GetPosition() - Vertices[0].GetVertex()->GetPosition() );
+
+    if( bNormalize && ( RetVector.SquaredLength() != 0.0f ) )
+    {
+        RetVector.Normalize();
+    }
+
+    return RetVector;
 }

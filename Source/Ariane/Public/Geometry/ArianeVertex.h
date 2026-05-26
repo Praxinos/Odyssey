@@ -81,6 +81,12 @@ struct ARIANE_API FArianeVertex : public FArianePoint
         /** Check if the vertex belongs to a chain */
         void SetChained( bool bInChained ) { bChained = bInChained; };
 
+        /** Check the vertex belongs to a chain */
+        bool IsHandleAligned() { return bHandleAligned; };
+
+        /** Check if the vertex belongs to a chain */
+        void SetHandleAligned( bool bInHandleAligned ) { bHandleAligned = bInHandleAligned; };
+
         /** Get the first segment attached to this vertex **/
         FArianeSegment* GetFirstSegment();
 
@@ -118,4 +124,5 @@ struct ARIANE_API FArianeVertex : public FArianePoint
         uint32 ID;
 
         bool bChained : 1;
+        bool bHandleAligned : 1;
 };

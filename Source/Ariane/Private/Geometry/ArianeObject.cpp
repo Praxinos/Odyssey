@@ -246,6 +246,12 @@ FArianeObject::Traverse( TFunction<TraversalReturnValue(FArianeObject*)> Callbac
     Traverse_Private( Callback );
 }
 
+const FTransform&
+FArianeObject::GetTransform()
+{
+    return GetDrawingLayer()->GetComponentTransform();
+}
+
 bool
 FArianeObject::Update( bool Recurse, bool bClearFlags )
 {

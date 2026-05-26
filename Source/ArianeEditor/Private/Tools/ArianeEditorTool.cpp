@@ -422,12 +422,12 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
         FVector Origin = FVector( OriX, OriY, 0.0f );
         FVector EndPos = FVector( EndX, EndY, 0.0f );
 
-        PDI->DrawLine( WorldMatrix.TransformPosition( Origin )
-                     , WorldMatrix.TransformPosition( EndPos )
-                     , ( i == StepCountHalf ) ? GridXAxisColor : GridColor
-                     , SDPG_Foreground // SDPG_World
-                     , AdjustedThickness
-                     , 0.0f ); // Lifetime 1 frame
+        PDI->DrawTranslucentLine( WorldMatrix.TransformPosition( Origin )
+                                , WorldMatrix.TransformPosition( EndPos )
+                                , ( i == StepCountHalf ) ? GridXAxisColor : GridColor
+                                , SDPG_Foreground // SDPG_World
+                                , AdjustedThickness
+                                , 0.0f ); // Lifetime 1 frame
 
         OriX += Step;
     }
@@ -443,12 +443,12 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
         FVector Origin = FVector( OriX, OriY, 0.0f );
         FVector EndPos = FVector( EndX, EndY, 0.0f );
 
-        PDI->DrawLine( WorldMatrix.TransformPosition( Origin )
-                     , WorldMatrix.TransformPosition( EndPos )
-                     , ( i == StepCountHalf ) ? GridYAxisColor : GridColor
-                     , SDPG_Foreground // SDPG_World
-                     , AdjustedThickness
-                     , 0.0f ); // Lifetime 1 frame
+        PDI->DrawTranslucentLine( WorldMatrix.TransformPosition( Origin )
+                                , WorldMatrix.TransformPosition( EndPos )
+                                , ( i == StepCountHalf ) ? GridYAxisColor : GridColor
+                                , SDPG_Foreground // SDPG_World
+                                , AdjustedThickness
+                                , 0.0f ); // Lifetime 1 frame
 
         OriY += Step;
     }

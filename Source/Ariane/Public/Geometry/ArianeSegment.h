@@ -117,15 +117,15 @@ struct ARIANE_API FArianeSegment
          * @param bNormalize normalize the result
          * @return the tangent vector at parametric value T
          */
-        FVector GetTangentVectorAt( double T, bool bNormalize );
+        virtual FVector GetTangentVectorAt( double T, bool bNormalize );
 
-        FVector GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormalize );
+        virtual FVector GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormalize );
 
         /** Get the segment's bounds ( including polygonal geometry ) */
         const FBoxSphereBounds& GetBounds();
 
         /** Update the segment */
-        void Update();
+        virtual void Update();
 
         /** Invalidate the segment */
         void Invalidate();
@@ -166,7 +166,7 @@ struct ARIANE_API FArianeSegment
                                        , float T1 );
 
         /** Get segment length **/
-        virtual double GetLength();
+        double GetLength();
 
     protected:
         /** Update the segment's bounds */

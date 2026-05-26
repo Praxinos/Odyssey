@@ -294,6 +294,9 @@ void FArianeEditor::UnregisterTools()
 {
     TObjectPtr<UInteractiveToolManager> ToolManager = GetToolManager();
 
+    // will deactivate the current tool.
+    SetCurrentTool( nullptr, EToolShutdownType::Completed, true );
+
     for( UArianeEditorTool* Tool : Tools )
     {
         ToolManager->UnregisterToolType( Tool->GetType() );
