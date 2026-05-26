@@ -38,11 +38,18 @@ private:
 
     void BindCommands( TSharedPtr<FUICommandList> ioCommandList );
 
+    /** Create the menu extenders that will be added to the registered customization builder */
+    TSharedPtr<FExtender> CreateActionsMenuExtender();
     TSharedPtr<FExtender> CreateObjectBindingContextMenuExtender(UE::Sequencer::FViewModelPtr InViewModel);
+    //TSharedPtr<FExtender> CreateObjectBindingSidebarMenuExtender( FViewModelPtr InViewModel );
+
+    /** Action Menu Extensions */
+    void FixActorReferences();
+
+    /** Object Binding Context Menu Extensions */
     void ExtendObjectBindingContextMenu(FMenuBuilder& MenuBuilder, TSharedPtr<UE::Sequencer::FObjectBindingModel> ObjectBindingModel);
 
-    //// Object binding sidebar menu extensions
-    //TSharedPtr<FExtender> CreateObjectBindingSidebarMenuExtender( FViewModelPtr InViewModel );
+    /** Object Binding Sidebar Menu Extensions */
     //void ExtendObjectBindingSidebarMenu( FMenuBuilder& MenuBuilder, TSharedPtr<FObjectBindingModel> ObjectBindingModel );
 
 private:

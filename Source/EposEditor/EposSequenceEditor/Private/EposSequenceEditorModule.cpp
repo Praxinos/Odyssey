@@ -238,10 +238,15 @@ FEposSequenceEditorModule::RegisterSequenceCustomizations()
 void
 FEposSequenceEditorModule::UnregisterSequenceCustomizations()
 {
-    ISequencerModule& sequencerModule = FModuleManager::LoadModuleChecked<ISequencerModule>( "Sequencer" );
-
-    sequencerModule.GetSequencerCustomizationManager()->UnregisterInstancedSequencerCustomization( UBoardSequence::StaticClass() );
-    sequencerModule.GetSequencerCustomizationManager()->UnregisterInstancedSequencerCustomization( UShotSequence::StaticClass() );
+    if( UObjectInitialized() )
+    {
+        ISequencerModule* SequencerModule = FModuleManager::GetModulePtr<ISequencerModule>( "Sequencer" );
+        if( SequencerModule )
+        {
+            SequencerModule->GetSequencerCustomizationManager()->UnregisterInstancedSequencerCustomization( UBoardSequence::StaticClass() );
+            SequencerModule->GetSequencerCustomizationManager()->UnregisterInstancedSequencerCustomization( UShotSequence::StaticClass() );
+        }
+    }
 }
 
 void

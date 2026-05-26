@@ -75,6 +75,9 @@ public:
     /** Bind commands for the overlays */
     void BindCommands( TSharedRef<FUICommandList> );
 
+    /** Register the default primary and toggleable overlays into UFilmOverlayToolkit (idempotent). */
+    static void RegisterDefaultOverlays();
+
     /** Generate menu content for the combo button */
     TSharedRef<SWidget> GetMenuContent();
 
