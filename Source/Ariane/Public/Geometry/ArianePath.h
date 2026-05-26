@@ -21,6 +21,7 @@
 #include "ArianePath.generated.h"
 
 struct FArianeSegment;
+struct FArianeSegmentCubic;
 struct FArianeVertex;
 class UMaterial;
 class UArianeLayerDrawing;
@@ -159,22 +160,22 @@ public:
     virtual void Removed() override;
 
     /**
-        * @brief Alloc a vertex. Nb: the vertex is a allocated inside a FInstancedStruct,
-        * hence supports the unreal reflection system.
-        * @param iPosition vertex's position
-        * @param InNormal vertex's normal vector (perpendicular to the plan it was drawn on)
-        * @param InRadius vertex's radius
-        * @return a pointer to the allocated vertex
-        */
+     * @brief Alloc a vertex. Nb: the vertex is a allocated inside a FInstancedStruct,
+     * hence supports the unreal reflection system.
+     * @param iPosition vertex's position
+     * @param InNormal vertex's normal vector (perpendicular to the plan it was drawn on)
+     * @param InRadius vertex's radius
+     * @return a pointer to the allocated vertex
+     */
     FArianeVertex* AllocVertex( const FVector& iPosition, const FVector& InNormal, double InRadius );
 
     /**
-        * @brief Alloc a segment. Nb: the segment is a allocated inside a FInstancedStruct,
-        * hence supports the unreal reflection system.
-        * @param Vertex0 first vertex
-        * @param Vertex1 second vertex
-        * @return a pointer to the allocated segment
-        */
+     * @brief Alloc a segment. Nb: the segment is a allocated inside a FInstancedStruct,
+     * hence supports the unreal reflection system.
+     * @param Vertex0 first vertex
+     * @param Vertex1 second vertex
+     * @return a pointer to the allocated segment
+     */
     FArianeSegment* AllocSegment( FArianeVertex* Vertex0, FArianeVertex* Vertex1 );
 
     /**
@@ -267,6 +268,19 @@ public:
 
     /** Get Path Material **/
     UMaterialInterface* GetMaterial();
+
+    FArianeSegmentCubic* AllocCubicSegment( FArianeVertex* Vertex0
+                                          , double Handle0X
+                                          , double Handle0Y
+                                          , double Handle0Z
+                                          , double Handle1X
+                                          , double Handle1Y
+                                          , double Handle1Z
+                                          , FArianeVertex* Vertex1 );
+    FArianeSegmentCubic* AllocCubicSegment( FArianeVertex* Vertex0
+                                          , const FVector& Handle0
+                                          , const FVector& Handle1
+                                          , FArianeVertex* Vertex1 );
 
 protected:
     void FindChains();
