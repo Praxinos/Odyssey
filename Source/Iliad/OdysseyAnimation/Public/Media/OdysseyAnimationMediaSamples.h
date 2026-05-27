@@ -6,8 +6,11 @@
 #include "CoreMinimal.h"
 #include "IMediaSamples.h"
 #include "Tickable.h"
-#include "TickableEditorObject.h"
 #include "UObject/StrongObjectPtr.h"
+
+#if WITH_EDITOR
+#include "TickableEditorObject.h"
+#endif
 
 #include "OdysseyRenderingAbility.h"
 #include "OdysseyInvalidTileMap.h"

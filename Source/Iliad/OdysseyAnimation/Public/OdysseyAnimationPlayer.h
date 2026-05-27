@@ -8,7 +8,10 @@
 #include "Misc/Attribute.h"
 #include "Misc/FrameTime.h"
 #include "Tickable.h"
+
+#if WITH_EDITOR
 #include "TickableEditorObject.h"
+#endif
 
 #include "OdysseyInvalidTileMap.h"
 #include "OdysseyRenderingAbility.h"
