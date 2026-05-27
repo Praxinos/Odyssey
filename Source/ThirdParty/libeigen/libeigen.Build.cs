@@ -54,6 +54,18 @@ public class libeigen : ModuleRules
             throw new InvalidOperationException("ERROR in libeigen Module : Target.Type == TargetType.Game");
         }
 
+        //Inactivate Unity builds to force devs to include all the necessary include files overywhere it is needed
+        //Inactivate Code Optimization in Debug configurations
+        //Because Engine modules and Engine Plugin Modules are always optimized by default
+        //and we don't want that
+        if (Target.Configuration == UnrealTargetConfiguration.Debug || Target.Configuration == UnrealTargetConfiguration.DebugGame)
+        {
+            bMergeUnityFiles = false;
+            PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+            bUseUnity = false;
+            OptimizeCode = CodeOptimization.Never;
+        }
+
         string includePath  = Path.GetFullPath( Path.Combine( ModuleDirectory, "include/eigen3" ) );
 //        string libPath      = Path.GetFullPath( Path.Combine( ModuleDirectory, "lib" ) );
 //        string binPath      = Path.GetFullPath( Path.Combine( ModuleDirectory, "bin" ) );

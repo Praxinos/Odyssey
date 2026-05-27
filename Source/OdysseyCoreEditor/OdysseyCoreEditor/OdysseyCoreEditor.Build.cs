@@ -23,6 +23,18 @@ public class OdysseyCoreEditor : ModuleRules
             throw new InvalidOperationException("ERROR in OdysseyCoreEditor Module : Target.Type == TargetType.Game");
         }
 
+        //Inactivate Unity builds to force devs to include all the necessary include files overywhere it is needed
+        //Inactivate Code Optimization in Debug configurations
+        //Because Engine modules and Engine Plugin Modules are always optimized by default
+        //and we don't want that
+        if (Target.Configuration == UnrealTargetConfiguration.Debug || Target.Configuration == UnrealTargetConfiguration.DebugGame)
+        {
+            bMergeUnityFiles = false;
+            PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+            bUseUnity = false;
+            OptimizeCode = CodeOptimization.Never;
+        }
+
         //Module's own include paths
         PrivateIncludePaths.AddRange
         (

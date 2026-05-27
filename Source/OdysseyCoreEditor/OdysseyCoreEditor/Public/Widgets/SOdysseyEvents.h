@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
 
 class ODYSSEYCOREEDITOR_API SOdysseyEvents
     : public SCompoundWidget
