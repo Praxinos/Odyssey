@@ -306,12 +306,12 @@ FNoteTrackEditor::GetReferenceRange( FFrameNumber iFrame )
 
     //UMovieSceneSequence* sequence = GetSequencer()->GetFocusedMovieSceneSequence();
     //UMovieSceneTrack* track = sequence ? sequence->GetMovieScene()->FindMasterTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
-    //UMovieSceneSection* section = track ? MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrame ) : nullptr;
+    //UMovieSceneSection* section = track ? EposSequenceHelpers::FindSectionAtTime( track->GetAllSections(), iFrame ) : nullptr;
     //if( section )
     //    return section->GetTrueRange();
 
     //track = sequence ? sequence->GetMovieScene()->GetCameraCutTrack() : nullptr;
-    //section = track ? MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrame ) : nullptr;
+    //section = track ? EposSequenceHelpers::FindSectionAtTime( track->GetAllSections(), iFrame ) : nullptr;
     //if( section )
     //    return section->GetTrueRange();
 
