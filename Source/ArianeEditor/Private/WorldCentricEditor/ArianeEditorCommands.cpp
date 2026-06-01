@@ -5,7 +5,7 @@
 #include "ArianeEditorCommands.h"
 // Odyssey
 #include "Command/OdysseyCommandMacros.h"
-#include "OdysseyStyle.h"
+#include "ArianeEditorStyle.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -29,7 +29,7 @@ FArianeEditorCommands::FArianeEditorCommands()
                                       , LOCTEXT( "editor-commands.name"
                                                , "Ariane Editor" )
                                       , NAME_None
-                                      , FOdysseyStyle::GetStyleSetName() )
+                                      , FArianeEditorStyle::Get().GetStyleSetName() )
 {
     AddBundle(ToolbarShortcuts, LOCTEXT("editor-commands.category.toolbar-shortcuts", "Toolbar Shortcuts"));
 /*

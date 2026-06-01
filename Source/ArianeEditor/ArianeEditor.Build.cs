@@ -100,6 +100,7 @@ public class ArianeEditor : ModuleRules
                 //"OdysseyVector",
                 "OdysseyWidgets",
                 "Ariane",
+                "OdysseyStyle",
                 "StylusInput",
                 "ApplicationCore",
                 "ULIS",
@@ -129,6 +130,7 @@ public class ArianeEditor : ModuleRules
                 //Path.Combine(ModuleDirectory, "Private", "Widgets", "Tools"),
                 Path.Combine(ModuleDirectory, "Private", "Tabs"),
                 Path.Combine(ModuleDirectory, "Private", "Tools"),
+                Path.Combine(ModuleDirectory, "Private", "Styles"),
                 Path.Combine(ModuleDirectory, "Private", "Widgets"),
                 Path.Combine(ModuleDirectory, "Private", "Customizations"),
             }
@@ -146,6 +148,7 @@ public class ArianeEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Public", "WorldCentricEditor"),
                 Path.Combine(ModuleDirectory, "Public", "Tabs"),
                 Path.Combine(ModuleDirectory, "Public", "Tools"),
+                Path.Combine(ModuleDirectory, "Public", "Styles"),
                 Path.Combine(ModuleDirectory, "Public", "Widgets"),
                 Path.Combine(ModuleDirectory, "Public", "Customizations"),
             }

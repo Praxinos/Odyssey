@@ -7,7 +7,7 @@
 #include "ArianeEditor.h"
 #include "ArianeEditorCommands.h"
 // Odyssey headers
-#include "OdysseyStyle.h"
+#include "ArianeEditorStyle.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -28,7 +28,7 @@ FArianeEditorLayerStackTab::~FArianeEditorLayerStackTab()
 }
 
 FArianeEditorLayerStackTab::FArianeEditorLayerStackTab( FArianeEditor* InEditor )
-    : FArianeEditorTab(LOCTEXT( "layerstack-tab.name", "Layer Stack" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
+    : FArianeEditorTab(LOCTEXT( "layerstack-tab.name", "Layer Stack" ), FSlateIcon( "ArianeEditorStyle", "ArianeEditor.Layers16" ))
     , Editor( InEditor )
 {
 }

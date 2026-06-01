@@ -11,7 +11,7 @@ UArianeEditorSettings::UArianeEditorSettings( const FObjectInitializer& iObjectI
     : Super( iObjectInitializer )
     , DistanceToNewActor( 5000 )
     , GridSize( 4000 )
-    , GridOpacity( 0.125f )
+    , GridOpacity( 0.250f )
     , GridColor( FLinearColor::Gray )
     , GridXAxisColor( FLinearColor::Red )
     , GridYAxisColor( FLinearColor::Green )

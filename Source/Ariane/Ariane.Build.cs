@@ -24,6 +24,7 @@ public class Ariane : ModuleRules
 
         PublicIncludePaths.AddRange(
             new string[] {
+                Path.Combine(ModuleDirectory, "Private", "Core"),
                 Path.Combine(ModuleDirectory, "Private", "Components"),
                 Path.Combine(ModuleDirectory, "Private", "Actors"),
                 Path.Combine(ModuleDirectory, "Private", "Geometry"),
@@ -33,6 +34,7 @@ public class Ariane : ModuleRules
 
         PublicIncludePaths.AddRange(
             new string[] {
+                Path.Combine(ModuleDirectory, "Public", "Core"),
                 Path.Combine(ModuleDirectory, "Public", "Components"),
                 Path.Combine(ModuleDirectory, "Public", "Actors"),
                 Path.Combine(ModuleDirectory, "Public", "Geometry"),

@@ -1,18 +1,20 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-// Ariane headers
+// Ariane Editor headers
 #include "SArianeEditorLayerStack.h"
 #include "SArianeEditorLayerStackContextMenu.h"
 #include "SArianeEditorLayerRow.h"
+#include "ArianeEditor.h"
+#include "ArianeEditorStyle.h"
+// Ariane headers
 #include "ArianePainting3DComponent.h"
 #include "ArianePainting3DActor.h"
 #include "ArianeLayer.h"
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerStack.h"
-#include "ArianeEditor.h"
-// Odyssey Headers
-#include "OdysseyStyle.h"
+
+
 // Unreal headers
 #include "Framework/Commands/GenericCommands.h"
 #include "Selection.h"
@@ -68,7 +70,7 @@ SArianeEditorLayerStack::Construct( const FArguments& InArgs, FArianeEditor* InE
                                            [
                                                SNew(SImage)
                                                .ToolTipText( FText::FromString(LAYER_TRANSFORM))
-                                               .Image( FOdysseyStyle::Get().GetBrush("PainterEditor.ToolsTab.Transform16") )
+                                               .Image( FArianeEditorStyle::Get().GetBrush("ArianeEditor.ToolsTab.Transform16") )
                                            ]
                                        ]
                                        + SHeaderRow::Column( LAYER_VISIBLE )
@@ -84,7 +86,7 @@ SArianeEditorLayerStack::Construct( const FArguments& InArgs, FArianeEditor* InE
                                            [
                                                SNew(SImage)
                                                .ToolTipText( FText::FromString(LAYER_VISIBLE))
-                                               .Image( FOdysseyStyle::Get().GetBrush("OdysseyLayerStack.Visible16") )
+                                               .Image( FArianeEditorStyle::Get().GetBrush("ArianeEditor.LayerStack.Visible16") )
                                            ]
                                        ]
                                        + SHeaderRow::Column( LAYER_LOCKED )
@@ -100,7 +102,7 @@ SArianeEditorLayerStack::Construct( const FArguments& InArgs, FArianeEditor* InE
                                            [
                                                SNew(SImage)
                                                .ToolTipText( FText::FromString(LAYER_LOCKED))
-                                               .Image( FOdysseyStyle::Get().GetBrush("OdysseyLayerStack.Locked16") )
+                                               .Image( FArianeEditorStyle::Get().GetBrush("ArianeEditor.LayerStack.Locked16") )
                                            ]
                                        ];
     Editor = InEditor;

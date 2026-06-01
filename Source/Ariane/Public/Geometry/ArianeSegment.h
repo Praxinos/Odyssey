@@ -22,10 +22,10 @@ struct ARIANE_API FArianeSegment
     GENERATED_BODY()
 
     public:
-        struct FractionStep
+        struct FFractionStep
         {
-            ~FractionStep(){};
-            FractionStep( FArianePoint* InPoint, float InT, float InRadius )
+            ~FFractionStep(){};
+            FFractionStep( FArianePoint* InPoint, float InT, float InRadius )
                 : Point( InPoint )
                 , T ( InT )
                 , Radius( InRadius )
@@ -37,15 +37,17 @@ struct ARIANE_API FArianeSegment
             float Radius;
         };
 
-        struct Fraction
+        struct FFraction
         {
-            ~Fraction(){};
-            Fraction( FractionStep* S0, FractionStep* S1 )
+            ~FFraction(){};
+            FFraction( FFractionStep* S0, FFractionStep* S1 )
                 : Steps { S0, S1 }
+                , Length( ( S1->Point->GetPosition() - S0->Point->GetPosition() ).Length() )
             {
             };
 
-            FractionStep* Steps[2];
+            FFractionStep* Steps[2];
+            double Length;
         };
 
     public:
@@ -90,7 +92,7 @@ struct ARIANE_API FArianeSegment
         FArianeVertex* GetOtherVertex( FArianeVertex* Vertex );
 
         /** Get an array of fraction points composing the segment */
-        const TArray<FractionStep>& GetFractionSteps();
+        const TArray<FFractionStep>& GetFractionSteps();
 
         /**
          * @brief Allocate FDynamicMeshVertex cache and Index cache for building a polygonal shape
@@ -106,7 +108,7 @@ struct ARIANE_API FArianeSegment
         const TArray<uint32>& GetIndexCache();
 
         /** Get the fraction cache */
-        const TArray<Fraction>& GetFractions();
+        const TArray<FFraction>& GetFractions();
 
         /** Get the fraction count */
         uint32 GetFractionCount();
@@ -186,8 +188,8 @@ struct ARIANE_API FArianeSegment
         FArianeVertexID Vertices[2];
 
     protected:
-        TArray<FractionStep> FractionSteps;
-        TArray<Fraction> Fractions;
+        TArray<FFractionStep> FractionSteps;
+        TArray<FFraction> Fractions;
         TArray<FDynamicMeshVertex> ModelVertexCache;
         TArray<uint32> IndexCache;
         FBoxSphereBounds Bounds;

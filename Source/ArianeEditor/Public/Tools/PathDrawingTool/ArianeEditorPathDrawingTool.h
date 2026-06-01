@@ -6,11 +6,14 @@
 // Unreal
 #include "CoreMinimal.h"
 #include "InteractiveToolBuilder.h"
-// Ariane
+// Ariane Editor Headers
 #include "ArianeEditorTool.h"
 #include "ArianeEditorPathDrawingToolBuilder.h" // that way only this header needs to be included by files using this tool
+#include "PathDrawingTool/ArianeEditorPathTracer.h"
+// Ariane Headers
 #include "ArianePainting3DComponent.h" // for EArianePainting3DGeometryMode
 #include "ArianePath.h"
+
 // Odyssey
 #include "OdysseyPainterEditorColorType.h"
 
@@ -18,6 +21,13 @@
 
 class FArianeEditor;
 struct FArianePath;
+
+UENUM(BlueprintType)
+enum class EArianeEditorPathDrawingToolSegmentType : uint8
+{
+    Polyline = 0,
+    CubicBezier = 1,
+};
 
 UCLASS()
 class ARIANEEDITOR_API UArianeEditorPathDrawingTool : public UArianeEditorTool
@@ -94,11 +104,17 @@ public:
 
     UPROPERTY( EditAnywhere
              , Category = PathDrawingTool )
+    EArianeEditorPathDrawingToolSegmentType SegmentType;
+
+    UPROPERTY( EditAnywhere
+             , Category = PathDrawingTool )
     bool bShowGrid;
 
     UPROPERTY( EditAnywhere )
     UMaterialInterface* MaterialInterface;
 
+
 protected:
     FArianePath* EditedPath;
+    FArianeEditorPathTracer PathTracer;
 };

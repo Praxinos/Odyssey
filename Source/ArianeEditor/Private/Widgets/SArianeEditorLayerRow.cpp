@@ -1,18 +1,19 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-// Ariane headers
+// Ariane Editor headers
 #include "SArianeEditorLayerRow.h"
 #include "SArianeEditorLayerStack.h"
 #include "ArianeEditor.h"
+#include "LayerTransformTool/ArianeEditorLayerTransformTool.h"
+#include "ArianeEditorStyle.h"
+// Ariane headers
 #include "ArianeLayer.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
-#include "LayerTransformTool/ArianeEditorLayerTransformTool.h"
-// Odyssey headers
-#include "OdysseyStyle.h"
+
 // Unreal headers
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 #include "Dialogs/Dialogs.h"
@@ -208,7 +209,7 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
 
     if( InColumnName == SArianeEditorLayerStack::LAYER_TRANSFORM )
     {
-        const FCheckBoxStyle* isTransformedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("ArianeLayerStack.IsTransformedToggle");
+        const FCheckBoxStyle* isTransformedToggleStyle = &FArianeEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>("ArianeEditor.LayerStack.IsTransformedToggle");
 
         ColumnWidget = SNew(SHorizontalBox)
                        + SHorizontalBox::Slot()
@@ -232,7 +233,7 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
 
     if( InColumnName == SArianeEditorLayerStack::LAYER_VISIBLE )
     {
-        const FCheckBoxStyle* isVisibleToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("ArianeLayerStack.IsVisibleToggle");
+        const FCheckBoxStyle* isVisibleToggleStyle = &FArianeEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>("ArianeEditor.LayerStack.IsVisibleToggle");
 
         ColumnWidget = SNew(SHorizontalBox)
                        + SHorizontalBox::Slot()
@@ -251,7 +252,7 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
 
     if( InColumnName == SArianeEditorLayerStack::LAYER_LOCKED )
     {
-        const FCheckBoxStyle* isLockedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("ArianeLayerStack.IsLockedToggle");
+        const FCheckBoxStyle* isLockedToggleStyle = &FArianeEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>("ArianeEditor.LayerStack.IsLockedToggle");
 
         ColumnWidget = SNew(SHorizontalBox)
                        + SHorizontalBox::Slot()
@@ -274,12 +275,12 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
 
         if ( Cast<UArianeLayerFolder>(Layer) )
         {
-            objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.Layers16" );
+            objectIcon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.Layers16" );
         }
         else
         if ( Cast<UArianeLayerDrawing>(Layer) )
         {
-            objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.Layers16" );
+            objectIcon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.Layers16" );
         }
 
         TextBlockWidget = SNew(SInlineEditableTextBlock)
@@ -470,7 +471,7 @@ SArianeEditorLayerRow::OnPaint( const FPaintArgs& Args
                               , const FWidgetStyle& InWidgetStyle
                               , bool bParentEnabled ) const
 {
-    const FTableRowStyle& style = FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows");
+    const FTableRowStyle& style = FArianeEditorStyle::Get().GetWidgetStyle<FTableRowStyle>("ArianeEditor.LayerStack.AlternatedRows");
     const FSlateBrush* DropIndicatorBrush = nullptr;
 
     int32 rowLayerId = SMultiColumnTableRow<TSharedPtr<FArianeEditorLayerRowItem>>::OnPaint( Args

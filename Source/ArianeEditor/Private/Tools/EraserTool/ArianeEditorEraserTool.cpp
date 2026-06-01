@@ -1,17 +1,18 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-// Ariane headers
+// Ariane Editor headers
 #include "EraserTool/ArianeEditorEraserTool.h"
 #include "ArianeEditor.h"
+#include "ArianeEditorStyle.h"
+// Ariane headers
 #include "ArianePainting3DComponent.h"
 #include "ArianePath.h"
 #include "ArianeVertex.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeSegmentCubic.h"
-// Odyssey
-#include "OdysseyStyle.h"
+
 // Unreal headers
 #include "Subsystems/EditorActorSubsystem.h"
 #include "SceneView.h"
@@ -35,7 +36,7 @@ UArianeEditorEraserTool::UArianeEditorEraserTool()
     , CanvasRenderTarget ( nullptr )
     , Brush( nullptr )
 {
-    Icon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser64");
+    Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.Eraser64");
 
     bHasContextMenu = true;
 }
@@ -239,10 +240,10 @@ UArianeEditorEraserTool::GetAlpha( int32 X, int32 Y, const TArray<FColor>& Pixel
 void
 UArianeEditorEraserTool::TraceLine( FArianePath* Path
                                   , FArianeSegment* Segment
-                                  , const FArianeSegment::FractionStep* Step0
+                                  , const FArianeSegment::FFractionStep* Step0
                                   , int32 ScreenX0
                                   , int32 ScreenY0
-                                  , const FArianeSegment::FractionStep* Step1
+                                  , const FArianeSegment::FFractionStep* Step1
                                   , int32 ScreenX1
                                   , int32 ScreenY1
                                   , const TArray<FColor>& Pixels
@@ -829,7 +830,7 @@ UArianeEditorEraserTool::EraseChainSegments( FEditorViewportClient* ViewportClie
             // and will be changed.
             //segment->Update( FArianeObject::UPDATE_NEEDPOLYLINE );
 
-            const TArray<FArianeSegment::Fraction>& Fractions = Segment->GetFractions();
+            const TArray<FArianeSegment::FFraction>& Fractions = Segment->GetFractions();
             FArianeVertex* OtherVertex = Segment->GetOtherVertex( Vertex );
             FArianeSegment* NextSegment = OtherVertex->GetOtherSegment( Segment );
             bool revert = ( Vertex == Segment->GetVertex(0) ) ? false : true;
@@ -839,9 +840,9 @@ UArianeEditorEraserTool::EraseChainSegments( FEditorViewportClient* ViewportClie
             {
                 for( auto it = Fractions.begin(); it != Fractions.end(); ++it )
                 {
-                    const FArianeSegment::Fraction& Fraction = *it;
-                    const FArianeSegment::FractionStep* Step0 = Fraction.Steps[0];
-                    const FArianeSegment::FractionStep* Step1 = Fraction.Steps[1];
+                    const FArianeSegment::FFraction& Fraction = *it;
+                    const FArianeSegment::FFractionStep* Step0 = Fraction.Steps[0];
+                    const FArianeSegment::FFractionStep* Step1 = Fraction.Steps[1];
                     FVector WorlCoords0 = WorldTransform.TransformPosition( Step0->Point->GetPosition() ) ;
                     FVector WorlCoords1 = WorldTransform.TransformPosition( Step1->Point->GetPosition() ) ;
                     FVector2D HUDCoords0 = ProjectWorldToHUD( ViewportClient, View, WorlCoords0 );
@@ -865,9 +866,9 @@ UArianeEditorEraserTool::EraseChainSegments( FEditorViewportClient* ViewportClie
             {
                 for( auto it = Fractions.rbegin(); it != Fractions.rend(); ++it )
                 {
-                    const FArianeSegment::Fraction& Fraction = *it;
-                    const FArianeSegment::FractionStep* Step0 = Fraction.Steps[0];
-                    const FArianeSegment::FractionStep* Step1 = Fraction.Steps[1];
+                    const FArianeSegment::FFraction& Fraction = *it;
+                    const FArianeSegment::FFractionStep* Step0 = Fraction.Steps[0];
+                    const FArianeSegment::FFractionStep* Step1 = Fraction.Steps[1];
                     FVector WorlCoords0 = WorldTransform.TransformPosition( Step0->Point->GetPosition() ) ;
                     FVector WorlCoords1 = WorldTransform.TransformPosition( Step1->Point->GetPosition() ) ;
                     FVector2D HUDCoords0 = ProjectWorldToHUD( ViewportClient, View, WorlCoords0 );

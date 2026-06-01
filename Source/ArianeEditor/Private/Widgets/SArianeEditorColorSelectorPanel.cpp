@@ -1,20 +1,23 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-// Ariane Headers
+// Ariane Editor Headers
 #include "SArianeEditorColorSelectorPanel.h"
 #include "SArianeEditorLayerStack.h"
 #include "ArianeEditor.h"
 #include "ArianeEditorTool.h"
+#include "ArianeEditorStyle.h"
+// Ariane Headers
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
 // Odyssey Headers
+#include "OdysseyStyle.h"
+
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/Color/SOdysseyAdvancedColorWheel.h"
 #include "Widgets/Color/SOdysseyColorSliders.h"
 #include "Widgets/Color/SOdysseyColorHexadecimal.h"
 //#include "Widgets/Palette/SOdysseyPainterEditorPaletteSetList.h"
-#include "OdysseyStyle.h"
 #include "OdysseyPalette.h"
 // Unreal headers
 #include "Widgets/Input/SSegmentedControl.h"
@@ -48,13 +51,13 @@ SArianeEditorColorSelectorPanel::Construct(const FArguments& InArgs, FArianeEdit
             + SSegmentedControl<EOdysseyPainterEditorColorType>::Slot(EOdysseyPainterEditorColorType::Raw)
             .Text(LOCTEXT("color-selector.color-type.raw.name", "Raw"))
             .ToolTip(LOCTEXT("color-selector.color-type.raw.tooltip", "Switch to Raw colors"))
-            .Icon(FOdysseyStyle::GetBrush( "PainterEditor.ColorSelector.ColorType.Raw" ))
+            .Icon(FOdysseyStyle::GetBrush( "ArianeEditor.ColorSelector.ColorType.Raw" ))
 
             //Color Type: INDEXED
             + SSegmentedControl<EOdysseyPainterEditorColorType>::Slot(EOdysseyPainterEditorColorType::Indexed)
             .Text(LOCTEXT("color-selector.color-type.indexed.name", "Indexed"))
             .ToolTip(LOCTEXT("color-selector.color-type.indexed.tooltip", "Switch to Indexed colors"))
-            .Icon(FOdysseyStyle::GetBrush( "PainterEditor.ColorSelector.ColorType.Indexed" ))
+            .Icon(FOdysseyStyle::GetBrush( "ArianeEditor.ColorSelector.ColorType.Indexed" ))
         ]
         +SScrollBox::Slot()
         .AutoSize()

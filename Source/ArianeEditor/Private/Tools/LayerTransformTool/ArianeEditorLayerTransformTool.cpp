@@ -1,15 +1,16 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-// Ariane headers
+// Ariane Editor headers
 #include "LayerTransformTool/ArianeEditorLayerTransformTool.h"
 #include "ArianeEditor.h"
+#include "ArianeEditorStyle.h"
+// Ariane headers
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerFolder.h"
-// Odyssey
-#include "OdysseyStyle.h"
+
 // Unreal headers
 #include "Subsystems/EditorActorSubsystem.h"
 #include "SceneView.h"
@@ -34,7 +35,7 @@ UArianeEditorLayerTransformTool::UArianeEditorLayerTransformTool()
     , Gizmo ( nullptr )
     , PreviousTool ( nullptr )
 {
-    Icon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform64");
+    Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.Transform64");
 
     bHasContextMenu = true;
 }
