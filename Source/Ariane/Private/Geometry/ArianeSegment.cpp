@@ -75,13 +75,13 @@ FArianeSegment::AllocateCache( uint32 VertexCount, uint32 TriangleCount )
     IndexCache.SetNumZeroed( TriangleCount * 3 );
 }
 
-const TArray<FArianeSegment::Fraction>&
+const TArray<FArianeSegment::FFraction>&
 FArianeSegment::GetFractions()
 {
     return Fractions;
 }
 
-const TArray<FArianeSegment::FractionStep>&
+const TArray<FArianeSegment::FFractionStep>&
 FArianeSegment::GetFractionSteps()
 {
     return FractionSteps;
@@ -134,7 +134,7 @@ FArianeSegment::UpdateBounds()
     {
         for( int32 i = 0; i < FractionSteps.Num(); i++ )
         {
-            FractionStep& Step = FractionSteps[i];
+            FFractionStep& Step = FractionSteps[i];
             FArianePoint* Point = Step.Point;
             float PointRadius = Step.Radius;
             const FVector PointPosition = Point->GetPosition();

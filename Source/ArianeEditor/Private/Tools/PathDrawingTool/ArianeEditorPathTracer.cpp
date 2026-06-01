@@ -1,16 +1,19 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
+// Ariane Editor Headers
 #include "PathDrawingTool/ArianeEditorPathTracer.h"
+// Ariane Headers
+#include "ArianeCore.h"
 #include "ArianePath.h"
 #include "ArianeVertex.h"
 #include "ArianeSegment.h"
 #include "ArianeSegmentCubic.h"
+// Odyssey Headers
+#include <OdysseyVector.h>
 
-// Cubix Bezier functions
+// Cubic Bezier functions
 #include <ULIS>
-
-#ifdef unused
 
 FArianeEditorPathTracer::~FArianeEditorPathTracer()
 {
@@ -19,7 +22,6 @@ FArianeEditorPathTracer::~FArianeEditorPathTracer()
 FArianeEditorPathTracer::FArianeEditorPathTracer()
     : DotLimit ( 0.0 ) // 90 deg
     //, mDotLimit ( 0.7071f ) // cos 45deg
-    , PointID( 0 )
     , SampleDistance( 3.0f )
     , TracingWidth( 6.0f )
     , CubicPath(nullptr)
@@ -55,17 +57,18 @@ FArianeEditorPathTracer::Reset()
     RecordBuffer.Empty();
     EdgeBuffer.Empty();
     CubicPath = nullptr;
-    PointID = 0;
 }
 
 FArianeSegment*
-FArianeEditorPathTracer::Flush( FArianeVertex* PreviousVertex, FArianeVertex* EndVertex )
+FArianeEditorPathTracer::Flush( FSceneView* View
+                              , FArianeVertex* FirstSegmentVertex
+                              , FArianeVertex* LastSegmentVertex ) // for loops
 {
     FArianeSegment* NewSegment = nullptr;
 
-    // forbid path with a signle vertex that has a segment that loops on itself
+    // forbid path with a single vertex that has a segment that loops on itself
     if ( ( CubicPath->GetVertices().Num() == 1 )
-      && ( CubicPath->GetVertices()[0].GetVertex() == EndVertex ) )
+      && ( CubicPath->GetVertices()[0].GetVertex() == LastSegmentVertex ) )
     {
         Reset();
 
@@ -74,17 +77,29 @@ FArianeEditorPathTracer::Flush( FArianeVertex* PreviousVertex, FArianeVertex* En
 
     if( EdgeBuffer.Num() )
     {
-        MakeBezier( true );
+        FTracerRecord* FirstRecord = &RecordBuffer[0];
+        FTracerRecord* LastRecord = &RecordBuffer.Last();
+        FTracerEdge* FirstEdge = &EdgeBuffer[0];
+        FTracerEdge* LastEdge = &EdgeBuffer.Last();
+        FVector CandidateBezier[4];
+        TestBezier( View, FirstEdge, LastEdge, CandidateBezier );
+
+        BestBezier.bInited = true;
+        BestBezier.FirstRecord = *FirstRecord;
+        BestBezier.LastRecord = *LastRecord;
+
+        memcpy( BestBezier.Points, CandidateBezier, sizeof( CandidateBezier ) );
+
         // NewSegment will be nullptr if iEndVertex == mPreviousVertex
-        NewSegment = CommitSegment( PreviousVertex
-                                  , EndVertex ? EndVertex : CommitVertex( false ) );
+        NewSegment = CommitBestBezier( FirstSegmentVertex
+                                     , LastSegmentVertex ? LastSegmentVertex : CommitVertex( BestBezier.LastRecord ) );
 
         // relocate the last vertex at the last entry
-        if( ( EndVertex == nullptr ) && PointBuffer.Num() )
+        if( ( LastSegmentVertex == nullptr ) && PointBuffer.Num() )
         {
             const FTransform& CubicPathTransform = CubicPath->GetTransform();
-            FVector LastPointCoords = PointBuffer.Last().Coords;
-            FVector LocalPoint = { CubicPathTransform.InverseTransformPosition( LastPointCoords ) };
+            FVector LastPointPosition = PointBuffer.Last().WorldPosition;
+            FVector LocalPoint = { CubicPathTransform.InverseTransformPosition( LastPointPosition ) };
 
             NewSegment->GetVertex(1)->SetPosition( LocalPoint.X, LocalPoint.Y, LocalPoint.Z );
         }
@@ -114,13 +129,19 @@ FArianeEditorPathTracer::GetEdgeBuffer()
 }
 
 double
-FArianeEditorPathTracer::GetEdgeChainLength()
+FArianeEditorPathTracer::GetEdgeChainLength( FTracerEdge* FirstEdge, FTracerEdge* LastEdge )
 {
     double Length = 0.0f;
 
     for( int i = 0; i < EdgeBuffer.Num(); i++ )
     {
-        Length += EdgeBuffer[i].Length;
+        FTracerEdge* CurrentEdge = &EdgeBuffer[i];
+
+        // Pointer arithmetic
+        if( ( CurrentEdge >= FirstEdge ) || ( CurrentEdge <= LastEdge ) )
+        {
+            Length += EdgeBuffer[i].WorldLength;
+        }
     }
 
     return Length;
@@ -170,7 +191,7 @@ FArianeEditorPathTracer::GetSamplePointAtParameter( double iEdgeChainLength, dou
 
     for( int i = 0; i < EdgeBuffer.Num(); i++ )
     {
-        cumulEdgeLength += EdgeBuffer[i].Length;
+        cumulEdgeLength += EdgeBuffer[i].WorldLength;
 
         ti = tf;
         tf = cumulEdgeLength / iEdgeChainLength;
@@ -179,7 +200,7 @@ FArianeEditorPathTracer::GetSamplePointAtParameter( double iEdgeChainLength, dou
         {
             double t = iAt - ti;
 
-            samplePoint = EdgeBuffer[i].P0 + ( EdgeBuffer[i].P1 - EdgeBuffer[i].P0 ) * t;
+            samplePoint = EdgeBuffer[i].P0.WorldPosition + ( EdgeBuffer[i].P1.WorldPosition - EdgeBuffer[i].P0.WorldPosition ) * t;
 
             break;
         }
@@ -206,11 +227,10 @@ void
 FArianeEditorPathTracer::AdjustBezierHandle( FVector Bezier[4]
                                            , FVector& ExpectedPoint
                                            , FVector& SampledPoint
-                                           , uint32 At )
+                                           , uint32 AtIndex )
 {
-    uint32 PointID = At;
-    uint32 HandleID = ( At == 0 ) ? 1 : 2;
-    FVector& EndPoint = Bezier[PointID];
+    uint32 HandleID = ( AtIndex == 0 ) ? 1 : 2;
+    FVector& EndPoint = Bezier[AtIndex];
     FVector& HandlePoint = Bezier[HandleID];
     FVector EndPointToExpectedPoint = ExpectedPoint - EndPoint;
     FVector EndPointToSampledPoint = SampledPoint - EndPoint;
@@ -242,78 +262,92 @@ FArianeEditorPathTracer::AdjustBezierHandle( FVector Bezier[4]
 }
 
 bool
-FArianeEditorPathTracer::TestBezier( FVector Bezier[4] )
+FArianeEditorPathTracer::TestBezier( FSceneView* View
+                                   , FTracerEdge* FirstEdge
+                                   , FTracerEdge* LastEdge
+                                   , FVector OutBezier[4] )
 {
-    // take 9 sample points are check how far they are from the edges
-    FVector Samples[9] = { ::ULIS::CubicBezierPointAtParameter( Bezier[0]
-                                                              , Bezier[1]
-                                                              , Bezier[2]
-                                                              , Bezier[3]
-                                                              , 0.10f )
-                         , ::ULIS::CubicBezierPointAtParameter( Bezier[0]
-                                                              , Bezier[1]
-                                                              , Bezier[2]
-                                                              , Bezier[3]
-                                                              , 0.20f )
-                         , ::ULIS::CubicBezierPointAtParameter( Bezier[0]
-                                                              , Bezier[1]
-                                                              , Bezier[2]
-                                                              , Bezier[3]
-                                                              , 0.30f )
-                         , ::ULIS::CubicBezierPointAtParameter( Bezier[0]
-                                                              , Bezier[1]
-                                                              , Bezier[2]
-                                                              , Bezier[3]
-                                                              , 0.40f )
-                         , ::ULIS::CubicBezierPointAtParameter( Bezier[0]
-                                                              , Bezier[1]
-                                                              , Bezier[2]
-                                                              , Bezier[3]
-                                                              , 0.50f )
-                         , ::ULIS::CubicBezierPointAtParameter( Bezier[0]
-                                                              , Bezier[1]
-                                                              , Bezier[2]
-                                                              , Bezier[3]
-                                                              , 0.60f )
-                         , ::ULIS::CubicBezierPointAtParameter( Bezier[0]
-                                                              , Bezier[1]
-                                                              , Bezier[2]
-                                                              , Bezier[3]
-                                                              , 0.70f )
-                         , ::ULIS::CubicBezierPointAtParameter( Bezier[0]
-                                                              , Bezier[1]
-                                                              , Bezier[2]
-                                                              , Bezier[3]
-                                                              , 0.80f )
-                         , ::ULIS::CubicBezierPointAtParameter( Bezier[0]
-                                                              , Bezier[1]
-                                                              , Bezier[2]
-                                                              , Bezier[3]
-                                                              , 0.90f ) };
-    double Tolerance = TracingWidth * 0.5f;
+    FVector& FirstRecordWorldPosition = FirstEdge->P0.WorldPosition;
+    FVector& LastRecordWorldPosition = LastEdge->P1.WorldPosition;
+    double EdgeChainLength = GetEdgeChainLength( FirstEdge, LastEdge );
+    FVector FirstEdgeVector = FirstEdge->P0.bSmooth ? SmoothVector           * EdgeChainLength * 0.33f
+                                                    : FirstEdge->WorldVector * EdgeChainLength * 0.33f;
+    FVector LastEdgeVector = LastEdge->WorldVector * EdgeChainLength * 0.33f;
 
-    for( uint32 i = 0; i < 9; i++ )
+    OutBezier[0] = FirstRecordWorldPosition;
+    OutBezier[1] = FirstRecordWorldPosition + FirstEdgeVector;
+    OutBezier[2] = LastRecordWorldPosition - LastEdgeVector;
+    OutBezier[3] = LastRecordWorldPosition;
+
+    AdjustBezier( OutBezier, EdgeChainLength );
+
+    return TestBezierSamples( View, OutBezier, FirstEdge, LastEdge, 5 );
+}
+
+bool
+FArianeEditorPathTracer::TestBezierSamples( FSceneView* View
+                                          , FVector Bezier[4]
+                                          , FTracerEdge* FirstEdge
+                                          , FTracerEdge* LastEdge
+                                          , uint32 Samples )
+{
+    if( Samples )
     {
-        double MinDistance = DBL_MAX;
+        float SampleStep = 1.0f / ( Samples + 1 );
+        float SampleT = SampleStep;
+        double Tolerance = TracingWidth * 0.5f;
 
-        for( FTracerEdge& Edge : EdgeBuffer )
+        for( uint32 i = 0; i < Samples; i++ )
         {
-            double Dist;
-            double t = FOdysseyVector::DistanceToSegmentConstrained( Samples[i], Edge.P0, Edge.P1, Dist );
+            // take sample point to check how far it is from the edges in View
+            FVector SampleAt = ::ULIS::CubicBezierPointAtParameter( Bezier[0]
+                                                                  , Bezier[1]
+                                                                  , Bezier[2]
+                                                                  , Bezier[3]
+                                                                  , SampleT );
+            //FVector SampleAtWorld = CubicPath->GetTransform().TransformPosition( SampleAt );
+            double MinDistance = DBL_MAX;
+            FVector2D SampleAtViewport;
 
-            if( Dist < MinDistance )
+            View->WorldToPixel( SampleAt, SampleAtViewport );
+
+//UE_LOG( LogTemp, Warning, TEXT("EdgeBuffer %d"), EdgeBuffer.Num() );
+
+            for( FTracerEdge& Edge : EdgeBuffer )
             {
-                MinDistance = Dist;
+                // Pointer arithmetic
+                if( ( &Edge >= FirstEdge ) && ( &Edge <= LastEdge ) )
+                {
+                    double Dist;
+                    double T = FArianeCore::DistanceToSegmentConstrained( ::ULIS::FVec2D( SampleAtViewport.X, SampleAtViewport.Y )
+                                                                        , ::ULIS::FVec2D( Edge.P0.ViewportPosition.X, Edge.P0.ViewportPosition.Y )
+                                                                        , ::ULIS::FVec2D( Edge.P1.ViewportPosition.X, Edge.P1.ViewportPosition.Y )
+                                                                        , Dist );
+/*
+UE_LOG( LogTemp, Warning, TEXT("PT %f %f - P0:%f %f P1:%f %f"), SampleAtViewport.X, SampleAtViewport.Y
+                                                              , Edge.P0.ViewportPosition.X, Edge.P0.ViewportPosition.Y
+                                                              , Edge.P1.ViewportPosition.X, Edge.P1.ViewportPosition.Y );
+*/
+
+                    if( Dist < MinDistance )
+                    {
+                        MinDistance = Dist;
+                    }
+                }
+            }
+
+            SampleT += SampleStep;
+
+            if( MinDistance > Tolerance )
+            {
+                return false;
             }
         }
 
-        if( MinDistance > Tolerance )
-        {
-            return false;
-        }
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 FArianeEditorPathTracer::FTracerBezier&
@@ -322,166 +356,31 @@ FArianeEditorPathTracer::GetBestBezier()
     return BestBezier;
 }
 
-FArianeEditorPathTracer::FTracerBezier&
+/*FArianeEditorPathTracer::FTracerBezier&
 FArianeEditorPathTracer::GetRawBezier()
 {
     return RawBezier;
 }
-
-// is there a bezier that matches ? return true if yes, false otherwise.
-bool
-FArianeEditorPathTracer::MakeBezier( bool iForce )
-{
-    FTracerRecord* FirstRecord = &RecordBuffer[0];
-    FTracerRecord* LastRecord = &RecordBuffer.Last();
-    FVector& FirstRecordCoords = FirstRecord->Coords;
-    FVector& LastRecordCoords = LastRecord->Coords;
-    FTracerEdge* FirstEdge = &EdgeBuffer[0];
-    FTracerEdge* LastEdge = &EdgeBuffer.Last();
-    double EdgeChainLength = GetEdgeChainLength();
-    FVector FirstEdgeVector = FirstRecord->bSmooth ? SmoothVector * EdgeChainLength * 0.33f
-                                                   : FirstEdge->Vector * EdgeChainLength * 0.33f;
-    FVector LastEdgeVector = LastEdge->Vector * EdgeChainLength * 0.33f;
-
-    //UE_LOG(LogTemp,Warning,TEXT("mRecordBuffer:%d mEdgeBuffer:%d %f"),mRecordBuffer.size(),mEdgeBuffer.size(),edgeChainLength);
-
-    CandidateBezier.bInited = true;
-    CandidateBezier.FirstRecordRadius = FirstRecord->Radius;
-    CandidateBezier.LastRecordRadius = LastRecord->Radius;
-
-    CandidateBezier.FirstRecordID = FirstRecord->ID;
-    CandidateBezier.LastRecordID = LastRecord->ID;
-    CandidateBezier.FirstEdgeID = FirstEdge->ID;
-    CandidateBezier.LastEdgeID = LastEdge->ID;
-
-    CandidateBezier.Points[0] = FirstRecordCoords;
-    CandidateBezier.Points[1] = FirstRecordCoords + FirstEdgeVector;
-    CandidateBezier.Points[2] = LastRecordCoords - LastEdgeVector;
-    CandidateBezier.Points[3] = LastRecordCoords;
-
-    // raw bezier is the bezier before adjustement. For debugging purposes only
-    RawBezier = CandidateBezier;
-
-    AdjustBezier( CandidateBezier.Points, EdgeChainLength );
-
-    if( 1 ) // the else statement is disabled for now
-    {
-        if( ( iForce == true ) || ( TestBezier( CandidateBezier.Points ) == true ) )
-        {
-            BestBezier = CandidateBezier;
-
-            return true;
-        }
-    }
-    else // disabled for now. Testing some "perfect mode" thats generates 1 bezier everytime the direction changes
-         // or everytime we can't find a better bezier
-    {
-        BestBezier = CandidateBezier;
-
-        if( EdgeBuffer.Num() > 1 )
-        {
-            FTracerEdge* AnteEdge = &EdgeBuffer[EdgeBuffer.Num()-2];
-            static double Limit = 0.99939082701f; // cos( 2deg );
-
-            if( ( AnteEdge->Vector.Dot( LastEdge->Vector ) < Limit ) || ( TestBezier( CandidateBezier.Points ) == false ) )
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-        else
-        {
-            return true;
-        }
-    }
-
-    // if we never found any best bezier, then we use the last candidate
-    if( BestBezier.bInited == false )
-    {
-        BestBezier = CandidateBezier;
-    }
-
-    return false;
-}
-
-void
-FArianeEditorPathTracer::ClearPointsTo( uint32 iPointID )
-{
-    TArray<FTracerPoint> NewPointArray;
-    int PointRank = 0;
-
-    // clear points until the one passed as parameter (but keep it)
-    NewPointArray.Reserve( PointBuffer.Num() );
-
-    while( PointBuffer[PointRank++].ID != iPointID );
-
-    for( int i = --PointRank, j = 0; i < PointBuffer.Num(); i++, j++ )
-    {
-        NewPointArray.Add( PointBuffer[i] );
-    }
-
-    PointBuffer = NewPointArray;
-}
-
-void
-FArianeEditorPathTracer::ClearTo( uint32 RecordID, uint32 EdgeID )
-{
-    TArray<FTracerRecord> NewRecordArray;
-    TArray<FTracerEdge> NewEdgeArray;
-    int recordRank = 0;
-    int edgeRank = 0;
-
-    // clear records until the one passed as parameter (but keep it)
-    NewRecordArray.Reserve( RecordBuffer.Num() );
-
-    while( RecordBuffer[recordRank++].ID != RecordID );
-
-    for( int i = --recordRank, j = 0; i < RecordBuffer.Num(); i++, j++ )
-    {
-        NewRecordArray.Add( RecordBuffer[i] );
-    }
-
-    RecordBuffer = NewRecordArray;
-
-
-
-    NewEdgeArray.Reserve( EdgeBuffer.Num() );
-
-    while( EdgeBuffer[edgeRank++].ID != EdgeID );
-
-    for( int i = edgeRank, j = 0; i < EdgeBuffer.Num(); i++, j++ )
-    {
-        NewEdgeArray.Add( EdgeBuffer[i] );
-    }
-
-    EdgeBuffer = NewEdgeArray;
-}
+*/
 
 FArianeVertex*
-FArianeEditorPathTracer::CommitVertex( bool bHandleAligned )
+FArianeEditorPathTracer::CommitVertex( const FTracerRecord& CommitRecord )
 {
     const FTransform& CubicPathTransform = CubicPath->GetTransform();
-    FVector LocalPoint = { CubicPathTransform.InverseTransformPosition( BestBezier.Points[3] ) };
-    FVector LocalVector = CubicPathTransform.InverseTransformVector( FVector( BestBezier.LastRecordRadius * 0.7071f
-                                                                            , BestBezier.LastRecordRadius * 0.7071f
-                                                                            , BestBezier.LastRecordRadius * 0.7071f ) );
-    double LocalRadius = FVector( LocalVector.X, LocalVector.Y, LocalVector.Z ).Length();
-    FArianeVertex* NewVertex = CubicPath->AllocVertex( LocalPoint,
-                                                , LocalRadius );
+    FVector LocalPoint = CubicPathTransform.InverseTransformPosition( CommitRecord.WorldPosition );
+    FVector LocalVector = CubicPathTransform.InverseTransformVector( CommitRecord.WorldNormal );
+    FArianeVertex* NewVertex = CubicPath->AllocVertex( LocalPoint, LocalVector, CommitRecord.Radius );
 
     CubicPath->AddVertex( NewVertex );
 
-    NewVertex->SetHandleAligned( bHandleAligned );
+    NewVertex->SetHandleAligned( CommitRecord.bSmooth );
 
     return NewVertex;
 }
 
 FArianeSegment*
-FArianeEditorPathTracer::CommitSegment( FArianeVertex* PreviousVertex
-                                      , FArianeVertex* EndVertex )
+FArianeEditorPathTracer::CommitBestBezier( FArianeVertex* PreviousVertex
+                                         , FArianeVertex* EndVertex )
 {
     if( EndVertex != PreviousVertex )
     {
@@ -495,15 +394,12 @@ FArianeEditorPathTracer::CommitSegment( FArianeVertex* PreviousVertex
                                                                            , LocalHandlePoint[1].X
                                                                            , LocalHandlePoint[1].Y
                                                                            , LocalHandlePoint[1].Z
-                                                                           , EndVertex
-                                                                           /*, true*/ );
+                                                                           , EndVertex );
         TArray<double> pressureProfile;
 
         CubicPath->AddSegment( NewCubicSegment );
 
         //NewCubicSegment->Update( /*0*/ );
-
-        ClearTo( BestBezier.LastRecordID, BestBezier.LastEdgeID );
 
         // must be done after segments are added to the path
         // so that the topology exists
@@ -529,83 +425,101 @@ FArianeEditorPathTracer::CommitSegment( FArianeVertex* PreviousVertex
 }
 
 FArianeSegment*
-FArianeEditorPathTracer::Trace( FArianeVertex* PreviousVertex
-                              , double WorldX
-                              , double WorldY
-                              , double WorldZ
+FArianeEditorPathTracer::Trace( FSceneView *View
+                              , FArianeVertex* FirstSegmentVertex
+                              , const FVector2D& ViewportPosition
+                              , const FVector& WorldPosition
+                              , const FVector& WorldNormal
                               , double Radius )
 {
     uint32 Indexn = PointBuffer.Num();
     FArianeSegment* NewSegment = nullptr;
 
-    PointBuffer.Emplace( PointID, WorldX, WorldY, WorldZ, Radius );
+    PointBuffer.Emplace( ViewportPosition, WorldPosition, WorldNormal, Radius );
 
     if( Indexn == 0 )
     {
-        RecordBuffer.Emplace( PointID, WorldX, WorldY, WorldZ, Radius );
+        RecordBuffer.Emplace( ViewportPosition, WorldPosition, WorldNormal, Radius );
     }
     else
     {
-        FTracerRecord* LastRecord = RecordBuffer.Num() ? &RecordBuffer.Last() : nullptr;
-        uint32 indexi = Indexn - 1;
+        FTracerRecord* PreviousRecord = &RecordBuffer.Last();
 
-        if( FVector( LastRecord->Coords.X - WorldX
-                   , LastRecord->Coords.Y - WorldY
-                   , LastRecord->Coords.Z - WorldZ ).Length() > SampleDistance )
+        // A record is a point that is separated from the previous Record by at least some distance (in viewport units, i.e pixels)
+        if( FVector2D( PreviousRecord->ViewportPosition - ViewportPosition ).Length() > SampleDistance )
         {
-            uint32 EdgeCount = EdgeBuffer.Num();
-            FTracerEdge* LastEdge = EdgeCount ? &EdgeBuffer.Last() : nullptr;
-            FTracerRecord NewRecord = FTracerRecord( PointID, WorldX, WorldY, WorldZ, Radius );
-            FTracerEdge NewEdge = FTracerEdge( LastRecord->ID
-                                             , LastRecord->Coords.X
-                                             , LastRecord->Coords.Y
-                                             , LastRecord->Coords.Z
-                                             , LastRecord->Radius
-                                             , WorldX
-                                             , WorldY
-                                             , WorldZ
-                                             , Radius );
+            FTracerEdge* PreviousEdge = EdgeBuffer.Num() ? &EdgeBuffer.Last() : nullptr;
+            // Note: FirstEdge can be equal to NewEdge
+            FTracerEdge* FirstEdge = EdgeBuffer.Num() ? &EdgeBuffer[0] : nullptr;
 
-            ClearPointsTo( PointID );
-
-            // detect if smooth or not
-            if( LastEdge )
+            if( PreviousEdge && FirstEdge )
             {
-                if ( LastEdge->Vector.Dot( NewEdge.Vector ) > DotLimit )
+                FTracerRecord* FirstRecord = &RecordBuffer[0];
+                FVector CandidateBezier[4];
+                bool bBezierFits = TestBezier( View, FirstEdge, PreviousEdge, CandidateBezier );
+                FVector2D NewRecordViewportVector = ( ViewportPosition - PreviousEdge->P1.ViewportPosition ).GetSafeNormal();
+
+                // the first Bezier fits no matter what
+                if( BestBezier.bInited == false )
                 {
-                    LastRecord->bSmooth = true;
+                    bBezierFits = true;
                 }
-            }
 
-            if( ( LastRecord->bSmooth == false ) && ( LastEdge != nullptr ) )
-            {
-                FArianeVertex* NewVertex;
+                if( bBezierFits )
+                {
+                    BestBezier.bInited = true;
 
-                MakeBezier( true );
+                    BestBezier.FirstRecord = *FirstRecord;
+                    BestBezier.LastRecord = *PreviousRecord;
 
-                NewVertex = CommitVertex( LastRecord->bSmooth );
-                NewSegment = CommitSegment( PreviousVertex, NewVertex );
+                    memcpy( BestBezier.Points, CandidateBezier, sizeof( CandidateBezier ) );
+                }
 
-                RecordBuffer.Add( NewRecord );
-                EdgeBuffer.Add( NewEdge );
+                PointBuffer.Empty();
+
+                // detect if smooth or not
+                if( PreviousEdge )
+                {
+                    if ( PreviousEdge->ViewportVector.Dot( NewRecordViewportVector ) > DotLimit )
+                    {
+                        PreviousRecord->bSmooth = true;
+                    }
+                }
+
+                bool PreviousRecordSmooth = PreviousRecord->bSmooth;
+                FTracerRecord PreviousRecordCopy = *PreviousRecord;
+                // the Emplace() funcs must be put after we are done with all the pointers form EdgeBuffer and RecordBuffer.
+                FTracerRecord* NewRecord = &RecordBuffer.Emplace_GetRef( ViewportPosition, WorldPosition, WorldNormal, Radius );
+                FTracerEdge* NewEdge = &EdgeBuffer.Emplace_GetRef( *PreviousRecord, *NewRecord );
+
+                // if the angle between the last 2 edges has passed a certain limit, commit the segment no matter what
+                if( ( ( PreviousRecordSmooth == false ) && ( PreviousEdge != nullptr ) )
+                // if the angle is smooth BUT the bezier does not fit anymore, commit the segment as well
+                 || ( ( PreviousRecordSmooth == true  ) && ( bBezierFits == false    ) ) )
+                {
+                    FTracerRecord NewRecordCopy = *NewRecord;
+                    FTracerEdge NewEdgeCopy = *NewEdge;
+                    FArianeVertex* NewVertex = CommitVertex( BestBezier.LastRecord );
+                    // CommitSegment uses the Best Bezier found my MakeBezier
+                    NewSegment = CommitBestBezier( FirstSegmentVertex, NewVertex );
+
+                    RecordBuffer.Empty();
+                    EdgeBuffer.Empty();
+
+                    // repopulate buffers
+                    RecordBuffer.Add( PreviousRecordCopy );
+                    RecordBuffer.Add( NewRecordCopy );
+                    EdgeBuffer.Add( NewEdgeCopy );
+                }
             }
             else
             {
-                RecordBuffer.Add( NewRecord );
-                EdgeBuffer.Add( NewEdge );
+                FTracerRecord* NewRecord = &RecordBuffer.Emplace_GetRef( ViewportPosition, WorldPosition, WorldNormal, Radius );
 
-                if( MakeBezier( false ) == false )
-                {
-                    FArianeVertex* NewVertex;
-
-                    NewVertex = CommitVertex( LastRecord->bSmooth );
-                    NewSegment = CommitSegment( PreviousVertex, NewVertex );
-                }
+                EdgeBuffer.Emplace( *PreviousRecord, *NewRecord );
             }
         }
     }
-
-    PointID++;
 
     return NewSegment;
 }
@@ -621,5 +535,3 @@ FArianeEditorPathTracer::GetPath()
 {
     return CubicPath;
 }
-
-#endif

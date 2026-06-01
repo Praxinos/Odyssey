@@ -16,24 +16,28 @@ class ARIANEEDITOR_API FArianeEditorPathTracer
 public:
     struct FTracerPoint
     {
-        uint32 ID;
-        FVector Coords;
+        FVector2D ViewportPosition;
+        FVector WorldPosition;
+        FVector WorldNormal;
         double Radius;
         bool bSmooth;
 
         FTracerPoint()
-            : ID ( 0 )
-            , Coords( 0.0f, 0.0f, 0.0f )
+            : ViewportPosition( FVector2D::Zero() )
+            , WorldNormal( FVector::Zero() )
             , Radius ( 0.0f )
             , bSmooth ( false )
         {
-            Coords.X = Coords.Y = Coords.Z = Radius = 0.0f;
             bSmooth = false;
         }
 
-        FTracerPoint( uint32 InID, double InX, double InY, double InZ, double InRadius )
-            : ID ( InID )
-            , Coords( InX, InY, InZ )
+        FTracerPoint( const FVector2D& InViewportPosition
+                    , const FVector& InWorldPosition
+                    , const FVector& InWorldNormal
+                    , double InRadius )
+            : ViewportPosition( InViewportPosition )
+            , WorldPosition( InWorldPosition )
+            , WorldNormal( InWorldNormal )
             , Radius ( InRadius )
             , bSmooth ( false )
         {
@@ -44,51 +48,34 @@ public:
 
     struct FTracerEdge
     {
-        uint32 ID;
-        FVector P0;
-        FVector P1;
-        double Radius0;
-        double Radius1;
-        FVector Vector;
-        double Length;
+        FTracerRecord P0;
+        FTracerRecord P1;
+        FVector2D ViewportVector;
+        FVector WorldVector;
+        double WorldLength;
 
         FTracerEdge()
         {
         }
 
-        FTracerEdge( uint32 InID
-                   , double InX0
-                   , double InY0
-                   , double InZ0
-                   , double InRadius0
-                   , double InX1
-                   , double InY1
-                   , double InZ1
-                   , double InRadius1 )
-        : ID ( InID )
-        , P0 ( InX0, InY0, InZ0 )
-        , P1 ( InX1, InY1, InZ1 )
-        , Radius0 ( InRadius0 )
-        , Radius1 ( InRadius1 )
-        , Vector ( P1 - P0 )
-        , Length ( Vector.Length() )
+        FTracerEdge( const FTracerRecord& InP0
+                   , const FTracerRecord& InP1 )
+        : P0 ( InP0 )
+        , P1 ( InP1 )
+        , ViewportVector ( P1.ViewportPosition - P0.ViewportPosition )
+        , WorldVector ( P1.WorldPosition - P0.WorldPosition )
+        , WorldLength ( WorldVector.Length() )
         {
-            if( Length )
-            {
-                Vector.Normalize();
-            }
+            ViewportVector.Normalize();
+            WorldVector.Normalize();
         }
     };
 
     struct FTracerBezier
     {
         bool bInited;
-        double FirstRecordRadius;
-        double LastRecordRadius;
-        uint32 FirstRecordID;
-        uint32 LastRecordID;
-        uint32 FirstEdgeID;
-        uint32 LastEdgeID;
+        FTracerRecord FirstRecord;
+        FTracerRecord LastRecord;
         FVector Points[4];
 
         FTracerBezier()
@@ -105,48 +92,51 @@ public:
     FTracerBezier& GetRawBezier();
     void AttachPath( FArianePath* InCubicPath );
     FArianePath* GetPath();
-    FArianeSegment* Trace( FArianeVertex* StitchedVertex
-                         , double InWorldX
-                         , double InWorldY
-                         , double InWorldZ
-                         , double InRadius );
-    bool MakeBezier( bool bForce );
-    bool TestBezier( FVector Bezier[4] );
+    FArianeSegment* Trace( FSceneView *View
+                         , FArianeVertex* FirstSegmentVertex
+                         , const FVector2D& ViewportPosition
+                         , const FVector& WorldPosition
+                         , const FVector& WorldNormal
+                         , double Radius );
+    bool TestBezierSamples( FSceneView* View
+                          , FVector InBezier[4]
+                          , FTracerEdge* FirstEdge
+                          , FTracerEdge* LastEdge
+                          , uint32 Samples );
+    bool TestBezier( FSceneView* View
+                   , FTracerEdge* FirstEdge
+                   , FTracerEdge* LastEdge
+                   , FVector OutBezier[4] );
     void Init();
     TArray<FTracerPoint>& GetPointBuffer();
     TArray<FTracerRecord>& GetRecordBuffer();
     TArray<FTracerEdge>& GetEdgeBuffer();
-    FArianeSegment* Flush( FArianeVertex* PreviousVertex
+    FArianeSegment* Flush( FSceneView* View
+                         , FArianeVertex* PreviousVertex
                          , FArianeVertex* EndVertex );
-    FArianeSegment* CommitSegment( FArianeVertex* PreviousVertex
-                                 , FArianeVertex* EndVertex );
-    FArianeVertex* CommitVertex( bool bHandleAligned );
+    FArianeSegment* CommitBestBezier( FArianeVertex* PreviousVertex, FArianeVertex* EndVertex );
+    FArianeVertex* CommitVertex( const FTracerRecord& CommitRecord );
     void Reset();
-    void ClearPointsTo( uint32 PointID );
-    void ClearTo( uint32 RecordID, uint32 EdgeID );
     void AdjustBezier( FVector Bezier[4], double EdgeChainLength );
     void AdjustBezierHandle( FVector Bezier[4]
                            , FVector& ExpectedPoint
                            , FVector& SampledPoint
                            , uint32 At );
     FVector GetSamplePointAtParameter( double EdgeChainLength, double At );
-    double GetEdgeChainLength();
+    double GetEdgeChainLength( FTracerEdge* FirstEdge, FTracerEdge* LastEdge );
     void SetDotLimit( double DotLimit );
     void SetTracingWidth( double TracingWidth );
     //::ULIS::FRectD GetRedrawRect();
 
 private:
     double DotLimit;
-    uint32 PointID;
     double SampleDistance;
     double TracingWidth;
     TArray<FTracerPoint> PointBuffer;
     TArray<FTracerRecord> RecordBuffer;
     TArray<FTracerEdge> EdgeBuffer;
     FVector SmoothVector;
-    FTracerBezier CandidateBezier;
     FTracerBezier BestBezier;
-    FTracerBezier RawBezier;
     FArianePath* CubicPath;
     uint32 Width;
     uint32 Height;

@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 // Ariane headers
 #include "ArianeSegment.h"
+#include "ArianePoint.h"
 #include "ArianeHandleSegment.h"
 
 #include "ArianeSegmentCubic.generated.h"
@@ -17,6 +18,40 @@ USTRUCT(BlueprintType)
 struct ARIANE_API FArianeSegmentCubic : public FArianeSegment
 {
     GENERATED_BODY()
+
+public:
+    struct FSubPoint
+    {
+        FArianePoint* Point;
+        FVector Position;
+        double T;
+        double Radius;
+        int32 Index;
+
+       ~FSubPoint();
+        FSubPoint();
+        FSubPoint( const FVector& Position
+                 , double T
+                 , double TRadius
+                 , int32 InIndex  );
+        FSubPoint( FArianePoint* InPoint
+                 , double T
+                 , double TRadius
+                 , int32 InIndex  );
+    };
+
+    struct FSubLine
+    {
+        FArianePoint* Point[2];
+        double T[2];
+        double Length;
+
+       ~FSubLine();
+        FSubLine( FArianePoint* Point0
+                , double T0
+                , FArianePoint* Point1
+                , double T1 );
+    };
 
 public:
     ~FArianeSegmentCubic();
@@ -43,13 +78,16 @@ public:
 
 protected:
     void BuildVariable( uint32 MinRecurse
-                      , uint32 MaxRecurse
-                      , double& OutXmin
-                      , double& OutYmin
-                      , double& OutXmax
-                      , double& OutYmax
-                      , double& OutZmin
-                      , double& OutZmax );
+                      , uint32 MaxRecurse );
+
+    static void BuildVariableAdaptive( TArray<FSubPoint>& SubPoints
+                                       , int32 FromSubPointIndex
+                                       , int32 ToSubPointIndex
+                                       , FVector Bezier[4]
+                                       , uint32 RecurseDepth
+                                       , uint32 MinRecurse
+                                       , uint32 MaxRecurse
+                                       , uint32& InOutPointCount );
 
 protected:
     UPROPERTY( EditAnywhere )
@@ -57,4 +95,7 @@ protected:
 
     UPROPERTY( EditAnywhere )
     FArianeHandleSegment Handle1;
+
+protected:
+    TArray<FArianePoint> FractionPoints;
 };

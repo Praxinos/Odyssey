@@ -776,12 +776,12 @@ FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
 
     TArray<FDynamicMeshVertex>& ModelVertexCache = const_cast<TArray<FDynamicMeshVertex>&>(Segment->GetModelVertexCache());
     TArray<uint32>& IndexCache = const_cast<TArray<uint32>&>(Segment->GetIndexCache());
-    const TArray<FArianeSegment::Fraction>& Fractions = Segment->GetFractions();
-    const TArray<FArianeSegment::FractionStep>& FractionSteps = Segment->GetFractionSteps();
+    const TArray<FArianeSegment::FFraction>& Fractions = Segment->GetFractions();
+    const TArray<FArianeSegment::FFractionStep>& FractionSteps = Segment->GetFractionSteps();
 
     for( int32 FractionStepIndex = 0; FractionStepIndex < FractionSteps.Num(); FractionStepIndex++ )
     {
-        const FArianeSegment::FractionStep& Step = FractionSteps[FractionStepIndex];
+        const FArianeSegment::FFractionStep& Step = FractionSteps[FractionStepIndex];
         uint32 ModelVertexOffset = FractionStepIndex * 2;
         double PointRadius = Radius0 + ( DeltaRadius * Step.T );
         FVector PerpendicularVector = Normal0 + ( DeltaNormal * Step.T );
@@ -828,7 +828,7 @@ FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
 
     for( int32 FractionIndex = 0; FractionIndex < Fractions.Num(); FractionIndex++ )
     {
-        const FArianeSegment::Fraction& SegmentFraction = Fractions[FractionIndex];
+        const FArianeSegment::FFraction& SegmentFraction = Fractions[FractionIndex];
         uint32 ModelVertexOffset0 =   FractionIndex * 2;
         uint32 ModelVertexOffset1 = ( FractionIndex + 1 ) * 2;
         FVector3f SampleVec0 = ModelVertexCache[ModelVertexOffset0 + 1].Position
@@ -892,8 +892,8 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
 
     TArray<FDynamicMeshVertex>& ModelVertexCache = const_cast<TArray<FDynamicMeshVertex>&>(Segment->GetModelVertexCache());
     TArray<uint32>& IndexCache = const_cast<TArray<uint32>&>(Segment->GetIndexCache());
-    const TArray<FArianeSegment::Fraction>& Fractions = Segment->GetFractions();
-    const TArray<FArianeSegment::FractionStep>& FractionSteps = Segment->GetFractionSteps();
+    const TArray<FArianeSegment::FFraction>& Fractions = Segment->GetFractions();
+    const TArray<FArianeSegment::FFractionStep>& FractionSteps = Segment->GetFractionSteps();
 
     if( InOutPreviousPerpendicularVector.IsZero() )
     {
@@ -917,7 +917,7 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
 
     for( int32 FractionStepIndex = 0; FractionStepIndex < FractionSteps.Num(); FractionStepIndex++ )
     {
-        const FArianeSegment::FractionStep& Step = FractionSteps[FractionStepIndex];
+        const FArianeSegment::FFractionStep& Step = FractionSteps[FractionStepIndex];
         uint32 ModelVertexOffset = FractionStepIndex * VertexDivisions;
         double PointRadius = SegmentRadius0 + ( SegmentDeltaRadius * Step.T );
         FVector TangentVector = GetTangentVectorAt( Segment
@@ -979,7 +979,7 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
 
     for( int32 FractionIndex = 0; FractionIndex < Fractions.Num(); FractionIndex++ )
     {
-        const FArianeSegment::Fraction& SegmentFraction = Fractions[FractionIndex];
+        const FArianeSegment::FFraction& SegmentFraction = Fractions[FractionIndex];
         uint32 ModelVertexOffset0 =   FractionIndex       * VertexDivisions;
         uint32 ModelVertexOffset1 = ( FractionIndex + 1 ) * VertexDivisions;
         FVector3f SampleVec0 = ModelVertexCache[ModelVertexOffset0 + 1].Position

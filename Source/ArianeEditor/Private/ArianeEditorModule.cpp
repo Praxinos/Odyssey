@@ -10,6 +10,7 @@
 #include "ArianeEditorColorSelectorTab.h"
 #include "ArianeEditorLayerStackTab.h"
 #include "ArianePainting3DComponentCustomization.h"
+#include "ArianeEditorStyle.h"
 // Ariane headers
 #include "ArianePainting3DActor.h"
 #include "ArianePainting3DComponent.h"
@@ -27,8 +28,6 @@
 #include "EditorModeManager.h"
 #include "Framework/Docking/LayoutExtender.h"
 #include "Framework/Docking/TabManager.h"
-
-#include "OdysseyStyle.h"
 
 #include "ArianeEditorViewportEdMode.h"
 
@@ -85,6 +84,8 @@ FArianeEditorModule::GetOpenedEditorForAsset(UObject* iObject)
 void
 FArianeEditorModule::StartupModule()
 {
+    FArianeEditorStyle::Register(); // Must be done before Commands(), as it uses style
+
     RegisterEditorMode();
 
     //UToolMenus::RegisterStartupCallback( FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FArianeEditorModule::RegisterMenus ) );
@@ -147,6 +148,8 @@ FArianeEditorModule::ShutdownModule()
     UnregisterCustomization();
     UnregisterEditorMode();
     UnregisterSettings();
+
+    FArianeEditorStyle::Unregister();
 
 /* Gary
     UnregisterBrushOverrides();
@@ -228,7 +231,10 @@ FArianeEditorModule::RegisterToolbarButton()
                                                                               {
                                                                                   ActivateEdMode( nullptr );
                                                                                   //GetModeManager()->ActivateMode( EM_ArianeEditorViewportEdModeId );
-                                                                              } ) );
+                                                                              } )
+                                                                             , LOCTEXT( "arianeeditor-launch.label", "Launch Ariane" )
+                                                                             , LOCTEXT( "arianeeditor-launch.tooltip", "Launch Ariane" )
+                                                                             , FSlateIcon( FArianeEditorStyle::Get().GetStyleSetName(), "ArianeEditor.EdMode24" ) );
 
         ToolbarSection->AddEntry( ArianeLauncherEntry );
     }
@@ -253,7 +259,7 @@ FArianeEditorModule::RegisterEditorMode()
     FEditorModeRegistry::Get().RegisterMode<FArianeEditorViewportEdMode>(
         FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId,
         LOCTEXT("ariane-editor-mode.name", "Ariane"),
-        FSlateIcon(FOdysseyStyle::GetStyleSetName(), "ArianeViewportDrawingEditMode.ArianeViewportDrawingIcon40", "ArianeViewportDrawingEditMode.ArianeViewportDrawingIcon16"),
+        FSlateIcon(FArianeEditorStyle::Get().GetStyleSetName(), "ArianeEditor.EdMode24" ),
         true );
 }
 

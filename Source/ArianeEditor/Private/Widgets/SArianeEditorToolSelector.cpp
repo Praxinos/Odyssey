@@ -1,10 +1,12 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
+// Ariane Editor Headers
 #include "SArianeEditorToolSelector.h"
 #include "ArianeEditor.h"
 #include "LayerTransformTool/ArianeEditorLayerTransformTool.h"
-#include "OdysseyStyle.h"
+#include "ArianeEditorStyle.h"
+
 // Unreal
 #include "Widgets/SBoxPanel.h"
 
@@ -27,7 +29,7 @@ SArianeEditorToolSelector::Construct(const FArguments& InArgs, FArianeEditor* In
 {
     Editor = InEditor;
 
-    const FCheckBoxStyle* checkboxStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.ToggleButton");
+    const FCheckBoxStyle* checkboxStyle = &FArianeEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>("ArianeEditorCheckBoxStyle.ToggleButton");
     TSharedRef<SVerticalBox> verticalBox = SNew(SVerticalBox);
 
     for ( UArianeEditorTool* Tool : Editor->GetTools() )

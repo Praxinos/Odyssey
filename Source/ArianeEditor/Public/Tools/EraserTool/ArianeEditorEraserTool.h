@@ -192,10 +192,10 @@ protected:
     uint8 GetAlpha( int32 X, int32 Y, const TArray<FColor>& Pixels );
     void TraceLine( FArianePath* Path
                   , FArianeSegment* Segment
-                  , const FArianeSegment::FractionStep* Step0
+                  , const FArianeSegment::FFractionStep* Step0
                   , int32 ScreenX0
                   , int32 ScreenY0
-                  , const FArianeSegment::FractionStep* Step1
+                  , const FArianeSegment::FFractionStep* Step1
                   , int32 ScreenX1
                   , int32 ScreenY1
                   , const TArray<FColor>& Pixels
