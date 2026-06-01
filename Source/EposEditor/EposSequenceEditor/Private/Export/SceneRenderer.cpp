@@ -14,6 +14,7 @@
 #include "LegacyScreenPercentageDriver.h"
 #include "MovieSceneCommonHelpers.h"
 #include "MovieSceneSequence.h"
+#include "RendererInterface.h"
 #include "SceneView.h"
 #include "SceneViewExtension.h"
 #include "SceneViewExtensionContext.h"

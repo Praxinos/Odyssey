@@ -4,6 +4,7 @@
 #include "Misc/EposSequenceEditorPlaybackContext.h"
 
 #include "Editor.h"
+#include "Engine/NetDriver.h"
 #include "IMovieScenePlaybackClient.h"
 #include "LevelInstance/LevelInstanceInterface.h"
 #include "LevelInstance/LevelInstanceSubsystem.h"

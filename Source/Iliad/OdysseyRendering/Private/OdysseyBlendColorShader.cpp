@@ -9,6 +9,7 @@
 #include "RenderGraphBuilder.h"
 #include "TextureCompiler.h"
 #include "SimpleElementShaders.h"
+#include "SceneView.h"
 #include "ScreenPass.h"
 #include "MeshPassProcessor.h"
 #include "BatchedElements.h"
