@@ -101,7 +101,7 @@ UOdysseyStylusInputSettings::GetFormatText(FName InStylusInputDriver)
     static const TMap<FName, FText> DriverLabels =
     {
         { "WinTab",      FText::FromString("Wintab") },
-        { "RealTimeStylus",  FText::FromString("Windows Ink") },
+        { "RealTimeStylus",  FText::FromString("Windows Ink - RealTimeStylus") },
         { "NSEvent", FText::FromString("NSEvent") }
     };
 
