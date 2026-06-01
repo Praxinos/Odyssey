@@ -591,7 +591,7 @@ FBoardSequenceCustomization::CreateInfoText() const
     const UMovieScene* current_moviescene = current_board ? current_board->GetMovieScene() : nullptr;
 
     UMovieSceneCinematicBoardTrack* board_track = current_moviescene ? current_moviescene->FindTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
-    UMovieSceneSection* board_section = board_track ? MovieSceneHelpers::FindSectionAtTime( board_track->GetAllSections(), sequencer->GetLocalTime().Time.FrameNumber ) : nullptr;
+    UMovieSceneSection* board_section = board_track ? EposSequenceHelpers::FindSectionAtTime( board_track->GetAllSections(), sequencer->GetLocalTime().Time.FrameNumber ) : nullptr;
     UMovieSceneSubSection* board_subsection = Cast<UMovieSceneSubSection>( board_section );
 
     const UMovieSceneSequence* current_subsequence = board_subsection ? board_subsection->GetSequence() : nullptr;
@@ -1623,7 +1623,7 @@ FBoardSequenceCustomization::OnGlobalTimeChanged()
     {
         UMovieScene* moviescene = sequencer->GetFocusedMovieSceneSequence()->GetMovieScene();
         UMovieSceneCinematicBoardTrack* board_track = moviescene ? moviescene->FindTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
-        UMovieSceneSection* section = board_track ? MovieSceneHelpers::FindSectionAtTime( board_track->GetAllSections(), sequencer->GetLocalTime().Time.FloorToFrame() ) : nullptr;
+        UMovieSceneSection* section = board_track ? EposSequenceHelpers::FindSectionAtTime( board_track->GetAllSections(), sequencer->GetLocalTime().Time.FloorToFrame() ) : nullptr;
         UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
 
         //USelection* selection = GEditor->GetSelectedActors();

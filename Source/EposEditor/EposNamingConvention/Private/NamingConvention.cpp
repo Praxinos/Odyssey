@@ -741,9 +741,9 @@ FindSiblingNameElements( const IMovieScenePlayer& iPlayer, const UMovieSceneSequ
         return TOptional<FSequenceNameElements>();
 
     TArray<UMovieSceneSection*> sections = boardTrack->GetAllSections();
-    UMovieSceneSection* section = MovieSceneHelpers::FindSectionAtTime( sections, iFrameNumber );
+    UMovieSceneSection* section = EposSequenceHelpers::FindSectionAtTime( sections, iFrameNumber );
     if( !section )
-        section = MovieSceneHelpers::FindNearestSectionAtTime( sections, iFrameNumber );
+        section = EposSequenceHelpers::FindNearestSectionAtTime( sections, iFrameNumber );
     if( !section )
         return TOptional<FSequenceNameElements>();
 
