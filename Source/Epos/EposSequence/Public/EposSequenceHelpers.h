@@ -66,6 +66,28 @@ typedef TMap<TWeakObjectPtr<UMovieSceneSection>, TSharedPtr<FMovieSceneChannelPr
 class EPOSSEQUENCE_API EposSequenceHelpers
 {
 public:
+    /**
+     * Finds a section that exists at a given time
+     *
+     * @param Time      The time to find a section at
+     * @param RowIndex  Limit the search to a given row index
+     * @return The found section or null
+     */
+    static UMovieSceneSection* FindSectionAtTime( TArrayView<UMovieSceneSection* const> Sections, FFrameNumber Time, int32 RowIndex = INDEX_NONE );
+    // "Override" the MovieSceneHelpers::FindSectionAtTime(...) because now (5.8) it checks keyable channels and a shot section is no more found by default
+    // see https://epicgames.slack.com/archives/C085QAADA9J/p1779867947683309
+
+    /**
+     * Finds the nearest section to the given time
+     *
+     * @param Time      The time to find a section at
+     * @param RowIndex  Limit the search to a given row index
+     * @return The found section or null
+     */
+    static UMovieSceneSection* FindNearestSectionAtTime( TArrayView<UMovieSceneSection* const> Sections, FFrameNumber Time, int32 RowIndex = INDEX_NONE );
+    // Same reason as FindSectionAtTime(...)
+
+public:
     static UEposMovieSceneSequence* GetRootEposSequence( IMovieScenePlayer& iPlayer, FMovieSceneSequenceIDRef iSequenceId );
     static UEposMovieSceneSequence* GetRootEposSequence( IMovieScenePlayer& iPlayer, FMovieSceneSequenceIDRef iSequenceId, FMovieSceneSequenceID& oRootSequenceId );
     static FQualifiedFrameTime GetIntermediateTime( IMovieScenePlayer& iPlayer, FQualifiedFrameTime iGlobalTime, FMovieSceneSequenceIDRef iToSequenceId );

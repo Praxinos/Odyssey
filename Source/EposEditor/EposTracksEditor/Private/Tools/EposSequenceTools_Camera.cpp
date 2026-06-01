@@ -365,7 +365,7 @@ ShotSequenceTools::CreateCameraCut( IMovieScenePlayer& iPlayer, UMovieSceneSeque
 
     if( CameraCutTrack )
     {
-        UMovieSceneSection* Section = MovieSceneHelpers::FindSectionAtTime( CameraCutTrack->GetAllSections(), 0 /*iFrameNumber*/ );
+        UMovieSceneSection* Section = EposSequenceHelpers::FindSectionAtTime( CameraCutTrack->GetAllSections(), 0 /*iFrameNumber*/ );
         UMovieSceneSingleCameraCutSection* CameraCutSection = Cast<UMovieSceneSingleCameraCutSection>( Section );
 
         if( CameraCutSection )
@@ -534,7 +534,7 @@ ShotSequenceTools::SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieScene
         return false;
 
     UMovieSceneTrack* track = movieScene->FindTrack<UMovieScene3DTransformTrack>( iCameraGuid );
-    UMovieSceneSection* section = track ? MovieSceneHelpers::FindSectionAtTime( track->GetAllSections(), iFrameNumber ) : nullptr;
+    UMovieSceneSection* section = track ? EposSequenceHelpers::FindSectionAtTime( track->GetAllSections(), iFrameNumber ) : nullptr;
     UMovieScene3DTransformSection* transform_section = Cast<UMovieScene3DTransformSection>( section );
 
     if( !transform_section )
@@ -997,7 +997,7 @@ ShotSequenceTools::StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequen
     if( !transform_track )
         return;
 
-    UMovieSceneSection* section = MovieSceneHelpers::FindSectionAtTime( transform_track->GetAllSections(), iFrameNumber );
+    UMovieSceneSection* section = EposSequenceHelpers::FindSectionAtTime( transform_track->GetAllSections(), iFrameNumber );
     if( !section )
         return;
 

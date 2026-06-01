@@ -128,7 +128,7 @@ BoardSequenceHelpers::GetInnerSequence( IMovieScenePlayer& iPlayer, UMovieSceneS
 {
     UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
     UMovieSceneCinematicBoardTrack* board_track = moviescene ? moviescene->FindTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
-    UMovieSceneSection* section = board_track ? MovieSceneHelpers::FindSectionAtTime( board_track->GetAllSections(), iFrameNumber ) : nullptr;
+    UMovieSceneSection* section = board_track ? EposSequenceHelpers::FindSectionAtTime( board_track->GetAllSections(), iFrameNumber ) : nullptr;
     UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
 
     if( !subsection )
@@ -545,6 +545,78 @@ ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( IMovieScenePlayer& iPlayer, 
 }
 
 //static
+UMovieSceneSection*
+EposSequenceHelpers::FindSectionAtTime( TArrayView<UMovieSceneSection* const> Sections, FFrameNumber Time, int32 RowIndex )
+{
+    // Get from MovieSceneHelpers::FindSectionAtTime(...)
+
+    for( int32 SectionIndex = 0; SectionIndex < Sections.Num(); ++SectionIndex )
+    {
+        UMovieSceneSection* Section = Sections[SectionIndex];
+
+        //@todo sequencer: There can be multiple sections overlapping in time. Returning instantly does not account for that.
+        if( ( RowIndex == INDEX_NONE || Section->GetRowIndex() == RowIndex ) &&
+            Section->IsTimeWithinSection( Time ) /*&& IsSectionKeyable( Section )*/ )
+        {
+            return Section;
+        }
+    }
+
+    return nullptr;
+}
+
+//static
+UMovieSceneSection*
+EposSequenceHelpers::FindNearestSectionAtTime( TArrayView<UMovieSceneSection* const> Sections, FFrameNumber Time, int32 RowIndex )
+{
+    // Get from MovieSceneHelpers::FindNearestSectionAtTime(...)
+
+    TArray<UMovieSceneSection*> OverlappingSections, NonOverlappingSections;
+    for( UMovieSceneSection* Section : Sections )
+    {
+        if( ( RowIndex == INDEX_NONE || Section->GetRowIndex() == RowIndex ) /*&&
+            IsSectionKeyable( Section )*/ )
+        {
+            if( Section->GetRange().Contains( Time ) )
+            {
+                OverlappingSections.Add( Section );
+            }
+            else
+            {
+                NonOverlappingSections.Add( Section );
+            }
+        }
+    }
+
+    if( OverlappingSections.Num() )
+    {
+        Algo::Sort( OverlappingSections, MovieSceneHelpers::SortOverlappingSections );
+        return OverlappingSections[0];
+    }
+
+    if( NonOverlappingSections.Num() )
+    {
+        Algo::SortBy( NonOverlappingSections, Projection( &UMovieSceneSection::GetRange, &TRange<FFrameNumber>::GetUpperBound ), MovieSceneHelpers::SortUpperBounds );
+
+        const int32 PreviousIndex = Algo::UpperBoundBy( NonOverlappingSections, TRangeBound<FFrameNumber>( Time ), Projection( &UMovieSceneSection::GetRange, &TRange<FFrameNumber>::GetUpperBound ), MovieSceneHelpers::SortUpperBounds ) - 1;
+        if( NonOverlappingSections.IsValidIndex( PreviousIndex ) )
+        {
+            return NonOverlappingSections[PreviousIndex];
+        }
+        else
+        {
+            Algo::SortBy( NonOverlappingSections, []( const UMovieSceneSection* A )
+                          {
+                              return A ? A->GetRange().GetLowerBound() : FFrameNumber( 0 );
+                          }, MovieSceneHelpers::SortLowerBounds );
+            return NonOverlappingSections[0];
+        }
+    }
+
+    return nullptr;
+}
+
+//static
 FQualifiedFrameTime
 EposSequenceHelpers::GetIntermediateTime( IMovieScenePlayer& iPlayer, FQualifiedFrameTime iGlobalTime, FMovieSceneSequenceIDRef iToSequenceId )
 {
@@ -801,7 +873,7 @@ EposSequenceHelpers::GetNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* 
         {
             if( iFrameNumber.IsSet() )
             {
-                //MovieSceneHelpers::FindSectionAtTime()
+                //EposSequenceHelpers::FindSectionAtTime()
                 if( !section->IsTimeWithinSection( iFrameNumber.GetValue() ) || !section->IsActive() )
                     continue;
             }

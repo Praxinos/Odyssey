@@ -193,7 +193,7 @@ FExportImageSequenceNamingFormatter::GetSequence() const
     if( !boardTrack )
         return info;
 
-    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( MovieSceneHelpers::FindSectionAtTime( boardTrack->GetAllSections(), mFrameInRootEposSequence ) );
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( EposSequenceHelpers::FindSectionAtTime( boardTrack->GetAllSections(), mFrameInRootEposSequence ) );
     if( !board_section )
         return info;
 
