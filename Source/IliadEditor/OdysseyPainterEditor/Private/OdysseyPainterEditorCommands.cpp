@@ -131,7 +131,7 @@ FOdysseyPainterEditorCommands::RegisterCommands()
 
     UI_BUNDLE_COMMAND( ActivateColorPickerTool, ToolsShortcuts, "Activate Color Picker Tool", "Activates the Color Picker Tool", EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( ActivateDrawingTool, ToolsShortcuts, "Activate Drawing Tool", "Activates the Drawing Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::B));
-    UI_BUNDLE_COMMAND( ActivateSelectionTool, ToolsShortcuts, "Activate Selection Tool", "Activates the Selection Tool", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Shift, EKeys::L));
+    UI_BUNDLE_COMMAND( ActivateSelectionTool, ToolsShortcuts, "Activate Selection Tool", "Activates the Selection Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::L));
     UI_BUNDLE_COMMAND( ActivatePaintBucketTool, ToolsShortcuts, "Activate PaintBucket Tool", "Activates the Paint Bucket Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::G));
     UI_BUNDLE_COMMAND( ActivateTransformTool, ToolsShortcuts, "Activate Transform Tool", "Activates the Transform Tool", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::T));
     UI_BUNDLE_COMMAND( ActivatePrimitiveDrawingTool, ToolsShortcuts, "Activate Primitive Drawing Tool", "Activates the Primitive Drawing Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::U));
