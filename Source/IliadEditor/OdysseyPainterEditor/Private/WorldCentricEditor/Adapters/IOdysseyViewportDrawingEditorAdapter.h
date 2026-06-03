@@ -101,9 +101,6 @@ protected:
     virtual void SetTool(UOdysseyPainterEditorTool* iTool);
     UOdysseyPainterEditorRasterDrawingTool* GetDrawingTool();
 
-    virtual void UnbindStampBrushInstance(UOdysseyBrushAssetBase* iUnbindBrush);
-    virtual void BindStampBrushInstance(UOdysseyBrushAssetBase* iBindBrush);
-
 private:
     //New API to manage drawing events
     void MouseDown(const FOdysseyRay& iRay, const FKey& iMouseButton);

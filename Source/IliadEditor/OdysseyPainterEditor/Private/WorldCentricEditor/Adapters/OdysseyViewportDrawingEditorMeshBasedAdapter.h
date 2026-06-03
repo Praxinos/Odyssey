@@ -93,9 +93,6 @@ private:
     float GetStampQuality();
     virtual ::ULIS::FEvent StampOverride( UOdysseyBrushAssetBase::FStampParams iStampParams ) override;
 
-protected:
-    virtual void BindStampBrushInstance(UOdysseyBrushAssetBase* iBindBrush) override;
-
 private:
     UTexture2D* mStrokeBufferTexture2D;
     FOdysseySurfaceTexture2DEditable* mStrokeBufferSurfaceTexture2DEditable;

@@ -33,9 +33,6 @@ void
 UOdysseyBrushOptions::SetSize(float InSize)
 {
     Size = InSize;
-
-    if (!IsInInteractiveMode())
-        mOnPropertyChangedDelegate.Broadcast();
 }
 
 float
@@ -48,9 +45,6 @@ void
 UOdysseyBrushOptions::SetFlow(float InFlow)
 {
     Flow = InFlow;
-
-    if (!IsInInteractiveMode())
-        mOnPropertyChangedDelegate.Broadcast();
 }
 
 float
@@ -63,9 +57,6 @@ void
 UOdysseyBrushOptions::SetColor(FOdysseyBrushColor InColor)
 {
     Color = InColor;
-
-    if (!IsInInteractiveMode())
-        mOnPropertyChangedDelegate.Broadcast();
 }
 
 FOdysseyBrushColor

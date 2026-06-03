@@ -645,11 +645,6 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
     return eventStampInternal;
 }
 
-void FOdysseyViewportDrawingEditorScreenBasedAdapter::BindStampBrushInstance(UOdysseyBrushAssetBase* iBindBrush)
-{
-    IOdysseyViewportDrawingEditorAdapter::BindStampBrushInstance( iBindBrush );
-}
-
 void FOdysseyViewportDrawingEditorScreenBasedAdapter::Tick(float iDelta)
 {
     IOdysseyViewportDrawingEditorAdapter::Tick( iDelta );

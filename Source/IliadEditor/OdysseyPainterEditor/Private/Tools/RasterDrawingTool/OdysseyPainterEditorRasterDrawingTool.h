@@ -32,8 +32,6 @@ public:
     typedef TMap< TObjectPtr<UClass>, TObjectPtr<UObject>> tOverride;
 
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnApplyOverrides, const tOverride&);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnDestroyBrushInstance, UOdysseyBrushAssetBase*);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnCreatedBrushInstance, UOdysseyBrushAssetBase*);
     DECLARE_DELEGATE_RetVal_OneParam(TArray<FOdysseyPoint>, FAdaptShapePoints, const TArray<FOdysseyPoint>&);
 
 public:
@@ -113,17 +111,8 @@ public:
     // Returns the BrushOptions
     UOdysseyBrushOptions* GetBrushOptions() const;
 
-    // Returns the OnDestroyBrushInstance delegate
-    FOnDestroyBrushInstance& OnDestroyBrushInstance();
-
-    // Returns the OnCreatedBrushInstance delegate
-    FOnCreatedBrushInstance& OnCreatedBrushInstance();
-
     // Returns the OnApplyOverrides delegate
-    FOnApplyOverrides& OnApplyOverridesDelegate();
     FAdaptShapePoints& AdaptShapePointsDelegate();
-
-    FSimpleMulticastDelegate& OnBrushChanged();
 
 public:
     //Properties changes
@@ -249,11 +238,7 @@ protected:
     //---
 
     //Internal
-    FOnApplyOverrides                   mOnApplyOverridesDelegate;
-    FOnDestroyBrushInstance             mOnDestroyBrushInstance;
-    FOnCreatedBrushInstance             mOnCreatedBrushInstance;
     FAdaptShapePoints                   mAdaptShapePointsDelegate;
-    FSimpleMulticastDelegate            mOnBrushChanged;
 
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;
 

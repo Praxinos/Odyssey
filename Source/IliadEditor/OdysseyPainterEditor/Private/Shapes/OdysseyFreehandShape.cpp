@@ -176,10 +176,10 @@ UOdysseyFreehandShape::ApplyOverrides(const TMap<TObjectPtr<UClass>, TObjectPtr<
         if(freehandShapeOverrides->bOverride_SmoothingCatchUp)
             smoothingOptions.SmoothingCatchUp = freehandShapeOverrides->SmoothingCatchUp;
 
-        FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyFreehandShape, SmoothingOptions), smoothingOptions);
+        SmoothingOptions = smoothingOptions;
 
         if(freehandShapeOverrides->bOverride_SmoothingEnabled)
-            FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyFreehandShape, SmoothingEnabled), freehandShapeOverrides->SmoothingEnabled);
+            SmoothingEnabled = freehandShapeOverrides->SmoothingEnabled;
     }
 }
 

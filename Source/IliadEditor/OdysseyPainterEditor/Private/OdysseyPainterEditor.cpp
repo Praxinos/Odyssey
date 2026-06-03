@@ -20,6 +20,7 @@
 #include "OdysseyAnimationGlobalShortcuts.h"
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyBlockClipboardData.h"
+#include "OdysseyBrushAssetBase.h"
 #include "OdysseyCoreEditorModule.h"
 #include "OdysseyEditorLayoutBuilder.h"
 #include "OdysseyHUDElement.h"
@@ -1541,7 +1542,13 @@ FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor, bool iIsComm
 
     //PATCH: should be automatic in the new drawing Tool, fix it asap
     if (iIsCommit)
+    {
         GetRasterDrawingTool()->GetBrushOptions()->SetColor(iColor);
+        if (GetCurrentTool() == GetRasterDrawingTool())
+        {
+            GetRasterDrawingTool()->GetBrushInstance()->ExecuteStateChanged();
+        }
+    }
 }
 
 TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition>
@@ -3642,6 +3649,10 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
 
         //PATCH: should be automatic in the new drawing Tool, fix it asap
         GetRasterDrawingTool()->GetBrushOptions()->SetColor(mPaintColor);
+        if (GetCurrentTool() == GetRasterDrawingTool())
+        {
+            GetRasterDrawingTool()->GetBrushInstance()->ExecuteStateChanged();
+        }
     }
 
     mCurrentPaletteEntryColor = iEntry;
