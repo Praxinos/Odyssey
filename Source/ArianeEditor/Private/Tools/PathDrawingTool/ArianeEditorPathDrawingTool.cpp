@@ -29,10 +29,10 @@ UArianeEditorPathDrawingTool::~UArianeEditorPathDrawingTool()
 UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
     : Size( 25.0f )
     , bPressureSensitivity( false )
-    , EditedPath( nullptr )
     , LineType ( EArianePathLineType::Tube )
     , bShowGrid ( true )
     , MaterialInterface ( nullptr )
+    , EditedPath(nullptr)
 {
     Icon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathDrawing64");
 

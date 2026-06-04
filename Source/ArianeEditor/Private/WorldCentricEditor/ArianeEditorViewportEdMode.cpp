@@ -124,6 +124,32 @@ FArianeEditorViewportEdMode::HandleClick( FEditorViewportClient* InViewportClien
 }
 
 
+bool FArianeEditorViewportEdMode::MouseEnter(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY)
+{
+    TSharedPtr<FArianeEditorViewportToolkit> viewportToolkit = GetArianeEditorViewportToolkit();
+
+    if (viewportToolkit->GetEditor().GetCurrentTool())
+    {
+        viewportToolkit->GetEditor().GetCurrentTool()->OnMouseEnter(iViewportClient, iViewport, iMouseX, iMouseY);
+        return true;
+    }
+
+    return FEdMode::MouseEnter( iViewportClient, iViewport, iMouseX, iMouseY);
+}
+
+bool FArianeEditorViewportEdMode::MouseLeave(FEditorViewportClient* iViewportClient, FViewport* iViewport)
+{
+    TSharedPtr<FArianeEditorViewportToolkit> viewportToolkit = GetArianeEditorViewportToolkit();
+
+    if (viewportToolkit->GetEditor().GetCurrentTool())
+    {
+        viewportToolkit->GetEditor().GetCurrentTool()->OnMouseLeave(iViewportClient, iViewport);
+        return true;
+    }
+
+    return FEdMode::MouseLeave(iViewportClient, iViewport);
+}
+
 #ifdef unused
 
 

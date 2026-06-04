@@ -59,6 +59,7 @@ public class Ariane : ModuleRules
                 "Engine",
 
                 "OdysseyPalette",
+                "ULIS",
             }
         );
 

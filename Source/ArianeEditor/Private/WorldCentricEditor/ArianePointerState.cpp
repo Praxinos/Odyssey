@@ -9,6 +9,21 @@ FArianePointerState::~FArianePointerState()
 {
 }
 
+FArianePointerState::FArianePointerState()
+{
+    ViewportX = 0.f;
+    ViewportY = 0.f;
+    Z = 0.0f;
+    Timer = 0;
+    Tilt = 0.0f;
+    TiltX = 0.0f;
+    TiltY = 0.0f;
+    Azimuth = 0.0f;
+    Altitude = 0.0f;
+    Twist = 0.0f;
+    Pressure = 1.0f;
+}
+
 FArianePointerState::FArianePointerState( double InViewportX
                                         , double InViewportY
                                         , const FStylusState& InStylusState )
