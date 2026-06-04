@@ -42,8 +42,16 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         LOCTEXT( "AddBoardBefore", "Add a new board or shot before" ),
         FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Plus" ) );
 
+    auto IsLeftToolBarVisible = [this]() -> EVisibility
+        {
+            if( mPopupWidget.IsValid() )
+                return EVisibility::Visible;
+
+            return mOptionalWidgetsVisibility.Get();
+        };
+
     TSharedRef< SWidget > left_toolbar = LeftToolbarBuilder.MakeWidget();
-    left_toolbar->SetVisibility( mOptionalWidgetsVisibility );
+    left_toolbar->SetVisibility( MakeAttributeLambda( IsLeftToolBarVisible ) );
 
     //---
 
@@ -74,7 +82,13 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
         UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( section_object );
-        return ( board_section->GetTakes().Num() > 1 && mOptionalWidgetsVisibility.Get().IsVisible() ) ? EVisibility::Visible : EVisibility::Collapsed;
+        if( board_section->GetTakes().Num() <= 1 )
+            return EVisibility::Collapsed;
+
+        if( mPopupWidget.IsValid() )
+            return EVisibility::Visible;
+
+        return mOptionalWidgetsVisibility.Get();
     };
 
     TSharedRef< SWidget > top_toolbar = TopToolbarBuilder.MakeWidget();
@@ -92,7 +106,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         LOCTEXT( "create-camera-and-settings-tooltip", "Create a new camera" ),
         FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "CreateCamera" ) );
 
-    auto IsToolBarVisible = [this]() -> EVisibility
+    auto IsMiddleToolBarVisible = [this]() -> EVisibility
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
@@ -100,7 +114,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
     };
 
     TSharedRef< SWidget > middle_toolbar = MiddleToolbarBuilder.MakeWidget();
-    middle_toolbar->SetVisibility( MakeAttributeLambda( IsToolBarVisible ) );
+    middle_toolbar->SetVisibility( MakeAttributeLambda( IsMiddleToolBarVisible ) );
 
     //---
 
@@ -114,8 +128,16 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         LOCTEXT( "AddBoardAfter", "Add a new board or shot after" ),
         FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Plus" ) );
 
+    auto IsRightToolBarVisible = [this]() -> EVisibility
+        {
+            if( mPopupWidget.IsValid() )
+                return EVisibility::Visible;
+
+            return mOptionalWidgetsVisibility.Get();
+        };
+
     TSharedRef< SWidget > right_toolbar = RightToolbarBuilder.MakeWidget();
-    right_toolbar->SetVisibility( mOptionalWidgetsVisibility );
+    right_toolbar->SetVisibility( MakeAttributeLambda( IsRightToolBarVisible ) );
 
     //---
 
@@ -212,7 +234,7 @@ SCinematicBoardSectionThumbnails::CreateCameraWithAnimation( TSharedRef<FString>
 TSharedRef<SWidget>
 SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
 {
-    FMenuBuilder MenuBuilder( true, mBoardSection.Pin()->GetSequencer()->GetCommandBindings() );
+    FMenuBuilder menuBuilder( true, mBoardSection.Pin()->GetSequencer()->GetCommandBindings() );
 
     //---
 
@@ -248,14 +270,14 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
 
     //---
 
-    EposTracksToolbarHelpers::MakeCameraEntries( MenuBuilder, camera_name, FSimpleDelegate::CreateRaw( this, &SCinematicBoardSectionThumbnails::CreateCameraWithAnimation, camera_name, animation_name ) );
-    EposTracksToolbarHelpers::MakeCameraSettingsEntries( MenuBuilder );
+    EposTracksToolbarHelpers::MakeCameraEntries( menuBuilder, camera_name, FSimpleDelegate::CreateRaw( this, &SCinematicBoardSectionThumbnails::CreateCameraWithAnimation, camera_name, animation_name ) );
+    EposTracksToolbarHelpers::MakeCameraSettingsEntries( menuBuilder );
 
     //---
 
-    EposTracksToolbarHelpers::MakeAnimationEntries( MenuBuilder, animation_name, FSimpleDelegate::CreateRaw( this, &SCinematicBoardSectionThumbnails::CreateCameraWithAnimation, camera_name, animation_name ) );
-    EposTracksToolbarHelpers::MakeAnimationActorSettingsEntries( MenuBuilder );
-    EposTracksToolbarHelpers::MakeAnimationSettingsEntries( MenuBuilder );
+    EposTracksToolbarHelpers::MakeAnimationEntries( menuBuilder, animation_name, FSimpleDelegate::CreateRaw( this, &SCinematicBoardSectionThumbnails::CreateCameraWithAnimation, camera_name, animation_name ) );
+    EposTracksToolbarHelpers::MakeAnimationActorSettingsEntries( menuBuilder );
+    EposTracksToolbarHelpers::MakeAnimationSettingsEntries( menuBuilder );
 
     auto CreateCameraWithAnimationOnClick = [this, camera_name, animation_name]() -> FReply
         {
@@ -267,7 +289,7 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
             return FReply::Handled();
         };
 
-    MenuBuilder.AddWidget( SNew( SVerticalBox )
+    menuBuilder.AddWidget( SNew( SVerticalBox )
                            + SVerticalBox::Slot()
                            .AutoHeight()
                            [
@@ -299,13 +321,13 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
                            FText::GetEmpty(),
                            true /* NoIndent */ );
 
-    return MenuBuilder.MakeWidget();
+    return menuBuilder.MakeWidget();
 }
 
 TSharedRef<SWidget>
 SCinematicBoardSectionThumbnails::MakeTakeMenu()
 {
-    FMenuBuilder MenuBuilder( true, mBoardSection.Pin()->GetSequencer()->GetCommandBindings() );
+    FMenuBuilder menuBuilder( true, mBoardSection.Pin()->GetSequencer()->GetCommandBindings() );
 
     //---
 
@@ -319,7 +341,7 @@ SCinematicBoardSectionThumbnails::MakeTakeMenu()
         if( !take_sequence )
             continue;
 
-        MenuBuilder.AddMenuEntry(
+        menuBuilder.AddMenuEntry(
             take_sequence->GetDisplayName(),
             FText::Format( LOCTEXT( "TakeNumberTooltip", "Switch to {0}" ), FText::FromString( take_sequence->GetPathName() ) ),
             take_sequence->GetPathName() == board_section->GetSequence()->GetPathName() ? FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Sequencer.Star" ) : FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Sequencer.Empty" ),
@@ -330,9 +352,9 @@ SCinematicBoardSectionThumbnails::MakeTakeMenu()
         );
     }
 
-    MenuBuilder.AddSeparator();
+    menuBuilder.AddSeparator();
 
-    MenuBuilder.AddMenuEntry(
+    menuBuilder.AddMenuEntry(
         LOCTEXT( "NewTake", "New Take" ),
         FText::Format( LOCTEXT( "NewTakeTooltip", "Create a new take for {0}" ), FText::FromString( board_section->GetBoardDisplayName() ) ),
         FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "Take" ),
@@ -342,7 +364,9 @@ SCinematicBoardSectionThumbnails::MakeTakeMenu()
                                                  } ) )
     );
 
-    return MenuBuilder.MakeWidget();
+    TSharedRef<SWidget> widget = menuBuilder.MakeWidget();
+    mPopupWidget = widget;
+    return widget;
 }
 
 TSharedRef<SWidget>
@@ -456,7 +480,9 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
                               FUIAction( FExecuteAction::CreateLambda( CloneSection ),
                                          FCanExecuteAction::CreateLambda( CanCloneSection ) ) );
 
-    return menuBuilder.MakeWidget();
+    TSharedRef<SWidget> widget = menuBuilder.MakeWidget();
+    mPopupWidget = widget;
+    return widget;
 }
 
 TSharedRef<SWidget>
@@ -570,7 +596,9 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
                               FUIAction( FExecuteAction::CreateLambda( CloneSection ),
                                          FCanExecuteAction::CreateLambda( CanCloneSection ) ) );
 
-    return menuBuilder.MakeWidget();
+    TSharedRef<SWidget> widget = menuBuilder.MakeWidget();
+    mPopupWidget = widget;
+    return widget;
 }
 
 TSharedRef<SWidget>

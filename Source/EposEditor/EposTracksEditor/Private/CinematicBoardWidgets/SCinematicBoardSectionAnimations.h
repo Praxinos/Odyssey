@@ -43,6 +43,7 @@ protected:
 private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
     TAttribute<EVisibility>             mOptionalWidgetsVisibility;
+    TWeakPtr<SWidget>                   mPopupWidget;
 
     TWeakPtr<ISequencer>                mSequencer;
 
