@@ -3181,7 +3181,7 @@ SCinematicBoardSectionAnimations::Construct( const FArguments& InArgs, TSharedRe
         ISequencer* sequencer = mSequencer.Pin().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
 
-        bool is_visible = mOptionalWidgetsVisibility.Get().IsVisible();
+        bool is_visible = mPopupWidget.IsValid() || mOptionalWidgetsVisibility.Get().IsVisible();
         is_visible &= BoardSequenceTools::CanCreateAnimation( sequencer, section_object->GetInclusiveStartFrame() );
 
         return is_visible ? EVisibility::Visible : EVisibility::Hidden;
@@ -3232,7 +3232,7 @@ SCinematicBoardSectionAnimations::CreateAnimation( TSharedRef<FString> iAnimatio
 TSharedRef<SWidget>
 SCinematicBoardSectionAnimations::MakeCreateAnimationMenu()
 {
-    FMenuBuilder MenuBuilder( true, mSequencer.Pin()->GetCommandBindings() );
+    FMenuBuilder menuBuilder( true, mSequencer.Pin()->GetCommandBindings() );
 
     //---
 
@@ -3249,9 +3249,9 @@ SCinematicBoardSectionAnimations::MakeCreateAnimationMenu()
 
     //---
 
-    EposTracksToolbarHelpers::MakeAnimationEntries( MenuBuilder, animation_name, FSimpleDelegate::CreateRaw( this, &SCinematicBoardSectionAnimations::CreateAnimation, animation_name ) );
-    EposTracksToolbarHelpers::MakeAnimationActorSettingsEntries( MenuBuilder );
-    EposTracksToolbarHelpers::MakeAnimationSettingsEntries( MenuBuilder );
+    EposTracksToolbarHelpers::MakeAnimationEntries( menuBuilder, animation_name, FSimpleDelegate::CreateRaw( this, &SCinematicBoardSectionAnimations::CreateAnimation, animation_name ) );
+    EposTracksToolbarHelpers::MakeAnimationActorSettingsEntries( menuBuilder );
+    EposTracksToolbarHelpers::MakeAnimationSettingsEntries( menuBuilder );
 
     //---
 
@@ -3287,7 +3287,7 @@ SCinematicBoardSectionAnimations::MakeCreateAnimationMenu()
         return BoardSequenceTools::CanCreateAnimation( sequencer, section_object->GetInclusiveStartFrame() );
     };
 
-    MenuBuilder.AddWidget(
+    menuBuilder.AddWidget(
         SNew( SVerticalBox )
         + SVerticalBox::Slot()
         .AutoHeight()
@@ -3347,7 +3347,9 @@ SCinematicBoardSectionAnimations::MakeCreateAnimationMenu()
         FText::GetEmpty(),
         true /* NoIndent */ );
 
-    return MenuBuilder.MakeWidget();
+    TSharedRef<SWidget> widget = menuBuilder.MakeWidget();
+    mPopupWidget = widget;
+    return widget;
 }
 
 
