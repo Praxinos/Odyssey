@@ -42,4 +42,7 @@ private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
 
     TAttribute<EVisibility> mOptionalWidgetsVisibility;
+    // Use the same variable for all popup (in left/top/right toolbar)
+    // It's not a problem that all toolbars are displayed simultaneously even if only one popup is displayed
+    TWeakPtr<SWidget> mPopupWidget;
 };
