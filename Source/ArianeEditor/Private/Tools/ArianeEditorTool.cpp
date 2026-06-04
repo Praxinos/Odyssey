@@ -10,17 +10,21 @@
 #include "ArianeLayerDrawing.h"
 // Odyssey
 #include "IOdysseyStylusInputModule.h"
+#include "OdysseyStylusInputSettings.h"
 // Unreal
-#include "Framework/Application/SlateApplication.h"
-#include "Misc/TransactionObjectEvent.h"
-#include "InputBehavior.h"
 #include "BaseBehaviors/MouseHoverBehavior.h"
 #include "BaseBehaviors/ClickDragBehavior.h"
-#include "InteractiveToolManager.h"
-#include "StylusInput.h"
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
 #include "Components/LineBatchComponent.h"
+#include "Framework/Application/SlateApplication.h"
+#include "InputBehavior.h"
+#include "InteractiveToolManager.h"
+#include "Misc/TransactionObjectEvent.h"
+#include "SEditorViewport.h"
+#include "Slate/SceneViewport.h"
+#include "StylusInput.h"
+#include "StylusInputTabletContext.h"
 
 UArianeEditorTool::~UArianeEditorTool()
 {
@@ -90,7 +94,16 @@ void UArianeEditorTool::PostDuplicate(EDuplicateMode::Type DuplicateMode)
 void
 UArianeEditorTool::Activate()
 {
-    ListenStylusInput();
+    FEditorViewportClient* viewportClient = GetActiveViewportClient();
+    if( viewportClient )
+    {
+        TSharedPtr< SViewport > viewportWidget = viewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin();
+        if (viewportWidget.IsValid())
+        {
+            RegisterWindow(viewportWidget.ToSharedRef());
+        }
+    }
+
     // register IInputProcessor interface for handling global key press
 /* Gary
     FSlateApplication::Get().RegisterInputPreProcessor(mInputProcessor);
@@ -107,7 +120,7 @@ UArianeEditorTool::Activate()
 void
 UArianeEditorTool::Inactivate()
 {
-    IgnoreStylusInput();
+    UnregisterWindow();
     // unregister IInputProcessor interface
 /* Gary
     FSlateApplication::Get().UnregisterInputPreProcessor(mInputProcessor);
@@ -120,45 +133,34 @@ UArianeEditorTool::Inactivate()
 */
 }
 
-void
-UArianeEditorTool::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget
-                                       , const TArray<FStylusState>& NewStates
-                                       , int32 StylusIndex )
-{
-    for ( const FStylusState& State : NewStates )
-    {
-        Pressure = State.GetPressure();
-    }
-}
-
 // Temp
 void
 UArianeEditorTool::FlushStylusInput()
 {
-    UOdysseyStylusInputSubsystem* InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+    /*UOdysseyStylusInputSubsystem* InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
 
     if( InputSubsystem )
-        InputSubsystem->Flush();
+        InputSubsystem->Flush();*/
 }
 
 // Temp
 void
 UArianeEditorTool::ListenStylusInput()
 {
-    UOdysseyStylusInputSubsystem* InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+    /*UOdysseyStylusInputSubsystem* InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
 
     if( InputSubsystem )
-        InputSubsystem->AddMessageHandler( *this );
+        InputSubsystem->AddMessageHandler( *this );*/
 }
 
 // Temp
 void
 UArianeEditorTool::IgnoreStylusInput()
 {
-    UOdysseyStylusInputSubsystem* InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+    /*UOdysseyStylusInputSubsystem* InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
 
     if( InputSubsystem )
-        InputSubsystem->RemoveMessageHandler(*this);
+        InputSubsystem->RemoveMessageHandler(*this);*/
 }
 
 bool
@@ -219,6 +221,31 @@ UArianeEditorTool::OnMouseClick( FEditorViewportClient* iViewportClient
     }
 
     return false;
+}
+
+bool UArianeEditorTool::OnMouseEnter( FEditorViewportClient* ViewportClient,
+                                      FViewport* Viewport,
+                                      int32 x,
+                                      int32 y )
+{
+    if (bIsStylusDown)
+        return false;
+
+    bIsFocused = true;
+    while (mPacketQueue.Dequeue());
+
+    return true;
+}
+
+bool UArianeEditorTool::OnMouseLeave( FEditorViewportClient* ViewportClient,
+                                      FViewport* Viewport )
+{
+    if (bIsStylusDown)
+        return false;
+
+    bIsFocused = false;
+
+    return true;
 }
 
 void
@@ -514,6 +541,180 @@ UArianeEditorTool::GetCursor( EMouseCursor::Type& OutCursor )
     return false;
 }
 
+void UArianeEditorTool::OnTick(float DeltaTime)
+{
+    if (bIsRecordingStylus)
+        ReadStylusInput(eStylusEventFence::kStylusUp);
+}
+
+void UArianeEditorTool::OnPacket( const UE::StylusInput::FStylusInputPacket& iPacket,
+                                  UE::StylusInput::IStylusInputInstance* iInstance )
+{
+    StylusLastEventTime = std::chrono::steady_clock::now();
+
+    // FIX: MOVE WINTAB COORDINATES WHEN MAIN SCREEN IS NOT ON THE (TOP) LEFT OF USER PHYSICAL DESKTOP - AWAITING FOR EPIC PULL REQUEST VALIDATION
+#if PLATFORM_WINDOWS
+    const UOdysseyStylusInputSettings* settings = GetDefault<UOdysseyStylusInputSettings>();
+    FName selectedAPI = settings->StylusInputDriver;
+    if (selectedAPI == "Wintab")
+    {
+        UE::StylusInput::FStylusInputPacket packetCopyWin = iPacket;
+        ConvertWintabToWindowCoordinates(packetCopyWin.X, packetCopyWin.Y);
+        mPacketQueue.Enqueue(packetCopyWin);
+        return;
+    }
+#endif
+    // FIX: MOVE WINTAB COORDINATES WHEN MAIN SCREEN IS NOT ON THE (TOP) LEFT OF USER PHYSICAL DESKTOP - AWAITING FOR EPIC PULL REQUEST VALIDATION
+
+    // FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
+#if PLATFORM_MAC
+    UE::StylusInput::FStylusInputPacket packetCopy = iPacket;
+
+    static UE::StylusInput::EPenStatus currentPenStatus = UE::StylusInput::EPenStatus::None;
+    static UE::StylusInput::EPacketType currentPacketType = UE::StylusInput::EPacketType::Invalid;
+
+    if (iPacket.NormalPressure == 0)
+    {
+        currentPenStatus = currentPenStatus & ~UE::StylusInput::EPenStatus::CursorIsTouching;
+        if (currentPacketType == UE::StylusInput::EPacketType::OnDigitizer)
+            currentPacketType = UE::StylusInput::EPacketType::StylusUp;
+        else
+            currentPacketType = UE::StylusInput::EPacketType::AboveDigitizer;
+    }
+
+    if (iPacket.NormalPressure != 0)
+    {
+        currentPenStatus = currentPenStatus | UE::StylusInput::EPenStatus::CursorIsTouching;
+        if (currentPacketType != UE::StylusInput::EPacketType::OnDigitizer && currentPacketType != UE::StylusInput::EPacketType::StylusDown)
+            currentPacketType = UE::StylusInput::EPacketType::StylusDown;
+        else
+            currentPacketType = UE::StylusInput::EPacketType::OnDigitizer;
+    }
+    else
+    {
+        currentPenStatus = currentPenStatus & ~UE::StylusInput::EPenStatus::CursorIsTouching;
+    }
+
+    packetCopy.PenStatus = currentPenStatus;
+    packetCopy.Type = currentPacketType;
+
+    mPacketQueue.Enqueue(packetCopy);
+    return;
+#endif
+    // FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
+
+    mPacketQueue.Enqueue(iPacket);
+}
+
+void UArianeEditorTool::StartStylusInputRecord(const FKey& iMouseButton)
+{
+    if (bIsRecordingStylus)
+        return;
+
+    auto end_time = std::chrono::steady_clock::now();
+    auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - StylusLastEventTime).count();
+    if (delta > 500)
+        return;
+
+    bIsRecordingStylus = true;
+    PressedKey = iMouseButton;
+}
+
+void UArianeEditorTool::StopStylusInputRecord()
+{
+    if (!bIsRecordingStylus)
+        return;
+
+    while (mPacketQueue.Dequeue()) {}
+
+    bIsRecordingStylus = false;
+}
+
+bool
+UArianeEditorTool::ReadStylusInput( eStylusEventFence iUntilEventType )
+{
+    if (!bIsFocused || mPacketQueue.Num() == 0)
+    {
+        while (mPacketQueue.Dequeue()) {}
+        return false;
+    }
+
+    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+    UE::StylusInput::FStylusInputPacket packet;
+
+    while (mPacketQueue.Dequeue(packet))
+    {
+        FArianePointerState arianePointerState = StylusPacketToArianePointerState(packet);
+
+        if (packet.Type == UE::StylusInput::EPacketType::StylusDown && CanDraw())
+        {
+            //MouseDown
+            bIsStylusDown = true;
+            OnMouseDown(ViewportClient, PressedKey, arianePointerState);
+
+            if (iUntilEventType == eStylusEventFence::kStylusDown)
+                return true;
+        }
+        else if (packet.Type == UE::StylusInput::EPacketType::StylusUp && CanDraw())
+        {
+            //MouseUp
+            OnMouseUp(ViewportClient, PressedKey, arianePointerState);
+            bIsStylusDown = false;
+
+            if (iUntilEventType == eStylusEventFence::kStylusUp && CanDraw())
+            {
+                StopStylusInputRecord();
+                return true;
+            }
+        }
+        else if (bIsStylusDown && CanDraw())
+        {
+            OnMouseDrag(ViewportClient, PressedKey, arianePointerState);
+        }
+    }
+    return true;
+}
+
+FArianePointerState
+UArianeEditorTool::StylusPacketToArianePointerState(const UE::StylusInput::FStylusInputPacket& iPacket)
+{
+    FEditorViewportClient* viewportClient = GetActiveViewportClient();
+    if (!viewportClient)
+        return FArianePointerState();
+
+    TSharedPtr< SViewport > viewportWidget = viewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin();
+    if (!viewportWidget)
+        return FArianePointerState();
+
+    TSharedPtr<SWindow> Window = mStylusInputWindow.Pin();
+
+    //Init our ArianePointer, having all the basic info to draw
+    float scaleDPI = viewportWidget->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
+    FVector2D positionInViewport = viewportWidget->GetCachedGeometry().AbsoluteToLocal(FVector2D(iPacket.X, iPacket.Y)) * scaleDPI;
+    positionInViewport += Window->GetRectInScreen().GetTopLeft();
+
+    const UE::StylusInput::IStylusInputTabletContext* tabletContext = GetTabletContext(mStylusInputInstance, iPacket.TabletContextID);
+    FArianePointerState arianePointerState;
+
+    if (tabletContext)
+    {
+        UE::StylusInput::ETabletSupportedProperties capabilities = tabletContext->GetSupportedProperties();
+        arianePointerState.ViewportX = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::X) ? positionInViewport.X : 0.f;
+        arianePointerState.ViewportY = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::Y) ? positionInViewport.Y : 0.f;
+        arianePointerState.Z = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::Z) ? iPacket.Z : 0.f;
+        arianePointerState.Pressure = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::NormalPressure) ? iPacket.NormalPressure : 1.f;
+        arianePointerState.Timer = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::TimerTick) ? iPacket.TimerTick : 1.f;
+        arianePointerState.Altitude = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::AltitudeOrientation) ? iPacket.AltitudeOrientation : 1.f;
+        arianePointerState.Azimuth = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::AzimuthOrientation) ? iPacket.AzimuthOrientation : 1.f;
+        arianePointerState.Twist = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::TwistOrientation) ? iPacket.TwistOrientation : 1.f;
+        //arianePointerState.mPoint.pitch = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::PitchRotation) ? iPacket.PitchRotation : 1.f;
+        //arianePointerState.mPoint.roll = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::RollRotation) ? iPacket.RollRotation : 1.f;
+        //arianePointerState.mPoint.yaw = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::YawRotation) ? iPacket.YawRotation : 1.f;
+    }
+
+    return arianePointerState;
+}
+
 FEditorViewportClient*
 UArianeEditorTool::GetActiveViewportClient()
 {
@@ -546,6 +747,8 @@ UArianeEditorTool::OnBeginHover( const FInputDeviceRay& DevicePos )
 bool
 UArianeEditorTool::OnUpdateHover( const FInputDeviceRay& DevicePos )
 {
+    bIsFocused = true;
+
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
 
     OnMouseHover( ViewportClient
@@ -616,42 +819,65 @@ UArianeEditorTool::CanDraw()
 void
 UArianeEditorTool::OnClickPress( const FInputDeviceRay& PressPos )
 {
-    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
-    FArianePointerState Pointerstate = FArianePointerState( PressPos.ScreenPosition.X
-                                                          , PressPos.ScreenPosition.Y );
+    StartStylusInputRecord(PressedKey);
 
+    if (bIsRecordingStylus)
+    {
+        ReadStylusInput();
+    }
+    else
+    {
+        FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+        FArianePointerState Pointerstate = FArianePointerState(PressPos.ScreenPosition.X
+            , PressPos.ScreenPosition.Y);
 
-    Pressure = 1.0f;
-
-    FlushStylusInput(); // will fill Pressure if any
-
-    Pointerstate.Pressure  = Pressure;
-
-    if( CanDraw() )
-        OnMouseDown( ViewportClient
-                   , PressedKey
-                   , Pointerstate );
+        if (CanDraw())
+            OnMouseDown(ViewportClient
+                , PressedKey
+                , Pointerstate);
+    }
 }
 
 // Implements IClickDragBehaviorTarget::OnClickDrag
 void
 UArianeEditorTool::OnClickDrag( const FInputDeviceRay& DragPos )
 {
-    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
-    FArianePointerState Pointerstate = FArianePointerState( DragPos.ScreenPosition.X
-                                                          , DragPos.ScreenPosition.Y );
-    UArianeLayer* CurrentLayer = GetCurrentLayer();
+    if (bIsRecordingStylus)
+    {
+        ReadStylusInput();
+    }
+    else
+    {
+        FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+        FArianePointerState Pointerstate = FArianePointerState(DragPos.ScreenPosition.X
+            , DragPos.ScreenPosition.Y);
 
-    Pressure = 1.0f;
+        if (CanDraw())
+            OnMouseDrag(ViewportClient
+                , PressedKey
+                , Pointerstate);
+    }
+}
 
-    FlushStylusInput(); // will fill Pressure if any
+// Implements IClickDragBehaviorTarget::OnClickRelease
+void
+UArianeEditorTool::OnClickRelease(const FInputDeviceRay& ReleasePos)
+{
+    if (bIsRecordingStylus)
+    {
+        ReadStylusInput(eStylusEventFence::kStylusUp);
+    }
+    else
+    {
+        FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+        FArianePointerState Pointerstate = FArianePointerState(ReleasePos.ScreenPosition.X
+            , ReleasePos.ScreenPosition.Y);
 
-    Pointerstate.Pressure  = Pressure;
-
-    if( CanDraw() )
-        OnMouseDrag( ViewportClient
-                   , PressedKey
-                   , Pointerstate );
+        if (CanDraw())
+            OnMouseUp(ViewportClient
+                , PressedKey
+                , Pointerstate);
+    }
 }
 
 FVector2D
@@ -663,27 +889,6 @@ UArianeEditorTool::ScreenToHUD( const FVector2D& ScreenPosition )
     double Y = ScreenPosition.Y / DPIScale;
 
     return FVector2D( X, Y );
-}
-
-// Implements IClickDragBehaviorTarget::OnClickRelease
-void
-UArianeEditorTool::OnClickRelease( const FInputDeviceRay& ReleasePos )
-{
-    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
-    FArianePointerState Pointerstate = FArianePointerState( ReleasePos.ScreenPosition.X
-                                                          , ReleasePos.ScreenPosition.Y );
-    UArianeLayer* CurrentLayer = GetCurrentLayer();
-
-    Pressure = 1.0f;
-
-    FlushStylusInput(); // will fill Pressure if any
-
-    Pointerstate.Pressure  = Pressure;
-
-    if( CanDraw() )
-        OnMouseUp( ViewportClient
-                 , PressedKey
-                 , Pointerstate );
 }
 
 void

@@ -61,6 +61,12 @@ public:
                             , HHitProxy* HitProxy
                             , const FViewportClick& Click ) override;
 
+    // Overriden from FEdMode
+    virtual bool MouseEnter(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY) override;
+
+    // Overriden from FEdMode
+    virtual bool MouseLeave(FEditorViewportClient* iViewportClient, FViewport* iViewport) override;
+
 #ifdef unused
     /** Overriden from FEdMode. */
     virtual bool MouseMove( FEditorViewportClient* iViewportClient
@@ -132,12 +138,6 @@ private:
 
 private:
     void OnEditorClose();
-    // Implements IStylusMessageHandler::OnStylusStateChanged
-/**
-    virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget
-                             , const TArray<FStylusState>& iStates
-                             , int32 iIndex ) override;
-*/
 
 private:
     bool bStylusInUse;

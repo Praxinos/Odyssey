@@ -16,6 +16,7 @@ struct FArianePointerState
 {
     public:
         ~FArianePointerState();
+        FArianePointerState();
         FArianePointerState( double InViewportX
                            , double InViewportY
                            , const FStylusState& InStylusState );

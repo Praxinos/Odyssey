@@ -12,7 +12,9 @@
 #include "ArianePointerState.h"
 // OdysseyHeaders
 #include "OdysseyPainterEditorColorType.h"
-#include "IStylusState.h"
+#include "StylusInputHandler.h"
+// Common
+#include <chrono>
 
 #include "ArianeEditorTool.generated.h"
 
@@ -30,9 +32,17 @@ UCLASS(Abstract)
 class ARIANEEDITOR_API UArianeEditorTool : public UInteractiveTool
                                          , public IClickDragBehaviorTarget
                                          , public IHoverBehaviorTarget
-                                         , public IStylusMessageHandler
+                                         , public FOdysseyStylusInputHandler
 {
     GENERATED_BODY()
+
+public:
+    enum class eStylusEventFence
+    {
+        kNone,
+        kStylusUp,
+        kStylusDown,
+    };
 
 public:
     // Destructor
@@ -90,6 +100,14 @@ public:
                              , const FKey& iKey
                              , const FArianePointerState& State );
 
+    virtual bool OnMouseEnter( FEditorViewportClient* ViewportClient,
+                               FViewport* Viewport,
+                               int32 x,
+                               int32 y );
+
+    virtual bool OnMouseLeave( FEditorViewportClient* ViewportClient,
+                               FViewport* Viewport );
+
     // Implements UInteractiveTool::DrawHUD for overlay drawing in 2D space
     virtual void DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
 
@@ -113,15 +131,23 @@ public:
      */
     virtual void Init( FArianeEditor* InEditor );
 
-    virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget
-                                     , const TArray<FStylusState>& NewStates
-                                     , int32 StylusIndex );
-
     /**
      * @brief Get the current mouse cursor to display
      * @return the current mouse cursor to display
      */
     virtual bool GetCursor( EMouseCursor::Type& OutCursor );
+
+public:
+    // UInteractiveTool
+    virtual void OnTick(float DeltaTime) override;
+
+private:
+    /** FOdysseyStylusInputHandler Overrides and utilities */
+    virtual void OnPacket(const UE::StylusInput::FStylusInputPacket& iPacket, UE::StylusInput::IStylusInputInstance* iInstance) override;
+    void StartStylusInputRecord(const FKey& iMouseButton);
+    void StopStylusInputRecord();
+    bool ReadStylusInput(eStylusEventFence iUntilEventType = eStylusEventFence::kNone);
+    FArianePointerState StylusPacketToArianePointerState(const UE::StylusInput::FStylusInputPacket& iPacket);
 
 protected:
     void PopupContextMenu();
@@ -204,6 +230,14 @@ public:
     FArianeEditor* GetEditor() const;
 
 protected:
+    /** Patch (kinda): Stylus state and time of last event, so that we can have a little control for differentiating mouse and stylus events */
+    std::chrono::steady_clock::time_point   StylusLastEventTime;
+
+    bool bIsRecordingStylus = false;
+    bool bIsStylusDown = false;
+    bool bIsFocused = false;
+
+protected:
 /*
     TSharedPtr<FArianeEditorToolInputProcessor> mInputProcessor;
 */
@@ -213,7 +247,6 @@ protected:
     bool bInited;
     FKey PressedKey;
     // Temp
-    double Pressure;
     FVector2D MousePosition;
 
 public:
