@@ -167,20 +167,24 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
     {
         uint32 cellIndex = vectorObject->GetCell()->GetIndex();
         const FSlateBrush* objectIcon = nullptr;
+        FText objectIconTooltip = FText::GetEmpty();
 
         if ( vectorObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
             objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Paintgroup" );
+            objectIconTooltip = LOCTEXT("vector-scene-tree-view.object-icon.paint-group.tooltip", "Paint Group");
         }
         else
         if ( vectorObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
         {
             objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Group" );
+            objectIconTooltip = LOCTEXT("vector-scene-tree-view.object-icon.group.tooltip", "Group");
         }
         else
         if ( vectorObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
             objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Path" );
+            objectIconTooltip = LOCTEXT("vector-scene-tree-view.object-icon.path.tooltip", "Path");
         }
         else
         {
@@ -216,6 +220,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
                [
                    SNew( SImage )
                    .Image( objectIcon )
+                   .ToolTipText(objectIconTooltip)
                ]
                + SHorizontalBox::Slot()
                .Padding( 2, 0 )
