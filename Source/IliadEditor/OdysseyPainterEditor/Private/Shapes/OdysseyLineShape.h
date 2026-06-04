@@ -47,6 +47,12 @@ private:
     bool mInvertSnapAngles = false;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Shape")
+    UPROPERTY(
+        EditAnywhere,
+        Category="Shape",
+        meta=(
+            Tooltip="If checked, draws horizontal / vertical lines (use SHIFT to invert behaviour)"
+        )
+    )
     bool SnapAngles = false;
 };

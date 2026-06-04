@@ -21,18 +21,48 @@ struct FOdysseySmoothingOptions
     {}
 
     /** The method used for smoothing. */
-    UPROPERTY( EditAnywhere, Category="Smoothing", meta=(DisplayName="Method") )
+    UPROPERTY(
+        EditAnywhere,
+        Category="Smoothing",
+        meta=(
+            Tooltip="The method used for smoothing.",
+            DisplayName="Method"
+        ) )
     EOdysseySmoothingMethod SmoothingMethod;
 
     /** Distance for Smooting computation. */
-    UPROPERTY( EditAnywhere, Category="Smoothing", meta = ( DisplayName="Strength", ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta= "1" ) )
+    UPROPERTY(
+        EditAnywhere,
+        Category="Smoothing",
+        meta = (
+            Tooltip = "Strength / Distance used by the Smooting method.",
+            DisplayName="Strength",
+            ClampMin = "1",
+            UIMin = "1",
+            LinearDeltaSensitivity = "15",
+            Delta= "1"
+        ) )
     int32   SmoothingStrength;
 
-    /** Should smoothing be real-time, meaning the first input draws directly, even though the strength is not reached yet. */
-    UPROPERTY( EditAnywhere, Category="Smoothing", meta=(DisplayName="Real Time") )
+    UPROPERTY(
+        EditAnywhere,
+        Category="Smoothing",
+        meta=(
+            Tooltip="If checked, the smoothing is immediately applied while drawing, applying a distance between the cursor and what is drawn. If unchecked, the smootning is applied when the stroke is complete.",
+            DisplayName="Real Time"
+        ) )
     bool    SmoothingRealTime;
 
     /** Should smoothing catch-up to the cursor before releasing the stroke. */
-    UPROPERTY( EditAnywhere, Category="Smoothing", meta = (DisplayName="CatchUp", EditCondition = "SmoothingMethod == EOdysseySmoothingMethod::kAverage", EditConditionHides) )
+    UPROPERTY(
+        EditAnywhere,
+        Category="Smoothing",
+        meta = (
+            Tooltip = "If checked, the smoothed stroke will try to catch-up to the cursor if it stops moving.",
+            DisplayName="CatchUp",
+            EditCondition = "SmoothingMethod == EOdysseySmoothingMethod::kAverage",
+            EditConditionHides
+        )
+    )
     bool    SmoothingCatchUp;
 };

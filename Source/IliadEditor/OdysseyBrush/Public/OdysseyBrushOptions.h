@@ -84,11 +84,35 @@ public:
 
 protected:
     /** The size. */
-    UPROPERTY( EditInstanceOnly, BlueprintReadOnly, Category="Common", meta = ( ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", DisplayPriority="1" ) )
+    UPROPERTY(
+        EditInstanceOnly,
+        BlueprintReadOnly,
+        Category="Common",
+        meta = (
+            Tooltip="The size of the brush (if the brush uses it)",
+            ClampMin = "1",
+            UIMin = "1",
+            LinearDeltaSensitivity = "15",
+            Delta = "1",
+            DisplayPriority="1"
+        ) )
     float   Size = 20.f;
 
     /** The flow. */
-    UPROPERTY( EditInstanceOnly, BlueprintReadOnly, Category="Common", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Units="Percent", DisplayPriority = "1") )
+    UPROPERTY(
+        EditInstanceOnly,
+        BlueprintReadOnly,
+        Category="Common",
+        meta = (
+            Tooltip="The flow of the brush (if the brush uses it)",
+            ClampMin = "0",
+            ClampMax = "100",
+            UIMin = "0",
+            UIMax = "100",
+            Delta = "1",
+            Units="Percent",
+            DisplayPriority = "1"
+        ) )
     float   Flow = 100.f;
 
     /** The color. */

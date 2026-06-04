@@ -47,6 +47,12 @@ private:
     bool mInvertUniform = false;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Shape")
+    UPROPERTY(
+        EditAnywhere,
+        Category="Shape",
+        meta=(
+            Tooltip="If checked, will draw a square instead of a rectangle"
+        )
+    )
     bool Uniform = false;
 };

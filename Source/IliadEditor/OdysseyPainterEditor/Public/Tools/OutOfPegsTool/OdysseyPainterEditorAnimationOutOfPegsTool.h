@@ -81,15 +81,40 @@ public:
 
 public:
     /** The pan. */
-    UPROPERTY(EditAnywhere, Category="Out Of Pegs", meta = ( LinearDeltaSensitivity = "5", Delta = "1" ) )
+    UPROPERTY(
+        EditAnywhere,
+        Category="Out Of Pegs",
+        meta = (
+            Tooltip = "Translation in pixels",
+            LinearDeltaSensitivity = "5",
+            Delta = "1"
+        ))
     FVector2D Pan = FVector2D(0, 0);
 
     /** The rotation. */
-    UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( LinearDeltaSensitivity="15", Delta = "1", Units = "Degrees" ) )
+    UPROPERTY(
+        EditAnywhere,
+        Category="Out Of Pegs",
+        meta = (
+            Tooltip = "Rotation in degrees",
+            LinearDeltaSensitivity="15",
+            Delta = "1",
+            Units = "Degrees"
+        ) )
     float Rotation = 0.f;
 
     /** The zoom. */
-    UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( ClampMin = "0.1", UIMin = "0.1", LinearDeltaSensitivity = "15", Delta = "1", Units="Percent") )
+    UPROPERTY(
+        EditAnywhere,
+        Category="Out Of Pegs",
+        meta = (
+            Tooltip = "Scale in percent",
+            ClampMin = "0.1",
+            UIMin = "0.1",
+            LinearDeltaSensitivity = "15",
+            Delta = "1",
+            Units="Percent"
+        ) )
     float Zoom = 100.f;
 
 private:

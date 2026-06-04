@@ -69,7 +69,13 @@ private:
     void RemoveHUD();
 
 private:
-    UPROPERTY( EditInstanceOnly, Category="Shape", meta=(InlineEditConditionToggle))
+    UPROPERTY(
+        EditInstanceOnly,
+        Category="Shape",
+        meta=(
+            Tooltip = "If checked, activates stroke smoothing",
+            InlineEditConditionToggle
+        ))
     bool    SmoothingEnabled = false;
 
     UPROPERTY( EditInstanceOnly, Category="Shape", meta=(DisplayName="Smoothing", editcondition = "SmoothingEnabled") )
