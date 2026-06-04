@@ -21,10 +21,22 @@ struct FPaletteEntrySelection
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere, Category=Appearance)
+    UPROPERTY(
+        EditAnywhere,
+        Category=Appearance,
+        meta=(
+            Tooltip="The Palette containing the color to use"
+        ))
     UOdysseyPalette* OdysseyPalette = nullptr;
 
-    UPROPERTY(EditAnywhere, Category=Appearance, meta = (EditCondition = "OdysseyPalette != nullptr", EditConditionHides))
+    UPROPERTY(
+        EditAnywhere,
+        Category=Appearance,
+        meta = (
+            Tooltip="The Palette's Color to use",
+            EditCondition = "OdysseyPalette != nullptr",
+            EditConditionHides
+        ))
     UOdysseyPaletteEntryColor* OdysseyPaletteEntryColor = nullptr;
 };
 
@@ -111,26 +123,26 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
 
         UPROPERTY( EditAnywhere
                  , Category=Identity
-                 , meta = ( ToolTip = "Name" ) )
+                 , meta = ( ToolTip = "The name of this vector object" ) )
         FString Name;
 
         UPROPERTY( EditAnywhere
                  , Category= Transform
-                 , meta = ( ToolTip = "Translation X"
+                 , meta = ( ToolTip = "The horizontal position of this vector object."
                             , LinearDeltaSensitivity = "5"
                             , Delta = "1" ) )
         double TranslationX;
 
         UPROPERTY( EditAnywhere
                  , Category= Transform
-                 , meta = ( ToolTip = "Translation Y"
+                 , meta = ( ToolTip = "The vertical position of this vector object."
                             , LinearDeltaSensitivity = "5"
                             , Delta = "1" ) )
         double TranslationY;
 
         UPROPERTY( EditAnywhere
                  , Category= Transform
-                 , meta = ( ToolTip = "Rotation"
+                 , meta = ( ToolTip = "The rotation of this vector object around its pivot point"
                             , LinearDeltaSensitivity = "15"
                             , Delta = "1"
                             , Units = "degrees" ) )
@@ -138,7 +150,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
 
         UPROPERTY( EditAnywhere
                  , Category= Transform
-                 , meta = ( ToolTip = "Scaling X"
+                 , meta = ( ToolTip = "The horizontal scaling of this vector object."
                             , LinearDeltaSensitivity = "15"
                             , Delta = "0.01"
                             //, Units = "degrees" //TODO: but only once the displayed value will be 0-100
@@ -147,7 +159,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
 
         UPROPERTY( EditAnywhere
                  , Category= Transform
-                 , meta = ( ToolTip = "Scaling Y"
+                 , meta = ( ToolTip = "The vertical scaling of this vector object."
                             , LinearDeltaSensitivity = "15"
                             , Delta = "0.01"
                             //, Units = "degrees" //TODO: but only once the displayed value will be 0-100
@@ -156,14 +168,14 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
 
         UPROPERTY( EditAnywhere
                  , Category= Transform
-                 , meta = ( ToolTip = "Skew X"
+                 , meta = ( ToolTip = "The horizontal Skew of this vector object."
                             , LinearDeltaSensitivity = "15"
                             , Delta = "0.01" ) )
         double SkewX;
 
         UPROPERTY( EditAnywhere
                  , Category= Transform
-                 , meta = ( ToolTip = "Skew Y"
+                 , meta = ( ToolTip = "The vertical Skew of this vector object."
                             , LinearDeltaSensitivity = "15"
                             , Delta = "0.01" ) )
         double SkewY;
@@ -174,46 +186,50 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
 
         UPROPERTY( EditAnywhere
                  , Category=Appearance
-                 , meta = ( ToolTip = "Visible" ) )
+                 , meta = ( ToolTip = "If checked, this vector object is visible." ) )
         bool Visible;
 
         UPROPERTY( EditAnywhere
                  , Category=Appearance
-                 , meta = ( ToolTip = "Foreground Color Mode"
+                 , meta = ( ToolTip = "This vector object's Foreground Color Mode"
                           , EditCondition = "( bDisplayForegroundProperties )"
                           , EditConditionHides ) )
         eForegroundColorMode ForegroundColorMode;
 
         UPROPERTY( EditAnywhere
                  , Category=Appearance
-                 , meta = ( ToolTip = "Foreground Color"
+                 , meta = ( ToolTip = "This vector object's Foreground Color"
                           , EditCondition = "( bDisplayForegroundProperties ) && ( ForegroundColorMode == eForegroundColorMode::SolidColor )"
                           , EditConditionHides ) )
         FColor ForegroundColor;
 
         UPROPERTY( EditAnywhere,
                    Category=Appearance,
-                   meta = ( EditCondition = "( bDisplayForegroundProperties ) && ( ForegroundColorMode == eForegroundColorMode::Palette )"
+                   meta = (
+                            Tooltip = "The Palette Color used as this vector object Foreground Color."
+                          , EditCondition = "( bDisplayForegroundProperties ) && ( ForegroundColorMode == eForegroundColorMode::Palette )"
                           , EditConditionHides ) )
         FPaletteEntrySelection ForegroundPaletteSelection;
 
         UPROPERTY( EditAnywhere
                  , Category=Appearance
-                 , meta = ( ToolTip = "Background Color Mode"
+                 , meta = ( ToolTip = "This vector object's Background Color Mode"
                           , EditCondition = "( bDisplayBackgroundProperties )"
                           , EditConditionHides ) )
         eBackgroundColorMode BackgroundColorMode;
 
         UPROPERTY( EditAnywhere
                  , Category=Appearance
-                 , meta = ( ToolTip = "Background Color"
+                 , meta = ( ToolTip = "This vector object's Background Color"
                           , EditCondition = "( bDisplayBackgroundProperties ) && ( BackgroundColorMode == eBackgroundColorMode::SolidColor )"
                           , EditConditionHides ) )
         FColor BackgroundColor;
 
         UPROPERTY( EditAnywhere
                  , Category = Appearance
-                 , meta = ( EditCondition = "( bDisplayBackgroundProperties ) && ( BackgroundColorMode == eBackgroundColorMode::Palette )"
+                 , meta = (
+                            Tooltip = "The Palette Color used as this vector object Foreground Color."
+                          , EditCondition = "( bDisplayBackgroundProperties ) && ( BackgroundColorMode == eBackgroundColorMode::Palette )"
                           , EditConditionHides ) )
         FPaletteEntrySelection BackgroundPaletteSelection;
 };

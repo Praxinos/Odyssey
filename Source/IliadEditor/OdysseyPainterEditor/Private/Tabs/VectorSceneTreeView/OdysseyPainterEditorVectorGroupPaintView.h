@@ -61,22 +61,22 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
     public:
         UPROPERTY( EditAnywhere
                  , Category = PaintGroup
-                 , meta = ( ToolTip = "Painted" ) )
+                 , meta = ( ToolTip = "Applies Paint Buckets when enabled" ) )
         bool Painted;
 
         UPROPERTY( EditAnywhere
                  , Category = PaintGroup
-                 , meta = ( ToolTip = "Monochrome" ) )
+                 , meta = ( ToolTip = "When enabled, the boolean hides colors from the Paint Buckets and shows all outlines (unless the option Visible is off)." ) )
         bool Monochrome;
 
         UPROPERTY( EditAnywhere
                  , Category = PaintGroup
-                 , meta = ( ToolTip = "MonochromeColor" ) )
+                 , meta = ( ToolTip = "Change the color of the monochrome filter." ) )
         FColor MonochromeColor;
 
         UPROPERTY( EditAnywhere
                  , Category = GapDetection
-                 , meta = ( ToolTip  = "Gap Tolerance"
+                 , meta = ( ToolTip  = "Increase or decrease the tolerance of a gap between 2 paths."
                           , ClampMin = "0.0"
                           , UIMin    = "0.0"
                           , LinearDeltaSensitivity = "15"
@@ -89,22 +89,22 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
 
         UPROPERTY( EditAnywhere
                  , Category = PaintGroup
-                 , meta = ( ToolTip = "Wireframe Color" ) )
+                 , meta = ( ToolTip = "Change the color of the Wireframe Mode (to be activated directly on the Vector Layer)." ) )
         FColor WireframeColor;
 
         UPROPERTY( EditAnywhere
                  , Category = PaintGroup
-                 , meta = ( ToolTip = "Intersects Canvas" ) )
+                 , meta = ( ToolTip = "When enabled, takes in consideration the border of the canvas to apply a Paint Bucket." ) )
         bool IntersectsCanvas;
 
         UPROPERTY( EditAnywhere
                  , Category = GapDetection
-                 , meta = ( ToolTip  = "Gap Detection Scheme" ) )
+                 , meta = ( ToolTip  = "Defines the algorithme used to detect gaps." ) )
         eGapDetectionScheme GapDetectionScheme;
 
         UPROPERTY( EditAnywhere
                  , Category = GapDetection
-                 , meta = ( ToolTip  = "Extended Segment Scheme"
+                 , meta = ( ToolTip  = "Defines the algorithme used to extend the segments when detecting gaps."
                           , EditCondition = "(GapDetectionScheme == eGapDetectionScheme::SegmentExtension)"
                           , EditConditionHides ) )
         eSegmentExtensionScheme SegmentExtensionScheme;
@@ -118,7 +118,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
 
         UPROPERTY( EditAnywhere
                  , Category = Advanced
-                 , meta = ( ToolTip = "Realtime" ) )
+                 , meta = ( ToolTip = "Enable this feature to see in realtime all changes brought to the Paint Group (this feature needs more ressources from your computer!)" ) )
         bool Realtime; // relatime updates
 
         //UPROPERTY( EditAnywhere, Category=Advanced )

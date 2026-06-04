@@ -56,6 +56,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupView : public UOd
     public:
         UPROPERTY( EditAnywhere
                  , Category = Appearance
-                 , meta = ( ToolTip = "HUD Color" ) )
+                 , meta = ( ToolTip = "Defines the color of the HUD." ) )
         FColor HUDColor;
 };

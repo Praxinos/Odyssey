@@ -99,12 +99,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
 
         UPROPERTY( EditAnywhere
                  , Category=Path
-                 , meta = ( ToolTip = "Joint Type" ) )
+                 , meta = ( ToolTip = "The type of joint to use between 2 vertices." ) )
         eVectorPathJointType JointType;
 
         UPROPERTY( EditAnywhere
                  , Category=Path
-                 , meta = ( ToolTip = "Miter Limit"
+                 , meta = ( ToolTip = "The limit value to use for the Miter Joint Type"
                             //TODO: no clamping at all ?!
                             , LinearDeltaSensitivity = "15"
                             , Delta = "1" ) )
@@ -112,7 +112,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
 
         UPROPERTY( EditAnywhere
                  , Category=Path
-                 , meta = ( ToolTip = "Brush" ) )
+                 , meta = ( ToolTip = "The texture to use along the path." ) )
         FOdysseyVectorBrush Brush;
 
         //UPROPERTY(EditAnywhere,Category=Path, meta = (ContentDir = ))
