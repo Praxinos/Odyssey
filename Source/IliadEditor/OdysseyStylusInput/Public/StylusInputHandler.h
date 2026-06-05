@@ -40,6 +40,7 @@ public:
     virtual FString GetName() override;
 
     void PrintPacket(const UE::StylusInput::FStylusInputPacket& iPacket);
+    void ClearQueue();
 
 public:
     TSpscQueue<UE::StylusInput::FStylusInputPacket> mPacketQueue;
@@ -57,6 +58,8 @@ protected:
 
     FDelegateHandle mOnStylusInputDriverChanged;
 
+    // Count the number of events consumed by the handler since last up event. Useful to clear the queue of packets between important events
+    uint32 mEventsConsumedSinceLastUp = 0;
 };
 
 //#endif // ENABLE_STYLUS_SUPPORT

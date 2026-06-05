@@ -936,6 +936,7 @@ IOdysseyViewportDrawingEditorAdapter::ReadStylusInput(eStylusEventFence iUntilEv
             //MouseDown
             mStylusIsDown = true;
             MouseDown(ray, mStylusButton);
+            mEventsConsumedSinceLastUp++;
 
             if (iUntilEventType == eStylusEventFence::kStylusDown)
                 return;
@@ -945,6 +946,7 @@ IOdysseyViewportDrawingEditorAdapter::ReadStylusInput(eStylusEventFence iUntilEv
             //MouseUp
             MouseUp(ray, mStylusButton);
             mStylusIsDown = false;
+            mEventsConsumedSinceLastUp = 0;
 
             if (iUntilEventType == eStylusEventFence::kStylusUp)
             {
@@ -957,6 +959,7 @@ IOdysseyViewportDrawingEditorAdapter::ReadStylusInput(eStylusEventFence iUntilEv
         {
             //MouseMove
             MouseDrag(ray);
+            mEventsConsumedSinceLastUp++;
         }
     }
 }
@@ -987,6 +990,9 @@ IOdysseyViewportDrawingEditorAdapter::OnPacket(const UE::StylusInput::FStylusInp
     {
         UE::StylusInput::FStylusInputPacket packetCopyWin = iPacket;
         ConvertWintabToWindowCoordinates(packetCopyWin.X, packetCopyWin.Y);
+        if( packetCopyWin.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0 )
+            ClearQueue();
+
         mPacketQueue.Enqueue(packetCopyWin);
         return;
     }
@@ -1025,10 +1031,16 @@ IOdysseyViewportDrawingEditorAdapter::OnPacket(const UE::StylusInput::FStylusInp
     packetCopy.PenStatus = currentPenStatus;
     packetCopy.Type = currentPacketType;
 
+    if (packetCopy.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
+        ClearQueue();
+
     mPacketQueue.Enqueue(packetCopy);
     return;
 #endif
 // FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
+
+    if (iPacket.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
+        ClearQueue();
 
     mPacketQueue.Enqueue(iPacket);
 }

@@ -117,6 +117,11 @@ void FOdysseyStylusInputHandler::PrintPacket(const UE::StylusInput::FStylusInput
     UE_LOG(LogTemp, Display, TEXT("TimerTick %d"), iPacket.TimerTick)
 }
 
+void FOdysseyStylusInputHandler::ClearQueue()
+{
+    while(mPacketQueue.Dequeue()) {}
+}
+
 const IStylusInputTabletContext* FOdysseyStylusInputHandler::GetTabletContext(IStylusInputInstance* iInstance, uint32 iTabletContextID)
 {
     if (!iInstance)

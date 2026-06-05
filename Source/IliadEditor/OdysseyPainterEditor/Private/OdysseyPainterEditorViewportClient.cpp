@@ -948,6 +948,7 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput(eStylusEventFence iUntilEve
             //MouseDown
             mStylusIsDown = true;
             MouseDown(point);
+            mEventsConsumedSinceLastUp++;
 
             if( iUntilEventType == eStylusEventFence::kStylusDown )
                 return;
@@ -957,6 +958,7 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput(eStylusEventFence iUntilEve
             //MouseUp
             MouseUp(point);
             mStylusIsDown = false;
+            mEventsConsumedSinceLastUp = 0;
 
             if ( iUntilEventType == eStylusEventFence::kStylusUp )
             {
@@ -968,6 +970,7 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput(eStylusEventFence iUntilEve
         {
             //MouseMove
             MouseDrag(point);
+            mEventsConsumedSinceLastUp++;
         }
     }
 }
@@ -984,6 +987,9 @@ void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylu
     {
         UE::StylusInput::FStylusInputPacket packetCopyWin = iPacket;
         ConvertWintabToWindowCoordinates(packetCopyWin.X, packetCopyWin.Y);
+        if (packetCopyWin.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
+            ClearQueue();
+
         mPacketQueue.Enqueue(packetCopyWin);
         return;
     }
@@ -1022,10 +1028,16 @@ void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylu
     packetCopyMac.PenStatus = currentPenStatus;
     packetCopyMac.Type = currentPacketType;
 
+    if (packetCopyMac.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
+        ClearQueue();
+
     mPacketQueue.Enqueue(packetCopyMac);
     return;
 #endif
 // FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
+
+    if (iPacket.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
+        ClearQueue();
 
     mPacketQueue.Enqueue(iPacket);
 }
