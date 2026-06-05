@@ -232,7 +232,7 @@ bool UArianeEditorTool::OnMouseEnter( FEditorViewportClient* ViewportClient,
         return false;
 
     bIsFocused = true;
-    while (mPacketQueue.Dequeue());
+    ClearQueue();
 
     return true;
 }
@@ -560,6 +560,38 @@ void UArianeEditorTool::OnPacket( const UE::StylusInput::FStylusInputPacket& iPa
     {
         UE::StylusInput::FStylusInputPacket packetCopyWin = iPacket;
         ConvertWintabToWindowCoordinates(packetCopyWin.X, packetCopyWin.Y);
+
+        static UE::StylusInput::EPenStatus currentPenStatusWintab = UE::StylusInput::EPenStatus::None;
+        static UE::StylusInput::EPacketType currentPacketTypeWintab = UE::StylusInput::EPacketType::Invalid;
+
+        if (iPacket.NormalPressure == 0)
+        {
+            currentPenStatusWintab = currentPenStatusWintab & ~UE::StylusInput::EPenStatus::CursorIsTouching;
+            if (currentPacketTypeWintab == UE::StylusInput::EPacketType::OnDigitizer)
+                currentPacketTypeWintab = UE::StylusInput::EPacketType::StylusUp;
+            else
+                currentPacketTypeWintab = UE::StylusInput::EPacketType::AboveDigitizer;
+        }
+
+        if (iPacket.NormalPressure != 0)
+        {
+            currentPenStatusWintab = currentPenStatusWintab | UE::StylusInput::EPenStatus::CursorIsTouching;
+            if (currentPacketTypeWintab != UE::StylusInput::EPacketType::OnDigitizer && currentPacketTypeWintab != UE::StylusInput::EPacketType::StylusDown)
+                currentPacketTypeWintab = UE::StylusInput::EPacketType::StylusDown;
+            else
+                currentPacketTypeWintab = UE::StylusInput::EPacketType::OnDigitizer;
+        }
+        else
+        {
+            currentPenStatusWintab = currentPenStatusWintab & ~UE::StylusInput::EPenStatus::CursorIsTouching;
+        }
+
+        packetCopyWin.PenStatus = currentPenStatusWintab;
+        packetCopyWin.Type = currentPacketTypeWintab;
+
+        if (packetCopyWin.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
+            ClearQueue();
+
         mPacketQueue.Enqueue(packetCopyWin);
         return;
     }
@@ -598,10 +630,16 @@ void UArianeEditorTool::OnPacket( const UE::StylusInput::FStylusInputPacket& iPa
     packetCopy.PenStatus = currentPenStatus;
     packetCopy.Type = currentPacketType;
 
+    if (packetCopy.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
+        ClearQueue();
+
     mPacketQueue.Enqueue(packetCopy);
     return;
 #endif
     // FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
+
+    if (iPacket.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
+        ClearQueue();
 
     mPacketQueue.Enqueue(iPacket);
 }
@@ -625,7 +663,7 @@ void UArianeEditorTool::StopStylusInputRecord()
     if (!bIsRecordingStylus)
         return;
 
-    while (mPacketQueue.Dequeue()) {}
+    ClearQueue();
 
     bIsRecordingStylus = false;
 }
@@ -635,7 +673,7 @@ UArianeEditorTool::ReadStylusInput( eStylusEventFence iUntilEventType )
 {
     if (!bIsFocused || mPacketQueue.Num() == 0)
     {
-        while (mPacketQueue.Dequeue()) {}
+        ClearQueue();
         return false;
     }
 
@@ -651,6 +689,7 @@ UArianeEditorTool::ReadStylusInput( eStylusEventFence iUntilEventType )
             //MouseDown
             bIsStylusDown = true;
             OnMouseDown(ViewportClient, PressedKey, arianePointerState);
+            mEventsConsumedSinceLastUp++;
 
             if (iUntilEventType == eStylusEventFence::kStylusDown)
                 return true;
@@ -660,15 +699,16 @@ UArianeEditorTool::ReadStylusInput( eStylusEventFence iUntilEventType )
             //MouseUp
             OnMouseUp(ViewportClient, PressedKey, arianePointerState);
             bIsStylusDown = false;
+            mEventsConsumedSinceLastUp = 0;
+            StopStylusInputRecord();
 
             if (iUntilEventType == eStylusEventFence::kStylusUp)
-            {
                 return true;
-            }
         }
         else if (bIsStylusDown && CanDraw())
         {
             OnMouseDrag(ViewportClient, PressedKey, arianePointerState);
+            mEventsConsumedSinceLastUp++;
         }
     }
     return true;
@@ -865,7 +905,6 @@ UArianeEditorTool::OnClickRelease(const FInputDeviceRay& ReleasePos)
     if (bIsRecordingStylus)
     {
         ReadStylusInput(eStylusEventFence::kStylusUp);
-        StopStylusInputRecord();
     }
     else
     {
