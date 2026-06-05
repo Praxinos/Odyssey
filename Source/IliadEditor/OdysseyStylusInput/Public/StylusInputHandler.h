@@ -62,6 +62,10 @@ protected:
     uint32 mEventsConsumedSinceLastUp = 0;
 
     FString mHandlerID;
+
+    // To remove after the fixes in Epic Code
+    UE::StylusInput::EPenStatus mCurrentPenStatus = UE::StylusInput::EPenStatus::None;
+    UE::StylusInput::EPacketType mCurrentPacketType = UE::StylusInput::EPacketType::Invalid;
 };
 
 //#endif // ENABLE_STYLUS_SUPPORT
