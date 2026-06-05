@@ -14,6 +14,7 @@ using namespace UE::StylusInput;
 #define LOCTEXT_NAMESPACE "StylusInput"
 
 FOdysseyStylusInputHandler::FOdysseyStylusInputHandler()
+    : mHandlerID(FGuid::NewGuid().ToString())
 {
     mOnStylusInputDriverChanged = UOdysseyStylusInputSettings::OnStylusInputDriverChanged.AddRaw( this, &FOdysseyStylusInputHandler::OnStylusInputDriverChanged );
 }
@@ -100,7 +101,7 @@ bool FOdysseyStylusInputHandler::UnregisterWindow()
 
 FString FOdysseyStylusInputHandler::GetName()
 {
-    return "OdysseyStylusInputHandler";
+    return mHandlerID;
 }
 
 void FOdysseyStylusInputHandler::PrintPacket(const UE::StylusInput::FStylusInputPacket& iPacket)
