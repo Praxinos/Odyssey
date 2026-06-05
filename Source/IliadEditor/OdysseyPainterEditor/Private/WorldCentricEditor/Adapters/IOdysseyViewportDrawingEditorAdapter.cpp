@@ -225,7 +225,7 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseEnter(FEditorViewportClient* Vie
         return false;
 
     mIsFocused = true;
-    while (mPacketQueue.Dequeue());
+    ClearQueue();
     mAdapterState = eAdapterState::kReadyToUse;
 
     return true;
@@ -824,7 +824,7 @@ IOdysseyViewportDrawingEditorAdapter::StopStylusInputRecord()
     if (!mIsRecordingStylus)
         return;
 
-    while (mPacketQueue.Dequeue()) {}
+    ClearQueue();
 
     mIsRecordingStylus = false;
 }
@@ -920,7 +920,7 @@ IOdysseyViewportDrawingEditorAdapter::ReadStylusInput(eStylusEventFence iUntilEv
 {
     if (!mIsFocused || mPacketQueue.Num() == 0)
     {
-        while (mPacketQueue.Dequeue()) {}
+        ClearQueue();
         return;
     }
 
@@ -990,7 +990,36 @@ IOdysseyViewportDrawingEditorAdapter::OnPacket(const UE::StylusInput::FStylusInp
     {
         UE::StylusInput::FStylusInputPacket packetCopyWin = iPacket;
         ConvertWintabToWindowCoordinates(packetCopyWin.X, packetCopyWin.Y);
-        if( packetCopyWin.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0 )
+
+        static UE::StylusInput::EPenStatus currentPenStatusWintab = UE::StylusInput::EPenStatus::None;
+        static UE::StylusInput::EPacketType currentPacketTypeWintab = UE::StylusInput::EPacketType::Invalid;
+
+        if (iPacket.NormalPressure == 0)
+        {
+            currentPenStatusWintab = currentPenStatusWintab & ~UE::StylusInput::EPenStatus::CursorIsTouching;
+            if (currentPacketTypeWintab == UE::StylusInput::EPacketType::OnDigitizer)
+                currentPacketTypeWintab = UE::StylusInput::EPacketType::StylusUp;
+            else
+                currentPacketTypeWintab = UE::StylusInput::EPacketType::AboveDigitizer;
+        }
+
+        if (iPacket.NormalPressure != 0)
+        {
+            currentPenStatusWintab = currentPenStatusWintab | UE::StylusInput::EPenStatus::CursorIsTouching;
+            if (currentPacketTypeWintab != UE::StylusInput::EPacketType::OnDigitizer && currentPacketTypeWintab != UE::StylusInput::EPacketType::StylusDown)
+                currentPacketTypeWintab = UE::StylusInput::EPacketType::StylusDown;
+            else
+                currentPacketTypeWintab = UE::StylusInput::EPacketType::OnDigitizer;
+        }
+        else
+        {
+            currentPenStatusWintab = currentPenStatusWintab & ~UE::StylusInput::EPenStatus::CursorIsTouching;
+        }
+
+        packetCopyWin.PenStatus = currentPenStatusWintab;
+        packetCopyWin.Type = currentPacketTypeWintab;
+
+        if (packetCopyWin.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
             ClearQueue();
 
         mPacketQueue.Enqueue(packetCopyWin);
