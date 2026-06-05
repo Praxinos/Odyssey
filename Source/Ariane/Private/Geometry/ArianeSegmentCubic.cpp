@@ -87,10 +87,21 @@ FArianeSegmentCubic::FArianeSegmentCubic( FArianeObject* Owner
 {
 }
 
+FArianeHandleSegment*
+FArianeSegmentCubic::GetHandle( uint32 Index )
+{
+    return ( Index == 0 ) ? &Handle0 : &Handle1;
+}
+
 void
 FArianeSegmentCubic::Update()
 {
-    BuildVariable( MINRECURSE, MAXRECURSE );
+    if( bAutoFractioned )
+    {
+        BuildVariable( MINRECURSE, MAXRECURSE );
+    }
+
+    UpdateBounds();
 
     bInvalidated = false;
 }
@@ -242,19 +253,19 @@ FArianeSegmentCubic::BuildVariable( uint32 MinRecurse
                 FractionSteps.Emplace( Point, SubPoint.T, SubPoint.Radius );
 
                 // ------ bounding -------//
-                if( Position.X < Min.X ) Min.X = Position.X;
-                if( Position.Y < Min.Y ) Min.Y = Position.Y;
-                if( Position.Z < Min.Z ) Min.Z = Position.Z;
-                if( Position.X > Max.X ) Max.X = Position.X;
-                if( Position.Y > Max.Y ) Max.Y = Position.Y;
-                if( Position.Z > Max.Z ) Max.Z = Position.Z;
+                //if( Position.X < Min.X ) Min.X = Position.X;
+                //if( Position.Y < Min.Y ) Min.Y = Position.Y;
+                //if( Position.Z < Min.Z ) Min.Z = Position.Z;
+                //if( Position.X > Max.X ) Max.X = Position.X;
+                //if( Position.Y > Max.Y ) Max.Y = Position.Y;
+                //if( Position.Z > Max.Z ) Max.Z = Position.Z;
                 // ---------------------- //
             }
         }
 
-        Bounds.Origin = ( Min + Max ) * 0.5f;
-        Bounds.BoxExtent = ( Max - Bounds.Origin );
-        Bounds.SphereRadius = Bounds.BoxExtent.Length();
+        //Bounds.Origin = ( Min + Max ) * 0.5f;
+        //Bounds.BoxExtent = ( Max - Bounds.Origin );
+        //Bounds.SphereRadius = Bounds.BoxExtent.Length();
 
         for( int32 i = 0, n = 1; n < FractionSteps.Num(); i++, n++ )
         {

@@ -272,21 +272,32 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* ViewportClient
 ///////////////////////
 /*
 FArianeVertex* TestVertex0 = EditedPath->AllocVertex( localCoords, localNormal, Radius );
-FArianeVertex* TestVertex1 = EditedPath->AllocVertex( localCoords + FVector(400,0,0), localNormal, Radius );
+FArianeVertex* TestVertex1 = EditedPath->AllocVertex( localCoords + FVector(400,0,   0), localNormal, Radius );
+FArianeVertex* TestVertex2 = EditedPath->AllocVertex( localCoords + FVector(200,0,-400), localNormal, Radius );
 
 EditedPath->AddVertex( TestVertex0 );
 EditedPath->AddVertex( TestVertex1 );
+EditedPath->AddVertex( TestVertex2 );
+
 EditedPath->AddSegment( EditedPath->AllocCubicSegment( TestVertex0
                                                      , TestVertex0->GetPosition().X
                                                      , TestVertex0->GetPosition().Y
-                                                     , TestVertex0->GetPosition().Z
+                                                     , TestVertex0->GetPosition().Z + 200
                                                      , TestVertex1->GetPosition().X
                                                      , TestVertex1->GetPosition().Y
-                                                     , TestVertex1->GetPosition().Z
+                                                     , TestVertex1->GetPosition().Z + 200
                                                      , TestVertex1 ) );
+
+EditedPath->AddSegment( EditedPath->AllocCubicSegment( TestVertex1
+                                                     , TestVertex1->GetPosition().X
+                                                     , TestVertex1->GetPosition().Y
+                                                     , TestVertex1->GetPosition().Z - 200
+                                                     , TestVertex1->GetPosition().X
+                                                     , TestVertex2->GetPosition().Y
+                                                     , TestVertex2->GetPosition().Z
+                                                     , TestVertex2 ) );
 */
 ///////////////////////
-
                 if( Vertex0 == nullptr )
                 {
                     Vertex0 = EditedPath->AllocVertex( localCoords, localNormal, Radius );
@@ -319,6 +330,8 @@ EditedPath->AddSegment( EditedPath->AllocCubicSegment( TestVertex0
                             if( Vertex0 )
                             {
                                 PathTracer.Trace( View
+                                                ,  EditedPath->GetSegments().Num() ? EditedPath->GetSegments().Last().GetSegment()
+                                                                                   : nullptr
                                                 , Vertex0
                                                 , ViewportPosition
                                                 , IntersectAt
@@ -376,16 +389,14 @@ UArianeEditorPathDrawingTool::OnMouseUp( FEditorViewportClient* ViewportClient
             {
                 case EArianeEditorPathDrawingToolSegmentType::CubicBezier :
                 {
-                    PathTracer.Reset();
-/*
                     PathTracer.Flush( View
                                     , Vertex0
-                                    , ViewportPosition
-                                    , IntersectAt
-                                    , FVector( DrawingPlane )
-                                    , Radius );
-*/
+                                    , nullptr );
                 }
+                break;
+
+                default :
+                break;
             }
 
             Painting3DComponent->Update( false );

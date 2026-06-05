@@ -99,6 +99,34 @@ FArianeVertex::GetGuid()
     return Guid;
 }
 
+bool
+FArianeVertex::IsLocked()
+{
+    return false;
+}
+
+bool
+FArianeVertex::IsSelected()
+{
+    return false;
+}
+
+void
+FArianeVertex::SetPosition( double X, double Y, double Z )
+{
+    Super::SetPosition( X, Y, Z );
+
+    Invalidate();
+}
+
+void
+FArianeVertex::SetPosition( const FVector& InPosition )
+{
+    Super::SetPosition( InPosition );
+
+    Invalidate();
+}
+
 FArianeSegment*
 FArianeVertex::GetOtherSegment( FArianeSegment* Segment )
 {

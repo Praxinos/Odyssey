@@ -8,6 +8,7 @@
 
 struct FArianeObject;
 struct FArianeSegment;
+struct FArianeSegmentCubic;
 struct FArianePath;
 struct FArianeVertex;
 
@@ -93,7 +94,8 @@ public:
     void AttachPath( FArianePath* InCubicPath );
     FArianePath* GetPath();
     FArianeSegment* Trace( FSceneView *View
-                         , FArianeVertex* FirstSegmentVertex
+                         , FArianeSegment* PreviousSegment
+                         , FArianeVertex* StartingVertex
                          , const FVector2D& ViewportPosition
                          , const FVector& WorldPosition
                          , const FVector& WorldNormal
@@ -111,10 +113,11 @@ public:
     TArray<FTracerPoint>& GetPointBuffer();
     TArray<FTracerRecord>& GetRecordBuffer();
     TArray<FTracerEdge>& GetEdgeBuffer();
-    FArianeSegment* Flush( FSceneView* View
-                         , FArianeVertex* PreviousVertex
-                         , FArianeVertex* EndVertex );
-    FArianeSegment* CommitBestBezier( FArianeVertex* PreviousVertex, FArianeVertex* EndVertex );
+    void Flush( FSceneView* View
+              , FArianeVertex* PreviousVertex
+              , FArianeVertex* EndVertex );
+    FArianeSegmentCubic* CreateCubicSegment( FArianeVertex* StartingVertex, FArianeVertex* EndingVertex );
+    void CommitBestBezier( FArianeSegmentCubic* CubicSegment );
     FArianeVertex* CommitVertex( const FTracerRecord& CommitRecord );
     void Reset();
     void AdjustBezier( FVector Bezier[4], double EdgeChainLength );
@@ -127,6 +130,7 @@ public:
     void SetDotLimit( double DotLimit );
     void SetTracingWidth( double TracingWidth );
     //::ULIS::FRectD GetRedrawRect();
+    void ExportBestBezier( FArianeSegmentCubic* CubicSegment );
 
 private:
     double DotLimit;

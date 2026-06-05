@@ -174,7 +174,7 @@ UArianeEditorEraserTool::ProjectWorldToHUD( FEditorViewportClient* ViewportClien
                               , ScreenCoords
                               , true ); // calc outside view position
 
-    return ScreenToHUD( ScreenCoords );
+    return ScreenToHUD( ViewportClient, ScreenCoords );
 }
 
 void
@@ -338,10 +338,10 @@ UArianeEditorEraserTool::TraceLine( FArianePath* Path
 }
 
 FBox2D
-UArianeEditorEraserTool::GetErasureBoundingArea( FSceneView* View )
+UArianeEditorEraserTool::GetErasureBoundingArea( FEditorViewportClient* ViewportClient, FSceneView* View )
 {
-    FVector2D HUDMouseAtDown = ScreenToHUD( MouseAtDown );
-    FVector2D HUDMouseAtUp = ScreenToHUD( MouseAtUp );
+    FVector2D HUDMouseAtDown = ScreenToHUD( ViewportClient, MouseAtDown );
+    FVector2D HUDMouseAtUp = ScreenToHUD( ViewportClient, MouseAtUp );
     double EraserRadius = Size * 0.5f;
     double XMin = FMath::Min( HUDMouseAtDown.X, HUDMouseAtUp.X ) - EraserRadius;
     double YMin = FMath::Min( HUDMouseAtDown.Y, HUDMouseAtUp.Y ) - EraserRadius;
@@ -392,7 +392,7 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
                                                                             , ViewportClient->EngineShowFlags )
                                                                             /*.SetRealtimeUpdate( iViewportClient->IsRealtime() )*/ );
     FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
-    FBox2D ErasureArea = GetErasureBoundingArea( View );
+    FBox2D ErasureArea = GetErasureBoundingArea( ViewportClient, View );
 
     RTResource->ReadPixels( Pixels
                           , FReadSurfaceDataFlags(RCM_UNorm)
@@ -979,7 +979,7 @@ UArianeEditorEraserTool::OnMouseDown( FEditorViewportClient* iViewportClient
         MouseRecords[0] = MouseRecords[1] = FIntVector2( PointerState.ViewportX, PointerState.ViewportY );
         // Will call UArianeEditorEraserTool::StampBrush()
         //CanvasRenderTarget->UpdateResource();
-        StampBrush();
+        StampBrush( iViewportClient );
 
         return true;
     }
@@ -1007,7 +1007,7 @@ UArianeEditorEraserTool::OnMouseDrag( FEditorViewportClient* iViewportClient
         // Will call UArianeEditorEraserTool::StampBrush()
         //CanvasRenderTarget->UpdateResource();
 
-        StampBrush();
+        StampBrush( iViewportClient );
 
         MouseRecords[0] = MouseRecords[1];
     }
@@ -1028,7 +1028,7 @@ UArianeEditorEraserTool::OnMouseUp( FEditorViewportClient* ViewportClient
         MouseRecords[1] = FIntVector2( PointerState.ViewportX, PointerState.ViewportY );
         // Will call UArianeEditorEraserTool::StampBrush()
         //CanvasRenderTarget->UpdateResource();
-        StampBrush();
+        StampBrush( ViewportClient );
 
         GetToolManager()->BeginUndoTransaction(FText::FromString("Erase object"));
 
@@ -1060,9 +1060,11 @@ UArianeEditorEraserTool::ExtendContextMenu( FMenuBuilder& menu )
 void
 UArianeEditorEraserTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderAPI* RenderAPI )
 {
+    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+
     if( CanDraw() )
     {
-        FVector2D HUDPosition = ScreenToHUD( MousePosition );
+        FVector2D HUDPosition = ScreenToHUD( ViewportClient, MousePosition );
 
         HUDCanvas->DrawTile(
             0, 0,
@@ -1095,12 +1097,12 @@ UArianeEditorEraserTool::ResizeBrush()
 }
 
 void
-UArianeEditorEraserTool::StampBrush()
+UArianeEditorEraserTool::StampBrush( FEditorViewportClient* ViewportClient )
 {
     FTextureRenderTargetResource* RTResource = CanvasRenderTarget->GameThread_GetRenderTargetResource();
     FCanvas Canvas(RTResource, nullptr, GetWorld(), GMaxRHIFeatureLevel);
-    FVector2D HUDMouseRecord0 = ScreenToHUD( FVector2D( MouseRecords[0] ) );
-    FVector2D HUDMouseRecord1 = ScreenToHUD( FVector2D( MouseRecords[1] ) );
+    FVector2D HUDMouseRecord0 = ScreenToHUD( ViewportClient, FVector2D( MouseRecords[0] ) );
+    FVector2D HUDMouseRecord1 = ScreenToHUD( ViewportClient, FVector2D( MouseRecords[1] ) );
     FVector2D DeltaHUDMouse = HUDMouseRecord1 - HUDMouseRecord0;
     int32 LenSq = ( DeltaHUDMouse.X * DeltaHUDMouse.X ) + ( DeltaHUDMouse.Y * DeltaHUDMouse.Y );
     int32 Len = LenSq ? sqrt( LenSq ) : 0;

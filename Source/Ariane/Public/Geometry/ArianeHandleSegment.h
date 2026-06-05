@@ -44,13 +44,13 @@ struct ARIANE_API FArianeHandleSegment : public FArianePoint
          * @param Y the desired handle's Y position
          * @param Z the desired handle's Z position
          */
-        void SetPosition( double X, double Y, double Z );
+        virtual void SetPosition( double X, double Y, double Z ) override;
 
         /**
          * @brief Set the handle's position
          * @param InPosition the desired handle's position
          */
-        void SetPosition( const FVector& InPosition );
+        virtual void SetPosition( const FVector& InPosition ) override;
 
         /**
          * @brief Get the handle's position

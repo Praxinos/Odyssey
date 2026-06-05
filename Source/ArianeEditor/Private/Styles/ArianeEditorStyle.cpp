@@ -61,6 +61,7 @@ FArianeEditorStyle::Init()
     // Tooling
     Set( "ArianeEditor.ToolsTab.PathDrawing64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_drawing_tool", Icon64x64 ) );
     Set( "ArianeEditor.ToolsTab.Eraser64"     , new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/eraser_tool"      , Icon64x64 ) );
+    Set( "ArianeEditor.ToolsTab.PathEdit64"   , new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool"   , Icon64x64 ) );
     Set( "ArianeEditor.ToolsTab.Transform64"  , new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool"   , Icon64x64 ) );
     Set( "ArianeEditor.ToolsTab.Transform16"  , new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool"   , Icon16x16 ) );
 

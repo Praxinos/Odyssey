@@ -106,6 +106,11 @@ struct ARIANE_API FArianeVertex : public FArianePoint
         /** Set the vertex's radius **/
         void SetRadius( double InRadius );
 
+        virtual void SetPosition( double X, double Y, double Z ) override;
+        virtual void SetPosition( const FVector& InPosition ) override;
+        bool IsSelected();
+        bool IsLocked();
+
     public:
         UPROPERTY( EditAnywhere )
         FGuid Guid;
