@@ -661,9 +661,8 @@ UArianeEditorTool::ReadStylusInput( eStylusEventFence iUntilEventType )
             OnMouseUp(ViewportClient, PressedKey, arianePointerState);
             bIsStylusDown = false;
 
-            if (iUntilEventType == eStylusEventFence::kStylusUp && CanDraw())
+            if (iUntilEventType == eStylusEventFence::kStylusUp)
             {
-                StopStylusInputRecord();
                 return true;
             }
         }
@@ -866,6 +865,7 @@ UArianeEditorTool::OnClickRelease(const FInputDeviceRay& ReleasePos)
     if (bIsRecordingStylus)
     {
         ReadStylusInput(eStylusEventFence::kStylusUp);
+        StopStylusInputRecord();
     }
     else
     {
