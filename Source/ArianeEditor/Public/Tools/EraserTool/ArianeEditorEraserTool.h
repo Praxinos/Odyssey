@@ -211,7 +211,7 @@ protected:
     void ResizeBrush();
     void FillBrush();
 
-    void StampBrush();
+    void StampBrush( FEditorViewportClient* ViewportClient );
     void ClearCanvas();
     static FWayFragment* GetStartFragment( FWayFragment* Fragment );
     static ESegmentAdditionFlags SegmentAdditionPolicy( FWayFragment* InFragment, bool bSplit );
@@ -231,7 +231,7 @@ protected:
                                       , TArray<FArianeVertex*>& OutRemovedVertices
                                       , bool bSplit );
     FBox2D GetPathBoundingArea( FEditorViewportClient* ViewportClient, FSceneView* View, FArianePath* Path );
-    FBox2D GetErasureBoundingArea( FSceneView* View );
+    FBox2D GetErasureBoundingArea( FEditorViewportClient* ViewportClient, FSceneView* View );
 
 public:
     UPROPERTY( EditAnywhere

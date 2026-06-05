@@ -54,6 +54,19 @@ public:
     };
 
 public:
+    /**
+        * @brief Get the class type
+        * @return the class type
+        */
+    static uint32 StaticClass() { return   0xebcb886e; }; // value is crc32 FArianeSegmentCubic
+
+    /**
+        * @brief Get the object type
+        * @return the object type
+        */
+    virtual uint32 GetClass() override { return StaticClass(); };
+
+public:
     ~FArianeSegmentCubic();
     FArianeSegmentCubic();
     FArianeSegmentCubic( FArianeObject* Owner
@@ -76,6 +89,8 @@ public:
     virtual FVector GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormalize ) override;
     virtual FVector GetTangentVectorAt( double T, bool bNormalize ) override;
 
+    FArianeHandleSegment* GetHandle( uint32 Index );
+
 protected:
     void BuildVariable( uint32 MinRecurse
                       , uint32 MaxRecurse );
@@ -95,7 +110,4 @@ protected:
 
     UPROPERTY( EditAnywhere )
     FArianeHandleSegment Handle1;
-
-protected:
-    TArray<FArianePoint> FractionPoints;
 };

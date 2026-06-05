@@ -51,6 +51,19 @@ struct ARIANE_API FArianeSegment
         };
 
     public:
+        /**
+         * @brief Get the class type
+         * @return the class type
+         */
+        static uint32 StaticClass() { return  0x93ecb258; }; // value is crc32 FArianeSegment
+
+        /**
+         * @brief Get the object type
+         * @return the object type
+         */
+        virtual uint32 GetClass() { return StaticClass(); };
+
+    public:
         virtual ~FArianeSegment();
         FArianeSegment();
 
@@ -170,6 +183,11 @@ struct ARIANE_API FArianeSegment
         /** Get segment length **/
         double GetLength();
 
+        void SetAutoFractioned( bool bInAutoFractioned );
+        bool IsAutoFractioned();
+        void SetFractions( const TArray<FArianePoint>& FractionPoints
+                         , const TArray<float>& Radii  );
+
     protected:
         /** Update the segment's bounds */
         void UpdateBounds();
@@ -188,11 +206,15 @@ struct ARIANE_API FArianeSegment
         FArianeVertexID Vertices[2];
 
     protected:
+        TArray<FArianePoint> FractionPoints;
         TArray<FFractionStep> FractionSteps;
         TArray<FFraction> Fractions;
         TArray<FDynamicMeshVertex> ModelVertexCache;
         TArray<uint32> IndexCache;
         FBoxSphereBounds Bounds;
         double Length;
-        bool bInvalidated;
+
+    protected:
+        bool bInvalidated : 1;
+        bool bAutoFractioned : 1;
 };

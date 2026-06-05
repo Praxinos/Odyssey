@@ -3,6 +3,7 @@
 
 // Ariane headers
 #include "ArianeHandleSegment.h"
+#include "ArianeSegment.h"
 
 FArianeHandleSegment::~FArianeHandleSegment()
 {
@@ -24,12 +25,16 @@ void
 FArianeHandleSegment::SetPosition( double InX, double InY, double InZ )
 {
     Super::SetPosition( InX, InY, InZ );
+
+    OwnerSegment->Invalidate();
 }
 
 void
 FArianeHandleSegment::SetPosition( const FVector& iPosition )
 {
     Super::SetPosition( iPosition );
+
+    OwnerSegment->Invalidate();
 }
 
 const FVector&

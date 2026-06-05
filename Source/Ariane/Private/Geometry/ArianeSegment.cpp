@@ -17,6 +17,7 @@ FArianeSegment::FArianeSegment( )
     , Vertices { FArianeVertexID(), FArianeVertexID() }
     , Length ( 0.0f )
     , bInvalidated ( false )
+    , bAutoFractioned ( true )
 {
 }
 
@@ -162,11 +163,72 @@ FArianeSegment::UpdateBounds()
 void
 FArianeSegment::Update()
 {
-    Length = ( GetVertex(1)->GetPosition() - GetVertex(0)->GetPosition() ).Length();
+    if( bAutoFractioned )
+    {
+        Length = ( GetVertex(1)->GetPosition() - GetVertex(0)->GetPosition() ).Length();
+    }
 
     UpdateBounds();
 
     bInvalidated = false;
+}
+
+void
+FArianeSegment::SetAutoFractioned( bool bInAutoFractioned )
+{
+    bAutoFractioned = bInAutoFractioned;
+
+    Invalidate();
+}
+
+bool
+FArianeSegment::IsAutoFractioned()
+{
+    return bAutoFractioned;
+}
+
+void
+FArianeSegment::SetFractions( const TArray<FArianePoint>& InFractionPoints
+                            , const TArray<float>& Radii )
+{
+    FractionPoints.Empty();
+    FractionSteps.Empty();
+    Fractions.Empty();
+    Length = 0.0f;
+
+    if( InFractionPoints.Num() >= 2 )
+    {
+        uint32 FractionStepCount = InFractionPoints.Num();
+
+        FractionPoints = InFractionPoints;
+        FractionSteps.Reserve( FractionStepCount );
+        Fractions.Reserve( FractionStepCount - 1 );
+
+        FFractionStep* Step0 = &FractionSteps.Emplace_GetRef( Vertices[0].GetVertex()
+                                                            , 0
+                                                            , Vertices[0].GetVertex()->GetRadius() );
+
+        Vertices[0].GetVertex()->SetPosition( FractionPoints[0].GetPosition() );
+
+        for( int32 i = 1, n = 2; i < FractionPoints.Num() - 1; i++, n++ )
+        {
+            FFractionStep* Step1 = &FractionSteps.Emplace_GetRef ( &FractionPoints[i], ( float ) n / FractionStepCount, Radii[i] );
+
+            Length += Fractions.Emplace_GetRef( Step0, Step1 ).Length;
+
+            Step0 = Step1;
+        }
+
+        FFractionStep* Step1 = &FractionSteps.Emplace_GetRef( Vertices[1].GetVertex()
+                                                            , 1
+                                                            , Vertices[1].GetVertex()->GetRadius() );
+
+        Vertices[1].GetVertex()->SetPosition( FractionPoints.Last().GetPosition() );
+
+        Length += Fractions.Emplace_GetRef( Step0, Step1 ).Length;
+    }
+
+    Invalidate();
 }
 
 bool

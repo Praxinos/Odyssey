@@ -8,6 +8,7 @@
 #include "ArianeEditorViewportToolkit.h"
 #include "ArianeEditorColorSelectorTab.h"
 #include "ArianeEditorLayerStackTab.h"
+#include "PathEditTool/ArianeEditorPathEditTool.h"
 #include "PathDrawingTool/ArianeEditorPathDrawingTool.h"
 #include "EraserTool/ArianeEditorEraserTool.h"
 #include "LayerTransformTool/ArianeEditorLayerTransformTool.h"
@@ -284,6 +285,7 @@ void
 FArianeEditor::RegisterTools()
 {
     AddToolBuilder( NewObject<UArianeEditorPathDrawingToolBuilder>() );
+    AddToolBuilder( NewObject<UArianeEditorPathEditToolBuilder>() );
     AddToolBuilder( NewObject<UArianeEditorEraserToolBuilder>() );
     AddToolBuilder( NewObject<UArianeEditorLayerTransformToolBuilder>() );
 

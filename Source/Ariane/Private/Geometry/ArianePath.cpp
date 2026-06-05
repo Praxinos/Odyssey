@@ -488,12 +488,16 @@ void
 FArianePath::InvalidateVertex( FArianeVertex* Vertex )
 {
     InvalidatedVertices.Add( Vertex );
+
+    Invalidate( FArianePathInvalidationFlags().SetVertexAltered() );
 }
 
 void
 FArianePath::InvalidateSegment( FArianeSegment* Segment )
 {
     InvalidatedSegments.Add( Segment );
+
+    Invalidate( FArianePathInvalidationFlags().SetSegmentAltered() );
 }
 
 void
@@ -732,6 +736,8 @@ FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
             FVector VectorBC = ConnectedSegments[1]->GetVectorLeavingFromVertex( Vertex, true );
 
             TangentVector = ( VectorBA - VectorBC );
+
+
         }
     }
 
@@ -742,15 +748,23 @@ FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
 
     if( TangentVector.IsNearlyZero(0.001f) )
     {
-        TangentVector = SegmentVector.GetSafeNormal();
+        TangentVector = Segment->GetTangentVectorAt( T, true );
     }
 
+/*
+    if( TangentVector.IsNearlyZero(0.001f) )
+    {
+        TangentVector = SegmentVector.GetSafeNormal();
+    }
+*/
+
     // Let's go in the same direction as the segment
+/*
     if( TangentVector.Dot( SegmentVector ) < 0.0f )
     {
         TangentVector = -TangentVector;
     }
-
+*/
     return TangentVector;
 }
 

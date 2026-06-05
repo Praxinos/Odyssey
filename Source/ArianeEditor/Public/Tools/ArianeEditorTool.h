@@ -19,6 +19,11 @@
 #include "ArianeEditorTool.generated.h"
 
 class FArianeEditor;
+struct FArianeVertex;
+struct FArianeSegment;
+struct FArianeSegmentCubic;
+struct FArianePath;
+struct FArianePoint;
 class FSceneView;
 class FStylusState;
 struct FSlateBrush;
@@ -27,6 +32,55 @@ class UArianeLayerDrawing;
 /* Gary
 class FArianeEditorToolInputProcessor;
 */
+
+namespace FArianeHUD
+{
+    static const uint32 VERTEXRADIUS = 4;
+    static const uint32 HANDLERADIUS = 3;
+
+    enum class EMode : uint8
+    {
+        Object =        1  ,
+        Vertex = ( 1 << 0 ),
+    };
+
+    struct FPickingFlags
+    {
+        public:
+            FPickingFlags& SetPathVertex()        { PathVertex         = true; return *this; };
+            FPickingFlags& SetPathSegment()       { PathSegment        = true; return *this; };
+            FPickingFlags& SetPathSegmentHandle() { PathSegmentHandle  = true; return *this; };
+            FPickingFlags& SetPathVertexHandle()  { PathVertexHandle   = true; return *this; };
+
+        public:
+            bool PathVertex         : 1 = 0;
+            bool PathSegment        : 1 = 0;
+            bool PathSegmentHandle  : 1 = 0;
+            bool PathVertexHandle   : 1 = 0;
+    };
+
+    struct FDrawingFlags
+    {
+        public:
+            FDrawingFlags& SetPathVertex()        { PathVertex         = true; return *this; };
+            FDrawingFlags& SetPathSegment()       { PathSegment        = true; return *this; };
+            FDrawingFlags& SetPathSegmentHandle() { PathSegmentHandle  = true; return *this; };
+            FDrawingFlags& SetPathVertexHandle()  { PathVertexHandle   = true; return *this; };
+            FDrawingFlags& SetPathVertexValence0(){ PathVertexValence0 = true; return *this; };
+            FDrawingFlags& SetPathVertexValence1(){ PathVertexValence1 = true; return *this; };
+            FDrawingFlags& SetPathVertexValence2(){ PathVertexValence2 = true; return *this; };
+
+        public:
+            EMode Mode = EMode::Object;
+            bool PathVertex         : 1 = 0;
+            bool PathSegment        : 1 = 0;
+            bool PathSegmentHandle  : 1 = 0;
+            bool PathVertexHandle   : 1 = 0;
+            bool PathVertexValence0 : 1 = 0;
+            bool PathVertexValence1 : 1 = 0;
+            bool PathVertexValence2 : 1 = 0;
+    };
+};
 
 UCLASS(Abstract)
 class ARIANEEDITOR_API UArianeEditorTool : public UInteractiveTool
@@ -178,9 +232,15 @@ protected:
 
    /**
      * @brief converts screen position to HUD position (i.e with DPI scaling)
+     * @param ViewportClient
      * @param ScreenPosition
      */
-    FVector2D ScreenToHUD( const FVector2D& ScreenPosition );
+    FVector2D ScreenToHUD( FEditorViewportClient* ViewportClient, const FVector2D& ScreenPosition );
+
+    FVector2D WorldToPixel( FSceneView* View, const FVector& WorldPosition );
+    FVector2D WorldToHUD( FEditorViewportClient* ViewportClient
+                        , FSceneView* View
+                        , const FVector& WorldPosition );
 
 /* Gary
 
@@ -222,8 +282,62 @@ protected:
     void ListenStylusInput();
     void IgnoreStylusInput();
 
-// HUD Primitives
+    // Picking
 protected:
+    void PickPathPoints( FArianePath* Path
+                       , bool bClearFirst
+                       , const FArianeHUD::FPickingFlags& PickingFlags
+                       , TArray<FArianePoint*> OutPickedPoints );
+
+    // HUD
+protected:
+    void DrawLineHUD( FCanvas* Canvas
+                    , FEditorViewportClient* ViewportClient
+                    , FSceneView* View
+                    , const FVector2D& HUDCoordsP0
+                    , const FVector2D& HUDCoordsP1
+                    , const FLinearColor& Color
+                    , float Thickness );
+    void DraweOutlinedLineHUD( FCanvas* Canvas
+                             , FEditorViewportClient* ViewportClient
+                             , FSceneView* View
+                             , const FVector2D& HUDCoordsP0
+                             , const FVector2D& HUDCoordsP1
+                             , const FLinearColor& Color
+                             , float Thickness );
+    void DrawVertexHUD( FCanvas* Canvas
+                      , FEditorViewportClient* ViewportClient
+                      , FSceneView* View
+                      , FArianeVertex* Vertex
+                      , const FLinearColor& FgColor
+                      , const FLinearColor& BgColor
+                      , const FLinearColor& HcColor
+                      , const FArianeHUD::FDrawingFlags& HUDDrawingFlags );
+    void DrawCubicSegmentHUD( FCanvas* Canvas
+                            , FEditorViewportClient* ViewportClient
+                            , FSceneView* View
+                            , FArianeSegmentCubic* CubicSegment
+                            , const FLinearColor& FgColor
+                            , const FLinearColor& BgColor
+                            , const FLinearColor& HcColor
+                            , const FArianeHUD::FDrawingFlags& HUDDrawingFlags );
+    void DrawSegmentHUD( FCanvas* Canvas
+                       , FEditorViewportClient* ViewportClient
+                       , FSceneView* View
+                       , FArianeSegment* CubicSegment
+                       , const FLinearColor& FgColor
+                       , const FLinearColor& BgColor
+                       , const FLinearColor& HcColor
+                       , const FArianeHUD::FDrawingFlags& HUDDrawingFlags );
+    void DrawPathHUD( FCanvas* Canvas
+                    , FEditorViewportClient* ViewportClient
+                    , FSceneView* View
+                    , FArianePath* Path
+                    , const FLinearColor& FgColor
+                    , const FLinearColor& BgColor
+                    , const FLinearColor& HcColor
+                    , const FArianeHUD::FDrawingFlags& HUDDrawingFlags );
+
     void DrawHUDCircle( FCanvas* Canvas, double X, double Y, double Radius, uint32 Steps );
 
 public:
@@ -249,6 +363,16 @@ protected:
     // Temp
     FVector2D MousePosition;
 
+// HUD Tiles
+protected:
+    UTexture* VertexTexture;
+    UTexture* VertexContourTexture;
+    UTexture* HandleTexture;
+    UTexture* LineOutlinedTexture;
+
 public:
     const FSlateBrush* Icon;
 };
+
+// define bitwise op
+//ENUM_CLASS_FLAGS(FArianeHUD::EModeFlags)
