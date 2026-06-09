@@ -41,18 +41,18 @@ class ODYSSEYSTYLUSINPUT_API UOdysseyStylusInputSettings
     GENERATED_UCLASS_BODY()
 
 public:
-    virtual void PostEditChangeProperty( struct FPropertyChangedEvent& iPropertyChangedEvent ) override;
+    virtual void PostInitProperties() override;
+    virtual void PostEditChangeProperty(struct FPropertyChangedEvent& iPropertyChangedEvent) override;
 
 public:
     FName GetStylusDriver() const;
     static FText GetFormatText(FName iStylusInputDriver );
 
-    /** Returns available driver names for the dropdown */
-    UFUNCTION()
-    static TArray<FName> GetAvailableStylusDrivers();
-
     virtual FName GetContainerName() const override;
     virtual FName GetCategoryName() const override;
+
+private:
+    FName GetDefaultStylusDriver() const;
 
 public:
     /** Driver to use to interpret Stylus inputs. */

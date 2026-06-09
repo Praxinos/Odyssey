@@ -71,8 +71,19 @@ FOnStylusInputDriverChanged UOdysseyStylusInputSettings::OnStylusInputDriverChan
 
 UOdysseyStylusInputSettings::UOdysseyStylusInputSettings( const FObjectInitializer& iObjectInitializer )
     : Super( iObjectInitializer )
-    , StylusInputDriver("None")
+    , StylusInputDriver(NAME_None)
 {
+}
+
+void UOdysseyStylusInputSettings::PostInitProperties()
+{
+    Super::PostInitProperties();
+
+    if (StylusInputDriver == NAME_None)
+    {
+        StylusInputDriver = GetDefaultStylusDriver();
+        SaveConfig();
+    }
 }
 
 void
@@ -89,41 +100,44 @@ UOdysseyStylusInputSettings::PostEditChangeProperty( struct FPropertyChangedEven
 }
 
 FName
+UOdysseyStylusInputSettings::GetDefaultStylusDriver() const
+{
+    FName defaultAPI;
+
+#if PLATFORM_MAC
+    defaultAPI = "NSEvent";
+#endif
+
+#if PLATFORM_WINDOWS
+    defaultAPI = "RealTimeStylus";
+#endif
+
+    return defaultAPI;
+}
+
+FName
 UOdysseyStylusInputSettings::GetStylusDriver() const
 {
-    if (StylusInputDriver != "None")
-    {
-        return StylusInputDriver;
-    }
-
-    TArray<FName> Interfaces = UE::StylusInput::GetAvailableInterfaces();
-
-    return Interfaces.Num() > 0 ? Interfaces[0] : "None";
+    return StylusInputDriver;
 }
 
 //static
 FText
-UOdysseyStylusInputSettings::GetFormatText(FName InStylusInputDriver)
+UOdysseyStylusInputSettings::GetFormatText(FName iStylusInputDriver)
 {
-    static const TMap<FName, FText> DriverLabels =
+    static const TMap<FName, FText> driversLabels =
     {
         { "WinTab",      FText::FromString("Wintab") },
         { "RealTimeStylus",  FText::FromString("Windows Ink - RealTimeStylus") },
         { "NSEvent", FText::FromString("NSEvent") }
     };
 
-    if (const FText* Found = DriverLabels.Find(InStylusInputDriver))
+    if (const FText* found = driversLabels.Find(iStylusInputDriver))
     {
-        return *Found;
+        return *found;
     }
 
-    return FText::FromName(InStylusInputDriver);
-}
-
-TArray<FName>
-UOdysseyStylusInputSettings::GetAvailableStylusDrivers()
-{
-    return UE::StylusInput::GetAvailableInterfaces();
+    return FText::FromName(iStylusInputDriver);
 }
 
 FName UOdysseyStylusInputSettings::GetContainerName() const
