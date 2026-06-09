@@ -79,6 +79,13 @@ void
 UOdysseyStylusInputSettings::PostEditChangeProperty( struct FPropertyChangedEvent& iPropertyChangedEvent )
 {
     Super::PostEditChangeProperty( iPropertyChangedEvent );
+
+    const FName propertyName = iPropertyChangedEvent.Property ? iPropertyChangedEvent.Property->GetFName() : NAME_None;
+
+    if (propertyName == GET_MEMBER_NAME_CHECKED( UOdysseyStylusInputSettings, StylusInputDriver ) )
+    {
+        OnStylusInputDriverChanged.Broadcast(StylusInputDriver);
+    }
 }
 
 FName
