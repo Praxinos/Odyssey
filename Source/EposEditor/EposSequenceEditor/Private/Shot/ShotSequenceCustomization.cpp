@@ -573,6 +573,20 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
     //    FSlateIcon( FEposSequenceEditorStyle::Get().GetStyleSetName(), "Settings" )
     //);
 
+#ifdef ODC_DEBUGGAME
+    ToolbarBuilder.AddSeparator();
+
+    ToolbarBuilder.AddWidget( SNew( SBox )
+                              .Padding( 10, 0 )
+                              .VAlign( VAlign_Center )
+                              [
+                                  SNew( STextBlock )
+                                      .Text( FText::FromString( TEXT( "DEBUG" ) ) )
+                                      .ColorAndOpacity( FLinearColor::Red )
+                              ]
+    );
+#endif
+
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().CreateCameraAtCurrentTime );
