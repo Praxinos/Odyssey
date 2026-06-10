@@ -381,17 +381,13 @@ UArianeEditorEraserTool::GetPathBoundingArea( FEditorViewportClient* ViewportCli
 
 bool
 UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
+                                   , FSceneView* View
                                    , UArianePainting3DComponent* Painting3DComponent )
 {
     FTextureRenderTargetResource* RTResource = CanvasRenderTarget->GameThread_GetRenderTargetResource();
     TArray<FColor> Pixels;
     uint32 Width = CanvasRenderTarget->SizeX;
     uint32 Height = CanvasRenderTarget->SizeY;
-    FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
-                                                                            , ViewportClient->GetScene()
-                                                                            , ViewportClient->EngineShowFlags )
-                                                                            /*.SetRealtimeUpdate( iViewportClient->IsRealtime() )*/ );
-    FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
     FBox2D ErasureArea = GetErasureBoundingArea( ViewportClient, View );
 
     RTResource->ReadPixels( Pixels
@@ -965,6 +961,7 @@ UArianeEditorEraserTool::ResizeCanvas( uint32 Width, uint32 Height )
 
 bool
 UArianeEditorEraserTool::OnMouseDown( FEditorViewportClient* iViewportClient
+                                    , FSceneView* View
                                     , const FKey& iKey
                                     , const FArianePointerState& PointerState
                                     , bool iRepeat )
@@ -989,6 +986,7 @@ UArianeEditorEraserTool::OnMouseDown( FEditorViewportClient* iViewportClient
 
 void
 UArianeEditorEraserTool::OnMouseHover( FEditorViewportClient* iViewportClient
+                                     , FSceneView* View
                                      , const FArianePointerState& PointerState )
 {
     MousePosition = FVector2D( PointerState.ViewportX, PointerState.ViewportY ) ;
@@ -996,6 +994,7 @@ UArianeEditorEraserTool::OnMouseHover( FEditorViewportClient* iViewportClient
 
 bool
 UArianeEditorEraserTool::OnMouseDrag( FEditorViewportClient* iViewportClient
+                                    , FSceneView* View
                                     , const FKey& iKey
                                     , const FArianePointerState& PointerState )
 {
@@ -1017,6 +1016,7 @@ UArianeEditorEraserTool::OnMouseDrag( FEditorViewportClient* iViewportClient
 
 bool
 UArianeEditorEraserTool::OnMouseUp( FEditorViewportClient* ViewportClient
+                                  , FSceneView* View
                                   , const FKey& iKey
                                   , const FArianePointerState& PointerState )
 {
@@ -1034,7 +1034,7 @@ UArianeEditorEraserTool::OnMouseUp( FEditorViewportClient* ViewportClient
 
         if( Painting3DComponent )
         {
-            ErasePaths( ViewportClient, Painting3DComponent );
+            ErasePaths( ViewportClient, View, Painting3DComponent );
         }
         GetToolManager()->EndUndoTransaction();
 
@@ -1061,6 +1061,14 @@ void
 UArianeEditorEraserTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderAPI* RenderAPI )
 {
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+    FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
+                                                                            , ViewportClient->GetScene()
+                                                                            , ViewportClient->EngineShowFlags ) );
+    // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
+    FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
+    FLinearColor FgColor = GetForegroundColor();
+    FLinearColor BgColor = GetBackgroundColor();
+    FLinearColor HcColor = GetHighlightColor();
 
     if( CanDraw() )
     {
@@ -1075,7 +1083,7 @@ UArianeEditorEraserTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderAPI* R
             true
         );
 
-        DrawHUDCircle ( HUDCanvas, HUDPosition.X, HUDPosition.Y, ( double ) Size * 0.5f, 32 );
+        DrawCircleHUD ( HUDCanvas, ViewportClient, View, HUDPosition, ( double ) Size * 0.5f, HcColor, 1.0f );
     }
 }
 

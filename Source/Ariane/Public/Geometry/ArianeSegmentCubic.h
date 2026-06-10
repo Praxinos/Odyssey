@@ -65,6 +65,7 @@ public:
         * @return the object type
         */
     virtual uint32 GetClass() override { return StaticClass(); };
+    virtual bool HasBaseClass( uint32 BaseClassID );
 
 public:
     ~FArianeSegmentCubic();
@@ -89,7 +90,10 @@ public:
     virtual FVector GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormalize ) override;
     virtual FVector GetTangentVectorAt( double T, bool bNormalize ) override;
 
-    FArianeHandleSegment* GetHandle( uint32 Index );
+    virtual FArianeHandleSegment* GetHandle( uint32 Index );
+    virtual FArianeHandleSegment* GetHandle( FArianeVertex* Vertex );
+    FVector GetHandleVector( uint32 HandleID, bool bNormalize );
+    FVector GetHandleVector( FArianeVertex* Vertex, bool bNormalize );
 
 protected:
     void BuildVariable( uint32 MinRecurse

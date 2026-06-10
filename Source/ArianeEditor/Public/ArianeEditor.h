@@ -11,6 +11,8 @@
 // ULIS Headers
 #include <ULIS>
 
+#include "ArianeEditorHUD.h"
+
 class UArianeEditorTool;
 class FArianeEditorViewportToolkit;
 class FArianeEditorTab;
@@ -195,6 +197,8 @@ public:
     /** Unresgister all tools */
     void UnregisterTools();
 
+    const FArianeEditorHUD::FDrawingFlags& GetHUDDrawingFlags();
+
 protected:
     /**
      * @brief Add a tab
@@ -233,5 +237,5 @@ protected:
     TWeakObjectPtr<UArianePainting3DComponent> CurrentPainting3DComponent;
     ::ULIS::FColor PaintColor;
     EOdysseyPainterEditorColorType ColorType;
-
+    FArianeEditorHUD::FDrawingFlags HUDDrawingFlags;
 };

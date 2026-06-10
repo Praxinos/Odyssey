@@ -106,10 +106,18 @@ struct ARIANE_API FArianeVertex : public FArianePoint
         /** Set the vertex's radius **/
         void SetRadius( double InRadius );
 
-        virtual void SetPosition( double X, double Y, double Z ) override;
-        virtual void SetPosition( const FVector& InPosition ) override;
         bool IsSelected();
         bool IsLocked();
+        static void ArrayToSegmentArray( const TArray<FArianeVertex*>& InVertices
+                                       , TArray<FArianeSegment*>& OutSegments
+                                       , bool bEmptyFirst );
+
+    protected:
+        /**
+         * @brief Set the handle's position
+         * @param InPosition the desired handle's position
+         */
+        virtual void SetPosition_Private( const FVector& InPosition );
 
     public:
         UPROPERTY( EditAnywhere )
@@ -124,10 +132,12 @@ struct ARIANE_API FArianeVertex : public FArianePoint
         UPROPERTY( EditAnywhere )
         FVector Normal;
 
+        UPROPERTY( EditAnywhere )
+        bool bHandleAligned;
+
     protected:
         TArray<FArianeSegment*> Segments;
         uint32 ID;
 
         bool bChained : 1;
-        bool bHandleAligned : 1;
 };

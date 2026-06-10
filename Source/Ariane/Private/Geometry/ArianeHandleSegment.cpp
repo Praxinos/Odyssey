@@ -4,47 +4,88 @@
 // Ariane headers
 #include "ArianeHandleSegment.h"
 #include "ArianeSegment.h"
+#include "ArianeSegmentCubic.h"
 
 FArianeHandleSegment::~FArianeHandleSegment()
 {
 }
 
-FArianeHandleSegment::FArianeHandleSegment( FArianeSegment* iOwnerSegment, double iX, double iY, double iZ )
+FArianeHandleSegment::FArianeHandleSegment( FArianeSegment* iOwnerSegment
+                                           // A handle can be linked to multiple vertices, Quadratic bezier e.g
+                                          , const TArray<uint32> InAttachedVertexIDs
+                                          , double iX
+                                          , double iY
+                                          , double iZ )
     : FArianePoint( iX, iY, iZ )
     , OwnerSegment ( iOwnerSegment )
+    , AttachedVertexIDs ( InAttachedVertexIDs )
 {
 }
 
-FArianeHandleSegment::FArianeHandleSegment( FArianeSegment* iOwnerSegment, const FVector& iPosition )
+FArianeHandleSegment::FArianeHandleSegment( FArianeSegment* iOwnerSegment
+                                           // A handle can be linked to multiple vertices, Quadratic bezier e.g
+                                          , const TArray<uint32> InAttachedVertexIDs
+                                          , const FVector& iPosition )
     // Delegating constructor
-    : FArianeHandleSegment ( iOwnerSegment, iPosition.X, iPosition.Y, iPosition.Z )
+    : FArianeHandleSegment ( iOwnerSegment, InAttachedVertexIDs, iPosition.X, iPosition.Y, iPosition.Z )
 {
 }
 
 void
-FArianeHandleSegment::SetPosition( double InX, double InY, double InZ )
+FArianeHandleSegment::SetPosition_Private( const FVector& iPosition )
 {
-    Super::SetPosition( InX, InY, InZ );
+    // invalidate the attached vertex in order to update the joint
+    for( uint32 AttachedVertexID : AttachedVertexIDs )
+    {
+        FArianeVertex* AttachedVertex = OwnerSegment->GetVertex(AttachedVertexID);
 
-    OwnerSegment->Invalidate();
-}
+        AttachedVertex->Invalidate();
 
-void
-FArianeHandleSegment::SetPosition( const FVector& iPosition )
-{
-    Super::SetPosition( iPosition );
+        if( AttachedVertex->IsLocked() == false )
+        {
+            FArianePoint::SetPosition_Private( iPosition );
 
-    OwnerSegment->Invalidate();
-}
+            OwnerSegment->Invalidate();
 
-const FVector&
-FArianeHandleSegment::GetPosition()
-{
-    return Position;
+            if( AttachedVertex->IsHandleAligned() )
+            {
+                FVector HandleVector = Position - AttachedVertex->GetPosition();
+                FArianeSegment* OtherSegment = AttachedVertex->GetOtherSegment( OwnerSegment );
+
+                if( OtherSegment )
+                {
+                    if( OtherSegment->GetClass() == FArianeSegmentCubic::StaticClass() )
+                    {
+                        FArianeSegmentCubic* OtherCubicSegment = static_cast<FArianeSegmentCubic*>(OtherSegment);
+                        FArianeHandleSegment* OtherHandle = OtherCubicSegment->GetHandle( AttachedVertex );
+                        FVector OtherHandleVector = OtherHandle->GetPosition() - AttachedVertex->GetPosition();
+
+                        if( HandleVector.SquaredLength() )
+                        {
+                            HandleVector.Normalize();
+
+                            FVector AlignedCoords = AttachedVertex->GetPosition() - ( OtherHandleVector.Length() * HandleVector );
+
+                            OtherHandle->FArianePoint::SetPosition_Private( AlignedCoords );
+
+                            OtherSegment->Invalidate();
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 void
 FArianeHandleSegment::SetOwnerSegment( FArianeSegment* InOwnerSegment )
 {
     OwnerSegment = InOwnerSegment;
+}
+
+
+FArianeSegment*
+FArianeHandleSegment::GetOwnerSegment()
+{
+    return OwnerSegment;
 }

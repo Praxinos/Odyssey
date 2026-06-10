@@ -207,6 +207,7 @@ UArianeEditorLayerTransformTool::OnTransformChanged( UTransformProxy* Proxy, FTr
 
 bool
 UArianeEditorLayerTransformTool::OnMouseDown( FEditorViewportClient* iViewportClient
+                                            , FSceneView* View
                                             , const FKey& iKey
                                             , const FArianePointerState& PointerState
                                             , bool iRepeat )
@@ -221,6 +222,7 @@ UArianeEditorLayerTransformTool::OnMouseDown( FEditorViewportClient* iViewportCl
 
 void
 UArianeEditorLayerTransformTool::OnMouseHover( FEditorViewportClient* iViewportClient
+                                             , FSceneView* View
                                              , const FArianePointerState& State )
 {
 
@@ -228,6 +230,7 @@ UArianeEditorLayerTransformTool::OnMouseHover( FEditorViewportClient* iViewportC
 
 bool
 UArianeEditorLayerTransformTool::OnMouseDrag( FEditorViewportClient* iViewportClient
+                                            , FSceneView* View
                                             , const FKey& iKey
                                             , const FArianePointerState& PointerState )
 {
@@ -240,6 +243,7 @@ UArianeEditorLayerTransformTool::OnMouseDrag( FEditorViewportClient* iViewportCl
 
 bool
 UArianeEditorLayerTransformTool::OnMouseUp( FEditorViewportClient* ViewportClient
+                                          , FSceneView* View
                                           , const FKey& iKey
                                           , const FArianePointerState& PointerState )
 {

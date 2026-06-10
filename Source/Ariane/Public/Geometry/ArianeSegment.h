@@ -62,6 +62,7 @@ struct ARIANE_API FArianeSegment
          * @return the object type
          */
         virtual uint32 GetClass() { return StaticClass(); };
+        virtual bool HasBaseClass( uint32 BaseClassID );
 
     public:
         virtual ~FArianeSegment();

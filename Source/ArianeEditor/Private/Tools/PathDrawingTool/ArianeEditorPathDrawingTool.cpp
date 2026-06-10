@@ -10,6 +10,7 @@
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerFolder.h"
 #include "ArianePath.h"
+#include "ArianeCore.h"
 #include "ArianeVertex.h"
 #include "ArianeLayerStack.h"
 #include "ArianeSegmentCubic.h"
@@ -77,10 +78,13 @@ UArianeEditorPathDrawingTool::Inactivate()
 
 bool
 UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
+                                         , FSceneView* View
                                          , const FKey& iKey
                                          , const FArianePointerState& PointerState
                                          , bool iRepeat )
 {
+    PreviousSegment = CurrentSegment = nullptr;
+
     if( iKey == EKeys::LeftMouseButton )
     {
         UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
@@ -130,37 +134,10 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
 
 void
 UArianeEditorPathDrawingTool::OnMouseHover( FEditorViewportClient* ViewportClient
+                                          , FSceneView* View
                                           , const FArianePointerState& State )
 {
 
-}
-
-float Intersect ( const FVector4& iPlane
-                , const FVector&  iOrigin
-                , const FVector&  iDirection
-               ,  FVector& oOut )
-{
-    float vo = ( iPlane.X * iOrigin.X ) +
-               ( iPlane.Y * iOrigin.Y ) +
-               ( iPlane.Z * iOrigin.Z ) + iPlane.W,
-          vd = ( iPlane.X * iDirection.X ) +
-               ( iPlane.Y * iDirection.Y ) +
-               ( iPlane.Z * iDirection.Z );
-    float t;
-
-    if ( vd == 0.0f ) return 0.0f;
-
-    t = - ( vo / vd );
-
-    if ( t > 0.0f ) {
-        oOut.X = iOrigin.X + ( iDirection.X * t );
-        oOut.Y = iOrigin.Y + ( iDirection.Y * t );
-        oOut.Z = iOrigin.Z + ( iDirection.Z * t );
-
-        return t;
-    }
-
-    return 0.0f;
 }
 
 void
@@ -262,7 +239,7 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* ViewportClient
                                     , RayOrigin
                                     , RayDirection );
 
-            if( Intersect( DrawingPlane, RayOrigin, RayDirection, IntersectAt  ) > 0.0f )
+            if( FArianeCore::IntersectPlane( DrawingPlane, RayOrigin, RayDirection, IntersectAt  ) > 0.0f )
             {
                 FVector localCoords = LayerWorldTransform.Inverse().TransformFVector4( IntersectAt );
                 FVector localNormal = LayerWorldTransform.Inverse().TransformVector( FVector( DrawingPlane ) );
@@ -329,14 +306,21 @@ EditedPath->AddSegment( EditedPath->AllocCubicSegment( TestVertex1
                         {
                             if( Vertex0 )
                             {
-                                PathTracer.Trace( View
-                                                ,  EditedPath->GetSegments().Num() ? EditedPath->GetSegments().Last().GetSegment()
-                                                                                   : nullptr
-                                                , Vertex0
-                                                , ViewportPosition
-                                                , IntersectAt
-                                                , FVector( DrawingPlane )
-                                                , Radius );
+                                FArianeSegment* NewSegment = PathTracer.Trace( View
+                                                                             , PreviousSegment
+                                                                             , CurrentSegment ? CurrentSegment->GetVertex(0)
+                                                                                              : Vertex0
+                                                                             , CurrentSegment
+                                                                             , ViewportPosition
+                                                                             , localCoords
+                                                                             , localNormal
+                                                                             , Radius );
+
+                                if( NewSegment != CurrentSegment )
+                                {
+                                    PreviousSegment = CurrentSegment;
+                                    CurrentSegment = NewSegment;
+                                }
                             }
                         }
                         break;
@@ -354,6 +338,7 @@ EditedPath->AddSegment( EditedPath->AllocCubicSegment( TestVertex1
 
 bool
 UArianeEditorPathDrawingTool::OnMouseDrag( FEditorViewportClient* ViewportClient
+                                         , FSceneView* View
                                          , const FKey& iKey
                                          , const FArianePointerState& PointerState )
 {
@@ -367,15 +352,11 @@ UArianeEditorPathDrawingTool::OnMouseDrag( FEditorViewportClient* ViewportClient
 
 bool
 UArianeEditorPathDrawingTool::OnMouseUp( FEditorViewportClient* ViewportClient
+                                       , FSceneView* View
                                        , const FKey& iKey
                                        , const FArianePointerState& PointerState )
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-    FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
-                                                                            , ViewportClient->GetScene()
-                                                                            , ViewportClient->EngineShowFlags ) );
-    // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
-    FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
 
     if( iKey == EKeys::LeftMouseButton )
     {

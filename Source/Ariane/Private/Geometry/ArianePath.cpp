@@ -229,6 +229,17 @@ FArianePath::FArianePath( UArianeLayerDrawing* InDrawingLayer )
     //MaterialInterface = GEngine->VertexColorMaterial;
 }
 
+bool
+FArianePath::HasBaseClass( uint32 BaseClass )
+{
+    if( StaticClass() == BaseClass )
+    {
+        return true;
+    }
+
+    return Super::HasBaseClass(BaseClass);
+}
+
 /*
 void
 FArianePath::PostLoad()
@@ -729,15 +740,14 @@ FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
         FVector AverageVector = FVector::Zero();
         const TArray<FArianeSegment*> ConnectedSegments = Vertex->GetSegments();
 
-        if( ConnectedSegments.Num() == 2 )
+        if( Vertex->GetSegments().Num() == 2 )
         {
             // For 3 points ABC
-            FVector VectorBA = ConnectedSegments[0]->GetVectorLeavingFromVertex( Vertex, true );
-            FVector VectorBC = ConnectedSegments[1]->GetVectorLeavingFromVertex( Vertex, true );
+            FArianeSegment* OtherSegment = Vertex->GetOtherSegment( Segment );
+            FVector VectorBA = Segment->GetTangentVectorAt( T, true );
+            FVector VectorBC = OtherSegment->GetVectorLeavingFromVertex( Vertex, true );
 
-            TangentVector = ( VectorBA - VectorBC );
-
-
+            TangentVector = ( VectorBA + VectorBC );
         }
     }
 

@@ -32,11 +32,17 @@ FArianePoint::GetPosition()
 void
 FArianePoint::SetPosition( double X, double Y, double Z )
 {
-    Position = FVector( X, Y, Z );
+    SetPosition_Private ( FVector( X, Y, Z ) );
 }
 
 void
 FArianePoint::SetPosition( const FVector& InPosition )
+{
+    SetPosition_Private( InPosition );
+}
+
+void
+FArianePoint::SetPosition_Private( const FVector& InPosition )
 {
     Position = InPosition;
 }

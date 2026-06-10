@@ -107,6 +107,17 @@ FArianeObject::FArianeObject( UArianeLayerDrawing* InDrawingLayer )
     DrawingLayer = InDrawingLayer;
 }
 
+bool
+FArianeObject::HasBaseClass( uint32 BaseClass )
+{
+    if( StaticClass() == BaseClass )
+    {
+        return true;
+    }
+
+    return false;
+}
+
 void
 FArianeObject::RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstancedObjects )
 {

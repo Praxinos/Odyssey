@@ -123,7 +123,7 @@ GENERATED_BODY()
 public:
     static uint32 StaticClass() { return 0xf13c7476; }; // value is crc32 FArianePath
     virtual uint32 GetClass() override { return StaticClass(); };
-    //virtual bool HasBaseClass( uint32 iBaseClassID );
+    virtual bool HasBaseClass( uint32 iBaseClassID );
 
 public:
     struct ARIANE_API Chain

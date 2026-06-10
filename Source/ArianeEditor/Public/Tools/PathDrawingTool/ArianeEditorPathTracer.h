@@ -18,29 +18,25 @@ public:
     struct FTracerPoint
     {
         FVector2D ViewportPosition;
-        FVector WorldPosition;
-        FVector WorldNormal;
+        FVector LocalPosition;
+        FVector LocalNormal;
         double Radius;
-        bool bSmooth;
 
         FTracerPoint()
             : ViewportPosition( FVector2D::Zero() )
-            , WorldNormal( FVector::Zero() )
+            , LocalNormal( FVector::Zero() )
             , Radius ( 0.0f )
-            , bSmooth ( false )
         {
-            bSmooth = false;
         }
 
         FTracerPoint( const FVector2D& InViewportPosition
-                    , const FVector& InWorldPosition
-                    , const FVector& InWorldNormal
+                    , const FVector& InLocalPosition
+                    , const FVector& InLocalNormal
                     , double InRadius )
             : ViewportPosition( InViewportPosition )
-            , WorldPosition( InWorldPosition )
-            , WorldNormal( InWorldNormal )
+            , LocalPosition( InLocalPosition )
+            , LocalNormal( InLocalNormal )
             , Radius ( InRadius )
-            , bSmooth ( false )
         {
         }
     };
@@ -52,8 +48,8 @@ public:
         FTracerRecord P0;
         FTracerRecord P1;
         FVector2D ViewportVector;
-        FVector WorldVector;
-        double WorldLength;
+        FVector LocalVector;
+        double LocalLength;
 
         FTracerEdge()
         {
@@ -64,11 +60,11 @@ public:
         : P0 ( InP0 )
         , P1 ( InP1 )
         , ViewportVector ( P1.ViewportPosition - P0.ViewportPosition )
-        , WorldVector ( P1.WorldPosition - P0.WorldPosition )
-        , WorldLength ( WorldVector.Length() )
+        , LocalVector ( P1.LocalPosition - P0.LocalPosition )
+        , LocalLength ( LocalVector.Length() )
         {
             ViewportVector.Normalize();
-            WorldVector.Normalize();
+            LocalVector.Normalize();
         }
     };
 
@@ -96,9 +92,10 @@ public:
     FArianeSegment* Trace( FSceneView *View
                          , FArianeSegment* PreviousSegment
                          , FArianeVertex* StartingVertex
+                         , FArianeSegment* CurrentSegment
                          , const FVector2D& ViewportPosition
-                         , const FVector& WorldPosition
-                         , const FVector& WorldNormal
+                         , const FVector& LocalPosition
+                         , const FVector& LocalNormal
                          , double Radius );
     bool TestBezierSamples( FSceneView* View
                           , FVector InBezier[4]
@@ -106,6 +103,8 @@ public:
                           , FTracerEdge* LastEdge
                           , uint32 Samples );
     bool TestBezier( FSceneView* View
+                   , FArianeSegment* PreviousSegment
+                   , FArianeVertex* FirsVertex
                    , FTracerEdge* FirstEdge
                    , FTracerEdge* LastEdge
                    , FVector OutBezier[4] );
@@ -139,7 +138,6 @@ private:
     TArray<FTracerPoint> PointBuffer;
     TArray<FTracerRecord> RecordBuffer;
     TArray<FTracerEdge> EdgeBuffer;
-    FVector SmoothVector;
     FTracerBezier BestBezier;
     FArianePath* CubicPath;
     uint32 Width;

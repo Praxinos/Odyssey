@@ -20,6 +20,18 @@
 
 class FArianeEditor;
 struct FArianePath;
+struct FArianeVertex;
+struct FArianeSegment;
+struct FArianeHandleSegment;
+
+UENUM()
+enum class EArianePathEditToolEditionMode : uint8
+{
+    Vertex = 0,
+    VertexHandle = 1,
+    SegmentHandle = 2,
+    Alter = 3 // Add, Remove or cut
+};
 
 UENUM(BlueprintType)
 enum class EArianeEditorPathEditToolSegmentType : uint8
@@ -32,6 +44,35 @@ UCLASS()
 class ARIANEEDITOR_API UArianeEditorPathEditTool : public UArianeEditorTool
 {
 GENERATED_BODY()
+
+    // struct that stores the ratio of handleLength / segmentLength at mouseDown
+    // This allows us to adjust the handle length when moving vertices.
+    struct FSegmentAdjustment
+    {
+        double HandleRatio[2];
+        FArianeSegment* Segment;
+
+        FSegmentAdjustment( FArianeSegment* InSegment );
+        void Adjust();
+    };
+
+    // Struct that stores the displacement plane and the vertex' original position, so that we don't have to recompute each time.
+    struct FPointDisplacement
+    {
+        ~FPointDisplacement();
+        FPointDisplacement( FArianePoint* Point
+                          , const FVector4& InWorldPlane
+                          , const FTransform& Transform
+                          , const FVector& RayOrigin
+                          , const FVector& RayDirection );
+
+
+    public:
+        FVector LocalPosition;
+        FVector WorldPosition;
+        FVector WorldRayPositionAtDown;
+        FVector4 WorldPlane;
+    };
 
 public:
     static FString GetStaticType() { return "ArianeEditor_PathEditTool"; };
@@ -46,15 +87,19 @@ public:
 
     //Mouse events overrides
     virtual bool OnMouseDown( FEditorViewportClient* iViewportClient
+                            , FSceneView* View
                             , const FKey& iKey
                             , const FArianePointerState& State
                             , bool iRepeat = false ) override;
     virtual void OnMouseHover( FEditorViewportClient* iViewportClient
+                             , FSceneView* View
                              , const FArianePointerState& State ) override;
     virtual bool OnMouseDrag( FEditorViewportClient* iViewportClient
+                            , FSceneView* View
                             , const FKey& iKey
                             , const FArianePointerState& State ) override;
     virtual bool OnMouseUp( FEditorViewportClient* iViewportClient
+                          , FSceneView* View
                           , const FKey& iKey
                           , const FArianePointerState& State ) override;
     virtual bool SupportsColorType( EOdysseyPainterEditorColorType ColorType ) override;
@@ -64,6 +109,10 @@ public:
     void Activate();
     void Inactivate();
     virtual void DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
+    virtual bool OnKeyUpGlobal( const FKeyEvent& InKeyEvent ) override;
+    virtual bool OnKeyDownGlobal( const FKeyEvent& InKeyEvent ) override;
+
+    virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
 
 protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
@@ -85,14 +134,49 @@ protected:
     FVector4 GetDrawingPlane( FEditorViewportClient* ViewportClient
                             , UArianeLayerDrawing* DrawingLayer );
 
+    FArianeEditorHUD::FDrawingFlags EditonModeToHUDDrawingFlags();
+    FPickingFlags EditonModeToPickingFlags();
+
+    static void BuildSegmentAdjustments( const TArray<FArianeSegment*>& Segments
+                                       , TArray<FSegmentAdjustment>& OutSegmentAdjustments );
+    void OnMouseDownPickPoint( FEditorViewportClient* ViewportClient
+                             , FSceneView* View
+                             , const FKey& iKey
+                             , const FArianePointerState& PointerState
+                             , bool iRepeat );
+
+    static void DisplacePoint( FArianePoint* Point
+                             , const FPointDisplacement& PointDisplacment
+                             , const FTransform& Transform
+                             , const FVector& RayOrigin
+                             , const FVector& RayDirection );
+    const FSlateBrush* GetBackgroundBrush( EArianePathEditToolEditionMode iMode ) const;
+    void SetEditionMode( EArianePathEditToolEditionMode iMode );
+    EArianePathEditToolEditionMode GetEditionMode();
+    TSharedRef<SWidget> CreateModifierSegmentControl();
+
 public:
     UPROPERTY( EditAnywhere
-             , Category = PathEditTool
-             , meta = ( ToolTip = "Size"
-                      , ClampMin = "0.0"
-                      , Delta = "0.1"
-                      , UIMin = "0.0" ) )
-    double Size;
+             , Category=PathEditTool
+             , meta = ( ToolTip  = "Picking Radius"
+                      , ClampMin = "0"
+                      , UIMin    = "0"
+                      , LinearDeltaSensitivity = "15"
+                      , Delta = "1" ) )
+    uint32 PickingRadius;
+
+    UPROPERTY( EditAnywhere
+             , Category=PathEditTool
+             , meta = ( ToolTip = "Widen All Along" ) )
+    bool WidenAllAlong;
 
 protected:
+    TArray<FArianeVertex*> PickedVertexArray;
+    TArray<FPointDisplacement> PickedVertexDisplacementArray;
+    TArray<double> PickedVertexRadiusArray;
+    TArray<FArianeHandleSegment*> PickedHandleArray;
+    TArray<FPointDisplacement> PickedHandleDisplacementArray;
+    TArray<FSegmentAdjustment> SegmentAdjustmentArray;
+    TArray<FArianePath*> SelectedPathArray;
+    EArianePathEditToolEditionMode EditionMode;
 };

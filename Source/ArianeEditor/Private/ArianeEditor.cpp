@@ -40,9 +40,17 @@ FArianeEditor::FArianeEditor( FArianeEditorViewportToolkit* iToolkit )
     , Name("ArianeEditor")
     , ColorType ( EOdysseyPainterEditorColorType::Raw )
 {
+    HUDDrawingFlags.Mode = FArianeEditorHUD::EMode::Object;
+
     // Component selection is managed by ArianeEditor in order to emulate a Pre/Post Selection event behavior
     USelection::SelectionChangedEvent.AddRaw( this, &FArianeEditor::OnEditorSelectionChanged );
 
+}
+
+const FArianeEditorHUD::FDrawingFlags&
+FArianeEditor::GetHUDDrawingFlags()
+{
+    return HUDDrawingFlags;
 }
 
 void

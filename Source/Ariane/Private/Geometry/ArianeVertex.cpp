@@ -112,17 +112,9 @@ FArianeVertex::IsSelected()
 }
 
 void
-FArianeVertex::SetPosition( double X, double Y, double Z )
+FArianeVertex::SetPosition_Private( const FVector& InPosition )
 {
-    Super::SetPosition( X, Y, Z );
-
-    Invalidate();
-}
-
-void
-FArianeVertex::SetPosition( const FVector& InPosition )
-{
-    Super::SetPosition( InPosition );
+    Super::SetPosition_Private( InPosition );
 
     Invalidate();
 }
@@ -169,4 +161,33 @@ uint32
 FArianeVertex::GetID()
 {
     return ID;
+}
+
+//static
+void
+FArianeVertex::ArrayToSegmentArray( const TArray<FArianeVertex*>& InVertices
+                                  , TArray<FArianeSegment*>& OutSegments
+                                  , bool bEmptyFirst )
+{
+    if( bEmptyFirst )
+    {
+        OutSegments.Empty();
+    }
+
+    OutSegments.Reserve( OutSegments.Max() + InVertices.Num() );
+
+    for( int i = 0; i < InVertices.Num(); i++ )
+    {
+        FArianeVertex* Vertex = InVertices[i];
+
+        for( const FArianeSegmentID& SegmentID : Vertex->GetSegments() )
+        {
+            FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment();
+
+            if( OutSegments.Find( Segment ) == INDEX_NONE )
+            {
+                OutSegments.Add( Segment );
+            }
+        }
+    }
 }
