@@ -157,14 +157,14 @@ IOdysseyViewportDrawingEditorAdapter::ViewportCoordinatesToTextureCoordinates(FV
     CollisionParams.bReturnFaceIndex = true;
     CollisionParams.bReturnPhysicalMaterial = true;
 
-    USkeletalMeshComponent* SkeletalMeshComponent = Cast< USkeletalMeshComponent >(mExtension->Component());
+    /*USkeletalMeshComponent* SkeletalMeshComponent = Cast< USkeletalMeshComponent >(mExtension->Component());
     if (SkeletalMeshComponent)
     {
         SkeletalMeshComponent->SetCollisionObjectType(ECC_PhysicsBody);
         SkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
         SkeletalMeshComponent->bEnablePerPolyCollision = true;
         SkeletalMeshComponent->RecreatePhysicsState();
-    }
+    }*/
 
     // Compute a world space ray from the screen space mouse coordinates
     /* FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
