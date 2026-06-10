@@ -39,6 +39,16 @@ public class EposSequenceEditor : ModuleRules
             OptimizeCode = CodeOptimization.Never;
         }
 
+        if (Target.Configuration == UnrealTargetConfiguration.Debug || Target.Configuration == UnrealTargetConfiguration.DebugGame)
+        {
+            // To know when the plugin is build in DebugGame mode
+            // Not intended to be overused, it's just to be able to display a note in the sequencer toolbar
+            //
+            // It has no value (=XX) to not have to also set it in the "else" part
+            // And so, in code, use #ifdef
+            PrivateDefinitions.Add("ODC_DEBUGGAME");
+        }
+
         PublicIncludePaths.AddRange(
             new string[] {
                 // ... add public include paths required here ...
