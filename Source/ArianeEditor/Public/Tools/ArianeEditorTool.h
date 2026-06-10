@@ -8,8 +8,9 @@
 #include "Framework/MultiBox/MultiBoxExtender.h"
 #include "InteractiveTool.h"
 #include "BaseBehaviors/BehaviorTargetInterfaces.h"
-// Ariane
+// Ariane Editor
 #include "ArianePointerState.h"
+#include "ArianeEditorHUD.h"
 // OdysseyHeaders
 #include "OdysseyPainterEditorColorType.h"
 #include "StylusInputHandler.h"
@@ -24,63 +25,13 @@ struct FArianeSegment;
 struct FArianeSegmentCubic;
 struct FArianePath;
 struct FArianePoint;
+struct FArianeHandleSegment;
 class FSceneView;
 class FStylusState;
 struct FSlateBrush;
 class UArianeLayer;
 class UArianeLayerDrawing;
-/* Gary
 class FArianeEditorToolInputProcessor;
-*/
-
-namespace FArianeHUD
-{
-    static const uint32 VERTEXRADIUS = 4;
-    static const uint32 HANDLERADIUS = 3;
-
-    enum class EMode : uint8
-    {
-        Object =        1  ,
-        Vertex = ( 1 << 0 ),
-    };
-
-    struct FPickingFlags
-    {
-        public:
-            FPickingFlags& SetPathVertex()        { PathVertex         = true; return *this; };
-            FPickingFlags& SetPathSegment()       { PathSegment        = true; return *this; };
-            FPickingFlags& SetPathSegmentHandle() { PathSegmentHandle  = true; return *this; };
-            FPickingFlags& SetPathVertexHandle()  { PathVertexHandle   = true; return *this; };
-
-        public:
-            bool PathVertex         : 1 = 0;
-            bool PathSegment        : 1 = 0;
-            bool PathSegmentHandle  : 1 = 0;
-            bool PathVertexHandle   : 1 = 0;
-    };
-
-    struct FDrawingFlags
-    {
-        public:
-            FDrawingFlags& SetPathVertex()        { PathVertex         = true; return *this; };
-            FDrawingFlags& SetPathSegment()       { PathSegment        = true; return *this; };
-            FDrawingFlags& SetPathSegmentHandle() { PathSegmentHandle  = true; return *this; };
-            FDrawingFlags& SetPathVertexHandle()  { PathVertexHandle   = true; return *this; };
-            FDrawingFlags& SetPathVertexValence0(){ PathVertexValence0 = true; return *this; };
-            FDrawingFlags& SetPathVertexValence1(){ PathVertexValence1 = true; return *this; };
-            FDrawingFlags& SetPathVertexValence2(){ PathVertexValence2 = true; return *this; };
-
-        public:
-            EMode Mode = EMode::Object;
-            bool PathVertex         : 1 = 0;
-            bool PathSegment        : 1 = 0;
-            bool PathSegmentHandle  : 1 = 0;
-            bool PathVertexHandle   : 1 = 0;
-            bool PathVertexValence0 : 1 = 0;
-            bool PathVertexValence1 : 1 = 0;
-            bool PathVertexValence2 : 1 = 0;
-    };
-};
 
 UCLASS(Abstract)
 class ARIANEEDITOR_API UArianeEditorTool : public UInteractiveTool
@@ -96,6 +47,21 @@ public:
         kNone,
         kStylusUp,
         kStylusDown,
+    };
+
+    struct FPickingFlags
+    {
+        public:
+            FPickingFlags& SetPathVertex()        { PathVertex         = true; return *this; };
+            FPickingFlags& SetPathSegment()       { PathSegment        = true; return *this; };
+            FPickingFlags& SetPathSegmentHandle() { PathSegmentHandle  = true; return *this; };
+            FPickingFlags& SetPathVertexHandle()  { PathVertexHandle   = true; return *this; };
+
+        public:
+            bool PathVertex         : 1 = 0;
+            bool PathSegment        : 1 = 0;
+            bool PathSegmentHandle  : 1 = 0;
+            bool PathVertexHandle   : 1 = 0;
     };
 
 public:
@@ -139,18 +105,23 @@ public:
 
     //Mouse events
     virtual bool OnMouseDown( FEditorViewportClient* iViewportClient
+                            , FSceneView* View
                             , const FKey& iKey
                             , const FArianePointerState& State
                             , bool iRepeat = false );
     virtual void OnMouseHover( FEditorViewportClient* iViewportClient
-                                , const FArianePointerState& State );
+                             , FSceneView* View
+                             , const FArianePointerState& State );
     virtual bool OnMouseDrag( FEditorViewportClient* iViewportClient
+                            , FSceneView* View
                             , const FKey& iKey
                             , const FArianePointerState& State );
     virtual bool OnMouseUp( FEditorViewportClient* iViewportClient
-                            , const FKey& iKey
-                            , const FArianePointerState& State );
+                          , FSceneView* View
+                          , const FKey& iKey
+                          , const FArianePointerState& State );
     virtual bool OnMouseClick( FEditorViewportClient* iViewportClient
+                             , FSceneView* View
                              , const FKey& iKey
                              , const FArianePointerState& State );
 
@@ -190,6 +161,14 @@ public:
      * @return the current mouse cursor to display
      */
     virtual bool GetCursor( EMouseCursor::Type& OutCursor );
+
+
+    bool ProcessKeyUpGlobal(const FKeyEvent& InKeyEvent);
+    bool ProcessKeyDownGlobal(const FKeyEvent& InKeyEvent);
+
+    // For global key press events
+    virtual bool OnKeyUpGlobal(const FKeyEvent& InKeyEvent);
+    virtual bool OnKeyDownGlobal(const FKeyEvent& InKeyEvent);
 
 public:
     // UInteractiveTool
@@ -237,11 +216,11 @@ protected:
      */
     FVector2D ScreenToHUD( FEditorViewportClient* ViewportClient, const FVector2D& ScreenPosition );
 
-    FVector2D WorldToPixel( FSceneView* View, const FVector& WorldPosition );
-    FVector2D WorldToHUD( FEditorViewportClient* ViewportClient
-                        , FSceneView* View
-                        , const FVector& WorldPosition );
-
+    bool WorldToPixel( FSceneView* View, const FVector& WorldPosition, FVector2D& OutHUDPosition );
+    bool WorldToHUD( FEditorViewportClient* ViewportClient
+                   , FSceneView* View
+                   , const FVector& WorldPosition
+                   , FVector2D& OutHUDPosition );
 /* Gary
 
     virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey );
@@ -254,13 +233,11 @@ protected:
 */
 
 public:
-
-
+    virtual void ExtendToolbar( UToolMenu* iToolMenu );
 
 /* Gary
     virtual void BindShortcuts(TSharedPtr<FUICommandList> iCommandList);
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender );
-    virtual void ExtendToolbar( UToolMenu* iToolMenu );
     virtual TSharedPtr<FOdysseyHUDElement> GetHUD();
 */
 
@@ -284,10 +261,15 @@ protected:
 
     // Picking
 protected:
-    void PickPathPoints( FArianePath* Path
-                       , bool bClearFirst
-                       , const FArianeHUD::FPickingFlags& PickingFlags
-                       , TArray<FArianePoint*> OutPickedPoints );
+    bool PickPathPoints( FEditorViewportClient* ViewportClient
+                       , FSceneView* View
+                       , FArianePath* Path
+                       , double ViewportX
+                       , double ViewportY
+                       , double PickingRadius
+                       , TArray<FArianeVertex*>& OutPickedVertices
+                       , TArray<FArianeHandleSegment*>& OutPickedHandles
+                       , const FPickingFlags& PickingFlags );
 
     // HUD
 protected:
@@ -312,7 +294,7 @@ protected:
                       , const FLinearColor& FgColor
                       , const FLinearColor& BgColor
                       , const FLinearColor& HcColor
-                      , const FArianeHUD::FDrawingFlags& HUDDrawingFlags );
+                      , const FArianeEditorHUD::FDrawingFlags& HUDDrawingFlags );
     void DrawCubicSegmentHUD( FCanvas* Canvas
                             , FEditorViewportClient* ViewportClient
                             , FSceneView* View
@@ -320,7 +302,7 @@ protected:
                             , const FLinearColor& FgColor
                             , const FLinearColor& BgColor
                             , const FLinearColor& HcColor
-                            , const FArianeHUD::FDrawingFlags& HUDDrawingFlags );
+                            , const FArianeEditorHUD::FDrawingFlags& HUDDrawingFlags );
     void DrawSegmentHUD( FCanvas* Canvas
                        , FEditorViewportClient* ViewportClient
                        , FSceneView* View
@@ -328,7 +310,7 @@ protected:
                        , const FLinearColor& FgColor
                        , const FLinearColor& BgColor
                        , const FLinearColor& HcColor
-                       , const FArianeHUD::FDrawingFlags& HUDDrawingFlags );
+                       , const FArianeEditorHUD::FDrawingFlags& HUDDrawingFlags );
     void DrawPathHUD( FCanvas* Canvas
                     , FEditorViewportClient* ViewportClient
                     , FSceneView* View
@@ -336,9 +318,18 @@ protected:
                     , const FLinearColor& FgColor
                     , const FLinearColor& BgColor
                     , const FLinearColor& HcColor
-                    , const FArianeHUD::FDrawingFlags& HUDDrawingFlags );
+                    , const FArianeEditorHUD::FDrawingFlags& HUDDrawingFlags );
 
-    void DrawHUDCircle( FCanvas* Canvas, double X, double Y, double Radius, uint32 Steps );
+    void DrawCircleHUD( FCanvas* Canvas
+                      , FEditorViewportClient* ViewportClient
+                      , FSceneView* View
+                      , const FVector2D& HUDCoords
+                      , double Radius
+                      , const FLinearColor& Color
+                      , float Thickness );
+    FLinearColor GetForegroundColor();
+    FLinearColor GetBackgroundColor();
+    FLinearColor GetHighlightColor();
 
 public:
     FArianeEditor* GetEditor() const;
@@ -352,9 +343,7 @@ protected:
     bool bIsFocused = false;
 
 protected:
-/*
-    TSharedPtr<FArianeEditorToolInputProcessor> mInputProcessor;
-*/
+    TSharedPtr<FArianeEditorToolInputProcessor> InputProcessor;
     FArianeEditor* Editor;
     TSharedPtr<FUICommandList> CommandList;
     bool bHasContextMenu;

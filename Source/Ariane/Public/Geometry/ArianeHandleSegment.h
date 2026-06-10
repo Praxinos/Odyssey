@@ -12,6 +12,7 @@
 
 struct FArianeObject;
 struct FArianeSegment;
+struct FArianeVertex;
 
 USTRUCT(BlueprintType)
 struct ARIANE_API FArianeHandleSegment : public FArianePoint
@@ -29,41 +30,36 @@ struct ARIANE_API FArianeHandleSegment : public FArianePoint
          * @param Y the desired handle's Y position
          * @param Z the desired handle's Z position
          */
-        FArianeHandleSegment( FArianeSegment* iOwnerSegment, double X, double Y, double Z );
+        FArianeHandleSegment( FArianeSegment* iOwnerSegment
+                            , const TArray<uint32> VertexIDs
+                            , double X
+                            , double Y
+                            , double Z );
 
         /**
          * @brief Constructor
          * @param InOwnerSegment handle's owner segment
          * @param InPosition the desired handle's position
          */
-        FArianeHandleSegment( FArianeSegment* InOwnerSegment, const FVector& InPosition );
-
-        /**
-         * @brief Set the handle's position
-         * @param X the desired handle's X position
-         * @param Y the desired handle's Y position
-         * @param Z the desired handle's Z position
-         */
-        virtual void SetPosition( double X, double Y, double Z ) override;
-
-        /**
-         * @brief Set the handle's position
-         * @param InPosition the desired handle's position
-         */
-        virtual void SetPosition( const FVector& InPosition ) override;
-
-        /**
-         * @brief Get the handle's position
-         * @return The handle's position
-         */
-        const FVector& GetPosition();
+        FArianeHandleSegment( FArianeSegment* InOwnerSegment
+                            , const TArray<uint32> InAttachedVertexIDs
+                            , const FVector& InPosition );
 
         /**
          * @brief Set the handle's owner segment
          * @param the handle's owner segment
          */
         void SetOwnerSegment( FArianeSegment* InOwnerSegment );
+        FArianeSegment* GetOwnerSegment();
+
+    protected:
+        /**
+         * @brief Set the handle's position
+         * @param InPosition the desired handle's position
+         */
+        virtual void SetPosition_Private( const FVector& InPosition ) override;
 
     protected:
         FArianeSegment* OwnerSegment;
+        TArray<uint32> AttachedVertexIDs;
 };

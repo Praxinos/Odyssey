@@ -47,15 +47,19 @@ public:
 
     //Mouse events overrides
     virtual bool OnMouseDown( FEditorViewportClient* iViewportClient
+                            , FSceneView* View
                             , const FKey& iKey
                             , const FArianePointerState& State
                             , bool iRepeat = false ) override;
     virtual void OnMouseHover( FEditorViewportClient* iViewportClient
+                             , FSceneView* View
                              , const FArianePointerState& State ) override;
     virtual bool OnMouseDrag( FEditorViewportClient* iViewportClient
+                            , FSceneView* View
                             , const FKey& iKey
                             , const FArianePointerState& State ) override;
     virtual bool OnMouseUp( FEditorViewportClient* iViewportClient
+                          , FSceneView* View
                           , const FKey& iKey
                           , const FArianePointerState& State ) override;
     virtual bool SupportsColorType( EOdysseyPainterEditorColorType ColorType ) override;
@@ -117,4 +121,6 @@ public:
 protected:
     FArianePath* EditedPath;
     FArianeEditorPathTracer PathTracer;
+    FArianeSegment* PreviousSegment;
+    FArianeSegment* CurrentSegment;
 };

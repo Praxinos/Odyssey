@@ -3,6 +3,7 @@
 
 // Ariane Editor Headers
 #include "ArianeEditorTool.h"
+#include "ArianeEditorToolInputProcessor.h"
 #include "ArianeEditor.h"
 #include "ArianeEditorSettings.h"
 // Ariane Headers
@@ -45,9 +46,8 @@ UArianeEditorTool::UArianeEditorTool()
     , HandleTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Handle_Full") ) )
     , LineOutlinedTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Line_Outlined") ) )
 {
-/* Gary
-    mInputProcessor = MakeShared<FArianeEditorToolInputProcessor>(this);
-*/
+    // For global key events
+    InputProcessor = MakeShared<FArianeEditorToolInputProcessor>(this);
 }
 
 void
@@ -114,10 +114,9 @@ UArianeEditorTool::Activate()
     }
 
     // register IInputProcessor interface for handling global key press
+    FSlateApplication::Get().RegisterInputPreProcessor(InputProcessor);
+
 /* Gary
-    FSlateApplication::Get().RegisterInputPreProcessor(mInputProcessor);
-
-
     mCommandList = MakeShared<FUICommandList>();
     BindShortcuts(mCommandList);
 
@@ -130,11 +129,11 @@ void
 UArianeEditorTool::Inactivate()
 {
     UnregisterWindow();
+
     // unregister IInputProcessor interface
+    FSlateApplication::Get().UnregisterInputPreProcessor(InputProcessor);
+
 /* Gary
-    FSlateApplication::Get().UnregisterInputPreProcessor(mInputProcessor);
-
-
     //mToolContext->OnChanged().RemoveAll(this);
     Flush(); //Finish everything
 
@@ -184,7 +183,32 @@ UArianeEditorTool::IsActivated() const
     return Editor->GetCurrentTool() == this;
 }
 
+bool
+UArianeEditorTool::ProcessKeyUpGlobal(const FKeyEvent& InKeyEvent)
+{
+    return OnKeyUpGlobal(InKeyEvent);
+}
+
+bool
+UArianeEditorTool::ProcessKeyDownGlobal(const FKeyEvent& InKeyEvent)
+{
+    return OnKeyDownGlobal(InKeyEvent);
+}
+
+bool
+UArianeEditorTool::OnKeyDownGlobal(const FKeyEvent& InKeyEvent)
+{
+    return false; //false means Unreal will continue as if we did nothing
+}
+
+bool
+UArianeEditorTool::OnKeyUpGlobal(const FKeyEvent& InKeyEvent)
+{
+    return false; //false means Unreal will continue as if we did nothing
+}
+
 bool UArianeEditorTool::OnMouseDown( FEditorViewportClient* iViewportClient
+                                   , FSceneView* View
                                    , const FKey& Key
                                    , const FArianePointerState& State
                                    , bool iRepeat )
@@ -194,12 +218,14 @@ bool UArianeEditorTool::OnMouseDown( FEditorViewportClient* iViewportClient
 
 void
 UArianeEditorTool::OnMouseHover( FEditorViewportClient* iViewportClient
+                               , FSceneView* View
                                , const FArianePointerState& State )
 {
 }
 
 bool
 UArianeEditorTool::OnMouseDrag( FEditorViewportClient* iViewportClient
+                              , FSceneView* View
                               , const FKey& iKey
                               , const FArianePointerState& State )
 {
@@ -208,6 +234,7 @@ UArianeEditorTool::OnMouseDrag( FEditorViewportClient* iViewportClient
 
 bool
 UArianeEditorTool::OnMouseUp( FEditorViewportClient* iViewportClient
+                            , FSceneView* View
                             , const FKey& Key
                             , const FArianePointerState& State )
 {
@@ -216,6 +243,7 @@ UArianeEditorTool::OnMouseUp( FEditorViewportClient* iViewportClient
 
 bool
 UArianeEditorTool::OnMouseClick( FEditorViewportClient* iViewportClient
+                               , FSceneView* View
                                , const FKey& Key
                                , const FArianePointerState& State )
 {
@@ -491,37 +519,6 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
 }
 
 void
-UArianeEditorTool::DrawHUDCircle(  FCanvas* Canvas, double X, double Y, double Radius, uint32 Steps )
-{
-    double Point0Angle = 0.0f;
-    double AngleStep = ( 2.0f * PI ) / Steps;
-    FVector Point0 =  FVector ( X + FMath::Cos( Point0Angle ) * Radius,
-                                Y + FMath::Sin( Point0Angle ) * Radius,
-                                0.0f );
-    FCanvasLineItem Line;
-
-    Line.LineThickness = 1.0f;
-    Line.SetColor( FColor::Red );
-
-    for ( uint32 i = 0; i < Steps; i++ )
-    {
-        double Point1Angle = Point0Angle + AngleStep;
-        FVector Point1 =  FVector ( X + FMath::Cos( Point1Angle ) * Radius,
-                                    Y + FMath::Sin( Point1Angle ) * Radius,
-                                    0.0f );
-
-        Line.Origin = Point0;
-        Line.EndPos = Point1;
-
-        Canvas->DrawItem( Line );
-
-        Point0 = Point1;
-
-        Point0Angle = Point1Angle;
-    }
-}
-
-void
 UArianeEditorTool::Render(IToolsContextRenderAPI* RenderAPI)
 {
 }
@@ -681,6 +678,11 @@ UArianeEditorTool::ReadStylusInput( eStylusEventFence iUntilEventType )
     }
 
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+    FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
+                                                                            , ViewportClient->GetScene()
+                                                                            , ViewportClient->EngineShowFlags ) );
+    // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
+    FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
     UE::StylusInput::FStylusInputPacket packet;
 
     while (mPacketQueue.Dequeue(packet))
@@ -691,7 +693,7 @@ UArianeEditorTool::ReadStylusInput( eStylusEventFence iUntilEventType )
         {
             //MouseDown
             bIsStylusDown = true;
-            OnMouseDown(ViewportClient, PressedKey, arianePointerState);
+            OnMouseDown(ViewportClient, View, PressedKey, arianePointerState);
             mEventsConsumedSinceLastUp++;
 
             if (iUntilEventType == eStylusEventFence::kStylusDown)
@@ -700,7 +702,7 @@ UArianeEditorTool::ReadStylusInput( eStylusEventFence iUntilEventType )
         else if (packet.Type == UE::StylusInput::EPacketType::StylusUp && CanDraw())
         {
             //MouseUp
-            OnMouseUp(ViewportClient, PressedKey, arianePointerState);
+            OnMouseUp(ViewportClient, View, PressedKey, arianePointerState);
             bIsStylusDown = false;
             mEventsConsumedSinceLastUp = 0;
             StopStylusInputRecord();
@@ -710,7 +712,7 @@ UArianeEditorTool::ReadStylusInput( eStylusEventFence iUntilEventType )
         }
         else if (bIsStylusDown && CanDraw())
         {
-            OnMouseDrag(ViewportClient, PressedKey, arianePointerState);
+            OnMouseDrag(ViewportClient, View, PressedKey, arianePointerState);
             mEventsConsumedSinceLastUp++;
         }
     }
@@ -792,8 +794,14 @@ UArianeEditorTool::OnUpdateHover( const FInputDeviceRay& DevicePos )
     bIsFocused = true;
 
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+    FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
+                                                                            , ViewportClient->GetScene()
+                                                                            , ViewportClient->EngineShowFlags ) );
+    // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
+    FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
 
     OnMouseHover( ViewportClient
+                , View
                 , FArianePointerState( DevicePos.ScreenPosition.X
                                      , DevicePos.ScreenPosition.Y ) );
 
@@ -870,13 +878,19 @@ UArianeEditorTool::OnClickPress( const FInputDeviceRay& PressPos )
     else
     {
         FEditorViewportClient* ViewportClient = GetActiveViewportClient();
-        FArianePointerState Pointerstate = FArianePointerState(PressPos.ScreenPosition.X
-            , PressPos.ScreenPosition.Y);
+        FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
+                                                                                , ViewportClient->GetScene()
+                                                                                , ViewportClient->EngineShowFlags ) );
+        // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
+        FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
+        FArianePointerState Pointerstate = FArianePointerState( PressPos.ScreenPosition.X
+                                                              , PressPos.ScreenPosition.Y );
 
         if (CanDraw())
-            OnMouseDown(ViewportClient
-                , PressedKey
-                , Pointerstate);
+            OnMouseDown( ViewportClient
+                       , View
+                       , PressedKey
+                       , Pointerstate);
     }
 }
 
@@ -891,13 +905,19 @@ UArianeEditorTool::OnClickDrag( const FInputDeviceRay& DragPos )
     else
     {
         FEditorViewportClient* ViewportClient = GetActiveViewportClient();
-        FArianePointerState Pointerstate = FArianePointerState(DragPos.ScreenPosition.X
-            , DragPos.ScreenPosition.Y);
+        FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
+                                                                                , ViewportClient->GetScene()
+                                                                                , ViewportClient->EngineShowFlags ) );
+        // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
+        FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
+        FArianePointerState Pointerstate = FArianePointerState( DragPos.ScreenPosition.X
+                                                              , DragPos.ScreenPosition.Y);
 
         if (CanDraw())
-            OnMouseDrag(ViewportClient
-                , PressedKey
-                , Pointerstate);
+            OnMouseDrag( ViewportClient
+                       , View
+                       , PressedKey
+                       , Pointerstate );
     }
 }
 
@@ -912,32 +932,44 @@ UArianeEditorTool::OnClickRelease(const FInputDeviceRay& ReleasePos)
     else
     {
         FEditorViewportClient* ViewportClient = GetActiveViewportClient();
-        FArianePointerState Pointerstate = FArianePointerState(ReleasePos.ScreenPosition.X
-            , ReleasePos.ScreenPosition.Y);
+        FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
+                                                                                , ViewportClient->GetScene()
+                                                                                , ViewportClient->EngineShowFlags ) );
+        // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
+        FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
+        FArianePointerState Pointerstate = FArianePointerState( ReleasePos.ScreenPosition.X
+                                                              , ReleasePos.ScreenPosition.Y );
 
         if (CanDraw())
-            OnMouseUp(ViewportClient
-                , PressedKey
-                , Pointerstate);
+            OnMouseUp( ViewportClient
+                     , View
+                     , PressedKey
+                     , Pointerstate);
     }
 }
 
-FVector2D
+bool
 UArianeEditorTool::WorldToHUD( FEditorViewportClient* ViewportClient
                              , FSceneView* View
-                             , const FVector& WorldPosition )
+                             , const FVector& WorldPosition
+                             , FVector2D& OutHUDPosition )
 {
-    return ScreenToHUD ( ViewportClient, WorldToPixel( View, WorldPosition ) );
+    FVector2D ScreenPosition;
+
+    if( WorldToPixel( View, WorldPosition, ScreenPosition ) )
+    {
+        OutHUDPosition = ScreenToHUD ( ViewportClient, ScreenPosition );
+
+        return true;
+    }
+
+    return false;
 }
 
-FVector2D
-UArianeEditorTool::WorldToPixel( FSceneView* View, const FVector& WorldPosition )
+bool
+UArianeEditorTool::WorldToPixel( FSceneView* View, const FVector& WorldPosition, FVector2D& OutHUDPosition )
 {
-    FVector2D PixelPosition;
-
-    View->WorldToPixel( WorldPosition, PixelPosition );
-
-    return PixelPosition;
+    return View->WorldToPixel( WorldPosition, OutHUDPosition );
 }
 
 FVector2D
@@ -955,17 +987,167 @@ UArianeEditorTool::OnTerminateDragSequence()
 {
 }
 
-// Picking
-void
-UArianeEditorTool::PickPathPoints( FArianePath* Path
-                                 , bool bClearFirst
-                                 , const FArianeHUD::FPickingFlags& PickingFlags
-                                 , TArray<FArianePoint*> OutPickedPoints )
-{
 
+
+// Picking
+bool
+UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
+                                 , FSceneView* View
+                                 , FArianePath* Path
+                                 , double ViewportX
+                                 , double ViewportY
+                                 , double PickingRadius
+                                 , TArray<FArianeVertex*>& OutPickedVertices
+                                 , TArray<FArianeHandleSegment*>& OutPickedHandles
+                                 , const FPickingFlags& PickingFlags )
+{
+    const FTransform& PathTransform = Path->GetTransform();
+    bool bAnythingPicked = false;
+    FVector2D HUDMousePosition = FVector2D( ViewportX, ViewportY );
+
+    for( const FArianeVertexID& VertexID : Path->GetVertices() )
+    {
+        FArianeVertex* Vertex = const_cast<FArianeVertexID&>(VertexID).GetVertex();
+
+        // Pick vertex
+        if ( PickingFlags.PathVertex )
+        {
+            const FVector& LocalVertexPosition = Vertex->GetPosition();
+            const FVector& WorldVertexPosition = PathTransform.TransformPosition( LocalVertexPosition );
+            FVector2D HUDVertexPosition;
+
+            if( WorldToHUD( ViewportClient, View, WorldVertexPosition, HUDVertexPosition ) )
+            {
+                FVector2D Dif = HUDVertexPosition - HUDMousePosition;
+
+                if( Dif.Length() < PickingRadius )
+                {
+                    OutPickedVertices.Add( Vertex );
+
+                    bAnythingPicked = true;
+                }
+            }
+        }
+
+        // Pick vertex handle
+        if( PickingFlags.PathVertexHandle )
+        {
+            FVector LocalHandlePosition[2];
+
+            //Vertex->GetHandlePosition( LocalHandlePosition );
+
+            for( int i = 0; i < 2; i++ )
+            {
+                FVector WorldHandlePosition = PathTransform.TransformPosition( LocalHandlePosition[i] );
+                FVector2D HUDHandlePosition;
+
+                if( WorldToHUD( ViewportClient, View, WorldHandlePosition, HUDHandlePosition ) )
+                {
+                    FVector2D Dif = HUDHandlePosition - HUDMousePosition;
+
+                    if( Dif.Length() <= PickingRadius )
+                    {
+                        OutPickedVertices.Add( Vertex );
+
+                        bAnythingPicked = true;
+
+                        break; // forbid multiple selection
+                    }
+                }
+            }
+        }
+    }
+
+    // Pick segment handles
+    if( PickingFlags.PathSegmentHandle )
+    {
+        for( const FArianeSegmentID& SegmentID : Path->GetSegments() )
+        {
+            FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment();
+
+            if( Segment->GetClass() == FArianeSegmentCubic::StaticClass() )
+            {
+                FArianeSegmentCubic* CubicSegment = static_cast<FArianeSegmentCubic*>(Segment);
+
+                for( uint32 i = 0; i < 2; i++ )
+                {
+                    // TODO: hit-test with segment's bounding box.
+                    FArianeHandleSegment* Handle = CubicSegment->GetHandle( (uint32) i );
+                    const FVector& LocalHandlePosition = Handle->GetPosition();
+                    // convert handles coordinates to world coordinates. Easier to detect collision inside
+                    // the picking circle.
+                    FVector WorldHandlePosition = PathTransform.TransformPosition( LocalHandlePosition );
+                    FVector2D HUDHandlePosition;
+
+                    if( WorldToHUD( ViewportClient, View, WorldHandlePosition, HUDHandlePosition ) )
+                    {
+                        FVector2D Dif0 = HUDHandlePosition - HUDMousePosition;
+
+                        if( Dif0.Length() <= PickingRadius )
+                        {
+                            OutPickedHandles.Add( Handle );
+
+                            bAnythingPicked = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return bAnythingPicked;
 }
 
 // HUD
+FLinearColor
+UArianeEditorTool::GetForegroundColor()
+{
+    return FLinearColor( FColor( 0, 169, 157, 255 ) ); // Odyssey's teal
+}
+
+FLinearColor
+UArianeEditorTool::GetBackgroundColor()
+{
+    return FLinearColor::Black;
+}
+
+FLinearColor
+UArianeEditorTool::GetHighlightColor()
+{
+    return FLinearColor::Red;
+}
+
+void
+UArianeEditorTool::DrawCircleHUD( FCanvas* Canvas
+                                , FEditorViewportClient* ViewportClient
+                                , FSceneView* View
+                                , const FVector2D& HUDCoords
+                                , double Radius
+                                , const FLinearColor& Color
+                                , float Thickness )
+{
+    uint32 Steps = 64;
+    double Point0Angle = 0.0f;
+    double AngleStep = ( 2.0f * PI ) / Steps;
+    FVector Point0 =  FVector ( HUDCoords.X + FMath::Cos( Point0Angle ) * Radius,
+                                HUDCoords.Y + FMath::Sin( Point0Angle ) * Radius,
+                                0.0f );
+
+    for ( uint32 i = 0; i < Steps; i++ )
+    {
+        double Point1Angle = Point0Angle + AngleStep;
+        FVector Point1 =  FVector ( HUDCoords.X + FMath::Cos( Point1Angle ) * Radius,
+                                    HUDCoords.Y + FMath::Sin( Point1Angle ) * Radius,
+                                    0.0f );
+
+        DrawLineHUD( Canvas, ViewportClient, View, FVector2D( Point0 ), FVector2D( Point1 ), Color, Thickness );
+
+        Point0 = Point1;
+
+        Point0Angle = Point1Angle;
+    }
+}
+
 void
 UArianeEditorTool::DrawLineHUD( FCanvas* Canvas
                               , FEditorViewportClient* ViewportClient
@@ -1057,136 +1239,108 @@ UArianeEditorTool::DrawVertexHUD( FCanvas* Canvas
                                 , const FLinearColor& FgColor
                                 , const FLinearColor& BgColor
                                 , const FLinearColor& HcColor
-                                , const FArianeHUD::FDrawingFlags& HUDDrawingFlags )
+                                , const FArianeEditorHUD::FDrawingFlags& HUDDrawingFlags )
 {
     FIntRect Screen = FIntRect( FIntPoint(0,0), ViewportClient->Viewport->GetSizeXY() );
     const FTransform& PathTransform = static_cast<FArianePath*>(Vertex->GetOwner())->GetTransform();
     // TODO: compute that once and pass it as parameter for all vertices
     FVector WorldVertexPoint = PathTransform.TransformPosition( Vertex->GetPosition() );
-    FVector2D HUDVertexPoint = WorldToHUD( ViewportClient, View, WorldVertexPoint );
-    static FLinearColor GreenColor = FLinearColor::Green;
-    static FLinearColor LightGrayColor = FLinearColor(  0.5f,  0.5f,  0.5f, 1.0f );
-    static FLinearColor DarkGrayColor = FLinearColor( 0.25f, 0.25f, 0.25f, 1.0f );
-    static FLinearColor RedColor = FLinearColor::Red;
-    double HUDVertexRadius = FArianeHUD::VERTEXRADIUS;
-    double HUDHandleRadius = FArianeHUD::HANDLERADIUS;
-    FIntRect HUDVertexBBox = FIntRect( HUDVertexPoint.X - HUDVertexRadius
-                                     , HUDVertexPoint.Y - HUDVertexRadius
-                                     , HUDVertexPoint.X + HUDVertexRadius
-                                     , HUDVertexPoint.Y + HUDVertexRadius );
+    FVector2D HUDVertexPoint;
 
-    if ( HUDDrawingFlags.PathVertexHandle )
+    if( WorldToHUD( ViewportClient, View, WorldVertexPoint, HUDVertexPoint ) )
     {
-        static FLinearColor WhiteColor = FLinearColor::White;
-        static FLinearColor BlackColor = FLinearColor::Black;
-        FVector LocalHandlePosition[2];
-        FVector WorldHandlePosition[2];
-        FVector2D HUDHandlePosition[2];
-        FCanvasLineItem HudHandleLine[2];
+        static FLinearColor GreenColor = FLinearColor::Green;
+        static FLinearColor LightGrayColor = FLinearColor(  0.5f,  0.5f,  0.5f, 1.0f );
+        static FLinearColor DarkGrayColor = FLinearColor( 0.25f, 0.25f, 0.25f, 1.0f );
+        static FLinearColor RedColor = FLinearColor::Red;
+        double HUDVertexRadius = FArianeEditorHUD::VERTEXRADIUS;
+        double HUDHandleRadius = FArianeEditorHUD::HANDLERADIUS;
+        FIntRect HUDVertexBBox = FIntRect( HUDVertexPoint.X - HUDVertexRadius
+                                         , HUDVertexPoint.Y - HUDVertexRadius
+                                         , HUDVertexPoint.X + HUDVertexRadius
+                                         , HUDVertexPoint.Y + HUDVertexRadius );
 
-        //Vertex->GetHandlePosition( LocalHandlePosition );
-
-        WorldHandlePosition[0] = PathTransform.TransformPosition( LocalHandlePosition[0] );
-        WorldHandlePosition[1] = PathTransform.TransformPosition( LocalHandlePosition[1] );
-
-        HUDHandlePosition[0] = WorldToHUD( ViewportClient, View, WorldHandlePosition[0] );
-        HUDHandlePosition[1] = WorldToHUD( ViewportClient, View, WorldHandlePosition[1] );
-
-        HudHandleLine[0] = FCanvasLineItem( HUDVertexPoint, HUDHandlePosition[0] );
-        HudHandleLine[1] = FCanvasLineItem( HUDVertexPoint, HUDHandlePosition[1] );
-
-        FIntRect HUDHandle0BBox = FIntRect( FMath::Min( HUDVertexPoint.X, HUDHandlePosition[0].X ) - HUDHandleRadius
-                                          , FMath::Min( HUDVertexPoint.Y, HUDHandlePosition[0].Y ) - HUDHandleRadius
-                                          , FMath::Max( HUDVertexPoint.X, HUDHandlePosition[0].X ) + HUDHandleRadius
-                                          , FMath::Max( HUDVertexPoint.Y, HUDHandlePosition[0].Y ) + HUDHandleRadius );
-
-        if( Screen.Contains( HUDHandle0BBox ) )
+        if ( HUDDrawingFlags.PathVertexHandle )
         {
-            // Line to handle
-            DraweOutlinedLineHUD( Canvas
-                                , ViewportClient
-                                , View
-                                , HUDVertexPoint
-                                , HUDHandlePosition[0]
-                                , WhiteColor
-                                , 1.0f );
+            static FLinearColor WhiteColor = FLinearColor::White;
+            static FLinearColor BlackColor = FLinearColor::Black;
+            FVector LocalHandlePosition[2];
 
-            // handle
-            Canvas->DrawTile( HUDHandlePosition[0].X - HUDHandleRadius
-                            , HUDHandlePosition[0].Y - HUDHandleRadius
-                            , HUDHandleRadius * 2.0f
-                            , HUDHandleRadius * 2.0f
-                            , 0.0f
-                            , 0.0f
-                            , 1.0f
-                            , 1.0f
-                            , WhiteColor
-                            , HandleTexture->GetResource()
-                            , ESimpleElementBlendMode::SE_BLEND_Masked );
+            //Vertex->GetHandlePosition( LocalHandlePosition );
+
+            for( uint32 i = 0; i < 2; i++ )
+            {
+                FVector WorldHandlePosition = PathTransform.TransformPosition( LocalHandlePosition[i] );
+                FVector2D HUDHandlePosition;
+
+                if ( WorldToHUD( ViewportClient, View, WorldHandlePosition, HUDHandlePosition ) )
+                {
+                    FCanvasLineItem HudHandleLine = FCanvasLineItem( HUDVertexPoint, HUDHandlePosition );
+                    FIntRect HUDHandle0BBox = FIntRect( FMath::Min( HUDVertexPoint.X, HUDHandlePosition.X ) - HUDHandleRadius
+                                                      , FMath::Min( HUDVertexPoint.Y, HUDHandlePosition.Y ) - HUDHandleRadius
+                                                      , FMath::Max( HUDVertexPoint.X, HUDHandlePosition.X ) + HUDHandleRadius
+                                                      , FMath::Max( HUDVertexPoint.Y, HUDHandlePosition.Y ) + HUDHandleRadius );
+
+                    if( Screen.Contains( HUDHandle0BBox ) )
+                    {
+                        // Line to handle
+                        DraweOutlinedLineHUD( Canvas
+                                            , ViewportClient
+                                            , View
+                                            , HUDVertexPoint
+                                            , HUDHandlePosition
+                                            , WhiteColor
+                                            , 1.0f );
+
+                        // handle
+                        Canvas->DrawTile( HUDHandlePosition.X - HUDHandleRadius
+                                        , HUDHandlePosition.Y - HUDHandleRadius
+                                        , HUDHandleRadius * 2.0f
+                                        , HUDHandleRadius * 2.0f
+                                        , 0.0f
+                                        , 0.0f
+                                        , 1.0f
+                                        , 1.0f
+                                        , WhiteColor
+                                        , HandleTexture->GetResource()
+                                        , ESimpleElementBlendMode::SE_BLEND_Masked );
+                    }
+                }
+            }
         }
 
-        FIntRect HUDHandle1BBox = FIntRect( FMath::Min( HUDVertexPoint.X, HUDHandlePosition[1].X ) - HUDHandleRadius
-                                          , FMath::Min( HUDVertexPoint.Y, HUDHandlePosition[1].Y ) - HUDHandleRadius
-                                          , FMath::Max( HUDVertexPoint.X, HUDHandlePosition[1].X ) + HUDHandleRadius
-                                          , FMath::Max( HUDVertexPoint.Y, HUDHandlePosition[1].Y ) + HUDHandleRadius );
-
-        if( Screen.Contains( HUDHandle1BBox ) )
+        if( Screen.Contains( HUDVertexBBox ) )
         {
-            // Line to handle
-            DraweOutlinedLineHUD( Canvas
-                                , ViewportClient
-                                , View
-                                , HUDVertexPoint
-                                , HUDHandlePosition[1]
-                                , WhiteColor
-                                , 1.0f );
-
-            // handle
-            Canvas->DrawTile( HUDHandlePosition[1].X - HUDHandleRadius
-                            , HUDHandlePosition[1].Y - HUDHandleRadius
-                            , HUDHandleRadius * 2.0f
-                            , HUDHandleRadius * 2.0f
-                            , 0.0f
-                            , 0.0f
-                            , 1.0f
-                            , 1.0f
-                            , WhiteColor
-                            , HandleTexture->GetResource()
-                            , ESimpleElementBlendMode::SE_BLEND_Masked );
-        }
-    }
-
-    if( Screen.Contains( HUDVertexBBox ) )
-    {
-        if( Vertex->IsLocked() == false )
-        {
-            Canvas->DrawTile( HUDVertexPoint.X - HUDVertexRadius
-                            , HUDVertexPoint.Y - HUDVertexRadius
-                            , HUDVertexRadius * 2.0f
-                            , HUDVertexRadius * 2.0f
-                            , 0.0f
-                            , 0.0f
-                            , 1.0f
-                            , 1.0f
-                            , Vertex->IsSelected() && ( HUDDrawingFlags.Mode == FArianeHUD::EMode::Vertex ) ? HcColor
-                                                                                                            : FgColor
-                            , VertexTexture->GetResource()
-                            , ESimpleElementBlendMode::SE_BLEND_Masked );
-        }
-        else
-        {
-            Canvas->DrawTile( HUDVertexPoint.X - HUDVertexRadius
-                            , HUDVertexPoint.Y - HUDVertexRadius
-                            , HUDVertexRadius * 2.0f
-                            , HUDVertexRadius * 2.0f
-                            , 0.0f
-                            , 0.0f
-                            , 1.0f
-                            , 1.0f
-                            , Vertex->IsSelected() && ( HUDDrawingFlags.Mode == FArianeHUD::EMode::Vertex ) ? ( HcColor * 0.5f )
-                                                                                                            : LightGrayColor
-                            , VertexTexture->GetResource()
-                            , ESimpleElementBlendMode::SE_BLEND_Masked );
+            if( Vertex->IsLocked() == false )
+            {
+                Canvas->DrawTile( HUDVertexPoint.X - HUDVertexRadius
+                                , HUDVertexPoint.Y - HUDVertexRadius
+                                , HUDVertexRadius * 2.0f
+                                , HUDVertexRadius * 2.0f
+                                , 0.0f
+                                , 0.0f
+                                , 1.0f
+                                , 1.0f
+                                , Vertex->IsSelected() && ( HUDDrawingFlags.Mode == FArianeEditorHUD::EMode::Vertex ) ? HcColor
+                                                                                                                      : FgColor
+                                , VertexTexture->GetResource()
+                                , ESimpleElementBlendMode::SE_BLEND_Masked );
+            }
+            else
+            {
+                Canvas->DrawTile( HUDVertexPoint.X - HUDVertexRadius
+                                , HUDVertexPoint.Y - HUDVertexRadius
+                                , HUDVertexRadius * 2.0f
+                                , HUDVertexRadius * 2.0f
+                                , 0.0f
+                                , 0.0f
+                                , 1.0f
+                                , 1.0f
+                                , Vertex->IsSelected() && ( HUDDrawingFlags.Mode == FArianeEditorHUD::EMode::Vertex ) ? ( HcColor * 0.5f )
+                                                                                                                      : LightGrayColor
+                                , VertexTexture->GetResource()
+                                , ESimpleElementBlendMode::SE_BLEND_Masked );
+            }
         }
     }
 }
@@ -1199,32 +1353,32 @@ UArianeEditorTool::DrawSegmentHUD( FCanvas* Canvas
                                  , const FLinearColor& FgColor
                                  , const FLinearColor& BgColor
                                  , const FLinearColor& HcColor
-                                 , const FArianeHUD::FDrawingFlags& HUDDrawingFlags )
+                                 , const FArianeEditorHUD::FDrawingFlags& HUDDrawingFlags )
 {
     const FTransform& PathTransform = static_cast<FArianePath*>(Segment->GetOwner())->GetTransform();
-    FVector V0 = PathTransform.TransformPosition( Segment->GetVertex(0)->GetPosition() );
-    FVector V1 = PathTransform.TransformPosition( Segment->GetVertex(1)->GetPosition() );
-    FVector2D HUDV0 = WorldToHUD( ViewportClient, View, V0 );
-    FVector2D HUDV1 = WorldToHUD( ViewportClient, View, V1 );
-    FCanvasLineItem LineItem;
-
-    LineItem.BlendMode = ESimpleElementBlendMode::SE_BLEND_Translucent;
 
     // Draw structure
     {
+        FCanvasLineItem LineItem;
+
+        LineItem.BlendMode = ESimpleElementBlendMode::SE_BLEND_Translucent;
+
         LineItem.SetColor( FgColor );
 
         for( const FArianeSegment::FFraction& Fraction : Segment->GetFractions() )
         {
             FVector P0 = PathTransform.TransformPosition( Fraction.Steps[0]->Point->GetPosition() );
             FVector P1 = PathTransform.TransformPosition( Fraction.Steps[1]->Point->GetPosition() );
-            FVector2D HUDP0 = WorldToHUD( ViewportClient, View, P0 );
-            FVector2D HUDP1 = WorldToHUD( ViewportClient, View, P1 );
+            FVector2D HUDP0;
+            FVector2D HUDP1;
 
-            LineItem.Origin = FVector( HUDP0.X, HUDP0.Y, 0.0f );
-            LineItem.EndPos = FVector( HUDP1.X, HUDP1.Y, 0.0f );
+            if( WorldToHUD( ViewportClient, View, P0, HUDP0 ) && WorldToHUD( ViewportClient, View, P1, HUDP1 ) )
+            {
+                LineItem.Origin = FVector( HUDP0.X, HUDP0.Y, 0.0f );
+                LineItem.EndPos = FVector( HUDP1.X, HUDP1.Y, 0.0f );
 
-            Canvas->DrawItem( LineItem );
+                Canvas->DrawItem( LineItem );
+            }
         }
     }
 }
@@ -1237,65 +1391,51 @@ UArianeEditorTool::DrawCubicSegmentHUD( FCanvas* Canvas
                                       , const FLinearColor& FgColor
                                       , const FLinearColor& BgColor
                                       , const FLinearColor& HcColor
-                                      , const FArianeHUD::FDrawingFlags& HUDDrawingFlags )
+                                      , const FArianeEditorHUD::FDrawingFlags& HUDDrawingFlags )
 {
     const FTransform& PathTransform = static_cast<FArianePath*>(CubicSegment->GetOwner())->GetTransform();
     FArianeVertex* Vertex0 = CubicSegment->GetVertex(0);
     FArianeVertex* Vertex1 = CubicSegment->GetVertex(1);
     FVector V0 = PathTransform.TransformPosition( Vertex0->GetPosition() );
     FVector V1 = PathTransform.TransformPosition( Vertex1->GetPosition() );
-    double HUDVertexRadius = FArianeHUD::VERTEXRADIUS;
-    double HUDHandleRadius = FArianeHUD::HANDLERADIUS;
-    FVector2D HUDV0 = WorldToHUD( ViewportClient, View, V0 );
-    FVector2D HUDV1 = WorldToHUD( ViewportClient, View, V1 );
+    double HUDHandleRadius = FArianeEditorHUD::HANDLERADIUS;
     FCanvasLineItem LineItem;
 
     DrawSegmentHUD( Canvas, ViewportClient, View, CubicSegment, FgColor, BgColor, HcColor, HUDDrawingFlags );
 
     LineItem.BlendMode = ESimpleElementBlendMode::SE_BLEND_Translucent;
 
-    if( HUDDrawingFlags.PathSegmentHandle )
+    if( HUDDrawingFlags.PathSegmentHandle)
     {
-        FVector H0 = PathTransform.TransformPosition( CubicSegment->GetHandle(0)->GetPosition() );
-        FVector H1 = PathTransform.TransformPosition( CubicSegment->GetHandle(1)->GetPosition() );
-        FVector2D HUDH0 = WorldToHUD( ViewportClient, View, H0 );
-        FVector2D HUDH1 = WorldToHUD( ViewportClient, View, H1 );
+        for( uint32 i = 0; i < 2; i++ )
+        {
+            FArianeVertex* Vertex = CubicSegment->GetVertex((uint32)i);
+            FVector WorldVertexPosition = PathTransform.TransformPosition( CubicSegment->GetVertex((uint32)i)->GetPosition() );
+            FVector WorldHandlePosition = PathTransform.TransformPosition( CubicSegment->GetHandle((uint32)i)->GetPosition() );
+            FVector2D HUDVertexPosition;
+            FVector2D HUDHandlePosition;
 
-        LineItem.SetColor( Vertex0->IsHandleAligned() ? FLinearColor::Green : FLinearColor::White );
+            WorldToHUD( ViewportClient, View, WorldVertexPosition, HUDVertexPosition );
+            WorldToHUD( ViewportClient, View, WorldHandlePosition, HUDHandlePosition );
 
-        LineItem.Origin = FVector( HUDV0.X, HUDV0.Y, 0.0f );
-        LineItem.EndPos = FVector( HUDH0.X, HUDH0.Y, 0.0f );
+            LineItem.SetColor( Vertex->IsHandleAligned() ? FLinearColor::Green : FLinearColor::White );
 
-        Canvas->DrawItem( LineItem );
-        Canvas->DrawTile( HUDH0.X - HUDHandleRadius
-                        , HUDH0.Y - HUDHandleRadius
-                        , HUDHandleRadius * 2.0f
-                        , HUDHandleRadius * 2.0f
-                        , 0.0f
-                        , 0.0f
-                        , 1.0f
-                        , 1.0f
-                        , FLinearColor::White
-                        , HandleTexture->GetResource()
-                        , ESimpleElementBlendMode::SE_BLEND_Masked );
+            LineItem.Origin = FVector( HUDVertexPosition.X, HUDVertexPosition.Y, 0.0f );
+            LineItem.EndPos = FVector( HUDHandlePosition.X, HUDHandlePosition.Y, 0.0f );
 
-        LineItem.SetColor( Vertex1->IsHandleAligned() ? FLinearColor::Green : FLinearColor::White );
-
-        LineItem.Origin = FVector( HUDV1.X, HUDV1.Y, 0.0f );
-        LineItem.EndPos = FVector( HUDH1.X, HUDH1.Y, 0.0f );
-
-        Canvas->DrawItem( LineItem );
-        Canvas->DrawTile( HUDH1.X - HUDHandleRadius
-                        , HUDH1.Y - HUDHandleRadius
-                        , HUDHandleRadius * 2.0f
-                        , HUDHandleRadius * 2.0f
-                        , 0.0f
-                        , 0.0f
-                        , 1.0f
-                        , 1.0f
-                        , FLinearColor::White
-                        , HandleTexture->GetResource()
-                        , ESimpleElementBlendMode::SE_BLEND_Masked );
+            Canvas->DrawItem( LineItem );
+            Canvas->DrawTile( HUDHandlePosition.X - HUDHandleRadius
+                            , HUDHandlePosition.Y - HUDHandleRadius
+                            , HUDHandleRadius * 2.0f
+                            , HUDHandleRadius * 2.0f
+                            , 0.0f
+                            , 0.0f
+                            , 1.0f
+                            , 1.0f
+                            , FLinearColor::White
+                            , HandleTexture->GetResource()
+                            , ESimpleElementBlendMode::SE_BLEND_Masked );
+        }
     }
 }
 
@@ -1307,7 +1447,7 @@ UArianeEditorTool::DrawPathHUD( FCanvas* Canvas
                               , const FLinearColor& FgColor
                               , const FLinearColor& BgColor
                               , const FLinearColor& HcColor
-                              , const FArianeHUD::FDrawingFlags& HUDDrawingFlags )
+                              , const FArianeEditorHUD::FDrawingFlags& HUDDrawingFlags )
 {
     if( HUDDrawingFlags.PathSegment )
     {
@@ -1329,28 +1469,30 @@ UArianeEditorTool::DrawPathHUD( FCanvas* Canvas
         }
     }
 
-    if( HUDDrawingFlags.PathVertex )
+    // Points and Point size handles
+    for( const FArianeVertexID& VertexID : Path->GetVertices() )
     {
-        // Points and Point size handles
-        for( const FArianeVertexID& VertexID : Path->GetVertices() )
-        {
-            FArianeVertex* Vertex = const_cast<FArianeVertexID&>(VertexID).GetVertex();
-            uint32 Valence = Vertex->GetSegments().Num();
+        FArianeVertex* Vertex = const_cast<FArianeVertexID&>(VertexID).GetVertex();
+        uint32 Valence = Vertex->GetSegments().Num();
 
-            if( ( Valence == 0 ) && HUDDrawingFlags.PathVertexValence0 )
-            {
-                DrawVertexHUD( Canvas, ViewportClient, View, Vertex, FgColor, BgColor, HcColor, HUDDrawingFlags );
-            }
-            else
-            if( ( Valence == 1 ) && HUDDrawingFlags.PathVertexValence1 )
-            {
-                DrawVertexHUD( Canvas, ViewportClient, View, Vertex, FgColor, BgColor, HcColor, HUDDrawingFlags );
-            }
-            else
-            if( ( Valence == 2 ) && HUDDrawingFlags.PathVertexValence2 )
-            {
-                DrawVertexHUD( Canvas, ViewportClient, View, Vertex, FgColor, BgColor, HcColor, HUDDrawingFlags );
-            }
+        if( HUDDrawingFlags.PathVertex || ( ( Valence == 0 ) && HUDDrawingFlags.PathVertexValence0 ) )
+        {
+            DrawVertexHUD( Canvas, ViewportClient, View, Vertex, FgColor, BgColor, HcColor, HUDDrawingFlags );
+        }
+        else
+        if( HUDDrawingFlags.PathVertex || ( ( Valence == 1 ) && HUDDrawingFlags.PathVertexValence1 ) )
+        {
+            DrawVertexHUD( Canvas, ViewportClient, View, Vertex, FgColor, BgColor, HcColor, HUDDrawingFlags );
+        }
+        else
+        if( HUDDrawingFlags.PathVertex || ( ( Valence == 2 ) && HUDDrawingFlags.PathVertexValence2 ) )
+        {
+            DrawVertexHUD( Canvas, ViewportClient, View, Vertex, FgColor, BgColor, HcColor, HUDDrawingFlags );
         }
     }
+}
+
+void
+UArianeEditorTool::ExtendToolbar( UToolMenu* iToolMenu )
+{
 }

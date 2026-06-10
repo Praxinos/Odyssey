@@ -27,8 +27,20 @@ FArianeSegment::FArianeSegment( FArianeObject* Owner, FArianeVertex* iVertex0, F
     , Vertices { iVertex0, iVertex1 }
     , Length ( 0.0f )
     , bInvalidated ( false )
+    , bAutoFractioned ( true )
 {
     Init();
+}
+
+bool
+FArianeSegment::HasBaseClass( uint32 BaseClassID )
+{
+    if( StaticClass() == BaseClassID )
+    {
+        return true;
+    }
+
+    return false;
 }
 
 void

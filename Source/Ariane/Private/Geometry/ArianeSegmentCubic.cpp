@@ -67,30 +67,53 @@ FArianeSegmentCubic::~FArianeSegmentCubic()
 
 FArianeSegmentCubic::FArianeSegmentCubic()
     : FArianeSegment()
-    , Handle0( this, FVector::Zero() )
-    , Handle1( this, FVector::Zero() )
+    , Handle0( this, {0}, FVector::Zero() )
+    , Handle1( this, {1}, FVector::Zero() )
 {
 }
 
 FArianeSegmentCubic::FArianeSegmentCubic( FArianeObject* Owner
-                                        , FArianeVertex* iVertex0
+                                        , FArianeVertex* Vertex0
                                         , double Handle0X
                                         , double Handle0Y
                                         , double Handle0Z
                                         , double Handle1X
                                         , double Handle1Y
                                         , double Handle1Z
-                                        , FArianeVertex* iVertex1 )
-    : FArianeSegment( Owner, iVertex0, iVertex1 )
-    , Handle0( this, FVector( Handle0X, Handle0Y, Handle0Z ) )
-    , Handle1( this, FVector( Handle1X, Handle1Y, Handle1Z ) )
+                                        , FArianeVertex* Vertex1 )
+    : FArianeSegment( Owner, Vertex0, Vertex1 )
+    , Handle0( this, {0}, FVector( Handle0X, Handle0Y, Handle0Z ) )
+    , Handle1( this, {1}, FVector( Handle1X, Handle1Y, Handle1Z ) )
 {
+}
+
+bool
+FArianeSegmentCubic::HasBaseClass( uint32 BaseClassID )
+{
+    if( StaticClass() == BaseClassID )
+    {
+        return true;
+    }
+
+    return Super::HasBaseClass( BaseClassID );
+}
+
+FArianeHandleSegment*
+FArianeSegmentCubic::GetHandle( FArianeVertex* Vertex )
+{
+    if( GetVertex(0) == Vertex ) return &Handle0;
+    if( GetVertex(1) == Vertex ) return &Handle1;
+
+    return nullptr;
 }
 
 FArianeHandleSegment*
 FArianeSegmentCubic::GetHandle( uint32 Index )
 {
-    return ( Index == 0 ) ? &Handle0 : &Handle1;
+    if( Index == 0 ) return &Handle0;
+    if( Index == 1 ) return &Handle1;
+
+    return nullptr;
 }
 
 void
@@ -294,10 +317,14 @@ FArianeSegmentCubic::Extract( FArianeObject* NewSegmentOwner
                             , FArianeVertex* NewSegmentVertex1
                             , float T1 )
 {
-    FVector Bezier[4] = { Vertices[0].GetVertex()->GetPosition()
+    FArianeVertex* Vertex0 = Vertices[0].GetVertex();
+    FArianeVertex* Vertex1 = Vertices[1].GetVertex();
+    FVector DeltaNormal = Vertex1->GetNormal() - Vertex0->GetNormal();
+    double DeltaRadius = Vertex1->GetRadius() - Vertex0->GetRadius();
+    FVector Bezier[4] = { Vertex0->GetPosition()
                         , Handle0.GetPosition()
                         , Handle1.GetPosition()
-                        , Vertices[1].GetVertex()->GetPosition() };
+                        , Vertex1->GetPosition() };
 
     ::ULIS::CubicBezierSplitAtParameter( &Bezier[0]
                                        , &Bezier[1]
@@ -311,14 +338,18 @@ FArianeSegmentCubic::Extract( FArianeObject* NewSegmentOwner
                                               , &Bezier[3]
                                               , T1 ? ( T0 / T1 ) : 0.0f );
 
-    Vertices[0].GetVertex()->SetPosition( Bezier[0] );
-    Handle0.SetPosition( Bezier[1] );
-    Handle1.SetPosition( Bezier[2] );
-    Vertices[1].GetVertex()->SetPosition( Bezier[3] );
+    NewSegmentVertex0->SetPosition( Bezier[0] );
+    NewSegmentVertex0->SetNormal( Vertex0->GetNormal() + DeltaNormal * T0 );
+    NewSegmentVertex0->SetRadius( Vertex0->GetRadius() + DeltaRadius * T0 );
+
+    NewSegmentVertex1->SetPosition( Bezier[3] );
+    NewSegmentVertex1->SetNormal( Vertex1->GetNormal() + DeltaNormal * T0 );
+    NewSegmentVertex1->SetRadius( Vertex1->GetRadius() + DeltaRadius * T0 );
+
 
     return static_cast<FArianePath*>(NewSegmentOwner)->AllocCubicSegment( NewSegmentVertex0
-                                                                        , Handle0.GetPosition()
-                                                                        , Handle1.GetPosition()
+                                                                        , Bezier[1]
+                                                                        , Bezier[2]
                                                                         , NewSegmentVertex1 );
 }
 
@@ -353,4 +384,26 @@ FArianeSegmentCubic::GetTangentVectorAt( double T, bool bNormalize )
     }
 
     return Tangent;
+}
+
+FVector
+FArianeSegmentCubic::GetHandleVector( FArianeVertex* Vertex, bool bNormalize )
+{
+    return GetHandleVector( ( Vertices[0].GetVertex() == Vertex ) ? 0 : 1, bNormalize );
+}
+
+FVector
+FArianeSegmentCubic::GetHandleVector( uint32 HandleID, bool bNormalize )
+{
+    FVector Vec = GetHandle(HandleID)->GetPosition() - GetVertex(HandleID)->GetPosition();
+
+    if( bNormalize )
+    {
+        if( Vec.SquaredLength() )
+        {
+            Vec.Normalize();
+        }
+    }
+
+    return Vec;
 }

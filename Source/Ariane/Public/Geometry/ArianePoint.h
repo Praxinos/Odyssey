@@ -40,16 +40,23 @@ struct ARIANE_API FArianePoint
          * @param Y coordinate along the Y axis.
          * @param Z coordinate along the Z axis.
          */
-        virtual void SetPosition( double X, double Y, double Z );
+        void SetPosition( double X, double Y, double Z );
 
         /**
          * @brief Set the vertex's position in space.
          * @param InPosition vertex's position.
          */
-        virtual void SetPosition( const FVector& InPosition );
+        void SetPosition( const FVector& InPosition );
 
         /** Run any object-specific task required immediately after undoing / redoing */
         virtual void PostEditUndo(){};
+
+    protected:
+        /**
+         * @brief Set the handle's position
+         * @param InPosition the desired handle's position
+         */
+        virtual void SetPosition_Private( const FVector& InPosition );
 
     protected:
         UPROPERTY( EditAnywhere )

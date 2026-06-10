@@ -63,7 +63,7 @@ struct ARIANE_API FArianeObject
          * @return the object type
          */
         virtual uint32 GetClass() { return StaticClass(); };
-        //virtual bool HasBaseClass( uint32 iBaseClassID );
+        virtual bool HasBaseClass( uint32 iBaseClassID );
 
     public:
         virtual ~FArianeObject();

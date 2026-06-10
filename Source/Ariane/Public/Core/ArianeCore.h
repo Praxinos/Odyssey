@@ -7,9 +7,9 @@
 
 namespace FArianeCore
 {
-    double ARIANE_API DistanceToSegment( const ::ULIS::FVec2D& iPt
-                                       , const ::ULIS::FVec2D& iSegmentP0
-                                       , const ::ULIS::FVec2D& iSegmentP1
+    double ARIANE_API DistanceToSegment( const FVector2D& iPt
+                                       , const FVector2D& iSegmentP0
+                                       , const FVector2D& iSegmentP1
                                        , double& oDistance );
 
     // This is a constrained version of a segment-to-point proximity test.
@@ -21,9 +21,14 @@ namespace FArianeCore
     // 1______________0   x (proj. point will also be at t = 0.0,
     //                       even though it is outside the segment)
     //
-    double ARIANE_API DistanceToSegmentConstrained( const ::ULIS::FVec2D& iPt
-                                                  , const ::ULIS::FVec2D& iSegmentP0
-                                                  , const ::ULIS::FVec2D& iSegmentP1
+    double ARIANE_API DistanceToSegmentConstrained( const FVector2D& iPt
+                                                  , const FVector2D& iSegmentP0
+                                                  , const FVector2D& iSegmentP1
                                                   , double&         oDistance );
+
+    float ARIANE_API IntersectPlane ( const FVector4& iPlane
+                                    , const FVector&  iOrigin
+                                    , const FVector&  iDirection
+                                    ,  FVector& oOut );
 
 }
