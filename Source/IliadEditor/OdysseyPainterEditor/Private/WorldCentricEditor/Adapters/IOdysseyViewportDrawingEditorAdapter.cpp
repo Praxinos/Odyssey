@@ -60,6 +60,10 @@ IOdysseyViewportDrawingEditorAdapter::Initialize()
     SetTool(editor->GetCurrentTool());
 
     mAdapterState = eAdapterState::kReadyToUse;
+
+    TSharedPtr< SViewport > viewportWidget = GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin();
+    if (viewportWidget.IsValid())
+        RegisterWindow(viewportWidget.ToSharedRef());
 }
 
 void
@@ -350,10 +354,6 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
 {
     if (mLastKnownViewport != iViewport)
         mLastKnownViewport = iViewport;
-
-    TSharedPtr< SViewport > viewportWidget = GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin();
-    if (viewportWidget.IsValid())
-        RegisterWindow(viewportWidget.ToSharedRef());
 
     if( iEvent == EInputEvent::IE_Pressed )
     {
