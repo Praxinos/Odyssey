@@ -71,15 +71,9 @@ ExportAsTexture(UObject* iObject, int iFrame, FString iAssetName, FString iPath 
     if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
         return nullptr;
 
-    //Create a Package to save the new texture in
-    FString Name;
-    FString PackageName;
-    IAssetTools& AssetTools = FModuleManager::Get().LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-    AssetTools.CreateUniqueAssetName(iPath, iAssetName, PackageName, Name);
-
     //Create the texture and update it with the renderTarget content
-
-    UTexture2D* texture = ability->CreateExportTexture(CreatePackage(*PackageName), FName(*Name), renderTarget->GetMaskedFlags() | RF_Public | RF_Standalone);
+    UTexture2D* texture = ability->CreateExportTexture( iAssetName, iPath, UTexture2D::StaticClass(), UTexture2DFactoryNew::StaticClass()->GetDefaultObject<UFactory>() );
+    check( texture );
 
     texture->PreEditChange(nullptr);
     texture->Source.Init(OutImage);

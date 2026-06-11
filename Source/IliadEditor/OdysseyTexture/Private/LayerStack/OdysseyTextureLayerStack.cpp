@@ -552,11 +552,16 @@ UOdysseyTextureLayerStack::CreateRenderingRenderTarget() const
 }
 
 UTexture2D*
-UOdysseyTextureLayerStack::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags)
+UOdysseyTextureLayerStack::CreateExportTexture( const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory )
 {
-    FObjectDuplicationParameters params(GetTexture(), Outer);
-    params.DestName = Name;
-    params.ApplyFlags = Flags;
+    FString packagePathName = iPackagePath / iAssetName;
+    UPackage* package = CreatePackage( *packagePathName );
+    if( !ensure(package) )
+        return nullptr;
+
+    FObjectDuplicationParameters params(GetTexture(), package );
+    params.DestName = FName( iAssetName );
+    params.ApplyFlags = RF_Public | RF_Standalone;
 
     UTexture2D* texture = Cast<UTexture2D>(StaticDuplicateObjectEx(params));
     texture->RemoveUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass());

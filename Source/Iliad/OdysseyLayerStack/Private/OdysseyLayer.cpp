@@ -1854,9 +1854,9 @@ UOdysseyLayer::GetLighttableImageRenderingComposition(int iFrameIndex) const
 }
 
 UTexture2D*
-UOdysseyLayer::CreateExportTexture(UObject* Outer, FName InName, EObjectFlags Flags)
+UOdysseyLayer::CreateExportTexture( const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory )
 {
-    return GetLayerStack()->CreateExportTexture(Outer, InName, Flags);
+    return GetLayerStack()->CreateExportTexture(iAssetName, iPackagePath, iAssetClass, iFactory);
 }
 
 #endif

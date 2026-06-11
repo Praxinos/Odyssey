@@ -100,7 +100,7 @@ public:
 public:
     //IOdysseyRenderingAbility overrides
     virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() const override;
-    virtual UTexture2D* CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags = RF_NoFlags) override;
+    virtual UTexture2D* CreateExportTexture( const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory ) override;
     virtual FIntRect GetDefaultRenderRect() const override;
 
 private:

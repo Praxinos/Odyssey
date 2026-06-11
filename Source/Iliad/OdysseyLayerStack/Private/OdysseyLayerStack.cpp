@@ -776,7 +776,7 @@ UOdysseyLayerStack::CreateRenderingRenderTarget() const
 #if WITH_EDITOR
 
 UTexture2D*
-UOdysseyLayerStack::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags)
+UOdysseyLayerStack::CreateExportTexture( const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory )
 {
     checkf(false, TEXT("Must be implemented by child class"));
     return nullptr;

@@ -20,6 +20,11 @@
 #include "OdysseyLayerCell.h"
 #include "OdysseyAnimationCellImageVector.h"
 
+#if WITH_EDITOR
+    #include "IAssetTools.h"
+    #include "AssetToolsModule.h"
+#endif
+
 #define LOCTEXT_NAMESPACE "Animation"
 
 int
@@ -615,16 +620,26 @@ UOdysseyAnimation::PreSave(FObjectPreSaveContext SaveContext)
 }
 
 UTexture2D*
-UOdysseyAnimation::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags)
+UOdysseyAnimation::CreateExportTexture( const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory ) //override
 {
-    UTexture2D* texture = NewObject<UTexture2D>(Outer, Name, Flags);
+    IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
+    UObject* object = AssetTools.CreateAsset(
+        iAssetName,
+        iPackagePath,
+        iAssetClass,
+        iFactory
+    );
 
-    switch(Format)
+    UTexture2D* texture = Cast<UTexture2D>( object );
+    if( !ensure( texture ) )
+        return nullptr;
+
+    switch( Format )
     {
         case EOdysseyAnimationFormat::BGRA8:
         {
-            texture->PreEditChange(nullptr);
-            texture->Source.Init(mWidth, mHeight, 1, 1, TSF_BGRA8);
+            texture->PreEditChange( nullptr );
+            texture->Source.Init( mWidth, mHeight, 1, 1, TSF_BGRA8 );
             texture->SRGB = true;
             texture->PostEditChange();
         }
@@ -632,13 +647,13 @@ UOdysseyAnimation::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags 
 
         case EOdysseyAnimationFormat::RGBAF:
         {
-            texture->PreEditChange(nullptr);
-            texture->Source.Init(mWidth, mHeight, 1, 1, TSF_RGBA32F);
+            texture->PreEditChange( nullptr );
+            texture->Source.Init( mWidth, mHeight, 1, 1, TSF_RGBA32F );
             texture->SRGB = false;
             texture->PostEditChange();
         }
         break;
-        default: checkf(false, TEXT("Non implemented format"))
+        default: checkf( false, TEXT( "Non implemented format" ) )
     }
 
     return texture;

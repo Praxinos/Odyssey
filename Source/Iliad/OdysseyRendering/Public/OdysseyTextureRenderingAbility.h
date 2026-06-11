@@ -12,6 +12,7 @@
 #include "OdysseyTextureRenderingAbility.generated.h"
 
 class FRDGBuilder;
+class UFactory;
 class UTexture2D;
 class UTextureRenderTarget2D;
 
@@ -84,7 +85,7 @@ public:
 public:
     virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() const = 0;
 #if WITH_EDITOR
-    virtual UTexture2D* CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags = RF_NoFlags) = 0;
+    virtual UTexture2D* CreateExportTexture( const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory ) = 0;
 #endif
 
 protected:

@@ -137,7 +137,7 @@ public:
 public:
     virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() const override;
 #if WITH_EDITOR
-    virtual UTexture2D* CreateExportTexture(UObject* iOuter, FName iName, EObjectFlags iFlags = RF_NoFlags) override;
+    virtual UTexture2D* CreateExportTexture( const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory ) override;
 #endif
     virtual bool BuildRenderPipelineInternal(
         FFrameNumber iFrame,

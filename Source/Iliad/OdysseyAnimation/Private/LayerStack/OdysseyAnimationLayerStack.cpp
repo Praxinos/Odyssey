@@ -84,10 +84,10 @@ UOdysseyAnimationLayerStack::CreateRenderingRenderTarget() const
 
 #if WITH_EDITOR
 UTexture2D*
-UOdysseyAnimationLayerStack::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags)
+UOdysseyAnimationLayerStack::CreateExportTexture( const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory )
 {
     check( GetAnimation() );
 
-    return GetAnimation()->CreateExportTexture(Outer, Name, Flags);
+    return GetAnimation()->CreateExportTexture( iAssetName, iPackagePath, iAssetClass, iFactory );
 }
 #endif

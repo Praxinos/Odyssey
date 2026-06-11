@@ -405,9 +405,9 @@ UOdysseyLayerCell::CreateRenderingRenderTarget() const
 #if WITH_EDITOR
 
 UTexture2D*
-UOdysseyLayerCell::CreateExportTexture(UObject* iOuter, FName iName, EObjectFlags iFlags)
+UOdysseyLayerCell::CreateExportTexture( const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory )
 {
-    return GetLayer()->CreateExportTexture(iOuter, iName, iFlags);
+    return GetLayer()->CreateExportTexture(iAssetName, iPackagePath, iAssetClass, iFactory);
 }
 
 #endif
