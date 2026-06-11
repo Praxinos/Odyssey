@@ -91,7 +91,7 @@ private:
     virtual void OnPacket(const UE::StylusInput::FStylusInputPacket& iPacket, UE::StylusInput::IStylusInputInstance* iInstance) override;
     void StartStylusInputRecord(const FKey& iMouseButton);
     void StopStylusInputRecord();
-    FOdysseyRay StylusPacketToRay(const UE::StylusInput::FStylusInputPacket& iPacket);
+    bool StylusPacketToRay(const UE::StylusInput::FStylusInputPacket& iPacket, FOdysseyRay& ioRay);
     void ReadStylusInput(eStylusEventFence iUntilEventType = eStylusEventFence::kNone);
     void GetRayParamsFromViewportPosition(FEditorViewportClient* iViewportClient, float iX, float iY, FVector* oOrigin, FVector* oDirection);
 
@@ -142,9 +142,6 @@ protected:
     /** Contains the MouseButton considered as the one currently used*/
     FKey mMouseButton;
 
-    /** Contains all the last styluses states */
-    TArray<FStylusState> mStylusStates;
-
     /** Are we using the stylus or not */
     bool mIsRecordingStylus = false;
 
@@ -152,8 +149,11 @@ protected:
     bool mIsFocused = false;
 
     /** Indicates if the stylus is considered as touching the tablet or not */
-    bool mStylusIsDown = false;
+    bool mIsStylusDown = false;
     bool mIsMouseDown = false;
+
+    /** Indicated if we stop to draw altogether, no matter the events that are treated by the adapter: for example, if we go even once outside the mesh with the mouse/stylus, we stop to draw */
+    bool mStopDrawing = false;
 
     FKey mStylusButton;
 

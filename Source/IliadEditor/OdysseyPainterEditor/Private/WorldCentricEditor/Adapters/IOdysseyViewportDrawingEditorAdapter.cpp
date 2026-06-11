@@ -120,6 +120,7 @@ IOdysseyViewportDrawingEditorAdapter::GetDrawingTool()
 
 void IOdysseyViewportDrawingEditorAdapter::StartPainting()
 {
+    mStopDrawing = false;
 }
 
 void IOdysseyViewportDrawingEditorAdapter::Paint()
@@ -137,7 +138,8 @@ void IOdysseyViewportDrawingEditorAdapter::Paint()
     if (!mTool)
         return;
 
-    mTool->ProcessMouseDrag(mCurrentStrokeRay.mPoint);
+    if( !mStopDrawing )
+        mTool->ProcessMouseDrag(mCurrentStrokeRay.mPoint);
 }
 
 void IOdysseyViewportDrawingEditorAdapter::FinishPainting()
@@ -469,6 +471,10 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
 
     FVector2D posInTexture = pointPos;
     bool isOutsideTexture = !ViewportCoordinatesToTextureCoordinates(pointPos, iViewportClient, &posInTexture);
+
+    if( isOutsideTexture )
+        mStopDrawing = true;
+
     if (isTextureBased)
         pointPos = posInTexture;
 
@@ -578,7 +584,10 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
         pointPos = posInTexture;
 
     if (isOutsideTexture)
+    {
+        mStopDrawing = true;
         return ShouldEditorCaptureMouse(); //don't allow camera to move with left click, but allow with right click
+    }
 
     //Init our StrokeRay, having all the basic info to draw
     FOdysseyRay strokeRay;
@@ -627,8 +636,11 @@ IOdysseyViewportDrawingEditorAdapter::HandleClick(FEditorViewportClient* iViewpo
     strokeRay.mPoint.keysDown = mKeysPressed;
     strokeRay.mPoint.ComputeRelativeParameters(mCurrentStrokeRay.mPoint);
 
-    mLastStrokeRay = mCurrentStrokeRay;
-    mCurrentStrokeRay = strokeRay;
+    if( !mStopDrawing )
+    {
+        mLastStrokeRay = mCurrentStrokeRay;
+        mCurrentStrokeRay = strokeRay;
+    }
 
     UOdysseyPainterEditorTool* selectedTool = editor->GetCurrentTool();
     if (selectedTool)
@@ -704,9 +716,11 @@ IOdysseyViewportDrawingEditorAdapter::MouseUp(const FOdysseyRay& iRay, const FKe
 
     mIsMouseDown = false;
 
-    mLastStrokeRay = mCurrentStrokeRay;
-    mCurrentStrokeRay = iRay;
-
+    if( !mStopDrawing )
+    {
+        mLastStrokeRay = mCurrentStrokeRay;
+        mCurrentStrokeRay = iRay;
+    }
 
     if (mAdapterState != eAdapterState::kUsedByEditor)
         return;
@@ -730,6 +744,7 @@ IOdysseyViewportDrawingEditorAdapter::MouseUp(const FOdysseyRay& iRay, const FKe
     }
 
     mTool->ProcessMouseUp(mCurrentStrokeRay.mPoint, mMouseButton);
+    mStopDrawing = false;
     mAdapterState = eAdapterState::kReadyToUse;
     mMouseButton = FKey();
 
@@ -753,8 +768,11 @@ IOdysseyViewportDrawingEditorAdapter::MouseDrag(const FOdysseyRay& iRay)
     if (!mIsMouseDown)
         return;
 
-    mLastStrokeRay = mCurrentStrokeRay;
-    mCurrentStrokeRay = iRay;
+    if( !mStopDrawing )
+    {
+        mLastStrokeRay = mCurrentStrokeRay;
+        mCurrentStrokeRay = iRay;
+    }
 
     if (mAdapterState != eAdapterState::kUsedByEditor)
         return;
@@ -860,16 +878,16 @@ IOdysseyViewportDrawingEditorAdapter::GetRayParamsFromViewportPosition(FEditorVi
     }
 }
 
-FOdysseyRay
-IOdysseyViewportDrawingEditorAdapter::StylusPacketToRay(const UE::StylusInput::FStylusInputPacket& iPacket)
+bool
+IOdysseyViewportDrawingEditorAdapter::StylusPacketToRay(const UE::StylusInput::FStylusInputPacket& iPacket, FOdysseyRay& ioRay)
 {
     FEditorViewportClient* viewportClient = (FEditorViewportClient*)mLastKnownViewport->GetClient();
     if (!viewportClient)
-        return FOdysseyRay();
+        return false;
 
     TSharedPtr< SViewport > viewportWidget = GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin();
     if (!viewportWidget)
-        return FOdysseyRay();
+        return false;
 
     TSharedPtr<SWindow> Window = mStylusInputWindow.Pin();
 
@@ -887,32 +905,34 @@ IOdysseyViewportDrawingEditorAdapter::StylusPacketToRay(const UE::StylusInput::F
         pointPos = posInTexture;
 
     if (isOutsideTexture)
-        return FOdysseyRay();
+    {
+        mStopDrawing = true;
+        return false;
+    }
 
     const UE::StylusInput::IStylusInputTabletContext* tabletContext = GetTabletContext(mStylusInputInstance, iPacket.TabletContextID);
-    FOdysseyRay strokeRay;
-    GetRayParamsFromViewportPosition(viewportClient, positionInViewport.X, positionInViewport.Y, &strokeRay.mRayOrigin, &strokeRay.mRayDirection);
+    GetRayParamsFromViewportPosition(viewportClient, positionInViewport.X, positionInViewport.Y, &ioRay.mRayOrigin, &ioRay.mRayDirection);
 
     if (tabletContext)
     {
         UE::StylusInput::ETabletSupportedProperties capabilities = tabletContext->GetSupportedProperties();
-        strokeRay.mPoint.x = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::X) ? pointPos.X : 0.f;
-        strokeRay.mPoint.y = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::Y) ? pointPos.Y : 0.f;
-        strokeRay.mPoint.z = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::Z) ? iPacket.Z : 0.f;
-        strokeRay.mPoint.pressure = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::NormalPressure) ? iPacket.NormalPressure : 1.f;
-        strokeRay.mPoint.time = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::TimerTick) ? iPacket.TimerTick : 1.f;
-        strokeRay.mPoint.altitude = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::AltitudeOrientation) ? iPacket.AltitudeOrientation : 1.f;
-        strokeRay.mPoint.azimuth = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::AzimuthOrientation) ? iPacket.AzimuthOrientation : 1.f;
-        strokeRay.mPoint.twist = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::TwistOrientation) ? iPacket.TwistOrientation : 1.f;
-        strokeRay.mPoint.pitch = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::PitchRotation) ? iPacket.PitchRotation : 1.f;
-        strokeRay.mPoint.roll = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::RollRotation) ? iPacket.RollRotation : 1.f;
-        strokeRay.mPoint.yaw = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::YawRotation) ? iPacket.YawRotation : 1.f;
+        ioRay.mPoint.x = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::X) ? pointPos.X : 0.f;
+        ioRay.mPoint.y = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::Y) ? pointPos.Y : 0.f;
+        ioRay.mPoint.z = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::Z) ? iPacket.Z : 0.f;
+        ioRay.mPoint.pressure = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::NormalPressure) ? iPacket.NormalPressure : 1.f;
+        ioRay.mPoint.time = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::TimerTick) ? iPacket.TimerTick : 1.f;
+        ioRay.mPoint.altitude = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::AltitudeOrientation) ? iPacket.AltitudeOrientation : 1.f;
+        ioRay.mPoint.azimuth = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::AzimuthOrientation) ? iPacket.AzimuthOrientation : 1.f;
+        ioRay.mPoint.twist = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::TwistOrientation) ? iPacket.TwistOrientation : 1.f;
+        ioRay.mPoint.pitch = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::PitchRotation) ? iPacket.PitchRotation : 1.f;
+        ioRay.mPoint.roll = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::RollRotation) ? iPacket.RollRotation : 1.f;
+        ioRay.mPoint.yaw = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::YawRotation) ? iPacket.YawRotation : 1.f;
     }
 
-    strokeRay.mPoint.keysDown = mKeysPressed;
-    strokeRay.mPoint.ComputeRelativeParameters(mCurrentStrokeRay.mPoint);
+    ioRay.mPoint.keysDown = mKeysPressed;
+    ioRay.mPoint.ComputeRelativeParameters(mCurrentStrokeRay.mPoint);
 
-    return strokeRay;
+    return true;
 }
 
 void
@@ -928,13 +948,14 @@ IOdysseyViewportDrawingEditorAdapter::ReadStylusInput(eStylusEventFence iUntilEv
 
     while (mPacketQueue.Dequeue(packet))
     {
-        FOdysseyRay ray = StylusPacketToRay(packet);
+        FOdysseyRay ray;
+        StylusPacketToRay(packet, ray);
 
         //Don't manage MouseDown when using the Right Mouse Button to allow hovered mouse clicks
         if (packet.Type == UE::StylusInput::EPacketType::StylusDown)
         {
             //MouseDown
-            mStylusIsDown = true;
+            mIsStylusDown = true;
             MouseDown(ray, mStylusButton);
             mEventsConsumedSinceLastUp++;
 
@@ -945,7 +966,7 @@ IOdysseyViewportDrawingEditorAdapter::ReadStylusInput(eStylusEventFence iUntilEv
         {
             //MouseUp
             MouseUp(ray, mStylusButton);
-            mStylusIsDown = false;
+            mIsStylusDown = false;
             mEventsConsumedSinceLastUp = 0;
 
             if (iUntilEventType == eStylusEventFence::kStylusUp)
@@ -955,7 +976,7 @@ IOdysseyViewportDrawingEditorAdapter::ReadStylusInput(eStylusEventFence iUntilEv
             }
         }
         //Force Right Mouse Button Drag
-        else if (mStylusIsDown)
+        else if (mIsStylusDown)
         {
             //MouseMove
             MouseDrag(ray);
