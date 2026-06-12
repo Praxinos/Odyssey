@@ -535,7 +535,7 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> iLayers, UOdysseyLayer* iP
 
         oldParent->RemoveChild(layer);
     }
-    index = FMath::Clamp(iIndexInParent, 0, iParentLayer->GetChildren().Num());
+    index = FMath::Clamp(index, 0, iParentLayer->GetChildren().Num());
 
     // Keep the original order of the layers
     Algo::Reverse( iLayers );

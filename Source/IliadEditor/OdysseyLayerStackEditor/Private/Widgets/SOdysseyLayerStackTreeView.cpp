@@ -340,16 +340,16 @@ SOdysseyLayerStackTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropE
     TArray<UOdysseyLayer*> layers = operation->GetLayers();
     if ( operationLayerStack == mLayerStack ) //droped from same layerstack, do a move of topmost dropped layers
     {
-        #if WITH_EDITOR
-            FScopedTransaction ScopedTransaction(LOCTEXT("drag-drop.transaction.move-layers", "Move Layers"));
-        #endif
+#if WITH_EDITOR
+        FScopedTransaction ScopedTransaction(LOCTEXT("drag-drop.transaction.move-layers", "Move Layers"));
+#endif
         mLayerStack->MoveLayers(layers, nullptr, mLayerStack->GetRootLayers().Num());
     }
     else
     {
-        #if WITH_EDITOR
-            FScopedTransaction ScopedTransaction(LOCTEXT("drag-drop.transaction.copy-layers", "Copy Layers"));
-        #endif
+#if WITH_EDITOR
+        FScopedTransaction ScopedTransaction(LOCTEXT("drag-drop.transaction.copy-layers", "Copy Layers"));
+#endif
         mLayerStack->CopyLayers(layers, nullptr, mLayerStack->GetRootLayers().Num());
     }
     return FReply::Handled();
