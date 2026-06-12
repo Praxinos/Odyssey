@@ -55,15 +55,13 @@ SOdysseyViewportDrawingEditorMasterTab::Construct(const FArguments& InArgs, FOdy
             .Value(this, &SOdysseyViewportDrawingEditorMasterTab::GetCurrentModeTool)
             .OnValueChecked(this, &SOdysseyViewportDrawingEditorMasterTab::OnModeToolChecked)
 
-            //Selection Tool
             + SSegmentedControl<EOdysseyViewportModeTool>::Slot(EOdysseyViewportModeTool::Selection)
             .Icon(FOdysseyStyle::GetBrush( "ViewportDrawingEditor.MainTab.ModeTool.Selection" ))
-            .ToolTip(LOCTEXT("master-tab.mode-tool.selection.tooltip", "Selection Tool"))
+            .ToolTip(LOCTEXT("master-tab.mode.drawing-configuration.tooltip", "Drawing Configuration"))
 
-            //Move Tool
             + SSegmentedControl<EOdysseyViewportModeTool>::Slot(EOdysseyViewportModeTool::Paint)
             .Icon(FOdysseyStyle::GetBrush( "ViewportDrawingEditor.MainTab.ModeTool.Paint" ))
-            .ToolTip(LOCTEXT("master-tab.mode-tool.paint.tooltip", "Move Tool"))
+            .ToolTip(LOCTEXT("master-tab.mode.drawing-tools.tooltip", "Drawing Tools"))
         ]
         +SVerticalBox::Slot()
         [
