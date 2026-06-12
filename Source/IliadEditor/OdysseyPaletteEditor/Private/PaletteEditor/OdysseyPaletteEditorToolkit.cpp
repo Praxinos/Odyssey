@@ -104,6 +104,7 @@ FOdysseyPaletteEditorToolkit::SpawnColorsTab(const FSpawnTabArgs& Args)
 {
     return SNew(SDockTab)
         .Label(LOCTEXT("tabs.colors.title", "Colors"))
+        .CanEverClose(false) //We don't want the user to be able to close the list of colors
         [
             SAssignNew(mTreeView, SOdysseyPaletteTreeView)
             .IsReadOnly(false)
