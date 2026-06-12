@@ -405,22 +405,7 @@ UOdysseyLayerStack::MergeLayers(TArray<UOdysseyLayer*> iLayers)
 bool
 UOdysseyLayerStack::CanMoveLayer(UOdysseyLayer* Layer, UOdysseyLayer* ParentLayer) const
 {
-    //No Layer or not contained by the layerstack
-    if(!Layer || !ContainsLayer(Layer))
-        return false;
-
-    if ( !ParentLayer )
-        ParentLayer = LayerRoot;
-
-    //If the given parent can't have children or isn't contained in this layerstack
-    if (!ParentLayer->CanHaveChildren() || !ContainsLayer(ParentLayer))
-        return false;
-
-    //Does Layer contain Parent Layer
-    if (Layer == ParentLayer || ParentLayer->IsChildOf(Layer))
-        return false;
-
-    return true;
+    return CanMoveLayers( { Layer }, ParentLayer );
 }
 
 bool
@@ -433,11 +418,17 @@ UOdysseyLayerStack::CanMoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* 
     if (!ParentLayer->CanHaveChildren() || !ContainsLayer(ParentLayer))
         return false;
 
+    if( !ParentLayer->IsEditable() )
+        return false;
+
     //Sanitize Layers array
     Layers.RemoveAll(
         [this, ParentLayer](UOdysseyLayer* iLayer)
         {
             if(!iLayer || !ContainsLayer(iLayer))
+                return true;
+
+            if( !iLayer->IsEditable() )
                 return true;
 
             if (iLayer == ParentLayer || ParentLayer->IsChildOf(iLayer))
@@ -479,6 +470,9 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> iLayers, UOdysseyLayer* iP
     if ( !iParentLayer )
         iParentLayer = LayerRoot;
 
+    if( !iParentLayer->IsEditable() )
+        return;
+
     //If the given parent can't have children or isn't contained in this layerstack
     if ( !iParentLayer->CanHaveChildren() || !ContainsLayer(iParentLayer))
         return;
@@ -488,6 +482,9 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> iLayers, UOdysseyLayer* iP
         [this, iParentLayer](UOdysseyLayer* iLayer)
         {
             if ( !iLayer || !ContainsLayer(iLayer) )
+                return true;
+
+            if( !iLayer->IsEditable() )
                 return true;
 
             if ( iLayer == iParentLayer || iParentLayer->IsChildOf(iLayer) )
