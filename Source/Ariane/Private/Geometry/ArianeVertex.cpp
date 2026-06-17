@@ -28,6 +28,17 @@ FArianeVertex::FArianeVertex( FArianeObject* Owner, const FVector& iPosition, co
 {
 }
 
+bool
+FArianeVertex::HasBaseClass( uint32 BaseClassID )
+{
+    if( StaticClass() == BaseClassID )
+    {
+        return true;
+    }
+
+    return Super::HasBaseClass( BaseClassID );
+}
+
 void
 FArianeVertex::SetNormal( const FVector& InNormal )
 {
@@ -85,6 +96,8 @@ void
 FArianeVertex::SetRadius( double InRadius )
 {
     Radius = InRadius;
+
+    Invalidate();
 }
 
 double

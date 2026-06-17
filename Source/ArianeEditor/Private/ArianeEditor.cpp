@@ -176,19 +176,17 @@ FArianeEditor::ExtendToolbarToolParameters( UToolMenu* iToolMenu )
         )
     );
 
-/*
-    UOdysseyPainterEditorTool* currentTool = GetCurrentTool();
-    if (currentTool)
+    UArianeEditorTool* CurrentTool = GetCurrentTool();
+    if (CurrentTool)
     {
-        currentTool->ExtendToolbar(iToolMenu);
+        CurrentTool->ExtendToolbar(iToolMenu);
     }
-*/
 }
 
 void
 FArianeEditor::ExtendLevelEditorToolbar( UToolMenu* iToolbar )
 {
-    //mToolbarMenuName = iToolbar->GetMenuName();
+    ToolbarMenuName = iToolbar->GetMenuName();
 
     iToolbar->AddDynamicSection(
         "ToolParameters",
@@ -260,6 +258,8 @@ FArianeEditor::SetCurrentTool( UArianeEditorTool* Tool
 
     if( TriggerEvent )
         OnPostCurrentToolChanged.Broadcast();
+
+    UToolMenus::Get()->RefreshMenuWidget(ToolbarMenuName);
 }
 
 UInteractiveToolManager*
@@ -477,6 +477,11 @@ FArianeEditor::AddPainting3DComponent( const TArray<class AActor *> iActors )
     }
 }
 
+FSimpleDelegate&
+FArianeEditor::OnRegenerateToolbarAndMenusDelegate()
+{
+    return OnRegenerateToolbarAndMenus;
+}
 
 void
 FArianeEditor::OnEditorSelectionChanged( UObject* NewSelection )

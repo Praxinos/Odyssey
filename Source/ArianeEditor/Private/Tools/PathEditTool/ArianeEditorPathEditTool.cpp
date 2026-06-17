@@ -93,15 +93,69 @@ UArianeEditorPathEditTool::FPointDisplacement::FPointDisplacement( FArianePoint*
 
 UArianeEditorPathEditTool::~UArianeEditorPathEditTool()
 {
+
 }
 
 UArianeEditorPathEditTool::UArianeEditorPathEditTool()
     : PickingRadius( 25.0f )
+    , bWidenAllAlong( true )
     , EditionMode  ( EArianePathEditToolEditionMode::Vertex )
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PathEdit64");
 
     bHasContextMenu = true;
+}
+
+void
+UArianeEditorPathEditTool::OnPostUpdate( bool bInteractive )
+{
+    if( bInteractive == false )
+    {
+        Reset();
+    }
+}
+
+void
+UArianeEditorPathEditTool::Reset()
+{
+    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+
+    if( ViewportClient )
+    {
+        FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
+                                                                                , ViewportClient->GetScene()
+                                                                                , ViewportClient->EngineShowFlags ) );
+        // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
+        FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
+
+        RebuildQuadTree( ViewportClient, View );
+    }
+}
+
+void
+UArianeEditorPathEditTool::BindDelegates()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        Painting3DComponent->OnPostUpdateDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPostUpdate );
+    }
+
+    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::Reset );
+}
+
+void
+UArianeEditorPathEditTool::UnbindDelegates()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
+
+    if( Painting3DComponent )
+    {
+        Painting3DComponent->OnPostUpdateDelegate().RemoveAll( this );
+    }
 }
 
 void
@@ -119,12 +173,16 @@ UArianeEditorPathEditTool::Activate()
 
         GEditor->RedrawAllViewports();
     }
+
+    BindDelegates();
 }
 
 void
 UArianeEditorPathEditTool::Inactivate()
 {
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+
+    UnbindDelegates();
 
     // ViewportClient can be nullptr when closing the editor
     if( ViewportClient )
@@ -143,37 +201,39 @@ UArianeEditorPathEditTool::OnKeyDownGlobal( const FKeyEvent& InKeyEvent )
 {
     if( InKeyEvent.IsRepeat() == false )
     {
-        FKey key = InKeyEvent.GetKey();
+        if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() && ( FSlateApplication::Get().GetModifierKeys().IsControlDown()
+                                                                        || FSlateApplication::Get().GetModifierKeys().IsCommandDown() ) )
+        {
+            FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(GetCurrentLayer());
 
-        FInputChord chord = FInputChord( ( InKeyEvent.IsControlDown() ? EModifierKey::Control : 0 )
-                                       | ( InKeyEvent.IsShiftDown()   ? EModifierKey::Shift   : 0 )
-                                       | ( InKeyEvent.IsAltDown()     ? EModifierKey::Alt     : 0 )
-                                       , key );
+            EditionMode  = EArianePathEditToolEditionMode::Alter;
 
-        // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
-        // with the events processing in the OnKeyUpGlobalVector(), we do like that.
-        if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
-          || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand ) )
+            if( ViewportClient && DrawingLayer )
+            {
+                FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
+                                                                                        , ViewportClient->GetScene()
+                                                                                        , ViewportClient->EngineShowFlags ) );
+                // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
+                FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
+
+                RebuildQuadTree( ViewportClient, View );
+            }
+
+            return true;
+        }
+
+        if ( FSlateApplication::Get().GetModifierKeys().IsControlDown()
+          || FSlateApplication::Get().GetModifierKeys().IsCommandDown() )
         {
             EditionMode   = EArianePathEditToolEditionMode::SegmentHandle;
 
             return true;
         }
 
-        // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
-        // with the events processing in the OnKeyUpGlobalVector(), we do like that.
-        if ( ( key == EKeys::LeftShift ) || ( key == EKeys::RightShift ) )
+        if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
         {
             EditionMode  = EArianePathEditToolEditionMode::VertexHandle;
-
-            return true;
-        }
-
-        // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
-        // with the events processing in the OnKeyUpGlobalVector(), we do like that.
-        if ( ( key == EKeys::LeftAlt ) || ( key == EKeys::RightAlt ) )
-        {
-            EditionMode  = EArianePathEditToolEditionMode::Alter;
 
             return true;
         }
@@ -232,13 +292,14 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
 
     View->DeprojectFVector2D( FVector2D( PointerState.ViewportX, PointerState.ViewportY ), RayOrigin, RayDirection );
 
-    SelectedPathArray.Empty();
-    PickedVertexArray.Empty();
-    PickedVertexDisplacementArray.Empty();
-    PickedVertexRadiusArray.Empty();
-    PickedHandleArray.Empty();
-    PickedHandleDisplacementArray.Empty();
-    SegmentAdjustmentArray.Empty();
+    SelectedPaths.Empty();
+    PickedVertices.Empty();
+    PickedVertexDisplacements.Empty();
+    PickedHandles.Empty();
+    PickedHandleDisplacements.Empty();
+    SegmentAdjustments.Empty();
+
+    SelectedPaths.Reserve( 200 );
 
     if( Painting3DComponent )
     {
@@ -256,14 +317,17 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
                   {
                       FArianePath* Path = static_cast<FArianePath*>(Object);
 
+                      // for widening all paths
+                      SelectedPaths.Add( Path );
+
                       PickPathPoints( ViewportClient
                                     , View
                                     , Path
                                     , PointerState.ViewportX
                                     , PointerState.ViewportY
                                     , PickingRadius
-                                    , PickedVertexArray
-                                    , PickedHandleArray
+                                    , PickedVertices
+                                    , PickedHandles
                                     , EditonModeToPickingFlags() );
                   }
               }
@@ -272,12 +336,13 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
           } );
 
         // Link or Unlink segment handles
-        if( ( EditionMode == EArianePathEditToolEditionMode::SegmentHandle ) &&  ( PickedVertexArray.Num() == 1 ) )
+        if( ( EditionMode == EArianePathEditToolEditionMode::SegmentHandle ) &&  ( PickedVertices.Num() == 1 ) )
         {
-            FArianeVertex* Vertex = PickedVertexArray[0];
+            FArianeVertex* Vertex = PickedVertices[0];
 
             //-------------- undo ---------------//
             GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.transaction.align-point-selection","Align Point Selection"));
+            DrawingLayer->Modify();
 
             Vertex->SetHandleAligned( Vertex->IsHandleAligned() ? false : true );
 
@@ -290,21 +355,23 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
             {
                 case EArianePathEditToolEditionMode::VertexHandle :
                     GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-vertex-handles","Edit Vertex Handles"));
+                    DrawingLayer->Modify();
                 break;
 
                 case EArianePathEditToolEditionMode::Vertex :
                 {
                     GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-vertices","Edit Vertices"));
+                    DrawingLayer->Modify();
 
-                    TArray<FArianeSegment*> AlteredSegmentArray;
+                    TArray<FArianeSegment*> AlteredSegments;
 
                     // static call
-                    FArianeVertex::ArrayToSegmentArray( PickedVertexArray, AlteredSegmentArray, false );
+                    FArianeVertex::ArrayToSegmentArray( PickedVertices, AlteredSegments, false );
                     // static call
-                    BuildSegmentAdjustments( AlteredSegmentArray, SegmentAdjustmentArray );
+                    BuildSegmentAdjustments( AlteredSegments, SegmentAdjustments );
 
                     // Control points must move with the point. Store them in the iPickedHandleArray
-                    for( FArianeVertex* Vertex : PickedVertexArray )
+                    for( FArianeVertex* Vertex : PickedVertices )
                     {
                         for( const FArianeSegmentID& SegmentID : Vertex->GetSegments() )
                         {
@@ -315,7 +382,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
                                 FArianeSegmentCubic* CubicSegment = static_cast<FArianeSegmentCubic*>(Segment);
                                 FArianeHandleSegment* Handle = CubicSegment->GetHandle( Vertex );
 
-                                PickedHandleArray.Add( Handle );
+                                PickedHandles.Add( Handle );
                             }
                         }
                     }
@@ -324,6 +391,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
 
                 case EArianePathEditToolEditionMode::SegmentHandle :
                     GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-handles","Edit Handles"));
+                    DrawingLayer->Modify();
                 break;
 
                 default:
@@ -332,23 +400,29 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
         }
 
         // remember vertex position at mouse down
-        PickedVertexDisplacementArray.Reserve( PickedVertexArray.Num() );
-        PickedVertexRadiusArray.Reserve( PickedVertexArray.Num() );
-        for( FArianeVertex* Vertex : PickedVertexArray )
+        PickedVertexDisplacements.Reserve( PickedVertices.Num() );
+        for( FArianeVertex* Vertex : PickedVertices )
         {
             const FTransform& OwnerTransform = Vertex->GetOwner()->GetTransform();
 
-            PickedVertexDisplacementArray.Emplace( Vertex, View->GetViewDirection(), OwnerTransform, RayOrigin, RayDirection );
-            PickedVertexRadiusArray.Emplace( Vertex->GetRadius() );
+            PickedVertexDisplacements.Emplace( Vertex
+                                             , View->GetViewDirection()
+                                             , OwnerTransform
+                                             , RayOrigin
+                                             , RayDirection );
         }
 
         // remember handle position at mouse down
-        PickedHandleDisplacementArray.Reserve( PickedHandleArray.Num() );
-        for( FArianeHandleSegment* Handle : PickedHandleArray )
+        PickedHandleDisplacements.Reserve( PickedHandles.Num() );
+        for( FArianeHandleSegment* Handle : PickedHandles )
         {
             const FTransform& OwnerTransform = Handle->GetOwnerSegment()->GetOwner()->GetTransform();
 
-            PickedHandleDisplacementArray.Emplace( Handle, View->GetViewDirection(), OwnerTransform, RayOrigin, RayDirection );
+            PickedHandleDisplacements.Emplace( Handle
+                                             , View->GetViewDirection()
+                                             , OwnerTransform
+                                             , RayOrigin
+                                             , RayDirection );
         }
 
         DrawingLayer->Update( true );
@@ -405,7 +479,15 @@ UArianeEditorPathEditTool::OnMouseHover( FEditorViewportClient* ViewportClient
                                        , FSceneView* View
                                        , const FArianePointerState& State )
 {
+    if( PointQuadTree )
+    {
+        HoveredPoints.Empty();
 
+        PointQuadTree->PickPoints( FVector2D( ViewportClient->Viewport->GetMouseX()
+                                            , ViewportClient->Viewport->GetMouseY() )
+                                 , PickingRadius
+                                 , HoveredPoints );
+    }
 }
 
 void
@@ -414,32 +496,40 @@ UArianeEditorPathEditTool::Render( IToolsContextRenderAPI* RenderAPI )
 
 }
 
-/*
 void
-UArianeEditorPathEditTool::DragVertexHandle( FArianeVertex *Vertex
-                                           , double OriginalRadius
-                                           , const ::ULIS::FVec2D& iPointInTexture
-                                           , bool iWidenAllAlong )
+UArianeEditorPathEditTool::DragVertexHandle( FArianeVertex* Vertex
+                                           , const TArray<FArianePath*>& SelectedPaths
+                                           , const FPointDisplacement& PointDisplacment
+                                           , const FTransform& Transform
+                                           , const FVector& RayOrigin
+                                           , const FVector& RayDirection
+                                           , bool bInWidenAllAlong )
 {
-    FOdysseyVectorPath* path = iVertex->GetOwnerAsPath();
-    ::ULIS::FVec2D localMouse = FOdysseyVector::MapPoint( path->GetInverseWorldMatrix()
-                                                        , iPointInTexture );
-    double ratio = ( ::ULIS::FVec2D( iVertex->GetX() - localMouse.x
-                                   , iVertex->GetY() - localMouse.y ).Distance() ) / iVertex->GetRadius();
+    FVector IntersectAt;
 
-    if( iWidenAllAlong )
+    if( FArianeCore::IntersectPlane( PointDisplacment.WorldPlane, RayOrigin, RayDirection, IntersectAt ) > 0.0f )
     {
-        for( int i = 0; i < mSelectedPathArray.size(); i++ )
+        FVector WorldDelta = IntersectAt - PointDisplacment.WorldRayPositionAtDown;
+        FVector LocalMouse = Transform.InverseTransformPosition( IntersectAt );
+
+        if( Vertex->GetRadius() )
         {
-            mSelectedPathArray[i]->AlterRadius( ratio  );
+            double Ratio = ( FVector( PointDisplacment.LocalPosition - LocalMouse ).Length() ) / Vertex->GetRadius();
+
+            if( bInWidenAllAlong )
+            {
+                for( FArianePath* Path : SelectedPaths )
+                {
+                    Path->AlterRadius( Ratio  );
+                }
+            }
+            else
+            {
+                Vertex->SetRadius( Vertex->GetRadius() * Ratio );
+            }
         }
     }
-    else
-    {
-        iVertex->SetRadius( iVertex->GetRadius() * ratio );
-    }
 }
-*/
 
 void
 UArianeEditorPathEditTool::DisplacePoint( FArianePoint* Point
@@ -477,49 +567,29 @@ UArianeEditorPathEditTool::OnMouseDrag( FEditorViewportClient* ViewportClient
 
         if( Painting3DComponent )
         {
-            //TArray<FArianePoint*> SnappedPointArray;
-
-            //mPathEditHUD->SetCutLineP1( iPointInTexture.x, iPointInTexture.y );
-            //mPathEditHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
-
-            /*
-            // snapping
-            mPathEditHUD->PickPoints( iPointInTexture.x
-                                    , iPointInTexture.y
-                                    , PickingRadius
-                                    , snappedPointArray );
-            if( snappedPointArray.size() )
-            {
-                if( snappedPointArray[0]->GetClass() == FOdysseyVectorVertex::StaticClass() )
-                {
-                    FOdysseyVectorVertex* snappedVertex = static_cast<FOdysseyVectorVertex*>(snappedPointArray[0]);
-                    ::ULIS::FVec2D snappedVertexWorldCoords = snappedVertex->GetWorldCoords();
-
-                    pointInTextureX = snappedVertexWorldCoords.x;
-                    pointInTextureY = snappedVertexWorldCoords.y;
-                }
-            }
-            */
-
             if( EditionMode == EArianePathEditToolEditionMode::VertexHandle  )
             {
-                for( int i = 0; i < PickedVertexArray.Num(); i++ )
+                for( int i = 0; i < PickedVertices.Num(); i++ )
                 {
-                    FArianeVertex *Vertex = PickedVertexArray[i];
+                    FArianeVertex *Vertex = PickedVertices[i];
+                    FPointDisplacement& PointDisplacement = PickedVertexDisplacements[i];
 
-                    ////DragVertexHandle( Vertex
-                    ////                , PickedVertexRadiusArray[i]
-                    ////                , ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y )
-                    ////                , WidenAllAlong && ( PickedVertexArray.Num() == 1 ) );
+                    DragVertexHandle( Vertex
+                                    , SelectedPaths
+                                    , PointDisplacement
+                                    , Vertex->GetOwner()->GetTransform()
+                                    , RayOrigin
+                                    , RayDirection
+                                    , bWidenAllAlong && ( PickedVertices.Num() == 1 ) );
                 }
             }
 
             if( EditionMode == EArianePathEditToolEditionMode::Vertex )
             {
-                for( int i = 0; i < PickedVertexArray.Num(); i++ )
+                for( int i = 0; i < PickedVertices.Num(); i++ )
                 {
-                    FArianeVertex *Vertex = PickedVertexArray[i];
-                    FPointDisplacement& PointDisplacement = PickedVertexDisplacementArray[i];
+                    FArianeVertex *Vertex = PickedVertices[i];
+                    FPointDisplacement& PointDisplacement = PickedVertexDisplacements[i];
 
                     DisplacePoint( Vertex
                                  , PointDisplacement
@@ -532,10 +602,10 @@ UArianeEditorPathEditTool::OnMouseDrag( FEditorViewportClient* ViewportClient
             if( ( EditionMode == EArianePathEditToolEditionMode::SegmentHandle )
             ||  ( EditionMode == EArianePathEditToolEditionMode::Vertex        ) )
             {
-                for( int i = 0; i < PickedHandleArray.Num(); i++ )
+                for( int i = 0; i < PickedHandles.Num(); i++ )
                 {
-                    FArianeHandleSegment *Handle = PickedHandleArray[i];
-                    FPointDisplacement& PointDisplacement = PickedHandleDisplacementArray[i];
+                    FArianeHandleSegment *Handle = PickedHandles[i];
+                    FPointDisplacement& PointDisplacement = PickedHandleDisplacements[i];
 
                     DisplacePoint( Handle
                                  , PointDisplacement
@@ -548,7 +618,7 @@ UArianeEditorPathEditTool::OnMouseDrag( FEditorViewportClient* ViewportClient
             // adjust handle length to keep the same ratio as before the editing
             if( EditionMode == EArianePathEditToolEditionMode::Vertex )
             {
-                for( FSegmentAdjustment& SegmentAdjustment : SegmentAdjustmentArray )
+                for( FSegmentAdjustment& SegmentAdjustment : SegmentAdjustments )
                 {
                     SegmentAdjustment.Adjust();
                 }
@@ -560,6 +630,112 @@ UArianeEditorPathEditTool::OnMouseDrag( FEditorViewportClient* ViewportClient
     }
 
     return false;
+}
+
+void
+UArianeEditorPathEditTool::OnMouseUpDeletePoint( const TArray<FArianePoint*>& PickedPoints )
+{
+    // temporary structure to store the path that will have their vertices removed.
+    // the path are retrived via the quadtree that is built by the HUD. Each quad
+    // stores points (vertices), and we retrieve the path from those vertices.
+    // then we can pass the data to FOdysseyVectorPath::DeleteVertex()
+    struct FAlteredPathRecord
+    {
+        FArianePath* Path;
+        TArray<FArianeVertex*> VertexArray;
+
+        FAlteredPathRecord( FArianePath* InPath )
+        {
+            Path = InPath;
+            VertexArray.Reserve( 10 );
+        }
+    };
+
+    TArray<UArianeLayerDrawing*> DrawingLayers;
+    TArray<FArianePath*> RemovedPaths;
+    TArray<FArianeVertex*> RemovedVertices;
+    TArray<FArianeSegment*> RemovedSegments;
+    TArray<FArianePath*> AddedPaths;
+    TArray<FArianeVertex*> AddedVertices; // not filled, here just for the undo record
+    TArray<FArianeSegment*> AddedSegments;
+    TArray<FAlteredPathRecord> AlteredPathRecords;
+    bool hasHit = false;
+
+    AlteredPathRecords.Reserve( 10 );
+    RemovedPaths.Reserve( 10 );
+    RemovedVertices.Reserve( 10 );
+    RemovedSegments.Reserve( 10 );
+    AddedSegments.Reserve( 10 );
+
+    for( FArianePoint* Point : PickedPoints )
+    {
+        if( Point->GetClass() == FArianeVertex::StaticClass() )
+        {
+            FArianeVertex* Vertex = static_cast<FArianeVertex*>(Point);
+            FArianeObject* Owner = Vertex->GetOwner();
+
+            if( Owner->GetClass() == FArianePath::StaticClass() )
+            {
+                FArianePath* OwnerPath = static_cast<FArianePath*>(Owner);
+
+                FAlteredPathRecord* AlteredPathRecord = AlteredPathRecords.FindByPredicate(
+                                                           [OwnerPath]( const FAlteredPathRecord& AlteredPathRecord ) -> bool
+                                                           {
+                                                               return ( AlteredPathRecord.Path == OwnerPath );
+                                                           } );
+
+                if( AlteredPathRecord == nullptr )
+                {
+                    AlteredPathRecord = &AlteredPathRecords.Emplace_GetRef( OwnerPath );
+                }
+
+                AlteredPathRecord->VertexArray.Add( Vertex );
+            }
+
+            if( DrawingLayers.Find( Owner->GetDrawingLayer() ) == INDEX_NONE )
+            {
+                DrawingLayers.Add( Owner->GetDrawingLayer() );
+            }
+        }
+    }
+
+    GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.delete-vertex","Delete Vertex"));
+
+    // Snapshot for undos
+    for( UArianeLayerDrawing* DrawingLayer : DrawingLayers )
+    {
+        DrawingLayer->Modify();
+    }
+
+    for( FAlteredPathRecord& AlteredPathRecord : AlteredPathRecords )
+    {
+        if( AlteredPathRecord.Path->DeleteVertex( AlteredPathRecord.VertexArray
+                                                , nullptr/*RemovedVertices*/
+                                                , nullptr/*RemovedSegments*/
+                                                , nullptr/*AddedSegments*/ ) )
+        {
+            RemovedPaths.Add( AlteredPathRecord.Path );
+        }
+    }
+
+    for( FArianePath* RemovedPath : RemovedPaths )
+    {
+        RemovedPath->GetParent()->RemoveChild( RemovedPath, true );
+    }
+
+    GetToolManager()->EndUndoTransaction();
+}
+
+void
+UArianeEditorPathEditTool::RebuildQuadTree( FEditorViewportClient* ViewportClient
+                                          , FSceneView* View )
+{
+    UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(GetCurrentLayer());
+
+    if( DrawingLayer )
+    {
+        MakePointQuadTree( ViewportClient, View, {DrawingLayer}, true );
+    }
 }
 
 bool
@@ -577,6 +753,12 @@ UArianeEditorPathEditTool::OnMouseUp( FEditorViewportClient* ViewportClient
         {
             switch( EditionMode )
             {
+                case EArianePathEditToolEditionMode::Vertex :
+                case EArianePathEditToolEditionMode::VertexHandle :
+                case EArianePathEditToolEditionMode::SegmentHandle :
+                    GetToolManager()->EndUndoTransaction();
+                break;
+
                 case EArianePathEditToolEditionMode::Alter :
                 {
                     ////TArray<FArianePoint*>& HoveredPointArray = PathEditHUD->GetHoveredPointArray();
@@ -584,41 +766,43 @@ UArianeEditorPathEditTool::OnMouseUp( FEditorViewportClient* ViewportClient
                     // This populates mPathEditHUD::mHoveredPointArray
                     //mPathEditHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-                    ////if( HoveredPointArray.Num() )
-                    ////{
-                        ////OnMouseUpDeletePoint( iScene, hoveredPointArray );
-                    ////}
-                    ////else
-                    ////{
-                        ////TArray<FArianeSegment*> PickedSegmentArray;
+                    if( HoveredPoints.Num() )
+                    {
+                        OnMouseUpDeletePoint( HoveredPoints );
+                    }
+                    else
+                    {
+/*
+                        TArray<FArianeSegment*> PickedSegmentArray;
 
                         // check if we picked any segment
-                        ////PickSegments( iScene
-                        ////            , iPointInTexture.x
-                        ////            , iPointInTexture.y
-                        ////            , PickingRadius
-                        ////            , true
-                        ////            , false
-                        ////            , pickedSegmentArray );
+                        PickSegments( iScene
+                                    , iPointInTexture.x
+                                    , iPointInTexture.y
+                                    , PickingRadius
+                                    , true
+                                    , false
+                                    , pickedSegmentArray );
 
-                        ////if( pickedSegmentArray.size() )
-                        ////{
-                            ////OnMouseUpAddPoint( iScene
-                            ////                 , iPointInTexture
-                            ////                 , pickedSegmentArray );
-                        ////}
-                        ////else
-                        ////{
-                            ////OnMouseUpCutPaths( iScene, iPointInTexture );
-                        ////}
-                    ////}
+                        if( pickedSegmentArray.size() )
+                        {
+                            OnMouseUpAddPoint( iScene
+                                             , iPointInTexture
+                                             , pickedSegmentArray );
+                        }
+                        else
+                        {
+                            OnMouseUpCutPaths( iScene, iPointInTexture );
+                        }
+*/
+                    }
                 }
                 break;
 
                 default:
                 {
                     // If nothing was selected, we pick an object
-                    if( ( PickedVertexArray.Num() == 0 ) && ( PickedHandleArray.Num() == 0 ) )
+                    if( ( PickedVertices.Num() == 0 ) && ( PickedHandles.Num() == 0 ) )
                     {
                         ////PickObjects( iScene, iPointInTexture.x, iPointInTexture.y );
                     }
@@ -628,8 +812,6 @@ UArianeEditorPathEditTool::OnMouseUp( FEditorViewportClient* ViewportClient
 
             Painting3DComponent->Update( false );
         }
-
-        GetToolManager()->EndUndoTransaction();
 
         return true;
     }
@@ -733,16 +915,8 @@ UArianeEditorPathEditTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* Re
     FLinearColor BgColor = GetBackgroundColor();
     FLinearColor HcColor = GetHighlightColor();
     FArianeEditorHUD::FDrawingFlags HUDDrawingFlags = EditonModeToHUDDrawingFlags();
-
-     // picking circle
-    DrawCircleHUD( Canvas
-                 , ViewportClient
-                 , View
-                 , FVector2D( ViewportClient->GetCachedMouseX()
-                            , ViewportClient->GetCachedMouseY() )
-                 , PickingRadius
-                 , HcColor
-                 , 1.0f );
+    FVector2D MousePosition = FVector2D( ViewportClient->GetCachedMouseX()
+                                       , ViewportClient->GetCachedMouseY() );
 
     if( Painting3DComponent )
     {
@@ -777,6 +951,47 @@ UArianeEditorPathEditTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* Re
             } );
         }
     }
+
+    if( EditionMode == EArianePathEditToolEditionMode::Alter )
+    {
+        if(  HoveredPoints.Num() )
+        {
+            FVector2D MinusP0 = FVector2D( MousePosition.X + PickingRadius
+                                         , MousePosition.Y - PickingRadius );
+            FVector2D MinusP1 = FVector2D( MousePosition.X + PickingRadius + 8
+                                         , MousePosition.Y - PickingRadius );
+
+            DrawLineHUD( Canvas, ViewportClient, View, MinusP0, MinusP1, HcColor, 1.0f );
+        }
+        else
+        {
+/*
+            FVector2D lineP0 = iParams.mTextureToHUD.Execute( FVector2D( mCutLinePoint[0].x, mCutLinePoint[0].y ) );
+            FVector2D lineP1 = iParams.mTextureToHUD.Execute( FVector2D( mCutLinePoint[1].x, mCutLinePoint[1].y ) );
+
+            // we are NOT over a vertex, draw a plus sign
+            DrawPrimitivePlus( iParams
+                             , FVector2D( MousePosition.X + PickingRadius
+                                        , MousePosition.Y - PickingRadius )
+                             , 4
+                             , HcColor
+                             , 1.0f );
+
+            // cutting Line
+            DrawPrimitiveLine( iParams, lineP0, lineP1, HcColor, 1.0f );
+*/
+        }
+    }
+
+     // picking circle
+    DrawCircleHUD( Canvas
+                 , ViewportClient
+                 , View
+                 , FVector2D( ViewportClient->GetCachedMouseX()
+                            , ViewportClient->GetCachedMouseY() )
+                 , PickingRadius
+                 , HcColor
+                 , 1.0f );
 }
 
 bool
@@ -900,7 +1115,7 @@ UArianeEditorPathEditTool::ExtendToolbar( UToolMenu* iToolMenu )
             SNew(SBox)
             .Padding(10.f, 0.f, 10.f, 0.f)
             [
-                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UArianeEditorPathEditTool, WidenAllAlong ), FSinglePropertyParams())
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UArianeEditorPathEditTool, bWidenAllAlong ), FSinglePropertyParams())
                 .InnerPadding(10.f)
             ],
             FText()

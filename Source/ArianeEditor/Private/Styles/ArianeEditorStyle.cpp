@@ -65,6 +65,12 @@ FArianeEditorStyle::Init()
     Set( "ArianeEditor.ToolsTab.Transform64"  , new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool"   , Icon64x64 ) );
     Set( "ArianeEditor.ToolsTab.Transform16"  , new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool"   , Icon16x16 ) );
 
+    // Tools shortcut
+    Set( "ArianeEditor.ToolsShortcuts.PathEditAddRemoveVertex20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool_add_remove_vertex", Icon20x20 ) );
+    Set( "ArianeEditor.ToolsShortcuts.PathEditDeformSegment20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool_deform_segment", Icon20x20 ) );
+    Set( "ArianeEditor.ToolsShortcuts.PathEditMoveVertex20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool_move_vertex", Icon20x20 ) );
+    Set( "ArianeEditor.ToolsShortcuts.PathEditWidenVertex20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool_widen_vertex", Icon20x20 ) );
+
     Set("ArianeEditorCheckBoxStyle.ToggleButton", FCheckBoxStyle( FAppStyle::Get().GetWidgetStyle<FCheckBoxStyle>("ToggleButtonCheckbox") )
         .SetPadding(FMargin())
     );

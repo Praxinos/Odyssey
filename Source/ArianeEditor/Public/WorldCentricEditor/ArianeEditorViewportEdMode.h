@@ -68,28 +68,24 @@ public:
     virtual bool MouseLeave(FEditorViewportClient* iViewportClient, FViewport* iViewport) override;
 
 #ifdef unused
-    /** Overriden from FEdMode. */
-    virtual bool MouseMove( FEditorViewportClient* iViewportClient
-                          , FViewport* iViewport
-                          , int32 iMouseX
-                          , int32 iMouseY ) override;
-
-
-
     // Overriden from FEdMode
     virtual bool InputKey( FEditorViewportClient* iViewportClient
                          , FViewport* iViewport
                          , FKey iKey
                          , EInputEvent iEvent) override;
 
-
-
-
     // Override from FEdMode
     virtual bool CapturedMouseMove( FEditorViewportClient* iViewportClient
                                   , FViewport* iViewport
                                   , int32 iMouseX
                                   , int32 iMouseY ) override;
+
+    /** Overriden from FEdMode. */
+    virtual bool MouseMove( FEditorViewportClient* iViewportClient
+                          , FViewport* iViewport
+                          , int32 iMouseX
+                          , int32 iMouseY ) override;
+
 
 #endif
 

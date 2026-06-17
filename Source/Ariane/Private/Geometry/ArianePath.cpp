@@ -483,6 +483,17 @@ FArianePath::GetVertices()
 }
 
 void
+FArianePath::AlterRadius( double RatioRadius )
+{
+    for( FArianeVertexID& VertexID : Vertices )
+    {
+        FArianeVertex* Vertex = VertexID.GetVertex();
+
+        Vertex->SetRadius( Vertex->GetRadius() * RatioRadius );
+    }
+}
+
+void
 FArianePath::UpdateBounds()
 {
     Bounds = FBoxSphereBounds(ForceInit);
@@ -683,6 +694,229 @@ FArianePath::GetGeometry3D()
     return Geometry3D;
 }
 
+// static
+FArianeVertex*
+FArianePath::GetStitchingVertex( FArianeVertex* Vertex
+                               , FArianeSegment* Segment
+                               , const TArray<FArianeVertex*>& PickedVertexArray
+                               , FVector& OutHandle )
+{
+    FArianeVertex *CurrentVertex = Vertex;
+    FArianeSegment *CurrentSegment = Segment;
+
+    do
+    {
+        // return the nextVertex if it is not marked for deletion. Then it will be stitched with its counterpart, if any.
+        if( PickedVertexArray.Find( CurrentVertex ) == INDEX_NONE )
+        {
+            if( CurrentSegment->GetClass() == FArianeSegmentCubic::StaticClass() )
+            {
+                FArianeSegmentCubic* CurrentCubicSegment = static_cast<FArianeSegmentCubic*>(CurrentSegment);
+
+                OutHandle = CurrentCubicSegment->GetHandle( CurrentVertex )->GetPosition();
+            }
+
+            return CurrentVertex;
+        }
+
+        // move to the next segment
+        CurrentSegment = CurrentVertex->GetOtherSegment( CurrentSegment );
+        CurrentVertex = CurrentSegment ? CurrentSegment->GetOtherVertex( CurrentVertex ) : nullptr;
+
+    } while( ( CurrentVertex ) && ( CurrentVertex != Vertex ) );
+                                  // loop detection
+
+    return nullptr;
+}
+
+bool
+FArianePath::DeleteVertex( const TArray<FArianeVertex*>& VerticesToRemove
+                         , TArray<FArianeVertex*>* OutRemovedVertices
+                         , TArray<FArianeSegment*>* OutRemovedSegments
+                         , TArray<FArianeSegment*>* OutAddedSegments )
+{
+    uint32 SegmentClass = Segments.Num() ? Segments[0].GetSegment()->GetClass()
+                                         : FArianeSegment::StaticClass();
+
+    // only used internally by FOdysseyVectorPath::DeletePoint(). Declare in CPP file
+    struct FStitchingPair
+    {
+        FArianeVertex* Vertex[2];
+        FVector Handle[2];
+
+        FStitchingPair( FArianeVertex* Vertex0, const FVector& Handle0
+                      , FArianeVertex* Vertex1, const FVector& Handle1 )
+        {
+            // Note: ordering will ease comparisons between stitching pairs.
+            Vertex[0] = Vertex0 < Vertex1 ? Vertex0 : Vertex1;
+            Handle[0] = Vertex0 < Vertex1 ? Handle0 : Handle1;
+
+            Vertex[1] = Vertex0 < Vertex1 ? Vertex1 : Vertex0;
+            Handle[1] = Vertex0 < Vertex1 ? Handle1 : Handle0;
+        }
+    };
+
+    TArray<FArianeVertex*> ExtendedVertices;
+    TArray<FStitchingPair> StitchingPairs;
+
+    StitchingPairs.Reserve( 10 );
+    ExtendedVertices.Reserve( 10 );
+
+    ExtendedVertices = VerticesToRemove;
+
+    // first step
+    // Build stitching pairs by finding a vertex that is not doomed for deletion on both sides.
+    for( FArianeVertex* Vertex : VerticesToRemove )
+    {
+        uint32 segmentCount = Vertex->GetSegments().Num();
+
+        if( segmentCount )
+        {
+            FVector Handle[2];
+            FArianeSegment* Segment0 = Vertex->GetFirstSegment();
+            FArianeSegment* Segment1 = Vertex->GetOtherSegment( Segment0 );
+            FArianeVertex* StitchingVertices[2] = { Segment0 ? GetStitchingVertex( Segment0->GetOtherVertex(Vertex)
+                                                                                 , Segment0
+                                                                                 , VerticesToRemove
+                                                                                 , Handle[0] ) : nullptr
+                                                  , Segment1 ? GetStitchingVertex( Segment1->GetOtherVertex(Vertex)
+                                                                                 , Segment1
+                                                                                 , VerticesToRemove
+                                                                                 , Handle[1] ) : nullptr };
+
+            if( StitchingVertices[0] == StitchingVertices[1] ) // e.g loops
+            {
+                if( StitchingVertices[0] )
+                {
+                    // for vertices that were not picked but that cannot be stitched, delete them as well.
+                    // they could aready be part of the picked vertices. We have to check if that's not already the case.
+                    if( ExtendedVertices.Find( StitchingVertices[0] ) == INDEX_NONE )
+                    {
+                        ExtendedVertices.Add( StitchingVertices[0] );
+                    }
+                }
+            }
+            else // StitchingVertices[0] != StitchingVertices[1]
+            {
+                if ( StitchingVertices[0] && StitchingVertices[1] )
+                {
+                    FStitchingPair StitchingPair = FStitchingPair( StitchingVertices[0], Handle[0]
+                                                                 , StitchingVertices[1], Handle[1] );
+
+                    if( StitchingPairs.FindByPredicate( [StitchingPair]( FStitchingPair& StoredPair)  -> bool
+                                                        {
+                                                            return ( StoredPair.Vertex[0] == StitchingPair.Vertex[0] )
+                                                                && ( StoredPair.Vertex[1] == StitchingPair.Vertex[1] );
+                                                        } ) == nullptr )
+                    {
+                        StitchingPairs.Add( StitchingPair );
+                    }
+                }
+                else
+                {
+                    if( StitchingVertices[0] && ( StitchingVertices[0]->GetSegments().Num() == 1 ) )
+                    {
+                        // for vertices that were not picked but that cannot be stitched, delete them as well.
+                        // they could aready be part of the picked vertices. We have to check if that's not already the case.
+                        if( ExtendedVertices.Find( StitchingVertices[0] ) == INDEX_NONE )
+                        {
+                            ExtendedVertices.Add( StitchingVertices[0] );
+                        }
+                    }
+
+                    if( StitchingVertices[1] && ( StitchingVertices[1]->GetSegments().Num() == 1 ) )
+                    {
+                        // for vertices that were not picked but that cannot be stitched, delete them as well.
+                        // they could aready be part of the picked vertices. We have to check if that's not already the case.
+                        if( ExtendedVertices.Find( StitchingVertices[1] ) == INDEX_NONE )
+                        {
+                            ExtendedVertices.Add( StitchingVertices[1] );
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // second step
+    // the actual deletion
+    for( FArianeVertex* ExtendedVertex : ExtendedVertices )
+    {
+        // Note: work on a copy of the list, because deletion will alter the segment list
+        TArray<FArianeSegment*> VertexSegments = ExtendedVertex->GetSegments();
+
+        for( FArianeSegment* VertexSegment : VertexSegments )
+        {
+            if( OutRemovedSegments )
+            {
+                RemoveSegment( VertexSegment, false );
+                // for custom undoing if needed
+                OutRemovedSegments->Add( VertexSegment );
+            }
+            else
+            {
+                RemoveSegment( VertexSegment, true );
+            }
+        }
+
+        if( OutRemovedVertices )
+        {
+            RemoveVertex( ExtendedVertex, false );
+            // for custom undoing if needed
+            OutRemovedVertices->Add( ExtendedVertex );
+        }
+        else
+        {
+            RemoveVertex( ExtendedVertex, true );
+        }
+    }
+
+    // third step
+    // stitch
+    for( FStitchingPair& StitchingPair : StitchingPairs )
+    {
+        FArianeVertex* StitchingVertex0 = StitchingPair.Vertex[0];
+        FArianeVertex* StitchingVertex1 = StitchingPair.Vertex[1];
+        FArianeSegment* StitchedSegment = nullptr;
+
+        if ( SegmentClass == FArianeSegment::StaticClass() )
+        {
+            StitchedSegment = AllocSegment( StitchingVertex0
+                                          , StitchingVertex1 );
+        }
+
+        if ( SegmentClass == FArianeSegmentCubic::StaticClass() )
+        {
+            FVector Handle0 = StitchingPair.Handle[0];
+            FVector Handle1 = StitchingPair.Handle[1];
+
+            StitchedSegment = AllocCubicSegment( StitchingVertex0
+                                               , Handle0.X
+                                               , Handle0.Y
+                                               , Handle0.Z
+                                               , Handle1.X
+                                               , Handle1.Y
+                                               , Handle1.Z
+                                               , StitchingVertex1 );
+        }
+
+        if( StitchedSegment )
+        {
+            AddSegment( StitchedSegment );
+
+            // for custom undoing if needed
+            if( OutAddedSegments )
+            {
+                OutAddedSegments->Add( StitchedSegment );
+            }
+        }
+    }
+
+    InvalidateAllSegments();
+
+    return ( GetSegments().Num() ) ? false : true; // return true if the path is now empty
+}
+
 FArianePathGeometry3D::~FArianePathGeometry3D()
 {
     // Some rendering commands use the vertex factory, flush them first
@@ -744,10 +978,11 @@ FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
         {
             // For 3 points ABC
             FArianeSegment* OtherSegment = Vertex->GetOtherSegment( Segment );
-            FVector VectorBA = Segment->GetTangentVectorAt( T, true );
+            FVector VectorBA = Segment->GetVectorLeavingFromVertex( Vertex, true );
             FVector VectorBC = OtherSegment->GetVectorLeavingFromVertex( Vertex, true );
 
-            TangentVector = ( VectorBA + VectorBC );
+            TangentVector = SegmentVector.Dot( VectorBA ) > 0.0f ? (   VectorBA - VectorBC )
+                                                                 : ( - VectorBA + VectorBC );
         }
     }
 

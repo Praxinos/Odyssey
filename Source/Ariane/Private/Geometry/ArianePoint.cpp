@@ -23,6 +23,17 @@ FArianePoint::FArianePoint( const FVector& InPosition )
 {
 }
 
+bool
+FArianePoint::HasBaseClass( uint32 BaseClassID )
+{
+    if( StaticClass() == BaseClassID )
+    {
+        return true;
+    }
+
+    return false;
+}
+
 const FVector&
 FArianePoint::GetPosition()
 {

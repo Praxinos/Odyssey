@@ -13,52 +13,67 @@ struct ARIANE_API FArianePoint
 {
     GENERATED_BODY()
 
-    public:
-        virtual ~FArianePoint();
-        FArianePoint();
+public:
+    /**
+        * @brief Get the class type
+        * @return the class type
+        */
+    static uint32 StaticClass() { return 0x9e865243; }; // value is crc32 FArianePoint
 
-        /**
-         * @brief Constructor
-         * @param X coordinate along the X axis.
-         * @param Y coordinate along the Y axis.
-         * @param Z coordinate along the Z axis.
-         */
-        FArianePoint( double X, double Y, double Z );
+    /**
+        * @brief Get the object type
+        * @return the object type
+        */
+    virtual uint32 GetClass() { return StaticClass(); };
+    virtual bool HasBaseClass( uint32 BaseClassID );
 
-        /**
-         * @brief Constructor
-         * @param InPosition vertex's position.
-         */
-        FArianePoint( const FVector& InPosition );
+public:
+    virtual ~FArianePoint();
+    FArianePoint();
 
-        /** Get the vertex's position */
-        const FVector& GetPosition();
 
-        /**
-         * @brief Set the vertex's position in space.
-         * @param X coordinate along the X axis.
-         * @param Y coordinate along the Y axis.
-         * @param Z coordinate along the Z axis.
-         */
-        void SetPosition( double X, double Y, double Z );
+    /**
+        * @brief Constructor
+        * @param X coordinate along the X axis.
+        * @param Y coordinate along the Y axis.
+        * @param Z coordinate along the Z axis.
+        */
+    FArianePoint( double X, double Y, double Z );
 
-        /**
-         * @brief Set the vertex's position in space.
-         * @param InPosition vertex's position.
-         */
-        void SetPosition( const FVector& InPosition );
+    /**
+        * @brief Constructor
+        * @param InPosition vertex's position.
+        */
+    FArianePoint( const FVector& InPosition );
 
-        /** Run any object-specific task required immediately after undoing / redoing */
-        virtual void PostEditUndo(){};
+    /** Get the vertex's position */
+    const FVector& GetPosition();
 
-    protected:
-        /**
-         * @brief Set the handle's position
-         * @param InPosition the desired handle's position
-         */
-        virtual void SetPosition_Private( const FVector& InPosition );
+    /**
+        * @brief Set the vertex's position in space.
+        * @param X coordinate along the X axis.
+        * @param Y coordinate along the Y axis.
+        * @param Z coordinate along the Z axis.
+        */
+    void SetPosition( double X, double Y, double Z );
 
-    protected:
-        UPROPERTY( EditAnywhere )
-        FVector Position;
+    /**
+        * @brief Set the vertex's position in space.
+        * @param InPosition vertex's position.
+        */
+    void SetPosition( const FVector& InPosition );
+
+    /** Run any object-specific task required immediately after undoing / redoing */
+    virtual void PostEditUndo(){};
+
+protected:
+    /**
+        * @brief Set the handle's position
+        * @param InPosition the desired handle's position
+        */
+    virtual void SetPosition_Private( const FVector& InPosition );
+
+protected:
+    UPROPERTY( EditAnywhere )
+    FVector Position;
 };

@@ -20,6 +20,7 @@
 
 class FArianeEditor;
 struct FArianePath;
+struct FArianePoint;
 struct FArianeVertex;
 struct FArianeSegment;
 struct FArianeHandleSegment;
@@ -144,16 +145,31 @@ protected:
                              , const FKey& iKey
                              , const FArianePointerState& PointerState
                              , bool iRepeat );
+    void OnMouseUpDeletePoint( const TArray<FArianePoint*>& PickedPoints );
 
     static void DisplacePoint( FArianePoint* Point
                              , const FPointDisplacement& PointDisplacment
                              , const FTransform& Transform
                              , const FVector& RayOrigin
                              , const FVector& RayDirection );
+    static void DragVertexHandle( FArianeVertex* Point
+                                , const TArray<FArianePath*>& SelectedPaths
+                                , const FPointDisplacement& PointDisplacment
+                                , const FTransform& Transform
+                                , const FVector& RayOrigin
+                                , const FVector& RayDirection
+                                , bool bInWidenAllAlong );
+
     const FSlateBrush* GetBackgroundBrush( EArianePathEditToolEditionMode iMode ) const;
     void SetEditionMode( EArianePathEditToolEditionMode iMode );
     EArianePathEditToolEditionMode GetEditionMode();
     TSharedRef<SWidget> CreateModifierSegmentControl();
+    void RebuildQuadTree( FEditorViewportClient* ViewportClient
+                        , FSceneView* View );
+    void OnPostUpdate( bool bInteractive );
+    void Reset();
+    void BindDelegates();
+    void UnbindDelegates();
 
 public:
     UPROPERTY( EditAnywhere
@@ -168,15 +184,15 @@ public:
     UPROPERTY( EditAnywhere
              , Category=PathEditTool
              , meta = ( ToolTip = "Widen All Along" ) )
-    bool WidenAllAlong;
+    bool bWidenAllAlong;
 
 protected:
-    TArray<FArianeVertex*> PickedVertexArray;
-    TArray<FPointDisplacement> PickedVertexDisplacementArray;
-    TArray<double> PickedVertexRadiusArray;
-    TArray<FArianeHandleSegment*> PickedHandleArray;
-    TArray<FPointDisplacement> PickedHandleDisplacementArray;
-    TArray<FSegmentAdjustment> SegmentAdjustmentArray;
-    TArray<FArianePath*> SelectedPathArray;
+    TArray<FArianeVertex*> PickedVertices;
+    TArray<FPointDisplacement> PickedVertexDisplacements;
+    TArray<FArianeHandleSegment*> PickedHandles;
+    TArray<FPointDisplacement> PickedHandleDisplacements;
+    TArray<FSegmentAdjustment> SegmentAdjustments;
+    TArray<FArianePath*> SelectedPaths;
     EArianePathEditToolEditionMode EditionMode;
+    TArray<FArianePoint*> HoveredPoints;
 };

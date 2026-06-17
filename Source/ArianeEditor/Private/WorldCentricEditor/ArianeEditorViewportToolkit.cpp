@@ -231,15 +231,14 @@ void
 FArianeEditorViewportToolkit::ExtendSecondaryModeToolbar(UToolMenu* InModeToolbarMenu)
 {
     Editor->ExtendLevelEditorToolbar( InModeToolbarMenu );
-/*
+
     FName menuName = InModeToolbarMenu->GetMenuName();
-    Editor.OnRegenerateToolbarAndMenus().BindLambda(
+    Editor->OnRegenerateToolbarAndMenusDelegate().BindLambda(
         [menuName]()
         {
             UToolMenus::Get()->RefreshMenuWidget(menuName);
         }
     );
-*/
 }
 
 /* Gary
