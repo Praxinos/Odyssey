@@ -56,6 +56,7 @@ public class OdysseyWidgets : ModuleRules
                 "PropertyEditor",
                 "RHI",
                 "OdysseyBrush",
+                "OdysseyCoreEditor",
                 "OdysseyImaging",
                 "OdysseyLayerStack",
                 "OdysseyLayerStackEditor",

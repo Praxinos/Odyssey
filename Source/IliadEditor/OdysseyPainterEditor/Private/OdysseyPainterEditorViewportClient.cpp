@@ -39,6 +39,7 @@
 #include "OdysseyKeyState.h"
 #include "MouseDeltaTracker.h"
 #include "OdysseyStylusInputSettings.h"
+#include "OdysseyViewportCommands.h"
 #include "StylusInputTabletContext.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 
@@ -1082,11 +1083,11 @@ FOdysseyPainterEditorViewportClient::InputChordToState()
         )
     );
 
-    if (FOdysseyPainterEditorCommands::Get().PanZoomViewport->HasActiveChord(activeChord))
+    if (FOdysseyViewportCommands::Get().PanZoomViewport->HasActiveChord(activeChord))
     {
         return mIsMouseDown ? mCurrentToolState : eState::kPanZoom;
     }
-    else if (FOdysseyPainterEditorCommands::Get().RotateViewport->HasActiveChord(activeChord))
+    else if (FOdysseyViewportCommands::Get().RotateViewport->HasActiveChord(activeChord))
     {
         return eState::kRotate;
     }

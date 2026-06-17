@@ -27,6 +27,8 @@ public:
         {}
         SLATE_ATTRIBUTE(UTexture*, Texture)
         SLATE_ARGUMENT(TSharedPtr<FExtender>, OptionExtender)
+        SLATE_ATTRIBUTE(float, RotationStep)    //PATCH
+        SLATE_ATTRIBUTE(float, ZoomStep)        //PATCH
     SLATE_END_ARGS()
 
 public:
@@ -35,6 +37,9 @@ public:
 
 public:
     // Public API
+
+    /* Get the command list */
+    TSharedPtr<FUICommandList> GetCommandList();
 
     /* Ge the texture the viewport is displaying */
     UTexture* GetTexture() const;
@@ -185,37 +190,46 @@ private:
     /* Handles the vertical scrollbar scroll event */
     void            HandleVerticalScrollBarScrolled(float InScrollOffsetFraction);
 
-    /* Handles the zoom menu option (X %) clicked event */
-    void            HandleZoomMenuEntryClicked( double ZoomValue );
-
-    /* Handles the zoom menu Fit To Viewport option clicked event */
-    void            HandleZoomMenuFitClicked();
-
     /* Handles the align with viewport option when flipping */
     void            HandleAlignWithViewportClicked();
 
     /* Handles the zoom slider changed event */
     void            HandleZoomSliderChanged( float NewValue );
 
-    /* Handles Rotate Left button clicked event */
-    void            HandleRotationLeft();
-
-    /* Handles Rotate Right button clicked event */
-    void            HandleRotationRight();
-
-    /* Handles Flip X clicked event */
-    void            HandleFlipHorizontal(ECheckBoxState iState);
-
-    /* Handles Flip Y clicked event */
-    void            HandleFlipVertical(ECheckBoxState iState);
-
     /* Handles Viewport Reset button clicked event */
-    void            HandleViewportReset();
+    //void            HandleViewportReset();
 
     /* Handles Rotation Spinbox value changed event */
     void            HandleRotationChanged( int newRotation );
 
 private:
+    //Shortcuts
+    virtual void OnResetViewport1On1();
+    virtual void OnResetViewportFit();
+    virtual void OnResetViewportAll();
+    virtual void OnResetViewportPosition();
+    virtual void OnResetViewportRotation();
+    virtual void OnResetViewportZoom();
+
+    virtual void OnFlipViewportHorizontally();
+    virtual void OnFlipViewportVertically();
+    virtual bool IsHorizontallyFlipped();
+    virtual bool IsVerticallyFlipped();
+
+    virtual void OnRotateViewportLeft();
+    virtual void OnRotateViewportRight();
+    virtual void OnSetRotation( float iAngleRadians );
+    virtual bool IsRotationEqual( float iAngleRadians );
+
+    virtual void OnSetZoom( float iZoomValue );
+    virtual bool IsZoomEqual( float iZoomValue );
+    virtual void OnZoomInExponential();
+    virtual void OnZoomOutExponential();
+    virtual void OnSetZoomFitScreen();
+
+private:
+    TSharedPtr<FUICommandList>          mCommandList;
+
     // Private Member Data
     TAttribute<UTexture*>               mTexture;
     TWeakPtr<FViewportClient>           mViewportClient;
@@ -223,16 +237,17 @@ private:
     TSharedPtr<SViewport>               mViewportWidget;
     TSharedPtr<SScrollBar>              mVerticalScrollBar;
     TSharedPtr<SScrollBar>              mHorizontalScrollBar;
-    TSharedPtr<SSpinBox<float>>         mZoomSpinBox;
     FTransform2D                        mTransform;
     bool                                mIsFitToViewport;
     bool                                mAlignWithViewport; // Keep the center of the viewport at the same position when flipping it when on.
 
     /* The scale applied to the viewport */
     double                              mZoom;
+    TAttribute<float>                   mZoomStep = 0.1f;
 
     /* The rotation (in radians) applied to the viewport */
     double                              mRotation;
+    TAttribute<float>                   mRotationStep = 15.f;
 
     /* The translation applied to the viewport */
     FVector2D                           mPan;

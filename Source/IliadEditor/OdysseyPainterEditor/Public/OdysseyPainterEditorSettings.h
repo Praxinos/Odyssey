@@ -165,6 +165,14 @@ public:
     UPROPERTY(config)
     bool FitToViewport;
 
+    /** Step to rotate the canvas in viewport. */
+    UPROPERTY(config, EditAnywhere, Category=Viewport)
+    float ViewportRotationStep = 15.f;
+
+    /** Step to zoom the canvas in viewport. */
+    UPROPERTY(config, EditAnywhere, Category=Viewport)
+    float ViewportZoomStep = .1f;
+
     /** Color to use for the texture border, if enabled. */
     UPROPERTY(config, EditAnywhere, Category=TextureBorder)
     FColor TextureBorderColor;

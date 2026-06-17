@@ -4,17 +4,19 @@
 #include "SlateOdysseyStyle.h"
 
 #include "HAL/FileManager.h"
+#include "Interfaces/IPluginManager.h"
 #include "Misc/CommandLine.h"
+#if (WITH_EDITOR || (IS_PROGRAM && PLATFORM_DESKTOP))
+    #include "PlatformInfo.h"
+#endif
 #include "Styling/CoreStyle.h"
 #include "Styling/SegmentedControlStyle.h"
 #include "Styling/SlateStyle.h"
 #include "Styling/StyleColors.h"
+#include "Styling/StarshipCoreStyle.h"
 #include "Styling/SlateTypes.h"
-#include "Interfaces/IPluginManager.h"
+#include "Styling/ToolBarStyle.h"
 
-#if (WITH_EDITOR || (IS_PROGRAM && PLATFORM_DESKTOP))
-    #include "PlatformInfo.h"
-#endif
 
 #define IMAGE_BRUSH( RelativePath, ... )    FSlateImageBrush( RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
 #define IMAGE_BRUSH_SVG( RelativePath, ... ) FSlateVectorImageBrush( RootToContentDir(RelativePath, TEXT(".svg")), __VA_ARGS__)
@@ -135,6 +137,7 @@ FOdysseyStyleDefault::FOdysseyStyleDefault()
 
     , mCoreTableRowStyle()
 {
+    SetParentStyleName( FAppStyle::Get().GetStyleSetName() ); // Mainly to not have to duplicate all "Menu.*"
 }
 
 //---
@@ -246,25 +249,34 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "AdvancedColorWheel.HintColorB", new IMAGE_BRUSH( "Color/AdvancedColorWheel/HintColorB", FVector2D( 100, 89 ) ) );
 
     //PainterEditor
+    Set( "PainterEditor.Settings", new IMAGE_BRUSH_SVG( "PainterEditor/settings", mIcon16x16 ) );
     Set( "PainterEditor.Tools", new IMAGE_BRUSH_SVG( "PainterEditor/tools", mIcon16x16 ) );
     Set( "PainterEditor.Layers16", new IMAGE_BRUSH_SVG( "PainterEditor/layers", mIcon16x16 ) );
     Set( "PainterEditor.Viewport16", new IMAGE_BRUSH_SVG( "PainterEditor/viewport", mIcon16x16 ) );
 
-    Set("PainterEditor.FlipVertical32", new IMAGE_BRUSH_SVG("PainterEditor/flip_vertical", mIcon32x32));
-    Set("PainterEditor.FlipHorizontal32", new IMAGE_BRUSH_SVG("PainterEditor/flip_horizontal", mIcon32x32));
-    Set("PainterEditor.FlipVertical16", new IMAGE_BRUSH_SVG("PainterEditor/flip_vertical_2", mIcon16x16));
-    Set("PainterEditor.FlipHorizontal16", new IMAGE_BRUSH_SVG("PainterEditor/flip_horizontal_2", mIcon16x16));
-
     Set( "PainterEditor.Mesh16", new IMAGE_BRUSH_SVG( "PainterEditor/mesh_selector", mIcon16x16 ) );
 
-    Set( "PainterEditor.RotateLeft", new IMAGE_BRUSH_SVG( "PainterEditor/rotate_left", mIcon16x16 ) );
-    Set( "PainterEditor.RotateRight", new IMAGE_BRUSH_SVG( "PainterEditor/rotate_right", mIcon16x16 ) );
+    Set("PainterEditor.FlipVertical32", new IMAGE_BRUSH_SVG("PainterEditor/flip_vertical", mIcon32x32));        // In OdysseyPainterEditorRasterTransformTool.cpp
+    Set("PainterEditor.FlipHorizontal32", new IMAGE_BRUSH_SVG("PainterEditor/flip_horizontal", mIcon32x32));
 
     Set( "PainterEditor.ColorWheel16", new IMAGE_BRUSH_SVG( "PainterEditor/color_wheel", mIcon16x16 ) );
 
     Set( "PainterEditor.DetailsTab", new IMAGE_BRUSH_SVG( "PainterEditor/details_panel", mIcon16x16 ) );
 
-    Set( "PainterEditor.RotateReset", new IMAGE_BRUSH_SVG( "PainterEditor/rotate_reset", mIcon16x16 ) );
+    // Smaller viewport toolbar
+    FToolBarStyle viewportToolbar = FStarshipCoreStyle::GetCoreStyle().GetWidgetStyle<FToolBarStyle>( "SlimToolBar" );
+    viewportToolbar.SetBackground( FSlateNoResource() );
+    viewportToolbar.SetButtonPadding( FMargin( 2, 0 ) );
+    viewportToolbar.SetBackgroundPadding( 0 );
+    viewportToolbar.SetIconSize( mIcon16x16 );
+    viewportToolbar.SetButtonStyle( viewportToolbar.ButtonStyle
+                                    .SetNormalPadding( FMargin( 5, 2 ) )
+                                    .SetPressedPadding( FMargin( 5, 3, 5, 1 ) )
+    );
+    viewportToolbar.SetWrapButtonStyle( viewportToolbar.WrapButtonStyle
+                                        .SetWrapButtonPadding( FMargin( 0.0 ) )
+    );
+    Set( "PainterEditor.ViewportToolbar", viewportToolbar );
 
     //PainterEditor - Vector Scene Tree View
     Set( "PainterEditor.VectorSceneTreeView.Paintgroup", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/paintgroup", mIcon16x16 ) );
@@ -806,6 +818,29 @@ FOdysseyStyleDefault::SetupOdysseyCommands()
     Set("OdysseyCommands.OpenOdysseyAboutWindow.Small", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/Commands/open-about-window", mIcon20x20));
     Set("OdysseyCommands.OpenOdysseyDocumentation", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/Commands/go-to-user-documentation", mIcon20x20));
     Set("OdysseyCommands.OpenOdysseyDocumentation.Small", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/Commands/go-to-user-documentation", mIcon20x20));
+
+    // OdysseyWidgets
+    Set( "OdysseyViewportCommands.FlipViewportVertically", new IMAGE_BRUSH_SVG( "PainterEditor/flip_vertical", mIcon24x24 ) );
+    Set( "OdysseyViewportCommands.FlipViewportVertically.Small", new IMAGE_BRUSH_SVG( "PainterEditor/flip_vertical", mIcon16x16 ) );
+    Set( "OdysseyViewportCommands.FlipViewportHorizontally", new IMAGE_BRUSH_SVG( "PainterEditor/flip_horizontal", mIcon24x24 ) );
+    Set( "OdysseyViewportCommands.FlipViewportHorizontally.Small", new IMAGE_BRUSH_SVG( "PainterEditor/flip_horizontal", mIcon16x16 ) );
+
+    Set( "OdysseyViewportCommands.RotateViewportLeft", new IMAGE_BRUSH_SVG( "PainterEditor/rotate_left", mIcon24x24 ) );
+    Set( "OdysseyViewportCommands.RotateViewportLeft.Small", new IMAGE_BRUSH_SVG( "PainterEditor/rotate_left", mIcon16x16 ) );
+    Set( "OdysseyViewportCommands.RotateViewportRight", new IMAGE_BRUSH_SVG( "PainterEditor/rotate_right", mIcon24x24 ) );
+    Set( "OdysseyViewportCommands.RotateViewportRight.Small", new IMAGE_BRUSH_SVG( "PainterEditor/rotate_right", mIcon16x16 ) );
+
+    Set( "OdysseyViewportCommands.ZoomInExponential", new IMAGE_BRUSH_SVG( "PainterEditor/zoom_in", mIcon24x24 ) );
+    Set( "OdysseyViewportCommands.ZoomInExponential.Small", new IMAGE_BRUSH_SVG( "PainterEditor/zoom_in", mIcon16x16 ) );
+    Set( "OdysseyViewportCommands.ZoomOutExponential", new IMAGE_BRUSH_SVG( "PainterEditor/zoom_out", mIcon24x24 ) );
+    Set( "OdysseyViewportCommands.ZoomOutExponential.Small", new IMAGE_BRUSH_SVG( "PainterEditor/zoom_out", mIcon16x16 ) );
+
+    Set( "OdysseyViewportCommands.ResetViewport1On1", new IMAGE_BRUSH_SVG( "PainterEditor/reset_1on1", mIcon24x24 ) );
+    Set( "OdysseyViewportCommands.ResetViewport1On1.Small", new IMAGE_BRUSH_SVG( "PainterEditor/reset_1on1", mIcon16x16 ) );
+    Set( "OdysseyViewportCommands.ResetViewportFit", new IMAGE_BRUSH_SVG( "PainterEditor/reset_fit", mIcon24x24 ) );
+    Set( "OdysseyViewportCommands.ResetViewportFit.Small", new IMAGE_BRUSH_SVG( "PainterEditor/reset_fit", mIcon16x16 ) );
+    Set( "OdysseyViewportCommands.ResetViewportAll", new IMAGE_BRUSH_SVG( "PainterEditor/reset_all", mIcon24x24 ) );
+    Set( "OdysseyViewportCommands.ResetViewportAll.Small", new IMAGE_BRUSH_SVG( "PainterEditor/reset_all", mIcon16x16 ) );
 }
 
 void

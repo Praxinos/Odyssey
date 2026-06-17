@@ -24,6 +24,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyViewportCommands.h"
 
 FPointQuadTree::~FPointQuadTree()
 {
@@ -2400,8 +2401,8 @@ FOdysseyPainterEditorVectorBaseToolHUD::CanReceiveEvents()
             )
         );
 
-    if ( ( FOdysseyPainterEditorCommands::Get().PanZoomViewport->HasActiveChord( activeChord ) )
-      || ( FOdysseyPainterEditorCommands::Get().RotateViewport->HasActiveChord( activeChord ) )
+    if ( ( FOdysseyViewportCommands::Get().PanZoomViewport->HasActiveChord( activeChord ) )
+      || ( FOdysseyViewportCommands::Get().RotateViewport->HasActiveChord( activeChord ) )
       || ( FOdysseyPainterEditorCommands::Get().PickColorInViewport->HasActiveChord( activeChord ) ) )
         {
             return false;

@@ -70,71 +70,8 @@ public:
 
     //Viewport Actions
 
-    /** Action to pan/Zoom the viewport */
-    TSharedPtr<FUICommandInfo> PanZoomViewport;
-
-    /** Action to rotate the viewport*/
-    TSharedPtr<FUICommandInfo> RotateViewport;
-
     /** Action to pick a color in the viewport */
     TSharedPtr<FUICommandInfo> PickColorInViewport;
-
-    /** Action to reset the viewport to its original position */
-    TSharedPtr<FUICommandInfo> ResetViewportPosition;
-
-    /** Action to reset the viewport rotation */
-    TSharedPtr<FUICommandInfo> ResetViewportRotation;
-
-    /** Action to rotate the viewport left */
-    TSharedPtr<FUICommandInfo> RotateViewportLeft;
-
-    /** Action to rotate the viewport right */
-    TSharedPtr<FUICommandInfo> RotateViewportRight;
-
-    /** Action to flip the viewport horizontally */
-    TSharedPtr<FUICommandInfo> FlipViewportHorizontally;
-
-    /** Action to flip the viewport vertically */
-    TSharedPtr<FUICommandInfo> FlipViewportVertically;
-
-    /** Action to set zoom pourcentage at 10% */
-    TSharedPtr<FUICommandInfo> SetZoom10Percent;
-
-    /** Action to set zoom pourcentage at 20% */
-    TSharedPtr<FUICommandInfo> SetZoom20Percent;
-
-    /** Action to set zoom pourcentage at 30% */
-    TSharedPtr<FUICommandInfo> SetZoom30Percent;
-
-    /** Action to set zoom pourcentage at 40% */
-    TSharedPtr<FUICommandInfo> SetZoom40Percent;
-
-    /** Action to set zoom pourcentage at 50% */
-    TSharedPtr<FUICommandInfo> SetZoom50Percent;
-
-    /** Action to set zoom pourcentage at 60% */
-    TSharedPtr<FUICommandInfo> SetZoom60Percent;
-
-    /** Action to set zoom pourcentage at 70% */
-    TSharedPtr<FUICommandInfo> SetZoom70Percent;
-
-    /** Action to set zoom pourcentage at 80% */
-    TSharedPtr<FUICommandInfo> SetZoom80Percent;
-
-    /** Action to set zoom pourcentage at 90% */
-    TSharedPtr<FUICommandInfo> SetZoom90Percent;
-
-    /** Action to set zoom pourcentage at 100% */
-    TSharedPtr<FUICommandInfo> SetZoom100Percent;
-
-    /** Action to set zoom at fit to screen */
-    TSharedPtr<FUICommandInfo> SetZoomFitScreen;
-
-    /** Action to zoom in*/
-    TSharedPtr<FUICommandInfo> ZoomInExponential;
-
-    /** Action to set zoom out*/
-    TSharedPtr<FUICommandInfo> ZoomOutExponential;
 
 
     //Brush actions

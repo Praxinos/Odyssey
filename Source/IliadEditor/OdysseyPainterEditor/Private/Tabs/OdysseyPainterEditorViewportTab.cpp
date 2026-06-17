@@ -69,13 +69,22 @@ TSharedPtr<SWidget>
 FOdysseyPainterEditorViewportTab::CreateWidget()
 {
     TSharedRef<FExtender> ToolbarExtender = MakeShared<FExtender>();
-    ToolbarExtender->AddMenuExtension( "OptionsSection", EExtensionHook::After, nullptr, FMenuExtensionDelegate::CreateRaw( this, &FOdysseyPainterEditorViewportTab::BuildOptionsMenu ) );
+    ToolbarExtender->AddMenuExtension( "SettingsAdvancedSection", EExtensionHook::Before, nullptr, FMenuExtensionDelegate::CreateRaw( this, &FOdysseyPainterEditorViewportTab::BuildOptionsMenu ) );
     //ToolbarExtender->AddMenuExtension( "FlipMenu", EExtensionHook::Before, nullptr, FMenuExtensionDelegate::CreateRaw( this, &FOdysseyPainterEditorViewportTab::BuildOptionsMenu ) ); // It doesn't work
     //ToolbarExtender->AddMenuExtension( "ZoomMenu", EExtensionHook::First, nullptr, FMenuExtensionDelegate::CreateRaw( this, &FOdysseyPainterEditorViewportTab::BuildOptionsMenu ) );  // It doesn't work
 
-    SAssignNew(mViewport, SOdysseyViewport)
-        .Texture(this, &FOdysseyPainterEditorViewportTab::Texture)
-        .OptionExtender( ToolbarExtender );
+    SAssignNew( mViewport, SOdysseyViewport )
+        .Texture( this, &FOdysseyPainterEditorViewportTab::Texture )
+        .OptionExtender( ToolbarExtender )
+        .RotationStep_Lambda( []() -> float
+                              {
+                                  return GetDefault<UOdysseyPainterEditorSettings>()->ViewportRotationStep;
+                              } )
+        .ZoomStep_Lambda( []() -> float
+                          {
+                              return GetDefault<UOdysseyPainterEditorSettings>()->ViewportZoomStep;
+                          } )
+        ;
 
     mViewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetMeshSelector().Get()));
 
@@ -467,31 +476,10 @@ void
 FOdysseyPainterEditorViewportTab::BindShortcuts(FBaseToolkit* iToolkit)
 {
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
-    const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
 
-    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorViewportTab::__VA_ARGS__ ), FCanExecuteAction() );
-
-    MAP_ACTION(painterEditorCommands.ResetViewportPosition, OnResetViewportPosition )
-    MAP_ACTION(painterEditorCommands.ResetViewportRotation, OnResetViewportRotation )
-    MAP_ACTION(painterEditorCommands.RotateViewportLeft, OnRotateViewportLeft )
-    MAP_ACTION(painterEditorCommands.RotateViewportRight, OnRotateViewportRight )
-    MAP_ACTION(painterEditorCommands.FlipViewportHorizontally, OnFlipViewportHorizontally)
-    MAP_ACTION(painterEditorCommands.FlipViewportVertically, OnFlipViewportVertically)
-    MAP_ACTION(painterEditorCommands.SetZoom10Percent, OnSetZoom, 0.1 )
-    MAP_ACTION(painterEditorCommands.SetZoom20Percent, OnSetZoom, 0.2 )
-    MAP_ACTION(painterEditorCommands.SetZoom30Percent, OnSetZoom, 0.3 )
-    MAP_ACTION(painterEditorCommands.SetZoom40Percent, OnSetZoom, 0.4 )
-    MAP_ACTION(painterEditorCommands.SetZoom50Percent, OnSetZoom, 0.5 )
-    MAP_ACTION(painterEditorCommands.SetZoom60Percent, OnSetZoom, 0.6 )
-    MAP_ACTION(painterEditorCommands.SetZoom70Percent, OnSetZoom, 0.7 )
-    MAP_ACTION(painterEditorCommands.SetZoom80Percent, OnSetZoom, 0.8 )
-    MAP_ACTION(painterEditorCommands.SetZoom90Percent, OnSetZoom, 0.9 )
-    MAP_ACTION(painterEditorCommands.SetZoom100Percent, OnSetZoom, 1.0 )
-    MAP_ACTION(painterEditorCommands.SetZoomFitScreen, OnSetZoomFitScreen )
-    MAP_ACTION(painterEditorCommands.ZoomInExponential, OnZoomInExponential )
-    MAP_ACTION(painterEditorCommands.ZoomOutExponential, OnZoomOutExponential )
-
-    #undef MAP_ACTION
+    TSharedPtr<FUICommandList> commands = mViewport->GetCommandList();
+    if( commands.IsValid() )
+        toolkitCommands->Append( mViewport->GetCommandList().ToSharedRef() );
 }
 
 void FOdysseyPainterEditorViewportTab::OnTabClosed(TSharedRef<SDockTab> iDockTab)
@@ -672,68 +660,6 @@ FOdysseyPainterEditorViewportTab::OnViewportKeyUp(const FKey& iKey)
         return false;
 
     return tool->ProcessKeyUp(iKey);
-}
-
-//--------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------- Shortcuts
-
-void
-FOdysseyPainterEditorViewportTab::OnResetViewportPosition()
-{
-    mViewport->SetRotation( 0 );
-    mViewport->ResetPan();
-}
-
-void
-FOdysseyPainterEditorViewportTab::OnResetViewportRotation()
-{
-    mViewport->SetRotation( 0 );
-}
-
-void
-FOdysseyPainterEditorViewportTab::OnRotateViewportLeft()
-{
-    mViewport->RotateLeft();
-}
-
-void
-FOdysseyPainterEditorViewportTab::OnRotateViewportRight()
-{
-    mViewport->RotateRight();
-}
-
-void FOdysseyPainterEditorViewportTab::OnFlipViewportHorizontally()
-{
-    mViewport->FlipHorizontal();
-}
-
-void FOdysseyPainterEditorViewportTab::OnFlipViewportVertically()
-{
-    mViewport->FlipVertical();
-}
-
-void
-FOdysseyPainterEditorViewportTab::OnSetZoom(double iZoomValue)
-{
-    mViewport->SetZoom(iZoomValue, mViewport->GetViewportCenter());
-}
-
-void
-FOdysseyPainterEditorViewportTab::OnSetZoomFitScreen()
-{
-    mViewport->ToggleFitToViewport();
-}
-
-void
-FOdysseyPainterEditorViewportTab::OnZoomInExponential()
-{
-    mViewport->ZoomExponential(mViewport->GetZoom(), 0.1);
-}
-
-void
-FOdysseyPainterEditorViewportTab::OnZoomOutExponential()
-{
-    mViewport->ZoomExponential(mViewport->GetZoom(), -0.1);
 }
 
 #undef LOCTEXT_NAMESPACE
