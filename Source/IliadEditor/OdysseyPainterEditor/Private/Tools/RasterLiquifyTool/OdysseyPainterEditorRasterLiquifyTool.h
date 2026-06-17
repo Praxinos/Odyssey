@@ -128,7 +128,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
                 width = iWidth;
                 height = iHeight;
 
-                toTargetBuffer.SetNum( width * height );
+                toTargetBuffer.Init( FFlow(0.f, 0.f), width * height );
             }
 
             // use floats instead of doubles to save some space
