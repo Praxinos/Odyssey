@@ -1042,11 +1042,20 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection( bool iCreateNew
         }
         else //If we have no selection, by default, transform tool with select whole block
         {
+            ::ULIS::FRectI boundingRect;
+            TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
+            TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = rasterBlock->GetBlock();
+
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+
+            ctx.AnalyzeSmallestVisibleRect( *block, &boundingRect );
+            ctx.Finish();
+
             TArray<FVector2D> polyPoints;
-            polyPoints.Add(FVector2D(0, 0));
-            polyPoints.Add(FVector2D(mEditor->RasterSelection()->GetBlock()->Width(), 0));
-            polyPoints.Add(FVector2D(mEditor->RasterSelection()->GetBlock()->Width(), mEditor->RasterSelection()->GetBlock()->Height()));
-            polyPoints.Add(FVector2D(0, mEditor->RasterSelection()->GetBlock()->Height()));
+            polyPoints.Add(FVector2D(boundingRect.x, boundingRect.y));
+            polyPoints.Add(FVector2D(boundingRect.x + boundingRect.w, boundingRect.y));
+            polyPoints.Add(FVector2D(boundingRect.x + boundingRect.w, boundingRect.y + boundingRect.h));
+            polyPoints.Add(FVector2D(boundingRect.x, boundingRect.y + boundingRect.h));
 
             mEditor->RasterSelection()->Add(polyPoints);
         }
