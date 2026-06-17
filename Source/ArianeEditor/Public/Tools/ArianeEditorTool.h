@@ -23,6 +23,7 @@ class FArianeEditor;
 struct FArianeVertex;
 struct FArianeSegment;
 struct FArianeSegmentCubic;
+struct FArianeObject;
 struct FArianePath;
 struct FArianePoint;
 struct FArianeHandleSegment;
@@ -47,6 +48,44 @@ public:
         kNone,
         kStylusUp,
         kStylusDown,
+    };
+
+    struct FPointQuadTreeEntry
+    {
+        FArianePoint* Point;
+        FVector2D HUDPosition;
+
+        FPointQuadTreeEntry( FArianePoint* InPoint, const FVector2D& InHUDPosition )
+        {
+            Point = InPoint;
+            HUDPosition = InHUDPosition;
+        }
+    };
+
+    struct ARIANEEDITOR_API FPointQuadTree
+    {
+        public:
+           ~FPointQuadTree();
+           FPointQuadTree( const FIntRect& InRect
+                         , uint32 MaxPointsPerQuad
+                         , TArray<FPointQuadTreeEntry>& PointQuadTreeEntries
+                         , uint32 Depth
+                         , uint32 MaxDepth );
+
+            void Build( uint32 MaxPointsPerQuad
+                      , TArray<FPointQuadTreeEntry>& ParentPointQuadTreeEntries
+                      , uint32 Depth
+                      , uint32 MaxDepth );
+            //void Draw( BLContext* iBLContext
+            //         , FOdysseyVectorGroupPaint* iScene
+            //         , uint64 iFlags );
+            void PickPoints( const FVector2D& HUDPosition
+                           , double SelectionRadius
+                           , TArray<FArianePoint*>& OutPickedPoints );
+        private:
+            TArray<FPointQuadTreeEntry> PointQuadTreeEntries;
+            FPointQuadTree* Children[4];
+            FIntRect Rect;
     };
 
     struct FPickingFlags
@@ -214,13 +253,13 @@ protected:
      * @param ViewportClient
      * @param ScreenPosition
      */
-    FVector2D ScreenToHUD( FEditorViewportClient* ViewportClient, const FVector2D& ScreenPosition );
+    static FVector2D ScreenToHUD( FEditorViewportClient* ViewportClient, const FVector2D& ScreenPosition );
 
-    bool WorldToPixel( FSceneView* View, const FVector& WorldPosition, FVector2D& OutHUDPosition );
-    bool WorldToHUD( FEditorViewportClient* ViewportClient
-                   , FSceneView* View
-                   , const FVector& WorldPosition
-                   , FVector2D& OutHUDPosition );
+    static bool WorldToPixel( FSceneView* View, const FVector& WorldPosition, FVector2D& OutHUDPosition );
+    static bool WorldToHUD( FEditorViewportClient* ViewportClient
+                          , FSceneView* View
+                          , const FVector& WorldPosition
+                          , FVector2D& OutHUDPosition );
 /* Gary
 
     virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey );
@@ -261,6 +300,23 @@ protected:
 
     // Picking
 protected:
+    static void MapPath( FEditorViewportClient* ViewportClient
+                       , FSceneView* View
+                       , FArianePath* Path
+                       , const FIntRect& Rect
+                       , TArray<FPointQuadTreeEntry>& OutPointQuadTreeEntries );
+    static void MapPoints( FEditorViewportClient* ViewportClient
+                         , FSceneView* View
+                         , FArianeObject* Object
+                         , const FIntRect& Rect
+                         , TArray<FPointQuadTreeEntry>& OutPointQuadTreeEntries );
+
+    void MakePointQuadTree( FEditorViewportClient* ViewportClient
+                          , FSceneView* View
+                          , TArray<UArianeLayerDrawing*> DrawingLayers
+                          , bool bFocusedObjectsOnly );
+
+    static void GetVertexHandlePositions( FArianeVertex* Vertex, FVector OutVertexHandlePositions[2] );
     bool PickPathPoints( FEditorViewportClient* ViewportClient
                        , FSceneView* View
                        , FArianePath* Path
@@ -350,7 +406,7 @@ protected:
     bool bInited;
     FKey PressedKey;
     // Temp
-    FVector2D MousePosition;
+    FPointQuadTree* PointQuadTree;
 
 // HUD Tiles
 protected:

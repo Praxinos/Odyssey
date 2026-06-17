@@ -188,6 +188,7 @@ public:
     FOnCurrentToolChanged& OnPostCurrentToolChangedDelegate();
     FOn3DPaintingComponentSelectionChanged& OnPre3DPaintingComponentSelectionChangedDelegate();
     FOn3DPaintingComponentSelectionChanged& OnPost3DPaintingComponentSelectionChangedDelegate();
+    FSimpleDelegate& OnRegenerateToolbarAndMenusDelegate();
 
     void ExtendLevelEditorToolbar( UToolMenu* iToolbar );
     UArianePainting3DComponent* GetCurrentPainting3DComponent();
@@ -223,6 +224,8 @@ protected:
 
 
 protected:
+    FSimpleDelegate OnRegenerateToolbarAndMenus;
+
     FOnCurrentToolChanged OnPreCurrentToolChanged;
     FOnCurrentToolChanged OnPostCurrentToolChanged;
 
@@ -231,6 +234,7 @@ protected:
 
     FArianeEditorViewportToolkit* Toolkit;
     FName Name;
+    FName ToolbarMenuName;
     TArray<UArianeEditorTool*> Tools;
     TArray<TSharedPtr<FArianeEditorTab>> Tabs;
     //UArianeEditorTool* CurrentTool;

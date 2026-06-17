@@ -152,7 +152,6 @@ bool FArianeEditorViewportEdMode::MouseLeave(FEditorViewportClient* iViewportCli
 
 #ifdef unused
 
-
 bool
 FArianeEditorViewportEdMode::InputKey( FEditorViewportClient* iViewportClient
                                      , FViewport* iViewport
@@ -161,27 +160,11 @@ FArianeEditorViewportEdMode::InputKey( FEditorViewportClient* iViewportClient
 {
     TSharedPtr<FArianeEditorViewportToolkit> ViewportToolkit = GetArianeEditorViewportToolkit();
 
-    if( iKey == EKeys::RightMouseButton )
+    if( iKey == EKeys::LeftAlt )
     {
-        switch( iEvent )
-        {
-            case IE_Pressed :
-                return true; // intercept right clicks for now
-            break;
-
-            case IE_Released :
-                return true; // intercept right clicks for now
-            break;
-        }
+        return true; // prevent Unreal from navigating for now.
     }
 
-/*
-    return ( bStylusInUse ) ? true : InputKey_Private( iViewportClient
-                                                     , iViewport
-                                                     , iKey
-                                                     , FArianePointerState( iViewport->GetMouseX(), iViewport->GetMouseY() )
-                                                     , iEvent );
-*/
     return false;
 }
 
@@ -487,6 +470,12 @@ bool FArianeEditorViewportEdMode::IsEditingEnabled() const
 
 void FArianeEditorViewportEdMode::OnEditorClose()
 {
+    UArianeEditorTool* EditorCurrentTool = GetArianeEditorViewportToolkit()->GetEditor().GetCurrentTool();
+
+    if( EditorCurrentTool )
+    {
+        EditorCurrentTool->Inactivate();
+    }
 /* Gary
     // Reset viewport color mode for all active viewports
     for (FEditorViewportClient* ViewportClient : GEditor->GetAllViewportClients())

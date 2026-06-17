@@ -213,14 +213,30 @@ UArianePainting3DComponent::CalcBounds(const FTransform& LocalToWorld) const
     return RetBounds.TransformBy( LocalToWorld );
 }
 
+UArianePainting3DComponent::FOnUpdateDelegate&
+UArianePainting3DComponent::OnPreUpdateDelegate()
+{
+    return OnPreUpdate;
+}
+
+UArianePainting3DComponent::FOnUpdateDelegate&
+UArianePainting3DComponent::OnPostUpdateDelegate()
+{
+    return OnPostUpdate;
+}
+
 void
 UArianePainting3DComponent::Update( bool bInteractive )
 {
+    OnPreUpdate.Broadcast( bInteractive );
+
     LayerStack->GetRootFolder()->Update( bInteractive );
 
     // will call CalcBounds (nb: calling UMeshComponent::UpdateBounds() does not work sometimes, especially when then
     // path starts empty but this works.
     UpdateComponentToWorld();
+
+    OnPostUpdate.Broadcast( bInteractive );
 
 //UpdateBounds();
 //MarkRenderTransformDirty();

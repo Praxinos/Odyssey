@@ -34,12 +34,17 @@
 
 UArianeEditorTool::~UArianeEditorTool()
 {
+    if( PointQuadTree )
+    {
+        delete PointQuadTree;
+    }
 }
 
 UArianeEditorTool::UArianeEditorTool()
     : Editor (nullptr)
     , bHasContextMenu ( false )
     , bInited ( false )
+    , PointQuadTree ( nullptr )
     , Icon ( nullptr )
     , VertexTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Vertex_Full") ) )
     , VertexContourTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Vertex_Contour") ) )
@@ -948,6 +953,7 @@ UArianeEditorTool::OnClickRelease(const FInputDeviceRay& ReleasePos)
     }
 }
 
+// static
 bool
 UArianeEditorTool::WorldToHUD( FEditorViewportClient* ViewportClient
                              , FSceneView* View
@@ -955,23 +961,29 @@ UArianeEditorTool::WorldToHUD( FEditorViewportClient* ViewportClient
                              , FVector2D& OutHUDPosition )
 {
     FVector2D ScreenPosition;
+    float Dot = ( WorldPosition - ViewportClient->GetViewLocation() ).Dot( View->GetViewDirection() );
 
-    if( WorldToPixel( View, WorldPosition, ScreenPosition ) )
+    if( Dot > 0.0f ) // in front of the camera
     {
-        OutHUDPosition = ScreenToHUD ( ViewportClient, ScreenPosition );
+        if( WorldToPixel( View, WorldPosition, ScreenPosition ) )
+        {
+            OutHUDPosition = ScreenToHUD ( ViewportClient, ScreenPosition );
 
-        return true;
+            return true;
+        }
     }
 
     return false;
 }
 
+// static
 bool
 UArianeEditorTool::WorldToPixel( FSceneView* View, const FVector& WorldPosition, FVector2D& OutHUDPosition )
 {
     return View->WorldToPixel( WorldPosition, OutHUDPosition );
 }
 
+// static
 FVector2D
 UArianeEditorTool::ScreenToHUD( FEditorViewportClient* ViewportClient, const FVector2D& ScreenPosition )
 {
@@ -987,9 +999,199 @@ UArianeEditorTool::OnTerminateDragSequence()
 {
 }
 
-
-
 // Picking
+UArianeEditorTool::FPointQuadTree::~FPointQuadTree()
+{
+    for( int i = 0 ; i < 4; i++ )
+    {
+        if( Children[i] )
+        {
+            delete Children[i];
+        }
+    }
+}
+
+UArianeEditorTool::FPointQuadTree::FPointQuadTree( const FIntRect& InRect
+                                                 , uint32 MaxPointsPerQuad
+                                                 , TArray<FPointQuadTreeEntry>& PointQuadTreeEntries
+                                                 , uint32 Depth
+                                                 , uint32 MaxDepth )
+    : Children { nullptr, nullptr, nullptr, nullptr }
+    , Rect( InRect )
+{
+    Build( MaxPointsPerQuad, PointQuadTreeEntries, Depth, MaxDepth );
+}
+
+/*
+void
+UArianeEditorTool::FPointQuadTree::Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene, uint64 iFlags )
+{
+    iBLContext->save();
+    iBLContext->reset_transform();
+    iBLContext->set_stroke_style( BLRgba32( 0xFF0000FF )  );
+    iBLContext->set_stroke_width( 1.0f );
+    iBLContext->stroke_rect( mRect.x, mRect.y, mRect.w, mRect.h );
+    iBLContext->restore();
+
+    for( int i = 0 ; i < 4; i++ )
+    {
+        if( mChildren[i] )
+        {
+            mChildren[i]->Draw( iBLContext, iScene, iFlags );
+        }
+    }
+}
+*/
+
+void
+UArianeEditorTool::FPointQuadTree::Build( uint32 MaxPointsPerQuad
+                                        , TArray<FPointQuadTreeEntry>& ParentPointQuadTreeEntries
+                                        , uint32 Depth
+                                        , uint32 MaxDepth )
+{
+    PointQuadTreeEntries.Reserve( ParentPointQuadTreeEntries.Num() );
+
+    for( int i = 0; i < ParentPointQuadTreeEntries.Num(); i++ )
+    {
+        if( Rect.Contains( FIntPoint( ParentPointQuadTreeEntries[i].HUDPosition.X
+                                    , ParentPointQuadTreeEntries[i].HUDPosition.Y ) ) )
+        {
+            PointQuadTreeEntries.Add( ParentPointQuadTreeEntries[i] );
+        }
+    }
+
+    if( ( PointQuadTreeEntries.Num() > (int32) MaxPointsPerQuad ) && ( Depth < MaxDepth ) )
+    {
+        double MinX =   Rect.Min.X;
+        double MinY =   Rect.Min.Y;
+        double MaxX =   Rect.Max.X;
+        double MaxY =   Rect.Max.Y;
+        double AvgX = ( Rect.Min.X + Rect.Max.X ) * 0.5f;
+        double AvgY = ( Rect.Min.Y + Rect.Max.Y ) * 0.5f;
+
+        Children[0] = new FPointQuadTree( FIntRect( MinX, MinY, AvgX, AvgY ), MaxPointsPerQuad, PointQuadTreeEntries, Depth + 1, MaxDepth );
+        Children[1] = new FPointQuadTree( FIntRect( AvgX, MinY, MaxX, AvgY ), MaxPointsPerQuad, PointQuadTreeEntries, Depth + 1, MaxDepth );
+        Children[2] = new FPointQuadTree( FIntRect( AvgX, AvgY, MaxX, MaxY ), MaxPointsPerQuad, PointQuadTreeEntries, Depth + 1, MaxDepth );
+        Children[3] = new FPointQuadTree( FIntRect( MinX, AvgY, AvgX, MaxY ), MaxPointsPerQuad, PointQuadTreeEntries, Depth + 1, MaxDepth );
+
+        PointQuadTreeEntries.Empty();
+    }
+}
+
+void
+UArianeEditorTool::FPointQuadTree::PickPoints( const FVector2D& HUDPosition
+                                             , double SelectionRadius
+                                             , TArray<FArianePoint*>& OutPickedPoints )
+{
+   FIntRect LargeRect = FIntRect( Rect.Min.X - SelectionRadius
+                                , Rect.Min.Y - SelectionRadius
+                                , Rect.Max.X + SelectionRadius
+                                , Rect.Max.Y + SelectionRadius );
+
+    if( LargeRect.Contains( FIntPoint( HUDPosition.X, HUDPosition.Y ) ) )
+    {
+        if( Children[0] == nullptr )
+        {
+            for( int i = 0; i < PointQuadTreeEntries.Num(); i++ )
+            {
+                FVector2D Dif = FVector2D( PointQuadTreeEntries[i].HUDPosition.X - HUDPosition.X
+                                         , PointQuadTreeEntries[i].HUDPosition.Y - HUDPosition.Y );
+
+                if( Dif.Length() <= SelectionRadius )
+                {
+                    OutPickedPoints.Add( PointQuadTreeEntries[i].Point );
+                }
+            }
+        }
+        else
+        {
+            for( int i = 0; i < 4; i++ )
+            {
+                Children[i]->PickPoints( HUDPosition, SelectionRadius, OutPickedPoints );
+            }
+        }
+    }
+}
+
+//static
+void
+UArianeEditorTool::MapPath( FEditorViewportClient* ViewportClient
+                          , FSceneView* View
+                          , FArianePath* Path
+                          , const FIntRect& Rect
+                          , TArray<FPointQuadTreeEntry>& OutPointQuadTreeEntries )
+{
+    const FTransform& PathTransform = Path->GetTransform();
+
+    for( FArianeVertexID& VertexID : Path->GetVertices() )
+    {
+        FArianeVertex* Vertex = VertexID.GetVertex();
+
+        FVector LocalVertexPosition = Vertex->GetPosition();
+        FVector WorldVertexPosition = PathTransform.TransformPosition( Vertex->GetPosition() );
+        FVector2D HUDVertexPosition;
+
+        if( WorldToHUD( ViewportClient, View, WorldVertexPosition, HUDVertexPosition ) )
+        {
+            if( Rect.Contains( FIntPoint( HUDVertexPosition.X, HUDVertexPosition.Y ) ) )
+            {
+                OutPointQuadTreeEntries.Emplace( Vertex, HUDVertexPosition );
+            }
+        }
+    }
+}
+
+//static
+void
+UArianeEditorTool::MapPoints( FEditorViewportClient* ViewportClient
+                            , FSceneView* View
+                            , FArianeObject* Object
+                            , const FIntRect& Rect
+                            , TArray<FPointQuadTreeEntry>& OutPointQuadTreeEntries )
+{
+    if( Object->HasBaseClass( FArianePath::StaticClass() ) )
+    {
+        FArianePath* Path = static_cast<FArianePath*>( Object );
+
+        MapPath( ViewportClient, View, Path, Rect, OutPointQuadTreeEntries );
+    }
+}
+
+void
+UArianeEditorTool::MakePointQuadTree( FEditorViewportClient* ViewportClient
+                                    , FSceneView* View
+                                    , TArray<UArianeLayerDrawing*> DrawingLayers
+                                    , bool bFocusedObjectsOnly )
+{
+    FIntRect ScreenRect = FIntRect( 0, 0, ViewportClient->Viewport->GetSizeXY().X, ViewportClient->Viewport->GetSizeXY().Y );
+    TArray<FPointQuadTreeEntry> PointQuadTreeEntries;
+
+    for( UArianeLayerDrawing* DrawingLayer : DrawingLayers )
+    {
+        PointQuadTreeEntries.Reserve( 200 );
+
+        DrawingLayer->GetRootObject()->Traverse( [ ViewportClient
+                                                 , View
+                                                 , &ScreenRect
+                                                 , &PointQuadTreeEntries ]( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
+        {
+            if( /*( iFocusedObjectsOnly == false ) || scene->GetCell()->ObjectHasFocus( object, traverseFlags )*/1 )
+            {
+                MapPoints( ViewportClient, View, Object, ScreenRect, PointQuadTreeEntries );
+
+                return FArianeObject::TraversalReturnValue::Continue;
+            }
+        } );
+
+        if( PointQuadTree )
+        {
+            delete PointQuadTree;
+        }
+
+        PointQuadTree = new FPointQuadTree( ScreenRect, 100, PointQuadTreeEntries, 0, 8 );
+    }
+}
+
 bool
 UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
                                  , FSceneView* View
@@ -1034,7 +1236,7 @@ UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
         {
             FVector LocalHandlePosition[2];
 
-            //Vertex->GetHandlePosition( LocalHandlePosition );
+            GetVertexHandlePositions( Vertex, LocalHandlePosition );
 
             for( int i = 0; i < 2; i++ )
             {
@@ -1115,6 +1317,39 @@ FLinearColor
 UArianeEditorTool::GetHighlightColor()
 {
     return FLinearColor::Red;
+}
+
+void
+UArianeEditorTool::GetVertexHandlePositions( FArianeVertex* Vertex, FVector OutVertexHandlePositions[2] )
+{
+    switch ( Vertex->GetSegments().Num() )
+    {
+        case 1:
+        {
+            FArianeSegment* FirstSegment = Vertex->GetFirstSegment();
+            FVector Cross = Vertex->GetNormal().Cross( FirstSegment->GetVectorLeavingFromVertex( Vertex, false ) ).GetSafeNormal();
+
+            OutVertexHandlePositions[0] = ( Vertex->GetPosition() + ( Cross * Vertex->GetRadius() ) );
+            OutVertexHandlePositions[1] = ( Vertex->GetPosition() - ( Cross * Vertex->GetRadius() ) );
+        }
+        break;
+
+        case 2 :
+        {
+            FArianeSegment* FirstSegment = Vertex->GetFirstSegment();
+            FArianeSegment* OtherSegment = Vertex->GetOtherSegment( FirstSegment );
+            FVector Average = ( - FirstSegment->GetVectorLeavingFromVertex( Vertex, true )
+                                + OtherSegment->GetVectorLeavingFromVertex( Vertex, true ) ).GetSafeNormal();
+            FVector Cross = Vertex->GetNormal().Cross( Average ).GetSafeNormal();
+
+            OutVertexHandlePositions[0] = ( Vertex->GetPosition() + ( Cross * Vertex->GetRadius() ) );
+            OutVertexHandlePositions[1] = ( Vertex->GetPosition() - ( Cross * Vertex->GetRadius() ) );
+        }
+        break;
+
+        default :
+        break;
+    }
 }
 
 void
@@ -1266,7 +1501,7 @@ UArianeEditorTool::DrawVertexHUD( FCanvas* Canvas
             static FLinearColor BlackColor = FLinearColor::Black;
             FVector LocalHandlePosition[2];
 
-            //Vertex->GetHandlePosition( LocalHandlePosition );
+            GetVertexHandlePositions( Vertex, LocalHandlePosition );
 
             for( uint32 i = 0; i < 2; i++ )
             {

@@ -63,6 +63,8 @@ class ARIANE_API UArianePainting3DComponent : public UMeshComponent
 {
     GENERATED_BODY()
 
+    DECLARE_MULTICAST_DELEGATE_OneParam( FOnUpdateDelegate, bool );
+
 public:
     ~UArianePainting3DComponent();
     UArianePainting3DComponent();
@@ -108,12 +110,12 @@ public:
     virtual void GetUsedMaterials(TArray<UMaterialInterface*>& OutMaterials, bool bGetDebugMaterials = false) const override;
 
     void Init();
+    FOnUpdateDelegate& OnPreUpdateDelegate();
+    FOnUpdateDelegate& OnPostUpdateDelegate();
+    void Update( bool bInteractive );
 
 private:
     virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
-
-public:
-    void Update( bool bInteractive );
 
 protected:
     UPROPERTY()
@@ -129,4 +131,6 @@ protected:
     UOdysseyPaletteEntryColor* CurrentPaletteColorEntry;
     FGuid CurrentPaletteSet;
     TArray<UMaterialInterface*> UsedMaterials;
+    FOnUpdateDelegate OnPreUpdate;
+    FOnUpdateDelegate OnPostUpdate;
 };

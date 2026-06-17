@@ -1,0 +1,626 @@
+// IDDN.FR.001.060015.014.S.X.2019.000.00000
+// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
+
+#include "Widgets/SArianeEditorLayerDrawingTreeViewRow.h"
+
+#ifdef unused
+
+#include "Editor.h"
+#include "Dialogs/Dialogs.h"
+#include "Widgets/Colors/SColorBlock.h"
+#include "Widgets/Colors/SColorPicker.h"
+#include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Text/SInlineEditableTextBlock.h"
+
+#include "OdysseyStyle.h"
+#include "OdysseyVector.h"
+#include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorLayer.h"
+#include "OdysseyVectorCell.h"
+#include "ArianeEditor.h"
+#include "Undo/OdysseyVectorUndoTransferObjects.h"
+#include "Undo/OdysseyVectorUndoObjectParam.h"
+#include "ArianeEditorSource.h"
+#include "Widgets/Tab/SArianeEditorVectorSceneTreeView.h"
+
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
+FVectorSceneTreeViewItem::~FVectorSceneTreeViewItem()
+{
+}
+
+FVectorSceneTreeViewItem::FVectorSceneTreeViewItem( FOdysseyVectorObject* iVectorObject, bool iSensitive )
+    : mVectorObject( iVectorObject )
+    , bSensitive( iSensitive )
+{
+}
+
+FOdysseyVectorObject*
+FVectorSceneTreeViewItem::GetVectorObject()
+{
+    return mVectorObject;
+}
+
+bool
+FVectorSceneTreeViewItem::IsSensitive()
+{
+    return bSensitive;
+}
+
+SArianeEditorVectorSceneTreeViewRow::~SArianeEditorVectorSceneTreeViewRow()
+{
+}
+
+SArianeEditorVectorSceneTreeViewRow::SArianeEditorVectorSceneTreeViewRow()
+    : mDropZone( DROPZONE_NONE )
+{
+}
+
+ECheckBoxState
+SArianeEditorVectorSceneTreeViewRow::GetHierarchicalVisibility() const
+{
+    bool visibility = mItem->GetVectorObject()->IsVisible( true );
+
+    return ( visibility ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+}
+
+bool
+SArianeEditorVectorSceneTreeViewRow::IsVisibilityEnabled() const
+{
+    return mItem->GetVectorObject()->GetParent()->IsVisible( true );
+}
+
+void
+SArianeEditorVectorSceneTreeViewRow::OnCheckBoxStateChanged( ECheckBoxState iState )
+{
+    const TSharedPtr< SArianeEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SArianeEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
+
+    // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
+    // rebuilt while it's processing stuff
+    treeView->UnbindLayerDelegates();
+
+    GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.object-visibility", "Set Object Visibility"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectParam( mItem->GetVectorObject()->GetLayer()
+                                                                                                      , mItem->GetVectorObject() ) );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+        TSharedPtr<FArianeEditorSource> source = treeView->GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
+    }
+    GEditor->EndTransaction();
+
+    switch( iState )
+    {
+        case ECheckBoxState::Checked :
+            mItem->GetVectorObject()->SetVisible( true );
+        break;
+
+        case ECheckBoxState::Unchecked :
+            mItem->GetVectorObject()->SetVisible( false );
+        break;
+
+        default :
+        break;
+    }
+
+    mItem->GetVectorObject()->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mItem->GetVectorObject()->GetLayer()->RequestRedraw( mItem->GetVectorObject()->GetCell(), 0 );
+
+    treeView->BindLayerDelegates();
+}
+
+void
+SArianeEditorVectorSceneTreeViewRow::Construct( const typename STableRow<TSharedPtr<FVectorSceneTreeViewItem>>::FArguments& InArgs
+                                                      , const TSharedRef< STableViewBase >& InOwnerTableView
+                                                      , const TSharedPtr<FVectorSceneTreeViewItem> iItem )
+{
+    mItem = iItem;
+
+    SMultiColumnTableRow <TSharedPtr<FVectorSceneTreeViewItem>>::Construct( InArgs, InOwnerTableView );
+}
+
+TSharedRef<SWidget>
+SArianeEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FName& InColumnName )
+{
+    FOdysseyVectorObject* vectorObject = mItem->GetVectorObject();
+
+    if( InColumnName == VSTV_OBJECT_VISIBLE )
+    {
+        const FCheckBoxStyle* isVisibleToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("VectorSceneTreeView.IsVisibleToggle");
+
+        return SNew(SHorizontalBox)
+               + SHorizontalBox::Slot()
+               .AutoWidth()
+               .HAlign( EHorizontalAlignment::HAlign_Center )
+               .VAlign( EVerticalAlignment::VAlign_Center )
+               [
+                   SNew( SCheckBox )
+                  .IsEnabled( mItem.Get()->IsSensitive() )
+                  .Style( isVisibleToggleStyle )
+                  .OnCheckStateChanged( this, &SArianeEditorVectorSceneTreeViewRow::OnCheckBoxStateChanged)
+                  .IsChecked( this, &SArianeEditorVectorSceneTreeViewRow::GetHierarchicalVisibility)
+                  .IsEnabled( this, &SArianeEditorVectorSceneTreeViewRow::IsVisibilityEnabled )
+               ];
+    }
+
+    if( InColumnName == VSTV_OBJECT_HUDCOLOR )
+    {
+        return SNew(SBorder)
+               .Padding(3, 2)
+               .BorderBackgroundColor( FSlateColor( FLinearColor( 0, 0, 0, 0 ) ) )
+               .IsEnabled( mItem->GetVectorObject()->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
+               .OnMouseButtonDown( FPointerEventHandler::CreateSP( this, &SArianeEditorVectorSceneTreeViewRow::PickColor ) )
+               [
+                   SNew( SColorBlock )
+                  .Color_Lambda( [this]
+                                 {
+                                     FLinearColor LinearHUDColor = FLinearColor( mItem->GetVectorObject()->GetHUDColor() );
+
+                                     return LinearHUDColor;
+                                 } )
+               ];
+    }
+
+    if( InColumnName == VSTV_OBJECT_NAME )
+    {
+        uint32 cellIndex = vectorObject->GetCell()->GetIndex();
+        const FSlateBrush* objectIcon = nullptr;
+        FText objectIconTooltip = FText::GetEmpty();
+
+        if ( vectorObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Paintgroup" );
+            objectIconTooltip = LOCTEXT("vector-scene-tree-view.object-icon.paint-group.tooltip", "Paint Group");
+        }
+        else
+        if ( vectorObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
+        {
+            objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Group" );
+            objectIconTooltip = LOCTEXT("vector-scene-tree-view.object-icon.group.tooltip", "Group");
+        }
+        else
+        if ( vectorObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Path" );
+            objectIconTooltip = LOCTEXT("vector-scene-tree-view.object-icon.path.tooltip", "Path");
+        }
+        else
+        {
+            objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.null16" );
+        }
+
+        mTextBlockWidget = SNew(SInlineEditableTextBlock)
+                           // display cell name only for insensitive objects, i.e objects from another cell
+                           .Text( FText::FromString( mItem->IsSensitive() ? vectorObject->GetName()
+                                                                          : FString::Printf( TEXT("Cell %d / "), cellIndex )
+                                                                          + vectorObject->GetName() ) )
+                           .ToolTipText_Lambda( [ vectorObject ]
+                                                {
+                                                    return FText::FromString( *vectorObject->GetName() );
+                                                } )
+                           .OnVerifyTextChanged( this, &SArianeEditorVectorSceneTreeViewRow::OnVerifyTextChanged )
+                           .OnTextCommitted( this, &SArianeEditorVectorSceneTreeViewRow::OnTextChanged );
+
+        mTextBlockWidget.Get()->SetOverflowPolicy( TOptional<ETextOverflowPolicy>(ETextOverflowPolicy::Ellipsis) );
+
+        return SNew(SHorizontalBox)
+               .IsEnabled( mItem.Get()->IsSensitive() )
+               +SHorizontalBox::Slot()
+               .AutoWidth()
+               .Padding(6.f, 0.f, 0.f, 0.f)
+               [
+                   SNew( SExpanderArrow, SharedThis(this) ).IndentAmount(12)
+               ]
+               + SHorizontalBox::Slot()
+               .AutoWidth()
+               .VAlign( EVerticalAlignment::VAlign_Center )
+               .HAlign( EHorizontalAlignment::HAlign_Center )
+               [
+                   SNew( SImage )
+                   .Image( objectIcon )
+                   .ToolTipText(objectIconTooltip)
+               ]
+               + SHorizontalBox::Slot()
+               .Padding( 2, 0 )
+               .AutoWidth()
+               [
+                   mTextBlockWidget.ToSharedRef()
+               ];
+    }
+
+    if( InColumnName == VSTV_OBJECT_TRANSFORMED )
+    {
+        const FSlateBrush* transformedIcon = nullptr;
+        TSharedPtr<SHorizontalBox> tagBox = SNew(SHorizontalBox);
+
+        //inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.InbetweenerTag16" );
+        transformedIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform16" );
+
+        return SNew(SHorizontalBox)
+               + SHorizontalBox::Slot()
+               .AutoWidth()
+               .VAlign( EVerticalAlignment::VAlign_Center )
+               .HAlign( EHorizontalAlignment::HAlign_Center )
+               [
+                   SNew( SImage )
+                   .Image( transformedIcon )
+                   .Visibility_Lambda( [this]
+                   {
+                       FOdysseyVectorObject* vectorObject = mItem->GetVectorObject();
+
+                       return ( vectorObject->GetLocalMatrix() == BLMatrix2D::make_identity() ) ? EVisibility::Hidden
+                                                                                               : EVisibility::Visible;
+                   } )
+               ];
+    }
+
+    if( InColumnName == VSTV_OBJECT_TAGS )
+    {
+        const FSlateBrush* inbetweenerTagIcon = nullptr;
+        TSharedPtr<SHorizontalBox> tagBox = SNew(SHorizontalBox);
+
+        //inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.InbetweenerTag16" );
+        inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching16" );
+
+        for( FOdysseyVectorTag* tag : vectorObject->GetTagList() )
+        {
+            if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+            {
+                //Cells widgets
+                tagBox->AddSlot()
+                .HAlign( EHorizontalAlignment::HAlign_Center )
+                .VAlign( EVerticalAlignment::VAlign_Center )
+                [
+                    SNew( SImage )
+                    .Image( inbetweenerTagIcon )
+                ];
+            }
+        }
+
+        return SNew(SHorizontalBox)
+                    .IsEnabled( mItem.Get()->IsSensitive() )
+                    + SHorizontalBox::Slot()
+                    .Padding( 10, 0 )
+                    .AutoWidth()
+                    [
+                        tagBox.ToSharedRef()
+                    ];
+    }
+
+    return SNullWidget::NullWidget;
+}
+
+FReply
+SArianeEditorVectorSceneTreeViewRow::PickColor( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent )
+{
+    if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    {
+        const TSharedPtr< SArianeEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SArianeEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
+
+        FColorPickerArgs args;
+
+        args.ParentWidget = treeView;
+        args.InitialColor = FLinearColor( mItem->GetVectorObject()->GetHUDColor() );
+        args.bIsModal = true;
+        args.OnColorCommitted = FOnLinearColorValueChanged::CreateSP( this, &SArianeEditorVectorSceneTreeViewRow::OnColorCommitted );
+
+        OpenColorPicker( args );
+
+        return FReply::Handled();
+    }
+
+    return FReply::Unhandled();
+}
+
+void
+SArianeEditorVectorSceneTreeViewRow::OnColorCommitted( FLinearColor iColor )
+{
+    if( mItem.Get()->GetVectorObject()->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
+    {
+        FOdysseyVectorGroup* group = static_cast<FOdysseyVectorGroup*>( mItem.Get()->GetVectorObject() );
+
+        group->SetHUDColor( iColor.ToFColor( true ) );
+    }
+}
+
+FReply
+SArianeEditorVectorSceneTreeViewRow::OnMouseButtonUp( const FGeometry & MyGeometry
+                                                            , const FPointerEvent & MouseEvent )
+{
+    FOdysseyVectorGroupPaint* scene = mItem.Get()->GetVectorObject()->GetScene();
+    FReply reply = FReply::Handled();
+
+    reply = SMultiColumnTableRow::OnMouseButtonUp( MyGeometry, MouseEvent );
+
+    scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+    // request redraw
+    scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
+
+    return reply;
+}
+
+
+FReply
+SArianeEditorVectorSceneTreeViewRow::OnMouseButtonDown( const FGeometry & MyGeometry
+                                                              , const FPointerEvent & MouseEvent )
+{
+    const TSharedPtr< SArianeEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SArianeEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
+    FOdysseyVectorObject* vectorObject = mItem.Get()->GetVectorObject();
+
+    return SMultiColumnTableRow::OnMouseButtonDown( MyGeometry, MouseEvent );
+}
+
+ESelectionMode::Type
+SArianeEditorVectorSceneTreeViewRow::GetSelectionMode () const
+{
+    return mItem.Get()->IsSensitive() ? ESelectionMode::Type::Multi :  ESelectionMode::Type::None;
+}
+
+
+bool
+SArianeEditorVectorSceneTreeViewRow::OnVerifyTextChanged( const FText& NewText
+                                                                , FText& OutErrorMessage )
+{
+    return true;
+}
+
+void
+SArianeEditorVectorSceneTreeViewRow::Rename()
+{
+    mTextBlockWidget.Get()->EnterEditingMode();
+}
+
+void
+SArianeEditorVectorSceneTreeViewRow::OnTextChanged( const FText& InText
+                                                          , ETextCommit::Type CommitInfo )
+{
+    const TSharedPtr< SArianeEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SArianeEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
+
+    // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
+    // rebuilt while it's processing stuff
+    //treeView->UnbindLayerDelegates();
+
+    FOdysseyVectorObject* itemObject = mItem.Get()->GetVectorObject();
+    FOdysseyVectorGroupPaint* itemScene = itemObject->GetScene();
+
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("vector-object.transaction.property-changed","Property Changed"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectParam( itemScene->GetLayer()
+                                                                    , itemObject
+                                                                    , FName( "Identity" )
+                                                                    , ""
+                                                                    , "" );
+        // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
+        // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
+        // of a call to GEditor::PostEditChangeProperty()
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+        TSharedPtr<FArianeEditorSource> source = treeView->GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
+    }
+    GEditor->EndTransaction();
+
+    mItem.Get()->GetVectorObject()->SetName( InText.ToString() );
+
+    mTextBlockWidget.Get()->SetText( FText::FromString( mItem.Get()->GetVectorObject()->GetName() ) );
+
+    itemScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    //itemScene->GetLayer()->Notify( FArianeEditor::UI_UPDATE_TIMELINE );
+
+    //treeView->BindLayerDelegates();
+}
+
+FReply
+SArianeEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
+                                                   , const FDragDropEvent& iDragDropEvent )
+{
+    const TSharedPtr< SArianeEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SArianeEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
+    TSharedPtr<FDragDropOperation> Operation = iDragDropEvent.GetOperation();
+    //FVector2D position = iGeometry.GetAbsolutePosition();
+    FOdysseyVectorObject* itemObject = mItem.Get()->GetVectorObject();
+    FOdysseyVectorGroupPaint* itemScene = itemObject->GetScene();
+    std::list<FOdysseyVectorObject*> focusedObjectList;
+    FOdysseyVectorObject* insertObject = itemObject;
+
+    // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
+    // rebuilt while it's processing stuff
+    //treeView->UnbindLayerDelegates();
+
+    itemScene->GetCell()->GetFocusedAncestorList( focusedObjectList );
+
+    GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.drag-drop-object", "Drop Objects"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoTransferObjects( itemScene
+                                                                                                          , focusedObjectList ) );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+        TSharedPtr<FArianeEditorSource> source = treeView->GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
+    }
+    GEditor->EndTransaction();
+
+    for( FOdysseyVectorObject* focusedObject : focusedObjectList )
+    {
+        switch( mDropZone )
+        {
+            //case DROPZONE_ABOVE:
+            // reverse order in order to get the most forward objet on top of the hierarchy
+            case DROPZONE_BELOW:
+            {
+                FOdysseyVectorObject* parentObject = itemObject->GetParent();
+
+                // note: SharedEnv and Root are system objects
+                if( parentObject->IsSystem() == false )
+                {
+                    // don't drop onto the same object or else expect some infinite loop
+                    if( parentObject != focusedObject )
+                    {
+                        parentObject->TransferChild( focusedObject, parentObject->GetPreviousChild( insertObject ) );
+
+                        insertObject = focusedObject;
+                    }
+                }
+            }
+            break;
+
+            case DROPZONE_ONTO:
+                // don't drop onto the same object or else expect some infinite loop
+                if( itemObject != focusedObject )
+                {
+                    itemObject->TransferChild( focusedObject, nullptr );
+                }
+            break;
+
+            // case DROPZONE_BELOW:
+            // reverse order in order to get the most forward objet on top of the hierarchy
+            case DROPZONE_ABOVE:
+            {
+                FOdysseyVectorObject* parentObject = itemObject->GetParent();
+
+                // note: Layer and Cell are system objects
+                if( parentObject->IsSystem() == false )
+                {
+                    if( parentObject != focusedObject )
+                    {
+                        parentObject->TransferChild( focusedObject, insertObject );
+
+                        insertObject = focusedObject;
+                    }
+                }
+            }
+            break;
+
+            default :
+            break;
+        }
+    }
+
+    mDropZone = DROPZONE_NONE;
+
+    itemScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    itemScene->GetLayer()->RequestRedraw( itemScene->GetCell(), 0 );
+
+    //treeView->BindLayerDelegates();
+
+    return FReply::Handled();
+}
+
+int32
+SArianeEditorVectorSceneTreeViewRow::OnPaint( const FPaintArgs& Args
+                                                    , const FGeometry& AllottedGeometry
+                                                    , const FSlateRect& MyCullingRect
+                                                    , FSlateWindowElementList& OutDrawElements
+                                                    , int32 LayerId
+                                                    , const FWidgetStyle& InWidgetStyle
+                                                    , bool bParentEnabled ) const
+{
+    const FTableRowStyle& style = FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows");
+    const FSlateBrush* DropIndicatorBrush = nullptr;
+
+    int32 rowLayerId = SMultiColumnTableRow<TSharedPtr<FVectorSceneTreeViewItem>>::OnPaint( Args
+                                                                                          , AllottedGeometry
+                                                                                          , MyCullingRect
+                                                                                          , OutDrawElements
+                                                                                          , LayerId
+                                                                                          , InWidgetStyle
+                                                                                          , bParentEnabled );
+    if( mDropZone )
+    {
+        switch( mDropZone )
+        {
+            case DROPZONE_ABOVE :
+                DropIndicatorBrush = &style.DropIndicator_Above;
+            break;
+
+            case DROPZONE_ONTO :
+                DropIndicatorBrush = &style.DropIndicator_Onto;
+            break;
+
+            case DROPZONE_BELOW :
+                DropIndicatorBrush = &style.DropIndicator_Below;
+            break;
+
+            default :
+            break;
+        }
+
+        FSlateDrawElement::MakeBox
+        (
+            OutDrawElements
+          , rowLayerId++
+          , AllottedGeometry.ToPaintGeometry()
+          , DropIndicatorBrush //&myBrush
+          , ESlateDrawEffect::None
+          , DropIndicatorBrush->GetTint(InWidgetStyle) * InWidgetStyle.GetColorAndOpacityTint()
+        );
+    }
+
+    return rowLayerId;
+}
+
+void
+SArianeEditorVectorSceneTreeViewRow::OnDragEnter( const FGeometry& MyGeometry
+                                                        , const FDragDropEvent& DragDropEvent )
+{
+    //const TSharedPtr<FVectorSceneTreeViewItem>* item = GetItemForThis( OwnerTablePtr.Pin().ToSharedRef() );
+
+    mDropZone = DROPZONE_ONTO;
+}
+
+void
+SArianeEditorVectorSceneTreeViewRow::OnDragLeave( const FDragDropEvent& DragDropEvent )
+{
+    //const TSharedPtr<FVectorSceneTreeViewItem>* item = GetItemForThis( OwnerTablePtr.Pin().ToSharedRef() );
+
+    mDropZone = DROPZONE_NONE;
+}
+
+FReply
+SArianeEditorVectorSceneTreeViewRow::OnDragOver( const FGeometry& iGeometry
+                                                       , const FDragDropEvent& iDragDropEvent )
+{
+    TSharedPtr<FDragDropOperation> Operation = iDragDropEvent.GetOperation();
+    //FVector2D position = iGeometry.GetAbsolutePosition();
+    const FVector2D localPointerPos = iGeometry.AbsoluteToLocal( iDragDropEvent.GetScreenSpacePosition() );
+    const FVector2D& widgetSize = iGeometry.GetLocalSize();
+
+    if( localPointerPos.Y < 5 )
+    {
+        mDropZone = DROPZONE_ABOVE;
+    }
+    else
+    if( localPointerPos.Y > widgetSize.Y - 5 )
+    {
+        mDropZone = DROPZONE_BELOW;
+    }
+    else
+    {
+        mDropZone = DROPZONE_ONTO;
+    }
+
+    return FReply::Handled();
+}
+
+FReply
+SArianeEditorVectorSceneTreeViewRow::OnDragDetected ( const FGeometry& iGeometry,
+                                                              const FPointerEvent& iMouseEvent )
+{
+    TSharedRef<FDragDropOperation> Operation = MakeShared<FDragDropOperation>();
+
+    return FReply::Handled().BeginDragDrop(Operation);
+}
+
+#undef LOCTEXT_NAMESPACE
+
+#endif

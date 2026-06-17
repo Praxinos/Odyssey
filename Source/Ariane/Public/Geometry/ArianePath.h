@@ -281,9 +281,22 @@ public:
                                           , const FVector& Handle0
                                           , const FVector& Handle1
                                           , FArianeVertex* Vertex1 );
+    void AlterRadius( double RatioRadius );
+
+    // returns true if the path is empty after vertex removal
+    bool DeleteVertex( const TArray<FArianeVertex*>& VerticesToRemove
+                     , TArray<FArianeVertex*>* OutRemovedVertices
+                     , TArray<FArianeSegment*>* OutRemovedSegments
+                     , TArray<FArianeSegment*>* OutAddedSegments );
 
 protected:
     void FindChains();
+
+private:
+    static FArianeVertex* GetStitchingVertex( FArianeVertex* Vertex
+                                            , FArianeSegment* Segment
+                                            , const TArray<FArianeVertex*>& PickedVertexArray
+                                            , FVector& OutHandle );
 
 protected:
     UPROPERTY( EditAnywhere )
