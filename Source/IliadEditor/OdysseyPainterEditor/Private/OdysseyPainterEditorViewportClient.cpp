@@ -1004,7 +1004,6 @@ void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylu
     if (selectedAPI == "Wintab")
     {
         UE::StylusInput::FStylusInputPacket packetCopyWin = iPacket;
-        ConvertWintabToWindowCoordinates(packetCopyWin.X, packetCopyWin.Y);
 
         if (iPacket.NormalPressure == 0)
         {

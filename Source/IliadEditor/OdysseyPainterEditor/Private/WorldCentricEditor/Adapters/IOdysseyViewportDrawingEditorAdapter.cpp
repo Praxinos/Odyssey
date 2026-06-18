@@ -1010,7 +1010,6 @@ IOdysseyViewportDrawingEditorAdapter::OnPacket(const UE::StylusInput::FStylusInp
     if (selectedAPI == "Wintab")
     {
         UE::StylusInput::FStylusInputPacket packetCopyWin = iPacket;
-        ConvertWintabToWindowCoordinates(packetCopyWin.X, packetCopyWin.Y);
 
         if (iPacket.NormalPressure == 0)
         {

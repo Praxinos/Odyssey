@@ -50,9 +50,6 @@ protected:
 
     void OnStylusInputDriverChanged(FName iStylusInputDriver);
 
-#if PLATFORM_WINDOWS
-    void ConvertWintabToWindowCoordinates(float& ioX, float& ioY);
-#endif
     UE::StylusInput::IStylusInputInstance* mStylusInputInstance = nullptr;
     TWeakPtr<SWindow> mStylusInputWindow;
 
