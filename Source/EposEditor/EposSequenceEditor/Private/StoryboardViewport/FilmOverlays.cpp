@@ -453,7 +453,7 @@ struct FFilmOverlay_LetterBox : IFilmOverlay
 
                 + SHorizontalBox::Slot()
                 [
-                    WidgetHelpers::CreateSpinBox<float>(&Ratio1, 0.1, 35)
+                    WidgetHelpers::CreateSpinBox<float>(&Ratio1, 0.1f, 35)
                 ]
 
                 + SHorizontalBox::Slot()
@@ -466,7 +466,7 @@ struct FFilmOverlay_LetterBox : IFilmOverlay
 
                 + SHorizontalBox::Slot()
                 [
-                    WidgetHelpers::CreateSpinBox<float>(&Ratio2, 0.1, 35)
+                    WidgetHelpers::CreateSpinBox<float>(&Ratio2, 0.1f, 35)
                 ]
             ]
 

@@ -1177,7 +1177,7 @@ FOdysseyPainterEditorViewportClient::ZoomInInViewport( const FVector2D& iPositio
 
     FVector2D pos = iPositionInViewport - viewportWidget->GetViewportCenter();
 
-    viewportWidget->ZoomExponential(viewportWidget->GetZoom(), 0.1, pos);
+    viewportWidget->ZoomExponential(viewportWidget->GetZoom(), 0.1f, pos);
 }
 
 void
@@ -1195,7 +1195,7 @@ FOdysseyPainterEditorViewportClient::ZoomOutInViewport( const FVector2D& iPositi
 
     FVector2D pos = iPositionInViewport - viewportWidget->GetViewportCenter();
 
-    viewportWidget->ZoomExponential(viewportWidget->GetZoom(), -0.1, pos);
+    viewportWidget->ZoomExponential(viewportWidget->GetZoom(), -0.1f, pos);
 }
 
 double
