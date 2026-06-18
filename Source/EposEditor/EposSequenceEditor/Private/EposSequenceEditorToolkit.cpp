@@ -361,7 +361,7 @@ FString FEposSequenceEditorToolkit::GetWorldCentricTabPrefix() const
 
 FLinearColor FEposSequenceEditorToolkit::GetWorldCentricTabColorScale() const
 {
-    return FLinearColor( 0.7, 0.0f, 0.2f, 0.5f );
+    return FLinearColor( 0.7f, 0.0f, 0.2f, 0.5f );
 }
 
 FText FEposSequenceEditorToolkit::GetTabSuffix() const

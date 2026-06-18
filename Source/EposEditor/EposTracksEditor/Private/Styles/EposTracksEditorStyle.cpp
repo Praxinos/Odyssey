@@ -182,7 +182,7 @@ FEposTracksEditorStyle::InitNotes()
 
     Set( "Notes.TableView.Row", FTableRowStyle( FAppStyle::Get().GetWidgetStyle<FTableRowStyle>( "TableView.Row" ) )
                                 .SetEvenRowBackgroundBrush( FSlateColorBrush( color ) )
-                                .SetOddRowBackgroundBrush( FSlateColorBrush( color * 1.33 ) ) ); // a little brighter
+                                .SetOddRowBackgroundBrush( FSlateColorBrush( color * 1.33f ) ) ); // a little brighter
 }
 
 

@@ -83,7 +83,7 @@ UOdysseyPainterEditorAnimationProjectSettings::PostInitProperties()
     defaultCellMarks.Add(
         {
             TEXT("To be checked"),
-            FLinearColor( 1.f, 0.3f, 0.475 ),
+            FLinearColor( 1.f, 0.3f, 0.475f ),
             EOdysseyAnimationCellMarkSymbol::Star
         }
     );
