@@ -1510,7 +1510,7 @@ static void
 PrintCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
           , std::vector<FOdysseyVectorSection*>& sectionArray)
 {
-    UE_LOG(LogTemp,Warning,TEXT("Array size: %d"), vertexArray.size() );
+    UE_LOG(LogTemp,Warning,TEXT("Array size: %zd"), vertexArray.size() );
 
     for( int i = 0; i < vertexArray.size(); i++ )
     {
@@ -1518,7 +1518,7 @@ PrintCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
         BLPoint pt0 = segment->GetOwnerAsPath()->GetWorldMatrix().map_point( sectionArray[i]->GetVertex(0)->GetCoords().x, sectionArray[i]->GetVertex(0)->GetCoords().y );
         BLPoint pt1 = segment->GetOwnerAsPath()->GetWorldMatrix().map_point( sectionArray[i]->GetVertex(1)->GetCoords().x, sectionArray[i]->GetVertex(1)->GetCoords().y );
 
-        UE_LOG(LogTemp,Warning,TEXT("Node: vertex:%d section:%d (%d[x:%f y:%f] -- %d[x:%f y:%f])"), vertexArray[i], sectionArray[i], sectionArray[i]->GetVertex(0), pt0.x, pt0.y, sectionArray[i]->GetVertex(1), pt1.x, pt1.y );
+        UE_LOG(LogTemp,Warning,TEXT("Node: vertex:%p section:%p (%p[x:%f y:%f] -- %p[x:%f y:%f])"), vertexArray[i], sectionArray[i], sectionArray[i]->GetVertex(0), pt0.x, pt0.y, sectionArray[i]->GetVertex(1), pt1.x, pt1.y );
     }
 }
 

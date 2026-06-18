@@ -117,13 +117,13 @@ namespace OdysseyMeshPaintRendering
 
     /** Binds the mesh paint vertex and pixel shaders to the graphics device */
     void SetMeshPaintShaders(FRHICommandList& iRHICmdList, FGraphicsPipelineStateInitializer& iGraphicsPSOInit,
-        ERHIFeatureLevel::Type iFeatureLevel,
+        EShaderPlatform InShaderPlatform,
         const FMatrix& iTransform,
         const float iGamma,
         const FOdysseyMeshPaintShaderParameters& iShaderParams)
     {
-        TShaderMapRef< TOdysseyMeshPaintVertexShader > VertexShader(GetGlobalShaderMap(iFeatureLevel));
-        TShaderMapRef< TOdysseyMeshPaintPixelShader > PixelShader(GetGlobalShaderMap(iFeatureLevel));
+        TShaderMapRef< TOdysseyMeshPaintVertexShader > VertexShader(GetGlobalShaderMap(InShaderPlatform));
+        TShaderMapRef< TOdysseyMeshPaintPixelShader > PixelShader(GetGlobalShaderMap(InShaderPlatform));
 
         iGraphicsPSOInit.BoundShaderState.VertexDeclarationRHI = GMeshPaintDilateVertexDeclaration.VertexDeclarationRHI;
         iGraphicsPSOInit.BoundShaderState.VertexShaderRHI = VertexShader.GetVertexShader();

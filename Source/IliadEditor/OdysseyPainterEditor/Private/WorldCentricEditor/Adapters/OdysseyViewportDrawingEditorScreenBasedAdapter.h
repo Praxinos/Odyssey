@@ -23,9 +23,9 @@ class FOdysseyScreenPaintBatchedElementParameters: public FBatchedElementParamet
 {
 public:
     /** Binds vertex and pixel shaders for this element */
-    virtual void BindShaders(FRHICommandList& RHICmdList,FGraphicsPipelineStateInitializer& GraphicsPSOInit,ERHIFeatureLevel::Type InFeatureLevel,const FMatrix& InTransform,const float InGamma,const FMatrix& ColorWeights,const FTexture* Texture) override
+    virtual void BindShaders(FRHICommandList& RHICmdList,FGraphicsPipelineStateInitializer& GraphicsPSOInit, EShaderPlatform InShaderPlatform,const FMatrix& InTransform,const float InGamma,const FMatrix& ColorWeights,const FTexture* Texture) override
     {
-        OdysseyScreenPaintRendering::SetMeshPaintShaders(RHICmdList,GraphicsPSOInit,InFeatureLevel,InTransform,InGamma,ShaderParams);
+        OdysseyScreenPaintRendering::SetMeshPaintShaders(RHICmdList,GraphicsPSOInit, InShaderPlatform,InTransform,InGamma,ShaderParams);
     }
 
 public:
@@ -42,9 +42,9 @@ class FOdysseyScreenSeamsPaintBatchedElementParameters : public FBatchedElementP
 {
 public:
     /** Binds vertex and pixel shaders for this element */
-    virtual void BindShaders(FRHICommandList& RHICmdList, FGraphicsPipelineStateInitializer& GraphicsPSOInit, ERHIFeatureLevel::Type InFeatureLevel, const FMatrix& InTransform, const float InGamma, const FMatrix& ColorWeights, const FTexture* Texture) override
+    virtual void BindShaders(FRHICommandList& RHICmdList, FGraphicsPipelineStateInitializer& GraphicsPSOInit, EShaderPlatform InShaderPlatform, const FMatrix& InTransform, const float InGamma, const FMatrix& ColorWeights, const FTexture* Texture) override
     {
-        OdysseySeamsPaintRendering::SetSeamsPaintShaders(RHICmdList, GraphicsPSOInit, InFeatureLevel, InTransform, InGamma, ShaderParams);
+        OdysseySeamsPaintRendering::SetSeamsPaintShaders(RHICmdList, GraphicsPSOInit, InShaderPlatform, InTransform, InGamma, ShaderParams);
     }
 
 public:

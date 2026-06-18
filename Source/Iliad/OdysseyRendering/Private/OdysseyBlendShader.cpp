@@ -174,11 +174,11 @@ FOdysseyBlendShader::FOdysseyBlendShader(FOdysseyBlendShaderParameters* iPixelSh
 }
 
 void
-FOdysseyBlendShader::BindShaders(FRHICommandList& RHICmdList, FGraphicsPipelineStateInitializer& GraphicsPSOInit, ERHIFeatureLevel::Type InFeatureLevel, const FMatrix& InTransform, const float InGamma, const FMatrix& ColorWeights, const FTexture* Texture)
+FOdysseyBlendShader::BindShaders(FRHICommandList& RHICmdList, FGraphicsPipelineStateInitializer& GraphicsPSOInit, EShaderPlatform InShaderPlatform, const FMatrix& InTransform, const float InGamma, const FMatrix& ColorWeights, const FTexture* Texture)
 {
     static TGlobalResource< FSimpleElementVertexDeclaration > GBlendVertexDeclaration;
-    TShaderMapRef< FSimpleElementVS > VertexShader(GetGlobalShaderMap(InFeatureLevel));
-    TShaderMapRef< FOdysseyBlendShaderPS > PixelShader(GetGlobalShaderMap(InFeatureLevel));
+    TShaderMapRef< FSimpleElementVS > VertexShader(GetGlobalShaderMap(InShaderPlatform));
+    TShaderMapRef< FOdysseyBlendShaderPS > PixelShader(GetGlobalShaderMap(InShaderPlatform));
     GraphicsPSOInit.BoundShaderState.VertexDeclarationRHI = GBlendVertexDeclaration.VertexDeclarationRHI;
     GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VertexShader.GetVertexShader();
     GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PixelShader.GetPixelShader();

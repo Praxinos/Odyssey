@@ -27,7 +27,7 @@ namespace OdysseySeamsPaintRendering
     /** Binds the mesh paint vertex and pixel shaders to the graphics device */
     ODYSSEYRENDERING_API void SetSeamsPaintShaders(  FRHICommandList& iRHICmdList,
                                             FGraphicsPipelineStateInitializer& iGraphicsPSOInit,
-                                            ERHIFeatureLevel::Type iFeatureLevel,
+                                            EShaderPlatform InShaderPlatform,
                                             const FMatrix& iTransform,
                                             const float iGamma,
                                             const FOdysseySeamsPaintShaderParameters& iShaderParams );
