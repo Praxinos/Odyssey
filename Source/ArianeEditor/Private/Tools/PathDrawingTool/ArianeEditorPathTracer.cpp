@@ -64,32 +64,35 @@ FArianeEditorPathTracer::Flush( FSceneView* View
                               , FArianeVertex* FirstSegmentVertex
                               , FArianeVertex* LastSegmentVertex ) // for loops
 {
-    FArianeSegmentCubic* CurrentCubicSegment = static_cast<FArianeSegmentCubic*>(CubicPath->GetSegments().Last().GetSegment());
-
-    // forbid path with a single vertex that has a segment that loops on itself
-    if ( ( CubicPath->GetVertices().Num() == 1 )
-      && ( CubicPath->GetVertices()[0].GetVertex() == LastSegmentVertex ) )
+    if( CubicPath )
     {
-        Reset();
+        FArianeSegmentCubic* CurrentCubicSegment = static_cast<FArianeSegmentCubic*>(CubicPath->GetSegments().Last().GetSegment());
 
-        return;
-    }
-
-    if( EdgeBuffer.Num() )
-    {
-        CommitBestBezier( CurrentCubicSegment );
-
-        // relocate the last vertex at the last entry
-        if( ( LastSegmentVertex == nullptr ) && PointBuffer.Num() )
+        // forbid path with a single vertex that has a segment that loops on itself
+        if ( ( CubicPath->GetVertices().Num() == 1 )
+          && ( CubicPath->GetVertices()[0].GetVertex() == LastSegmentVertex ) )
         {
-            const FTransform& CubicPathTransform = CubicPath->GetTransform();
-            FVector LocalPoint = PointBuffer.Last().LocalPosition;
+            Reset();
 
-            CurrentCubicSegment->GetVertex(1)->SetPosition( LocalPoint.X, LocalPoint.Y, LocalPoint.Z );
+            return;
         }
-    }
 
-    Reset();
+        if( EdgeBuffer.Num() )
+        {
+            CommitBestBezier( CurrentCubicSegment );
+
+            // relocate the last vertex at the last entry
+            if( ( LastSegmentVertex == nullptr ) && PointBuffer.Num() )
+            {
+                const FTransform& CubicPathTransform = CubicPath->GetTransform();
+                FVector LocalPoint = PointBuffer.Last().LocalPosition;
+
+                CurrentCubicSegment->GetVertex(1)->SetPosition( LocalPoint.X, LocalPoint.Y, LocalPoint.Z );
+            }
+        }
+
+        Reset();
+    }
 }
 
 TArray<FArianeEditorPathTracer::FTracerPoint>&
