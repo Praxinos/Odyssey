@@ -127,7 +127,8 @@ FOdysseyPainterEditorTextureSource::InitTextureUserData()
 
     //Init user data
     userData = NewObject<UOdysseyTextureLayerStackUserData>(mTexture, NAME_None, RF_Public);
-    userData->InitWithDefaultLayerStack();
+    //userData->InitWithDefaultLayerStack();
+    userData->InitWithEmptyLayerStack();
 
     // Notify for changes
     mTexture->AddAssetUserData( userData );

@@ -35,6 +35,9 @@ bool
 FOdysseyLayerCellImageStaggerImport::Read( UOdysseyLayerCellImageStagger* iLayerCellImageStagger
                                             , FArchive &Ar )
 {
+    if (Ar.IsCriticalError())
+        return true;
+
     uint64 start = Ar.Tell();
 
     uint32 chunkID;
@@ -44,6 +47,19 @@ FOdysseyLayerCellImageStaggerImport::Read( UOdysseyLayerCellImageStagger* iLayer
     // Reads the first chunk (CHUNK_CELLIMAGESTAGGER)
     Ar << chunkID;
     Ar << chunkLen;
+
+    //PATCH:
+    // If we read out of the Linker bounds (which is not the same as the Archive bounds)
+    // The archive generates a CriticalError
+    // We don't have access to the linker bounds, so we can only rely on the critical error state
+    // We then need to seek to start again, like nothing ever happened
+    // And clear the Critical Error state
+    if (Ar.IsCriticalError())
+    {
+        Ar.Seek( start );
+        Ar.ClearCriticalError();
+        return true;
+    }
 
     chunkEnd = Ar.Tell() + chunkLen;
 
