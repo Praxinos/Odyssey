@@ -93,6 +93,10 @@
         {
             "Enabled": true,
             "Name": "BlueprintFileUtils"
+        },
+        {
+            "Enabled": true,
+            "Name": "NamingTokens"
         }
     ],
     "Modules": [

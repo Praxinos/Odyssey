@@ -84,6 +84,10 @@ FOdysseyPainterEditorViewportTab::CreateWidget()
                           {
                               return GetDefault<UOdysseyPainterEditorSettings>()->ViewportZoomStep;
                           } )
+        .StatusbarTemplateString_Lambda( []() -> FTemplateString
+                                         {
+                                             return GetDefault<UOdysseyPainterEditorSettings>()->StatusBarTemplateString;
+                                         } )
         ;
 
     mViewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetMeshSelector().Get()));

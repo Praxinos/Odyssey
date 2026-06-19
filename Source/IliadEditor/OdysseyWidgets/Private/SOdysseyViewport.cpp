@@ -4,13 +4,17 @@
 #include "SOdysseyViewport.h"
 
 #include "ObjectEditorUtils.h"
+#include "Engine/Engine.h"
 #include "Engine/Texture.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Framework/MultiBox/SToolBarButtonBlock.h"
 #include "ImageUtils.h"
 #include "ISettingsModule.h"
 #include "Modules/ModuleManager.h"
+#include "NamingTokensEngineSubsystem.h"
+#include "SNamingTokensEditableTextBox.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SScrollBar.h"
@@ -53,6 +57,8 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
         mRotationStep = InArgs._RotationStep;
     if( InArgs._ZoomStep.IsSet() )
         mZoomStep = InArgs._ZoomStep;
+    if( InArgs._StatusbarTemplateString.IsSet() )
+        mStatusbarTemplateString = InArgs._StatusbarTemplateString;
 
     mCommandList = MakeShared<FUICommandList>();
 
@@ -394,13 +400,43 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
         [
             SNew(SHorizontalBox)
 
+            //+ SHorizontalBox::Slot()
+            //.AutoWidth()
+            //.VAlign( VAlign_Center )
+            //[
+            //    SNew( STextBlock )
+            //    .Text( this, &SOdysseyViewport::GetTextureInfosValue )
+            //]
+
             + SHorizontalBox::Slot()
             .AutoWidth()
             .VAlign( VAlign_Center )
             [
                 SNew( STextBlock )
-                .Text( this, &SOdysseyViewport::GetTextureInfosValue )
+                .Text( this, &SOdysseyViewport::GetStatusbarText )
             ]
+
+            //+ SHorizontalBox::Slot()
+            //.AutoWidth()
+            //.VAlign( VAlign_Center )
+            //[
+            //    SNew( SNamingTokensEditableTextBox )
+            //    .IsReadOnly( true )
+            //    .Text_Lambda( [this]() -> FText
+            //                  {
+            //                      return FText::FromString( mStatusbarTemplateString.Get().Template );
+            //                  } )
+            //    .ResolvedText_Lambda( [this]() -> FText
+            //                          {
+            //                              //FNamingTokenFilterArgs FilterArgs;
+            //                              //FilterArgs.AdditionalNamespacesToInclude.Add( TokenNamespace );
+
+            //                              UNamingTokensEngineSubsystem* NamingTokensSubsystem = GEngine->GetEngineSubsystem<UNamingTokensEngineSubsystem>();
+            //                              FNamingTokenResultData Result = NamingTokensSubsystem->EvaluateTokenString( mStatusbarTemplateString.Get().Template );
+
+            //                              return Result.EvaluatedText;
+            //                          } )
+            //]
 
             + SHorizontalBox::Slot()
             .FillWidth( 1.f )
@@ -786,13 +822,62 @@ SOdysseyViewport::GetGuiRotationValue() const
 }
 
 FText
-SOdysseyViewport::GetTextureInfosValue( ) const
+SOdysseyViewport::GetStatusbarText() const
+{
+    //FNamingTokenFilterArgs FilterArgs;
+    //FilterArgs.AdditionalNamespacesToInclude.Add( TokenNamespace );
+
+    UNamingTokensEngineSubsystem* NamingTokensSubsystem = GEngine->GetEngineSubsystem<UNamingTokensEngineSubsystem>();
+    FNamingTokenResultData Result = NamingTokensSubsystem->EvaluateTokenString( mStatusbarTemplateString.Get().Template );
+
+    return Result.EvaluatedText;
+}
+
+FText
+SOdysseyViewport::GetTextureInfosValue() const
 {
     UTexture* texture       = GetTexture();
     if (!texture)
-        return LOCTEXT("viewport.no-texture-provided", "No Texture Provided");
+        return LOCTEXT("viewport.status-bar.no-texture-provided", "No Texture Provided");
 
-    return FText::Format( LOCTEXT("viewport.texture-dimensions","{0}x{1} px"), FText::AsNumber(texture->GetSurfaceWidth() ), FText::AsNumber(texture->GetSurfaceHeight() ));
+    FText textureSize = FText::Format( LOCTEXT( "viewport.status-bar.texture-size", "{0}x{1} px" ), FText::AsNumber( texture->GetSurfaceWidth() ), FText::AsNumber( texture->GetSurfaceHeight() ) );
+
+    FVector2D cursorPos = FSlateApplication::Get().GetCursorPos();
+    FVector2D cursorPosInViewport = mViewportWidget->GetTickSpaceGeometry().AbsoluteToLocal( cursorPos );
+    FVector2D cursorPosInCanvas = ToLocal( cursorPosInViewport );
+    FIntVector2 cursorPosInCanvasInt( FMath::FloorToInt( cursorPosInCanvas.X ), FMath::FloorToInt( cursorPosInCanvas.Y ) );
+
+    cursorPosInCanvasInt += FIntVector2( texture->GetSurfaceWidth() / 2, texture->GetSurfaceHeight() / 2 );
+
+    FText cursorText = FText::Format( LOCTEXT( "viewport.status-bar.cursor", "XY: {0}, {1} px" ), FText::AsNumber( cursorPosInCanvasInt.X ), FText::AsNumber( cursorPosInCanvasInt.Y ) );
+
+    FText colorText;
+    UTextureRenderTarget2D* renderTarget = Cast<UTextureRenderTarget2D>( texture ); //TODO: should also test UTexture2D but FImageUtils::GetTexture2DImage() does nothing -_-
+    if( !renderTarget )
+    {
+        colorText = LOCTEXT( "viewport.status-bar.pixel-color.no-pixel", "RGBA: No pixel" );
+    }
+    else
+    {
+        if( cursorPosInCanvasInt.X < 0 || cursorPosInCanvasInt.X >= renderTarget->GetSurfaceWidth()
+            || cursorPosInCanvasInt.Y < 0 || cursorPosInCanvasInt.Y >= renderTarget->GetSurfaceHeight() )
+        {
+            colorText = LOCTEXT( "viewport.status-bar.pixel-color.outside-texture", "RGBA: Outside" );
+        }
+        else
+        {
+            static FImage image;
+            FIntRect rect( cursorPosInCanvasInt.X, cursorPosInCanvasInt.Y, cursorPosInCanvasInt.X + 1, cursorPosInCanvasInt.Y + 1 );
+            FImageUtils::GetRenderTargetImage( renderTarget, image, rect );
+            FLinearColor linearColor = image.GetOnePixelLinear( 0, 0 );
+            FColor color = linearColor.ToFColor( true );
+            //FColor color = linearColor.ToFColor( false );
+
+            colorText = FText::Format( LOCTEXT( "viewport.status-bar.pixel-color", "RGBA: {0}, {1}, {2}, {3}" ), FText::AsNumber( color.R ), FText::AsNumber( color.G ), FText::AsNumber( color.B ), FText::AsNumber( color.A ) );
+        }
+    }
+
+    return FText::Format( LOCTEXT("viewport.status-bar.text","{0} | {1} | {2}"), textureSize, cursorText, colorText );
 }
 
 

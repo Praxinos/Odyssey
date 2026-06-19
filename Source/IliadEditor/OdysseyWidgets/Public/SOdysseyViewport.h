@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Layout/Visibility.h"
+#include "UObject/TemplateString.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/SViewport.h"
 #include "Widgets/SCompoundWidget.h"
@@ -27,8 +28,9 @@ public:
         {}
         SLATE_ATTRIBUTE(UTexture*, Texture)
         SLATE_ARGUMENT(TSharedPtr<FExtender>, OptionExtender)
-        SLATE_ATTRIBUTE(float, RotationStep)    //PATCH
-        SLATE_ATTRIBUTE(float, ZoomStep)        //PATCH
+        SLATE_ATTRIBUTE(float, RotationStep)                        //PATCH: see comment in OdysseyPainterEditor\Public\OdysseyPainterEditorSettings.h
+        SLATE_ATTRIBUTE(float, ZoomStep)                            //PATCH
+        SLATE_ATTRIBUTE(FTemplateString, StatusbarTemplateString)   //PATCH
     SLATE_END_ARGS()
 
 public:
@@ -151,10 +153,10 @@ private:
     void            FitToViewport();
 
     /* Get the Vertical Scrollbar Widget */
-    TSharedPtr<SScrollBar>              GetVerticalScrollBar()     const;
+    TSharedPtr<SScrollBar>      GetVerticalScrollBar()     const;
 
     /* Get the Horizontal Scrolbar Widget */
-    TSharedPtr<SScrollBar>              GetHorizontalScrollBar()   const;
+    TSharedPtr<SScrollBar>      GetHorizontalScrollBar()   const;
 
     /* Returns the expected translation from the given scrollbars offsets */
     FVector2D                   GetTranslationFromSlidersOffsets(float InScrollOffsetFractionX, float InScrollOffsetFractionY);
@@ -180,6 +182,9 @@ private:
 
     /* Return the align with viewport option state */
     bool            IsAlignWithViewportChecked() const;
+
+    /* Return the status bar text to display */
+    FText           GetStatusbarText() const;
 
     /* Return the Texture Infos to display */
     FText           GetTextureInfosValue() const;
@@ -254,4 +259,6 @@ private:
 
     /* (0,0) if no flip, (1,0) if flip X, (0,1) if flip Y, (1,1) if both axis are flipped */
     FVector2D                           mFlipStateUV;
+
+    TAttribute<FTemplateString>         mStatusbarTemplateString;
 };

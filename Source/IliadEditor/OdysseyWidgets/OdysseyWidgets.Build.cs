@@ -44,6 +44,7 @@ public class OdysseyWidgets : ModuleRules
                 "CoreUObject",
                 "Slate",
                 "SlateCore",
+                "ImageCore",
                 "InputCore",
                 "EditorStyle",
                 "EditorWidgets",
@@ -67,6 +68,8 @@ public class OdysseyWidgets : ModuleRules
                 "StylusInput",
                 "KismetWidgets",
                 "ToolWidgets",
+                "NamingTokens",
+                "NamingTokensUI",
             }
         );
 

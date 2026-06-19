@@ -9,6 +9,7 @@
 #include "UObject/ObjectMacros.h"
 
 #include "OdysseyBrushBlueprint.h"
+#include "UObject/TemplateString.h"
 
 #include "OdysseyPainterEditorSettings.generated.h"
 
@@ -168,10 +169,24 @@ public:
     /** Step to rotate the canvas in viewport. */
     UPROPERTY(config, EditAnywhere, Category=Viewport)
     float ViewportRotationStep = 15.f;
+    //PATCH: (maybe)
+    // Until SOdysseyViewport will be in SOdysseyWidgets module, all value stored here (settings in PainterEditor module) must be add/set as SLATE_ATTRIBUTE in SOdysseyWidgets
+    // which can lead to maaaany attributes ...
+    // A discussion must be done to know if:
+    // - we want to keep both disconnected like now, but in this case, SOdysseyViewport MUST BE totally customizable in a GOOD way
+    // - or move SOdysseyViewport inside PainterEditor module to have easily access to all those settings here (in this case, remove references in OdysseyVector module)
 
     /** Step to zoom the canvas in viewport. */
     UPROPERTY(config, EditAnywhere, Category=Viewport)
     float ViewportZoomStep = .1f;
+    //PATCH: See comment above
+
+    /** Pattern of the left status bar in viewport */
+    UPROPERTY(config, EditAnywhere, Category=Viewport )
+    FTemplateString StatusBarTemplateString = { .Template = TEXT( "{user} - {yyyy}/{mm}/{dd} - {24h}:{min}:{sec}" ) };
+    //FTemplateString StatusBarTemplateString = { .Template = TEXT( "{odc:viewport:texture-width} x {odc:viewport:texture-height} px | ..." ) };
+    //PATCH: See comment above
+    // Moreover, every tokens are defined in SOdysseyWidgets module -_-
 
     /** Color to use for the texture border, if enabled. */
     UPROPERTY(config, EditAnywhere, Category=TextureBorder)
