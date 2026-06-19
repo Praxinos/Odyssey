@@ -10,6 +10,7 @@
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerFolder.h"
 #include "ArianePath.h"
+#include "ArianeGroup.h"
 #include "ArianeCore.h"
 #include "ArianeVertex.h"
 #include "ArianeLayerStack.h"
@@ -104,9 +105,9 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
             {
                 DrawingLayer->Modify();
 
-                EditedPath = DrawingLayer->AllocPath( MaterialInterface );
+                EditedPath = DrawingLayer->AllocPath( MaterialInterface, "Path" );
 
-                DrawingLayer->GetRootObject()->AppendChild( EditedPath );
+                DrawingLayer->GetRootGroup()->AppendChild( EditedPath );
 
                 EditedPath->SetColor( ueColor );
                 EditedPath->SetLineType( LineType );

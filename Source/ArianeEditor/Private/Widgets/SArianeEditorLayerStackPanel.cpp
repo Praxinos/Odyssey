@@ -32,8 +32,8 @@ SArianeEditorLayerStackPanel::OnPre3DPaintingComponentSelectionChanged()
     {
         UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
 
-        LayerStack->OnPreLayerSelectionChangedDelegate().RemoveAll( this );
-        LayerStack->OnPostLayerSelectionChangedDelegate().RemoveAll( this );
+        LayerStack->OnPreSelectionChangedDelegate().RemoveAll( this );
+        LayerStack->OnPostSelectionChangedDelegate().RemoveAll( this );
     }
 }
 
@@ -46,8 +46,8 @@ SArianeEditorLayerStackPanel::OnPost3DPaintingComponentSelectionChanged()
     {
         UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
 
-        LayerStack->OnPreLayerSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnPreLayerSelectionChanged );
-        LayerStack->OnPostLayerSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnPostLayerSelectionChanged );
+        LayerStack->OnPreSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnPreLayerSelectionChanged );
+        LayerStack->OnPostSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnPostLayerSelectionChanged );
         // Refresh the details view
         OnPostLayerSelectionChanged();
     }

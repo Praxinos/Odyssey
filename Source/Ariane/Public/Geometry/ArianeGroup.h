@@ -56,7 +56,7 @@ public:
 public:
     virtual ~FArianeGroup();
     FArianeGroup();
-    FArianeGroup( UArianeLayerDrawing* InDrawingLayer );
+    FArianeGroup( UArianeLayerDrawing* InDrawingLayer, const FName& InName  );
 
 public:
     /** overriden from ArianeObject */
@@ -70,4 +70,18 @@ public:
     //virtual void ExportProperties( FArianeObject* DestObject ) override;
     //virtual void Added() override;
     //virtual void Removed() override;
+
+#if WITH_EDITOR
+   void SetHUDForegroundColor( const FColor& InHUDForegroundColor );
+    void UseEditorHUDForegroundColor( bool bInUseEditorHUDForegroundColor );
+#endif
+
+protected:
+#if WITH_EDITORONLY_DATA
+    UPROPERTY( EditAnywhere )
+    FColor HUDForegroundColor;
+
+    UPROPERTY( EditAnywhere )
+    bool bUseEditorHUDForegroundColor;
+#endif
 };

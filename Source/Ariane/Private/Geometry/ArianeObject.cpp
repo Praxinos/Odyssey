@@ -3,9 +3,13 @@
 
 // Ariane headers
 #include "ArianeObject.h"
-#include "StructUtils/InstancedStruct.h"
+#include "ArianeGroup.h"
+#include "ArianeTag.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerDrawing.h"
+#include "ArianeLayerStack.h"
+// Unreal headers
+#include "StructUtils/InstancedStruct.h"
 
 bool
 FArianeObjectInvalidationFlags::HasBaseClass( uint32 BaseClass ) const
@@ -28,6 +32,7 @@ FArianeObjectInvalidationFlags::AND( const FArianeObjectInvalidationFlags& RHS )
         Hierarchy &= ((FArianeObjectInvalidationFlags&)RHS).Hierarchy;
         Color     &= ((FArianeObjectInvalidationFlags&)RHS).Color;
         Children  &= ((FArianeObjectInvalidationFlags&)RHS).Children;
+        Tags      &= ((FArianeObjectInvalidationFlags&)RHS).Tags;
     }
 
     return *this;
@@ -43,6 +48,7 @@ FArianeObjectInvalidationFlags::OR( const FArianeObjectInvalidationFlags& RHS )
         Hierarchy |= ((FArianeObjectInvalidationFlags&)RHS).Hierarchy;
         Color     |= ((FArianeObjectInvalidationFlags&)RHS).Color;
         Children  |= ((FArianeObjectInvalidationFlags&)RHS).Children;
+        Tags      |= ((FArianeObjectInvalidationFlags&)RHS).Tags;
     }
 
     return *this;
@@ -55,7 +61,8 @@ FArianeObjectInvalidationFlags::SetAll()
     Altered   = 1;
     Hierarchy = 1;
     Color     = 1;
-    Children     = 1;
+    Children  = 1;
+    Tags      = 1;
 
     return *this;
 }
@@ -68,6 +75,7 @@ FArianeObjectInvalidationFlags::Clear()
     Hierarchy = 0;
     Color     = 0;
     Children  = 0;
+    Tags      = 0;
 
     return *this;
 }
@@ -79,7 +87,8 @@ FArianeObjectInvalidationFlags::HasAny()
           || Altered
           || Hierarchy
           || Color
-          || Children );
+          || Children
+          || Tags  );
 }
 
 
@@ -97,14 +106,17 @@ FArianeObject::FArianeObject()
     , RotationInDegrees( 0.0f )
     , Scaling( 1.0f, 1.0f, 1.0f )
     , DrawingLayer( nullptr )
+    , bVisible ( true )
+    , bExpanded ( false )
     , InvalidationFlags ( new FArianeObjectInvalidationFlags() )
 {
 }
 
-FArianeObject::FArianeObject( UArianeLayerDrawing* InDrawingLayer )
+FArianeObject::FArianeObject( UArianeLayerDrawing* InDrawingLayer, const FName& InName )
     : FArianeObject()
 {
     DrawingLayer = InDrawingLayer;
+    Name = InName;
 }
 
 bool
@@ -121,12 +133,12 @@ FArianeObject::HasBaseClass( uint32 BaseClass )
 void
 FArianeObject::RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstancedObjects )
 {
-    ChildrenID.RemoveAll( [ ChildToRemove ](  FArianeObjectID& ChildObjectID ) -> bool
+    Children.RemoveAll( [ ChildToRemove ](  FArianeObjectID& ChildObjectID ) -> bool
     {
         return ( ChildToRemove->GetGuid() == ChildObjectID.Guid );
     } );
 
-    InvalidatedChildrenID.RemoveAll( [ ChildToRemove ](  FArianeObjectID& ChildObjectID ) -> bool
+    InvalidatedChildren.RemoveAll( [ ChildToRemove ](  FArianeObjectID& ChildObjectID ) -> bool
     {
         return ( ChildToRemove->GetGuid() == ChildObjectID.Guid );
     } );
@@ -148,7 +160,7 @@ FArianeObject::RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstan
 void
 FArianeObject::AppendChild( FArianeObject* Child )
 {
-    ChildrenID.Add( FArianeObjectID( Child ) );
+    Children.Add( FArianeObjectID( Child ) );
 
     Child->SetParent( this );
     Child->Added();
@@ -159,7 +171,7 @@ FArianeObject::AppendChild( FArianeObject* Child )
 void
 FArianeObject::PrependChild( FArianeObject* Child )
 {
-    ChildrenID.Insert( FArianeObjectID( Child ), 0 );
+    Children.Insert( FArianeObjectID( Child ), 0 );
 
     Child->SetParent( this );
     Child->Added();
@@ -170,12 +182,12 @@ FArianeObject::PrependChild( FArianeObject* Child )
 void
 FArianeObject::InsertChild( FArianeObject* Child, FArianeObject* InsertAfter )
 {
-    int FoundObjectIndex = ChildrenID.IndexOfByPredicate( [Child]( const FArianeObjectID& ObjectID ) -> bool
-                                                          {
-                                                              return ( ObjectID.Guid == Child->Guid ) ? true : false;
-                                                          } );
+    int FoundObjectIndex = Children.IndexOfByPredicate( [Child]( const FArianeObjectID& ObjectID ) -> bool
+                                                        {
+                                                            return ( ObjectID.Guid == Child->Guid ) ? true : false;
+                                                        } );
 
-    ChildrenID.Insert( FArianeObjectID( Child ), FoundObjectIndex + 1 );
+    Children.Insert( FArianeObjectID( Child ), FoundObjectIndex + 1 );
 
     Child->SetParent( this );
     Child->Added();
@@ -187,12 +199,12 @@ void
 FArianeObject::InvalidateChild( FArianeObject* Child )
 {
 
-    if( InvalidatedChildrenID.FindByPredicate( [Child]( const FArianeObjectID& ObjectID ) -> bool
-                                               {
-                                                   return ( ObjectID.Guid == Child->Guid ) ? true : false;
-                                               } ) == nullptr )
+    if( InvalidatedChildren.FindByPredicate( [Child]( const FArianeObjectID& ObjectID ) -> bool
+                                             {
+                                                 return ( ObjectID.Guid == Child->Guid ) ? true : false;
+                                             } ) == nullptr )
     {
-        InvalidatedChildrenID.Add( FArianeObjectID( Child ) );
+        InvalidatedChildren.Add( FArianeObjectID( Child ) );
     }
 
     Invalidate( FArianeObjectInvalidationFlags().SetChildren() );
@@ -214,7 +226,7 @@ FArianeObject::Invalidate( const FArianeObjectInvalidationFlags& InInvalidationF
 void
 FArianeObject::GetInvalidatedChildren( TArray<FArianeObject*> OutInvalidatedObjects, bool bRecurse )
 {
-    for( FArianeObjectID& InvalidatedObject : InvalidatedChildrenID )
+    for( FArianeObjectID& InvalidatedObject : InvalidatedChildren )
     {
         OutInvalidatedObjects.Add( InvalidatedObject.GetObject() );
 
@@ -237,7 +249,7 @@ FArianeObject::Traverse_Private( TFunction<TraversalReturnValue(FArianeObject*)>
 
     if( ( Ret == TraversalReturnValue::IgnoreChildren ) == 0 )
     {
-        for( FArianeObjectID& ChildID : ChildrenID )
+        for( FArianeObjectID& ChildID : Children )
         {
             TraversalReturnValue ChildRet = ChildID.GetObject()->Traverse_Private( Callback );
 
@@ -268,7 +280,7 @@ FArianeObject::Update( bool Recurse, bool bClearFlags )
 {
     if( Recurse )
     {
-        InvalidatedChildrenID.RemoveAll( [&Recurse](  FArianeObjectID& InvalidatedChildID )
+        InvalidatedChildren.RemoveAll( [&Recurse](  FArianeObjectID& InvalidatedChildID )
             {
                 return InvalidatedChildID.GetObject()->Update( Recurse );
             } );
@@ -279,7 +291,7 @@ FArianeObject::Update( bool Recurse, bool bClearFlags )
         InvalidationFlags->Clear();
     }
 
-    return InvalidatedChildrenID.Num() ? false : true;
+    return InvalidatedChildren.Num() ? false : true;
 }
 
 FArianeObjectInvalidationFlags&
@@ -287,6 +299,20 @@ FArianeObject::GetInvalidationFlags()
 {
     return *InvalidationFlags;
 }
+
+
+UArianePainting3DComponent*
+FArianeObject::GetPainting3DComponent()
+{
+    return DrawingLayer ? DrawingLayer->GetLayerStack()->GetPainting3DComponent() : nullptr;
+}
+
+void
+FArianeObject::SetExpanded( bool bInExpanded )
+{
+    bExpanded = bInExpanded;
+}
+
 
 const
 FBoxSphereBounds&
@@ -335,6 +361,215 @@ void
 FArianeObject::SetDrawingLayer( UArianeLayerDrawing* InDrawingLayer )
 {
     DrawingLayer = InDrawingLayer;
+}
+
+TArray<FArianeObjectID>&
+FArianeObject::GetChildren()
+{
+    return Children;
+}
+
+const TArray<FArianeObjectID>&
+FArianeObject::GetChildren() const
+{
+    return Children;
+}
+
+void
+FArianeObject::SetName( const FName& InName )
+{
+    Name = InName;
+}
+
+const FName&
+FArianeObject::GetName()
+{
+    return Name;
+}
+
+FArianeObject*
+FArianeObject::GetAncestorByClass( uint32 iClass, bool bHasBaseObjectClass, bool bSelf )
+{
+    FArianeObject* Ancestor = bSelf ? this : ParentID.GetObject();
+
+    while ( Ancestor )
+    {
+        if( ( bHasBaseObjectClass && Ancestor->HasBaseClass( iClass )  ) || Ancestor->GetClass() == iClass )
+        {
+            return Ancestor;
+        }
+
+        Ancestor = Ancestor->GetParent();
+    }
+
+    return nullptr;
+}
+
+FArianeTag*
+FArianeObject::GetTagByGuid( const FGuid& InGuid )
+{
+    for( FInstancedStruct& InstancedTag : InstancedTags )
+    {
+        FArianeTag* Tag = InstancedTag.GetMutablePtr<FArianeTag>();
+
+        if( Tag->GetGuid() == InGuid )
+        {
+            return Tag;
+        }
+    }
+
+    return nullptr;
+}
+
+const TArray<FArianeTagID>&
+FArianeObject::GetTags() const
+{
+    return Tags;
+}
+
+TArray<FArianeTagID>&
+FArianeObject::GetTags()
+{
+    return Tags;
+}
+
+bool
+FArianeObject::IsExpanded()
+{
+    return bExpanded;
+}
+
+void
+FArianeObject::SetSelected( bool bInSelected )
+{
+    bSelected = bInSelected;
+
+    Invalidate( FArianeObjectInvalidationFlags().SetSelected() );
+}
+
+bool
+FArianeObject::IsSelected()
+{
+    return bSelected;
+}
+
+FArianeObject*
+FArianeObject::GetPreviousChild( FArianeObject* Child )
+{
+    FArianeObject* PreviousItem = nullptr;
+
+    for( FArianeObjectID& ItemID : Children )
+    {
+        FArianeObject* Item = ItemID.GetObject();
+
+        if( Item == Child )
+        {
+            return PreviousItem;
+        }
+
+        PreviousItem = Item;
+    }
+
+    return PreviousItem;
+}
+
+void
+FArianeObject::TransferChild( FArianeObject* FosterChild
+                            , FArianeObject* InsertAfter )
+{
+    if( ( FosterChild != this ) && ( FosterChild != InsertAfter ) )
+    {
+        FArianeObject* FormerParent = FosterChild->GetParent();
+        FArianeObject* PreviousChild = FormerParent->GetPreviousChild( FosterChild );
+
+        //uint32 removalFlags = FosterChild->GetParent()->RemoveChild( FosterChild, false );
+        FosterChild->GetParent()->RemoveChild( FosterChild, false );
+
+        // removal succeeded
+        ////if( removalFlags == HIERARCHY_CHANGE_SUCCESS )
+        {
+            //BLMatrix2D childFormerWorldMatrix = iFosterChild->mWorldMatrix;
+            //uint32 additionFlags = AddChild( FosterChild, InsertAfter );
+
+            FArianeObjectID* InsertAfterID = Children.FindByPredicate(
+                [InsertAfter] ( FArianeObjectID& ItemID ) -> bool
+                {
+                   if( ItemID.Guid == InsertAfter->GetGuid() )
+                   {
+                       return true;
+                   }
+
+                    return false;
+                } );
+
+            if( InsertAfterID )
+            {
+                Children.Insert( FosterChild, InsertAfterID - Children.GetData() );
+            }
+/* Gary
+            if( additionFlags == HIERARCHY_CHANGE_SUCCESS )
+            {
+                double translationX, translationY, rotation, scalingX, scalingY, skewX, skewY;
+                BLMatrix2D localMatrix;
+
+                FOdysseyVector::MatrixMultiply( mInverseWorldMatrix, childFormerWorldMatrix, localMatrix );
+                FOdysseyVector::ExtractTransformations( localMatrix
+                                                      , &translationX
+                                                      , &translationY
+                                                      , &rotation
+                                                      , &scalingX
+                                                      , &scalingY
+                                                      , &skewX
+                                                      , &skewY
+                                                      , true ); // in degrees
+
+                iFosterChild->SetTransform( translationX
+                                          , translationY
+                                          , rotation
+                                          , scalingX
+                                          , scalingY
+                                          , skewX
+                                          , skewY );
+
+                iFosterChild->UpdateMatrix();
+            }
+            else // add back
+            {
+                FormerParent->AddChild( FosterChild, PreviousChild );
+            }
+
+            //return additionFlags; // transfer succeeded
+*/
+        }
+
+        //return removalFlags;
+    }
+
+    //return HIERARCHY_CHANGE_ERROR;
+}
+
+FArianeGroup*
+FArianeObject::GetRootGroup()
+{
+    return DrawingLayer ? DrawingLayer->GetRootGroup() : nullptr;
+}
+
+#ifdef WITH_EDITOR
+FColor
+FArianeObject::GetHUDForegroundColor()
+{
+    FArianeObject* Group = GetAncestorByClass( FArianeGroup::StaticClass()
+                                             , true
+                                             , false );
+
+    return Group ? Group->GetHUDForegroundColor() : DrawingLayer->GetLayerStack()->GetPainting3DComponent()->GetHUDForegroundColor();
+}
+#endif
+
+void
+FArianeObject::SetVisible( bool bInVisible )
+{
+    bVisible = bInVisible;
 }
 
 bool

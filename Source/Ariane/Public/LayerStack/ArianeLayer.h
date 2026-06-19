@@ -23,7 +23,7 @@ public:
     ~UArianeLayer();
     UArianeLayer();
 
-    DECLARE_MULTICAST_DELEGATE_OneParam( FOnUpdateDelegate, bool );
+    //DECLARE_MULTICAST_DELEGATE_OneParam( FOnUpdateDelegate, bool );
 
 #if WITH_EDITOR
     DECLARE_MULTICAST_DELEGATE( FOnTransformChanged );
@@ -87,10 +87,10 @@ public:
     UArianeLayerFolder* GetRootFolder();
 
     /** The delegate run just before the update **/
-    FOnUpdateDelegate& OnPreUpdateDelegate();
+    //FOnUpdateDelegate& OnPreUpdateDelegate();
 
     /** The delegate run right after the update **/
-    FOnUpdateDelegate& OnPostUpdateDelegate();
+    //FOnUpdateDelegate& OnPostUpdateDelegate();
 
     /**
      * @brief Set the parent folder
@@ -125,8 +125,8 @@ protected:
     bool bInvalidatedInParentFolder;
     FBoxSphereBounds Bounds;
     FArianeLayerInvalidationFlags* InvalidationFlags;
-    FOnUpdateDelegate OnPreUpdate;
-    FOnUpdateDelegate OnPostUpdate;
+    //FOnUpdateDelegate OnPreUpdate;
+    //FOnUpdateDelegate OnPostUpdate;
 
 #if WITH_EDITORONLY_DATA
     FOnTransformChanged OnTransformChanged;

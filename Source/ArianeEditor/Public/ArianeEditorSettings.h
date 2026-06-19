@@ -54,6 +54,8 @@ public:
     double GetDistanceToNewActor() const;
     /** Sets the distance to a new Paintingg 3D Actor. */
     void SetDistanceToNewActor( double InDistanceToNewActor );
+    /** Gets the HUD foreground color. */
+    FColor GetHUDForegroundColor() const;
 
     //FOnGridSizeChanged& GetOnGridSizeChanged();
 
@@ -81,6 +83,10 @@ private:
     /** The layer grid Y-Axis color. */
     UPROPERTY(config, EditAnywhere, Category=Grid, DisplayName = "The layer grid Y-Axis color")
     FLinearColor GridYAxisColor;
+
+    /** HUD Foreground Color */
+    UPROPERTY(config, EditAnywhere, Category=Grid, DisplayName = "The HUD foreground Color")
+    FColor HUDForegroundColor;
 
 private:
     //FOnGridSizeChanged OnGridSizeChanged;

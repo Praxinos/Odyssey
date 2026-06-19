@@ -8,6 +8,7 @@
 #include "ArianeEditorViewportToolkit.h"
 #include "ArianeEditorColorSelectorTab.h"
 #include "ArianeEditorLayerStackTab.h"
+#include "ArianeEditorSceneTreeViewTab.h"
 #include "PathEditTool/ArianeEditorPathEditTool.h"
 #include "PathDrawingTool/ArianeEditorPathDrawingTool.h"
 #include "EraserTool/ArianeEditorEraserTool.h"
@@ -341,6 +342,7 @@ FArianeEditor::InitTabs()
 {
     AddTab( MakeShared<FArianeEditorColorSelectorTab>(this) );
     AddTab( MakeShared<FArianeEditorLayerStackTab>(this) );
+    AddTab( MakeShared<FArianeEditorSceneTreeViewTab>(this) );
 
     for (const TSharedPtr<FArianeEditorTab> tab : Tabs)
     {
@@ -522,7 +524,31 @@ FArianeEditor::OnEditorSelectionChanged( UObject* NewSelection )
         }
     }
 
+    // allow the component to communicate with the Editor to retrieve Environnement Settings
+    if( CurrentPainting3DComponent.Get() )
+    {
+        CurrentPainting3DComponent->SetEditorInterface( this );
+    }
+
     OnPost3DPaintingComponentSelectionChanged.Broadcast();
+}
+
+void
+FArianeEditor::SetCurrentPainting3DComponent( UArianePainting3DComponent* InPainting3DComponent )
+{
+    OnPre3DPaintingComponentSelectionChanged.Broadcast();
+
+    CurrentPainting3DComponent = InPainting3DComponent;
+
+    OnPost3DPaintingComponentSelectionChanged.Broadcast();
+}
+
+FColor
+FArianeEditor::GetHUDForegroundColor()
+{
+    const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
+
+    return Settings->GetHUDForegroundColor();
 }
 
 UArianePainting3DComponent*

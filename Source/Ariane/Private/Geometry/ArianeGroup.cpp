@@ -94,6 +94,10 @@ FArianeGroup::~FArianeGroup()
 
 FArianeGroup::FArianeGroup()
     : FArianeObject()
+#if WITH_EDITOR
+    , HUDForegroundColor( FColor::Black )
+    , bUseEditorHUDForegroundColor( true )
+#endif
 {
     InvalidationFlags = new FArianeGroupInvalidationFlags();
 
@@ -101,8 +105,12 @@ FArianeGroup::FArianeGroup()
     //MaterialInterface = GEngine->VertexColorMaterial;
 }
 
-FArianeGroup::FArianeGroup( UArianeLayerDrawing* InDrawingLayer )
-    : FArianeObject ( InDrawingLayer )
+FArianeGroup::FArianeGroup( UArianeLayerDrawing* InDrawingLayer, const FName& InName  )
+    : FArianeObject ( InDrawingLayer, InName )
+#if WITH_EDITOR
+    , HUDForegroundColor( FColor::Black )
+    , bUseEditorHUDForegroundColor( true )
+#endif
 {
     InvalidationFlags = new FArianeGroupInvalidationFlags();
 
@@ -163,3 +171,17 @@ FArianeGroup::Update( bool Recurse, bool bClearFlags )
     FArianeObject::Update( Recurse , false );
 }
 */
+
+#if WITH_EDITOR
+void
+FArianeGroup::SetHUDForegroundColor( const FColor& InHUDForegroundColor )
+{
+    HUDForegroundColor = InHUDForegroundColor;
+}
+
+void
+FArianeGroup::UseEditorHUDForegroundColor( bool bInUseEditorHUDForegroundColor )
+{
+    bUseEditorHUDForegroundColor = bInUseEditorHUDForegroundColor;
+}
+#endif

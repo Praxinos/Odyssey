@@ -476,6 +476,7 @@ void FArianeEditorViewportEdMode::OnEditorClose()
     {
         EditorCurrentTool->Inactivate();
     }
+
 /* Gary
     // Reset viewport color mode for all active viewports
     for (FEditorViewportClient* ViewportClient : GEditor->GetAllViewportClients())

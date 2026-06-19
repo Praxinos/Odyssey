@@ -1,0 +1,135 @@
+// IDDN.FR.001.060015.014.S.X.2019.000.00000
+// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
+
+
+// Ariane Editor Headers
+#include "SArianeEditorSceneTreeViewContextMenu.h"
+#include "SArianeEditorSceneTreeView.h"
+#include "SArianeEditorSceneTreeViewRow.h"
+#include "ArianeEditor.h"
+// Ariane Headers
+#include "ArianeObject.h"
+#include "ArianeGroup.h"
+#include "ArianeLayerDrawing.h"
+// Unreal headers
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Dialogs/Dialogs.h"
+// OdysseyVector
+
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
+// static
+TSharedPtr<SWidget>
+SArianeEditorSceneTreeViewContextMenu::CreateWidget( SArianeEditorSceneTreeView* TreeView )
+{
+    TSharedPtr<FSceneTreeViewItem> RootItem = TreeView->GetRootItem();
+    FArianeGroup* RootGroup = static_cast<FArianeGroup*>(RootItem.Get()->GetObject());
+    FArianeEditor* Editor = TreeView->GetEditor();
+    FMenuBuilder Menu( true, nullptr );
+
+    Menu.BeginSection("Context");
+    {
+/*
+        menu.AddMenuEntry(
+            LOCTEXT("ariane-scene-tree-view.context-menu.rename.name", "Rename")
+          , LOCTEXT("ariane-scene-tree-view.context-menu.rename.tooltip", "Rename")
+          , FSlateIcon()
+          , FUIAction(FExecuteAction::CreateRaw(iTreeView, &SArianeEditorSceneTreeViewContextMenu::RenameSelectedItem)));
+
+        menu.AddMenuEntry(
+            LOCTEXT("ariane-scene-tree-view.context-menu.group-paint.name", "Make Paint Group")
+          , LOCTEXT("ariane-scene-tree-view.context-menu.group-paint.tooltip", "Make Paint Group")
+          , FSlateIcon()
+          , FUIAction(FExecuteAction::CreateStatic( &FArianeEditor::MakePaintGroup, iTreeView->GetEditor(), vectorScene )));
+
+        menu.AddMenuEntry(
+            LOCTEXT("ariane-scene-tree-view.context-menu.group.name", "Group")
+          , LOCTEXT("ariane-scene-tree-view.context-menu.group.tooltip", "Group")
+          , FSlateIcon()
+          , FUIAction(FExecuteAction::CreateStatic( &SArianeEditorSceneTreeViewContextMenuContextMenu::Group, iTreeView->GetEditor(), vectorScene )));
+
+        menu.AddMenuEntry(
+            LOCTEXT("ariane-scene-tree-view.context-menu.ungroup.name", "Ungroup")
+          , LOCTEXT("ariane-scene-tree-view.context-menu.ungroup.tooltip", "Ungroup")
+          , FSlateIcon()
+          , FUIAction(FExecuteAction::CreateStatic( &FArianeEditor::Ungroup, iTreeView->GetEditor(), vectorScene )
+                    , FCanExecuteAction::CreateStatic( &SArianeEditorSceneTreeViewContextMenuContextMenu::CanUngroup, vectorScene )));
+
+        menu.AddMenuEntry(
+            LOCTEXT("ariane-scene-tree-view.context-menu.copy.name", "Copy")
+          , LOCTEXT("ariane-scene-tree-view.context-menu.copy.tooltip", "Copy")
+          , FSlateIcon()
+          , FUIAction(FExecuteAction::CreateStatic(&FArianeEditor::CopyObjects, vectorScene)));
+
+        menu.AddMenuEntry(
+            LOCTEXT("ariane-scene-tree-view.context-menu.paste.name", "Paste")
+          , LOCTEXT("ariane-scene-tree-view.context-menu.paste.tooltip", "Paste")
+          , FSlateIcon()
+          , FUIAction(FExecuteAction::CreateStatic(&FArianeEditor::PasteObjects, iTreeView->GetEditor(), vectorScene)));
+
+        menu.AddMenuEntry(
+            LOCTEXT("ariane-scene-tree-view.context-menu.copy-transformation.name", "Copy Transformation")
+          , LOCTEXT("ariane-scene-tree-view.context-menu.copy-transformation.tooltip", "Copy Transformation")
+          , FSlateIcon()
+          , FUIAction(FExecuteAction::CreateStatic(&FArianeEditor::CopyTransformation, vectorScene)));
+
+        menu.AddMenuEntry(
+            LOCTEXT("ariane-scene-tree-view.context-menu.paste-transformation.name", "Paste Transformation")
+          , LOCTEXT("ariane-scene-tree-view.context-menu.paste-transformation.tooltip", "Paste Transformation")
+          , FSlateIcon()
+          , FUIAction(FExecuteAction::CreateStatic(&FArianeEditor::PasteTransformation, iTreeView->GetEditor(), vectorScene)));
+
+        menu.AddMenuEntry(
+            LOCTEXT("ariane-scene-tree-view.context-menu.delete-selection.name","Delete Selection")
+          , LOCTEXT("ariane-scene-tree-view.context-menu.delete-selection.tooltip","Delete Selection")
+          , FSlateIcon()
+          , FUIAction(FExecuteAction::CreateStatic(&FArianeEditor::DeleteObjects, iTreeView->GetEditor(), vectorScene)));
+
+        menu.AddMenuEntry(
+              LOCTEXT("ariane-tool.object-context-menu.apply-transformations.name", "Apply Transformations")
+            , LOCTEXT("ariane-tool.object-context-menu.apply-transformations.tooltip", "Apply Transformations")
+            , FSlateIcon()
+            , FUIAction(FExecuteAction::CreateStatic( &FArianeEditor::ApplyTransformations, editor, vectorScene )));
+*/
+    }
+    Menu.EndSection();
+
+    return Menu.MakeWidget();
+}
+
+// static
+void
+SArianeEditorSceneTreeViewContextMenu::Group( FArianeEditor* Editor, FArianeGroup* RootGroup )
+{
+    SGenericDialogWidget::FArguments Args;
+/*
+    SGenericDialogWidget::OpenDialog( FText::FromString( "test" )
+                                    , SNew(SEditableTextBox)
+                                      .Text( FText::FromString("New Group") )
+                                    , args
+                                    , true );
+*/
+    //FArianeEditor::Group( Editor, RootGroup );
+}
+
+// static
+bool
+SArianeEditorSceneTreeViewContextMenu::CanUngroup( FArianeGroup* RootGroup )
+{
+    bool Ret = false;
+
+    for( FArianeObject* SelectedObject : RootGroup->GetDrawingLayer()->GetSelectedObjects() )
+    {
+        if( ( SelectedObject->HasBaseClass( FArianeGroup::StaticClass() ) == false )
+         || ( SelectedObject == RootGroup ) )
+        {
+            return false;
+        }
+
+        Ret = true;
+    }
+
+    return Ret;
+}
+
+#undef LOCTEXT_NAMESPACE

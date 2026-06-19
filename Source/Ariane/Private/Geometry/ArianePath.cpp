@@ -216,8 +216,8 @@ FArianePath::FArianePath()
     //MaterialInterface = GEngine->VertexColorMaterial;
 }
 
-FArianePath::FArianePath( UArianeLayerDrawing* InDrawingLayer )
-    : FArianeObject ( InDrawingLayer )
+FArianePath::FArianePath( UArianeLayerDrawing* InDrawingLayer, const FName& InName )
+    : FArianeObject ( InDrawingLayer, InName )
     , LineType ( EArianePathLineType::Tube )
     , Color ( 0, 0, 0, 255 )
     , MaterialInterface ( nullptr )

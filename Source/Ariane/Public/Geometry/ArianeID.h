@@ -11,6 +11,7 @@
 struct FArianeObject;
 struct FArianeSegment;
 struct FArianeVertex;
+struct FArianeTag;
 class UArianeLayerDrawing;
 
 USTRUCT(BlueprintType)
@@ -90,4 +91,31 @@ struct ARIANE_API FArianeSegmentID
 
     protected:
         FArianeSegment* CachedSegment;
+};
+
+USTRUCT(BlueprintType)
+struct ARIANE_API FArianeTagID
+{
+    GENERATED_BODY()
+
+    public:
+        ~FArianeTagID(){};
+        FArianeTagID();
+        FArianeTagID( FArianeTag* InTag );
+
+        FArianeTag* GetTag();
+        void InvalidateCache();
+
+    public:
+        UPROPERTY( EditAnywhere )
+        UArianeLayerDrawing* DrawingLayer;
+
+        UPROPERTY( EditAnywhere )
+        FGuid Guid;
+
+        UPROPERTY( EditAnywhere )
+        FGuid OwnerGuid;
+
+    protected:
+        FArianeTag* CachedTag;
 };

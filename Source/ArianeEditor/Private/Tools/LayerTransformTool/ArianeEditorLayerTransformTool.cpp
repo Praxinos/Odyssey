@@ -57,11 +57,11 @@ UArianeEditorLayerTransformTool::BindComponentDelegates()
     {
         UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
 
-        LayerStack->OnPreLayerSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::ClearGizmo );
-        LayerStack->OnPostLayerSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::CreateGizmo );
+        LayerStack->OnPreSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::ClearGizmo );
+        LayerStack->OnPostSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::CreateGizmo );
 
         // Refresh the tool's Gizmo when the layer Transform is updated (e.g via a widget)
-        LayerStack->GetRootFolder()->OnPostUpdateDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::OnRootFolderUpdate );
+        Painting3DComponent->OnPostUpdateDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::OnRootFolderUpdate );
     }
 }
 
@@ -100,10 +100,10 @@ UArianeEditorLayerTransformTool::UnbindComponentDelegates()
     {
         UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
 
-        LayerStack->OnPreLayerSelectionChangedDelegate().RemoveAll( this );
-        LayerStack->OnPostLayerSelectionChangedDelegate().RemoveAll( this );
+        LayerStack->OnPreSelectionChangedDelegate().RemoveAll( this );
+        LayerStack->OnPostSelectionChangedDelegate().RemoveAll( this );
 
-        LayerStack->GetRootFolder()->OnPostUpdateDelegate().RemoveAll( this );
+        Painting3DComponent->OnPostUpdateDelegate().RemoveAll( this );
     }
 }
 

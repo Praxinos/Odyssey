@@ -10,6 +10,7 @@
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerFolder.h"
 #include "ArianePath.h"
+#include "ArianeGroup.h"
 #include "ArianeCore.h"
 #include "ArianeVertex.h"
 #include "ArianeLayerStack.h"
@@ -305,7 +306,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
     {
         UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        DrawingLayer->GetRootObject()->Traverse
+        DrawingLayer->GetRootGroup()->Traverse
         ( [ this
           , ViewportClient
           , View
@@ -924,14 +925,14 @@ UArianeEditorPathEditTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* Re
 
         if( DrawingLayer )
         {
-            DrawingLayer->GetRootObject()->Traverse( [ this
-                                                     , Canvas
-                                                     , ViewportClient
-                                                     , View
-                                                     , FgColor
-                                                     , BgColor
-                                                     , HcColor
-                                                     , HUDDrawingFlags ]( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
+            DrawingLayer->GetRootGroup()->Traverse( [ this
+                                                    , Canvas
+                                                    , ViewportClient
+                                                    , View
+                                                    , FgColor
+                                                    , BgColor
+                                                    , HcColor
+                                                    , HUDDrawingFlags ]( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
             {
                 if( Object->GetClass() == FArianePath::StaticClass() )
                 {
