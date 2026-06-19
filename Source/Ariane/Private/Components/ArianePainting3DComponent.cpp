@@ -6,6 +6,7 @@
 #include "ArianePath.h"
 #include "ArianeSegment.h"
 #include "ArianeVertex.h"
+#include "ArianeGroup.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerDrawing.h"
@@ -34,6 +35,7 @@ UArianePainting3DComponent::~UArianePainting3DComponent()
 UArianePainting3DComponent::UArianePainting3DComponent()
     : LayerStack ( nullptr )
     , CurrentPaletteColorEntry ( nullptr )
+    , EditorInterface ( nullptr )
 {
     LayerStack = CreateDefaultSubobject<UArianeLayerStack>(TEXT("LayerStack"));
 
@@ -56,6 +58,14 @@ UArianePainting3DComponent::UArianePainting3DComponent()
 
     //LineBatchComponent = CreateDefaultSubobject<ULineBatchComponent>(TEXT("LineBatcher"));
 }
+
+#if WITH_EDITOR
+void
+UArianePainting3DComponent::SetEditorInterface( IArianePainting3DComponentEditorInterface* InEditorInterface )
+{
+    EditorInterface = InEditorInterface;
+}
+#endif
 
 void
 UArianePainting3DComponent::OnRegister()
@@ -311,6 +321,12 @@ UArianePainting3DComponent::SetCurrentPaletteColorEntry( UOdysseyPaletteEntryCol
 {
 }
 
+FColor
+UArianePainting3DComponent::GetHUDForegroundColor()
+{
+    return EditorInterface ? EditorInterface->GetHUDForegroundColor() : FColor::Black;
+}
+
 //--------------------------------------------------------------------------------------------------
 
 FArianeGeometryProxy::~FArianeGeometryProxy()
@@ -420,11 +436,11 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
 
     DrawingLayer->InstancedObjectsAccessRW.Lock();
 
-    DrawingLayer->GetRootObject()->Traverse( [ this
-                                             , DrawingLayer
-                                             //, MaterialInterface
-                                             , ViewIndex
-                                             , &Collector ]( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
+    DrawingLayer->GetRootGroup()->Traverse( [ this
+                                            , DrawingLayer
+                                            //, MaterialInterface
+                                            , ViewIndex
+                                            , &Collector ]( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
     {
         if( ( Object->GetClass() == FArianePath::StaticClass() )  )
         {

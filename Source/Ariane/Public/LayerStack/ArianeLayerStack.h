@@ -20,8 +20,8 @@ class ARIANE_API UArianeLayerStack : public USceneComponent
 {
     GENERATED_BODY()
 
-    DECLARE_MULTICAST_DELEGATE( FOnLayerStackChanged );
-    DECLARE_MULTICAST_DELEGATE( FOnLayerSelectionChanged );
+    DECLARE_MULTICAST_DELEGATE( FOnHierarchyChanged );
+    DECLARE_MULTICAST_DELEGATE( FOnSelectionChanged );
 
 public:
     ~UArianeLayerStack();
@@ -102,11 +102,11 @@ public:
     */
     void GetLayers( TArray<UArianeLayer*>& OutLayers );
 
-    FOnLayerStackChanged& OnPreLayerStackChangedDelegate();
-    FOnLayerStackChanged& OnPostLayerStackChangedDelegate();
+    FOnHierarchyChanged& OnPreHierarchyChangedDelegate();
+    FOnHierarchyChanged& OnPostHierarchyChangedDelegate();
 
-    FOnLayerSelectionChanged& OnPreLayerSelectionChangedDelegate();
-    FOnLayerSelectionChanged& OnPostLayerSelectionChangedDelegate();
+    FOnSelectionChanged& OnPreSelectionChangedDelegate();
+    FOnSelectionChanged& OnPostSelectionChangedDelegate();
 
 #if WITH_EDITOR
     void PreEditUndo();
@@ -124,9 +124,9 @@ protected:
     TArray<UArianeLayer*> SelectedLayers;
 
 protected:
-    FOnLayerStackChanged OnPreLayerStackChanged;
-    FOnLayerStackChanged OnPostLayerStackChanged;
+    FOnHierarchyChanged OnPreHierarchyChanged;
+    FOnHierarchyChanged OnPostHierarchyChanged;
 
-    FOnLayerSelectionChanged OnPreLayerSelectionChanged;
-    FOnLayerSelectionChanged OnPostLayerSelectionChanged;
+    FOnSelectionChanged OnPreSelectionChanged;
+    FOnSelectionChanged OnPostSelectionChanged;
 };

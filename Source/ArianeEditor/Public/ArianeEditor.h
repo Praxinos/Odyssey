@@ -5,6 +5,8 @@
 
 // Unreal
 #include "CoreMinimal.h"
+// Ariane Headers
+#include "ArianePainting3DComponentEditorInterface.h"
 // Odyssey Headers
 #include "OdysseyPainterEditorColorType.h"
 #include "InteractiveTool.h"
@@ -29,6 +31,7 @@ class UArianeEditorToolBuilder;
 class ARIANEEDITOR_API FArianeEditor
     : public FGCObject //Allows us to register External UObject in Garbage Collector
     , public TSharedFromThis<FArianeEditor>
+    , public IArianePainting3DComponentEditorInterface
 {
 public:
     DECLARE_MULTICAST_DELEGATE( FOnCurrentToolChanged );
@@ -199,6 +202,10 @@ public:
     void UnregisterTools();
 
     const FArianeEditorHUD::FDrawingFlags& GetHUDDrawingFlags();
+
+    // immplements IArianePainting3DComponentEditorInterface::GetHUDForegroundColor
+    virtual FColor GetHUDForegroundColor() override;
+    void SetCurrentPainting3DComponent( UArianePainting3DComponent* InPainting3DComponent );
 
 protected:
     /**

@@ -1,8 +1,6 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-#ifdef unused
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -11,41 +9,41 @@
 #include "Widgets/Views/STreeView.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 
-class FOdysseyVectorObject;
+struct FArianeObject;
 
-class FLayerDrawingTreeViewItem
+class FSceneTreeViewItem
 {
     public:
-        ~FLayerDrawingTreeViewItem();
-        FLayerDrawingTreeViewItem(FOdysseyVectorObject* iVectorObject, bool iSensitive);
+        ~FSceneTreeViewItem();
+        FSceneTreeViewItem(FArianeObject* iVectorObject, bool iSensitive);
 
-        FOdysseyVectorObject* GetVectorObject();
+        FArianeObject* GetObject();
         bool IsSensitive();
 
     public:
-        FOdysseyVectorObject* mVectorObject;
+        FArianeObject* Object;
         bool bSensitive;
-        TArray<TSharedPtr<FLayerDrawingTreeViewItem>> mChildren;
+        TArray<TSharedPtr<FSceneTreeViewItem>> Children;
 };
 
 /**
  * Implements the Scene Tree View Widget
  */
-class ARIANEEDITOR_API SArianeEditorVectorSceneTreeViewRow
-    : public SMultiColumnTableRow<TSharedPtr<FLayerDrawingTreeViewItem>>
+class ARIANEEDITOR_API SArianeEditorSceneTreeViewRow
+    : public SMultiColumnTableRow<TSharedPtr<FSceneTreeViewItem>>
 {
     public:
-        ~SArianeEditorVectorSceneTreeViewRow();
-        SArianeEditorVectorSceneTreeViewRow();
+        ~SArianeEditorSceneTreeViewRow();
+        SArianeEditorSceneTreeViewRow();
 
         static const uint32 DROPZONE_NONE  = 0;
         static const uint32 DROPZONE_ONTO  = 1;
         static const uint32 DROPZONE_ABOVE = 2;
         static const uint32 DROPZONE_BELOW = 3;
 
-        void Construct( const typename STableRow<TSharedPtr<FLayerDrawingTreeViewItem>>::FArguments& InArgs
+        void Construct( const typename STableRow<TSharedPtr<FSceneTreeViewItem>>::FArguments& InArgs
                       , const TSharedRef< STableViewBase >& InOwnerTableView
-                      , const TSharedPtr<FLayerDrawingTreeViewItem> iItem );
+                      , const TSharedPtr<FSceneTreeViewItem> iItem );
         virtual TSharedRef< SWidget > GenerateWidgetForColumn ( const FName& InColumnName ) override;
 
         void Rename();
@@ -81,9 +79,7 @@ class ARIANEEDITOR_API SArianeEditorVectorSceneTreeViewRow
         void OnColorCommitted( FLinearColor iColor );
 
     protected:
-        uint32 mDropZone;
-        TSharedPtr<FLayerDrawingTreeViewItem> mItem;
-        TSharedPtr<SInlineEditableTextBlock> mTextBlockWidget;
+        uint32 DropZone;
+        TSharedPtr<FSceneTreeViewItem> Item;
+        TSharedPtr<SInlineEditableTextBlock> TextBlockWidget;
 };
-
-#endif

@@ -82,8 +82,8 @@ class ARIANEEDITOR_API SArianeEditorLayerStack
         void OnPost3DPaintingComponentSelectionChanged();
         void UnbindDelegates();
         void BindDelegates();
-        void OnPostLayerStackChanged();
-        void OnPostCurrentLayerChanged();
+        void OnPostLayerStackHierarchyChanged();
+        void OnPostLayerStackSelectionChanged();
         void ModifyLayerStackAndSelectedLayers( UArianeLayerStack* LayerStack
                                               , const TArray<UArianeLayer*>& OldSelectedLayers
                                               , const TArray<UArianeLayer*>& NewSelectedLayers );

@@ -8,6 +8,7 @@
 #include "ArianeSegment.h"
 #include "ArianeObject.h"
 #include "ArianePath.h"
+#include "ArianeTag.h"
 
 FArianeObjectID::FArianeObjectID()
     : DrawingLayer( nullptr )
@@ -130,4 +131,44 @@ void
 FArianeSegmentID::InvalidateCache()
 {
     CachedSegment = nullptr;
+}
+
+///////////////////////// TagID
+
+FArianeTagID::FArianeTagID()
+    : DrawingLayer( nullptr )
+    , CachedTag( nullptr )
+{
+}
+
+FArianeTagID::FArianeTagID( FArianeTag* Tag )
+    : CachedTag( nullptr )
+{
+    DrawingLayer = Tag->GetOwner()->GetDrawingLayer();
+
+    Guid = Tag->GetGuid();
+
+    OwnerGuid = Tag->GetOwner()->GetGuid();
+}
+
+FArianeTag*
+FArianeTagID::GetTag()
+{
+    if( CachedTag == nullptr )
+    {
+        FArianeObject* OwnerObject = DrawingLayer->GetObject( OwnerGuid );
+
+        if( OwnerObject )
+        {
+            CachedTag = OwnerObject->GetTagByGuid( Guid );
+        }
+    }
+
+    return CachedTag;
+};
+
+void
+FArianeTagID::InvalidateCache()
+{
+    CachedTag = nullptr;
 }

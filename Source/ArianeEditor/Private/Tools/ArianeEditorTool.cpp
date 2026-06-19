@@ -14,6 +14,7 @@
 #include "ArianeSegment.h"
 #include "ArianeSegmentCubic.h"
 #include "ArianePath.h"
+#include "ArianeGroup.h"
 // Odyssey
 #include "IOdysseyStylusInputModule.h"
 #include "OdysseyStylusInputSettings.h"
@@ -1170,10 +1171,10 @@ UArianeEditorTool::MakePointQuadTree( FEditorViewportClient* ViewportClient
     {
         PointQuadTreeEntries.Reserve( 200 );
 
-        DrawingLayer->GetRootObject()->Traverse( [ ViewportClient
-                                                 , View
-                                                 , &ScreenRect
-                                                 , &PointQuadTreeEntries ]( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
+        DrawingLayer->GetRootGroup()->Traverse( [ ViewportClient
+                                                , View
+                                                , &ScreenRect
+                                                , &PointQuadTreeEntries ]( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
         {
             if( /*( iFocusedObjectsOnly == false ) || scene->GetCell()->ObjectHasFocus( object, traverseFlags )*/1 )
             {

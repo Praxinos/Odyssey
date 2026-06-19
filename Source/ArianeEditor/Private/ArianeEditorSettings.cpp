@@ -15,6 +15,7 @@ UArianeEditorSettings::UArianeEditorSettings( const FObjectInitializer& iObjectI
     , GridColor( FLinearColor::Gray )
     , GridXAxisColor( FLinearColor::Red )
     , GridYAxisColor( FLinearColor::Green )
+    , HUDForegroundColor ( FColor( 0, 169, 157, 255 ) ) // Odyssey's teal
 {
 }
 
@@ -127,4 +128,11 @@ void
 UArianeEditorSettings::SetDistanceToNewActor( double InDistanceToNewActor )
 {
     DistanceToNewActor = InDistanceToNewActor;
+}
+
+
+FColor
+UArianeEditorSettings::GetHUDForegroundColor() const
+{
+    return HUDForegroundColor;
 }

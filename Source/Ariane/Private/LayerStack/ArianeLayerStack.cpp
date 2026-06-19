@@ -43,7 +43,7 @@ void
 UArianeLayerStack::PreEditUndo()
 {
     // trigger an event
-    OnPreLayerStackChanged.Broadcast();
+    OnPreHierarchyChanged.Broadcast();
 
     Super::PreEditUndo();
 }
@@ -54,7 +54,7 @@ UArianeLayerStack::PostEditUndo()
     Super::PostEditUndo();
 
     // trigger an event
-    OnPostLayerStackChanged.Broadcast();
+    OnPostHierarchyChanged.Broadcast();
 }
 #endif
 
@@ -121,7 +121,7 @@ UArianeLayerStack::SelectLayers( const TArray<UArianeLayer*> LayerSelection
                                , bool bTriggerevent )
 {
     if( bTriggerevent )
-        OnPreLayerSelectionChanged.Broadcast();
+        OnPreSelectionChanged.Broadcast();
 
     if( bClearSelectionFirst )
         ClearLayerSelection( false );
@@ -132,19 +132,19 @@ UArianeLayerStack::SelectLayers( const TArray<UArianeLayer*> LayerSelection
     }
 
     if( bTriggerevent )
-        OnPostLayerSelectionChanged.Broadcast();
+        OnPostSelectionChanged.Broadcast();
 }
 
 void
 UArianeLayerStack::SelectLayer( UArianeLayer* Layer, bool bTriggerevent )
 {
     if( bTriggerevent )
-        OnPreLayerSelectionChanged.Broadcast();
+        OnPreSelectionChanged.Broadcast();
 
     SelectLayer_Private( Layer );
 
     if( bTriggerevent )
-        OnPostLayerSelectionChanged.Broadcast();
+        OnPostSelectionChanged.Broadcast();
 }
 
 void
@@ -172,7 +172,7 @@ void
 UArianeLayerStack::ClearLayerSelection( bool bTriggerEvent )
 {
     if( bTriggerEvent )
-        OnPreLayerSelectionChanged.Broadcast();
+        OnPreSelectionChanged.Broadcast();
 
     SelectedLayers.RemoveAll([] ( UArianeLayer* Layer )
                              {
@@ -182,7 +182,7 @@ UArianeLayerStack::ClearLayerSelection( bool bTriggerEvent )
                              });
 
     if( bTriggerEvent )
-        OnPostLayerSelectionChanged.Broadcast();
+        OnPostSelectionChanged.Broadcast();
 }
 
 const TArray<UArianeLayer*>&
@@ -206,12 +206,12 @@ UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder, 
     NewDrawingLayer->RegisterComponent();
 
     if( bTriggerEvent )
-        OnPreLayerStackChanged.Broadcast();
+        OnPreHierarchyChanged.Broadcast();
 
     ParentLayerFolder->AddChildLayer( NewDrawingLayer );
 
     if( bTriggerEvent )
-        OnPostLayerStackChanged.Broadcast();
+        OnPostHierarchyChanged.Broadcast();
 
     return NewDrawingLayer;
 }
@@ -231,36 +231,36 @@ UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder, b
     NewLayerFolder->RegisterComponent();
 
     if( bTriggerEvent )
-        OnPreLayerStackChanged.Broadcast();
+        OnPreHierarchyChanged.Broadcast();
 
     ParentLayerFolder->AddChildLayer( NewLayerFolder );
 
     if( bTriggerEvent )
-        OnPostLayerStackChanged.Broadcast();
+        OnPostHierarchyChanged.Broadcast();
 
     return NewLayerFolder;
 }
 
-UArianeLayerStack::FOnLayerStackChanged&
-UArianeLayerStack::OnPreLayerStackChangedDelegate()
+UArianeLayerStack::FOnHierarchyChanged&
+UArianeLayerStack::OnPreHierarchyChangedDelegate()
 {
-    return OnPreLayerStackChanged;
+    return OnPreHierarchyChanged;
 }
 
-UArianeLayerStack::FOnLayerStackChanged&
-UArianeLayerStack::OnPostLayerStackChangedDelegate()
+UArianeLayerStack::FOnHierarchyChanged&
+UArianeLayerStack::OnPostHierarchyChangedDelegate()
 {
-    return OnPostLayerStackChanged;
+    return OnPostHierarchyChanged;
 }
 
-UArianeLayerStack::FOnLayerSelectionChanged&
-UArianeLayerStack::OnPreLayerSelectionChangedDelegate()
+UArianeLayerStack::FOnSelectionChanged&
+UArianeLayerStack::OnPreSelectionChangedDelegate()
 {
-    return OnPreLayerSelectionChanged;
+    return OnPreSelectionChanged;
 }
 
-UArianeLayerStack::FOnLayerSelectionChanged&
-UArianeLayerStack::OnPostLayerSelectionChangedDelegate()
+UArianeLayerStack::FOnSelectionChanged&
+UArianeLayerStack::OnPostSelectionChangedDelegate()
 {
-    return OnPostLayerSelectionChanged;
+    return OnPostSelectionChanged;
 }

@@ -144,7 +144,7 @@ public:
 public:
     virtual ~FArianePath();
     FArianePath();
-    FArianePath( UArianeLayerDrawing* InDrawingLayer );
+    FArianePath( UArianeLayerDrawing* InDrawingLayer, const FName& InName );
 
 public:
     /** overriden from ArianeObject */

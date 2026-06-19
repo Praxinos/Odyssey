@@ -8,6 +8,7 @@
 // Ariane headers
 #include "ArianePainting3DComponent.h"
 #include "ArianePath.h"
+#include "ArianeGroup.h"
 #include "ArianeVertex.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayerDrawing.h"
@@ -405,15 +406,15 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
 
             DrawingLayer->Modify();
 
-            DrawingLayer->GetRootObject()->Traverse( [ this
-                                                     , ViewportClient
-                                                     , View
-                                                     , ErasureArea
-                                                     , DrawingLayer
-                                                     , Pixels
-                                                     , Width
-                                                     , &AddedPaths
-                                                     , &RemovedPaths ] ( FArianeObject* TravesedObject ) -> FArianeObject::TraversalReturnValue
+            DrawingLayer->GetRootGroup()->Traverse( [ this
+                                                    , ViewportClient
+                                                    , View
+                                                    , ErasureArea
+                                                    , DrawingLayer
+                                                    , Pixels
+                                                    , Width
+                                                    , &AddedPaths
+                                                    , &RemovedPaths ] ( FArianeObject* TravesedObject ) -> FArianeObject::TraversalReturnValue
             {
                 if( TravesedObject->GetClass() == FArianePath::StaticClass() )
                 {
@@ -743,7 +744,7 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
 
             if( ( SegmentAdditionFlags & ESegmentAdditionFlags::CreateNewPath ) == ESegmentAdditionFlags::CreateNewPath )
             {
-                CurrentPath = DrawingLayer->AllocPath( ChainPath->GetMaterial() );
+                CurrentPath = DrawingLayer->AllocPath( ChainPath->GetMaterial(), ChainPath->GetName() );
                 // for postprocessing. the path is not added to the parent yet
                 CurrentPath->SetParent( ChainPath->GetParent() );
 

@@ -441,6 +441,7 @@ FArianeEditorViewportToolkit::GetBaseToolkitName() const
 void
 FArianeEditorViewportToolkit::Exit()
 {
+    Editor->SetCurrentPainting3DComponent( nullptr );
     Editor->UnregisterTools();
     Editor->UnregisterTabSpawners();
 }

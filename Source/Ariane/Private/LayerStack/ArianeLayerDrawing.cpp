@@ -6,6 +6,7 @@
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianePath.h"
+#include "ArianeGroup.h"
 
 UArianeLayerDrawing::~UArianeLayerDrawing()
 {
@@ -33,10 +34,10 @@ UArianeLayerDrawing::UArianeLayerDrawing()
 }
 
 
-FArianeObject*
-UArianeLayerDrawing::GetRootObject()
+FArianeGroup*
+UArianeLayerDrawing::GetRootGroup()
 {
-    return RootObjectID.GetObject();
+    return static_cast<FArianeGroup*>(RootGroupID.GetObject());
 }
 
 void
@@ -55,8 +56,16 @@ UArianeLayerDrawing::PostLoad()
 {
     Super::PostLoad();
 
+    if( RootObjectID_DEPRECATED.GetObject() )
+    {
+        RootGroupID = FArianeObjectID( AllocGroup( "Root Group" ) );
+
+        // We set the parent, then FArianeObject::PostLoad will build the hierarchy
+        RootObjectID_DEPRECATED.GetObject()->SetParent( RootGroupID.GetObject() );
+    }
+
     // RootObjectID won't have its cache reset after Undoing, we have to force it.
-    RootObjectID.InvalidateCache();
+    RootGroupID.InvalidateCache();
 
     BindDelegates();
 
@@ -82,7 +91,7 @@ UArianeLayerDrawing::PostEditUndo()
     Super::PostEditUndo();
 
     // RootObjectID won't have its cache reset after Undoing, we have to force it.
-    RootObjectID.InvalidateCache();
+    RootGroupID.InvalidateCache();
 
     BindDelegates();
 
@@ -119,10 +128,10 @@ UArianeLayerDrawing::GetObject( const FGuid& InGuid )
 }
 
 FArianeObject*
-UArianeLayerDrawing::AllocObject()
+UArianeLayerDrawing::AllocObject( const FName& InName )
 {
     InstancedObjectsAccessRW.Lock();
-    InstancedObjects.Add( FInstancedStruct::Make<FArianeObject>( this ) );
+    InstancedObjects.Add( FInstancedStruct::Make<FArianeObject>( this, InName ) );
     InstancedObjectsAccessRW.Unlock();
 
     FArianeObject* NewObject = InstancedObjects.Last().GetMutablePtr<FArianeObject>();
@@ -130,11 +139,23 @@ UArianeLayerDrawing::AllocObject()
     return NewObject;
 }
 
-FArianePath*
-UArianeLayerDrawing::AllocPath( UMaterialInterface* InMaterialInterface )
+FArianeGroup*
+UArianeLayerDrawing::AllocGroup( const FName& InName )
 {
     InstancedObjectsAccessRW.Lock();
-    InstancedObjects.Add( FInstancedStruct::Make<FArianePath>( this ) );
+    InstancedObjects.Add( FInstancedStruct::Make<FArianeGroup>( this, InName ) );
+    InstancedObjectsAccessRW.Unlock();
+
+    FArianeGroup* NewGroup = InstancedObjects.Last().GetMutablePtr<FArianeGroup>();
+
+    return NewGroup;
+}
+
+FArianePath*
+UArianeLayerDrawing::AllocPath( UMaterialInterface* InMaterialInterface, const FName& InName )
+{
+    InstancedObjectsAccessRW.Lock();
+    InstancedObjects.Add( FInstancedStruct::Make<FArianePath>( this, InName ) );
     InstancedObjectsAccessRW.Unlock();
 
     FArianePath* NewPath = InstancedObjects.Last().GetMutablePtr<FArianePath>();
@@ -195,7 +216,8 @@ UArianeLayerDrawing::GetInstancedObjects()
 void
 UArianeLayerDrawing::Update( bool bInteractive )
 {
-    RootObjectID.GetObject()->Update( true );
+                                           // clear flags only if we are NOT interactive
+    RootGroupID.GetObject()->Update( true, bInteractive ? false : true );
 
     UpdateBounds();
 
@@ -211,18 +233,18 @@ UArianeLayerDrawing::OnRootObjectInvalidated()
 void
 UArianeLayerDrawing::BindDelegates()
 {
-    if( RootObjectID.GetObject() )
+    if( RootGroupID.GetObject() )
     {
-        RootObjectID.GetObject()->GetOnPostInvalidatedDelegate().AddUObject( this, &UArianeLayerDrawing::OnRootObjectInvalidated );
+        RootGroupID.GetObject()->GetOnPostInvalidatedDelegate().AddUObject( this, &UArianeLayerDrawing::OnRootObjectInvalidated );
     }
 }
 
 void
 UArianeLayerDrawing::UnbindDelegates()
 {
-    if( RootObjectID.GetObject() )
+    if( RootGroupID.GetObject() )
     {
-        RootObjectID.GetObject()->GetOnPostInvalidatedDelegate().RemoveAll( this );
+        RootGroupID.GetObject()->GetOnPostInvalidatedDelegate().RemoveAll( this );
     }
 }
 
@@ -234,7 +256,7 @@ UArianeLayerDrawing::ResetHierarchy()
     InstancedObjects.Empty();
     UsedMaterials.Empty();
 
-    RootObjectID = FArianeObjectID( AllocObject() );
+    RootGroupID = FArianeObjectID( AllocGroup( "Root Group" ) );
 
     BindDelegates();
 }
@@ -293,4 +315,30 @@ void
 UArianeLayerDrawing::SetDrawingOrientation( EArianeLayerDrawingOrientation InDrawingOrientation )
 {
     DrawingOrientation = InDrawingOrientation;
+}
+
+void
+UArianeLayerDrawing::ClearObjectSelection()
+{
+    SelectedObjects.Empty();
+}
+
+void
+UArianeLayerDrawing::SelectObject( FArianeObject* ObjectToSelect )
+{
+    SelectedObjects.Add( ObjectToSelect );
+
+    ObjectToSelect->SetSelected( true );
+}
+
+const TArray<FArianeObject*>&
+UArianeLayerDrawing::GetSelectedObjects() const
+{
+    return SelectedObjects;
+}
+
+TArray<FArianeObject*>&
+UArianeLayerDrawing::GetSelectedObjects()
+{
+    return SelectedObjects;
 }

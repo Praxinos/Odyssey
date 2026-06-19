@@ -14,6 +14,7 @@
 #include "RawIndexBuffer.h"
 // Ariane Headers
 #include "ArianePath.h" // for EArianePathLineType
+#include "ArianePainting3DComponentEditorInterface.h"
 // Odyssey Headers
 #include "OdysseyPalette.h"
 
@@ -113,6 +114,8 @@ public:
     FOnUpdateDelegate& OnPreUpdateDelegate();
     FOnUpdateDelegate& OnPostUpdateDelegate();
     void Update( bool bInteractive );
+    FColor GetHUDForegroundColor();
+    void SetEditorInterface( IArianePainting3DComponentEditorInterface* InEditorInterface );
 
 private:
     virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
@@ -133,4 +136,5 @@ protected:
     TArray<UMaterialInterface*> UsedMaterials;
     FOnUpdateDelegate OnPreUpdate;
     FOnUpdateDelegate OnPostUpdate;
+    IArianePainting3DComponentEditorInterface* EditorInterface;
 };

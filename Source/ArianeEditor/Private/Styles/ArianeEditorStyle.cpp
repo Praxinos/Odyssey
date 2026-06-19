@@ -129,6 +129,24 @@ FArianeEditorStyle::Init()
         .SetCheckedHoveredImage(*FAppStyle::Get().GetBrush("Level.LockedIcon16x"))
         .SetCheckedPressedImage(*FAppStyle::Get().GetBrush("Level.LockedIcon16x"))
     );
+
+    // Ariane Editor Scene Tree View
+    Set( "ArianeEditor.SceneTreeView.Paintgroup", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/paintgroup", Icon16x16 ) );
+    Set( "ArianeEditor.SceneTreeView.Path", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/path", Icon16x16 ) );
+    Set( "ArianeEditor.SceneTreeView.Group", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/group", Icon16x16 ) );
+    Set( "ArianeEditor.SceneTreeView.MenuIcon", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/MenuIcon", Icon16x16 ) );
+
+    Set("ArianeEditor.SceneTreeView.IsVisibleToggle", FCheckBoxStyle()
+        .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
+        .SetForegroundColor(FLinearColor(0, 0, 0, 0))
+        .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
+        .SetUncheckedImage(*FAppStyle::Get().GetBrush("Level.NotVisibleIcon16x"))
+        .SetUncheckedHoveredImage(*FAppStyle::Get().GetBrush("Level.NotVisibleIcon16x"))
+        .SetUncheckedPressedImage(*FAppStyle::Get().GetBrush("Level.NotVisibleIcon16x"))
+        .SetCheckedImage(FSlateNoResource())
+        .SetCheckedHoveredImage(*FAppStyle::Get().GetBrush("Level.VisibleIcon16x"))
+        .SetCheckedPressedImage(*FAppStyle::Get().GetBrush("Level.VisibleIcon16x"))
+    );
 }
 
 //static

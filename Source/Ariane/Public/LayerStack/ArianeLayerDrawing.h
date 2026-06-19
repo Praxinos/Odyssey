@@ -14,6 +14,7 @@
 #include "ArianeLayerDrawing.generated.h"
 
 struct FArianeObject;
+struct FArianeGroup;
 struct FArianePath;
 class UMaterialInterface;
 
@@ -50,20 +51,27 @@ public:
      * @brief Get the top-most vector object
      * @return the top-most vector object
      */
-    FArianeObject* GetRootObject();
+    FArianeGroup* GetRootGroup();
 
     /**
      * @brief Allocate a new path (in a FInstancedStruct)
      * @param InMaterialInterface a material interface or nullptr to use the default one
      * @return the new path
      */
-    FArianePath* AllocPath( UMaterialInterface* InMaterialInterface );
+    FArianePath* AllocPath( UMaterialInterface* InMaterialInterface, const FName& InName );
 
     /**
      * @brief Allocate a new basic object (in a FInstancedStruct)
      * @return the new object
      */
-    FArianeObject* AllocObject();
+    FArianeObject* AllocObject( const FName& InName );
+
+    /**
+     * @brief Allocate a new group (in a FInstancedStruct)
+     * @return the new group
+     */
+    FArianeGroup* AllocGroup( const FName& InName );
+
 
     /**
      * @brief Get all instanced objects
@@ -122,6 +130,10 @@ public:
      * @bEmptyFirst empty the output array first.
      */
     void GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials, bool bEmptyFirst );
+    void ClearObjectSelection();
+    void SelectObject( FArianeObject* ObjectToSelect );
+    const TArray<FArianeObject*>& GetSelectedObjects() const;
+    TArray<FArianeObject*>& GetSelectedObjects();
 
 protected:
     void BindDelegates();
@@ -137,8 +149,11 @@ public:
     mutable FCriticalSection InstancedObjectsAccessRW;
 
 protected:
+    UPROPERTY()
+    FArianeObjectID RootObjectID_DEPRECATED;
+
     UPROPERTY( EditAnywhere )
-    FArianeObjectID RootObjectID;
+    FArianeObjectID RootGroupID;
 
     UPROPERTY( EditAnywhere )
     EArianeLayerDrawingOrigin DrawingOrigin;
@@ -148,4 +163,7 @@ protected:
 
 protected:
     TMap<UMaterialInterface*, uint32> UsedMaterials;
+
+    // Temp
+    TArray<FArianeObject*> SelectedObjects;
 };

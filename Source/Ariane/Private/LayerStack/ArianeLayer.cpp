@@ -164,25 +164,9 @@ UArianeLayer::GetBounds()
 void
 UArianeLayer::Update( bool Interactive )
 {
-    OnPreUpdate.Broadcast( Interactive );
-
     // will call CalcBounds (nb: calling UMeshComponent::UpdateBounds() does not work sometimes, especially when then
     // path starts empty but this works.
     UpdateComponentToWorld();
-
-    OnPostUpdate.Broadcast( Interactive );
-}
-
-UArianeLayer::FOnUpdateDelegate&
-UArianeLayer::OnPreUpdateDelegate()
-{
-    return OnPreUpdate;
-}
-
-UArianeLayer::FOnUpdateDelegate&
-UArianeLayer::OnPostUpdateDelegate()
-{
-    return OnPostUpdate;
 }
 
 UArianeLayer::FOnTransformChanged&
