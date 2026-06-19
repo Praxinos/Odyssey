@@ -23,8 +23,9 @@ FInbetweenerStep::SetAligned( bool iIsAligned )
     {
         mFlags |= ALIGNED;
 
-        // force realigning now. Only needed for the first handle, hence the break
-        for( FInbetweenerTrajectory* trajectory : mTrajectoryArray )
+        // force realigning now. Only needed for the first handle
+        FInbetweenerTrajectory* trajectory = mTrajectoryArray.size() > 0 ? mTrajectoryArray[0] : nullptr;
+        if( trajectory )
         {
             if( trajectory->GetStep(0) == this )
             {
@@ -39,8 +40,6 @@ FInbetweenerStep::SetAligned( bool iIsAligned )
 
                 handle->Set( handle->GetDirection(), handle->GetLengthRatio() );
             }
-
-            break;
         }
     }
     else

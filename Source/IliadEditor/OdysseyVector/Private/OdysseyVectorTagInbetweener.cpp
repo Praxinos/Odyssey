@@ -756,8 +756,6 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
 
         return newBreakdown;
     }
-
-    return nullptr;
 }
 
 FInbetweenerBreakdown*
@@ -1311,16 +1309,15 @@ FOdysseyVectorTagInbetweener::UpdateMatrix()
 void
 FOdysseyVectorTagInbetweener::DeformObjectsAtSource()
 {
-    for( FInbetweenerBreakdown* breakdown : mBreakdownList )
+    // we do it only for the first breakdown
+    FInbetweenerBreakdown* breakdown = mBreakdownList.size() > 0 ? mBreakdownList.front() : nullptr;
+    if( breakdown )
     {
         FInbetweenerChart::Inbetween* inbetween = &breakdown->GetChart()->GetInbetweenBuffer().front();
 
         // deform the path according to grid geometry
         breakdown->GetGrid()->DeformObjects( inbetween
                                          , eInbetweenerPointPositionType::SourcePosition );
-
-        // we do it only for the first breakdown
-        break;
     }
 }
 /*
@@ -1790,7 +1787,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorCell* iDisplayedCell
                         iBLContext->fill_polygon( pt, 6 );
                     }
                 }
-                else
+                /*else
                 {
                     BLPoint pt[2] = { worldMatrix.map_point( localPointPositioni->x
                                                           , localPointPositioni->y )
@@ -1798,7 +1795,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorCell* iDisplayedCell
                                                           , localPointPositionn->y ) };
 
                     iBLContext->stroke_line( pt[0].x, pt[0].y, pt[1].x, pt[1].y );
-                }
+                }*/
             }
         }
     }

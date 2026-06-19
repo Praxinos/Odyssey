@@ -379,7 +379,7 @@ FOdysseyVectorPathTracer::MakeBezier( bool iForce )
             return true;
         }
     }
-    else // disabled for now. Testing some "perfect mode" thats generates 1 bezier everytime the direction changes
+    /*else // disabled for now. Testing some "perfect mode" thats generates 1 bezier everytime the direction changes
          // or everytime we can't find a better bezier
     {
         mBestBezier = mCandidateBezier;
@@ -402,7 +402,7 @@ FOdysseyVectorPathTracer::MakeBezier( bool iForce )
         {
             return true;
         }
-    }
+    }*/
 
     // if we never found any best bezier, then we use the last candidate
     if( mBestBezier.inited == false )

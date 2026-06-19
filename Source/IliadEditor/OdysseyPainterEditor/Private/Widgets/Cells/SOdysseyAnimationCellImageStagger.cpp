@@ -163,15 +163,12 @@ SOdysseyAnimationCellImageStagger::GetBehaviourBrush() const
     {
         case EOdysseyLayerCellImageStaggerBehaviour::Loop:
             return FOdysseyStyle::GetBrush("Animation.CellImageStagger.Behaviour.Loop");
-        break;
 
         case EOdysseyLayerCellImageStaggerBehaviour::PingPong:
             return FOdysseyStyle::GetBrush("Animation.CellImageStagger.Behaviour.PingPong");
-        break;
 
         case EOdysseyLayerCellImageStaggerBehaviour::Random:
             return FOdysseyStyle::GetBrush("Animation.CellImageStagger.Behaviour.Random");
-        break;
     }
     return nullptr;
 }
@@ -318,11 +315,9 @@ SOdysseyAnimationCellImageStagger::GetStaggerLength() const
         case EOdysseyLayerCellImageStaggerBehaviour::Loop:
         case EOdysseyLayerCellImageStaggerBehaviour::Random:
             return GetClampedReach();
-        break;
 
         case EOdysseyLayerCellImageStaggerBehaviour::PingPong:
             return GetClampedReach() - 1;
-        break;
     }
     return INDEX_NONE;
 }

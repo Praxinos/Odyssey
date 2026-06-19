@@ -20,6 +20,8 @@
 
 #include "hpdf.h"
 
+#include <setjmp.h>
+
 #define LOCTEXT_NAMESPACE "ExportPDFExporter"
 
 // Disable warning "interaction between '_setjmp' and C++ object destruction is non-portable"

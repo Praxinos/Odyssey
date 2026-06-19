@@ -1073,13 +1073,12 @@ void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylu
 
     mPacketQueue.Enqueue(packetCopyMac);
     return;
-#endif
-// FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
-
+#else// FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
     if (iPacket.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
         ClearQueue();
 
     mPacketQueue.Enqueue(iPacket);
+#endif
 }
 
 //--------------------------------------------------------------------------------------

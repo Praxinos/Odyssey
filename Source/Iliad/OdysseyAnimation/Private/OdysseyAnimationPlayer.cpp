@@ -290,7 +290,6 @@ UOdysseyAnimationPlayer::ApplyPreBehaviour(FFrameTime iFrame) const
         {
             return FFrameTime(Animation->GetFrameRange().GetLowerBoundValue());
         }
-        break;
 
         case EOdysseyAnimationPlayerPostBehaviour::Loop:
         {
@@ -304,7 +303,6 @@ UOdysseyAnimationPlayer::ApplyPreBehaviour(FFrameTime iFrame) const
 
             return rightBound - ((leftBound - iFrame) % duration);
         }
-        break;
     }
     return iFrame;
 }
@@ -321,7 +319,6 @@ UOdysseyAnimationPlayer::ApplyPostBehaviour(FFrameTime iFrame) const
         {
             return FFrameTime(Animation->GetFrameRange().GetUpperBoundValue());
         }
-        break;
 
         case EOdysseyAnimationPlayerPostBehaviour::Loop:
         {
@@ -333,7 +330,6 @@ UOdysseyAnimationPlayer::ApplyPostBehaviour(FFrameTime iFrame) const
 
             return (iFrame - leftBound) % duration + leftBound;
         }
-        break;
     }
 
     return iFrame;

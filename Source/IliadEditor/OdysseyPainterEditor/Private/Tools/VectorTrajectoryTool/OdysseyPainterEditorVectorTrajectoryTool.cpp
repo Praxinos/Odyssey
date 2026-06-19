@@ -26,12 +26,12 @@
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "InbetweenerTag/InbetweenerRoute.h"
-#include "undo/OdysseyVectorUndoTagInbetweenerRouteAlter.h"
-#include "undo/OdysseyVectorUndoTagInbetweenerTrajectoryAlter.h"
-#include "undo/OdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint.h"
-#include "undo/OdysseyVectorUndoTagInbetweenerRouteAdd.h"
-#include "undo/OdysseyVectorUndoTagInbetweenerRouteRemove.h"
-#include "undo/OdysseyVectorUndoTagInbetweenerStepAlign.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerRouteAlter.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerTrajectoryAlter.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerRouteAdd.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerRouteRemove.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerStepAlign.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
