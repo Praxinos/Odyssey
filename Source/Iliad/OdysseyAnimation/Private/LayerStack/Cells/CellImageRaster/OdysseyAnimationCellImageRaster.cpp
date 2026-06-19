@@ -235,7 +235,6 @@ UOdysseyAnimationCellImageRaster::GetImageRenderingMutex() const
     return &mImageRenderingMutex;
 }
 
-
 void
 UOdysseyAnimationCellImageRaster::Serialize(FArchive& Ar)
 {

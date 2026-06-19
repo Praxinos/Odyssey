@@ -9,6 +9,9 @@ bool
 FOdysseyTextureLayerImageRasterImport::Read( UOdysseyTextureLayerImageRaster* iTextureLayerImageRaster
                                             , FArchive &Ar )
 {
+    if (Ar.IsCriticalError())
+        return true;
+
     uint64 start = Ar.Tell();
     uint64 end = Ar.TotalSize();
     if (end - start < 4 + 8) //check if we can read chunkID and chunkLen
@@ -21,6 +24,19 @@ FOdysseyTextureLayerImageRasterImport::Read( UOdysseyTextureLayerImageRaster* iT
     // Reads the first chunk (FOdysseyFile::Texture::CHUNK_TEXTURELAYERIMAGERASTER)
     Ar << chunkID;
     Ar << chunkLen;
+
+    //PATCH:
+    // If we read out of the Linker bounds (which is not the same as the Archive bounds)
+    // The archive generates a CriticalError
+    // We don't have access to the linker bounds, so we can only rely on the critical error state
+    // We then need to seek to start again, like nothing ever happened
+    // And clear the Critical Error state
+    if (Ar.IsCriticalError())
+    {
+        Ar.Seek( start );
+        Ar.ClearCriticalError();
+        return true;
+    }
 
     chunkEnd = Ar.Tell() + chunkLen;
 
