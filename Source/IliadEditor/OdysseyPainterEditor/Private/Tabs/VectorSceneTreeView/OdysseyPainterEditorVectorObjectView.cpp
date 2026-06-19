@@ -67,7 +67,9 @@ UOdysseyPainterEditorVectorObjectView::ImportParamFromOtherView( UOdysseyPainter
 void
 UOdysseyPainterEditorVectorObjectView::ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
-    for( FOdysseyVectorObject* focusedObject : iFocusedObjectList )
+    // Only first
+    FOdysseyVectorObject* focusedObject = iFocusedObjectList.size() > 0 ? iFocusedObjectList.front() : nullptr;
+    if( focusedObject )
     {
         // Category "Identity"
         Name = focusedObject->GetName();
@@ -114,9 +116,6 @@ UOdysseyPainterEditorVectorObjectView::ImportParam( const std::list<FOdysseyVect
             BackgroundPaletteSelection.OdysseyPalette = nullptr;
             BackgroundPaletteSelection.OdysseyPaletteEntryColor = nullptr;
         }
-
-
-        break; // only one
     }
 }
 

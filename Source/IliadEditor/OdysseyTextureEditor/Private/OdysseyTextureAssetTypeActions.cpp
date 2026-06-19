@@ -4,7 +4,7 @@
 #include "OdysseyTextureAssetTypeActions.h"
 
 #include "ContentBrowserModule.h"
-#include "Engine/texture2D.h"
+#include "Engine/Texture2D.h"
 #include "IContentBrowserSingleton.h"
 #include "Interfaces/ITextureEditorModule.h"
 

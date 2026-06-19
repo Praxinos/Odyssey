@@ -1079,13 +1079,14 @@ IOdysseyViewportDrawingEditorAdapter::OnPacket(const UE::StylusInput::FStylusInp
 
     mPacketQueue.Enqueue(packetCopy);
     return;
-#endif
 // FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
+#else
 
     if (iPacket.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
         ClearQueue();
 
     mPacketQueue.Enqueue(iPacket);
+#endif
 }
 
 bool

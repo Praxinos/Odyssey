@@ -1200,16 +1200,12 @@ SOdysseyAnimationCells::GetPreBehaviourBrush() const
     {
         case EOdysseyLayerImagePostBehaviour::None:
             return FOdysseyStyle::GetBrush("Animation.Layer.PreBehaviour.None");
-        break;
         case EOdysseyLayerImagePostBehaviour::Hold:
             return FOdysseyStyle::GetBrush("Animation.Layer.PreBehaviour.Hold");
-        break;
         case EOdysseyLayerImagePostBehaviour::Loop:
             return FOdysseyStyle::GetBrush("Animation.Layer.PreBehaviour.Loop");
-        break;
         case EOdysseyLayerImagePostBehaviour::PingPong:
             return FOdysseyStyle::GetBrush("Animation.Layer.PreBehaviour.PingPong");
-        break;
     }
     return nullptr;
 }
@@ -1223,16 +1219,12 @@ SOdysseyAnimationCells::GetPostBehaviourBrush() const
     {
         case EOdysseyLayerImagePostBehaviour::None:
             return FOdysseyStyle::GetBrush("Animation.Layer.PostBehaviour.None");
-        break;
         case EOdysseyLayerImagePostBehaviour::Hold:
             return FOdysseyStyle::GetBrush("Animation.Layer.PostBehaviour.Hold");
-        break;
         case EOdysseyLayerImagePostBehaviour::Loop:
             return FOdysseyStyle::GetBrush("Animation.Layer.PostBehaviour.Loop");
-        break;
         case EOdysseyLayerImagePostBehaviour::PingPong:
             return FOdysseyStyle::GetBrush("Animation.Layer.PostBehaviour.PingPong");
-        break;
     }
     return nullptr;
 }

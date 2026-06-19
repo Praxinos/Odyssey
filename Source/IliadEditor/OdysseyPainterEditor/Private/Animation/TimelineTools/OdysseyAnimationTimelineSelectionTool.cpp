@@ -31,7 +31,6 @@ FOdysseyAnimationTimelineSelectionTool::OnMouseButtonDown(const FMouseEventParam
             mTimelineCellSelection->SetSelectedCells({});
             return FReply::Handled();
         }
-        break;
 
         case EMouseEventOrigin::CellsTimeline:
         {
@@ -42,7 +41,6 @@ FOdysseyAnimationTimelineSelectionTool::OnMouseButtonDown(const FMouseEventParam
             else
                 return OnDefaultSelectionMouseButtonDown(iParams);
         }
-        break;
     }
 
     return FReply::Unhandled();

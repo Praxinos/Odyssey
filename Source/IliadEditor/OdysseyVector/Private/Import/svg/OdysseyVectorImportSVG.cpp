@@ -50,7 +50,6 @@ static bool IsComma( TCHAR iChar )
     {
         case TCHAR(','):
             return true;
-        break;
 
         default :
         break;
@@ -69,7 +68,6 @@ static bool IsWhiteSpace( TCHAR iChar )
         case TCHAR(0xD)  :
         case TCHAR(0x20) :
             return true;
-        break;
 
         default :
         break;
@@ -333,7 +331,6 @@ static bool IsPathCommand( const TCHAR* iCommandName )
         case TCHAR('Z'):
         case TCHAR('z'):
             return true;
-        break;
 
         default: break;
     }
@@ -360,35 +357,27 @@ TCHAR* FOdysseyVectorImportSVG::PathProcessAttributeDCommand( const TCHAR* iComm
     {
         case TCHAR('M'):
             return PathProcessAttributeDCommandM( iCommandArgs, true );
-        break;
 
         case TCHAR('m'):
             return PathProcessAttributeDCommandM( iCommandArgs, false );
-        break;
 
         case TCHAR('C'):
             return PathProcessAttributeDCommandC( iCommandArgs, true );
-        break;
 
         case TCHAR('c'):
             return PathProcessAttributeDCommandC( iCommandArgs, false );
-        break;
 
         case TCHAR('S'):
             return PathProcessAttributeDCommandS( iCommandArgs, true );
-        break;
 
         case TCHAR('s'):
             return PathProcessAttributeDCommandS( iCommandArgs, false );
-        break;
 
         case TCHAR('Z'):
             return PathProcessAttributeDCommandZ( iCommandArgs, true );
-        break;
 
         case TCHAR('z'):
             return PathProcessAttributeDCommandZ( iCommandArgs, false );
-        break;
 
         // unsupported commands
         case TCHAR('L'):

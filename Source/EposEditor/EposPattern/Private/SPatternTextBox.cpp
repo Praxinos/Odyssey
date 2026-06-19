@@ -3,7 +3,7 @@
 
 #include "SPatternTextBox.h"
 
-#include "Brushes/SlatecolorBrush.h"
+#include "Brushes/SlateColorBrush.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "PropertyHandle.h"
 #include "Styling/StyleColors.h"

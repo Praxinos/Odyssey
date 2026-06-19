@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-#include "proxies/OdysseyBrushColor.h"
+#include "Proxies/OdysseyBrushColor.h"
 #include "OdysseyPainterEditorFunctionLibrary.generated.h"
 
 class UOdysseyBrushAssetBase;

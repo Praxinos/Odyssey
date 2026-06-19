@@ -208,7 +208,6 @@ UOdysseyPainterEditorVectorCutTool::GenerateMask( bool iStroke )
 
                 return mPickHUD->GenerateRectangleMask( rect, iStroke );
             }
-            break;
 
             case EOdysseyShapeType::kEllipse:
             {
@@ -219,17 +218,14 @@ UOdysseyPainterEditorVectorCutTool::GenerateMask( bool iStroke )
                                                    , diagonal.Distance()
                                                    , iStroke );
             }
-            break;
 
             case EOdysseyShapeType::kLine:
             {
                 return mPickHUD->GenerateLineMask( mPointArray[0], mPointArray[1] );
             }
-            break;
 
             case EOdysseyShapeType::kFreehand:
                 return mPickHUD->GenerateFreehandMask( mPointArray, iStroke );
-            break;
 
             default:
             break;

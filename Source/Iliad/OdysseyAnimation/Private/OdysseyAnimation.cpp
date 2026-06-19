@@ -296,13 +296,11 @@ UOdysseyAnimation::GetLeftBoundValue() const
             FInt32Range frameRange = mLayerStack->GetFrameRange();
             return frameRange.GetLowerBoundValue();
         }
-        break;
 
         case EOdysseyAnimationBoundMode::Manual:
         {
             return FMath::Max(0, LeftBound);
         }
-        break;
     }
     return LeftBound;
 }
@@ -320,13 +318,11 @@ UOdysseyAnimation::GetRightBoundValue() const
             FInt32Range frameRange = mLayerStack->GetFrameRange();
             return frameRange.GetUpperBoundValue();
         }
-        break;
 
         case EOdysseyAnimationBoundMode::Manual:
         {
             return FMath::Max(0, RightBound);
         }
-        break;
     }
     return RightBound;
 }

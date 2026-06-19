@@ -284,7 +284,6 @@ FOdysseyVectorBucket::GetColor()
                 return mSolidColor;
             }
         }
-        break;
 
         case eBucketColorMode::SolidColor:
         return mSolidColor;
