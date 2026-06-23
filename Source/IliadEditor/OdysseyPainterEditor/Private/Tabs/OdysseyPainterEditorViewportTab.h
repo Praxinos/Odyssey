@@ -70,18 +70,6 @@ protected:
     virtual bool OnViewportKeyUp(const FKey& iKey);
 
 protected:
-    //Shortcuts
-    virtual void OnResetViewportPosition();
-    virtual void OnResetViewportRotation();
-    virtual void OnRotateViewportLeft();
-    virtual void OnRotateViewportRight();
-    virtual void OnFlipViewportHorizontally();
-    virtual void OnFlipViewportVertically();
-    virtual void OnSetZoom(double iZoomValue);
-    virtual void OnSetZoomFitScreen();
-    virtual void OnZoomInExponential();
-    virtual void OnZoomOutExponential();
-
     //HUD
     //virtual void OnViewportSizeChanged(FViewport* iViewport, uint32 iUnused);
 

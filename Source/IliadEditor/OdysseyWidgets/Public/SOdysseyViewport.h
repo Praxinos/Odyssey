@@ -5,18 +5,65 @@
 
 #include "CoreMinimal.h"
 #include "Layout/Visibility.h"
+#include "NamingTokens.h"
+#include "UObject/TemplateString.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/SViewport.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Input/SSpinBox.h"
 
+#include "SOdysseyViewport.generated.h"
+
 class FExtender;
 class FOdysseySceneViewport;
 class SScrollBar;
+class SOdysseyViewport;
 class SViewport;
 class UTexture2D;
 class UTexture;
 
+
+/** Context object that lets callers supply viewport data when evaluating tokens */
+UCLASS()
+class UOdysseyViewportNamingTokensContext
+    : public UObject
+{
+    GENERATED_BODY()
+
+public:
+    /** The animation asset to use when evaluating tokens */
+    TWeakPtr<SOdysseyViewport> ViewportWidget;
+};
+
+//---
+
+/* Naming Tokens related to Odyssey Animation */
+UCLASS(MinimalAPI, NotBlueprintable)
+class UOdysseyViewportNamingTokens
+    : public UNamingTokens
+{
+    GENERATED_BODY()
+
+protected:
+    // ~Begin UNamingTokens
+    virtual void OnCreateDefaultTokens(TArray<FNamingTokenData>& Tokens) override;
+    virtual void OnPreEvaluate_Implementation(const FNamingTokensEvaluationData& InEvaluationData) override;
+    virtual void OnPostEvaluate_Implementation() override;
+    // ~End UNamingTokens
+
+public:
+    UOdysseyViewportNamingTokens();
+
+    static ODYSSEYWIDGETS_API FString TokenNamespace;
+
+private:
+    TOptional<FIntVector2> GetMousePositionInCanvas( TWeakPtr<SOdysseyViewport> iWeakViewportWidget ) const;
+    TOptional<FColor> GetColorAtPosition( TWeakPtr<SOdysseyViewport> iWeakViewportWidget ) const;
+
+private:
+    /** The current context to use when evaluating tokens */
+    TObjectPtr<UOdysseyViewportNamingTokensContext> Context;
+};
 
 /////////////////////////////////////////////////////
 // SOdysseyViewport
@@ -27,6 +74,10 @@ public:
         {}
         SLATE_ATTRIBUTE(UTexture*, Texture)
         SLATE_ARGUMENT(TSharedPtr<FExtender>, OptionExtender)
+        SLATE_ATTRIBUTE(float, RotationStep)                        //PATCH: see comment in OdysseyPainterEditor\Public\OdysseyPainterEditorSettings.h
+        SLATE_ATTRIBUTE(float, ZoomStep)                            //PATCH
+        SLATE_ATTRIBUTE(FTemplateString, StatusbarTemplateString)   //PATCH
+        SLATE_ATTRIBUTE(TArray<UObject*>, NamingTokensContexts)     //PATCH
     SLATE_END_ARGS()
 
 public:
@@ -35,6 +86,9 @@ public:
 
 public:
     // Public API
+
+    /* Get the command list */
+    TSharedPtr<FUICommandList> GetCommandList();
 
     /* Ge the texture the viewport is displaying */
     UTexture* GetTexture() const;
@@ -146,10 +200,10 @@ private:
     void            FitToViewport();
 
     /* Get the Vertical Scrollbar Widget */
-    TSharedPtr<SScrollBar>              GetVerticalScrollBar()     const;
+    TSharedPtr<SScrollBar>      GetVerticalScrollBar()     const;
 
     /* Get the Horizontal Scrolbar Widget */
-    TSharedPtr<SScrollBar>              GetHorizontalScrollBar()   const;
+    TSharedPtr<SScrollBar>      GetHorizontalScrollBar()   const;
 
     /* Returns the expected translation from the given scrollbars offsets */
     FVector2D                   GetTranslationFromSlidersOffsets(float InScrollOffsetFractionX, float InScrollOffsetFractionY);
@@ -176,6 +230,9 @@ private:
     /* Return the align with viewport option state */
     bool            IsAlignWithViewportChecked() const;
 
+    /* Return the status bar text to display */
+    FText           GetStatusbarText() const;
+
     /* Return the Texture Infos to display */
     FText           GetTextureInfosValue() const;
 
@@ -185,37 +242,46 @@ private:
     /* Handles the vertical scrollbar scroll event */
     void            HandleVerticalScrollBarScrolled(float InScrollOffsetFraction);
 
-    /* Handles the zoom menu option (X %) clicked event */
-    void            HandleZoomMenuEntryClicked( double ZoomValue );
-
-    /* Handles the zoom menu Fit To Viewport option clicked event */
-    void            HandleZoomMenuFitClicked();
-
     /* Handles the align with viewport option when flipping */
     void            HandleAlignWithViewportClicked();
 
     /* Handles the zoom slider changed event */
     void            HandleZoomSliderChanged( float NewValue );
 
-    /* Handles Rotate Left button clicked event */
-    void            HandleRotationLeft();
-
-    /* Handles Rotate Right button clicked event */
-    void            HandleRotationRight();
-
-    /* Handles Flip X clicked event */
-    void            HandleFlipHorizontal(ECheckBoxState iState);
-
-    /* Handles Flip Y clicked event */
-    void            HandleFlipVertical(ECheckBoxState iState);
-
     /* Handles Viewport Reset button clicked event */
-    void            HandleViewportReset();
+    //void            HandleViewportReset();
 
     /* Handles Rotation Spinbox value changed event */
     void            HandleRotationChanged( int newRotation );
 
 private:
+    //Shortcuts
+    virtual void OnResetViewport1On1();
+    virtual void OnResetViewportFit();
+    virtual void OnResetViewportAll();
+    virtual void OnResetViewportPosition();
+    virtual void OnResetViewportRotation();
+    virtual void OnResetViewportZoom();
+
+    virtual void OnFlipViewportHorizontally();
+    virtual void OnFlipViewportVertically();
+    virtual bool IsHorizontallyFlipped();
+    virtual bool IsVerticallyFlipped();
+
+    virtual void OnRotateViewportLeft();
+    virtual void OnRotateViewportRight();
+    virtual void OnSetRotation( float iAngleRadians );
+    virtual bool IsRotationEqual( float iAngleRadians );
+
+    virtual void OnSetZoom( float iZoomValue );
+    virtual bool IsZoomEqual( float iZoomValue );
+    virtual void OnZoomInExponential();
+    virtual void OnZoomOutExponential();
+    virtual void OnSetZoomFitScreen();
+
+private:
+    TSharedPtr<FUICommandList>          mCommandList;
+
     // Private Member Data
     TAttribute<UTexture*>               mTexture;
     TWeakPtr<FViewportClient>           mViewportClient;
@@ -223,20 +289,24 @@ private:
     TSharedPtr<SViewport>               mViewportWidget;
     TSharedPtr<SScrollBar>              mVerticalScrollBar;
     TSharedPtr<SScrollBar>              mHorizontalScrollBar;
-    TSharedPtr<SSpinBox<float>>         mZoomSpinBox;
     FTransform2D                        mTransform;
     bool                                mIsFitToViewport;
     bool                                mAlignWithViewport; // Keep the center of the viewport at the same position when flipping it when on.
 
     /* The scale applied to the viewport */
     double                              mZoom;
+    TAttribute<float>                   mZoomStep = 0.1f;
 
     /* The rotation (in radians) applied to the viewport */
     double                              mRotation;
+    TAttribute<float>                   mRotationStep = 15.f;
 
     /* The translation applied to the viewport */
     FVector2D                           mPan;
 
     /* (0,0) if no flip, (1,0) if flip X, (0,1) if flip Y, (1,1) if both axis are flipped */
     FVector2D                           mFlipStateUV;
+
+    TAttribute<FTemplateString>         mStatusbarTemplateString;
+    TAttribute<TArray<UObject*>>        mNamingTokensContexts;
 };

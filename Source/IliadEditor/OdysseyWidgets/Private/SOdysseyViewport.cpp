@@ -4,9 +4,17 @@
 #include "SOdysseyViewport.h"
 
 #include "ObjectEditorUtils.h"
+#include "Engine/Engine.h"
 #include "Engine/Texture.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Framework/MultiBox/SToolBarButtonBlock.h"
+#include "ImageUtils.h"
+#include "ISettingsModule.h"
+#include "Modules/ModuleManager.h"
+#include "NamingTokensEngineSubsystem.h"
+#include "SNamingTokensEditableTextBox.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SScrollBar.h"
@@ -19,8 +27,9 @@
 #include "Widgets/Input/SSlider.h"
 
 #include "FOdysseySceneViewport.h"
-#include "OdysseyStyle.h"
 #include "Math/OdysseyMathUtils.h"
+#include "OdysseyStyle.h"
+#include "OdysseyViewportCommands.h"
 
 #include <ULIS>
 
@@ -28,15 +37,204 @@
 
 #define MinZoom 0.01
 #define MaxZoom 200.0
-#define NeutralZoom 1.0
-#define ZoomStep 0.025
-#define RotationStep 15
 
 #define ScrollbarThumbRatio 0.1f
 #define ScrollbarSpaceRatio (1.f - ScrollbarThumbRatio)
 
 
 #define LOCTEXT_NAMESPACE "Widgets"
+
+//---
+
+/*static*/ FString UOdysseyViewportNamingTokens::TokenNamespace = TEXT( "odysseyViewport2d" );
+
+UOdysseyViewportNamingTokens::UOdysseyViewportNamingTokens()
+{
+    Namespace = TokenNamespace;
+    NamespaceDisplayName = LOCTEXT( "namespace.label", "Odyssey Viewport 2D" );
+}
+
+
+TOptional<FIntVector2>
+UOdysseyViewportNamingTokens::GetMousePositionInCanvas( TWeakPtr<SOdysseyViewport> iWeakViewportWidget ) const
+{
+    SOdysseyViewport* viewportWidget = iWeakViewportWidget.Pin().Get();
+    if( !viewportWidget )
+        return TOptional<FIntVector2>();
+
+    FVector2D cursorPos = FSlateApplication::Get().GetCursorPos();
+    if( !viewportWidget->GetViewportWidget()->GetTickSpaceGeometry().IsUnderLocation( cursorPos ) )
+        return TOptional<FIntVector2>();
+
+    FVector2D cursorPosInViewport = viewportWidget->GetTickSpaceGeometry().AbsoluteToLocal( cursorPos );
+    FVector2D cursorPosInCanvas = viewportWidget->ToLocal( cursorPosInViewport );
+    FIntVector2 cursorPosInCanvasInt( FMath::FloorToInt( cursorPosInCanvas.X ), FMath::FloorToInt( cursorPosInCanvas.Y ) );
+
+    cursorPosInCanvasInt += FIntVector2( viewportWidget->GetTexture()->GetSurfaceWidth() / 2, viewportWidget->GetTexture()->GetSurfaceHeight() / 2 );
+
+    return cursorPosInCanvasInt;
+}
+
+TOptional<FColor>
+UOdysseyViewportNamingTokens::GetColorAtPosition( TWeakPtr<SOdysseyViewport> iWeakViewportWidget ) const
+{
+    SOdysseyViewport* viewportWidget = iWeakViewportWidget.Pin().Get();
+    if( !viewportWidget )
+        return TOptional<FColor>();
+
+    UTexture* texture = viewportWidget->GetTexture();
+    if( !texture )
+        return TOptional<FColor>();
+
+    UTextureRenderTarget2D* renderTarget = Cast<UTextureRenderTarget2D>( texture ); //TODO: should also test UTexture2D but FImageUtils::GetTexture2DImage() does nothing -_-
+    if( !renderTarget )
+        return TOptional<FColor>();
+
+    TOptional<FIntVector2> mousePosition = GetMousePositionInCanvas( iWeakViewportWidget );
+    if( !mousePosition.IsSet() )
+        return TOptional<FColor>();
+
+    if( mousePosition->X < 0 || mousePosition->X >= renderTarget->GetSurfaceWidth()
+        || mousePosition->Y < 0 || mousePosition->Y >= renderTarget->GetSurfaceHeight() )
+        return TOptional<FColor>();
+
+    static FImage image;
+    FIntRect rect( mousePosition->X, mousePosition->Y, mousePosition->X + 1, mousePosition->Y + 1 );
+    FImageUtils::GetRenderTargetImage( renderTarget, image, rect );
+    FLinearColor linearColor = image.GetOnePixelLinear( 0, 0 );
+    FColor color = linearColor.ToFColor( true );
+    //FColor color = linearColor.ToFColor( false );
+
+    return color;
+}
+
+void
+UOdysseyViewportNamingTokens::OnCreateDefaultTokens( TArray<FNamingTokenData>& Tokens ) //override
+{
+    Super::OnCreateDefaultTokens( Tokens );
+
+    FNamingTokenData CursorXInCanvasToken;
+    CursorXInCanvasToken.TokenKey = TEXT( "x" );
+    CursorXInCanvasToken.DisplayName = LOCTEXT( "CursorXInCanvasToken", "Cursor X position in canvas" );
+    CursorXInCanvasToken.TokenProcessorNative.BindLambda( [this]()
+                                                          {
+                                                              if( !Context )
+                                                                  return FText::FromString( TEXT( "-" ) );
+                                                                  //return FText::GetEmpty();
+
+                                                              TOptional<FIntVector2> mousePositionInCanvas = GetMousePositionInCanvas( Context->ViewportWidget );
+                                                              if( !mousePositionInCanvas.IsSet() )
+                                                                  return FText::FromString( TEXT( "-" ) );
+                                                                  //return FText::GetEmpty();
+
+                                                              return FText::AsNumber( mousePositionInCanvas->X );
+                                                          } );
+    Tokens.Add( CursorXInCanvasToken );
+
+    //-
+
+    FNamingTokenData CursorYInCanvasToken;
+    CursorYInCanvasToken.TokenKey = TEXT( "y" );
+    CursorYInCanvasToken.DisplayName = LOCTEXT( "CursorYInCanvasToken", "Cursor Y position in canvas" );
+    CursorYInCanvasToken.TokenProcessorNative.BindLambda( [this]()
+                                                         {
+                                                              if( !Context )
+                                                                  return FText::FromString( TEXT( "-" ) );
+
+                                                              TOptional<FIntVector2> mousePositionInCanvas = GetMousePositionInCanvas( Context->ViewportWidget );
+                                                              if( !mousePositionInCanvas.IsSet() )
+                                                                  return FText::FromString( TEXT( "-" ) );
+
+                                                              return FText::AsNumber( mousePositionInCanvas->Y );
+                                                         } );
+    Tokens.Add( CursorYInCanvasToken );
+
+    //-
+
+    FNamingTokenData RedAtPositionToken;
+    RedAtPositionToken.TokenKey = TEXT( "r" );
+    RedAtPositionToken.DisplayName = LOCTEXT( "CanvasRedToken", "Canvas RED component at cursor position" );
+    RedAtPositionToken.TokenProcessorNative.BindLambda( [this]()
+                                                        {
+                                                            if( !Context )
+                                                                return FText::FromString( TEXT( "-" ) );
+
+                                                            TOptional<FColor> color = GetColorAtPosition( Context->ViewportWidget );
+                                                            if( !color.IsSet() )
+                                                                return FText::FromString( TEXT( "-" ) );
+
+                                                            return FText::AsNumber( color->R );
+                                                            //return FText::FromString( color->ToString() );
+                                                            //return FText::Format( LOCTEXT( "viewport.status-bar.pixel-color", "RGBA: {0}, {1}, {2}, {3}" ), FText::AsNumber( color.R ), FText::AsNumber( color.G ), FText::AsNumber( color.B ), FText::AsNumber( color.A ) );
+                                                        } );
+    Tokens.Add( RedAtPositionToken );
+
+    FNamingTokenData GreenAtPositionToken;
+    GreenAtPositionToken.TokenKey = TEXT( "g" );
+    GreenAtPositionToken.DisplayName = LOCTEXT( "CanvasGreenToken", "Canvas GREEN component at cursor position" );
+    GreenAtPositionToken.TokenProcessorNative.BindLambda( [this]()
+                                                          {
+                                                              if( !Context )
+                                                                  return FText::FromString( TEXT( "-" ) );
+
+                                                              TOptional<FColor> color = GetColorAtPosition( Context->ViewportWidget );
+                                                              if( !color.IsSet() )
+                                                                  return FText::FromString( TEXT( "-" ) );
+
+                                                              return FText::AsNumber( color->G );
+                                                          } );
+    Tokens.Add( GreenAtPositionToken );
+
+    FNamingTokenData BlueAtPositionToken;
+    BlueAtPositionToken.TokenKey = TEXT( "b" );
+    BlueAtPositionToken.DisplayName = LOCTEXT( "CanvasBlueToken", "Canvas BLUE component at cursor position" );
+    BlueAtPositionToken.TokenProcessorNative.BindLambda( [this]()
+                                                          {
+                                                              if( !Context )
+                                                                  return FText::FromString( TEXT( "-" ) );
+
+                                                              TOptional<FColor> color = GetColorAtPosition( Context->ViewportWidget );
+                                                              if( !color.IsSet() )
+                                                                  return FText::FromString( TEXT( "-" ) );
+
+                                                              return FText::AsNumber( color->B );
+                                                          } );
+    Tokens.Add( BlueAtPositionToken );
+
+    FNamingTokenData AlphaAtPositionToken;
+    AlphaAtPositionToken.TokenKey = TEXT( "a" );
+    AlphaAtPositionToken.DisplayName = LOCTEXT( "CanvasAlphaToken", "Canvas ALPHA component at cursor position" );
+    AlphaAtPositionToken.TokenProcessorNative.BindLambda( [this]()
+                                                          {
+                                                              if( !Context )
+                                                                  return FText::FromString( TEXT( "-" ) );
+
+                                                              TOptional<FColor> color = GetColorAtPosition( Context->ViewportWidget );
+                                                              if( !color.IsSet() )
+                                                                  return FText::FromString( TEXT( "-" ) );
+
+                                                              return FText::AsNumber( color->A );
+                                                          } );
+    Tokens.Add( AlphaAtPositionToken );
+}
+
+void
+UOdysseyViewportNamingTokens::OnPreEvaluate_Implementation( const FNamingTokensEvaluationData& InEvaluationData ) //override
+{
+    Super::OnPreEvaluate_Implementation( InEvaluationData );
+
+    UOdysseyViewportNamingTokensContext* MatchingContext = nullptr;
+    InEvaluationData.Contexts.FindItemByClass<UOdysseyViewportNamingTokensContext>( &MatchingContext );
+    Context = MatchingContext;
+}
+
+void
+UOdysseyViewportNamingTokens::OnPostEvaluate_Implementation() //override
+{
+    Super::OnPostEvaluate_Implementation();
+
+    Context = nullptr;
+}
 
 /////////////////////////////////////////////////////
 // SOdysseyViewport
@@ -47,6 +245,68 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
 {
     mTexture = InArgs._Texture;
 
+    if( InArgs._RotationStep.IsSet() )
+        mRotationStep = InArgs._RotationStep;
+    if( InArgs._ZoomStep.IsSet() )
+        mZoomStep = InArgs._ZoomStep;
+
+    if( InArgs._StatusbarTemplateString.IsSet() )
+        mStatusbarTemplateString = InArgs._StatusbarTemplateString;
+    if( InArgs._NamingTokensContexts.IsSet() )
+        mNamingTokensContexts = InArgs._NamingTokensContexts;
+
+    mCommandList = MakeShared<FUICommandList>();
+
+#define MAP_ACTION(ACTION, DELEGATE_EXECUTE) mCommandList->MapAction( ACTION, FExecuteAction::CreateSP( this, &SOdysseyViewport::DELEGATE_EXECUTE ), FCanExecuteAction() )
+
+    MAP_ACTION( FOdysseyViewportCommands::Get().ResetViewport1On1, OnResetViewport1On1 );
+    MAP_ACTION( FOdysseyViewportCommands::Get().ResetViewportFit, OnResetViewportFit );
+    MAP_ACTION( FOdysseyViewportCommands::Get().ResetViewportAll, OnResetViewportAll );
+    MAP_ACTION( FOdysseyViewportCommands::Get().ResetViewportPosition, OnResetViewportPosition );
+    MAP_ACTION( FOdysseyViewportCommands::Get().ResetViewportRotation, OnResetViewportRotation );
+    MAP_ACTION( FOdysseyViewportCommands::Get().ResetViewportZoom, OnResetViewportZoom );
+
+    MAP_ACTION( FOdysseyViewportCommands::Get().RotateViewportLeft, OnRotateViewportLeft );
+    MAP_ACTION( FOdysseyViewportCommands::Get().RotateViewportRight, OnRotateViewportRight );
+
+    MAP_ACTION( FOdysseyViewportCommands::Get().ZoomInExponential, OnZoomInExponential );
+    MAP_ACTION( FOdysseyViewportCommands::Get().ZoomOutExponential, OnZoomOutExponential );
+
+#undef MAP_ACTION
+
+#define MAP_ACTION_WITH_CHECKED(ACTION, DELEGATE_EXECUTE, DELEGATE_ISCHECKED) mCommandList->MapAction( ACTION, FExecuteAction::CreateSP( this, &SOdysseyViewport::DELEGATE_EXECUTE ), FCanExecuteAction(), FIsActionChecked::CreateSP( this, &SOdysseyViewport::DELEGATE_ISCHECKED ) )
+
+    MAP_ACTION_WITH_CHECKED( FOdysseyViewportCommands::Get().FlipViewportHorizontally, OnFlipViewportHorizontally, IsHorizontallyFlipped );
+    MAP_ACTION_WITH_CHECKED( FOdysseyViewportCommands::Get().FlipViewportVertically, OnFlipViewportVertically, IsVerticallyFlipped );
+
+    MAP_ACTION_WITH_CHECKED( FOdysseyViewportCommands::Get().SetZoomFitScreen, OnSetZoomFitScreen, IsZoomMenuFitChecked );
+
+#undef MAP_ACTION_WITH_CHECKED
+
+#define MAP_ACTION_WITH_CHECKED_WITH_PARAMETER(ACTION, DELEGATE_EXECUTE, DELEGATE_ISCHECKED, VALUE) mCommandList->MapAction( ACTION, FExecuteAction::CreateSP( this, &SOdysseyViewport::DELEGATE_EXECUTE, VALUE ), FCanExecuteAction(), FIsActionChecked::CreateSP( this, &SOdysseyViewport::DELEGATE_ISCHECKED, VALUE ) )
+
+    MAP_ACTION_WITH_CHECKED_WITH_PARAMETER( FOdysseyViewportCommands::Get().SetRotationMinus135, OnSetRotation, IsRotationEqual, FMath::DegreesToRadians( -135.f ) );
+    MAP_ACTION_WITH_CHECKED_WITH_PARAMETER( FOdysseyViewportCommands::Get().SetRotationMinus90, OnSetRotation, IsRotationEqual, FMath::DegreesToRadians( -90.f ) );
+    MAP_ACTION_WITH_CHECKED_WITH_PARAMETER( FOdysseyViewportCommands::Get().SetRotationMinus45, OnSetRotation, IsRotationEqual, FMath::DegreesToRadians( -45.f ) );
+    MAP_ACTION_WITH_CHECKED_WITH_PARAMETER( FOdysseyViewportCommands::Get().SetRotation0, OnSetRotation, IsRotationEqual, FMath::DegreesToRadians( 0.f ) );
+    MAP_ACTION_WITH_CHECKED_WITH_PARAMETER( FOdysseyViewportCommands::Get().SetRotation45, OnSetRotation, IsRotationEqual, FMath::DegreesToRadians( 45.f ) );
+    MAP_ACTION_WITH_CHECKED_WITH_PARAMETER( FOdysseyViewportCommands::Get().SetRotation90, OnSetRotation, IsRotationEqual, FMath::DegreesToRadians( 90.f ) );
+    MAP_ACTION_WITH_CHECKED_WITH_PARAMETER( FOdysseyViewportCommands::Get().SetRotation135, OnSetRotation, IsRotationEqual, FMath::DegreesToRadians( 135.f ) );
+    MAP_ACTION_WITH_CHECKED_WITH_PARAMETER( FOdysseyViewportCommands::Get().SetRotation180, OnSetRotation, IsRotationEqual, FMath::DegreesToRadians( 180.f ) );
+
+    MAP_ACTION_WITH_CHECKED_WITH_PARAMETER( FOdysseyViewportCommands::Get().SetZoom10Percent, OnSetZoom, IsZoomEqual, 0.1f );
+    MAP_ACTION_WITH_CHECKED_WITH_PARAMETER( FOdysseyViewportCommands::Get().SetZoom25Percent, OnSetZoom, IsZoomEqual, 0.25f );
+    MAP_ACTION_WITH_CHECKED_WITH_PARAMETER( FOdysseyViewportCommands::Get().SetZoom50Percent, OnSetZoom, IsZoomEqual, 0.5f );
+    MAP_ACTION_WITH_CHECKED_WITH_PARAMETER( FOdysseyViewportCommands::Get().SetZoom75Percent, OnSetZoom, IsZoomEqual, 0.75f );
+    MAP_ACTION_WITH_CHECKED_WITH_PARAMETER( FOdysseyViewportCommands::Get().SetZoom100Percent, OnSetZoom, IsZoomEqual, 1.f );
+    MAP_ACTION_WITH_CHECKED_WITH_PARAMETER( FOdysseyViewportCommands::Get().SetZoom200Percent, OnSetZoom, IsZoomEqual, 2.f );
+    MAP_ACTION_WITH_CHECKED_WITH_PARAMETER( FOdysseyViewportCommands::Get().SetZoom400Percent, OnSetZoom, IsZoomEqual, 4.f );
+    MAP_ACTION_WITH_CHECKED_WITH_PARAMETER( FOdysseyViewportCommands::Get().SetZoom800Percent, OnSetZoom, IsZoomEqual, 8.f );
+
+#undef MAP_ACTION_WITH_CHECKED_WITH_PARAMETER
+
+    //---
+
     mFlipStateUV = FVector2D(0.f, 0.f);
     mPan = FVector2D( 0.f, 0.f );
     mRotation = 0;
@@ -56,277 +316,462 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
 
     mAlignWithViewport = true;
 
-    FMenuBuilder ViewportMenu(true, NULL, InArgs._OptionExtender);
+    //---
 
-    ViewportMenu.BeginSection( "OptionsSection" ); // Create a section to be able to use FExtender outside this widget (mainly in FOdysseyPainterEditorViewportTab)
+    FSlimHorizontalToolBarBuilder toolbarBuilder( mCommandList, FMultiBoxCustomization::None, nullptr /* extender */, true );
+    toolbarBuilder.SetLabelVisibility( EVisibility::Collapsed );
+    toolbarBuilder.SetStyle( &FOdysseyStyle::Get(), "PainterEditor.ViewportToolbar" );
 
-    ViewportMenu.AddSubMenu(
-        FText::FromString("Zoom options"),
-        FText::FromString(""),
-        FNewMenuDelegate::CreateLambda([this](FMenuBuilder& ZoomMenuBuilder)
-            {
-                FUIAction Zoom25Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 0.25));
-                ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.25percent.name", "25%"), LOCTEXT("viewport.zoom.25percent.tooltip", "Show the texture at a quarter of its size."), FSlateIcon(), Zoom25Action);
+    // Rotation
+    FButtonArgs args;
+    args.Command = FOdysseyViewportCommands::Get().RotateViewportLeft;
+    toolbarBuilder.AddToolBarButton( args );
 
-                FUIAction Zoom50Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 0.5));
-                ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.50percent.name", "50%"), LOCTEXT("viewport.zoom.50percent.tooltip", "Show the texture at half its size."), FSlateIcon(), Zoom50Action);
+    args.Command = FOdysseyViewportCommands::Get().RotateViewportRight;
+    toolbarBuilder.AddToolBarButton( args );
 
-                FUIAction Zoom100Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 1.0));
-                ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.100percent.name", "100%"), LOCTEXT("viewport.zoom.100percent.tooltip", "Show the texture in its original size."), FSlateIcon(), Zoom100Action);
+    toolbarBuilder.AddToolBarWidget(
+        SNew( SSpinBox< int > )
+        .Value( this, &SOdysseyViewport::GetGuiRotationValue )
+        .OnValueChanged( this, &SOdysseyViewport::HandleRotationChanged )
+        .LinearDeltaSensitivity( 10 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
+        .Delta( 1 )
+        .TypeInterface( MakeShared<TNumericUnitTypeInterface< int >>( EUnit::Degrees ) )
+        .MinDesiredWidth( 48.0f ),
+        LOCTEXT( "viewport.rotation.label", "Rotation" )
+        );
 
-                FUIAction Zoom200Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 2.0));
-                ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.200percent.name", "200%"), LOCTEXT("viewport.zoom.200percent.tooltip", "Show the texture at twice its size."), FSlateIcon(), Zoom200Action);
+    toolbarBuilder.AddComboButton(
+        FUIAction(),
+        FOnGetContent::CreateLambda( [this, iExtender=InArgs._OptionExtender]() -> TSharedRef<SWidget>
+                                     {
+                                         FMenuBuilder rotationMenu( true, mCommandList, iExtender );
 
-                FUIAction Zoom400Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 4.0));
-                ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.400percent.name", "400%"), LOCTEXT("viewport.zoom.400percent.tooltip", "Show the texture at four times its size."), FSlateIcon(), Zoom400Action);
+                                         rotationMenu.BeginSection( "RotationOptionsSection" );
 
-                ZoomMenuBuilder.AddMenuSeparator();
+                                         // Can't be used because FMenuEntryParams has its own constructor -_-
+                                         //FMenuEntryParams params = { .Action=FOdysseyViewportCommands::Get().ResetViewportRotation };
+                                         // It works, but yerk ... -_-
+                                         //FMenuEntryParams params;
+                                         //*( const_cast<TSharedPtr< const FUICommandInfo >*>( &params.Action ) ) = FOdysseyViewportCommands::Get().ResetViewportRotation;
+                                         //ioZoomMenuBuilder.AddMenuEntry( params );
+                                         // So, use the old way
+                                         rotationMenu.AddMenuEntry( FOdysseyViewportCommands::Get().ResetViewportRotation, NAME_None, LOCTEXT( "viewport.rotation.reset.label", "Reset" ) );
 
-                FUIAction ZoomFitAction(
-                    FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuFitClicked),
-                    FCanExecuteAction(),
-                    FIsActionChecked::CreateSP(this, &SOdysseyViewport::IsZoomMenuFitChecked)
-                );
-                ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.fit.name", "Scale To Fit"), LOCTEXT("viewport.zoom.fit.tooltip", "Scale the texture to fit the viewport."), FSlateIcon(), ZoomFitAction, NAME_None, EUserInterfaceActionType::ToggleButton);
-            })
-            //, false, FSlateIcon(), true, "ZoomMenu" // HookName doesn't seem to work when used in an entry, only in section
+                                         rotationMenu.AddSeparator();
+
+                                         rotationMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetRotationMinus135, NAME_None, LOCTEXT( "viewport.rotation.preset-Minus135.label", "-135°" ) );
+                                         rotationMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetRotationMinus90, NAME_None, LOCTEXT( "viewport.rotation.preset-Minus90.label", "-90°" ) );
+                                         rotationMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetRotationMinus45, NAME_None, LOCTEXT( "viewport.rotation.preset-Minus45.label", "-45°" ) );
+                                         rotationMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetRotation0, NAME_None, LOCTEXT( "viewport.rotation.preset-0.label", "0°" ) );
+                                         rotationMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetRotation45, NAME_None, LOCTEXT( "viewport.rotation.preset-45.label", "45°" ) );
+                                         rotationMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetRotation90, NAME_None, LOCTEXT( "viewport.rotation.preset-90.label", "90°" ) );
+                                         rotationMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetRotation135, NAME_None, LOCTEXT( "viewport.rotation.preset-135.label", "135°" ) );
+                                         rotationMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetRotation180, NAME_None, LOCTEXT( "viewport.rotation.preset-180.label", "180°" ) );
+
+                                         rotationMenu.EndSection();
+
+                                         return rotationMenu.MakeWidget();
+                                     } ),
+        LOCTEXT( "viewport.rotate.options.label", "Rotation Options" ),
+        LOCTEXT( "viewport.rotate.options.tooltip", "Rotation options" ),
+        TAttribute<FSlateIcon>(),
+        false
     );
 
-    ViewportMenu.AddSubMenu(
-        FText::FromString("Flip options"),
-        FText::FromString(""),
-        FNewMenuDelegate::CreateLambda([this](FMenuBuilder& FlipMenuBuilder)
-            {
-                FUIAction AlignCenterOption(
-                    FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleAlignWithViewportClicked),
-                    FCanExecuteAction(),
-                    FIsActionChecked::CreateSP(this, &SOdysseyViewport::IsAlignWithViewportChecked)
-                );
-                FlipMenuBuilder.AddMenuEntry(LOCTEXT("viewport.flip.align.name", "Align with viewport center on flip"), LOCTEXT("viewport.flip.align.tooltip", "Keep the center of the viewport at the same position when flipping it when on"), FSlateIcon(), AlignCenterOption, NAME_None, EUserInterfaceActionType::ToggleButton);
-            })
-        //, false, FSlateIcon(), true, "FlipMenu" // HookName doesn't seem to work when used in an entry, only in section
+    toolbarBuilder.AddSeparator();
+
+    // Zoom
+    args.Command = FOdysseyViewportCommands::Get().ZoomInExponential;
+    toolbarBuilder.AddToolBarButton( args );
+
+    args.Command = FOdysseyViewportCommands::Get().ZoomOutExponential;
+    toolbarBuilder.AddToolBarButton( args );
+
+    toolbarBuilder.AddToolBarWidget(
+        SNew( SSpinBox< float > )
+        .Value( this, &SOdysseyViewport::GetGuiZoomValue )
+        .OnValueChanged( this, &SOdysseyViewport::HandleZoomSliderChanged )
+        //.LinearDeltaSensitivity(20)  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set. But we choosed not to use this option here.
+        .Delta( 1 )
+        .TypeInterface( MakeShared<TNumericUnitTypeInterface<float>>( EUnit::Percentage ) )
+        .ShiftMultiplier( 15.f )
+        .SliderExponent( 1.f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+        .MinFractionalDigits( 2 )
+        .MaxFractionalDigits( 2 )
+        .MinDesiredWidth( 70.0f ),
+        LOCTEXT( "viewport.zoom.label", "Zoom" )
     );
 
-    ViewportMenu.EndSection();
+    //toolbarBuilder.AddToolBarWidget(
+    //    SNew( SSpinBox< float > )
+    //    .Value( this, &SOdysseyViewport::GetGuiZoomValue )
+    //    .OnValueChanged( this, &SOdysseyViewport::HandleZoomSliderChanged )
+    //    .MinValue( 1.f )
+    //    .MaxValue( 20000.f )
+    //    .MinSliderValue( 1.f )
+    //    .MaxSliderValue( 20000.f )
+    //    //.LinearDeltaSensitivity(20)  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set. But we choosed not to use this option here.
+    //    //.Delta( 1 )
+    //    .TypeInterface( MakeShared<TNumericUnitTypeInterface<float>>( EUnit::Percentage ) )
+    //    .ShiftMultiplier( 15.f )
+    //    .SliderExponent( 4.f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
+    //    .SliderExponentNeutralValue( 100.f )
+    //    .MinFractionalDigits( 2 )
+    //    .MaxFractionalDigits( 2 )
+    //    .MinDesiredWidth( 70.0f ),
+    //    LOCTEXT( "viewport.zoom.label", "Zoom" )
+    //);
 
-    TSharedPtr<SHorizontalBox> HorizontalBox;
+    toolbarBuilder.AddComboButton(
+        FUIAction(),
+        FOnGetContent::CreateLambda( [this, iExtender = InArgs._OptionExtender]() -> TSharedRef<SWidget>
+                                     {
+                                         FMenuBuilder zoomMenu( true, mCommandList, iExtender );
+
+                                         zoomMenu.BeginSection( "ZoomOptionsSection" );
+
+                                         zoomMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetZoomFitScreen, NAME_None, LOCTEXT( "viewport.zoom.fit.label", "Scale To Fit" ) );
+                                         zoomMenu.AddMenuEntry( FOdysseyViewportCommands::Get().ResetViewportZoom, NAME_None, LOCTEXT( "viewport.zoom.reset.label", "Reset" ) );
+
+                                         zoomMenu.AddSeparator();
+
+                                         zoomMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetZoom10Percent, NAME_None, LOCTEXT( "viewport.zoom.preset-10.label", "10%" ) );
+                                         zoomMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetZoom25Percent, NAME_None, LOCTEXT( "viewport.zoom.preset-25.label", "25%" ) );
+                                         zoomMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetZoom50Percent, NAME_None, LOCTEXT( "viewport.zoom.preset-50.label", "50%" ) );
+                                         zoomMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetZoom75Percent, NAME_None, LOCTEXT( "viewport.zoom.preset-75.label", "75%" ) );
+                                         zoomMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetZoom100Percent, NAME_None, LOCTEXT( "viewport.zoom.preset-100.label", "100%" ) );
+                                         zoomMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetZoom200Percent, NAME_None, LOCTEXT( "viewport.zoom.preset-200.label", "200%" ) );
+                                         zoomMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetZoom400Percent, NAME_None, LOCTEXT( "viewport.zoom.preset-400.label", "400%" ) );
+                                         zoomMenu.AddMenuEntry( FOdysseyViewportCommands::Get().SetZoom800Percent, NAME_None, LOCTEXT( "viewport.zoom.preset-800.label", "800%" ) );
+
+                                         zoomMenu.EndSection();
+
+                                         return zoomMenu.MakeWidget();
+                                     } ),
+        LOCTEXT( "viewport.zoom.options.label", "Zoom Options" ),
+        LOCTEXT( "viewport.zoom.options.tooltip", "Zoom options" ),
+        TAttribute<FSlateIcon>(),
+        false
+    );
+
+    toolbarBuilder.AddSeparator();
+
+    // Reset
+    args.Command = FOdysseyViewportCommands::Get().ResetViewport1On1;
+    toolbarBuilder.AddToolBarButton( args );
+
+    args.Command = FOdysseyViewportCommands::Get().ResetViewportFit;
+    toolbarBuilder.AddToolBarButton( args );
+
+    toolbarBuilder.AddSeparator();
+
+    // Flip
+    args.Command = FOdysseyViewportCommands::Get().FlipViewportHorizontally;
+    toolbarBuilder.AddToolBarButton( args );
+
+    args.Command = FOdysseyViewportCommands::Get().FlipViewportVertically;
+    toolbarBuilder.AddToolBarButton( args );
+
+    toolbarBuilder.AddSeparator();
+
+    // Settings
+    toolbarBuilder.AddComboButton(
+        FUIAction(),
+        FOnGetContent::CreateLambda( [this, iExtender = InArgs._OptionExtender]() -> TSharedRef<SWidget>
+                                     {
+                                         FMenuBuilder settingsMenu( true, mCommandList, iExtender );
+
+                                         //---
+
+                                         settingsMenu.BeginSection( "SettingsMiscSection", LOCTEXT( "viewport.settings-section.advanced.label", "Misc" ) );
+
+                                         settingsMenu.AddMenuEntry( FOdysseyViewportCommands::Get().ResetViewportAll );
+
+                                         settingsMenu.AddSeparator( "SettingsMiscSeparator" );
+
+                                         {
+                                             FMenuEntryParams params;
+                                             params.LabelOverride = LOCTEXT( "viewport.settings.entry.preserve-canvas-when-flipping.label", "Preserve canvas position when flipping" );
+                                             params.ToolTipOverride = LOCTEXT( "viewport.settings.entry.preserve-canvas-when-flipping.tooltip", "Keep the center of the viewport at the same position when flipping it when on" );
+                                             params.DirectActions = FUIAction(
+                                                 FExecuteAction::CreateSP( this, &SOdysseyViewport::HandleAlignWithViewportClicked ),
+                                                 FCanExecuteAction(),
+                                                 FIsActionChecked::CreateSP( this, &SOdysseyViewport::IsAlignWithViewportChecked )
+                                             );
+                                             params.UserInterfaceActionType = EUserInterfaceActionType::ToggleButton;
+                                             settingsMenu.AddMenuEntry( params );
+                                         }
+
+                                         settingsMenu.EndSection();
+
+                                         //---
+
+                                         settingsMenu.BeginSection( "SettingsAdvancedSection", LOCTEXT( "viewport.settings-section.advanced.label", "Advanced Settings" ) );
+
+                                         {
+                                             FMenuEntryParams params;
+                                             params.LabelOverride = LOCTEXT( "viewport.settings.entry.settings.label", "Open Viewport Settings..." );
+                                             params.ToolTipOverride = LOCTEXT( "viewport.settings.entry.settings.tooltip", "Open the viewport settings panel" );
+                                             params.DirectActions = FUIAction(
+                                                 FExecuteAction::CreateLambda( []()
+                                                                               {
+                                                                                   FModuleManager::LoadModuleChecked<ISettingsModule>( "Settings" ).ShowViewer( "Editor", "Plugins", "OdysseyPainterEditor" );
+                                                                               } )
+                                             );
+                                             settingsMenu.AddMenuEntry( params );
+                                         }
+
+                                         settingsMenu.EndSection();
+
+                                         //---
+
+                                         return settingsMenu.MakeWidget();
+                                     } ),
+        LOCTEXT( "viewport.settings.label", "Settings" ),
+        LOCTEXT( "viewport.settings.tooltip", "Settings" ),
+        FSlateIcon( FOdysseyStyle::GetStyleSetName(), "PainterEditor.Settings" ),
+        false
+    );
+
+    //---
 
     this->ChildSlot
     [
         SNew(SVerticalBox)
 
         + SVerticalBox::Slot()
-            .FillHeight(1.0f)
-            [
-                SNew(SHorizontalBox)
-
-                + SHorizontalBox::Slot()
-                    .FillWidth(1.0f)
-                    [
-                        SNew(SVerticalBox)
-
-                        + SVerticalBox::Slot()
-                            .FillHeight(1)
-                            [
-                                SNew(SOverlay)
-
-                                // viewport canvas
-                                + SOverlay::Slot()
-                                    [
-                                        SAssignNew(mViewportWidget, SViewport)
-                                            .EnableGammaCorrection(false)
-                                            .IsEnabled(FSlateApplication::Get().GetNormalExecutionAttribute())
-                                            .ShowEffectWhenDisabled(false)
-                                            .EnableBlending(true)
-                                    ]
-                            ]
-                    ]
-
-                + SHorizontalBox::Slot()
-                    .AutoWidth()
-                    [
-                        // vertical scroll bar
-                        SAssignNew(mVerticalScrollBar, SScrollBar)
-                            .AlwaysShowScrollbar(true)
-                            .Thickness(FVector2D(10.f, 10.f))
-                            .OnUserScrolled(this, &SOdysseyViewport::HandleVerticalScrollBarScrolled)
-                    ]
-            ]
-
-        + SVerticalBox::Slot()
-            .AutoHeight()
-            [
-                // horizontal scrollbar
-                SAssignNew(mHorizontalScrollBar, SScrollBar)
-                    .Orientation( Orient_Horizontal )
-                    .AlwaysShowScrollbar(true)
-                    .Thickness(FVector2D(10.f, 10.f))
-                    .OnUserScrolled(this, &SOdysseyViewport::HandleHorizontalScrollBarScrolled)
-            ]
-
-        + SVerticalBox::Slot()
-            .AutoHeight()
-            .Padding(0.0f, 2.0f, 0.0f, 0.0f)
-            [
-                SAssignNew(HorizontalBox, SHorizontalBox)
-            ]
-    ];
-
-    // zoom slider and rotation
-    HorizontalBox->AddSlot()
-        .FillWidth(1.0f)
+        .FillHeight(1.0f)
         [
             SNew(SHorizontalBox)
+
             + SHorizontalBox::Slot()
-            .HAlign(HAlign_Left)
-            .VAlign(VAlign_Center)
+            .FillWidth(1.0f)
             [
-                SNew(STextBlock)
-                .Text( this, &SOdysseyViewport::GetTextureInfosValue)
+                SNew(SVerticalBox)
+
+                + SVerticalBox::Slot()
+                .FillHeight(1)
+                [
+                    SNew(SOverlay)
+
+                    // viewport canvas
+                    + SOverlay::Slot()
+                    [
+                        SAssignNew(mViewportWidget, SViewport)
+                        .EnableGammaCorrection( false )
+                        .IsEnabled( FSlateApplication::Get().GetNormalExecutionAttribute() )
+                        .ShowEffectWhenDisabled( false )
+                        .EnableBlending( true )
+                    ]
+                ]
             ]
+
             + SHorizontalBox::Slot()
-            .HAlign(HAlign_Left)
-            .VAlign(VAlign_Center)
+            .AutoWidth()
             [
-                SNew(SHorizontalBox)
-                + SHorizontalBox::Slot()
-
-                    .AutoWidth()
-                    .Padding(4.0f, 0.0f)
-                    .VAlign(VAlign_Center)
-                    [
-                        SNew(STextBlock)
-                        .Text(LOCTEXT("viewport.rotation", "Rotation: "))
-                    ]
-                + SHorizontalBox::Slot()
-                    .Padding(2.0f, 0.0f)
-                    .VAlign(VAlign_Center)
-                    [
-                        SNew(SSpinBox< int >)
-                            .Value(this, &SOdysseyViewport::GetGuiRotationValue)
-                            .OnValueChanged(this, &SOdysseyViewport::HandleRotationChanged)
-                            .LinearDeltaSensitivity(10)  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
-                            .Delta(1)
-                            .TypeInterface(MakeShared<TNumericUnitTypeInterface< int >>(EUnit::Degrees))
-                            .MinDesiredWidth(48.0f)
-                    ]
-                + SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .Padding(4.0f, 0.0f)
-                    .VAlign(VAlign_Center)
-                    [
-                        SNew(SButton)
-                            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-                            .OnPressed(this, &SOdysseyViewport::HandleRotationLeft)
-                        [
-                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.RotateLeft"))
-                        ]
-                    ]
-
-                + SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .Padding(4.0f, 0.0f)
-                    .VAlign(VAlign_Center)
-                    [
-                        SNew(SButton)
-                            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-                            .OnPressed(this, &SOdysseyViewport::HandleViewportReset)
-                        [
-                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.RotateReset"))
-                        ]
-                    ]
-
-                + SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .Padding(4.0f, 0.0f)
-                    .VAlign(VAlign_Center)
-                    [
-                        SNew(SButton)
-                            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
-                            .OnPressed(this, &SOdysseyViewport::HandleRotationRight)
-                        [
-                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.RotateRight"))
-                        ]
-                    ]
-                + SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .Padding(4.0f, 0.0f)
-                    .VAlign(VAlign_Center)
-                    [
-                        SNew(SCheckBox)
-                            .Style(&FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("CheckBox.BasicOnOff"))
-                            .IsFocusable(false)
-                            .OnCheckStateChanged(this, &SOdysseyViewport::HandleFlipHorizontal)
-                            .IsChecked_Lambda([this]() -> ECheckBoxState { return mFlipStateUV.X == 1 ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; })
-                            [
-                                SNew(SImage).Image(FOdysseyStyle::GetBrush("PainterEditor.FlipHorizontal16"))
-                            ]
-                    ]
-                + SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .Padding(4.0f, 0.0f)
-                    .VAlign(VAlign_Center)
-                    [
-                        SNew(SCheckBox)
-                            .Style(&FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("CheckBox.BasicOnOff"))
-                            .IsFocusable(false)
-                            .OnCheckStateChanged(this, &SOdysseyViewport::HandleFlipVertical)
-                            .IsChecked_Lambda([this]() -> ECheckBoxState { return mFlipStateUV.Y == 1 ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; })
-                            [
-                                SNew(SImage).Image(FOdysseyStyle::GetBrush("PainterEditor.FlipVertical16"))
-                            ]
-                    ]
+                // vertical scroll bar
+                SAssignNew(mVerticalScrollBar, SScrollBar)
+                .AlwaysShowScrollbar( true )
+                .Thickness( FVector2D( 10.f, 10.f ) )
+                .OnUserScrolled( this, &SOdysseyViewport::HandleVerticalScrollBarScrolled )
             ]
+        ]
+
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            // horizontal scrollbar
+            SAssignNew(mHorizontalScrollBar, SScrollBar)
+            .Orientation( Orient_Horizontal )
+            .AlwaysShowScrollbar( true )
+            .Thickness( FVector2D( 10.f, 10.f ) )
+            .OnUserScrolled( this, &SOdysseyViewport::HandleHorizontalScrollBarScrolled )
+        ]
+
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .Padding(2.0f, 2.0f, 2.0f, 0.0f)
+        [
+            SNew(SHorizontalBox)
+
+            //+ SHorizontalBox::Slot()
+            //.AutoWidth()
+            //.VAlign( VAlign_Center )
+            //[
+            //    SNew( STextBlock )
+            //    .Text( this, &SOdysseyViewport::GetTextureInfosValue )
+            //]
+
             + SHorizontalBox::Slot()
-            .HAlign(HAlign_Right)
-            .VAlign(VAlign_Center)
+            .AutoWidth()
+            .VAlign( VAlign_Center )
             [
-                SNew(SHorizontalBox)
-                + SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .VAlign(VAlign_Center)
-                    [
-                        SNew(STextBlock)
-                            .Text(LOCTEXT("viewport.zoom", "Zoom:"))
-                    ]
+                SNew( STextBlock )
+                .Text( this, &SOdysseyViewport::GetStatusbarText )
+            ]
 
-                + SHorizontalBox::Slot()
-                    .FillWidth(1.0f)
-                    .Padding(4.0f, 0.0f)
-                    .VAlign(VAlign_Center)
-                    [
-                        //TODO UE5: MaxFractionnal digits is set correctly in UE5. In UE4, we have to call SetMaxFractionnalDigits/SetMinFractionalDigits
-                        SAssignNew( mZoomSpinBox, SSpinBox< float > )
-                            .Value( this, &SOdysseyViewport::GetGuiZoomValue )
-                            .OnValueChanged( this, &SOdysseyViewport::HandleZoomSliderChanged )
-                            // .LinearDeltaSensitivity(20)  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set. But we choosed not to use this option here.
-                            .TypeInterface(MakeShared<TNumericUnitTypeInterface<float>>(EUnit::Percentage))
-                            .ShiftMultiplier( 15.f )
-                            .Delta( 1 )
-                            .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
-                            .SliderExponentNeutralValue( 100.0f )
-                            .MaxFractionalDigits( 2 )
-                            .MinFractionalDigits( 2 )
-                            .MinDesiredWidth( 70.0f )
+            //+ SHorizontalBox::Slot()
+            //.AutoWidth()
+            //.VAlign( VAlign_Center )
+            //[
+            //    SNew( SNamingTokensEditableTextBox )
+            //    .IsReadOnly( true )
+            //    .Text_Lambda( [this]() -> FText
+            //                  {
+            //                      return FText::FromString( mStatusbarTemplateString.Get().Template );
+            //                  } )
+            //    .ResolvedText_Lambda( [this]() -> FText
+            //                          {
+            //                              //FNamingTokenFilterArgs FilterArgs;
+            //                              //FilterArgs.AdditionalNamespacesToInclude.Add( TokenNamespace );
 
-                   ]
-                + SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .Padding(2.0f, 0.0f, 0.0f, 0.0f)
-                    .VAlign(VAlign_Center)
-                    [
-                        SNew(SComboButton)
-                            .ContentPadding(FMargin(0.0))
-                            .MenuContent()
-                            [
-                                ViewportMenu.MakeWidget()
-                            ]
-                    ]
-             ]
-        ];
+            //                              UNamingTokensEngineSubsystem* NamingTokensSubsystem = GEngine->GetEngineSubsystem<UNamingTokensEngineSubsystem>();
+            //                              FNamingTokenResultData Result = NamingTokensSubsystem->EvaluateTokenString( mStatusbarTemplateString.Get().Template );
 
-    mZoomSpinBox->SetMaxFractionalDigits(2);
-    mZoomSpinBox->SetMinFractionalDigits(2);
+            //                              return Result.EvaluatedText;
+            //                          } )
+            //]
+
+            + SHorizontalBox::Slot()
+            .FillWidth( 1.f )
+            .HAlign( HAlign_Right )
+            .VAlign( VAlign_Center )
+            [
+                toolbarBuilder.MakeWidget()
+            ]
+        ]
+    ];
+}
+
+
+TSharedPtr<FUICommandList>
+SOdysseyViewport::GetCommandList()
+{
+    return mCommandList;
+}
+
+//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------- Shortcuts
+
+
+void
+SOdysseyViewport::OnResetViewport1On1()
+{
+    ResetPan();
+    SetRotation( 0.f );
+    SetZoom( 1.f );
+}
+
+void
+SOdysseyViewport::OnResetViewportFit()
+{
+    FitToViewport();
+}
+
+void
+SOdysseyViewport::OnResetViewportAll()
+{
+    mFlipStateUV = FVector2D( 0.f, 0.f );
+    SetRotation( 0.f );
+    FitToViewport();
+}
+
+void
+SOdysseyViewport::OnResetViewportPosition()
+{
+    SetRotation( 0 );
+    ResetPan();
+}
+
+void
+SOdysseyViewport::OnResetViewportRotation()
+{
+    SetRotation( 0 );
+}
+
+void
+SOdysseyViewport::OnResetViewportZoom()
+{
+    SetZoom( 1.f );
+}
+
+void
+SOdysseyViewport::OnRotateViewportLeft()
+{
+    RotateLeft();
+}
+
+void
+SOdysseyViewport::OnRotateViewportRight()
+{
+    RotateRight();
+}
+
+void SOdysseyViewport::OnFlipViewportHorizontally()
+{
+    FlipHorizontal();
+}
+
+void SOdysseyViewport::OnFlipViewportVertically()
+{
+    FlipVertical();
+}
+
+bool
+SOdysseyViewport::IsHorizontallyFlipped()
+{
+    return mFlipStateUV.X == 1;
+}
+
+bool
+SOdysseyViewport::IsVerticallyFlipped()
+{
+    return mFlipStateUV.Y == 1;
+}
+
+void
+SOdysseyViewport::OnSetRotation( float iAngleRadians )
+{
+    SetRotation( iAngleRadians );
+}
+
+bool
+SOdysseyViewport::IsRotationEqual( float iAngleRadians )
+{
+    return FMath::IsNearlyEqual( FMath::UnwindRadians( mRotation ), FMath::UnwindRadians( iAngleRadians ) );
+}
+
+void
+SOdysseyViewport::OnSetZoom( float iZoomValue )
+{
+    SetZoom( iZoomValue );
+    // Old way ?
+    //SetZoom( iZoomValue, GetViewportCenter() );
+}
+
+bool
+SOdysseyViewport::IsZoomEqual( float iZoomValue )
+{
+    return FMath::IsNearlyEqual( mZoom, iZoomValue );
+}
+
+void
+SOdysseyViewport::OnSetZoomFitScreen()
+{
+    ToggleFitToViewport();
+}
+
+void
+SOdysseyViewport::OnZoomInExponential()
+{
+    ZoomExponential( GetZoom(), mZoomStep.Get() );
+}
+
+void
+SOdysseyViewport::OnZoomOutExponential()
+{
+    ZoomExponential( GetZoom(), -mZoomStep.Get() );
 }
 
 
@@ -524,57 +969,22 @@ SOdysseyViewport::HandleVerticalScrollBarScrolled( float InScrollOffsetFraction 
 
 
 void
-SOdysseyViewport::HandleZoomMenuEntryClicked( double ZoomValue )
-{
-    SetZoom( ZoomValue );
-}
-
-
-void
-SOdysseyViewport::HandleZoomMenuFitClicked()
-{
-    ToggleFitToViewport();
-}
-
-void
 SOdysseyViewport::HandleAlignWithViewportClicked()
 {
     ToggleAlignWithViewport();
 }
 
-void
-SOdysseyViewport::HandleRotationLeft()
-{
-    RotateLeft();
-}
-
-void
-SOdysseyViewport::HandleRotationRight()
-{
-    RotateRight();
-}
-
-void SOdysseyViewport::HandleFlipHorizontal(ECheckBoxState iState)
-{
-    FlipHorizontal();
-}
-
-void SOdysseyViewport::HandleFlipVertical(ECheckBoxState iState)
-{
-    FlipVertical();
-}
-
-void
-SOdysseyViewport::HandleViewportReset()
-{
-    mTransform = FTransform2D(1.0f, FVector2D(0.0f, 0.0f));
-    mFlipStateUV = FVector2D(0.f, 0.f);
-    mPan = FVector2D( 0.f, 0.f );
-    mRotation = 0;
-    mZoom = 1.f;
-    SetFitToViewport(false);
-    UpdateScrollBars();
-}
+//void
+//SOdysseyViewport::HandleViewportReset()
+//{
+//    mTransform = FTransform2D(1.0f, FVector2D(0.0f, 0.0f));
+//    mFlipStateUV = FVector2D(0.f, 0.f);
+//    mPan = FVector2D( 0.f, 0.f );
+//    mRotation = 0;
+//    mZoom = 1.f;
+//    SetFitToViewport(false);
+//    UpdateScrollBars();
+//}
 
 
 bool
@@ -599,21 +1009,73 @@ int
 SOdysseyViewport::GetGuiRotationValue() const
 {
     float angle = FMath::RadiansToDegrees(GetRotation());
-    if (angle < 0)
-        angle += 360.0;
+    //if (angle < 0)
+    //    angle += 360.0;
 
-    FMath::Fmod( angle, 360.0 );
+    //FMath::Fmod( angle, 360.0 );
     return FMath::RoundHalfFromZero(angle);
 }
 
 FText
-SOdysseyViewport::GetTextureInfosValue( ) const
+SOdysseyViewport::GetStatusbarText() const
+{
+    FNamingTokenFilterArgs FilterArgs;
+    //FilterArgs.AdditionalNamespacesToInclude.Add( TokenNamespace );
+
+    //TArray<UObject*> contexts;
+
+    UNamingTokensEngineSubsystem* NamingTokensSubsystem = GEngine->GetEngineSubsystem<UNamingTokensEngineSubsystem>();
+    FNamingTokenResultData Result = NamingTokensSubsystem->EvaluateTokenString( mStatusbarTemplateString.Get().Template, FilterArgs, mNamingTokensContexts.Get() );
+    //FNamingTokenResultData Result = NamingTokensSubsystem->EvaluateTokenString( mStatusbarTemplateString.Get().Template, FilterArgs, contexts );
+
+    return Result.EvaluatedText;
+}
+
+FText
+SOdysseyViewport::GetTextureInfosValue() const
 {
     UTexture* texture       = GetTexture();
     if (!texture)
-        return LOCTEXT("viewport.no-texture-provided", "No Texture Provided");
+        return LOCTEXT("viewport.status-bar.no-texture-provided", "No Texture Provided");
 
-    return FText::Format( LOCTEXT("viewport.texture-dimensions","{0}x{1} px"), FText::AsNumber(texture->GetSurfaceWidth() ), FText::AsNumber(texture->GetSurfaceHeight() ));
+    FText textureSize = FText::Format( LOCTEXT( "viewport.status-bar.texture-size", "{0}x{1} px" ), FText::AsNumber( texture->GetSurfaceWidth() ), FText::AsNumber( texture->GetSurfaceHeight() ) );
+
+    FVector2D cursorPos = FSlateApplication::Get().GetCursorPos();
+    FVector2D cursorPosInViewport = mViewportWidget->GetTickSpaceGeometry().AbsoluteToLocal( cursorPos );
+    FVector2D cursorPosInCanvas = ToLocal( cursorPosInViewport );
+    FIntVector2 cursorPosInCanvasInt( FMath::FloorToInt( cursorPosInCanvas.X ), FMath::FloorToInt( cursorPosInCanvas.Y ) );
+
+    cursorPosInCanvasInt += FIntVector2( texture->GetSurfaceWidth() / 2, texture->GetSurfaceHeight() / 2 );
+
+    FText cursorText = FText::Format( LOCTEXT( "viewport.status-bar.cursor", "XY: {0}, {1} px" ), FText::AsNumber( cursorPosInCanvasInt.X ), FText::AsNumber( cursorPosInCanvasInt.Y ) );
+
+    FText colorText;
+    UTextureRenderTarget2D* renderTarget = Cast<UTextureRenderTarget2D>( texture ); //TODO: should also test UTexture2D but FImageUtils::GetTexture2DImage() does nothing -_-
+    if( !renderTarget )
+    {
+        colorText = LOCTEXT( "viewport.status-bar.pixel-color.no-pixel", "RGBA: No pixel" );
+    }
+    else
+    {
+        if( cursorPosInCanvasInt.X < 0 || cursorPosInCanvasInt.X >= renderTarget->GetSurfaceWidth()
+            || cursorPosInCanvasInt.Y < 0 || cursorPosInCanvasInt.Y >= renderTarget->GetSurfaceHeight() )
+        {
+            colorText = LOCTEXT( "viewport.status-bar.pixel-color.outside-texture", "RGBA: Outside" );
+        }
+        else
+        {
+            static FImage image;
+            FIntRect rect( cursorPosInCanvasInt.X, cursorPosInCanvasInt.Y, cursorPosInCanvasInt.X + 1, cursorPosInCanvasInt.Y + 1 );
+            FImageUtils::GetRenderTargetImage( renderTarget, image, rect );
+            FLinearColor linearColor = image.GetOnePixelLinear( 0, 0 );
+            FColor color = linearColor.ToFColor( true );
+            //FColor color = linearColor.ToFColor( false );
+
+            colorText = FText::Format( LOCTEXT( "viewport.status-bar.pixel-color", "RGBA: {0}, {1}, {2}, {3}" ), FText::AsNumber( color.R ), FText::AsNumber( color.G ), FText::AsNumber( color.B ), FText::AsNumber( color.A ) );
+        }
+    }
+
+    return FText::Format( LOCTEXT("viewport.status-bar.text","{0} | {1} | {2}"), textureSize, cursorText, colorText );
 }
 
 
@@ -761,7 +1223,8 @@ void SOdysseyViewport::SetRotation(double RotationValue)
     FTransform2D translationDiff = mTransform.Concatenate(rotationTransform);
 
     mPan = translationDiff.GetTranslation();
-    mRotation = fmod( 2 * PI + fmod(RotationValue, 2 * PI), 2 * PI); //Positive modulo;
+    mRotation = FMath::UnwindRadians( RotationValue );
+    //mRotation = fmod( 2 * PI + fmod(RotationValue, 2 * PI), 2 * PI); //Positive modulo;
 
     UpdateTransform();
     UpdateScrollBars();
@@ -812,12 +1275,12 @@ void SOdysseyViewport::ResetPan()
 
 void SOdysseyViewport::RotateLeft()
 {
-    Rotate(- FMath::DegreesToRadians(RotationStep));
+    Rotate(- FMath::DegreesToRadians(mRotationStep.Get()));
 }
 
 void SOdysseyViewport::RotateRight()
 {
-    Rotate(FMath::DegreesToRadians(RotationStep));
+    Rotate(FMath::DegreesToRadians(mRotationStep.Get()));
 }
 
 void SOdysseyViewport::FlipHorizontal()

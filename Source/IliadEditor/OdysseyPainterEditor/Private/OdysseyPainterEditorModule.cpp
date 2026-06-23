@@ -41,6 +41,7 @@
 #include "OdysseyToolCollectionAssetTypeActions.h"
 #include "Tools/OutOfPegsTool/OdysseyPainterEditorAnimationOutOfPegsTool.h"
 #include "StandaloneEditor/OdysseyPainterEditorStandaloneToolkit.h"
+#include "OdysseyViewportCommands.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
