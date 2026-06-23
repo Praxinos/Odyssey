@@ -898,6 +898,10 @@ FArianeEditor::CopySelectedObjects()
 
             if( ObjectsToCopy.Num() )
             {
+                FArianeObject::FCopyArgs CopyArgs;
+
+                CopyArgs.Flags = FArianeObject::ECopyFlags::AllocByOperatingSystem;
+
                 // free copied objects
                 for( FArianeObject* ObjectToCopy : Clipboard.CopiedObjects )
                 {
@@ -911,7 +915,7 @@ FArianeEditor::CopySelectedObjects()
                     // We alloc with new because we don't want this object to be saved by the serialization
                     // that saves all objects allocated as instanced structs. We want independent objects to store in
                     // a clipboard
-                    Clipboard.CopiedObjects.Add ( ObjectToCopy->Copy( FArianeObject::ECopyFlags::AllocWithNew ) );
+                    Clipboard.CopiedObjects.Add ( ObjectToCopy->Copy( CopyArgs ) );
                 }
             }
         }
@@ -933,6 +937,12 @@ FArianeEditor::PasteObjects()
             {
                 TArray<FArianeObject*> SelectedObjects;
                 FArianeObject* Destination = DrawingLayer->GetRootGroup();
+                FArianeObject::FCopyArgs CopyArgs = FArianeObject::FCopyArgs();
+
+                // ECopyFlags::AllocByLayer means the allocation will be made as FInstancedstruct, thus saved by
+                // Unreal Engine's serialization
+                CopyArgs.Flags = FArianeObject::ECopyFlags::AllocAsInstancedStruct;
+                CopyArgs.DrawingLayer = DrawingLayer;
 
                 DrawingLayer->GetUniquelySelectedObjects( SelectedObjects, false );
 
@@ -941,9 +951,7 @@ FArianeEditor::PasteObjects()
 
                 for( FArianeObject* CopiedObject : Clipboard.CopiedObjects )
                 {
-                    // ECopyFlags to none means the allocation will be made as FInstancedstruct, thus saved by
-                    // Unreal Engine's serialization
-                    FArianeObject* PasteObject = CopiedObject->Copy( FArianeObject::ECopyFlags::None );
+                    FArianeObject* PasteObject = CopiedObject->Copy( CopyArgs );
 
                     Destination->AppendChild( PasteObject );
 

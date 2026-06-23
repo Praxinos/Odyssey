@@ -101,6 +101,16 @@ FArianeObjectInvalidationFlags::HasAny()
 
 FArianeObject::~FArianeObject()
 {
+    // free mallocated Tags.
+    for( FArianeTagID& TagID : Tags )
+    {
+        FArianeTag* Tag = TagID.GetTag();
+
+        if( Tag->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
+        {
+            delete Tag;
+        }
+    }
 }
 
 FArianeObject::FArianeObject()
@@ -115,14 +125,24 @@ FArianeObject::FArianeObject()
     , bExpanded ( true )
     , InvalidationFlags ( new FArianeObjectInvalidationFlags() )
     , bSelected ( false )
+    , AllocationModel ( EArianeAllocationModel::InstancedStruct )
 {
 }
 
-FArianeObject::FArianeObject( UArianeLayerDrawing* InDrawingLayer, const FName& InName )
+FArianeObject::FArianeObject( UArianeLayerDrawing* InDrawingLayer
+                            , const FName& InName
+                            , EArianeAllocationModel InAllocationModel )
     : FArianeObject()
 {
     DrawingLayer = InDrawingLayer;
     Name = InName;
+    AllocationModel = InAllocationModel;
+}
+
+EArianeAllocationModel
+FArianeObject::GetAllocationModel()
+{
+    return AllocationModel;
 }
 
 bool
@@ -595,7 +615,7 @@ FArianeObject::TransferChild( FArianeObject* FosterChild
 }
 
 void
-FArianeObject::CopySettings( FArianeObject* DestinationObject, ECopyFlags CopyFlags, bool bInvalidate )
+FArianeObject::CopySettings( FArianeObject* DestinationObject, const FCopyArgs& CopyArgs, bool bInvalidate )
 {
     DestinationObject->Name = Name;
     DestinationObject->Translation = Translation;
@@ -612,25 +632,36 @@ FArianeObject::CopySettings( FArianeObject* DestinationObject, ECopyFlags CopyFl
 }
 
 FArianeObject*
-FArianeObject::CopyShape( ECopyFlags CopyFlags )
+FArianeObject::CopyShape( const FCopyArgs& CopyArgs )
 {
-    FArianeObject* ObjectCopy = EnumHasAllFlags( CopyFlags, ECopyFlags::AllocWithNew ) ? new FArianeObject( nullptr, Name )
-                                                                                       : DrawingLayer->AllocObject( Name );
+    FArianeObject* ObjectCopy = nullptr;
 
-    CopySettings( ObjectCopy, CopyFlags, true );
+    if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocByOperatingSystem ) )
+    {
+        ObjectCopy = new FArianeObject( nullptr
+                                      , Name
+                                      , EArianeAllocationModel::OperatingSystem );
+    }
+
+    if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocAsInstancedStruct ) )
+    {
+        ObjectCopy = CopyArgs.DrawingLayer->AllocObject( Name );
+    }
+
+    CopySettings( ObjectCopy, CopyArgs, true );
 
 
     return ObjectCopy;
 }
 
 FArianeObject*
-FArianeObject::Copy( ECopyFlags CopyFlags
-                   , TFunction<void( FArianeObject*,ECopyFlags)> PreCallback
-                   , TFunction<void( FArianeObject*, FArianeObject*, ECopyFlags )> PostCallback )
+FArianeObject::Copy( const FCopyArgs& CopyArgs
+                   , TFunction<void( FArianeObject*, const FCopyArgs& )> PreCallback
+                   , TFunction<void( FArianeObject*, FArianeObject*, const FCopyArgs& )> PostCallback )
 {
-    PreCallback( this, CopyFlags );
+    PreCallback( this, CopyArgs );
 
-    FArianeObject* ObjectCopy = CopyShape( CopyFlags );
+    FArianeObject* ObjectCopy = CopyShape( CopyArgs );
 
     if( ObjectCopy )
     {
@@ -640,13 +671,13 @@ FArianeObject::Copy( ECopyFlags CopyFlags
         for( FArianeObjectID& ChildID : Children )
         {
             FArianeObject* Child = ChildID.GetObject();
-            FArianeObject* ChildCopy = Child->Copy( CopyFlags, PreCallback, PostCallback );
+            FArianeObject* ChildCopy = Child->Copy( CopyArgs, PreCallback, PostCallback );
 
             ObjectCopy->AppendChild( ChildCopy );
         }
 
         // copy tags
-        if( EnumHasAllFlags( CopyFlags, ECopyFlags::IgnoreTags ) == false )
+        if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::IgnoreTags ) == false )
         {
             for( FArianeTagID& TagID : Tags )
             {
@@ -659,18 +690,18 @@ FArianeObject::Copy( ECopyFlags CopyFlags
         }
     }
 
-    PostCallback( this, ObjectCopy, CopyFlags );
+    PostCallback( this, ObjectCopy, CopyArgs );
 
     return ObjectCopy;
 }
 
 FArianeObject*
-FArianeObject::Copy( ECopyFlags CopyFlags )
+FArianeObject::Copy( const FCopyArgs& CopyArgs )
 {
-    return Copy( CopyFlags
-               , []( FArianeObject* Object, ECopyFlags CopyFlags ){ return 0; }
+    return Copy( CopyArgs
+               , []( FArianeObject* Object, const FCopyArgs& CopyArgs ){ return 0; }
                , []( FArianeObject* SourceObject
-                   , FArianeObject* ObjectCopy, ECopyFlags CopyFlags ){ return 0; } );
+                   , FArianeObject* ObjectCopy, const FCopyArgs& CopyArgs ){ return 0; } );
 }
 
 void

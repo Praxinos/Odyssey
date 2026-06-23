@@ -131,7 +131,7 @@ FArianeObject*
 UArianeLayerDrawing::AllocObject( const FName& InName )
 {
     InstancedObjectsAccessRW.Lock();
-    InstancedObjects.Add( FInstancedStruct::Make<FArianeObject>( this, InName ) );
+    InstancedObjects.Add( FInstancedStruct::Make<FArianeObject>( this, InName, EArianeAllocationModel::InstancedStruct ) );
     InstancedObjectsAccessRW.Unlock();
 
     FArianeObject* NewObject = InstancedObjects.Last().GetMutablePtr<FArianeObject>();
@@ -143,7 +143,7 @@ FArianeGroup*
 UArianeLayerDrawing::AllocGroup( const FName& InName )
 {
     InstancedObjectsAccessRW.Lock();
-    InstancedObjects.Add( FInstancedStruct::Make<FArianeGroup>( this, InName ) );
+    InstancedObjects.Add( FInstancedStruct::Make<FArianeGroup>( this, InName, EArianeAllocationModel::InstancedStruct ) );
     InstancedObjectsAccessRW.Unlock();
 
     FArianeGroup* NewGroup = InstancedObjects.Last().GetMutablePtr<FArianeGroup>();
@@ -155,7 +155,7 @@ FArianePath*
 UArianeLayerDrawing::AllocPath( UMaterialInterface* InMaterialInterface, const FName& InName )
 {
     InstancedObjectsAccessRW.Lock();
-    InstancedObjects.Add( FInstancedStruct::Make<FArianePath>( this, InName ) );
+    InstancedObjects.Add( FInstancedStruct::Make<FArianePath>( this, InName, EArianeAllocationModel::InstancedStruct ) );
     InstancedObjectsAccessRW.Unlock();
 
     FArianePath* NewPath = InstancedObjects.Last().GetMutablePtr<FArianePath>();

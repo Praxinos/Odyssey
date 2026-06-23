@@ -201,6 +201,27 @@ void FArianePathVertexBuffer::InitRHI(FRHICommandListBase& RHICmdList)
 
 FArianePath::~FArianePath()
 {
+    // free mallocated segments.
+    for( FArianeSegmentID& SegmentID : Segments )
+    {
+        FArianeSegment* Segment = SegmentID.GetSegment();
+
+        if( Segment->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
+        {
+            delete Segment;
+        }
+    }
+
+    // free mallocated vertices
+    for( FArianeVertexID& VertexID : Vertices )
+    {
+        FArianeVertex* Vertex = VertexID.GetVertex();
+
+        if( Vertex->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
+        {
+            delete Vertex;
+        }
+    }
 }
 
 FArianePath::FArianePath()
@@ -216,8 +237,10 @@ FArianePath::FArianePath()
     //MaterialInterface = GEngine->VertexColorMaterial;
 }
 
-FArianePath::FArianePath( UArianeLayerDrawing* InDrawingLayer, const FName& InName )
-    : FArianeObject ( InDrawingLayer, InName )
+FArianePath::FArianePath( UArianeLayerDrawing* InDrawingLayer
+                        , const FName& InName
+                        , EArianeAllocationModel InAllocationModel )
+    : FArianeObject ( InDrawingLayer, InName, InAllocationModel )
     , LineType ( EArianePathLineType::Tube )
     , Color ( 0, 0, 0, 255 )
     , MaterialInterface ( nullptr )
@@ -258,7 +281,7 @@ FArianePath::PostLoad()
 void
 FArianePath::Added()
 {
-    if( MaterialInterface )
+    if( MaterialInterface && DrawingLayer )
     {
         DrawingLayer->IncrementMaterial( MaterialInterface );
     }
@@ -267,7 +290,7 @@ FArianePath::Added()
 void
 FArianePath::Removed()
 {
-    if( MaterialInterface )
+    if( MaterialInterface && DrawingLayer )
     {
         DrawingLayer->DecrementMaterial( MaterialInterface );
     }
@@ -283,13 +306,13 @@ void
 FArianePath::SetMaterial( UMaterialInterface* InMaterialInterface )
 {
     // remove the current material from the used material list
-    if( MaterialInterface )
+    if( MaterialInterface && DrawingLayer )
     {
         DrawingLayer->DecrementMaterial( MaterialInterface );
     }
 
     // add the new material to the used material list
-    if( InMaterialInterface )
+    if( InMaterialInterface && DrawingLayer )
     {
         DrawingLayer->IncrementMaterial( InMaterialInterface );
     }
@@ -304,9 +327,13 @@ FArianePath::GetChains()
 }
 
 FArianeVertex*
-FArianePath::AllocVertex( const FVector& iPosition, const FVector& InNormal, double InRadius )
+FArianePath::AllocVertex( const FVector& InPosition, const FVector& InNormal, double InRadius )
 {
-    InstancedVertices.Push( FInstancedStruct::Make<FArianeVertex>( this, iPosition, InNormal, InRadius ) );
+    InstancedVertices.Push( FInstancedStruct::Make<FArianeVertex>( this
+                                                                 , InPosition
+                                                                 , InNormal
+                                                                 , InRadius
+                                                                 , EArianeAllocationModel::InstancedStruct ) );
 
     FArianeVertex* NewVertex = InstancedVertices.Last().GetMutablePtr<FArianeVertex>();
 
@@ -367,7 +394,7 @@ FArianePath::GetSegmentByGuid( const FGuid& InGuid )
 FArianeSegment*
 FArianePath::AllocSegment( FArianeVertex* Vertex0, FArianeVertex* Vertex1 )
 {
-    InstancedSegments.Push( FInstancedStruct::Make<FArianeSegment>( this, Vertex0, Vertex1 ) );
+    InstancedSegments.Push( FInstancedStruct::Make<FArianeSegment>( this, Vertex0, Vertex1, EArianeAllocationModel::InstancedStruct ) );
 
     FArianeSegment* NewSegment = InstancedSegments.Last().GetMutablePtr<FArianeSegment>();
 
@@ -409,7 +436,8 @@ FArianePath::AllocCubicSegment( FArianeVertex* Vertex0
                                                                        , Handle1X
                                                                        , Handle1Y
                                                                        , Handle1Z
-                                                                       , Vertex1 ) );
+                                                                       , Vertex1
+                                                                       , EArianeAllocationModel::InstancedStruct ) );
 
     FArianeSegmentCubic* NewCubicSegment = InstancedSegments.Last().GetMutablePtr<FArianeSegmentCubic>();
 
@@ -494,11 +522,11 @@ FArianePath::AlterRadius( double RatioRadius )
 }
 
 void
-FArianePath::CopySettings( FArianeObject* DestinationObject, ECopyFlags CopyFlags, bool bInvalidate )
+FArianePath::CopySettings( FArianeObject* DestinationObject, const FCopyArgs& CopyArgs, bool bInvalidate )
 {
     FArianePath* DestinationPath = static_cast<FArianePath*>(DestinationObject);
 
-    Super::CopySettings( DestinationObject, CopyFlags, false );
+    Super::CopySettings( DestinationObject, CopyArgs, false );
 
     DestinationPath->LineType = LineType;
     DestinationPath->Color = Color;
@@ -511,14 +539,25 @@ FArianePath::CopySettings( FArianeObject* DestinationObject, ECopyFlags CopyFlag
 }
 
 FArianePath*
-FArianePath::CopyShape( ECopyFlags CopyFlags )
+FArianePath::CopyShape( const FCopyArgs& CopyArgs )
 {
-    FArianePath* PathCopy = EnumHasAllFlags( CopyFlags, ECopyFlags::AllocWithNew ) ? new FArianePath( nullptr, Name )
-                                                                                   : DrawingLayer->AllocPath( nullptr, Name );
     TArray<FArianeVertex*> LookupTable;
+    FArianePath* PathCopy = nullptr;
     uint32 VertexID = 0;
 
-    CopySettings( PathCopy, CopyFlags, true );
+    if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocByOperatingSystem ) )
+    {
+        PathCopy = new FArianePath( nullptr
+                                  , Name
+                                  , EArianeAllocationModel::OperatingSystem );
+    }
+
+    if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocAsInstancedStruct ) )
+    {
+        PathCopy = CopyArgs.DrawingLayer->AllocPath( nullptr, Name );
+    }
+
+    CopySettings( PathCopy, CopyArgs, true );
 
     LookupTable.Reserve ( Vertices.Num() );
 
@@ -529,16 +568,25 @@ FArianePath::CopyShape( ECopyFlags CopyFlags )
         FVector OriginalVertexPosition = OriginalVertex->GetPosition();
         FVector OriginalVertexNormal = OriginalVertex->GetNormal();
         double OriginalVertexRadius = OriginalVertex->GetRadius();
-        FArianeVertex* NewVertex;
+        FArianeVertex* NewVertex = nullptr;
 
-        NewVertex = EnumHasAllFlags( CopyFlags, ECopyFlags::AllocWithNew ) ? new FArianeVertex( PathCopy
-                                                                                              , OriginalVertexPosition
-                                                                                              , OriginalVertexNormal
-                                                                                              , OriginalVertexRadius )
-                                                                           : PathCopy->AllocVertex( OriginalVertexPosition
-                                                                                                  , OriginalVertexNormal
-                                                                                                  , OriginalVertexRadius );
+        if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocByOperatingSystem ) )
+        {
+            NewVertex = new FArianeVertex( PathCopy
+                                         , OriginalVertexPosition
+                                         , OriginalVertexNormal
+                                         , OriginalVertexRadius
+                                         , EArianeAllocationModel::OperatingSystem );
+        }
 
+        if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocAsInstancedStruct ) )
+        {
+            NewVertex = PathCopy->AllocVertex( OriginalVertexPosition
+                                             , OriginalVertexNormal
+                                             , OriginalVertexRadius );
+        }
+
+        // Don't check if NewVertex is null, it must not be.
         NewVertex->SetHandleAligned( OriginalVertex->IsHandleAligned() );
 
         LookupTable.Add( NewVertex );
@@ -564,38 +612,52 @@ FArianePath::CopyShape( ECopyFlags CopyFlags )
             FVector OriginalHandle0Position = OriginalHandle0->GetPosition();
             FVector OriginalHandle1Position = OriginalHandle1->GetPosition();
 
-            NewSegment = EnumHasAllFlags( CopyFlags, ECopyFlags::AllocWithNew ) ? new FArianeSegmentCubic( PathCopy
-                                                                                                         , LookupTable[Vertex0->GetID()]
-                                                                                                         , OriginalHandle0Position.X
-                                                                                                         , OriginalHandle0Position.Y
-                                                                                                         , OriginalHandle0Position.Z
-                                                                                                         , OriginalHandle1Position.X
-                                                                                                         , OriginalHandle1Position.Y
-                                                                                                         , OriginalHandle1Position.Z
-                                                                                                         , LookupTable[Vertex1->GetID()] )
-                                                                                : PathCopy->AllocCubicSegment ( LookupTable[Vertex0->GetID()]
-                                                                                                              , OriginalHandle0Position.X
-                                                                                                              , OriginalHandle0Position.Y
-                                                                                                              , OriginalHandle0Position.Z
-                                                                                                              , OriginalHandle1Position.X
-                                                                                                              , OriginalHandle1Position.Y
-                                                                                                              , OriginalHandle1Position.Z
-                                                                                                              , LookupTable[Vertex1->GetID()] );
+            if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocByOperatingSystem ) )
+            {
+                NewSegment = new FArianeSegmentCubic( PathCopy
+                                                    , LookupTable[Vertex0->GetID()]
+                                                    , OriginalHandle0Position.X
+                                                    , OriginalHandle0Position.Y
+                                                    , OriginalHandle0Position.Z
+                                                    , OriginalHandle1Position.X
+                                                    , OriginalHandle1Position.Y
+                                                    , OriginalHandle1Position.Z
+                                                    , LookupTable[Vertex1->GetID()]
+                                                    , EArianeAllocationModel::OperatingSystem );
+            }
+
+            if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocAsInstancedStruct ) )
+            {
+                NewSegment = PathCopy->AllocCubicSegment ( LookupTable[Vertex0->GetID()]
+                                                         , OriginalHandle0Position.X
+                                                         , OriginalHandle0Position.Y
+                                                         , OriginalHandle0Position.Z
+                                                         , OriginalHandle1Position.X
+                                                         , OriginalHandle1Position.Y
+                                                         , OriginalHandle1Position.Z
+                                                         , LookupTable[Vertex1->GetID()] );
+            }
         }
 
         if( OriginalSegment->GetClass() == FArianeSegment::StaticClass() )
         {
-            NewSegment = EnumHasAllFlags( CopyFlags, ECopyFlags::AllocWithNew ) ? new FArianeSegment( PathCopy
-                                                                                                    , LookupTable[Vertex0->GetID()]
-                                                                                                    , LookupTable[Vertex1->GetID()] )
-                                                                                : PathCopy->AllocSegment ( LookupTable[Vertex0->GetID()]
-                                                                                                         , LookupTable[Vertex1->GetID()] );
+            if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocByOperatingSystem ) )
+            {
+                NewSegment = new FArianeSegment( PathCopy
+                                               , LookupTable[Vertex0->GetID()]
+                                               , LookupTable[Vertex1->GetID()]
+                                               , EArianeAllocationModel::OperatingSystem );
+            }
+
+            if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocAsInstancedStruct ) )
+            {
+                NewSegment = PathCopy->AllocSegment ( LookupTable[Vertex0->GetID()]
+                                                    , LookupTable[Vertex1->GetID()] );
+            }
         }
 
-        if( NewSegment )
-        {
-            PathCopy->AddSegment( NewSegment );
-        }
+        // Don't check if NewSegment is null, it must not be.
+        PathCopy->AddSegment( NewSegment );
     }
 
     return PathCopy;

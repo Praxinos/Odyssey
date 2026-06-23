@@ -105,8 +105,10 @@ FArianeGroup::FArianeGroup()
     //MaterialInterface = GEngine->VertexColorMaterial;
 }
 
-FArianeGroup::FArianeGroup( UArianeLayerDrawing* InDrawingLayer, const FName& InName  )
-    : FArianeObject ( InDrawingLayer, InName )
+FArianeGroup::FArianeGroup( UArianeLayerDrawing* InDrawingLayer
+                          , const FName& InName
+                          , EArianeAllocationModel InAllocationModel   )
+    : FArianeObject ( InDrawingLayer, InName, InAllocationModel )
 #if WITH_EDITOR
     , HUDForegroundColor( FColor::Black )
     , bUseEditorHUDForegroundColor( true )

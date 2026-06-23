@@ -144,7 +144,9 @@ public:
 public:
     virtual ~FArianePath();
     FArianePath();
-    FArianePath( UArianeLayerDrawing* InDrawingLayer, const FName& InName );
+    FArianePath( UArianeLayerDrawing* InDrawingLayer
+               , const FName& InName
+               , EArianeAllocationModel InAllocationModel );
 
 public:
     /** overriden from ArianeObject */
@@ -291,8 +293,8 @@ public:
 
 protected:
     void FindChains();
-    virtual FArianePath* CopyShape( ECopyFlags CopyFlags ) override;
-    virtual void CopySettings( FArianeObject* DestinationObject, ECopyFlags CopyFlags, bool bInvalidate ) override;
+    virtual FArianePath* CopyShape( const FCopyArgs& CopyArgs ) override;
+    virtual void CopySettings( FArianeObject* DestinationObject, const FCopyArgs& CopyArgs, bool bInvalidate ) override;
 
 private:
     static FArianeVertex* GetStitchingVertex( FArianeVertex* Vertex

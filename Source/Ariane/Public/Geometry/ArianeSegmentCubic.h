@@ -78,7 +78,8 @@ public:
                        , double Handle1X
                        , double Handle1Y
                        , double Handle1Z
-                       , FArianeVertex* iVertex1 );
+                       , FArianeVertex* iVertex1
+                       , EArianeAllocationModel InAllocationModel );
 
     virtual void Update() override;
     virtual FVector GetPointAt( double T ) override;

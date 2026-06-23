@@ -3,10 +3,10 @@
 
 #pragma once
 
+// Unreal headers
 #include "CoreMinimal.h"
-
-#include <Core/Core.h>
-#include <Image/Block.h>
+// Ariane headers
+#include "ArianeCoreEnums.h"
 
 #include "ArianeTag.generated.h"
 
@@ -26,7 +26,7 @@ public:
 
     virtual ~FArianeTag();
     FArianeTag();
-    FArianeTag( FArianeObject* InOwnerObject );
+    FArianeTag( FArianeObject* InOwnerObject, EArianeAllocationModel InAllocationModel );
     virtual void Draw( double iAncestorsOpacity
                         , uint64 iDrawingFlags );
     virtual void Update( uint32 UpdateFlags
@@ -42,10 +42,14 @@ public:
 
     /** Get tag's Guid */
     const FGuid& GetGuid();
+    EArianeAllocationModel GetAllocationModel();
 
 protected:
     UPROPERTY( EditAnywhere, meta = (IgnoreForMemberInitializationTest) )
     FGuid Guid;
+
+    UPROPERTY()
+    EArianeAllocationModel AllocationModel;
 
 protected:
     FArianeObject* Owner;

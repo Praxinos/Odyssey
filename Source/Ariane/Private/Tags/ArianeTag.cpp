@@ -14,15 +14,23 @@ FArianeTag::FArianeTag()
     , Owner( nullptr )
     , Flags( 0 )
     , bShared( false )
+    , AllocationModel ( EArianeAllocationModel::InstancedStruct )
 {
 }
 
-FArianeTag::FArianeTag( FArianeObject* InOwnerObject )
+FArianeTag::FArianeTag( FArianeObject* InOwnerObject, EArianeAllocationModel InAllocationModel )
     : Guid ( FGuid::NewGuid() )
     , Owner( InOwnerObject )
     , Flags( 0 )
     , bShared( false )
+    , AllocationModel( InAllocationModel )
 {
+}
+
+EArianeAllocationModel
+FArianeTag::GetAllocationModel()
+{
+    return AllocationModel;
 }
 
 const FGuid&

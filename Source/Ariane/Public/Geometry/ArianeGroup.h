@@ -8,6 +8,7 @@
 // Ariane Headers
 #include "ArianeID.h"
 #include "ArianeObject.h"
+#include "ArianeCoreEnums.h"
 
 #include "ArianeGroup.generated.h"
 
@@ -56,7 +57,9 @@ public:
 public:
     virtual ~FArianeGroup();
     FArianeGroup();
-    FArianeGroup( UArianeLayerDrawing* InDrawingLayer, const FName& InName  );
+    FArianeGroup( UArianeLayerDrawing* InDrawingLayer
+                , const FName& InName
+                , EArianeAllocationModel InAllocationModel );
 
 public:
     /** overriden from ArianeObject */
