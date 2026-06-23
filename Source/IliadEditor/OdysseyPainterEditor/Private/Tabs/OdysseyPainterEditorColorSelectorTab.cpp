@@ -45,28 +45,33 @@ TSharedPtr<SWidget>
 FOdysseyPainterEditorColorSelectorTab::CreateWidget()
 {
     return
-        SNew(SScrollBox)
-        +SScrollBox::Slot()
-        .AutoSize()
-        [
-            SNew(SSegmentedControl<EOdysseyPainterEditorColorType>)
-            .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetColorTypeVisibility)
-            .Value(this, &FOdysseyPainterEditorColorSelectorTab::GetColorType)
-            .OnValueChecked(this, &FOdysseyPainterEditorColorSelectorTab::OnColorTypeChanged)
-            .Style( &FOdysseyStyle::Get(), "OdysseyPalette.Tabs" )
+    SNew(SVerticalBox)
+    + SVerticalBox::Slot()
+    .AutoHeight()
+    [
+        SNew(SSegmentedControl<EOdysseyPainterEditorColorType>)
+        .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetColorTypeVisibility)
+        .Value(this, &FOdysseyPainterEditorColorSelectorTab::GetColorType)
+        .OnValueChecked(this, &FOdysseyPainterEditorColorSelectorTab::OnColorTypeChanged)
+        .Style( &FOdysseyStyle::Get(), "OdysseyPalette.Tabs" )
 
-            //Color Type: RAW
-            + SSegmentedControl<EOdysseyPainterEditorColorType>::Slot(EOdysseyPainterEditorColorType::Raw)
-            .Text(LOCTEXT("color-selector.color-type.raw.name", "Raw"))
-            .ToolTip(LOCTEXT("color-selector.color-type.raw.tooltip", "Switch to Raw colors"))
-            .Icon(FOdysseyStyle::GetBrush( "PainterEditor.ColorSelector.ColorType.Raw" ))
+        //Color Type: RAW
+        + SSegmentedControl<EOdysseyPainterEditorColorType>::Slot(EOdysseyPainterEditorColorType::Raw)
+        .Text(LOCTEXT("color-selector.color-type.raw.name", "Raw"))
+        .ToolTip(LOCTEXT("color-selector.color-type.raw.tooltip", "Switch to Raw colors"))
+        .Icon(FOdysseyStyle::GetBrush( "PainterEditor.ColorSelector.ColorType.Raw" ))
 
-            //Color Type: INDEXED
-            + SSegmentedControl<EOdysseyPainterEditorColorType>::Slot(EOdysseyPainterEditorColorType::Indexed)
-            .Text(LOCTEXT("color-selector.color-type.indexed.name", "Indexed"))
-            .ToolTip(LOCTEXT("color-selector.color-type.indexed.tooltip", "Switch to Indexed colors"))
-            .Icon(FOdysseyStyle::GetBrush( "PainterEditor.ColorSelector.ColorType.Indexed" ))
-        ]
+        //Color Type: INDEXED
+        + SSegmentedControl<EOdysseyPainterEditorColorType>::Slot(EOdysseyPainterEditorColorType::Indexed)
+        .Text(LOCTEXT("color-selector.color-type.indexed.name", "Indexed"))
+        .ToolTip(LOCTEXT("color-selector.color-type.indexed.tooltip", "Switch to Indexed colors"))
+        .Icon(FOdysseyStyle::GetBrush( "PainterEditor.ColorSelector.ColorType.Indexed" ))
+    ]
+
+    + SVerticalBox::Slot()
+    .FillHeight( 1.f )
+    [
+        SNew( SScrollBox )
         +SScrollBox::Slot()
         .AutoSize()
         [
@@ -238,10 +243,8 @@ FOdysseyPainterEditorColorSelectorTab::CreateWidget()
                 ]
             ]
             +SVerticalBox::Slot()
+            .AutoHeight()
             [
-                SNew(SBox)
-                .MaxDesiredHeight(100.f)
-                [
                     SNew(SOdysseyPainterEditorPaletteSetList)
                     .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetColorPaletteVisibility)
                     .PaletteSets(this, &FOdysseyPainterEditorColorSelectorTab::GetPaletteSets)
@@ -252,9 +255,9 @@ FOdysseyPainterEditorColorSelectorTab::CreateWidget()
                     .OnAddPaletteSet(this, &FOdysseyPainterEditorColorSelectorTab::OnAddPaletteSet)
                     .OnRemovePaletteSet(this, &FOdysseyPainterEditorColorSelectorTab::OnRemovePaletteSet)
                     .OnCurrentColorEntryChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentColorEntryChanged)
-                ]
             ]
-        ];
+        ]
+    ];
 }
 
 //--------------------------------------------------------------------------------------
