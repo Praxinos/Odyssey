@@ -10,6 +10,7 @@
 // Ariane Headers
 #include "ArianeID.h"
 #include "ArianeLayer.h"
+#include "ArianeLayerDrawingEnums.h"
 
 #include "ArianeLayerDrawing.generated.h"
 
@@ -17,22 +18,6 @@ struct FArianeObject;
 struct FArianeGroup;
 struct FArianePath;
 class UMaterialInterface;
-
-UENUM()
-enum class EArianeLayerDrawingOrigin : uint8
-{
-    Layer,
-    Surface
-};
-
-UENUM()
-enum class EArianeLayerDrawingOrientation : uint8
-{
-    LayerXY,
-    LayerYZ,
-    LayerZX,
-    View,
-};
 
 UCLASS()
 class ARIANE_API UArianeLayerDrawing : public UArianeLayer
@@ -134,6 +119,7 @@ public:
     void SelectObject( FArianeObject* ObjectToSelect );
     const TArray<FArianeObject*>& GetSelectedObjects() const;
     TArray<FArianeObject*>& GetSelectedObjects();
+    void GetUniquelySelectedObjects( TArray<FArianeObject*>& UniquelySelectedObjects, bool bEmptyfirst );
 
 protected:
     void BindDelegates();

@@ -127,14 +127,6 @@ protected:
                    , const FArianePointerState& State
                    , bool bInteractive );
 
-    /**
-     * @brief Get a layer's drawing plane
-     * @param ViewportClient
-     * @param DrawingLayer the layer from get the plane from
-     */
-    FVector4 GetDrawingPlane( FEditorViewportClient* ViewportClient
-                            , UArianeLayerDrawing* DrawingLayer );
-
     FArianeEditorHUD::FDrawingFlags EditonModeToHUDDrawingFlags();
     FPickingFlags EditonModeToPickingFlags();
 

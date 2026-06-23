@@ -310,7 +310,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
         ( [ this
           , ViewportClient
           , View
-          , &PointerState ]( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
+          , &PointerState ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
           {
               if( /*iScene->GetCell()->ObjectHasFocus( object, traversalFlags )*/1 )
               {
@@ -333,7 +333,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
                   }
               }
 
-              return FArianeObject::TraversalReturnValue::Continue;
+              return FArianeObject::ETraversalReturnValue::Continue;
           } );
 
         // Link or Unlink segment handles
@@ -932,7 +932,7 @@ UArianeEditorPathEditTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* Re
                                                     , FgColor
                                                     , BgColor
                                                     , HcColor
-                                                    , HUDDrawingFlags ]( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
+                                                    , HUDDrawingFlags ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
             {
                 if( Object->GetClass() == FArianePath::StaticClass() )
                 {
@@ -942,13 +942,13 @@ UArianeEditorPathEditTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* Re
                                , ViewportClient
                                , View
                                , Path
-                               , FgColor
+                               , Path->GetHUDForegroundColor() //FgColor
                                , BgColor
                                , HcColor
                                , HUDDrawingFlags );
                 }
 
-                return FArianeObject::TraversalReturnValue::Continue;
+                return FArianeObject::ETraversalReturnValue::Continue;
             } );
         }
     }

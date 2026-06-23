@@ -7,6 +7,7 @@
 #include "ArianeEditor.h"
 #include "ArianeEditorTab.h"
 #include "ArianeEditorLayerStackTab.h"
+#include "ArianeEditorSceneTreeViewTab.h"
 #include "ArianeEditorColorSelectorTab.h"
 #include "SArianeEditorMasterPanel.h"
 // Ariane headers
@@ -454,7 +455,7 @@ FArianeEditorViewportToolkit::InvokeUI()
 
     TabManager->TryInvokeTab( FTabId( FArianeEditorColorSelectorTab::StaticId() ) );
     TabManager->TryInvokeTab( FTabId( FArianeEditorLayerStackTab::StaticId() ) );
-
+    TabManager->TryInvokeTab( FTabId( FArianeEditorSceneTreeViewTab::StaticId() ) );
 
 
 

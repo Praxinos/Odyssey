@@ -142,6 +142,7 @@ UArianeLayer::Invalidate( const FArianeLayerInvalidationFlags& InInvalidationFla
     InvalidationFlags->OR( InInvalidationFlags );
 
     //GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
+    MarkPackageDirty();
 }
 
 void UArianeLayer::SetInvalidatedInParentFolder( bool bInInvalidatedInParentFolder )

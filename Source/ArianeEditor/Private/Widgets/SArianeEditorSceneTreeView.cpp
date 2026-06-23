@@ -109,15 +109,15 @@ SArianeEditorSceneTreeView::OnPost3DPaintingComponentSelectionChanged()
 void
 SArianeEditorSceneTreeView::RenameSelectedItem()
 {
-    TArray<TSharedPtr<FSceneTreeViewItem>> selectedItems = GetSelectedItems();
+    TArray<TSharedPtr<FSceneTreeViewItem>> LayerSelectedItems = GetSelectedItems();
 
     // no need to create an undo record or do anything if the selection is empty
-    if( selectedItems.Num() )
+    if( LayerSelectedItems.Num() )
     {
-        TSharedPtr<ITableRow> tableRow = WidgetFromItem( selectedItems[0] );
-        TSharedPtr<SArianeEditorSceneTreeViewRow> itemWidget = StaticCastSharedPtr<SArianeEditorSceneTreeViewRow>(tableRow);
+        TSharedPtr<ITableRow> tableRow = WidgetFromItem( LayerSelectedItems[0] );
+        TSharedPtr<SArianeEditorSceneTreeViewRow> ItemWidget = StaticCastSharedPtr<SArianeEditorSceneTreeViewRow>(tableRow);
 
-        itemWidget->Rename();
+        ItemWidget->Rename();
     }
 }
 
@@ -385,48 +385,47 @@ SArianeEditorSceneTreeView::OnPrePainting3DComponentUpdate( bool bInteractive )
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
-    bDoUpdate = false;
+    // the bInteractive is voluntarily ignored. During a MouseDown, the flag is set but we still need to mark the widget
+    // as needing an update
+    Painting3DComponent->GetLayerStack()->GetRootFolder()->Traverse (
+        [this]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
+        {
+            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Layer);
 
-    if( bInteractive == false )
-    {
-        Painting3DComponent->GetLayerStack()->GetRootFolder()->Traverse (
-            [this]( UArianeLayer* Layer ) -> UArianeLayerFolder::TraversalReturnValue
+            if( DrawingLayer )
             {
-                UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Layer);
+                FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
 
-                if( DrawingLayer )
-                {
-                    FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
-
-                    if( RootGroup->GetInvalidationFlags().HasAny() )
+                RootGroup->Traverse (
+                    [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
                     {
-                        RootGroup->Traverse (
-                            [this] ( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
-                            {
-                                if( Object->GetInvalidationFlags().Hierarchy
-                                 || Object->GetInvalidationFlags().Tags )
-                                {
-                                    bDoUpdate = true;
-                                }
+                        if( Object->GetInvalidationFlags().Hierarchy
+                         || Object->GetInvalidationFlags().Tags )
+                        {
+                            bDoUpdate = true;
+                        }
 
-                                return bDoUpdate ? FArianeObject::TraversalReturnValue::Stop
-                                                 : FArianeObject::TraversalReturnValue::Continue;
-                            } );
-                    }
-                }
+                        return bDoUpdate ? FArianeObject::ETraversalReturnValue::Stop
+                                            : FArianeObject::ETraversalReturnValue::Continue;
+                    } );
+            }
 
-                return bDoUpdate ? UArianeLayerFolder::TraversalReturnValue::Stop
-                                 : UArianeLayerFolder::TraversalReturnValue::Continue;
-            } );
-    }
+            return bDoUpdate ? UArianeLayerFolder::ETraversalReturnValue::Stop
+                                : UArianeLayerFolder::ETraversalReturnValue::Continue;
+        } );
 }
 
 void
 SArianeEditorSceneTreeView::OnPostPainting3DComponentUpdate( bool bInteractive )
 {
-    if( bDoUpdate )
+    if( bInteractive == false )
     {
-        Update();
+        if( bDoUpdate )
+        {
+            Update();
+
+            bDoUpdate = false;
+        }
     }
 }
 

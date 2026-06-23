@@ -29,44 +29,48 @@ SArianeEditorSceneTreeViewContextMenu::CreateWidget( SArianeEditorSceneTreeView*
 
     Menu.BeginSection("Context");
     {
-/*
-        menu.AddMenuEntry(
+        Menu.AddMenuEntry(
             LOCTEXT("ariane-scene-tree-view.context-menu.rename.name", "Rename")
           , LOCTEXT("ariane-scene-tree-view.context-menu.rename.tooltip", "Rename")
           , FSlateIcon()
-          , FUIAction(FExecuteAction::CreateRaw(iTreeView, &SArianeEditorSceneTreeViewContextMenu::RenameSelectedItem)));
+          , FUIAction(FExecuteAction::CreateRaw(TreeView, &SArianeEditorSceneTreeView::RenameSelectedItem)));
 
-        menu.AddMenuEntry(
-            LOCTEXT("ariane-scene-tree-view.context-menu.group-paint.name", "Make Paint Group")
-          , LOCTEXT("ariane-scene-tree-view.context-menu.group-paint.tooltip", "Make Paint Group")
-          , FSlateIcon()
-          , FUIAction(FExecuteAction::CreateStatic( &FArianeEditor::MakePaintGroup, iTreeView->GetEditor(), vectorScene )));
-
-        menu.AddMenuEntry(
+        Menu.AddMenuEntry(
             LOCTEXT("ariane-scene-tree-view.context-menu.group.name", "Group")
           , LOCTEXT("ariane-scene-tree-view.context-menu.group.tooltip", "Group")
           , FSlateIcon()
-          , FUIAction(FExecuteAction::CreateStatic( &SArianeEditorSceneTreeViewContextMenuContextMenu::Group, iTreeView->GetEditor(), vectorScene )));
+          , FUIAction( FExecuteAction::CreateStatic( &SArianeEditorSceneTreeViewContextMenu::Group, Editor )
+                     , FCanExecuteAction::CreateStatic( &SArianeEditorSceneTreeViewContextMenu::CanGroup, RootGroup )));
 
-        menu.AddMenuEntry(
+        Menu.AddMenuEntry(
             LOCTEXT("ariane-scene-tree-view.context-menu.ungroup.name", "Ungroup")
           , LOCTEXT("ariane-scene-tree-view.context-menu.ungroup.tooltip", "Ungroup")
           , FSlateIcon()
-          , FUIAction(FExecuteAction::CreateStatic( &FArianeEditor::Ungroup, iTreeView->GetEditor(), vectorScene )
-                    , FCanExecuteAction::CreateStatic( &SArianeEditorSceneTreeViewContextMenuContextMenu::CanUngroup, vectorScene )));
+          , FUIAction(FExecuteAction::CreateRaw( Editor, &FArianeEditor::UngroupSelectedGroups )
+                    , FCanExecuteAction::CreateStatic( &SArianeEditorSceneTreeViewContextMenu::CanUngroup, RootGroup )));
 
-        menu.AddMenuEntry(
+        Menu.AddMenuEntry(
             LOCTEXT("ariane-scene-tree-view.context-menu.copy.name", "Copy")
           , LOCTEXT("ariane-scene-tree-view.context-menu.copy.tooltip", "Copy")
           , FSlateIcon()
-          , FUIAction(FExecuteAction::CreateStatic(&FArianeEditor::CopyObjects, vectorScene)));
+          , FUIAction(FExecuteAction::CreateRaw( Editor, &FArianeEditor::CopySelectedObjects )));
 
-        menu.AddMenuEntry(
+        Menu.AddMenuEntry(
             LOCTEXT("ariane-scene-tree-view.context-menu.paste.name", "Paste")
           , LOCTEXT("ariane-scene-tree-view.context-menu.paste.tooltip", "Paste")
           , FSlateIcon()
-          , FUIAction(FExecuteAction::CreateStatic(&FArianeEditor::PasteObjects, iTreeView->GetEditor(), vectorScene)));
+          , FUIAction(FExecuteAction::CreateRaw( Editor, &FArianeEditor::PasteObjects )
+                    , FCanExecuteAction::CreateStatic( &SArianeEditorSceneTreeViewContextMenu::CanPaste, Editor )));
 
+        Menu.AddMenuEntry(
+            LOCTEXT("ariane-scene-tree-view.context-menu.delete-selection.name","Delete Selection")
+          , LOCTEXT("ariane-scene-tree-view.context-menu.delete-selection.tooltip","Delete Selection")
+          , FSlateIcon()
+          , FUIAction(FExecuteAction::CreateRaw( Editor, &FArianeEditor::DeleteSelectedObjects)
+                    , FCanExecuteAction::CreateStatic( &SArianeEditorSceneTreeViewContextMenu::CanDelete, RootGroup )));
+
+
+/*
         menu.AddMenuEntry(
             LOCTEXT("ariane-scene-tree-view.context-menu.copy-transformation.name", "Copy Transformation")
           , LOCTEXT("ariane-scene-tree-view.context-menu.copy-transformation.tooltip", "Copy Transformation")
@@ -79,11 +83,7 @@ SArianeEditorSceneTreeViewContextMenu::CreateWidget( SArianeEditorSceneTreeView*
           , FSlateIcon()
           , FUIAction(FExecuteAction::CreateStatic(&FArianeEditor::PasteTransformation, iTreeView->GetEditor(), vectorScene)));
 
-        menu.AddMenuEntry(
-            LOCTEXT("ariane-scene-tree-view.context-menu.delete-selection.name","Delete Selection")
-          , LOCTEXT("ariane-scene-tree-view.context-menu.delete-selection.tooltip","Delete Selection")
-          , FSlateIcon()
-          , FUIAction(FExecuteAction::CreateStatic(&FArianeEditor::DeleteObjects, iTreeView->GetEditor(), vectorScene)));
+
 
         menu.AddMenuEntry(
               LOCTEXT("ariane-tool.object-context-menu.apply-transformations.name", "Apply Transformations")
@@ -99,17 +99,35 @@ SArianeEditorSceneTreeViewContextMenu::CreateWidget( SArianeEditorSceneTreeView*
 
 // static
 void
-SArianeEditorSceneTreeViewContextMenu::Group( FArianeEditor* Editor, FArianeGroup* RootGroup )
+SArianeEditorSceneTreeViewContextMenu::Group( FArianeEditor* Editor )
 {
     SGenericDialogWidget::FArguments Args;
 /*
+    TSharedPtr<SEditableTextBox> TextBox;
+
     SGenericDialogWidget::OpenDialog( FText::FromString( "test" )
-                                    , SNew(SEditableTextBox)
+                                    , SAssignNew(TextBox,SEditableTextBox)
                                       .Text( FText::FromString("New Group") )
-                                    , args
+                                    , Args
                                     , true );
+
+    Editor->GroupSelectedObjects( FName( *TextBox->GetText().ToString() ) );
 */
-    //FArianeEditor::Group( Editor, RootGroup );
+    Editor->GroupSelectedObjects( "New Group" );
+}
+
+// static
+bool
+SArianeEditorSceneTreeViewContextMenu::CanDelete( FArianeGroup* RootGroup )
+{
+    return RootGroup->IsSelected() ? false : true;
+}
+
+// static
+bool
+SArianeEditorSceneTreeViewContextMenu::CanGroup( FArianeGroup* RootGroup )
+{
+    return RootGroup->IsSelected() ? false : true;
 }
 
 // static
@@ -130,6 +148,13 @@ SArianeEditorSceneTreeViewContextMenu::CanUngroup( FArianeGroup* RootGroup )
     }
 
     return Ret;
+}
+
+// static
+bool
+SArianeEditorSceneTreeViewContextMenu::CanPaste( FArianeEditor* Editor )
+{
+    return Editor->GetClipboard().GetCopiedObjects().Num() ? true : false;
 }
 
 #undef LOCTEXT_NAMESPACE

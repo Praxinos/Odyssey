@@ -80,14 +80,7 @@ protected:
     void PlotVertex( FEditorViewportClient* ViewportClient
                    , const FArianePointerState& State
                    , bool bInteractive );
-
-    /**
-     * @brief Get a layer's drawing plane
-     * @param ViewportClient
-     * @param DrawingLayer the layer from get the plane from
-     */
-    FVector4 GetDrawingPlane( FEditorViewportClient* ViewportClient
-                            , UArianeLayerDrawing* DrawingLayer );
+    FArianeGroup* GetParentGroup( UArianeLayerDrawing* DrawingLayer );
 
 public:
     UPROPERTY( EditAnywhere
@@ -114,7 +107,8 @@ public:
              , Category = PathDrawingTool )
     bool bShowGrid;
 
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere
+             , Category = PathDrawingTool )
     UMaterialInterface* MaterialInterface;
 
 

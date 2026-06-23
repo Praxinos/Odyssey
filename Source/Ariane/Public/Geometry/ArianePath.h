@@ -291,6 +291,8 @@ public:
 
 protected:
     void FindChains();
+    virtual FArianePath* CopyShape( ECopyFlags CopyFlags ) override;
+    virtual void CopySettings( FArianeObject* DestinationObject, ECopyFlags CopyFlags, bool bInvalidate ) override;
 
 private:
     static FArianeVertex* GetStitchingVertex( FArianeVertex* Vertex

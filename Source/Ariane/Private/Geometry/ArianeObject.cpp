@@ -33,6 +33,7 @@ FArianeObjectInvalidationFlags::AND( const FArianeObjectInvalidationFlags& RHS )
         Color     &= ((FArianeObjectInvalidationFlags&)RHS).Color;
         Children  &= ((FArianeObjectInvalidationFlags&)RHS).Children;
         Tags      &= ((FArianeObjectInvalidationFlags&)RHS).Tags;
+        Name      &= ((FArianeObjectInvalidationFlags&)RHS).Name;
     }
 
     return *this;
@@ -49,6 +50,7 @@ FArianeObjectInvalidationFlags::OR( const FArianeObjectInvalidationFlags& RHS )
         Color     |= ((FArianeObjectInvalidationFlags&)RHS).Color;
         Children  |= ((FArianeObjectInvalidationFlags&)RHS).Children;
         Tags      |= ((FArianeObjectInvalidationFlags&)RHS).Tags;
+        Name      |= ((FArianeObjectInvalidationFlags&)RHS).Name;
     }
 
     return *this;
@@ -63,6 +65,7 @@ FArianeObjectInvalidationFlags::SetAll()
     Color     = 1;
     Children  = 1;
     Tags      = 1;
+    Name      = 1;
 
     return *this;
 }
@@ -76,6 +79,7 @@ FArianeObjectInvalidationFlags::Clear()
     Color     = 0;
     Children  = 0;
     Tags      = 0;
+    Name      = 0;
 
     return *this;
 }
@@ -88,7 +92,8 @@ FArianeObjectInvalidationFlags::HasAny()
           || Hierarchy
           || Color
           || Children
-          || Tags  );
+          || Tags
+          || Name  );
 }
 
 
@@ -107,8 +112,9 @@ FArianeObject::FArianeObject()
     , Scaling( 1.0f, 1.0f, 1.0f )
     , DrawingLayer( nullptr )
     , bVisible ( true )
-    , bExpanded ( false )
+    , bExpanded ( true )
     , InvalidationFlags ( new FArianeObjectInvalidationFlags() )
+    , bSelected ( false )
 {
 }
 
@@ -237,23 +243,23 @@ FArianeObject::GetInvalidatedChildren( TArray<FArianeObject*> OutInvalidatedObje
     }
 }
 
-FArianeObject::TraversalReturnValue
-FArianeObject::Traverse_Private( TFunction<TraversalReturnValue(FArianeObject*)> Callback )
+FArianeObject::ETraversalReturnValue
+FArianeObject::Traverse_Private( TFunction<ETraversalReturnValue(FArianeObject*)> Callback )
 {
-    TraversalReturnValue Ret = Callback( this );
+    ETraversalReturnValue Ret = Callback( this );
 
-    if( Ret == TraversalReturnValue::Stop )
+    if( Ret == ETraversalReturnValue::Stop )
     {
         return Ret;
     }
 
-    if( ( Ret == TraversalReturnValue::IgnoreChildren ) == 0 )
+    if( ( Ret == ETraversalReturnValue::IgnoreChildren ) == 0 )
     {
         for( FArianeObjectID& ChildID : Children )
         {
-            TraversalReturnValue ChildRet = ChildID.GetObject()->Traverse_Private( Callback );
+            ETraversalReturnValue ChildRet = ChildID.GetObject()->Traverse_Private( Callback );
 
-            if( ChildRet == TraversalReturnValue::Stop )
+            if( ChildRet == ETraversalReturnValue::Stop )
             {
                 return ChildRet;
             }
@@ -264,9 +270,38 @@ FArianeObject::Traverse_Private( TFunction<TraversalReturnValue(FArianeObject*)>
 }
 
 void
-FArianeObject::Traverse( TFunction<TraversalReturnValue(FArianeObject*)> Callback )
+FArianeObject::Traverse( TFunction<ETraversalReturnValue(FArianeObject*)> Callback )
 {
     Traverse_Private( Callback );
+}
+
+FArianeObject::ETraversalReturnValue
+FArianeObject::TraverseBackwards_Private( TFunction<ETraversalReturnValue(FArianeObject*)> Callback )
+{
+    ETraversalReturnValue Ret = Callback( this );
+
+    if( Ret == ETraversalReturnValue::Stop )
+    {
+        return Ret;
+    }
+
+    if( ParentID.GetObject() )
+    {
+        ETraversalReturnValue ParentRet = ParentID.GetObject()->TraverseBackwards_Private( Callback );
+
+        if( ParentRet == ETraversalReturnValue::Stop )
+        {
+            return ParentRet;
+        }
+    }
+
+    return Ret;
+}
+
+void
+FArianeObject::TraverseBackwards( TFunction<ETraversalReturnValue(FArianeObject*)> Callback )
+{
+    TraverseBackwards_Private( Callback );
 }
 
 const FTransform&
@@ -379,6 +414,8 @@ void
 FArianeObject::SetName( const FName& InName )
 {
     Name = InName;
+
+    Invalidate( FArianeObjectInvalidationFlags().SetName() );
 }
 
 const FName&
@@ -491,21 +528,30 @@ FArianeObject::TransferChild( FArianeObject* FosterChild
             //BLMatrix2D childFormerWorldMatrix = iFosterChild->mWorldMatrix;
             //uint32 additionFlags = AddChild( FosterChild, InsertAfter );
 
-            FArianeObjectID* InsertAfterID = Children.FindByPredicate(
-                [InsertAfter] ( FArianeObjectID& ItemID ) -> bool
-                {
-                   if( ItemID.Guid == InsertAfter->GetGuid() )
-                   {
-                       return true;
-                   }
-
-                    return false;
-                } );
-
-            if( InsertAfterID )
+            if( InsertAfter )
             {
+                FArianeObjectID* InsertAfterID = Children.FindByPredicate(
+                    [InsertAfter] ( FArianeObjectID& ItemID ) -> bool
+                    {
+                       if( ItemID.Guid == InsertAfter->GetGuid() )
+                       {
+                           return true;
+                       }
+
+                       return false;
+                    } );
+
                 Children.Insert( FosterChild, InsertAfterID - Children.GetData() );
             }
+            else
+            {
+                Children.Add( FosterChild );
+            }
+
+            FosterChild->SetParent( this );
+            FosterChild->Added();
+
+            Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 /* Gary
             if( additionFlags == HIERARCHY_CHANGE_SUCCESS )
             {
@@ -548,6 +594,95 @@ FArianeObject::TransferChild( FArianeObject* FosterChild
     //return HIERARCHY_CHANGE_ERROR;
 }
 
+void
+FArianeObject::CopySettings( FArianeObject* DestinationObject, ECopyFlags CopyFlags, bool bInvalidate )
+{
+    DestinationObject->Name = Name;
+    DestinationObject->Translation = Translation;
+    DestinationObject->RotationInDegrees = RotationInDegrees;
+    DestinationObject->Scaling = Scaling;
+    DestinationObject->bVisible = bVisible;
+    DestinationObject->bExpanded = bExpanded;
+    //DestinationObject->Opacity = Opacity;
+
+    if( bInvalidate )
+    {
+        DestinationObject->Invalidate( FArianeObjectInvalidationFlags().SetAll() );
+    }
+}
+
+FArianeObject*
+FArianeObject::CopyShape( ECopyFlags CopyFlags )
+{
+    FArianeObject* ObjectCopy = EnumHasAllFlags( CopyFlags, ECopyFlags::AllocWithNew ) ? new FArianeObject( nullptr, Name )
+                                                                                       : DrawingLayer->AllocObject( Name );
+
+    CopySettings( ObjectCopy, CopyFlags, true );
+
+
+    return ObjectCopy;
+}
+
+FArianeObject*
+FArianeObject::Copy( ECopyFlags CopyFlags
+                   , TFunction<void( FArianeObject*,ECopyFlags)> PreCallback
+                   , TFunction<void( FArianeObject*, FArianeObject*, ECopyFlags )> PostCallback )
+{
+    PreCallback( this, CopyFlags );
+
+    FArianeObject* ObjectCopy = CopyShape( CopyFlags );
+
+    if( ObjectCopy )
+    {
+
+
+        // recurse
+        for( FArianeObjectID& ChildID : Children )
+        {
+            FArianeObject* Child = ChildID.GetObject();
+            FArianeObject* ChildCopy = Child->Copy( CopyFlags, PreCallback, PostCallback );
+
+            ObjectCopy->AppendChild( ChildCopy );
+        }
+
+        // copy tags
+        if( EnumHasAllFlags( CopyFlags, ECopyFlags::IgnoreTags ) == false )
+        {
+            for( FArianeTagID& TagID : Tags )
+            {
+                FArianeTag* Tag = TagID.GetTag();
+
+                FArianeTag* TagCopy = Tag->Copy( ObjectCopy );
+
+                ObjectCopy->AddTag( TagCopy );
+            }
+        }
+    }
+
+    PostCallback( this, ObjectCopy, CopyFlags );
+
+    return ObjectCopy;
+}
+
+FArianeObject*
+FArianeObject::Copy( ECopyFlags CopyFlags )
+{
+    return Copy( CopyFlags
+               , []( FArianeObject* Object, ECopyFlags CopyFlags ){ return 0; }
+               , []( FArianeObject* SourceObject
+                   , FArianeObject* ObjectCopy, ECopyFlags CopyFlags ){ return 0; } );
+}
+
+void
+FArianeObject::AddTag( FArianeTag* Tag )
+{
+    Tags.Add( FArianeTagID( Tag ) );
+
+    Tag->Added();
+
+    Invalidate( FArianeObjectInvalidationFlags().SetTags() );
+}
+
 FArianeGroup*
 FArianeObject::GetRootGroup()
 {
@@ -560,9 +695,10 @@ FArianeObject::GetHUDForegroundColor()
 {
     FArianeObject* Group = GetAncestorByClass( FArianeGroup::StaticClass()
                                              , true
-                                             , false );
+                                             , true );
 
-    return Group ? Group->GetHUDForegroundColor() : DrawingLayer->GetLayerStack()->GetPainting3DComponent()->GetHUDForegroundColor();
+    return Group ? Group->GetHUDForegroundColor()
+                 : DrawingLayer->GetLayerStack()->GetPainting3DComponent()->GetHUDForegroundColor();
 }
 #endif
 
@@ -575,12 +711,11 @@ FArianeObject::SetVisible( bool bInVisible )
 bool
 FArianeObject::IsVisible( bool bInHierarchical )
 {
-    if( bInHierarchical )
-    {
-        // Unimplemented
-    }
+    FArianeObject* Parent = ParentID.GetObject();
 
-    return ( ( DrawingLayer == nullptr ) || DrawingLayer->IsVisible() == true ) ? true : false;
+    //return ( ( DrawingLayer == nullptr ) || DrawingLayer->IsVisible() == true ) ? true : false;
+    return ( bInHierarchical && Parent ) ? bVisible && Parent->IsVisible( bInHierarchical )
+                                         : bVisible;
 }
 
 const FGuid&

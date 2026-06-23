@@ -421,7 +421,7 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
 
     AdjustedThickness = ( Distance / 1000.0f ) * AdjustedThickness;
 
-    switch( DrawingLayer->GetDrawingOrientation() )
+    switch( Editor->GetLayerDrawingOrientation( DrawingLayer ) )
     {
         case EArianeLayerDrawingOrientation::LayerXY:
             WorldMatrix = LayerMatrix;
@@ -849,6 +849,49 @@ UArianeEditorTool::CanBeginClickDragSequence(const FInputDeviceRay& PressPos)
     return DummyHit;
 }
 
+FVector4
+UArianeEditorTool::GetDrawingPlane( FEditorViewportClient* ViewportClient, UArianeLayerDrawing* DrawingLayer )
+{
+    IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
+    const FTransform& LayerWorldTransform = DrawingLayer->GetComponentTransform();
+    FVector LayerWorldPosition = DrawingLayer->GetComponentLocation();
+    FVector4 DrawingPlane = FVector4( 0.0f, 0.0f, 0.0f, 0.0f );
+    FViewCameraState CameraState;
+
+    QueriesAPI->GetCurrentViewState( CameraState );
+
+    FVector CameraLocation = CameraState.Position;
+    FVector CameraDirection = CameraState.Orientation.GetForwardVector();
+
+    switch ( Editor->GetLayerDrawingOrientation( DrawingLayer ) )
+    {
+        case EArianeLayerDrawingOrientation::LayerXY :
+        DrawingPlane = LayerWorldTransform.TransformVector( FVector( 0.0f, 0.0f, 1.0f ) );
+
+        break;
+
+        case EArianeLayerDrawingOrientation::LayerYZ :
+        DrawingPlane = LayerWorldTransform.TransformVector( FVector( 1.0f, 0.0f, 0.0f ) );
+
+        break;
+
+        case EArianeLayerDrawingOrientation::LayerZX :
+        DrawingPlane = LayerWorldTransform.TransformVector( FVector( 0.0f, 1.0f, 0.0f ) );
+
+        break;
+
+        default : // View
+            DrawingPlane = -CameraDirection;
+        break;
+    }
+
+    DrawingPlane.W = - ( ( DrawingPlane.X * LayerWorldPosition.X )
+                       + ( DrawingPlane.Y * LayerWorldPosition.Y )
+                       + ( DrawingPlane.Z * LayerWorldPosition.Z ) );
+
+    return DrawingPlane;
+}
+
 // Helper function
 UArianeLayer*
 UArianeEditorTool::GetCurrentLayer()
@@ -1174,13 +1217,13 @@ UArianeEditorTool::MakePointQuadTree( FEditorViewportClient* ViewportClient
         DrawingLayer->GetRootGroup()->Traverse( [ ViewportClient
                                                 , View
                                                 , &ScreenRect
-                                                , &PointQuadTreeEntries ]( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
+                                                , &PointQuadTreeEntries ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
         {
             if( /*( iFocusedObjectsOnly == false ) || scene->GetCell()->ObjectHasFocus( object, traverseFlags )*/1 )
             {
                 MapPoints( ViewportClient, View, Object, ScreenRect, PointQuadTreeEntries );
 
-                return FArianeObject::TraversalReturnValue::Continue;
+                return FArianeObject::ETraversalReturnValue::Continue;
             }
         } );
 

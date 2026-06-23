@@ -414,7 +414,7 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
                                                     , Pixels
                                                     , Width
                                                     , &AddedPaths
-                                                    , &RemovedPaths ] ( FArianeObject* TravesedObject ) -> FArianeObject::TraversalReturnValue
+                                                    , &RemovedPaths ] ( FArianeObject* TravesedObject ) -> FArianeObject::ETraversalReturnValue
             {
                 if( TravesedObject->GetClass() == FArianePath::StaticClass() )
                 {
@@ -506,7 +506,7 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
                     }
                 }
 
-                return FArianeObject::TraversalReturnValue::Continue;
+                return FArianeObject::ETraversalReturnValue::Continue;
             } );
 
             // Process outside the Traverse function because Traverse will alter the hierarchy

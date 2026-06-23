@@ -358,11 +358,11 @@ void
 SArianeEditorSceneTreeViewRow::OnTextChanged( const FText& InText
                                             , ETextCommit::Type CommitInfo )
 {
-    const TSharedPtr< SArianeEditorSceneTreeView > treeView = StaticCastSharedPtr<SArianeEditorSceneTreeView>(OwnerTablePtr.Pin());
+    const TSharedPtr< SArianeEditorSceneTreeView > TreeView = StaticCastSharedPtr<SArianeEditorSceneTreeView>(OwnerTablePtr.Pin());
 
     // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
     // rebuilt while it's processing stuff
-    //treeView->UnbindLayerDelegates();
+    TreeView->UnbindComponentDelegates();
 
     FArianeObject* ItemObject = Item.Get()->GetObject();
     FArianeGroup* RootGroup = ItemObject->GetRootGroup();
@@ -375,94 +375,94 @@ SArianeEditorSceneTreeViewRow::OnTextChanged( const FText& InText
     TextBlockWidget.Get()->SetText( FText::FromName( Item.Get()->GetObject()->GetName() ) );
 
     RootGroup->GetPainting3DComponent()->Update( false );
-    //itemScene->GetLayer()->Notify( FArianeEditor::UI_UPDATE_TIMELINE );
 
-    //treeView->BindLayerDelegates();
+    TreeView->BindComponentDelegates();
 }
 
 FReply
 SArianeEditorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
-                                                   , const FDragDropEvent& iDragDropEvent )
+                                     , const FDragDropEvent& iDragDropEvent )
 {
-    const TSharedPtr< SArianeEditorSceneTreeView > treeView = StaticCastSharedPtr<SArianeEditorSceneTreeView>(OwnerTablePtr.Pin());
+    const TSharedPtr< SArianeEditorSceneTreeView > TreeView = StaticCastSharedPtr<SArianeEditorSceneTreeView>(OwnerTablePtr.Pin());
     TSharedPtr<FDragDropOperation> Operation = iDragDropEvent.GetOperation();
     //FVector2D position = iGeometry.GetAbsolutePosition();
     FArianeObject* ItemObject = Item.Get()->GetObject();
     FArianeGroup* RootGroup = ItemObject->GetRootGroup();
-    TArray<FArianeObject*> FocusedObjects;
+    TArray<FArianeObject*> UniquelySelectedObjects;
     FArianeObject* InsertObject = ItemObject;
 
     // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
     // rebuilt while it's processing stuff
-    //treeView->UnbindLayerDelegates();
+    //TreeView->UnbindComponentDelegates();
 
-    /* Gary
-    RootGroup->GetDrawingLayer()->GetFocusedAncestorList( FocusedObjects );
-    */
+    RootGroup->GetDrawingLayer()->GetUniquelySelectedObjects( UniquelySelectedObjects, false );
 
-    GEditor->BeginTransaction(LOCTEXT("ariane-tree-view.transaction.drag-drop-object", "Drop Objects"));
-
-    for( FArianeObject* FocusedObject : FocusedObjects )
+    if( RootGroup->IsSelected() == false )
     {
-        switch( DropZone )
+        GEditor->BeginTransaction(LOCTEXT("ariane-tree-view.transaction.drag-drop-object", "Drop Objects"));
+
+        for( FArianeObject* FocusedObject : UniquelySelectedObjects )
         {
-            //case DROPZONE_ABOVE:
-            // reverse order in order to get the most forward objet on top of the hierarchy
-            case DROPZONE_BELOW:
+            switch( DropZone )
             {
-                FArianeObject* parentObject = ItemObject->GetParent();
-
-                // note: SharedEnv and Root are system objects
-                //if( parentObject->IsSystem() == false )
+                //case DROPZONE_ABOVE:
+                // reverse order in order to get the most forward objet on top of the hierarchy
+                case DROPZONE_BELOW:
                 {
+                    FArianeObject* parentObject = ItemObject->GetParent();
+
+                    // note: SharedEnv and Root are system objects
+                    //if( parentObject->IsSystem() == false )
+                    {
+                        // don't drop onto the same object or else expect some infinite loop
+                        if( parentObject != FocusedObject )
+                        {
+                            parentObject->TransferChild( FocusedObject, parentObject->GetPreviousChild( InsertObject ) );
+
+                            InsertObject = FocusedObject;
+                        }
+                    }
+                }
+                break;
+
+                case DROPZONE_ONTO:
                     // don't drop onto the same object or else expect some infinite loop
-                    if( parentObject != FocusedObject )
+                    if( ItemObject != FocusedObject )
                     {
-                        parentObject->TransferChild( FocusedObject, parentObject->GetPreviousChild( InsertObject ) );
+                        ItemObject->TransferChild( FocusedObject, nullptr );
+                    }
+                break;
 
-                        InsertObject = FocusedObject;
+                // case DROPZONE_BELOW:
+                // reverse order in order to get the most forward objet on top of the hierarchy
+                case DROPZONE_ABOVE:
+                {
+                    FArianeObject* ParentObject = ItemObject->GetParent();
+
+                    // note: Layer and Cell are system objects
+                    //if( ParentObject->IsSystem() == false )
+                    {
+                        if( ParentObject != FocusedObject )
+                        {
+                            ParentObject->TransferChild( FocusedObject, InsertObject );
+
+                            InsertObject = FocusedObject;
+                        }
                     }
                 }
+                break;
+
+                default :
+                break;
             }
-            break;
-
-            case DROPZONE_ONTO:
-                // don't drop onto the same object or else expect some infinite loop
-                if( ItemObject != FocusedObject )
-                {
-                    ItemObject->TransferChild( FocusedObject, nullptr );
-                }
-            break;
-
-            // case DROPZONE_BELOW:
-            // reverse order in order to get the most forward objet on top of the hierarchy
-            case DROPZONE_ABOVE:
-            {
-                FArianeObject* ParentObject = ItemObject->GetParent();
-
-                // note: Layer and Cell are system objects
-                //if( ParentObject->IsSystem() == false )
-                {
-                    if( ParentObject != FocusedObject )
-                    {
-                        ParentObject->TransferChild( FocusedObject, InsertObject );
-
-                        InsertObject = FocusedObject;
-                    }
-                }
-            }
-            break;
-
-            default :
-            break;
         }
+
+        DropZone = DROPZONE_NONE;
+
+        RootGroup->GetPainting3DComponent()->Update( false );
+
+        //TreeView->BindComponentDelegates();
     }
-
-    DropZone = DROPZONE_NONE;
-
-    RootGroup->GetPainting3DComponent()->Update( false );
-
-    //treeView->BindLayerDelegates();
 
     return FReply::Handled();
 }
@@ -524,16 +524,12 @@ void
 SArianeEditorSceneTreeViewRow::OnDragEnter( const FGeometry& MyGeometry
                                           , const FDragDropEvent& DragDropEvent )
 {
-    //const TSharedPtr<FSceneTreeViewItem>* item = GetItemForThis( OwnerTablePtr.Pin().ToSharedRef() );
-
     DropZone = DROPZONE_ONTO;
 }
 
 void
 SArianeEditorSceneTreeViewRow::OnDragLeave( const FDragDropEvent& DragDropEvent )
 {
-    //const TSharedPtr<FSceneTreeViewItem>* item = GetItemForThis( OwnerTablePtr.Pin().ToSharedRef() );
-
     DropZone = DROPZONE_NONE;
 }
 

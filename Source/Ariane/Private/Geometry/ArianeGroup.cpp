@@ -184,4 +184,12 @@ FArianeGroup::UseEditorHUDForegroundColor( bool bInUseEditorHUDForegroundColor )
 {
     bUseEditorHUDForegroundColor = bInUseEditorHUDForegroundColor;
 }
+
+FColor
+FArianeGroup::GetHUDForegroundColor()
+{
+    return bUseEditorHUDForegroundColor ? DrawingLayer->GetLayerStack()->GetPainting3DComponent()->GetHUDForegroundColor()
+                                        : HUDForegroundColor;
+}
+
 #endif

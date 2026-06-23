@@ -39,6 +39,7 @@ public:
     FArianeObjectInvalidationFlags& SetColor()    { Color     = 1; return *this; };
     FArianeObjectInvalidationFlags& SetChildren() { Children  = 1; return *this; };
     FArianeObjectInvalidationFlags& SetTags()     { Tags      = 1; return *this; };
+    FArianeObjectInvalidationFlags& SetName()     { Name      = 1; return *this; };
 
 public:
     bool Selected  : 1 = 0;
@@ -47,6 +48,7 @@ public:
     bool Color     : 1 = 0;
     bool Children  : 1 = 0;
     bool Tags      : 1 = 0;
+    bool Name      : 1 = 0;
 };
 
 USTRUCT(BlueprintType)
@@ -55,7 +57,14 @@ struct ARIANE_API FArianeObject
 GENERATED_BODY()
 
 public:
-    enum class TraversalReturnValue{ Continue, IgnoreChildren, Stop };
+    enum class ECopyFlags : uint8
+    {
+        None         =       0,
+        AllocWithNew = ( 1 < 0 ),
+        IgnoreTags   = ( 1 < 1 ),
+    };
+
+    enum class ETraversalReturnValue{ Continue, IgnoreChildren, Stop };
 
 public:
     /**
@@ -152,7 +161,7 @@ public:
         * @brief Run a function to each object of the object tree
         * @param Callback the function to run
         */
-    void Traverse( TFunction<TraversalReturnValue(FArianeObject*)> Callback );
+    void Traverse( TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
 
     /** Get object's parent object */
     FArianeObject* GetParent();
@@ -218,6 +227,13 @@ public:
     void SetVisible( bool bInVisible );
     void SetName( const FName& InName );
     void SetSelected( bool bInSelected );
+    void TraverseBackwards( TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
+
+    FArianeObject* Copy( ECopyFlags CopyFlags
+                       , TFunction<void( FArianeObject*,ECopyFlags)> PreCallback
+                       , TFunction<void( FArianeObject*, FArianeObject*, ECopyFlags )> PostCallback );
+    FArianeObject* Copy( ECopyFlags CopyFlags );
+    void AddTag( FArianeTag* Tag );
 
 protected:
     /**
@@ -226,8 +242,11 @@ protected:
         */
     void InvalidateChild( FArianeObject* Child );
 
+    virtual FArianeObject* CopyShape( ECopyFlags CopyFlags );
+    virtual void CopySettings( FArianeObject* DestinationObject, ECopyFlags CopyFlags, bool bInvalidate );
 
-    TraversalReturnValue Traverse_Private( TFunction<TraversalReturnValue(FArianeObject*)> Callback );
+    ETraversalReturnValue Traverse_Private( TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
+    ETraversalReturnValue TraverseBackwards_Private( TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
 
 protected:
     UPROPERTY( EditAnywhere )
@@ -271,3 +290,6 @@ protected:
     FArianeObjectInvalidationFlags* InvalidationFlags;
     bool bSelected;
 };
+
+// define bitwise op
+ENUM_CLASS_FLAGS(FArianeObject::ECopyFlags)

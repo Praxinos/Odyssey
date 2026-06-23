@@ -17,7 +17,7 @@ class ARIANE_API UArianeLayerFolder : public UArianeLayer
     GENERATED_BODY()
 
 public:
-    enum class TraversalReturnValue{ Continue, IgnoreChildren, Stop };
+    enum class ETraversalReturnValue{ Continue, IgnoreChildren, Stop };
 
 public:
     ~UArianeLayerFolder();
@@ -59,10 +59,10 @@ public:
      * @brief Recursively execute a function
      * @param Callback the function to run
      */
-    void Traverse( TFunction<TraversalReturnValue(UArianeLayer*)> Callback );
+    void Traverse( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
 
 protected:
-    TraversalReturnValue Traverse_Private( TFunction<TraversalReturnValue(UArianeLayer*)> Callback );
+    ETraversalReturnValue Traverse_Private( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
 
     void UpdateBounds();
 
