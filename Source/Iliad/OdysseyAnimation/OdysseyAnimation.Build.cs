@@ -61,7 +61,7 @@ namespace UnrealBuildTool.Rules
                 {
                     "MediaAssets",
                     "OdysseyRendering",
-                    "OdysseyPalette"
+                    "OdysseyPalette",
                     // ... add other public dependencies that you statically link with here ...
                 }
             );
@@ -81,6 +81,7 @@ namespace UnrealBuildTool.Rules
                     "OdysseyLayerStack",
                     "RHI",
                     "CinematicCamera",
+                    "NamingTokens",
                     // ... add private dependencies that you statically link with here ...
                 }
                 );

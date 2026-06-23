@@ -183,8 +183,7 @@ public:
 
     /** Pattern of the left status bar in viewport */
     UPROPERTY(config, EditAnywhere, Category=Viewport )
-    FTemplateString StatusBarTemplateString = { .Template = TEXT( "{user} - {yyyy}/{mm}/{dd} - {24h}:{min}:{sec}" ) };
-    //FTemplateString StatusBarTemplateString = { .Template = TEXT( "{odc:viewport:texture-width} x {odc:viewport:texture-height} px | ..." ) };
+    FTemplateString StatusBarTemplateString = { .Template = TEXT( "{yyyy}/{mm}/{dd} - {24h}:{min}:{sec} | {odysseyAnimation:width} x {odysseyAnimation:height} px | {odysseyAnimation:name} > {odysseyAnimation:currentLayerName} @ {odysseyAnimation:currentFrame} | {odysseyViewport2d:x}, {odysseyViewport2d:y} | ({odysseyViewport2d:r}, {odysseyViewport2d:g}, {odysseyViewport2d:b}, {odysseyViewport2d:a})" ) };
     //PATCH: See comment above
     // Moreover, every tokens are defined in SOdysseyWidgets module -_-
 

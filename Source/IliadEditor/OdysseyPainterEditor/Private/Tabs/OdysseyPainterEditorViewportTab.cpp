@@ -16,6 +16,8 @@
 #include "OdysseyHUDElement.h"
 #include "SOdysseyViewport.h"
 #include "FOdysseySceneViewport.h"
+#include "OdysseyAnimationNamingTokens.h"
+#include "OdysseyAnimationPlayer.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorViewportClient.h"
 #include "OdysseyBrushOptions.h"
@@ -73,6 +75,12 @@ FOdysseyPainterEditorViewportTab::CreateWidget()
     //ToolbarExtender->AddMenuExtension( "FlipMenu", EExtensionHook::Before, nullptr, FMenuExtensionDelegate::CreateRaw( this, &FOdysseyPainterEditorViewportTab::BuildOptionsMenu ) ); // It doesn't work
     //ToolbarExtender->AddMenuExtension( "ZoomMenu", EExtensionHook::First, nullptr, FMenuExtensionDelegate::CreateRaw( this, &FOdysseyPainterEditorViewportTab::BuildOptionsMenu ) );  // It doesn't work
 
+    //TODO: store it somewhere ? here ? toolkit ?
+    // But must be filled as lambda, as animation is not valid when the widget is created
+    UOdysseyAnimationNamingTokensContext* AnimationNamingTokenContext = NewObject<UOdysseyAnimationNamingTokensContext>();
+    UOdysseyAnimationPlayerNamingTokensContext* AnimationPlayerNamingTokenContext = NewObject<UOdysseyAnimationPlayerNamingTokensContext>();
+    UOdysseyViewportNamingTokensContext* ViewportNamingTokenContext = NewObject<UOdysseyViewportNamingTokensContext>();
+
     SAssignNew( mViewport, SOdysseyViewport )
         .Texture( this, &FOdysseyPainterEditorViewportTab::Texture )
         .OptionExtender( ToolbarExtender )
@@ -88,6 +96,21 @@ FOdysseyPainterEditorViewportTab::CreateWidget()
                                          {
                                              return GetDefault<UOdysseyPainterEditorSettings>()->StatusBarTemplateString;
                                          } )
+        .NamingTokensContexts_Lambda( [this, AnimationNamingTokenContext, AnimationPlayerNamingTokenContext, ViewportNamingTokenContext]() -> TArray<UObject*>
+                                      {
+                                          TArray<UObject*> contexts;
+
+                                          AnimationNamingTokenContext->Animation = mEditor->GetAnimation();
+                                          contexts.Add( AnimationNamingTokenContext );
+
+                                          AnimationPlayerNamingTokenContext->AnimationPlayer = mEditor->GetAnimationPlayer();
+                                          contexts.Add( AnimationPlayerNamingTokenContext );
+
+                                          ViewportNamingTokenContext->ViewportWidget = mViewport;
+                                          contexts.Add( ViewportNamingTokenContext );
+
+                                          return contexts;
+                                      } )
         ;
 
     mViewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetMeshSelector().Get()));

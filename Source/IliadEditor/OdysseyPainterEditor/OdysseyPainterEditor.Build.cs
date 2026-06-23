@@ -78,6 +78,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "ToolWidgets",
                 "UnrealEd",
                 "ViewportInteraction",
+                "NamingTokens",
 
                 "OdysseyAnimation",
                 "OdysseyAnimationTracks",

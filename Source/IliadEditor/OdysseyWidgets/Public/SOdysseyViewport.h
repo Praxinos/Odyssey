@@ -5,19 +5,65 @@
 
 #include "CoreMinimal.h"
 #include "Layout/Visibility.h"
+#include "NamingTokens.h"
 #include "UObject/TemplateString.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/SViewport.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Input/SSpinBox.h"
 
+#include "SOdysseyViewport.generated.h"
+
 class FExtender;
 class FOdysseySceneViewport;
 class SScrollBar;
+class SOdysseyViewport;
 class SViewport;
 class UTexture2D;
 class UTexture;
 
+
+/** Context object that lets callers supply viewport data when evaluating tokens */
+UCLASS()
+class UOdysseyViewportNamingTokensContext
+    : public UObject
+{
+    GENERATED_BODY()
+
+public:
+    /** The animation asset to use when evaluating tokens */
+    TWeakPtr<SOdysseyViewport> ViewportWidget;
+};
+
+//---
+
+/* Naming Tokens related to Odyssey Animation */
+UCLASS(MinimalAPI, NotBlueprintable)
+class UOdysseyViewportNamingTokens
+    : public UNamingTokens
+{
+    GENERATED_BODY()
+
+protected:
+    // ~Begin UNamingTokens
+    virtual void OnCreateDefaultTokens(TArray<FNamingTokenData>& Tokens) override;
+    virtual void OnPreEvaluate_Implementation(const FNamingTokensEvaluationData& InEvaluationData) override;
+    virtual void OnPostEvaluate_Implementation() override;
+    // ~End UNamingTokens
+
+public:
+    UOdysseyViewportNamingTokens();
+
+    static ODYSSEYWIDGETS_API FString TokenNamespace;
+
+private:
+    TOptional<FIntVector2> GetMousePositionInCanvas( TWeakPtr<SOdysseyViewport> iWeakViewportWidget ) const;
+    TOptional<FColor> GetColorAtPosition( TWeakPtr<SOdysseyViewport> iWeakViewportWidget ) const;
+
+private:
+    /** The current context to use when evaluating tokens */
+    TObjectPtr<UOdysseyViewportNamingTokensContext> Context;
+};
 
 /////////////////////////////////////////////////////
 // SOdysseyViewport
@@ -31,6 +77,7 @@ public:
         SLATE_ATTRIBUTE(float, RotationStep)                        //PATCH: see comment in OdysseyPainterEditor\Public\OdysseyPainterEditorSettings.h
         SLATE_ATTRIBUTE(float, ZoomStep)                            //PATCH
         SLATE_ATTRIBUTE(FTemplateString, StatusbarTemplateString)   //PATCH
+        SLATE_ATTRIBUTE(TArray<UObject*>, NamingTokensContexts)     //PATCH
     SLATE_END_ARGS()
 
 public:
@@ -261,4 +308,5 @@ private:
     FVector2D                           mFlipStateUV;
 
     TAttribute<FTemplateString>         mStatusbarTemplateString;
+    TAttribute<TArray<UObject*>>        mNamingTokensContexts;
 };

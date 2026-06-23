@@ -44,6 +44,198 @@
 
 #define LOCTEXT_NAMESPACE "Widgets"
 
+//---
+
+/*static*/ FString UOdysseyViewportNamingTokens::TokenNamespace = TEXT( "odysseyViewport2d" );
+
+UOdysseyViewportNamingTokens::UOdysseyViewportNamingTokens()
+{
+    Namespace = TokenNamespace;
+    NamespaceDisplayName = LOCTEXT( "namespace.label", "Odyssey Viewport 2D" );
+}
+
+
+TOptional<FIntVector2>
+UOdysseyViewportNamingTokens::GetMousePositionInCanvas( TWeakPtr<SOdysseyViewport> iWeakViewportWidget ) const
+{
+    SOdysseyViewport* viewportWidget = iWeakViewportWidget.Pin().Get();
+    if( !viewportWidget )
+        return TOptional<FIntVector2>();
+
+    FVector2D cursorPos = FSlateApplication::Get().GetCursorPos();
+    if( !viewportWidget->GetViewportWidget()->GetTickSpaceGeometry().IsUnderLocation( cursorPos ) )
+        return TOptional<FIntVector2>();
+
+    FVector2D cursorPosInViewport = viewportWidget->GetTickSpaceGeometry().AbsoluteToLocal( cursorPos );
+    FVector2D cursorPosInCanvas = viewportWidget->ToLocal( cursorPosInViewport );
+    FIntVector2 cursorPosInCanvasInt( FMath::FloorToInt( cursorPosInCanvas.X ), FMath::FloorToInt( cursorPosInCanvas.Y ) );
+
+    cursorPosInCanvasInt += FIntVector2( viewportWidget->GetTexture()->GetSurfaceWidth() / 2, viewportWidget->GetTexture()->GetSurfaceHeight() / 2 );
+
+    return cursorPosInCanvasInt;
+}
+
+TOptional<FColor>
+UOdysseyViewportNamingTokens::GetColorAtPosition( TWeakPtr<SOdysseyViewport> iWeakViewportWidget ) const
+{
+    SOdysseyViewport* viewportWidget = iWeakViewportWidget.Pin().Get();
+    if( !viewportWidget )
+        return TOptional<FColor>();
+
+    UTexture* texture = viewportWidget->GetTexture();
+    if( !texture )
+        return TOptional<FColor>();
+
+    UTextureRenderTarget2D* renderTarget = Cast<UTextureRenderTarget2D>( texture ); //TODO: should also test UTexture2D but FImageUtils::GetTexture2DImage() does nothing -_-
+    if( !renderTarget )
+        return TOptional<FColor>();
+
+    TOptional<FIntVector2> mousePosition = GetMousePositionInCanvas( iWeakViewportWidget );
+    if( !mousePosition.IsSet() )
+        return TOptional<FColor>();
+
+    if( mousePosition->X < 0 || mousePosition->X >= renderTarget->GetSurfaceWidth()
+        || mousePosition->Y < 0 || mousePosition->Y >= renderTarget->GetSurfaceHeight() )
+        return TOptional<FColor>();
+
+    static FImage image;
+    FIntRect rect( mousePosition->X, mousePosition->Y, mousePosition->X + 1, mousePosition->Y + 1 );
+    FImageUtils::GetRenderTargetImage( renderTarget, image, rect );
+    FLinearColor linearColor = image.GetOnePixelLinear( 0, 0 );
+    FColor color = linearColor.ToFColor( true );
+    //FColor color = linearColor.ToFColor( false );
+
+    return color;
+}
+
+void
+UOdysseyViewportNamingTokens::OnCreateDefaultTokens( TArray<FNamingTokenData>& Tokens ) //override
+{
+    Super::OnCreateDefaultTokens( Tokens );
+
+    FNamingTokenData CursorXInCanvasToken;
+    CursorXInCanvasToken.TokenKey = TEXT( "x" );
+    CursorXInCanvasToken.DisplayName = LOCTEXT( "CursorXInCanvasToken", "Cursor X position in canvas" );
+    CursorXInCanvasToken.TokenProcessorNative.BindLambda( [this]()
+                                                          {
+                                                              if( !Context )
+                                                                  return FText::FromString( TEXT( "-" ) );
+                                                                  //return FText::GetEmpty();
+
+                                                              TOptional<FIntVector2> mousePositionInCanvas = GetMousePositionInCanvas( Context->ViewportWidget );
+                                                              if( !mousePositionInCanvas.IsSet() )
+                                                                  return FText::FromString( TEXT( "-" ) );
+                                                                  //return FText::GetEmpty();
+
+                                                              return FText::AsNumber( mousePositionInCanvas->X );
+                                                          } );
+    Tokens.Add( CursorXInCanvasToken );
+
+    //-
+
+    FNamingTokenData CursorYInCanvasToken;
+    CursorYInCanvasToken.TokenKey = TEXT( "y" );
+    CursorYInCanvasToken.DisplayName = LOCTEXT( "CursorYInCanvasToken", "Cursor Y position in canvas" );
+    CursorYInCanvasToken.TokenProcessorNative.BindLambda( [this]()
+                                                         {
+                                                              if( !Context )
+                                                                  return FText::FromString( TEXT( "-" ) );
+
+                                                              TOptional<FIntVector2> mousePositionInCanvas = GetMousePositionInCanvas( Context->ViewportWidget );
+                                                              if( !mousePositionInCanvas.IsSet() )
+                                                                  return FText::FromString( TEXT( "-" ) );
+
+                                                              return FText::AsNumber( mousePositionInCanvas->Y );
+                                                         } );
+    Tokens.Add( CursorYInCanvasToken );
+
+    //-
+
+    FNamingTokenData RedAtPositionToken;
+    RedAtPositionToken.TokenKey = TEXT( "r" );
+    RedAtPositionToken.DisplayName = LOCTEXT( "CanvasRedToken", "Canvas RED component at cursor position" );
+    RedAtPositionToken.TokenProcessorNative.BindLambda( [this]()
+                                                        {
+                                                            if( !Context )
+                                                                return FText::FromString( TEXT( "-" ) );
+
+                                                            TOptional<FColor> color = GetColorAtPosition( Context->ViewportWidget );
+                                                            if( !color.IsSet() )
+                                                                return FText::FromString( TEXT( "-" ) );
+
+                                                            return FText::AsNumber( color->R );
+                                                            //return FText::FromString( color->ToString() );
+                                                            //return FText::Format( LOCTEXT( "viewport.status-bar.pixel-color", "RGBA: {0}, {1}, {2}, {3}" ), FText::AsNumber( color.R ), FText::AsNumber( color.G ), FText::AsNumber( color.B ), FText::AsNumber( color.A ) );
+                                                        } );
+    Tokens.Add( RedAtPositionToken );
+
+    FNamingTokenData GreenAtPositionToken;
+    GreenAtPositionToken.TokenKey = TEXT( "g" );
+    GreenAtPositionToken.DisplayName = LOCTEXT( "CanvasGreenToken", "Canvas GREEN component at cursor position" );
+    GreenAtPositionToken.TokenProcessorNative.BindLambda( [this]()
+                                                          {
+                                                              if( !Context )
+                                                                  return FText::FromString( TEXT( "-" ) );
+
+                                                              TOptional<FColor> color = GetColorAtPosition( Context->ViewportWidget );
+                                                              if( !color.IsSet() )
+                                                                  return FText::FromString( TEXT( "-" ) );
+
+                                                              return FText::AsNumber( color->G );
+                                                          } );
+    Tokens.Add( GreenAtPositionToken );
+
+    FNamingTokenData BlueAtPositionToken;
+    BlueAtPositionToken.TokenKey = TEXT( "b" );
+    BlueAtPositionToken.DisplayName = LOCTEXT( "CanvasBlueToken", "Canvas BLUE component at cursor position" );
+    BlueAtPositionToken.TokenProcessorNative.BindLambda( [this]()
+                                                          {
+                                                              if( !Context )
+                                                                  return FText::FromString( TEXT( "-" ) );
+
+                                                              TOptional<FColor> color = GetColorAtPosition( Context->ViewportWidget );
+                                                              if( !color.IsSet() )
+                                                                  return FText::FromString( TEXT( "-" ) );
+
+                                                              return FText::AsNumber( color->B );
+                                                          } );
+    Tokens.Add( BlueAtPositionToken );
+
+    FNamingTokenData AlphaAtPositionToken;
+    AlphaAtPositionToken.TokenKey = TEXT( "a" );
+    AlphaAtPositionToken.DisplayName = LOCTEXT( "CanvasAlphaToken", "Canvas ALPHA component at cursor position" );
+    AlphaAtPositionToken.TokenProcessorNative.BindLambda( [this]()
+                                                          {
+                                                              if( !Context )
+                                                                  return FText::FromString( TEXT( "-" ) );
+
+                                                              TOptional<FColor> color = GetColorAtPosition( Context->ViewportWidget );
+                                                              if( !color.IsSet() )
+                                                                  return FText::FromString( TEXT( "-" ) );
+
+                                                              return FText::AsNumber( color->A );
+                                                          } );
+    Tokens.Add( AlphaAtPositionToken );
+}
+
+void
+UOdysseyViewportNamingTokens::OnPreEvaluate_Implementation( const FNamingTokensEvaluationData& InEvaluationData ) //override
+{
+    Super::OnPreEvaluate_Implementation( InEvaluationData );
+
+    UOdysseyViewportNamingTokensContext* MatchingContext = nullptr;
+    InEvaluationData.Contexts.FindItemByClass<UOdysseyViewportNamingTokensContext>( &MatchingContext );
+    Context = MatchingContext;
+}
+
+void
+UOdysseyViewportNamingTokens::OnPostEvaluate_Implementation() //override
+{
+    Super::OnPostEvaluate_Implementation();
+
+    Context = nullptr;
+}
+
 /////////////////////////////////////////////////////
 // SOdysseyViewport
 //--------------------------------------------------------------------------------------
@@ -57,8 +249,11 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
         mRotationStep = InArgs._RotationStep;
     if( InArgs._ZoomStep.IsSet() )
         mZoomStep = InArgs._ZoomStep;
+
     if( InArgs._StatusbarTemplateString.IsSet() )
         mStatusbarTemplateString = InArgs._StatusbarTemplateString;
+    if( InArgs._NamingTokensContexts.IsSet() )
+        mNamingTokensContexts = InArgs._NamingTokensContexts;
 
     mCommandList = MakeShared<FUICommandList>();
 
@@ -396,7 +591,7 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
 
         + SVerticalBox::Slot()
         .AutoHeight()
-        .Padding(0.0f, 2.0f, 0.0f, 0.0f)
+        .Padding(2.0f, 2.0f, 2.0f, 0.0f)
         [
             SNew(SHorizontalBox)
 
@@ -824,11 +1019,14 @@ SOdysseyViewport::GetGuiRotationValue() const
 FText
 SOdysseyViewport::GetStatusbarText() const
 {
-    //FNamingTokenFilterArgs FilterArgs;
+    FNamingTokenFilterArgs FilterArgs;
     //FilterArgs.AdditionalNamespacesToInclude.Add( TokenNamespace );
 
+    //TArray<UObject*> contexts;
+
     UNamingTokensEngineSubsystem* NamingTokensSubsystem = GEngine->GetEngineSubsystem<UNamingTokensEngineSubsystem>();
-    FNamingTokenResultData Result = NamingTokensSubsystem->EvaluateTokenString( mStatusbarTemplateString.Get().Template );
+    FNamingTokenResultData Result = NamingTokensSubsystem->EvaluateTokenString( mStatusbarTemplateString.Get().Template, FilterArgs, mNamingTokensContexts.Get() );
+    //FNamingTokenResultData Result = NamingTokensSubsystem->EvaluateTokenString( mStatusbarTemplateString.Get().Template, FilterArgs, contexts );
 
     return Result.EvaluatedText;
 }
