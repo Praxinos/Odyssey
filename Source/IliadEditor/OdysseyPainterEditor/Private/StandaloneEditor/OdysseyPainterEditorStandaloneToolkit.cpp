@@ -238,7 +238,7 @@ FOdysseyPainterEditorStandaloneToolkit::OnAddEditedObject(UObject* iObject)
 void
 FOdysseyPainterEditorStandaloneToolkit::OnRemoveEditedObject(UObject* iObject)
 {
-    AddEditingObject(iObject);
+    RemoveEditingObject(iObject);
 }
 
 #undef LOCTEXT_NAMESPACE
