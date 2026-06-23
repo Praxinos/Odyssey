@@ -18,7 +18,7 @@ FArianeObjectID::FArianeObjectID()
 
 FArianeObjectID::FArianeObjectID( FArianeObject* Object )
     : DrawingLayer( nullptr )
-    , CachedObject( nullptr )
+    , CachedObject( ( Object && ( Object->GetAllocationModel() == EArianeAllocationModel::OperatingSystem ) ) ? Object : nullptr )
 {
     if( Object )
     {
@@ -58,7 +58,7 @@ FArianeVertexID::FArianeVertexID()
 }
 
 FArianeVertexID::FArianeVertexID( FArianeVertex* Vertex )
-    : CachedVertex( nullptr )
+    : CachedVertex( ( Vertex && ( Vertex->GetAllocationModel() == EArianeAllocationModel::OperatingSystem ) ) ? Vertex : nullptr )
 {
     DrawingLayer = Vertex->GetOwner()->GetDrawingLayer();
 
@@ -100,7 +100,7 @@ FArianeSegmentID::FArianeSegmentID()
 }
 
 FArianeSegmentID::FArianeSegmentID( FArianeSegment* Segment )
-    : CachedSegment( nullptr )
+    : CachedSegment( ( Segment && ( Segment->GetAllocationModel() == EArianeAllocationModel::OperatingSystem ) ) ? Segment : nullptr )
 {
     DrawingLayer = Segment->GetOwner()->GetDrawingLayer();
 
@@ -142,7 +142,7 @@ FArianeTagID::FArianeTagID()
 }
 
 FArianeTagID::FArianeTagID( FArianeTag* Tag )
-    : CachedTag( nullptr )
+    : CachedTag( ( Tag && ( Tag->GetAllocationModel() == EArianeAllocationModel::OperatingSystem ) ) ? Tag : nullptr )
 {
     DrawingLayer = Tag->GetOwner()->GetDrawingLayer();
 

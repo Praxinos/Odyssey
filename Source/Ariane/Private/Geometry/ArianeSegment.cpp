@@ -18,18 +18,29 @@ FArianeSegment::FArianeSegment( )
     , Length ( 0.0f )
     , bInvalidated ( false )
     , bAutoFractioned ( true )
+    , AllocationModel( EArianeAllocationModel::InstancedStruct )
 {
 }
 
-FArianeSegment::FArianeSegment( FArianeObject* Owner, FArianeVertex* iVertex0, FArianeVertex* iVertex1 )
+FArianeSegment::FArianeSegment( FArianeObject* Owner
+                              , FArianeVertex* InVertex0
+                              , FArianeVertex* InVertex1
+                              , EArianeAllocationModel InAllocationModel )
     : Guid( FGuid::NewGuid() )
     , OwnerID( Owner )
-    , Vertices { iVertex0, iVertex1 }
+    , Vertices { InVertex0, InVertex1 }
     , Length ( 0.0f )
     , bInvalidated ( false )
     , bAutoFractioned ( true )
+    , AllocationModel( InAllocationModel )
 {
     Init();
+}
+
+EArianeAllocationModel
+FArianeSegment::GetAllocationModel()
+{
+    return AllocationModel;
 }
 
 bool

@@ -14,10 +14,15 @@ FArianeVertex::~FArianeVertex()
 FArianeVertex::FArianeVertex()
     : Radius( 0.0f )
     , Normal ( FVector::Zero() )
+    , AllocationModel( EArianeAllocationModel::InstancedStruct )
 {
 }
 
-FArianeVertex::FArianeVertex( FArianeObject* Owner, const FVector& iPosition, const FVector& InNormal, double InRadius )
+FArianeVertex::FArianeVertex( FArianeObject* Owner
+                            , const FVector& iPosition
+                            , const FVector& InNormal
+                            , double InRadius
+                            , EArianeAllocationModel InAllocationModel )
     : FArianePoint( iPosition )
     , Guid( FGuid::NewGuid() )
     , OwnerID( Owner )
@@ -25,7 +30,14 @@ FArianeVertex::FArianeVertex( FArianeObject* Owner, const FVector& iPosition, co
     , Normal ( InNormal )
     , bChained( false )
     , bHandleAligned( true )
+    , AllocationModel( InAllocationModel )
 {
+}
+
+EArianeAllocationModel
+FArianeVertex::GetAllocationModel()
+{
+    return AllocationModel;
 }
 
 bool

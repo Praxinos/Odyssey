@@ -7,6 +7,8 @@
 #include "CoreMinimal.h"
 #include "ArianeID.h"
 #include "ArianePoint.h"
+#include "ArianeCoreEnums.h"
+
 #include "ArianeVertex.generated.h"
 
 struct FArianeObject;
@@ -41,8 +43,13 @@ public:
         * @param InPosition vertex's position
         * @param InNormal vertex's normal vector
         * @param InRadius vertex's radius
+        * @param InAllocationModel Memory allocation model, either InstancedStruct or System
         */
-    FArianeVertex( FArianeObject* Owner, const FVector& InPosition, const FVector& InNormal, double InRadius );
+    FArianeVertex( FArianeObject* Owner
+                 , const FVector& InPosition
+                 , const FVector& InNormal
+                 , double InRadius
+                 , EArianeAllocationModel InAllocationModel );
 
     /**
         * @brief Add a segment to the list of segments
@@ -125,6 +132,7 @@ public:
     static void ArrayToSegmentArray( const TArray<FArianeVertex*>& InVertices
                                     , TArray<FArianeSegment*>& OutSegments
                                     , bool bEmptyFirst );
+    EArianeAllocationModel GetAllocationModel();
 
 protected:
     /**
@@ -148,6 +156,9 @@ public:
 
     UPROPERTY( EditAnywhere )
     bool bHandleAligned;
+
+    UPROPERTY()
+    EArianeAllocationModel AllocationModel;
 
 protected:
     TArray<FArianeSegment*> Segments;

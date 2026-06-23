@@ -80,8 +80,9 @@ FArianeSegmentCubic::FArianeSegmentCubic( FArianeObject* Owner
                                         , double Handle1X
                                         , double Handle1Y
                                         , double Handle1Z
-                                        , FArianeVertex* Vertex1 )
-    : FArianeSegment( Owner, Vertex0, Vertex1 )
+                                        , FArianeVertex* Vertex1
+                                        , EArianeAllocationModel InAllocationModel )
+    : FArianeSegment( Owner, Vertex0, Vertex1, InAllocationModel )
     , Handle0( this, {0}, FVector( Handle0X, Handle0Y, Handle0Z ) )
     , Handle1( this, {1}, FVector( Handle1X, Handle1Y, Handle1Z ) )
 {

@@ -10,6 +10,7 @@
 // Ariane Headers
 #include "ArianeVertex.h"
 #include "ArianeID.h"
+#include "ArianeCoreEnums.h"
 
 #include "ArianeSegment.generated.h"
 
@@ -73,8 +74,12 @@ struct ARIANE_API FArianeSegment
          * @param Owner owner object
          * @param Vertex0 first vertex
          * @param Vertex1 second vertex
+         * @param InAllocationModel Memory allocation model, either InstancedStruct or System
          */
-        FArianeSegment( FArianeObject* InOwner, FArianeVertex* Vertex0, FArianeVertex* Vertex1 );
+        FArianeSegment( FArianeObject* InOwner
+                      , FArianeVertex* Vertex0
+                      , FArianeVertex* Vertex1
+                      , EArianeAllocationModel InAllocationModel );
 
         /** Get the segment's owner object */
         FArianeObject* GetOwner();
@@ -188,6 +193,7 @@ struct ARIANE_API FArianeSegment
         bool IsAutoFractioned();
         void SetFractions( const TArray<FArianePoint>& FractionPoints
                          , const TArray<float>& Radii  );
+        EArianeAllocationModel GetAllocationModel();
 
     protected:
         /** Update the segment's bounds */
@@ -205,6 +211,9 @@ struct ARIANE_API FArianeSegment
 
         UPROPERTY( EditAnywhere )
         FArianeVertexID Vertices[2];
+
+        UPROPERTY()
+        EArianeAllocationModel AllocationModel;
 
     protected:
         TArray<FArianePoint> FractionPoints;

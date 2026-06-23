@@ -5,10 +5,10 @@
 
 // Unreal headers
 #include "CoreMinimal.h"
-#include "ArianeID.h"
 #include "StructUtils/InstancedStruct.h"
-// std C++ Headers
-#include <functional>
+// Ariane Headers
+#include "ArianeID.h"
+#include "ArianeCoreEnums.h"
 
 #include "ArianeObject.generated.h"
 
@@ -59,9 +59,15 @@ GENERATED_BODY()
 public:
     enum class ECopyFlags : uint8
     {
-        None         =       0,
-        AllocWithNew = ( 1 < 0 ),
-        IgnoreTags   = ( 1 < 1 ),
+        AllocAsInstancedStruct = ( 1 << 0 ), // alloc as FInstancedStruct
+        AllocByOperatingSystem = ( 1 << 1 ), // alloc with "new"
+        IgnoreTags             = ( 1 << 2 ),
+    };
+
+    struct FCopyArgs
+    {
+        ECopyFlags Flags = {}; // init as zero
+        UArianeLayerDrawing* DrawingLayer = nullptr;
     };
 
     enum class ETraversalReturnValue{ Continue, IgnoreChildren, Stop };
@@ -84,7 +90,9 @@ public:
     virtual ~FArianeObject();
     FArianeObject();
 
-    FArianeObject( UArianeLayerDrawing* InDrawingLayer, const FName& InName );
+    FArianeObject( UArianeLayerDrawing* InDrawingLayer
+                 , const FName& InName
+                 , EArianeAllocationModel InAllocationModel );
 
     /**
         * @brief Add a child to this object at the end of the list of children.
@@ -229,11 +237,12 @@ public:
     void SetSelected( bool bInSelected );
     void TraverseBackwards( TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
 
-    FArianeObject* Copy( ECopyFlags CopyFlags
-                       , TFunction<void( FArianeObject*,ECopyFlags)> PreCallback
-                       , TFunction<void( FArianeObject*, FArianeObject*, ECopyFlags )> PostCallback );
-    FArianeObject* Copy( ECopyFlags CopyFlags );
+    FArianeObject* Copy( const FCopyArgs& CopyArgs
+                       , TFunction<void( FArianeObject*, const FCopyArgs& )> PreCallback
+                       , TFunction<void( FArianeObject*, FArianeObject*, const FCopyArgs& )> PostCallback );
+    FArianeObject* Copy( const FCopyArgs& CopyArgs );
     void AddTag( FArianeTag* Tag );
+    EArianeAllocationModel GetAllocationModel();
 
 protected:
     /**
@@ -242,8 +251,8 @@ protected:
         */
     void InvalidateChild( FArianeObject* Child );
 
-    virtual FArianeObject* CopyShape( ECopyFlags CopyFlags );
-    virtual void CopySettings( FArianeObject* DestinationObject, ECopyFlags CopyFlags, bool bInvalidate );
+    virtual FArianeObject* CopyShape( const FCopyArgs& CopyArgs );
+    virtual void CopySettings( FArianeObject* DestinationObject, const FCopyArgs& CopyArgs, bool bInvalidate );
 
     ETraversalReturnValue Traverse_Private( TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
     ETraversalReturnValue TraverseBackwards_Private( TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
@@ -279,8 +288,11 @@ protected:
     UPROPERTY( EditAnywhere )
     TArray<FArianeTagID> Tags;
 
-    UPROPERTY( EditAnywhere )
+    UPROPERTY()
     TArray<FInstancedStruct> InstancedTags;
+
+    UPROPERTY()
+    EArianeAllocationModel AllocationModel;
 
 protected:
     FSimpleMulticastDelegate  OnPostInvalidated;
