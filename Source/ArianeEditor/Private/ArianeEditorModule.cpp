@@ -9,6 +9,7 @@
 #include "ArianeEditorSettings.h"
 #include "ArianeEditorColorSelectorTab.h"
 #include "ArianeEditorLayerStackTab.h"
+#include "ArianeEditorSceneTreeViewTab.h"
 #include "ArianePainting3DComponentCustomization.h"
 #include "ArianeEditorStyle.h"
 // Ariane headers
@@ -97,6 +98,7 @@ FArianeEditorModule::StartupModule()
 
     FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
+    // color Selector
     LevelEditorModule.OnRegisterLayoutExtensions().AddLambda([](FLayoutExtender& InExtender)
     {
         FTabManager::FTab ColorSelectorTab = FTabManager::FTab(FTabId(FArianeEditorColorSelectorTab::StaticId()), ETabState::OpenedTab);
@@ -108,6 +110,19 @@ FArianeEditorModule::StartupModule()
         );
     });
 
+    // Scene Treeview
+    LevelEditorModule.OnRegisterLayoutExtensions().AddLambda([](FLayoutExtender& InExtender)
+    {
+        FTabManager::FTab SceneTreeViewTab = FTabManager::FTab(FTabId(FArianeEditorSceneTreeViewTab::StaticId()), ETabState::OpenedTab);
+
+        InExtender.ExtendLayout(
+            FTabId("TopLeftModeTab"),
+            ELayoutExtensionPosition::Below,
+            SceneTreeViewTab
+        );
+    });
+
+    // Layer Stack
     LevelEditorModule.OnRegisterLayoutExtensions().AddLambda([](FLayoutExtender& InExtender)
     {
         FTabManager::FTab LayerStackTab = FTabManager::FTab(FTabId(FArianeEditorLayerStackTab::StaticId()), ETabState::OpenedTab);

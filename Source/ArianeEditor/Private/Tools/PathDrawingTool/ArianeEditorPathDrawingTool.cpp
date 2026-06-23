@@ -77,6 +77,22 @@ UArianeEditorPathDrawingTool::Inactivate()
     Super::Inactivate();
 }
 
+FArianeGroup*
+UArianeEditorPathDrawingTool::GetParentGroup( UArianeLayerDrawing* DrawingLayer )
+{
+    TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetSelectedObjects();
+
+    if( SelectedObjects.Num() == 1 )
+    {
+       if( SelectedObjects[0]->GetClass() == FArianeGroup::StaticClass() )
+       {
+           return static_cast<FArianeGroup*>(SelectedObjects[0]);
+       }
+    }
+
+    return DrawingLayer->GetRootGroup();
+}
+
 bool
 UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
                                          , FSceneView* View
@@ -103,11 +119,14 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
 
             if( DrawingLayer )
             {
+                // choose between the root group and the selected group if any
+                FArianeGroup* ParentGroup = GetParentGroup( DrawingLayer );
+
                 DrawingLayer->Modify();
 
                 EditedPath = DrawingLayer->AllocPath( MaterialInterface, "Path" );
 
-                DrawingLayer->GetRootGroup()->AppendChild( EditedPath );
+                ParentGroup->AppendChild( EditedPath );
 
                 EditedPath->SetColor( ueColor );
                 EditedPath->SetLineType( LineType );
@@ -162,49 +181,6 @@ UArianeEditorPathDrawingTool::Render(IToolsContextRenderAPI* RenderAPI)
             }
         }
     }
-}
-
-FVector4
-UArianeEditorPathDrawingTool::GetDrawingPlane( FEditorViewportClient* ViewportClient
-                                             , UArianeLayerDrawing* DrawingLayer )
-{
-    IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
-    const FTransform& LayerWorldTransform = DrawingLayer->GetComponentTransform();
-    FVector LayerWorldPosition = DrawingLayer->GetComponentLocation();
-    FVector4 DrawingPlane = FVector4( 0.0f, 0.0f, 0.0f, 0.0f );
-    FViewCameraState CameraState;
-
-    QueriesAPI->GetCurrentViewState( CameraState );
-
-    FVector CameraLocation = CameraState.Position;
-    FVector CameraDirection = CameraState.Orientation.GetForwardVector();
-
-    switch( DrawingLayer->GetDrawingOrientation() )
-    {
-        case EArianeLayerDrawingOrientation::LayerXY :
-            DrawingPlane = LayerWorldTransform.TransformVector( FVector( 0.0f, 0.0f, 1.0f ) );
-        break;
-
-        case EArianeLayerDrawingOrientation::LayerYZ :
-            DrawingPlane = LayerWorldTransform.TransformVector( FVector( 1.0f, 0.0f, 0.0f ) );
-        break;
-
-        case EArianeLayerDrawingOrientation::LayerZX :
-            DrawingPlane = LayerWorldTransform.TransformVector( FVector( 0.0f, 1.0f, 0.0f ) );
-        break;
-
-        default : // EArianeLayerDrawingOrientation::View
-        {
-            DrawingPlane = -CameraDirection;
-        }
-        break;
-    }
-
-    DrawingPlane.W = - ( ( DrawingPlane.X * LayerWorldPosition.X )
-                       + ( DrawingPlane.Y * LayerWorldPosition.Y )
-                       + ( DrawingPlane.Z * LayerWorldPosition.Z ) );
-
-    return DrawingPlane;
 }
 
 void

@@ -255,8 +255,11 @@ UArianeLayerDrawing::ResetHierarchy()
 
     InstancedObjects.Empty();
     UsedMaterials.Empty();
+    SelectedObjects.Empty();
 
     RootGroupID = FArianeObjectID( AllocGroup( "Root Group" ) );
+
+    RootGroupID.GetObject()->Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 
     BindDelegates();
 }
@@ -320,7 +323,13 @@ UArianeLayerDrawing::SetDrawingOrientation( EArianeLayerDrawingOrientation InDra
 void
 UArianeLayerDrawing::ClearObjectSelection()
 {
-    SelectedObjects.Empty();
+    SelectedObjects.RemoveAll(
+        []( FArianeObject* SelectedObject )
+        {
+            SelectedObject->SetSelected( false );
+
+            return true;
+        } );
 }
 
 void
@@ -341,4 +350,44 @@ TArray<FArianeObject*>&
 UArianeLayerDrawing::GetSelectedObjects()
 {
     return SelectedObjects;
+}
+
+void
+UArianeLayerDrawing::GetUniquelySelectedObjects( TArray<FArianeObject*>& UniquelySelectedObjects, bool bEmptyFirst )
+{
+    if( bEmptyFirst )
+    {
+        UniquelySelectedObjects.Empty();
+    }
+
+    UniquelySelectedObjects.Reserve( UniquelySelectedObjects.Num() + SelectedObjects.Num() );
+
+    for( FArianeObject* SelectedObject : SelectedObjects )
+    {
+        bool bHasSelectedAncestor = false;
+
+        // Group only objects that have no selected ancestors
+        SelectedObject->TraverseBackwards (
+            [ SelectedObject
+            , &bHasSelectedAncestor
+            , &UniquelySelectedObjects ]( FArianeObject* TraversedObject ) -> FArianeObject::ETraversalReturnValue
+            {
+                if( TraversedObject != SelectedObject )
+                {
+                    if( TraversedObject->IsSelected() )
+                    {
+                        bHasSelectedAncestor = true;
+
+                        return FArianeObject::ETraversalReturnValue::Stop;
+                    }
+                }
+
+                return FArianeObject::ETraversalReturnValue::Continue;
+            } );
+
+        if( bHasSelectedAncestor == false )
+        {
+            UniquelySelectedObjects.Add( SelectedObject );
+        }
+    }
 }

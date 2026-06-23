@@ -82,7 +82,7 @@ UArianePainting3DComponent::GetUsedMaterials( TArray<UMaterialInterface*>& OutMa
 {
     //OutMaterials.Append( UsedMaterials );
 
-    LayerStack->GetRootFolder()->Traverse( [ &OutMaterials ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::TraversalReturnValue
+    LayerStack->GetRootFolder()->Traverse( [ &OutMaterials ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
         {
             UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Layer);
 
@@ -95,7 +95,7 @@ UArianePainting3DComponent::GetUsedMaterials( TArray<UMaterialInterface*>& OutMa
                 OutMaterials.Append( DrawingLayerUsedMaterials );
             }
 
-            return UArianeLayerFolder::TraversalReturnValue::Continue;
+            return UArianeLayerFolder::ETraversalReturnValue::Continue;
         } );
 }
 
@@ -366,7 +366,7 @@ FArianeGeometryProxy::DrawStaticElements( FStaticPrimitiveDrawInterface * PDI )
 
     Painting3DComponent->GetRootObject()->Traverse( [ this
                                                     , MaterialInterface
-                                                    , PDI ]( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
+                                                    , PDI ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
     {
         if( Object->GetClass() == FArianePath::StaticClass() )
         {
@@ -420,7 +420,7 @@ FArianeGeometryProxy::DrawStaticElements( FStaticPrimitiveDrawInterface * PDI )
             }
         }
 
-        return FArianeObject::TraversalReturnValue::Continue;
+        return FArianeObject::ETraversalReturnValue::Continue;
     } );
 
     Painting3DComponent->InstancedObjectsAccessRW.Unlock();
@@ -440,7 +440,7 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
                                             , DrawingLayer
                                             //, MaterialInterface
                                             , ViewIndex
-                                            , &Collector ]( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
+                                            , &Collector ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
     {
         if( ( Object->GetClass() == FArianePath::StaticClass() )  )
         {
@@ -532,7 +532,7 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
             }
         }
 
-        return FArianeObject::TraversalReturnValue::Continue;
+        return FArianeObject::ETraversalReturnValue::Continue;
     } );
 
     DrawingLayer->InstancedObjectsAccessRW.Unlock();
@@ -553,18 +553,18 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
 
         LayerStack->GetRootFolder()->Traverse( [ this
                                                     , &Collector
-                                                    , ViewIndex ]( UArianeLayer* Layer ) -> UArianeLayerFolder::TraversalReturnValue
+                                                    , ViewIndex ]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
         {
             UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Layer);
 
-            if( DrawingLayer )
+            if( DrawingLayer && DrawingLayer->IsVisible() )
             {
                 GetDrawingLayerDynamicMeshElements( DrawingLayer
                                                   , Collector
                                                   , ViewIndex );
             }
 
-            return UArianeLayerFolder::TraversalReturnValue::Continue;
+            return UArianeLayerFolder::ETraversalReturnValue::Continue;
         } );
 
         // Render bounds manually because it's a bit complicated to render them when using custom proxies like this one.

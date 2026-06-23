@@ -19,5 +19,8 @@ class ARIANEEDITOR_API SArianeEditorSceneTreeViewContextMenu
 
     protected:
         static bool CanUngroup( FArianeGroup* Scene );
-        static void Group( FArianeEditor* iEditor, FArianeGroup* Scene );
+        static bool CanGroup( FArianeGroup* RootGroup );
+        static bool CanDelete( FArianeGroup* RootGroup );
+        static bool CanPaste( FArianeEditor* Editor );
+        static void Group( FArianeEditor* Editor );
 };

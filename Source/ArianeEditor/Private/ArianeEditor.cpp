@@ -3,6 +3,7 @@
 
 // ArianeEditor headers
 #include "ArianeEditor.h"
+#include "ArianeEditorStyle.h"
 #include "ArianeEditorTool.h"
 #include "ArianeEditorSettings.h"
 #include "ArianeEditorViewportToolkit.h"
@@ -14,6 +15,7 @@
 #include "EraserTool/ArianeEditorEraserTool.h"
 #include "LayerTransformTool/ArianeEditorLayerTransformTool.h"
 // Ariane headers
+#include "ArianeGroup.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayerDrawing.h"
@@ -28,6 +30,7 @@
 #include "Selection.h"
 #include "EditorModeManager.h"
 #include "Tools/EdModeInteractiveToolsContext.h"
+#include "Widgets/Input/SSegmentedControl.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -40,6 +43,7 @@ FArianeEditor::FArianeEditor( FArianeEditorViewportToolkit* iToolkit )
     : Toolkit( iToolkit )
     , Name("ArianeEditor")
     , ColorType ( EOdysseyPainterEditorColorType::Raw )
+    , DrawingOrientation ( EArianeEditorDrawingOrientation::View )
 {
     HUDDrawingFlags.Mode = FArianeEditorHUD::EMode::Object;
 
@@ -92,6 +96,116 @@ FArianeEditor::ExtendToolbarSaveAssetButton( UToolMenu* iToolMenu )
     );
 }
 
+EArianeLayerDrawingOrientation
+FArianeEditor::GetLayerDrawingOrientation( UArianeLayerDrawing* DrawingLayer )
+{
+    if( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerXY )
+     || ( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerDefined )
+       && ( DrawingLayer->GetDrawingOrientation() ==  EArianeLayerDrawingOrientation::LayerXY ) ) )
+    {
+        return EArianeLayerDrawingOrientation::LayerXY;
+    }
+
+    if( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerYZ )
+     || ( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerDefined )
+       && ( DrawingLayer->GetDrawingOrientation() ==  EArianeLayerDrawingOrientation::LayerYZ ) ) )
+    {
+        return EArianeLayerDrawingOrientation::LayerYZ;
+    }
+
+    if( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerZX )
+     || ( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerDefined )
+       && ( DrawingLayer->GetDrawingOrientation() ==  EArianeLayerDrawingOrientation::LayerZX ) ) )
+    {
+        return EArianeLayerDrawingOrientation::LayerZX;
+    }
+
+    if( ( DrawingOrientation == EArianeEditorDrawingOrientation::View )
+     || ( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerDefined )
+       && ( DrawingLayer->GetDrawingOrientation() ==  EArianeLayerDrawingOrientation::View ) ) )
+    {
+        return EArianeLayerDrawingOrientation::View;
+    }
+
+    // should not de reached anyways
+    return EArianeLayerDrawingOrientation::View;
+}
+
+void
+FArianeEditor::SetDrawingOrientation( EArianeEditorDrawingOrientation InDrawingOrientation )
+{
+    DrawingOrientation = InDrawingOrientation;
+}
+
+const FSlateBrush*
+FArianeEditor::GetDrawingOrientationBackgroundBrush( EArianeEditorDrawingOrientation InDrawingOrientation ) const
+{
+    static FSlateColorBrush Selected = FSlateColorBrush( FStyleColors::Select );
+
+    return ( DrawingOrientation == InDrawingOrientation ) ? &Selected : nullptr;
+}
+
+TSharedRef<SWidget>
+FArianeEditor::CreateDrawingOrientationSegmentControl()
+{
+    return SNew(SSegmentedControl<EArianeEditorDrawingOrientation>)
+           .Value_Lambda( [this]{ return DrawingOrientation; } )
+           .SupportsEmptySelection( false )
+           .SupportsMultiSelection( false )
+           .UniformPadding( FMargin( 2, 0, 2, 0 ) )
+           .OnValueChanged( SSegmentedControl<EArianeEditorDrawingOrientation>::FOnValueChanged::CreateSP( this, &FArianeEditor::SetDrawingOrientation ) )
+           + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::View )
+           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.View.name", "Use Camera's view") )
+           [
+               SNew(SBorder)
+               .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::View  )
+               [
+                   SNew(SImage)
+                   .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.View20") )
+               ]
+           ]
+           + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::LayerXY )
+           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerXY.name", "Use Layer's XY Plane") )
+           [
+               SNew(SBorder)
+               .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::LayerXY  )
+               [
+                   SNew(SImage)
+                   .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerXY20") )
+               ]
+           ]
+           + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::LayerYZ )
+           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerYZ.name", "Use on the Layer's YZ Plane") )
+           [
+               SNew(SBorder)
+               .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::LayerYZ  )
+               [
+                   SNew(SImage)
+                   .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerYZ20") )
+               ]
+           ]
+           + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::LayerZX )
+           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerZX.name", "Use Layer's ZX Plane") )
+           [
+               SNew(SBorder)
+               .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::LayerZX  )
+               [
+                   SNew(SImage)
+                   .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerZX20") )
+               ]
+           ]
+           + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::LayerDefined )
+           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerZX.name", "Use Layer's drawing orientation") )
+           [
+               SNew(SBorder)
+               .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::LayerDefined  )
+               [
+                   SNew(SImage)
+                   .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerDefined20") )
+               ]
+           ];
+}
+
 void
 FArianeEditor::ClearPainting3DComponents()
 {
@@ -112,6 +226,8 @@ FArianeEditor::ClearPainting3DComponents()
 
                 CurrentDrawingLayer->ResetHierarchy();
             }
+
+            Painting3DComponent->Update( false );
         }
     }
 }
@@ -174,6 +290,16 @@ FArianeEditor::ExtendToolbarToolParameters( UToolMenu* iToolMenu )
             LOCTEXT("ariane-top-tab-.clear", "Clear selected Painting3D actors."),
             FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Clear32"),
             EUserInterfaceActionType::Button
+        )
+    );
+
+    FToolMenuSection& DrawingOrientationSection = iToolMenu->AddSection("DrawingOrientation");
+
+    DrawingOrientationSection.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            CreateDrawingOrientationSegmentControl(),
+            FText()
         )
     );
 
@@ -615,6 +741,219 @@ FString
 FArianeEditor::GetReferencerName() const
 {
     return "FArianeEditor";
+}
+
+const FArianeEditor::FClipboard&
+FArianeEditor::GetClipboard() const
+{
+    return Clipboard;
+}
+
+TArray<FArianeObject*>&
+FArianeEditor::FClipboard::GetCopiedObjects()
+{
+    return CopiedObjects;
+}
+
+const TArray<FArianeObject*>&
+FArianeEditor::FClipboard::GetCopiedObjects() const
+{
+    return CopiedObjects;
+}
+
+void
+FArianeEditor::UngroupSelectedGroups()
+{
+    UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        if( DrawingLayer )
+        {
+            FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
+
+            for( FArianeObject* SelectedObject : DrawingLayer->GetSelectedObjects() )
+            {
+                if( SelectedObject != RootGroup )
+                {
+                    if( SelectedObject->GetClass() == FArianeGroup::StaticClass() )
+                    {
+                        FArianeGroup* SelectedGroup = static_cast<FArianeGroup*>(SelectedObject);
+                        // we work on a copy of the array because the hierarchy will be modified
+                        TArray<FArianeObjectID> ChildrenIDs = SelectedGroup->GetChildren();
+
+                        for( FArianeObjectID& ChildID : ChildrenIDs )
+                        {
+                            FArianeObject* Child = ChildID.GetObject();
+
+                            SelectedGroup->GetParent()->TransferChild( Child, nullptr );
+                        }
+                    }
+                }
+            }
+
+            Painting3DComponent->Update( false );
+        }
+    }
+}
+
+void
+FArianeEditor::GroupSelectedObjects( const FName& NewGroupName )
+{
+    UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        if( DrawingLayer )
+        {
+            FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
+            FArianeObject* FosterParent = RootGroup;
+            FArianeGroup* NewGroup = DrawingLayer->AllocGroup( NewGroupName );
+            TArray<FArianeObject*> ObjectsToRegroup;
+
+            if( RootGroup->IsSelected() == false )
+            {
+                DrawingLayer->GetUniquelySelectedObjects( ObjectsToRegroup, false );
+
+                // Check if they all belong to the same parent
+                if( ObjectsToRegroup.Num() >= 2 )
+                {
+                    FosterParent = ObjectsToRegroup[0]->GetParent();
+
+                    for( int32 i = 1; i < ObjectsToRegroup.Num(); i++ )
+                    {
+                        FArianeObject* SelectedObject = ObjectsToRegroup[i];
+
+                        if( SelectedObject->GetParent() != FosterParent )
+                        {
+                            // if they don't belong to the same parent, use the RootGroup as the new group's parent
+                            FosterParent = RootGroup;
+
+                            break;
+                        }
+                    }
+                }
+
+                // Final step
+                FosterParent->AppendChild( NewGroup );
+
+                for( FArianeObject* ObjectToRegroup : ObjectsToRegroup )
+                {
+                    NewGroup->TransferChild( ObjectToRegroup, nullptr );
+                }
+
+                Painting3DComponent->Update( false );
+            }
+        }
+    }
+}
+
+void
+FArianeEditor::DeleteSelectedObjects()
+{
+    UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        if( DrawingLayer )
+        {
+            FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
+            TArray<FArianeObject*> ObjectsToDelete;
+
+            if( RootGroup->IsSelected() == false )
+            {
+                DrawingLayer->GetUniquelySelectedObjects( ObjectsToDelete, false );
+
+                for( FArianeObject* ObjectToDelete : ObjectsToDelete )
+                {
+                    ObjectToDelete->GetParent()->RemoveChild( ObjectToDelete, true );
+                }
+
+                Painting3DComponent->Update( false );
+            }
+        }
+    }
+}
+
+void
+FArianeEditor::CopySelectedObjects()
+{
+    UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        if( DrawingLayer )
+        {
+            TArray<FArianeObject*> ObjectsToCopy;
+
+            DrawingLayer->GetUniquelySelectedObjects( ObjectsToCopy, false );
+
+            if( ObjectsToCopy.Num() )
+            {
+                // free copied objects
+                for( FArianeObject* ObjectToCopy : Clipboard.CopiedObjects )
+                {
+                    delete ObjectToCopy;
+                }
+
+                Clipboard.CopiedObjects.Empty();
+
+                for( FArianeObject* ObjectToCopy : ObjectsToCopy )
+                {
+                    // We alloc with new because we don't want this object to be saved by the serialization
+                    // that saves all objects allocated as instanced structs. We want independent objects to store in
+                    // a clipboard
+                    Clipboard.CopiedObjects.Add ( ObjectToCopy->Copy( FArianeObject::ECopyFlags::AllocWithNew ) );
+                }
+            }
+        }
+    }
+}
+
+void
+FArianeEditor::PasteObjects()
+{
+    UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        if( DrawingLayer )
+        {
+            if( Clipboard.CopiedObjects.Num() )
+            {
+                TArray<FArianeObject*> SelectedObjects;
+                FArianeObject* Destination = DrawingLayer->GetRootGroup();
+
+                DrawingLayer->GetUniquelySelectedObjects( SelectedObjects, false );
+
+                Destination = ( SelectedObjects.Num() == 1 ) ? SelectedObjects[0]
+                                                             : DrawingLayer->GetRootGroup();
+
+                for( FArianeObject* CopiedObject : Clipboard.CopiedObjects )
+                {
+                    // ECopyFlags to none means the allocation will be made as FInstancedstruct, thus saved by
+                    // Unreal Engine's serialization
+                    FArianeObject* PasteObject = CopiedObject->Copy( FArianeObject::ECopyFlags::None );
+
+                    Destination->AppendChild( PasteObject );
+
+                    DrawingLayer->SelectObject( PasteObject );
+                }
+
+                Painting3DComponent->Update( false );
+            }
+        }
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

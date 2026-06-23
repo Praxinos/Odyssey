@@ -7,13 +7,16 @@
 #include "CoreMinimal.h"
 // Ariane Headers
 #include "ArianePainting3DComponentEditorInterface.h"
+#include "ArianeLayerDrawingEnums.h"
+// Ariane Editor Headers
+#include "ArianeEditorHUD.h"
 // Odyssey Headers
 #include "OdysseyPainterEditorColorType.h"
 #include "InteractiveTool.h"
 // ULIS Headers
 #include <ULIS>
 
-#include "ArianeEditorHUD.h"
+#include "ArianeEditor.generated.h"
 
 class UArianeEditorTool;
 class FArianeEditorViewportToolkit;
@@ -24,6 +27,18 @@ class AArianePainting3DActor;
 class UArianePainting3DComponent;
 class UInteractiveToolManager;
 class UArianeEditorToolBuilder;
+class UArianeLayerDrawing;
+struct FArianeObject;
+
+UENUM()
+enum class EArianeEditorDrawingOrientation : uint8
+{
+    LayerXY = EArianeLayerDrawingOrientation::LayerXY,
+    LayerYZ = EArianeLayerDrawingOrientation::LayerYZ,
+    LayerZX = EArianeLayerDrawingOrientation::LayerZX,
+    View = EArianeLayerDrawingOrientation::View,
+    LayerDefined,
+};
 
 /**
  * Base class for a Painting Editor
@@ -33,6 +48,19 @@ class ARIANEEDITOR_API FArianeEditor
     , public TSharedFromThis<FArianeEditor>
     , public IArianePainting3DComponentEditorInterface
 {
+public:
+    struct ARIANEEDITOR_API FClipboard
+    {
+        friend class FArianeEditor;
+
+    public :
+        TArray<FArianeObject*>& GetCopiedObjects();
+        const TArray<FArianeObject*>& GetCopiedObjects() const;
+
+    protected:
+        TArray<FArianeObject*> CopiedObjects;
+    };
+
 public:
     DECLARE_MULTICAST_DELEGATE( FOnCurrentToolChanged );
     DECLARE_MULTICAST_DELEGATE( FOn3DPaintingComponentSelectionChanged );
@@ -206,6 +234,15 @@ public:
     // immplements IArianePainting3DComponentEditorInterface::GetHUDForegroundColor
     virtual FColor GetHUDForegroundColor() override;
     void SetCurrentPainting3DComponent( UArianePainting3DComponent* InPainting3DComponent );
+    EArianeLayerDrawingOrientation GetLayerDrawingOrientation( UArianeLayerDrawing* DrawingLayer );
+
+    const FClipboard& GetClipboard() const;
+
+    void GroupSelectedObjects( const FName& NewGroupName );
+    void UngroupSelectedGroups();
+    void DeleteSelectedObjects();
+    void CopySelectedObjects();
+    void PasteObjects();
 
 protected:
     /**
@@ -225,6 +262,9 @@ protected:
 
     void ExtendToolbarSaveAssetButton( UToolMenu* iToolMenu );
     void ExtendToolbarToolParameters( UToolMenu* iToolMenu );
+    void SetDrawingOrientation( EArianeEditorDrawingOrientation InDrawingOrientation);
+    TSharedRef<SWidget> CreateDrawingOrientationSegmentControl();
+    const FSlateBrush* GetDrawingOrientationBackgroundBrush( EArianeEditorDrawingOrientation InDrawingOrientation ) const;
     void ClearPainting3DComponents();
     void OnEditorSelectionChanged( UObject* NewSelection );
     void AddToolBuilder( UArianeEditorToolBuilder* ToolBuilder );
@@ -249,4 +289,6 @@ protected:
     ::ULIS::FColor PaintColor;
     EOdysseyPainterEditorColorType ColorType;
     FArianeEditorHUD::FDrawingFlags HUDDrawingFlags;
+    EArianeEditorDrawingOrientation DrawingOrientation;
+    FClipboard Clipboard;
 };

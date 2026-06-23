@@ -56,7 +56,7 @@ FArianeEditorStyle::Init()
 {
     SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) );
 
-    Set( "ArianeEditor.EdMode24", new IMAGE_BRUSH_SVG( "Ariane/ariane_edmode", Icon24x24 ) );
+    Set( "ArianeEditor.EdMode24", new IMAGE_BRUSH_SVG( "ArianeEditor/ariane_edmode", Icon24x24 ) );
 
     // Tooling
     Set( "ArianeEditor.ToolsTab.PathDrawing64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_drawing_tool", Icon64x64 ) );
@@ -129,6 +129,13 @@ FArianeEditorStyle::Init()
         .SetCheckedHoveredImage(*FAppStyle::Get().GetBrush("Level.LockedIcon16x"))
         .SetCheckedPressedImage(*FAppStyle::Get().GetBrush("Level.LockedIcon16x"))
     );
+
+    // Ariane Editor Drawing Orientation
+    Set( "ArianeEditor.DrawingOrientation.View20", new IMAGE_BRUSH_SVG( "ArianeEditor/drawing_orientation_view", Icon20x20 ) );
+    Set( "ArianeEditor.DrawingOrientation.LayerXY20", new IMAGE_BRUSH_SVG( "ArianeEditor/drawing_orientation_xy", Icon20x20 ) );
+    Set( "ArianeEditor.DrawingOrientation.LayerYZ20", new IMAGE_BRUSH_SVG( "ArianeEditor/drawing_orientation_yz", Icon20x20 ) );
+    Set( "ArianeEditor.DrawingOrientation.LayerZX20", new IMAGE_BRUSH_SVG( "ArianeEditor/drawing_orientation_zx", Icon20x20 ) );
+    Set( "ArianeEditor.DrawingOrientation.LayerDefined20", new IMAGE_BRUSH_SVG( "ArianeEditor/drawing_orientation_layer_defined", Icon20x20 ) );
 
     // Ariane Editor Scene Tree View
     Set( "ArianeEditor.SceneTreeView.Paintgroup", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/paintgroup", Icon16x16 ) );

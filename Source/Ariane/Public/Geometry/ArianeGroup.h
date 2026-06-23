@@ -73,7 +73,8 @@ public:
 
 #if WITH_EDITOR
    void SetHUDForegroundColor( const FColor& InHUDForegroundColor );
-    void UseEditorHUDForegroundColor( bool bInUseEditorHUDForegroundColor );
+   void UseEditorHUDForegroundColor( bool bInUseEditorHUDForegroundColor );
+   virtual FColor GetHUDForegroundColor() override;
 #endif
 
 protected:

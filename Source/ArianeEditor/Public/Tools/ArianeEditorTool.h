@@ -227,6 +227,13 @@ protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu );
 
     /**
+     * @brief Get a layer's drawing plane
+     * @param ViewportClient
+     * @param DrawingLayer the layer from get the plane from
+     */
+    FVector4 GetDrawingPlane( FEditorViewportClient* ViewportClient, UArianeLayerDrawing* DrawingLayer );
+
+    /**
      * @brief Get the active viewport client
      * @return the active viewport client
      */

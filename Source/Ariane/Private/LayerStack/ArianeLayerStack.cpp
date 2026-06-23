@@ -84,11 +84,11 @@ UArianeLayerStack::RemoveSelectedLayers()
 void
 UArianeLayerStack::GetLayers( TArray<UArianeLayer*>& OutLayers )
 {
-    RootFolder->Traverse( [ &OutLayers ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::TraversalReturnValue
+    RootFolder->Traverse( [ &OutLayers ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
     {
         OutLayers.Add( Layer );
 
-        return UArianeLayerFolder::TraversalReturnValue::Continue;
+        return UArianeLayerFolder::ETraversalReturnValue::Continue;
     } );
 }
 
