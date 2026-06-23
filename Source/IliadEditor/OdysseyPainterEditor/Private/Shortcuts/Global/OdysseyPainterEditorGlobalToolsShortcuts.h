@@ -28,6 +28,7 @@ public:
     void Action_ActivateEraserTool();
     void Action_ActivateWarpTool();
     void Action_SetToolRadius();
+    void Action_InactivateTemporaryTool();
 
     bool CanAction_ActivateTool(UOdysseyPainterEditorTool* iTool);
     bool CanAction_ActivateColorPickerTool();
@@ -39,6 +40,7 @@ public:
     bool CanAction_ActivateEraserTool();
     bool CanAction_ActivateWarpTool();
     bool CanAction_SetToolRadius();
+    bool CanAction_InactivateTemporaryTool();
 
 public:
     //Shortcuts

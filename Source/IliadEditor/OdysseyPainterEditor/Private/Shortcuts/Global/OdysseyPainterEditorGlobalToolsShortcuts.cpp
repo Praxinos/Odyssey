@@ -7,6 +7,7 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 
 #include "OdysseyPainterEditorRasterDrawingTool.h"
+#include "Tools/OutOfPegsTool/OdysseyPainterEditorAnimationOutOfPegsTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
 #include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
@@ -83,6 +84,12 @@ FOdysseyPainterEditorGlobalToolsShortcuts::MapActionsToCommandList(TSharedRef<FU
         FOdysseyPainterEditorCommands::Get().ActivateWarpTool,
         FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateWarpTool),
         FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateWarpTool)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().InactivateTemporaryTool,
+        FExecuteAction::CreateRaw( this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_InactivateTemporaryTool ),
+        FCanExecuteAction::CreateRaw( this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_InactivateTemporaryTool )
     );
 
     //Specific tool shortcuts
@@ -344,6 +351,19 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateWarpTool()
 }
 
 void
+FOdysseyPainterEditorGlobalToolsShortcuts::Action_InactivateTemporaryTool()
+{
+    if (!mEditor)
+        return;
+
+    if (mEditor->GetCurrentTemporaryTool())
+    {
+        mEditor->InactivateTemporaryTool();
+        return;
+    }
+}
+
+void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_SetToolRadius()
 {
     if (!mEditor)
@@ -483,6 +503,18 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateWarpTool()
     */
 
     if (CanAction_ActivateTool(mEditor->GetVectorGridTool()))
+        return true;
+
+    return false;
+}
+
+bool
+FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_InactivateTemporaryTool()
+{
+    if (!mEditor)
+        return false;
+
+    if (mEditor->GetCurrentTemporaryTool())
         return true;
 
     return false;

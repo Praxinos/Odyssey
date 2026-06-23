@@ -113,6 +113,11 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( ActivateEraserTool, ToolsShortcuts, "Activate Eraser Tool", "Activates the Eraser Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::E));
     UI_BUNDLE_COMMAND( ActivateWarpTool, ToolsShortcuts, "Activate Warp Tool", "Activates the Warp Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::W));
 
+    //TODO: rename this shortcut label (and tooltip) to something: "Inactivate Temporary Tool (Out of Peg,...)"
+    // once more than 1 temporary tool will be available
+    // By listing all temporary tools in label, the shortcut will be found when searching for a specific temporary tool
+    UI_BUNDLE_COMMAND( InactivateTemporaryTool, ToolsShortcuts, "Inactivate Out of Peg Tool", "Inactivates any temporary tool like: Out of Peg Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::Enter), FInputChord(EKeys::Escape));
+
     UI_BUNDLE_COMMAND( ActivateRasterDrawingTool, ToolsShortcuts, "Activate Raster Drawing Tool", "Activates the editor Raster Drawing tool", EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( ActivateRasterEraserTool, ToolsShortcuts, "Activate Raster Eraser Tool", "Activates the editor Raster Eraser tool", EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( ActivateRasterPaintBucketTool, ToolsShortcuts, "Activate Raster Paint Bucket Tool", "Activates the editor Raster Paint Bucket tool", EUserInterfaceActionType::Button, FInputChord() );
