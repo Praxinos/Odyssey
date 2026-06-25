@@ -114,12 +114,16 @@ public:
      * @OutUsedMaterials output array
      * @bEmptyFirst empty the output array first.
      */
-    void GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials, bool bEmptyFirst );
+    void GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials );
+
+    void AppendUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials );
     void ClearObjectSelection();
     void SelectObject( FArianeObject* ObjectToSelect );
     const TArray<FArianeObject*>& GetSelectedObjects() const;
     TArray<FArianeObject*>& GetSelectedObjects();
-    void GetUniquelySelectedObjects( TArray<FArianeObject*>& UniquelySelectedObjects, bool bEmptyfirst );
+    void AppendSelectedTrees( TArray<FArianeObject*>& SelectedTrees );
+    void GetSelectedTrees( TArray<FArianeObject*>& SelectedTrees );
+    void UnselectObject( FArianeObject* ObjectToSelect );
 
 protected:
     void BindDelegates();

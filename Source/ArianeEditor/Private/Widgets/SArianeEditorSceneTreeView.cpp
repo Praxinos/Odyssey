@@ -23,8 +23,6 @@
 
 SArianeEditorSceneTreeView::~SArianeEditorSceneTreeView()
 {
-    // Keep commented-out until we convert Editor to a sharedptr
-    //Editor->OnSourceChanged().RemoveAll( this );
 }
 
 SArianeEditorSceneTreeView::SArianeEditorSceneTreeView()
@@ -211,7 +209,7 @@ void
 SArianeEditorSceneTreeView::Update()
 {
     ItemsSource.Empty();
-    SelectedItems.Empty();
+    ClearSelection();
     RequestTreeRefresh();
 
     FArianeGroup* RootGroup = GetRootGroup();
@@ -384,35 +382,29 @@ void
 SArianeEditorSceneTreeView::OnPrePainting3DComponentUpdate( bool bInteractive )
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+    UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+    // Note: Painting3DComponent cannot be null since it is supposed to exist at that step. Do not check for its validity.
 
     // the bInteractive is voluntarily ignored. During a MouseDown, the flag is set but we still need to mark the widget
     // as needing an update
-    Painting3DComponent->GetLayerStack()->GetRootFolder()->Traverse (
-        [this]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
-        {
-            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Layer);
+    if( DrawingLayer )
+    {
+        FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
 
-            if( DrawingLayer )
+        RootGroup->Traverse (
+            [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
             {
-                FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
+                if( Object->GetInvalidationFlags().Hierarchy
+                    || Object->GetInvalidationFlags().Tags )
+                {
+                    bDoUpdate = true;
+                }
 
-                RootGroup->Traverse (
-                    [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
-                    {
-                        if( Object->GetInvalidationFlags().Hierarchy
-                         || Object->GetInvalidationFlags().Tags )
-                        {
-                            bDoUpdate = true;
-                        }
-
-                        return bDoUpdate ? FArianeObject::ETraversalReturnValue::Stop
-                                            : FArianeObject::ETraversalReturnValue::Continue;
-                    } );
-            }
-
-            return bDoUpdate ? UArianeLayerFolder::ETraversalReturnValue::Stop
-                                : UArianeLayerFolder::ETraversalReturnValue::Continue;
-        } );
+                return bDoUpdate ? FArianeObject::ETraversalReturnValue::Stop
+                                    : FArianeObject::ETraversalReturnValue::Continue;
+            } );
+    }
 }
 
 void

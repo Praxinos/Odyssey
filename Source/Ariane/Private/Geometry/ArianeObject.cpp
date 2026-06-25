@@ -177,6 +177,11 @@ FArianeObject::RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstan
     ChildToRemove->Update( true );
     ChildToRemove->Removed();
 
+    if( ChildToRemove->IsSelected() )
+    {
+        DrawingLayer->UnselectObject( ChildToRemove );
+    }
+
     if( bRemoveFromInstancedObjects )
     {
         DrawingLayer->DeleteInstancedObject( ChildToRemove );
@@ -328,6 +333,47 @@ const FTransform&
 FArianeObject::GetTransform()
 {
     return GetDrawingLayer()->GetComponentTransform();
+}
+
+//static
+uint32
+FArianeObject::CheckCommonClass( const TArray<FArianeObject*>& Objects, uint32 CommonClass )
+{
+    if( Objects.Num() )
+    {
+        for( FArianeObject* Object : Objects )
+        {
+            if( Object->HasBaseClass( CommonClass ) )
+            {
+                uint32 ObjectClass = Object->GetClass();
+
+                if( ObjectClass != CommonClass )
+                {
+                    uint32 NewCommonClass = CheckCommonClass( Objects, ObjectClass );
+
+                    if( NewCommonClass )
+                    {
+                        return NewCommonClass;
+                    }
+                }
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        return CommonClass;
+    }
+
+    return 0;
+}
+
+// static
+uint32
+FArianeObject::GetCommonClass( const TArray<FArianeObject*>& Objects )
+{
+    return CheckCommonClass( Objects, FArianeObject::StaticClass() );
 }
 
 bool
@@ -617,7 +663,10 @@ FArianeObject::TransferChild( FArianeObject* FosterChild
 void
 FArianeObject::CopySettings( FArianeObject* DestinationObject, const FCopyArgs& CopyArgs, bool bInvalidate )
 {
-    DestinationObject->Name = Name;
+    FName NewName = EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::Rename ) ? FName( Name.ToString() + "_copy" )
+                                                                          : Name;
+
+    DestinationObject->Name = NewName;
     DestinationObject->Translation = Translation;
     DestinationObject->RotationInDegrees = RotationInDegrees;
     DestinationObject->Scaling = Scaling;
@@ -648,9 +697,6 @@ FArianeObject::CopyShape( const FCopyArgs& CopyArgs )
         ObjectCopy = CopyArgs.DrawingLayer->AllocObject( Name );
     }
 
-    CopySettings( ObjectCopy, CopyArgs, true );
-
-
     return ObjectCopy;
 }
 
@@ -665,13 +711,18 @@ FArianeObject::Copy( const FCopyArgs& CopyArgs
 
     if( ObjectCopy )
     {
-
+        CopySettings( ObjectCopy, CopyArgs, true );
 
         // recurse
         for( FArianeObjectID& ChildID : Children )
         {
             FArianeObject* Child = ChildID.GetObject();
-            FArianeObject* ChildCopy = Child->Copy( CopyArgs, PreCallback, PostCallback );
+            FCopyArgs ChildCopyArgs = CopyArgs;
+
+            // We only rename the first item of the tree, that's why we reset the flag
+            EnumRemoveFlags( ChildCopyArgs.Flags, ECopyFlags::Rename );
+
+            FArianeObject* ChildCopy = Child->Copy( ChildCopyArgs, PreCallback, PostCallback );
 
             ObjectCopy->AppendChild( ChildCopy );
         }

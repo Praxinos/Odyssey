@@ -4,7 +4,7 @@
 // Ariane Editor Headers
 #include "ArianeEditorSceneTreeViewTab.h"
 #include "SArianeEditorSceneTreeView.h"
-//#include "SArianeEditorSceneDetailsView.h"
+#include "SArianeEditorCurrentObjectDetailsView.h"
 //#include "ArianeEditorObjectView.h"
 //#include "ArianeEditorPathView.h"
 //#include "ArianeEditorGroupView.h"
@@ -70,12 +70,10 @@ FArianeEditorSceneTreeViewTab::CreateWidget()
             [
                 SNew( SArianeEditorSceneTreeView, Editor )
             ]
-/* Gary
             +SSplitter::Slot()
             [
-                SNew( SArianeEditorSceneDetailsView, Editor )
+                SNew( SArianeEditorCurrentObjectDetailsView, Editor )
             ]
-*/
         ];
 
 }

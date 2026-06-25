@@ -250,6 +250,9 @@ public:
     /** Invalidate all segments */
     void InvalidateAllSegments();
 
+    /** Invalidate all segments */
+    void InvalidateAllVertices();
+
     /** Get all chains (i.e all continguous sets of segments) */
     const TArray<Chain>& GetChains();
 

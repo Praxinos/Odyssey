@@ -1,92 +1,183 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-#include "Widgets/SArianeEditorCurrentObjectDetailsView.h"
-
-#ifdef unused
-
+// Ariane Editor Headers
+#include "SArianeEditorCurrentObjectDetailsView.h"
+#include "ArianeEditor.h"
+#include "ArianeEditorObjectProxy.h"
+#include "ArianeEditorPathProxy.h"
+#include "ArianeEditorGroupProxy.h"
+// Ariane Headers
+#include "ArianePainting3DComponent.h"
+#include "ArianeLayer.h"
+#include "ArianeLayerDrawing.h"
+#include "ArianeLayerStack.h"
+#include "ArianeObject.h"
+#include "ArianeGroup.h"
+// Unreal Headers
 #include "Editor.h"
 #include "IDetailPropertyRow.h"
 #include "DetailWidgetRow.h"
 #include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
 
-#include "OdysseyVectorEngine.h"
-#include "OdysseyVectorCell.h"
-#include "OdysseyPainterEditor.h"
-#include "OdysseyPainterEditorVectorObjectView.h"
-#include "OdysseyPainterEditorVectorPathView.h"
-#include "OdysseyPainterEditorVectorGroupPaintView.h"
-#include "OdysseyPainterEditorVectorTagInbetweenerView.h"
-#include "OdysseyLayerStack.h"
-#include "OdysseyAnimationLayerImageVector.h"
-#include "OdysseyTextureLayerImageVector.h"
-#include "Undo/OdysseyVectorUndoObjectParam.h"
-#include "OdysseyAnimationLayerImageVector.h"
-#include "OdysseyTextureLayerImageVector.h"
 
 #include "HUD/OdysseyVectorHUD.h"
 
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
-SLATE_IMPLEMENT_WIDGET(SOdysseyPainterEditorVectorSceneDetailsView)
-void
-SOdysseyPainterEditorVectorSceneDetailsView::PrivateRegisterAttributes(FSlateAttributeInitializer& AttributeInitializer)
+SArianeEditorCurrentObjectDetailsView::~SArianeEditorCurrentObjectDetailsView()
 {
-    SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, mScene, EInvalidateWidgetReason::None)
-    .OnValueChanged(FSlateAttributeDescriptor::FAttributeValueChangedDelegate::CreateLambda(
-        [](SWidget& Widget)
-        {
-            static_cast<SOdysseyPainterEditorVectorSceneDetailsView&>(Widget).OnSceneChanged();
-        }
-    ));
 }
 
-SOdysseyPainterEditorVectorSceneDetailsView::~SOdysseyPainterEditorVectorSceneDetailsView()
-{
-    UnbindLayerDelegates();
-
-    // Keep commented-out until we convert mEditor to a sharedptr
-    //mEditor->OnSourceChanged().RemoveAll( this );
-
-    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll( this );
-}
-
-SOdysseyPainterEditorVectorSceneDetailsView::SOdysseyPainterEditorVectorSceneDetailsView()
-    : mEditor(nullptr)
-    , mScene(*this, nullptr)
-    , mVectorLayer ( nullptr )
+SArianeEditorCurrentObjectDetailsView::SArianeEditorCurrentObjectDetailsView()
+    : Editor(nullptr)
+    , bDoUpdate(false)
 {
 }
 
 void
-SOdysseyPainterEditorVectorSceneDetailsView::Construct( const FArguments& InArgs )
+SArianeEditorCurrentObjectDetailsView::Construct( const FArguments& InArgs, FArianeEditor* InEditor )
 {
-    mEditor = InArgs._Editor;
-    mScene.Assign(*this, InArgs._Scene);
+    Editor = InEditor;
 
-    mDetailsView = CreateObjectPropertiesPanel();
+    DetailsView = CreateObjectPropertiesPanel();
+
     ChildSlot
     [
-        mDetailsView.ToSharedRef()
+        DetailsView.ToSharedRef()
     ];
 
-    mObjectView = NewObject<UOdysseyPainterEditorVectorObjectView>();
-    mGroupView = NewObject<UOdysseyPainterEditorVectorGroupView>();
-    mPathView = NewObject<UOdysseyPainterEditorVectorPathView>();
-    mGroupPaintView = NewObject<UOdysseyPainterEditorVectorGroupPaintView>();
-    mTagInbetweenerView = NewObject<UOdysseyPainterEditorVectorTagInbetweenerView>();
+    ObjectProxy = NewObject<UArianeEditorObjectProxy>();
+    GroupProxy = NewObject<UArianeEditorGroupProxy>();
+    PathProxy = NewObject<UArianeEditorPathProxy>();
 
-    UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &SOdysseyPainterEditorVectorSceneDetailsView::OnCurrentLayerChanged);
+    DetailsView->OnFinishedChangingProperties().AddSP( this, &SArianeEditorCurrentObjectDetailsView::PropertyValueChanged );
 
-    mEditor->OnSourceChanged().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnSourceChanged );
+    Editor->OnPre3DPaintingComponentSelectionChangedDelegate().AddSP( this, &SArianeEditorCurrentObjectDetailsView::OnPre3DPaintingComponentSelectionChanged );
+    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddSP( this, &SArianeEditorCurrentObjectDetailsView::OnPost3DPaintingComponentSelectionChanged );
 
-    mDetailsView->OnFinishedChangingProperties().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::PropertyValueChanged );
+    // First update. Following updates will be triggered by delegates
+    Update();
+}
+
+void
+SArianeEditorCurrentObjectDetailsView::OnPrePainting3DComponentUpdate( bool bInteractive )
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+    UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+    // Note: Painting3DComponent cannot be null since it is supposed to exist at that step. Do not check for its validity.
+
+    // the bInteractive is voluntarily ignored. During a MouseDown, the flag is set but we still need to mark the widget
+    // as needing an update
+    if( DrawingLayer )
+    {
+        FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
+
+        RootGroup->Traverse (
+            [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+            {
+                if( Object->GetInvalidationFlags().HasAny() )
+                {
+                    bDoUpdate = true;
+                }
+
+                return bDoUpdate ? FArianeObject::ETraversalReturnValue::Stop
+                                 : FArianeObject::ETraversalReturnValue::Continue;
+            } );
+    }
+}
+
+void
+SArianeEditorCurrentObjectDetailsView::OnPostPainting3DComponentUpdate( bool bInteractive )
+{
+    if( bInteractive == false )
+    {
+        if( bDoUpdate )
+        {
+            Update();
+
+            bDoUpdate = false;
+        }
+    }
+}
+
+void
+SArianeEditorCurrentObjectDetailsView::OnPre3DPaintingComponentSelectionChanged()
+{
+    UnbindComponentDelegates();
+}
+
+void
+SArianeEditorCurrentObjectDetailsView::OnPost3DPaintingComponentSelectionChanged()
+{
+    BindComponentDelegates();
+
+    Update();
+}
+
+void
+SArianeEditorCurrentObjectDetailsView::OnPreLayerStackSelectionChanged()
+{
+}
+
+void
+SArianeEditorCurrentObjectDetailsView::OnPostLayerStackSelectionChanged()
+{
+    Update();
+}
+
+void
+SArianeEditorCurrentObjectDetailsView::OnPreLayerStackHierarchyChanged()
+{
+}
+
+void
+SArianeEditorCurrentObjectDetailsView::OnPostLayerStackHierarchyChanged()
+{
+    Update();
+}
+
+void
+SArianeEditorCurrentObjectDetailsView::UnbindComponentDelegates()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        Painting3DComponent->GetLayerStack()->OnPreHierarchyChangedDelegate().RemoveAll( this );
+        Painting3DComponent->GetLayerStack()->OnPostHierarchyChangedDelegate().RemoveAll( this );
+
+        Painting3DComponent->GetLayerStack()->OnPreSelectionChangedDelegate().RemoveAll( this );
+        Painting3DComponent->GetLayerStack()->OnPostSelectionChangedDelegate().RemoveAll( this );
+
+        Painting3DComponent->OnPreUpdateDelegate().RemoveAll( this );
+        Painting3DComponent->OnPostUpdateDelegate().RemoveAll( this );
+    }
+}
+
+void
+SArianeEditorCurrentObjectDetailsView::BindComponentDelegates()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        Painting3DComponent->GetLayerStack()->OnPreHierarchyChangedDelegate().AddSP( this, &SArianeEditorCurrentObjectDetailsView::OnPreLayerStackHierarchyChanged );
+        Painting3DComponent->GetLayerStack()->OnPostHierarchyChangedDelegate().AddSP( this, &SArianeEditorCurrentObjectDetailsView::OnPostLayerStackHierarchyChanged );
+
+        Painting3DComponent->GetLayerStack()->OnPreSelectionChangedDelegate().AddSP( this, &SArianeEditorCurrentObjectDetailsView::OnPreLayerStackSelectionChanged );
+        Painting3DComponent->GetLayerStack()->OnPostSelectionChangedDelegate().AddSP( this, &SArianeEditorCurrentObjectDetailsView::OnPostLayerStackSelectionChanged );
+
+        Painting3DComponent->OnPreUpdateDelegate().AddSP( this, &SArianeEditorCurrentObjectDetailsView::OnPrePainting3DComponentUpdate );
+        Painting3DComponent->OnPostUpdateDelegate().AddSP( this, &SArianeEditorCurrentObjectDetailsView::OnPostPainting3DComponentUpdate );
+    }
 }
 
 TSharedPtr<IDetailsView>
-SOdysseyPainterEditorVectorSceneDetailsView::CreateObjectPropertiesPanel()
+SArianeEditorCurrentObjectDetailsView::CreateObjectPropertiesPanel()
 {
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FDetailsViewArgs DetailsViewArgs;
@@ -104,249 +195,134 @@ SOdysseyPainterEditorVectorSceneDetailsView::CreateObjectPropertiesPanel()
     return detailsView;
 }
 
-void
-SOdysseyPainterEditorVectorSceneDetailsView::Update()
+FArianeGroup*
+SArianeEditorCurrentObjectDetailsView::GetRootGroup()
 {
-    mDetailsView->SetObject( nullptr );
-    mCurrentObjectView = nullptr;
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
-    FOdysseyVectorGroupPaint* scene = mScene.Get();
-    if (!scene)
-        return;
-
-    if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+    if( Painting3DComponent )
     {
-        if( mTagInbetweenerView->Update( mEditor, scene ) )
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        if( DrawingLayer )
         {
-            mDetailsView->SetObject( mTagInbetweenerView );
+            return DrawingLayer->GetRootGroup();
         }
     }
-    else
-    {
-        // defaults to scene
-        std::list<FOdysseyVectorObject*>& sceneAsList = scene->GetCell()->GetChildrenList();
-        std::list<FOdysseyVectorObject*>& selectedObjectList = scene->GetCell()->GetSelectedObjectList();
-        std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList
-                                                                                        : sceneAsList;
-        uint32 objectClass = FOdysseyVectorObject::GetCommonClass( focusedObjectList );
 
-        if( objectClass )
+    return nullptr;
+}
+
+void
+SArianeEditorCurrentObjectDetailsView::Update()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    DetailsView->SetObject( nullptr );
+    CurrentObjectProxy = nullptr;
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        if( DrawingLayer )
         {
-            if( objectClass == FOdysseyVectorPath::StaticClass() )
+            TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetSelectedObjects();
+
+            if( SelectedObjects.IsEmpty() )
             {
-                mPathView->Update( mVectorLayer, focusedObjectList );
-                mDetailsView->SetObject( mPathView );
-                mCurrentObjectView = mPathView;
+                // Use the root group as the default object
+                SelectedObjects.Add( DrawingLayer->GetRootGroup() );
             }
 
-            if( objectClass == FOdysseyVectorGroup::StaticClass() )
+           uint32 ObjectClass = FArianeObject::GetCommonClass( SelectedObjects );
+
+            if( ObjectClass )
             {
-                mGroupView->Update( mVectorLayer, focusedObjectList );
-                mDetailsView->SetObject( mGroupView );
-                mCurrentObjectView = mGroupView;
+                if( ObjectClass == FArianePath::StaticClass() )
+                {
+                    PathProxy->Update( SelectedObjects );
+                    DetailsView->SetObject( PathProxy );
+
+                    CurrentObjectProxy = PathProxy;
+                }
+
+                if( ObjectClass == FArianeGroup::StaticClass() )
+                {
+                    GroupProxy->Update( SelectedObjects );
+                    DetailsView->SetObject( GroupProxy );
+
+                    CurrentObjectProxy = GroupProxy;
+                }
+
+                if( ObjectClass == FArianeObject::StaticClass() )
+                {
+                    // default
+                    ObjectProxy->Update( SelectedObjects );
+                    DetailsView->SetObject( ObjectProxy );
+
+                    CurrentObjectProxy = ObjectProxy;
+                }
+            }
+        }
+    }
+}
+
+void
+SArianeEditorCurrentObjectDetailsView::PropertyValueChanged( const FPropertyChangedEvent& iEvent )
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        // for undos
+        GEditor->BeginTransaction(LOCTEXT("ariane-object.transaction.property-changed","Property Changed"));
+
+        if( DrawingLayer && CurrentObjectProxy )
+        {
+            TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetSelectedObjects();
+            FArianeGroup* RootGroup = GetRootGroup();
+
+            // for undos
+            DrawingLayer->Modify();
+
+            // Unregister this widget's updates when the scene is updated. We don't want this widget to be
+            // rebuilt while it's processing stuff
+            UnbindComponentDelegates();
+
+            if( SelectedObjects.IsEmpty() )
+            {
+                // Use the root group as the default object
+                SelectedObjects.Add( DrawingLayer->GetRootGroup() );
             }
 
-            if( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
-            {
-                mGroupPaintView->Update( mVectorLayer, focusedObjectList );
-                mDetailsView->SetObject( mGroupPaintView );
-                mCurrentObjectView = mGroupPaintView;
-            }
+            CurrentObjectProxy->ValidateProperties( SelectedObjects, true );
 
-            if( objectClass == FOdysseyVectorObject::StaticClass() )
-            {
-                // default
-                mObjectView->Update( mVectorLayer, focusedObjectList );
-                mDetailsView->SetObject( mObjectView );
-                mCurrentObjectView = mObjectView;
-            }
-        }
-    }
-}
+            Painting3DComponent->Update( false );
 
-void
-SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
-                                                                , uint32 iUpdateFlags )
-{
-    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
-    {
-        FOdysseyVectorGroupPaint* currentScene = mScene.Get();
-
-        // update the cached Value by calling the getter. Hence it will call OnSceneChanged()
-        mScene.UpdateNow( *this );
-
-        // if the attributes value does not changes, we force the update of the tree
-        if( currentScene == mScene.Get() )
-        {
-            ParseVectorNotifications( iInvalidationFlags );
-        }
-    }
-}
-
-void
-SOdysseyPainterEditorVectorSceneDetailsView::ParseVectorNotifications( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
-{
-    FOdysseyVectorObjectInvalidationFlags excludeFlags;
-
-    excludeFlags.Set(FOdysseyVectorObjectInvalidationFlags::COLOR);
-    excludeFlags.Set(FOdysseyVectorObjectInvalidationFlags::CHILD_COLOR);
-
-    // DO NOT react to color change events. First it is useless because widgets dynamically display the coorect color,
-    // second it creates issues when picking a color in a color picker modal window
-    if( (iInvalidationFlags.bits & (~excludeFlags.bits)).any() )
-    {
-        Update();
-    }
-}
-
-void
-SOdysseyPainterEditorVectorSceneDetailsView::UnbindLayerDelegates()
-{
-    if( mVectorLayer.IsValid() )
-    {
-        mVectorLayer->OnUpdateDelegate().RemoveAll( this );
-    }
-}
-
-void
-SOdysseyPainterEditorVectorSceneDetailsView::UpdateCurrentLayer( UOdysseyLayerStack* iLayerStack )
-{
-    //warning. The CurrentLayerStack delegate is STATIC. The iLayerStack received might not belong to this editor
-    if( mEditor->LayerStack() == iLayerStack )
-    {
-        UOdysseyAnimationLayerImageVector* animationVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayerStack->GetCurrentLayer());
-        UOdysseyTextureLayerImageVector* textureVectorLayer = Cast<UOdysseyTextureLayerImageVector>(iLayerStack->GetCurrentLayer());
-
-        if( animationVectorLayer )
-        {
-            mVectorLayer = animationVectorLayer->GetVectorLayer();
+            // Re-register this widget after we are done
+            BindComponentDelegates();
         }
 
-        if( textureVectorLayer )
-        {
-            mVectorLayer = textureVectorLayer->GetVectorLayer();
-        }
-    }
-}
-
-void
-SOdysseyPainterEditorVectorSceneDetailsView::BindLayerDelegates()
-{
-    if( mVectorLayer.IsValid() )
-    {
-        mVectorLayer->OnUpdateDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify );
-    }
-}
-
-void
-SOdysseyPainterEditorVectorSceneDetailsView::OnSourceChanged()
-{
-    if( mEditor->GetSource() )
-    {
-        UOdysseyLayerStack* layerStack = mEditor->GetSource()->GetLayerStack();
-
-        if( layerStack )
-        {
-            UOdysseyLayer* layer = layerStack->GetCurrentLayer();
-            UOdysseyAnimationLayerImageVector* animationLayer = Cast<UOdysseyAnimationLayerImageVector>(layer);
-            UOdysseyTextureLayerImageVector* textureLayer = Cast<UOdysseyTextureLayerImageVector>(layer);
-
-            if( animationLayer || textureLayer )
-            {
-                TSharedPtr<FOdysseyVectorLayer> vectorLayer = animationLayer ? animationLayer->GetVectorLayer()
-                                                                             : textureLayer->GetVectorLayer();
-            }
-
-            UnbindLayerDelegates();
-            UpdateCurrentLayer( layerStack );
-            BindLayerDelegates();
-        }
-    }
-}
-
-void
-SOdysseyPainterEditorVectorSceneDetailsView::PropertyValueChanged( const FPropertyChangedEvent& iEvent )
-{
-    // mCurrentObjectView can be NULL in INBETWEENING mode
-    if( mCurrentObjectView )
-    {
-        FOdysseyVectorGroupPaint* scene = mScene.Get();
-
-        if (!scene)
-            return;
-
-        // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
-        // rebuilt while it's processing stuff
-        UnbindLayerDelegates();
-
-        // defaults to scene
-        std::list<FOdysseyVectorObject*>& sceneAsList = scene->GetCell()->GetChildrenList();
-        std::list<FOdysseyVectorObject*>& selectedObjectList = scene->GetCell()->GetSelectedObjectList();
-        std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList
-                                                                                        : sceneAsList;
-        // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("vector-object.transaction.property-changed","Property Changed"));
-        if( GUndo )
-        {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectParam( scene->GetLayer()
-                                                                        , focusedObjectList
-                                                                        , FName(iEvent.Property->GetMetaData(TEXT("Category")))
-                                                                        , iEvent.MemberProperty->GetFName()
-                                                                        , iEvent.GetPropertyName() );
-            // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
-            // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
-            // of a call to GEditor::PostEditChangeProperty()
-            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-
-            TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-            if (source)
-                source->RecordCurrentFrameUndo();
-        }
         GEditor->EndTransaction();
-
-        mCurrentObjectView->ValidateProperties( focusedObjectList, true );
-
-        // Update vector scene
-        scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        scene->GetLayer()->RequestRedraw( nullptr, 0 );
-
-        // Re-register this widget after we are done
-        BindLayerDelegates();
     }
-}
-
-void
-SOdysseyPainterEditorVectorSceneDetailsView::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack )
-{
-    UnbindLayerDelegates();
-    UpdateCurrentLayer( iLayerStack );
-    BindLayerDelegates();
-}
-
-void
-SOdysseyPainterEditorVectorSceneDetailsView::OnSceneChanged()
-{
-    // Parse by simulating a scene invalidation
-    ParseVectorNotifications( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::DEFAULT) );
 }
 
 FString
-SOdysseyPainterEditorVectorSceneDetailsView::GetReferencerName() const
+SArianeEditorCurrentObjectDetailsView::GetReferencerName() const
 {
-    return "SOdysseyPainterEditorVectorSceneDetailsView";
+    return "SArianeEditorCurrentObjectDetailsView";
 }
 
 void
-SOdysseyPainterEditorVectorSceneDetailsView::AddReferencedObjects(FReferenceCollector& Collector)
+SArianeEditorCurrentObjectDetailsView::AddReferencedObjects(FReferenceCollector& Collector)
 {
     // Prevent these UObjects from being destroyed by garbage collection
-    Collector.AddReferencedObject(mObjectView);
-    Collector.AddReferencedObject(mPathView);
-    Collector.AddReferencedObject(mGroupView);
-    Collector.AddReferencedObject(mGroupPaintView);
-    Collector.AddReferencedObject(mTagInbetweenerView);
+    Collector.AddReferencedObject(ObjectProxy);
+    Collector.AddReferencedObject(PathProxy);
+    Collector.AddReferencedObject(GroupProxy);
 }
 
 #undef LOCTEXT_NAMESPACE
-
-#endif

@@ -817,7 +817,7 @@ FArianeEditor::GroupSelectedObjects( const FName& NewGroupName )
 
             if( RootGroup->IsSelected() == false )
             {
-                DrawingLayer->GetUniquelySelectedObjects( ObjectsToRegroup, false );
+                DrawingLayer->GetSelectedTrees( ObjectsToRegroup );
 
                 // Check if they all belong to the same parent
                 if( ObjectsToRegroup.Num() >= 2 )
@@ -868,7 +868,10 @@ FArianeEditor::DeleteSelectedObjects()
 
             if( RootGroup->IsSelected() == false )
             {
-                DrawingLayer->GetUniquelySelectedObjects( ObjectsToDelete, false );
+                DrawingLayer->GetSelectedTrees( ObjectsToDelete );
+
+                // We need to clear the selection because ObjectsToDelete may not contain all selected objects
+                DrawingLayer->ClearObjectSelection();
 
                 for( FArianeObject* ObjectToDelete : ObjectsToDelete )
                 {
@@ -894,7 +897,7 @@ FArianeEditor::CopySelectedObjects()
         {
             TArray<FArianeObject*> ObjectsToCopy;
 
-            DrawingLayer->GetUniquelySelectedObjects( ObjectsToCopy, false );
+            DrawingLayer->GetSelectedTrees( ObjectsToCopy );
 
             if( ObjectsToCopy.Num() )
             {
@@ -935,19 +938,22 @@ FArianeEditor::PasteObjects()
         {
             if( Clipboard.CopiedObjects.Num() )
             {
-                TArray<FArianeObject*> SelectedObjects;
+                TArray<FArianeObject*> SelectedTrees;
                 FArianeObject* Destination = DrawingLayer->GetRootGroup();
                 FArianeObject::FCopyArgs CopyArgs = FArianeObject::FCopyArgs();
 
                 // ECopyFlags::AllocByLayer means the allocation will be made as FInstancedstruct, thus saved by
                 // Unreal Engine's serialization
-                CopyArgs.Flags = FArianeObject::ECopyFlags::AllocAsInstancedStruct;
+                CopyArgs.Flags = FArianeObject::ECopyFlags::AllocAsInstancedStruct
+                               | FArianeObject::ECopyFlags::Rename;
                 CopyArgs.DrawingLayer = DrawingLayer;
 
-                DrawingLayer->GetUniquelySelectedObjects( SelectedObjects, false );
+                DrawingLayer->GetSelectedTrees( SelectedTrees );
 
-                Destination = ( SelectedObjects.Num() == 1 ) ? SelectedObjects[0]
-                                                             : DrawingLayer->GetRootGroup();
+                Destination = ( SelectedTrees.Num() == 1 ) ? SelectedTrees[0]
+                                                           : DrawingLayer->GetRootGroup();
+
+               DrawingLayer->ClearObjectSelection();
 
                 for( FArianeObject* CopiedObject : Clipboard.CopiedObjects )
                 {

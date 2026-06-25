@@ -49,7 +49,7 @@ SArianeEditorLayerStackPanel::OnPost3DPaintingComponentSelectionChanged()
         LayerStack->OnPreSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnPreLayerSelectionChanged );
         LayerStack->OnPostSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnPostLayerSelectionChanged );
         // Refresh the details view
-        OnPostLayerSelectionChanged();
+        //OnPostLayerSelectionChanged();
     }
 }
 

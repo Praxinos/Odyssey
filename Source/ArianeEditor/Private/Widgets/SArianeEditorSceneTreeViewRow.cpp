@@ -388,20 +388,20 @@ SArianeEditorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     //FVector2D position = iGeometry.GetAbsolutePosition();
     FArianeObject* ItemObject = Item.Get()->GetObject();
     FArianeGroup* RootGroup = ItemObject->GetRootGroup();
-    TArray<FArianeObject*> UniquelySelectedObjects;
+    TArray<FArianeObject*> SelectedTrees;
     FArianeObject* InsertObject = ItemObject;
 
     // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
     // rebuilt while it's processing stuff
     //TreeView->UnbindComponentDelegates();
 
-    RootGroup->GetDrawingLayer()->GetUniquelySelectedObjects( UniquelySelectedObjects, false );
+    RootGroup->GetDrawingLayer()->GetSelectedTrees( SelectedTrees );
 
     if( RootGroup->IsSelected() == false )
     {
         GEditor->BeginTransaction(LOCTEXT("ariane-tree-view.transaction.drag-drop-object", "Drop Objects"));
 
-        for( FArianeObject* FocusedObject : UniquelySelectedObjects )
+        for( FArianeObject* SelectedTree : SelectedTrees )
         {
             switch( DropZone )
             {
@@ -415,11 +415,11 @@ SArianeEditorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
                     //if( parentObject->IsSystem() == false )
                     {
                         // don't drop onto the same object or else expect some infinite loop
-                        if( parentObject != FocusedObject )
+                        if( parentObject != SelectedTree )
                         {
-                            parentObject->TransferChild( FocusedObject, parentObject->GetPreviousChild( InsertObject ) );
+                            parentObject->TransferChild( SelectedTree, parentObject->GetPreviousChild( InsertObject ) );
 
-                            InsertObject = FocusedObject;
+                            InsertObject = SelectedTree;
                         }
                     }
                 }
@@ -427,9 +427,9 @@ SArianeEditorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
 
                 case DROPZONE_ONTO:
                     // don't drop onto the same object or else expect some infinite loop
-                    if( ItemObject != FocusedObject )
+                    if( ItemObject != SelectedTree )
                     {
-                        ItemObject->TransferChild( FocusedObject, nullptr );
+                        ItemObject->TransferChild( SelectedTree, nullptr );
                     }
                 break;
 
@@ -442,11 +442,11 @@ SArianeEditorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
                     // note: Layer and Cell are system objects
                     //if( ParentObject->IsSystem() == false )
                     {
-                        if( ParentObject != FocusedObject )
+                        if( ParentObject != SelectedTree )
                         {
-                            ParentObject->TransferChild( FocusedObject, InsertObject );
+                            ParentObject->TransferChild( SelectedTree, InsertObject );
 
-                            InsertObject = FocusedObject;
+                            InsertObject = SelectedTree;
                         }
                     }
                 }
