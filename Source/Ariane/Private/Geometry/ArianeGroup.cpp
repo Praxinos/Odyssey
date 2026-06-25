@@ -131,6 +131,42 @@ FArianeGroup::HasBaseClass( uint32 BaseClass )
     return Super::HasBaseClass(BaseClass);
 }
 
+void
+FArianeGroup::CopySettings( FArianeObject* DestinationObject, const FCopyArgs& CopyArgs, bool bInvalidate )
+{
+    FArianeGroup* DestinationGroup = static_cast<FArianeGroup*>(DestinationObject);
+
+    Super::CopySettings( DestinationObject, CopyArgs, false );
+
+    DestinationGroup->HUDForegroundColor = HUDForegroundColor;
+    DestinationGroup->bUseEditorHUDForegroundColor = bUseEditorHUDForegroundColor;
+
+    if( bInvalidate )
+    {
+        DestinationGroup->Invalidate( FArianeGroupInvalidationFlags().SetAll() );
+    }
+}
+
+FArianeGroup*
+FArianeGroup::CopyShape( const FCopyArgs& CopyArgs )
+{
+    FArianeGroup* GroupCopy = nullptr;
+
+    if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocByOperatingSystem ) )
+    {
+        GroupCopy = new FArianeGroup( nullptr
+                                    , Name
+                                    , EArianeAllocationModel::OperatingSystem );
+    }
+
+    if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocAsInstancedStruct ) )
+    {
+        GroupCopy = CopyArgs.DrawingLayer->AllocGroup( Name );
+    }
+
+    return GroupCopy;
+}
+
 /*
 void
 FArianeGroup::PostLoad()

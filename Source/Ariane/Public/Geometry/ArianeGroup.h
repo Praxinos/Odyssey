@@ -60,6 +60,8 @@ public:
     FArianeGroup( UArianeLayerDrawing* InDrawingLayer
                 , const FName& InName
                 , EArianeAllocationModel InAllocationModel );
+    virtual FArianeGroup* CopyShape( const FCopyArgs& CopyArgs ) override;
+    virtual void CopySettings( FArianeObject* DestinationObject, const FCopyArgs& CopyArgs, bool bInvalidate ) override;
 
 public:
     /** overriden from ArianeObject */

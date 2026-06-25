@@ -160,6 +160,7 @@ protected:
                         , FSceneView* View );
     void OnPostUpdate( bool bInteractive );
     void Reset();
+    void ResetQuadTree();
     void BindDelegates();
     void UnbindDelegates();
 
@@ -187,4 +188,5 @@ protected:
     TArray<FArianePath*> SelectedPaths;
     EArianePathEditToolEditionMode EditionMode;
     TArray<FArianePoint*> HoveredPoints;
+    TArray<FArianeObject*> SelectedTrees;
 };

@@ -90,7 +90,7 @@ UArianePainting3DComponent::GetUsedMaterials( TArray<UMaterialInterface*>& OutMa
             {
                 TArray<UMaterialInterface*> DrawingLayerUsedMaterials;
 
-                DrawingLayer->GetUsedMaterials( DrawingLayerUsedMaterials, false );
+                DrawingLayer->GetUsedMaterials( DrawingLayerUsedMaterials );
 
                 OutMaterials.Append( DrawingLayerUsedMaterials );
             }

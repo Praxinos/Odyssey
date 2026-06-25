@@ -117,12 +117,13 @@ UArianeEditorPathEditTool::OnPostUpdate( bool bInteractive )
 }
 
 void
-UArianeEditorPathEditTool::Reset()
+UArianeEditorPathEditTool::ResetQuadTree()
 {
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
 
     if( ViewportClient )
     {
+
         FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
                                                                                 , ViewportClient->GetScene()
                                                                                 , ViewportClient->EngineShowFlags ) );
@@ -130,6 +131,21 @@ UArianeEditorPathEditTool::Reset()
         FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
 
         RebuildQuadTree( ViewportClient, View );
+    }
+}
+
+void
+UArianeEditorPathEditTool::Reset()
+{
+    UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(GetCurrentLayer());
+
+    ResetQuadTree();
+
+    SelectedTrees.Empty();
+
+    if( DrawingLayer )
+    {
+        DrawingLayer->GetSelectedTrees( SelectedTrees );
     }
 }
 
@@ -212,13 +228,7 @@ UArianeEditorPathEditTool::OnKeyDownGlobal( const FKeyEvent& InKeyEvent )
 
             if( ViewportClient && DrawingLayer )
             {
-                FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
-                                                                                        , ViewportClient->GetScene()
-                                                                                        , ViewportClient->EngineShowFlags ) );
-                // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
-                FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
-
-                RebuildQuadTree( ViewportClient, View );
+                ResetQuadTree();
             }
 
             return true;
@@ -306,35 +316,38 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
     {
         UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        DrawingLayer->GetRootGroup()->Traverse
-        ( [ this
-          , ViewportClient
-          , View
-          , &PointerState ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
-          {
-              if( /*iScene->GetCell()->ObjectHasFocus( object, traversalFlags )*/1 )
+        for( FArianeObject* SelectedTree : SelectedTrees )
+        {
+            SelectedTree->Traverse
+            ( [ this
+              , ViewportClient
+              , View
+              , &PointerState ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
               {
-                  if( Object->HasBaseClass( FArianePath::StaticClass() ) )
+                  if( /*iScene->GetCell()->ObjectHasFocus( object, traversalFlags )*/1 )
                   {
-                      FArianePath* Path = static_cast<FArianePath*>(Object);
+                      if( Object->HasBaseClass( FArianePath::StaticClass() ) )
+                      {
+                          FArianePath* Path = static_cast<FArianePath*>(Object);
 
-                      // for widening all paths
-                      SelectedPaths.Add( Path );
+                          // for widening all paths
+                          SelectedPaths.Add( Path );
 
-                      PickPathPoints( ViewportClient
-                                    , View
-                                    , Path
-                                    , PointerState.ViewportX
-                                    , PointerState.ViewportY
-                                    , PickingRadius
-                                    , PickedVertices
-                                    , PickedHandles
-                                    , EditonModeToPickingFlags() );
+                          PickPathPoints( ViewportClient
+                                        , View
+                                        , Path
+                                        , PointerState.ViewportX
+                                        , PointerState.ViewportY
+                                        , PickingRadius
+                                        , PickedVertices
+                                        , PickedHandles
+                                        , EditonModeToPickingFlags() );
+                      }
                   }
-              }
 
-              return FArianeObject::ETraversalReturnValue::Continue;
-          } );
+                  return FArianeObject::ETraversalReturnValue::Continue;
+              } );
+        }
 
         // Link or Unlink segment handles
         if( ( EditionMode == EArianePathEditToolEditionMode::SegmentHandle ) &&  ( PickedVertices.Num() == 1 ) )
@@ -925,31 +938,34 @@ UArianeEditorPathEditTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* Re
 
         if( DrawingLayer )
         {
-            DrawingLayer->GetRootGroup()->Traverse( [ this
-                                                    , Canvas
-                                                    , ViewportClient
-                                                    , View
-                                                    , FgColor
-                                                    , BgColor
-                                                    , HcColor
-                                                    , HUDDrawingFlags ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+            for( FArianeObject* SelectedTree : SelectedTrees )
             {
-                if( Object->GetClass() == FArianePath::StaticClass() )
+                SelectedTree->Traverse( [ this
+                                        , Canvas
+                                        , ViewportClient
+                                        , View
+                                        , FgColor
+                                        , BgColor
+                                        , HcColor
+                                        , HUDDrawingFlags ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
                 {
-                    FArianePath* Path = static_cast<FArianePath*>( Object );
+                    if( Object->GetClass() == FArianePath::StaticClass() )
+                    {
+                        FArianePath* Path = static_cast<FArianePath*>( Object );
 
-                    DrawPathHUD( Canvas
-                               , ViewportClient
-                               , View
-                               , Path
-                               , Path->GetHUDForegroundColor() //FgColor
-                               , BgColor
-                               , HcColor
-                               , HUDDrawingFlags );
-                }
+                        DrawPathHUD( Canvas
+                                   , ViewportClient
+                                   , View
+                                   , Path
+                                   , Path->GetHUDForegroundColor() //FgColor
+                                   , BgColor
+                                   , HcColor
+                                   , HUDDrawingFlags );
+                    }
 
-                return FArianeObject::ETraversalReturnValue::Continue;
-            } );
+                    return FArianeObject::ETraversalReturnValue::Continue;
+                } );
+            }
         }
     }
 

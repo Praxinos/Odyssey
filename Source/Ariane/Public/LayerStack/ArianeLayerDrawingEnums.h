@@ -13,7 +13,8 @@ UENUM()
 enum class EArianeLayerDrawingOrigin : uint8
 {
     Layer,
-    Surface
+    //View,
+    Surface,
 };
 
 UENUM()

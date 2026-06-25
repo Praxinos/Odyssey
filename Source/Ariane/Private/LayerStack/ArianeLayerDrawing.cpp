@@ -71,6 +71,8 @@ UArianeLayerDrawing::PostLoad()
 
     // Empty the map before reloading. Each path will populate or increment the attached value.
     UsedMaterials.Empty();
+    // Empty the selection
+    ClearObjectSelection();
 
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
@@ -97,6 +99,8 @@ UArianeLayerDrawing::PostEditUndo()
 
     // Empty the map before reloading. Each path will populate or increment the attached value.
     UsedMaterials.Empty();
+    // Empty the selection
+    ClearObjectSelection();
 
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
@@ -170,19 +174,22 @@ UArianeLayerDrawing::AllocPath( UMaterialInterface* InMaterialInterface, const F
 }
 
 void
-UArianeLayerDrawing::GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials, bool bEmtpyFirst )
+UArianeLayerDrawing::AppendUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials )
 {
-    if( bEmtpyFirst )
-    {
-        OutUsedMaterials.Empty();
-    }
-
     OutUsedMaterials.Reserve( OutUsedMaterials.Num() + UsedMaterials.Num() );
 
     for( auto Pair : UsedMaterials )
     {
         OutUsedMaterials.Add( Pair.Key );
     }
+}
+
+void
+UArianeLayerDrawing::GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials )
+{
+    OutUsedMaterials.Empty();
+
+    AppendUsedMaterials( OutUsedMaterials );
 }
 
 void
@@ -333,6 +340,14 @@ UArianeLayerDrawing::ClearObjectSelection()
 }
 
 void
+UArianeLayerDrawing::UnselectObject( FArianeObject* ObjectToSelect )
+{
+    SelectedObjects.Remove( ObjectToSelect );
+
+    ObjectToSelect->SetSelected( false );
+}
+
+void
 UArianeLayerDrawing::SelectObject( FArianeObject* ObjectToSelect )
 {
     SelectedObjects.Add( ObjectToSelect );
@@ -353,14 +368,9 @@ UArianeLayerDrawing::GetSelectedObjects()
 }
 
 void
-UArianeLayerDrawing::GetUniquelySelectedObjects( TArray<FArianeObject*>& UniquelySelectedObjects, bool bEmptyFirst )
+UArianeLayerDrawing::AppendSelectedTrees( TArray<FArianeObject*>& SelectedTrees )
 {
-    if( bEmptyFirst )
-    {
-        UniquelySelectedObjects.Empty();
-    }
-
-    UniquelySelectedObjects.Reserve( UniquelySelectedObjects.Num() + SelectedObjects.Num() );
+    SelectedTrees.Reserve( SelectedTrees.Num() + SelectedObjects.Num() );
 
     for( FArianeObject* SelectedObject : SelectedObjects )
     {
@@ -370,7 +380,7 @@ UArianeLayerDrawing::GetUniquelySelectedObjects( TArray<FArianeObject*>& Uniquel
         SelectedObject->TraverseBackwards (
             [ SelectedObject
             , &bHasSelectedAncestor
-            , &UniquelySelectedObjects ]( FArianeObject* TraversedObject ) -> FArianeObject::ETraversalReturnValue
+            , &SelectedTrees ]( FArianeObject* TraversedObject ) -> FArianeObject::ETraversalReturnValue
             {
                 if( TraversedObject != SelectedObject )
                 {
@@ -387,7 +397,15 @@ UArianeLayerDrawing::GetUniquelySelectedObjects( TArray<FArianeObject*>& Uniquel
 
         if( bHasSelectedAncestor == false )
         {
-            UniquelySelectedObjects.Add( SelectedObject );
+            SelectedTrees.Add( SelectedObject );
         }
     }
+}
+
+void
+UArianeLayerDrawing::GetSelectedTrees( TArray<FArianeObject*>& SelectedTrees )
+{
+    SelectedTrees.Empty();
+
+    AppendSelectedTrees( SelectedTrees );
 }

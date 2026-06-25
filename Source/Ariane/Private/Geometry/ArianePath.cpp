@@ -557,8 +557,6 @@ FArianePath::CopyShape( const FCopyArgs& CopyArgs )
         PathCopy = CopyArgs.DrawingLayer->AllocPath( nullptr, Name );
     }
 
-    CopySettings( PathCopy, CopyArgs, true );
-
     LookupTable.Reserve ( Vertices.Num() );
 
     // Copy Geometry. First, vertices.
@@ -856,6 +854,17 @@ FArianePath::InvalidateAllSegments()
     }
 
     Invalidate( FArianePathInvalidationFlags().SetSegmentAltered() );
+}
+
+void
+FArianePath::InvalidateAllVertices()
+{
+    for( FArianeVertexID& VertexID : Vertices )
+    {
+        InvalidatedVertices.Add( VertexID.GetVertex() );
+    }
+
+    Invalidate( FArianePathInvalidationFlags().SetVertexAltered() );
 }
 
 FArianePathGeometry3D&

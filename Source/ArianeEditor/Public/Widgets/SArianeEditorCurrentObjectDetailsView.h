@@ -8,70 +8,56 @@
 #include "IDetailChildrenBuilder.h"
 #include "DetailWidgetRow.h"
 
-class UOdysseyPainterEditorVectorObjectView;
-class UOdysseyPainterEditorVectorPathView;
-class UOdysseyPainterEditorVectorGroupView;
-class UOdysseyPainterEditorVectorGroupPaintView;
-class UOdysseyPainterEditorVectorTagInbetweenerView;
-class FOdysseyVectorGroupPaint;
-class FOdysseyPainterEditor;
-class FOdysseyVectorLayer;
-class UOdysseyLayerStack;
-struct FPropertyChangedEvent;
-struct FOdysseyVectorObjectInvalidationFlags;
 
-/**
- * Implements the Scene Tree View Widget
- */
-class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneDetailsView
+struct FArianeGroup;
+class FArianeEditor;
+class UArianeEditorObjectProxy;
+class UArianeEditorPathProxy;
+class UArianeEditorGroupProxy;
+
+class ARIANEEDITOR_API SArianeEditorCurrentObjectDetailsView
     : public SCompoundWidget
     , public FGCObject
 {
-    SLATE_DECLARE_WIDGET(SOdysseyPainterEditorVectorSceneDetailsView, SCompoundWidget)
-
     public:
-        SLATE_BEGIN_ARGS(SOdysseyPainterEditorVectorSceneDetailsView)
+        SLATE_BEGIN_ARGS(SArianeEditorCurrentObjectDetailsView)
             {}
-            SLATE_ARGUMENT(FOdysseyPainterEditor*, Editor)
-            SLATE_ATTRIBUTE(FOdysseyVectorGroupPaint*, Scene)
         SLATE_END_ARGS()
 
     public:
         // Construction / Destruction
-        ~SOdysseyPainterEditorVectorSceneDetailsView();
-        SOdysseyPainterEditorVectorSceneDetailsView();
+        ~SArianeEditorCurrentObjectDetailsView();
+        SArianeEditorCurrentObjectDetailsView();
 
-        void Construct(const FArguments& InArgs );
+        void Construct(const FArguments& InArgs, FArianeEditor* Editor );
         void Update();
 
-        void BindLayerDelegates();
-        void UnbindLayerDelegates();
+        void BindComponentDelegates();
+        void UnbindComponentDelegates();
 
     protected:
         virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
         virtual FString GetReferencerName() const override;
+        FArianeGroup* GetRootGroup();
 
     protected:
         TSharedPtr<IDetailsView> CreateObjectPropertiesPanel();
-        void OnVectorLayerNotify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
-                                , uint32 iUpdateFlags );
-        void ParseVectorNotifications( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags );
-        void OnSceneChanged();
-        void OnSourceChanged();
-        void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
         void PropertyValueChanged( const FPropertyChangedEvent& iEvent );
-        void UpdateCurrentLayer( UOdysseyLayerStack* iLayerStack );
+        void OnPre3DPaintingComponentSelectionChanged();
+        void OnPost3DPaintingComponentSelectionChanged();
+        void OnPreLayerStackSelectionChanged();
+        void OnPostLayerStackSelectionChanged();
+        void OnPreLayerStackHierarchyChanged();
+        void OnPostLayerStackHierarchyChanged();
+        void OnPrePainting3DComponentUpdate( bool bInteractive );
+        void OnPostPainting3DComponentUpdate( bool bInteractive );
 
     protected:
-        FOdysseyPainterEditor* mEditor;
-        TSlateAttribute<FOdysseyVectorGroupPaint*> mScene;
-        TSharedPtr<FOdysseyVectorLayer> mVectorLayer;
-
-        TSharedPtr<IDetailsView> mDetailsView;
-        TObjectPtr<UOdysseyPainterEditorVectorObjectView> mCurrentObjectView;
-        TObjectPtr<UOdysseyPainterEditorVectorObjectView> mObjectView;
-        TObjectPtr<UOdysseyPainterEditorVectorPathView> mPathView;
-        TObjectPtr<UOdysseyPainterEditorVectorGroupView> mGroupView;
-        TObjectPtr<UOdysseyPainterEditorVectorGroupPaintView> mGroupPaintView;
-        TObjectPtr<UOdysseyPainterEditorVectorTagInbetweenerView> mTagInbetweenerView;
+        FArianeEditor* Editor;
+        bool bDoUpdate;
+        TSharedPtr<IDetailsView> DetailsView;
+        UArianeEditorObjectProxy* CurrentObjectProxy;
+        UArianeEditorObjectProxy* ObjectProxy;
+        UArianeEditorPathProxy* PathProxy;
+        UArianeEditorGroupProxy* GroupProxy;
 };

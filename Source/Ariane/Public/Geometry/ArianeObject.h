@@ -62,6 +62,7 @@ public:
         AllocAsInstancedStruct = ( 1 << 0 ), // alloc as FInstancedStruct
         AllocByOperatingSystem = ( 1 << 1 ), // alloc with "new"
         IgnoreTags             = ( 1 << 2 ),
+        Rename                 = ( 1 << 3 ),
     };
 
     struct FCopyArgs
@@ -243,6 +244,7 @@ public:
     FArianeObject* Copy( const FCopyArgs& CopyArgs );
     void AddTag( FArianeTag* Tag );
     EArianeAllocationModel GetAllocationModel();
+    static uint32 GetCommonClass( const TArray<FArianeObject*>& Objects );
 
 protected:
     /**
@@ -256,6 +258,9 @@ protected:
 
     ETraversalReturnValue Traverse_Private( TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
     ETraversalReturnValue TraverseBackwards_Private( TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
+
+    static uint32 CheckCommonClass( const TArray<FArianeObject*>& Objects, uint32 CommonClass );
+
 
 protected:
     UPROPERTY( EditAnywhere )
