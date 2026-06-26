@@ -28,10 +28,12 @@ class FArianePathGeometry3D;
 struct FArianeSegment;
 class UArianeLayerFolder;
 class UArianeLayer;
+class UArianeLayerDrawing;
 class UArianeLayerStack;
 class UOdysseyPalette;
 class UOdysseyPaletteSet;
 class UOdysseyPaletteEntryColor;
+class UArianePainting3DStaticMeshComponent;
 
 class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
 {
@@ -116,6 +118,8 @@ public:
     void Update( bool bInteractive );
     FColor GetHUDForegroundColor();
     void SetEditorInterface( IArianePainting3DComponentEditorInterface* InEditorInterface );
+    void ConvertToStaticMesh();
+    UArianePainting3DStaticMeshComponent* GetStaticMeshComponent();
 
 private:
     virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
@@ -137,4 +141,5 @@ protected:
     FOnUpdateDelegate OnPreUpdate;
     FOnUpdateDelegate OnPostUpdate;
     IArianePainting3DComponentEditorInterface* EditorInterface;
+    UArianePainting3DStaticMeshComponent* StaticMeshComponent;
 };

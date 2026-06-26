@@ -62,6 +62,8 @@ private:
 
    // Menus
     void RegisterMenus();
+    void RegisterActorMenu();
+    void ConvertToStaticMesh();
 
     void RegisterThumbnailRenderers();
     void UnregisterThumbnailRenderers();

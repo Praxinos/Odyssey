@@ -23,10 +23,7 @@ FArianeGroupInvalidationFlags::AND( const FArianeObjectInvalidationFlags& RHS )
 {
     if( RHS.HasBaseClass( FArianeGroupInvalidationFlags::StaticClass() ) )
     {
-        //VertexAltered &= ((FArianeGroupInvalidationFlags&)RHS).VertexAltered;
-        //SegmentAltered &= ((FArianeGroupInvalidationFlags&)RHS).SegmentAltered;
-        //VertexAddedOrRemoved &= ((FArianeGroupInvalidationFlags&)RHS).VertexAddedOrRemoved;
-        //SegmentAddedOrRemoved &= ((FArianeGroupInvalidationFlags&)RHS).SegmentAddedOrRemoved;
+        HUDForegroundColor &= ((FArianeGroupInvalidationFlags&)RHS).HUDForegroundColor;
     }
 
     Super::AND( RHS );
@@ -39,10 +36,7 @@ FArianeGroupInvalidationFlags::OR( const FArianeObjectInvalidationFlags& RHS )
 {
     if( RHS.HasBaseClass( FArianeGroupInvalidationFlags::StaticClass() ) )
     {
-        //VertexAltered |= ((FArianeGroupInvalidationFlags&)RHS).VertexAltered;
-        //SegmentAltered |= ((FArianeGroupInvalidationFlags&)RHS).SegmentAltered;
-        //VertexAddedOrRemoved |= ((FArianeGroupInvalidationFlags&)RHS).VertexAddedOrRemoved;
-        //SegmentAddedOrRemoved |= ((FArianeGroupInvalidationFlags&)RHS).SegmentAddedOrRemoved;
+        HUDForegroundColor |= ((FArianeGroupInvalidationFlags&)RHS).HUDForegroundColor;
     }
 
     Super::OR( RHS );
@@ -53,10 +47,7 @@ FArianeGroupInvalidationFlags::OR( const FArianeObjectInvalidationFlags& RHS )
 FArianeGroupInvalidationFlags&
 FArianeGroupInvalidationFlags::SetAll()
 {
-    //VertexAltered  =
-    //SegmentAltered =
-    //VertexAddedOrRemoved  =
-    //SegmentAddedOrRemoved = 1;
+    HUDForegroundColor = 1;
 
     Super::SetAll();
 
@@ -68,10 +59,7 @@ FArianeGroupInvalidationFlags::Clear()
 {
     Super::Clear();
 
-    //VertexAltered  =
-    //SegmentAltered =
-    //VertexAddedOrRemoved  =
-    //SegmentAddedOrRemoved = 0;
+    HUDForegroundColor= 0;
 
     return *this;
 }
@@ -79,11 +67,7 @@ FArianeGroupInvalidationFlags::Clear()
 bool
 FArianeGroupInvalidationFlags::HasAny()
 {
-    return Super::HasAny();
-    //return ( VertexAltered
-    //      || SegmentAltered
-    //      || VertexAddedOrRemoved
-    //      || SegmentAddedOrRemoved ) ? true : Super::HasAny();
+    return ( HUDForegroundColor ) ? true : Super::HasAny();
 }
 
 //--------------------- Group
@@ -215,6 +199,8 @@ void
 FArianeGroup::SetHUDForegroundColor( const FColor& InHUDForegroundColor )
 {
     HUDForegroundColor = InHUDForegroundColor;
+
+    Invalidate( FArianeGroupInvalidationFlags().SetHUDForegroundColor() );
 }
 
 void

@@ -109,10 +109,10 @@ struct ARIANE_API FArianePathInvalidationFlags : FArianeObjectInvalidationFlags
         FArianePathInvalidationFlags& SetSegmentAddedOrRemoved() { SegmentAddedOrRemoved = 1; return *this; };
 
     public:
-        bool VertexAltered  : 1  = 0;
-        bool SegmentAltered : 1  = 0;
-        bool VertexAddedOrRemoved  : 1  = 0;
-        bool SegmentAddedOrRemoved : 1  = 0;
+        uint32 VertexAltered  : 1  = 0;
+        uint32 SegmentAltered : 1  = 0;
+        uint32 VertexAddedOrRemoved  : 1  = 0;
+        uint32 SegmentAddedOrRemoved : 1  = 0;
 };
 
 USTRUCT(BlueprintType)

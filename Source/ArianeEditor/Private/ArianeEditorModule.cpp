@@ -15,6 +15,7 @@
 // Ariane headers
 #include "ArianePainting3DActor.h"
 #include "ArianePainting3DComponent.h"
+#include "ArianePainting3DStaticMeshComponent.h"
 // Unreal headers
 #include "AssetToolsModule.h"
 #include "CoreMinimal.h"
@@ -29,6 +30,8 @@
 #include "EditorModeManager.h"
 #include "Framework/Docking/LayoutExtender.h"
 #include "Framework/Docking/TabManager.h"
+#include "Selection.h"
+#include "MeshUtilities.h" // for conversion to static mesh
 
 #include "ArianeEditorViewportEdMode.h"
 
@@ -89,7 +92,7 @@ FArianeEditorModule::StartupModule()
 
     RegisterEditorMode();
 
-    //UToolMenus::RegisterStartupCallback( FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FArianeEditorModule::RegisterMenus ) );
+    UToolMenus::RegisterStartupCallback( FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FArianeEditorModule::RegisterMenus ) );
 
     //FCoreDelegates::OnPostEngineInit.AddRaw(this, &FArianeEditorModule::OnEngineInit );
 
@@ -261,11 +264,89 @@ FArianeEditorModule::UnregisterToolbarButton()
 }
 
 void
+FArianeEditorModule::RegisterActorMenu()
+{
+    UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.ActorContextMenu");
+    FToolMenuSection& Section = Menu->FindOrAddSection("ActorOptions");
+
+    FToolMenuEntry Entry = FToolMenuEntry::InitMenuEntry(
+        "ConvertToStaticMesh",
+        LOCTEXT("arianeeditor-convert-to-static-mesh.label", "[Ariane] Convert to Static Mesh"),
+        LOCTEXT("arianeeditor-convert-to-static-mesh.tooltip", ""),
+        FSlateIcon(FAppStyle::GetAppStyleSetName(), "GenericEditor.Bake"),
+        FUIAction(FExecuteAction::CreateRaw(this, &FArianeEditorModule::ConvertToStaticMesh))
+    );
+
+    Section.AddEntry(Entry);
+}
+
+void
+FArianeEditorModule::ConvertToStaticMesh()
+{
+    IMeshUtilities& MeshUtilities = FModuleManager::Get().LoadModuleChecked<IMeshUtilities>("MeshUtilities");
+    USelection* SelectionSet = GEditor->GetSelectedActors();
+
+    if( SelectionSet )
+    {
+        TArray<AActor*> ActorsToConvert;
+
+        SelectionSet->GetSelectedObjects<AActor>(ActorsToConvert);
+
+        if( ActorsToConvert.Num() )
+        {
+            for( AActor* ActorToConvert : ActorsToConvert )
+            {
+                TInlineComponentArray<UMeshComponent*> MeshComponents( ActorToConvert );
+                TArray<UMeshComponent*> MeshComponentsToConvert;
+
+                for (UMeshComponent* MeshComponent : MeshComponents)
+                {
+                    if ( MeshComponent->IsA( UArianePainting3DComponent::StaticClass() ) )
+                    {
+                        UArianePainting3DComponent* Painting3DComponent = Cast<UArianePainting3DComponent>(MeshComponent);
+                        UArianePainting3DStaticMeshComponent* Painting3DStaticMeshComponent = Painting3DComponent->GetStaticMeshComponent();
+
+                        // if the component is invisible, it wil lnot be converted to
+                        // a static mesh by MeshUtilities.ConvertMeshesToStaticMesh
+                        Painting3DStaticMeshComponent->SetVisibility(true);
+                        Painting3DStaticMeshComponent->SetHiddenInGame(false);
+                        //MeshComponent->MarkRenderStateDirty();
+                        //MeshComponent->RecreateRenderState_Concurrent();
+
+                        Painting3DComponent->ConvertToStaticMesh();
+                    }
+
+                    MeshComponentsToConvert.Add( MeshComponent );
+                }
+
+                MeshUtilities.ConvertMeshesToStaticMesh( MeshComponentsToConvert, ActorToConvert->GetTransform() );
+
+                for (UMeshComponent* MeshComponent : MeshComponents)
+                {
+                    if ( MeshComponent->IsA( UArianePainting3DComponent::StaticClass() ) )
+                    {
+                        UArianePainting3DComponent* Painting3DComponent = Cast<UArianePainting3DComponent>(MeshComponent);
+                        UArianePainting3DStaticMeshComponent* Painting3DStaticMeshComponent = Painting3DComponent->GetStaticMeshComponent();
+
+                        Painting3DStaticMeshComponent->SetStaticMesh( nullptr );
+                        Painting3DStaticMeshComponent->SetVisibility(false);
+                        Painting3DStaticMeshComponent->SetHiddenInGame(true);
+                    }
+                }
+
+                //ArianeComp->ClearDummyStaticMesh();
+            }
+        }
+    }
+}
+
+void
 FArianeEditorModule::RegisterMenus()
 {
-    UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("ContentBrowser.AssetContextMenu.AssetActionsSubMenu");
-    FToolMenuSection& Section = Menu->FindOrAddSection("AssetContextMoveActions");
+    //UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("ContentBrowser.AssetContextMenu.AssetActionsSubMenu");
+    //FToolMenuSection& Section = Menu->FindOrAddSection("AssetContextMoveActions");
 
+    RegisterActorMenu();
 }
 
 void
