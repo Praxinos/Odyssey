@@ -61,7 +61,12 @@ public class Ariane : ModuleRules
                 "Core",
                 "SlateCore",
                 "Engine",
-
+                "MeshUtilities",
+                "MeshDescription", //  FMeshDescription
+                "StaticMeshDescription",  // FStaticMeshAttributes
+                "MeshConversion", //  FMeshDescriptionBuilder
+                "GeometryCore",
+                "GeometryFramework",
                 "OdysseyPalette",
                 "ULIS",
             }
@@ -74,7 +79,12 @@ public class Ariane : ModuleRules
                 "Renderer",
                 "RHI",
                 "TypedElementRuntime",
-
+                "MeshUtilities",
+                "MeshDescription", //  FMeshDescription
+                "StaticMeshDescription",  // FStaticMeshAttributes
+                "MeshConversion", //  FMeshDescriptionBuilder
+                "GeometryCore",
+                "GeometryFramework",
                 "OdysseyPalette",
                 //"OdysseyMedia",
                 //"OdysseyRendering",

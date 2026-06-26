@@ -32,16 +32,10 @@ struct ARIANE_API FArianeGroupInvalidationFlags : FArianeObjectInvalidationFlags
         virtual bool HasAny() override;
 
     public:
-        FArianeGroupInvalidationFlags& SetVertexAltered()  { VertexAltered  = 1; return *this; };
-        FArianeGroupInvalidationFlags& SetSegmentAltered() { SegmentAltered = 1; return *this; };
-        FArianeGroupInvalidationFlags& SetVertexAddedOrRemoved()  { VertexAddedOrRemoved  = 1; return *this; };
-        FArianeGroupInvalidationFlags& SetSegmentAddedOrRemoved() { SegmentAddedOrRemoved = 1; return *this; };
+        FArianeGroupInvalidationFlags& SetHUDForegroundColor()  { HUDForegroundColor  = 1; return *this; };
 
     public:
-        bool VertexAltered  : 1  = 0;
-        bool SegmentAltered : 1  = 0;
-        bool VertexAddedOrRemoved  : 1  = 0;
-        bool SegmentAddedOrRemoved : 1  = 0;
+        uint32 HUDForegroundColor  : 1  = 0;
 };
 
 USTRUCT(BlueprintType)

@@ -42,13 +42,13 @@ public:
     FArianeObjectInvalidationFlags& SetName()     { Name      = 1; return *this; };
 
 public:
-    bool Selected  : 1 = 0;
-    bool Altered   : 1 = 0;
-    bool Hierarchy : 1 = 0;
-    bool Color     : 1 = 0;
-    bool Children  : 1 = 0;
-    bool Tags      : 1 = 0;
-    bool Name      : 1 = 0;
+    uint32 Selected  : 1 = 0;
+    uint32 Altered   : 1 = 0;
+    uint32 Hierarchy : 1 = 0;
+    uint32 Color     : 1 = 0;
+    uint32 Children  : 1 = 0;
+    uint32 Tags      : 1 = 0;
+    uint32 Name      : 1 = 0;
 };
 
 USTRUCT(BlueprintType)

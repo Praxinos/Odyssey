@@ -3,6 +3,7 @@
 
 // Ariane headers
 #include "ArianePainting3DComponent.h"
+#include "ArianePainting3DStaticMeshComponent.h"
 #include "ArianePath.h"
 #include "ArianeSegment.h"
 #include "ArianeVertex.h"
@@ -50,6 +51,15 @@ UArianePainting3DComponent::UArianePainting3DComponent()
     bAutoActivate = true;
     bTickInEditor = true;
 
+    StaticMeshComponent = CreateDefaultSubobject<UArianePainting3DStaticMeshComponent>(TEXT("Dummy"));
+
+    StaticMeshComponent->SetVisibility(false);
+    StaticMeshComponent->SetHiddenInGame(true);
+    StaticMeshComponent->SetCastShadow(false);
+    //StaticMeshComponent->bComponentTickEnabled = false;
+
+    StaticMeshComponent->SetupAttachment(this);
+
 /*
     SelectionOverrideDelegate.BindLambda([](const UPrimitiveComponent*) {
         return false; // don't draw the outline
@@ -57,6 +67,12 @@ UArianePainting3DComponent::UArianePainting3DComponent()
 */
 
     //LineBatchComponent = CreateDefaultSubobject<ULineBatchComponent>(TEXT("LineBatcher"));
+}
+
+UArianePainting3DStaticMeshComponent*
+UArianePainting3DComponent::GetStaticMeshComponent()
+{
+    return StaticMeshComponent;
 }
 
 #if WITH_EDITOR
@@ -325,6 +341,12 @@ FColor
 UArianePainting3DComponent::GetHUDForegroundColor()
 {
     return EditorInterface ? EditorInterface->GetHUDForegroundColor() : FColor::Black;
+}
+
+void
+UArianePainting3DComponent::ConvertToStaticMesh()
+{
+    StaticMeshComponent->ConvertToStaticMesh();
 }
 
 //--------------------------------------------------------------------------------------------------

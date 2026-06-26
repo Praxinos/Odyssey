@@ -72,7 +72,7 @@ UArianeLayerDrawing::PostLoad()
     // Empty the map before reloading. Each path will populate or increment the attached value.
     UsedMaterials.Empty();
     // Empty the selection
-    ClearObjectSelection();
+    SelectedObjects.Empty();
 
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
@@ -100,7 +100,7 @@ UArianeLayerDrawing::PostEditUndo()
     // Empty the map before reloading. Each path will populate or increment the attached value.
     UsedMaterials.Empty();
     // Empty the selection
-    ClearObjectSelection();
+    SelectedObjects.Empty();
 
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {

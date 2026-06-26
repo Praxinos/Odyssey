@@ -306,12 +306,14 @@ SArianeEditorSceneTreeViewRow::OnColorCommitted( FLinearColor Color )
 
         Group->UseEditorHUDForegroundColor( false );
         Group->SetHUDForegroundColor( Color.ToFColor( true ) );
+
+        Group->GetPainting3DComponent()->Update( false );
     }
 }
 
 FReply
 SArianeEditorSceneTreeViewRow::OnMouseButtonUp( const FGeometry & MyGeometry
-                                                            , const FPointerEvent & MouseEvent )
+                                              , const FPointerEvent & MouseEvent )
 {
     FArianeGroup* RootGroup = Item.Get()->GetObject()->GetRootGroup();
     FReply reply = FReply::Handled();
