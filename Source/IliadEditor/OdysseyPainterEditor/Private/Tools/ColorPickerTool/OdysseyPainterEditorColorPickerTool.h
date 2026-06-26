@@ -37,8 +37,6 @@ public:
 
     virtual FText GetTooltip() const override;
 
-    virtual EMouseCursor::Type GetMouseCursor() const override;
-
     void PickColorMove( const FOdysseyPoint& iPointInTexture );
     void PickColorUp( const FOdysseyPoint& iPointInTexture );
 

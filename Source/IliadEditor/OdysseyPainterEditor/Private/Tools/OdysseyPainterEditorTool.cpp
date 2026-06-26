@@ -6,15 +6,19 @@
 #include "Engine/Engine.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Commands/UICommandList.h"
+#include "HAL/FileManager.h"
+#include "Interfaces/IPluginManager.h"
+#include "Internationalization/Regex.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "Toolkits/BaseToolkit.h"
 
 #include "Misc/OdysseyUndoDelegates.h"
-#include "OdysseyPainterEditor.h"
-#include "OdysseyPainterEditorToolInputProcessor.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDCircle.h"
 #include "OdysseyHUDLine.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorSettings.h"
+#include "OdysseyPainterEditorToolInputProcessor.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -23,8 +27,9 @@ UOdysseyPainterEditorTool::~UOdysseyPainterEditorTool()
 }
 
 UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
-    : mEditor (nullptr)
-    , mIsActivated(false)
+    : mEditor( nullptr )
+    , mMouseCursor( EMouseCursor::Crosshairs )
+    , mIsActivated( false )
 {
     mRootHUD = MakeShared<FOdysseyHUDElement>();
     mHUD = MakeShared<FOdysseyHUDElement>();
@@ -32,6 +37,9 @@ UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
     mRootHUD->AddElement(mHUD);
 
     mInputProcessor = MakeShared<FOdysseyPainterEditorToolInputProcessor>(this);
+
+    const UOdysseyPainterEditorSettings* settings = GetDefault<UOdysseyPainterEditorSettings>();
+    mMouseCursor = settings->GetToolMouseCursor();
 }
 
 bool
@@ -109,6 +117,8 @@ UOdysseyPainterEditorTool::Activate()
     toolkitCommandList->Append(mCommandList.ToSharedRef());
 
     Load();
+
+    mMouseCursor.UpdateCursor();
 }
 
 void
@@ -395,9 +405,17 @@ TSharedPtr<FOdysseyHUDElement> UOdysseyPainterEditorTool::GetHUD()
     return mRootHUD;
 }
 
-EMouseCursor::Type UOdysseyPainterEditorTool::GetMouseCursor() const
+void UOdysseyPainterEditorTool::GetMouseCursorImpl() const
 {
-    return EMouseCursor::Crosshairs;
+}
+
+FMouseCursor UOdysseyPainterEditorTool::GetMouseCursor() const
+{
+    GetMouseCursorImpl();
+
+    mMouseCursor.UpdateCursor();
+
+    return mMouseCursor;
 }
 
 bool

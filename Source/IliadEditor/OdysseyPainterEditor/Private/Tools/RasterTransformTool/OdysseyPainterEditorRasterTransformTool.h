@@ -50,12 +50,14 @@ public:
     virtual void Load() override;
     virtual void Unload() override;
 
-    virtual EMouseCursor::Type GetMouseCursor() const override;
-
     virtual FText GetTooltip() const override;
 
     virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
 
+protected:
+    virtual void GetMouseCursorImpl() const override;
+
+public:
     bool FlipHorizontal();
     bool FlipVertical();
 
@@ -120,8 +122,6 @@ private:
 
     int mLastReferenceRotation;
     FVector2D mMouseLastReferencePoint;
-
-    EMouseCursor::Type mMouseCursor;
 
     TSharedPtr<::ULIS::FBlock> mSelectionBlock; // The base block we transform
     TSharedPtr<::ULIS::FBlock> mTransformedBlock; // The transformed block

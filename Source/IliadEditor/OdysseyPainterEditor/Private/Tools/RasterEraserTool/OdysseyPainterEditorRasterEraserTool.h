@@ -50,13 +50,14 @@ public:
     virtual bool OnKeyDown(const FKey& iKey) override;
     virtual bool OnKeyUp(const FKey& iKey) override;
 
-    virtual EMouseCursor::Type GetMouseCursor() const override;
-
     virtual void Commit() override;
 
     virtual FText GetTooltip() const override;
 
     virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
+
+protected:
+    virtual void GetMouseCursorImpl() const override;
 
 public:
     // Getters

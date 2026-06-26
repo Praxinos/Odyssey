@@ -10,9 +10,12 @@
 #include "Input/OdysseyPoint.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorToolMouseCursor.h"
 #include "OdysseyStyle.h"
 
 #include "OdysseyPainterEditorTool.generated.h"
+
+//---
 
 class FExtender;
 class UToolMenu;
@@ -20,12 +23,16 @@ class FOdysseyPainterEditor;
 class FOdysseyHUDElement;
 class FOdysseyPainterEditorToolInputProcessor;
 
+//---
+
 UENUM()
 enum class EPainterEditorToolRadiusReference
 {
     Texture,
     HUD
 };
+
+//---
 
 UCLASS(DefaultToInstanced)
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorTool : public UObject
@@ -142,9 +149,28 @@ public:
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender );
     virtual void ExtendToolbar( UToolMenu* iToolMenu );
     virtual TSharedPtr<FOdysseyHUDElement> GetHUD();
-    virtual EMouseCursor::Type GetMouseCursor() const;
+
+    /** Get the mouse cursor of the the tool
+      * - it can be a native one
+      * - or a custom one if native == custom
+      *
+      * DON'T make it virtual, it's wanted to not be able to override it !!!
+      * Override GetMouseCursorImpl() if you need to change the cursor "on the fly" when GetMouseCursor() is called
+      *
+      * The goal of this pattern is to not be able to return FMouseCursor (created on the fly) directly in GetMouseCursor()
+      * because it won't correspond to mMouseCursor stored in the object
+      */
+    /*virtual*/ FMouseCursor GetMouseCursor() const;
+
     virtual bool UsesRasterSelection() const;
     virtual bool SupportsColorType(EOdysseyPainterEditorColorType iType);
+
+protected:
+    /** Called inside GetMouseCursor()
+      * Override this function to set/modify mMouseCursor inside
+      * (see comment of GetMouseCursor())
+      */
+    virtual void GetMouseCursorImpl() const;
 
 protected:
     virtual void PropertyChanged(const FName& iPropertyName);
@@ -194,6 +220,9 @@ protected:
     TSharedPtr<FOdysseyHUDElement>      mHUD;
 
     TSharedPtr<FUICommandList>          mCommandList;
+
+    // It is mutable to be able to modify it in GetMouseCursorImpl() which is const
+    mutable FMouseCursor                mMouseCursor;
 
 public:
     UPROPERTY(EditDefaultsOnly, Category = "Tool")

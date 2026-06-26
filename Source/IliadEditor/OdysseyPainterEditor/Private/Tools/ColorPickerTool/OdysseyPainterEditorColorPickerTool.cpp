@@ -25,6 +25,7 @@ UOdysseyPainterEditorColorPickerTool::~UOdysseyPainterEditorColorPickerTool()
 UOdysseyPainterEditorColorPickerTool::UOdysseyPainterEditorColorPickerTool()
 {
     mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.ColorPicker64"));
+    mMouseCursor = EMouseCursor::EyeDropper;
 }
 
 //--------------------------------------------------------------------------------------
@@ -117,12 +118,6 @@ FText
 UOdysseyPainterEditorColorPickerTool::GetTooltip() const
 {
     return LOCTEXT("color-picker-tool.tooltip", "Color Picker Tool");
-}
-
-EMouseCursor::Type
-UOdysseyPainterEditorColorPickerTool::GetMouseCursor() const
-{
-    return EMouseCursor::EyeDropper;
 }
 
 #undef LOCTEXT_NAMESPACE

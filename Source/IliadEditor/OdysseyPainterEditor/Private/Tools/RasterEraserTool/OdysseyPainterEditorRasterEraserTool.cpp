@@ -423,14 +423,11 @@ UOdysseyPainterEditorRasterEraserTool::PostPropertyChanged(const FName& iPropert
         mOnOpacityChanged.Broadcast();
 }
 
-EMouseCursor::Type
-UOdysseyPainterEditorRasterEraserTool::GetMouseCursor() const
+void UOdysseyPainterEditorRasterEraserTool::GetMouseCursorImpl() const //override
 {
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return EMouseCursor::SlashedCircle;
-
-    return UOdysseyPainterEditorTool::GetMouseCursor();
+    if( mediaProvider.IsLocked() )
+        mMouseCursor = EMouseCursor::SlashedCircle;
 }
 
 FText

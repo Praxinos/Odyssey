@@ -38,8 +38,6 @@ public:
     virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
 
-    virtual EMouseCursor::Type GetMouseCursor() const override;
-
 public:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& iEvent) override;
 

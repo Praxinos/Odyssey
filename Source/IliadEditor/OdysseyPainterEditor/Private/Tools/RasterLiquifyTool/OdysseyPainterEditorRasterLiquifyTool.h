@@ -167,8 +167,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         virtual void ExtendMenu( TSharedRef<FExtender> iExtender) override;
         virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
 
-        virtual EMouseCursor::Type GetMouseCursor() const override;
-
         virtual FText GetTooltip() const override;
         virtual bool HasRadius() const override;
         virtual float GetRadius() const override;
@@ -177,6 +175,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         static void RegisterDetailCustomization();
         static void UnregisterDetailCustomization();
         FFlowMap& GetFlowMap();
+
+    protected:
+        virtual void GetMouseCursorImpl() const override;
 
     protected:
         double GetStrength();

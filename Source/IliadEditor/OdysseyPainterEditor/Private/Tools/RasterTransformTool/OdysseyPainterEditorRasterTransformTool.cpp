@@ -51,7 +51,6 @@ UOdysseyPainterEditorRasterTransformTool::UOdysseyPainterEditorRasterTransformTo
     , mTransformCaptureMode(EOdysseyTransformCapture::NoCapture)
     , mTransformToolHUD(MakeShared<FOdysseyHUDElement>())
     , mTransformAreaHUD(nullptr)
-    , mMouseCursor(EMouseCursor::Crosshairs)
     , mSelectionBlock(nullptr)
     , mTransformedBlock(nullptr)
     , mIndexTransaction(0)
@@ -142,11 +141,14 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseHover(const FOdysseyPoint&
 
     switch (DetectCaptureMode(FVector2D(iPointInTexture.x, iPointInTexture.y)))
     {
-    case EOdysseyTransformCapture::Inside:
-        mMouseCursor = EMouseCursor::GrabHand;
-        break;
-    default:
-        mMouseCursor = EMouseCursor::Crosshairs;
+        case EOdysseyTransformCapture::Inside:
+            mMouseCursor = EMouseCursor::GrabHand;
+            break;
+        case EOdysseyTransformCapture::Rotation:
+            mMouseCursor = EMouseCursorCustom::CircleClockwise;
+            break;
+        default:
+            mMouseCursor = EMouseCursor::Crosshairs;
     }
 }
 
@@ -323,13 +325,11 @@ void UOdysseyPainterEditorRasterTransformTool::Unload()
     UOdysseyPainterEditorTool::Unload();
 }
 
-EMouseCursor::Type UOdysseyPainterEditorRasterTransformTool::GetMouseCursor() const
+void UOdysseyPainterEditorRasterTransformTool::GetMouseCursorImpl() const
 {
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return EMouseCursor::SlashedCircle;
-
-    return mMouseCursor;
+    if( mediaProvider.IsLocked() )
+        mMouseCursor = EMouseCursor::SlashedCircle;
 }
 
 int

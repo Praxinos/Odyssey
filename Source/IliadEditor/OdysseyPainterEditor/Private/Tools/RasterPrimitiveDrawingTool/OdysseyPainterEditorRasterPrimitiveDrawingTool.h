@@ -48,9 +48,10 @@ public:
     virtual void Commit() override;
     virtual void Tick(float iDeltaTime) override;
 
-    virtual EMouseCursor::Type GetMouseCursor() const override;
-
     virtual FText GetTooltip() const override;
+
+protected:
+    virtual void GetMouseCursorImpl() const override;
 
 private:
     // Internal - Callbacks

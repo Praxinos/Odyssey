@@ -146,12 +146,6 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::OnMouseDrag(const FOdysseyPoint& iP
     }
 }
 
-EMouseCursor::Type
-UOdysseyPainterEditorAnimationOutOfPegsTool::GetMouseCursor() const
-{
-    return UOdysseyPainterEditorTool::GetMouseCursor();
-}
-
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::PostEditChangeProperty( FPropertyChangedEvent& iEvent)
 {

@@ -82,7 +82,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                                           , const FName& iPropertyName ) override;
 
         virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
-        virtual EMouseCursor::Type GetMouseCursor() const override;
+
+    protected:
+        virtual void GetMouseCursorImpl() const override;
 
     private:
         void AddSize(int iAmount);

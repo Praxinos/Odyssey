@@ -1805,14 +1805,11 @@ UOdysseyPainterEditorVectorBaseTool::MakeTest( FOdysseyVectorGroupPaint* iScene 
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 }
 
-EMouseCursor::Type
-UOdysseyPainterEditorVectorBaseTool::GetMouseCursor() const
+void UOdysseyPainterEditorVectorBaseTool::GetMouseCursorImpl() const
 {
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return EMouseCursor::SlashedCircle;
-
-    return UOdysseyPainterEditorTool::GetMouseCursor();
+    if( mediaProvider.IsLocked() )
+        mMouseCursor = EMouseCursor::SlashedCircle;
 }
 
 #undef LOCTEXT_NAMESPACE

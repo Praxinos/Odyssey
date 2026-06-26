@@ -278,7 +278,9 @@ FOdysseyPainterEditorViewportClient::GetCursor( FViewport* iViewport, int32 iX, 
     else if( mCurrentToolState == eState::kPick )
         mCurrentMouseCursor = EMouseCursor::EyeDropper;
     else if( mOdysseyPainterEditor->GetCurrentTool() )
-        mCurrentMouseCursor = mOdysseyPainterEditor->GetCurrentTool()->GetMouseCursor();
+    {
+        return mOdysseyPainterEditor->GetCurrentTool()->GetMouseCursor().GetMouseCursorNative();
+    }
 
     return mCurrentMouseCursor;
 }
@@ -286,6 +288,23 @@ FOdysseyPainterEditorViewportClient::GetCursor( FViewport* iViewport, int32 iX, 
 TOptional< TSharedRef< SWidget > >
 FOdysseyPainterEditorViewportClient::MapCursor( FViewport* iViewport, const FCursorReply& iCursorReply )
 {
+    // - The widget MUST BE retain by the object (should be in a class variable instead of static)
+    // - When using SWidget, there is a really small (but perceptible) lag -_-
+    //
+    // So don't use SWidget as cursor.
+    // This is just for information.
+    //
+    //static TSharedRef< SWidget > widget =
+    //    SNew( SBox )
+    //    .WidthOverride( 10 )
+    //    .HeightOverride( 10 )
+    //    [
+    //        SNew( SBorder )
+    //            .BorderImage( FAppStyle::GetBrush( "WhiteBrush" ) )
+    //            .BorderBackgroundColor( FSlateColor( FLinearColor( 255, 0, 0, 255 ) ) )
+    //    ];
+    //return widget;
+
     return FViewportClient::MapCursor( iViewport, iCursorReply );
 }
 

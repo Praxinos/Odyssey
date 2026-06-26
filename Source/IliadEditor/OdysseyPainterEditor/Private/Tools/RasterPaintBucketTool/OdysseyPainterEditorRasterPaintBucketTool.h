@@ -66,13 +66,14 @@ public:
     virtual void ExtendContextMenu(FMenuBuilder& iBuilder, const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
-    virtual EMouseCursor::Type GetMouseCursor() const override;
-
     virtual void Commit() override;
 
     virtual FText GetTooltip() const override;
 
     virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
+
+protected:
+    virtual void GetMouseCursorImpl() const override;
 
 public:
     void SetSourceProvider(TSharedPtr<FOdysseyPainterEditorRasterPaintBucketToolSourceProvider> iProvider);

@@ -80,9 +80,10 @@ public:
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender) override;
     virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
 
-    virtual EMouseCursor::Type GetMouseCursor() const override;
-
     virtual FText GetTooltip() const override;
+
+protected:
+    virtual void GetMouseCursorImpl() const override;
 
 public:
     // Setters

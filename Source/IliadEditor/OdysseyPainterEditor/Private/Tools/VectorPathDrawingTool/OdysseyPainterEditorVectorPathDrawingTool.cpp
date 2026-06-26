@@ -369,19 +369,22 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
     return true;
 }
 
-EMouseCursor::Type
-UOdysseyPainterEditorVectorPathDrawingTool::GetMouseCursor() const
+void UOdysseyPainterEditorVectorPathDrawingTool::GetMouseCursorImpl() const
 {
     // working group can be null if were are not on a cell
     FOdysseyVectorGroup* workingGroup = GetWorkingGroup();
 
     if( workingGroup )
     {
-        return workingGroup->IsVisible( true ) ? EMouseCursor::Type::Crosshairs
-                                               : EMouseCursor::Type::SlashedCircle;
+        if( workingGroup->IsVisible( true ) )
+            mMouseCursor = EMouseCursor::Crosshairs;
+        else
+            mMouseCursor = EMouseCursor::SlashedCircle;
     }
-
-    return EMouseCursor::Type::Crosshairs;
+    else
+    {
+        mMouseCursor = EMouseCursor::Crosshairs;
+    }
 }
 
 void

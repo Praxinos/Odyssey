@@ -849,14 +849,11 @@ UOdysseyPainterEditorRasterDrawingTool::PostPropertyChanged(const FName& iProper
     }
 }
 
-EMouseCursor::Type
-UOdysseyPainterEditorRasterDrawingTool::GetMouseCursor() const
+void UOdysseyPainterEditorRasterDrawingTool::GetMouseCursorImpl() const
 {
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return EMouseCursor::SlashedCircle;
-
-    return UOdysseyPainterEditorTool::GetMouseCursor();
+    if( mediaProvider.IsLocked() )
+        mMouseCursor = EMouseCursor::SlashedCircle;
 }
 
 FText

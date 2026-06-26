@@ -1,0 +1,28 @@
+
+- The reference file is ALWAYS the png
+
+- The png file can be any size (<=256px)
+
+- The name of the file MUST represente its content and NOT how it will be used !
+For example, the oriented circle must be named "circle-clockwise..." and NOT "rotate..."
+
+- The filename can be what you want but it MUST contain the hotspot of the cursor
+(hotspot: the pixel in the image which will correspond to the pixel clicked on the screen)
+The formatting of the hotspot MUST BE: .<HotspotX>x<HotspotY>
+
+- Each time a png is updated, run (on linux-like (WSL,mac,...) with icoutils package installed):
+    python3 ./build.cur.py
+
+---
+
+- When ADDING a new png cursor file:
+    - run the script
+    - update the code:
+        ...\IliadEditor\OdysseyPainterEditor\Public\Tools\OdysseyPainterEditorTool.h
+        - add a new entry in EMouseCursorCustom enum
+        ...\IliadEditor\OdysseyPainterEditor\Public\Tools\OdysseyPainterEditorTool.cpp
+        - add new corresponding id <-> file entry at the end of FMouseCursor::InitializeCustomCursorMap()
+        - use the cursor id everywhere it's needed
+
+- When only UPDATING a png cursor file:
+    - run the script

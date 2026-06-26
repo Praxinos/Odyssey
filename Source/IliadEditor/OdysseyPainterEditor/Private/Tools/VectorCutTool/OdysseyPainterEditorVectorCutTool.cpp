@@ -35,7 +35,6 @@ UOdysseyPainterEditorVectorCutTool::~UOdysseyPainterEditorVectorCutTool()
 
 UOdysseyPainterEditorVectorCutTool::UOdysseyPainterEditorVectorCutTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorCutToolHUD>( this ), false, true )
-    , mMouseCursor ( EMouseCursor::Crosshairs )
 {
     mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.PathCut64"));
 
@@ -90,16 +89,11 @@ UOdysseyPainterEditorVectorCutTool::UnloadVector( FOdysseyVectorGroupPaint* iSce
     return 0;
 }
 
-EMouseCursor::Type
-UOdysseyPainterEditorVectorCutTool::GetMouseCursor() const
+void UOdysseyPainterEditorVectorCutTool::GetMouseCursorImpl() const
 {
-/*
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return EMouseCursor::SlashedCircle;
-*/
-
-    return mMouseCursor;
+    //FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    //if( mediaProvider.IsLocked() )
+    //    mMouseCursor = EMouseCursor::SlashedCircle;
 }
 
 void

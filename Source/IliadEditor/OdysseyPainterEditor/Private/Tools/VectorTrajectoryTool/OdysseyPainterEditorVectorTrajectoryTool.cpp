@@ -56,6 +56,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::UOdysseyPainterEditorVectorTrajectory
     , GridDisplayMode( eVectorTrajectoryGridDisplayMode::AsPoints )
 {
     mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Trajectory64"));
+    mMouseCursor = EMouseCursor::Default;
 
     mTrajectoryHUD = static_cast<FOdysseyPainterEditorVectorTrajectoryToolHUD*>( mBaseHUD.Get() );
 }
@@ -160,8 +161,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyUpGlobalVector( FOdysseyVectorGr
     return false;
 }
 
-EMouseCursor::Type
-UOdysseyPainterEditorVectorTrajectoryTool::GetMouseCursor() const
+void UOdysseyPainterEditorVectorTrajectoryTool::GetMouseCursorImpl() const
 {
     if( mTrajectoryHUD->GetSelectedInbetweenerTagList().size() )
     {
@@ -169,11 +169,9 @@ UOdysseyPainterEditorVectorTrajectoryTool::GetMouseCursor() const
 
         if( inbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::Linear )
         {
-            return EMouseCursor::SlashedCircle;
+            mMouseCursor = EMouseCursor::SlashedCircle;
         }
     }
-
-    return EMouseCursor::Default;
 }
 
 bool

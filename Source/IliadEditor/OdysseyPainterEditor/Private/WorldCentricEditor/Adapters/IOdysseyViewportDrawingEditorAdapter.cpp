@@ -335,7 +335,7 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
     {
         editor->GetCurrentTool()->ProcessMouseHover( mCurrentStrokeRay.mPoint );
 
-        mMouseCursor = editor->GetCurrentTool()->GetMouseCursor();
+        mMouseCursor = editor->GetCurrentTool()->GetMouseCursor().GetMouseCursorNative();
         mOverrideMouseCursor = true;
     }
 

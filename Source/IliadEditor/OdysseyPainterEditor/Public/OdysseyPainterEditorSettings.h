@@ -9,6 +9,7 @@
 #include "UObject/ObjectMacros.h"
 
 #include "OdysseyBrushBlueprint.h"
+#include "Tools/OdysseyPainterEditorToolMouseCursor.h"
 #include "UObject/TemplateString.h"
 
 #include "OdysseyPainterEditorSettings.generated.h"
@@ -195,7 +196,22 @@ public:
     UPROPERTY(config)
     bool TextureBorderEnabled;
 
+private:
+     UFUNCTION()
+     static TArray<FString> GetCursorOptions();
+
+public:
     /** Defines the defaults values of the brush being used when opening the editor */
-    UPROPERTY(config, EditAnywhere, Category=Defaults )
+    UPROPERTY(config, EditAnywhere, Category=Defaults, meta=(ShowOnlyInnerProperties) )
     FBrushDefaults BrushDefaults;
+
+    /** Defines the default cursor of the tool being used when opening the editor
+      *
+      * (The painter editor needs to be re-opened)
+      */
+    UPROPERTY(config, EditAnywhere, Category=Defaults, meta=(GetOptions="GetCursorOptions") )
+    FString ToolMouseCursor = TEXT( "Cross" );
+
+public:
+     FMouseCursor GetToolMouseCursor() const;
 };

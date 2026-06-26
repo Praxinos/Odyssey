@@ -82,7 +82,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
                                         , const FKey& iKey ) override;
         virtual void PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName ) override;
-        virtual EMouseCursor::Type GetMouseCursor() const override;
         virtual void ExtendContextMenuInbetween( FOdysseyVectorGroupPaint* iScene
                                                , FMenuBuilder& menu
                                                , uint64 iInbetweenMenuFlags ) override;
@@ -93,6 +92,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
         TSharedRef<SWidget> CreateModifierSegmentControl();
 
     protected:
+        virtual void GetMouseCursorImpl() const override;
+
         void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
                                 , uint32 iUpdateFlags );
 

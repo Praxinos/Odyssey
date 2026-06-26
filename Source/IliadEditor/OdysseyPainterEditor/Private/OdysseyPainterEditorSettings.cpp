@@ -182,3 +182,31 @@ UOdysseyPainterEditorSettings::GetCheckerPresets() const
 {
     return CheckerPresets;
 }
+
+//---
+
+//static
+TArray<FString>
+UOdysseyPainterEditorSettings::GetCursorOptions()
+{
+    return {
+        TEXT( "Default" ),
+        TEXT( "Cross" ),
+        TEXT( "Circle" ),
+        TEXT( "Dot" ),
+    };
+}
+
+FMouseCursor
+UOdysseyPainterEditorSettings::GetToolMouseCursor() const
+{
+    if( ToolMouseCursor == TEXT( "Cross" ) )
+        return FMouseCursor( EMouseCursor::Crosshairs );
+    else if( ToolMouseCursor == TEXT( "Circle" ) )
+        return FMouseCursor( EMouseCursorCustom::Circle );
+    else if( ToolMouseCursor == TEXT( "Dot" ) )
+        return FMouseCursor( EMouseCursorCustom::Dot );
+
+    // TEXT( "Default" )
+    return FMouseCursor( EMouseCursor::Default );
+}
