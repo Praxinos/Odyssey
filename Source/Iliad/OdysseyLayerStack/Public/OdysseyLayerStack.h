@@ -284,6 +284,23 @@ public:
 
     UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
     UOdysseyLayer* GetCurrentLayer() const;
+
+    UFUNCTION( BlueprintPure, Category="Odyssey|LayerStack")
+    bool GetDisplayOnlyCurrentLayer() const;
+
+    UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
+    void SetDisplayOnlyCurrentLayer(bool iDisplayOnlyCurrentLayer);
+
+    UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
+    void ToggleDisplayOnlyCurrentLayer();
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
+    float GetOtherLayersOpacity() const;
+
+    float GetOtherLayersOpacityNormalized() const;
+
+    UFUNCTION( BlueprintCallable, Category="Odyssey|LayerStack")
+    void SetOtherLayersOpacity(float iOtherLayersOpacity);
 #endif
 
     UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
@@ -302,6 +319,14 @@ protected:
     // which prevents us to compile this for runtime.
     //UPROPERTY(Transient, NonTransactional)
     //USelection* LayerSelection = nullptr;
+
+    UPROPERTY()
+    bool bDisplayOnlyCurrentLayer = false;
+
+    /** Opacity of other layers when only the current layer is displayed */
+    UPROPERTY(meta=(ClampMin="0", ClampMax="100", UIMin="0", UIMax="100", Delta="1", Units="Percent", EditCondition="bDisplayOnlyCurrentLayer"))
+    float OtherLayersOpacity = 0.f; // 0 -> 100
+
 #endif
 
     UPROPERTY()

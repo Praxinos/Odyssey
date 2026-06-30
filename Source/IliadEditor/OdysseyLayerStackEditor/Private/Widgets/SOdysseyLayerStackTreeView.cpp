@@ -5,14 +5,21 @@
 
 #include "Editor.h"
 #include "Framework/Commands/GenericCommands.h"
+#include "Math/UnitConversion.h"
 #include "ScopedTransaction.h"
 #include "Selection.h"
 #include "ToolMenus.h"
+#include "Widgets/Input/SComboButton.h"
+#include "Widgets/Input/SSpinBox.h"
+#include "Widgets/Input/SNumericEntryBox.h"
+#include "Widgets/Input/NumericTypeInterface.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
 
 #include "Commands/OdysseyLayerStackEditorCommands.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyLayerStackFunctionLibrary.h"
 #include "OdysseyStyle.h"
+#include "Shortcuts/OdysseyLayerStackGlobalShortcuts.h"
 #include "Shortcuts/OdysseyLayerStackShortcuts.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/SOdysseyLayerRow.h"
@@ -33,6 +40,8 @@ SOdysseyLayerStackTreeView::SOdysseyLayerStackTreeView()
     //: mLayerStack(*this, nullptr)
     : mLayerStack(nullptr)
     , mLayerStackShortcuts(nullptr)
+    , mLayerStackGlobalShortcuts(nullptr)
+    , mCommandList(nullptr)
 {
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnCurrentLayerChanged);
     UOdysseyLayerStack::OnHierarchyChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerStackHierarchyChanged);
@@ -45,6 +54,12 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
 {
     mLayerStack = InArgs._LayerStack;
     mLayerStackShortcuts = MakeShared<FOdysseyLayerStackShortcuts>(SharedThis(this), mLayerStack);
+    mLayerStackGlobalShortcuts = MakeShared<FOdysseyLayerStackGlobalShortcuts>( mLayerStack );
+    mCommandList = MakeShared<FUICommandList>();
+    mCommandList->Append( mLayerStackShortcuts->GetCommandList() );
+    mLayerStackGlobalShortcuts->MapActionsToCommandList( mCommandList.ToSharedRef() );
+
+    //---
 
     TSharedRef<SHeaderRow> headerRow = SNew(SHeaderRow)
         .SplitterHandleSize(0.f); //Fixes alignment between header row and actual rows
@@ -61,7 +76,6 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
     {
         headerRow->AddColumn(
             SHeaderRow::Column("IsActivated")
-            .ToolTipText(LOCTEXT("header-row.is-layer-activated.tooltip", "Toggle Layer Activation"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)
             .VAlignHeader(VAlign_Center)
@@ -69,9 +83,56 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
             .VAlignCell(VAlign_Top)
             .HeaderContentPadding(FMargin(0))
             [
-                SNew(SBox)
-                .HeightOverride(25.f)
-                .VAlign(VAlign_Center)
+                SNew( SComboButton )
+                .ContentPadding( 2.f )
+                .HAlign( HAlign_Center )
+                .VAlign( VAlign_Center )
+                .ToolTipText( LOCTEXT( "header-row.is-layer-activated.tooltip", "Toggle Layer Activation" ) )
+                .ComboButtonStyle( FAppStyle::Get(), TEXT( "SimpleComboButtonWithIcon" ) )
+                .HasDownArrow( false )
+                .OnGetMenuContent_Lambda( [this]() -> TSharedRef<SWidget>
+                                            {
+                                                FMenuBuilder builder( true, mCommandList );
+
+                                                builder.AddMenuEntry( FOdysseyLayerStackEditorCommands::Get().ActivateAllLayers );
+                                                builder.AddMenuEntry( FOdysseyLayerStackEditorCommands::Get().InactivateAllLayers );
+
+                                                builder.AddSeparator();
+
+                                                builder.AddMenuEntry( FOdysseyLayerStackEditorCommands::Get().DisplayOnlyCurrentLayer );
+                                                builder.AddWidget( SNew( SSpinBox<float> )
+                                                                   .IsEnabled_Lambda( [this]() -> bool
+                                                                                      {
+                                                                                          return mLayerStack->GetDisplayOnlyCurrentLayer();
+                                                                                      } )
+                                                                   .MinValue( 0.f )
+                                                                   .MaxValue( 100.f )
+                                                                   .MinSliderValue( 0.f )
+                                                                   .MaxSliderValue( 100.f )
+                                                                   .MinFractionalDigits( 0 )
+                                                                   .MaxFractionalDigits( 2 )
+                                                                   .TypeInterface( MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Percentage ) ) )
+                                                                   .LinearDeltaSensitivity( 25 )
+                                                                   .Delta( 1 )
+                                                                   .MinDesiredWidth( 55.f )
+                                                                   .Value_Lambda( [this]() -> float
+                                                                                  {
+                                                                                      return mLayerStack->GetOtherLayersOpacity();
+                                                                                  } )
+                                                                   .OnValueChanged_Lambda( [this]( float iNewValue )
+                                                                                           {
+                                                                                               return mLayerStack->SetOtherLayersOpacity( iNewValue );
+                                                                                           } )
+                                                                   .OnValueCommitted_Lambda( [this]( float iNewValue, ETextCommit::Type iType )
+                                                                                             {
+                                                                                                 return mLayerStack->SetOtherLayersOpacity( iNewValue );
+                                                                                             } )
+                                                                   , LOCTEXT( "header-row-entry.other-layers-opacity.label", "Other layers opacity" )
+                                                );
+
+                                                return builder.MakeWidget();
+                                            } )
+                .ButtonContent()
                 [
                     SNew(SImage)
                     .ColorAndOpacity(FSlateColor::UseForeground())
@@ -81,7 +142,6 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
         );
         headerRow->AddColumn(
             SHeaderRow::Column("IsLocked")
-            .ToolTipText(LOCTEXT("header-row.is-layer-locked.tooltip", "Toggle Layer Locked State"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)
             .VAlignHeader(VAlign_Center)
@@ -89,20 +149,33 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
             .VAlignCell(VAlign_Top)
             .HeaderContentPadding(FMargin(0))
             [
-                SNew(SBox)
-                .HeightOverride(25.f)
-                .VAlign(VAlign_Center)
+                SNew(SComboButton)
+                .ContentPadding( 2.f )
+                .HAlign( HAlign_Center )
+                .VAlign( VAlign_Center )
+                .ToolTipText(LOCTEXT("header-row.is-layer-locked.tooltip", "Toggle Layer Locked State"))
+                .ComboButtonStyle( FAppStyle::Get(), TEXT( "SimpleComboButtonWithIcon" ) )
+                .HasDownArrow( false )
+                .OnGetMenuContent_Lambda( [this]() -> TSharedRef<SWidget>
+                                          {
+                                              FMenuBuilder builder( true, mCommandList );
+
+                                              builder.AddMenuEntry( FOdysseyLayerStackEditorCommands::Get().LockAllLayers );
+                                              builder.AddMenuEntry( FOdysseyLayerStackEditorCommands::Get().UnlockAllLayers );
+
+                                              return builder.MakeWidget();
+                                          } )
+                .ButtonContent()
                 [
-                    SNew(SImage)
-                    .ColorAndOpacity(FSlateColor::UseForeground())
-                    .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16"))
+                    SNew( SImage )
+                    .ColorAndOpacity( FSlateColor::UseForeground() )
+                    .Image( FOdysseyStyle::GetBrush( "OdysseyLayerStack.Locked16" ) )
                 ]
             ]
         );
 
         headerRow->AddColumn(
             SHeaderRow::Column("DisplayOptions")
-            .ToolTipText(LOCTEXT("header-row.display-options.tooltip", "Display / Hide Layer's Options"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)
             .VAlignHeader(VAlign_Center)
@@ -110,9 +183,28 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
             .VAlignCell(VAlign_Top)
             .HeaderContentPadding(FMargin(0))
             [
-                SNew(SBox)
-                .HeightOverride(25.f)
-                .VAlign(VAlign_Center)
+                SNew( SComboButton )
+                .ContentPadding( 2.f )
+                .HAlign( HAlign_Center )
+                .VAlign( VAlign_Center )
+                .ToolTipText( LOCTEXT( "header-row.display-options.tooltip", "Display / Hide Layer's Options" ) )
+                .ComboButtonStyle( FAppStyle::Get(), TEXT( "SimpleComboButtonWithIcon" ) )
+                .HasDownArrow( false )
+                .OnGetMenuContent_Lambda( [this]() -> TSharedRef<SWidget>
+                                            {
+                                                FMenuBuilder builder( true, mCommandList );
+
+                                                builder.AddMenuEntry( FOdysseyLayerStackEditorCommands::Get().CollapseAllLayers );
+                                                builder.AddMenuEntry( FOdysseyLayerStackEditorCommands::Get().UncollapseAllLayers );
+
+                                                builder.AddSeparator();
+
+                                                builder.AddMenuEntry( FOdysseyLayerStackEditorCommands::Get().OpenAllFolderLayers );
+                                                builder.AddMenuEntry( FOdysseyLayerStackEditorCommands::Get().CloseAllFolderLayers );
+
+                                                return builder.MakeWidget();
+                                            } )
+                .ButtonContent()
                 [
                     SNew(SImage)
                     .ColorAndOpacity(FSlateColor::UseForeground())
@@ -239,7 +331,7 @@ SOdysseyLayerStackTreeView::OnPaint( const FPaintArgs& Args, const FGeometry& Al
 FReply
 SOdysseyLayerStackTreeView::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
 {
-    if (mLayerStackShortcuts->GetCommandList()->ProcessCommandBindings(iKeyEvent))
+    if (mCommandList->ProcessCommandBindings(iKeyEvent))
         return FReply::Handled();
 
     return STreeView<UOdysseyLayer*>::OnKeyDown(iGeometry, iKeyEvent);
@@ -472,26 +564,22 @@ SOdysseyLayerStackTreeView::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStac
 }
 
 // ContextMenu
-TSharedPtr<FOdysseyLayerStackShortcuts>
-SOdysseyLayerStackTreeView::GetLayerStackShortcuts()
+TSharedPtr<FUICommandList>
+SOdysseyLayerStackTreeView::GetCommandList() const
 {
-    return mLayerStackShortcuts;
+    return mCommandList;
 }
 
 TSharedPtr<SWidget>
 SOdysseyLayerStackTreeView::OnContextMenuOpening()
 {
-    //Create a new command, so that we can add context menu specific entries
-    TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
-    commandList->Append(mLayerStackShortcuts->GetCommandList());
-
     //Allows us to extend the menu context by inserting entries everywhere we want
     //Overriding CreateContextMenu does not allow that
     TArray<TSharedPtr<FExtender>> extenders = ExtendContextMenu();
     TSharedPtr<FExtender> extender = FExtender::Combine(extenders);
 
     //Build menu
-    FToolMenuContext menuContext(commandList, extender);
+    FToolMenuContext menuContext(mCommandList, extender);
     return UToolMenus::Get()->GenerateWidget(contextMenuName, menuContext);
 }
 

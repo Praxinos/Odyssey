@@ -31,6 +31,16 @@ public:
     TSharedPtr<FUICommandInfo> OpenFolderLayer;
     TSharedPtr<FUICommandInfo> CloseFolderLayer;
 
+    TSharedPtr<FUICommandInfo> LockAllLayers;
+    TSharedPtr<FUICommandInfo> UnlockAllLayers;
+    TSharedPtr<FUICommandInfo> ActivateAllLayers;
+    TSharedPtr<FUICommandInfo> InactivateAllLayers;
+    TSharedPtr<FUICommandInfo> DisplayOnlyCurrentLayer;
+    TSharedPtr<FUICommandInfo> CollapseAllLayers;
+    TSharedPtr<FUICommandInfo> UncollapseAllLayers;
+    TSharedPtr<FUICommandInfo> OpenAllFolderLayers;
+    TSharedPtr<FUICommandInfo> CloseAllFolderLayers;
+
     /** Action for changing the current layer's blending mode */
     TArray<TSharedPtr<FUICommandInfo>> SetCurrentLayerBlendMode;
     TSharedPtr<FUICommandInfo> SetCurrentLayerBlendModeToNextBlendMode;

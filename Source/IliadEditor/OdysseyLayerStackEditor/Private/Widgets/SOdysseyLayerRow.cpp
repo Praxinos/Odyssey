@@ -187,7 +187,7 @@ SOdysseyLayerRow::CreateBlendModesMenu()
     // global shortcuts
     mLayerStackGlobalShortcuts->MapActionsToCommandList( commandList );
     // widget shortcuts
-    commandList->Append( treeView.Get()->GetLayerStackShortcuts()->GetCommandList());
+    commandList->Append( treeView.Get()->GetCommandList().ToSharedRef() );
 
     FMenuBuilder menu( true, commandList );
 
@@ -346,8 +346,34 @@ SOdysseyLayerRow::GetIsActivatedCheckBoxEnabled() const
 void
 SOdysseyLayerRow::OnIsLockedCheckBoxStateChanged(ECheckBoxState iState)
 {
+    TSet<UOdysseyLayer*> selected_layers;
+    UOdysseyLayerStack* layerStack = GetLayer()->GetLayerStack();
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        if( layerStack->IsLayerSelected( layer ) )
+            selected_layers.Add( layer );
+    }
+    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
+    // But too much interrogations to fix it (as many callbacks can be called.
+    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
+    // So, at least for now, just always add it.
+    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
+    selected_layers.Add( layerStack->GetCurrentLayer() );
+
+    // If the focused layer is outside the selection, just change it
+    UOdysseyLayer* focusedLayer = GetLayer();
+    if( !selected_layers.Contains( focusedLayer ) )
+    {
+        selected_layers.Empty();
+        selected_layers.Add( focusedLayer );
+    }
+
     FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-is-locked", "Change Layer Lock"));
-    GetLayer()->SetIsLocked(iState == ECheckBoxState::Checked);
+
+    for( UOdysseyLayer* layer : selected_layers )
+    {
+        layer->SetIsLocked( iState == ECheckBoxState::Checked );
+    }
 }
 
 ECheckBoxState

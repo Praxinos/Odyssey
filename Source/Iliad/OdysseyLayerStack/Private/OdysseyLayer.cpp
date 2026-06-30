@@ -1595,11 +1595,17 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
         IOdysseyTextureRenderingAbility::FRenderFunction childRenderFunction;
         if (child->BuildRenderPipeline(iFrame, iType, childRenderFunction, iCanRenderFunction, iParents))
         {
+            float opacity = child->GetOpacity();
+
+            UOdysseyLayerStack* layerStack = child->GetLayerStack();
+            if( child != layerStack->GetCurrentLayer() && layerStack->GetDisplayOnlyCurrentLayer() )
+                opacity = opacity * layerStack->GetOtherLayersOpacityNormalized();
+
             childrenRenderParams.Add(
                 {
                     childRenderFunction,
                     child->GetBlendMode(),
-                    child->GetOpacity()
+                    opacity
                 }
             );
         }

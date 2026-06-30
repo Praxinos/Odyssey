@@ -27,6 +27,18 @@ public:
     void Action_OpenFolderLayer();
     void Action_CloseFolderLayer();
 
+    void Action_LockAllLayers();
+    void Action_UnlockAllLayers();
+    void Action_ActivateAllLayers();
+    void Action_InactivateAllLayers();
+    void Action_DisplayOnlyCurrentLayer();
+    bool CanAction_DisplayOnlyCurrentLayer();
+    bool IsActionChecked_DisplayOnlyCurrentLayer();
+    void Action_CollapseAllLayers();
+    void Action_UncollapseAllLayers();
+    void Action_OpenAllFolderLayers();
+    void Action_CloseAllFolderLayers();
+
     void Action_SetCurrentLayerBlendMode(EOdysseyBlendingMode iBlendMode);
     void Action_SetCurrentLayerBlendModeToNextBlendMode();
     void Action_SetCurrentLayerBlendModeToPreviousBlendMode();

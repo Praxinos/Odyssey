@@ -41,6 +41,57 @@ FOdysseyLayerStackGlobalShortcuts::MapActionsToCommandList(TSharedRef<FUICommand
         FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_CloseFolderLayer)
     );
 
+    //---
+
+    iCommandList->MapAction(
+        FOdysseyLayerStackEditorCommands::Get().LockAllLayers,
+        FExecuteAction::CreateRaw( this, &FOdysseyLayerStackGlobalShortcuts::Action_LockAllLayers )
+    );
+
+    iCommandList->MapAction(
+        FOdysseyLayerStackEditorCommands::Get().UnlockAllLayers,
+        FExecuteAction::CreateRaw( this, &FOdysseyLayerStackGlobalShortcuts::Action_UnlockAllLayers )
+    );
+
+    iCommandList->MapAction(
+        FOdysseyLayerStackEditorCommands::Get().ActivateAllLayers,
+        FExecuteAction::CreateRaw( this, &FOdysseyLayerStackGlobalShortcuts::Action_ActivateAllLayers )
+    );
+
+    iCommandList->MapAction(
+        FOdysseyLayerStackEditorCommands::Get().InactivateAllLayers,
+        FExecuteAction::CreateRaw( this, &FOdysseyLayerStackGlobalShortcuts::Action_InactivateAllLayers )
+    );
+
+    iCommandList->MapAction(
+        FOdysseyLayerStackEditorCommands::Get().DisplayOnlyCurrentLayer,
+        FExecuteAction::CreateRaw( this, &FOdysseyLayerStackGlobalShortcuts::Action_DisplayOnlyCurrentLayer ),
+        FCanExecuteAction::CreateRaw( this, &FOdysseyLayerStackGlobalShortcuts::CanAction_DisplayOnlyCurrentLayer ),
+        FIsActionChecked::CreateRaw( this, &FOdysseyLayerStackGlobalShortcuts::IsActionChecked_DisplayOnlyCurrentLayer )
+    );
+
+    iCommandList->MapAction(
+        FOdysseyLayerStackEditorCommands::Get().CollapseAllLayers,
+        FExecuteAction::CreateRaw( this, &FOdysseyLayerStackGlobalShortcuts::Action_CollapseAllLayers )
+    );
+
+    iCommandList->MapAction(
+        FOdysseyLayerStackEditorCommands::Get().UncollapseAllLayers,
+        FExecuteAction::CreateRaw( this, &FOdysseyLayerStackGlobalShortcuts::Action_UncollapseAllLayers )
+    );
+
+    iCommandList->MapAction(
+        FOdysseyLayerStackEditorCommands::Get().OpenAllFolderLayers,
+        FExecuteAction::CreateRaw( this, &FOdysseyLayerStackGlobalShortcuts::Action_OpenAllFolderLayers )
+    );
+
+    iCommandList->MapAction(
+        FOdysseyLayerStackEditorCommands::Get().CloseAllFolderLayers,
+        FExecuteAction::CreateRaw( this, &FOdysseyLayerStackGlobalShortcuts::Action_CloseAllFolderLayers )
+    );
+
+    //---
+
     iCommandList->MapAction(
         FOdysseyLayerStackEditorCommands::Get().SetCurrentLayerBlendModeToNextBlendMode,
         FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_SetCurrentLayerBlendModeToNextBlendMode)
@@ -201,6 +252,156 @@ FOdysseyLayerStackGlobalShortcuts::Action_CloseFolderLayer()
     selected_layers.Add( layerStack->GetCurrentLayer() );
 
     for( UOdysseyLayer* layer : selected_layers )
+    {
+        layer->SetDisplayChildren( false );
+    }
+}
+
+void
+FOdysseyLayerStackGlobalShortcuts::Action_LockAllLayers()
+{
+    UOdysseyLayerStack* layerStack = mLayerStack.Get();
+    if( !layerStack )
+        return;
+
+    FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.lock-all-layers", "Lock All Layers" ) );
+
+    TSet<UOdysseyLayer*> selected_layers;
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        layer->SetIsLocked( true );
+    }
+}
+void
+FOdysseyLayerStackGlobalShortcuts::Action_UnlockAllLayers()
+{
+    UOdysseyLayerStack* layerStack = mLayerStack.Get();
+    if( !layerStack )
+        return;
+
+    FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.unlock-all-layers", "Unock All Layers" ) );
+
+    TSet<UOdysseyLayer*> selected_layers;
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        layer->SetIsLocked( false );
+    }
+}
+void
+FOdysseyLayerStackGlobalShortcuts::Action_ActivateAllLayers()
+{
+    UOdysseyLayerStack* layerStack = mLayerStack.Get();
+    if( !layerStack )
+        return;
+
+    FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.activate-all-layers", "Activate All Layers" ) );
+
+    TSet<UOdysseyLayer*> selected_layers;
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        layer->SetIsActivated( true );
+    }
+}
+void
+FOdysseyLayerStackGlobalShortcuts::Action_InactivateAllLayers()
+{
+    UOdysseyLayerStack* layerStack = mLayerStack.Get();
+    if( !layerStack )
+        return;
+
+    FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.inactivate-all-layers", "Inactivate All Layers" ) );
+
+    TSet<UOdysseyLayer*> selected_layers;
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        layer->SetIsActivated( false );
+    }
+}
+void
+FOdysseyLayerStackGlobalShortcuts::Action_DisplayOnlyCurrentLayer()
+{
+    UOdysseyLayerStack* layerStack = mLayerStack.Get();
+    if( !layerStack )
+        return;
+
+    FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.diaply-only-current-layer", "Display Only Current layer" ) );
+
+    layerStack->ToggleDisplayOnlyCurrentLayer();
+}
+bool
+FOdysseyLayerStackGlobalShortcuts::CanAction_DisplayOnlyCurrentLayer()
+{
+    UOdysseyLayerStack* layerStack = mLayerStack.Get();
+    if( !layerStack )
+        return false;
+
+    return true;
+}
+bool
+FOdysseyLayerStackGlobalShortcuts::IsActionChecked_DisplayOnlyCurrentLayer()
+{
+    UOdysseyLayerStack* layerStack = mLayerStack.Get();
+    if( !layerStack )
+        return false;
+
+    return layerStack->GetDisplayOnlyCurrentLayer();
+}
+void
+FOdysseyLayerStackGlobalShortcuts::Action_CollapseAllLayers()
+{
+    UOdysseyLayerStack* layerStack = mLayerStack.Get();
+    if( !layerStack )
+        return;
+
+    FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.collapse-all-layers", "Collapse All Layers" ) );
+
+    TSet<UOdysseyLayer*> selected_layers;
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        layer->SetDisplayOptions( false );
+    }
+}
+void
+FOdysseyLayerStackGlobalShortcuts::Action_UncollapseAllLayers()
+{
+    UOdysseyLayerStack* layerStack = mLayerStack.Get();
+    if( !layerStack )
+        return;
+
+    FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.uncollapse-all-layers", "Uncollapse All Layers" ) );
+
+    TSet<UOdysseyLayer*> selected_layers;
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        layer->SetDisplayOptions( true );
+    }
+}
+void
+FOdysseyLayerStackGlobalShortcuts::Action_OpenAllFolderLayers()
+{
+    UOdysseyLayerStack* layerStack = mLayerStack.Get();
+    if( !layerStack )
+        return;
+
+    FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.open-all-folder-layers", "Open All Folder Layers" ) );
+
+    TSet<UOdysseyLayer*> selected_layers;
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        layer->SetDisplayChildren( true );
+    }
+}
+void
+FOdysseyLayerStackGlobalShortcuts::Action_CloseAllFolderLayers()
+{
+    UOdysseyLayerStack* layerStack = mLayerStack.Get();
+    if( !layerStack )
+        return;
+
+    FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.close-all-folder-layers", "Close All Folder Layers" ) );
+
+    TSet<UOdysseyLayer*> selected_layers;
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
     {
         layer->SetDisplayChildren( false );
     }

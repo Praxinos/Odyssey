@@ -8,9 +8,11 @@
 #include "OdysseyLayer.h"
 #include "Widgets/Views/STreeView.h"
 
-class UOdysseyLayerStack;
-class FOdysseyLayerStackShortcuts;
 class FExtender;
+class FOdysseyLayerStackGlobalShortcuts;
+class FOdysseyLayerStackShortcuts;
+class UOdysseyLayerStack;
+class FUICommandList;
 
 /**
  * Implements the Layer stack widget
@@ -46,7 +48,7 @@ public:
     UOdysseyLayerStack* GetLayerStack() const;
     void SetIsRenamePending(bool iValue);
     TSharedPtr<FOdysseyLayerStackDragDropOperation> CreateDragDropOperation() const;
-    TSharedPtr<FOdysseyLayerStackShortcuts> GetLayerStackShortcuts();
+    TSharedPtr<FUICommandList> GetCommandList() const;
 
 protected:
     //SWidget overrides
@@ -171,4 +173,7 @@ protected:
     bool mDisplayDropZone = false;
 
     TSharedPtr<FOdysseyLayerStackShortcuts> mLayerStackShortcuts;
+    TSharedPtr<FOdysseyLayerStackGlobalShortcuts> mLayerStackGlobalShortcuts;
+    TSharedPtr<FUICommandList> mCommandList;
+
 };

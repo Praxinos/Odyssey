@@ -690,7 +690,11 @@ UOdysseyLayerStack::PostTransacted(const FTransactionObjectEvent& iTransactionEv
 
     const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
     if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer)))
-        OnCurrentLayerChanged().Broadcast(this);
+    {
+        OnCurrentLayerChanged().Broadcast( this );
+        if( GetDisplayOnlyCurrentLayer() )
+            RenderingChanged();
+    }
 }
 
 void
@@ -699,12 +703,56 @@ UOdysseyLayerStack::SetCurrentLayer(UOdysseyLayer* Layer)
     Modify();
     CurrentLayer = Layer;
     OnCurrentLayerChanged().Broadcast(this);
+    if( GetDisplayOnlyCurrentLayer() )
+        RenderingChanged();
 }
 
 UOdysseyLayer*
 UOdysseyLayerStack::GetCurrentLayer() const
 {
     return CurrentLayer;
+}
+
+bool
+UOdysseyLayerStack::GetDisplayOnlyCurrentLayer() const
+{
+    return bDisplayOnlyCurrentLayer;
+}
+
+void
+UOdysseyLayerStack::SetDisplayOnlyCurrentLayer( bool iDisplayOnlyCurrentLayer )
+{
+    bDisplayOnlyCurrentLayer = iDisplayOnlyCurrentLayer;
+
+    RenderingChanged();
+}
+
+void
+UOdysseyLayerStack::ToggleDisplayOnlyCurrentLayer()
+{
+    bDisplayOnlyCurrentLayer = !bDisplayOnlyCurrentLayer;
+
+    RenderingChanged();
+}
+
+float
+UOdysseyLayerStack::GetOtherLayersOpacity() const
+{
+    return OtherLayersOpacity;
+}
+
+float
+UOdysseyLayerStack::GetOtherLayersOpacityNormalized() const
+{
+    return OtherLayersOpacity / 100.f;
+}
+
+void
+UOdysseyLayerStack::SetOtherLayersOpacity( float iOtherLayersOpacity )
+{
+    OtherLayersOpacity = FMath::Clamp( iOtherLayersOpacity, 0.f, 100.f );
+
+    RenderingChanged();
 }
 
 void

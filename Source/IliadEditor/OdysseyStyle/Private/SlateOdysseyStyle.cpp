@@ -841,6 +841,20 @@ FOdysseyStyleDefault::SetupOdysseyCommands()
     Set( "OdysseyViewportCommands.ResetViewportFit.Small", new IMAGE_BRUSH_SVG( "PainterEditor/reset_fit", mIcon16x16 ) );
     Set( "OdysseyViewportCommands.ResetViewportAll", new IMAGE_BRUSH_SVG( "PainterEditor/reset_all", mIcon24x24 ) );
     Set( "OdysseyViewportCommands.ResetViewportAll.Small", new IMAGE_BRUSH_SVG( "PainterEditor/reset_all", mIcon16x16 ) );
+
+    Set( "LayerStackEditorCommands.LockAllLayers", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/locked", mIcon16x16 ) );
+    Set( "LayerStackEditorCommands.UnlockAllLayers", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/unlocked", mIcon16x16 ) );
+    Set( "LayerStackEditorCommands.ActivateAllLayers", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/visible", mIcon16x16 ) );
+    Set( "LayerStackEditorCommands.InactivateAllLayers", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/not_visible", mIcon16x16 ) );
+    Set( "LayerStackEditorCommands.DisplayOnlyCurrentLayer", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/display_only_current_layer", mIcon16x16 ) );
+    Set( "LayerStackEditorCommands.CollapseAllLayers", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/options_hidden", mIcon16x16 ) );
+    Set( "LayerStackEditorCommands.UncollapseAllLayers", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/options_displayed", mIcon16x16 ) );
+
+    SetContentRoot( FPaths::EngineContentDir() / TEXT( "Slate" ) );
+    {
+        Set( "LayerStackEditorCommands.OpenAllFolderLayers", new IMAGE_BRUSH_SVG( "Starship/Common/folder-open", mIcon16x16 ) );
+        Set( "LayerStackEditorCommands.CloseAllFolderLayers", new IMAGE_BRUSH_SVG( "Starship/Common/folder-closed", mIcon16x16 ) );
+    }
 }
 
 void
