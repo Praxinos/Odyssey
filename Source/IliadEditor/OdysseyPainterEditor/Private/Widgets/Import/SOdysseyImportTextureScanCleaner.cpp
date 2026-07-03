@@ -215,6 +215,15 @@ SOdysseyImportTextureScanCleaner::OnSetOutputViewRange(float Min, float Max)
 void
 SOdysseyImportTextureScanCleaner::OnUpdateCurve( UCurveBase* Curve, EPropertyChangeType::Type ChangeType)
 {
+    //PATCH: ?
+    // Need to add this here to recreate the models inside the curve editor
+    // But it's only useful during an undo
+    // Because when undoing, models are emptied (that's why nothing is displayed after an undo)
+    // and this delegate is called during an undo, so add it here
+    // Otherwise, all the widget (mCurveEditor or even SOdysseyImportTextureScanCleaner) should be recreated (?) in a tick (?) in undo delegate ?
+    // (in the curve editor in timeline in actor blueprint, during an undo, all the widgets are recreated)
+    mCurveEditor->SetCurveOwner( mData->GetScanCleanerCurve() );
+
     FRichCurve& curve = mData->GetScanCleanerCurve()->FloatCurve;
     for (auto it = curve.GetKeyHandleIterator(); it; it++)
     {
