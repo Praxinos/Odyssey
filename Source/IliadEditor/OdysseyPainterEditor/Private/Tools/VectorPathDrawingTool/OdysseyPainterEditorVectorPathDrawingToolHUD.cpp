@@ -88,7 +88,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::DrawEdge( BLContext* iBLContext
     ::ULIS::FVec2D nextEdgeVector = ( iNextEdge ) ? iNextEdge->vector : ::ULIS::FVec2D( 0.0f, 0.0f );
     ::ULIS::FVec2D prevEdgePerpendicularVector;
     ::ULIS::FVec2D nextEdgePerpendicularVector;
-    ::ULIS::FVec2D combinedVector = iCurrEdge->vector;
+    ::ULIS::FVec2D combinedVector = currEdgeVector;
     BLPoint pt[4];
 
     if( iPrevEdge )

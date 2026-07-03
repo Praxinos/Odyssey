@@ -524,7 +524,6 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnPaint( const FPaintArgs& Args
                                                     , bool bParentEnabled ) const
 {
     const FTableRowStyle& style = FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows");
-    const FSlateBrush* DropIndicatorBrush = nullptr;
 
     int32 rowLayerId = SMultiColumnTableRow<TSharedPtr<FVectorSceneTreeViewItem>>::OnPaint( Args
                                                                                           , AllottedGeometry
@@ -535,6 +534,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnPaint( const FPaintArgs& Args
                                                                                           , bParentEnabled );
     if( mDropZone )
     {
+        const FSlateBrush* DropIndicatorBrush = nullptr;
         switch( mDropZone )
         {
             case DROPZONE_ABOVE :
@@ -553,6 +553,10 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnPaint( const FPaintArgs& Args
             break;
         }
 
+        FLinearColor DropIndicatorColor = FLinearColor::Transparent;
+        if (DropIndicatorBrush)
+            DropIndicatorColor = DropIndicatorBrush->GetTint(InWidgetStyle) * InWidgetStyle.GetColorAndOpacityTint();
+
         FSlateDrawElement::MakeBox
         (
             OutDrawElements
@@ -560,7 +564,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnPaint( const FPaintArgs& Args
           , AllottedGeometry.ToPaintGeometry()
           , DropIndicatorBrush //&myBrush
           , ESlateDrawEffect::None
-          , DropIndicatorBrush->GetTint(InWidgetStyle) * InWidgetStyle.GetColorAndOpacityTint()
+          , DropIndicatorColor
         );
     }
 

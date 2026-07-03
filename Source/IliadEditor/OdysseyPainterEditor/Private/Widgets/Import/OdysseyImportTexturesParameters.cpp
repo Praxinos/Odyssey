@@ -185,7 +185,7 @@ FOdysseyImportTexturesParameters::GetTextureScaledSize(int iSourceTextureIndex) 
 FVector2D
 FOdysseyImportTexturesParameters::GetTexturePosition(const FVector2D& iTextureSize) const
 {
-    FVector2D texturePosition;
+    FVector2D texturePosition(0, 0);
     switch(mAlignment)
     {
         case EOdysseyImportTextureAlignment::TopLeft: texturePosition = FVector2D::ZeroVector; break;
