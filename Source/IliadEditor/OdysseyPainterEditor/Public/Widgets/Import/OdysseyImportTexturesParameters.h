@@ -91,6 +91,8 @@ public:
     void SetScaling(EOdysseyImportTextureScaling iScaling);
     void SetResamplingMethod(EOdysseyAntiAliasing iMethod);
 
+    void ResetScanCleaner();
+
 private:
     void OnUpdateCurve( UCurveBase* Curve, EPropertyChangeType::Type ChangeType);
     void UpdateScanCleanerCurveTextures();

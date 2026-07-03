@@ -4,6 +4,7 @@
 #include "SOdysseyImportTextureScanCleaner.h"
 
 #include "SCurveEditor.h"
+#include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 
@@ -178,6 +179,22 @@ SOdysseyImportTextureScanCleaner::Construct(const FArguments& InArgs)
             .OnSetInputViewRange(this, &SOdysseyImportTextureScanCleaner::OnSetInputViewRange)
             .OnSetOutputViewRange(this, &SOdysseyImportTextureScanCleaner::OnSetOutputViewRange)
             .ShowZoomButtons(false)
+        ]
+
+        + SVerticalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 0.f, 4.f))
+        .AutoHeight()
+        .HAlign( HAlign_Center )
+        [
+            SNew( SButton )
+            .Text( LOCTEXT( "import-texture-dialog.scan-cleaner.reset.label", "Reset" ) )
+            .OnClicked_Lambda( [this]() -> FReply
+                                {
+                                    mData->ResetScanCleaner();
+                                    mOnChanged.ExecuteIfBound();
+
+                                    return FReply::Handled();
+                                } )
         ]
     ];
 

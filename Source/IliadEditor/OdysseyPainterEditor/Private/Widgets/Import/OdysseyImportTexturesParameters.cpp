@@ -488,4 +488,19 @@ FOdysseyImportTexturesParameters::SetResamplingMethod(EOdysseyAntiAliasing iMeth
     mResamplingMethod = iMethod;
 }
 
+void
+FOdysseyImportTexturesParameters::ResetScanCleaner()
+{
+    mScanCleanerColorSaturation = 1.f;
+    mScanCleanerColorValue = 1.f;
+
+    mScanCleanerCurve->FloatCurve.Reset();
+    mScanCleanerCurve->FloatCurve.AddKey( 0.f, 0.f );
+    mScanCleanerCurve->FloatCurve.AddKey( 0.25f, 0.f );
+    mScanCleanerCurve->FloatCurve.AddKey( 0.75f, 1.f );
+    mScanCleanerCurve->FloatCurve.AddKey( 1.f, 1.f );
+
+    UpdateScanCleanerCurveTextures();
+}
+
 #undef LOCTEXT_NAMESPACE
