@@ -130,6 +130,28 @@ FArianeEditorStyle::Init()
         .SetCheckedPressedImage(*FAppStyle::Get().GetBrush("Level.LockedIcon16x"))
     );
 
+    //LayerStack
+    {
+        FTableRowStyle CoreTableRowStyle = FAppStyle::Get().GetWidgetStyle<FTableRowStyle>("TableView.Row");
+        FSlateColor SelectedRow(FStyleColors::Select.GetSpecifiedColor().CopyWithNewOpacity(0.3f));
+        FSlateColor SelectedInactiveRow(FStyleColors::SelectInactive.GetSpecifiedColor().CopyWithNewOpacity(0.3f));
+        FSlateColor SelectedParentRow(FStyleColors::SelectParent.GetSpecifiedColor().CopyWithNewOpacity(0.3f));
+        Set ("OdysseyLayerStack.CurrentLayerBackgroundBrush", new FSlateColorBrush(FStyleColors::Select));
+        Set( "ArianeEditor.LayerStack.AlternatedRows", FTableRowStyle( CoreTableRowStyle )
+            .SetOddRowBackgroundBrush(FSlateColorBrush(FStyleColors::Header))
+            .SetSelectorFocusedBrush(FSlateNoResource())
+            .SetActiveBrush(FSlateColorBrush(SelectedRow))
+            .SetActiveHoveredBrush(FSlateColorBrush(SelectedRow))
+            .SetInactiveBrush(FSlateColorBrush(SelectedInactiveRow))
+            .SetInactiveHoveredBrush(FSlateColorBrush(SelectedInactiveRow))
+            .SetActiveHighlightedBrush(FSlateColorBrush(SelectedParentRow)) // This is the parent hightlight
+            .SetInactiveHighlightedBrush(FSlateColorBrush(SelectedParentRow))// This is the parent highlight
+            //.SetDropIndicator_Above(const FSlateBrush& InValue)
+            //.SetDropIndicator_Onto(const FSlateBrush& InValue)
+            //.SetDropIndicator_Below(const FSlateBrush& InValue)
+        );
+    }
+
     // Ariane Editor Drawing Orientation
     Set( "ArianeEditor.DrawingOrientation.View20", new IMAGE_BRUSH_SVG( "ArianeEditor/drawing_orientation_view", Icon20x20 ) );
     Set( "ArianeEditor.DrawingOrientation.LayerXY20", new IMAGE_BRUSH_SVG( "ArianeEditor/drawing_orientation_xy", Icon20x20 ) );

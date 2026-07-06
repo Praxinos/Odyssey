@@ -10,12 +10,16 @@
 UArianeEditorSettings::UArianeEditorSettings( const FObjectInitializer& iObjectInitializer )
     : Super( iObjectInitializer )
     , DistanceToNewActor( 5000 )
+    , DefaultPathDrawingMaterial( Cast<UMaterial>( StaticLoadObject( UMaterial::StaticClass()
+                                                                   , nullptr
+                                                                   , TEXT("/Odyssey/Materials/ArianeDefaultMaterial.ArianeDefaultMaterial") ) ) )
     , GridSize( 4000 )
     , GridOpacity( 0.250f )
     , GridColor( FLinearColor::Gray )
     , GridXAxisColor( FLinearColor::Red )
     , GridYAxisColor( FLinearColor::Green )
     , HUDForegroundColor ( FColor( 0, 169, 157, 255 ) ) // Odyssey's teal
+
 {
 }
 
@@ -135,4 +139,16 @@ FColor
 UArianeEditorSettings::GetHUDForegroundColor() const
 {
     return HUDForegroundColor;
+}
+
+void
+UArianeEditorSettings::SetDefaultPathDrawingMaterial( UMaterial* InDefaultPathDrawingMaterial )
+{
+    DefaultPathDrawingMaterial = InDefaultPathDrawingMaterial;
+}
+
+UMaterial*
+UArianeEditorSettings::GetDefaultPathDrawingMaterial() const
+{
+    return DefaultPathDrawingMaterial;
 }

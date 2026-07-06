@@ -20,6 +20,7 @@
 #include "RawIndexBuffer.h"
 #include "Materials/MaterialRenderProxy.h"
 #include "HAL/IConsoleManager.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 // testing
 #include "Components/LineBatchComponent.h"
@@ -35,6 +36,7 @@ UArianePainting3DComponent::~UArianePainting3DComponent()
 
 UArianePainting3DComponent::UArianePainting3DComponent()
     : LayerStack ( nullptr )
+    , DefaultMaterial ( nullptr )
     , CurrentPaletteColorEntry ( nullptr )
     , EditorInterface ( nullptr )
 {
@@ -83,20 +85,33 @@ UArianePainting3DComponent::SetEditorInterface( IArianePainting3DComponentEditor
 }
 #endif
 
+UMaterialInstanceDynamic*
+UArianePainting3DComponent::GetDefaultMaterial()
+{
+    return DefaultMaterial;
+}
+
 void
 UArianePainting3DComponent::OnRegister()
 {
+    UMaterial* BaseMaterial = Cast<UMaterial>( StaticLoadObject( UMaterial::StaticClass()
+                                                               , nullptr
+                                                               , TEXT("/Odyssey/Materials/ArianeDefaultMaterial.ArianeDefaultMaterial") ) );
+
     Super::OnRegister();
 
-    //UsedMaterials.Add( GEngine->VertexColorMaterial );
-
-    //SetMaterial( 0, GEngine->VertexColorMaterial );
+    DefaultMaterial = UMaterialInstanceDynamic::Create( BaseMaterial, this );
+    // disable emission
+    //DefaultMaterial->SetVectorParameterValue(FName("EmissiveColor"), FLinearColor::Black);
 }
 
 void
 UArianePainting3DComponent::GetUsedMaterials( TArray<UMaterialInterface*>& OutMaterials, bool bGetDebugMaterials ) const
 {
-    //OutMaterials.Append( UsedMaterials );
+    if( DefaultMaterial )
+    {
+        OutMaterials.Add( DefaultMaterial );
+    }
 
     LayerStack->GetRootFolder()->Traverse( [ &OutMaterials ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
         {

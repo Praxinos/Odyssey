@@ -34,6 +34,13 @@ UArianeLayerDrawing::UArianeLayerDrawing()
 }
 
 
+void
+UArianeLayerDrawing::InvalidateCache()
+{
+    // RootObjectID won't have its cache reset after Undoing, we have to force it.
+    RootGroupID.InvalidateCache();
+}
+
 FArianeGroup*
 UArianeLayerDrawing::GetRootGroup()
 {
@@ -56,16 +63,8 @@ UArianeLayerDrawing::PostLoad()
 {
     Super::PostLoad();
 
-    if( RootObjectID_DEPRECATED.GetObject() )
-    {
-        RootGroupID = FArianeObjectID( AllocGroup( "Root Group" ) );
-
-        // We set the parent, then FArianeObject::PostLoad will build the hierarchy
-        RootObjectID_DEPRECATED.GetObject()->SetParent( RootGroupID.GetObject() );
-    }
-
     // RootObjectID won't have its cache reset after Undoing, we have to force it.
-    RootGroupID.InvalidateCache();
+    InvalidateCache();
 
     BindDelegates();
 
@@ -93,7 +92,7 @@ UArianeLayerDrawing::PostEditUndo()
     Super::PostEditUndo();
 
     // RootObjectID won't have its cache reset after Undoing, we have to force it.
-    RootGroupID.InvalidateCache();
+    InvalidateCache();
 
     BindDelegates();
 
@@ -165,7 +164,7 @@ UArianeLayerDrawing::AllocPath( UMaterialInterface* InMaterialInterface, const F
     FArianePath* NewPath = InstancedObjects.Last().GetMutablePtr<FArianePath>();
 
     NewPath->SetMaterial( InMaterialInterface ? InMaterialInterface
-                                              : GEngine->VertexColorMaterial );
+                                              : GetLayerStack()->GetPainting3DComponent()->GetDefaultMaterial() );
 
     // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
     GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
@@ -195,7 +194,16 @@ UArianeLayerDrawing::GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMater
 void
 UArianeLayerDrawing::IncrementMaterial( UMaterialInterface* MaterialInterface )
 {
-    UsedMaterials.FindOrAdd( MaterialInterface )++;
+    uint32* value = UsedMaterials.Find( MaterialInterface );
+
+    // not: do not use findOrAdd, it will not initialize value to zero.
+    if( value == nullptr )
+    {
+        UsedMaterials.Add( MaterialInterface, 1 );
+    }
+
+    // we need to rebuild the proxy
+    GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
 }
 
 void
@@ -211,9 +219,18 @@ UArianeLayerDrawing::DecrementMaterial( UMaterialInterface* MaterialInterface )
     {
         UsedMaterials.Remove( MaterialInterface );
     }
+
+    // we need to rebuild the proxy
+    GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
 }
 
 const
+TArray<FInstancedStruct>&
+UArianeLayerDrawing::GetInstancedObjects() const
+{
+    return InstancedObjects;
+}
+
 TArray<FInstancedStruct>&
 UArianeLayerDrawing::GetInstancedObjects()
 {

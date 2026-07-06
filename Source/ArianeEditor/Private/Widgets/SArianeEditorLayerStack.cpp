@@ -21,21 +21,6 @@
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
-SLATE_IMPLEMENT_WIDGET(SArianeEditorLayerStack)
-void
-SArianeEditorLayerStack::PrivateRegisterAttributes(FSlateAttributeInitializer& AttributeInitializer)
-{
-/*
-    SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, Painting3DComponent, EInvalidateWidgetReason::None)
-    .OnValueChanged(FSlateAttributeDescriptor::FAttributeValueChangedDelegate::CreateLambda(
-        [](SWidget& Widget)
-        {
-            static_cast<SArianeEditorLayerStack&>(Widget).OnPainting3DComponentChanged();
-        }
-    ));
-*/
-}
-
 SArianeEditorLayerStack::~SArianeEditorLayerStack()
 {
     USelection::SelectionChangedEvent.RemoveAll( this );
@@ -210,21 +195,38 @@ SArianeEditorLayerStack::DeleteSelectedItem()
     if( CurrentPainting3DComponent )
     {
         UArianeLayerStack* LayerStack = CurrentPainting3DComponent->GetLayerStack();
+        TArray<UArianeLayer*> SelectedTrees;
+        TArray<UArianeLayer*> ParentFolders;
+        uint32 SelectedElderLayerCount = 0;
+
+        LayerStack->GetSelectedTrees( SelectedTrees );
 
         GEditor->BeginTransaction(LOCTEXT("ariane-layer-stack.delete-layer","Delete Layer"));
 
+        for( UArianeLayer* Layer : SelectedTrees )
+        {
+            ParentFolders.AddUnique( Layer->GetParentFolder() );
+        }
+
+        for( UArianeLayer* Layer : SelectedTrees )
+        {
+            Layer->Modify();
+        }
+
+        for( UArianeLayer* ParentFolder : ParentFolders )
+        {
+            ParentFolder->Modify();
+        }
+
         LayerStack->Modify();
 
-        // no need to create an undo record or do anything if the selection is empty
-        for( TSharedPtr<FArianeEditorLayerRowItem> SelectedItem : SelectedItems )
+        for( UArianeLayer* Layer : SelectedTrees )
         {
-            UArianeLayer* Layer = SelectedItem->GetLayer();
-
-            Layer->GetParentFolder()->Modify();
             Layer->GetParentFolder()->RemoveChildLayer( Layer );
         }
 
         GEditor->EndTransaction();
+
 
         Update();
     }

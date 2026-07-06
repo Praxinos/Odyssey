@@ -29,7 +29,8 @@ class ARIANEEDITOR_API UArianeEditorPathProxy : public UArianeEditorObjectProxy
         struct
         {
             uint32 PathWidthInPercent : 1;
-            uint32 PathWidthInUnits : 1;
+            uint32 PathWidthInUnits   : 1;
+            uint32 Material           : 1;
             //uint32 JointType : 1;
             //uint32 MiterLimit : 1;
             //uint32 Brush : 1;
@@ -97,6 +98,11 @@ class ARIANEEDITOR_API UArianeEditorPathProxy : public UArianeEditorObjectProxy
                           , LinearDeltaSensitivity = "15"
                           , Delta = "1" ) )
         double PathWidthInUnits;
+
+        UPROPERTY( EditAnywhere
+                 , Category=Path
+                 , meta = ( ToolTip = "The material to use along the path." ) )
+        UMaterialInterface* Material;
 
         //UPROPERTY( EditAnywhere
         //         , Category=Path

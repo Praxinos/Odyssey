@@ -25,6 +25,7 @@ class ARIANE_API UArianeLayerStack : public USceneComponent
 
 public:
     ~UArianeLayerStack();
+    // Legacy compatibility
     UArianeLayerStack();
 
     // overrides
@@ -102,11 +103,18 @@ public:
     */
     void GetLayers( TArray<UArianeLayer*>& OutLayers );
 
+    void AddLayer( UArianeLayerFolder* FosterFolder, UArianeLayer* OrphanLayer, bool bTriggerEvent );
+
+    void AppendSelectedTrees( TArray<UArianeLayer*>& SelectedTrees );
+    void GetSelectedTrees( TArray<UArianeLayer*>& SelectedTrees );
+
     FOnHierarchyChanged& OnPreHierarchyChangedDelegate();
     FOnHierarchyChanged& OnPostHierarchyChangedDelegate();
 
     FOnSelectionChanged& OnPreSelectionChangedDelegate();
     FOnSelectionChanged& OnPostSelectionChangedDelegate();
+
+    virtual void Serialize( FArchive& Ar ) override;
 
 #if WITH_EDITOR
     void PreEditUndo();
@@ -120,7 +128,7 @@ protected:
     UPROPERTY()
     UArianeLayerFolder* RootFolder;
 
-    UPROPERTY(Transient)
+    //UPROPERTY(Transient)
     TArray<UArianeLayer*> SelectedLayers;
 
 protected:

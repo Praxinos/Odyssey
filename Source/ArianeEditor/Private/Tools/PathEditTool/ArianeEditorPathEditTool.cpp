@@ -191,6 +191,8 @@ UArianeEditorPathEditTool::Activate()
         GEditor->RedrawAllViewports();
     }
 
+    Reset();
+
     BindDelegates();
 }
 

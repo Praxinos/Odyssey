@@ -68,6 +68,8 @@ public:
 
     void Activate();
     void Inactivate();
+    virtual void DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
+    virtual bool GetCursor( EMouseCursor::Type& OutCursor ) override;
 
 protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
@@ -117,4 +119,5 @@ protected:
     FArianeEditorPathTracer PathTracer;
     FArianeSegment* PreviousSegment;
     FArianeSegment* CurrentSegment;
+    EMouseCursor::Type Cursor;
 };

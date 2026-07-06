@@ -17,9 +17,6 @@ class ARIANE_API UArianeLayerFolder : public UArianeLayer
     GENERATED_BODY()
 
 public:
-    enum class ETraversalReturnValue{ Continue, IgnoreChildren, Stop };
-
-public:
     ~UArianeLayerFolder();
     UArianeLayerFolder();
 
@@ -67,14 +64,12 @@ protected:
     void UpdateBounds();
 
 protected:
-    // Even though unreal has the list of attached Actors, it does not take the order into consideration.
-    // so we have to have our own list
-    UPROPERTY()
-    TArray<UArianeLayer*> ChildLayers;
-
     UPROPERTY()
     bool bExpanded;
 
 protected:
+    // Even though unreal has the list of attached Actors, it does not take the order into consideration.
+    // so we have to have our own list
+    TArray<UArianeLayer*> ChildLayers;
     TArray<UArianeLayer*> InvalidatedChildLayers;
 };

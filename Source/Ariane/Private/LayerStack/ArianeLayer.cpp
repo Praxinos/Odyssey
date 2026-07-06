@@ -14,7 +14,8 @@ UArianeLayer::~UArianeLayer()
 
 UArianeLayer::UArianeLayer()
     : //bVisible ( true )
-      bLocked ( false )
+      ParentFolder( nullptr )
+    , bLocked ( false )
     , bSelected ( false )
     , bInvalidatedInParentFolder ( false )
     , Bounds ( FBoxSphereBounds(ForceInit) )
@@ -61,6 +62,41 @@ UArianeLayer::GetLayerStack()
 
     return Painting3DActor->GetPainting3DComponent()->GetLayerStack();
     //return Cast<UArianeLayerStack>(GetOuter());
+}
+
+#if WITH_EDITOR
+void
+UArianeLayer::PreEditUndo()
+{
+    Super::PreEditUndo();
+
+    if( ParentFolder )
+    {
+        ParentFolder->RemoveChildLayer( this );
+    }
+}
+
+void
+UArianeLayer::PostEditUndo()
+{
+    Super::PostEditUndo();
+
+    if( ParentFolder )
+    {
+        ParentFolder->AddChildLayer( this );
+    }
+}
+#endif
+
+void
+UArianeLayer::PostLoad()
+{
+    Super::PostLoad();
+
+    if( ParentFolder )
+    {
+        ParentFolder->AddChildLayer( this );
+    }
 }
 
 /*
@@ -180,4 +216,33 @@ void
 UArianeLayer::OnUpdateTransform(EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport)
 {
     OnTransformChanged.Broadcast();
+}
+
+UArianeLayer::ETraversalReturnValue
+UArianeLayer::TraverseBackwards_Private( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback )
+{
+    ETraversalReturnValue Ret = Callback( this );
+
+    if( Ret == ETraversalReturnValue::Stop )
+    {
+        return Ret;
+    }
+
+    if( ParentFolder )
+    {
+        ETraversalReturnValue ParentRet = ParentFolder->TraverseBackwards_Private( Callback );
+
+        if( ParentRet == ETraversalReturnValue::Stop )
+        {
+            return ParentRet;
+        }
+    }
+
+    return Ret;
+}
+
+void
+UArianeLayer::TraverseBackwards( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback )
+{
+    TraverseBackwards_Private( Callback );
 }

@@ -478,7 +478,7 @@ SArianeEditorSceneTreeViewRow::OnPaint( const FPaintArgs& Args
                                                     , const FWidgetStyle& InWidgetStyle
                                                     , bool bParentEnabled ) const
 {
-    const FTableRowStyle& style = FArianeEditorStyle::Get().GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows");
+    const FTableRowStyle& style = FArianeEditorStyle::Get().GetWidgetStyle<FTableRowStyle>("ArianeEditor.LayerStack.AlternatedRows");
     const FSlateBrush* DropIndicatorBrush = nullptr;
 
     int32 rowLayerId = SMultiColumnTableRow<TSharedPtr<FSceneTreeViewItem>>::OnPaint( Args
