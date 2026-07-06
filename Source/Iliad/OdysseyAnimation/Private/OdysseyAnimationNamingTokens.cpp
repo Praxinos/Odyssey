@@ -118,6 +118,7 @@ UOdysseyAnimationNamingTokens::OnCreateDefaultTokens( TArray<FNamingTokenData>& 
                                                     } );
     Tokens.Add( FrameRateToken );
 
+#if WITH_EDITOR
     FNamingTokenData CurrentLayerNameToken;
     CurrentLayerNameToken.TokenKey = TEXT( "currentLayerName" );
     CurrentLayerNameToken.DisplayName = LOCTEXT( "CurrentLayerNameToken", "Current layer name" );
@@ -135,6 +136,7 @@ UOdysseyAnimationNamingTokens::OnCreateDefaultTokens( TArray<FNamingTokenData>& 
                                                                return currentLayer->GetLayerName();
                                                            } );
     Tokens.Add( CurrentLayerNameToken );
+#endif
 
     //---
 

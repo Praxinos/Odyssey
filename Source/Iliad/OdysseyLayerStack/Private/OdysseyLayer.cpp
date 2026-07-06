@@ -1597,9 +1597,11 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
         {
             float opacity = child->GetOpacity();
 
+#if WITH_EDITOR
             UOdysseyLayerStack* layerStack = child->GetLayerStack();
             if( child != layerStack->GetCurrentLayer() && layerStack->GetDisplayOnlyCurrentLayer() )
                 opacity = opacity * layerStack->GetOtherLayersOpacityNormalized();
+#endif
 
             childrenRenderParams.Add(
                 {
