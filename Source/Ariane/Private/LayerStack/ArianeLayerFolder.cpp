@@ -4,6 +4,7 @@
 // Ariane headers
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerFolderInvalidationFlags.h"
+#include "ArianeLayerStack.h"
 
 UArianeLayerFolder::~UArianeLayerFolder()
 {
@@ -81,7 +82,6 @@ UArianeLayerFolder::RemoveChildLayer( UArianeLayer* Child )
     // Rename() is used to define the parent object
     Child->Rename( nullptr, nullptr );
 }
-
 
 UArianeLayerFolder::ETraversalReturnValue
 UArianeLayerFolder::Traverse_Private( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback )

@@ -51,7 +51,7 @@ UArianePainting3DStaticMeshComponent::ConvertPathToStaticMesh( FMeshDescriptionB
     uint32 VertexIDOffset = 0;
 
     // Allocate a polygon group
-    FPolygonGroupID PolygonGroup = MeshDescriptionBuilder.AppendPolygonGroup();
+    FPolygonGroupID PolygonGroup = MeshDescriptionBuilder.AppendPolygonGroup( Path->GetMaterial()->GetFName() );
 
     for ( FArianeSegmentID& SegmentID : Path->GetSegments() )
     {
@@ -137,6 +137,15 @@ UArianePainting3DStaticMeshComponent::ConvertToStaticMesh()
         MeshDescriptionBuilder.EnablePolyGroups();
         MeshDescriptionBuilder.SetNumUVLayers(1);
 
+        TArray<UMaterialInterface*> MaterialInterfaces;
+        Painting3DComponent->GetUsedMaterials( MaterialInterfaces );
+        for( int32 i = 0; i < MaterialInterfaces.Num(); i++ )
+        {
+            UMaterialInterface *MaterialInterface = MaterialInterfaces[i];
+            ConvertedStaticMesh->GetStaticMaterials().Add( FStaticMaterial( MaterialInterface
+                                                                          , MaterialInterface->GetFName() ) );
+        }
+
         LayerStack->GetRootFolder()->Traverse(
             [ &MeshDescriptionBuilder ]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
             {
@@ -150,41 +159,45 @@ UArianePainting3DStaticMeshComponent::ConvertToStaticMesh()
                 return UArianeLayerFolder::ETraversalReturnValue::Continue;
             } );
 
-        // At least one material must be added
-        ConvertedStaticMesh->GetStaticMaterials().Add( FStaticMaterial() );
-
         FStaticMeshSourceModel& StaticMeshSourceModel = ConvertedStaticMesh->AddSourceModel();
         StaticMeshSourceModel.BuildSettings.bRecomputeNormals = false;
         StaticMeshSourceModel.BuildSettings.bRecomputeTangents = true;
         StaticMeshSourceModel.BuildSettings.bRemoveDegenerates = false;
 
         ConvertedStaticMesh->CreateMeshDescription(0, MoveTemp(MeshDescription));
+        ConvertedStaticMesh->CommitMeshDescription(0);
 
-        /*if ( Material )
+        // <begin_explanation>
+        // I after some debugging and troubles with materials, I found that I had to fill the Mesg's SectionInfoMap
+        // before converting the mesh with Build() in order to have Material correctly attached to the sections (polygongroups).
+        // I don't get the point of doing :
+        // FPolygonGroupID PolygonGroup = MeshDescriptionBuilder.AppendPolygonGroup( Path->GetMaterial()->GetFName() );
+        // in ConvertPathToStaticMesh then if the mapping is not automatically done. Anyways...
+        const TPolygonGroupAttributesRef<FName> PolygonGroupNames = Attributes.GetPolygonGroupMaterialSlotNames();
+
+        for ( const FPolygonGroupID PolygonGroupID : MeshDescription.PolygonGroups().GetElementIDs() )
         {
-            StaticMesh->GetStaticMaterials().Add( FStaticMaterial( Material ) );
-        }*/
+            int32 SectionIndex = PolygonGroupID.GetValue();
+            FName MaterialSlotName = *PolygonGroupNames[PolygonGroupID].ToString();
+            int32 MaterialIndex = ConvertedStaticMesh->GetMaterialIndexFromImportedMaterialSlotName( MaterialSlotName );
+
+            ConvertedStaticMesh->GetSectionInfoMap().Set( 0
+                                                        , SectionIndex
+                                                        , FMeshSectionInfo(MaterialIndex) );
+        }
+        // <end_explanation>
 
         ConvertedStaticMesh->SetImportVersion( EImportStaticMeshVersion::LastVersion );
         ConvertedStaticMesh->InitResources();
         ConvertedStaticMesh->SetLightingGuid();
         ConvertedStaticMesh->Build( false );
+
 #if WITH_EDITOR
         ConvertedStaticMesh->PostEditChange();
-#else
-        ConvertedStaticMesh->UpdateResource();
 #endif
 
         SetStaticMesh(ConvertedStaticMesh);
 
-        UE_LOG( LogTemp
-              , Warning
-              , TEXT("UArianePainting3DStaticMeshComponent::ConvertToStaticMesh: %d %d %d")
-              , GetStaticMesh().Get()
-              , GetStaticMesh()->GetRenderData()
-              , IsVisible() );
-
-        //ConvertedStaticMesh->MarkPackageDirty();
-
+        MarkRenderStateDirty();
     }
 }

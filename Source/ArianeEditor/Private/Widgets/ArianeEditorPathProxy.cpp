@@ -18,6 +18,7 @@ UArianeEditorPathProxy::UArianeEditorPathProxy()
     , WideningMode ( EArianeEditorPathProxyWideningMode::Percent )
     , PathWidthInPercent ( 100.0f )
     , PathWidthInUnits ( 2.0f )
+    , Material ( nullptr )
     //, Brush ( nullptr )
 {
     //bDisplayBackgroundProperties = false;
@@ -42,6 +43,7 @@ UArianeEditorPathProxy::ImportParamFromOtherProxy( UArianeEditorObjectProxy* Oth
         WideningMode = OtherPathView->WideningMode;
         PathWidthInPercent = OtherPathView->PathWidthInPercent;
         PathWidthInUnits = OtherPathView->PathWidthInUnits;
+        Material = OtherPathView->Material;
         //Brush = otherPathView->Brush;
     }
 
@@ -59,6 +61,8 @@ UArianeEditorPathProxy::ImportParam( const TArray<FArianeObject*>& ModifiedObjec
         {
             FArianePath* ModifiedPath = static_cast<FArianePath*>(ModifiedObject);
 
+
+            Material = ModifiedPath->GetMaterial();
             //JointType  = ModifiedPath->GetJointType();
             //Brush      = ModifiedPath->GetBrush();
             //MiterLimit = ModifiedPath->GetMiterLimit();
@@ -102,6 +106,9 @@ UArianeEditorPathProxy::GetPropertyBit( const FName& PropertyName )
 
     if( PropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPathProxy, PathWidthInUnits) )
         return PathPropertyBits.PathWidthInUnits;
+
+    if( PropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPathProxy, Material) )
+        return PathPropertyBits.Material;
 
     //if( PropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPathProxy, JointType) )
     //    return PathPropertyBits.JointType;
@@ -150,6 +157,9 @@ UArianeEditorPathProxy::ApplyPropertyBits( FArianeObject* Object )
             }
         }
 
+        if( PathPropertyBits.Material )
+            Path->SetMaterial( Material );
+
         //if( PathPropertyBits.JointType )
         //    Path->SetJointType( JointType, true );
 
@@ -177,6 +187,9 @@ UArianeEditorPathProxy::SetPropertyBit( const FName& PropertyName
 
     if( PropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPathProxy, PathWidthInUnits) )
         PathPropertyBits.PathWidthInUnits = State;
+
+    if( PropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPathProxy, Material) )
+        PathPropertyBits.Material = State;
 
     //if( iPropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPathProxy, JointType) )
     //    PathPropertyBits.JointType = iState;

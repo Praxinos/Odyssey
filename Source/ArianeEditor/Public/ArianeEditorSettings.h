@@ -56,6 +56,10 @@ public:
     void SetDistanceToNewActor( double InDistanceToNewActor );
     /** Gets the HUD foreground color. */
     FColor GetHUDForegroundColor() const;
+    /** Sets the default matezrial to use for the path drawing tool */
+    void SetDefaultPathDrawingMaterial( UMaterial* InDefaultPathDrawingMaterial );
+    /** Gets the default matezrial used by the path drawing tool */
+    UMaterial* GetDefaultPathDrawingMaterial() const;
 
     //FOnGridSizeChanged& GetOnGridSizeChanged();
 
@@ -63,6 +67,9 @@ private:
     /** The distance to a newly created Painting 3D Actor. */
     UPROPERTY(config, EditAnywhere, Category=General, DisplayName = "The distance to the camera when a new Painting 3D Actor is created")
     double DistanceToNewActor;
+
+    UPROPERTY(EditAnywhere, Category=General, DisplayName = "The material to use by default for the drawing tool")
+    UMaterial* DefaultPathDrawingMaterial;
 
     /** The layer grid size. */
     UPROPERTY(config, EditAnywhere, Category=Grid, DisplayName = "The layer grid size")

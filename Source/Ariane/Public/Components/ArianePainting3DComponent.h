@@ -34,6 +34,7 @@ class UOdysseyPalette;
 class UOdysseyPaletteSet;
 class UOdysseyPaletteEntryColor;
 class UArianePainting3DStaticMeshComponent;
+class UMaterialInstanceDynamic;
 
 class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
 {
@@ -120,6 +121,7 @@ public:
     void SetEditorInterface( IArianePainting3DComponentEditorInterface* InEditorInterface );
     void ConvertToStaticMesh();
     UArianePainting3DStaticMeshComponent* GetStaticMeshComponent();
+    UMaterialInstanceDynamic* GetDefaultMaterial();
 
 private:
     virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
@@ -132,7 +134,11 @@ protected:
     TArray<UOdysseyPaletteSet*> PaletteSets;
 
     UPROPERTY()
+    UMaterialInstanceDynamic* DefaultMaterial;
+
+    UPROPERTY()
     int FileVersion = 1;
+
 
 protected:
     UOdysseyPaletteEntryColor* CurrentPaletteColorEntry;

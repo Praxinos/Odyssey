@@ -20,6 +20,9 @@ class ARIANE_API UArianeLayer : public USceneComponent
     GENERATED_BODY()
 
 public:
+    enum class ETraversalReturnValue{ Continue, IgnoreChildren, Stop };
+
+public:
     ~UArianeLayer();
     UArianeLayer();
 
@@ -108,6 +111,14 @@ public:
     UArianeLayer::FOnTransformChanged& GetOnTransformChangedDelegate();
 
     FArianeLayerInvalidationFlags* GetInvalidationFlags();
+
+    void TraverseBackwards( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
+    void PreEditUndo();
+    void PostEditUndo();
+    void PostLoad();
+
+protected:
+    ETraversalReturnValue TraverseBackwards_Private( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
 
 protected:
     UPROPERTY()

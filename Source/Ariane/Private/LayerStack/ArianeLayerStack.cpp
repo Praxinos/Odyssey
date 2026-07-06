@@ -6,24 +6,28 @@
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianePainting3DComponent.h"
+#include "ArianeGroup.h"
 
 UArianeLayerStack::~UArianeLayerStack()
 {
 }
 
+// Legacy compatibility
 UArianeLayerStack::UArianeLayerStack()
     : RootFolder ( nullptr )
 {
-    // Create the default Root folder.
-    RootFolder = CreateDefaultSubobject<UArianeLayerFolder>( "Root Folder" );
+    // Do not load the default drawing layer. this was a bad legacy design
+    //ObjectInitializer.DoNotCreateDefaultSubobject(TEXT("Drawing Layer"));
+
+    // init the root folder
+    RootFolder = CreateDefaultSubobject<UArianeLayerFolder>(TEXT("Root Folder"));
     RootFolder->SetupAttachment(this);
+}
 
-    // Create the default Drawing Layer folder.
-    UArianeLayerDrawing* NewDrawingLayer = CreateDefaultSubobject<UArianeLayerDrawing>( "Drawing Layer" );
-
-    RootFolder->AddChildLayer( NewDrawingLayer );
-
-    SelectLayer( NewDrawingLayer, true );
+void
+UArianeLayerStack::Serialize( FArchive& Ar )
+{
+    Super::Serialize(Ar);
 }
 
 UArianePainting3DComponent*
@@ -63,7 +67,8 @@ UArianeLayerStack::PostLoad()
 {
     Super::PostLoad();
 
-    SelectLayer( RootFolder->GetChildLayers()[0], true );
+    //SelectLayer( RootFolder->GetChildLayers()[0], true );
+    OnPostHierarchyChanged.Broadcast();
 }
 
 void
@@ -105,6 +110,18 @@ UArianeLayerStack::OnComponentDestroyed( bool bDestroyingHierarchy )
     }
 */
     Super::OnComponentDestroyed( bDestroyingHierarchy );
+}
+
+void
+UArianeLayerStack::AddLayer( UArianeLayerFolder* FosterFolder, UArianeLayer* OrphanLayer, bool bTriggerEvent )
+{
+    if( bTriggerEvent )
+        OnPreHierarchyChanged.Broadcast();
+
+    FosterFolder->AddChildLayer( OrphanLayer );
+
+    if( bTriggerEvent )
+        OnPostHierarchyChanged.Broadcast();
 }
 
 void
@@ -205,13 +222,7 @@ UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder, 
     NewDrawingLayer->SetupAttachment( ParentLayerFolder );
     NewDrawingLayer->RegisterComponent();
 
-    if( bTriggerEvent )
-        OnPreHierarchyChanged.Broadcast();
-
-    ParentLayerFolder->AddChildLayer( NewDrawingLayer );
-
-    if( bTriggerEvent )
-        OnPostHierarchyChanged.Broadcast();
+    AddLayer( ParentLayerFolder, NewDrawingLayer, bTriggerEvent );
 
     return NewDrawingLayer;
 }
@@ -230,16 +241,54 @@ UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder, b
     NewLayerFolder->SetupAttachment( ParentLayerFolder );
     NewLayerFolder->RegisterComponent();
 
-    if( bTriggerEvent )
-        OnPreHierarchyChanged.Broadcast();
-
-    ParentLayerFolder->AddChildLayer( NewLayerFolder );
-
-    if( bTriggerEvent )
-        OnPostHierarchyChanged.Broadcast();
+    AddLayer( ParentLayerFolder, NewLayerFolder, bTriggerEvent );
 
     return NewLayerFolder;
 }
+
+void
+UArianeLayerStack::AppendSelectedTrees( TArray<UArianeLayer*>& SelectedTrees )
+{
+    SelectedTrees.Reserve( SelectedTrees.Num() + SelectedLayers.Num() );
+
+    for( UArianeLayer* SelectedLayer : SelectedLayers )
+    {
+        bool bHasSelectedAncestor = false;
+
+        // Group only objects that have no selected ancestors
+        SelectedLayer->TraverseBackwards (
+            [ SelectedLayer
+            , &bHasSelectedAncestor
+            , &SelectedTrees ]( UArianeLayer* TraversedLayer ) -> UArianeLayerFolder::ETraversalReturnValue
+            {
+                if( TraversedLayer != SelectedLayer )
+                {
+                    if( TraversedLayer->IsSelected() )
+                    {
+                        bHasSelectedAncestor = true;
+
+                        return UArianeLayerFolder::ETraversalReturnValue::Stop;
+                    }
+                }
+
+                return UArianeLayerFolder::ETraversalReturnValue::Continue;
+            } );
+
+        if( bHasSelectedAncestor == false )
+        {
+            SelectedTrees.Add( SelectedLayer );
+        }
+    }
+}
+
+void
+UArianeLayerStack::GetSelectedTrees( TArray<UArianeLayer*>& SelectedTrees )
+{
+    SelectedTrees.Empty();
+
+    AppendSelectedTrees( SelectedTrees );
+}
+
 
 UArianeLayerStack::FOnHierarchyChanged&
 UArianeLayerStack::OnPreHierarchyChangedDelegate()

@@ -62,7 +62,9 @@ public:
      * @brief Get all instanced objects
      * @return an array of all instanced objects
      */
-    const TArray<FInstancedStruct>& GetInstancedObjects();
+    const TArray<FInstancedStruct>& GetInstancedObjects() const;
+
+    TArray<FInstancedStruct>& GetInstancedObjects();
 
     /**
      * @brief Get an instanced object by its ID
@@ -124,6 +126,7 @@ public:
     void AppendSelectedTrees( TArray<FArianeObject*>& SelectedTrees );
     void GetSelectedTrees( TArray<FArianeObject*>& SelectedTrees );
     void UnselectObject( FArianeObject* ObjectToSelect );
+    void InvalidateCache();
 
 protected:
     void BindDelegates();
@@ -139,9 +142,6 @@ public:
     mutable FCriticalSection InstancedObjectsAccessRW;
 
 protected:
-    UPROPERTY()
-    FArianeObjectID RootObjectID_DEPRECATED;
-
     UPROPERTY( EditAnywhere )
     FArianeObjectID RootGroupID;
 

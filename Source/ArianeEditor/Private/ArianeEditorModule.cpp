@@ -16,6 +16,10 @@
 #include "ArianePainting3DActor.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianePainting3DStaticMeshComponent.h"
+#include "ArianeLayer.h"
+#include "ArianeLayerDrawing.h"
+#include "ArianeLayerFolder.h"
+#include "ArianeLayerStack.h"
 // Unreal headers
 #include "AssetToolsModule.h"
 #include "CoreMinimal.h"
@@ -226,6 +230,14 @@ FArianeEditorModule::ActivateEdMode( AArianePainting3DActor* Painting3DActor )
             if( Painting3DActor == nullptr )
             {
                 Painting3DActor = ArianeToolkit->GetEditor().AddPainting3DActor();
+
+                UArianeLayerStack* LayerStack = Painting3DActor->GetPainting3DComponent()->GetLayerStack();
+                UArianeLayerFolder* RootFolder = LayerStack->GetRootFolder();
+                UArianeLayerDrawing* NewDrawingLayer = LayerStack->CreateDrawingLayer( RootFolder, true );
+
+                NewDrawingLayer->Rename( TEXT("Drawing Layer") );
+
+                LayerStack->SelectLayer( NewDrawingLayer, true );
             }
 
             // Select the actor
@@ -294,47 +306,55 @@ FArianeEditorModule::ConvertToStaticMesh()
 
         if( ActorsToConvert.Num() )
         {
+            TArray<UMeshComponent*> MeshComponentsToConvert;
+
+            // first step retrieve all mesh components
+            //FMeshUtilities::GetSkinnedAndStaticMeshComponentsFromActors( ActorsToConvert, MeshComponentsToConvert );
+
             for( AActor* ActorToConvert : ActorsToConvert )
             {
                 TInlineComponentArray<UMeshComponent*> MeshComponents( ActorToConvert );
-                TArray<UMeshComponent*> MeshComponentsToConvert;
 
                 for (UMeshComponent* MeshComponent : MeshComponents)
                 {
-                    if ( MeshComponent->IsA( UArianePainting3DComponent::StaticClass() ) )
+                    if ( MeshComponent->IsA( UStaticMeshComponent::StaticClass() ) )
                     {
-                        UArianePainting3DComponent* Painting3DComponent = Cast<UArianePainting3DComponent>(MeshComponent);
-                        UArianePainting3DStaticMeshComponent* Painting3DStaticMeshComponent = Painting3DComponent->GetStaticMeshComponent();
-
-                        // if the component is invisible, it wil lnot be converted to
-                        // a static mesh by MeshUtilities.ConvertMeshesToStaticMesh
-                        Painting3DStaticMeshComponent->SetVisibility(true);
-                        Painting3DStaticMeshComponent->SetHiddenInGame(false);
-                        //MeshComponent->MarkRenderStateDirty();
-                        //MeshComponent->RecreateRenderState_Concurrent();
-
-                        Painting3DComponent->ConvertToStaticMesh();
+                        MeshComponentsToConvert.Add( MeshComponent );
                     }
-
-                    MeshComponentsToConvert.Add( MeshComponent );
                 }
+            }
 
-                MeshUtilities.ConvertMeshesToStaticMesh( MeshComponentsToConvert, ActorToConvert->GetTransform() );
-
-                for (UMeshComponent* MeshComponent : MeshComponents)
+            for (UMeshComponent* MeshComponent : MeshComponentsToConvert )
+            {
+                if ( MeshComponent->IsA( UArianePainting3DStaticMeshComponent::StaticClass() ) )
                 {
-                    if ( MeshComponent->IsA( UArianePainting3DComponent::StaticClass() ) )
-                    {
-                        UArianePainting3DComponent* Painting3DComponent = Cast<UArianePainting3DComponent>(MeshComponent);
-                        UArianePainting3DStaticMeshComponent* Painting3DStaticMeshComponent = Painting3DComponent->GetStaticMeshComponent();
+                    //UArianePainting3DComponent* Painting3DComponent = Cast<UArianePainting3DComponent>(MeshComponent);
+                    UArianePainting3DStaticMeshComponent* Painting3DStaticMeshComponent = Cast<UArianePainting3DStaticMeshComponent>(MeshComponent);
 
-                        Painting3DStaticMeshComponent->SetStaticMesh( nullptr );
-                        Painting3DStaticMeshComponent->SetVisibility(false);
-                        Painting3DStaticMeshComponent->SetHiddenInGame(true);
-                    }
+                    // if the component is invisible, it will not be converted to
+                    // a static mesh by MeshUtilities.ConvertMeshesToStaticMesh
+                    Painting3DStaticMeshComponent->SetVisibility(true);
+                    Painting3DStaticMeshComponent->SetHiddenInGame(false);
+
+                    Painting3DStaticMeshComponent->ConvertToStaticMesh();
                 }
+            }
 
-                //ArianeComp->ClearDummyStaticMesh();
+            MeshUtilities.ConvertMeshesToStaticMesh( MeshComponentsToConvert
+                                                   , ActorsToConvert.Num() == 1 ? ActorsToConvert[0]->GetTransform()
+                                                                                : FTransform::Identity );
+
+            for (UMeshComponent* MeshComponent : MeshComponentsToConvert )
+            {
+                if ( MeshComponent->IsA( UArianePainting3DStaticMeshComponent::StaticClass() ) )
+                {
+                    //UArianePainting3DComponent* Painting3DComponent = Cast<UArianePainting3DComponent>(MeshComponent);
+                    UArianePainting3DStaticMeshComponent* Painting3DStaticMeshComponent = Cast<UArianePainting3DStaticMeshComponent>(MeshComponent);
+
+                    Painting3DStaticMeshComponent->SetStaticMesh( nullptr );
+                    Painting3DStaticMeshComponent->SetVisibility(false);
+                    Painting3DStaticMeshComponent->SetHiddenInGame(true);
+                }
             }
         }
     }

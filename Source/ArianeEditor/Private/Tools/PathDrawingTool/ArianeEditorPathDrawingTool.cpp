@@ -4,6 +4,7 @@
 // Ariane Editor headers
 #include "PathDrawingTool/ArianeEditorPathDrawingTool.h"
 #include "ArianeEditor.h"
+#include "ArianeEditorSettings.h"
 #include "ArianeEditorStyle.h"
 // Ariane headers
 #include "ArianePainting3DComponent.h"
@@ -37,6 +38,7 @@ UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
     , bShowGrid ( true )
     , MaterialInterface ( nullptr )
     , EditedPath(nullptr)
+    , Cursor( EMouseCursor::Type::Default )
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PathDrawing64");
 
@@ -100,6 +102,8 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
                                          , const FArianePointerState& PointerState
                                          , bool iRepeat )
 {
+    const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
+
     PreviousSegment = CurrentSegment = nullptr;
 
     if( iKey == EKeys::LeftMouseButton )
@@ -121,10 +125,13 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
             {
                 // choose between the root group and the selected group if any
                 FArianeGroup* ParentGroup = GetParentGroup( DrawingLayer );
+                int PathNumber = DrawingLayer->GetInstancedObjects().Num();
 
                 DrawingLayer->Modify();
 
-                EditedPath = DrawingLayer->AllocPath( MaterialInterface, "Path" );
+                EditedPath = DrawingLayer->AllocPath( MaterialInterface ? MaterialInterface
+                                                                        : Settings->GetDefaultPathDrawingMaterial()
+                                                     , *(FString( "Path_" ) + FString::FromInt( PathNumber )) );
 
                 ParentGroup->AppendChild( EditedPath );
 
@@ -157,7 +164,39 @@ UArianeEditorPathDrawingTool::OnMouseHover( FEditorViewportClient* ViewportClien
                                           , FSceneView* View
                                           , const FArianePointerState& State )
 {
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
+    if( Painting3DComponent )
+    {
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        if( DrawingLayer )
+        {
+            FVector4 DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
+            FVector RayOrigin, RayDirection;
+            FVector IntersectAt;
+            FVector2D ViewportPosition = FVector2D( ViewportClient->Viewport->GetMouseX()
+                                                  , ViewportClient->Viewport->GetMouseY() );
+
+            View->DeprojectFVector2D( ViewportPosition
+                                    , RayOrigin
+                                    , RayDirection );
+
+            Cursor = ( FArianeCore::IntersectPlane( DrawingPlane
+                                                  , RayOrigin
+                                                  , RayDirection
+                                                  , IntersectAt ) > 0.0f ) ? EMouseCursor::Type::Crosshairs
+                                                                           : EMouseCursor::Type::SlashedCircle;
+        }
+    }
+}
+
+bool
+UArianeEditorPathDrawingTool::GetCursor( EMouseCursor::Type& OutCursor )
+{
+    OutCursor = Cursor;
+
+    return true;
 }
 
 void
@@ -372,6 +411,35 @@ UArianeEditorPathDrawingTool::OnMouseUp( FEditorViewportClient* ViewportClient
     }
 
     return false;
+}
+
+void
+UArianeEditorPathDrawingTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI )
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+    FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
+                                                                            , ViewportClient->GetScene()
+                                                                            , ViewportClient->EngineShowFlags ) );
+    // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
+    FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
+    //FLinearColor FgColor = GetForegroundColor();
+    //FLinearColor BgColor = GetBackgroundColor();
+    FLinearColor HcColor = GetHighlightColor();
+    FVector2D MousePosition = FVector2D( ViewportClient->GetCachedMouseX()
+                                       , ViewportClient->GetCachedMouseY() );
+
+     // picking circle
+/*
+    DrawCircleHUD( Canvas
+                 , ViewportClient
+                 , View
+                 , FVector2D( ViewportClient->GetCachedMouseX()
+                            , ViewportClient->GetCachedMouseY() )
+                 , Size * 0.5f
+                 , HcColor
+                 , 1.0f );
+*/
 }
 
 bool
