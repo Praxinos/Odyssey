@@ -240,4 +240,5 @@ private:
     TSharedPtr<class FOdysseyHUDLine> mRIMHorizontalHUD;
     TSharedPtr<class FOdysseyHUDLine> mRIMVerticalHUD;
     float mRIMStartRadius;
+    FOdysseyPoint mRIMStartMousePosition;
 };

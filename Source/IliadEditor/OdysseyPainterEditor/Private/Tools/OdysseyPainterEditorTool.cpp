@@ -497,6 +497,7 @@ UOdysseyPainterEditorTool::StartRadiusInteractiveModifier()
     mIsRIMActive = true;
 
     mRIMStartRadius = GetRadius();
+    mRIMStartMousePosition = mPreviousMousePosition;
 
     mRIMHUD = MakeShared<FOdysseyHUDCircle>(
         GetRIMCenter(mPreviousMousePosition),
@@ -559,6 +560,7 @@ UOdysseyPainterEditorTool::EndRIM()
     mRootHUD->AddElement(mHUD);
 
     mRIMStartRadius = 0.f;
+    mRIMStartMousePosition = FOdysseyPoint();
     mRIMHUD = nullptr;
     mRIMHorizontalHUD = nullptr;
     mRIMVerticalHUD = nullptr;
@@ -573,7 +575,6 @@ UOdysseyPainterEditorTool::CancelRIM()
     SetRadius(mRIMStartRadius); //Cancel by setting mRIMStartRadius again
     EndInteractiveMode();
 
-
     mIsRIMActive = false;
 
     //Put the tool's HUD in place again
@@ -581,6 +582,7 @@ UOdysseyPainterEditorTool::CancelRIM()
     mRootHUD->AddElement(mHUD);
 
     mRIMStartRadius = 0.f;
+    mRIMStartMousePosition = FOdysseyPoint();
     mRIMHUD = nullptr;
     mRIMHorizontalHUD = nullptr;
     mRIMVerticalHUD = nullptr;
@@ -589,8 +591,9 @@ UOdysseyPainterEditorTool::CancelRIM()
 FVector2D
 UOdysseyPainterEditorTool::GetRIMCenter(const FVector2D& iMousePositionInTexture) const
 {
-    FVector2D delta(GetRadius() * UE_DOUBLE_INV_SQRT_2, GetRadius() * UE_DOUBLE_INV_SQRT_2);
+    FVector2D delta(0, 0);
     FVector2D center = FVector2D(iMousePositionInTexture);
+
     switch(GetRadiusReference())
     {
         case EPainterEditorToolRadiusReference::Texture:
@@ -627,6 +630,7 @@ UOdysseyPainterEditorTool::RIMOnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     FVector2D center(0,0);
     FVector2D mousePosition(0,0);
+    FVector2D mouseDelta(0,0);
 
     switch(GetRadiusReference())
     {
@@ -634,6 +638,7 @@ UOdysseyPainterEditorTool::RIMOnMouseDrag(const FOdysseyPoint& iPointInTexture)
         {
             center =  mRIMHUD->GetCenter();
             mousePosition =  iPointInTexture;
+            mouseDelta = mousePosition - mRIMStartMousePosition;
         }
         break;
 
@@ -641,14 +646,25 @@ UOdysseyPainterEditorTool::RIMOnMouseDrag(const FOdysseyPoint& iPointInTexture)
         {
             center =  mRIMHUD->GetCenter();
             mousePosition =  mRootHUD->TextureToHUD( iPointInTexture );
+            mouseDelta = mousePosition - mRootHUD->TextureToHUD( mRIMStartMousePosition );
         }
         break;
     }
 
-    float distance = FMath::CeilToFloat( FVector2D::Distance(mousePosition, center) );
-    float radius = distance;
+    //UE_LOG( LogTemp, Warning, TEXT( "mouse delta X: %f" ), mouseDelta.X );
 
-    mRIMHUD->SetRadius(radius);
+    auto ComputeDeltaSizeFromMouseDelta = []( float iX ) -> float
+        {
+            return FMath::Sign( iX ) *  0.0008f * FMath::Square( iX );
+        };
+
+    float distance = FMath::TruncToFloat( ComputeDeltaSizeFromMouseDelta( mouseDelta.X ) * 2.f ) / 2.f; // *2 / 2 to increase/decrease radius of 0.5, then size increase/decrease of 1
+    //UE_LOG( LogTemp, Warning, TEXT( "distance: %f" ), distance );
+
+    float radius = FMath::Clamp( mRIMStartRadius + distance, 1.f, 2000.f );
+
+    mRIMHUD->SetRadius( radius );
+    //UE_LOG( LogTemp, Warning, TEXT( "hud radius: %f" ), mRIMHUD->GetRadius() );
 
     mRIMHorizontalHUD->SetStartPoint(mRIMHUD->GetCenter() + FVector2D(-mRIMHUD->GetRadius(), 0));
     mRIMHorizontalHUD->SetEndPoint(mRIMHUD->GetCenter() + FVector2D(mRIMHUD->GetRadius(), 0));
@@ -656,4 +672,5 @@ UOdysseyPainterEditorTool::RIMOnMouseDrag(const FOdysseyPoint& iPointInTexture)
     mRIMVerticalHUD->SetEndPoint(mRIMHUD->GetCenter() + FVector2D(0, mRIMHUD->GetRadius()));
 
     SetRadius(radius);
+    //UE_LOG( LogTemp, Warning, TEXT( "tool radius: %f" ), GetRadius() );
 }
