@@ -1036,14 +1036,13 @@ void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylu
         mPacketQueue.Enqueue(packetCopyWin);
         return;
     }
+#endif
 // FIX: MOVE WINTAB COORDINATES WHEN MAIN SCREEN IS NOT ON THE (TOP) LEFT OF USER PHYSICAL DESKTOP - AWAITING FOR EPIC PULL REQUEST VALIDATION
 
-#else
     if (iPacket.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
         ClearQueue();
 
     mPacketQueue.Enqueue(iPacket);
-#endif
 }
 
 //--------------------------------------------------------------------------------------
