@@ -123,9 +123,9 @@ FArianeObject::FArianeObject()
     , DrawingLayer( nullptr )
     , bVisible ( true )
     , bExpanded ( true )
+    , AllocationModel ( EArianeAllocationModel::InstancedStruct )
     , InvalidationFlags ( new FArianeObjectInvalidationFlags() )
     , bSelected ( false )
-    , AllocationModel ( EArianeAllocationModel::InstancedStruct )
 {
 }
 

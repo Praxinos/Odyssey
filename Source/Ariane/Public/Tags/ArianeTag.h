@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 // Ariane headers
 #include "ArianeCoreEnums.h"
+#include "ArianeID.h"
 
 #include "ArianeTag.generated.h"
 
@@ -49,10 +50,12 @@ protected:
     FGuid Guid;
 
     UPROPERTY()
+    FArianeObjectID OwnerID;
+
+    UPROPERTY()
     EArianeAllocationModel AllocationModel;
 
 protected:
-    FArianeObject* Owner;
     uint32 Flags;
     bool bShared;
 };

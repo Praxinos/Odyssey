@@ -15,10 +15,10 @@ FArianeSegment::FArianeSegment( )
     : Guid( FGuid::NewGuid() )
     , OwnerID()
     , Vertices { FArianeVertexID(), FArianeVertexID() }
+    , AllocationModel( EArianeAllocationModel::InstancedStruct )
     , Length ( 0.0f )
     , bInvalidated ( false )
     , bAutoFractioned ( true )
-    , AllocationModel( EArianeAllocationModel::InstancedStruct )
 {
 }
 
@@ -29,10 +29,10 @@ FArianeSegment::FArianeSegment( FArianeObject* Owner
     : Guid( FGuid::NewGuid() )
     , OwnerID( Owner )
     , Vertices { InVertex0, InVertex1 }
+    , AllocationModel( InAllocationModel )
     , Length ( 0.0f )
     , bInvalidated ( false )
     , bAutoFractioned ( true )
-    , AllocationModel( InAllocationModel )
 {
     Init();
 }

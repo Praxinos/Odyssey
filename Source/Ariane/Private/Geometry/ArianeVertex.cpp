@@ -28,9 +28,9 @@ FArianeVertex::FArianeVertex( FArianeObject* Owner
     , OwnerID( Owner )
     , Radius( InRadius )
     , Normal ( InNormal )
-    , bChained( false )
     , bHandleAligned( true )
     , AllocationModel( InAllocationModel )
+    , bChained( false )
 {
 }
 

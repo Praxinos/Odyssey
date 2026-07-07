@@ -46,11 +46,11 @@ UArianeEditorTool::UArianeEditorTool()
     , bHasContextMenu ( false )
     , bInited ( false )
     , PointQuadTree ( nullptr )
-    , Icon ( nullptr )
     , VertexTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Vertex_Full") ) )
     , VertexContourTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Vertex_Contour") ) )
     , HandleTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Handle_Full") ) )
     , LineOutlinedTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Line_Outlined") ) )
+    , Icon ( nullptr )
 {
     // For global key events
     InputProcessor = MakeShared<FArianeEditorToolInputProcessor>(this);
