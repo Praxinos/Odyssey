@@ -11,19 +11,19 @@ FArianeTag::~FArianeTag()
 
 FArianeTag::FArianeTag()
     : Guid ( FGuid::NewGuid() )
-    , Owner( nullptr )
+    , OwnerID( nullptr )
+    , AllocationModel ( EArianeAllocationModel::InstancedStruct )
     , Flags( 0 )
     , bShared( false )
-    , AllocationModel ( EArianeAllocationModel::InstancedStruct )
 {
 }
 
 FArianeTag::FArianeTag( FArianeObject* InOwnerObject, EArianeAllocationModel InAllocationModel )
     : Guid ( FGuid::NewGuid() )
-    , Owner( InOwnerObject )
+    , OwnerID( InOwnerObject )
+    , AllocationModel( InAllocationModel )
     , Flags( 0 )
     , bShared( false )
-    , AllocationModel( InAllocationModel )
 {
 }
 
@@ -58,7 +58,7 @@ FArianeTag::Copy( FArianeObject* InOwnerObject )
 FArianeObject*
 FArianeTag::GetOwner()
 {
-    return Owner;
+    return OwnerID.GetObject();
 }
 
 void
