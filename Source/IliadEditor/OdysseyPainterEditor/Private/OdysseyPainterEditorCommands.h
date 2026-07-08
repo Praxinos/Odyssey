@@ -68,11 +68,6 @@ public:
     /** Action for inverting the current raster selection */
     TSharedPtr<FUICommandInfo> InvertSelection;
 
-    //Viewport Actions
-
-    /** Action to pick a color in the viewport */
-    TSharedPtr<FUICommandInfo> PickColorInViewport;
-
 
     //Brush actions
 

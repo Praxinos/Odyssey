@@ -56,7 +56,6 @@ public:
         kPanZoom,
         kPan,
         kZoom,
-        kPick
     };
 
 public:
@@ -107,7 +106,6 @@ public:
 
 public:
     // Public API
-    FOnPickColor&    OnPickColor() { return mOnPickColor; }
     FOnMouseDown&   OnMouseDown()   { return mOnMouseDown; }
     FOnMouseClick& OnMouseClick() { return mOnMouseClick; }
     FOnMouseDoubleClick&   OnMouseDoubleClick()   { return mOnMouseDoubleClick; }
@@ -157,7 +155,6 @@ private:
 
     eState                                  mCurrentToolState;
 
-    FOnPickColor                            mOnPickColor;
     FOnMouseDown                            mOnMouseDown;
     FOnMouseUp                              mOnMouseUp;
     FOnMouseClick                           mOnMouseClick;

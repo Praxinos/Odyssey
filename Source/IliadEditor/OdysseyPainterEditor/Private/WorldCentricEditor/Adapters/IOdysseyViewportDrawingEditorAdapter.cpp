@@ -125,16 +125,6 @@ void IOdysseyViewportDrawingEditorAdapter::StartPainting()
 
 void IOdysseyViewportDrawingEditorAdapter::Paint()
 {
-    if (mIsPickingColor)
-    {
-        TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
-        if (!editor)
-            return;
-
-        editor->GetTemporaryColorPickerTool() ? editor->GetTemporaryColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint) : editor->GetColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint);
-        return;
-    }
-
     if (!mTool)
         return;
 
@@ -306,29 +296,6 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
     mCurrentStrokeRay.mPoint.y = pointPos.Y;
     mCurrentStrokeRay.mPoint.keysDown = mKeysPressed;
     mCurrentStrokeRay.mPoint.ComputeRelativeParameters(mLastStrokeRay.mPoint);
-
-    if (FOdysseyKeyState::GetLastKey() != FKey())
-    {
-        FModifierKeysState ModifierKeysState = FSlateApplication::Get().GetModifierKeys();
-        const FInputChord activeChord(FOdysseyKeyState::GetLastKey(),
-            EModifierKey::FromBools(
-                ModifierKeysState.IsControlDown(),
-                ModifierKeysState.IsAltDown(),
-                ModifierKeysState.IsShiftDown(),
-                ModifierKeysState.IsCommandDown()
-            )
-        );
-
-        if (FOdysseyPainterEditorCommands::Get().PickColorInViewport->HasActiveChord(activeChord))
-        {
-            mIsPickingColor = true;
-            mOverrideMouseCursor = true;
-            mMouseCursor = EMouseCursor::EyeDropper;
-            return true;
-        }
-    }
-
-    mIsPickingColor = false;
 
     TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
     if( editor && editor->GetCurrentTool() )
@@ -676,14 +643,6 @@ IOdysseyViewportDrawingEditorAdapter::MouseDown(const FOdysseyRay& iRay, const F
     if (iMouseButton != EKeys::LeftMouseButton && iMouseButton != EKeys::RightMouseButton)
         return;
 
-    if (mIsPickingColor)
-    {
-        mAdapterState = eAdapterState::kUsedByEditor;
-        mMouseButton = iMouseButton;
-        editor->GetTemporaryColorPickerTool() ? editor->GetTemporaryColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint) : editor->GetColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint);
-        return;
-    }
-
     UOdysseyPainterEditorRasterDrawingTool* rasterDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mTool.Get());
     if (rasterDrawingTool)
     {
@@ -727,14 +686,6 @@ IOdysseyViewportDrawingEditorAdapter::MouseUp(const FOdysseyRay& iRay, const FKe
 
     if (iMouseButton != EKeys::LeftMouseButton && iMouseButton != EKeys::RightMouseButton)
         return;
-
-    if (mIsPickingColor)
-    {
-        mAdapterState = eAdapterState::kReadyToUse;
-        mMouseButton = FKey();
-        editor->GetTemporaryColorPickerTool() ? editor->GetTemporaryColorPickerTool()->PickColorUp(mCurrentStrokeRay.mPoint) : editor->GetColorPickerTool()->PickColorUp(mCurrentStrokeRay.mPoint);
-        return;
-    }
 
     if (!mTool)
     {

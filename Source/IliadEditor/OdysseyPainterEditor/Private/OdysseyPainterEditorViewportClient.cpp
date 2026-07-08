@@ -275,8 +275,6 @@ FOdysseyPainterEditorViewportClient::GetCursor( FViewport* iViewport, int32 iX, 
 {
     if( mCurrentToolState == eState::kPan || mCurrentToolState == eState::kPanZoom || mCurrentToolState == eState::kZoom )
         mCurrentMouseCursor = EMouseCursor::GrabHand;
-    else if( mCurrentToolState == eState::kPick )
-        mCurrentMouseCursor = EMouseCursor::EyeDropper;
     else if( mOdysseyPainterEditor->GetCurrentTool() )
     {
         return mOdysseyPainterEditor->GetCurrentTool()->GetMouseCursor().GetMouseCursorNative();
@@ -687,12 +685,6 @@ FOdysseyPainterEditorViewportClient::MouseDown(const FOdysseyPoint& iPoint)
             mZoomViewportPointReference = FVector2D(iPoint.x, iPoint.y);
         }
     }
-    else if( mCurrentToolState == eState::kPick && mMouseButton == EKeys::LeftMouseButton )
-    {
-        FOdysseyPoint strokePoint_in_texture = GetLocalMousePosition(iPoint);
-        FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y );
-        mOnPickColor.ExecuteIfBound(eOdysseyEventState::kAdjust, position_in_texture);
-    }
 }
 
 void
@@ -745,12 +737,6 @@ FOdysseyPainterEditorViewportClient::MouseUp(const FOdysseyPoint& iPoint)
     }
     else if (mCurrentToolState == eState::kZoom && mMouseButton == EKeys::LeftMouseButton)
     {
-    }
-    else if( mCurrentToolState == eState::kPick && mMouseButton == EKeys::LeftMouseButton )
-    {
-        FOdysseyPoint strokePoint_in_texture = GetLocalMousePosition(iPoint);
-        FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y);
-        mOnPickColor.ExecuteIfBound(eOdysseyEventState::kSet, position_in_texture);
     }
 
     if (!mKeysPressed.Contains(mMouseButton))
@@ -826,20 +812,6 @@ FOdysseyPainterEditorViewportClient::MouseDrag(const FOdysseyPoint& iPoint)
             float newDist = mZoomReference + (dist / smoothness);
             float zoom = ::FMath::Exp(newDist);
             viewportWidget->SetZoom(zoom, mZoomViewportPointReference - mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter());
-        }
-    }
-    else if( mCurrentToolState == eState::kPick)
-    {
-        FOdysseyPoint strokePoint_in_texture = GetLocalMousePosition(iPoint);
-        FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y);
-
-        uint32 textureFullWidth = texture->Source.IsValid() ? texture->Source.GetSizeX() : texture->GetSurfaceWidth();
-        uint32 textureFullHeight = texture->Source.IsValid() ? texture->Source.GetSizeY() : texture->GetSurfaceHeight();
-
-        if( position_in_texture.X >= 0 && position_in_texture.X < textureFullWidth &&
-            position_in_texture.Y >= 0 && position_in_texture.Y < textureFullHeight)
-        {
-            mOnPickColor.ExecuteIfBound(eOdysseyEventState::kAdjust, position_in_texture);
         }
     }
 }
@@ -1142,10 +1114,6 @@ FOdysseyPainterEditorViewportClient::InputChordToState()
     else if (FOdysseyViewportCommands::Get().RotateViewport->HasActiveChord(activeChord))
     {
         return eState::kRotate;
-    }
-    else if (FOdysseyPainterEditorCommands::Get().PickColorInViewport->HasActiveChord(activeChord))
-    {
-        return eState::kPick;
     }
     return eState::kIdle;
 }
