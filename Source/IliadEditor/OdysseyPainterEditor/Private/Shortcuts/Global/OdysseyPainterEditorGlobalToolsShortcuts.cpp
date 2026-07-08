@@ -87,6 +87,12 @@ FOdysseyPainterEditorGlobalToolsShortcuts::MapActionsToCommandList(TSharedRef<FU
     );
 
     iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().ActivateTemporaryColorPickerTool,
+        FExecuteAction::CreateRaw( this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTemporaryColorPickerTool ),
+        FCanExecuteAction::CreateRaw( this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTemporaryColorPickerTool )
+    );
+
+    iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().InactivateTemporaryTool,
         FExecuteAction::CreateRaw( this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_InactivateTemporaryTool ),
         FCanExecuteAction::CreateRaw( this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_InactivateTemporaryTool )
@@ -200,6 +206,18 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool(UOdysseyPainterEd
         return;
 
     mEditor->ActivateMainTool(iTool);
+}
+
+void
+FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTemporaryTool( UOdysseyPainterEditorTool* iTool )
+{
+    if( !mEditor )
+        return;
+
+    if( !iTool->IsActivable() || iTool->IsActivated() )
+        return;
+
+    mEditor->ActivateTemporaryTool( iTool );
 }
 
 void
@@ -351,6 +369,19 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateWarpTool()
 }
 
 void
+FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTemporaryColorPickerTool()
+{
+    if( !mEditor )
+        return;
+
+    if( CanAction_ActivateTemporaryTool( mEditor->GetTemporaryColorPickerTool() ) )
+    {
+        Action_ActivateTemporaryTool( mEditor->GetTemporaryColorPickerTool() );
+        return;
+    }
+}
+
+void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_InactivateTemporaryTool()
 {
     if (!mEditor)
@@ -384,6 +415,18 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool(UOdysseyPainte
         return false;
 
     if (!iTool->IsActivable() || iTool->IsActivated() )
+        return false;
+
+    return true;
+}
+
+bool
+FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTemporaryTool( UOdysseyPainterEditorTool* iTool )
+{
+    if( !mEditor )
+        return false;
+
+    if( !iTool->IsActivable() || iTool->IsActivated() )
         return false;
 
     return true;
@@ -503,6 +546,18 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateWarpTool()
     */
 
     if (CanAction_ActivateTool(mEditor->GetVectorGridTool()))
+        return true;
+
+    return false;
+}
+
+bool
+FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTemporaryColorPickerTool()
+{
+    if( !mEditor )
+        return false;
+
+    if( CanAction_ActivateTemporaryTool( mEditor->GetTemporaryColorPickerTool() ) )
         return true;
 
     return false;

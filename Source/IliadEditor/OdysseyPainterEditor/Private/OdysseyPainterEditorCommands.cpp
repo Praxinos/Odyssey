@@ -113,6 +113,8 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( ActivateEraserTool, ToolsShortcuts, "Activate Eraser Tool", "Activates the Eraser Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::E));
     UI_BUNDLE_COMMAND( ActivateWarpTool, ToolsShortcuts, "Activate Warp Tool", "Activates the Warp Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::W));
 
+    UI_BUNDLE_COMMAND( ActivateTemporaryColorPickerTool, ToolsShortcuts, "Activate Color Picker Temporarily", "Activates the Color Picker Tool Temporarily", EUserInterfaceActionType::Button, FInputChord( EKeys::I ) );
+
     //TODO: rename this shortcut label (and tooltip) to something: "Inactivate Temporary Tool (Out of Peg,...)"
     // once more than 1 temporary tool will be available
     // By listing all temporary tools in label, the shortcut will be found when searching for a specific temporary tool

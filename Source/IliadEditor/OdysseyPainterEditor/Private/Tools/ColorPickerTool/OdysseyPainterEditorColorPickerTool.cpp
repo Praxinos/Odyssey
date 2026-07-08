@@ -106,6 +106,9 @@ void
 UOdysseyPainterEditorColorPickerTool::PickColorUp( const FOdysseyPoint& iPointInTexture )
 {
     mEditor->PaintColor(mEditor->PaintColor(), true); //Commit paintColor
+
+    if( mIsTemporaryTool )
+        mEditor->InactivateTemporaryTool();
 }
 
 void

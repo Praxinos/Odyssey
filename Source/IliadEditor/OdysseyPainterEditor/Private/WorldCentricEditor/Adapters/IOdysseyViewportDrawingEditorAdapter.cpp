@@ -131,7 +131,7 @@ void IOdysseyViewportDrawingEditorAdapter::Paint()
         if (!editor)
             return;
 
-        editor->GetColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint);
+        editor->GetTemporaryColorPickerTool() ? editor->GetTemporaryColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint) : editor->GetColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint);
         return;
     }
 
@@ -680,7 +680,7 @@ IOdysseyViewportDrawingEditorAdapter::MouseDown(const FOdysseyRay& iRay, const F
     {
         mAdapterState = eAdapterState::kUsedByEditor;
         mMouseButton = iMouseButton;
-        editor->GetColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint);
+        editor->GetTemporaryColorPickerTool() ? editor->GetTemporaryColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint) : editor->GetColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint);
         return;
     }
 
@@ -732,7 +732,7 @@ IOdysseyViewportDrawingEditorAdapter::MouseUp(const FOdysseyRay& iRay, const FKe
     {
         mAdapterState = eAdapterState::kReadyToUse;
         mMouseButton = FKey();
-        editor->GetColorPickerTool()->PickColorUp(mCurrentStrokeRay.mPoint);
+        editor->GetTemporaryColorPickerTool() ? editor->GetTemporaryColorPickerTool()->PickColorUp(mCurrentStrokeRay.mPoint) : editor->GetColorPickerTool()->PickColorUp(mCurrentStrokeRay.mPoint);
         return;
     }
 

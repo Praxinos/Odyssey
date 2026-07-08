@@ -255,6 +255,8 @@ public:
     TSharedPtr<FUICommandInfo> ActivateEraserTool;
     TSharedPtr<FUICommandInfo> ActivateWarpTool;
 
+    TSharedPtr<FUICommandInfo> ActivateTemporaryColorPickerTool;
+
     TSharedPtr<FUICommandInfo> InactivateTemporaryTool;
 
     // Specific Tools commands

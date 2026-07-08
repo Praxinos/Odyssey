@@ -222,7 +222,8 @@ public:
     virtual UOdysseyPainterEditorVectorPaintBucketTool*              GetVectorPaintBucketTool() const;
     virtual UOdysseyPainterEditorColorPickerTool*                    GetColorPickerTool() const;
 
-    UOdysseyPainterEditorAnimationOutOfPegsTool* GetOutOfPegsTool() const;
+    UOdysseyPainterEditorAnimationOutOfPegsTool*    GetOutOfPegsTool() const;
+    UOdysseyPainterEditorColorPickerTool*           GetTemporaryColorPickerTool() const;
 
 public:
     // Getters
@@ -451,7 +452,9 @@ protected:
     TObjectPtr<UOdysseyPainterEditorVectorMatchingTool> mVectorMatchingTool;
     TObjectPtr<UOdysseyPainterEditorVectorChartTool> mVectorChartTool;
     TObjectPtr<UOdysseyPainterEditorVectorTrajectoryTool> mVectorTrajectoryTool;
+
     TObjectPtr<UOdysseyPainterEditorAnimationOutOfPegsTool> mOutOfPegsTool;
+    TObjectPtr<UOdysseyPainterEditorColorPickerTool> mTemporaryColorPickerTool;
 
     TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentMainToolPerLayerClass;
 
