@@ -6,6 +6,7 @@
 #include "ObjectEditorUtils.h"
 #include "Engine/Engine.h"
 #include "Engine/Texture.h"
+#include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
@@ -66,7 +67,8 @@ UOdysseyViewportNamingTokens::GetMousePositionInCanvas( TWeakPtr<SOdysseyViewpor
     if( !viewportWidget->GetViewportWidget()->GetTickSpaceGeometry().IsUnderLocation( cursorPos ) )
         return TOptional<FIntVector2>();
 
-    FVector2D cursorPosInViewport = viewportWidget->GetTickSpaceGeometry().AbsoluteToLocal( cursorPos );
+    float scaleDPI = viewportWidget->GetTickSpaceGeometry().GetAccumulatedLayoutTransform().GetScale();
+    FVector2D cursorPosInViewport = viewportWidget->GetTickSpaceGeometry().AbsoluteToLocal( cursorPos ) * scaleDPI;
     FVector2D cursorPosInCanvas = viewportWidget->ToLocal( cursorPosInViewport );
     FIntVector2 cursorPosInCanvasInt( FMath::FloorToInt( cursorPosInCanvas.X ), FMath::FloorToInt( cursorPosInCanvas.Y ) );
 
@@ -1019,6 +1021,16 @@ SOdysseyViewport::GetGuiRotationValue() const
 FText
 SOdysseyViewport::GetStatusbarText() const
 {
+    //TODO: For the moment, display nothing when in texture editor mode:
+    // 1- problem with UOdysseyViewportNamingTokens::GetColorAtPosition() to get (in an optimize way) the color at position of a texture
+    // 2- multiple solutions
+    //     - must create new naming tokens which will store a texture as context instead of an animation
+    //       which implies another namespace which implies (maybe) 2 patterns in settings but in this case, how to know which one to display ?!
+    //     - OR use another context to store the texture like the animation does (or add the texture in the existing context near the animation ?)
+    //       but in this case, the name of the namespace is no more really coherent (?)
+    if( Cast<UTexture2D>( GetTexture() ) )
+        return FText::GetEmpty();
+
     FNamingTokenFilterArgs FilterArgs;
     //FilterArgs.AdditionalNamespacesToInclude.Add( TokenNamespace );
 
