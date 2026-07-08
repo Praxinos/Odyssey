@@ -140,24 +140,28 @@ UOdysseyAnimationNamingTokens::OnCreateDefaultTokens( TArray<FNamingTokenData>& 
 
     //---
 
-    FNamingTokenData CurrentFrameToken;
-    CurrentFrameToken.TokenKey = TEXT( "currentFrame" );
-    CurrentFrameToken.DisplayName = LOCTEXT( "CurrentFrameToken", "Current frame" );
-    CurrentFrameToken.TokenProcessorNative.BindLambda( [this]()
-                                                       {
-                                                           if( !ContextPlayer )
-                                                               return FText::GetEmpty();
+    //TODO: for the moment, don't use it
+    // as there is a shift between the value returned and the one displayed in the timeline
+    // (see comment in the lambda)
 
-                                                           UOdysseyAnimationPlayer* player = ContextPlayer->AnimationPlayer.Pin().Get();
-                                                           if( !player )
-                                                               return FText::GetEmpty();
+    //FNamingTokenData CurrentFrameToken;
+    //CurrentFrameToken.TokenKey = TEXT( "currentFrame" );
+    //CurrentFrameToken.DisplayName = LOCTEXT( "CurrentFrameToken", "Current frame" );
+    //CurrentFrameToken.TokenProcessorNative.BindLambda( [this]()
+    //                                                   {
+    //                                                       if( !ContextPlayer )
+    //                                                           return FText::GetEmpty();
 
-                                                           // How to (or should we) use UOdysseyPainterEditorAnimationUserSettings::Get(); to get the startframe ?!?!
-                                                           // Or make another "editor" naming token context ?
-                                                           FFrameTime current_frametime = player->GetCurrentFrame();
-                                                           return FText::AsNumber( current_frametime.FloorToFrame().Value );
-                                                       } );
-    Tokens.Add( CurrentFrameToken );
+    //                                                       UOdysseyAnimationPlayer* player = ContextPlayer->AnimationPlayer.Pin().Get();
+    //                                                       if( !player )
+    //                                                           return FText::GetEmpty();
+
+    //                                                       // How to (or should we) use UOdysseyPainterEditorAnimationUserSettings::Get(); to get the startframe ?!?!
+    //                                                       // Or make another "editor" naming token context ?
+    //                                                       FFrameTime current_frametime = player->GetCurrentFrame();
+    //                                                       return FText::AsNumber( current_frametime.FloorToFrame().Value );
+    //                                                   } );
+    //Tokens.Add( CurrentFrameToken );
 }
 
 void
