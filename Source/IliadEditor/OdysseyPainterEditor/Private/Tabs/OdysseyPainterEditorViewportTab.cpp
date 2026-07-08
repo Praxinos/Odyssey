@@ -115,7 +115,6 @@ FOdysseyPainterEditorViewportTab::CreateWidget()
 
     mViewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetMeshSelector().Get()));
 
-    mViewportClient->OnPickColor().BindRaw(this, &FOdysseyPainterEditorViewportTab::HandleViewportColorPicked);
     mViewportClient->OnMouseDown().BindRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseDown);
     mViewportClient->OnMouseClick().BindRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseClick);
     mViewportClient->OnMouseDoubleClick().BindRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseDoubleClick);
@@ -592,15 +591,6 @@ FOdysseyPainterEditorViewportTab::Texture() const
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
-
-void
-FOdysseyPainterEditorViewportTab::HandleViewportColorPicked(eOdysseyEventState::Type iEventState, const FVector2D& iPositionInTexture)
-{
-    if (iEventState == eOdysseyEventState::kSet)
-        mEditor->GetTemporaryColorPickerTool() ? mEditor->GetTemporaryColorPickerTool()->PickColorUp(FOdysseyPoint(iPositionInTexture.X, iPositionInTexture.Y)) : mEditor->GetColorPickerTool()->PickColorUp(FOdysseyPoint(iPositionInTexture.X, iPositionInTexture.Y));
-    else
-        mEditor->GetTemporaryColorPickerTool() ? mEditor->GetTemporaryColorPickerTool()->PickColorMove(FOdysseyPoint(iPositionInTexture.X, iPositionInTexture.Y)) : mEditor->GetColorPickerTool()->PickColorMove(FOdysseyPoint(iPositionInTexture.X, iPositionInTexture.Y));
-}
 
 bool
 FOdysseyPainterEditorViewportTab::OnViewportMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)

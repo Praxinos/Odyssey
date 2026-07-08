@@ -159,7 +159,6 @@ protected:
 
     bool mOverrideMouseCursor = false;
     EMouseCursor::Type mMouseCursor = EMouseCursor::Default;
-    bool mIsPickingColor = false;
 
     FOdysseyPoint mCurrentHUDPoint;
     FOdysseyPoint mLastHUDPoint;

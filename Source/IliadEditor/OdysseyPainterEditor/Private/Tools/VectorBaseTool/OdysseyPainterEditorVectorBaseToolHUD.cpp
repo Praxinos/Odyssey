@@ -2402,8 +2402,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::CanReceiveEvents()
         );
 
     if ( ( FOdysseyViewportCommands::Get().PanZoomViewport->HasActiveChord( activeChord ) )
-      || ( FOdysseyViewportCommands::Get().RotateViewport->HasActiveChord( activeChord ) )
-      || ( FOdysseyPainterEditorCommands::Get().PickColorInViewport->HasActiveChord( activeChord ) ) )
+      || ( FOdysseyViewportCommands::Get().RotateViewport->HasActiveChord( activeChord ) ) )
         {
             return false;
         }
