@@ -394,11 +394,13 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeAbort()
     mTransaction = nullptr; //Finish the undo transaction
 }
 
-void UOdysseyPainterEditorRasterPrimitiveDrawingTool::GetMouseCursorImpl() const //override
+TOptional<FMouseCursor> UOdysseyPainterEditorRasterPrimitiveDrawingTool::GetMouseCursorOverride() const
 {
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     if( mediaProvider.IsLocked() )
-        mMouseCursor = EMouseCursor::SlashedCircle;
+        return FMouseCursor( EMouseCursor::SlashedCircle );
+
+    return Super::GetMouseCursorOverride();
 }
 
 FText

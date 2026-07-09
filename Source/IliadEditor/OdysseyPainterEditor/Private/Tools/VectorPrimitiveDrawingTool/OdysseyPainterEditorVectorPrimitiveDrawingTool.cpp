@@ -209,22 +209,19 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     return true;
 }
 
-void UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetMouseCursorImpl() const
+TOptional<FMouseCursor> UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetMouseCursorOverride() const
 {
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if( mediaProvider.IsLocked() )
+        return FMouseCursor( EMouseCursor::SlashedCircle );
+
     // working group can be null if were are not on a cell
     FOdysseyVectorGroup* workingGroup = GetWorkingGroup();
 
-    if( workingGroup )
-    {
-        if( workingGroup->IsVisible( true ) )
-            mMouseCursor = EMouseCursor::Crosshairs;
-        else
-            mMouseCursor = EMouseCursor::SlashedCircle;
-    }
-    else
-    {
-        mMouseCursor = EMouseCursor::Crosshairs;
-    }
+    if( workingGroup && !workingGroup->IsVisible( true ) )
+        return FMouseCursor( EMouseCursor::SlashedCircle );
+
+    return Super::GetMouseCursorOverride();
 }
 
 double

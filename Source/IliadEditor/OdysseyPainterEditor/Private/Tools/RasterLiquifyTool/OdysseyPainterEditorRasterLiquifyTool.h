@@ -177,7 +177,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         FFlowMap& GetFlowMap();
 
     protected:
-        virtual void GetMouseCursorImpl() const override;
+        virtual TOptional<FMouseCursor> GetMouseCursorOverride() const override;
 
     protected:
         double GetStrength();

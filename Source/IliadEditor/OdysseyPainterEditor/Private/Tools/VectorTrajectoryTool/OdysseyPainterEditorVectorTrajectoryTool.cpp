@@ -161,7 +161,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyUpGlobalVector( FOdysseyVectorGr
     return false;
 }
 
-void UOdysseyPainterEditorVectorTrajectoryTool::GetMouseCursorImpl() const
+TOptional<FMouseCursor> UOdysseyPainterEditorVectorTrajectoryTool::GetMouseCursorOverride() const
 {
     if( mTrajectoryHUD->GetSelectedInbetweenerTagList().size() )
     {
@@ -169,9 +169,11 @@ void UOdysseyPainterEditorVectorTrajectoryTool::GetMouseCursorImpl() const
 
         if( inbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::Linear )
         {
-            mMouseCursor = EMouseCursor::SlashedCircle;
+            return FMouseCursor( EMouseCursor::SlashedCircle );
         }
     }
+
+    return Super::GetMouseCursorOverride();
 }
 
 bool

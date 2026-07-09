@@ -92,7 +92,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
         TSharedRef<SWidget> CreateModifierSegmentControl();
 
     protected:
-        virtual void GetMouseCursorImpl() const override;
+        virtual TOptional<FMouseCursor> GetMouseCursorOverride() const override;
 
         void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
                                 , uint32 iUpdateFlags );

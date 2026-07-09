@@ -89,28 +89,26 @@ UOdysseyPainterEditorVectorCutTool::UnloadVector( FOdysseyVectorGroupPaint* iSce
     return 0;
 }
 
-void UOdysseyPainterEditorVectorCutTool::GetMouseCursorImpl() const
+TOptional<FMouseCursor> UOdysseyPainterEditorVectorCutTool::GetMouseCursorOverride() const
 {
     //FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     //if( mediaProvider.IsLocked() )
-    //    mMouseCursor = EMouseCursor::SlashedCircle;
+    //    return FMouseCursor( EMouseCursor::SlashedCircle );
+
+    return Super::GetMouseCursorOverride();
 }
 
 void
 UOdysseyPainterEditorVectorCutTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                       , const FOdysseyPoint& iPointInTexture )
 {
-    if( ( iPointInTexture.x < 0 )
-     || ( iPointInTexture.y < 0 )
-     || ( iPointInTexture.x > iScene->GetLayer()->GetWidth()  )
-     || ( iPointInTexture.y > iScene->GetLayer()->GetHeight() ) )
-    {
-        mMouseCursor = EMouseCursor::SlashedCircle;
-    }
-    else
-    {
-        mMouseCursor = EMouseCursor::Crosshairs;
-    }
+    mIsLayerHovered = !(
+        ( iPointInTexture.x < 0 )
+        || ( iPointInTexture.y < 0 )
+        || ( iPointInTexture.x > iScene->GetLayer()->GetWidth() )
+        || ( iPointInTexture.y > iScene->GetLayer()->GetHeight() ) );
+
+    mMouseCursor = mIsLayerHovered ? EMouseCursor::Crosshairs : EMouseCursor::SlashedCircle;
 }
 
 bool
@@ -122,7 +120,7 @@ UOdysseyPainterEditorVectorCutTool::OnMouseDownVector( FOdysseyVectorGroupPaint*
         return false;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
-    if( ( mMouseCursor == EMouseCursor::Crosshairs )
+    if( ( mIsLayerHovered )
      && ( iKey == EKeys::LeftMouseButton ) )
     {
         mPointArray.clear();
@@ -152,7 +150,7 @@ UOdysseyPainterEditorVectorCutTool::OnMouseDragVector( FOdysseyVectorGroupPaint*
 {
     //::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
 
-    if ( ( mMouseCursor == EMouseCursor::Crosshairs )
+    if ( ( mIsLayerHovered )
       && ( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE ) )
     {
         ::ULIS::FVec2D point = { iPointInTexture.x, iPointInTexture.y };
@@ -407,7 +405,7 @@ UOdysseyPainterEditorVectorCutTool::OnMouseUpVector( FOdysseyVectorGroupPaint* i
     ::ULIS::FRectD roi;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
-    if( ( mMouseCursor == EMouseCursor::Crosshairs )
+    if( ( mIsLayerHovered )
      && ( iKey == EKeys::LeftMouseButton ) )
     {
 /*refactor

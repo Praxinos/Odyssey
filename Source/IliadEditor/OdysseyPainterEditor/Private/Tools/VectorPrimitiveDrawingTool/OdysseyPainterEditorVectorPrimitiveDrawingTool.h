@@ -64,7 +64,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
         FOdysseyVectorObject* GetParentObject( FOdysseyVectorGroupPaint* iScene );
 
     protected:
-        virtual void GetMouseCursorImpl() const override;
+        virtual TOptional<FMouseCursor> GetMouseCursorOverride() const override;
 
     private:
         double GetLineRotationAngle( FOdysseyVectorLine* iLine, const FOdysseyPoint& iPointInTexture );

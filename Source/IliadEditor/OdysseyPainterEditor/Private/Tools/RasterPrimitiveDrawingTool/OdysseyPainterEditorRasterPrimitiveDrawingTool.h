@@ -51,7 +51,7 @@ public:
     virtual FText GetTooltip() const override;
 
 protected:
-    virtual void GetMouseCursorImpl() const override;
+    virtual TOptional<FMouseCursor> GetMouseCursorOverride() const override;
 
 private:
     // Internal - Callbacks

@@ -1129,11 +1129,13 @@ UOdysseyPainterEditorRasterLiquifyTool::PostPropertyChanged(const FName& iProper
     Super::PostPropertyChanged(iPropertyName, iIsInteractive);
 }
 
-void UOdysseyPainterEditorRasterLiquifyTool::GetMouseCursorImpl() const
+TOptional<FMouseCursor> UOdysseyPainterEditorRasterLiquifyTool::GetMouseCursorOverride() const
 {
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     if( mediaProvider.IsLocked() )
-        mMouseCursor = EMouseCursor::SlashedCircle;
+        return FMouseCursor( EMouseCursor::SlashedCircle );
+
+    return Super::GetMouseCursorOverride();
 }
 
 void

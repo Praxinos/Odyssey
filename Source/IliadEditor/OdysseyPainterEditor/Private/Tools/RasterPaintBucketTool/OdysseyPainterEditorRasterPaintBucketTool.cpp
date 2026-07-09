@@ -538,11 +538,13 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetBlendParameters() const
     return BlendParameters;
 }
 
-void UOdysseyPainterEditorRasterPaintBucketTool::GetMouseCursorImpl() const
+TOptional<FMouseCursor> UOdysseyPainterEditorRasterPaintBucketTool::GetMouseCursorOverride() const
 {
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     if( mediaProvider.IsLocked() )
-        mMouseCursor = EMouseCursor::SlashedCircle;
+        return FMouseCursor( EMouseCursor::SlashedCircle );
+
+    return Super::GetMouseCursorOverride();
 }
 
 FText
