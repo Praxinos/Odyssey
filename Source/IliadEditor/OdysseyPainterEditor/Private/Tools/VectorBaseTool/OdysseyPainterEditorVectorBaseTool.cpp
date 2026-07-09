@@ -1805,11 +1805,15 @@ UOdysseyPainterEditorVectorBaseTool::MakeTest( FOdysseyVectorGroupPaint* iScene 
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 }
 
-void UOdysseyPainterEditorVectorBaseTool::GetMouseCursorImpl() const
+TOptional<FMouseCursor> UOdysseyPainterEditorVectorBaseTool::GetMouseCursorOverride() const
 {
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if( mediaProvider.IsLocked() )
-        mMouseCursor = EMouseCursor::SlashedCircle;
+    //TODO: to much problem with tool subclasses which mainly don't take locked layer into account
+    // So for the moment, just comment it and only Path and Primitive drawing tools will manage it
+    //FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    //if( mediaProvider.IsLocked() )
+    //    return FMouseCursor( EMouseCursor::SlashedCircle );
+
+    return TOptional<FMouseCursor>();
 }
 
 #undef LOCTEXT_NAMESPACE

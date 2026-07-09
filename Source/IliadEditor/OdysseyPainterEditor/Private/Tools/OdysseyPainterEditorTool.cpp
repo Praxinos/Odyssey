@@ -405,13 +405,20 @@ TSharedPtr<FOdysseyHUDElement> UOdysseyPainterEditorTool::GetHUD()
     return mRootHUD;
 }
 
-void UOdysseyPainterEditorTool::GetMouseCursorImpl() const
+TOptional<FMouseCursor> UOdysseyPainterEditorTool::GetMouseCursorOverride() const
 {
+    return TOptional<FMouseCursor>();
 }
 
 FMouseCursor UOdysseyPainterEditorTool::GetMouseCursor() const
 {
-    GetMouseCursorImpl();
+    TOptional<FMouseCursor> cursorOverride = GetMouseCursorOverride();
+    if( cursorOverride )
+    {
+        cursorOverride->UpdateCursor();
+
+        return cursorOverride.GetValue();
+    }
 
     mMouseCursor.UpdateCursor();
 

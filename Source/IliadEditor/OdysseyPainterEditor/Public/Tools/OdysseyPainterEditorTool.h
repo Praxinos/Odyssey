@@ -155,10 +155,21 @@ public:
       * - or a custom one if native == custom
       *
       * DON'T make it virtual, it's wanted to not be able to override it !!!
-      * Override GetMouseCursorImpl() if you need to change the cursor "on the fly" when GetMouseCursor() is called
+      * Override GetMouseCursorOverride() if you need to change the cursor "on the fly" when GetMouseCursor() is called
       *
-      * The goal of this pattern is to not be able to return FMouseCursor (created on the fly) directly in GetMouseCursor()
-      * because it won't correspond to mMouseCursor stored in the object
+      * The goal of this pattern is to be able to store the real value of the cursor in mMouseCursor
+      * and change it where you need in every functions of the class
+      * OR
+      * by overriding GetMouseCursorOverride(), it's possible to use a value "on the fly" of the cursor
+      * without having to change mMouseCursor and store its previous value, restore it when needed, ...
+      *
+      * A typical example is to display EMouseCursor::SlashedCircle when drawing is not possible,
+      * unlike to add a callback to the lock/unlock layer function,
+      * just set it in the GetMouseCursorOverride() by checking its value and as it is called in each tick
+      * everything will be display correctly, and as soon, the layer is unlock, in the next tick,
+      * GetMouseCursorOverride() will return an empty value, and so mMouseCursor will be reused
+      *
+      * WARNING: with this way, the displayed cursor WON'T be necessary the same as the one stored in mMouseCursor !
       */
     /*virtual*/ FMouseCursor GetMouseCursor() const;
 
@@ -167,10 +178,10 @@ public:
 
 protected:
     /** Called inside GetMouseCursor()
-      * Override this function to set/modify mMouseCursor inside
-      * (see comment of GetMouseCursor())
+      * Override this function to override mMouseCursor value
+      * (see also comment of GetMouseCursor())
       */
-    virtual void GetMouseCursorImpl() const;
+    virtual TOptional<FMouseCursor> GetMouseCursorOverride() const;
 
 protected:
     virtual void PropertyChanged(const FName& iPropertyName);
@@ -221,8 +232,7 @@ protected:
 
     TSharedPtr<FUICommandList>          mCommandList;
 
-    // It is mutable to be able to modify it in GetMouseCursorImpl() which is const
-    mutable FMouseCursor                mMouseCursor;
+    FMouseCursor                        mMouseCursor;
 
 public:
     UPROPERTY(EditDefaultsOnly, Category = "Tool")

@@ -73,7 +73,7 @@ public:
     virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
 
 protected:
-    virtual void GetMouseCursorImpl() const override;
+    virtual TOptional<FMouseCursor> GetMouseCursorOverride() const override;
 
 public:
     void SetSourceProvider(TSharedPtr<FOdysseyPainterEditorRasterPaintBucketToolSourceProvider> iProvider);

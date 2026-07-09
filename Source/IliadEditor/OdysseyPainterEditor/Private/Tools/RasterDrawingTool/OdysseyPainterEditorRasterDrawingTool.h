@@ -83,7 +83,7 @@ public:
     virtual FText GetTooltip() const override;
 
 protected:
-    virtual void GetMouseCursorImpl() const override;
+    virtual TOptional<FMouseCursor> GetMouseCursorOverride() const override;
 
 public:
     // Setters
