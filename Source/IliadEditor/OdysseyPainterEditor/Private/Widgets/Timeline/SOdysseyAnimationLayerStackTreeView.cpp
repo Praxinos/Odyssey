@@ -178,6 +178,23 @@ SOdysseyAnimationLayerStackTreeView::Action_ConvertLayerToRasterLayer()
         }
     );
 
+    // Sort all selected layer from bottom to top
+    // Otherwise during the merge of each layer, the new layer (via AddLayer()) will return nullptr
+    // - as the previous merged layer was removed
+    // - but as it was the parent of the layer being merged, the AddLayer() will return nullptr
+    // because it doesn't find the old parent in the layer list
+    //
+    // So sort all selected layers from bottom to top, so each merged (and removed) layer won't never be
+    // the parent of a future layer which will be merged
+    TArray<UOdysseyLayer*> sortedBottomToTopSelectedLayers;
+    TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
+    Algo::Reverse( layers );
+    for( UOdysseyLayer* layer : layers )
+    {
+        if( selectedLayers.Contains( layer ) )
+            sortedBottomToTopSelectedLayers.Add( layer );
+    }
+
     if (!shouldConvert)
         return;
 
@@ -187,7 +204,7 @@ SOdysseyAnimationLayerStackTreeView::Action_ConvertLayerToRasterLayer()
 
     UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
 
-    for (UOdysseyLayer* layer : selectedLayers)
+    for (UOdysseyLayer* layer : sortedBottomToTopSelectedLayers )
     {
         UOdysseyLayer* parent = layer->GetParent();
         int indexInParent = layer->GetIndexInParent();
