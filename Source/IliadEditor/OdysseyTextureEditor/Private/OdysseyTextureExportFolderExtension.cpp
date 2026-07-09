@@ -177,21 +177,28 @@ void FOdysseyTextureExportFolderExtension::PerformExportFolder(TArray<FName> iPa
         FScopedSlowTask slowTask( iPackageNamesToExport.Num(), LOCTEXT( "export-folder.dependencies-gathering.progressbar.title", "Gathering Dependencies..." ) );
         slowTask.MakeDialog();
 
-        for ( auto packageIt = iPackageNamesToExport.CreateConstIterator(); packageIt; ++packageIt )
-        {
-            slowTask.EnterProgressFrame();
+        // If dependencies are checked, palette can be included in the export list (when a texture use it)
+        // (which leads to a crash)
+        // More generally, when exporting textures, only textures should appear in the list
+        // and not all its dependencies
+        // Let's see if it's ok
+        allPackageNamesToMove = TSet<FName>( iPackageNamesToExport );
 
-            if ( !allPackageNamesToMove.Contains(*packageIt) )
-            {
-                allPackageNamesToMove.Add(*packageIt);
-                FString path = (*packageIt).ToString();
-                FString originalRootString;
-                path.RemoveFromStart(TEXT("/"));
-                path.Split("/", &originalRootString, &path, ESearchCase::IgnoreCase, ESearchDir::FromStart);
-                originalRootString = TEXT("/") + originalRootString;
-                RecursiveGetDependencies(*packageIt, allPackageNamesToMove, originalRootString);
-            }
-        }
+        //for ( auto packageIt = iPackageNamesToExport.CreateConstIterator(); packageIt; ++packageIt )
+        //{
+        //    slowTask.EnterProgressFrame();
+
+        //    if ( !allPackageNamesToMove.Contains(*packageIt) )
+        //    {
+        //        allPackageNamesToMove.Add(*packageIt);
+        //        FString path = (*packageIt).ToString();
+        //        FString originalRootString;
+        //        path.RemoveFromStart(TEXT("/"));
+        //        path.Split("/", &originalRootString, &path, ESearchCase::IgnoreCase, ESearchDir::FromStart);
+        //        originalRootString = TEXT("/") + originalRootString;
+        //        RecursiveGetDependencies(*packageIt, allPackageNamesToMove, originalRootString);
+        //    }
+        //}
     }
 
     // Confirm that there is at least one package to move
