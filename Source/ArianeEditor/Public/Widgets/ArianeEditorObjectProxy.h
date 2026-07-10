@@ -43,7 +43,7 @@ class ARIANEEDITOR_API UArianeEditorObjectProxy : public UObject
     typedef union {
         struct
         {
-            uint32 Name : 1;
+            bool Name : 1;
             //uint32 TranslationX : 1;
             //uint32 TranslationY : 1;
             //uint32 Rotation : 1;
@@ -52,7 +52,7 @@ class ARIANEEDITOR_API UArianeEditorObjectProxy : public UObject
             //uint32 SkewX : 1;
             //uint32 SkewY : 1;
             //uint32 Opacity : 1;
-            uint32 Visible : 1;
+            bool Visible : 1;
             //uint32 ForegroundColorMode : 1;
             //uint32 ForegroundColor : 1;
             //uint32 ForegroundPaletteSelection : 1;

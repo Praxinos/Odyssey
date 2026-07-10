@@ -18,13 +18,21 @@ FArianeObjectID::FArianeObjectID()
 
 FArianeObjectID::FArianeObjectID( FArianeObject* Object )
     : DrawingLayer( nullptr )
-    , CachedObject( ( Object && ( Object->GetAllocationModel() == EArianeAllocationModel::OperatingSystem ) ) ? Object : nullptr )
+    , CachedObject( nullptr )
 {
     if( Object )
     {
-        DrawingLayer = Object->GetDrawingLayer();
+        if( Object->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
+        {
+            CachedObject = Object;
+        }
 
-        Guid = Object->GetGuid();
+        if( Object->GetAllocationModel() == EArianeAllocationModel::InstancedStruct )
+        {
+            DrawingLayer = Object->GetDrawingLayer();
+
+            Guid = Object->GetGuid();
+        }
     }
 }
 
@@ -58,13 +66,25 @@ FArianeVertexID::FArianeVertexID()
 }
 
 FArianeVertexID::FArianeVertexID( FArianeVertex* Vertex )
-    : CachedVertex( ( Vertex && ( Vertex->GetAllocationModel() == EArianeAllocationModel::OperatingSystem ) ) ? Vertex : nullptr )
+    : DrawingLayer( nullptr )
+    , CachedVertex( nullptr )
 {
-    DrawingLayer = Vertex->GetOwner()->GetDrawingLayer();
+    if( Vertex )
+    {
+        if( Vertex->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
+        {
+            CachedVertex = Vertex;
+        }
 
-    Guid = Vertex->GetGuid();
+        if( Vertex->GetAllocationModel() == EArianeAllocationModel::InstancedStruct )
+        {
+            DrawingLayer = Vertex->GetOwner()->GetDrawingLayer();
 
-    OwnerGuid = Vertex->GetOwner()->GetGuid();
+            Guid = Vertex->GetGuid();
+
+            OwnerGuid = Vertex->GetOwner()->GetGuid();
+        }
+    }
 }
 
 FArianeVertex*
@@ -100,13 +120,25 @@ FArianeSegmentID::FArianeSegmentID()
 }
 
 FArianeSegmentID::FArianeSegmentID( FArianeSegment* Segment )
-    : CachedSegment( ( Segment && ( Segment->GetAllocationModel() == EArianeAllocationModel::OperatingSystem ) ) ? Segment : nullptr )
+    : DrawingLayer( nullptr )
+    , CachedSegment( nullptr )
 {
-    DrawingLayer = Segment->GetOwner()->GetDrawingLayer();
+    if( Segment )
+    {
+        if( Segment->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
+        {
+            CachedSegment = Segment;
+        }
 
-    Guid = Segment->GetGuid();
+        if( Segment->GetAllocationModel() == EArianeAllocationModel::InstancedStruct )
+        {
+            DrawingLayer = Segment->GetOwner()->GetDrawingLayer();
 
-    OwnerGuid = Segment->GetOwner()->GetGuid();
+            Guid = Segment->GetGuid();
+
+            OwnerGuid = Segment->GetOwner()->GetGuid();
+        }
+    }
 }
 
 FArianeSegment*
@@ -142,13 +174,25 @@ FArianeTagID::FArianeTagID()
 }
 
 FArianeTagID::FArianeTagID( FArianeTag* Tag )
-    : CachedTag( ( Tag && ( Tag->GetAllocationModel() == EArianeAllocationModel::OperatingSystem ) ) ? Tag : nullptr )
+    : DrawingLayer( nullptr )
+    , CachedTag( nullptr )
 {
-    DrawingLayer = Tag->GetOwner()->GetDrawingLayer();
+    if( Tag )
+    {
+        if( Tag->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
+        {
+            CachedTag = Tag;
+        }
 
-    Guid = Tag->GetGuid();
+        if( Tag->GetAllocationModel() == EArianeAllocationModel::InstancedStruct )
+        {
+            DrawingLayer = Tag->GetOwner()->GetDrawingLayer();
 
-    OwnerGuid = Tag->GetOwner()->GetGuid();
+            Guid = Tag->GetGuid();
+
+            OwnerGuid = Tag->GetOwner()->GetGuid();
+        }
+    }
 }
 
 FArianeTag*

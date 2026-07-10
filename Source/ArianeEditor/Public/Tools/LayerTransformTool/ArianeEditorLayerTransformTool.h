@@ -8,7 +8,6 @@
 #include "InteractiveToolBuilder.h"
 // Ariane
 #include "ArianeEditorTool.h"
-#include "ArianeEditorLayerTransformToolBuilder.h" // that way only this header needs to be included by files using this tool
 
 #include "ArianeEditorLayerTransformTool.generated.h"
 

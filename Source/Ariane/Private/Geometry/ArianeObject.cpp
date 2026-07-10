@@ -114,29 +114,38 @@ FArianeObject::~FArianeObject()
 }
 
 FArianeObject::FArianeObject()
-    : Name ( FName( "Ariane Object" ) )
-    , Guid ( FGuid::NewGuid() )
-    , ParentID ( FArianeObjectID() )
-    , Translation ( 0.0f, 0.0f, 0.0f )
-    , RotationInDegrees( 0.0f )
-    , Scaling( 1.0f, 1.0f, 1.0f )
-    , DrawingLayer( nullptr )
-    , bVisible ( true )
-    , bExpanded ( true )
-    , AllocationModel ( EArianeAllocationModel::InstancedStruct )
-    , InvalidationFlags ( new FArianeObjectInvalidationFlags() )
-    , bSelected ( false )
+    : FArianeObject( nullptr
+                   , FName( "Ariane Object" )
+                   , EArianeAllocationModel::InstancedStruct
+                   , new FArianeObjectInvalidationFlags() )
 {
 }
 
 FArianeObject::FArianeObject( UArianeLayerDrawing* InDrawingLayer
                             , const FName& InName
-                            , EArianeAllocationModel InAllocationModel )
-    : FArianeObject()
+                            , EArianeAllocationModel InAllocationModel
+                            , FArianeObjectInvalidationFlags* InInvalidationFlags )
+    : Name ( InName )
+    , Guid ( FGuid::NewGuid() )
+    , ParentID ( FArianeObjectID() )
+    , Translation ( 0.0f, 0.0f, 0.0f )
+    , RotationInDegrees( 0.0f )
+    , Scaling( 1.0f, 1.0f, 1.0f )
+    , DrawingLayer( InDrawingLayer )
+    , bVisible ( true )
+    , bExpanded ( true )
+    , AllocationModel ( InAllocationModel  )
+    , InvalidationFlags ( InInvalidationFlags ? InInvalidationFlags
+                                              : new FArianeObjectInvalidationFlags() )
+    , bSelected ( false )
+
 {
-    DrawingLayer = InDrawingLayer;
-    Name = InName;
-    AllocationModel = InAllocationModel;
+}
+
+FArianeObjectInvalidationFlags&
+FArianeObject::GetInvalidationFlags()
+{
+    return *InvalidationFlags;
 }
 
 EArianeAllocationModel
@@ -174,7 +183,7 @@ FArianeObject::RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstan
     ChildToRemove->SetParent( nullptr );
     ChildToRemove->Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
     // update now because the child won't be recursively updatable from a parent object
-    ChildToRemove->Update( true );
+    ChildToRemove->Update( EUpdateFlags::None, true );
     ChildToRemove->Removed();
 
     if( ChildToRemove->IsSelected() )
@@ -376,31 +385,32 @@ FArianeObject::GetCommonClass( const TArray<FArianeObject*>& Objects )
     return CheckCommonClass( Objects, FArianeObject::StaticClass() );
 }
 
-bool
-FArianeObject::Update( bool Recurse, bool bClearFlags )
+void
+FArianeObject::UpdateShape( EUpdateFlags UpdateFlags )
 {
+}
+
+bool
+FArianeObject::Update( EUpdateFlags UpdateFlags, bool Recurse )
+{
+    UpdateShape( UpdateFlags );
+
     if( Recurse )
     {
-        InvalidatedChildren.RemoveAll( [&Recurse](  FArianeObjectID& InvalidatedChildID )
+        InvalidatedChildren.RemoveAll( [ &UpdateFlags
+                                       , &Recurse](  FArianeObjectID& InvalidatedChildID )
             {
-                return InvalidatedChildID.GetObject()->Update( Recurse );
+                return InvalidatedChildID.GetObject()->Update( UpdateFlags, Recurse );
             } );
     }
 
-    if( bClearFlags )
+    if( EnumHasAllFlags( UpdateFlags, EUpdateFlags::KeepInvalidated ) == false )
     {
         InvalidationFlags->Clear();
     }
 
     return InvalidatedChildren.Num() ? false : true;
 }
-
-FArianeObjectInvalidationFlags&
-FArianeObject::GetInvalidationFlags()
-{
-    return *InvalidationFlags;
-}
-
 
 UArianePainting3DComponent*
 FArianeObject::GetPainting3DComponent()
@@ -683,19 +693,7 @@ FArianeObject::CopySettings( FArianeObject* DestinationObject, const FCopyArgs& 
 FArianeObject*
 FArianeObject::CopyShape( const FCopyArgs& CopyArgs )
 {
-    FArianeObject* ObjectCopy = nullptr;
-
-    if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocByOperatingSystem ) )
-    {
-        ObjectCopy = new FArianeObject( nullptr
-                                      , Name
-                                      , EArianeAllocationModel::OperatingSystem );
-    }
-
-    if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocAsInstancedStruct ) )
-    {
-        ObjectCopy = CopyArgs.DrawingLayer->AllocObject( Name );
-    }
+    FArianeObject* ObjectCopy = CopyArgs.DrawingLayer->AllocObject( Name, CopyArgs.AllocationModel );
 
     return ObjectCopy;
 }

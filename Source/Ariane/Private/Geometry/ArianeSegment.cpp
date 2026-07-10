@@ -265,7 +265,7 @@ FArianeSegment::Invalidate()
 {
     if( OwnerID.GetObject() && ( bInvalidated == false ) )
     {
-        if( OwnerID.GetObject()->GetClass() == FArianePath::StaticClass() )
+        if( OwnerID.GetObject()->HasBaseClass( FArianePath::StaticClass() ) )
         {
             FArianePath* Path = static_cast<FArianePath*>( OwnerID.GetObject() );
 
@@ -343,7 +343,9 @@ FArianeSegment::Extract( FArianeObject* NewSegmentOwner
     {
         FArianePath* Path = static_cast<FArianePath*>( NewSegmentOwner );
 
-        return Path->AllocSegment( NewSegmentVertex0, NewSegmentVertex1 );
+        return Path->AllocSegment( NewSegmentVertex0
+                                 , NewSegmentVertex1
+                                 , Path->GetAllocationModel() );
     }
 
     return nullptr;

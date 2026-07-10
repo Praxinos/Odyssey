@@ -38,7 +38,7 @@ UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
     , bShowGrid ( true )
     , MaterialInterface ( nullptr )
     , EditedPath(nullptr)
-    , Cursor( EMouseCursor::Type::Default )
+    , Cursor( EMouseCursor::Type::Crosshairs )
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PathDrawing64");
 
@@ -70,6 +70,7 @@ UArianeEditorPathDrawingTool::Inactivate()
     // ViewportClient can be nullptr when closing the editor
     if( ViewportClient )
     {
+        // Hide outlining
         ViewportClient->EngineShowFlags.SetSelectionOutline(true);
         ViewportClient->Invalidate();
 
@@ -131,7 +132,8 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
 
                 EditedPath = DrawingLayer->AllocPath( MaterialInterface ? MaterialInterface
                                                                         : Settings->GetDefaultPathDrawingMaterial()
-                                                     , *(FString( "Path_" ) + FString::FromInt( PathNumber )) );
+                                                     , *(FString( "Path_" ) + FString::FromInt( PathNumber ))
+                                                     , EArianeAllocationModel::InstancedStruct );
 
                 ParentGroup->AppendChild( EditedPath );
 
@@ -293,7 +295,10 @@ EditedPath->AddSegment( EditedPath->AllocCubicSegment( TestVertex1
 ///////////////////////
                 if( Vertex0 == nullptr )
                 {
-                    Vertex0 = EditedPath->AllocVertex( localCoords, localNormal, Radius );
+                    Vertex0 = EditedPath->AllocVertex( localCoords
+                                                      , localNormal
+                                                      , Radius
+                                                      , EArianeAllocationModel::InstancedStruct );
 
                     EditedPath->AddVertex( Vertex0 );
                 }
@@ -305,13 +310,18 @@ EditedPath->AddSegment( EditedPath->AllocCubicSegment( TestVertex1
                     {
                         case EArianeEditorPathDrawingToolSegmentType::Polyline :
                         {
-                            FArianeVertex *Vertex1 = EditedPath->AllocVertex( localCoords, localNormal, Radius );
+                            FArianeVertex *Vertex1 = EditedPath->AllocVertex( localCoords
+                                                                            , localNormal
+                                                                            , Radius
+                                                                            , EArianeAllocationModel::InstancedStruct );
 
                             EditedPath->AddVertex( Vertex1 );
 
                             if( Vertex0 )
                             {
-                                FArianeSegment *Segment = EditedPath->AllocSegment( Vertex0, Vertex1 );
+                                FArianeSegment *Segment = EditedPath->AllocSegment( Vertex0
+                                                                                  , Vertex1
+                                                                                  , EArianeAllocationModel::InstancedStruct );
 
                                 EditedPath->AddSegment( Segment );
                             }

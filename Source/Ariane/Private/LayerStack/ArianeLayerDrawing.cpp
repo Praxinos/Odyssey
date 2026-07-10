@@ -7,6 +7,10 @@
 #include "ArianePainting3DComponent.h"
 #include "ArianePath.h"
 #include "ArianeGroup.h"
+#include "ArianeEllipse.h"
+#include "ArianeRectangle.h"
+#include "ArianeLine.h"
+#include "ArianePolygon.h"
 
 UArianeLayerDrawing::~UArianeLayerDrawing()
 {
@@ -131,7 +135,7 @@ UArianeLayerDrawing::GetObject( const FGuid& InGuid )
 }
 
 FArianeObject*
-UArianeLayerDrawing::AllocObject( const FName& InName )
+UArianeLayerDrawing::AllocObject( const FName& InName, EArianeAllocationModel AllocationModel )
 {
     InstancedObjectsAccessRW.Lock();
     InstancedObjects.Add( FInstancedStruct::Make<FArianeObject>( this, InName, EArianeAllocationModel::InstancedStruct ) );
@@ -143,25 +147,192 @@ UArianeLayerDrawing::AllocObject( const FName& InName )
 }
 
 FArianeGroup*
-UArianeLayerDrawing::AllocGroup( const FName& InName )
+UArianeLayerDrawing::AllocGroup( const FName& InName
+                               , EArianeAllocationModel AllocationModel )
 {
-    InstancedObjectsAccessRW.Lock();
-    InstancedObjects.Add( FInstancedStruct::Make<FArianeGroup>( this, InName, EArianeAllocationModel::InstancedStruct ) );
-    InstancedObjectsAccessRW.Unlock();
+    FArianeGroup* NewGroup = nullptr;
 
-    FArianeGroup* NewGroup = InstancedObjects.Last().GetMutablePtr<FArianeGroup>();
+    if( AllocationModel == EArianeAllocationModel::InstancedStruct )
+    {
+        InstancedObjectsAccessRW.Lock();
+        InstancedObjects.Add( FInstancedStruct::Make<FArianeGroup>( this, InName, AllocationModel ) );
+        InstancedObjectsAccessRW.Unlock();
+
+        NewGroup = InstancedObjects.Last().GetMutablePtr<FArianeGroup>();
+    }
+
+    if( AllocationModel == EArianeAllocationModel::OperatingSystem )
+    {
+        NewGroup = new FArianeGroup( this, InName, AllocationModel );
+    }
 
     return NewGroup;
 }
 
-FArianePath*
-UArianeLayerDrawing::AllocPath( UMaterialInterface* InMaterialInterface, const FName& InName )
+FArianeEllipse*
+UArianeLayerDrawing::AllocEllipse( const FName& InName
+                                 , double RadiusX
+                                 , double RadiusY
+                                 , double StrokeWidth
+                                 , EArianeAllocationModel AllocationModel )
 {
-    InstancedObjectsAccessRW.Lock();
-    InstancedObjects.Add( FInstancedStruct::Make<FArianePath>( this, InName, EArianeAllocationModel::InstancedStruct ) );
-    InstancedObjectsAccessRW.Unlock();
+    FArianeEllipse* Ellipse = nullptr;
 
-    FArianePath* NewPath = InstancedObjects.Last().GetMutablePtr<FArianePath>();
+    if( AllocationModel == EArianeAllocationModel::InstancedStruct )
+    {
+        InstancedObjectsAccessRW.Lock();
+        InstancedObjects.Add( FInstancedStruct::Make<FArianeEllipse>( this
+                                                                    , InName
+                                                                    , RadiusX
+                                                                    , RadiusY
+                                                                    , StrokeWidth
+                                                                    , AllocationModel ) );
+        InstancedObjectsAccessRW.Unlock();
+
+        Ellipse = InstancedObjects.Last().GetMutablePtr<FArianeEllipse>();
+    }
+
+    if( AllocationModel == EArianeAllocationModel::OperatingSystem )
+    {
+        Ellipse = new FArianeEllipse( this
+                                   , InName
+                                   , RadiusX
+                                   , RadiusY
+                                   , StrokeWidth
+                                   , AllocationModel );
+    }
+
+    return Ellipse;
+}
+
+FArianeLine*
+UArianeLayerDrawing::AllocLine( const FName& InName
+                              , const FVector& StartPoint
+                              , const FVector& EndPoint
+                              , double StrokeWidth
+                              , EArianeAllocationModel AllocationModel )
+{
+    FArianeLine* Line = nullptr;
+
+    if( AllocationModel == EArianeAllocationModel::InstancedStruct )
+    {
+        InstancedObjectsAccessRW.Lock();
+        InstancedObjects.Add( FInstancedStruct::Make<FArianeLine>( this
+                                                                 , InName
+                                                                 , StartPoint
+                                                                 , EndPoint
+                                                                 , StrokeWidth
+                                                                 , AllocationModel ) );
+        InstancedObjectsAccessRW.Unlock();
+
+        Line = InstancedObjects.Last().GetMutablePtr<FArianeLine>();
+    }
+
+    if( AllocationModel == EArianeAllocationModel::OperatingSystem )
+    {
+        Line = new FArianeLine( this
+                              , InName
+                              , StartPoint
+                              , EndPoint
+                              , StrokeWidth
+                              , AllocationModel );
+    }
+
+    return Line;
+}
+
+FArianePolygon*
+UArianeLayerDrawing::AllocPolygon( const FName& InName
+                                 , uint32 CornerCount
+                                 , double Radius
+                                 , double StrokeWidth
+                                 , EArianeAllocationModel AllocationModel )
+{
+    FArianePolygon* Polygon = nullptr;
+
+    if( AllocationModel == EArianeAllocationModel::InstancedStruct )
+    {
+        InstancedObjectsAccessRW.Lock();
+        InstancedObjects.Add( FInstancedStruct::Make<FArianePolygon>( this
+                                                                    , InName
+                                                                    , CornerCount
+                                                                    , Radius
+                                                                    , StrokeWidth
+                                                                    , AllocationModel ) );
+        InstancedObjectsAccessRW.Unlock();
+
+        Polygon = InstancedObjects.Last().GetMutablePtr<FArianePolygon>();
+    }
+
+    if( AllocationModel == EArianeAllocationModel::OperatingSystem )
+    {
+        Polygon = new FArianePolygon( this
+                                    , InName
+                                    , CornerCount
+                                    , Radius
+                                    , StrokeWidth
+                                    , AllocationModel );
+    }
+
+    return Polygon;
+}
+
+FArianeRectangle*
+UArianeLayerDrawing::AllocRectangle( const FName& InName
+                                   , double Width
+                                   , double Height
+                                   , double StrokeWidth
+                                   , EArianeAllocationModel AllocationModel )
+{
+    FArianeRectangle* Rectangle = nullptr;
+
+    if( AllocationModel == EArianeAllocationModel::InstancedStruct )
+    {
+        InstancedObjectsAccessRW.Lock();
+        InstancedObjects.Add( FInstancedStruct::Make<FArianeRectangle>( this
+                                                                      , InName
+                                                                      , Width
+                                                                      , Height
+                                                                      , StrokeWidth
+                                                                      , AllocationModel ) );
+        InstancedObjectsAccessRW.Unlock();
+
+        Rectangle = InstancedObjects.Last().GetMutablePtr<FArianeRectangle>();
+    }
+
+    if( AllocationModel == EArianeAllocationModel::OperatingSystem )
+    {
+        Rectangle = new FArianeRectangle( this
+                                        , InName
+                                        , Width
+                                        , Height
+                                        , StrokeWidth
+                                        , AllocationModel );
+    }
+
+    return Rectangle;
+}
+
+FArianePath*
+UArianeLayerDrawing::AllocPath( UMaterialInterface* InMaterialInterface
+                              , const FName& InName
+                              , EArianeAllocationModel AllocationModel )
+{
+    FArianePath* NewPath = nullptr;
+
+    if( AllocationModel == EArianeAllocationModel::InstancedStruct )
+    {
+        InstancedObjectsAccessRW.Lock();
+        InstancedObjects.Add( FInstancedStruct::Make<FArianePath>( this, InName, AllocationModel ) );
+        InstancedObjectsAccessRW.Unlock();
+
+        NewPath = InstancedObjects.Last().GetMutablePtr<FArianePath>();
+    }
+
+    if( AllocationModel == EArianeAllocationModel::OperatingSystem )
+    {
+        NewPath = new FArianePath( this, InName, AllocationModel );
+    }
 
     NewPath->SetMaterial( InMaterialInterface ? InMaterialInterface
                                               : GetLayerStack()->GetPainting3DComponent()->GetDefaultMaterial() );
@@ -240,8 +411,14 @@ UArianeLayerDrawing::GetInstancedObjects()
 void
 UArianeLayerDrawing::Update( bool bInteractive )
 {
-                                           // clear flags only if we are NOT interactive
-    RootGroupID.GetObject()->Update( true, bInteractive ? false : true );
+    FArianeObject::EUpdateFlags ObjectUpdateFlags = FArianeObject::EUpdateFlags::None;
+
+    if( bInteractive )
+    {
+        ObjectUpdateFlags = FArianeObject::EUpdateFlags::Interactive;
+    }
+
+    RootGroupID.GetObject()->Update( ObjectUpdateFlags, true );
 
     UpdateBounds();
 
@@ -281,7 +458,7 @@ UArianeLayerDrawing::ResetHierarchy()
     UsedMaterials.Empty();
     SelectedObjects.Empty();
 
-    RootGroupID = FArianeObjectID( AllocGroup( "Root Group" ) );
+    RootGroupID = FArianeObjectID( AllocGroup( "Root Group", EArianeAllocationModel::InstancedStruct ) );
 
     RootGroupID.GetObject()->Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 
@@ -311,7 +488,7 @@ UArianeLayerDrawing::UpdateBounds()
     {
         const FArianeObject* Object = InstancedObject.GetPtr<FArianeObject>();
 
-        if( const_cast<FArianeObject*>(Object)->GetClass() == FArianePath::StaticClass() )
+        if( const_cast<FArianeObject*>(Object)->HasBaseClass( FArianePath::StaticClass() ) )
         {
             const FArianePath* Path = static_cast<const FArianePath*>(Object);
 

@@ -7,6 +7,10 @@
 #include "ArianeEditorObjectProxy.h"
 #include "ArianeEditorPathProxy.h"
 #include "ArianeEditorGroupProxy.h"
+#include "ArianeEditorEllipseProxy.h"
+#include "ArianeEditorRectangleProxy.h"
+#include "ArianeEditorLineProxy.h"
+#include "ArianeEditorPolygonProxy.h"
 // Ariane Headers
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayer.h"
@@ -14,6 +18,10 @@
 #include "ArianeLayerStack.h"
 #include "ArianeObject.h"
 #include "ArianeGroup.h"
+#include "ArianeEllipse.h"
+#include "ArianeRectangle.h"
+#include "ArianeLine.h"
+#include "ArianePolygon.h"
 // Unreal Headers
 #include "Editor.h"
 #include "IDetailPropertyRow.h"
@@ -52,6 +60,10 @@ SArianeEditorCurrentObjectDetailsView::Construct( const FArguments& InArgs, FAri
     ObjectProxy = NewObject<UArianeEditorObjectProxy>();
     GroupProxy = NewObject<UArianeEditorGroupProxy>();
     PathProxy = NewObject<UArianeEditorPathProxy>();
+    EllipseProxy = NewObject<UArianeEditorEllipseProxy>();
+    RectangleProxy = NewObject<UArianeEditorRectangleProxy>();
+    LineProxy = NewObject<UArianeEditorLineProxy>();
+    PolygonProxy = NewObject<UArianeEditorPolygonProxy>();
 
     DetailsView->OnFinishedChangingProperties().AddSP( this, &SArianeEditorCurrentObjectDetailsView::PropertyValueChanged );
 
@@ -255,6 +267,38 @@ SArianeEditorCurrentObjectDetailsView::Update()
                     CurrentObjectProxy = GroupProxy;
                 }
 
+                if( ObjectClass == FArianeEllipse::StaticClass() )
+                {
+                    EllipseProxy->Update( SelectedObjects );
+                    DetailsView->SetObject( EllipseProxy );
+
+                    CurrentObjectProxy = EllipseProxy;
+                }
+
+                if( ObjectClass == FArianeRectangle::StaticClass() )
+                {
+                    RectangleProxy->Update( SelectedObjects );
+                    DetailsView->SetObject( RectangleProxy );
+
+                    CurrentObjectProxy = RectangleProxy;
+                }
+
+                if( ObjectClass == FArianeLine::StaticClass() )
+                {
+                    LineProxy->Update( SelectedObjects );
+                    DetailsView->SetObject( LineProxy );
+
+                    CurrentObjectProxy = LineProxy;
+                }
+
+                if( ObjectClass == FArianePolygon::StaticClass() )
+                {
+                    PolygonProxy->Update( SelectedObjects );
+                    DetailsView->SetObject( PolygonProxy );
+
+                    CurrentObjectProxy = PolygonProxy;
+                }
+
                 if( ObjectClass == FArianeObject::StaticClass() )
                 {
                     // default
@@ -323,6 +367,10 @@ SArianeEditorCurrentObjectDetailsView::AddReferencedObjects(FReferenceCollector&
     Collector.AddReferencedObject(ObjectProxy);
     Collector.AddReferencedObject(PathProxy);
     Collector.AddReferencedObject(GroupProxy);
+    Collector.AddReferencedObject(EllipseProxy);
+    Collector.AddReferencedObject(RectangleProxy);
+    Collector.AddReferencedObject(LineProxy);
+    Collector.AddReferencedObject(PolygonProxy);
 }
 
 #undef LOCTEXT_NAMESPACE

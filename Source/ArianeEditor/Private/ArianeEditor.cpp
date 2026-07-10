@@ -11,9 +11,15 @@
 #include "ArianeEditorLayerStackTab.h"
 #include "ArianeEditorSceneTreeViewTab.h"
 #include "PathEditTool/ArianeEditorPathEditTool.h"
+#include "PathEditTool/ArianeEditorPathEditToolBuilder.h"
 #include "PathDrawingTool/ArianeEditorPathDrawingTool.h"
+#include "PathDrawingTool/ArianeEditorPathDrawingToolBuilder.h"
+#include "PrimitiveDrawingTool/ArianeEditorPrimitiveDrawingTool.h"
+#include "PrimitiveDrawingTool/ArianeEditorPrimitiveDrawingToolBuilder.h"
 #include "EraserTool/ArianeEditorEraserTool.h"
+#include "EraserTool/ArianeEditorEraserToolBuilder.h"
 #include "LayerTransformTool/ArianeEditorLayerTransformTool.h"
+#include "LayerTransformTool/ArianeEditorLayerTransformToolBuilder.h"
 // Ariane headers
 #include "ArianeGroup.h"
 #include "ArianePainting3DComponent.h"
@@ -420,6 +426,7 @@ void
 FArianeEditor::RegisterTools()
 {
     AddToolBuilder( NewObject<UArianeEditorPathDrawingToolBuilder>() );
+    AddToolBuilder( NewObject<UArianeEditorPrimitiveDrawingToolBuilder>() );
     AddToolBuilder( NewObject<UArianeEditorPathEditToolBuilder>() );
     AddToolBuilder( NewObject<UArianeEditorEraserToolBuilder>() );
     AddToolBuilder( NewObject<UArianeEditorLayerTransformToolBuilder>() );
@@ -812,7 +819,7 @@ FArianeEditor::GroupSelectedObjects( const FName& NewGroupName )
         {
             FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
             FArianeObject* FosterParent = RootGroup;
-            FArianeGroup* NewGroup = DrawingLayer->AllocGroup( NewGroupName );
+            FArianeGroup* NewGroup = DrawingLayer->AllocGroup( NewGroupName, EArianeAllocationModel::InstancedStruct );
             TArray<FArianeObject*> ObjectsToRegroup;
 
             if( RootGroup->IsSelected() == false )
@@ -903,7 +910,8 @@ FArianeEditor::CopySelectedObjects()
             {
                 FArianeObject::FCopyArgs CopyArgs;
 
-                CopyArgs.Flags = FArianeObject::ECopyFlags::AllocByOperatingSystem;
+                CopyArgs.DrawingLayer = DrawingLayer;
+                CopyArgs.AllocationModel = EArianeAllocationModel::OperatingSystem;
 
                 // free copied objects
                 for( FArianeObject* ObjectToCopy : Clipboard.CopiedObjects )
@@ -944,8 +952,8 @@ FArianeEditor::PasteObjects()
 
                 // ECopyFlags::AllocByLayer means the allocation will be made as FInstancedstruct, thus saved by
                 // Unreal Engine's serialization
-                CopyArgs.Flags = FArianeObject::ECopyFlags::AllocAsInstancedStruct
-                               | FArianeObject::ECopyFlags::Rename;
+                CopyArgs.Flags = FArianeObject::ECopyFlags::Rename;
+                CopyArgs.AllocationModel = EArianeAllocationModel::InstancedStruct;
                 CopyArgs.DrawingLayer = DrawingLayer;
 
                 DrawingLayer->GetSelectedTrees( SelectedTrees );

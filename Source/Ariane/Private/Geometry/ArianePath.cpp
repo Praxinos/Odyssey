@@ -212,6 +212,8 @@ FArianePath::~FArianePath()
         }
     }
 
+    Segments.Empty();
+
     // free mallocated vertices
     for( FArianeVertexID& VertexID : Vertices )
     {
@@ -222,34 +224,32 @@ FArianePath::~FArianePath()
             delete Vertex;
         }
     }
+
+    Vertices.Empty();
 }
 
 FArianePath::FArianePath()
-    : FArianeObject()
-    , LineType( EArianePathLineType::Tube )
-    , Color ( 0, 0, 0, 255 )
-    , MaterialInterface ( nullptr )
-    , Geometry3D ( this )
+    : FArianePath( nullptr
+                 , FName( "Ariane Path" )
+                 , EArianeAllocationModel::InstancedStruct
+                 , new FArianePathInvalidationFlags() )
 {
-    InvalidationFlags = new FArianePathInvalidationFlags();
-
-    // Default material interface. color only
-    //MaterialInterface = GEngine->VertexColorMaterial;
 }
 
 FArianePath::FArianePath( UArianeLayerDrawing* InDrawingLayer
                         , const FName& InName
-                        , EArianeAllocationModel InAllocationModel )
-    : FArianeObject ( InDrawingLayer, InName, InAllocationModel )
+                        , EArianeAllocationModel InAllocationModel
+                        , FArianePathInvalidationFlags* InInvalidationFlags )
+    : FArianeObject ( InDrawingLayer
+                    , InName
+                    , InAllocationModel
+                    , InInvalidationFlags ? InInvalidationFlags
+                                          : new FArianePathInvalidationFlags() )
     , LineType ( EArianePathLineType::Tube )
     , Color ( 0, 0, 0, 255 )
     , MaterialInterface ( nullptr )
     , Geometry3D ( this )
 {
-    InvalidationFlags = new FArianePathInvalidationFlags();
-
-    // Default material interface. color only
-    //MaterialInterface = GEngine->VertexColorMaterial;
 }
 
 bool
@@ -327,21 +327,38 @@ FArianePath::GetChains()
 }
 
 FArianeVertex*
-FArianePath::AllocVertex( const FVector& InPosition, const FVector& InNormal, double InRadius )
+FArianePath::AllocVertex( const FVector& InPosition
+                        , const FVector& InNormal
+                        , double InRadius
+                        , EArianeAllocationModel InAllocationModel )
 {
-    InstancedVertices.Push( FInstancedStruct::Make<FArianeVertex>( this
-                                                                 , InPosition
-                                                                 , InNormal
-                                                                 , InRadius
-                                                                 , EArianeAllocationModel::InstancedStruct ) );
+    FArianeVertex* NewVertex = nullptr;
 
-    FArianeVertex* NewVertex = InstancedVertices.Last().GetMutablePtr<FArianeVertex>();
+    if( InAllocationModel == EArianeAllocationModel::InstancedStruct )
+    {
+        InstancedVertices.Push( FInstancedStruct::Make<FArianeVertex>( this
+                                                                     , InPosition
+                                                                     , InNormal
+                                                                     , InRadius
+                                                                     , InAllocationModel ) );
+
+        NewVertex = InstancedVertices.Last().GetMutablePtr<FArianeVertex>();
+    }
+
+    if( InAllocationModel == EArianeAllocationModel::OperatingSystem )
+    {
+        NewVertex = new FArianeVertex( this
+                                     , FVector()
+                                     , FVector()
+                                     , InRadius
+                                     , InAllocationModel );
+    }
 
     return NewVertex;
 }
 
 void
-FArianePath::RemoveVertex( FArianeVertex* Vertex, bool bRemoveFromInstancedVertices )
+FArianePath::RemoveVertex( FArianeVertex* Vertex, bool bUnallocate )
 {
     Vertices.RemoveAll( [Vertex]( FArianeVertexID& VertexID ) -> bool
     {
@@ -350,12 +367,20 @@ FArianePath::RemoveVertex( FArianeVertex* Vertex, bool bRemoveFromInstancedVerti
 
     Invalidate( FArianePathInvalidationFlags().SetVertexAddedOrRemoved() );
 
-    if( bRemoveFromInstancedVertices )
+    if( bUnallocate )
     {
-        InstancedVertices.RemoveAll( [Vertex]( FInstancedStruct& Struct ) -> bool
+        if( Vertex->GetAllocationModel() == EArianeAllocationModel::InstancedStruct )
         {
-            return ( Vertex == Struct.GetPtr<FArianeVertex>() ) ? true : false;
-        } );
+            InstancedVertices.RemoveAll( [Vertex]( FInstancedStruct& Struct ) -> bool
+            {
+                return ( Vertex == Struct.GetPtr<FArianeVertex>() ) ? true : false;
+            } );
+        }
+
+        if( Vertex->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
+        {
+            delete Vertex;
+        }
     }
 }
 
@@ -392,11 +417,26 @@ FArianePath::GetSegmentByGuid( const FGuid& InGuid )
 }
 
 FArianeSegment*
-FArianePath::AllocSegment( FArianeVertex* Vertex0, FArianeVertex* Vertex1 )
+FArianePath::AllocSegment( FArianeVertex* Vertex0
+                         , FArianeVertex* Vertex1
+                         , EArianeAllocationModel InAllocationModel )
 {
-    InstancedSegments.Push( FInstancedStruct::Make<FArianeSegment>( this, Vertex0, Vertex1, EArianeAllocationModel::InstancedStruct ) );
+    FArianeSegment* NewSegment = nullptr;
 
-    FArianeSegment* NewSegment = InstancedSegments.Last().GetMutablePtr<FArianeSegment>();
+    if( InAllocationModel == EArianeAllocationModel::InstancedStruct )
+    {
+        InstancedSegments.Push( FInstancedStruct::Make<FArianeSegment>( this
+                                                                      , Vertex0
+                                                                      , Vertex1
+                                                                      , InAllocationModel ) );
+
+        NewSegment = InstancedSegments.Last().GetMutablePtr<FArianeSegment>();
+    }
+
+    if( InAllocationModel == EArianeAllocationModel::OperatingSystem )
+    {
+        NewSegment = new FArianeSegment( this, Vertex0, Vertex1, InAllocationModel );
+    }
 
     return NewSegment;
 }
@@ -406,7 +446,8 @@ FArianeSegmentCubic*
 FArianePath::AllocCubicSegment( FArianeVertex* Vertex0
                               , const FVector& Handle0
                               , const FVector& Handle1
-                              , FArianeVertex* Vertex1 )
+                              , FArianeVertex* Vertex1
+                              , EArianeAllocationModel InAllocationModel )
 {
     return AllocCubicSegment( Vertex0
                             , Handle0.X
@@ -415,7 +456,8 @@ FArianePath::AllocCubicSegment( FArianeVertex* Vertex0
                             , Handle1.X
                             , Handle1.Y
                             , Handle1.Z
-                            , Vertex1 );
+                            , Vertex1
+                            , InAllocationModel );
 }
 
 FArianeSegmentCubic*
@@ -426,20 +468,39 @@ FArianePath::AllocCubicSegment( FArianeVertex* Vertex0
                               , double Handle1X
                               , double Handle1Y
                               , double Handle1Z
-                              , FArianeVertex* Vertex1 )
+                              , FArianeVertex* Vertex1
+                              , EArianeAllocationModel InAllocationModel )
 {
-    InstancedSegments.Push( FInstancedStruct::Make<FArianeSegmentCubic>( this
-                                                                       , Vertex0
-                                                                       , Handle0X
-                                                                       , Handle0Y
-                                                                       , Handle0Z
-                                                                       , Handle1X
-                                                                       , Handle1Y
-                                                                       , Handle1Z
-                                                                       , Vertex1
-                                                                       , EArianeAllocationModel::InstancedStruct ) );
+    FArianeSegmentCubic* NewCubicSegment = nullptr;
 
-    FArianeSegmentCubic* NewCubicSegment = InstancedSegments.Last().GetMutablePtr<FArianeSegmentCubic>();
+    if( InAllocationModel == EArianeAllocationModel::InstancedStruct )
+    {
+        InstancedSegments.Push( FInstancedStruct::Make<FArianeSegmentCubic>( this
+                                                                           , Vertex0
+                                                                           , Handle0X
+                                                                           , Handle0Y
+                                                                           , Handle0Z
+                                                                           , Handle1X
+                                                                           , Handle1Y
+                                                                           , Handle1Z
+                                                                           , Vertex1
+                                                                           , InAllocationModel ) );
+        NewCubicSegment = InstancedSegments.Last().GetMutablePtr<FArianeSegmentCubic>();
+    }
+
+    if( InAllocationModel == EArianeAllocationModel::OperatingSystem )
+    {
+        NewCubicSegment = new FArianeSegmentCubic( this
+                                                 , Vertex0
+                                                 , Handle0X
+                                                 , Handle0Y
+                                                 , Handle0Z
+                                                 , Handle1X
+                                                 , Handle1Y
+                                                 , Handle1Z
+                                                 , Vertex1
+                                                 , InAllocationModel );
+    }
 
     return NewCubicSegment;
 }
@@ -470,7 +531,7 @@ FArianePath::AddSegment( FArianeSegment* Segment )
 }
 
 void
-FArianePath::RemoveSegment( FArianeSegment* Segment, bool bRemoveFromInstancedSegments )
+FArianePath::RemoveSegment( FArianeSegment* Segment, bool bUnallocate )
 {
     Segments.RemoveAll( [Segment]( FArianeSegmentID& SegmentID ) -> bool
     {
@@ -483,12 +544,20 @@ FArianePath::RemoveSegment( FArianeSegment* Segment, bool bRemoveFromInstancedSe
 
     Invalidate( FArianePathInvalidationFlags().SetSegmentAddedOrRemoved() );
 
-    if( bRemoveFromInstancedSegments )
+    if( bUnallocate )
     {
-        InstancedSegments.RemoveAll( [Segment]( const FInstancedStruct& Struct ) -> bool
+        if( Segment->GetAllocationModel() == EArianeAllocationModel::InstancedStruct )
         {
-            return ( Segment == Struct.GetPtr<FArianeSegment>() ) ? true : false;
-        } );
+            InstancedSegments.RemoveAll( [Segment]( const FInstancedStruct& Struct ) -> bool
+            {
+                return ( Segment == Struct.GetPtr<FArianeSegment>() ) ? true : false;
+            } );
+        }
+
+        if( Segment->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
+        {
+            delete Segment;
+        }
     }
 }
 
@@ -545,17 +614,7 @@ FArianePath::CopyShape( const FCopyArgs& CopyArgs )
     FArianePath* PathCopy = nullptr;
     uint32 VertexID = 0;
 
-    if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocByOperatingSystem ) )
-    {
-        PathCopy = new FArianePath( nullptr
-                                  , Name
-                                  , EArianeAllocationModel::OperatingSystem );
-    }
-
-    if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocAsInstancedStruct ) )
-    {
-        PathCopy = CopyArgs.DrawingLayer->AllocPath( nullptr, Name );
-    }
+    PathCopy = CopyArgs.DrawingLayer->AllocPath( nullptr, Name, CopyArgs.AllocationModel );
 
     LookupTable.Reserve ( Vertices.Num() );
 
@@ -566,23 +625,10 @@ FArianePath::CopyShape( const FCopyArgs& CopyArgs )
         FVector OriginalVertexPosition = OriginalVertex->GetPosition();
         FVector OriginalVertexNormal = OriginalVertex->GetNormal();
         double OriginalVertexRadius = OriginalVertex->GetRadius();
-        FArianeVertex* NewVertex = nullptr;
-
-        if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocByOperatingSystem ) )
-        {
-            NewVertex = new FArianeVertex( PathCopy
-                                         , OriginalVertexPosition
-                                         , OriginalVertexNormal
-                                         , OriginalVertexRadius
-                                         , EArianeAllocationModel::OperatingSystem );
-        }
-
-        if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocAsInstancedStruct ) )
-        {
-            NewVertex = PathCopy->AllocVertex( OriginalVertexPosition
-                                             , OriginalVertexNormal
-                                             , OriginalVertexRadius );
-        }
+        FArianeVertex* NewVertex = PathCopy->AllocVertex( OriginalVertexPosition
+                                                        , OriginalVertexNormal
+                                                        , OriginalVertexRadius
+                                                        , CopyArgs.AllocationModel );
 
         // Don't check if NewVertex is null, it must not be.
         NewVertex->SetHandleAligned( OriginalVertex->IsHandleAligned() );
@@ -610,48 +656,22 @@ FArianePath::CopyShape( const FCopyArgs& CopyArgs )
             FVector OriginalHandle0Position = OriginalHandle0->GetPosition();
             FVector OriginalHandle1Position = OriginalHandle1->GetPosition();
 
-            if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocByOperatingSystem ) )
-            {
-                NewSegment = new FArianeSegmentCubic( PathCopy
-                                                    , LookupTable[Vertex0->GetID()]
-                                                    , OriginalHandle0Position.X
-                                                    , OriginalHandle0Position.Y
-                                                    , OriginalHandle0Position.Z
-                                                    , OriginalHandle1Position.X
-                                                    , OriginalHandle1Position.Y
-                                                    , OriginalHandle1Position.Z
-                                                    , LookupTable[Vertex1->GetID()]
-                                                    , EArianeAllocationModel::OperatingSystem );
-            }
-
-            if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocAsInstancedStruct ) )
-            {
-                NewSegment = PathCopy->AllocCubicSegment ( LookupTable[Vertex0->GetID()]
-                                                         , OriginalHandle0Position.X
-                                                         , OriginalHandle0Position.Y
-                                                         , OriginalHandle0Position.Z
-                                                         , OriginalHandle1Position.X
-                                                         , OriginalHandle1Position.Y
-                                                         , OriginalHandle1Position.Z
-                                                         , LookupTable[Vertex1->GetID()] );
-            }
+            NewSegment = PathCopy->AllocCubicSegment ( LookupTable[Vertex0->GetID()]
+                                                     , OriginalHandle0Position.X
+                                                     , OriginalHandle0Position.Y
+                                                     , OriginalHandle0Position.Z
+                                                     , OriginalHandle1Position.X
+                                                     , OriginalHandle1Position.Y
+                                                     , OriginalHandle1Position.Z
+                                                     , LookupTable[Vertex1->GetID()]
+                                                     , CopyArgs.AllocationModel );
         }
 
         if( OriginalSegment->GetClass() == FArianeSegment::StaticClass() )
         {
-            if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocByOperatingSystem ) )
-            {
-                NewSegment = new FArianeSegment( PathCopy
-                                               , LookupTable[Vertex0->GetID()]
-                                               , LookupTable[Vertex1->GetID()]
-                                               , EArianeAllocationModel::OperatingSystem );
-            }
-
-            if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocAsInstancedStruct ) )
-            {
-                NewSegment = PathCopy->AllocSegment ( LookupTable[Vertex0->GetID()]
-                                                    , LookupTable[Vertex1->GetID()] );
-            }
+            NewSegment = PathCopy->AllocSegment ( LookupTable[Vertex0->GetID()]
+                                                , LookupTable[Vertex1->GetID()]
+                                                , CopyArgs.AllocationModel );
         }
 
         // Don't check if NewSegment is null, it must not be.
@@ -666,9 +686,9 @@ FArianePath::UpdateBounds()
 {
     Bounds = FBoxSphereBounds(ForceInit);
 
-    for( FInstancedStruct& InstancedSegment : InstancedSegments )
+    for( FArianeSegmentID& SegmentID : Segments )
     {
-        FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
+        FArianeSegment* Segment = SegmentID.GetSegment();
 
         Bounds = Bounds + Segment->GetBounds();
     }
@@ -817,12 +837,12 @@ FArianePath::FindChains()
     }
 }
 
-bool
-FArianePath::Update( bool Recurse, bool bClearFlags )
+void
+FArianePath::UpdateShape( EUpdateFlags UpdateFlags )
 {
     FArianePathInvalidationFlags* PathInvalidationFlags = static_cast<FArianePathInvalidationFlags*>(InvalidationFlags);
 
-    FArianeObject::Update( Recurse , false );
+    //FArianeObject::Update( Recurse , false );
 
     if( PathInvalidationFlags->VertexAddedOrRemoved
      || PathInvalidationFlags->SegmentAddedOrRemoved )
@@ -840,9 +860,9 @@ FArianePath::Update( bool Recurse, bool bClearFlags )
         UpdateBounds();
     }
 
-    PathInvalidationFlags->Clear();
+    //PathInvalidationFlags->Clear();
 
-    return true; // update succeeded
+    //return true; // update succeeded
 }
 
 void
@@ -1061,7 +1081,8 @@ FArianePath::DeleteVertex( const TArray<FArianeVertex*>& VerticesToRemove
         if ( SegmentClass == FArianeSegment::StaticClass() )
         {
             StitchedSegment = AllocSegment( StitchingVertex0
-                                          , StitchingVertex1 );
+                                          , StitchingVertex1
+                                          , AllocationModel );
         }
 
         if ( SegmentClass == FArianeSegmentCubic::StaticClass() )
@@ -1076,7 +1097,8 @@ FArianePath::DeleteVertex( const TArray<FArianeVertex*>& VerticesToRemove
                                                , Handle1.X
                                                , Handle1.Y
                                                , Handle1.Z
-                                               , StitchingVertex1 );
+                                               , StitchingVertex1
+                                               , AllocationModel );
         }
 
         if( StitchedSegment )

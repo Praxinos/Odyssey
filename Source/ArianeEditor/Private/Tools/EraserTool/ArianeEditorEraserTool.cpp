@@ -664,7 +664,10 @@ UArianeEditorEraserTool::AssignVertex( FArianePath* OwnerPath
         // boundary vertices are guaranteed unique per nature, no need to check uniqueness
         if( ( VertexAdditionFlags & EVertexAdditionFlags::CreateBoundaryVertex ) == EVertexAdditionFlags::CreateBoundaryVertex )
         {
-            WayPoint.AssignedVertex = OwnerPath->AllocVertex( FVector::Zero(), FVector::Zero(), 0.0f );
+            WayPoint.AssignedVertex = OwnerPath->AllocVertex( FVector::Zero()
+                                                            , FVector::Zero()
+                                                            , 0.0f
+                                                            , EArianeAllocationModel::InstancedStruct );
 
             OutAddedVertices.Add( WayPoint.AssignedVertex );
         }
@@ -673,7 +676,10 @@ UArianeEditorEraserTool::AssignVertex( FArianePath* OwnerPath
         {
             //bool bHandleAligned = WayPoint.OriginalVertex->IsHandleAligned();
 
-            WayPoint.AssignedVertex = OwnerPath->AllocVertex( FVector::Zero(), FVector::Zero(), 0.0f );
+            WayPoint.AssignedVertex = OwnerPath->AllocVertex( FVector::Zero()
+                                                            , FVector::Zero()
+                                                            , 0.0f
+                                                            , EArianeAllocationModel::InstancedStruct );
 
             OutAddedVertices.Add( WayPoint.AssignedVertex );
         }
@@ -744,7 +750,9 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
 
             if( ( SegmentAdditionFlags & ESegmentAdditionFlags::CreateNewPath ) == ESegmentAdditionFlags::CreateNewPath )
             {
-                CurrentPath = DrawingLayer->AllocPath( ChainPath->GetMaterial(), ChainPath->GetName() );
+                CurrentPath = DrawingLayer->AllocPath( ChainPath->GetMaterial()
+                                                     , ChainPath->GetName()
+                                                     , EArianeAllocationModel::InstancedStruct );
                 // for postprocessing. the path is not added to the parent yet
                 CurrentPath->SetParent( ChainPath->GetParent() );
 

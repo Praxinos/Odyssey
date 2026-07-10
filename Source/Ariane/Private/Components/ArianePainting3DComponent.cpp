@@ -479,7 +479,7 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
                                             , ViewIndex
                                             , &Collector ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
     {
-        if( ( Object->GetClass() == FArianePath::StaticClass() )  )
+        if( Object->HasBaseClass( FArianePath::StaticClass() ) )
         {
             FArianePath* Path = static_cast<FArianePath*>(Object);
             FArianePathGeometry3D& Mesh = Path->GetGeometry3D();

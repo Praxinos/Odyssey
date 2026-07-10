@@ -11,6 +11,7 @@
 #include "ArianeID.h"
 #include "ArianeLayer.h"
 #include "ArianeLayerDrawingEnums.h"
+#include "ArianeCoreEnums.h"
 
 #include "ArianeLayerDrawing.generated.h"
 
@@ -18,6 +19,10 @@ struct FArianeObject;
 struct FArianeGroup;
 struct FArianePath;
 class UMaterialInterface;
+struct FArianeEllipse;
+struct FArianeRectangle;
+struct FArianeLine;
+struct FArianePolygon;
 
 UCLASS()
 class ARIANE_API UArianeLayerDrawing : public UArianeLayer
@@ -41,21 +46,26 @@ public:
     /**
      * @brief Allocate a new path (in a FInstancedStruct)
      * @param InMaterialInterface a material interface or nullptr to use the default one
+     * @param AllocationModel
      * @return the new path
      */
-    FArianePath* AllocPath( UMaterialInterface* InMaterialInterface, const FName& InName );
+    FArianePath* AllocPath( UMaterialInterface* InMaterialInterface
+                          , const FName& InName
+                          , EArianeAllocationModel AllocationModel );
 
     /**
      * @brief Allocate a new basic object (in a FInstancedStruct)
+     * @param AllocationModel
      * @return the new object
      */
-    FArianeObject* AllocObject( const FName& InName );
+    FArianeObject* AllocObject( const FName& InName, EArianeAllocationModel AllocationModel );
 
     /**
      * @brief Allocate a new group (in a FInstancedStruct)
+     * @param AllocationModel
      * @return the new group
      */
-    FArianeGroup* AllocGroup( const FName& InName );
+    FArianeGroup* AllocGroup( const FName& InName, EArianeAllocationModel AllocationModel );
 
 
     /**
@@ -127,7 +137,26 @@ public:
     void GetSelectedTrees( TArray<FArianeObject*>& SelectedTrees );
     void UnselectObject( FArianeObject* ObjectToSelect );
     void InvalidateCache();
-
+    FArianeEllipse* AllocEllipse( const FName& InName
+                                , double RadiusX
+                                , double RadiusY
+                                , double StrokeWidth
+                                , EArianeAllocationModel AllocationModel );
+    FArianeRectangle* AllocRectangle( const FName& InName
+                                    , double Width
+                                    , double Height
+                                    , double StrokeWidth
+                                    , EArianeAllocationModel AllocationModel );
+    FArianeLine* AllocLine( const FName& InName
+                          , const FVector& StartPoint
+                          , const FVector& EndPoint
+                          , double StrokeWidth
+                          , EArianeAllocationModel AllocationModel );
+    FArianePolygon* AllocPolygon( const FName& InName
+                                , uint32 CornerCount
+                                , double Radius
+                                , double StrokeWidth
+                                , EArianeAllocationModel AllocationModel );
 protected:
     void BindDelegates();
     void UnbindDelegates();
