@@ -359,7 +359,8 @@ FArianeEditorPathTracer::CommitVertex( const FTracerRecord& CommitRecord )
 {
     FArianeVertex* NewVertex = CubicPath->AllocVertex( CommitRecord.LocalPosition
                                                      , CommitRecord.LocalNormal
-                                                     , CommitRecord.Radius );
+                                                     , CommitRecord.Radius
+                                                     , EArianeAllocationModel::InstancedStruct );
 
     CubicPath->AddVertex( NewVertex );
 
@@ -399,7 +400,8 @@ FArianeEditorPathTracer::CreateCubicSegment( FArianeVertex* StartingVertex, FAri
     FArianeSegmentCubic* NewCubicSegment = CubicPath->AllocCubicSegment( StartingVertex
                                                                        , StartingVertex->GetPosition()
                                                                        , EndingVertex->GetPosition()
-                                                                       , EndingVertex );
+                                                                       , EndingVertex
+                                                                       , EArianeAllocationModel::InstancedStruct );
 
     //CubicPath->AddVertex( EndingVertex );
     CubicPath->AddSegment( NewCubicSegment );

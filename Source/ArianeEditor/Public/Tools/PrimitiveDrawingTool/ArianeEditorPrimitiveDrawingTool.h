@@ -8,7 +8,6 @@
 #include "InteractiveToolBuilder.h"
 // Ariane Editor Headers
 #include "ArianeEditorTool.h"
-#include "PathDrawingTool/ArianeEditorPathTracer.h"
 // Ariane Headers
 #include "ArianePainting3DComponent.h" // for EArianePainting3DGeometryMode
 #include "ArianePath.h"
@@ -16,33 +15,35 @@
 // Odyssey
 #include "OdysseyPainterEditorColorType.h"
 
-#include "ArianeEditorPathDrawingTool.generated.h"
+#include "ArianeEditorPrimitiveDrawingTool.generated.h"
 
-class FArianeEditor;
-struct FArianePath;
+struct FArianePrimitive;
 
-UENUM(BlueprintType)
-enum class EArianeEditorPathDrawingToolSegmentType : uint8
+UENUM()
+enum class EArianePrimitiveToolShapeType : uint8
 {
-    Polyline = 0,
-    CubicBezier = 1,
+    Ellipse,
+    Rectangle,
+    Line,
+    Polygon,
 };
 
 UCLASS()
-class ARIANEEDITOR_API UArianeEditorPathDrawingTool : public UArianeEditorTool
+class ARIANEEDITOR_API UArianeEditorPrimitiveDrawingTool : public UArianeEditorTool
 {
-GENERATED_BODY()
+public:
+    GENERATED_BODY()
 
 public:
-    static FString GetStaticType() { return "ArianeEditor_PathDrawingTool"; };
+    static FString GetStaticType() { return "ArianeEditor_PrimitiveDrawingTool"; };
     virtual FString GetType() override { return GetStaticType(); };
 
 public:
     // Destructor
-    virtual ~UArianeEditorPathDrawingTool();
+    virtual ~UArianeEditorPrimitiveDrawingTool();
 
     //Constructor
-    UArianeEditorPathDrawingTool();
+    UArianeEditorPrimitiveDrawingTool();
 
     //Mouse events overrides
     virtual bool OnMouseDown( FEditorViewportClient* iViewportClient
@@ -61,62 +62,56 @@ public:
                           , FSceneView* View
                           , const FKey& iKey
                           , const FArianePointerState& State ) override;
-    virtual bool SupportsColorType( EOdysseyPainterEditorColorType ColorType ) override;
-
-    virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
+    //virtual bool SupportsColorType( EOdysseyPainterEditorColorType ColorType ) override;
 
     void Activate();
     void Inactivate();
-    virtual void DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
     virtual bool GetCursor( EMouseCursor::Type& OutCursor ) override;
+    virtual bool OnKeyDownGlobal( const FKeyEvent& InKeyEvent ) override;
+    virtual bool OnKeyUpGlobal( const FKeyEvent& InKeyEvent ) override;
+    virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
 
 protected:
-    virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
-
-    /**
-     * @brief Add a new vertex to the current Path. Create a segment between this vertex and the previously created one.
-     * @param ViewportClient
-     * @param State the state of the input device (mouse or stylus)
-     */
-    void PlotVertex( FEditorViewportClient* ViewportClient
-                   , const FArianePointerState& State
-                   , bool bInteractive );
+    //double GetLineRotationAngle( FArianeLine* iLine, const FOdysseyPoint& iPointInTexture );
     FArianeGroup* GetParentGroup( UArianeLayerDrawing* DrawingLayer );
+    //void BindDelegates();
+    //void UnbindDelegates();
 
 public:
     UPROPERTY( EditAnywhere
-             , Category = PathDrawingTool
-             , meta = ( ToolTip = "Size"
+             , Category = PrimitiveDrawingTool
+             , meta = ( ToolTip = "StrokeWidth"
                       , ClampMin = "0.0"
                       , Delta = "0.1"
                       , UIMin = "0.0" ) )
-    double Size;
+    double StrokeWidth;
 
     UPROPERTY( EditAnywhere
-             , Category = PathDrawingTool )
-    bool bPressureSensitivity;
-
-    UPROPERTY( EditAnywhere
-             , Category = PathDrawingTool )
-    EArianePathLineType LineType;
-
-    UPROPERTY( EditAnywhere
-             , Category = PathDrawingTool )
-    EArianeEditorPathDrawingToolSegmentType SegmentType;
-
-    UPROPERTY( EditAnywhere
-             , Category = PathDrawingTool )
+             , Category = PrimitiveDrawingTool )
     bool bShowGrid;
 
     UPROPERTY( EditAnywhere
-             , Category = PathDrawingTool )
+             , Category = PrimitiveDrawingTool )
     UMaterialInterface* MaterialInterface;
 
+    //UPROPERTY( EditAnywhere
+    //         , Category = "Shape" )
+    //FOdysseyShapes Shapes;
+
+    UPROPERTY( EditAnywhere
+             , Category = "Parameters"
+             , meta = ( ToolTip  = "Uniform" ) )
+    bool Uniform;
+    bool UniformAtKeyDown;
 
 protected:
-    FArianePath* EditedPath;
-    FArianeEditorPathTracer PathTracer;
-    FArianeSegment* PreviousSegment;
-    FArianeSegment* CurrentSegment;
+    FArianePrimitive* Primitive;
+    FVector2D MouseDown;
+    uint32 RectangleNumber;
+    uint32 LineNumber;
+    uint32 EllipseNumber;
+    uint32 PolygonNumber;
     EMouseCursor::Type Cursor;
+    FVector LocalCoordsAtDown;
+    EArianePrimitiveToolShapeType PrimitiveShapeType;
 };

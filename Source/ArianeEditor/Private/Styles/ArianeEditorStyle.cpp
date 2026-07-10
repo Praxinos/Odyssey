@@ -59,11 +59,12 @@ FArianeEditorStyle::Init()
     Set( "ArianeEditor.EdMode24", new IMAGE_BRUSH_SVG( "ArianeEditor/ariane_edmode", Icon24x24 ) );
 
     // Tooling
-    Set( "ArianeEditor.ToolsTab.PathDrawing64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_drawing_tool", Icon64x64 ) );
-    Set( "ArianeEditor.ToolsTab.Eraser64"     , new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/eraser_tool"      , Icon64x64 ) );
-    Set( "ArianeEditor.ToolsTab.PathEdit64"   , new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool"   , Icon64x64 ) );
-    Set( "ArianeEditor.ToolsTab.Transform64"  , new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool"   , Icon64x64 ) );
-    Set( "ArianeEditor.ToolsTab.Transform16"  , new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool"   , Icon16x16 ) );
+    Set( "ArianeEditor.ToolsTab.PathDrawing64"     , new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_drawing_tool", Icon64x64 ) );
+    Set( "ArianeEditor.ToolsTab.PrimitiveDrawing64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/shapes_tool"      , Icon64x64 ) );
+    Set( "ArianeEditor.ToolsTab.Eraser64"          , new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/eraser_tool"      , Icon64x64 ) );
+    Set( "ArianeEditor.ToolsTab.PathEdit64"        , new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool"   , Icon64x64 ) );
+    Set( "ArianeEditor.ToolsTab.Transform64"       , new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool"   , Icon64x64 ) );
+    Set( "ArianeEditor.ToolsTab.Transform16"       , new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool"   , Icon16x16 ) );
 
     // Tools shortcut
     Set( "ArianeEditor.ToolsShortcuts.PathEditAddRemoveVertex20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool_add_remove_vertex", Icon20x20 ) );

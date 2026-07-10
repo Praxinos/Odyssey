@@ -351,7 +351,8 @@ FArianeSegmentCubic::Extract( FArianeObject* NewSegmentOwner
     return static_cast<FArianePath*>(NewSegmentOwner)->AllocCubicSegment( NewSegmentVertex0
                                                                         , Bezier[1]
                                                                         , Bezier[2]
-                                                                        , NewSegmentVertex1 );
+                                                                        , NewSegmentVertex1
+                                                                        , AllocationModel );
 }
 
 FVector

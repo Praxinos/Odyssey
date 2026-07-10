@@ -7,7 +7,6 @@
 #include "CoreMinimal.h"
 // Ariane
 #include "ArianeEditorTool.h"
-#include "ArianeEditorEraserToolBuilder.h" // that way only this header needs to be included by files using this tool
 #include "ArianePath.h"
 #include "ArianeSegment.h"
 #include "ArianeVertex.h"

@@ -92,7 +92,7 @@ struct ARIANE_API FArianePathInvalidationFlags : FArianeObjectInvalidationFlags
 
     public:
         static const uint32 StaticClass() { return 0xb2a965bc; }; // value is crc32 FArianePathInvalidationFlags
-        virtual uint32 GetClass() { return StaticClass(); };
+        virtual uint32 GetClass() override { return StaticClass(); };
         virtual bool HasBaseClass( uint32 BaseClass ) const override;
 
     public:
@@ -146,11 +146,12 @@ public:
     FArianePath();
     FArianePath( UArianeLayerDrawing* InDrawingLayer
                , const FName& InName
-               , EArianeAllocationModel InAllocationModel );
+               , EArianeAllocationModel InAllocationModel
+               , FArianePathInvalidationFlags* InInvalidationFlags = nullptr );
 
 public:
     /** overriden from ArianeObject */
-    virtual bool Update( bool Recurse, bool bClearFlags = true ) override;
+    virtual void UpdateShape( EUpdateFlags UpdateFlags ) override;
     /** overriden from ArianeObject */
     virtual void UpdateBounds() override;
     /** overriden from ArianeObject */
@@ -169,7 +170,10 @@ public:
      * @param InRadius vertex's radius
      * @return a pointer to the allocated vertex
      */
-    FArianeVertex* AllocVertex( const FVector& iPosition, const FVector& InNormal, double InRadius );
+    FArianeVertex* AllocVertex( const FVector& InPosition
+                              , const FVector& InNormal
+                              , double InRadius
+                              , EArianeAllocationModel InAllocationModel );
 
     /**
      * @brief Alloc a segment. Nb: the segment is a allocated inside a FInstancedStruct,
@@ -178,7 +182,9 @@ public:
      * @param Vertex1 second vertex
      * @return a pointer to the allocated segment
      */
-    FArianeSegment* AllocSegment( FArianeVertex* Vertex0, FArianeVertex* Vertex1 );
+    FArianeSegment* AllocSegment( FArianeVertex* Vertex0
+                                , FArianeVertex* Vertex1
+                                , EArianeAllocationModel InAllocationModel );
 
     /**
      * @brief Add a vertex to this path.
@@ -195,16 +201,16 @@ public:
     /**
      * @brief Remove a vertex from this path.
      * @param Vertex the vertex.
-     * @param bRemoveFromInstancedVertices true to remove from allocated vertices, false otherwise.
+     * @param bUnallocate true to free the memory used by this vertex, false otherwise.
      */
-    void RemoveVertex( FArianeVertex* iVertex, bool bRemoveFromInstancedVertices = true );
+    void RemoveVertex( FArianeVertex* iVertex, bool bUnallocate = true );
 
     /**
      * @brief Remove a segment from this path.
      * @param Segment the segment.
-     * @param bRemoveFromInstancedVertices true to remove from allocated segments, false otherwise.
+     * @param bUnallocate true to free the memory used by this segment, false otherwise.
      */
-    void RemoveSegment( FArianeSegment* Segment, bool bRemoveFromInstancedSegments = true );
+    void RemoveSegment( FArianeSegment* Segment, bool bUnallocate = true );
 
     /** Get all the vertices added to this path */
     TArray<FArianeVertexID>& GetVertices();
@@ -281,11 +287,13 @@ public:
                                           , double Handle1X
                                           , double Handle1Y
                                           , double Handle1Z
-                                          , FArianeVertex* Vertex1 );
+                                          , FArianeVertex* Vertex1
+                                          , EArianeAllocationModel InAllocationModel );
     FArianeSegmentCubic* AllocCubicSegment( FArianeVertex* Vertex0
                                           , const FVector& Handle0
                                           , const FVector& Handle1
-                                          , FArianeVertex* Vertex1 );
+                                          , FArianeVertex* Vertex1
+                                          , EArianeAllocationModel InAllocationModel );
     void AlterRadius( double RatioRadius );
 
     // returns true if the path is empty after vertex removal

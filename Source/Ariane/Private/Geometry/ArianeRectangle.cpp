@@ -1,0 +1,159 @@
+// IDDN.FR.001.060015.014.S.X.2019.000.00000
+// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
+
+#include "ArianeRectangle.h"
+#include "ArianeVertex.h"
+#include "ArianeSegmentCubic.h"
+#include "ArianeLayerDrawing.h"
+
+// https://stackoverflow.com/a/27863181
+// https://stackoverflow.com/questions/1734745/how-to-create-circle-with-b%c3%a9zier-curves
+
+FArianeRectangle::~FArianeRectangle()
+{
+   // vertices ans segments freed in ArianePath::~destructor
+}
+
+FArianeRectangle::FArianeRectangle()
+    : FArianeRectangle( nullptr
+                      , FName ( "Ariane Rectangle" )
+                      , 0.0f
+                      , 0.0f
+                      , 0.0f
+                      , EArianeAllocationModel::InstancedStruct )
+{
+}
+
+FArianeRectangle::FArianeRectangle( UArianeLayerDrawing* InDrawingLayer
+                                  , const FName& InName
+                                  , double InWidth
+                                  , double InHeight
+                                  , double InStrokeWidth
+                                  , EArianeAllocationModel InAllocationModel )
+    : FArianePrimitive( InDrawingLayer
+                      , InName
+                      , InStrokeWidth
+                      , InAllocationModel
+                      , new FArianePrimitiveInvalidationFlags() )
+    , Width( InWidth )
+    , Height( InHeight )
+{
+    for( uint32 i = 0; i < 4; i++ )
+    {
+        // EArianeAllocationModel::OperatingSystem means we use "new" to alloc the vertices. they won't be saved
+        // as instanced structs by the reflection system
+        GeneratedVertices[i] = AllocVertex( FVector()
+                                          , FVector::ZAxisVector
+                                          , StrokeWidth
+                                          , EArianeAllocationModel::OperatingSystem );
+    }
+
+    for( uint32 i = 0; i < 4; i++ )
+    {
+        uint32 n = ( i + 1 ) % 4;
+
+        // EArianeAllocationModel::OperatingSystem means we use "new" to alloc the vertices. they won't be saved
+        // as instanced structs by the reflection system
+        GeneratedSegments[i] = AllocCubicSegment( GeneratedVertices[i]
+                                                , GeneratedVertices[i]->GetPosition()
+                                                , GeneratedVertices[n]->GetPosition()
+                                                , GeneratedVertices[n]
+                                                , EArianeAllocationModel::OperatingSystem );
+
+        GeneratedVertices[i]->SetHandleAligned( false );
+    }
+
+    ResetGeometry();
+    ReshapeGeometry();
+}
+
+bool
+FArianeRectangle::HasBaseClass( uint32 BaseClassID )
+{
+    if( StaticClass() == BaseClassID )
+    {
+        return true;
+    }
+
+    return Super::HasBaseClass( BaseClassID );
+}
+
+void
+FArianeRectangle::ResetGeometry()
+{
+    Vertices.Empty();
+    Segments.Empty();
+
+    InvalidatedVertices.Empty();
+    InvalidatedSegments.Empty();
+
+    AddVertex ( GeneratedVertices[0] );
+    AddVertex ( GeneratedVertices[1] );
+    AddVertex ( GeneratedVertices[2] );
+    AddVertex ( GeneratedVertices[3] );
+
+    AddSegment ( GeneratedSegments[0] );
+    AddSegment ( GeneratedSegments[1] );
+    AddSegment ( GeneratedSegments[2] );
+    AddSegment ( GeneratedSegments[3] );
+}
+
+
+void
+FArianeRectangle::ReshapeGeometry()
+{
+    GeneratedVertices[0]->SetPosition( FVector( 0.0f , 0.0f  , 0.0f ) );
+    GeneratedVertices[1]->SetPosition( FVector( Width, 0.0f  , 0.0f ) );
+    GeneratedVertices[2]->SetPosition( FVector( Width, Height, 0.0f ) );
+    GeneratedVertices[3]->SetPosition( FVector( 0.0f , Height, 0.0f ) );
+
+    GeneratedSegments[0]->GetHandle((uint32)0)->SetPosition(  FVector( Width  * 0.25f, 0.0f          , 0.0f ) );
+    GeneratedSegments[0]->GetHandle((uint32)1)->SetPosition(  FVector( Width  * 0.75f, 0.0f          , 0.0f ) );
+
+    GeneratedSegments[1]->GetHandle((uint32)0)->SetPosition(  FVector( Width         , Height * 0.25f, 0.0f ) );
+    GeneratedSegments[1]->GetHandle((uint32)1)->SetPosition(  FVector( Width         , Height * 0.75f, 0.0f ) );
+
+    GeneratedSegments[2]->GetHandle((uint32)0)->SetPosition(  FVector( Width  * 0.75f, Height        , 0.0f ) );
+    GeneratedSegments[2]->GetHandle((uint32)1)->SetPosition(  FVector( Width  * 0.25f, Height        , 0.0f ) );
+
+    GeneratedSegments[3]->GetHandle((uint32)0)->SetPosition(  FVector( 0.0f          , Height * 0.75f, 0.0f ) );
+    GeneratedSegments[3]->GetHandle((uint32)1)->SetPosition(  FVector( 0.0f          , Height * 0.25f, 0.0f ) );
+
+    GeneratedVertices[0]->SetRadius( StrokeWidth );
+    GeneratedVertices[1]->SetRadius( StrokeWidth );
+    GeneratedVertices[2]->SetRadius( StrokeWidth );
+    GeneratedVertices[3]->SetRadius( StrokeWidth );
+}
+
+FArianeRectangle*
+FArianeRectangle::CopyShape( const FCopyArgs& CopyArgs )
+{
+    FArianeRectangle* RectangleCopy = CopyArgs.DrawingLayer->AllocRectangle( Name
+                                                                           , Width
+                                                                           , Height
+                                                                           , StrokeWidth
+                                                                           , CopyArgs.AllocationModel );
+
+    return RectangleCopy;
+}
+
+void
+FArianeRectangle::SetSize( double InWidth, double InHeight )
+{
+    Width = InWidth;
+    Height = InHeight;
+
+    ReshapeGeometry();
+}
+
+double
+FArianeRectangle::GetWidth()
+{
+    return Width;
+}
+
+double
+FArianeRectangle::GetHeight()
+{
+    return Height;
+}

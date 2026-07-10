@@ -59,19 +59,27 @@ GENERATED_BODY()
 public:
     enum class ECopyFlags : uint8
     {
-        AllocAsInstancedStruct = ( 1 << 0 ), // alloc as FInstancedStruct
-        AllocByOperatingSystem = ( 1 << 1 ), // alloc with "new"
-        IgnoreTags             = ( 1 << 2 ),
-        Rename                 = ( 1 << 3 ),
+        IgnoreTags             = ( 1 << 0 ),
+        Rename                 = ( 1 << 1 ),
+        AsBezier               = ( 1 << 2 ),
+        AsPolyline             = ( 1 << 3 ),
     };
 
     struct FCopyArgs
     {
         ECopyFlags Flags = {}; // init as zero
+        EArianeAllocationModel AllocationModel;
         UArianeLayerDrawing* DrawingLayer = nullptr;
     };
 
     enum class ETraversalReturnValue{ Continue, IgnoreChildren, Stop };
+
+    enum class EUpdateFlags : uint8
+    {
+        None            =          0,
+        Interactive     = ( 1 << 0 ),
+        KeepInvalidated = ( 1 << 1 ),
+    };
 
 public:
     /**
@@ -89,11 +97,12 @@ public:
 
 public:
     virtual ~FArianeObject();
-    FArianeObject();
 
+    FArianeObject();
     FArianeObject( UArianeLayerDrawing* InDrawingLayer
                  , const FName& InName
-                 , EArianeAllocationModel InAllocationModel );
+                 , EArianeAllocationModel InAllocationModel
+                 , FArianeObjectInvalidationFlags* InInvalidationFlags = nullptr );
 
     /**
         * @brief Add a child to this object at the end of the list of children.
@@ -131,10 +140,10 @@ public:
         * @brief Update the object
         * @param bRecurse Update recursively
         */
-    virtual bool Update( bool bRecurse, bool bClearFlags = true );
+    virtual bool Update( EUpdateFlags UpdateFlags, bool bRecurse );
 
     /** Get the invalidation flags */
-    FArianeObjectInvalidationFlags& GetInvalidationFlags();
+    virtual FArianeObjectInvalidationFlags& GetInvalidationFlags();
 
     /** Get object's bounds */
     const FBoxSphereBounds& GetBounds();
@@ -245,6 +254,7 @@ public:
     void AddTag( FArianeTag* Tag );
     EArianeAllocationModel GetAllocationModel();
     static uint32 GetCommonClass( const TArray<FArianeObject*>& Objects );
+    virtual void UpdateShape( EUpdateFlags UpdateFlags );
 
 protected:
     /**
@@ -310,3 +320,4 @@ protected:
 
 // define bitwise op
 ENUM_CLASS_FLAGS(FArianeObject::ECopyFlags)
+ENUM_CLASS_FLAGS(FArianeObject::EUpdateFlags)

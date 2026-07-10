@@ -136,17 +136,8 @@ FArianeGroup::CopyShape( const FCopyArgs& CopyArgs )
 {
     FArianeGroup* GroupCopy = nullptr;
 
-    if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocByOperatingSystem ) )
-    {
-        GroupCopy = new FArianeGroup( nullptr
-                                    , Name
-                                    , EArianeAllocationModel::OperatingSystem );
-    }
+    GroupCopy = CopyArgs.DrawingLayer->AllocGroup( Name, CopyArgs.AllocationModel );
 
-    if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::AllocAsInstancedStruct ) )
-    {
-        GroupCopy = CopyArgs.DrawingLayer->AllocGroup( Name );
-    }
 
     return GroupCopy;
 }
