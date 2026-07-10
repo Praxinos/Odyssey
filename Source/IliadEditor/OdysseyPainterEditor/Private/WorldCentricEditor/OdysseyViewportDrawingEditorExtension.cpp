@@ -886,7 +886,7 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultTexture()
 
     //try to select the previously selected texture for the selected component
     FInstanceTexturePaintSettings& texturePaintSettings = mComponentToTexturePaintSettingsMap.FindOrAdd(mComponent);
-    if (texturePaintSettings.mSelectedTexture && mSelectableTextures.Contains(texturePaintSettings.mSelectedTexture))
+    if (texturePaintSettings.mSelectedTexture && mSelectableTextures.Contains(texturePaintSettings.mSelectedTexture) && DoesMaterialUseTexture(mMaterial, texturePaintSettings.mSelectedTexture))
     {
         if (texturePaintSettings.mSelectedTexture == Texture()) //if the texture is already selected we assume we have nothing to do
             return;
