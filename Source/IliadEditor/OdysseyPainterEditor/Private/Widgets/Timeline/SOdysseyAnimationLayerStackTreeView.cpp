@@ -178,6 +178,9 @@ SOdysseyAnimationLayerStackTreeView::Action_ConvertLayerToRasterLayer()
         }
     );
 
+    if (!shouldConvert)
+        return;
+
     // Sort all selected layer from bottom to top
     // Otherwise during the merge of each layer, the new layer (via AddLayer()) will return nullptr
     // - as the previous merged layer was removed
@@ -194,9 +197,6 @@ SOdysseyAnimationLayerStackTreeView::Action_ConvertLayerToRasterLayer()
         if( selectedLayers.Contains( layer ) )
             sortedBottomToTopSelectedLayers.Add( layer );
     }
-
-    if (!shouldConvert)
-        return;
 
 #if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("animation.layer.transaction.convert-to-raster", "Convert Layer To Raster Layer"));
