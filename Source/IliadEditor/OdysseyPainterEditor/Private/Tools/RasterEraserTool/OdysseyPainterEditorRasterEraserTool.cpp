@@ -138,6 +138,12 @@ UOdysseyPainterEditorRasterEraserTool::Unload()
     UOdysseyPainterEditorTool::Unload();
 }
 
+void UOdysseyPainterEditorRasterEraserTool::RefreshToolFromProperties()
+{
+    SizeChanged();
+    OpacityChanged();
+}
+
 bool
 UOdysseyPainterEditorRasterEraserTool::IsActivable() const
 {

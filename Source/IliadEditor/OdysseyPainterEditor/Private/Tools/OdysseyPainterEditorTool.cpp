@@ -147,6 +147,11 @@ UOdysseyPainterEditorTool::Unload()
     CancelRIM();
 }
 
+void UOdysseyPainterEditorTool::RefreshToolFromProperties()
+{
+
+}
+
 bool
 UOdysseyPainterEditorTool::IsActivable() const
 {
