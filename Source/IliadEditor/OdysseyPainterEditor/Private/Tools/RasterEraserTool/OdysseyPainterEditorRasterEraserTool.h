@@ -39,6 +39,8 @@ public:
     virtual void Load() override;
     virtual void Unload() override;
 
+    virtual void RefreshToolFromProperties() override;
+
     virtual bool HasRadius() const override;
     virtual void SetRadius(float Radius = false) override;
     virtual float GetRadius() const override;

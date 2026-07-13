@@ -66,6 +66,9 @@ public:
     virtual void Load();
     virtual void Unload();
 
+    /** Refresh the tool based on its properties. Useful for toolCollection that don't call propertyChanged when loading a tool from it */
+    virtual void RefreshToolFromProperties();
+
     /**
      * Starts an interactive operation
      *

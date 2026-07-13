@@ -106,6 +106,7 @@ FReply SOdysseyPainterEditorToolTile::OnMouseButtonUp( const FGeometry& MyGeomet
                         Cast<UOdysseyPainterEditorRasterDrawingTool>(editorTool)->RefreshBrushInstance(false);
 
                     mEditor->ActivateMainTool(editorTool);
+                    editorTool->RefreshToolFromProperties();
                 }
             }
         }
