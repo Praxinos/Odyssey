@@ -42,7 +42,7 @@ public:
     void PrintPacket(const UE::StylusInput::FStylusInputPacket& iPacket);
     void ClearQueue();
 
-public:
+protected:
     TSpscQueue<UE::StylusInput::FStylusInputPacket> mPacketQueue;
 
 protected:
