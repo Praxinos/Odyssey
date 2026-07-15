@@ -63,6 +63,10 @@ UOdysseyViewportNamingTokens::GetMousePositionInCanvas( TWeakPtr<SOdysseyViewpor
     if( !viewportWidget )
         return TOptional<FIntVector2>();
 
+    UTexture* texture = viewportWidget->GetTexture();
+    if( !texture )
+        return TOptional<FIntVector2>();
+
     FVector2D cursorPos = FSlateApplication::Get().GetCursorPos();
     if( !viewportWidget->GetViewportWidget()->GetTickSpaceGeometry().IsUnderLocation( cursorPos ) )
         return TOptional<FIntVector2>();
