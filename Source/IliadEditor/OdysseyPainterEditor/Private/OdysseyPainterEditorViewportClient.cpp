@@ -917,9 +917,30 @@ FOdysseyPoint FOdysseyPainterEditorViewportClient::StylusPacketToPoint(const UE:
         return FOdysseyPoint();
 
     TSharedPtr<SWindow> Window = mStylusInputWindow.Pin();
+    FVector2D packetPos = FVector2D(iPacket.X, iPacket.Y);
+
+//Fix wrong coordinates with Wintab, Epic should fix it in their code
+#if PLATFORM_WINDOWS
+    const UOdysseyStylusInputSettings* settings = GetDefault<UOdysseyStylusInputSettings>();
+    FName selectedAPI = settings->StylusInputDriver;
+    if (selectedAPI == "Wintab")
+    {
+        TSharedPtr<FGenericWindow> nativeWindow = Window->GetNativeWindow();
+        void* osHandle = nativeWindow->GetOSWindowHandle();
+        HWND hwnd = static_cast<HWND>(osHandle);
+        RECT winRect;
+        GetWindowRect(hwnd, &winRect);
+
+        FVector2D slateTopLeft = Window->GetRectInScreen().GetTopLeft();
+
+        FVector2D correction(slateTopLeft.X - winRect.left, slateTopLeft.Y - winRect.top);
+
+        packetPos -= correction;
+    }
+#endif
 
     float scale_dpi = viewport->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
-    FVector2D position_in_viewport = viewportWidget->GetCachedGeometry().AbsoluteToLocal( FVector2D( iPacket.X, iPacket.Y ) ) * scale_dpi;
+    FVector2D position_in_viewport = viewportWidget->GetCachedGeometry().AbsoluteToLocal( packetPos ) * scale_dpi;
     position_in_viewport += Window->GetRectInScreen().GetTopLeft();
 
     const UE::StylusInput::IStylusInputTabletContext* tabletContext = GetTabletContext(mStylusInputInstance, iPacket.TabletContextID);
