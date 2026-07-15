@@ -188,7 +188,6 @@ public:
       * {odysseyAnimation:height}: height of the animation
       * {odysseyAnimation:name}: name of the animation
       * {odysseyAnimation:currentLayerName}: current layer name of the animation
-      * {odysseyAnimation:currentFrame}: current frame of the animation
       * {odysseyAnimation:framerate}: framerate of the animation
       *
       * {odysseyViewport2d:x}: X coordinate of the cursor in the viewport 2D
@@ -199,7 +198,7 @@ public:
       * {odysseyViewport2d:a}: ALPHA component of the pixel under the cursor in the viewport 2D
       */
     UPROPERTY(config, EditAnywhere, Category=Viewport )
-    FTemplateString StatusBarTemplateString = { .Template = TEXT( "{yyyy}/{mm}/{dd} - {24h}:{min}:{sec} | {odysseyAnimation:width} x {odysseyAnimation:height} px | {odysseyAnimation:name} > {odysseyAnimation:currentLayerName} @ {odysseyAnimation:currentFrame} | {odysseyViewport2d:x}, {odysseyViewport2d:y} | ({odysseyViewport2d:r}, {odysseyViewport2d:g}, {odysseyViewport2d:b}, {odysseyViewport2d:a})" ) };
+    FTemplateString StatusBarTemplateString = { .Template = TEXT( "{odysseyAnimation:width} x {odysseyAnimation:height} px" ) };
     //PATCH: See comment above
     // Moreover, every tokens are defined in SOdysseyWidgets module -_-
     //
