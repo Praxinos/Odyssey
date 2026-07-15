@@ -890,10 +890,31 @@ IOdysseyViewportDrawingEditorAdapter::StylusPacketToRay(const UE::StylusInput::F
         return false;
 
     TSharedPtr<SWindow> Window = mStylusInputWindow.Pin();
+    FVector2D packetPos = FVector2D(iPacket.X, iPacket.Y);
+
+//Fix wrong coordinates with Wintab, Epic should fix it in their code
+#if PLATFORM_WINDOWS
+    const UOdysseyStylusInputSettings* settings = GetDefault<UOdysseyStylusInputSettings>();
+    FName selectedAPI = settings->StylusInputDriver;
+    if (selectedAPI == "Wintab")
+    {
+        TSharedPtr<FGenericWindow> nativeWindow = Window->GetNativeWindow();
+        void* osHandle = nativeWindow->GetOSWindowHandle();
+        HWND hwnd = static_cast<HWND>(osHandle);
+        RECT winRect;
+        GetWindowRect(hwnd, &winRect);
+
+        FVector2D slateTopLeft = Window->GetRectInScreen().GetTopLeft();
+
+        FVector2D correction(slateTopLeft.X - winRect.left, slateTopLeft.Y - winRect.top);
+
+        packetPos -= correction;
+    }
+#endif
 
     //Init our StrokeRay, having all the basic info to draw
     float scaleDPI = viewportWidget->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
-    FVector2D positionInViewport = viewportWidget->GetCachedGeometry().AbsoluteToLocal(FVector2D(iPacket.X, iPacket.Y)) * scaleDPI;
+    FVector2D positionInViewport = viewportWidget->GetCachedGeometry().AbsoluteToLocal(packetPos) * scaleDPI;
     positionInViewport += Window->GetRectInScreen().GetTopLeft();
 
     FVector2D pointPos = positionInViewport;
