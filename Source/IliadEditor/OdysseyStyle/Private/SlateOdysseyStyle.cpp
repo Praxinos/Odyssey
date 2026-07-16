@@ -142,6 +142,31 @@ FOdysseyStyleDefault::FOdysseyStyleDefault()
 
 //---
 
+class FTemporarySetContentRoot
+{
+public:
+    FTemporarySetContentRoot( FOdysseyStyleDefault& iStyle, FString iContentRoot );
+    ~FTemporarySetContentRoot();
+
+private:
+    FOdysseyStyleDefault& Style;
+    FString OldContentRoot;
+};
+
+FTemporarySetContentRoot::FTemporarySetContentRoot( FOdysseyStyleDefault& iStyle, FString iContentRoot )
+    : Style( iStyle)
+{
+    OldContentRoot = iStyle.GetContentRootDir();
+    Style.SetContentRoot( iContentRoot );
+}
+
+FTemporarySetContentRoot::~FTemporarySetContentRoot()
+{
+    Style.SetContentRoot( OldContentRoot );
+}
+
+//---
+
 void
 FOdysseyStyleDefault::Initialize()
 {
@@ -850,8 +875,9 @@ FOdysseyStyleDefault::SetupOdysseyCommands()
     Set( "LayerStackEditorCommands.CollapseAllLayers", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/options_hidden", mIcon16x16 ) );
     Set( "LayerStackEditorCommands.UncollapseAllLayers", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/options_displayed", mIcon16x16 ) );
 
-    SetContentRoot( FPaths::EngineContentDir() / TEXT( "Slate" ) );
     {
+        FTemporarySetContentRoot tmp( *this, FPaths::EngineContentDir() / TEXT( "Slate" ) );
+
         Set( "LayerStackEditorCommands.OpenAllFolderLayers", new IMAGE_BRUSH_SVG( "Starship/Common/folder-open", mIcon16x16 ) );
         Set( "LayerStackEditorCommands.CloseAllFolderLayers", new IMAGE_BRUSH_SVG( "Starship/Common/folder-closed", mIcon16x16 ) );
     }
@@ -860,8 +886,6 @@ FOdysseyStyleDefault::SetupOdysseyCommands()
 void
 FOdysseyStyleDefault::SetupOdysseyAboutWindow()
 {
-    //---
-
     static const FVector2D Icon30x30(30.0f, 30.0f);
 
     Set("Odyssey.About.Facebook", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/AboutWindow/facebook", Icon30x30));
