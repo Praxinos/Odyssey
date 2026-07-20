@@ -28,6 +28,20 @@
 
 //---
 
+bool
+IsFocusedSequenceSameAs( ISequencer* iSequencer, const UMovieSceneSequence* iSequence )
+{
+    return iSequencer->GetFocusedMovieSceneSequence() == iSequence;
+}
+
+bool
+IsFocusedSequenceSameAs( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection )
+{
+    return iSequencer->GetFocusedMovieSceneSequence() == iSubSection.GetTypedOuter<UMovieSceneSequence>();
+}
+
+//---
+
 void
 EjectAnyActor()
 {

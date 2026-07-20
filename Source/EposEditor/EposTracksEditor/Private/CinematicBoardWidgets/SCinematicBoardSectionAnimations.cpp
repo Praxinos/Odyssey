@@ -419,18 +419,22 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+
+        if( !IsFocusedSequenceSameAs( sequencer, subsection_object ) )
+            return false;
+
         return BoardSequenceTools::CanDetachAnimation( sequencer, subsection_object, mBinding.GetGuid() );
     };
 
     auto GetDetachAnimationTooltip = [this]() -> FText
-        {
-            FText commun_tooltip = GetTooltipText();
-            FText button_tooltip;
+    {
+        FText commun_tooltip = GetTooltipText();
+        FText button_tooltip;
 
-            button_tooltip = LOCTEXT( "DetachAnimation", "Detach the animation" );
+        button_tooltip = LOCTEXT( "DetachAnimation", "Detach the animation" );
 
-            return FText::Join( FText::FromString( TEXT( "\n\n" ) ), commun_tooltip, button_tooltip );
-        };
+        return FText::Join( FText::FromString( TEXT( "\n\n" ) ), commun_tooltip, button_tooltip );
+    };
 
     resize_params.ClippingPriority = ePriority::Low;
 
@@ -486,6 +490,10 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
         FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+
+        if( !IsFocusedSequenceSameAs( sequencer, subsection_object ) )
+            return false;
+
         return BoardSequenceTools::CanCreateAnimationCut( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
     };
 
@@ -832,6 +840,9 @@ SCinematicBoardSectionAnimationTitle::IsAnimationVisible() const
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
     const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
     ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    if( !IsFocusedSequenceSameAs( sequencer, *subsection_object ) )
+        return false;
 
     return BoardSequenceTools::IsAnimationVisible( sequencer, *subsection_object, mBinding.GetGuid() );
 }
@@ -3180,6 +3191,10 @@ SCinematicBoardSectionAnimations::Construct( const FArguments& InArgs, TSharedRe
     {
         ISequencer* sequencer = mSequencer.Pin().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+
+        if( !IsFocusedSequenceSameAs( sequencer, subsection_object ) )
+            return EVisibility::Hidden;
 
         bool is_visible = mPopupWidget.IsValid() || mOptionalWidgetsVisibility.Get().IsVisible();
         is_visible &= BoardSequenceTools::CanCreateAnimation( sequencer, section_object->GetInclusiveStartFrame() );

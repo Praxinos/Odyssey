@@ -350,12 +350,16 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
         const FCheckBoxStyle* displayLayersToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Sequencer.AnimationTimelineTrack.DisplayLayersToggle");
 
         TWeakPtr<UE::Sequencer::ISequencerTreeViewRow> weakRow = iParams.TreeViewRow;
+        ::UE::Sequencer::TWeakViewModelPtr<::UE::Sequencer::IOutlinerExtension> weakOutlinerExtension = outlinerExtension; // Convert to a weak ptr so it won't count a reference when giving it to the lambda
 
         return SNew(SBox)
             .HeightOverride_Lambda(
-                [outlinerExtension]()
+                [weakOutlinerExtension]() -> FOptionalSize
                 {
-                    return outlinerExtension->GetOutlinerSizing().GetTotalHeight();
+                    if( !weakOutlinerExtension.Pin() )
+                        return FOptionalSize();
+
+                    return weakOutlinerExtension.Pin()->GetOutlinerSizing().GetTotalHeight();
                 }
             )
             [
