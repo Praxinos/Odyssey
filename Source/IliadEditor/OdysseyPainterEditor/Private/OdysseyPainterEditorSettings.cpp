@@ -190,7 +190,7 @@ TArray<FString>
 UOdysseyPainterEditorSettings::GetCursorOptions()
 {
     return {
-        TEXT( "Default" ),
+        TEXT( "Default (OS)" ),
         TEXT( "Cross" ),
         TEXT( "Circle" ),
         TEXT( "Dot" ),
@@ -207,6 +207,6 @@ UOdysseyPainterEditorSettings::GetToolMouseCursor() const
     else if( ToolMouseCursor == TEXT( "Dot" ) )
         return FMouseCursor( EMouseCursorCustom::Dot );
 
-    // TEXT( "Default" )
+    // TEXT( "Default (OS)" )
     return FMouseCursor( EMouseCursor::Default );
 }
