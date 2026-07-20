@@ -16,7 +16,7 @@ bool
 FOdysseyAnimationLayerImageRasterImport::Read( UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
                                             , FArchive &Ar )
 {
-    if (Ar.IsCriticalError())
+    if (Ar.AtEnd() || Ar.IsCriticalError())
         return true;
 
     uint64 start = Ar.Tell();
