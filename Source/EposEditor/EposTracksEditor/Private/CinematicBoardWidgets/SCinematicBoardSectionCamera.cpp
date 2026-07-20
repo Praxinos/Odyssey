@@ -100,6 +100,9 @@ SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedR
         const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
         FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
 
+        if( !IsFocusedSequenceSameAs( sequencer, subsection_object ) )
+            return false;
+
         return BoardSequenceTools::CanPilotCamera( sequencer, subsection_object, local_frame )
                 || BoardSequenceTools::CanEjectCamera( sequencer, subsection_object, local_frame );
     };
@@ -109,6 +112,9 @@ SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedR
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
         FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+
+        if( !IsFocusedSequenceSameAs( sequencer, subsection_object ) )
+            return false;
 
         return BoardSequenceTools::IsPilotingCamera( sequencer, subsection_object );
     };
@@ -132,6 +138,9 @@ SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedR
             ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
             const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
             FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+
+            if( !IsFocusedSequenceSameAs( sequencer, subsection_object ) )
+                return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "PilotCamera" );
 
             if( BoardSequenceTools::IsPilotingCamera( sequencer, subsection_object ) )
                 return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "EjectCamera" );
@@ -166,6 +175,10 @@ SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedR
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
         FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+
+        if( !IsFocusedSequenceSameAs( sequencer, subsection_object ) )
+            return false;
+
         return BoardSequenceTools::CanSnapCameraToViewport( sequencer, subsection_object, local_frame );
     };
 
@@ -284,6 +297,9 @@ SCinematicBoardSectionCameraTitle::HandleTitleText() const
     UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
+    if( !IsFocusedSequenceSameAs( sequencer, *subsection_object ) )
+        return FText::GetEmpty();
+
     FGuid camera_binding = BoardSequenceHelpers::GetCameraBinding( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
 
     UMovieSceneSequence* sequence = subsection_object->GetSequence();
@@ -313,6 +329,9 @@ SCinematicBoardSectionCameraTitle::GetBackgroundTint() const
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
     const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
     ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    if( !IsFocusedSequenceSameAs( sequencer, *subsection_object ) )
+        return FStyleColors::Header;
 
     FGuid camera_binding = BoardSequenceHelpers::GetCameraBinding( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
     ACineCameraActor* camera = BoardSequenceHelpers::GetCameraSpawned( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), camera_binding );

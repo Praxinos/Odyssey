@@ -70,7 +70,13 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
     TopToolbarBuilder.AddComboButton(
         FUIAction(
             FExecuteAction(),
-            FCanExecuteAction::CreateLambda( [this]() { return !BoardSequenceTools::IsAnimationInEditionMode( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSubSectionObject() ); } )
+            FCanExecuteAction::CreateLambda( [this]()
+                                             {
+                                                 if( !IsFocusedSequenceSameAs( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSubSectionObject() ) )
+                                                     return false;
+
+                                                 return !BoardSequenceTools::IsAnimationInEditionMode( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSubSectionObject() );
+                                             } )
         ),
         FOnGetContent::CreateRaw( this, &SCinematicBoardSectionThumbnails::MakeTakeMenu ),
         FText::GetEmpty(),
@@ -110,6 +116,11 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+
+        if( !IsFocusedSequenceSameAs( sequencer, subsection_object ) )
+            return EVisibility::Hidden;
+
         return BoardSequenceTools::CanCreateCamera( sequencer, section_object->GetInclusiveStartFrame() ) ? EVisibility::Visible : EVisibility::Hidden;
     };
 
