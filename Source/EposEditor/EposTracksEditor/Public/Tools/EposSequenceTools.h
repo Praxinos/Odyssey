@@ -38,6 +38,24 @@ struct FMovieSceneChannelHandle;
 
 void EjectAnyActor();
 
+/** Check if the current focused sequence of the sequencer match the one used locally (set as parameter)
+  *
+  * This is due to a change in 5.8, where the "gui" of the previous focused sequence is no more destroy
+  * before the new focused sequence is focused
+  *
+  * In other words, when switching between a board sequence to a shot sequence:
+  * - internally, the focused sequence is the shot
+  * - but when board commands which occur in ticks (like CanExecuteAction or IsChecked) happen and call BoardSequenceTools,
+  *   it fails with the assert which checked the focused sequence is a board sequence
+  *
+  * This function must be called outside each Board/ShotSequenceTools, because otherwise:
+  * - add a new parameter which represents the sequence to apply on
+  * - but, in this case, it would suggest that the function can be called on a sequence anywhere in the hierarchy
+  * - and it's not correct, as some (many) functions rely on sequencer functions which manage always the focused sequence
+  */
+bool IsFocusedSequenceSameAs( ISequencer* iSequencer, const UMovieSceneSequence* iSequence );
+bool IsFocusedSequenceSameAs( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection );
+
 struct FCameraArgs
 {
     FString mName;
