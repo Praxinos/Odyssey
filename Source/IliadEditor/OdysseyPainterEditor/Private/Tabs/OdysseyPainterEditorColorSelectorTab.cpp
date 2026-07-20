@@ -72,6 +72,7 @@ FOdysseyPainterEditorColorSelectorTab::CreateWidget()
     .FillHeight( 1.f )
     [
         SNew( SScrollBox )
+        .ScrollBarAlwaysVisible(true)
         +SScrollBox::Slot()
         .AutoSize()
         [

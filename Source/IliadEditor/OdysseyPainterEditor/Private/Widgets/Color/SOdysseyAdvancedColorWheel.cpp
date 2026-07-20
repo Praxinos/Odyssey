@@ -160,7 +160,8 @@ SOdysseyAdvancedColorWheel::ComputeDesiredSize( float iScale ) const
 {
     FVector2D result = SOdysseyLeafWidget::ComputeDesiredSize( iScale );
 
-    result.X = FMath::Max(ExternalSize.X, result.X);
+    //result.X = FMath::Max(ExternalSize.X, result.X);
+    result = ExternalSize;
 
     const FOptionalSize CurrentMinDesiredWidth = MinDesiredWidth.Get();
     const FOptionalSize CurrentMaxDesiredWidth = MaxDesiredWidth.Get();
