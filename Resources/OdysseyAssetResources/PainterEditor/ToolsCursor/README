@@ -9,6 +9,7 @@ For example, the oriented circle must be named "circle-clockwise..." and NOT "ro
 - The filename can be what you want but it MUST contain the hotspot of the cursor
 (hotspot: the pixel in the image which will correspond to the pixel clicked on the screen)
 The formatting of the hotspot MUST BE: .<HotspotX>x<HotspotY>
+The hotspot must be between [0,100], "0%x0%" = top-left corner, "50%x50%" = center, "100%x100%" = bottom-right corner
 
 - Each time a png is updated, run (on linux-like (WSL,mac,...) with icoutils package installed):
     python3 ./build.cur.py

@@ -132,23 +132,26 @@ FMouseCursor::InitializeCustomCursorMap()
                     return filenames.Array()[0];
                 };
 
-            auto GetHotSpot = []( const FString& iFilename ) -> FIntVector2
+            auto GetHotSpot = []( const FString& iFilename ) -> FVector2D
                 {
-                    const FString regex = TEXT( ".*\\.([0-9]+)x([0-9]+)(\\..*)?" );
+                    const FString regex = TEXT( R"(.*\.([0-9]+)%x([0-9]+)%(\..*)?)" );
                     FRegexPattern hotspotPattern( regex );
 
                     FRegexMatcher matcher( hotspotPattern, iFilename );
                     check( matcher.FindNext() );
 
                     FString hotspotX_group = matcher.GetCaptureGroup( 1 );
-                    checkf( !hotspotX_group.IsEmpty(), TEXT( "Can't find hotspot X coordinates inside filename: must be mycursor.XxY.ext" ) );
+                    checkf( !hotspotX_group.IsEmpty(), TEXT( "Can't find hotspot X coordinates inside filename: must be mycursor.X%%xY%%.ext" ) );
                     FString hotspotY_group = matcher.GetCaptureGroup( 2 );
-                    checkf( !hotspotY_group.IsEmpty(), TEXT( "Can't find hotspot Y coordinates inside filename: must be mycursor.XxY.ext" ) );
+                    checkf( !hotspotY_group.IsEmpty(), TEXT( "Can't find hotspot Y coordinates inside filename: must be mycursor.X%%xY%%.ext" ) );
 
                     int32 hotspotX = FCString::Atoi( *hotspotX_group );
                     int32 hotspotY = FCString::Atoi( *hotspotY_group );
 
-                    return FIntVector2( hotspotX, hotspotY );
+                    checkf( hotspotX >= 0 && hotspotX <= 100, TEXT( "hotspotX must be between 0 and 100" ) );
+                    checkf( hotspotY >= 0 && hotspotY <= 100, TEXT( "hotspotY must be between 0 and 100" ) );
+
+                    return FVector2D( hotspotX / 100.f, hotspotY / 100.f );
                 };
 
             //---
@@ -156,10 +159,10 @@ FMouseCursor::InitializeCustomCursorMap()
             FString cursorPath = IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) / TEXT( "PainterEditor" ) / TEXT( "ToolsCursor" );
 
             FString cursorFilenameWithoutExtension = FindFilename( cursorPath, iCursorName );
-            FIntVector2 hotspot = GetHotSpot( cursorFilenameWithoutExtension );
+            FVector2D hotspot = GetHotSpot( cursorFilenameWithoutExtension );
 
             TSharedPtr<ICursor> PlatformCursor = FSlateApplication::Get().GetPlatformCursor();
-            void* cursor = PlatformCursor->CreateCursorFromFile( cursorPath / cursorFilenameWithoutExtension, FVector2D( hotspot ) );
+            void* cursor = PlatformCursor->CreateCursorFromFile( cursorPath / cursorFilenameWithoutExtension, hotspot );
             ioCustomCursorMap.Add( iCursorId, cursor );
         };
 
