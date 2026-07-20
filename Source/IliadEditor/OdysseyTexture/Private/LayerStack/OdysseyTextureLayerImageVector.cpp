@@ -105,11 +105,6 @@ void
 UOdysseyTextureLayerImageVector::InitTexture()
 {
     Super::InitTexture();
-
-    UTexture2D* texture = GetRenderTexture();
-    InitTextureWithBlockData(mVectorBlock->GetBlock(mDrawingFlags).Get(), texture, TextureSourceFormatForULISFormat(mVectorBlock->GetFormat()));
-    texture->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({ texture });
 }
 #endif
 
@@ -154,14 +149,14 @@ UOdysseyTextureLayerImageVector::BuildRenderPipelineInternal(
     bool drawingFlagsChanged = UpdateDrawingFlags();
     if ( drawingFlagsChanged )
     {
-        CopyVectorBlockInRenderTexture(FIntRect(0, 0, mVectorBlock->GetWidth(), mVectorBlock->GetHeight()));
+        CopyVectorBlockInRenderTextureGPU(FIntRect(0, 0, mVectorBlock->GetWidth(), mVectorBlock->GetHeight()));
     }
     if ( mVectorBlock->NeedsRender() )
     {
         mVectorBlock->Render(mDrawingFlags);
 
         ::ULIS::FRectI rect = mVectorBlock->GetSanitizedRect();
-        CopyVectorBlockInRenderTexture(ULISUtils::ToIntRect(rect));
+        CopyVectorBlockInRenderTextureGPU(ULISUtils::ToIntRect(rect));
     }
 #endif
 
@@ -186,16 +181,20 @@ UOdysseyTextureLayerImageVector::PostLoad()
 
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
     mVectorBlock->Init(mVectorBlockId, mVectorCell, Width, Height, format);
-    InitTexture();
-
     mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
     mVectorLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    CopyVectorBlockInRenderTexture(FIntRect(0, 0, mVectorBlock->GetWidth(), mVectorBlock->GetHeight()));
 
     // textures must be assigned to brushes in PostLoad and not in Serialize(), because the UAsset won't be fully loaded
     // and there dimensions would be 0 at that point.
     mImporterV2.PostLoadTextures();
+
+    //Update source of the texture to match VectorBlock content
+    //This avoids that the texture is cleared when its UpdateResource() function is called
+    //Ideally all non-interative modifications should be written directly in the texture source
+    //to ensure the texture is not loaded empty
+    //But in previous versions of UOdysseyTextureLayerImageVector, the texture source was never written
+    //So we kkep this for retrocompatbility
+    CopyVectorBlockInRenderTextureSource(FIntRect(0, 0, mVectorBlock->GetWidth(), mVectorBlock->GetHeight()));
 }
 
 TSharedPtr<::ULIS::FBlock>
@@ -371,7 +370,20 @@ UOdysseyTextureLayerImageVector::GetRenderingComposition(uint64 iRenderType, int
 void
 UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated( const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
-    RenderingChanged(::ULISUtils::ToIntRects(iRects), iIsInteractive);
+    //If the vectorblock is invalidated non interactively
+    //We need to copy the vector block into the RenderTexture Source
+    //So that the RenderTexture can be correctly loaded after a save or any call to UpdateTextureResource()
+    TArray<FIntRect> rects = ::ULISUtils::ToIntRects(iRects);
+    if (!iIsInteractive)
+    {
+        for (const FIntRect& rect : rects)
+        {
+            CopyVectorBlockInRenderTextureSource(rect);
+        }
+    }
+
+    RenderingChanged(rects, iIsInteractive);
+
 }
 
 void
@@ -545,16 +557,17 @@ UOdysseyTextureLayerImageVector::PreSave(FObjectPreSaveContext SaveContext)
     //Setting mDrawingFlags here ensures the Texture will update correctly on the next call to BuildTextureRenderer()
     //If some drawing flags are needed
     //As UpdateDrawingFlags() will return true and enforce Texture redraw.
-    mDrawingFlags = 0;
-    InitTexture();
+    //mDrawingFlags = 0;
+    //InitTexture();
 }
 
 #if WITH_EDITOR
-void
-UOdysseyTextureLayerImageVector::CopyVectorBlockInRenderTexture(FIntRect iRect) const
+
+TSharedPtr<::ULIS::FBlock>
+UOdysseyTextureLayerImageVector::GetVectorBlockToCopyInRenderTexture(FIntRect iRect, uint64 iDrawingFlags) const
 {
     UTexture2D* texture = GetRenderTexture();
-    TSharedPtr<::ULIS::FBlock> vectorBlock = mVectorBlock->GetBlock(mDrawingFlags);
+    TSharedPtr<::ULIS::FBlock> vectorBlock = mVectorBlock->GetBlock(iDrawingFlags);
     TSharedPtr<::ULIS::FBlock> block = vectorBlock;
 
     ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
@@ -573,9 +586,24 @@ UOdysseyTextureLayerImageVector::CopyVectorBlockInRenderTexture(FIntRect iRect) 
         ctx.Finish();
     }
 
-    FOdysseySurfaceTexture2DEditable surface(texture, block);
+    return block;
+}
+
+void
+UOdysseyTextureLayerImageVector::CopyVectorBlockInRenderTextureGPU(FIntRect iRect) const
+{
+    TSharedPtr<::ULIS::FBlock> block = GetVectorBlockToCopyInRenderTexture(iRect, mDrawingFlags);
+    FOdysseySurfaceTexture2DEditable surface(GetRenderTexture(), block);
     surface.Invalidate({ ULISUtils::ToULISRectI(iRect) });
 }
+
+void
+UOdysseyTextureLayerImageVector::CopyVectorBlockInRenderTextureSource(FIntRect iRect) const
+{
+    TSharedPtr<::ULIS::FBlock> block = GetVectorBlockToCopyInRenderTexture(iRect, 0);
+    CopyBlockDataToTextureSource(block.Get(), GetRenderTexture(), { iRect });
+}
+
 
 void
 UOdysseyTextureLayerImageVector::OnRefreshReferencedPalette(UOdysseyPalette* iPalette)
