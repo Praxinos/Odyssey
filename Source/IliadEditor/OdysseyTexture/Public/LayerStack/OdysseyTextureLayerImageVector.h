@@ -100,7 +100,9 @@ public:
 public:
 #if WITH_EDITOR
     void OnRefreshReferencedPalette(UOdysseyPalette* iPalette);
-    void CopyVectorBlockInRenderTexture(FIntRect iRect) const;
+    void CopyVectorBlockInRenderTextureSource(FIntRect iRect) const;
+    void CopyVectorBlockInRenderTextureGPU(FIntRect iRect) const;
+    TSharedPtr<::ULIS::FBlock> GetVectorBlockToCopyInRenderTexture(FIntRect iRect, uint64 iDrawingFlags) const;
 #endif
 
 private:
