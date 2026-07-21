@@ -185,10 +185,6 @@ private:
 public:
     friend class SOdysseyPainterEditorRasterDrawingToolBrushSelector;
 
-private:
-    UFUNCTION(BlueprintSetter)
-    void SubPixelBlueprintSetter(bool Value);
-
 public:
     /** The brush. */
     UPROPERTY(
@@ -228,9 +224,7 @@ public:
     /** Use subpixel mode. */
     UPROPERTY(
         EditInstanceOnly,
-        BlueprintReadWrite,
         Category="Shape",
-        BlueprintSetter=SubPixelBlueprintSetter,
         meta = (
             Tooltip="If checked, allows stamps to be positionned between 2 pixels for a smoother result."
         )
