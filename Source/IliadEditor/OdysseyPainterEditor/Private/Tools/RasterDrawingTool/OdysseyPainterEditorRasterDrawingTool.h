@@ -208,7 +208,7 @@ public:
     TObjectPtr<UOdysseyBrushAssetBase> BrushInstance;
 
     /** The brush options. */
-    UPROPERTY(meta=(IgnoreToolConfiguration))
+    UPROPERTY()
     TObjectPtr<UOdysseyBrushOptions> BrushOptions;
 
     /** The list of available shapes. */
