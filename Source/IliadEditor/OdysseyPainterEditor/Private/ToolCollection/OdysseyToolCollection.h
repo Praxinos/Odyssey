@@ -57,7 +57,7 @@ public:
     const TArray<UOdysseyPainterEditorToolConfiguration*> GetToolConfigurations() const;
 
 protected:
-    static void ConvertToolToPropertySnapshot(UOdysseyPainterEditorTool* iTool, FToolPropertySnapshot& oSnapshot);
+    static void ConvertObjectToPropertySnapshot(UObject* iObject, FToolPropertySnapshot& oSnapshot, TSet<const UObject*> Visited = TSet<const UObject*>());
 
 public:
     FOnCollectionChanged OnCollectionChanged;

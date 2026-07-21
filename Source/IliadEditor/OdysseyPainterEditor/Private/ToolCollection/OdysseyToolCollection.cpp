@@ -136,12 +136,12 @@ bool UOdysseyToolCollection::ContainsSimilarToolConfiguration(UClass* iToolClass
     check( iToolClass );
 
     FToolPropertySnapshot toolToCheckSnapshot;
-    UOdysseyToolCollection::ConvertToolToPropertySnapshot( iTool, toolToCheckSnapshot );
+    UOdysseyToolCollection::ConvertObjectToPropertySnapshot( iTool, toolToCheckSnapshot );
 
     for (UOdysseyPainterEditorToolConfiguration* toolConfig : mToolsConfig)
     {
         FToolPropertySnapshot toolConfigSnapshot;
-        UOdysseyToolCollection::ConvertToolToPropertySnapshot( toolConfig->mTool, toolConfigSnapshot );
+        UOdysseyToolCollection::ConvertObjectToPropertySnapshot( toolConfig->mTool, toolConfigSnapshot );
 
         if( toolToCheckSnapshot == toolConfigSnapshot )
             return true;
@@ -155,11 +155,18 @@ const TArray<UOdysseyPainterEditorToolConfiguration*> UOdysseyToolCollection::Ge
     return mToolsConfig;
 }
 
-void UOdysseyToolCollection::ConvertToolToPropertySnapshot(UOdysseyPainterEditorTool* iTool, FToolPropertySnapshot& oSnapshot)
+void UOdysseyToolCollection::ConvertObjectToPropertySnapshot(UObject* iObject, FToolPropertySnapshot& oSnapshot, TSet<const UObject*> Visited)
 {
-    oSnapshot.Values.Reset();
+    if (Visited.Contains(iObject))
+    {
+        return;
+    }
 
-    for (TFieldIterator<FProperty> it(iTool->GetClass()); it; ++it)
+    Visited.Add(iObject);
+
+    //oSnapshot.Values.Reset();
+
+    for (TFieldIterator<FProperty> it(iObject->GetClass()); it; ++it)
     {
         FProperty* property = *it;
 
@@ -168,7 +175,7 @@ void UOdysseyToolCollection::ConvertToolToPropertySnapshot(UOdysseyPainterEditor
             continue;
         }
 
-        const void* valuePtr = property->ContainerPtrToValuePtr<void>(iTool);
+        const void* valuePtr = property->ContainerPtrToValuePtr<void>(iObject);
 
         // Enum
         if (FEnumProperty* enumProperty = CastField<FEnumProperty>(property))
@@ -213,8 +220,13 @@ void UOdysseyToolCollection::ConvertToolToPropertySnapshot(UOdysseyPainterEditor
         // Serialized UObject
         else if (FObjectProperty* objectProperty = CastField<FObjectProperty>(property))
         {
+            UObject* childObject = objectProperty->GetObjectPropertyValue(valuePtr);
             FToolObjectValue data;
-            data.Value = objectProperty->GetPropertyValue(valuePtr);
+
+            if (childObject)
+            {
+                ConvertObjectToPropertySnapshot(childObject, data.Value, Visited);
+            }
 
             oSnapshot.Values.Add(property->GetFName(), FInstancedStruct::Make(data));
         }
@@ -225,7 +237,7 @@ void UOdysseyToolCollection::ConvertToolToPropertySnapshot(UOdysseyPainterEditor
             data.InitializeAs(structProperty->Struct);
 
             void* dest = data.GetMutableMemory();
-            const void* src = structProperty->ContainerPtrToValuePtr<void>(iTool);
+            const void* src = structProperty->ContainerPtrToValuePtr<void>(iObject);
 
             structProperty->Struct->CopyScriptStruct(dest, src);
 

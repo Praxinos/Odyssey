@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
+#include "OdysseyToolCollection.h"
 #include "OdysseyPainterEditorToolConfigurationUtils.generated.h"
 
 USTRUCT()
@@ -58,5 +59,5 @@ struct FToolObjectValue
     GENERATED_BODY()
 
     UPROPERTY()
-    TSoftObjectPtr<UObject> Value;
+    FToolPropertySnapshot Value;
 };
