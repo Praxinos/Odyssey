@@ -70,6 +70,8 @@ public:
     //Properties changes
     void SizeChanged();
     void OpacityChanged();
+    void HardnessChanged();
+    void AntialiasingChanged();
 
     virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
     virtual void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive) override;
@@ -91,14 +93,23 @@ private:
     void ResetInterpolation();
 
 private:
-    TSharedPtr<::ULIS::FBlock> CreateStampBlockMask();
-    void PrepareStampBlock();
+    void UpdateStampBlockMask();
+    void UpdateStampBlock();
     void Stamp(const FOdysseyPoint& iPoint);
 
 protected:
     //Visible properties
     UPROPERTY(EditAnywhere, Category="Shape", meta = (IgnoreToolConfiguration))
     FOdysseyShapes Shapes;
+
+    UPROPERTY(
+        EditInstanceOnly,
+        Category="Shape",
+        meta = (
+            Tooltip="If checked, allows stamps to be positionned between 2 pixels for a smoother result."
+        )
+    )
+    bool SubPixel = true;
 
     UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", DisplayPriority="1" ) )
     float   Size = 20.f;
@@ -108,6 +119,12 @@ protected:
 
     UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Units = "Percent" ) )
     float   Opacity = 100.f;
+
+    UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Units = "Percent" ) )
+    float   Hardness = 100.f;
+
+    UPROPERTY( EditAnywhere, Category="Parameters" )
+    bool    Antialiasing = true;
 
     UPROPERTY( EditInstanceOnly, Category="Interpolation" )
     EOdysseyInterpolationType InterpolationType = EOdysseyInterpolationType::kCatmullRom;
@@ -136,4 +153,7 @@ protected:
 
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;
     TSharedPtr<FScopedTransaction> mTransaction;
+
+    bool bNeedsStampBlockUpdate = true;
+    FOdysseyPoint mSubPixelPoint;
 };

@@ -56,8 +56,6 @@ UOdysseyPainterEditorRasterEraserTool::UOdysseyPainterEditorRasterEraserTool()
     Shapes.AddShapeType(EOdysseyShapeType::kBezier, CreateShape<UOdysseyBezierShape>("UOdysseyPainterEditorRasterEraserTool::BezierShape"));
 
     Shapes.SetActiveShapeType(EOdysseyShapeType::kFreehand);
-
-    mStampBlockMask = CreateStampBlockMask();
 }
 
 template<class T>
@@ -74,28 +72,6 @@ UOdysseyPainterEditorRasterEraserTool::CreateShape(FName iName)
     shape->SetHUD( mShapeHUD );
 
     return shape;
-}
-
-TSharedPtr<::ULIS::FBlock>
-UOdysseyPainterEditorRasterEraserTool::CreateStampBlockMask()
-{
-    int32 StampSize = FMath::CeilToInt32(Size);
-    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(StampSize, StampSize, ::ULIS::Format_GAF);
-
-    float center = StampSize/2.f;
-    for (int y = 0; y < StampSize; y++)
-    {
-        for (int x = 0; x < StampSize; x++)
-        {
-            float dist = FVector2D::Distance(FVector2D(center, center), FVector2D(x, y)) / (Size / 2.f);
-            ::ULIS::FColor color = ::ULIS::FColor::FromGreyAF(0, 0);
-            if (dist <= 1.f)
-                color = ::ULIS::FColor::FromGreyAF(0, 1.f - dist);
-            block->SetPixel(x, y, color);
-        }
-    }
-
-    return block;
 }
 
 float
@@ -210,7 +186,15 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseDown(const FOdysseyPoint& iPointIn
         return false;
 
     mPaintEngine.RasterBlock(rasterBlock);
-    return Shapes.GetActiveShape()->OnMouseDown(iPointInTexture, iKey);
+
+    mSubPixelPoint = iPointInTexture;
+    if (!SubPixel)
+    {
+        mSubPixelPoint.x = FMath::Floor(mSubPixelPoint.x) + 0.5f;
+        mSubPixelPoint.y = FMath::Floor(mSubPixelPoint.y) + 0.5f;
+    }
+
+    return Shapes.GetActiveShape()->OnMouseDown(mSubPixelPoint, iKey);
 }
 
 bool
@@ -226,7 +210,14 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseUp(const FOdysseyPoint& iPointInTe
         return false;
     }
 
-    return Shapes.GetActiveShape()->OnMouseUp(iPointInTexture, iKey);
+    mSubPixelPoint = iPointInTexture;
+    if (!SubPixel)
+    {
+        mSubPixelPoint.x = FMath::Floor(mSubPixelPoint.x) + 0.5f;
+        mSubPixelPoint.y = FMath::Floor(mSubPixelPoint.y) + 0.5f;
+    }
+
+    return Shapes.GetActiveShape()->OnMouseUp(mSubPixelPoint, iKey);
 }
 
 void
@@ -236,7 +227,14 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseHover(const FOdysseyPoint& iPointI
     if (!rasterBlock)
         return;
 
-    Shapes.GetActiveShape()->OnMouseHover(iPointInTexture);
+    mSubPixelPoint = iPointInTexture;
+    if (!SubPixel)
+    {
+        mSubPixelPoint.x = FMath::Floor(mSubPixelPoint.x) + 0.5f;
+        mSubPixelPoint.y = FMath::Floor(mSubPixelPoint.y) + 0.5f;
+    }
+
+    Shapes.GetActiveShape()->OnMouseHover(mSubPixelPoint);
 }
 
 void
@@ -249,7 +247,19 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseDrag(const FOdysseyPoint& iPointIn
         return;
     }
 
-    Shapes.GetActiveShape()->OnMouseDrag(iPointInTexture);
+    FOdysseyPoint point = iPointInTexture;
+    if (!SubPixel)
+    {
+        point.x = FMath::Floor(point.x) + 0.5f;
+        point.y = FMath::Floor(point.y) + 0.5f;
+
+        if (mSubPixelPoint == point)
+            return;
+    }
+
+    mSubPixelPoint = point;
+
+    Shapes.GetActiveShape()->OnMouseDrag(point);
 }
 
 bool
@@ -336,36 +346,115 @@ UOdysseyPainterEditorRasterEraserTool::ExtendToolbar( UToolMenu* iToolMenu )
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Shape Callbacks
 
+
+
 void
-UOdysseyPainterEditorRasterEraserTool::PrepareStampBlock()
+UOdysseyPainterEditorRasterEraserTool::UpdateStampBlockMask()
+{
+    int32 StampSize = 1 + FMath::CeilToInt32(Size) * 2; //we add 1 for antialisaing purposes
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(StampSize, StampSize, ::ULIS::Format_GAF);
+
+    FVector2D center(StampSize/2.f, StampSize/2.f);
+    float radius = Size / 2.f;
+    float normalizedHardness = Hardness / 100.f;
+    float AAThreshold = Antialiasing ? 0.5f / StampSize : 0.0f;
+    float AALowDist = 1.0f - AAThreshold;
+    float AAHighDist = 1.0f + AAThreshold;
+    float AARatio = AAHighDist != AALowDist ? 1.0f / (AAHighDist - AALowDist) : 1.f;
+
+    for (int y = 0; y < StampSize; y++)
+    {
+        for (int x = 0; x < StampSize; x++)
+        {
+            float dist = FVector2D::Distance(center, FVector2D(x + 0.5f, y + 0.5f)) / radius;
+            ::ULIS::FColor color = ::ULIS::FColor::FromGreyAF(0, 0);
+
+            if (dist >= AAHighDist)
+            {
+                //Write empty pixel
+                block->SetPixel(x, y, color);
+                continue;
+            }
+
+            float alpha = 1.0f;
+            if (normalizedHardness >= 1.0f)
+            {
+                alpha = 1.0f;
+            }
+            else if (dist > normalizedHardness)
+            {
+                float newDist = (dist - normalizedHardness) / (1.0f - normalizedHardness);
+                alpha = FMath::Clamp(1.0f - newDist, 0.0f, 1.0f);
+            }
+
+            if (dist <= AALowDist)
+            {
+                //Write non AA pixel
+                color = ::ULIS::FColor::FromGreyAF(0, alpha);
+                block->SetPixel(x, y, color);
+                continue;
+            }
+
+            // Write AA pixel
+            float AAValue = (dist - AALowDist) * AARatio;
+            color = ::ULIS::FColor::FromGreyAF(0, alpha * AAValue);
+            block->SetPixel(x, y, color);
+        }
+    }
+
+    mStampBlockMask = block;
+}
+
+void
+UOdysseyPainterEditorRasterEraserTool::UpdateStampBlock()
 {
     TSharedPtr<::ULIS::FBlock> paintBlock = mPaintEngine.PaintBlock();
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(paintBlock->Format());
-    if (!mStampBlock || mStampBlock->Width() != mStampBlockMask->Width() || mStampBlock->Height() != mStampBlockMask->Height() || mStampBlock->Format() != paintBlock->Format())
+
+    if (!mStampBlock || bNeedsStampBlockUpdate)
     {
+        UpdateStampBlockMask();
+
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(paintBlock->Format());
         mStampBlock = MakeShared<::ULIS::FBlock>(mStampBlockMask->Width(), mStampBlockMask->Height(), paintBlock->Format());
         ctx.ConvertFormat(*mStampBlockMask, *mStampBlock);
         ctx.Finish();
+
+        bNeedsStampBlockUpdate = false;
     }
 }
 
 void
 UOdysseyPainterEditorRasterEraserTool::Stamp(const FOdysseyPoint& iPoint)
 {
-    PrepareStampBlock();
+    UpdateStampBlock();
 
     TSharedPtr<::ULIS::FBlock> paintBlock = mPaintEngine.PaintBlock();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(paintBlock->Format());
 
-    ctx.BlendAA(
-          *mStampBlock
-        , *paintBlock
-        , ::ULIS::FRectI::Auto
-        , ::ULIS::FVec2F(iPoint.x - mStampBlock->Width() / 2.f, iPoint.y - mStampBlock->Height() / 2.f)
-        , ::ULIS::Blend_Normal
-        , ::ULIS::Alpha_Normal
-        , iPoint.pressure * Flow / 100.f
-    );
+    if (Antialiasing)
+    {
+        ctx.BlendAA(
+            *mStampBlock
+            , *paintBlock
+            , ::ULIS::FRectI::Auto
+            , ::ULIS::FVec2F(iPoint.x - mStampBlock->Width() / 2.f, iPoint.y - mStampBlock->Height() / 2.f)
+            , ::ULIS::Blend_Normal
+            , ::ULIS::Alpha_Normal
+            , iPoint.pressure * Flow / 100.f
+        );
+    }
+    else
+    {
+        ctx.Blend(
+            *mStampBlock
+            , *paintBlock
+            , ::ULIS::FRectI::Auto
+            , ::ULIS::FVec2F(iPoint.x - mStampBlock->Width() / 2.f, iPoint.y - mStampBlock->Height() / 2.f)
+            , ::ULIS::Blend_Normal
+            , ::ULIS::Alpha_Normal
+            , iPoint.pressure * Flow / 100.f
+        );
+    }
     //ctx.Copy(*mStampBlock, *paintBlock);
     ctx.Finish();
 
@@ -394,13 +483,25 @@ UOdysseyPainterEditorRasterEraserTool::OnOpacityChanged()
 void
 UOdysseyPainterEditorRasterEraserTool::SizeChanged()
 {
-    mStampBlockMask = CreateStampBlockMask();
+    bNeedsStampBlockUpdate = true;
 }
 
 void
 UOdysseyPainterEditorRasterEraserTool::OpacityChanged()
 {
     mBlendParameters.Opacity = Opacity;
+}
+
+void
+UOdysseyPainterEditorRasterEraserTool::HardnessChanged()
+{
+    bNeedsStampBlockUpdate = true;
+}
+
+void
+UOdysseyPainterEditorRasterEraserTool::AntialiasingChanged()
+{
+    bNeedsStampBlockUpdate = true;
 }
 
 void UOdysseyPainterEditorRasterEraserTool::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
@@ -415,6 +516,12 @@ void UOdysseyPainterEditorRasterEraserTool::PropertyChanged(const FName& iProper
 
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Opacity))
         OpacityChanged();
+
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Hardness))
+        HardnessChanged();
+
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Antialiasing))
+        AntialiasingChanged();
 }
 
 void

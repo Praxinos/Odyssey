@@ -1038,12 +1038,6 @@ UOdysseyPainterEditorRasterDrawingTool::ResetInterpolation()
 }
 
 void
-UOdysseyPainterEditorRasterDrawingTool::SubPixelBlueprintSetter(bool Value)
-{
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, SubPixel), Value);
-}
-
-void
 UOdysseyPainterEditorRasterDrawingTool::RegisterDetailCustomization()
 {
     FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
