@@ -979,10 +979,8 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput(eStylusEventFence iUntilEve
     }
 
     UE::StylusInput::FStylusInputPacket packet;
-    UE_LOG(LogTemp, Display, TEXT("%p, %ld"), mStylusInputWindow.Pin().Get(), mPacketQueue.Num())
     while (mPacketQueue.Dequeue(packet))
     {
-        UE_LOG(LogTemp, Display, TEXT("%ld"), packet.Type)
         FOdysseyPoint point = StylusPacketToPoint(packet);
         if (packet.Type == UE::StylusInput::EPacketType::StylusDown)
         {

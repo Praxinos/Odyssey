@@ -1063,6 +1063,7 @@ IOdysseyViewportDrawingEditorAdapter::OnPacket(const UE::StylusInput::FStylusInp
         mPacketQueue.Enqueue(packetCopyWin);
         return;
     }
+#endif
 // FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
 #if PLATFORM_MAC
     UE::StylusInput::FStylusInputPacket packetCopyMac = iPacket;
