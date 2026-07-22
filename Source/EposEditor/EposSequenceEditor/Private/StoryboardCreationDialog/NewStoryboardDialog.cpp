@@ -739,6 +739,9 @@ SNewStoryboardSettings::GetErrorText() const
     {
         if( !mImportImageSequenceSettings->Options.mPatternKeywordLists.IsValidPattern( mImportImageSequenceSettings->Options.FilePattern ) )
             return LOCTEXT( "ImageSequenceWrongPattern", "Error: Wrong Pattern" );
+
+        if( ( mImportImageSequenceSettings->Options.FilePattern.Len() || mImportImageSequenceSettings->Options.ImageSequencePath.Path.Len() ) && mPanelItemsList.IsEmpty() )
+            return LOCTEXT( "ImageSequenceEmptyList", "Error: Nothing to load (check your input path or your pattern)" );
     }
 
     if( !mImageSequenceImportErrorMessage.IsEmpty() )
