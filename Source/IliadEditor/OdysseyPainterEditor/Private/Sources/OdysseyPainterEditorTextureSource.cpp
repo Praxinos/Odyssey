@@ -394,4 +394,9 @@ FOdysseyPainterEditorTextureSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBl
     mutator.Commit();
 }
 
+bool FOdysseyPainterEditorTextureSource::IsValid() const
+{
+    return ( mTexture != nullptr && mTexture->IsValidLowLevel() );
+}
+
 #undef LOCTEXT_NAMESPACE

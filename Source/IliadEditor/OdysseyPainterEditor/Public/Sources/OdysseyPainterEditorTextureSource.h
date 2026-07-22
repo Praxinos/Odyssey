@@ -36,6 +36,7 @@ public:
     virtual void ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock> iBlock) override;
     virtual void PasteBlockToCurrentLayer(TSharedPtr<::ULIS::FBlock> iBlock) override;
     virtual void PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iBlock ) override;
+    virtual bool IsValid() const override;
 
 public:
     UTexture2D* GetTexture() const;
