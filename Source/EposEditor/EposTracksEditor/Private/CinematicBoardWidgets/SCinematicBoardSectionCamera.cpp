@@ -68,6 +68,7 @@ private:
 private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
     TAttribute<EVisibility>             mOptionalWidgetsVisibility;
+    TWeakPtr<SWidget>                   mPopupWidget;
 };
 
 void
@@ -194,13 +195,14 @@ SCinematicBoardSectionCameraTitle::Construct( const FArguments& InArgs, TSharedR
 
     auto IsToolBarVisible = [this]() -> EVisibility
     {
-        bool is_visible = mOptionalWidgetsVisibility.Get().IsVisible();
+        bool is_visible = mPopupWidget.IsValid() || mOptionalWidgetsVisibility.Get().IsVisible();
         is_visible &= !!Cast<UShotSequence>( mBoardSection.Pin()->GetSubSectionObject().GetSequence() );
 
         return is_visible ? EVisibility::Visible : EVisibility::Hidden;
     };
 
     TSharedRef< SWidget > left_toolbar = LeftToolbarBuilder.MakeWidget();
+    mPopupWidget = left_toolbar;
     left_toolbar->SetVisibility( MakeAttributeLambda( IsToolBarVisible ) );
 
     //---
