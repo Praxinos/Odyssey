@@ -1063,13 +1063,47 @@ IOdysseyViewportDrawingEditorAdapter::OnPacket(const UE::StylusInput::FStylusInp
         mPacketQueue.Enqueue(packetCopyWin);
         return;
     }
-#endif
-// FIX: MOVE WINTAB COORDINATES WHEN MAIN SCREEN IS NOT ON THE (TOP) LEFT OF USER PHYSICAL DESKTOP - AWAITING FOR EPIC PULL REQUEST VALIDATION
+// FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
+#if PLATFORM_MAC
+    UE::StylusInput::FStylusInputPacket packetCopyMac = iPacket;
+
+    if (iPacket.NormalPressure == 0)
+    {
+        mCurrentPenStatus = mCurrentPenStatus & ~UE::StylusInput::EPenStatus::CursorIsTouching;
+        if (mCurrentPacketType == UE::StylusInput::EPacketType::OnDigitizer)
+            mCurrentPacketType = UE::StylusInput::EPacketType::StylusUp;
+        else
+            mCurrentPacketType = UE::StylusInput::EPacketType::AboveDigitizer;
+    }
+
+    if (iPacket.NormalPressure != 0)
+    {
+        mCurrentPenStatus = mCurrentPenStatus | UE::StylusInput::EPenStatus::CursorIsTouching;
+        if (mCurrentPacketType != UE::StylusInput::EPacketType::OnDigitizer && mCurrentPacketType != UE::StylusInput::EPacketType::StylusDown)
+            mCurrentPacketType = UE::StylusInput::EPacketType::StylusDown;
+        else
+            mCurrentPacketType = UE::StylusInput::EPacketType::OnDigitizer;
+    }
+    else
+    {
+        mCurrentPenStatus = mCurrentPenStatus & ~UE::StylusInput::EPenStatus::CursorIsTouching;
+    }
+
+    packetCopyMac.PenStatus = mCurrentPenStatus;
+    packetCopyMac.Type = mCurrentPacketType;
+
+    if (packetCopyMac.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
+        ClearQueue();
+
+    mPacketQueue.Enqueue(packetCopyMac);
+    return;
+#else// FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
 
     if (iPacket.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
         ClearQueue();
 
     mPacketQueue.Enqueue(iPacket);
+#endif
 }
 
 bool
