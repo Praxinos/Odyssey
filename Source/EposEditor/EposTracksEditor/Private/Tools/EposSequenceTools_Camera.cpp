@@ -761,7 +761,15 @@ ShotSequenceTools::PilotCamera( ISequencer* iSequencer, UMovieSceneSequence* iSe
 
     FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, iSequence, iSequenceID );
     ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawned( *iSequencer, iSequence, iSequenceID, camera_binding );
-    if( !ensureMsgf(camera, TEXT("In case of a spawnable, it means it is not spawned, the sequence is not the focused one by the sequencer")) )
+    // It's possible to not have a camera here
+    // In case of a spawnable, it means it is not spawned, the sequence is not the focused one by the sequencer
+    // And it can happen when:
+    // - create a new take
+    // - increase its size
+    // - set the current frame on the "increased" part
+    // - switch to the previous take
+    // -> current frame is now outside the range of the first take -> no more camera to spawn
+    if( !camera )
         return;
 
     if( GCurrentLevelEditingViewportClient && GCurrentLevelEditingViewportClient->GetViewMode() != VMI_Unknown && GCurrentLevelEditingViewportClient->AllowsCinematicControl() )
