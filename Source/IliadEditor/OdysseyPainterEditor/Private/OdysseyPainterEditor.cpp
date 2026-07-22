@@ -1488,7 +1488,7 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         mAnimationTimelinePosition->Reset();
     }
 
-    if (iSource)
+    if (iSource && iSource->IsValid())
     {
         mSource = iSource;
         mSource->OnAddEditedObjectDelegate().AddLambda([this](UObject* iObject) { AddEditedObject(iObject);});

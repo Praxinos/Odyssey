@@ -539,6 +539,11 @@ FOdysseyPainterEditorAnimationSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::F
     currentFrameMutator.Commit();
 }
 
+bool FOdysseyPainterEditorAnimationSource::IsValid() const
+{
+    return ( mAnimation != nullptr && mAnimation->IsValidLowLevel() );
+}
+
 void
 FOdysseyPainterEditorAnimationSource::RecordCurrentFrameUndo() const
 {
