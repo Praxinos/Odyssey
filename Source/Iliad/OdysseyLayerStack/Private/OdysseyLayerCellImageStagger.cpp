@@ -5,6 +5,7 @@
 #include "OdysseyLayerCellImageStaggerImport.h"
 #include "OdysseyLayer.h"
 
+#if WITH_EDITOR
 void
 UOdysseyLayerCellImageStagger::OldSerialize(FArchive& Ar)
 {
@@ -17,6 +18,7 @@ UOdysseyLayerCellImageStagger::OldSerialize(FArchive& Ar)
         }
     }
 }
+#endif
 
 UOdysseyLayerCell*
 UOdysseyLayerCellImageStagger::GetReferenceCellAtFrame(int Frame, bool Recursive) const

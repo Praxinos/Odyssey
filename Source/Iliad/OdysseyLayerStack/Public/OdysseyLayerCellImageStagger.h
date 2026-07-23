@@ -32,7 +32,9 @@ public:
     ) const override;
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const override;
     virtual FIntRect GetDefaultRenderRect() const override;
+#if WITH_EDITOR
     virtual void OldSerialize(FArchive& Ar) override; //DEPRECATED: Keep that for compatibility with early versions of Odyssey
+#endif
 
 public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")

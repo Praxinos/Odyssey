@@ -3,8 +3,11 @@
 
 #pragma once
 
-#include "Serialization/Archive.h"
+#include "CoreMinimal.h"
 
+#if WITH_EDITOR
+
+class FArchive;
 class UOdysseyLayerCellImageStagger;
 
 class FOdysseyLayerCellImageStaggerImport
@@ -27,3 +30,4 @@ private:
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };
+#endif

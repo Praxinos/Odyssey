@@ -5,6 +5,8 @@
 
 #include "CoreMinimal.h"
 
+#if WITH_EDITOR
+
 class FArchive;
 class UOdysseyLayerCell;
 
@@ -29,3 +31,5 @@ private:
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };
+
+#endif
