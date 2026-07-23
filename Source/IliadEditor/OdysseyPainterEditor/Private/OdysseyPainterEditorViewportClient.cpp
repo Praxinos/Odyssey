@@ -1098,7 +1098,7 @@ void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylu
     {
         ClearQueue();
     }
-    mPacketQueue.Enqueue(iPacket);`
+    mPacketQueue.Enqueue(iPacket);
 #endif
 }
 
