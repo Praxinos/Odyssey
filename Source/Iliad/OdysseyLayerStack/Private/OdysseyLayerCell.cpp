@@ -45,6 +45,7 @@ UOdysseyLayerCell::GetLayer() const
     return Cast<UOdysseyLayer>(GetOuter());
 }
 
+#if WITH_EDITOR
 void
 UOdysseyLayerCell::OldSerialize(FArchive& Ar)
 {
@@ -57,6 +58,7 @@ UOdysseyLayerCell::OldSerialize(FArchive& Ar)
         Ar << Exposure;
     }
 }
+#endif
 
 int32
 UOdysseyLayerCell::FrameInLayerToIndexInCell( FFrameNumber iFrame )

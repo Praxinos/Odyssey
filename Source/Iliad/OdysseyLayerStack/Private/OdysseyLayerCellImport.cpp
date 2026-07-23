@@ -2,6 +2,9 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyLayerCellImport.h"
+
+#if WITH_EDITOR
+
 #include "Serialization/Archive.h"
 #include "OdysseyLayerCell.h"
 #include <functional>
@@ -115,3 +118,5 @@ FOdysseyLayerCellImport::Read( UOdysseyLayerCell* iCell
             }
         } );
 }
+
+#endif

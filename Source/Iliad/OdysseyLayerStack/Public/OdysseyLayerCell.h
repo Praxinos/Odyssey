@@ -153,9 +153,9 @@ public:
 #endif
 
 public:
+#if WITH_EDITOR
     // UObject overrides
     virtual void OldSerialize(FArchive& Ar); //DEPRECATED: Keep that for compatibility with early versions of Odyssey
-#if WITH_EDITOR
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 #endif
 
