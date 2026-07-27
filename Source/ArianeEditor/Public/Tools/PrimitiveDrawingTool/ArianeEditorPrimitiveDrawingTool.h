@@ -70,6 +70,7 @@ public:
     virtual bool OnKeyDownGlobal( const FKeyEvent& InKeyEvent ) override;
     virtual bool OnKeyUpGlobal( const FKeyEvent& InKeyEvent ) override;
     virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
+    virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
 
 protected:
     //double GetLineRotationAngle( FArianeLine* iLine, const FOdysseyPoint& iPointInTexture );
@@ -112,6 +113,6 @@ protected:
     uint32 EllipseNumber;
     uint32 PolygonNumber;
     EMouseCursor::Type Cursor;
-    FVector LocalCoordsAtDown;
+    FVector PrimitiveCoordsAtDown;
     EArianePrimitiveToolShapeType PrimitiveShapeType;
 };

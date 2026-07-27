@@ -33,13 +33,14 @@ public:
     virtual bool HasAny();
 
 public:
-    FArianeObjectInvalidationFlags& SetAltered()  { Altered   = 1; return *this; };
-    FArianeObjectInvalidationFlags& SetSelected() { Selected  = 1; return *this; };
-    FArianeObjectInvalidationFlags& SetHierarchy(){ Hierarchy = 1; return *this; };
-    FArianeObjectInvalidationFlags& SetColor()    { Color     = 1; return *this; };
-    FArianeObjectInvalidationFlags& SetChildren() { Children  = 1; return *this; };
-    FArianeObjectInvalidationFlags& SetTags()     { Tags      = 1; return *this; };
-    FArianeObjectInvalidationFlags& SetName()     { Name      = 1; return *this; };
+    FArianeObjectInvalidationFlags& SetAltered()   { Altered   = 1; return *this; };
+    FArianeObjectInvalidationFlags& SetSelected()  { Selected  = 1; return *this; };
+    FArianeObjectInvalidationFlags& SetHierarchy() { Hierarchy = 1; return *this; };
+    FArianeObjectInvalidationFlags& SetColor()     { Color     = 1; return *this; };
+    FArianeObjectInvalidationFlags& SetChildren()  { Children  = 1; return *this; };
+    FArianeObjectInvalidationFlags& SetTags()      { Tags      = 1; return *this; };
+    FArianeObjectInvalidationFlags& SetName()      { Name      = 1; return *this; };
+    FArianeObjectInvalidationFlags& SetTransform() { Transform = 1; return *this; };
 
 public:
     uint32 Selected  : 1 = 0;
@@ -49,6 +50,7 @@ public:
     uint32 Children  : 1 = 0;
     uint32 Tags      : 1 = 0;
     uint32 Name      : 1 = 0;
+    uint32 Transform : 1 = 0;
 };
 
 USTRUCT(BlueprintType)
@@ -167,7 +169,7 @@ public:
     FVector GetTranslation();
 
     /** Get object's rotation */
-    FVector GetRotationInDegrees();
+    FVector GetRotation();
 
     /** Get object's scaling */
     FVector GetScaling();
@@ -255,6 +257,25 @@ public:
     EArianeAllocationModel GetAllocationModel();
     static uint32 GetCommonClass( const TArray<FArianeObject*>& Objects );
     virtual void UpdateShape( EUpdateFlags UpdateFlags );
+    void UpdateTransform();
+    void SetTranslation( double InX, double InY, double InZ );
+    void SetTranslation( const FVector& InTranslation );
+    void SetRotation( double InX, double InY, double InZ );
+    void SetRotation( const FVector& InRotation );
+    void SetScaling( double InX, double InY, double InZ );
+    void SetScaling( const FVector& InScaling );
+    const FTransform& GetLocalTransform();
+    void GetTransform( FVector& OutTranslation
+                     , FVector& OutRotation
+                     , FVector& OutScaling
+                     , FVector& OutSkewing );
+
+    void SetTransform( const FVector& InTranslation
+                     , const FVector& InRotation
+                     , const FVector& InScaling
+                     , const FVector& InSkewing );
+
+    void ResetTransform();
 
 protected:
     /**
@@ -283,15 +304,6 @@ protected:
     FArianeObjectID ParentID;
 
     UPROPERTY( EditAnywhere )
-    FVector Translation;
-
-    UPROPERTY( EditAnywhere )
-    FVector RotationInDegrees;
-
-    UPROPERTY( EditAnywhere )
-    FVector Scaling;
-
-    UPROPERTY( EditAnywhere )
     UArianeLayerDrawing* DrawingLayer;
 
     UPROPERTY( EditAnywhere )
@@ -313,6 +325,8 @@ protected:
     FSimpleMulticastDelegate  OnPostInvalidated;
     TArray<FArianeObjectID> InvalidatedChildren;
     TArray<FArianeObjectID> Children;
+    FTransform LocalTransform;
+    FTransform WorldTransform;
     FBoxSphereBounds Bounds;
     FArianeObjectInvalidationFlags* InvalidationFlags;
     bool bSelected;
