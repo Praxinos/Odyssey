@@ -45,7 +45,7 @@ UArianeEditorPrimitiveDrawingTool::UArianeEditorPrimitiveDrawingTool()
     , EllipseNumber( 0 )
     , PolygonNumber( 0 )
     , Cursor( EMouseCursor::Type::Crosshairs )
-    , PrimitiveShapeType ( EArianePrimitiveToolShapeType::Line )
+    , PrimitiveShapeType ( EArianePrimitiveToolShapeType::Rectangle )
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PrimitiveDrawing64");
 
@@ -122,12 +122,15 @@ UArianeEditorPrimitiveDrawingTool::Inactivate()
 bool
 UArianeEditorPrimitiveDrawingTool::OnKeyDownGlobal( const FKeyEvent& InKeyEvent )
 {
-    UniformAtKeyDown = Uniform;
-
-    if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+    if( InKeyEvent.IsRepeat() == false )
     {
-        Uniform = !Uniform; // flip the value
-        return true;
+        UniformAtKeyDown = Uniform;
+
+        if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+        {
+            Uniform = !Uniform; // flip the value
+            return true;
+        }
     }
 
     return false;
@@ -194,8 +197,12 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
                 if( FArianeCore::IntersectPlane( DrawingPlane, RayOrigin, RayDirection, IntersectAt  ) > 0.0f )
                 {
                     const FTransform& ParentGroupTransform = ParentGroup->GetTransform();
+                    FQuat WorldOrientationQuat = FQuat::FindBetweenVectors( ParentGroup->GetTransform().TransformVector( FVector::UpVector )
+                                                                          , DrawingPlane.GetSafeNormal() );
+                    FQuat LocalOrientationQuat = ParentGroupTransform.InverseTransformRotation( WorldOrientationQuat );
+                    FVector LocalOrientation = LocalOrientationQuat.Euler();
 
-                    LocalCoordsAtDown = ParentGroupTransform.InverseTransformPosition( IntersectAt );
+                    PrimitiveCoordsAtDown = ParentGroupTransform.InverseTransformPosition( IntersectAt );
 
                     switch( PrimitiveShapeType/*Shapes.GetActiveShapeType()*/ )
                     {
@@ -249,8 +256,8 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
                         Primitive->SetMaterial( MaterialInterface );
                     }
 
-                    //Primitive->Translate( LocalCoords.X, LocalCoords.Y, LocalCoords.Z );
-                    //Primitive->UpdateMatrix();
+                    Primitive->SetTransform( PrimitiveCoordsAtDown, LocalOrientation, FVector::One(), FVector::Zero() );
+                    Primitive->UpdateTransform();
                 }
             }
 
@@ -356,7 +363,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDrag( FEditorViewportClient* ViewportC
                 {
                     const FTransform& PrimitiveTransform = Primitive->GetTransform();
                     FVector LocalCoordsAtDrag = PrimitiveTransform.InverseTransformPosition( IntersectAt );
-                    FVector Diff = ( LocalCoordsAtDrag - LocalCoordsAtDown );
+                    FVector Diff = ( LocalCoordsAtDrag - FVector::Zero() );
 
                     switch( PrimitiveShapeType/*Shapes.GetActiveShapeType()*/ )
                     {
@@ -445,6 +452,29 @@ UArianeEditorPrimitiveDrawingTool::OnMouseUp( FEditorViewportClient* ViewportCli
     }
 
     return true;
+}
+
+void
+//UArianeEditorTool::OnTick(float DeltaTime)
+UArianeEditorPrimitiveDrawingTool::Render(IToolsContextRenderAPI* RenderAPI)
+{
+    if  ( 1 )
+    {
+        UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+        //Super::OnTick( DeltaTime );
+
+        if( Painting3DComponent )
+        {
+            UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>( LayerStack->GetCurrentLayer() );
+
+            if( DrawingLayer )
+            {
+                DrawLayerOrientationGrid( RenderAPI, DrawingLayer );
+            }
+        }
+    }
 }
 
 void

@@ -7,6 +7,8 @@
 #include "CoreMinimal.h"
 // Ariane Editor Headers
 #include "ArianeEditorObjectProxy.h"
+// Ariane Headers
+#include "ArianePath.h" // for EArianePathLineType
 
 #include "ArianeEditorPathProxy.generated.h"
 
@@ -28,9 +30,10 @@ class ARIANEEDITOR_API UArianeEditorPathProxy : public UArianeEditorObjectProxy
     typedef union {
         struct
         {
-            uint32 PathWidthInPercent : 1;
-            uint32 PathWidthInUnits   : 1;
-            uint32 Material           : 1;
+            bool PathWidthInPercent : 1;
+            bool PathWidthInUnits   : 1;
+            bool Material           : 1;
+            bool LineType           : 1;
             //uint32 JointType : 1;
             //uint32 MiterLimit : 1;
             //uint32 Brush : 1;
@@ -103,6 +106,11 @@ class ARIANEEDITOR_API UArianeEditorPathProxy : public UArianeEditorObjectProxy
                  , Category=Path
                  , meta = ( ToolTip = "The material to use along the path." ) )
         UMaterialInterface* Material;
+
+        UPROPERTY( EditAnywhere
+                 , Category=Path
+                 , meta = ( ToolTip = "Either tube or flat." ) )
+        EArianePathLineType LineType;
 
         //UPROPERTY( EditAnywhere
         //         , Category=Path

@@ -34,6 +34,7 @@ FArianeObjectInvalidationFlags::AND( const FArianeObjectInvalidationFlags& RHS )
         Children  &= ((FArianeObjectInvalidationFlags&)RHS).Children;
         Tags      &= ((FArianeObjectInvalidationFlags&)RHS).Tags;
         Name      &= ((FArianeObjectInvalidationFlags&)RHS).Name;
+        Transform &= ((FArianeObjectInvalidationFlags&)RHS).Transform;
     }
 
     return *this;
@@ -51,6 +52,7 @@ FArianeObjectInvalidationFlags::OR( const FArianeObjectInvalidationFlags& RHS )
         Children  |= ((FArianeObjectInvalidationFlags&)RHS).Children;
         Tags      |= ((FArianeObjectInvalidationFlags&)RHS).Tags;
         Name      |= ((FArianeObjectInvalidationFlags&)RHS).Name;
+        Transform |= ((FArianeObjectInvalidationFlags&)RHS).Transform;
     }
 
     return *this;
@@ -66,6 +68,7 @@ FArianeObjectInvalidationFlags::SetAll()
     Children  = 1;
     Tags      = 1;
     Name      = 1;
+    Transform = 1;
 
     return *this;
 }
@@ -80,6 +83,7 @@ FArianeObjectInvalidationFlags::Clear()
     Children  = 0;
     Tags      = 0;
     Name      = 0;
+    Transform = 0;
 
     return *this;
 }
@@ -93,7 +97,8 @@ FArianeObjectInvalidationFlags::HasAny()
           || Color
           || Children
           || Tags
-          || Name  );
+          || Name
+          || Transform );
 }
 
 
@@ -128,9 +133,6 @@ FArianeObject::FArianeObject( UArianeLayerDrawing* InDrawingLayer
     : Name ( InName )
     , Guid ( FGuid::NewGuid() )
     , ParentID ( FArianeObjectID() )
-    , Translation ( 0.0f, 0.0f, 0.0f )
-    , RotationInDegrees( 0.0f )
-    , Scaling( 1.0f, 1.0f, 1.0f )
     , DrawingLayer( InDrawingLayer )
     , bVisible ( true )
     , bExpanded ( true )
@@ -341,8 +343,15 @@ FArianeObject::TraverseBackwards( TFunction<ETraversalReturnValue(FArianeObject*
 const FTransform&
 FArianeObject::GetTransform()
 {
-    return GetDrawingLayer()->GetComponentTransform();
+    return WorldTransform;
 }
+
+const FTransform&
+FArianeObject::GetLocalTransform()
+{
+    return LocalTransform;
+}
+
 
 //static
 uint32
@@ -412,6 +421,139 @@ FArianeObject::Update( EUpdateFlags UpdateFlags, bool Recurse )
     return InvalidatedChildren.Num() ? false : true;
 }
 
+void
+FArianeObject::SetTranslation( double InX, double InY, double InZ )
+{
+    SetTranslation( FVector( InX, InY, InZ ) );
+}
+
+void
+FArianeObject::SetTranslation( const FVector& InTranslation )
+{
+    LocalTransform.SetTranslation( InTranslation );
+
+    Invalidate( FArianeObjectInvalidationFlags().SetTransform() );
+}
+
+void
+FArianeObject::SetRotation( double InX, double InY, double InZ )
+{
+    SetRotation( FVector( InX, InY, InZ ) );
+}
+
+void
+FArianeObject::SetRotation( const FVector& InRotation )
+{
+    FRotator Rotator( InRotation.Y, InRotation.Z, InRotation.X );
+
+    LocalTransform.SetRotation( Rotator.Quaternion() );
+
+    Invalidate( FArianeObjectInvalidationFlags().SetTransform() );
+}
+
+void
+FArianeObject::SetScaling( double InX, double InY, double InZ )
+{
+    SetScaling( FVector( InX, InY, InZ ) );
+}
+
+void
+FArianeObject::SetScaling( const FVector& InScaling )
+{
+    LocalTransform.SetScale3D( InScaling );
+
+    Invalidate( FArianeObjectInvalidationFlags().SetTransform() );
+}
+
+/*
+void
+FArianeObject::SetSkew( double InX, double InY, double InZ )
+{
+    SetSkew( FVector( InX, InY, InZ ) );
+}
+
+void
+FArianeObject::SetSkew( const FVector& InSkew )
+{
+    Skew = InSkew;
+
+    Invalidate( FArianeObjectInvalidationFlags().SetTransform() );
+}
+*/
+
+FVector
+FArianeObject::GetTranslation()
+{
+    return LocalTransform.GetTranslation();
+}
+
+FVector
+FArianeObject::GetScaling()
+{
+    return LocalTransform.GetScale3D();
+}
+
+FVector
+FArianeObject::GetRotation()
+{
+    return LocalTransform.GetRotation().Euler();
+}
+
+/*
+FVector
+FArianeObject::GetSkew()
+{
+    return Skew;
+}
+*/
+
+void
+FArianeObject::GetTransform( FVector& OutTranslation
+                           , FVector& OutRotation
+                           , FVector& OutScaling
+                           , FVector& OutSkewing )
+{
+    OutTranslation = GetTranslation();
+    OutRotation = GetRotation();
+    OutScaling = GetScaling();
+    //OutSkewing = Skew;
+}
+
+void
+FArianeObject::SetTransform( const FVector& InTranslation
+                           , const FVector& InRotation
+                           , const FVector& InScaling
+                           , const FVector& InSkew )
+{
+    SetTranslation( InTranslation );
+    SetRotation( InRotation );
+    SetScaling( InScaling );
+    //Skew = InSkew ;
+}
+
+void
+FArianeObject::ResetTransform()
+{
+    SetTranslation( FVector::Zero() );
+    SetScaling( FVector::One() );
+    SetRotation( FVector::Zero() );
+    //SetSkew( FVector::Zero() );
+}
+
+void
+FArianeObject::UpdateTransform()
+{
+    Traverse( [this]( FArianeObject* Object  ) -> ETraversalReturnValue
+        {
+            FArianeObject* Parent = ParentID.GetObject();
+
+            WorldTransform =  Parent ? Parent->WorldTransform * LocalTransform
+                                     : GetDrawingLayer()->GetComponentTransform();
+
+            return ETraversalReturnValue::Continue;
+        } );
+}
+
 UArianePainting3DComponent*
 FArianeObject::GetPainting3DComponent()
 {
@@ -436,24 +578,6 @@ void
 FArianeObject::UpdateBounds()
 {
 
-}
-
-FVector
-FArianeObject::GetTranslation()
-{
-    return Translation;
-}
-
-FVector
-FArianeObject::GetRotationInDegrees()
-{
-    return RotationInDegrees;
-}
-
-FVector
-FArianeObject::GetScaling()
-{
-    return Scaling;
 }
 
 FSimpleMulticastDelegate &
@@ -677,9 +801,7 @@ FArianeObject::CopySettings( FArianeObject* DestinationObject, const FCopyArgs& 
                                                                           : Name;
 
     DestinationObject->Name = NewName;
-    DestinationObject->Translation = Translation;
-    DestinationObject->RotationInDegrees = RotationInDegrees;
-    DestinationObject->Scaling = Scaling;
+    DestinationObject->LocalTransform = LocalTransform;
     DestinationObject->bVisible = bVisible;
     DestinationObject->bExpanded = bExpanded;
     //DestinationObject->Opacity = Opacity;
@@ -808,9 +930,7 @@ void
 FArianeObject::ExportProperties( FArianeObject* DestObject )
 {
     DestObject->Name = Name;
-    DestObject->Translation = Translation;
-    DestObject->RotationInDegrees = RotationInDegrees;
-    DestObject->Scaling = Scaling;
+    DestObject->LocalTransform = LocalTransform;
 }
 
 FArianeObject*

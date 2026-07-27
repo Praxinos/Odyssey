@@ -715,8 +715,8 @@ FArianePath::SetLineType( EArianePathLineType InLineType )
 {
     LineType = InLineType;
 
-    Invalidate( FArianePathInvalidationFlags().SetSegmentAltered()
-                                              .SetVertexAltered() );
+    InvalidateAllSegments();
+    InvalidateAllVertices();
 }
 
 EArianePathLineType
@@ -870,10 +870,8 @@ FArianePath::InvalidateAllSegments()
 {
     for( FArianeSegmentID& SegmentID : Segments )
     {
-        InvalidatedSegments.Add( SegmentID.GetSegment() );
+        SegmentID.GetSegment()->Invalidate();
     }
-
-    Invalidate( FArianePathInvalidationFlags().SetSegmentAltered() );
 }
 
 void

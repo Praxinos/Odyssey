@@ -25,6 +25,8 @@ UArianeLayerDrawing::UArianeLayerDrawing()
 
     ResetHierarchy();
 
+    bWantsOnUpdateTransform = true;
+
 /*
     PrimaryComponentTick.bCanEverTick = true;
     PrimaryComponentTick.bStartWithTickEnabled = true;
@@ -495,6 +497,13 @@ UArianeLayerDrawing::UpdateBounds()
             Bounds = Bounds + const_cast<FArianePath*>(Path)->GetBounds();
         }
     }
+}
+
+
+void
+UArianeLayerDrawing::OnUpdateTransform( EUpdateTransformFlags UpdateTransformFlags, ETeleportType TeleportType )
+{
+    GetRootGroup()->UpdateTransform();
 }
 
 EArianeLayerDrawingOrigin

@@ -157,6 +157,8 @@ public:
                                 , double Radius
                                 , double StrokeWidth
                                 , EArianeAllocationModel AllocationModel );
+    virtual void OnUpdateTransform( EUpdateTransformFlags UpdateTransformFlags, ETeleportType TeleportType ) override;
+
 protected:
     void BindDelegates();
     void UnbindDelegates();

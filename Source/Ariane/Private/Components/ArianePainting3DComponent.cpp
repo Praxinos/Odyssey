@@ -520,7 +520,8 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
                 FDynamicPrimitiveUniformBuffer& DynamicPrimitiveUniformBuffer = Collector.AllocateOneFrameResource<FDynamicPrimitiveUniformBuffer>();
 
                 DynamicPrimitiveUniformBuffer.Set( Collector.GetRHICommandList()
-                                                 , DrawingLayer->GetComponentToWorld().ToMatrixWithScale() //GetLocalToWorld()
+                                                 , Path->GetTransform().ToMatrixWithScale()
+                                                 //, DrawingLayer->GetComponentToWorld().ToMatrixWithScale() //GetLocalToWorld()
                                                  , PreviousLocalToWorld
                                                  , GetBounds()
                                                  , GetLocalBounds()
