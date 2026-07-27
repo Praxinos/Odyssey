@@ -239,18 +239,21 @@ FCinematicBoardSection::~FCinematicBoardSection()
 void
 FCinematicBoardSection::AddReferencedObjects( FReferenceCollector& Collector ) //override
 {
-    for( const auto& pair1 : mAnimationsTimelineMetaChannel )
+    /**
+     * mAnimationsTimelineThumbnailPool contains all the thumbnail textures
+     * Those textures must be maintained in memory.
+     *
+     * In a previous version, those textures were retrieved here via mAnimationsTimelineThumbnails
+     * But this leaded to crashes after the garbage collector was triggered.
+     * The reason was, mAnimationsTimelineThumbnails is constructed based on mAnimationsTimelineThumbnailPool
+     * but when the thumbnails needed to be recreated mAnimationsTimelineThumbnails was destroyed.
+     * Which leaded to all textures also being destroyed, leaving mAnimationsTimelineThumbnailPool with invalid texture pointers.
+     * And when mAnimationsTimelineThumbnails was constructing itself again, it used the mAnimationsTimelineThumbnailPool's invalid texture pointers.
+     */
+    for( auto& pair : mAnimationsTimelineThumbnailPool )
     {
-        FGuid guid = pair1.Key;
-
-        if( !mAnimationsTimelineThumbnails.Contains( guid ) )
-            continue;
-
-        for( FThumbnailData& thumbnail_data : mAnimationsTimelineThumbnails[guid] )
-        {
-            //Collector.AddReferencedObject( thumbnail_data.RenderTarget );
-            Collector.AddReferencedObject( thumbnail_data.Texture );
-        }
+        FPoolData& poolData = pair.Value;
+        Collector.AddReferencedObject(poolData.Texture);
     }
 
     Collector.AddReferencedObject( mBuildRenderTargetTmp );

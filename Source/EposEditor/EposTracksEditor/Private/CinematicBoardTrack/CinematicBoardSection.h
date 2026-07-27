@@ -135,7 +135,8 @@ private:
     struct FPoolData
     {
         //UTextureRenderTarget2D* RenderTarget = nullptr;
-        UTexture2D* Texture = nullptr;
+        TObjectPtr<UTexture2D> Texture;
+        //UTexture2D* Texture;
     };
     typedef TArray<FGuid> FRenderingComposition;
     // A pool containing textures corresponding to each thumbnail and referenced by the render composition of the cell
