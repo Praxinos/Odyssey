@@ -23,7 +23,18 @@ void MainPS(
     float destinationLODCount = 0;
     DestinationTexture.GetDimensions(0, destinationSize.x, destinationSize.y, destinationLODCount);
     float2 dstCoordinate = float2(InVertexPosition.x / destinationSize.x, InVertexPosition.y / destinationSize.y);
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, dstCoordinate);
-    float4 cs = SourceTexture.Sample(SourceTextureSampler, InTextureCoordinate);
+
+    float4 cb = float4(0.f, 0.f, 0.f, 0.f);
+    if (dstCoordinate.x >= 0.0f && dstCoordinate.y >= 0.0f && dstCoordinate.x <= 1.0f && dstCoordinate.y <= 1.0f)
+    {
+        cb = DestinationTexture.Sample(DestinationTextureSampler, dstCoordinate);
+    }
+
+    float4 cs = float4(0.f, 0.f, 0.f, 0.f);
+    if (InTextureCoordinate.x >= 0.0f && InTextureCoordinate.y >= 0.0f && InTextureCoordinate.x <= 1.0f && InTextureCoordinate.y <= 1.0f)
+    {
+        cs = SourceTexture.Sample(SourceTextureSampler, InTextureCoordinate);
+    }
+
     OutColor = Blend(cb, cs, Opacity, BlendMode, AlphaMode, uint2(int(floor(InVertexPosition.x)), int(floor(InVertexPosition.y))));
 }
