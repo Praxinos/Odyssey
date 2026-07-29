@@ -17,6 +17,7 @@
 
 #include "OdysseyAnalyticsProvider.h"
 #include "OdysseyTelemetryLog.h"
+#include "PlatformTimeZone.h"
 
 //---
 
@@ -157,6 +158,7 @@ struct SessionStart_TelemetryFields
     static inline FString UserId_KeyName_AsString = TEXT( "User_ID" );
     static inline FString UserLanguage_KeyName_AsString = TEXT( "User_Language" );
     static inline FString UserRegion_KeyName_AsString = TEXT( "User_Region" );
+    static inline FString UserTimeZoneId_KeyName_AsString = TEXT( "User_TimeZoneId" );
     //static inline FString ApplicationCommandline_KeyName_AsString = TEXT( "Application_Commandline" );
 
     static inline FString HardwarePlatform_KeyName_AsString = TEXT( "Hardware_Platform" );
@@ -234,7 +236,10 @@ FOdysseyTelemetry::StartSession()
 
     FGuid SessionID = FApp::GetInstanceId();
 
+    //FDateTime Now = FDateTime::Now();
     FDateTime NowUtc = FDateTime::UtcNow();
+    //double TimeZoneOffset = ( Now - NowUtc ).GetTotalSeconds();
+    FString TimeZoneId = FPlatformTimeZone::GetTimeZoneId();
 
     //---
 
@@ -265,6 +270,7 @@ FOdysseyTelemetry::StartSession()
         SessionContextAttributes.Emplace( SessionStartFields::UserId_KeyName_AsString, UserID );
         SessionContextAttributes.Emplace( SessionStartFields::UserLanguage_KeyName_AsString, UserLanguage );
         SessionContextAttributes.Emplace( SessionStartFields::UserRegion_KeyName_AsString, UserRegion );
+        SessionContextAttributes.Emplace( SessionStartFields::UserTimeZoneId_KeyName_AsString, TimeZoneId );
     //    SessionContextAttributes.Emplace( SessionStartFields::ApplicationCommandline_KeyName_AsString, FCommandLine::Get() );
     //}
 
