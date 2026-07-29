@@ -801,7 +801,7 @@ UArianeEditorEraserTool::EraseChainSegments( FEditorViewportClient* ViewportClie
 {
     //const FTransform& WorldTransform = Painting3DComponent->GetComponentTransform();
     UArianePainting3DComponent* Painting3DComponent = DrawingLayer->GetLayerStack()->GetPainting3DComponent();
-    const FTransform& WorldTransform = DrawingLayer->GetComponentTransform();
+    const FTransform& WorldTransform = Path->GetTransform();
 
     FArianeVertex* FirstVertex = Chain.LeadingVertex;
     TArray<FMetaFragment> MetaFragmentBuffer;

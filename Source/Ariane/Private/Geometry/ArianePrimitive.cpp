@@ -52,20 +52,21 @@ FArianePrimitive::HasBaseClass( uint32 BaseClassID )
         return true;
     }
 
-    return FArianePath::HasBaseClass( BaseClassID );
+    return Super::HasBaseClass( BaseClassID );
 }
 
 FArianePath*
 FArianePrimitive::Convert( EConversionFlags ConversionFlags )
 {
-    FArianeObject::FCopyArgs CopyArgs = FArianeObject::FCopyArgs();
+    FCopyArgs CopyArgs = FCopyArgs();
 
-    CopyArgs.Flags = EnumHasAllFlags( ConversionFlags, EConversionFlags::Bezier ) ? FArianeObject::ECopyFlags::AsBezier
-                                                                                  : FArianeObject::ECopyFlags::AsPolyline;
+    CopyArgs.Flags = ECopyFlags::PrimitiveAsPath
+                   | ( EnumHasAllFlags( ConversionFlags, EConversionFlags::Bezier ) ? ECopyFlags::AsBezier
+                                                                                    : ECopyFlags::AsPolyline );
     CopyArgs.AllocationModel = AllocationModel;
     CopyArgs.DrawingLayer = DrawingLayer;
 
-    FArianePath* Path = static_cast<FArianePath*>(this->FArianePath::Copy( CopyArgs ) );
+    FArianePath* Path = static_cast<FArianePath*>(this->Copy( CopyArgs ) );
 
 
     return Path;

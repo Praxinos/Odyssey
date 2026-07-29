@@ -65,6 +65,7 @@ public:
         Rename                 = ( 1 << 1 ),
         AsBezier               = ( 1 << 2 ),
         AsPolyline             = ( 1 << 3 ),
+        PrimitiveAsPath        = ( 1 << 4 ),
     };
 
     struct FCopyArgs

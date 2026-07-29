@@ -81,6 +81,11 @@ protected:
 public:
     UPROPERTY( EditAnywhere
              , Category = PrimitiveDrawingTool
+             , meta = ( ToolTip  = "PrimitiveShapeType" ) )
+    EArianePrimitiveToolShapeType PrimitiveShapeType;
+
+    UPROPERTY( EditAnywhere
+             , Category = PrimitiveDrawingTool
              , meta = ( ToolTip = "StrokeWidth"
                       , ClampMin = "0.0"
                       , Delta = "0.1"
@@ -100,10 +105,23 @@ public:
     //FOdysseyShapes Shapes;
 
     UPROPERTY( EditAnywhere
+             , Category = Polygon
+             , meta = ( ToolTip = "Polygon corner count"
+                      , EditCondition = "PrimitiveShapeType == EArianePrimitiveToolShapeType::Polygon"
+                      , EditConditionHides
+                      , ClampMin = "3"
+                      , UIMin = "3"
+                      , ClampMax = "256"
+                      , UIMax = "256" ) )
+    int PolygonCornerCount;
+
+    UPROPERTY( EditAnywhere
              , Category = "Parameters"
              , meta = ( ToolTip  = "Uniform" ) )
     bool Uniform;
     bool UniformAtKeyDown;
+
+
 
 protected:
     FArianePrimitive* Primitive;
@@ -114,5 +132,4 @@ protected:
     uint32 PolygonNumber;
     EMouseCursor::Type Cursor;
     FVector PrimitiveCoordsAtDown;
-    EArianePrimitiveToolShapeType PrimitiveShapeType;
 };

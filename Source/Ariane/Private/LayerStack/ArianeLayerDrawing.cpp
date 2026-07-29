@@ -486,15 +486,17 @@ UArianeLayerDrawing::UpdateBounds()
     // ForceInit makes the box invalid and excludes it from the computation unitl it is valid
     Bounds = FBoxSphereBounds(ForceInit);
 
-    for( const FInstancedStruct& InstancedObject : InstancedObjects )
+    for( FInstancedStruct& InstancedObject : InstancedObjects )
     {
-        const FArianeObject* Object = InstancedObject.GetPtr<FArianeObject>();
+        FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
 
-        if( const_cast<FArianeObject*>(Object)->HasBaseClass( FArianePath::StaticClass() ) )
+        if( Object->HasBaseClass( FArianePath::StaticClass() ) )
         {
-            const FArianePath* Path = static_cast<const FArianePath*>(Object);
+            FArianePath* Path = static_cast<FArianePath*>(Object);
+            const FTransform& PathTransform = Path->GetTransform();
+            FMatrix RelativeMatrix = GetComponentTransform().ToInverseMatrixWithScale() * PathTransform.ToMatrixWithScale();
 
-            Bounds = Bounds + const_cast<FArianePath*>(Path)->GetBounds();
+            Bounds = Bounds + Path->GetBounds().TransformBy( RelativeMatrix );
         }
     }
 }

@@ -101,14 +101,23 @@ FArianeLine::ReshapeGeometry()
     GeneratedVertices[1]->SetRadius( StrokeWidth );
 }
 
-FArianeLine*
+FArianeObject*
 FArianeLine::CopyShape( const FCopyArgs& CopyArgs )
 {
-    FArianeLine* LineCopy = CopyArgs.DrawingLayer->AllocLine( Name
-                                                            , StartPoint
-                                                            , EndPoint
-                                                            , StrokeWidth
-                                                            , CopyArgs.AllocationModel );
+    FArianeObject* LineCopy;
+
+    if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::PrimitiveAsPath ) )
+    {
+        LineCopy = FArianePath::CopyShape( CopyArgs );
+    }
+    else
+    {
+         LineCopy = CopyArgs.DrawingLayer->AllocLine( Name
+                                                    , StartPoint
+                                                    , EndPoint
+                                                    , StrokeWidth
+                                                    , CopyArgs.AllocationModel );
+    }
 
     return LineCopy;
 }

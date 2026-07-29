@@ -243,6 +243,7 @@ public:
     void DeleteSelectedObjects();
     void CopySelectedObjects();
     void PasteObjects();
+    void ConvertSelectedPrimitives();
 
 protected:
     /**

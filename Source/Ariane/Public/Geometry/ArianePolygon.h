@@ -9,11 +9,16 @@
 #include "ArianePrimitive.h"
 #include "ArianeCoreEnums.h"
 
+#include "ArianePolygon.generated.h"
+
 struct FArianeVertex;
 struct FArianeSegmentCubic;
 
+USTRUCT(BlueprintType)
 struct ARIANE_API FArianePolygon : public FArianePrimitive
 {
+    GENERATED_BODY()
+
 public:
     static uint32 StaticClass() { return    0x4cc9662f; }; // value is crc32 FArianePolygon
     virtual uint32 GetClass() override { return StaticClass(); };
@@ -45,9 +50,9 @@ public:
 protected:
     /**
      * @brief Copy this ellipse (for copy-paste operations).
-     * @return a newly allocated polygon that looks the same as this polygon.
+     * @return a newly allocated polygon or path that looks the same as this polygon.
      */
-    virtual FArianePolygon* CopyShape( const FCopyArgs& CopyArgs ) override;
+    virtual FArianeObject* CopyShape( const FCopyArgs& CopyArgs ) override;
 
 protected:
     UPROPERTY( EditAnywhere )

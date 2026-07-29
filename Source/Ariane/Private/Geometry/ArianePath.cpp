@@ -607,7 +607,7 @@ FArianePath::CopySettings( FArianeObject* DestinationObject, const FCopyArgs& Co
     }
 }
 
-FArianePath*
+FArianeObject*
 FArianePath::CopyShape( const FCopyArgs& CopyArgs )
 {
     TArray<FArianeVertex*> LookupTable;
@@ -1190,7 +1190,7 @@ FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
         TangentVector.Normalize();
     }
 
-    if( TangentVector.IsNearlyZero(0.001f) )
+    if( TangentVector.IsNearlyZero() )
     {
         TangentVector = Segment->GetTangentVectorAt( T, true );
     }
@@ -1353,13 +1353,11 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
     const TArray<FArianeSegment::FFraction>& Fractions = Segment->GetFractions();
     const TArray<FArianeSegment::FFractionStep>& FractionSteps = Segment->GetFractionSteps();
 
-    if( InOutPreviousPerpendicularVector.IsZero() )
+    if( InOutPreviousPerpendicularVector.IsNearlyZero() )
     {
-        FVector UpVector = Path->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->GetUpVector();
-
-        if( SegmentVector.Dot( UpVector ) )
+        if (SegmentVector.GetSafeNormal().Dot(FVector::UpVector) <  1.0f)
         {
-            InOutPreviousPerpendicularVector = SegmentVector.Cross( UpVector );
+            InOutPreviousPerpendicularVector = SegmentVector.Cross( FVector::UpVector );
             InOutPreviousPerpendicularVector.Normalize();
         }
         else
@@ -1400,6 +1398,11 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
                                                                           , TangentVector.Y
                                                                           , TangentVector.Z );
 */
+        if( TangentVector.IsNearlyZero() || PerpendicularVector.IsNearlyZero() )
+        {
+            UE_LOG( LogTemp, Warning, TEXT("BuildSegmentAsTube"));
+        }
+
         if( PerpendicularVector.IsZero() == false )
         {
             float AngleInDegrees = 0.0f;

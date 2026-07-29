@@ -9,11 +9,16 @@
 #include "ArianePrimitive.h"
 #include "ArianeCoreEnums.h"
 
+#include "ArianeEllipse.generated.h"
+
 struct FArianeVertex;
 struct FArianeSegmentCubic;
 
+USTRUCT(BlueprintType)
 struct ARIANE_API FArianeEllipse : public FArianePrimitive
 {
+    GENERATED_BODY()
+
 public:
     static uint32 StaticClass() { return  0xc76ec157; }; // value is crc32 FArianeEllipse
     virtual uint32 GetClass() override { return StaticClass(); };
@@ -65,9 +70,9 @@ public:
 protected:
     /**
      * @brief Copy this ellipse (for copy-paste operations).
-     * @return a newly allocated ellipse that looks the same as this ellipse.
+     * @return a newly allocated ellipse or path that looks the same as this ellipse.
      */
-    virtual FArianeEllipse* CopyShape( const FCopyArgs& CopyArgs ) override;
+    virtual FArianeObject* CopyShape( const FCopyArgs& CopyArgs ) override;
 
 protected:
     UPROPERTY( EditAnywhere )

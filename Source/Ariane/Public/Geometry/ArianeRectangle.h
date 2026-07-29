@@ -9,11 +9,16 @@
 #include "ArianePrimitive.h"
 #include "ArianeCoreEnums.h"
 
+#include "ArianeRectangle.generated.h"
+
 struct FArianeVertex;
 struct FArianeSegmentCubic;
 
+USTRUCT(BlueprintType)
 struct ARIANE_API FArianeRectangle : public FArianePrimitive
 {
+    GENERATED_BODY()
+
 public:
     static uint32 StaticClass() { return   0xce49ed79; }; // value is crc32 FArianeRectangle
     virtual uint32 GetClass() override { return StaticClass(); };
@@ -42,10 +47,10 @@ public:
 
 protected:
     /**
-     * @brief Copy this ellipse (for copy-paste operations).
-     * @return a newly allocated rectangle that looks the same as this rectangle.
+     * @brief Copy this rectangle (for copy-paste operations).
+     * @return a newly allocated rectangle or a path that looks the same as this rectangle.
      */
-    virtual FArianeRectangle* CopyShape( const FCopyArgs& CopyArgs ) override;
+    virtual FArianeObject* CopyShape( const FCopyArgs& CopyArgs ) override;
 
 protected :
     UPROPERTY( EditAnywhere )

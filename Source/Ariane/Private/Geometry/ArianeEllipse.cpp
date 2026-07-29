@@ -139,14 +139,23 @@ FArianeEllipse::ReshapeGeometry()
     GeneratedSegments[3]->GetHandle((uint32)1)->SetPosition( FVector( -ctlDistX,  RadiusY, 0.0f ) );
 }
 
-FArianeEllipse*
+FArianeObject*
 FArianeEllipse::CopyShape( const FCopyArgs& CopyArgs )
 {
-    FArianeEllipse* EllipseCopy = CopyArgs.DrawingLayer->AllocEllipse( Name
-                                                                     , RadiusX
-                                                                     , RadiusY
-                                                                     , StrokeWidth
-                                                                     , CopyArgs.AllocationModel );
+    FArianeObject* EllipseCopy;
+
+    if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::PrimitiveAsPath ) )
+    {
+        EllipseCopy = FArianePath::CopyShape( CopyArgs );
+    }
+    else
+    {
+         EllipseCopy = CopyArgs.DrawingLayer->AllocEllipse( Name
+                                                          , RadiusX
+                                                          , RadiusY
+                                                          , StrokeWidth
+                                                          , CopyArgs.AllocationModel );
+    }
 
     return EllipseCopy;
 }

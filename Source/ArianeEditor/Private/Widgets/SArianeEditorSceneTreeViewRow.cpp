@@ -9,6 +9,10 @@
 // Ariane Headers
 #include "ArianeObject.h"
 #include "ArianeGroup.h"
+#include "ArianeRectangle.h"
+#include "ArianeEllipse.h"
+#include "ArianeLine.h"
+#include "ArianePolygon.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
@@ -160,6 +164,30 @@ SArianeEditorSceneTreeViewRow::GenerateWidgetForColumn ( const FName& InColumnNa
         {
             ObjectIcon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.SceneTreeView.Group" );
             ObjectIconTooltip = LOCTEXT("ariane-scene-tree-view.object-icon.group.tooltip", "Group");
+        }
+        else
+        if ( Object->HasBaseClass( FArianePolygon::StaticClass() ) )
+        {
+            ObjectIcon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.SceneTreeView.Polygon" );
+            ObjectIconTooltip = LOCTEXT("ariane-scene-tree-view.object-icon.polygon.tooltip", "Polygon");
+        }
+        else
+        if ( Object->HasBaseClass( FArianeLine::StaticClass() ) )
+        {
+            ObjectIcon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.SceneTreeView.Line" );
+            ObjectIconTooltip = LOCTEXT("ariane-scene-tree-view.object-icon.line.tooltip", "Line");
+        }
+        else
+        if ( Object->HasBaseClass( FArianeRectangle::StaticClass() ) )
+        {
+            ObjectIcon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.SceneTreeView.Rectangle" );
+            ObjectIconTooltip = LOCTEXT("ariane-scene-tree-view.object-icon.rectangle.tooltip", "Rectangle");
+        }
+        else
+        if ( Object->HasBaseClass( FArianeEllipse::StaticClass() ) )
+        {
+            ObjectIcon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.SceneTreeView.Ellipse" );
+            ObjectIconTooltip = LOCTEXT("ariane-scene-tree-view.object-icon.ellipse.tooltip", "Ellipse");
         }
         else
         if ( Object->HasBaseClass( FArianePath::StaticClass() ) )

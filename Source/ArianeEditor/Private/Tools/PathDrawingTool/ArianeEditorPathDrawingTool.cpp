@@ -245,7 +245,7 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* ViewportClient
 
         if( DrawingLayer )
         {
-            const FTransform& LayerWorldTransform = DrawingLayer->GetComponentTransform();
+            const FTransform& PathTransform = EditedPath->GetTransform();
             // note: we could do that at MouseDown
             FVector4 DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
             FVector RayOrigin, RayDirection;
@@ -259,8 +259,8 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* ViewportClient
 
             if( FArianeCore::IntersectPlane( DrawingPlane, RayOrigin, RayDirection, IntersectAt  ) > 0.0f )
             {
-                FVector localCoords = LayerWorldTransform.Inverse().TransformFVector4( IntersectAt );
-                FVector localNormal = LayerWorldTransform.Inverse().TransformVector( FVector( DrawingPlane ) );
+                FVector localCoords = PathTransform.Inverse().TransformFVector4( IntersectAt );
+                FVector localNormal = PathTransform.Inverse().TransformVector( FVector( DrawingPlane ) );
                 FArianeVertex *Vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last().GetVertex()
                                                                          : nullptr;
 
