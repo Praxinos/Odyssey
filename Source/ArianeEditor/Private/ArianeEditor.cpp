@@ -21,6 +21,7 @@
 #include "LayerTransformTool/ArianeEditorLayerTransformTool.h"
 #include "LayerTransformTool/ArianeEditorLayerTransformToolBuilder.h"
 // Ariane headers
+#include "ArianePrimitive.h"
 #include "ArianeGroup.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
@@ -887,6 +888,65 @@ FArianeEditor::DeleteSelectedObjects()
 
                 Painting3DComponent->Update( false );
             }
+        }
+    }
+}
+
+void
+FArianeEditor::ConvertSelectedPrimitives()
+{
+    UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        if( DrawingLayer )
+        {
+            TArray<FArianePrimitive*> PrimitivesToConvert;
+
+            PrimitivesToConvert.Reserve( DrawingLayer->GetSelectedObjects().Num() );
+
+            for( FArianeObject* SelectedObject : DrawingLayer->GetSelectedObjects() )
+            {
+                if( SelectedObject->HasBaseClass( FArianePrimitive::StaticClass() ) )
+                {
+                    FArianePrimitive* SelectedPrimitive = static_cast<FArianePrimitive*>(SelectedObject);
+
+                    PrimitivesToConvert.Add( SelectedPrimitive );
+                }
+            }
+
+            for( FArianePrimitive* SelectedPrimitive : PrimitivesToConvert )
+            {
+                TArray<FArianeObjectID> Children;
+                FArianePath* Path;
+
+                Children = SelectedPrimitive->GetChildren();
+
+                // first step: remove the children first or else the conversion will convert all children primitives
+                // even the one that were not selected
+                for( FArianeObjectID& ChildID : Children )
+                {
+                    SelectedPrimitive->RemoveChild( ChildID.GetObject(), false ); // remove but do not free the child
+                }
+
+                // second step: convert
+                Path = SelectedPrimitive->Convert( FArianePrimitive::EConversionFlags::Bezier );
+
+                // third step: append children
+                for( FArianeObjectID& ChildID : Children )
+                {
+                    Path->AppendChild( ChildID.GetObject() );
+                }
+
+                // final step: append the converted path and remove the primitive
+                SelectedPrimitive->GetParent()->AppendChild( Path );
+
+                SelectedPrimitive->GetParent()->RemoveChild( SelectedPrimitive, true );
+            }
+
+            Painting3DComponent->Update( false );
         }
     }
 }

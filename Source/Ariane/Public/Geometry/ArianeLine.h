@@ -27,7 +27,7 @@ class UArianeLayerDrawing;
 USTRUCT(BlueprintType)
 struct ARIANE_API FArianeLine : public FArianePrimitive
 {
-GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
     static uint32 StaticClass() { return 0x2b7c4b8f; }; // value is crc32 FArianeLine
@@ -64,9 +64,9 @@ public:
 protected:
     /**
      * @brief Copy this ellipse (for copy-paste operations).
-     * @return a newly allocated line that looks the same as this line.
+     * @return a newly allocated line or path that looks the same as this line.
      */
-    virtual FArianeLine* CopyShape( const FCopyArgs& CopyArgs ) override;
+    virtual FArianeObject* CopyShape( const FCopyArgs& CopyArgs ) override;
 
 protected :
     UPROPERTY( EditAnywhere )

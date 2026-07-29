@@ -304,7 +304,7 @@ public:
 
 protected:
     void FindChains();
-    virtual FArianePath* CopyShape( const FCopyArgs& CopyArgs ) override;
+    virtual FArianeObject* CopyShape( const FCopyArgs& CopyArgs ) override;
     virtual void CopySettings( FArianeObject* DestinationObject, const FCopyArgs& CopyArgs, bool bInvalidate ) override;
 
 private:

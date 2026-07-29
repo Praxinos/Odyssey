@@ -207,6 +207,8 @@ FArianeObject::AppendChild( FArianeObject* Child )
     Child->SetParent( this );
     Child->Added();
 
+    InvalidateChild( Child );
+
     Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 }
 
@@ -217,6 +219,8 @@ FArianeObject::PrependChild( FArianeObject* Child )
 
     Child->SetParent( this );
     Child->Added();
+
+    InvalidateChild( Child );
 
     Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 }
@@ -802,6 +806,7 @@ FArianeObject::CopySettings( FArianeObject* DestinationObject, const FCopyArgs& 
 
     DestinationObject->Name = NewName;
     DestinationObject->LocalTransform = LocalTransform;
+    DestinationObject->WorldTransform = WorldTransform;
     DestinationObject->bVisible = bVisible;
     DestinationObject->bExpanded = bExpanded;
     //DestinationObject->Opacity = Opacity;

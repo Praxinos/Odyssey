@@ -125,14 +125,23 @@ FArianeRectangle::ReshapeGeometry()
     GeneratedVertices[3]->SetRadius( StrokeWidth );
 }
 
-FArianeRectangle*
+FArianeObject*
 FArianeRectangle::CopyShape( const FCopyArgs& CopyArgs )
 {
-    FArianeRectangle* RectangleCopy = CopyArgs.DrawingLayer->AllocRectangle( Name
-                                                                           , Width
-                                                                           , Height
-                                                                           , StrokeWidth
-                                                                           , CopyArgs.AllocationModel );
+    FArianeObject* RectangleCopy;
+
+    if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::PrimitiveAsPath ) )
+    {
+        RectangleCopy = FArianePath::CopyShape( CopyArgs );
+    }
+    else
+    {
+         RectangleCopy = CopyArgs.DrawingLayer->AllocRectangle( Name
+                                                              , Width
+                                                              , Height
+                                                              , StrokeWidth
+                                                              , CopyArgs.AllocationModel );
+    }
 
     return RectangleCopy;
 }

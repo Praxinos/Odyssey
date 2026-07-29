@@ -37,7 +37,7 @@ UArianeEditorPrimitiveDrawingTool::~UArianeEditorPrimitiveDrawingTool()
 
 UArianeEditorPrimitiveDrawingTool::UArianeEditorPrimitiveDrawingTool()
     : MaterialInterface ( nullptr )
-    , StrokeWidth( 4.0f )
+    , StrokeWidth( 30.0f )
     , Uniform( false )
     , Primitive( nullptr )
     , RectangleNumber ( 0 )
@@ -45,7 +45,8 @@ UArianeEditorPrimitiveDrawingTool::UArianeEditorPrimitiveDrawingTool()
     , EllipseNumber( 0 )
     , PolygonNumber( 0 )
     , Cursor( EMouseCursor::Type::Crosshairs )
-    , PrimitiveShapeType ( EArianePrimitiveToolShapeType::Rectangle )
+    , PrimitiveShapeType ( EArianePrimitiveToolShapeType::Polygon )
+    , PolygonCornerCount( 5 )
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PrimitiveDrawing64");
 
@@ -197,12 +198,34 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
                 if( FArianeCore::IntersectPlane( DrawingPlane, RayOrigin, RayDirection, IntersectAt  ) > 0.0f )
                 {
                     const FTransform& ParentGroupTransform = ParentGroup->GetTransform();
-                    FQuat WorldOrientationQuat = FQuat::FindBetweenVectors( ParentGroup->GetTransform().TransformVector( FVector::UpVector )
-                                                                          , DrawingPlane.GetSafeNormal() );
-                    FQuat LocalOrientationQuat = ParentGroupTransform.InverseTransformRotation( WorldOrientationQuat );
-                    FVector LocalOrientation = LocalOrientationQuat.Euler();
+                    FVector LocalOrientation;
 
                     PrimitiveCoordsAtDown = ParentGroupTransform.InverseTransformPosition( IntersectAt );
+
+                    switch( Editor->GetLayerDrawingOrientation( DrawingLayer ) )
+                    {
+                        case EArianeLayerDrawingOrientation::View :
+                        {
+                            FVector CamForward = View->GetViewDirection();
+                            FVector CamUp = View->GetViewUp();
+                            FVector CamRight = View->GetViewRight();
+                            FMatrix ViewAlignedRot = FMatrix( CamUp, CamRight, -CamForward, FVector::ZeroVector );
+                            FQuat LocalOrientationQuat = ParentGroupTransform.InverseTransformRotation( ViewAlignedRot.ToQuat() );
+
+                            LocalOrientation = LocalOrientationQuat.Euler();
+                        }
+                        break;
+
+                        default :
+                        {
+                            FQuat WorldOrientationQuat = FQuat::FindBetweenVectors( ParentGroup->GetTransform().TransformVector( FVector::UpVector )
+                                                                                  , DrawingPlane.GetSafeNormal() );
+                            FQuat LocalOrientationQuat = ParentGroupTransform.InverseTransformRotation( WorldOrientationQuat );
+
+                            LocalOrientation = LocalOrientationQuat.Euler();
+                        }
+                        break;
+                    };
 
                     switch( PrimitiveShapeType/*Shapes.GetActiveShapeType()*/ )
                     {
@@ -236,7 +259,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
                         //case EOdysseyShapeType::kPolygon:
                         case EArianePrimitiveToolShapeType::Polygon:
                             Primitive = DrawingLayer->AllocPolygon( *(FString("Polygon_") + FString::FromInt( PolygonNumber++ ))
-                                                                  , 0.0f
+                                                                  , PolygonCornerCount
                                                                   , 0.0f
                                                                   , StrokeWidth//width.Distance()
                                                                   , EArianeAllocationModel::InstancedStruct );
@@ -419,6 +442,14 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDrag( FEditorViewportClient* ViewportC
                             Line->SetEndPoint( FVector( StartPoint.X + Diff.X
                                                       , StartPoint.Y + Diff.Y
                                                       , 0.0f ) );
+                        }
+                        break;
+
+                        case EArianePrimitiveToolShapeType::Polygon:
+                        {
+                            FArianePolygon* Polygon = static_cast<FArianePolygon*>(Primitive);
+
+                            Polygon->SetRadius( Diff.Length() );
                         }
                         break;
 

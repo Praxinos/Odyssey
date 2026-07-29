@@ -53,7 +53,11 @@ class ARIANEEDITOR_API UArianeEditorPolygonProxy : public UArianeEditorPrimitive
     public:
         UPROPERTY( EditAnywhere
                  , Category=Line
-                 , meta = ( ToolTip = "CornerCount" ) )
+                 , meta = ( ToolTip = "CornerCount"
+                          , ClampMin = "3"
+                          , UIMin = "3"
+                          , ClampMax = "256"
+                          , UIMax = "256" ) )
         int CornerCount;
 
         UPROPERTY( EditAnywhere

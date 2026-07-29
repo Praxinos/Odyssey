@@ -9,6 +9,7 @@
 #include "ArianeEditor.h"
 // Ariane Headers
 #include "ArianeObject.h"
+#include "ArianePrimitive.h"
 #include "ArianeGroup.h"
 #include "ArianeLayerDrawing.h"
 // Unreal headers
@@ -69,6 +70,14 @@ SArianeEditorSceneTreeViewContextMenu::CreateWidget( SArianeEditorSceneTreeView*
           , FUIAction(FExecuteAction::CreateRaw( Editor, &FArianeEditor::DeleteSelectedObjects)
                     , FCanExecuteAction::CreateStatic( &SArianeEditorSceneTreeViewContextMenu::CanDelete, RootGroup )));
 
+        if( HasOnlySelectedPrimitives( RootGroup ) )
+        {
+             Menu.AddMenuEntry(
+                LOCTEXT("ariane-scene-tree-view.context-menu.convert-primitive-to-path.name","Convert primitive to path")
+              , LOCTEXT("ariane-scene-tree-view.context-menu.convert-primitive-to-path.tooltip","Convert primitive to path")
+              , FSlateIcon()
+              , FUIAction(FExecuteAction::CreateRaw( Editor, &FArianeEditor::ConvertSelectedPrimitives ) ));
+        }
 
 /*
         menu.AddMenuEntry(
@@ -95,6 +104,23 @@ SArianeEditorSceneTreeViewContextMenu::CreateWidget( SArianeEditorSceneTreeView*
     Menu.EndSection();
 
     return Menu.MakeWidget();
+}
+
+// static
+bool
+SArianeEditorSceneTreeViewContextMenu::HasOnlySelectedPrimitives( FArianeGroup* RootGroup )
+{
+    UArianeLayerDrawing* DrawingLayer = RootGroup->GetDrawingLayer();
+
+    for( FArianeObject* SelectedObject : DrawingLayer->GetSelectedObjects() )
+    {
+        if( SelectedObject->HasBaseClass( FArianePrimitive::StaticClass() ) == false )
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 // static

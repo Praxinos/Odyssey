@@ -38,33 +38,8 @@ FArianePolygon::FArianePolygon( UArianeLayerDrawing* InDrawingLayer
     , CornerCount( InCornerCount < 3 ? 3 : InCornerCount )
     , Radius ( InRadius )
 {
-/*
-    for( uint32 i = 0; i < CornerCount; i++ )
-    {
-        // EArianeAllocationModel::OperatingSystem means we use "new" to alloc the vertices. they won't be saved
-        // as instanced structs by the reflection system
-        GeneratedVertices.Add( AllocVertex( FVector()
-                                          , FVector::ZAxisVector
-                                          , StrokeWidth
-                                          , EArianeAllocationModel::OperatingSystem ) );
-    }
-
-    for( uint32 i = 0; i < CornerCount; i++ )
-    {
-        uint32 n = ( i + 1 ) % CornerCount;
-
-        // EArianeAllocationModel::OperatingSystem means we use "new" to alloc the vertices. they won't be saved
-        // as instanced structs by the reflection system
-        GeneratedSegments.Add( AllocCubicSegment( GeneratedVertices[i]
-                                                , GeneratedVertices[i]->GetPosition()
-                                                , GeneratedVertices[n]->GetPosition()
-                                                , GeneratedVertices[n]
-                                                , EArianeAllocationModel::OperatingSystem ) );
-    }
-
     ResetGeometry();
     ReshapeGeometry();
-*/
 }
 
 bool
@@ -81,21 +56,51 @@ FArianePolygon::HasBaseClass( uint32 BaseClassID )
 void
 FArianePolygon::ResetGeometry()
 {
-    Vertices.Empty();
-    Segments.Empty();
+    for( FArianeSegment* Segment : GeneratedSegments )
+    {
+        RemoveSegment( Segment ); // will auto unallocate
+    }
+
+    for( FArianeVertex* Vertex : GeneratedVertices )
+    {
+        RemoveVertex( Vertex ); // will auto unallocate
+    }
+
+    GeneratedVertices.Empty();
+    GeneratedSegments.Empty();
 
     InvalidatedVertices.Empty();
     InvalidatedSegments.Empty();
 
     for( uint32 i = 0; i < CornerCount; i++ )
     {
-        AddVertex ( GeneratedVertices[i] );
-        AddSegment ( GeneratedSegments[i] );
+        // EArianeAllocationModel::OperatingSystem means we use "new" to alloc the vertices. they won't be saved
+        // as instanced structs by the reflection system
+        GeneratedVertices.Add( AllocVertex( FVector()
+                                          , FVector::ZAxisVector
+                                          , StrokeWidth
+                                          , EArianeAllocationModel::OperatingSystem ) );
 
-        GeneratedVertices[i]->SetHandleAligned( false );
+        AddVertex ( GeneratedVertices[i] );
+
+        //GeneratedVertices[i]->SetHandleAligned( false );
+    }
+
+    for( uint32 i = 0; i < CornerCount; i++ )
+    {
+        uint32 n = ( i + 1 ) % CornerCount;
+
+        // EArianeAllocationModel::OperatingSystem means we use "new" to alloc the vertices. they won't be saved
+        // as instanced structs by the reflection system
+        GeneratedSegments.Add( AllocCubicSegment( GeneratedVertices[i]
+                                                , GeneratedVertices[i]->GetPosition()
+                                                , GeneratedVertices[n]->GetPosition()
+                                                , GeneratedVertices[n]
+                                                , EArianeAllocationModel::OperatingSystem ) );
+
+        AddSegment ( GeneratedSegments[i] );
     }
 }
-
 
 void
 FArianePolygon::ReshapeGeometry()
@@ -124,14 +129,23 @@ FArianePolygon::ReshapeGeometry()
     }
 }
 
-FArianePolygon*
+FArianeObject*
 FArianePolygon::CopyShape( const FCopyArgs& CopyArgs )
 {
-    FArianePolygon* PolygonCopy = CopyArgs.DrawingLayer->AllocPolygon( Name
-                                                                     , CornerCount
-                                                                     , Radius
-                                                                     , StrokeWidth
-                                                                     , CopyArgs.AllocationModel );
+    FArianeObject* PolygonCopy;
+
+    if( EnumHasAllFlags( CopyArgs.Flags, ECopyFlags::PrimitiveAsPath ) )
+    {
+        PolygonCopy = FArianePath::CopyShape( CopyArgs );
+    }
+    else
+    {
+         PolygonCopy = CopyArgs.DrawingLayer->AllocPolygon( Name
+                                                          , CornerCount
+                                                          , Radius
+                                                          , StrokeWidth
+                                                          , CopyArgs.AllocationModel );
+    }
 
     return PolygonCopy;
 }
@@ -141,6 +155,7 @@ FArianePolygon::SetCornerCount( uint32 InCornerCount )
 {
     CornerCount = InCornerCount;
 
+    ResetGeometry();
     ReshapeGeometry();
 }
 

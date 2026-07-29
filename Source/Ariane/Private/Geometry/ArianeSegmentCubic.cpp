@@ -380,6 +380,11 @@ FArianeSegmentCubic::GetTangentVectorAt( double T, bool bNormalize )
                                                            , Vertices[1].GetVertex()->GetPosition()
                                                            , T );
 
+    if( Tangent.IsNearlyZero() )
+    {
+        Tangent = ( Vertices[1].GetVertex()->GetPosition() - Vertices[0].GetVertex()->GetPosition() );
+    }
+
     if( bNormalize )
     {
         Tangent.Normalize();

@@ -552,13 +552,13 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
                 // for debugging purpose (flag "r.Ariane.ShowNormals")
                 if ( CVarShowArianeNormals.GetValueOnRenderThread() )
                 {
-                    const FTransform& DrawingLayerTransform = DrawingLayer->GetComponentTransform();
+                    const FTransform& PathTransform = Path->GetTransform();
 
                     for ( FArianeVertexID& VertexID : Path->GetVertices() )
                     {
                         FArianeVertex* Vertex = VertexID.GetVertex();
-                        FVector VertexWorldPosition = DrawingLayerTransform.TransformPosition( Vertex->GetPosition() );
-                        FVector VertexWorldNormal = DrawingLayerTransform.TransformVector( Vertex->GetNormal() );
+                        FVector VertexWorldPosition = PathTransform.TransformPosition( Vertex->GetPosition() );
+                        FVector VertexWorldNormal = PathTransform.TransformVector( Vertex->GetNormal() );
 
                         PDI->DrawLine( VertexWorldPosition
                                      , VertexWorldPosition + ( VertexWorldNormal * 200.0f )
