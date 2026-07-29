@@ -36,7 +36,9 @@ CreateAnalyticsUserId( const FString& EpicAccountId )
     // EpicAccountId is a parameter as it seems it can change during a session
     // that's why it's done like this in UE_5.8\Engine\Source\Runtime\Engine\Private\EngineAnalytics.cpp
     // but here, for the moment, no delegate used for this behavior
-    return FString::Printf( TEXT( "%s|%s|%s" ), *FPlatformMisc::GetLoginId(), *EpicAccountId, *FPlatformMisc::GetOperatingSystemId() );
+    //return FString::Printf( TEXT( "%s|%s|%s" ), *FPlatformMisc::GetLoginId(), *EpicAccountId, *FPlatformMisc::GetOperatingSystemId() );
+
+    return FString::Printf( TEXT( "%s" ), *FPlatformMisc::GetLoginId() );
 }
 
 static
@@ -232,13 +234,15 @@ FOdysseyTelemetry::StartSession()
 
     FGuid SessionID = FApp::GetInstanceId();
 
+    FDateTime NowUtc = FDateTime::UtcNow();
+
     //---
 
     using SessionStartFields = SessionStart_TelemetryFields;
 
     // Build the default attributes. These are sent with ALL events
     DefaultAttributes.Emplace( SessionStartFields::SessionId_KeyName_AsString, SessionID.ToString( EGuidFormats::DigitsWithHyphensInBraces ) );
-    DefaultAttributes.Emplace( SessionStartFields::SessionStartUTC_KeyName_AsDouble, FDateTime::UtcNow().ToUnixTimestampDecimal() );
+    DefaultAttributes.Emplace( SessionStartFields::SessionStartUTC_KeyName_AsDouble, NowUtc.ToUnixTimestampDecimal() );
 
     //
 
@@ -309,14 +313,15 @@ FOdysseyTelemetry::StartSession()
     OdysseyAnalyticsProvider->StartSession( SessionID.ToString( EGuidFormats::DigitsWithHyphensInBraces ), TArray<FAnalyticsEventAttribute>() );
 
     // Create the IAnalyticsTracer interface
-    OdysseyAnalyticsTracer = FAnalytics::Get().CreateAnalyticsTracer();
-    OdysseyAnalyticsTracer->SetProvider( OdysseyAnalyticsProvider );
-    OdysseyAnalyticsTracer->StartSession();
+    // [Not for the moment, let's see if spans are really useful (?)]
+    //OdysseyAnalyticsTracer = FAnalytics::Get().CreateAnalyticsTracer();
+    //OdysseyAnalyticsTracer->SetProvider( OdysseyAnalyticsProvider );
+    //OdysseyAnalyticsTracer->StartSession();
 
     // Bind the pre-exit callback
     FCoreDelegates::OnEnginePreExit.AddRaw( &FOdysseyTelemetry::Get(), &FOdysseyTelemetry::EndSession );
 
-    SessionStartTime = FDateTime::UtcNow();
+    SessionStartTime = NowUtc;
 
     TArray<FAnalyticsEventAttribute> Attributes;
     if( Config.bSendSessionContext == false )
@@ -465,7 +470,7 @@ struct AssetAdded_TelemetryFields
 
     // Attributes
     static inline FString AssetClassPath_KeyName_AsString = TEXT( "AssetClassPath" );
-    static inline FString AssetFullName_KeyName_AsString = TEXT( "AssetFullName" );
+    //static inline FString AssetFullName_KeyName_AsString = TEXT( "AssetFullName" );
 };
 
 void
@@ -491,7 +496,7 @@ FOdysseyTelemetry::RegisterOnAssetCreation()
                                                             {
                                                                 TArray<FAnalyticsEventAttribute> Attributes;
                                                                 Attributes.Emplace( AssetAddedFields::AssetClassPath_KeyName_AsString, iAssetData.AssetClassPath.ToString() );
-                                                                Attributes.Emplace( AssetAddedFields::AssetFullName_KeyName_AsString, iAssetData.GetFullName() );
+                                                                //Attributes.Emplace( AssetAddedFields::AssetFullName_KeyName_AsString, iAssetData.GetFullName() );
 
                                                                 OdysseyAnalyticsProvider->RecordEvent( TEXT( "AssetRegistry.AssetAdded" ), Attributes );
                                                             }
