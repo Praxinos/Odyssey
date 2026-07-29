@@ -7,11 +7,13 @@
 #include "OdysseyHUDLine.h"
 #include "OdysseyHUDPolygon.h"
 
-FOdysseyPainterEditorRasterSelection::~FOdysseyPainterEditorRasterSelection()
+UOdysseyPainterEditorRasterSelection::~UOdysseyPainterEditorRasterSelection()
 {
+    if (mRasterBlock)
+        mRasterBlock->OnBlockCommited().RemoveAll(this);
 }
 
-FOdysseyPainterEditorRasterSelection::FOdysseyPainterEditorRasterSelection()
+UOdysseyPainterEditorRasterSelection::UOdysseyPainterEditorRasterSelection()
     : mHUD(MakeShared<FOdysseyHUDElement>())
 {
     mDottedSelectionCustomization.mColors.Add(FLinearColor::Black);
@@ -21,39 +23,66 @@ FOdysseyPainterEditorRasterSelection::FOdysseyPainterEditorRasterSelection()
     mDottedSelectionCustomization.mSpeed = 10.f;
     mDottedSelectionCustomization.mIsActive = false;
     mHUD->SetCustomization( mDottedSelectionCustomization );
+    mShowHUD = true;
 }
 
 FSimpleMulticastDelegate&
-FOdysseyPainterEditorRasterSelection::OnChanged()
+UOdysseyPainterEditorRasterSelection::OnChanged()
 {
     return mOnChanged;
 }
 
 void
-FOdysseyPainterEditorRasterSelection::Init(int iWidth, int iHeight)
+UOdysseyPainterEditorRasterSelection::Init(int iWidth, int iHeight)
 {
-    mBlock = MakeShared<::ULIS::FBlock>(iWidth, iHeight, ::ULIS::Format_GF);
+    if( mRasterBlock )
+        mRasterBlock->OnBlockCommited().RemoveAll(this);
+
+    mRasterBlock = MakeShared<FOdysseyRasterBlock>(this, iWidth, iHeight, ::ULIS::Format_GF);
+    mBlock = mRasterBlock->GetBlock(); //This initialize the block inside of mRasterBlock
+    mRasterMutator.SetRasterBlock( mRasterBlock );
+
     Clear();
     RefreshHUD();
 
+    mRasterBlock->OnBlockCommited().AddUObject(this, &UOdysseyPainterEditorRasterSelection::OnBlockCommited);
+
     mOnChanged.Broadcast();
 }
 
 void
-FOdysseyPainterEditorRasterSelection::Reset()
+UOdysseyPainterEditorRasterSelection::Reset()
 {
+    if( mRasterBlock )
+        mRasterBlock->OnBlockCommited().RemoveAll(this);
+
     mBlock = nullptr;
+    mRasterBlock = nullptr;
     RefreshHUD();
 
     mOnChanged.Broadcast();
 }
 
 void
-FOdysseyPainterEditorRasterSelection::Clear()
+UOdysseyPainterEditorRasterSelection::Clear()
 {
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
-    ctx.Clear(*mBlock);
-    ctx.Finish();
+    ::ULIS::FRectI boundingRect = ::ULIS::FRectI::FromXYWH(0, 0, mBlock->Width(), mBlock->Height());
+
+    mRasterMutator.EditTilesFromRects(
+        { boundingRect },
+        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+        {
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
+
+            ctx.Clear(*mBlock);
+
+            ctx.Finish();
+
+            return { };
+        }
+    );
+
+    mRasterMutator.Commit();
 
     RefreshHUD();
 
@@ -61,23 +90,37 @@ FOdysseyPainterEditorRasterSelection::Clear()
 }
 
 bool
-FOdysseyPainterEditorRasterSelection::IsEmpty() const
+UOdysseyPainterEditorRasterSelection::IsEmpty() const
 {
     return mBoundingRect.Area() <= 0;
 }
 
 void
-FOdysseyPainterEditorRasterSelection::Add(const TArray<FVector2D>& iPolygon)
+UOdysseyPainterEditorRasterSelection::Add(const TArray<FVector2D>& iPolygon)
 {
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
+    ::ULIS::FRectI boundingRect = ComputeBoundingRect(iPolygon);
+
     std::vector<::ULIS::FVec2I> points;
     for (const FVector2D& point : iPolygon)
     {
         points.push_back(::ULIS::FVec2I(point.X, point.Y));
     }
 
-    ctx.DrawPolygon(*mBlock, points, ::ULIS::FColor::FromGrey8(255), true);
-    ctx.Finish();
+    mRasterMutator.EditTilesFromRects(
+        { boundingRect },
+        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+        {
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
+
+            ctx.DrawPolygon(*mBlock, points, ::ULIS::FColor::FromGrey8(255), true);
+
+            ctx.Finish();
+
+            return { };
+        }
+    );
+
+    mRasterMutator.Commit();
 
     RefreshHUD();
 
@@ -85,69 +128,101 @@ FOdysseyPainterEditorRasterSelection::Add(const TArray<FVector2D>& iPolygon)
 }
 
 void
-FOdysseyPainterEditorRasterSelection::Substract(const TArray<FVector2D>& iPolygon)
+UOdysseyPainterEditorRasterSelection::Substract(const TArray<FVector2D>& iPolygon)
 {
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
+    ::ULIS::FRectI boundingRect = ComputeBoundingRect(iPolygon);
+
     std::vector<::ULIS::FVec2I> points;
     for ( const FVector2D& point : iPolygon )
     {
         points.push_back(::ULIS::FVec2I(point.X, point.Y));
     }
 
-    ctx.DrawPolygon(*mBlock, points, ::ULIS::FColor::FromGrey8(0), true);
-    ctx.Finish();
+    mRasterMutator.EditTilesFromRects(
+        { boundingRect },
+        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+        {
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
+
+            ctx.DrawPolygon(*mBlock, points, ::ULIS::FColor::FromGrey8(0), true);
+            ctx.Finish();
+
+            return { };
+        }
+    );
+
+    mRasterMutator.Commit();
 
     RefreshHUD();
 
     mOnChanged.Broadcast();
 }
 
-void FOdysseyPainterEditorRasterSelection::Invert()
+void UOdysseyPainterEditorRasterSelection::Invert()
 {
     if( !mBlock )
         return;
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
-    ctx.FilterInto(
-        [this](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
+    ::ULIS::FRectI boundingRect = ::ULIS::FRectI::FromXYWH(0, 0, mBlock->Width(), mBlock->Height());
+
+    mRasterMutator.EditTilesFromRects(
+        { boundingRect },
+        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
         {
-            for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
-            {
-                if (iSrcPixel.GreyF() == 0.f)
-                    iDstPixel.SetGreyF(1.f);
-                else
-                    iDstPixel.SetGreyF(0.f);
-            }
-        }
-        , *mBlock
-        , *mBlock
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
+            ctx.FilterInto(
+                [this](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
+                {
+                    for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+                    {
+                        if (iSrcPixel.GreyF() == 0.f)
+                            iDstPixel.SetGreyF(1.f);
+                        else
+                            iDstPixel.SetGreyF(0.f);
+                    }
+                }
+                , *mBlock
+                , *mBlock
             );
 
-    ctx.Finish();
+            ctx.Finish();
+
+            return { };
+        }
+    );
+
+    mRasterMutator.Commit();
 
     RefreshHUD();
+    mOnChanged.Broadcast();
 }
 
 ::ULIS::FRectI
-FOdysseyPainterEditorRasterSelection::GetMaskBoundingRect() const
+UOdysseyPainterEditorRasterSelection::GetMaskBoundingRect() const
 {
     return mBoundingRect;
 }
 
+TSharedPtr<FOdysseyRasterBlock>
+UOdysseyPainterEditorRasterSelection::GetRasterBlock()
+{
+    return mRasterBlock;
+}
+
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-FOdysseyPainterEditorRasterSelection::GetBlock()
+UOdysseyPainterEditorRasterSelection::GetBlock()
 {
     return mBlock;
 }
 
 TSharedPtr<FOdysseyHUDElement>
-FOdysseyPainterEditorRasterSelection::GetHUD()
+UOdysseyPainterEditorRasterSelection::GetHUD()
 {
     return mHUD;
 }
 
 void
-FOdysseyPainterEditorRasterSelection::RefreshHUD()
+UOdysseyPainterEditorRasterSelection::RefreshHUD()
 {
     mHUD->EmptyElements();
     mHUD->InactivateCustomization();
@@ -156,8 +231,6 @@ FOdysseyPainterEditorRasterSelection::RefreshHUD()
 
     if (!mBlock)
         return;
-
-    mHUD->ActivateCustomization();
 
     TArray<FVector2D> points;
     TArray<FIntEdge> edges;
@@ -192,6 +265,9 @@ FOdysseyPainterEditorRasterSelection::RefreshHUD()
 
     mBoundingRect = ComputeBoundingRect(points);
 
+    if (!mShowHUD)
+        return;
+
     TArray<TArray<FVector2D>> contours = BuildContours(edges);
 
     for (const TArray<FVector2D>& contour : contours)
@@ -205,9 +281,24 @@ FOdysseyPainterEditorRasterSelection::RefreshHUD()
 
         mHUD->AddElement(polygonHUD);
     }
+
+    mHUD->ActivateCustomization();
+
 }
 
-TArray<TArray<FVector2D>> FOdysseyPainterEditorRasterSelection::BuildContours(const TArray<FIntEdge>& edges)
+void UOdysseyPainterEditorRasterSelection::HideSelectionHUD()
+{
+    mShowHUD = false;
+    RefreshHUD();
+}
+
+void UOdysseyPainterEditorRasterSelection::ShowSelectionHUD()
+{
+    mShowHUD = true;
+    RefreshHUD();
+}
+
+TArray<TArray<FVector2D>> UOdysseyPainterEditorRasterSelection::BuildContours(const TArray<FIntEdge>& edges)
 {
     TMultiMap<FIntPoint, FIntPoint> adjacency;
     for( const FIntEdge& edge : edges )
@@ -267,8 +358,14 @@ TArray<TArray<FVector2D>> FOdysseyPainterEditorRasterSelection::BuildContours(co
     return contours;
 }
 
+void UOdysseyPainterEditorRasterSelection::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
+{
+    RefreshHUD();
+    mOnChanged.Broadcast();
+}
+
 ::ULIS::FRectI
-FOdysseyPainterEditorRasterSelection::ComputeBoundingRect(const TArray<FVector2D>& iPoints) const
+UOdysseyPainterEditorRasterSelection::ComputeBoundingRect(const TArray<FVector2D>& iPoints) const
 {
     if (iPoints.IsEmpty())
         return ::ULIS::FRectI::FromXYWH(0, 0, 0, 0);
