@@ -2,12 +2,12 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
+
+#include "Input/OdysseyPoint.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "OdysseyPainterEditor.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyHUDElement.h"
-#include "Input/OdysseyPoint.h"
 
 #include "OdysseyFreehandShape.h"
 #include "OdysseyRectangleShape.h"
@@ -15,6 +15,9 @@
 #include "OdysseyEllipseShape.h"
 #include "OdysseyBezierShape.h"
 #include "OdysseyPainterEditorViewportTab.h"
+
+#include "ScopedTransaction.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorRasterSelectionTool"
 
@@ -146,7 +149,7 @@ void UOdysseyPainterEditorRasterSelectionTool::Unload()
 void
 UOdysseyPainterEditorRasterSelectionTool::Deselect()
 {
-    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->Clear();
 }
 
@@ -165,17 +168,20 @@ void
 UOdysseyPainterEditorRasterSelectionTool::OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset)
 {
     TArray<FVector2D> points(iPoints);
-    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     if (mSelectionState == EOdysseySelectionState::Add) //Add selection to existing one
     {
+        FScopedTransaction scopedTransaction(LOCTEXT("actions.raster.selection.add", "Add Raster Selection"));
         rasterSelection->Add(points);
     }
     else if (mSelectionState == EOdysseySelectionState::Substract) //Remove selection to existing one
     {
+        FScopedTransaction scopedTransaction(LOCTEXT("actions.raster.selection.substract", "Substract Raster Selection"));
         rasterSelection->Substract(points);
     }
     else //Normal, we replace the selection
     {
+        FScopedTransaction scopedTransaction(LOCTEXT("actions.raster.selection", "Raster Selection"));
         rasterSelection->Clear();
         rasterSelection->Add(points);
     }

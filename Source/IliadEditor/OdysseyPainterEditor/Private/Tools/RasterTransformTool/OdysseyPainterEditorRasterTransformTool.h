@@ -72,6 +72,7 @@ private:
     void ConstrainToRectangle( FVector2D iPosition );
     void ConstrainToParallelogram(FVector2D iPosition);
 
+    void TransformBlockPerspective(TSharedPtr<::ULIS::FBlock> iBaseBlock, TSharedPtr<::ULIS::FBlock> iDestBlock); //Transforms a block depending on the handles positions of the transform HUD
     void UpdateTransformHUD(); // Update the HUD of the transform based on current selection
     void UpdateTransformBlock(); // Update the pixel block of the transform based on current selection
     ::ULIS::FRectI GetTransformAreaBoundingRect();
@@ -98,7 +99,6 @@ private:
     void OnRasterSelectionChanged();
 
     void UpdateRasterSelection( bool iCreateNewIfEmpty = false );
-    void ResetRasterSelection();
 
 public:
     /** Use a perspective transform. */

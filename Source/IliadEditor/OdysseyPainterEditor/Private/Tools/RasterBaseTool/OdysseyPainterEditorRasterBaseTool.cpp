@@ -15,6 +15,7 @@
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "OdysseyRasterBlock.h"
+#include "ScopedTransaction.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
 #include "PropertyHandle.h"
 #include <chrono>
@@ -584,12 +585,14 @@ void UOdysseyPainterEditorRasterBaseTool::PasteCurrentSelectionInNewLayer()
 
 void UOdysseyPainterEditorRasterBaseTool::ClearCurrentSelection()
 {
+    FScopedTransaction scopedTransaction(LOCTEXT("actions.raster.selection.clear", "Clear Raster Selection"));
     if (mEditor)
         mEditor->RasterSelection()->Clear();
 }
 
 void UOdysseyPainterEditorRasterBaseTool::InvertSelection()
 {
+    FScopedTransaction scopedTransaction(LOCTEXT("actions.raster.selection.invert", "Invert Raster Selection"));
     if (mEditor)
         mEditor->RasterSelection()->Invert();
 }

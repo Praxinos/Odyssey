@@ -26,7 +26,7 @@ class FOdysseyPainterEditorExtension;
 class UOdysseyLayerStack;
 class FOdysseyMeshSelector;
 class UOdysseyTextureLayerStackUserData;
-class FOdysseyPainterEditorRasterSelection;
+class UOdysseyPainterEditorRasterSelection;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorSegment;
 class FOdysseyVectorPath;
@@ -248,7 +248,7 @@ public:
     EOdysseyPainterEditorColorType                           GetColorType() const;
     virtual FOdysseyMediaProvider                            GetCurrentMediaProvider();
     virtual UOdysseyLayerStack*                              LayerStack() const;
-    virtual TSharedPtr<FOdysseyPainterEditorRasterSelection> RasterSelection();
+    virtual TObjectPtr<UOdysseyPainterEditorRasterSelection> RasterSelection();
     int GetCurrentFrame() const;
 
     const TArray<UOdysseyPaletteSet*> GetPaletteSets() const;
@@ -417,7 +417,7 @@ protected:
     TSharedPtr<FOdysseyHUDElement>  mHUDSystem;
     TSharedPtr<FOdysseyHUDElement>  mToolsHUD;
     TSharedPtr<FOdysseyHUDElement>  mRasterSelectionHUD;
-    TSharedPtr<FOdysseyPainterEditorRasterSelection> mRasterSelection;
+    TObjectPtr<UOdysseyPainterEditorRasterSelection> mRasterSelection;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
     TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> mAnimationTimelinePosition;

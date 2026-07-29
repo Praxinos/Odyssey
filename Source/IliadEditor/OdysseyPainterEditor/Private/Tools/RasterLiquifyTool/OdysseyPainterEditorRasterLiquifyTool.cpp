@@ -116,7 +116,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
 
-    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
 
     rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterLiquifyTool::OnRasterSelectionChanged);
 
@@ -126,7 +126,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Load()
 void
 UOdysseyPainterEditorRasterLiquifyTool::Unload()
 {
-    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
 
      // TODO: what to do when the tool is unloaded ? commit changes or not ?
 
@@ -242,7 +242,7 @@ UOdysseyPainterEditorRasterLiquifyTool::GetFlowMap()
 void
 UOdysseyPainterEditorRasterLiquifyTool::FetchSourceImages()
 {
-    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     TSharedPtr<FOdysseyRasterBlock> srcRasterBlock = GetRasterBlockFromEditor(false);
     if (!srcRasterBlock)
         return;
@@ -1028,7 +1028,7 @@ void UOdysseyPainterEditorRasterLiquifyTool::BindShortcuts(TSharedPtr<FUICommand
 void
 UOdysseyPainterEditorRasterLiquifyTool::OnRasterSelectionChanged()
 {
-    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
 
     for( FAlteredImage& alteredImage : mAlteredImageBuffer )
     {

@@ -94,7 +94,7 @@ UOdysseyPainterEditorRasterEraserTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
 
-    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterEraserTool::OnRasterSelectionChanged);
     if (!rasterSelection->IsEmpty())
         mPaintEngine.SetMaskBlock(rasterSelection->GetBlock());
@@ -108,7 +108,7 @@ UOdysseyPainterEditorRasterEraserTool::Unload()
     mPaintEngine.RasterBlock(nullptr);
     mPaintEngine.SetMaskBlock(nullptr);
 
-    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->OnChanged().RemoveAll(this);
 
     UOdysseyPainterEditorTool::Unload();
@@ -554,7 +554,7 @@ UOdysseyPainterEditorRasterEraserTool::GetTooltip() const
 void
 UOdysseyPainterEditorRasterEraserTool::OnRasterSelectionChanged()
 {
-    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     if (rasterSelection->IsEmpty())
     {
         mPaintEngine.SetMaskBlock(nullptr);

@@ -154,7 +154,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
     , mHUDSystem(MakeShared<FOdysseyHUDElement>())
     , mToolsHUD(MakeShared<FOdysseyHUDElement>())
     , mRasterSelectionHUD(MakeShared<FOdysseyHUDElement>())
-    , mRasterSelection(MakeShared< FOdysseyPainterEditorRasterSelection >())
+    , mRasterSelection(NewObject< UOdysseyPainterEditorRasterSelection >())
     , mBrushContexts()
     , mPaintColor(::ULIS::FColor::Black)
     , mAnimationTimelinePosition(MakeShared<FOdysseyPainterEditorAnimationTimelinePosition>())
@@ -1435,7 +1435,7 @@ FOdysseyPainterEditor::LayerStack() const
     return source->GetLayerStack();
 }
 
-TSharedPtr<FOdysseyPainterEditorRasterSelection>
+TObjectPtr<UOdysseyPainterEditorRasterSelection>
 FOdysseyPainterEditor::RasterSelection()
 {
     return mRasterSelection;
@@ -1482,8 +1482,8 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         mSource->Inactivate();
         mSource = nullptr;
 
-        mRasterSelection.Reset();
-        mRasterSelection = MakeShared< FOdysseyPainterEditorRasterSelection >();
+        mRasterSelection = nullptr;
+        mRasterSelection = NewObject< UOdysseyPainterEditorRasterSelection >();
 
         mAnimationTimelinePosition->Reset();
     }
@@ -3425,6 +3425,7 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 
     Collector.AddReferencedObject(mCurrentPaletteEntryColor);
     Collector.AddReferencedObject(mRecentTools);
+    Collector.AddReferencedObject(mRasterSelection);
 }
 
 const TArray<UOdysseyPaletteSet*>
