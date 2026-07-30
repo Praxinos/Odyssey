@@ -90,6 +90,7 @@ namespace UnrealBuildTool.Rules
                     "OdysseyStyle",
                     "OdysseyTexture",
                     "OdysseyVector",
+                    "OdysseyTelemetry",
                     // ... add private dependencies that you statically link with here ...
                 }
                 );
