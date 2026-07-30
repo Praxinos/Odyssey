@@ -1,16 +1,18 @@
 // IDDN.FR.001.060015.015.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-
 #include "OdysseyBrushEditorModule.h"
+
+#include "AssetToolsModule.h"
 #include "Editor.h"
 #include "Modules/ModuleManager.h"
-#include "AssetToolsModule.h"
+#include "ThumbnailRendering/ThumbnailManager.h"
+
 #include "AssetTypeActions_OdysseyBrush.h"
+#include "OdysseyBrush_ContentBrowserExtensions.h"
 #include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushThumbnailRenderer.h"
-#include "ThumbnailRendering/ThumbnailManager.h"
-#include "OdysseyBrush_ContentBrowserExtensions.h"
+#include "OdysseyTelemetryModule.h"
 
 #define LOCTEXT_NAMESPACE "BrushEditor"
 
@@ -36,10 +38,14 @@ void FOdysseyBrushEditorModule::StartupModule()
     {
         FOdysseyBrushContentBrowserExtensions::InstallHooks();
     }
+
+    RegisterTelemetry();
 }
 
 void FOdysseyBrushEditorModule::ShutdownModule()
 {
+    UnregisterTelemetry();
+
     /////////////////
     if( !UObjectInitialized() )
     {
@@ -55,6 +61,19 @@ void FOdysseyBrushEditorModule::ShutdownModule()
     // Unregister the thumbnail renderers
     UThumbnailManager::Get().UnregisterCustomRenderer( UOdysseyBrush::StaticClass() );
     /////////////////
+}
+
+
+void
+FOdysseyBrushEditorModule::RegisterTelemetry()
+{
+    FOdysseyTelemetryModule::Get().RegisterAssetClassToTrackForCreation( UOdysseyBrush::StaticClass() );
+}
+
+void
+FOdysseyBrushEditorModule::UnregisterTelemetry()
+{
+    FOdysseyTelemetryModule::Get().UnregisterAssetClassToTrackForCreation( UOdysseyBrush::StaticClass() );
 }
 
 

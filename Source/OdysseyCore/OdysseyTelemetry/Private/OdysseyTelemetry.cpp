@@ -15,8 +15,9 @@
 #include "Internationalization/Internationalization.h"
 #include "Misc/EngineVersion.h"
 
-#include "OdysseyAnalyticsProvider.h"
 #include "OdysseyTelemetryLog.h"
+#include "OdysseyTelemetryModule.h"
+#include "OdysseyAnalyticsProvider.h"
 #include "PlatformTimeZone.h"
 
 //---
@@ -493,12 +494,7 @@ FOdysseyTelemetry::RegisterOnAssetCreation()
 
                                                             using AssetAddedFields = AssetAdded_TelemetryFields;
 
-                                                            // Not ideal, but can't use UOdysseyAnimation (or any other custom) classes to avoid dependency problems ...
-                                                            // Maybe record events in each custom factory (?)
-                                                            if( iAssetData.GetClass()->GetName() == TEXT( "OdysseyAnimation" )
-                                                                || iAssetData.GetClass()->GetName() == TEXT( "BoardSequence" )
-                                                                || iAssetData.GetClass()->GetName() == TEXT( "ShotSequence" ) )
-                                                            //if( iAssetData.GetClass() == UTexture2D::StaticClass() )
+                                                            if( FOdysseyTelemetryModule::Get().IsAssetClassToTrackForCreation( iAssetData.GetClass() ) )
                                                             {
                                                                 TArray<FAnalyticsEventAttribute> Attributes;
                                                                 Attributes.Emplace( AssetAddedFields::AssetClassPath_KeyName_AsString, iAssetData.AssetClassPath.ToString() );

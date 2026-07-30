@@ -12,16 +12,56 @@ IMPLEMENT_MODULE( FOdysseyTelemetryModule, OdysseyTelemetry );
 
 //---
 
-void FOdysseyTelemetryModule::StartupModule()
+void
+FOdysseyTelemetryModule::StartupModule()
 {
 #if !UE_BUILD_SHIPPING
     FOdysseyTelemetry::Get().StartSession();
 #endif
 }
 
-void FOdysseyTelemetryModule::ShutdownModule()
+void
+FOdysseyTelemetryModule::ShutdownModule()
 {
 #if !UE_BUILD_SHIPPING
     FOdysseyTelemetry::Get().EndSession();
 #endif
+}
+
+//---
+
+//static
+FOdysseyTelemetryModule&
+FOdysseyTelemetryModule::Get()
+{
+    static const FName ModuleName = "OdysseyTelemetry";
+    return FModuleManager::LoadModuleChecked<FOdysseyTelemetryModule>( ModuleName );
+}
+
+//static
+bool
+FOdysseyTelemetryModule::IsAvailable()
+{
+    static const FName ModuleName = "OdysseyTelemetry";
+    return FModuleManager::Get().IsModuleLoaded( ModuleName );
+}
+
+//---
+
+void
+FOdysseyTelemetryModule::RegisterAssetClassToTrackForCreation( UClass* iClass )
+{
+    AssetClassToTrackForCreation.Add( iClass );
+}
+
+void
+FOdysseyTelemetryModule::UnregisterAssetClassToTrackForCreation( UClass* iClass )
+{
+    AssetClassToTrackForCreation.Remove( iClass );
+}
+
+bool
+FOdysseyTelemetryModule::IsAssetClassToTrackForCreation( UClass* iClass ) const
+{
+    return AssetClassToTrackForCreation.Contains( iClass );
 }

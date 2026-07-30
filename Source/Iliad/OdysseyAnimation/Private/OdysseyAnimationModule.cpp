@@ -6,16 +6,24 @@
 #include "IMediaModule.h"
 
 #include "Media/OdysseyAnimationMediaPlayerFactory.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyTelemetryModule.h"
+
+//---
 
 void FOdysseyAnimationModule::StartupModule()
 {
     RegisterMedia();
+    RegisterTelemetry();
 }
 
 void FOdysseyAnimationModule::ShutdownModule()
 {
     UnregisterMedia();
+    UnregisterTelemetry();
 }
+
+//---
 
 void
 FOdysseyAnimationModule::RegisterMedia()
@@ -36,5 +44,21 @@ FOdysseyAnimationModule::UnregisterMedia()
     if (MediaModule != nullptr)
         MediaModule->UnregisterPlayerFactory(mAnimationMediaPlayerFactory);
 }
+
+//---
+
+void
+FOdysseyAnimationModule::RegisterTelemetry()
+{
+    FOdysseyTelemetryModule::Get().RegisterAssetClassToTrackForCreation( UOdysseyAnimation::StaticClass() );
+}
+
+void
+FOdysseyAnimationModule::UnregisterTelemetry()
+{
+    FOdysseyTelemetryModule::Get().UnregisterAssetClassToTrackForCreation( UOdysseyAnimation::StaticClass() );
+}
+
+//---
 
 IMPLEMENT_MODULE(FOdysseyAnimationModule, OdysseyAnimation);

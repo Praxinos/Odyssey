@@ -50,6 +50,7 @@ namespace UnrealBuildTool.Rules
                     "Slate",
                     "SlateCore",
                     // ... add private dependencies that you statically link with here ...
+                    "OdysseyTelemetry",
                 }
                 );
 

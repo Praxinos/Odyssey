@@ -24,6 +24,9 @@ private:
     void RegisterMedia();
     void UnregisterMedia();
 
+    void RegisterTelemetry();
+    void UnregisterTelemetry();
+
 public:
     FOdysseyAnimationMediaPlayerFactory mAnimationMediaPlayerFactory;
 };

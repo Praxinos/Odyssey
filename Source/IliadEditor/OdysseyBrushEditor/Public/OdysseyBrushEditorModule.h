@@ -22,4 +22,8 @@ public:
     // End of IModuleInterface interface
 
     TSharedPtr< FAssetTypeActions_OdysseyBrush >  OdysseyBrushAssetTypeActions;
+
+private:
+    void RegisterTelemetry();
+    void UnregisterTelemetry();
 };

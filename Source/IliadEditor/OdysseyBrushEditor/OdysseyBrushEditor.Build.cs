@@ -49,7 +49,8 @@ public class OdysseyBrushEditor : ModuleRules
                 "SlateCore",
                 "UnrealEd",
 
-                "OdysseyBrush"
+                "OdysseyBrush",
+                "OdysseyTelemetry",
             }
             );
 
