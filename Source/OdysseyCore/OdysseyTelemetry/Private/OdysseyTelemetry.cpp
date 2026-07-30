@@ -492,7 +492,8 @@ FOdysseyTelemetry::RegisterOnAssetCreation()
 
                                                             using FAssetAddedFields = FAssetAdded_TelemetryFields;
 
-                                                            if( FOdysseyTelemetryModule::Get().IsAssetClassToTrackForCreation( iAssetData.GetClass() ) )
+                                                            if( FOdysseyTelemetryModule::Get().IsAssetClassToTrackForCreation( iAssetData.GetClass() )
+                                                                && FPackageName::DoesPackageExist( iAssetData.PackageName.ToString() ) )
                                                             {
                                                                 TArray<FAnalyticsEventAttribute> Attributes;
                                                                 Attributes.Emplace( FAssetAddedFields::AssetClassPath_KeyName_AsString, iAssetData.AssetClassPath.ToString() );
