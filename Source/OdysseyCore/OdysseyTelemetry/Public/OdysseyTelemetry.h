@@ -91,9 +91,11 @@ private:
     FDateTime                               SessionStartTime;
 };
 
+//---
+
 // This struct may be used in other context than just the AssetRegistry here
 // (like texture/flipbook factories)
-// So expose it to be able to reuse it
+// So declare it here to be able to use the same one everywhere
 //
 // MUST END with "_TelemetryFields" (to find all of them easily)
 // MUST BE synchronized with web code
@@ -103,5 +105,21 @@ struct FAssetAdded_TelemetryFields
 
     // Attributes
     static inline FString AssetClassPath_KeyName_AsString = TEXT( "AssetClassPath" );
-    //static inline FString AssetFullName_KeyName_AsString = TEXT( "AssetFullName" );
+    //static inline FString AssetFullName_KeyName_AsString = TEXT( "AssetFullName" ); // Sensitive
+};
+
+//---
+
+// This struct may be used with many editors in different modules
+// So declare it here to be able to use the same one everywhere
+//
+// MUST END with "_TelemetryFields" (to find all of them easily)
+// MUST BE synchronized with web code
+struct FAssetEdition_TelemetryFields
+{
+    static inline FString KeyName = TEXT( "AssetEdition" );
+
+    // Attributes
+    static inline FString EditorName_KeyName_AsString = TEXT( "EditorName" );
+    static inline FString SessionDuration_KeyName_AsDouble = TEXT( "SessionDuration" );
 };

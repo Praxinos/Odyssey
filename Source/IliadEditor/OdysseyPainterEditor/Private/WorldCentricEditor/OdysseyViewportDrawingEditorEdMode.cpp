@@ -19,18 +19,18 @@
 #include "MeshPaintSettings.h"
 #include "ToolMenus.h"
 #include "Selection.h"
-
+#include "UObject/UObjectGlobals.h"
+#include "Editor/EditorPerProjectUserSettings.h"
+#include "MediaPlate.h"
+#include "SEditorViewport.h"
 #include "EditorWorldExtension.h"
 #include "ViewportWorldInteraction.h"
 #include "Misc/MessageDialog.h"
 
 #include "OdysseyViewportDrawingEditorToolkit.h"
 #include "Adapters/IOdysseyViewportDrawingEditorAdapter.h"
+#include "OdysseyTelemetry.h"
 
-#include "UObject/UObjectGlobals.h"
-#include "Editor/EditorPerProjectUserSettings.h"
-#include "MediaPlate.h"
-#include "SEditorViewport.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
@@ -199,6 +199,8 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
 {
     FEdMode::Enter();
 
+    SessionStartTime = FDateTime::UtcNow();
+
     if (UsesToolkits() && !Toolkit.IsValid())
     {
         mViewportDrawingEditorToolkit = MakeShared<FOdysseyViewportDrawingEditorToolkit>(this);
@@ -264,6 +266,19 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
 
     mViewportDrawingEditorExtension = nullptr;
     mViewportDrawingEditorToolkit = nullptr;
+
+    {
+        // Use this in a module startup, but maybe to painful to store/compute duration (?)
+        //GLevelEditorModeTools().OnEditorModeIDChanged().AddLambda( ... );
+
+        using FAssetEditionFields = FAssetEdition_TelemetryFields;
+
+        TArray<FAnalyticsEventAttribute> Attributes;
+        Attributes.Emplace( FAssetEditionFields::EditorName_KeyName_AsString, TEXT( "EdMode:Odyssey" ) ); // GetModeInfo().Name.ToString() == "Odyssey"
+        Attributes.Emplace( FAssetEditionFields::SessionDuration_KeyName_AsDouble, ( FDateTime::UtcNow() - SessionStartTime ).GetTotalSeconds() );
+
+        FOdysseyTelemetry::Get().RecordEvent( FAssetEditionFields::KeyName, Attributes );
+    }
 
     // Call parent implementation
     FEdMode::Exit();
