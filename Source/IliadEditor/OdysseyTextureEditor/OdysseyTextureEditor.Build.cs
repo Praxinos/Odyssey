@@ -76,6 +76,7 @@ namespace UnrealBuildTool.Rules
                     "OdysseyStyle",
                     "OdysseyTexture",
                     "OdysseyWidgets",
+                    "OdysseyTelemetry",
 
                     "ULIS",
                     "zlib"

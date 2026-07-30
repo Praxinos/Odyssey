@@ -195,9 +195,9 @@ FOdysseyAnalyticsProvider::~FOdysseyAnalyticsProvider()
     EndSession();
 }
 
-// MUST END with "_TelemetryFields"
+// MUST END with "_TelemetryFields" (to find all of them easily)
 // MUST BE synchronized with web code
-struct ProviderSessionStart_TelemetryFields
+struct FProviderSessionStart_TelemetryFields
 {
     static inline FString KeyName = TEXT( "OdysseyProvider.SessionStart" );
 
@@ -217,21 +217,21 @@ bool FOdysseyAnalyticsProvider::StartSession( FString InSessionID, const TArray<
     }
     SessionID = MoveTemp( InSessionID );
 
-    using ProviderSessionStartFields = ProviderSessionStart_TelemetryFields;
+    using FProviderSessionStartFields = FProviderSessionStart_TelemetryFields;
 
     // always ensure we send a few specific attributes on session start.
     TArray<FAnalyticsEventAttribute> AttributesWithPlatform = Attributes;
-    AttributesWithPlatform.Emplace( ProviderSessionStartFields::Platform_KeyName_String, FString( FPlatformProperties::IniPlatformName() ) );
+    AttributesWithPlatform.Emplace( FProviderSessionStartFields::Platform_KeyName_String, FString( FPlatformProperties::IniPlatformName() ) );
 
-    RecordEvent( ProviderSessionStartFields::KeyName, AttributesWithPlatform );
+    RecordEvent( FProviderSessionStartFields::KeyName, AttributesWithPlatform );
 
     bSessionInProgress = true;
     return bSessionInProgress;
 }
 
-// MUST END with "_TelemetryFields"
+// MUST END with "_TelemetryFields" (to find all of them easily)
 // MUST BE synchronized with web code
-struct ProviderSessionEnd_TelemetryFields
+struct FProviderSessionEnd_TelemetryFields
 {
     static inline FString KeyName = TEXT( "OdysseyProvider.SessionEnd" );
 
@@ -247,9 +247,9 @@ void FOdysseyAnalyticsProvider::EndSession()
     LLM_SCOPE_BYNAME( TEXT( "OdysseyAnalytics" ) );
     if( bSessionInProgress )
     {
-        using ProviderSessionEndFields = ProviderSessionEnd_TelemetryFields;
+        using FProviderSessionEndFields = FProviderSessionEnd_TelemetryFields;
 
-        RecordEvent( ProviderSessionEndFields::KeyName, TArray<FAnalyticsEventAttribute>() );
+        RecordEvent( FProviderSessionEndFields::KeyName, TArray<FAnalyticsEventAttribute>() );
 
         UE_LOGF( LogAnalytics, Display, "[%ls] OdysseyAnalyticsProvider::EndSession", *Config.APIKeyOdyssey );
     }

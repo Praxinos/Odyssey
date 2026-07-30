@@ -124,9 +124,9 @@ CreatePraxinosAnalyticsProvider()
     return FOdysseyAnalyticsModule::Get().CreateAnalyticsProvider( Config );
 }
 
-// MUST END with "_TelemetryFields"
+// MUST END with "_TelemetryFields" (to find all of them easily)
 // MUST BE synchronized with web code
-struct SessionStart_TelemetryFields
+struct FSessionStart_TelemetryFields
 {
     static inline FString KeyName = TEXT( "OdysseyTelemetry.SessionStart" );
 
@@ -244,48 +244,48 @@ FOdysseyTelemetry::StartSession()
 
     //---
 
-    using SessionStartFields = SessionStart_TelemetryFields;
+    using FSessionStartFields = FSessionStart_TelemetryFields;
 
     // Build the default attributes. These are sent with ALL events
-    DefaultAttributes.Emplace( SessionStartFields::SessionId_KeyName_AsString, SessionID.ToString( EGuidFormats::DigitsWithHyphensInBraces ) );
-    DefaultAttributes.Emplace( SessionStartFields::SessionStartUTC_KeyName_AsDouble, NowUtc.ToUnixTimestampDecimal() );
+    DefaultAttributes.Emplace( FSessionStartFields::SessionId_KeyName_AsString, SessionID.ToString( EGuidFormats::DigitsWithHyphensInBraces ) );
+    DefaultAttributes.Emplace( FSessionStartFields::SessionStartUTC_KeyName_AsDouble, NowUtc.ToUnixTimestampDecimal() );
 
     //
 
     // Build the session context attributes. These will always be sent with the SessionStart event but can also be appended to default attributes to send with all ALL events.
-    //SessionContextAttributes.Emplace( SessionStartFields::ProjectName_KeyName_AsString, ProjectName );
-    SessionContextAttributes.Emplace( SessionStartFields::ProjectId_KeyName_AsString, ProjectID );
+    //SessionContextAttributes.Emplace( FSessionStartFields::ProjectName_KeyName_AsString, ProjectName );
+    SessionContextAttributes.Emplace( FSessionStartFields::ProjectId_KeyName_AsString, ProjectID );
 
-    SessionContextAttributes.Emplace( SessionStartFields::BuildConfiguration_KeyName_AsEBuildConfiguration, FApp::GetBuildConfiguration() );
-    SessionContextAttributes.Emplace( SessionStartFields::BuildBranchName_KeyName_AsString, FApp::GetBranchName().ToLower() );
-    SessionContextAttributes.Emplace( SessionStartFields::BuildChangelist_KeyName_AsInt, BuildSettings::GetCurrentChangelist() );
+    SessionContextAttributes.Emplace( FSessionStartFields::BuildConfiguration_KeyName_AsEBuildConfiguration, FApp::GetBuildConfiguration() );
+    SessionContextAttributes.Emplace( FSessionStartFields::BuildBranchName_KeyName_AsString, FApp::GetBranchName().ToLower() );
+    SessionContextAttributes.Emplace( FSessionStartFields::BuildChangelist_KeyName_AsInt, BuildSettings::GetCurrentChangelist() );
 
-    SessionContextAttributes.Emplace( SessionStartFields::ConfigIsEditor_KeyName_AsBool, GIsEditor );
-    SessionContextAttributes.Emplace( SessionStartFields::ConfigIsBuildMachine_KeyName_AsBool, GIsBuildMachine );
-    SessionContextAttributes.Emplace( SessionStartFields::ConfigIsRunningCommandlet_KeyName_AsBool, IsRunningCommandlet() );
-    SessionContextAttributes.Emplace( SessionStartFields::ConfigIsDebuggerPresent_KeyName_AsBool, FPlatformMisc::IsDebuggerPresent() );
+    SessionContextAttributes.Emplace( FSessionStartFields::ConfigIsEditor_KeyName_AsBool, GIsEditor );
+    SessionContextAttributes.Emplace( FSessionStartFields::ConfigIsBuildMachine_KeyName_AsBool, GIsBuildMachine );
+    SessionContextAttributes.Emplace( FSessionStartFields::ConfigIsRunningCommandlet_KeyName_AsBool, IsRunningCommandlet() );
+    SessionContextAttributes.Emplace( FSessionStartFields::ConfigIsDebuggerPresent_KeyName_AsBool, FPlatformMisc::IsDebuggerPresent() );
 
     //// Only send user data if requested
     //if( Config.bSendUserData == true )
     //{
-        SessionContextAttributes.Emplace( SessionStartFields::UserId_KeyName_AsString, UserID );
-        SessionContextAttributes.Emplace( SessionStartFields::UserLanguage_KeyName_AsString, UserLanguage );
-        SessionContextAttributes.Emplace( SessionStartFields::UserRegion_KeyName_AsString, UserRegion );
-        SessionContextAttributes.Emplace( SessionStartFields::UserTimeZoneId_KeyName_AsString, TimeZoneId );
-    //    SessionContextAttributes.Emplace( SessionStartFields::ApplicationCommandline_KeyName_AsString, FCommandLine::Get() );
+    SessionContextAttributes.Emplace( FSessionStartFields::UserId_KeyName_AsString, UserID );
+    SessionContextAttributes.Emplace( FSessionStartFields::UserLanguage_KeyName_AsString, UserLanguage );
+    SessionContextAttributes.Emplace( FSessionStartFields::UserRegion_KeyName_AsString, UserRegion );
+    SessionContextAttributes.Emplace( FSessionStartFields::UserTimeZoneId_KeyName_AsString, TimeZoneId );
+    //    SessionContextAttributes.Emplace( FSessionStartFields::ApplicationCommandline_KeyName_AsString, FCommandLine::Get() );
     //}
 
     // ALways send the platform
-    SessionContextAttributes.Emplace( SessionStartFields::HardwarePlatform_KeyName_AsString, FString( FPlatformProperties::IniPlatformName() ) );
+    SessionContextAttributes.Emplace( FSessionStartFields::HardwarePlatform_KeyName_AsString, FString( FPlatformProperties::IniPlatformName() ) );
 
     // Only send detailed hardware data if requested
     //if( Config.bSendHardwareData == true )
     {
-        SessionContextAttributes.Emplace( SessionStartFields::HardwareCPU_KeyName_AsString, FPlatformMisc::GetCPUBrand() );
-        SessionContextAttributes.Emplace( SessionStartFields::HardwareCPUCoresPhysical_KeyName_AsInt32, FPlatformMisc::NumberOfCores() );
-        SessionContextAttributes.Emplace( SessionStartFields::HardwareCPUCoresLogical_KeyName_AsInt32, FPlatformMisc::NumberOfCoresIncludingHyperthreads() );
-        SessionContextAttributes.Emplace( SessionStartFields::HardwareRAM_KeyName_AsUint64, FPlatformMemory::GetStats().TotalPhysical );
-        //SessionContextAttributes.Emplace( SessionStartFields::HardwareComputerName_KeyName_AsString, ComputerName );
+        SessionContextAttributes.Emplace( FSessionStartFields::HardwareCPU_KeyName_AsString, FPlatformMisc::GetCPUBrand() );
+        SessionContextAttributes.Emplace( FSessionStartFields::HardwareCPUCoresPhysical_KeyName_AsInt32, FPlatformMisc::NumberOfCores() );
+        SessionContextAttributes.Emplace( FSessionStartFields::HardwareCPUCoresLogical_KeyName_AsInt32, FPlatformMisc::NumberOfCoresIncludingHyperthreads() );
+        SessionContextAttributes.Emplace( FSessionStartFields::HardwareRAM_KeyName_AsUint64, FPlatformMemory::GetStats().TotalPhysical );
+        //SessionContextAttributes.Emplace( FSessionStartFields::HardwareComputerName_KeyName_AsString, ComputerName );
     }
 
     // Only send OS data if requested
@@ -295,10 +295,10 @@ FOdysseyTelemetry::StartSession()
         FString OSSubVersionLabel;
         FPlatformMisc::GetOSVersions( OSVersionLabel, OSSubVersionLabel );
 
-        SessionContextAttributes.Emplace( SessionStartFields::OSVersion_KeyName_AsString, FPlatformMisc::GetOSVersion() );
-        SessionContextAttributes.Emplace( SessionStartFields::OSVersionLabel_KeyName_AsString, OSVersionLabel );
-        SessionContextAttributes.Emplace( SessionStartFields::OSVersionSubLabel_KeyName_AsString, OSSubVersionLabel );
-        SessionContextAttributes.Emplace( SessionStartFields::OSVersionId_KeyName_AsString, FPlatformMisc::GetOperatingSystemId() );
+        SessionContextAttributes.Emplace( FSessionStartFields::OSVersion_KeyName_AsString, FPlatformMisc::GetOSVersion() );
+        SessionContextAttributes.Emplace( FSessionStartFields::OSVersionLabel_KeyName_AsString, OSVersionLabel );
+        SessionContextAttributes.Emplace( FSessionStartFields::OSVersionSubLabel_KeyName_AsString, OSSubVersionLabel );
+        SessionContextAttributes.Emplace( FSessionStartFields::OSVersionId_KeyName_AsString, FPlatformMisc::GetOperatingSystemId() );
     }
 
     // Send the Session Context attributes with ALL events by appending to the default attributes if required
@@ -338,9 +338,9 @@ FOdysseyTelemetry::StartSession()
     }
 
     const int32 SessionContextSchemaVersion = 1;
-    Attributes.Emplace( SessionStartFields::SchemaVersion_KeyName_AsInt32, SessionContextSchemaVersion );
+    Attributes.Emplace( FSessionStartFields::SchemaVersion_KeyName_AsInt32, SessionContextSchemaVersion );
 
-    OdysseyAnalyticsProvider->RecordEvent( SessionStartFields::KeyName, Attributes );
+    OdysseyAnalyticsProvider->RecordEvent( FSessionStartFields::KeyName, Attributes );
 
     //---
 
@@ -478,17 +478,6 @@ FOdysseyTelemetry::GetSessionSpan() const
 
 //---
 
-// MUST END with "_TelemetryFields"
-// MUST BE synchronized with web code
-struct AssetAdded_TelemetryFields
-{
-    static inline FString KeyName = TEXT( "AssetCreation" );
-
-    // Attributes
-    static inline FString AssetClassPath_KeyName_AsString = TEXT( "AssetClassPath" );
-    //static inline FString AssetFullName_KeyName_AsString = TEXT( "AssetFullName" );
-};
-
 void
 FOdysseyTelemetry::RegisterOnAssetCreation()
 {
@@ -501,15 +490,15 @@ FOdysseyTelemetry::RegisterOnAssetCreation()
                                                             if( AssetRegistryModule.Get().IsLoadingAssets() )
                                                                 return;
 
-                                                            using AssetAddedFields = AssetAdded_TelemetryFields;
+                                                            using FAssetAddedFields = FAssetAdded_TelemetryFields;
 
                                                             if( FOdysseyTelemetryModule::Get().IsAssetClassToTrackForCreation( iAssetData.GetClass() ) )
                                                             {
                                                                 TArray<FAnalyticsEventAttribute> Attributes;
-                                                                Attributes.Emplace( AssetAddedFields::AssetClassPath_KeyName_AsString, iAssetData.AssetClassPath.ToString() );
-                                                                //Attributes.Emplace( AssetAddedFields::AssetFullName_KeyName_AsString, iAssetData.GetFullName() ); // Sensitive
+                                                                Attributes.Emplace( FAssetAddedFields::AssetClassPath_KeyName_AsString, iAssetData.AssetClassPath.ToString() );
+                                                                //Attributes.Emplace( FAssetAddedFields::AssetFullName_KeyName_AsString, iAssetData.GetFullName() ); // Sensitive
 
-                                                                OdysseyAnalyticsProvider->RecordEvent( AssetAddedFields::KeyName, Attributes );
+                                                                OdysseyAnalyticsProvider->RecordEvent( FAssetAddedFields::KeyName, Attributes );
                                                             }
                                                         } );
 }

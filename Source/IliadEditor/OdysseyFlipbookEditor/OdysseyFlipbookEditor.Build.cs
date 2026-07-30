@@ -56,6 +56,7 @@ public class OdysseyFlipbookEditor : ModuleRules
                 "UnrealEd",
 
                 "OdysseyPainterEditor",
+                "OdysseyTelemetry",
             }
         );
 
