@@ -423,6 +423,15 @@ FOdysseyTelemetry::GetProvider()
     return OdysseyAnalyticsProvider;
 }
 
+void
+FOdysseyTelemetry::RecordEvent( const FString& EventName, const TArray<FAnalyticsEventAttribute>& Attributes )
+{
+    if( !IsAvailable() )
+        return;
+
+    OdysseyAnalyticsProvider->RecordEvent( EventName, Attributes );
+}
+
 //---
 
 TWeakPtr<IAnalyticsTracer>

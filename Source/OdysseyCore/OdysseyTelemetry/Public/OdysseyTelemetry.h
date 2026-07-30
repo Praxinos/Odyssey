@@ -42,6 +42,10 @@ public:
     ODYSSEYTELEMETRY_API void EndSession();
 
 public:
+    /** Record a new event in provider if available */
+    ODYSSEYTELEMETRY_API void RecordEvent( const FString& EventName, const TArray<FAnalyticsEventAttribute>& Attributes );
+
+public:
     /** Start a new span specifying the parent*/
     ODYSSEYTELEMETRY_API TSharedPtr<IAnalyticsSpan> StartSpan( const FName Name, const TArray<FAnalyticsEventAttribute>& AdditionalAttributes = {} );
 
