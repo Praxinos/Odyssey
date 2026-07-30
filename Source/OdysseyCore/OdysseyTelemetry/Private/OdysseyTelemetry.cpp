@@ -144,7 +144,7 @@ struct SessionStart_TelemetryFields
     // SessionAttributes
     // - may be added in DefaultAttributes (in ALL future requests)
     // - or may be added a single time in Attributes only for the SessionStart request
-    //static inline FString ProjectName_KeyName_AsString = TEXT( "ProjectName" );
+    //static inline FString ProjectName_KeyName_AsString = TEXT( "ProjectName" ); // Sensitive
     static inline FString ProjectId_KeyName_AsString = TEXT( "ProjectID" );
 
     static inline FString BuildConfiguration_KeyName_AsEBuildConfiguration = TEXT( "Build_Configuration" );
@@ -160,14 +160,14 @@ struct SessionStart_TelemetryFields
     static inline FString UserLanguage_KeyName_AsString = TEXT( "User_Language" );
     static inline FString UserRegion_KeyName_AsString = TEXT( "User_Region" );
     static inline FString UserTimeZoneId_KeyName_AsString = TEXT( "User_TimeZoneId" );
-    //static inline FString ApplicationCommandline_KeyName_AsString = TEXT( "Application_Commandline" );
+    //static inline FString ApplicationCommandline_KeyName_AsString = TEXT( "Application_Commandline" ); // Sensitive
 
     static inline FString HardwarePlatform_KeyName_AsString = TEXT( "Hardware_Platform" );
     static inline FString HardwareCPU_KeyName_AsString = TEXT( "Hardware_CPU" );
     static inline FString HardwareCPUCoresPhysical_KeyName_AsInt32 = TEXT( "Hardware_CPU_Cores_Physical" );
     static inline FString HardwareCPUCoresLogical_KeyName_AsInt32 = TEXT( "Hardware_CPU_Cores_Logical" );
     static inline FString HardwareRAM_KeyName_AsUint64 = TEXT( "Hardware_RAM" );
-    //static inline FString HardwareComputerName_KeyName_AsString = TEXT( "Hardware_ComputerName" );
+    //static inline FString HardwareComputerName_KeyName_AsString = TEXT( "Hardware_ComputerName" ); // Sensitive
 
     static inline FString OSVersion_KeyName_AsString = TEXT( "OS_Version" );
     static inline FString OSVersionLabel_KeyName_AsString = TEXT( "OS_VersionLabel" );
@@ -302,10 +302,10 @@ FOdysseyTelemetry::StartSession()
     }
 
     // Send the Session Context attributes with ALL events by appending to the default attributes if required
-    if( Config.bSendSessionContext == true )
-    {
-        DefaultAttributes.Append( SessionContextAttributes );
-    }
+    //if( Config.bSendSessionContext == true )
+    //{
+    //    DefaultAttributes.Append( SessionContextAttributes );
+    //}
 
     // Set up the analytics provider
     OdysseyAnalyticsProvider->SetUserID( UserID );
@@ -331,7 +331,7 @@ FOdysseyTelemetry::StartSession()
     SessionStartTime = NowUtc;
 
     TArray<FAnalyticsEventAttribute> Attributes;
-    if( Config.bSendSessionContext == false )
+    //if( Config.bSendSessionContext == false )
     {
         // We always send the session context with the SessionStart event so if we have opted out of sending it with the DefaultAttributes to ALL events we need append it here
         Attributes = SessionContextAttributes;
@@ -412,7 +412,7 @@ FOdysseyTelemetry::LoadConfiguration()
     //GConfig->GetBool( *SectionName, TEXT( "SendUserData" ), Config.bSendUserData, ConfigPathfile );
     //GConfig->GetBool( *SectionName, TEXT( "SendHardwareData" ), Config.bSendHardwareData, ConfigPathfile );
     //GConfig->GetBool( *SectionName, TEXT( "SendOSData" ), Config.bSendOSData, ConfigPathfile );
-    GConfig->GetBool( *SectionName, TEXT( "SendSessionContext" ), Config.bSendSessionContext, ConfigPathfile );
+    //GConfig->GetBool( *SectionName, TEXT( "SendSessionContext" ), Config.bSendSessionContext, ConfigPathfile ); // NOT USED
 }
 
 //---
@@ -473,7 +473,7 @@ FOdysseyTelemetry::GetSessionSpan() const
 // MUST BE synchronized with web code
 struct AssetAdded_TelemetryFields
 {
-    static inline FString KeyName = TEXT( "AssetRegistry.AssetAdded" );
+    static inline FString KeyName = TEXT( "AssetCreation" );
 
     // Attributes
     static inline FString AssetClassPath_KeyName_AsString = TEXT( "AssetClassPath" );
@@ -498,9 +498,9 @@ FOdysseyTelemetry::RegisterOnAssetCreation()
                                                             {
                                                                 TArray<FAnalyticsEventAttribute> Attributes;
                                                                 Attributes.Emplace( AssetAddedFields::AssetClassPath_KeyName_AsString, iAssetData.AssetClassPath.ToString() );
-                                                                //Attributes.Emplace( AssetAddedFields::AssetFullName_KeyName_AsString, iAssetData.GetFullName() );
+                                                                //Attributes.Emplace( AssetAddedFields::AssetFullName_KeyName_AsString, iAssetData.GetFullName() ); // Sensitive
 
-                                                                OdysseyAnalyticsProvider->RecordEvent( TEXT( "AssetRegistry.AssetAdded" ), Attributes );
+                                                                OdysseyAnalyticsProvider->RecordEvent( AssetAddedFields::KeyName, Attributes );
                                                             }
                                                         } );
 }

@@ -73,7 +73,7 @@ private:
         //bool bSendUserData = false;  // Never send user data unless specifically asked to
         //bool bSendHardwareData = false; // Never send hardware data unless specifically asked to
         //bool bSendOSData = false; // Never send operating system data unless specifically asked to
-        bool bSendSessionContext = false; // Send the session context data with every event
+        //bool bSendSessionContext = false; // Send the session context data with every event // NOT USED, always send it one time at startup
     };
 
 private:
