@@ -8,6 +8,7 @@
 #include "DerivedDataValue.h"
 #include "DerivedDataRequestTypes.h"
 #include "DerivedDataRequestOwner.h"
+#include "HAL/PlatformTime.h"
 
 FOdysseyDiskCache::~FOdysseyDiskCache()
 {

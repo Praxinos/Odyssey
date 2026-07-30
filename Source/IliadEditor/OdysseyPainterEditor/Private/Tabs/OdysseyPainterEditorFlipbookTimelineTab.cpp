@@ -66,7 +66,7 @@ FOdysseyPainterEditorFlipbookTimelineTab::BindShortcuts(FBaseToolkit* iToolkit)
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     const FOdysseyPainterEditorFlipbookCommands& flipbookEditorCommands = FOdysseyPainterEditorFlipbookCommands::Get();
 
-    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorViewportTab::__VA_ARGS__ ), FCanExecuteAction() );
+    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorFlipbookTimelineTab::__VA_ARGS__ ), FCanExecuteAction() );
 
     // Insert Shortcuts Here
 

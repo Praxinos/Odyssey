@@ -76,6 +76,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "Sequencer",
                 "ToolMenus",
                 "ToolWidgets",
+                "TraceLog",
                 "UnrealEd",
                 "ViewportInteraction",
                 "NamingTokens",

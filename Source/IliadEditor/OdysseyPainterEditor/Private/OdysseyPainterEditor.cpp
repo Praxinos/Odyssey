@@ -120,6 +120,7 @@
 #include "OdysseyPainterEditorLayerStackTab.h"
 #include "OdysseyPainterEditorMeshSelectorTab.h"
 #include "OdysseyPainterEditorTextureDetailsTab.h"
+#include "OdysseyPainterEditorTiledViewportTab.h"
 #include "OdysseyPainterEditorToolCollectionTab.h"
 #include "OdysseyPainterEditorToolsTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
@@ -256,6 +257,7 @@ FOdysseyPainterEditor::InitTabs()
 {
     TSharedRef<FOdysseyPainterEditorMeshSelectorTab> meshSelectorTab = MakeShared<FOdysseyPainterEditorMeshSelectorTab>(this);
     TSharedRef<FOdysseyPainterEditorViewportTab> viewportTab = MakeShared<FOdysseyPainterEditorViewportTab>(this);
+    TSharedRef<FOdysseyPainterEditorTiledViewportTab> tiledViewportTab = MakeShared<FOdysseyPainterEditorTiledViewportTab>(this);
     TSharedRef<FOdysseyPainterEditorColorSelectorTab> colorSelectorTab = MakeShared<FOdysseyPainterEditorColorSelectorTab>(this);
     TSharedRef<FOdysseyPainterEditorToolsTab> toolsTab = MakeShared<FOdysseyPainterEditorToolsTab>(this);
     TSharedRef<FOdysseyPainterEditorToolCollectionTab> toolCollectionTab = MakeShared<FOdysseyPainterEditorToolCollectionTab>(this);
@@ -271,6 +273,7 @@ FOdysseyPainterEditor::InitTabs()
     AddTab(toolCollectionTab);
     AddTab(meshSelectorTab);
     AddTab(viewportTab);
+    AddTab(tiledViewportTab);
     AddTab(colorSelectorTab);
     AddTab(vectorSceneTreeViewTab);
     AddTab(layerStackTab);
