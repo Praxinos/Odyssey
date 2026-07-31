@@ -254,4 +254,8 @@ private:
     TSharedPtr<class FOdysseyHUDLine> mRIMVerticalHUD;
     float mRIMStartRadius;
     FOdysseyPoint mRIMStartMousePosition;
+
+private:
+    // Telemetry
+    FDateTime SessionStartTime;
 };
