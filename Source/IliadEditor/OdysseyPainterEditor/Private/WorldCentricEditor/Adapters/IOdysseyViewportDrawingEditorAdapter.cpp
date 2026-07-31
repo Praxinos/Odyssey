@@ -934,6 +934,7 @@ IOdysseyViewportDrawingEditorAdapter::StylusPacketToRay(const UE::StylusInput::F
     const UE::StylusInput::IStylusInputTabletContext* tabletContext = GetTabletContext(mStylusInputInstance, iPacket.TabletContextID);
     GetRayParamsFromViewportPosition(viewportClient, positionInViewport.X, positionInViewport.Y, &ioRay.mRayOrigin, &ioRay.mRayDirection);
 
+#if PLATFORM_WINDOWS
     if (tabletContext)
     {
         UE::StylusInput::ETabletSupportedProperties capabilities = tabletContext->GetSupportedProperties();
@@ -949,23 +950,19 @@ IOdysseyViewportDrawingEditorAdapter::StylusPacketToRay(const UE::StylusInput::F
         ioRay.mPoint.roll = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::RollRotation) ? iPacket.RollRotation : 1.f;
         ioRay.mPoint.yaw = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::YawRotation) ? iPacket.YawRotation : 1.f;
     }
-    else //If for some reason we don't have tablet context, but we still get a packet (it happens sometimes on Mac because of Mac securities), then force retrieve packet info
-    {
-        ioRay.mPoint.x = pointPos.X;
-        ioRay.mPoint.y = pointPos.Y;
-        ioRay.mPoint.z = iPacket.Z;
-        ioRay.mPoint.pressure = iPacket.NormalPressure;
-        ioRay.mPoint.time = iPacket.TimerTick;
-        ioRay.mPoint.altitude = iPacket.AltitudeOrientation;
-        ioRay.mPoint.azimuth = iPacket.AzimuthOrientation;
-        ioRay.mPoint.twist = iPacket.TwistOrientation;
-        ioRay.mPoint.pitch = iPacket.PitchRotation;
-        ioRay.mPoint.roll = iPacket.RollRotation;
-        ioRay.mPoint.yaw = iPacket.YawRotation;
-#if UE_BUILD_DEBUG
-        UE_LOG(LogTemp, Warning, TEXT("Warning: no tablet context found"))
+#elif PLATFORM_MAC
+    ioRay.mPoint.x = pointPos.X;
+    ioRay.mPoint.y = pointPos.Y;
+    ioRay.mPoint.z = iPacket.Z;
+    ioRay.mPoint.pressure = iPacket.NormalPressure;
+    ioRay.mPoint.time = iPacket.TimerTick;
+    ioRay.mPoint.altitude = iPacket.AltitudeOrientation;
+    ioRay.mPoint.azimuth = iPacket.AzimuthOrientation;
+    ioRay.mPoint.twist = iPacket.TwistOrientation;
+    ioRay.mPoint.pitch = iPacket.PitchRotation;
+    ioRay.mPoint.roll = iPacket.RollRotation;
+    ioRay.mPoint.yaw = iPacket.YawRotation;
 #endif
-    }
 
     ioRay.mPoint.keysDown = mKeysPressed;
     ioRay.mPoint.ComputeRelativeParameters(mCurrentStrokeRay.mPoint);
