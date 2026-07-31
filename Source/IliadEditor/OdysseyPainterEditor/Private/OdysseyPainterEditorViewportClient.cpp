@@ -961,6 +961,24 @@ FOdysseyPoint FOdysseyPainterEditorViewportClient::StylusPacketToPoint(const UE:
         point.roll =     EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::RollRotation) ? iPacket.RollRotation : 1.f;
         point.yaw =      EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::YawRotation) ? iPacket.YawRotation : 1.f;
     }
+    else //If for some reason we don't have tablet context, but we still get a packet (it happens sometimes on Mac because of Mac securities), then force retrieve packet info
+    {
+        point.x = position_in_viewport.X;
+        point.y = position_in_viewport.Y;
+        point.z = iPacket.Z;
+        point.pressure = iPacket.NormalPressure;
+        point.time = iPacket.TimerTick;
+        point.altitude = iPacket.AltitudeOrientation;
+        point.azimuth = iPacket.AzimuthOrientation;
+        point.twist = iPacket.TwistOrientation;
+        point.pitch = iPacket.PitchRotation;
+        point.roll = iPacket.RollRotation;
+        point.yaw = iPacket.YawRotation;
+#if UE_BUILD_DEBUG
+        UE_LOG(LogTemp, Warning, TEXT("Warning: no tablet context found"))
+#endif
+    }
+
 
     TArray<FKey> pressedKeys = mKeysPressed;
     pressedKeys.AddUnique(FOdysseyKeyState::GetLastKey());
