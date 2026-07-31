@@ -13,6 +13,7 @@
 #include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushThumbnailRenderer.h"
 #include "OdysseyTelemetryModule.h"
+#include "OdysseyTelemetry.h"
 
 #define LOCTEXT_NAMESPACE "BrushEditor"
 
@@ -68,14 +69,64 @@ void
 FOdysseyBrushEditorModule::RegisterTelemetry()
 {
     FOdysseyTelemetryModule::Get().RegisterAssetClassToTrackForCreation( UOdysseyBrush::StaticClass() );
+
+    // GEditor and/or Subsystem may not be available directly here (in a StartupModule),
+    // so delegate it once the engine is fully loaded
+    FCoreDelegates::GetOnPostEngineInit().AddLambda( [this]()
+                                                     {
+                                                         UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+                                                         AssetEditorSubsystem->OnAssetEditorOpened().AddRaw( this, &FOdysseyBrushEditorModule::OnAssetEditorOpened );
+                                                         AssetEditorSubsystem->OnAssetClosedInEditor().AddRaw( this, &FOdysseyBrushEditorModule::OnAssetEditorClosed );
+                                                     } );
 }
 
 void
 FOdysseyBrushEditorModule::UnregisterTelemetry()
 {
+    if( GEditor )
+    {
+        UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+        AssetEditorSubsystem->OnAssetEditorOpened().RemoveAll( this );
+        AssetEditorSubsystem->OnAssetClosedInEditor().RemoveAll( this );
+    }
+
+    FCoreDelegates::GetOnPostEngineInit().RemoveAll( this );
+
     FOdysseyTelemetryModule::Get().UnregisterAssetClassToTrackForCreation( UOdysseyBrush::StaticClass() );
 }
 
+void
+FOdysseyBrushEditorModule::OnAssetEditorOpened( UObject* iObject )
+{
+    UOdysseyBrush* brush = Cast<UOdysseyBrush>( iObject );
+    if( !brush )
+        return;
+
+    UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+    IAssetEditorInstance* Editor = AssetEditorSubsystem->FindEditorForAsset( iObject, false );
+
+    SessionInfoByObject.Add( brush, { FDateTime::UtcNow(), Editor->GetEditorName() } );
+}
+
+void
+FOdysseyBrushEditorModule::OnAssetEditorClosed( UObject* iObject, IAssetEditorInstance* iAssetEditorInstance )
+{
+    UOdysseyBrush* brush = Cast<UOdysseyBrush>( iObject );
+    if( !brush )
+        return;
+
+    FSessionInfo SessionInfo = SessionInfoByObject.FindAndRemoveChecked( brush );
+
+    {
+        using FAssetEditionFields = FAssetEdition_TelemetryFields;
+
+        TArray<FAnalyticsEventAttribute> Attributes;
+        Attributes.Emplace( FAssetEditionFields::EditorName_KeyName_AsString, FString::Printf( TEXT( "%s:Brush" ), *SessionInfo.EditorName.ToString() ) );
+        Attributes.Emplace( FAssetEditionFields::SessionDuration_KeyName_AsDouble, ( FDateTime::UtcNow() - SessionInfo.SessionStartTime ).GetTotalSeconds() );
+
+        FOdysseyTelemetry::Get().RecordEvent( FAssetEditionFields::KeyName, Attributes );
+    }
+}
 
 IMPLEMENT_MODULE( FOdysseyBrushEditorModule, OdysseyBrushEditor );
 
