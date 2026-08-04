@@ -849,47 +849,43 @@ UArianeEditorTool::CanBeginClickDragSequence(const FInputDeviceRay& PressPos)
     return DummyHit;
 }
 
-FVector4
+FPlane
 UArianeEditorTool::GetDrawingPlane( FEditorViewportClient* ViewportClient, UArianeLayerDrawing* DrawingLayer )
 {
     IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
     const FTransform& LayerWorldTransform = DrawingLayer->GetComponentTransform();
     FVector LayerWorldPosition = DrawingLayer->GetComponentLocation();
-    FVector4 DrawingPlane = FVector4( 0.0f, 0.0f, 0.0f, 0.0f );
     FViewCameraState CameraState;
 
     QueriesAPI->GetCurrentViewState( CameraState );
 
     FVector CameraLocation = CameraState.Position;
     FVector CameraDirection = CameraState.Orientation.GetForwardVector();
+    FVector PlaneWorldDirection = FVector( 0.0f, 0.0f, 0.0f ) ;
 
     switch ( Editor->GetLayerDrawingOrientation( DrawingLayer ) )
     {
         case EArianeLayerDrawingOrientation::LayerXY :
-        DrawingPlane = LayerWorldTransform.TransformVector( FVector( 0.0f, 0.0f, 1.0f ) );
+        PlaneWorldDirection = LayerWorldTransform.TransformVector( FVector( 0.0f, 0.0f, 1.0f ) );
 
         break;
 
         case EArianeLayerDrawingOrientation::LayerYZ :
-        DrawingPlane = LayerWorldTransform.TransformVector( FVector( 1.0f, 0.0f, 0.0f ) );
+        PlaneWorldDirection = LayerWorldTransform.TransformVector( FVector( 1.0f, 0.0f, 0.0f ) );
 
         break;
 
         case EArianeLayerDrawingOrientation::LayerZX :
-        DrawingPlane = LayerWorldTransform.TransformVector( FVector( 0.0f, 1.0f, 0.0f ) );
+        PlaneWorldDirection = LayerWorldTransform.TransformVector( FVector( 0.0f, 1.0f, 0.0f ) );
 
         break;
 
         default : // View
-            DrawingPlane = -CameraDirection;
+            PlaneWorldDirection = -CameraDirection;
         break;
     }
 
-    DrawingPlane.W = - ( ( DrawingPlane.X * LayerWorldPosition.X )
-                       + ( DrawingPlane.Y * LayerWorldPosition.Y )
-                       + ( DrawingPlane.Z * LayerWorldPosition.Z ) );
-
-    return DrawingPlane;
+    return FPlane( LayerWorldPosition, PlaneWorldDirection );
 }
 
 // Helper function

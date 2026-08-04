@@ -231,7 +231,7 @@ protected:
      * @param ViewportClient
      * @param DrawingLayer the layer from get the plane from
      */
-    FVector4 GetDrawingPlane( FEditorViewportClient* ViewportClient, UArianeLayerDrawing* DrawingLayer );
+    FPlane GetDrawingPlane( FEditorViewportClient* ViewportClient, UArianeLayerDrawing* DrawingLayer );
 
     /**
      * @brief Get the active viewport client

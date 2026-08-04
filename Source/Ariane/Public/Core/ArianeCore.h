@@ -26,9 +26,16 @@ namespace FArianeCore
                                                   , const FVector2D& iSegmentP1
                                                   , double&         oDistance );
 
-    float ARIANE_API IntersectPlane ( const FVector4& iPlane
+    float ARIANE_API IntersectPlane ( const FPlane& iPlane
                                     , const FVector&  iOrigin
                                     , const FVector&  iDirection
                                     ,  FVector& oOut );
+
+    bool ARIANE_API IntersectSegment( const FVector2D& Line0p0
+                                    , const FVector2D& Line0p1
+                                    , const FVector2D& Line1p0
+                                    , const FVector2D& Line1p1
+                                    , double* Line0t
+                                    , double* Line1t );
 
 }

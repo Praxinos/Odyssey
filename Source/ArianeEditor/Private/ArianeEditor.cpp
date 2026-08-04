@@ -18,6 +18,8 @@
 #include "PrimitiveDrawingTool/ArianeEditorPrimitiveDrawingToolBuilder.h"
 #include "EraserTool/ArianeEditorEraserTool.h"
 #include "EraserTool/ArianeEditorEraserToolBuilder.h"
+#include "PaintBucketTool/ArianeEditorPaintBucketTool.h"
+#include "PaintBucketTool/ArianeEditorPaintBucketToolBuilder.h"
 #include "LayerTransformTool/ArianeEditorLayerTransformTool.h"
 #include "LayerTransformTool/ArianeEditorLayerTransformToolBuilder.h"
 // Ariane headers
@@ -430,6 +432,7 @@ FArianeEditor::RegisterTools()
     AddToolBuilder( NewObject<UArianeEditorPrimitiveDrawingToolBuilder>() );
     AddToolBuilder( NewObject<UArianeEditorPathEditToolBuilder>() );
     AddToolBuilder( NewObject<UArianeEditorEraserToolBuilder>() );
+    AddToolBuilder( NewObject<UArianeEditorPaintBucketToolBuilder>() );
     AddToolBuilder( NewObject<UArianeEditorLayerTransformToolBuilder>() );
 
     SetCurrentTool( Tools[0], EToolShutdownType::Accept, true );

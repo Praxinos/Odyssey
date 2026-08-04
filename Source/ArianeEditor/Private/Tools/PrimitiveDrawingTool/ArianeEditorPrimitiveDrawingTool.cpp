@@ -185,7 +185,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
             if( DrawingLayer )
             {
                 FArianeGroup* ParentGroup = GetParentGroup( DrawingLayer );
-                FVector4 DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
+                FPlane DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
                 FVector RayOrigin, RayDirection;
                 FVector IntersectAt;
                 FVector2D ViewportPosition = FVector2D( PointerState.ViewportX
@@ -304,7 +304,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseHover( FEditorViewportClient* Viewport
 
         if( DrawingLayer )
         {
-            FVector4 DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
+            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
             FVector RayOrigin, RayDirection;
             FVector IntersectAt;
             FVector2D ViewportPosition = FVector2D( ViewportClient->Viewport->GetMouseX()
@@ -372,7 +372,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDrag( FEditorViewportClient* ViewportC
             if( DrawingLayer )
             {
                 FArianeGroup* ParentGroup = GetParentGroup( DrawingLayer );
-                FVector4 DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
+                FPlane DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
                 FVector RayOrigin, RayDirection;
                 FVector IntersectAt;
                 FVector2D ViewportPosition = FVector2D( PointerState.ViewportX
