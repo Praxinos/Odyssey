@@ -36,6 +36,7 @@ struct ARIANE_API FArianeSegment
             FArianePoint* Point;
             float T;
             float Radius;
+            uint32 ID; // for indexing use only
         };
 
         struct FFraction
@@ -111,7 +112,8 @@ struct ARIANE_API FArianeSegment
         FArianeVertex* GetOtherVertex( FArianeVertex* Vertex );
 
         /** Get an array of fraction points composing the segment */
-        const TArray<FFractionStep>& GetFractionSteps();
+        const TArray<FFractionStep>& GetFractionSteps() const;
+        TArray<FFractionStep>& GetFractionSteps();
 
         /**
          * @brief Allocate FDynamicMeshVertex cache and Index cache for building a polygonal shape

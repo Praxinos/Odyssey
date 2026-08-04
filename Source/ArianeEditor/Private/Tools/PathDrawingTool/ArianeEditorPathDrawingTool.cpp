@@ -174,7 +174,7 @@ UArianeEditorPathDrawingTool::OnMouseHover( FEditorViewportClient* ViewportClien
 
         if( DrawingLayer )
         {
-            FVector4 DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
+            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
             FVector RayOrigin, RayDirection;
             FVector IntersectAt;
             FVector2D ViewportPosition = FVector2D( ViewportClient->Viewport->GetMouseX()
@@ -247,7 +247,7 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* ViewportClient
         {
             const FTransform& PathTransform = EditedPath->GetTransform();
             // note: we could do that at MouseDown
-            FVector4 DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
+            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
             FVector RayOrigin, RayDirection;
             FVector IntersectAt;
             FVector2D ViewportPosition = FVector2D( PointerState.ViewportX

@@ -106,6 +106,12 @@ FArianeSegment::GetFractions()
 }
 
 const TArray<FArianeSegment::FFractionStep>&
+FArianeSegment::GetFractionSteps() const
+{
+    return FractionSteps;
+}
+
+TArray<FArianeSegment::FFractionStep>&
 FArianeSegment::GetFractionSteps()
 {
     return FractionSteps;

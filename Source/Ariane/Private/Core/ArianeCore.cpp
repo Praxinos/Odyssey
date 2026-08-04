@@ -65,11 +65,23 @@ FArianeCore::DistanceToSegmentConstrained( const FVector2D& iPt
 }
 
 float
-FArianeCore::IntersectPlane ( const FVector4& iPlane
-                            , const FVector&  iOrigin
-                            , const FVector&  iDirection
-                            ,  FVector& oOut )
+FArianeCore::IntersectPlane ( const FPlane& iPlane
+                            , const FVector& iOrigin
+                            , const FVector& iDirection
+                            , FVector& oOut )
 {
+    if( FVector::DotProduct(iDirection, iPlane) )
+    {
+        double T = FMath::RayPlaneIntersectionParam( iOrigin, iDirection, iPlane );
+
+        oOut = iOrigin + ( iDirection * T );
+
+        return T;
+    }
+
+    return -1.0f;
+
+/* commented-out: Unreal uses Ax+By+Cz=W, hence W = -D. So we use unreal's plane API
     float vo = ( iPlane.X * iOrigin.X ) +
                ( iPlane.Y * iOrigin.Y ) +
                ( iPlane.Z * iOrigin.Z ) + iPlane.W,
@@ -92,4 +104,31 @@ FArianeCore::IntersectPlane ( const FVector4& iPlane
     }
 
     return 0.0f;
+*/
+}
+
+// https://stackoverflow.com/questions/35473936/find-whether-two-line-segments-intersect-or-not-in-c
+bool
+FArianeCore::IntersectSegment( const FVector2D& Line0p0
+                             , const FVector2D& Line0p1
+                             , const FVector2D& Line1p0
+                             , const FVector2D& Line1p1
+                             , double* Line0t
+                             , double* Line1t )
+{
+    FVector2D L0Vec   = { Line0p1.X - Line0p0.X, Line0p1.Y - Line0p0.Y };
+    FVector2D L1Vec   = { Line1p0.X - Line1p1.X, Line1p0.Y - Line1p1.Y };
+    FVector2D L0L1Vec = { Line1p0.X - Line0p0.X, Line1p0.Y - Line0p0.Y };
+
+    double Det = L0Vec.X * L1Vec.Y - L0Vec.Y * L1Vec.X;
+
+    if ( fabs(Det) == 0.0f ) return false;
+
+    double R = ( L0L1Vec.X * L1Vec.Y   - L0L1Vec.Y * L1Vec.X   ) / Det;
+    double S = (   L0Vec.X * L0L1Vec.Y -   L0Vec.Y * L0L1Vec.X ) / Det;
+
+    if( Line0t ) *Line0t = R;
+    if( Line1t ) *Line1t = S;
+
+    return !(R < 0 || R > 1 || S < 0 || S > 1);
 }
