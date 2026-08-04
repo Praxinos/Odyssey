@@ -44,6 +44,9 @@ private:
 
 private:
     void InitTransform(FViewport* InViewport);
+    void DrawCheckboard( FViewport* iViewport, FCanvas* ioCanvas );
+    void DrawVirtualTexture( FViewport* iViewport, FCanvas* ioCanvas );
+    void DrawVirtualTextureWarning( FViewport* iViewport, FCanvas* ioCanvas );
 
 private:
     // Private Data Members

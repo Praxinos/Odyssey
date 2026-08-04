@@ -10,10 +10,12 @@ FOdysseyVirtualRenderTargetProducer::~FOdysseyVirtualRenderTargetProducer()
 
 }
 
-FOdysseyVirtualRenderTargetProducer::FOdysseyVirtualRenderTargetProducer(const FName& InName, TSharedPtr<class FOdysseyVirtualRenderTargetData> InData, int32 InFirstMipToUse)
+FOdysseyVirtualRenderTargetProducer::FOdysseyVirtualRenderTargetProducer(const FName& InName, TSharedPtr<class FOdysseyVirtualRenderTargetData> InData, int32 InFirstMipToUse, const FVTProducerDescription& InProducerDesc)
     : Name(InName)
     , WeakVTData(InData)
     , FirstMipOffset(InFirstMipToUse)
+    , ProducerDesc(InProducerDesc)
+    , Finalizer(InProducerDesc)
 {
 
 }
@@ -58,8 +60,14 @@ FOdysseyVirtualRenderTargetProducer::RequestPageData(FRHICommandListBase& RHICmd
     vLevel += FirstMipOffset;
 
     //TODO: Request the tile (what does it mean ?)
+    //Here we have to load the tile's data from anywhere it's located (BulkData, DDC, or anywhere else)
+    //For example : A classical VirtualTexture might load the tile's data from DDC here and keep it in memory for later
+    //Other example : FTextureCollectionVirtualRedirector can render from another texture already on GPU, in this case
+    // it just ensures the texture is available on GPU for later use in ProducePageData
+    //
+    //So requesting page data just means "loading data from somewhere to somewhere else to be used later in ProducePageData()"
 
-    return FVTRequestPageResult();
+    return FVTRequestPageResult(EVTRequestPageStatus::Available, 0);
 }
 
 IVirtualTextureFinalizer*
@@ -79,8 +87,18 @@ FOdysseyVirtualRenderTargetProducer::ProducePageData(
     const uint32 SkipBorderSize = (Flags & EVTProducePageFlags::SkipPageBorders) != EVTProducePageFlags::None ? VTData->TileBorderSize : 0;
 
     //TODO: Produce Tile (What does it mean ?)
+    // Here we need to prepare a Finalizer
+    // The finalizer role is to copy some data at the right place on GPU
+    // Preparing the finalizer means defining what data to copy, to which target to copy it.
 
-    return nullptr;
+    UE_LOG(LogTemp, Warning, TEXT("Produce %d, %d"), vAddress, vLevel);
+
+    FOdysseyVirtualRenderTargetFinalizer::FTileEntry Tile;
+    Tile.Target = TargetLayers[0];
+    Tile.vAddress = vAddress;
+    Tile.vLevel = vLevel;
+    Finalizer.AddTile(Tile);
+    return &Finalizer;
 }
 
 void

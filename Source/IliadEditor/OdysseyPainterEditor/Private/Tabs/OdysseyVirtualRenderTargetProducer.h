@@ -6,12 +6,24 @@
 #include "CoreMinimal.h"
 #include "VirtualTexturing.h"
 
+#include "OdysseyVirtualRenderTargetFinalizer.h"
+
+/**
+ * A Finalizer is an object that does the final work of filling the physical textures.
+ * The work for all finalizers is scheduled at a specific point in the frame where we can write to the physical texture without hazards, and
+ * where the virtual texture page tables are also updated.
+ * The finalizer work may be split into two parts.
+ * RenderFinalize() does not write to the physical texture, but can read from virtual textures. This is a phase that allows any
+ * page rendering which may need to sample virtual textures. Runtime virtual textures and material systems require this.
+ * Finalise() must write to the physical textures, but cannot sample from them.
+ * All finalizers need to implement Finalize() but only ones that need to sample virtual textures need to implement RenderFinalize().
+ */
 class FOdysseyVirtualRenderTargetProducer
     : public IVirtualTexture //This is actually the base class for a Producer
 {
 public:
     virtual ~FOdysseyVirtualRenderTargetProducer();
-    FOdysseyVirtualRenderTargetProducer(const FName& InName, TSharedPtr<class FOdysseyVirtualRenderTargetData> InData, int32 FirstMipToUse);
+    FOdysseyVirtualRenderTargetProducer(const FName& InName, TSharedPtr<class FOdysseyVirtualRenderTargetData> InData, int32 FirstMipToUse, const FVTProducerDescription& InProducerDesc);
 
 public:
     // IVirtualTexture interface
@@ -33,4 +45,7 @@ private:
     FName Name;
     TWeakPtr<class FOdysseyVirtualRenderTargetData> WeakVTData;
     int32 FirstMipOffset;
+    FVTProducerDescription ProducerDesc;
+
+    FOdysseyVirtualRenderTargetFinalizer Finalizer;
 };

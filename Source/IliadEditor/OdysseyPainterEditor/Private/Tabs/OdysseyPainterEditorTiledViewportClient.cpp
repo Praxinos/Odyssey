@@ -7,6 +7,7 @@
 #include "CanvasTypes.h"
 #include "CanvasRender.h"
 #include "Engine/Texture2D.h"
+#include "Engine.h"
 #include "EngineModule.h"
 #include "ImageUtils.h"
 #include "InputKeyEventArgs.h"
@@ -48,13 +49,13 @@ FOdysseyPainterEditorTiledViewportClient::FOdysseyPainterEditorTiledViewportClie
     mCheckerboardTexture = FImageUtils::CreateCheckerboardTexture( settings.GetCheckerColorOne(), settings.GetCheckerColorTwo(), settings.GetCheckerSize() );
 
     RenderTargetData->NumLayers = 1;
-    RenderTargetData->NumMips = 1;
-    RenderTargetData->Width = 256;
-    RenderTargetData->Height = 256;
+    RenderTargetData->Width = 8192;
+    RenderTargetData->Height = 8192;
+    RenderTargetData->NumMips = FMath::CeilLogTwo(FMath::Max(RenderTargetData->Width, RenderTargetData->Height));
     RenderTargetData->WidthInBlocks = 1;
     RenderTargetData->HeightInBlocks = 1;
     RenderTargetData->TileSize = 256;
-    RenderTargetData->TileBorderSize = 0; // A BorderSize pixel border will be added around all tiles
+    RenderTargetData->TileBorderSize = 0; // A B orderSize pixel border will be added around all tiles
 
     for (uint32 i = 0; i < RenderTargetData->NumLayers; i++)
     {
@@ -89,16 +90,10 @@ FOdysseyPainterEditorTiledViewportClient::FOdysseyPainterEditorTiledViewportClie
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------ Draw Viewport
+
 void
-FOdysseyPainterEditorTiledViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
+FOdysseyPainterEditorTiledViewportClient::DrawCheckboard( FViewport* iViewport, FCanvas* ioCanvas )
 {
-    if (!mTranformInitialized)
-        InitTransform(iViewport);
-
-    const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
-    ioCanvas->Clear(settings.GetBackgroundColor());
-    ioCanvas->PushRelativeTransform(mTransform); //
-
     // Draw background Checker
     if (mCheckerboardTexture)
     {
@@ -113,154 +108,151 @@ FOdysseyPainterEditorTiledViewportClient::Draw( FViewport* iViewport, FCanvas* i
         tileItem.BlendMode = SE_BLEND_Opaque;
         ioCanvas->DrawItem( tileItem );
     }
+}
 
-    bool bSingleVTPhysicalSpace = false;
-    bool bIsVirtualTexture = true;
-    float XPos = 0;
-    float YPos = 0;
-    float Width = RenderTargetResource.GetSizeX();
-    float Height = RenderTargetResource.GetSizeY();
-    FVector2D ViewportSize = FVector2D(iViewport->GetSizeXY());
-    int32 MipLevel = 0;
+void
+FOdysseyPainterEditorTiledViewportClient::DrawVirtualTexture( FViewport* iViewport, FCanvas* ioCanvas )
+{
+    const FVector scaleVector = mTransform.GetScaleVector();
+    int32 MipLevel = FMath::CeilToInt(FMath::Max(1.0f, -FMath::Log2(scaleVector.X))) - 1.0f;
+
+    UE_LOG(LogTemp, Warning, TEXT("===================="));
+    UE_LOG(LogTemp, Warning, TEXT("MipLevel=%d"), MipLevel);
+    UE_LOG(LogTemp, Warning, TEXT("Zoom=%.2f %% "), scaleVector.X * 100.f);
+
+    FOdysseyVirtualRenderTargetResource* RenderTargetResourcePtr = &RenderTargetResource;
+    FVector2D TextureSize(RenderTargetResource.GetSizeX(), RenderTargetResource.GetSizeY());
+    FVector2D ScaledTextureSize = TextureSize * scaleVector.X;
+    FVector2D ViewportSize(iViewport->GetSizeXY());
 
     TRefCountPtr<FBatchedElementParameters> BatchedElementParameters = new FBatchedElementTexture2DPreviewParameters(MipLevel, 0, 0, false, false, false, true, false, false);
 
-    FOdysseyVirtualRenderTargetResource* RenderTargetResourcePtr = &RenderTargetResource;
-    //if ( Texture->GetResource() != nullptr && !CPUCopyTexture )
+    FMatrix inverseTransform = mTransform.Inverse();
+
+    FVector ViewportTopLeft = inverseTransform.TransformPosition(FVector(0.0f, 0.0f, 0.f));
+    FVector ViewportTopRight = inverseTransform.TransformPosition(FVector(ViewportSize.X, 0.f, 0.f));
+    FVector ViewportBottomLeft = inverseTransform.TransformPosition(FVector(0.f, ViewportSize.Y, 0.f));
+    FVector ViewportBottomRight = inverseTransform.TransformPosition(FVector(ViewportSize.X, ViewportSize.Y, 0.f));
+
+    FBox2D TransformedViewportBoundingBox(
+        FVector2D(
+            FMath::Min(ViewportTopLeft.X, ViewportTopRight.X, ViewportBottomLeft.X, ViewportBottomRight.X) * scaleVector.X,
+            FMath::Min(ViewportTopLeft.Y, ViewportTopRight.Y, ViewportBottomLeft.Y, ViewportBottomRight.Y) * scaleVector.Y
+        ),
+        FVector2D(
+            FMath::Max(ViewportTopLeft.X, ViewportTopRight.X, ViewportBottomLeft.X, ViewportBottomRight.X) * scaleVector.X,
+            FMath::Max(ViewportTopLeft.Y, ViewportTopRight.Y, ViewportBottomLeft.Y, ViewportBottomRight.Y) * scaleVector.Y
+        )
+    );
+
+    FVector2D TransformedViewportBoundingBoxSize = TransformedViewportBoundingBox.Max - TransformedViewportBoundingBox.Min;
+    FBox2D ScaledTextureBoundingBox( FVector2D::Zero(), ScaledTextureSize);
+    FBox2D BoundingBoxToLoad = TransformedViewportBoundingBox.Overlap( ScaledTextureBoundingBox );
+    const FVector2D UV0 = FVector2D(BoundingBoxToLoad.Min.X / ScaledTextureSize.X, BoundingBoxToLoad.Min.Y / ScaledTextureSize.Y);
+    const FVector2D UV1 = FVector2D(BoundingBoxToLoad.Max.X / ScaledTextureSize.X, BoundingBoxToLoad.Max.Y / ScaledTextureSize.Y);
+    const FVector2D TexturePositionInTransformedViewport = -TransformedViewportBoundingBox.Min;
+
+    UE::RenderCommandPipe::FSyncScope SyncScope;
+
+    const ERHIFeatureLevel::Type InFeatureLevel = GMaxRHIFeatureLevel;
+    ENQUEUE_RENDER_COMMAND(MakeTilesResident)(
+        [InFeatureLevel, RenderTargetResourcePtr, ScaledTextureSize, TexturePositionInTransformedViewport, TransformedViewportBoundingBoxSize, UV0, UV1, MipLevel](FRHICommandListImmediate& RHICmdList)
     {
-        FCanvasTileItem TileItem( FVector2D( XPos, YPos ), RenderTargetResourcePtr, FVector2D( Width, Height ), FLinearColor::White );
+        // AcquireAllocatedVT() must happen on render thread
+        IAllocatedVirtualTexture* AllocatedVT = RenderTargetResourcePtr->AcquireAllocatedVT();
 
-        // Add the red, green, blue, alpha and desaturation flags to the enum to identify the chosen filters
-        uint32 BlendMode = (uint32)SE_BLEND_RGBA_MASK_START;
-        BlendMode += 1 << 0;
-        BlendMode += 1 << 1;
-        BlendMode += 1 << 2;
-        BlendMode += 1 << 3;
-        TileItem.BlendMode = (ESimpleElementBlendMode)BlendMode;
+        IRendererModule& RenderModule = GetRendererModule();
+        RenderModule.RequestVirtualTextureTiles(AllocatedVT, ScaledTextureSize, TexturePositionInTransformedViewport, TransformedViewportBoundingBoxSize, FVector2D(0, 0), FVector2D(1, 1), MipLevel);
+        RenderModule.LoadPendingVirtualTextureTiles(RHICmdList, InFeatureLevel);
+    });
 
-        TileItem.BatchedElementParameters = BatchedElementParameters;
+    FCanvasTileItem TileItem( FVector2D(0, 0), RenderTargetResourcePtr, TextureSize, FVector2D(0.f, 0.f), FVector2D(1.f, 1.f), FLinearColor::White );
 
-        if (bIsVirtualTexture && RenderTargetResource.GetNumBlocks() > 1)
+    // Add the red, green, blue, alpha and desaturation flags to the enum to identify the chosen filters
+    uint32 BlendMode = (uint32)SE_BLEND_RGBA_MASK_START;
+    BlendMode += 1 << 0;
+    BlendMode += 1 << 1;
+    BlendMode += 1 << 2;
+    BlendMode += 1 << 3;
+    TileItem.BlendMode = (ESimpleElementBlendMode)BlendMode;
+
+    TileItem.BatchedElementParameters = BatchedElementParameters;
+
+    if (RenderTargetResource.GetNumBlocks() > 1)
+    {
+        // Adjust UVs to display entire UDIM range, accounting for UE inverted V-axis
+        const FIntPoint BlockSize = RenderTargetResource.GetSizeInBlocks();
+        TileItem.UV0 = FVector2D(0.0f, 1.0f - (float)BlockSize.Y);
+        TileItem.UV1 = FVector2D((float)BlockSize.X, 1.0f);
+    }
+
+    ioCanvas->DrawItem( TileItem );
+}
+
+void
+FOdysseyPainterEditorTiledViewportClient::DrawVirtualTextureWarning( FViewport* iViewport, FCanvas* ioCanvas )
+{
+    UFont* ReportingFont = GEngine->GetLargeFont();
+    constexpr double ReportingLineSpacing = 2;
+    double ReportingLineX = 8;
+    double ReportingLineY = 8;
+    float FontScale = 1.f;
+    FSlateFontInfo FontInfo(ReportingFont, ReportingFont->LegacyFontSize);
+
+    auto DrawText = [&FontInfo, &ioCanvas, &FontScale](const double LineX, const double LineY, const FText& InText, const FLinearColor& InColor)->FVector2D
+    {
+        const FVector2D InPosition(LineX, LineY);
+        FCanvasTextItem TextItem(InPosition, InText, FontInfo, InColor);
+        TextItem.Scale = FVector2D(FontScale);
+        ioCanvas->DrawItem(TextItem);
+        return TextItem.DrawnSize;
+    };
+
+    checkf(ReportingFont, TEXT("Texture Editor : Engine large font must be set"));
+
+    // If we are requesting an explicit mip level of a VT asset, test to see if we can even display it properly and warn about it
+    const FVector scaleVector = mTransform.GetScaleVector();
+    int32 MipLevel = FMath::CeilLogTwo(1/scaleVector.X);
+    MipLevel = FMath::Max(0, MipLevel);
+    if (MipLevel >= 0.f)
+    {
+        const uint32 Mip = (uint32)MipLevel;
+        const FIntPoint SizeOnMip = { (int32)RenderTargetResource.GetSizeX() >> Mip, (int32)RenderTargetResource.GetSizeY() >> Mip };
+        const uint64 NumPixels = static_cast<uint64>(SizeOnMip.X) * SizeOnMip.Y;
+
+        const FIntPoint PhysicalTextureSize = RenderTargetResource.GetPhysicalTextureSize(0u);
+        const uint64 NumPhysicalPixels = static_cast<uint64>(PhysicalTextureSize.X) * PhysicalTextureSize.Y;
+
+        if (NumPixels >= NumPhysicalPixels)
         {
-            // Adjust UVs to display entire UDIM range, accounting for UE inverted V-axis
-            const FIntPoint BlockSize = RenderTargetResource.GetSizeInBlocks();
-            TileItem.UV0 = FVector2D(0.0f, 1.0f - (float)BlockSize.Y);
-            TileItem.UV1 = FVector2D((float)BlockSize.X, 1.0f);
-        }
-
-        ioCanvas->DrawItem( TileItem );
-
-        // if we are presenting a virtual texture, make the appropriate tiles resident
-        if (bIsVirtualTexture)
-        {
-            const FVector2D ScreenSpaceSize(Width, Height);
-            const FVector2D ViewportPositon(XPos, YPos);
-            const FVector2D UV0 = TileItem.UV0;
-            const FVector2D UV1 = TileItem.UV1;
-
-            UE::RenderCommandPipe::FSyncScope SyncScope;
-
-            const ERHIFeatureLevel::Type InFeatureLevel = GMaxRHIFeatureLevel;
-            ENQUEUE_RENDER_COMMAND(MakeTilesResident)(
-                [InFeatureLevel, RenderTargetResourcePtr, ScreenSpaceSize, ViewportPositon, ViewportSize, UV0, UV1, MipLevel](FRHICommandListImmediate& RHICmdList)
-            {
-                // AcquireAllocatedVT() must happen on render thread
-                IAllocatedVirtualTexture* AllocatedVT = RenderTargetResourcePtr->AcquireAllocatedVT();
-
-                IRendererModule& RenderModule = GetRendererModule();
-                RenderModule.RequestVirtualTextureTiles(AllocatedVT, ScreenSpaceSize, ViewportPositon, ViewportSize, UV0, UV1, MipLevel);
-                RenderModule.LoadPendingVirtualTextureTiles(RHICmdList, InFeatureLevel);
-            });
+            const FText Message = NSLOCTEXT("OdysseyTextureEditor", "InvalidVirtualTextureMipDisplay", "Displaying a virtual texture on a mip level that is larger than the physical cache. Rendering will probably be invalid!");
+            DrawText(ReportingLineX, ReportingLineY, Message, FLinearColor::Red);
+            //ReportingLineY += ReportingLineHeight;
         }
     }
+}
+
+void
+FOdysseyPainterEditorTiledViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
+{
+    if (!mTranformInitialized)
+        InitTransform(iViewport);
+
+    const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
+    ioCanvas->Clear(settings.GetBackgroundColor());
+    ioCanvas->PushRelativeTransform(mTransform); //
+
+    DrawCheckboard(iViewport, ioCanvas);
+
+    bool bIsVirtualTexture = true;
+    if (bIsVirtualTexture)
+        DrawVirtualTexture(iViewport, ioCanvas);
 
     ioCanvas->PopTransform();
 
-    //Draws the checkerBoard
-    //After this line we can draw directly in the Canvas RenderTarget
+    DrawVirtualTextureWarning(iViewport, ioCanvas);
+
     ioCanvas->Flush_GameThread();
-
-    /* IOdysseyTextureRenderingAbility::FRenderFunction renderFunction;
-
-    if (mTextureRenderer && mTextureRenderer->BuildRenderPipeline(FFrameNumber(0),EOdysseyRenderingType::Editor,renderFunction))
-    {
-        FIntRect srcRect = mTextureRenderer->GetDefaultRenderRect();
-
-        ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(
-            [this, srcRect, renderFunction, canvasRenderTarget = ioCanvas->GetRenderTarget()](FRHICommandListImmediate& RHICmdList)
-            {
-                FRDGBuilder graphBuilder(RHICmdList);
-
-                FRDGTextureRef canvasTexture = canvasRenderTarget->GetRenderTargetTexture( graphBuilder );
-                FRDGTextureDesc renderTextureDesc = FRDGTextureDesc::Create2D(
-                    //canvasTexture->Desc.Extent,
-                    srcRect.Size(),
-                    //canvasTexture->Desc.Format,
-                    PF_B8G8R8A8,
-                    FClearValueBinding::Transparent,
-                    ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
-                );
-                FRDGTextureRef renderTexture = graphBuilder.CreateTexture( renderTextureDesc, TEXT( "FOdysseyPainterEditorTiledViewportClient::RenderTexture" ) );
-
-                FIntRect canvasRect(0, 0, canvasTexture->Desc.Extent.X, canvasTexture->Desc.Extent.Y);
-
-                renderFunction(
-                    graphBuilder,
-                    GMaxRHIFeatureLevel,
-                    renderTexture,
-                    srcRect,
-                    srcRect,
-                    FMatrix::Identity
-                );
-
-                FOdysseyBlendShader::BlendRect(
-                    graphBuilder,
-                    GMaxRHIFeatureLevel,
-                    canvasTexture,
-                    renderTexture,
-                    canvasTexture,
-                    canvasRect,
-                    canvasRect,
-                    mTransform,
-                    EOdysseyBlendingMode::kNormal,
-                    EOdysseyAlphaMode::kNormal,
-                    1.f,
-                    EOdysseyAntiAliasing::NearestNeighbor
-                );
-
-                graphBuilder.Execute();
-            }
-        );
-    } */
-
-    /* if (mTexture && mTexture->GetResource())
-    {
-        float width = mTexture->GetSurfaceWidth();
-        float height = mTexture->GetSurfaceHeight();
-
-        mNearestNeighborTexture->TextureRHI = mTexture->GetResource()->TextureRHI;
-        mBilinearTexture->TextureRHI = mTexture->GetResource()->TextureRHI;
-        FTexture* tileTexture = GetZoom() <= 1.5 ? mBilinearTexture.Get() : mNearestNeighborTexture.Get();
-
-        //TileItem
-        FCanvasTileItem tileItem(
-            FVector2D( 0, 0 ),
-            tileTexture,
-            FVector2D(width, height),
-            FVector2D(0, 0),
-            FVector2D( 1.f, 1.f ),
-            FLinearColor::White
-        );
-        uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
-        result += ( 1 << 0 );
-        result += ( 1 << 1 );
-        result += ( 1 << 2 );
-        result += ( 1 << 3 );
-        tileItem.BlendMode = (ESimpleElementBlendMode)result;
-        ioCanvas->DrawItem( tileItem );
-    } */
-
-
 }
 
 float

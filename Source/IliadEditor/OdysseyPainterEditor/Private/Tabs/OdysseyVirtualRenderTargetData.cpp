@@ -56,7 +56,7 @@ void FOdysseyVirtualRenderTargetTileOffsetData::Finalize()
 
 uint32 FOdysseyVirtualRenderTargetTileOffsetData::GetTileOffset(uint32 InAddress) const
 {
-    const int32 BlockIndex = Algo::UpperBound(Addresses, InAddress) - 1;
+    /* const int32 BlockIndex = Algo::UpperBound(Addresses, InAddress) - 1;
     const uint32 BaseOffset = Offsets[BlockIndex];
     if (BaseOffset == ~0u)
     {
@@ -65,12 +65,14 @@ uint32 FOdysseyVirtualRenderTargetTileOffsetData::GetTileOffset(uint32 InAddress
     }
     const uint32 BaseAddress = Addresses[BlockIndex];
     const uint32 LocalOffset = InAddress - BaseAddress;
-    return BaseOffset + LocalOffset;
+    return BaseOffset + LocalOffset; */
+
+    return 0;
 }
 
 bool FOdysseyVirtualRenderTargetData::IsValidAddress(uint32 vLevel, uint32 vAddress)
 {
-    bool bIsValid = false;
+    /* bool bIsValid = false;
 
     if (TileOffsetData.IsValidIndex(vLevel))
     {
@@ -79,13 +81,15 @@ bool FOdysseyVirtualRenderTargetData::IsValidAddress(uint32 vLevel, uint32 vAddr
         bIsValid = X < TileOffsetData[vLevel].Width && Y < TileOffsetData[vLevel].Height;
     }
 
-    return bIsValid;
+    return bIsValid; */
+
+    return true;
 }
 
 
 uint32 FOdysseyVirtualRenderTargetData::GetTileOffset(uint32 vLevel, uint32 vAddress, uint32 LayerIndex) const
 {
-    uint32 Offset = ~0u;
+    /* uint32 Offset = ~0u;
 
     if (BaseOffsetPerMip.IsValidIndex(vLevel) && TileOffsetData.IsValidIndex(vLevel))
     {
@@ -102,5 +106,6 @@ uint32 FOdysseyVirtualRenderTargetData::GetTileOffset(uint32 vLevel, uint32 vAdd
         }
     }
 
-    return Offset;
+    return Offset; */
+    return 0;
 }

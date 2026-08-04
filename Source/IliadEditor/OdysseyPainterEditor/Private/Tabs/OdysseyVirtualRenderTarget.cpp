@@ -120,7 +120,7 @@ FOdysseyVirtualRenderTargetResource::InitRHI(FRHICommandListBase& RHICmdList)
     ProducerDesc.Priority = VirtualTextureStreamingPriority;
 
     //FUploadingVirtualTexture* VirtualTexture = new FUploadingVirtualTexture(ProducerDesc.Name, VTData, FirstMipToUse);
-    FOdysseyVirtualRenderTargetProducer* Producer = new FOdysseyVirtualRenderTargetProducer(ProducerDesc.Name, VTData, FirstMipToUse);
+    FOdysseyVirtualRenderTargetProducer* Producer = new FOdysseyVirtualRenderTargetProducer(ProducerDesc.Name, VTData, FirstMipToUse, ProducerDesc);
     ProducerHandle = GetRendererModule().RegisterVirtualTextureProducer(RHICmdList, ProducerDesc, Producer);
 
     // Only create the miptails mini-texture in-editor.
