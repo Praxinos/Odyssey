@@ -7,8 +7,10 @@
 #include "ScreenPass.h"
 #include "TextureCompiler.h"
 #include "TextureResource.h"
-#include "OdysseyTextureLayerStack.h"
+
 #include "OdysseyBlendShader.h"
+#include "OdysseyTextureLayerStack.h"
+#include "OdysseyTexture2DUtils.h"
 
 UTexture2D*
 UOdysseyTextureLayer::GetTexture() const
@@ -46,6 +48,35 @@ UOdysseyTextureLayer::PostLoad()
         Texture->SRGB = false;
         Texture->PostEditChange();
     }
+
+    UpdateTextureSize();
+}
+
+void
+UOdysseyTextureLayer::UpdateTextureSize()
+{
+    if (!Texture)
+        return;
+
+    FIntRect rect = GetDefaultRenderRect();
+
+    uint32 layerWidth = rect.Width();
+    uint32 layerHeight = rect.Height();
+
+    uint32 textureWidth = Texture->Source.GetSizeX();
+    uint32 textureHeight = Texture->Source.GetSizeY();
+    if ( textureWidth != layerWidth || textureHeight != layerHeight)
+    {
+        Odyssey::ResizeTexture2D(Texture, layerWidth, layerHeight);
+    }
+}
+
+void
+UOdysseyTextureLayer::PostDuplicate( EDuplicateMode::Type iDuplicateMode ) //override
+{
+    Super::PostDuplicate( iDuplicateMode );
+
+    UpdateTextureSize();
 }
 
 void

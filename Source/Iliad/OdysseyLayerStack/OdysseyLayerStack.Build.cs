@@ -56,10 +56,12 @@ public class OdysseyLayerStack : ModuleRules
         PrivateDependencyModuleNames.AddRange(
             new string[] {
                 "CoreUObject",
+                "ImageCore",
                 "RenderCore",
                 "Renderer",
                 "RHI",
                 "TypedElementRuntime",
+                "OdysseyCore",
                 "OdysseyMedia",
                 "OdysseyRendering",
             }

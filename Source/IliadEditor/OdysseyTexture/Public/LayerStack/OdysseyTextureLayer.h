@@ -24,6 +24,7 @@ public:
 
 public:
     virtual void PostLoad() override;
+    virtual void PostDuplicate( EDuplicateMode::Type iDuplicateMode ) override;
 
 public:
     virtual void InitTexture();
@@ -37,6 +38,9 @@ public:
     FSimpleMulticastDelegate& OnThumbnailChanged();
     FSimpleMulticastDelegate& OnThumbnailDirtied();
 #endif
+
+private:
+    void UpdateTextureSize();
 
 private:
     UPROPERTY(NonTransactional)
