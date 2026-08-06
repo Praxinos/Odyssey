@@ -173,6 +173,9 @@ private:
     void OutOfPegsChanged(bool iIsInteractive);
 #endif
 
+private:
+    void UpdateTextureSize();
+
 public: //Public needed for the shortcuts
     UPROPERTY()//TODO: meta (minvalue 1)
     int Exposure = 1;

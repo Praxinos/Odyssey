@@ -2,14 +2,17 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyLayerCell.h"
-#include "OdysseyLayerCellImport.h"
-#include "OdysseyLayer.h"
+
+#include "Engine/Texture2D.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "ScreenPass.h"
 #include "TextureCompiler.h"
 #include "TextureResource.h"
-#include "Engine/Texture2D.h"
+
 #include "OdysseyBlendShader.h"
+#include "OdysseyLayer.h"
+#include "OdysseyLayerCellImport.h"
+#include "OdysseyTexture2DUtils.h"
 
 void
 UOdysseyLayerCell::PostInitProperties() //override
@@ -29,12 +32,34 @@ UOdysseyLayerCell::PostLoad() //override
         Mark_DEPRECATED = -1;
     }
 #endif
+    UpdateTextureSize();
+}
+
+void
+UOdysseyLayerCell::UpdateTextureSize()
+{
+    if (!Texture)
+        return;
+
+    FIntRect rect = GetDefaultRenderRect();
+
+    uint32 layerWidth = rect.Width();
+    uint32 layerHeight = rect.Height();
+
+    uint32 textureWidth = Texture->Source.GetSizeX();
+    uint32 textureHeight = Texture->Source.GetSizeY();
+    if ( textureWidth != layerWidth || textureHeight != layerHeight)
+    {
+        Odyssey::ResizeTexture2D(Texture, layerWidth, layerHeight);
+    }
 }
 
 void
 UOdysseyLayerCell::PostDuplicate( EDuplicateMode::Type iDuplicateMode ) //override
 {
     Super::PostDuplicate( iDuplicateMode );
+
+    UpdateTextureSize();
 }
 
 //---

@@ -36,6 +36,7 @@ public class OdysseyCore : ModuleRules
                 "Core",
                 "CoreUObject",
                 "Engine",
+                "ImageCore",
                 "InputCore",
                 "SlateCore",
                 "Slate"
