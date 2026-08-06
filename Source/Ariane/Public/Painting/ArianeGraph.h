@@ -7,6 +7,8 @@
 #include "CoreMinimal.h"
 #include "Math/Vector2D.h"
 // Ariane
+// Blend2D
+#include <blend2d.h>
 
 struct FArianeObject;
 struct FArianePoint;
@@ -17,9 +19,34 @@ class ARIANE_API FArianeGraph
     struct FSection;
     struct FEdge;
     struct FNode;
+    struct FCycle;
+
+    struct FSectionLinkInfo
+    {
+        FSection* Section;
+        uint32 SectionNodeIndex;
+
+        // copy constructor
+        FSectionLinkInfo( const FSectionLinkInfo& SectionLinkInfo )
+        {
+            this->Section          = SectionLinkInfo.Section;
+            this->SectionNodeIndex = SectionLinkInfo.SectionNodeIndex;
+        }
+
+        FSectionLinkInfo( FSection* InSection, uint32 InSectionNodeIndex )
+        {
+            Section = InSection;
+            SectionNodeIndex = InSectionNodeIndex;
+        }
+
+       FVector2D GetVector();
+    };
 
     struct FPoint
     {
+        static uint32 StaticClass(){ return 0x336f5643; }; // crc32 FArianeGraph::FPoint
+        virtual uint32 GetClass(){ return StaticClass(); };
+
         FPoint( const FVector2D& InPosition, bool bProjected, const FVector& InOriginalPosition );
 
         FVector2D Position;
@@ -30,9 +57,18 @@ class ARIANE_API FArianeGraph
     // a node represents a vertex or a segment's fraction point
     struct FNode : public FPoint
     {
-        FNode( const FVector2D& InPosition, bool bProjected, const FVector& InOriginalPosition );
+        static uint32 StaticClass(){ return  0xf19b5156; }; // crc32 FArianeGraph::FNode
+        virtual uint32 GetClass() override { return StaticClass(); };
 
-        TArray<FSection*> Sections;
+        FNode( const FVector2D& InPosition, bool bProjected, const FVector& InOriginalPosition );
+        void AddSection( FSection* Section, uint32 SectionNodeIndex );
+        void RemoveSection( FSection* Section, uint32 SectionNodeIndex );
+        FSection* GetSection( FEdge* Edge );
+        FEdge *GetOtherEdge( FEdge* Edge );
+        int32 GetIndex( FEdge* Edge );
+
+        TArray<FSectionLinkInfo> SectionLinkInfos;
+        FEdge* Edges[2];
         uint32 EdgeCount;
     };
 
@@ -46,6 +82,9 @@ class ARIANE_API FArianeGraph
 
     struct FNodeIntersection : public FNode
     {
+        static uint32 StaticClass(){ return 0xb1317d8a; }; // crc32 FArianeGraph::FNodeIntersection
+        virtual uint32 GetClass() override { return StaticClass(); };
+
         // small temporary structure will allow us to alloc the intersection vertices in one go.
         // for X-Junction
         struct XRecord
@@ -89,20 +128,63 @@ class ARIANE_API FArianeGraph
     // and edge represents a segment
     struct FEdge
     {
+        virtual uint32 GetClass() = 0;
+
         FEdge( FNode* InNode0
              , FNode* InNode1
-             , FFraction* InFractions );
+             , uint32 InFractionCount
+             , FFraction* InFractions
+             , double InLength );
+        FNode* GetOtherNode( FNode* Node );
 
-        FVector GetOriginalPosition( float T );
+        virtual FVector GetOriginalPosition( float T ) = 0;
+        void CreateSections( TArray<FSection>& SectionBuffer
+                           , bool bStitchShortSections
+                           , TArray<FSection*>& ShortSections );
 
-        FArianeSegment* Segment;
+        //FArianeSegment* Segment;
 
         FNode* Nodes[2];
         FFraction* Fractions;
         uint32 FractionCount;
-        uint32 IntersectionSlot;
+        uint32 IntersectionSlotCount;
         TArray<FIntersection*> Intersections;
+        //FSection* Sections;
+        //uint32 SectionCount;
         FBox2D BBox;
+        double Length;
+    };
+
+    struct FEdgeLinear : FEdge
+    {
+        static uint32 StaticClass(){ return  0xffabad9f; }; // crc32 FArianeGraph::FEdgeLinear
+        virtual uint32 GetClass() override { return StaticClass(); };
+
+        FEdgeLinear( FNode* InNode0
+                   , FNode* InNode1
+                   , FFraction* InFractions );
+
+        virtual FVector GetOriginalPosition( float T ) override;
+    };
+
+    struct FEdgeCubic : FEdge
+    {
+        static uint32 StaticClass(){ return 0x7893373f; }; // crc32 FArianeGraph::FEdgeCubic
+        virtual uint32 GetClass() override { return StaticClass(); };
+
+        FEdgeCubic( FNode* InNode0
+                  , const FVector2D& Handle0Position
+                  , const FVector& OriginalHandle0Position
+                  , const FVector2D& Handle1Position
+                  , const FVector& OriginalHandle1Position
+                  , FNode* InNode1
+                  , uint32 InFractionCount
+                  , FFraction* InFractions );
+
+        virtual FVector GetOriginalPosition( float T ) override;
+
+        FVector2D Bezier[4];
+        FVector OriginalHandlePosition[2];
     };
 
 /* Later
@@ -117,8 +199,145 @@ class ARIANE_API FArianeGraph
 
     struct FSection
     {
-        int dummy;
+        static uint32 StaticClass(){ return 0xa1735422; }; // crc32 FArianeGraph::FSection
+        virtual uint32 GetClass() = 0;
+
+       /**
+         * @brief constructor
+         * @param InEdge the segment it belongs to
+         * @param InNode0 end point 0
+         * @param InNode1 end point 1
+         */
+        FSection( FEdge* InEdge
+                , FNode* InNode0
+                , FNode* InNode1
+                , double InEdgeT0
+                , double InEdgeT1 );
+       /**
+         * @brief Get the node at the other end.
+         * @param Node node at this end.
+         * return a pointer to the node at the other end.
+         */
+        FNode* GetOtherNode( FNode* Node );
+
+       /**
+         * @brief Block the section for traversal from the node index passed as parameter.
+         * @param NodeIndex
+         */
+        void UnBlock( uint32 NodeIndex );
+
+       /**
+         * @brief Unblock the section for traversal from the node index passed as parameter.
+         * @param NodeIndex
+         */
+        void Block( uint32 NodeIndex );
+
+       /**
+         * @brief Check the blocking status of this section from the node passed as parameter.
+         * @param NodeIndex
+         * @return true or false
+         */
+        bool IsBlocked( uint32 NodeIndex );
+
+        FVector2D GetVector( uint32 NodeIndex );
+
+        virtual FVector2D GetPointAt( double t ) = 0;
+        virtual FVector2D GetTangentAt( double t, bool iNormalize ) = 0;
+
+        bool IsLinked();
+        void Link();
+        void Unlink( bool bRestore  );
+        FCycle* GetCycle( uint32 CycleID );
+        void AddCycle( FCycle* Cycle );
+        FCycle* GetOtherCycle( FCycle* iCycle );
+        bool HasCycle( FCycle* iCycle );
+        void SetErased( bool iErased );
+        bool IsErased();
+        double GetLength();
+        bool IsValid();
+        double GetT( uint32 Index );
+        void Merge( uint32 PartnerID );
+        void Stitch();
+        FEdge* GetEdge();
+        double GetEdgeT( uint32 Index );
+
+       /**
+         * @brief Get a vector tangent to this section, starting at this node.
+         * @param NodeIndex index the node (0 or 1)
+         * @param bStraight
+         * @param bNormalize normalize the vector or not
+         * return a vector tangent to this section, starting at this node.
+         */
+        //virtual FVector2D GetVectorFromNode( uint32 NodeIndex, bool bStraight, bool bNormalize ) = 0;
+
+        double GetSegmentT( uint32 iIndex );
+        void Print();
+        void LinkWithoutStitching();
+        void UnlinkWithoutStitching();
+        //bool IsGap();
+
+    //protected:
+        FEdge* Edge;
+        FNode* Nodes[2];
+        // These are the nodes before stitching.
+        // Used by the eraser tool in "section mode"
+        FNode* OriginalNodes[2];
+        uint32 Flags;
+        uint32 CycleCount;
+        FCycle* Cycles[2]; // there are 2 cycles per section at most. No need for a complicated container.
+        double Length;
+        double EdgeT[2];
+        // vectors at endpoint;
+        FVector2D Vector[2];
+
+    //private:
+        static const uint32 BLOCKNODE0 = ( 1 << 0 );
+        static const uint32 BLOCKNODE1 = ( 1 << 1 );
+        static const uint32 LINKED     = ( 1 << 2 );
+        static const uint32 ERASED     = ( 1 << 3 );
+        static const uint32 GAP        = ( 1 << 4 );
     };
+
+    struct FSectionLinear : public FSection
+    {
+        static uint32 StaticClass(){ return 0x2cb54896; }; // crc32 FArianeGraph::FSectionLinear
+        virtual uint32 GetClass() override { return StaticClass(); };
+
+        FSectionLinear( FEdge* InEdge
+                      , FNode* InNode0
+                      , FNode* InNode1
+                      , double InEdgeT0
+                      , double InEdgeT1
+                      , bool bStitchShortSections
+                      , TArray<FSection*>& OutShortSections );
+
+        //virtual FVector2D GetVectorFromNode( uint32 NodeIndex, bool bStraight, bool bNormalize ) override;
+        virtual FVector2D GetPointAt( double t ) override;
+        virtual FVector2D GetTangentAt( double t, bool iNormalize ) override;
+    };
+
+    struct FSectionCubic : public FSection
+    {
+        static uint32 StaticClass(){ return 0xb082c558; }; // crc32 FArianeGraph::FSectionCubic
+        virtual uint32 GetClass() override { return StaticClass(); };
+
+        FSectionCubic( FEdgeCubic* InCubicEdge
+                     , FNode* InNode0
+                     , FNode* InNode1
+                     , double InEdgeT0
+                     , double InEdgeT1
+                     , bool bStitchShortSections
+                     , TArray<FSection*>& OutShortSections );
+
+        //virtual FVector2D GetVectorFromNode( uint32 NodeIndex, bool bStraight, bool bNormalize ) override;
+        virtual FVector2D GetPointAt( double t ) override;
+        virtual FVector2D GetTangentAt( double t, bool iNormalize ) override;
+
+        FVector2D* GetBezier();
+        FVector2D Bezier[4];
+    };
+
+
 
 /* Later
     struct FSectionCubic : public FSectionCubic
@@ -128,12 +347,146 @@ class ARIANE_API FArianeGraph
 
     struct FPath
     {
-        FPath( uint32 InNodeCount, FNode* InNodes, uint32 InEdgeCount, FEdge* InEdges );
+        FPath( uint32 InNodeCount
+             , FNode* InNodes
+             , uint32 InLinearEdgeCount
+             , uint32 InCubicEdgeCount
+             , FEdge** InEdges );
 
+        void ToNodeIndicesAndSections( TArray<uint32>& OutNodeIndices
+                                     , TArray<FSection*>& OutSections );
+        bool IsLoop();
+        uint32 GetEdgeCount();
+
+        bool bSectionnable;
+        bool bHasIntersections;
         uint32 NodeCount;
         FNode* Nodes; // we dont use TArray, for performance reasons
-        uint32 EdgeCount;
-        FEdge* Edges; // we dont use TArray, for performance reasons
+        uint32 LinearEdgeCount;
+        uint32 CubicEdgeCount;
+        FEdge** Edges; // we dont use TArray, for performance reasons
+    };
+
+    struct FCycle
+    {
+        /**
+         * @brief build the cycle from vertices/sections passed as parameter. Sections can belong to different paths.
+         * @param iVertexArray
+         * @param iSectionArray drawing flags.
+         */
+        void Build();
+
+        //void ToBucketArray( std::vector<FCycle*>& iCyleArray
+        //                  , std::vector<FOdysseyVectorBucket*>& oBucketArray );
+
+        TArray<FSection*>& GetContourSectionArray();
+        TArray<FSection*>& GetInnerSectionArray();
+
+        /**
+         * @brief destructor.
+         */
+        ~FCycle();
+
+        /**
+         * @brief constructor.
+         * @param NodeIndices the node array as indexes (0 or 1).
+         * @param Sections the section array.
+         */
+         FCycle( const TArray<uint32>& NodeIndices
+               , const TArray<FSection*>& Sections );
+
+        /**
+         * @brief Test whether or not this cycle fits entirely within the cycle passed as parameter.
+         * @param iParentCandidate the candidate parent cycle.
+         */
+        bool FitsIn( FCycle* ParentCandidate );
+
+        /**
+         * @brief Gets this cycle's bounding box
+         * @return the bounding box as a rectangle
+         */
+        //::ULIS::FRectD GetBBox( bool iWorld );
+
+        /**
+         * @brief Get the attached bucket, if any.
+         * @return the attached bucket or nullptr if none.
+         */
+        //FOdysseyVectorBucket* GetBucket();
+
+        /**
+         * @brief Get this cycle's parent cycle.
+         * @return this cycle's parent cycle.
+         */
+        FCycle* GetParentCycle();
+
+        /**
+         * @brief Gets the bucket that should color this cycle without being its official bucket.
+         * @return a pointer to the propagated bucket
+         */
+        //FOdysseyVectorBucket* GetPropagatedBucket();
+
+        /**
+         * @brief collision test with coordinates passed as parameters.
+         * @param iX local coordinate on X-Axis.
+         * @param iY local coordinate on Y-Axis.
+         */
+        bool HitTest( double iLocalX, double iLocalY );
+
+        /**
+         * @brief Merge this cycle's contour path with the contour path of the cycle passed as parameter
+         * thus creating a combined path.
+         * @param iMergeCycle the cycle that will be merged.
+         */
+        void Merge( FCycle* MergeCycle );
+
+        /**
+         * @brief Gets a propagated bucket from any neighbour cycle
+         * @return true if it got any, false otherwise
+         */
+        //void PropagateBucket( std::vector<FOdysseyVectorCycle*>& oNextCycleArray );
+
+        /**
+         * @brief Attach a bucket. Can be nullptr.
+         * @param iBucket the bucket to attach.
+         */
+        //void SetBucket( FOdysseyVectorBucket* iBucket );
+
+        /**
+         * @brief Set this cycle's parent cycle (the cycle that this one fits in).
+         * @param iParent a pointer to this cycle's parent cycle.
+         */
+        void SetParentCycle( FCycle *InParentCycle );
+
+        /**
+         * @brief Sets a bucket that should color this cycle without being its official bucket.
+         * @param iPropagatedBucket the propagated bucket
+         */
+        //void SetPropagatedBucket( FOdysseyVectorBucket* iPropagatedBucket );
+
+        /**
+         * @brief Stroke the path using BLend2D API. The context (path width, color) can be set before calling this method.
+         * @param iWorld true if it should be drawn in world coordinates, false otherwise
+         */
+        //void StrokePath( BLContext* iBLContext, bool iWorld );
+
+    private :
+        void PropagateBucket( TArray<FSection*> iSectionArray
+                            , TArray<FCycle*>& oNextCycleArray );
+
+        bool HasNode( FNode* Node );
+
+    protected :
+        BLPath ContourPath;
+        BLPath CombinedPath;
+        //FOdysseyVectorBucket* mBucket;
+        //FOdysseyVectorBucket* mPropagatedBucket;
+        TArray<uint32> ContourNodeIndices;
+        TArray<FSection*> ContourSections;
+        TArray<FSection*> InnerSections;
+        TArray<FCycle*> Children;
+        FCycle* ParentCycle;
+        FBox2D BBox;
+        //bool mPropagated;
     };
 
 public:
@@ -144,26 +497,41 @@ public:
 
 protected:
     void Import( const FVector& ViewOrigin, const FPlane& ProjectionPlane, const TArray<FArianeObject*>& Objects );
-    void Intersect();
+    void Intersect( TArray<FPath*>& SectionnablePaths
+                  , uint32& OutTotalLinearSectionCount
+                  , uint32& OutTotalCubicSectionCount );
     void IntersectEdgeWithPath( FEdge* Edge, FPath* Path );
     void IntersectEdges( FEdge* Edge0
                        , FEdge* Edge1
                        , const FVector2D& Edge1MinWithTolerance
                        , const FVector2D& Edge1MaxWithTolerance
                        , TArray<FNodeIntersection::XRecord>& OutIntersectionRecordArray );
-
+    bool IntersectPath( FPath* Path );
+    void CreatePathSections( FPath* Path, TArray<FSection*>& ShortSections );
+    void CreateEdgeSections( FEdge* Edge, TArray<FSection*>& ShortSections );
+    void CreateEdgeSection( FEdge* Edge
+                          , FNode* Node0
+                          , FNode* Node1
+                          , double SectionNode0EdgeT
+                          , double SectionNode1EdgeT
+                          , TArray<FSection*>& ShortSections );
 protected:
     FCriticalSection Mutex;
     // we store everything in one buffer per type, for performance
     TArray<FPoint> PointBuffer;
     TArray<FNode> NodeBuffer;
     TArray<FFraction> FractionBuffer;
-    TArray<FEdge> EdgeBuffer;
-    TArray<FSection> SectionBuffer;
+    TArray<FEdgeLinear> LinearEdgeBuffer;
+    TArray<FEdgeCubic> CubicEdgeBuffer;
+    TArray<FEdge*> Edges;
+    TArray<FSectionLinear> LinearSectionBuffer;
+    TArray<FSectionCubic> CubicSectionBuffer;
+    TArray<FSection*> Sections;
     TArray<FNodeIntersection> IntersectionNodeBuffer;
     TArray<FPath> PathBuffer;
     TArray<FNodeIntersection::XRecord> XIntersectionRecordArray;
     //TArray<FEdgeCubic> CubicSegmentBuffer;
+    TArray<FCycle*> Cycles;
     bool bMultithreaded;
     double GapTolerance;
 };

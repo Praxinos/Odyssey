@@ -38,4 +38,71 @@ namespace FArianeCore
                                     , double* Line0t
                                     , double* Line1t );
 
+    template< typename T >
+    void BezierExtract( const T& InP0
+                      , const T& InP1
+                      , const T& InP2
+                      , const T& InP3
+                      , double FromT
+                      , double ToT
+                      , T& OutP0
+                      , T& OutP1
+                      , T& OutP2
+                      , T& OutP3 )
+    {
+        OutP0 = InP0;
+        OutP1 = InP1;
+        OutP2 = InP2;
+        OutP3 = InP3;
+
+        ::ULIS::CubicBezierInverseSplitAtParameter<T>( &OutP0, &OutP1, &OutP2, &OutP3, FromT );
+
+        ToT = ( FromT == 1.0f ) ? 1.0f : ( ToT - FromT ) / ( 1.0f - FromT ); // adjust T
+
+        ::ULIS::CubicBezierSplitAtParameter<T>( &OutP0, &OutP1, &OutP2, &OutP3, ToT );
+    }
+
+    template< typename T >
+    double GetCubicBezierApproximateLength( const T Bezier[4]
+                                          , uint32 Divisions
+                                          , TArray<double>* OutDivisionLengthBuffer )
+    {
+        T P0 = Bezier[0];
+        double Step = 1.0f / Divisions;
+        double Length = 0.0f;
+        double T0 = 0.0f;
+
+        if( OutDivisionLengthBuffer )
+            OutDivisionLengthBuffer->SetNum( Divisions );
+
+        for( uint32 i = 0; i < Divisions; i++ )
+        {
+            double T1 = T0 + Step;
+            T P1 = ::ULIS::CubicBezierPointAtParameter<T>( Bezier[0]
+                                                         , Bezier[1]
+                                                         , Bezier[2]
+                                                         , Bezier[3]
+                                                         , T1 );
+
+            double FractionLength = T( P1 - P0 ).Length();
+
+            if( OutDivisionLengthBuffer )
+            {
+                (*OutDivisionLengthBuffer)[i] = FractionLength;
+            }
+
+            Length += FractionLength;
+
+            T0 = T1;
+            P0 = P1;
+        }
+
+        return Length;
+    }
+
+    template< typename T >
+    double GetCubicBezierApproximateLength( const T Bezier[4], uint32 Divisions )
+    {
+        return GetCubicBezierApproximateLength<T>( Bezier, Divisions, nullptr );
+    }
 }
