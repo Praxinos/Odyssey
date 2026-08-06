@@ -8,6 +8,12 @@
 #include "ArianeVertex.h"
 #include "ArianeSegment.h"
 
+FVector2D
+FArianeGraph::FSectionLinkInfo::GetVector()
+{
+    return Section->GetVector( SectionNodeIndex );
+}
+
 FArianeGraph::FPoint::FPoint( const FVector2D& InPosition, bool bInProjected, const FVector& InOriginalPosition )
     : Position ( InPosition )
     , bProjected ( bInProjected )
@@ -19,6 +25,67 @@ FArianeGraph::FNode::FNode( const FVector2D& InPosition, bool bInProjected, cons
     : FPoint( InPosition, bInProjected, InOriginalPosition )
     , EdgeCount( 0 )
 {
+}
+
+void
+FArianeGraph::FNode::AddSection( FSection* Section, uint32 SectionNodeIndex )
+{
+    SectionLinkInfos.Emplace( Section, SectionNodeIndex );
+}
+
+FArianeGraph::FSection*
+FArianeGraph::FNode::GetSection( FEdge* Edge )
+{
+    for( FSectionLinkInfo& SectionLinkInfo : SectionLinkInfos )
+    {
+        if( SectionLinkInfo.Section->GetEdge() == Edge )
+        {
+            return SectionLinkInfo.Section;
+        }
+    }
+
+    return nullptr;
+}
+
+void
+FArianeGraph::FNode::RemoveSection( FSection* Section, uint32 SectionNodeIndex )
+{
+    SectionLinkInfos.RemoveAll( [ Section
+                                , SectionNodeIndex ]( FSectionLinkInfo& SectionLinkInfo )
+        {
+            return ( ( SectionLinkInfo.Section          == Section            )
+                  && ( SectionLinkInfo.SectionNodeIndex == SectionNodeIndex ) );
+        } );
+}
+
+FArianeGraph::FEdge*
+FArianeGraph::FNode::GetOtherEdge( FEdge* InEdge )
+{
+    for( uint32 i = 0; i < EdgeCount; i++ )
+    {
+        if( Edges[i] != InEdge )
+        {
+            return Edges[i];
+        }
+    }
+
+    return nullptr;
+}
+
+int32
+FArianeGraph::FNode::GetIndex( FEdge* Edge )
+{
+    if( this == Edge->Nodes[0] )
+    {
+        return 0;
+    }
+
+    if( this == Edge->Nodes[1] )
+    {
+        return 1;
+    }
+
+    return -1;
 }
 
 FArianeGraph::FIntersection::FIntersection( FNode* InNode, float InEdgeT )
@@ -59,8 +126,8 @@ FArianeGraph::FNodeIntersection::XRecord::XRecord( const FVector2D& InPosition
     , Edge1T ( InEdge1T )
     , Position ( InPosition )
 {
-    Edge0->IntersectionSlot++;
-    Edge1->IntersectionSlot++;
+    Edge0->IntersectionSlotCount++;
+    Edge1->IntersectionSlotCount++;
 }
 
 FArianeGraph::FFraction::FFraction( double InFromT, double InToT, FPoint* InPoint0, FPoint* InPoint1 )
@@ -76,15 +143,40 @@ FArianeGraph::FFraction::FFraction( double InFromT, double InToT, FPoint* InPoin
 
 FArianeGraph::FEdge::FEdge( FNode* InNode0
                           , FNode* InNode1
-                          , FFraction* InFractions )
+                          , uint32 InFractionCount
+                          , FFraction* InFractions
+                          , double InLength )
     : Nodes { InNode0, InNode1 }
     , Fractions( InFractions )
     , FractionCount ( 1 )
-    , IntersectionSlot ( 0 )
+    , IntersectionSlotCount ( 0 )
+    , Length ( InLength )
 {
-    Nodes[0]->EdgeCount++;
-    Nodes[1]->EdgeCount++;
+    Nodes[0]->Edges[Nodes[0]->EdgeCount++] = this;
+    Nodes[1]->Edges[Nodes[1]->EdgeCount++] = this;
+}
 
+FArianeGraph::FNode*
+FArianeGraph::FEdge::GetOtherNode( FNode* Node )
+{
+    if( Nodes[0] == Node )
+    {
+        return Nodes[1];
+    }
+
+    if( Nodes[1] == Node )
+    {
+        return Nodes[0];
+    }
+
+    return nullptr;
+}
+
+FArianeGraph::FEdgeLinear::FEdgeLinear( FNode* InNode0
+                                      , FNode* InNode1
+                                      , FFraction* InFractions )
+    : FEdge( InNode0, InNode1, 1, InFractions, ( InNode1->Position - InNode0->Position ).Length() )
+{
     BBox.Min.X = FMath::Min( Nodes[0]->Position.X, Nodes[1]->Position.X );
     BBox.Min.Y = FMath::Min( Nodes[0]->Position.Y, Nodes[1]->Position.Y );
     BBox.Max.X = FMath::Max( Nodes[0]->Position.X, Nodes[1]->Position.X );
@@ -92,18 +184,97 @@ FArianeGraph::FEdge::FEdge( FNode* InNode0
 }
 
 FVector
-FArianeGraph::FEdge::GetOriginalPosition( float T )
+FArianeGraph::FEdgeLinear::GetOriginalPosition( float T )
 {
     return Nodes[0]->OriginalPosition + ( T * ( Nodes[1]->OriginalPosition
                                               - Nodes[0]->OriginalPosition ) );
 }
 
-FArianeGraph::FPath::FPath( uint32 InNodeCount, FNode* InNodes, uint32 InEdgeCount, FEdge* InEdges )
-    : NodeCount( InNodeCount )
+FArianeGraph::FEdgeCubic::FEdgeCubic( FNode* InNode0
+                                    , const FVector2D& Handle0Position
+                                    , const FVector& OriginalHandle0Position
+                                    , const FVector2D& Handle1Position
+                                    , const FVector& OriginalHandle1Position
+                                    , FNode* InNode1
+                                    , uint32 InFractionCount
+                                    , FFraction* InFractions )
+    : FEdge( InNode0, InNode1, 1, InFractions, 0.0f )
+{
+    Bezier[0] = InNode0->Position;
+    Bezier[1] = Handle0Position;
+    Bezier[2] = Handle1Position;
+    Bezier[3] = InNode1->Position;
+
+    Length = FArianeCore::GetCubicBezierApproximateLength( Bezier, 8 );
+
+    BBox.Min.X = FMath::Min( Bezier[0].X, FMath::Min3 ( Bezier[1].X, Bezier[2].X, Bezier[3].X ) );
+    BBox.Min.Y = FMath::Min( Bezier[0].Y, FMath::Min3 ( Bezier[1].Y, Bezier[2].Y, Bezier[3].Y ) );
+    BBox.Max.X = FMath::Max( Bezier[0].X, FMath::Max3 ( Bezier[1].X, Bezier[2].X, Bezier[3].X ) );
+    BBox.Max.Y = FMath::Max( Bezier[0].Y, FMath::Max3 ( Bezier[1].Y, Bezier[2].Y, Bezier[3].Y ) );
+}
+
+FVector
+FArianeGraph::FEdgeCubic::GetOriginalPosition( float T )
+{
+    return ::ULIS::CubicBezierPointAtParameter<FVector>( Nodes[0]->OriginalPosition
+                                                       , OriginalHandlePosition[0]
+                                                       , OriginalHandlePosition[1]
+                                                       , Nodes[1]->OriginalPosition
+                                                       , T );
+}
+
+
+FArianeGraph::FPath::FPath( uint32 InNodeCount
+                          , FNode* InNodes
+                          , uint32 InLinearEdgeCount
+                          , uint32 InCubicEdgeCount
+                          , FEdge** InEdges )
+    : bHasIntersections ( false )
+    , bSectionnable ( false )
+    , NodeCount( InNodeCount )
     , Nodes( InNodes )
-    , EdgeCount( InEdgeCount )
+    , LinearEdgeCount( InLinearEdgeCount )
+    , CubicEdgeCount( InCubicEdgeCount )
     , Edges( InEdges )
 {
+}
+
+uint32
+FArianeGraph::FPath::GetEdgeCount()
+{
+    return ( LinearEdgeCount + CubicEdgeCount );
+}
+
+bool
+FArianeGraph::FPath::IsLoop()
+{
+    return ( GetEdgeCount() == NodeCount );
+}
+
+void
+FArianeGraph::FPath::ToNodeIndicesAndSections( TArray<uint32>& OutNodeIndices
+                                             , TArray<FSection*>& OutSections )
+{
+    if( GetEdgeCount() )
+    {
+        FEdge *Edge = Edges[0];
+        FNode* FirstNode = Edge->Nodes[0];
+        FNode* Node = FirstNode;
+
+        do
+        {
+            FNode* NextNode = Edge->GetOtherNode( Node );
+            FSection* Section = Node->GetSection( Edge );
+            FEdge *NextEdge = NextNode->GetOtherEdge( Edge );
+
+            OutNodeIndices.Add( Node->GetIndex( Edge ) );
+            OutSections.Add( Section );
+
+            Node = NextNode;
+            Edge = NextEdge;
+        }
+        while( Edge && ( Node != FirstNode ) );
+    }
 }
 
 FArianeGraph::FArianeGraph()
@@ -262,9 +433,9 @@ FArianeGraph::IntersectEdgeWithPath( FEdge* Edge, FPath* IntersectedPath )
     FVector2D EdgeMaxWithTolerance( EdgeBBox.Max.X + GapTolerance
                                   , EdgeBBox.Max.Y + GapTolerance );
 
-    for( uint32 i = 0; i < IntersectedPath->EdgeCount; i++ )
+    for( uint32 i = 0; i < IntersectedPath->GetEdgeCount(); i++ )
     {
-        FEdge* IntersectedEdge = &IntersectedPath->Edges[i];
+        FEdge* IntersectedEdge = IntersectedPath->Edges[i];
         FBox2D& IntersectedEdgeBBox = IntersectedEdge->BBox;
         FVector2D IntersectedEdgeMinWithTolerance( IntersectedEdgeBBox.Min.X - GapTolerance
                                                  , IntersectedEdgeBBox.Min.Y - GapTolerance );
@@ -316,13 +487,15 @@ FArianeGraph::Import( const FVector& ViewOrigin, const FPlane& ProjectionPlane, 
     FVector ProjectionPlaneOrigin = ProjectionPlane.GetOrigin();
     FVector::ZAxisVector;
     uint32 NodeCount = 0;
-    uint32 EdgeCount = 0;
+    uint32 LinearEdgeCount = 0;
+    uint32 CubicEdgeCount = 0; // will stay at 0 because no Bezier will stay a Bezier due to the projection
     uint32 FractionCount = 0;
     uint32 PathCount = 0;
 
     NodeBuffer.Empty();
     FractionBuffer.Empty();
-    EdgeBuffer.Empty();
+    LinearEdgeBuffer.Empty();
+    CubicEdgeBuffer.Empty();
     PathBuffer.Empty();
 
     // first step, evaluate the memory needed
@@ -341,7 +514,7 @@ FArianeGraph::Import( const FVector& ViewOrigin, const FPlane& ProjectionPlane, 
 
                 NodeCount += Segment->GetFractionCount() - 1;
                 FractionCount += Segment->GetFractionCount();
-                EdgeCount += Segment->GetFractionCount(); // for 3D objects, there are as many edges as fractions
+                LinearEdgeCount += Segment->GetFractionCount(); // for 3D objects, there are as many edges as fractions
             }
 
             PathCount++;
@@ -350,8 +523,10 @@ FArianeGraph::Import( const FVector& ViewOrigin, const FPlane& ProjectionPlane, 
 
     // Allocate memory in one go, for performance
     NodeBuffer.Reserve( NodeCount );
-    FractionBuffer.Reserve( EdgeCount );
-    EdgeBuffer.Reserve( EdgeCount ); // for 3D objects, there are as many edges as fractions
+    FractionBuffer.Reserve( LinearEdgeCount );
+    LinearEdgeBuffer.Reserve( LinearEdgeCount ); // for 3D objects, there are as many edges as fractions
+    CubicEdgeBuffer.Reserve( CubicEdgeCount ); // for 3D objects, there are as many edges as fractions
+    Edges.Reserve( LinearEdgeCount + CubicEdgeCount );
     PathBuffer.Reserve( PathCount );
 
     // first step, evaluate the memory needed
@@ -362,7 +537,8 @@ FArianeGraph::Import( const FVector& ViewOrigin, const FPlane& ProjectionPlane, 
             FArianePath* Path = static_cast<FArianePath*>(Object);
             const FTransform& PathTransform = Path->GetTransform();
             uint32 PathNodeCount = 0;
-            uint32 PathEdgeCount = 0;
+            uint32 PathLinearEdgeCount = 0;
+            uint32 PathCubicEdgeCount = 0;
 
             for( FArianeVertexID& VertexID : Path->GetVertices() )
             {
@@ -427,25 +603,62 @@ FArianeGraph::Import( const FVector& ViewOrigin, const FPlane& ProjectionPlane, 
 
                     FFraction* Fraction = &FractionBuffer.Emplace_GetRef( 0.0f, 1.0f, Point0, Point1 );
 
-                    EdgeBuffer.Emplace( Point0
-                                      , Point1
-                                      , Fraction );
+                    FEdgeLinear* LinearEdge = &LinearEdgeBuffer.Emplace_GetRef( Point0
+                                                                              , Point1
+                                                                              , Fraction );
+                    Edges.Add( LinearEdge );
 
-                    PathEdgeCount++;
+                    PathLinearEdgeCount++;
                 }
             }
 
             PathBuffer.Emplace( PathNodeCount
-                              , &NodeBuffer[NodeBuffer.Num()-PathNodeCount]
-                              , PathEdgeCount
-                              , &EdgeBuffer[EdgeBuffer.Num()-PathEdgeCount] );
+                              , &NodeBuffer[ NodeBuffer.Num() - PathNodeCount ]
+                              , PathLinearEdgeCount
+                              , PathCubicEdgeCount
+                              , &Edges[ Edges.Num() - ( PathLinearEdgeCount + PathCubicEdgeCount ) ] );
         }
     }
 }
 
-void
-FArianeGraph::Intersect()
+// returns true if the path needs to be taken into account in the graph
+bool
+FArianeGraph::IntersectPath( FPath* Path )
 {
+    for( uint32 j = 0; j < Path->GetEdgeCount(); j++ )
+    {
+        FEdge* Edge = Path->Edges[j];
+
+        for( int k = 0; k < PathBuffer.Num(); k++ )
+        {
+            FPath& IntersectedPath = PathBuffer[k];
+
+            // populate mXIntersectionRecordArray
+            IntersectEdgeWithPath ( Edge, &IntersectedPath );
+        }
+
+        if( Edge->IntersectionSlotCount )
+        {
+            Path->bHasIntersections = true;
+            Path->bSectionnable = true;
+        }
+    }
+
+    if( Path->IsLoop() )
+    {
+        Path->bSectionnable = true;
+    }
+
+    return Path->bSectionnable;
+}
+
+void
+FArianeGraph::Intersect( TArray<FPath*>& SectionnablePaths
+                       , uint32& OutTotalLinearSectionCount
+                       , uint32& OutTotalCubicSectionCount )
+{
+    uint32 TotalSectionCount = 0;
+
     // find intersections
     if( bMultithreaded )
     {
@@ -454,23 +667,22 @@ FArianeGraph::Intersect()
 #if !PLATFORM_MAC
         ParallelFor( CoreCount
                    , [ this
+                     , &SectionnablePaths
+                     , &OutTotalLinearSectionCount
+                     , &OutTotalCubicSectionCount
                      , CoreCount ]( int32 CpuID )
             {
-                for( int i = 0; i < PathBuffer.Num(); i += CoreCount )
+                for( int i = CpuID; i < PathBuffer.Num(); i += CoreCount )
                 {
                     FPath& Path = PathBuffer[i];
 
-                    for( uint32 j = 0; j < Path.EdgeCount; j++ )
+                    if( IntersectPath( &Path ) )
                     {
-                        FEdge& Edge = Path.Edges[j];
-
-                        for( int k = 0; k < PathBuffer.Num(); k++ )
-                        {
-                            FPath& IntersectedPath = PathBuffer[k];
-
-                            // populate mXIntersectionRecordArray
-                            IntersectEdgeWithPath ( &Edge, &IntersectedPath );
-                        }
+                        Mutex.Lock();
+                        SectionnablePaths.Add( &Path );
+                        OutTotalLinearSectionCount += Path.LinearEdgeCount;
+                        OutTotalCubicSectionCount += Path.CubicEdgeCount;
+                        Mutex.Unlock();
                     }
                 }
             }
@@ -483,19 +695,109 @@ FArianeGraph::Intersect()
         {
             FPath& Path = PathBuffer[i];
 
-            for( uint32 j = 0; j < Path.EdgeCount; j++ )
+            if( IntersectPath( &Path ) )
             {
-                FEdge& Edge = Path.Edges[j];
+                SectionnablePaths.Add( &Path );
 
-                for( int k = 0; k < PathBuffer.Num(); k++ )
-                {
-                    FPath& IntersectedPath = PathBuffer[k];
-
-                    // populate mXIntersectionRecordArray
-                    IntersectEdgeWithPath ( &Edge, &IntersectedPath );
-                }
+                OutTotalLinearSectionCount += Path.LinearEdgeCount;
+                OutTotalCubicSectionCount += Path.CubicEdgeCount;
             }
         }
+    }
+}
+
+void
+FArianeGraph::CreateEdgeSection( FEdge* Edge
+                               , FNode* SectionNode0
+                               , FNode* SectionNode1
+                               , double SectionNode0EdgeT
+                               , double SectionNode1EdgeT
+                               , TArray<FSection*>& ShortSections )
+{
+    FSection* Section = nullptr;
+
+    if( Edge->GetClass() == FEdgeLinear::StaticClass() )
+    {
+        FEdgeLinear* LinearEdge = static_cast<FEdgeLinear*>(Edge);
+
+        Section = &LinearSectionBuffer.Emplace_GetRef( LinearEdge
+                                                     , SectionNode0
+                                                     , SectionNode1
+                                                     , SectionNode0EdgeT
+                                                     , SectionNode1EdgeT
+                                                     , true
+                                                     , ShortSections );
+    }
+
+    if( Edge->GetClass() == FEdgeCubic::StaticClass() )
+    {
+        FEdgeCubic* CubicEdge = static_cast<FEdgeCubic*>(Edge);
+
+        Section = &CubicSectionBuffer.Emplace_GetRef( CubicEdge
+                                                    , SectionNode0
+                                                    , SectionNode1
+                                                    , SectionNode0EdgeT
+                                                    , SectionNode1EdgeT
+                                                    , true
+                                                    , ShortSections );
+    }
+
+    Sections.Add( Section );
+}
+
+void
+FArianeGraph::CreateEdgeSections( FEdge* Edge, TArray<FSection*>& ShortSections )
+{
+    FNode* Node0 = Edge->Nodes[0];
+    FNode* Node1 = Edge->Nodes[1];
+    FNode* SectionNode0 = Node0;
+    double SectionNode0T = 0.0f;
+
+
+    //Sections = &SectionBuffer[SectionBuffer.Num()];
+
+    if( Edge->Intersections.Num() )
+    {
+        for( FIntersection* Intersection : Edge->Intersections )
+        {
+            FNode* SectionNode1 = Intersection->Node;
+            double SectionNode1T = Intersection->EdgeT;
+            // constructor also links sections to the vertex
+
+            CreateEdgeSection( Edge
+                             , SectionNode0
+                             , SectionNode1
+                             , SectionNode0T
+                             , SectionNode1T
+                             , ShortSections );
+
+            SectionNode0 = SectionNode1;
+            SectionNode0T = SectionNode1T;
+        }
+    }
+
+    CreateEdgeSection( Edge
+                     , SectionNode0
+                     , Node1 // edge's second end point
+                     , SectionNode0T
+                     , 1.0f
+                     , ShortSections );
+}
+
+void
+FArianeGraph::CreatePathSections( FPath* Path, TArray<FSection*>& ShortSections )
+{
+    for( uint32 i = 0; i < Path->GetEdgeCount(); i++ )
+    {
+        FEdge *Edge = Path->Edges[i];
+        //FNode* Node0 = Edge->Nodes( 0 );
+        //FNode* Node1 = Edge->Nodes( 1 );
+
+        CreateEdgeSections( Edge, ShortSections );
+
+        //TODO::Possible optimization: call only if nearestVertex exists
+        //CreateVertexGapSegment( vertex0 );
+        //CreateVertexGapSegment( vertex1 );
     }
 }
 
@@ -503,23 +805,29 @@ FArianeGraph::Intersect()
 void
 FArianeGraph::Build( const FVector& ViewOrigin, const FPlane& ProjectionPlane, const TArray<FArianeObject*>& Objects )
 {
-    uint32 TotalSectionCount = 0;
-
-
-    IntersectionNodeBuffer.Empty();
-    SectionBuffer.Empty();
-
-
+    uint32 TotalLinearSectionCount = 0;
+    uint32 TotalCubicSectionCount = 0;
+    TArray<FPath*> SectionnablePaths;
+    TArray<FSection*> ShortSections;
 
     // Step1: Import Paths and convert them into 2D space
     Import( ViewOrigin, ProjectionPlane, Objects );
 
+    SectionnablePaths.Reserve( PathBuffer.Num() );
+
+    IntersectionNodeBuffer.Empty();
+
+    LinearSectionBuffer.Empty();
+    CubicSectionBuffer.Empty();
+    Sections.Empty();
+
     // Step2: find intersections
-    Intersect();
+    Intersect( SectionnablePaths, TotalLinearSectionCount, TotalCubicSectionCount );
 
-    TotalSectionCount = EdgeBuffer.Num() + XIntersectionRecordArray.Num();
+    LinearSectionBuffer.Reserve( TotalLinearSectionCount );
+    CubicSectionBuffer.Reserve( TotalCubicSectionCount );
+    Sections.Reserve( TotalLinearSectionCount + TotalCubicSectionCount );
 
-    SectionBuffer.Reserve( TotalSectionCount );
     // reserve memory to vertices in one go.
     IntersectionNodeBuffer.Reserve( XIntersectionRecordArray.Num() );
 
@@ -531,5 +839,59 @@ FArianeGraph::Build( const FVector& ViewOrigin, const FPlane& ProjectionPlane, c
                                       , XintersectionRecord.Edge0T
                                       , XintersectionRecord.Edge1
                                       , XintersectionRecord.Edge1T );
+
+        if( XintersectionRecord.Edge0->GetClass() == FEdgeLinear::StaticClass() )
+        {
+            TotalLinearSectionCount++;
+        }
+
+        if( XintersectionRecord.Edge0->GetClass() == FEdgeCubic::StaticClass() )
+        {
+            TotalCubicSectionCount++;
+        }
+
+        if( XintersectionRecord.Edge1->GetClass() == FEdgeLinear::StaticClass() )
+        {
+            TotalLinearSectionCount++;
+        }
+
+        if( XintersectionRecord.Edge1->GetClass() == FEdgeCubic::StaticClass() )
+        {
+            TotalCubicSectionCount++;
+        }
+    }
+
+    // create sections for exact intersections on each segment
+    // only for path that have intersected segments.
+    for( FPath* Path : SectionnablePaths )
+    {
+        CreatePathSections( Path, ShortSections );
+
+        // create a cycle right now for untouched looped-paths
+        if( ( Path->IsLoop() == true ) && ( Path->bHasIntersections == false ) )
+        {
+            TArray<uint32> PathNodeIndices;
+            TArray<FSection*> PathSections;
+
+            Path->ToNodeIndicesAndSections( PathNodeIndices, PathSections );
+
+            if( PathNodeIndices.Num() )
+            {
+                Cycles.Add( new FCycle( PathNodeIndices
+                                      , PathSections ) );
+            }
+        }
+    }
+
+    //for( FOdysseyVectorSegmentExtended& extendedSegment : mExtendedSegmentBuffer )
+    //{
+    //    extendedSegment.GetOwnerAsPath()->RemoveSegment( &extendedSegment );
+    //}
+
+    // Get rid of section of length 0
+    for( FSection* ShortSection : ShortSections )
+    {
+        // Unlink() and stitch
+        ShortSection->Stitch();
     }
 }

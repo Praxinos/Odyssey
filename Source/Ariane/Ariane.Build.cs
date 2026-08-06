@@ -71,6 +71,7 @@ public class Ariane : ModuleRules
                 "GeometryFramework",
                 "OdysseyPalette",
                 "ULIS",
+                "blend2d", // for Cycles
             }
         );
 
