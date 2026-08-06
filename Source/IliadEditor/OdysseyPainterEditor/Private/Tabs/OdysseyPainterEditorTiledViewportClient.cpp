@@ -48,32 +48,23 @@ FOdysseyPainterEditorTiledViewportClient::FOdysseyPainterEditorTiledViewportClie
     const UOdysseyPainterEditorSettings& settings = *GetDefault< UOdysseyPainterEditorSettings >();
     mCheckerboardTexture = FImageUtils::CreateCheckerboardTexture( settings.GetCheckerColorOne(), settings.GetCheckerColorTwo(), settings.GetCheckerSize() );
 
+    //We only need 1 layer containing base color
     RenderTargetData->NumLayers = 1;
-    RenderTargetData->Width = 8192;
-    RenderTargetData->Height = 8192;
-    RenderTargetData->NumMips = FMath::CeilLogTwo(FMath::Max(RenderTargetData->Width, RenderTargetData->Height));
     RenderTargetData->WidthInBlocks = 1;
     RenderTargetData->HeightInBlocks = 1;
     RenderTargetData->TileSize = 256;
-    RenderTargetData->TileBorderSize = 0; // A B orderSize pixel border will be added around all tiles
+    RenderTargetData->TileBorderSize = 0; // A BorderSize pixel border will be added around all tiles
+    RenderTargetData->Width = 65536; //~2 million pixels in width => 2^21
+    RenderTargetData->Height = 65536; //~ 2 million pixels in height => 2^21
+    RenderTargetData->NumMips = FMath::CeilLogTwo(FMath::Max(RenderTargetData->Width, RenderTargetData->Height));
+
+    check(RenderTargetData->Width / RenderTargetData->TileSize <= VIRTUALTEXTURE_MAX_PAGETABLE_SIZE)
+    check(RenderTargetData->Height / RenderTargetData->TileSize <= VIRTUALTEXTURE_MAX_PAGETABLE_SIZE)
 
     for (uint32 i = 0; i < RenderTargetData->NumLayers; i++)
     {
         RenderTargetData->LayerTypes[i] = PF_B8G8R8A8;
         RenderTargetData->LayerFallbackColors[i] = FLinearColor::Yellow;
-        RenderTargetData->TileDataOffsetPerLayer.Add(0);
-        RenderTargetData->BaseOffsetPerMip.Add(0);
-
-        FOdysseyVirtualRenderTargetTileOffsetData tileOffsetData;
-        tileOffsetData.Init(RenderTargetData->GetWidthInTiles(), RenderTargetData->GetHeightInTiles());
-
-        uint32 numTiles = tileOffsetData.Width * tileOffsetData.Height;
-        for (uint32 j = 0; j < numTiles; j++)
-        {
-            tileOffsetData.AddTile(j);
-        }
-        tileOffsetData.Finalize();
-        RenderTargetData->TileOffsetData.Add(tileOffsetData);
     }
 
     // Equivalent to a Texture->UpdateResource()
@@ -146,11 +137,23 @@ FOdysseyPainterEditorTiledViewportClient::DrawVirtualTexture( FViewport* iViewpo
     );
 
     FVector2D TransformedViewportBoundingBoxSize = TransformedViewportBoundingBox.Max - TransformedViewportBoundingBox.Min;
-    FBox2D ScaledTextureBoundingBox( FVector2D::Zero(), ScaledTextureSize);
+    /*FBox2D ScaledTextureBoundingBox( FVector2D::Zero(), ScaledTextureSize);
     FBox2D BoundingBoxToLoad = TransformedViewportBoundingBox.Overlap( ScaledTextureBoundingBox );
-    const FVector2D UV0 = FVector2D(BoundingBoxToLoad.Min.X / ScaledTextureSize.X, BoundingBoxToLoad.Min.Y / ScaledTextureSize.Y);
-    const FVector2D UV1 = FVector2D(BoundingBoxToLoad.Max.X / ScaledTextureSize.X, BoundingBoxToLoad.Max.Y / ScaledTextureSize.Y);
-    const FVector2D TexturePositionInTransformedViewport = -TransformedViewportBoundingBox.Min;
+    FVector2D UV0 = FVector2D(BoundingBoxToLoad.Min.X / ScaledTextureSize.X, BoundingBoxToLoad.Min.Y / ScaledTextureSize.Y);
+    FVector2D UV1 = FVector2D(BoundingBoxToLoad.Max.X / ScaledTextureSize.X, BoundingBoxToLoad.Max.Y / ScaledTextureSize.Y);
+
+    if (RenderTargetResource.GetNumBlocks() > 1)
+    {
+        // Adjust UVs to display entire UDIM range, accounting for UE inverted V-axis
+        const FIntPoint BlockSize = RenderTargetResource.GetSizeInBlocks();
+        UV0 = FVector2D(-1.0f, -1.0f) + UV0 * BlockSize;
+        UV1 = FVector2D(-1.0f, -1.0f) + UV1 * BlockSize;
+    } */
+
+    const FVector2D TexturePositionInTransformedViewport = -TransformedViewportBoundingBox.Min - ScaledTextureSize / 2.f;
+
+    FVector2D UV0(1.0f - RenderTargetResource.GetSizeInBlocks().X, 1.0f - RenderTargetResource.GetSizeInBlocks().Y);
+    FVector2D UV1(RenderTargetResource.GetSizeInBlocks().X, RenderTargetResource.GetSizeInBlocks().Y);
 
     UE::RenderCommandPipe::FSyncScope SyncScope;
 
@@ -162,11 +165,19 @@ FOdysseyPainterEditorTiledViewportClient::DrawVirtualTexture( FViewport* iViewpo
         IAllocatedVirtualTexture* AllocatedVT = RenderTargetResourcePtr->AcquireAllocatedVT();
 
         IRendererModule& RenderModule = GetRendererModule();
-        RenderModule.RequestVirtualTextureTiles(AllocatedVT, ScaledTextureSize, TexturePositionInTransformedViewport, TransformedViewportBoundingBoxSize, FVector2D(0, 0), FVector2D(1, 1), MipLevel);
+        RenderModule.RequestVirtualTextureTiles(
+            AllocatedVT,
+            ScaledTextureSize,
+            TexturePositionInTransformedViewport,
+            TransformedViewportBoundingBoxSize,
+            UV0,
+            UV1,
+            MipLevel
+        );
         RenderModule.LoadPendingVirtualTextureTiles(RHICmdList, InFeatureLevel);
     });
 
-    FCanvasTileItem TileItem( FVector2D(0, 0), RenderTargetResourcePtr, TextureSize, FVector2D(0.f, 0.f), FVector2D(1.f, 1.f), FLinearColor::White );
+    FCanvasTileItem TileItem( -TextureSize/2, RenderTargetResourcePtr, TextureSize, UV0, UV1, FLinearColor::White );
 
     // Add the red, green, blue, alpha and desaturation flags to the enum to identify the chosen filters
     uint32 BlendMode = (uint32)SE_BLEND_RGBA_MASK_START;
@@ -178,13 +189,13 @@ FOdysseyPainterEditorTiledViewportClient::DrawVirtualTexture( FViewport* iViewpo
 
     TileItem.BatchedElementParameters = BatchedElementParameters;
 
-    if (RenderTargetResource.GetNumBlocks() > 1)
+    /* if (RenderTargetResource.GetNumBlocks() > 1)
     {
         // Adjust UVs to display entire UDIM range, accounting for UE inverted V-axis
         const FIntPoint BlockSize = RenderTargetResource.GetSizeInBlocks();
         TileItem.UV0 = FVector2D(0.0f, 1.0f - (float)BlockSize.Y);
         TileItem.UV1 = FVector2D((float)BlockSize.X, 1.0f);
-    }
+    } */
 
     ioCanvas->DrawItem( TileItem );
 }

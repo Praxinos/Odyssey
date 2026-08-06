@@ -3,109 +3,59 @@
 
 #include "OdysseyVirtualRenderTargetData.h"
 
+#include "OdysseyVirtualRenderTargetTileManager.h"
 
-#if WITH_EDITOR
-
-void FOdysseyVirtualRenderTargetTileOffsetData::Init(uint32 InWidth, uint32 InHeight)
+/* uint32
+FOdysseyVirtualRenderTargetData::ComputeMipWidth(uint32 InMip) const
 {
-    Width = FMath::Max(InWidth, 1u);
-    Height = FMath::Max(InHeight, 1u);
+    if (Mips.IsEmpty())
+        return 0;
 
-    const uint32 SizePadded = FMath::RoundUpToPowerOfTwo(FMath::Max(Width, Height));
-    MaxAddress = SizePadded * SizePadded;
-
-    Addresses.Empty();
-    Offsets.Empty();
-    TileStates.Empty(MaxAddress);
-    TileStates.Add(false, MaxAddress);
-}
-
-void FOdysseyVirtualRenderTargetTileOffsetData::AddTile(uint32 InAddress)
-{
-    TileStates[InAddress] = true;
-}
-
-void FOdysseyVirtualRenderTargetTileOffsetData::Finalize()
-{
-    uint32 Offset = 0;
-    uint32 StartAddress = 0;
-    bool bCurrentState = TileStates[0];
-
-    Addresses.Add(StartAddress);
-    Offsets.Add(bCurrentState ? Offset : ~0u);
-
-    for (uint32 Address = 1; Address < MaxAddress; ++Address)
+    if (InMip >= Mips.Num())
     {
-        const bool bState = TileStates[Address];
-        if (bState != bCurrentState)
-        {
-            Offset += bCurrentState ? Address - StartAddress : 0;
+        uint32 mipWidth = ComputeMipWidth(Mips.Num() - 1);
 
-            StartAddress = Address;
-            bCurrentState = bState;
-
-            Addresses.Add(StartAddress);
-            Offsets.Add(bCurrentState ? Offset : ~0u);
-        }
     }
 
-    TileStates.Empty();
+
+    //Find an available Mip
+
+
 }
 
-#endif // WITH_EDITOR
-
-uint32 FOdysseyVirtualRenderTargetTileOffsetData::GetTileOffset(uint32 InAddress) const
+uint32
+FOdysseyVirtualRenderTargetData::ComputeHeight() const
 {
-    /* const int32 BlockIndex = Algo::UpperBound(Addresses, InAddress) - 1;
-    const uint32 BaseOffset = Offsets[BlockIndex];
-    if (BaseOffset == ~0u)
-    {
-        // Address is in empty space.
-        return ~0u;
-    }
-    const uint32 BaseAddress = Addresses[BlockIndex];
-    const uint32 LocalOffset = InAddress - BaseAddress;
-    return BaseOffset + LocalOffset; */
+    if (Mips.IsEmpty())
+        return 0;
+}*/
 
-    return 0;
+bool
+FOdysseyVirtualRenderTargetData::TileExists(uint32 InMip, const FIntPoint& InTilePosition) const
+{
+    if (InMip >= (uint32)Mips.Num())
+        return false;
+
+    return Mips[InMip].TileKeyToIndex.Contains(InTilePosition);
 }
 
-bool FOdysseyVirtualRenderTargetData::IsValidAddress(uint32 vLevel, uint32 vAddress)
+bool
+FOdysseyVirtualRenderTargetData::IsTileEmpty(uint32 InMip, const FIntPoint& InTilePosition) const
 {
-    /* bool bIsValid = false;
+    //A non existing tile can be considered as empty
+    //Anyway, calling TileExists() seperately is better practice
+    if (!TileExists(InMip, InTilePosition))
+        return true;
 
-    if (TileOffsetData.IsValidIndex(vLevel))
-    {
-        const uint32 X = FMath::ReverseMortonCode2(vAddress);
-        const uint32 Y = FMath::ReverseMortonCode2(vAddress >> 1);
-        bIsValid = X < TileOffsetData[vLevel].Width && Y < TileOffsetData[vLevel].Height;
-    }
+    FGuid TileIndex = Mips[InMip].TileKeyToIndex[InTilePosition];
 
-    return bIsValid; */
+    FOdysseyVirtualRenderTargetTileManager& TileManager = FOdysseyVirtualRenderTargetTileManager::Get();
+    FOdysseyVirtualRenderTargetTileManager::FTileDescriptor TileDesc;
 
-    return true;
-}
+    bool TileFound = TileManager.GetTileDescriptor(TileIndex, TileDesc);
+    check(TileFound);
+    if (!TileFound)
+        return true;
 
-
-uint32 FOdysseyVirtualRenderTargetData::GetTileOffset(uint32 vLevel, uint32 vAddress, uint32 LayerIndex) const
-{
-    /* uint32 Offset = ~0u;
-
-    if (BaseOffsetPerMip.IsValidIndex(vLevel) && TileOffsetData.IsValidIndex(vLevel))
-    {
-        // If the tile offset is ~0u there is no data present so we return ~0u to indicate that.
-        const uint32 BaseOffset = BaseOffsetPerMip[vLevel];
-        const uint32 TileOffset = TileOffsetData[vLevel].GetTileOffset(vAddress);
-        if (BaseOffset != ~0u && TileOffset != ~0u)
-        {
-            const uint32 TileDataSize = TileDataOffsetPerLayer.Last();
-            const uint32 LayerDataOffset = LayerIndex == 0 ? 0 : TileDataOffsetPerLayer[LayerIndex - 1];
-
-            int64 Offset64 = BaseOffset + (int64) TileOffset * TileDataSize + LayerDataOffset;
-            Offset = IntCastChecked<uint32>( Offset64 );
-        }
-    }
-
-    return Offset; */
-    return 0;
+    return TileDesc.bIsEmpty;
 }

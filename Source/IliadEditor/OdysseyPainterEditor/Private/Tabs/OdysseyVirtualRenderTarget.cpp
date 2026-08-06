@@ -52,15 +52,15 @@ FOdysseyVirtualRenderTargetResource::InitRHI(FRHICommandListBase& RHICmdList)
     LLM_SCOPE_DYNAMIC_STAT_OBJECTPATH_FNAME(FRHITextureCreateDesc().GetTraceClassName(), ELLMTagSet::AssetClasses);
     UE_TRACE_METADATA_SCOPE_ASSET_FNAME(NAME_None, FRHITextureCreateDesc().GetTraceClassName(), PackageName);
 
-    TSharedPtr<FOdysseyVirtualRenderTargetData> VTData = WeakVTData.Pin();
-    if (!VTData)
+    TSharedPtr<FOdysseyVirtualRenderTargetData> PinnedVTData = WeakVTData.Pin();
+    if (!PinnedVTData)
         return;
 
     uint32 MaxAnisotropy = 0;
     if (VirtualTextureScalability::IsAnisotropicFilteringEnabled())
     {
         // Limit HW MaxAnisotropy to avoid sampling outside VT borders
-        MaxAnisotropy = FMath::Min<int32>(VirtualTextureScalability::GetMaxAnisotropy(), VTData->TileBorderSize);
+        MaxAnisotropy = FMath::Min<int32>(VirtualTextureScalability::GetMaxAnisotropy(), PinnedVTData->TileBorderSize);
     }
 
     // We always create a sampler state if we're attached to a texture. This is used to sample the cache texture during actual rendering and the miptails editor resource.
@@ -92,35 +92,35 @@ FOdysseyVirtualRenderTargetResource::InitRHI(FRHICommandListBase& RHICmdList)
 
 
 
-    const int32 MaxLevel = VTData->GetNumMips() - FirstMipToUse - 1;
+    const int32 MaxLevel = PinnedVTData->GetNumMips() - FirstMipToUse - 1;
     check(MaxLevel >= 0);
 
     FVTProducerDescription ProducerDesc;
     ProducerDesc.Name = TextureName;
     ProducerDesc.FullNameHash = FullNameHash;
     ProducerDesc.Dimensions = 2;
-    ProducerDesc.TileSize = VTData->TileSize;
-    ProducerDesc.TileBorderSize = VTData->TileBorderSize;
-    ProducerDesc.BlockWidthInTiles = FMath::DivideAndRoundUp<uint32>(GetNumTilesX(), VTData->WidthInBlocks);
-    ProducerDesc.BlockHeightInTiles = FMath::DivideAndRoundUp<uint32>(GetNumTilesY(), VTData->HeightInBlocks);
-    ProducerDesc.WidthInBlocks = VTData->WidthInBlocks;
-    ProducerDesc.HeightInBlocks = VTData->HeightInBlocks;
+    ProducerDesc.TileSize = PinnedVTData->TileSize;
+    ProducerDesc.TileBorderSize = PinnedVTData->TileBorderSize;
+    ProducerDesc.BlockWidthInTiles = FMath::DivideAndRoundUp<uint32>(GetNumTilesX(), PinnedVTData->WidthInBlocks);
+    ProducerDesc.BlockHeightInTiles = FMath::DivideAndRoundUp<uint32>(GetNumTilesY(), PinnedVTData->HeightInBlocks);
+    ProducerDesc.WidthInBlocks = PinnedVTData->WidthInBlocks;
+    ProducerDesc.HeightInBlocks = PinnedVTData->HeightInBlocks;
     ProducerDesc.DepthInTiles = 1u;
     ProducerDesc.MaxLevel = MaxLevel;
-    ProducerDesc.NumTextureLayers = VTData->GetNumLayers();
-    ProducerDesc.NumPhysicalGroups = bSinglePhysicalSpace ? 1 : VTData->GetNumLayers();
-    for (uint32 LayerIndex = 0u; LayerIndex < VTData->GetNumLayers(); ++LayerIndex)
+    ProducerDesc.NumTextureLayers = PinnedVTData->GetNumLayers();
+    ProducerDesc.NumPhysicalGroups = bSinglePhysicalSpace ? 1 : PinnedVTData->GetNumLayers();
+    for (uint32 LayerIndex = 0u; LayerIndex < PinnedVTData->GetNumLayers(); ++LayerIndex)
     {
-        ProducerDesc.LayerFormat[LayerIndex] = VTData->LayerTypes[LayerIndex];
-        ProducerDesc.LayerFallbackColor[LayerIndex] = VTData->LayerFallbackColors[LayerIndex];
+        ProducerDesc.LayerFormat[LayerIndex] = PinnedVTData->LayerTypes[LayerIndex];
+        ProducerDesc.LayerFallbackColor[LayerIndex] = PinnedVTData->LayerFallbackColors[LayerIndex];
         ProducerDesc.PhysicalGroupIndex[LayerIndex] = bSinglePhysicalSpace ? 0 : LayerIndex;
         ProducerDesc.bIsLayerSRGB[LayerIndex] = bSRGB;
     }
     ProducerDesc.bRequiresSinglePhysicalPool = bRequiresSinglePhysicalPool;
     ProducerDesc.Priority = VirtualTextureStreamingPriority;
 
-    //FUploadingVirtualTexture* VirtualTexture = new FUploadingVirtualTexture(ProducerDesc.Name, VTData, FirstMipToUse);
-    FOdysseyVirtualRenderTargetProducer* Producer = new FOdysseyVirtualRenderTargetProducer(ProducerDesc.Name, VTData, FirstMipToUse, ProducerDesc);
+    //FUploadingVirtualTexture* VirtualTexture = new FUploadingVirtualTexture(ProducerDesc.Name, PinnedVTData, FirstMipToUse);
+    FOdysseyVirtualRenderTargetProducer* Producer = new FOdysseyVirtualRenderTargetProducer(ProducerDesc.Name, PinnedVTData, FirstMipToUse, ProducerDesc);
     ProducerHandle = GetRendererModule().RegisterVirtualTextureProducer(RHICmdList, ProducerDesc, Producer);
 
     // Only create the miptails mini-texture in-editor.
@@ -128,12 +128,10 @@ FOdysseyVirtualRenderTargetResource::InitRHI(FRHICommandListBase& RHICmdList)
     //InitializeEditorResources(RHICmdList, VirtualTexture);
 #endif
 
-    /*
-    if (TextureRHI.IsValid())
+    /*if (TextureRHI.IsValid())
     {
         TextureRHI->SetOwnerName(GetOwnerName());
-    }
-    */
+    }*/
 }
 
 void
@@ -145,67 +143,34 @@ FOdysseyVirtualRenderTargetResource::ReleaseRHI()
     ProducerHandle = FVirtualTextureProducerHandle();
 }
 
-IAllocatedVirtualTexture*
-FOdysseyVirtualRenderTargetResource::AcquireAllocatedVT()
-{
-    check(IsInRenderingThread());
-    if (!AllocatedVT)
-    {
-        FAllocatedVTDescription VTDesc;
-        VTDesc.Dimensions = 2;
-        VTDesc.TileSize = GetTileSize();
-        VTDesc.TileBorderSize = GetBorderSize();
-        VTDesc.NumTextureLayers = GetNumLayers();
-        VTDesc.bShareDuplicateLayers = bSinglePhysicalSpace;
-
-        for (uint32 LayerIndex = 0u; LayerIndex < VTDesc.NumTextureLayers; ++LayerIndex)
-        {
-            VTDesc.ProducerHandle[LayerIndex] = ProducerHandle; // use the same producer for each layer
-            VTDesc.ProducerLayerIndex[LayerIndex] = LayerIndex;
-        }
-        AllocatedVT = GetRendererModule().AllocateVirtualTexture(VTDesc);
-    }
-    return AllocatedVT;
-}
-
-void
-FOdysseyVirtualRenderTargetResource::ReleaseAllocatedVT()
-{
-    if (AllocatedVT)
-    {
-        GetRendererModule().DestroyVirtualTexture(AllocatedVT);
-        AllocatedVT = nullptr;
-    }
-}
-
 uint32
 FOdysseyVirtualRenderTargetResource::GetSizeX() const
 {
-    TSharedPtr<FOdysseyVirtualRenderTargetData> VTData = WeakVTData.Pin();
-    if (!VTData)
+    TSharedPtr<FOdysseyVirtualRenderTargetData> PinnedVTData = WeakVTData.Pin();
+    if (!PinnedVTData)
         return 0;
 
-    return FMath::Max(VTData->Width >> FirstMipToUse, 1u);
+    return FMath::Max(PinnedVTData->Width >> FirstMipToUse, 1u);
 }
 
 uint32
 FOdysseyVirtualRenderTargetResource::GetSizeY() const
 {
-    TSharedPtr<FOdysseyVirtualRenderTargetData> VTData = WeakVTData.Pin();
-    if (!VTData)
+    TSharedPtr<FOdysseyVirtualRenderTargetData> PinnedVTData = WeakVTData.Pin();
+    if (!PinnedVTData)
         return 0;
 
-    return FMath::Max(VTData->Height >> FirstMipToUse, 1u);
+    return FMath::Max(PinnedVTData->Height >> FirstMipToUse, 1u);
 }
 
 EPixelFormat
 FOdysseyVirtualRenderTargetResource::GetFormat(uint32 LayerIndex) const
 {
-    TSharedPtr<FOdysseyVirtualRenderTargetData> VTData = WeakVTData.Pin();
-    if (!VTData)
+    TSharedPtr<FOdysseyVirtualRenderTargetData> PinnedVTData = WeakVTData.Pin();
+    if (!PinnedVTData)
         return PF_Unknown;
 
-    return VTData->LayerTypes[LayerIndex];
+    return PinnedVTData->LayerTypes[LayerIndex];
 }
 
 int
@@ -218,91 +183,70 @@ FOdysseyVirtualRenderTargetResource::GetNumBlocks() const
 FIntPoint
 FOdysseyVirtualRenderTargetResource::GetSizeInBlocks() const
 {
-    TSharedPtr<FOdysseyVirtualRenderTargetData> VTData = WeakVTData.Pin();
-    if (!VTData)
+    TSharedPtr<FOdysseyVirtualRenderTargetData> PinnedVTData = WeakVTData.Pin();
+    if (!PinnedVTData)
         return FIntPoint(0, 0);
 
-    return FIntPoint(VTData->WidthInBlocks, VTData->HeightInBlocks);
+    return FIntPoint(PinnedVTData->WidthInBlocks, PinnedVTData->HeightInBlocks);
 }
 
 uint32
 FOdysseyVirtualRenderTargetResource::GetNumTilesX() const
 {
-    TSharedPtr<FOdysseyVirtualRenderTargetData> VTData = WeakVTData.Pin();
-    if (!VTData)
+    TSharedPtr<FOdysseyVirtualRenderTargetData> PinnedVTData = WeakVTData.Pin();
+    if (!PinnedVTData)
         return 0;
 
-    return FMath::Max(VTData->GetWidthInTiles() >> FirstMipToUse, 1u);
+    return FMath::Max(PinnedVTData->GetWidthInTiles() >> FirstMipToUse, 1u);
 }
 
 uint32
 FOdysseyVirtualRenderTargetResource::GetNumTilesY() const
 {
-    TSharedPtr<FOdysseyVirtualRenderTargetData> VTData = WeakVTData.Pin();
-    if (!VTData)
+    TSharedPtr<FOdysseyVirtualRenderTargetData> PinnedVTData = WeakVTData.Pin();
+    if (!PinnedVTData)
         return 0;
 
-    return FMath::Max(VTData->GetHeightInTiles() >> FirstMipToUse, 1u);
+    return FMath::Max(PinnedVTData->GetHeightInTiles() >> FirstMipToUse, 1u);
 }
 
 uint32
 FOdysseyVirtualRenderTargetResource::GetNumMips() const
-{TSharedPtr<FOdysseyVirtualRenderTargetData> VTData = WeakVTData.Pin();
-    if (!VTData)
+{
+    TSharedPtr<FOdysseyVirtualRenderTargetData> PinnedVTData = WeakVTData.Pin();
+    if (!PinnedVTData)
         return 0;
 
-    ensure((int32)VTData->GetNumMips() > FirstMipToUse);
-    return VTData->GetNumMips() - FirstMipToUse;
+    ensure((int32)PinnedVTData->GetNumMips() > FirstMipToUse);
+    return PinnedVTData->GetNumMips() - FirstMipToUse;
 }
 
 uint32
 FOdysseyVirtualRenderTargetResource::GetNumLayers() const
 {
-    TSharedPtr<FOdysseyVirtualRenderTargetData> VTData = WeakVTData.Pin();
-    if (!VTData)
+    TSharedPtr<FOdysseyVirtualRenderTargetData> PinnedVTData = WeakVTData.Pin();
+    if (!PinnedVTData)
         return 0;
 
-    return VTData->GetNumLayers();
+    return PinnedVTData->GetNumLayers();
 }
 
 uint32
 FOdysseyVirtualRenderTargetResource::GetTileSize() const
 {
-    TSharedPtr<FOdysseyVirtualRenderTargetData> VTData = WeakVTData.Pin();
-    if (!VTData)
+    TSharedPtr<FOdysseyVirtualRenderTargetData> PinnedVTData = WeakVTData.Pin();
+    if (!PinnedVTData)
         return 0;
 
-    return VTData->TileSize;
+    return PinnedVTData->TileSize;
 }
 
 uint32
 FOdysseyVirtualRenderTargetResource::GetBorderSize() const
 {
-    TSharedPtr<FOdysseyVirtualRenderTargetData> VTData = WeakVTData.Pin();
-    if (!VTData)
+    TSharedPtr<FOdysseyVirtualRenderTargetData> PinnedVTData = WeakVTData.Pin();
+    if (!PinnedVTData)
         return 0;
 
-    return VTData->TileBorderSize;
-}
-
-
-uint32
-FOdysseyVirtualRenderTargetResource::GetAllocatedvAddress() const
-{
-    if (AllocatedVT)
-    {
-        return AllocatedVT->GetVirtualAddress();
-    }
-    return ~0;
-}
-
-FIntPoint
-FOdysseyVirtualRenderTargetResource::GetPhysicalTextureSize(uint32 LayerIndex) const
-{
-    if (AllocatedVT)
-    {
-        const uint32 PhysicalTextureSize = AllocatedVT->GetPhysicalTextureSize(LayerIndex);
-        return FIntPoint(PhysicalTextureSize, PhysicalTextureSize);
-    }
-    return FIntPoint(0, 0);
+    return PinnedVTData->TileBorderSize;
 }

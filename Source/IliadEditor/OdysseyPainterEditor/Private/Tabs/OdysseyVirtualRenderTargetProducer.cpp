@@ -27,6 +27,7 @@ FOdysseyVirtualRenderTargetProducer::GetLocalMipBias(uint8 vLevel, uint32 vAddre
     if (!VTData)
         return 0;
 
+    /*
     vLevel += FirstMipOffset;
 
     const uint32 NumMips = VTData->NumMips;
@@ -34,13 +35,6 @@ FOdysseyVirtualRenderTargetProducer::GetLocalMipBias(uint8 vLevel, uint32 vAddre
     uint32 Current_vAddress = vAddress;
     while (Current_vLevel < NumMips)
     {
-        if (!VTData->IsValidAddress(Current_vLevel, Current_vAddress))
-        {
-            // vAddress is out-of-bounds for the given producer
-            Current_vLevel = NumMips - 1u;
-            break;
-        }
-
         const uint32 TileOffset = VTData->GetTileOffset(Current_vLevel, Current_vAddress, 0);
         if (TileOffset != ~0u)
         {
@@ -49,9 +43,9 @@ FOdysseyVirtualRenderTargetProducer::GetLocalMipBias(uint8 vLevel, uint32 vAddre
 
         Current_vLevel++;
         Current_vAddress >>= 2;
-    }
+    } */
 
-    return Current_vLevel - vLevel;
+    return 0; //Current_vLevel - vLevel;
 }
 
 FVTRequestPageResult

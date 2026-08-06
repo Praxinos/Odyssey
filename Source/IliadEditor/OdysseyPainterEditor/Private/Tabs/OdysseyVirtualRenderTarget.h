@@ -4,13 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "RenderResource.h"
+#include "TextureResource.h"
 #include "VirtualTexturing.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorTiledViewportClient
 class FOdysseyVirtualRenderTargetResource
-    : public FTexture
+    : public FVirtualTexture2DResource
 {
 public:
     // Construction / Destruction
@@ -26,59 +26,20 @@ public:
     virtual uint32 GetSizeY() const override;
     // FTexture overrides
 
-    const FVirtualTextureProducerHandle& GetProducerHandle() const { return ProducerHandle; }
-
-    /**
-     * FVirtualTexture2DResource may have an AllocatedVT, which represents a page table allocation for the virtual texture.
-     * VTs used by materials generally don't need their own allocation, since the material has its own page table allocation for each VT stack.
-     * VTs used as lightmaps need their own allocation.  Also VTs open in texture editor will have a temporary allocation.
-     * GetAllocatedVT() will return the current allocation if one exists.
-     * AcquireAllocatedVT() will make a new allocation if needed, and return it.
-     * ReleaseAllocatedVT() will free any current allocation.
-     */
-    class IAllocatedVirtualTexture* GetAllocatedVT() const { return AllocatedVT; }
-    class IAllocatedVirtualTexture* AcquireAllocatedVT();
-    void ReleaseAllocatedVT();
-
-    EPixelFormat GetFormat(uint32 LayerIndex) const;
     int GetNumBlocks() const;
-    FIntPoint GetSizeInBlocks() const;
-    uint32 GetNumTilesX() const;
-    uint32 GetNumTilesY() const;
-    uint32 GetNumMips() const;
-    uint32 GetNumLayers() const;
-    uint32 GetTileSize() const; //no borders
-    uint32 GetBorderSize() const;
-    uint32 GetAllocatedvAddress() const;
+    virtual EPixelFormat GetFormat(uint32 LayerIndex) const override;
+    virtual FIntPoint GetSizeInBlocks() const override;
+    virtual uint32 GetNumTilesX() const override;
+    virtual uint32 GetNumTilesY() const override;
+    virtual uint32 GetNumMips() const override;
+    virtual uint32 GetNumLayers() const override;
+    virtual uint32 GetTileSize() const override; //no borders
+    virtual uint32 GetBorderSize() const override;
 
-    FIntPoint GetPhysicalTextureSize(uint32 LayerIndex) const;
 
 protected:
-    /** The FName of the texture asset */
-    FName TextureName;
-    /** The FName of the texture package for stats */
-    FName PackageName;
-    /** A hash of the texture asset name */
-    uint32 FullNameHash = 0;
-    /** Cached sampler config */
-    TEnumAsByte<ESamplerFilter> Filter = SF_Bilinear;
-    TEnumAsByte<ESamplerAddressMode> AddressU = AM_Wrap;
-    TEnumAsByte<ESamplerAddressMode> AddressV = AM_Wrap;
-    /** Cached flags for texture creation. */
-    ETextureCreateFlags TexCreateFlags = ETextureCreateFlags::None;
-    /** Cached owner settings */
-    bool bSinglePhysicalSpace = false;
-    bool bRequiresSinglePhysicalPool = false;
-    EVTProducerPriority VirtualTextureStreamingPriority;
-    /** Mip offset */
-    int32 FirstMipToUse = 0;
-
     /**
      * The actual data of the render target (not GPU)
      */
     TWeakPtr<class FOdysseyVirtualRenderTargetData> WeakVTData;
-
-    /** Local allocated VT objects used for editor views etc. */
-    class IAllocatedVirtualTexture* AllocatedVT = nullptr;
-    FVirtualTextureProducerHandle ProducerHandle;
 };

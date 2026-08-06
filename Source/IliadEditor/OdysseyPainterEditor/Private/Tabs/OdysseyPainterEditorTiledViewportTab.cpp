@@ -77,10 +77,10 @@ void
 FOdysseyPainterEditorTiledViewportTab::UpdateViewportTextureRenderer()
 {
     IOdysseyTextureRenderingAbility* renderer = nullptr;
-    int width = 256;
-    int height = 256;
+    int width = 8192;
+    int height = 8192;
 
-    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+    /* TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
     if (source)
     {
         if (source->Id() == FOdysseyPainterEditorTextureSource::StaticId())
@@ -97,7 +97,7 @@ FOdysseyPainterEditorTiledViewportTab::UpdateViewportTextureRenderer()
 
         width = source->Width();
         height = source->Height();
-    }
+    } */
 
     mViewportClient->SetTextureRenderer(renderer);
     mViewportClient->SetCanvasSize(width, height);

@@ -60,7 +60,7 @@ FOdysseyVirtualRenderTargetFinalizer::Finalize(FRDGBuilder& GraphBuilder)
             ETextureCreateFlags::RenderTargetable | ETextureCreateFlags::ShaderResource
         );
         FRDGTextureRef TextRenderTarget = GraphBuilder.CreateTexture(TextRenderTargetDesc, TEXT("FOdysseyVirtualRenderTargetFinalizer.TextRenderTarget"));
-        AddClearRenderTargetPass(GraphBuilder, TextRenderTarget, FLinearColor::Green);
+        AddClearRenderTargetPass(GraphBuilder, TextRenderTarget, FLinearColor(0.f,1.f,0.f,0.5f));
 
         FCanvas* TextCanvas = FCanvas::Create(GraphBuilder, TextRenderTarget, nullptr, FGameTime(), GMaxRHIFeatureLevel);
 
