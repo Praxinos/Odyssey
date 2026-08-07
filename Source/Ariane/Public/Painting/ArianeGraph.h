@@ -23,6 +23,21 @@ public:
     struct FCycle;
     struct FPath;
 
+    struct FExplorationPair
+    {
+        FSection* ReturnSection;
+        FNode* DepartNode;
+        FSection* DepartSection;
+        uint32 DepartNodeIndex;
+        double SectionLength;
+
+        FExplorationPair();
+        FExplorationPair( FSection* ReturnSection
+                        , FNode* DepartVertex
+                        , uint32 DepartVertexIndex
+                        , FSection* DepartSection );
+    };
+
     struct ARIANE_API FSectionLinkInfo
     {
         FSection* Section;
@@ -65,9 +80,14 @@ public:
         FNode( const FVector2D& InPosition, bool bProjected, const FVector& InOriginalPosition );
         void AddSection( FSection* Section, uint32 SectionNodeIndex );
         void RemoveSection( FSection* Section, uint32 SectionNodeIndex );
+        FSectionLinkInfo* GetSectionLinkInfo( FSection* Section, uint32 SectionNodeIndex );
+        FSectionLinkInfo* GetCycleNextSection( FSectionLinkInfo* LastSectionLinkInfo, double Orientation );
+        FSectionLinkInfo* GetOtherSectionLinkInfo( FSectionLinkInfo* LastSectionLinkInfo );
         FSection* GetSection( FEdge* Edge );
         FEdge *GetOtherEdge( FEdge* Edge );
         int32 GetIndex( FEdge* Edge );
+        void BuildExplorationPairs( TArray<FExplorationPair>& OutExplorationPairsArray );
+        void UnlinkPendantSections();
 
         TArray<FSectionLinkInfo> SectionLinkInfos;
         FEdge* Edges[2];
@@ -494,14 +514,29 @@ public:
 public:
     FArianeGraph();
 
-    void Build( const FVector& ViewOrigin, const FPlane& ProjectionPlane, const TArray<FArianeObject*>& Objects );
+    void Solve( const FVector& ViewOrigin, const FPlane& ProjectionPlane, const TArray<FArianeObject*>& Objects );
     //Build( TArray<FOdysseyVectorObject*> Objects ); // Later
     FCycle* PickCycle( const FVector& RayOrigin, const FVector& RayDirection );
     void HighlightCycle( FCycle* Cycle );
     const FPlane& GetProjectionPlane();
 
 protected:
+    static FSectionLinkInfo* FindNextSectionLinkInfo( FSectionLinkInfo* LastSectionLinkInfo
+                                                    , TArray<FSectionLinkInfo>& CandidateSections
+                                                    , double Orientation );
+    static double GetCycleNormalVector( TArray<uint32>& NodeIndexArray, TArray<FSection*>& SectionArray );
+
     void Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& Objects );
+    void Build();
+    void SimplifyGraph();
+    void Explore( FExplorationPair* ExplorationPair );
+    uint32 FindPath( FSection* ReturnSection
+                   , uint32 SectionNodeIndex
+                   , FSection* Section
+                   , TArray<uint32>& OutNodeIndexArray
+                   , TArray<FSection*>& OutSectionArray
+                   , double Orientation
+                   , uint32 Depth );
     void Intersect( TArray<FPath*>& SectionnablePaths
                   , uint32& OutTotalLinearSectionCount
                   , uint32& OutTotalCubicSectionCount );
@@ -523,6 +558,10 @@ protected:
                           , double SectionNode1EdgeT
                           , TArray<FSection*>& ShortSections );
 protected:
+    static const uint32 NOCYCLE  = 0;
+    static const uint32 BLOCKED  = 1;
+    static const uint32 HASCYCLE = 2;
+
     FPlane ProjectionPlane;
     FCriticalSection Mutex;
     // we store everything in one buffer per type, for performance

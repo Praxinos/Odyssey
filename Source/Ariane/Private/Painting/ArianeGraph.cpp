@@ -8,6 +8,170 @@
 #include "ArianeVertex.h"
 #include "ArianeSegment.h"
 
+//static
+FArianeGraph::FSectionLinkInfo*
+FArianeGraph::FindNextSectionLinkInfo( FSectionLinkInfo* LastSectionLinkInfo
+                                     , TArray<FSectionLinkInfo>& CandidateSections
+                                     , double Orientation )
+{
+    FSectionLinkInfo* RightRet = nullptr;
+    FSectionLinkInfo* WrongRet = nullptr;
+
+    if( CandidateSections.Num() )
+    {
+        FVector2D LastSectionVector = LastSectionLinkInfo->GetVector();
+        double MinDot =  DBL_MAX;
+        double MaxDot = -DBL_MAX;
+        TArray<FSectionLinkInfo*> RightSideSections;
+        TArray<FSectionLinkInfo*> WrongSideSections;
+        uint32 SectionCount = CandidateSections.Num();
+
+        RightSideSections.Reserve( SectionCount );
+        WrongSideSections.Reserve( SectionCount );
+
+        for( FSectionLinkInfo& CandidateSectionInfo : CandidateSections )
+        {
+            if( &CandidateSectionInfo != LastSectionLinkInfo )
+            {
+                if( CandidateSectionInfo.GetVector().SquaredLength() )
+                {
+                    double CrossProduct = FVector2D::CrossProduct( -LastSectionVector
+                                                                  , CandidateSectionInfo.GetVector() );
+
+                    if( ( CrossProduct * Orientation >= 0.0f ) )
+                    {
+                        RightSideSections.Add( &CandidateSectionInfo );
+                    }
+
+                    if( ( CrossProduct * Orientation <= 0.0f ) )
+                    {
+                        WrongSideSections.Add( &CandidateSectionInfo );
+                    }
+                }
+            }
+        }
+
+        for( FSectionLinkInfo* RightSideSectionLinkInfo : RightSideSections )
+        {
+            FSection* Section = RightSideSectionLinkInfo->Section;
+            FVector2D SectionVector = RightSideSectionLinkInfo->GetVector();
+            double Dot = LastSectionVector.Dot( SectionVector );
+
+            if( Dot > MaxDot )
+            {
+                RightRet = RightSideSectionLinkInfo;
+
+                MaxDot = Dot;
+            }
+        }
+
+        if( RightRet )
+        {
+            return RightRet;
+        }
+
+        for( FSectionLinkInfo* WrongSideSectionLinkInfo : WrongSideSections )
+        {
+            FSection* Section = WrongSideSectionLinkInfo->Section;
+            FVector2D SectionVector = WrongSideSectionLinkInfo->GetVector();
+            double Dot = LastSectionVector.Dot( SectionVector );
+
+            if( Dot < MinDot )
+            {
+                WrongRet = WrongSideSectionLinkInfo;
+
+                MinDot = Dot;
+            }
+        }
+
+        if( WrongRet )
+        {
+            return WrongRet;
+        }
+    }
+
+    return nullptr;
+}
+
+// find the overall orientation of the future cycle
+//static
+double
+FArianeGraph::GetCycleNormalVector( TArray<uint32>& NodeIndexArray, TArray<FSection*>& SectionArray )
+{
+    double Z = 0;
+    int32 ArraySize = SectionArray.Num();
+
+    for( int i = 0; i < ArraySize; i++ )
+    {
+        int n = ( i + 1 ) % ArraySize;
+        FSection* Sectioni = SectionArray[i];
+        uint32 NodeIndex = NodeIndexArray[i];
+        FNode* Node = Sectioni->Nodes[NodeIndexArray[i]];
+        uint32 NextNodeIndex = ( NodeIndex == 0 ) ? 1 : 0;
+        FNode* NextNode = Sectioni->Nodes[NextNodeIndex];
+
+        FVector2D& NodeCoords = Node->Position;
+        FVector2D& NextNodeCoords = NextNode->Position;
+
+        if( ( Sectioni->GetClass() == FSectionLinear::StaticClass() ) )
+        {
+            Z += ( ( NodeCoords.X - NextNodeCoords.X ) * ( NodeCoords.Y + NextNodeCoords.Y ) );
+        }
+
+        if( Sectioni->GetClass() == FSectionCubic::StaticClass() )
+        {
+            double DeltaT = (double)NextNodeIndex - (double)NodeIndex;
+            int Subdiv = 8;
+            double StepT = DeltaT / Subdiv;
+            double T0 = NodeIndex;
+
+            // By relying only on start and end points of a section, we lack precision.
+            // Here we rely on more acurate computation by getting intermediate points.
+            for( int j = 0; j < Subdiv; j++ )
+            {
+                double T1 = T0 + StepT;
+                // however at end points, we need the same coordinates for each section. Relying on T value does not guarantee that
+                // due to imprecision and would fake the calculation. So, we use the value stored in viCoords and vnCoords.
+                FVector2D P0Coords = ( j == 0          ) ? NodeCoords     : Sectioni->GetPointAt( T0 );
+                FVector2D P1Coords = ( j == Subdiv - 1 ) ? NextNodeCoords : Sectioni->GetPointAt( T1 );
+
+                Z += ( ( P0Coords.X - P1Coords.X ) * ( P0Coords.Y + P1Coords.Y ) );
+
+                T0 += StepT;
+            }
+        }
+
+
+// https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal
+// Newell's method
+        //z += ( ( viCoords.x - vnCoords.x ) * ( viCoords.y + vnCoords.y ) );
+    }
+
+    return Z;
+}
+
+FArianeGraph::FExplorationPair::FExplorationPair()
+    : ReturnSection ( nullptr )
+    , DepartNode ( nullptr )
+    , DepartSection ( nullptr )
+    , DepartNodeIndex ( 0 )
+    , SectionLength ( 0.0f )
+{
+}
+
+FArianeGraph::FExplorationPair::FExplorationPair( FSection* InReturnSection
+                                                , FNode* InDepartNode
+                                                , uint32 InDepartNodeIndex
+                                                , FSection* InDepartSection )
+    : ReturnSection ( InReturnSection )
+    , DepartNode ( InDepartNode )
+    , DepartNodeIndex ( InDepartNodeIndex )
+    , DepartSection ( InDepartSection )
+    // SectionLength is used for sorting exploration pairs
+    , SectionLength ( ReturnSection->GetLength() + DepartSection->GetLength() )
+{
+}
+
 FVector2D
 FArianeGraph::FSectionLinkInfo::GetVector()
 {
@@ -58,6 +222,49 @@ FArianeGraph::FNode::RemoveSection( FSection* Section, uint32 SectionNodeIndex )
         } );
 }
 
+FArianeGraph::FSectionLinkInfo*
+FArianeGraph::FNode::GetSectionLinkInfo( FSection* Section, uint32 SectionNodeIndex )
+{
+   for( FSectionLinkInfo& SectionLinkInfo : SectionLinkInfos )
+    {
+        if( ( SectionLinkInfo.Section          == Section            )
+         && ( SectionLinkInfo.SectionNodeIndex == SectionNodeIndex ) )
+        {
+            return &SectionLinkInfo;
+        }
+    }
+
+    return nullptr;
+}
+
+FArianeGraph::FSectionLinkInfo*
+FArianeGraph::FNode::GetOtherSectionLinkInfo( FSectionLinkInfo* LastSectionLinkInfo )
+{
+    for( FSectionLinkInfo& CandidateSectionInfo : SectionLinkInfos )
+    {
+        if( &CandidateSectionInfo != LastSectionLinkInfo )
+        {
+            return &CandidateSectionInfo;
+        }
+    }
+
+    return nullptr;
+}
+
+FArianeGraph::FSectionLinkInfo*
+FArianeGraph::FNode::GetCycleNextSection( FSectionLinkInfo* LastSectionLinkInfo
+                                        , double Orientation )
+{
+    if( SectionLinkInfos.Num() == 2 )
+    {
+        return GetOtherSectionLinkInfo( LastSectionLinkInfo );
+    }
+
+    return FindNextSectionLinkInfo( LastSectionLinkInfo
+                                  , SectionLinkInfos
+                                  , Orientation );
+}
+
 FArianeGraph::FEdge*
 FArianeGraph::FNode::GetOtherEdge( FEdge* InEdge )
 {
@@ -86,6 +293,42 @@ FArianeGraph::FNode::GetIndex( FEdge* Edge )
     }
 
     return -1;
+}
+
+void
+FArianeGraph::FNode::BuildExplorationPairs( TArray<FExplorationPair>& OutExplorationPairsArray )
+{
+    FSectionLinkInfo* DepartSectionLinkInfo = nullptr;
+
+    for( FSectionLinkInfo& ReturnSectionLinkInfo : SectionLinkInfos )
+    {
+        DepartSectionLinkInfo = FindNextSectionLinkInfo( &ReturnSectionLinkInfo
+                                                       , SectionLinkInfos
+                                                       , 1.0f );
+
+        if( DepartSectionLinkInfo )
+        {
+            OutExplorationPairsArray.Emplace(  ReturnSectionLinkInfo.Section
+                                             , this
+                                             , DepartSectionLinkInfo->SectionNodeIndex
+                                             , DepartSectionLinkInfo->Section );
+        }
+    }
+}
+
+void
+FArianeGraph::FNode::UnlinkPendantSections()
+{
+    FNode* CurrentNode = this;
+
+    while( CurrentNode->SectionLinkInfos.Num() == 1 )
+    {
+        FSection* PendantSection = CurrentNode->SectionLinkInfos[0].Section;
+
+        CurrentNode->SectionLinkInfos[0].Section->Unlink( false );
+
+        CurrentNode = PendantSection->GetOtherNode( CurrentNode );
+    }
 }
 
 FArianeGraph::FIntersection::FIntersection( FNode* InNode, float InEdgeT )
@@ -631,7 +874,6 @@ FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& O
     }
 }
 
-// returns true if the path needs to be taken into account in the graph
 void
 FArianeGraph::IntersectPath( FPath* Path )
 {
@@ -650,7 +892,7 @@ FArianeGraph::IntersectPath( FPath* Path )
 }
 
 void
-FArianeGraph::Intersect( TArray<FPath*>& SectionnablePaths
+FArianeGraph::Intersect( TArray<FPath*>& OutSectionnablePaths
                        , uint32& OutTotalLinearSectionCount
                        , uint32& OutTotalCubicSectionCount )
 {
@@ -664,7 +906,7 @@ FArianeGraph::Intersect( TArray<FPath*>& SectionnablePaths
 #if !PLATFORM_MAC
         ParallelFor( CoreCount
                    , [ this
-                     , &SectionnablePaths
+                     , &OutSectionnablePaths
                      , &OutTotalLinearSectionCount
                      , &OutTotalCubicSectionCount
                      , CoreCount ]( int32 CpuID )
@@ -694,7 +936,7 @@ FArianeGraph::Intersect( TArray<FPath*>& SectionnablePaths
     {
         if( Path.IsLoop() || Path.bHasIntersections )
         {
-            SectionnablePaths.Add( &Path );
+            OutSectionnablePaths.Add( &Path );
 
             OutTotalLinearSectionCount += Path.LinearEdgeCount;
             OutTotalCubicSectionCount += Path.CubicEdgeCount;
@@ -797,43 +1039,24 @@ FArianeGraph::CreatePathSections( FPath* Path, TArray<FSection*>& ShortSections 
     }
 }
 
-// Note: For ariane objects, there is no need for cubic segments because a projected cubic segment is not a cubic segment itself
 void
-FArianeGraph::Build( const FVector& ViewOrigin, const FPlane& InProjectionPlane, const TArray<FArianeObject*>& Objects )
+FArianeGraph::Build()
 {
     uint32 TotalLinearSectionCount = 0;
     uint32 TotalCubicSectionCount = 0;
     TArray<FPath*> SectionnablePaths;
     TArray<FSection*> ShortSections;
 
-    ProjectionPlane = InProjectionPlane;
-
-
-    // clear cycles
-    for( FCycle* Cycle : Cycles )
-    {
-        delete Cycle;
-    }
-
-    Cycles.Empty();
-
-    // Step1: Import Paths and convert them into 2D space
-    Import( ViewOrigin, Objects );
-
-
     LinearSectionBuffer.Empty();
     CubicSectionBuffer.Empty();
     Sections.Empty();
 
+    XIntersectionRecordArray.Empty();
     IntersectionNodeBuffer.Empty();
 
     SectionnablePaths.Reserve( PathBuffer.Num() );
     // Step2: find intersections
     Intersect( SectionnablePaths, TotalLinearSectionCount, TotalCubicSectionCount );
-
-    LinearSectionBuffer.Reserve( TotalLinearSectionCount );
-    CubicSectionBuffer.Reserve( TotalCubicSectionCount );
-    Sections.Reserve( TotalLinearSectionCount + TotalCubicSectionCount );
 
     // reserve memory to vertices in one go.
     IntersectionNodeBuffer.Reserve( XIntersectionRecordArray.Num() );
@@ -868,6 +1091,10 @@ FArianeGraph::Build( const FVector& ViewOrigin, const FPlane& InProjectionPlane,
         }
     }
 
+    LinearSectionBuffer.Reserve( TotalLinearSectionCount );
+    CubicSectionBuffer.Reserve( TotalCubicSectionCount );
+    Sections.Reserve( TotalLinearSectionCount + TotalCubicSectionCount );
+
     // create sections for exact intersections on each segment
     // only for path that have intersected segments.
     for( FPath* Path : SectionnablePaths )
@@ -901,6 +1128,177 @@ FArianeGraph::Build( const FVector& ViewOrigin, const FPlane& InProjectionPlane,
         // Unlink() and stitch
         ShortSection->Stitch();
     }
+}
+
+
+
+void
+FArianeGraph::SimplifyGraph()
+{
+    // we iterate sections because paths without any intersections (or loops) won't have sections, that way it
+    // is faster than iterating using the nodes or edges, as all paths haves nodes and edges, even those that will be ignored.
+    for( FSection *Section : Sections )
+    {
+        if( Section->IsLinked() == true )
+        {
+            if( Section->Nodes[0] != Section->Nodes[1]  ) // exclude loops
+            {
+                if( Section->Nodes[0]->SectionLinkInfos.Num() == 1 )
+                {
+                    Section->Nodes[0]->UnlinkPendantSections();
+                }
+
+                if( Section->Nodes[1]->SectionLinkInfos.Num() == 1 )
+                {
+                    Section->Nodes[1]->UnlinkPendantSections();
+                }
+            }
+        }
+    }
+}
+
+uint32
+FArianeGraph::FindPath( FSection* ReturnSection
+                      , uint32 SectionNodeIndex
+                      , FSection* Section
+                      , TArray<uint32>& OutNodeIndexArray
+                      , TArray<FSection*>& OutSectionArray
+                      , double Orientation
+                      , uint32 Depth ) // we could also use iVertexArray.size()
+{
+    FNode* SectionNode = Section->Nodes[SectionNodeIndex];
+    uint32 SectionNextNodeIndex = ( SectionNodeIndex == 0 ) ? 1 : 0;
+    FNode* SectionNextNode = Section->Nodes[SectionNextNodeIndex];
+    uint32 Ret = FArianeGraph::NOCYCLE;
+    bool bIsLoop = false;
+
+    OutNodeIndexArray.Push( SectionNodeIndex );
+    OutSectionArray.Push( Section );
+    Section->Block( SectionNodeIndex );
+
+    bIsLoop = ( OutSectionArray[0]->Nodes[OutNodeIndexArray[0]] == SectionNextNode );
+
+    if( ( bIsLoop == true )// cycle detected
+    && ( ( ( ReturnSection->IsLinked() == true ) && ( ReturnSection == Section ) ) // 1 return path accepted
+        || ( ReturnSection->IsLinked() == false ) ) ) // any return path accepted
+    {
+        double NormalVector = GetCycleNormalVector( OutNodeIndexArray, OutSectionArray );
+
+        if ( NormalVector > 0.0f )
+        {
+            Cycles.Add( new FCycle( OutNodeIndexArray, OutSectionArray ) );
+        }
+
+        Ret = FArianeGraph::HASCYCLE;
+    }
+    else
+    {
+        FSectionLinkInfo* SectionLinkInfo = SectionNextNode->GetSectionLinkInfo( Section, SectionNextNodeIndex );
+        FSectionLinkInfo* NextSectionLinkInfo = SectionNextNode->GetCycleNextSection( SectionLinkInfo, 1.0f );
+
+        if( NextSectionLinkInfo )
+        {
+            FSection* NextSection = NextSectionLinkInfo->Section;
+
+            if( NextSection->IsBlocked( NextSectionLinkInfo->SectionNodeIndex ) == false )
+            {
+                Ret = FindPath( ReturnSection
+                              , NextSectionLinkInfo->SectionNodeIndex
+                              , NextSectionLinkInfo->Section
+                              , OutNodeIndexArray
+                              , OutSectionArray
+                              , Orientation
+                              , Depth + 1 );
+            }
+            else
+            {
+                Ret = FArianeGraph::BLOCKED;
+            }
+        }
+    }
+
+    // propbably useless
+    OutNodeIndexArray.Pop();
+    OutSectionArray.Pop();
+
+    return Ret;
+}
+
+void
+FArianeGraph::Explore( FExplorationPair* ExplorationPair )
+{
+    if( ExplorationPair->DepartSection )
+    {
+        if( ExplorationPair->DepartSection->IsLinked() == true )
+        {
+            if( ExplorationPair->DepartSection->IsBlocked( ExplorationPair->DepartNodeIndex ) == false )
+            {
+                TArray<uint32> NodeIndexArray;
+                TArray<FSection*> SectionArray;
+
+                NodeIndexArray.Reserve( 10 );
+                SectionArray.Reserve( 10 );
+
+                uint32 ret = FindPath( ExplorationPair->ReturnSection
+                                     , ExplorationPair->DepartNodeIndex // lies on DepartSection
+                                     , ExplorationPair->DepartSection
+                                     , NodeIndexArray
+                                     , SectionArray
+                                     , 1.0f
+                                     , 0 );
+            }
+        }
+    }
+}
+
+// Note: For ariane objects, there is no need for cubic segments because a projected cubic segment is not a cubic segment itself
+void
+FArianeGraph::Solve( const FVector& ViewOrigin, const FPlane& InProjectionPlane, const TArray<FArianeObject*>& Objects )
+{
+    TArray<FExplorationPair> ExplorationPairsBuffer;
+
+    ProjectionPlane = InProjectionPlane;
+
+    // clear cycles
+    for( FCycle* Cycle : Cycles )
+    {
+        delete Cycle;
+    }
+
+    Cycles.Empty();
+
+    // Step1: Import Paths and convert them into 2D space
+    Import( ViewOrigin, Objects );
+
+    // Step2 Intersect and build the Graph
+    Build();
+
+    // Build exploration pair before simplification
+    for( FNodeIntersection& IntersectionNode : IntersectionNodeBuffer )
+    {
+        IntersectionNode.BuildExplorationPairs( ExplorationPairsBuffer );
+    }
+
+    // sort exploration pairs in order to always have a propagation that starts from
+    // the same vertex/section between sessions. This is needed in monothread and
+    // multihread modes because the exploration pairs won't be in the same order
+    // and we may switch from one to the other.
+    ExplorationPairsBuffer.Sort( []( const FExplorationPair& PairA, const FExplorationPair& PairB )
+        {
+            return PairA.SectionLength > PairB.SectionLength;
+        } );
+
+    SimplifyGraph();
+
+    // explore the graph from intersections
+    for( FExplorationPair& ExplorationPair : ExplorationPairsBuffer )
+    {
+        Explore( &ExplorationPair );
+    }
+
+    //OrderCycles();
+
+    //MergeCycles();
 }
 
 FArianeGraph::FCycle*
