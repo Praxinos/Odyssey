@@ -83,7 +83,7 @@ UArianeEditorPaintBucketTool::Reset()
                     return FArianeObject::ETraversalReturnValue::Continue;
                 } );
 
-            Graph->Build( CameraLocation, DrawingPlane, GraphedPaths );
+            Graph->Solve( CameraLocation, DrawingPlane, GraphedPaths );
         }
     }
 }
