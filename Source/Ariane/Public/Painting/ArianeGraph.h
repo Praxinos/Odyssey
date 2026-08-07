@@ -16,12 +16,14 @@ struct FArianeSegment;
 
 class ARIANE_API FArianeGraph
 {
+public:
     struct FSection;
     struct FEdge;
     struct FNode;
     struct FCycle;
+    struct FPath;
 
-    struct FSectionLinkInfo
+    struct ARIANE_API FSectionLinkInfo
     {
         FSection* Section;
         uint32 SectionNodeIndex;
@@ -42,7 +44,7 @@ class ARIANE_API FArianeGraph
        FVector2D GetVector();
     };
 
-    struct FPoint
+    struct ARIANE_API FPoint
     {
         static uint32 StaticClass(){ return 0x336f5643; }; // crc32 FArianeGraph::FPoint
         virtual uint32 GetClass(){ return StaticClass(); };
@@ -55,7 +57,7 @@ class ARIANE_API FArianeGraph
     };
 
     // a node represents a vertex or a segment's fraction point
-    struct FNode : public FPoint
+    struct ARIANE_API FNode : public FPoint
     {
         static uint32 StaticClass(){ return  0xf19b5156; }; // crc32 FArianeGraph::FNode
         virtual uint32 GetClass() override { return StaticClass(); };
@@ -72,7 +74,7 @@ class ARIANE_API FArianeGraph
         uint32 EdgeCount;
     };
 
-    struct FIntersection
+    struct ARIANE_API FIntersection
     {
         FIntersection( FNode* InNode, float InEdgeT );
 
@@ -80,7 +82,7 @@ class ARIANE_API FArianeGraph
         float EdgeT;
     };
 
-    struct FNodeIntersection : public FNode
+    struct ARIANE_API FNodeIntersection : public FNode
     {
         static uint32 StaticClass(){ return 0xb1317d8a; }; // crc32 FArianeGraph::FNodeIntersection
         virtual uint32 GetClass() override { return StaticClass(); };
@@ -96,8 +98,10 @@ class ARIANE_API FArianeGraph
             FVector2D Position;
 
             XRecord( const FVector2D& InPosition
+                   , FPath* InPath0
                    , FEdge* InEdge0
                    , double InEdge0T
+                   , FPath* InPath1
                    , FEdge* InEdge1
                    , double InEdge1T );
         };
@@ -114,7 +118,7 @@ class ARIANE_API FArianeGraph
         FEdge* Edges[2];
     };
 
-    struct FFraction
+    struct ARIANE_API FFraction
     {
         FFraction( double InFromT, double InToT, FPoint* InPoint0, FPoint* InPoint1 );
 
@@ -126,7 +130,7 @@ class ARIANE_API FArianeGraph
 
 
     // and edge represents a segment
-    struct FEdge
+    struct ARIANE_API FEdge
     {
         virtual uint32 GetClass() = 0;
 
@@ -143,7 +147,6 @@ class ARIANE_API FArianeGraph
                            , TArray<FSection*>& ShortSections );
 
         //FArianeSegment* Segment;
-
         FNode* Nodes[2];
         FFraction* Fractions;
         uint32 FractionCount;
@@ -155,7 +158,7 @@ class ARIANE_API FArianeGraph
         double Length;
     };
 
-    struct FEdgeLinear : FEdge
+    struct ARIANE_API FEdgeLinear : FEdge
     {
         static uint32 StaticClass(){ return  0xffabad9f; }; // crc32 FArianeGraph::FEdgeLinear
         virtual uint32 GetClass() override { return StaticClass(); };
@@ -167,7 +170,7 @@ class ARIANE_API FArianeGraph
         virtual FVector GetOriginalPosition( float T ) override;
     };
 
-    struct FEdgeCubic : FEdge
+    struct ARIANE_API FEdgeCubic : FEdge
     {
         static uint32 StaticClass(){ return 0x7893373f; }; // crc32 FArianeGraph::FEdgeCubic
         virtual uint32 GetClass() override { return StaticClass(); };
@@ -197,7 +200,7 @@ class ARIANE_API FArianeGraph
     };
 */
 
-    struct FSection
+    struct ARIANE_API FSection
     {
         static uint32 StaticClass(){ return 0xa1735422; }; // crc32 FArianeGraph::FSection
         virtual uint32 GetClass() = 0;
@@ -298,12 +301,12 @@ class ARIANE_API FArianeGraph
         static const uint32 GAP        = ( 1 << 4 );
     };
 
-    struct FSectionLinear : public FSection
+    struct ARIANE_API FSectionLinear : public FSection
     {
         static uint32 StaticClass(){ return 0x2cb54896; }; // crc32 FArianeGraph::FSectionLinear
         virtual uint32 GetClass() override { return StaticClass(); };
 
-        FSectionLinear( FEdge* InEdge
+        FSectionLinear( FEdgeLinear* InLinearEdge
                       , FNode* InNode0
                       , FNode* InNode1
                       , double InEdgeT0
@@ -316,7 +319,7 @@ class ARIANE_API FArianeGraph
         virtual FVector2D GetTangentAt( double t, bool iNormalize ) override;
     };
 
-    struct FSectionCubic : public FSection
+    struct ARIANE_API FSectionCubic : public FSection
     {
         static uint32 StaticClass(){ return 0xb082c558; }; // crc32 FArianeGraph::FSectionCubic
         virtual uint32 GetClass() override { return StaticClass(); };
@@ -345,7 +348,7 @@ class ARIANE_API FArianeGraph
     };
 */
 
-    struct FPath
+    struct ARIANE_API FPath
     {
         FPath( uint32 InNodeCount
              , FNode* InNodes
@@ -358,7 +361,6 @@ class ARIANE_API FArianeGraph
         bool IsLoop();
         uint32 GetEdgeCount();
 
-        bool bSectionnable;
         bool bHasIntersections;
         uint32 NodeCount;
         FNode* Nodes; // we dont use TArray, for performance reasons
@@ -367,7 +369,7 @@ class ARIANE_API FArianeGraph
         FEdge** Edges; // we dont use TArray, for performance reasons
     };
 
-    struct FCycle
+    struct ARIANE_API FCycle
     {
         /**
          * @brief build the cycle from vertices/sections passed as parameter. Sections can belong to different paths.
@@ -379,8 +381,8 @@ class ARIANE_API FArianeGraph
         //void ToBucketArray( std::vector<FCycle*>& iCyleArray
         //                  , std::vector<FOdysseyVectorBucket*>& oBucketArray );
 
-        TArray<FSection*>& GetContourSectionArray();
-        TArray<FSection*>& GetInnerSectionArray();
+        TArray<FSection*>& GetContourSections();
+        TArray<FSection*>& GetInnerSections();
 
         /**
          * @brief destructor.
@@ -494,19 +496,24 @@ public:
 
     void Build( const FVector& ViewOrigin, const FPlane& ProjectionPlane, const TArray<FArianeObject*>& Objects );
     //Build( TArray<FOdysseyVectorObject*> Objects ); // Later
+    FCycle* PickCycle( const FVector& RayOrigin, const FVector& RayDirection );
+    void HighlightCycle( FCycle* Cycle );
+    const FPlane& GetProjectionPlane();
 
 protected:
-    void Import( const FVector& ViewOrigin, const FPlane& ProjectionPlane, const TArray<FArianeObject*>& Objects );
+    void Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& Objects );
     void Intersect( TArray<FPath*>& SectionnablePaths
                   , uint32& OutTotalLinearSectionCount
                   , uint32& OutTotalCubicSectionCount );
-    void IntersectEdgeWithPath( FEdge* Edge, FPath* Path );
-    void IntersectEdges( FEdge* Edge0
+    void IntersectEdgeWithPath( FPath* Path, FEdge* Edge, FPath* IntersectedPath );
+    void IntersectEdges( FPath* Path0
+                       , FEdge* Edge0
+                       , FPath* Path1
                        , FEdge* Edge1
                        , const FVector2D& Edge1MinWithTolerance
                        , const FVector2D& Edge1MaxWithTolerance
                        , TArray<FNodeIntersection::XRecord>& OutIntersectionRecordArray );
-    bool IntersectPath( FPath* Path );
+    void IntersectPath( FPath* Path );
     void CreatePathSections( FPath* Path, TArray<FSection*>& ShortSections );
     void CreateEdgeSections( FEdge* Edge, TArray<FSection*>& ShortSections );
     void CreateEdgeSection( FEdge* Edge
@@ -516,6 +523,7 @@ protected:
                           , double SectionNode1EdgeT
                           , TArray<FSection*>& ShortSections );
 protected:
+    FPlane ProjectionPlane;
     FCriticalSection Mutex;
     // we store everything in one buffer per type, for performance
     TArray<FPoint> PointBuffer;

@@ -3,19 +3,46 @@
 
 #include "ArianeGraph.h"
 
-FArianeGraph::FSectionLinear::FSectionLinear( FEdge* InEdge
+FArianeGraph::FSectionLinear::FSectionLinear( FEdgeLinear* InLinearEdge
                                             , FNode* InNode0
                                             , FNode* InNode1
                                             , double InEdgeT0
                                             , double InEdgeT1
                                             , bool bStitchShortSections
                                             , TArray<FSection*>& OutShortSections )
-    : FSection ( InEdge, InNode0, InNode1, InEdgeT0, InEdgeT1 )
+    : FSection ( InLinearEdge, InNode0, InNode1, InEdgeT0, InEdgeT1 )
 {
-    FVector2D Tangent = ( Nodes[1]->Position - Nodes[0]->Position ).GetSafeNormal();
+    Length = fabs ( InEdgeT1 - InEdgeT0 ) * InLinearEdge->Length;
 
-    Vector[0] =  Tangent; //GetVectorFromNode( 0, false, true );
-    Vector[1] = -Tangent; //GetVectorFromNode( 1, false, true );
+    if( Length > 0.0f )
+    {
+        FVector2D Tangent = ( Nodes[1]->Position - Nodes[0]->Position ).GetSafeNormal();
+
+        Vector[0] =  Tangent; //GetVectorFromNode( 0, false, true );
+        Vector[1] = -Tangent; //GetVectorFromNode( 1, false, true );
+
+        // check bezier validity. It can happen at very very small values
+        // of T that the bezier has the same values at all controllers. We get rid of those
+        // sections in FOdysseyVectorGroupPaint::SimplifyGraph()
+        if( /*( mVector[0] == zeroVector ) || ( mVector[1] == zeroVector )*/
+            Length < 0.0000000001f
+            /*( mBezier[0] == mBezier[1] )
+         && ( mBezier[0] == mBezier[2] )
+         && ( mBezier[0] == mBezier[3] )*/ )
+        {
+            Length = 0.0f;
+        }
+    }
+
+    if( bStitchShortSections )
+    {
+        if( Length == 0.0f )
+        {
+            OutShortSections.Add( this );
+        }
+    }
+
+    Link();
 }
 
 FVector2D

@@ -10,6 +10,7 @@
 #include "ArianePath.h"
 #include "ArianeSegment.h"
 #include "ArianeVertex.h"
+#include "ArianeGraph.h"
 
 #include "ArianeEditorPaintBucketTool.generated.h"
 
@@ -71,9 +72,27 @@ public:
     virtual void DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void Init( FArianeEditor* InEditor ) override;
+    virtual void Activate() override;
 
 protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
+    void DrawCycleHUD ( FCanvas* HUDCanvas
+                      , IToolsContextRenderAPI* RenderAPI
+                      , FEditorViewportClient* ViewportClient
+                      , FSceneView* View
+                      , const FLinearColor& HcColor
+                      , FArianeGraph::FCycle* Cycle );
+    void DrawSectionsHUD ( FCanvas* HUDCanvas
+                         , IToolsContextRenderAPI* RenderAPI
+                         , FEditorViewportClient* ViewportClient
+                         , FSceneView* View
+                         , const FLinearColor& HcColor
+                         , const TArray<FArianeGraph::FSection*>& Sections );
+    void Reset();
+
+protected:
+    FArianeGraph* Graph;
+    FArianeGraph::FCycle* PickedCycle;
 };
 
 // define bitwise op
