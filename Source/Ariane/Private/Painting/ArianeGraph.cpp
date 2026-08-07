@@ -116,8 +116,10 @@ FArianeGraph::FNodeIntersection::SelfIntersects()
 }
 
 FArianeGraph::FNodeIntersection::XRecord::XRecord( const FVector2D& InPosition
+                                                 , FPath* InPath0
                                                  , FEdge* InEdge0
                                                  , double InEdge0T
+                                                 , FPath* InPath1
                                                  , FEdge* InEdge1
                                                  , double InEdge1T )
     : Edge0 ( InEdge0 )
@@ -128,6 +130,9 @@ FArianeGraph::FNodeIntersection::XRecord::XRecord( const FVector2D& InPosition
 {
     Edge0->IntersectionSlotCount++;
     Edge1->IntersectionSlotCount++;
+
+    InPath0->bHasIntersections = true;
+    InPath1->bHasIntersections = true;
 }
 
 FArianeGraph::FFraction::FFraction( double InFromT, double InToT, FPoint* InPoint0, FPoint* InPoint1 )
@@ -230,7 +235,6 @@ FArianeGraph::FPath::FPath( uint32 InNodeCount
                           , uint32 InCubicEdgeCount
                           , FEdge** InEdges )
     : bHasIntersections ( false )
-    , bSectionnable ( false )
     , NodeCount( InNodeCount )
     , Nodes( InNodes )
     , LinearEdgeCount( InLinearEdgeCount )
@@ -294,7 +298,9 @@ FArianeGraph::FArianeGraph()
 // A Tolerance value is accepted to test for near-intersections, that will be created later in the
 // process.
 void
-FArianeGraph::IntersectEdges( FEdge* Edge0
+FArianeGraph::IntersectEdges( FPath* Path0
+                            , FEdge* Edge0
+                            , FPath* Path1
                             , FEdge* Edge1
                             , const FVector2D& Edge1MinWithTolerance
                             , const FVector2D& Edge1MaxWithTolerance
@@ -408,8 +414,10 @@ FArianeGraph::IntersectEdges( FEdge* Edge0
                                     // save in temporary struct array will allow to alloc vertices in one go.
                                     Mutex.Lock();
                                     OutIntersectionRecordArray.Emplace( Edge0ISXCoords
+                                                                      , Path0
                                                                       , Edge0
                                                                       , Edge0T
+                                                                      , Path1
                                                                       , Edge1
                                                                       , Edge1T );
                                     Mutex.Unlock();
@@ -425,7 +433,7 @@ FArianeGraph::IntersectEdges( FEdge* Edge0
 }
 
 void
-FArianeGraph::IntersectEdgeWithPath( FEdge* Edge, FPath* IntersectedPath )
+FArianeGraph::IntersectEdgeWithPath( FPath* Path, FEdge* Edge, FPath* IntersectedPath )
 {
     FBox2D& EdgeBBox = Edge->BBox;
     FVector2D EdgeMinWithTolerance( EdgeBBox.Min.X - GapTolerance
@@ -447,7 +455,9 @@ FArianeGraph::IntersectEdgeWithPath( FEdge* Edge, FPath* IntersectedPath )
          && ( EdgeMinWithTolerance.Y < IntersectedEdgeMaxWithTolerance.Y )
          && ( EdgeMaxWithTolerance.Y > IntersectedEdgeMinWithTolerance.Y ) )
         {
-            IntersectEdges( Edge
+            IntersectEdges( Path
+                          , Edge
+                          , IntersectedPath
                           , IntersectedEdge
                           , IntersectedEdgeMinWithTolerance
                           , IntersectedEdgeMaxWithTolerance
@@ -479,7 +489,7 @@ FArianeGraph::IntersectEdgeWithPath( FEdge* Edge, FPath* IntersectedPath )
 }
 
 void
-FArianeGraph::Import( const FVector& ViewOrigin, const FPlane& ProjectionPlane, const TArray<FArianeObject*>& Objects )
+FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& Objects )
 {
     // find the angle between the Z axis and the plane's normal vector in order to find the rotation matrix.
     // we will then use it to convert 3D points coordinates in a 2D coordinate system (with Z = 0).
@@ -622,7 +632,7 @@ FArianeGraph::Import( const FVector& ViewOrigin, const FPlane& ProjectionPlane, 
 }
 
 // returns true if the path needs to be taken into account in the graph
-bool
+void
 FArianeGraph::IntersectPath( FPath* Path )
 {
     for( uint32 j = 0; j < Path->GetEdgeCount(); j++ )
@@ -634,22 +644,9 @@ FArianeGraph::IntersectPath( FPath* Path )
             FPath& IntersectedPath = PathBuffer[k];
 
             // populate mXIntersectionRecordArray
-            IntersectEdgeWithPath ( Edge, &IntersectedPath );
-        }
-
-        if( Edge->IntersectionSlotCount )
-        {
-            Path->bHasIntersections = true;
-            Path->bSectionnable = true;
+            IntersectEdgeWithPath ( Path, Edge, &IntersectedPath );
         }
     }
-
-    if( Path->IsLoop() )
-    {
-        Path->bSectionnable = true;
-    }
-
-    return Path->bSectionnable;
 }
 
 void
@@ -676,14 +673,7 @@ FArianeGraph::Intersect( TArray<FPath*>& SectionnablePaths
                 {
                     FPath& Path = PathBuffer[i];
 
-                    if( IntersectPath( &Path ) )
-                    {
-                        Mutex.Lock();
-                        SectionnablePaths.Add( &Path );
-                        OutTotalLinearSectionCount += Path.LinearEdgeCount;
-                        OutTotalCubicSectionCount += Path.CubicEdgeCount;
-                        Mutex.Unlock();
-                    }
+                    IntersectPath( &Path );
                 }
             }
             , EParallelForFlags::None );
@@ -695,13 +685,19 @@ FArianeGraph::Intersect( TArray<FPath*>& SectionnablePaths
         {
             FPath& Path = PathBuffer[i];
 
-            if( IntersectPath( &Path ) )
-            {
-                SectionnablePaths.Add( &Path );
+            IntersectPath( &Path );
+        }
+    }
 
-                OutTotalLinearSectionCount += Path.LinearEdgeCount;
-                OutTotalCubicSectionCount += Path.CubicEdgeCount;
-            }
+    // another for-loop to do the counting
+    for( FPath& Path : PathBuffer )
+    {
+        if( Path.IsLoop() || Path.bHasIntersections )
+        {
+            SectionnablePaths.Add( &Path );
+
+            OutTotalLinearSectionCount += Path.LinearEdgeCount;
+            OutTotalCubicSectionCount += Path.CubicEdgeCount;
         }
     }
 }
@@ -803,24 +799,35 @@ FArianeGraph::CreatePathSections( FPath* Path, TArray<FSection*>& ShortSections 
 
 // Note: For ariane objects, there is no need for cubic segments because a projected cubic segment is not a cubic segment itself
 void
-FArianeGraph::Build( const FVector& ViewOrigin, const FPlane& ProjectionPlane, const TArray<FArianeObject*>& Objects )
+FArianeGraph::Build( const FVector& ViewOrigin, const FPlane& InProjectionPlane, const TArray<FArianeObject*>& Objects )
 {
     uint32 TotalLinearSectionCount = 0;
     uint32 TotalCubicSectionCount = 0;
     TArray<FPath*> SectionnablePaths;
     TArray<FSection*> ShortSections;
 
+    ProjectionPlane = InProjectionPlane;
+
+
+    // clear cycles
+    for( FCycle* Cycle : Cycles )
+    {
+        delete Cycle;
+    }
+
+    Cycles.Empty();
+
     // Step1: Import Paths and convert them into 2D space
-    Import( ViewOrigin, ProjectionPlane, Objects );
+    Import( ViewOrigin, Objects );
 
-    SectionnablePaths.Reserve( PathBuffer.Num() );
-
-    IntersectionNodeBuffer.Empty();
 
     LinearSectionBuffer.Empty();
     CubicSectionBuffer.Empty();
     Sections.Empty();
 
+    IntersectionNodeBuffer.Empty();
+
+    SectionnablePaths.Reserve( PathBuffer.Num() );
     // Step2: find intersections
     Intersect( SectionnablePaths, TotalLinearSectionCount, TotalCubicSectionCount );
 
@@ -894,4 +901,35 @@ FArianeGraph::Build( const FVector& ViewOrigin, const FPlane& ProjectionPlane, c
         // Unlink() and stitch
         ShortSection->Stitch();
     }
+}
+
+FArianeGraph::FCycle*
+FArianeGraph::PickCycle( const FVector& RayOrigin, const FVector& RayDirection )
+{
+    // find the angle between the Z axis and the plane's normal vector in order to find the rotation matrix.
+    // we will then use it to convert 3D points coordinates in a 2D coordinate system (with Z = 0).
+    FQuat RotationQuat = FQuat::FindBetweenNormals( ProjectionPlane.GetNormal(), FVector::UpVector );
+    FVector ProjectionPlaneOrigin = ProjectionPlane.GetOrigin();
+    FVector IntersectAt;
+
+    if( FArianeCore::IntersectPlane( ProjectionPlane, RayOrigin, RayDirection, IntersectAt ) )
+    {
+        FVector PositionInPlaneSpace = RotationQuat * ( IntersectAt - ProjectionPlaneOrigin );
+
+        for( FCycle* Cycle : Cycles )
+        {
+            if( Cycle->HitTest( PositionInPlaneSpace.X, PositionInPlaneSpace.Y ) )
+            {
+                return Cycle;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+const FPlane&
+FArianeGraph::GetProjectionPlane()
+{
+    return ProjectionPlane;
 }

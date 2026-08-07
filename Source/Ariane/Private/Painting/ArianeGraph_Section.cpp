@@ -16,6 +16,7 @@ FArianeGraph::FSection::FSection( FEdge* InEdge
     , Cycles { nullptr, nullptr }
     , Length ( 0 )
     , EdgeT{ InEdgeT0, InEdgeT1 }
+    , Vector { FVector2D::Zero(), FVector2D::Zero() }
 {
 }
 
