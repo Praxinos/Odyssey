@@ -25,18 +25,6 @@ FArianeGraph::FCycle::FCycle( const TArray<uint32>& NodeIndices
     Build( );
 }
 
-TArray<FArianeGraph::FSection*>&
-FArianeGraph::FCycle::GetContourSections()
-{
-    return ContourSections;
-}
-
-TArray<FArianeGraph::FSection*>&
-FArianeGraph::FCycle::GetInnerSections()
-{
-    return InnerSections;
-}
-
 void
 FArianeGraph::FCycle::Merge( FArianeGraph::FCycle* MergeCycle )
 {

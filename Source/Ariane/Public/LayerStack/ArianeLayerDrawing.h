@@ -12,17 +12,19 @@
 #include "ArianeLayer.h"
 #include "ArianeLayerDrawingEnums.h"
 #include "ArianeCoreEnums.h"
-
+#include "ArianeGraph.h"
 #include "ArianeLayerDrawing.generated.h"
 
 struct FArianeObject;
 struct FArianeGroup;
+struct FArianeCycle;
 struct FArianePath;
 class UMaterialInterface;
 struct FArianeEllipse;
 struct FArianeRectangle;
 struct FArianeLine;
 struct FArianePolygon;
+
 
 UCLASS()
 class ARIANE_API UArianeLayerDrawing : public UArianeLayer
@@ -157,6 +159,11 @@ public:
                                 , double Radius
                                 , double StrokeWidth
                                 , EArianeAllocationModel AllocationModel );
+    FArianeCycle* AllocCycle( UMaterialInterface* InMaterialInterface
+                            , const FName& InName
+                            , FArianeGraph* Graph
+                            , FArianeGraph::FCycle* Cycle
+                            , EArianeAllocationModel AllocationModel );
     virtual void OnUpdateTransform( EUpdateTransformFlags UpdateTransformFlags, ETeleportType TeleportType ) override;
 
 protected:

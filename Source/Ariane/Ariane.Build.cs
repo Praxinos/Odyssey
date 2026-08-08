@@ -72,6 +72,7 @@ public class Ariane : ModuleRules
                 "OdysseyPalette",
                 "ULIS",
                 "blend2d", // for Cycles
+                "earcut", // for Cycle triangulation
             }
         );
 

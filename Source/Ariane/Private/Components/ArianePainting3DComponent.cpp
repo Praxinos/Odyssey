@@ -5,6 +5,7 @@
 #include "ArianePainting3DComponent.h"
 #include "ArianePainting3DStaticMeshComponent.h"
 #include "ArianePath.h"
+#include "ArianeCycle.h"
 #include "ArianeSegment.h"
 #include "ArianeVertex.h"
 #include "ArianeGroup.h"
@@ -469,38 +470,53 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
                                                         , FMeshElementCollector& Collector
                                                         , int32 ViewIndex ) const
 {
+    FPrimitiveDrawInterface* PDI = Collector.GetPDI(ViewIndex);
     //UMaterialInterface* MaterialInterface = GEngine->VertexColorMaterial;
 
     DrawingLayer->InstancedObjectsAccessRW.Lock();
 
     DrawingLayer->GetRootGroup()->Traverse( [ this
+                                            , PDI
                                             , DrawingLayer
-                                            //, MaterialInterface
                                             , ViewIndex
                                             , &Collector ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
     {
+
+        FArianeObjectGeometry3D* Geometry3D = nullptr;
+        UMaterialInterface* MaterialInterface = nullptr;
+
         if( Object->HasBaseClass( FArianePath::StaticClass() ) )
         {
             FArianePath* Path = static_cast<FArianePath*>(Object);
-            FArianePathGeometry3D& Mesh = Path->GetGeometry3D();
-            UMaterialInterface* MaterialInterface = Path->GetMaterial();
-            FPrimitiveDrawInterface* PDI = Collector.GetPDI(ViewIndex);
 
-            if( MaterialInterface
-             && MaterialInterface->GetRenderProxy()
-             && Path->IsVisible( true )
-             && Path->GetSegments().Num()
-             && Mesh.GetIndexBuffer().GetNumIndices()
-             && Mesh.GetIndexBuffer().IsInitialized() )
+            Geometry3D = &Path->GetGeometry3D();
+            MaterialInterface = Path->GetMaterial();
+        }
+
+        if( Object->HasBaseClass( FArianeCycle::StaticClass() ) )
+        {
+            FArianeCycle* Cycle = static_cast<FArianeCycle*>(Object);
+
+            Geometry3D = &Cycle->GetGeometry3D();
+            MaterialInterface = Cycle->GetMaterial();
+        }
+
+        if( Geometry3D && MaterialInterface )
+        {
+            if( MaterialInterface->GetRenderProxy()
+             && Object->IsVisible( true )
+             //&& Path->GetSegments().Num()
+             && Geometry3D->GetIndexBuffer().GetNumIndices()
+             && Geometry3D->GetIndexBuffer().IsInitialized() )
             {
                 // Allocate a mesh batch and get a ref to the first element
                 FMeshBatch& MeshBatch = Collector.AllocateMesh();
                 FMeshBatchElement& BatchElement = MeshBatch.Elements[0];
 
-                BatchElement.IndexBuffer = &Mesh.GetIndexBuffer();
+                BatchElement.IndexBuffer = &Geometry3D->GetIndexBuffer();
 
                 //Mesh.bWireframe = bWireframe;
-                MeshBatch.VertexFactory = Mesh.GetVertexFactory();
+                MeshBatch.VertexFactory = Geometry3D->GetVertexFactory();
                 MeshBatch.MaterialRenderProxy = MaterialInterface->GetRenderProxy();;
 
                 //The LocalVertexFactory uses a uniform buffer to pass primitve data like the local to world transform for this frame and for the previous one
@@ -520,7 +536,7 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
                 FDynamicPrimitiveUniformBuffer& DynamicPrimitiveUniformBuffer = Collector.AllocateOneFrameResource<FDynamicPrimitiveUniformBuffer>();
 
                 DynamicPrimitiveUniformBuffer.Set( Collector.GetRHICommandList()
-                                                 , Path->GetTransform().ToMatrixWithScale()
+                                                 , Object->GetTransform().ToMatrixWithScale()
                                                  //, DrawingLayer->GetComponentToWorld().ToMatrixWithScale() //GetLocalToWorld()
                                                  , PreviousLocalToWorld
                                                  , GetBounds()
@@ -535,9 +551,9 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
 
                 //Additional data
                 BatchElement.FirstIndex = 0;
-                BatchElement.NumPrimitives = Mesh.GetIndexBuffer().GetNumIndices() / 3;
+                BatchElement.NumPrimitives = Geometry3D->GetIndexBuffer().GetNumIndices() / 3;
                 BatchElement.MinVertexIndex = 0;
-                BatchElement.MaxVertexIndex = Mesh.GetVertexCount() - 1;
+                BatchElement.MaxVertexIndex = Geometry3D->GetVertexCount() - 1;
 
                 MeshBatch.ReverseCulling = IsLocalToWorldDeterminantNegative();
                 MeshBatch.Type = PT_TriangleList;
@@ -549,23 +565,30 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
                 //Add the batch to the collector
                 Collector.AddMesh( ViewIndex, MeshBatch );
 
-                // for debugging purpose (flag "r.Ariane.ShowNormals")
-                if ( CVarShowArianeNormals.GetValueOnRenderThread() )
+
+            }
+        }
+
+        if( Object->HasBaseClass( FArianePath::StaticClass() ) )
+        {
+            FArianePath* Path = static_cast<FArianePath*>(Object);
+
+            // for debugging purpose (flag "r.Ariane.ShowNormals")
+            if ( CVarShowArianeNormals.GetValueOnRenderThread() )
+            {
+                const FTransform& PathTransform = Path->GetTransform();
+
+                for ( FArianeVertexID& VertexID : Path->GetVertices() )
                 {
-                    const FTransform& PathTransform = Path->GetTransform();
+                    FArianeVertex* Vertex = VertexID.GetVertex();
+                    FVector VertexWorldPosition = PathTransform.TransformPosition( Vertex->GetPosition() );
+                    FVector VertexWorldNormal = PathTransform.TransformVector( Vertex->GetNormal() );
 
-                    for ( FArianeVertexID& VertexID : Path->GetVertices() )
-                    {
-                        FArianeVertex* Vertex = VertexID.GetVertex();
-                        FVector VertexWorldPosition = PathTransform.TransformPosition( Vertex->GetPosition() );
-                        FVector VertexWorldNormal = PathTransform.TransformVector( Vertex->GetNormal() );
-
-                        PDI->DrawLine( VertexWorldPosition
-                                     , VertexWorldPosition + ( VertexWorldNormal * 200.0f )
-                                     , FLinearColor::Green
-                                     , SDPG_World
-                                     , 1.0f );
-                    }
+                    PDI->DrawLine( VertexWorldPosition
+                                 , VertexWorldPosition + ( VertexWorldNormal * 200.0f )
+                                 , FLinearColor::Green
+                                 , SDPG_World
+                                 , 1.0f );
                 }
             }
         }

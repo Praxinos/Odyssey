@@ -102,6 +102,149 @@ FArianeObjectInvalidationFlags::HasAny()
 }
 
 
+FArianeObjectGeometry3D::~FArianeObjectGeometry3D()
+{
+    // Some rendering commands use the vertex factory, flush them first
+    FlushRenderingCommands();
+
+    if( VertexFactory )
+    {
+        PositionBuffer.ReleaseResource();
+        StaticMeshVB.ReleaseResource();
+        ColorBuffer.ReleaseResource();
+        IndexBuffer.ReleaseResource();
+        VertexFactory->ReleaseResource();
+
+        delete VertexFactory;
+    }
+}
+
+FArianeObjectGeometry3D::FArianeObjectGeometry3D( FArianeObject* InObject )
+    : VertexCount( 0 )
+    , VertexFactory( nullptr )
+    , Object( InObject )
+{
+
+}
+
+const uint32
+FArianeObjectGeometry3D::GetVertexCount() const
+{
+    return VertexCount;
+}
+
+const FRawStaticIndexBuffer&
+FArianeObjectGeometry3D::GetIndexBuffer() const
+{
+    return IndexBuffer;
+}
+
+FArianeObject*
+FArianeObjectGeometry3D::GetObject()
+{
+     return Object;
+}
+
+FLocalVertexFactory*
+FArianeObjectGeometry3D::GetVertexFactory()
+{
+    return VertexFactory;
+}
+
+void
+FArianeObjectGeometry3D::InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices
+                                          , TArray<uint32>& Indices )
+{
+    if( VertexFactory == nullptr )
+    {
+        VertexFactory = new FLocalVertexFactory( Object->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->GetWorld()->GetFeatureLevel(), "Object Vertex Factory" );
+    }
+
+    ENQUEUE_RENDER_COMMAND(StaticMeshVertexBuffersLegacyInit)(
+        [ this
+        ,  VerticesAsync = MoveTemp(Vertices) ] ( FRHICommandListImmediate& RHICmdList )
+        {
+            FLocalVertexFactory::FDataType Data;
+
+            VertexCount = VerticesAsync.Num();
+
+            if( PositionBuffer.IsInitialized() == false ) PositionBuffer.InitResource( RHICmdList );
+            if( StaticMeshVB.IsInitialized()   == false ) StaticMeshVB.InitResource( RHICmdList );
+            if( ColorBuffer.IsInitialized()    == false ) ColorBuffer.InitResource( RHICmdList );
+
+            if( VertexCount )
+            {
+                PositionBuffer.Init( VertexCount );
+                StaticMeshVB.Init( VertexCount, 1 );
+                ColorBuffer.Init( VertexCount );
+
+                for ( uint32 i = 0; i < VertexCount; ++i )
+                {
+                    FVector3f TangentX = VerticesAsync[i].TangentX.ToFVector3f();
+                    FVector3f TangentZ = VerticesAsync[i].TangentZ.ToFVector3f();
+
+                    PositionBuffer.VertexPosition( i ) = VerticesAsync[i].Position;
+                    ColorBuffer.VertexColor( i ) = VerticesAsync[i].Color;
+                    StaticMeshVB.SetVertexUV( i, 0, VerticesAsync[i].TextureCoordinate[0] );
+                    StaticMeshVB.SetVertexTangents( i, TangentX, TangentX.Cross( TangentZ ), TangentZ );
+                }
+
+                // Copy RAM to VRAM
+                PositionBuffer.UpdateRHI( RHICmdList );
+                StaticMeshVB.UpdateRHI( RHICmdList );
+                ColorBuffer.UpdateRHI( RHICmdList );
+
+                PositionBuffer.BindPositionVertexBuffer( VertexFactory, Data );
+                StaticMeshVB.BindTangentVertexBuffer( VertexFactory, Data );
+                StaticMeshVB.BindPackedTexCoordVertexBuffer( VertexFactory, Data );
+                ColorBuffer.BindColorVertexBuffer( VertexFactory, Data );
+
+                VertexFactory->SetData( RHICmdList, Data );
+
+                // Init / update the factory after SetData
+                if (!VertexFactory->IsInitialized()) {
+                    VertexFactory->InitResource(RHICmdList);
+                } else {
+                    VertexFactory->UpdateRHI(RHICmdList);
+                }
+            }
+            else
+            {
+                if (VertexFactory->IsInitialized()) VertexFactory->ReleaseResource();
+                if (PositionBuffer.IsInitialized()) PositionBuffer.ReleaseResource();
+                if (StaticMeshVB.IsInitialized()) StaticMeshVB.ReleaseResource();
+                if (ColorBuffer.IsInitialized()) ColorBuffer.ReleaseResource();
+
+                VertexCount = 0;
+            }
+        } );
+
+    ENQUEUE_RENDER_COMMAND(IndexBufferInit)(
+        [ this
+        , IndicesAsync = MoveTemp(Indices) ] ( FRHICommandListImmediate& RHICmdList )
+        {
+            uint32 IndexCount = IndicesAsync.Num();
+
+            if( IndexCount )
+            {
+                IndexBuffer.SetIndices( IndicesAsync, EIndexBufferStride::Type::Force32Bit );
+
+                if( IndexBuffer.IsInitialized() )
+                {
+                    IndexBuffer.UpdateRHI( RHICmdList );
+                }
+                else
+                {
+                    IndexBuffer.InitResource( RHICmdList );
+                }
+            }
+            else
+            {
+                if( IndexBuffer.IsInitialized() ) IndexBuffer.ReleaseResource();
+            }
+        } );
+}
+
 ///---------------------------------------------------------
 
 FArianeObject::~FArianeObject()

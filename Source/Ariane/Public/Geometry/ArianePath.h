@@ -44,18 +44,14 @@ public:
     virtual void InitRHI(FRHICommandListBase& RHICmdList) override;
 };
 
-class ARIANE_API FArianePathGeometry3D
+class ARIANE_API FArianePathGeometry3D : public FArianeObjectGeometry3D
 {
     public:
         ~FArianePathGeometry3D();
         FArianePathGeometry3D( FArianePath* InPath );
 
-        void Build();
-
-        const uint32 GetVertexCount() const;
-        const FRawStaticIndexBuffer& GetIndexBuffer() const;
+        virtual void Build() override;
         FArianePath* GetPath();
-        FLocalVertexFactory* GetVertexFactory();
 
     protected:
         void BuildSegmentAsTube( FArianeSegment* Segment
@@ -66,23 +62,11 @@ class ARIANE_API FArianePathGeometry3D
                                , double SegmentT0
                                , double SegmentT1
                                , FVector& InOutPreviousPerpendicularVector );
-
-        void InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices, TArray<uint32>& Indices );
         FVector GetTangentVectorAt( FArianeSegment* Segment
                                   , double T
                                   , bool bNormalize );
         FVector GetLeavingVectorAt( FArianeSegment* Segment
                                   , double T );
-
-    protected:
-        FArianePath* Path;
-
-        uint32 VertexCount;
-        FPositionVertexBuffer PositionBuffer;
-        FStaticMeshVertexBuffer StaticMeshVB;
-        FColorVertexBuffer ColorBuffer;
-        FRawStaticIndexBuffer IndexBuffer;
-        FLocalVertexFactory* VertexFactory;
 };
 
 struct ARIANE_API FArianePathInvalidationFlags : FArianeObjectInvalidationFlags
