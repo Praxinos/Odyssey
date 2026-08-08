@@ -401,9 +401,6 @@ public:
         //void ToBucketArray( std::vector<FCycle*>& iCyleArray
         //                  , std::vector<FOdysseyVectorBucket*>& oBucketArray );
 
-        TArray<FSection*>& GetContourSections();
-        TArray<FSection*>& GetInnerSections();
-
         /**
          * @brief destructor.
          */
@@ -497,7 +494,7 @@ public:
 
         bool HasNode( FNode* Node );
 
-    protected :
+    public :
         BLPath ContourPath;
         BLPath CombinedPath;
         //FOdysseyVectorBucket* mBucket;

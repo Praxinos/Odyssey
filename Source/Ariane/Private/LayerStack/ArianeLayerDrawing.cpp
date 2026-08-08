@@ -7,6 +7,7 @@
 #include "ArianePainting3DComponent.h"
 #include "ArianePath.h"
 #include "ArianeGroup.h"
+#include "ArianeCycle.h"
 #include "ArianeEllipse.h"
 #include "ArianeRectangle.h"
 #include "ArianeLine.h"
@@ -169,6 +170,38 @@ UArianeLayerDrawing::AllocGroup( const FName& InName
     }
 
     return NewGroup;
+}
+
+FArianeCycle*
+UArianeLayerDrawing::AllocCycle( UMaterialInterface* InMaterialInterface
+                               , const FName& InName
+                               , FArianeGraph* Graph
+                               , FArianeGraph::FCycle* Cycle
+                               , EArianeAllocationModel AllocationModel )
+{
+    FArianeCycle* NewCycle = nullptr;
+
+    if( AllocationModel == EArianeAllocationModel::InstancedStruct )
+    {
+        InstancedObjectsAccessRW.Lock();
+        InstancedObjects.Add( FInstancedStruct::Make<FArianeCycle>( this, InName, Graph, Cycle, AllocationModel ) );
+        InstancedObjectsAccessRW.Unlock();
+
+        NewCycle = InstancedObjects.Last().GetMutablePtr<FArianeCycle>();
+    }
+
+    if( AllocationModel == EArianeAllocationModel::OperatingSystem )
+    {
+        NewCycle = new FArianeCycle( this, InName, Graph, Cycle, AllocationModel );
+    }
+
+    NewCycle->SetMaterial( InMaterialInterface ? InMaterialInterface
+                                               : GetLayerStack()->GetPainting3DComponent()->GetDefaultMaterial() );
+
+    // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
+    GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
+
+    return NewCycle;
 }
 
 FArianeEllipse*

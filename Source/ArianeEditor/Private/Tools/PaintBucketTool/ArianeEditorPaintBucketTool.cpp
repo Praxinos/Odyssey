@@ -4,13 +4,13 @@
 // Ariane Editor headers
 #include "PaintBucketTool/ArianeEditorPaintBucketTool.h"
 #include "ArianeEditor.h"
+#include "ArianeEditorSettings.h"
 #include "ArianeEditorStyle.h"
 // Ariane headers
 #include "ArianePainting3DComponent.h"
-#include "ArianePath.h"
+#include "ArianeCycle.h"
 #include "ArianeGroup.h"
 #include "ArianeGraph.h"
-#include "ArianeVertex.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeSegmentCubic.h"
@@ -34,7 +34,8 @@ UArianeEditorPaintBucketTool::~UArianeEditorPaintBucketTool()
 }
 
 UArianeEditorPaintBucketTool::UArianeEditorPaintBucketTool()
-    : Graph( new FArianeGraph() )
+    : MaterialInterface( nullptr )
+    , Graph( new FArianeGraph() )
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PaintBucket64");
 
@@ -150,9 +151,47 @@ UArianeEditorPaintBucketTool::OnMouseUp( FEditorViewportClient* ViewportClient
                                        , const FKey& iKey
                                        , const FArianePointerState& PointerState )
 {
+    const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
+
     if( iKey == EKeys::LeftMouseButton )
     {
-        //UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+        UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+        ::ULIS::FColor color = Editor->GetPaintColor();
+        ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
+        FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
+
+        GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-drawing-tool.draw-path","Draw Path"));
+
+        if( Painting3DComponent )
+        {
+            //painting3DComponent->PrintPointers();
+            UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
+
+            if( DrawingLayer )
+            {
+                // choose between the root group and the selected group if any
+                FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
+                int PathNumber = DrawingLayer->GetInstancedObjects().Num();
+
+                DrawingLayer->Modify();
+
+                FArianeCycle* PaintedCycle = DrawingLayer->AllocCycle( MaterialInterface ? MaterialInterface
+                                                                                         : Settings->GetDefaultPathDrawingMaterial()
+                                                                     , *(FString( "Cycle_" ) + FString::FromInt( PathNumber ))
+                                                                     , Graph
+                                                                     , PickedCycle
+                                                                     , EArianeAllocationModel::InstancedStruct );
+
+                RootGroup->AppendChild( PaintedCycle );
+
+                PaintedCycle->SetColor( ueColor );
+            }
+
+            PickedCycle = nullptr;
+
+            Painting3DComponent->Update( false );
+        }
 
         return true;
     }
@@ -224,8 +263,8 @@ UArianeEditorPaintBucketTool::DrawCycleHUD ( FCanvas* HUDCanvas
                                            , const FLinearColor& HcColor
                                            , FArianeGraph::FCycle* Cycle )
 {
-    DrawSectionsHUD( HUDCanvas, RenderAPI, ViewportClient, View, HcColor, Cycle->GetContourSections() );
-    DrawSectionsHUD( HUDCanvas, RenderAPI, ViewportClient, View, HcColor, Cycle->GetInnerSections() );
+    DrawSectionsHUD( HUDCanvas, RenderAPI, ViewportClient, View, HcColor, Cycle->ContourSections );
+    DrawSectionsHUD( HUDCanvas, RenderAPI, ViewportClient, View, HcColor, Cycle->InnerSections );
 }
 
 void

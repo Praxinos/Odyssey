@@ -53,6 +53,31 @@ public:
     uint32 Transform : 1 = 0;
 };
 
+class ARIANE_API FArianeObjectGeometry3D
+{
+    public:
+        ~FArianeObjectGeometry3D();
+        FArianeObjectGeometry3D( FArianeObject* InObject );
+
+        virtual void Build() = 0;
+
+        const uint32 GetVertexCount() const;
+        const FRawStaticIndexBuffer& GetIndexBuffer() const;
+        FArianeObject* GetObject();
+        FLocalVertexFactory* GetVertexFactory();
+        void InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices, TArray<uint32>& Indices );
+
+    protected:
+        FArianeObject* Object;
+
+        uint32 VertexCount;
+        FPositionVertexBuffer PositionBuffer;
+        FStaticMeshVertexBuffer StaticMeshVB;
+        FColorVertexBuffer ColorBuffer;
+        FRawStaticIndexBuffer IndexBuffer;
+        FLocalVertexFactory* VertexFactory;
+};
+
 USTRUCT(BlueprintType)
 struct ARIANE_API FArianeObject
 {

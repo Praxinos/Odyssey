@@ -90,6 +90,12 @@ protected:
                          , const TArray<FArianeGraph::FSection*>& Sections );
     void Reset();
 
+public:
+    UPROPERTY( EditAnywhere
+             , Category = PathDrawingTool )
+    UMaterialInterface* MaterialInterface;
+
+
 protected:
     FArianeGraph* Graph;
     FArianeGraph::FCycle* PickedCycle;
