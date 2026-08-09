@@ -450,19 +450,6 @@ FArianeCycle::UpdateShape( EUpdateFlags UpdateFlags )
 
 FArianeCycleGeometry3D::~FArianeCycleGeometry3D()
 {
-    // Some rendering commands use the vertex factory, flush them first
-    FlushRenderingCommands();
-
-    if( VertexFactory )
-    {
-        PositionBuffer.ReleaseResource();
-        StaticMeshVB.ReleaseResource();
-        ColorBuffer.ReleaseResource();
-        IndexBuffer.ReleaseResource();
-        VertexFactory->ReleaseResource();
-
-        delete VertexFactory;
-    }
 }
 
 FArianeCycleGeometry3D::FArianeCycleGeometry3D( FArianeCycle* InCycle )
