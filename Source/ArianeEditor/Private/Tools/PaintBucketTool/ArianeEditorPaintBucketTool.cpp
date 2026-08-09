@@ -61,6 +61,8 @@ UArianeEditorPaintBucketTool::Reset()
     IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
+    PickedCycle = nullptr;
+
     if( Painting3DComponent )
     {
         UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
@@ -242,7 +244,7 @@ UArianeEditorPaintBucketTool::DrawSectionsHUD ( FCanvas* HUDCanvas
                         , P0HUD
                         , P1HUD
                         , HcColor
-                        , 1.0f );
+                        , 2.0f );
         }
 
         //if( ContourSection->GetCycle(0) == this )

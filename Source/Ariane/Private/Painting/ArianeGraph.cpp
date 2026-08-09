@@ -572,8 +572,8 @@ FArianeGraph::IntersectEdges( FPath* Path0
         if( Edge0 >= Edge1 )
         {
             if( ( Edge0Fraction->BBox.Min.X <= Edge1MaxWithTolerance.X )
-             && ( Edge0Fraction->BBox.Max.Y >= Edge1MinWithTolerance.X )
-             && ( Edge0Fraction->BBox.Min.X <= Edge1MaxWithTolerance.Y )
+             && ( Edge0Fraction->BBox.Max.X >= Edge1MinWithTolerance.X )
+             && ( Edge0Fraction->BBox.Min.Y <= Edge1MaxWithTolerance.Y )
              && ( Edge0Fraction->BBox.Max.Y >= Edge1MinWithTolerance.Y ) )
             {
                 for( uint32 j = 0; j < Edge1->FractionCount; j++ )
@@ -749,6 +749,7 @@ FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& O
     FractionBuffer.Empty();
     LinearEdgeBuffer.Empty();
     CubicEdgeBuffer.Empty();
+    Edges.Empty();
     PathBuffer.Empty();
 
     // first step, evaluate the memory needed
@@ -797,7 +798,7 @@ FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& O
             {
                 FArianeVertex* Vertex = VertexID.GetVertex();
                 FVector VertexWorldPosition = PathTransform.TransformPosition( Vertex->GetPosition() );
-                FVector RayDirection = PathTransform.TransformPosition( Vertex->GetPosition() ) - ViewOrigin;
+                FVector RayDirection = VertexWorldPosition - ViewOrigin;
                 FVector IntersectAt;
                 bool bProjected = ( FArianeCore::IntersectPlane( ProjectionPlane
                                                                , ViewOrigin

@@ -19,6 +19,7 @@ FArianeSegment::FArianeSegment( )
     , Length ( 0.0f )
     , bInvalidated ( false )
     , bAutoFractioned ( true )
+    , Bounds ( FBoxSphereBounds(ForceInit) )
 {
 }
 
@@ -33,6 +34,7 @@ FArianeSegment::FArianeSegment( FArianeObject* Owner
     , Length ( 0.0f )
     , bInvalidated ( false )
     , bAutoFractioned ( true )
+    , Bounds ( FBoxSphereBounds(ForceInit) )
 {
     Init();
 }
