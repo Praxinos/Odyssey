@@ -396,7 +396,7 @@ FArianeGraph::FEdge::FEdge( FNode* InNode0
                           , double InLength )
     : Nodes { InNode0, InNode1 }
     , Fractions( InFractions )
-    , FractionCount ( 1 )
+    , FractionCount ( InFractionCount )
     , IntersectionSlotCount ( 0 )
     , Length ( InLength )
 {
@@ -531,7 +531,6 @@ FArianeGraph::FArianeGraph()
     bMultithreaded = false;
 #else
     bMultithreaded = true;
-    bMultithreaded = false;
 #endif
 }
 
