@@ -92,24 +92,10 @@ FOdysseyInvalidTileMap::Invalidate(const FIntRect& iRect)
         return;
     }
 
-    float x1f = float( iRect.Min.X ) / mTileSize;
-    float y1f = float( iRect.Min.Y ) / mTileSize;
-    float x2f = float( iRect.Max.X ) / mTileSize;
-    float y2f = float( iRect.Max.Y ) / mTileSize;
-
-    FIntPoint tileCount = mTileMap.Size();
-
-    int x = FMath::Max(0, x1f);
-    int y = FMath::Max(0, y1f);
-    int w = FMath::Min( tileCount.X, int( ceil( x2f ) ) ) - abs((int)x1f);
-    int h = FMath::Min( tileCount.Y, int( ceil( y2f ) ) ) - abs((int)y1f);
-
-    for( int i = 0; i < h; ++i ) //y
+    TArray<FIntPoint> tileIndexes = GetTileIndexesForRect(iRect);
+    for (const FIntPoint& tileIndex : tileIndexes)
     {
-        for( int j = 0; j < w; ++j ) //x
-        {
-            mTileMap.Set(x+j, y+i, false);
-        }
+        mTileMap.Set(tileIndex.X, tileIndex.Y, false);
     }
 }
 
@@ -150,6 +136,38 @@ FOdysseyInvalidTileMap::GetTileRect(const FIntPoint& iTileIndex) const
         FMath::Min( (iTileIndex.X + 1) * mTileSize, mWidth),
         FMath::Min( (iTileIndex.Y + 1) * mTileSize, mHeight)
     );
+}
+
+TArray<FIntPoint>
+FOdysseyInvalidTileMap::GetTileIndexesForRect(const FIntRect& iRect) const
+{
+    if (iRect.Min.X >= mWidth || iRect.Max.X < 0 || iRect.Min.Y >= mHeight || iRect.Max.Y < 0)
+        return {};
+
+    FIntPoint tileCount = mTileMap.Size();
+
+    int x1 = FMath::Clamp(iRect.Min.X / mTileSize, 0, tileCount.X - 1);
+    int y1 = FMath::Clamp(iRect.Min.Y / mTileSize, 0, tileCount.Y - 1);
+    int x2 = FMath::Clamp(iRect.Max.X / mTileSize, 0, tileCount.X - 1);
+    int y2 = FMath::Clamp(iRect.Max.Y / mTileSize, 0, tileCount.Y - 1);
+
+    int w = x2 - x1 + 1;
+    int h = y2 - y1 + 1;
+
+    if (w <= 0 || h <= 0)
+        return {};
+
+    TArray<FIntPoint> tileIndexes;
+    tileIndexes.Reserve(w * h);
+    for( int y = y1; y <= y2; ++y ) //y
+    {
+        for( int x = x1; x <= x2; ++x ) //x
+        {
+            tileIndexes.Add({x, y});
+        }
+    }
+
+    return tileIndexes;
 }
 
 bool

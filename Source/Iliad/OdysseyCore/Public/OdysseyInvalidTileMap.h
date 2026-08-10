@@ -76,6 +76,9 @@ public:
      */
     FIntRect GetTileRect(const FIntPoint& iTileIndex) const;
 
+    // Returns tile indexes affected by iRect
+    TArray<FIntPoint> GetTileIndexesForRect(const FIntRect& iRect) const;
+
     /** Wether the given tile index is valid
      *
      * @param iTileIndex the index of the tile
