@@ -54,8 +54,8 @@ FOdysseyPainterEditorTiledViewportClient::FOdysseyPainterEditorTiledViewportClie
     RenderTargetData->HeightInBlocks = 1;
     RenderTargetData->TileSize = 256;
     RenderTargetData->TileBorderSize = 0; // A BorderSize pixel border will be added around all tiles
-    RenderTargetData->Width = 65536; //~2 million pixels in width => 2^21
-    RenderTargetData->Height = 65536; //~ 2 million pixels in height => 2^21
+    RenderTargetData->Width = 1048576; //~2 million pixels in width => 2^20
+    RenderTargetData->Height = 1048576; //~ 2 million pixels in height => 2^20
     RenderTargetData->NumMips = FMath::CeilLogTwo(FMath::Max(RenderTargetData->Width, RenderTargetData->Height));
 
     check(RenderTargetData->Width / RenderTargetData->TileSize <= VIRTUALTEXTURE_MAX_PAGETABLE_SIZE)
