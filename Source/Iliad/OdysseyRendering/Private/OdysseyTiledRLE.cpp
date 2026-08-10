@@ -6,6 +6,7 @@
 #include "RenderGraphBuilder.h"
 #include "RenderGraphEvent.h"
 #include "RenderGraphUtils.h"
+#include "Engine/TextureRenderTarget2D.h"
 
 DECLARE_STATS_GROUP(TEXT("OdysseyDecompressTiledRLEShader"), STATGROUP_OdysseyDecompressTiledRLEShader, STATCAT_Advanced);
 DECLARE_CYCLE_STAT(TEXT("OdysseyDecompressTiledRLEShader Execute"), STAT_OdysseyDecompressTiledRLEShader_Execute, STATGROUP_OdysseyDecompressTiledRLEShader);
@@ -18,25 +19,12 @@ public:
     DECLARE_GLOBAL_SHADER(FOdysseyDecompressTiledRLEShader);
     SHADER_USE_PARAMETER_STRUCT(FOdysseyDecompressTiledRLEShader, FGlobalShader);
 
-
-    /* class FOdysseyDecompressTiledRLEShader_Perm_TEST : SHADER_PERMUTATION_INT("TEST", 1);
-    using FPermutationDomain = TShaderPermutationDomain<
-        FOdysseyDecompressTiledRLEShader_Perm_TEST
-    >; */
-
-    //Weights 32Ko for an empty 4096x4096 image with 64x64 tiles
-    struct FTileDescriptor
-    {
-        int32 Position;
-        uint32 Count;
-    };
-
     BEGIN_SHADER_PARAMETER_STRUCT(FParameters, )
         SHADER_PARAMETER(uint32, TileWidth) //Width of 1 tile in pixels
         SHADER_PARAMETER(uint32, TileHeight) //Height of 1 tile in pixels
         SHADER_PARAMETER(uint32, TextureHeight) //Width of the final Texture
         SHADER_PARAMETER(uint32, TextureWidth) //Height of the final Texture
-        SHADER_PARAMETER(uint32, ValueSize) //0 = RGBA8, 1 = RGBA16F, 2 = RGBA32F
+        SHADER_PARAMETER(uint32, BytesPerComponent)
         SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<FTileDescriptor>, TileDescriptors) //Contains informations about tiles (which tile contains data and where to find taht data in the RLEBuffer
         SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int32>, RLEPositions) //Contains each valid tile data compressed in RLE
         SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<uint32>, RLEData) //Contains each valid tile data compressed in RLE
@@ -66,162 +54,45 @@ private:
 //                            ShaderType                            ShaderPath                     Shader function name    Type
 IMPLEMENT_GLOBAL_SHADER(FOdysseyDecompressTiledRLEShader, "/OdysseyShaders/Private/OdysseyDecompressTiledRLEShader.usf", "Main", SF_Compute);
 
-
-
-void TestDecompressTiledRLEShader(FRDGBuilder& iGraphBuilder, FIntPoint iNumTiles, FOdysseyDecompressTiledRLEShader::FParameters* oPassParameters)
-{
-    TArray<FOdysseyDecompressTiledRLEShader::FTileDescriptor> tileDescriptors;
-    TArray<int32> rlePositions;
-    TArray<uint8> rleData;
-    TArray<uint8> sequenceData;
-
-    //RGBA8 so ValueSize is 1 (1 byte per component)
-    oPassParameters->ValueSize = 1;
-    //oPassParameters->ValueSize = 2;
-
-    //1st Tile
-    tileDescriptors.AddZeroed(iNumTiles.X * iNumTiles.Y);
-    for (int i = 0; i < iNumTiles.X * iNumTiles.Y; i++)
-    {
-        //Tile is empty by default, we use negative values to identify empty tiles
-        tileDescriptors[i] = { /*position*/-1, /*count*/0 };
-    }
-    tileDescriptors[0] = { /*position*/0, /*count*/4 };
-    tileDescriptors[1] = { /*position*/5, /*count*/1 };
-
-    uint8 one = 255;
-    uint8 zero = 0;
-    //FFloat16 one(1.0f);
-    //FFloat16 zero(0.0f);
-
-    rlePositions.Add(0); //start from first section
-    rlePositions.Add(oPassParameters->TileWidth * oPassParameters->TileHeight * 1 / 4); //start from second section
-    rlePositions.Add(oPassParameters->TileWidth * oPassParameters->TileHeight * 2 / 4); //start from third section
-    rlePositions.Add(oPassParameters->TileWidth * oPassParameters->TileHeight * 3 / 4); //start from fourth section
-    rlePositions.Add(oPassParameters->TileWidth * oPassParameters->TileHeight); //end at last section of the tile
-
-    rleData.AddUninitialized(4 * oPassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (0 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (1 * oPassParameters->ValueSize), &zero, oPassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (2 * oPassParameters->ValueSize), &zero, oPassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (3 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
-
-    rleData.AddUninitialized(4 * oPassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (4 * oPassParameters->ValueSize), &zero, oPassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (5 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (6 * oPassParameters->ValueSize), &zero, oPassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (7 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
-
-    rleData.AddUninitialized(4 * oPassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (8 * oPassParameters->ValueSize), &zero, oPassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (9 * oPassParameters->ValueSize), &zero, oPassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (10 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (11 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
-
-    rleData.AddUninitialized(4 * oPassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (12 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (13 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (14 * oPassParameters->ValueSize), &zero, oPassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (15 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
-
-    //Sequence Tile
-    rlePositions.Add(0); //start of sequence tile
-    rlePositions.Add(oPassParameters->TileWidth * oPassParameters->TileHeight * -1); //end at last section of the tile
-
-    rleData.AddUninitialized(4 * oPassParameters->ValueSize);
-    uint32 pointerToSequence = 0;
-    FMemory::Memcpy(rleData.GetData() + (16 * oPassParameters->ValueSize), &pointerToSequence, sizeof(pointerToSequence));
-
-    sequenceData.AddUninitialized(oPassParameters->TileWidth * oPassParameters->TileHeight * 4 * oPassParameters->ValueSize);
-    for (uint32 i = 0; i < oPassParameters->TileWidth * oPassParameters->TileHeight; i++)
-    {
-        if (i&1)
-        {
-            FMemory::Memcpy(sequenceData.GetData() + (i * 4 + 0) * oPassParameters->ValueSize, &one, oPassParameters->ValueSize);
-            FMemory::Memcpy(sequenceData.GetData() + (i * 4 + 1) * oPassParameters->ValueSize, &zero, oPassParameters->ValueSize);
-            FMemory::Memcpy(sequenceData.GetData() + (i * 4 + 2) * oPassParameters->ValueSize, &zero, oPassParameters->ValueSize);
-            FMemory::Memcpy(sequenceData.GetData() + (i * 4 + 3) * oPassParameters->ValueSize, &one, oPassParameters->ValueSize);
-        }
-        else
-        {
-            FMemory::Memcpy(sequenceData.GetData() + (i * 4 + 0) * oPassParameters->ValueSize, &zero, oPassParameters->ValueSize);
-            FMemory::Memcpy(sequenceData.GetData() + (i * 4 + 1) * oPassParameters->ValueSize, &one, oPassParameters->ValueSize);
-            FMemory::Memcpy(sequenceData.GetData() + (i * 4 + 2) * oPassParameters->ValueSize, &zero, oPassParameters->ValueSize);
-            FMemory::Memcpy(sequenceData.GetData() + (i * 4 + 3) * oPassParameters->ValueSize, &one, oPassParameters->ValueSize);
-        }
-    }
-
-    if (tileDescriptors.IsEmpty()) //a buffer must contain something otherwise we get an error.
-        rleData.AddUninitialized();
-
-    if (rlePositions.IsEmpty()) //a buffer must contain something otherwise we get an error.
-        rleData.AddUninitialized();
-
-    if (rleData.IsEmpty()) //a buffer must contain something otherwise we get an error.
-        rleData.AddUninitialized();
-
-    if (sequenceData.IsEmpty()) //a buffer must contain something otherwise we get an error.
-        sequenceData.AddUninitialized();
-
-    FRDGBufferRef tileDescriptorsBuffer = CreateUploadBuffer(iGraphBuilder, TEXT("TileDescriptors"), sizeof(FOdysseyDecompressTiledRLEShader::FTileDescriptor), tileDescriptors.Num(), tileDescriptors.GetData(), tileDescriptors.Num() * sizeof(FOdysseyDecompressTiledRLEShader::FTileDescriptor));
-    FRDGBufferRef rlePositionsBuffer = CreateUploadBuffer(iGraphBuilder, TEXT("RLEPositions"), sizeof(int32), rlePositions.Num(), rlePositions.GetData(), rlePositions.Num() * sizeof(int32));
-    FRDGBufferRef rleDataBuffer = CreateUploadBuffer(iGraphBuilder, TEXT("RLEData"), sizeof(uint32), rleData.Num(), rleData.GetData(), rleData.Num() * sizeof(uint32));
-    FRDGBufferRef sequenceDataBuffer = CreateUploadBuffer(iGraphBuilder, TEXT("SequenceData"), sizeof(uint32), sequenceData.Num(), sequenceData.GetData(), sequenceData.Num() * sizeof(uint32));
-
-    oPassParameters->TileDescriptors = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(tileDescriptorsBuffer, PF_R32_SINT));
-    oPassParameters->RLEPositions = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(rlePositionsBuffer, PF_R32_SINT));
-    oPassParameters->RLEData = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(rleDataBuffer, PF_R32_UINT));
-    oPassParameters->SequenceData = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(sequenceDataBuffer, PF_R32_UINT));
-}
-
-FIntPoint
-GetNumTiles(const FOdysseyTiledRLE::FCompressionParams& Params)
-{
-    return FIntPoint(
-        FMath::Max(uint32(1), ((Params.TextureWidth - 1) / Params.TileWidth) + 1),
-        FMath::Max(uint32(1), ((Params.TextureHeight - 1) / Params.TileHeight) + 1)
-    );
-}
-
 FRDGTextureRef
-FOdysseyTiledRLE::DecompressRenderThread(FRDGBuilder& iGraphBuilder, const FRLEBuffer& iBuffer, const FCompressionParams& Params)
+FOdysseyTiledRLE::DecompressRenderThread(FRDGBuilder& iGraphBuilder, const FRLECompressedBuffer& iBuffer, EPixelFormat iPixelFormat)
 {
     SCOPE_CYCLE_COUNTER(STAT_OdysseyDecompressTiledRLEShader_Execute);
     DECLARE_GPU_STAT(OdysseyDecompressTiledRLEShader);
     RDG_EVENT_SCOPE(iGraphBuilder, "OdysseyDecompressTiledRLEShader");
     RDG_GPU_STAT_SCOPE(iGraphBuilder, OdysseyDecompressTiledRLEShader);
 
-    //typename FOdysseyDecompressTiledRLEShader::FPermutationDomain PermutationVector;
-
-    // Add any static permutation options here
-    // PermutationVector.Set<FOdysseyDecompressTiledRLEShader::FMyPermutationName>(12345);
-
-    TShaderMapRef<FOdysseyDecompressTiledRLEShader> ComputeShader(GetGlobalShaderMap(GMaxRHIFeatureLevel)/*, PermutationVector*/);
+    TShaderMapRef<FOdysseyDecompressTiledRLEShader> ComputeShader(GetGlobalShaderMap(GMaxRHIFeatureLevel));
     if (!ComputeShader.IsValid())
         return nullptr;
 
     FOdysseyDecompressTiledRLEShader::FParameters* PassParameters = iGraphBuilder.AllocParameters<FOdysseyDecompressTiledRLEShader::FParameters>();
     FRDGTextureDesc desc = FRDGTextureDesc::Create2D(
-        FIntPoint(Params.TextureWidth, Params.TextureHeight),
-        Params.PixelFormat,
+        FIntPoint(iBuffer.TextureWidth, iBuffer.TextureHeight),
+        iPixelFormat,
         FClearValueBinding::Transparent,
         ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable | ETextureCreateFlags::UAV
     );
     FRDGTextureRef outputTexture = iGraphBuilder.CreateTexture(desc, TEXT("FOdysseyTiledRLE::outputTexture"));
-    AddClearRenderTargetPass(iGraphBuilder, outputTexture, FLinearColor::Transparent);
 
-    PassParameters->TileWidth = Params.TileWidth;
-    PassParameters->TileHeight = Params.TileHeight;
-    PassParameters->TextureWidth = Params.TextureWidth;
-    PassParameters->TextureHeight = Params.TextureHeight;
+    FRDGBufferRef tileDescriptorsBuffer = CreateUploadBuffer(iGraphBuilder, TEXT("TileDescriptors"), sizeof(FTileDescriptor), iBuffer.TileDescriptors.Num(), iBuffer.TileDescriptors.GetData(), iBuffer.TileDescriptors.Num() * sizeof(FTileDescriptor));
+    FRDGBufferRef rlePositionsBuffer = CreateUploadBuffer(iGraphBuilder, TEXT("RLEPositions"), sizeof(int32), iBuffer.RLEPositions.Num(), iBuffer.RLEPositions.GetData(), iBuffer.RLEPositions.Num() * sizeof(int32));
+    FRDGBufferRef rleDataBuffer = CreateUploadBuffer(iGraphBuilder, TEXT("RLEData"), sizeof(uint32), iBuffer.RLEData.Num(), iBuffer.RLEData.GetData(), iBuffer.RLEData.Num() * sizeof(uint32));
+    FRDGBufferRef sequenceDataBuffer = CreateUploadBuffer(iGraphBuilder, TEXT("SequenceData"), sizeof(uint32), iBuffer.SequenceData.Num(), iBuffer.SequenceData.GetData(), iBuffer.SequenceData.Num() * sizeof(uint32));
 
-    FIntPoint numTiles = GetNumTiles(Params);
-    TestDecompressTiledRLEShader(iGraphBuilder, numTiles, PassParameters);
-
+    PassParameters->TileWidth = iBuffer.TileWidth;
+    PassParameters->TileHeight = iBuffer.TileHeight;
+    PassParameters->TextureWidth = iBuffer.TextureWidth;
+    PassParameters->TextureHeight = iBuffer.TextureHeight;
+    PassParameters->BytesPerComponent = iBuffer.BytesPerComponent;
+    PassParameters->TileDescriptors = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(tileDescriptorsBuffer, PF_R32_SINT));
+    PassParameters->RLEPositions = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(rlePositionsBuffer, PF_R32_SINT));
+    PassParameters->RLEData = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(rleDataBuffer, PF_R32_UINT));
+    PassParameters->SequenceData = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(sequenceDataBuffer, PF_R32_UINT));
     PassParameters->OutputTexture = iGraphBuilder.CreateUAV(FRDGTextureUAVDesc(outputTexture), ERDGUnorderedAccessViewFlags::None);
 
-    int TileMapWidth = ((Params.TextureWidth - 1) / Params.TileWidth) + 1;
-    int TileMapHeight = ((Params.TextureHeight - 1) / Params.TileHeight) + 1;
+    int TileMapWidth = ((iBuffer.TextureWidth - 1) / iBuffer.TileWidth) + 1;
+    int TileMapHeight = ((iBuffer.TextureHeight - 1) / iBuffer.TileHeight) + 1;
 
     auto GroupCount = FIntVector(TileMapWidth, TileMapHeight, 1);
     FComputeShaderUtils::AddPass(
@@ -238,19 +109,130 @@ FOdysseyTiledRLE::DecompressRenderThread(FRDGBuilder& iGraphBuilder, const FRLEB
 
 // Executes this shader on the render thread from the game thread via EnqueueRenderThreadCommand
 void
-FOdysseyTiledRLE::DecompressGameThread(const FRLEBuffer& iBuffer, const FCompressionParams& Params, UTextureRenderTarget2D* oTexture)
+FOdysseyTiledRLE::DecompressGameThread(const FRLECompressedBuffer& iBuffer, UTextureRenderTarget2D* oTexture)
 {
+    //TODO: Test if oTexture has the size expected by iBuffer
+
+    EPixelFormat pixelFormat = oTexture->GetFormat();
+
     ENQUEUE_RENDER_COMMAND(SceneDrawCompletion)(
-    [iBuffer, Params](FRHICommandListImmediate& RHICmdList)
+    [iBuffer, pixelFormat](FRHICommandListImmediate& RHICmdList)
     {
         FRDGBuilder graphBuilder(RHICmdList);
-        FRDGTextureRef outputTexture = DecompressRenderThread(graphBuilder, iBuffer, Params);
+        FRDGTextureRef outputTexture = DecompressRenderThread(graphBuilder, iBuffer, pixelFormat);
         graphBuilder.Execute();
     });
 }
 
-FOdysseyTiledRLE::FRLEBuffer
+FOdysseyTiledRLE::FRLECompressedBuffer
 FOdysseyTiledRLE::Compress(UTexture* iTexture, const FCompressionParams& Params)
 {
-    return FRLEBuffer();
+    return FRLECompressedBuffer();
+}
+
+FIntPoint
+GetNumTiles(const FOdysseyTiledRLE::FRLECompressedBuffer& iBuffer)
+{
+    return FIntPoint(
+        FMath::Max(uint32(1), ((iBuffer.TextureWidth - 1) / iBuffer.TileWidth) + 1),
+        FMath::Max(uint32(1), ((iBuffer.TextureHeight - 1) / iBuffer.TileHeight) + 1)
+    );
+}
+
+void
+FOdysseyTiledRLE::TestDecompressTiledRLEShader(uint32 iTextureWidth, uint32 iTextureHeight, FRLECompressedBuffer& oRLEBuffer)
+{
+    oRLEBuffer.TextureHeight= iTextureWidth;
+    oRLEBuffer.TextureWidth= iTextureHeight;
+    oRLEBuffer.TileWidth = 64;
+    oRLEBuffer.TileHeight = 64;
+    oRLEBuffer.BytesPerComponent = 1;
+
+    FIntPoint numTiles = GetNumTiles(oRLEBuffer);
+
+    //1st Tile
+    oRLEBuffer.TileDescriptors.AddZeroed(numTiles.X * numTiles.Y);
+    for (int i = 0; i < numTiles.X * numTiles.Y; i++)
+    {
+        //Tile is empty by default, we use negative values to identify empty tiles
+        oRLEBuffer.TileDescriptors[i] = { /*position*/-1, /*count*/0 };
+    }
+    oRLEBuffer.TileDescriptors[0] = { /*position*/0, /*count*/4 };
+    oRLEBuffer.TileDescriptors[1] = { /*position*/5, /*count*/1 };
+
+    uint8 one = 255;
+    uint8 zero = 0;
+    //FFloat16 one(1.0f);
+    //FFloat16 zero(0.0f);
+
+    uint32 numPixelsInTile = oRLEBuffer.TileWidth * oRLEBuffer.TileHeight;
+
+    oRLEBuffer.RLEPositions.Add(0); //start from first section
+    oRLEBuffer.RLEPositions.Add(numPixelsInTile * 1 / 4); //start from second section
+    oRLEBuffer.RLEPositions.Add(numPixelsInTile * 2 / 4); //start from third section
+    oRLEBuffer.RLEPositions.Add(numPixelsInTile * 3 / 4); //start from fourth section
+    oRLEBuffer.RLEPositions.Add(numPixelsInTile); //end at last section of the tile
+
+    oRLEBuffer.RLEData.AddUninitialized(4 * oRLEBuffer.BytesPerComponent);
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (0 * oRLEBuffer.BytesPerComponent), &one, oRLEBuffer.BytesPerComponent);
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (1 * oRLEBuffer.BytesPerComponent), &zero, oRLEBuffer.BytesPerComponent);
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (2 * oRLEBuffer.BytesPerComponent), &zero, oRLEBuffer.BytesPerComponent);
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (3 * oRLEBuffer.BytesPerComponent), &one, oRLEBuffer.BytesPerComponent);
+
+    oRLEBuffer.RLEData.AddUninitialized(4 * oRLEBuffer.BytesPerComponent);
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (4 * oRLEBuffer.BytesPerComponent), &zero, oRLEBuffer.BytesPerComponent);
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (5 * oRLEBuffer.BytesPerComponent), &one, oRLEBuffer.BytesPerComponent);
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (6 * oRLEBuffer.BytesPerComponent), &zero, oRLEBuffer.BytesPerComponent);
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (7 * oRLEBuffer.BytesPerComponent), &one, oRLEBuffer.BytesPerComponent);
+
+    oRLEBuffer.RLEData.AddUninitialized(4 * oRLEBuffer.BytesPerComponent);
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (8 * oRLEBuffer.BytesPerComponent), &zero, oRLEBuffer.BytesPerComponent);
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (9 * oRLEBuffer.BytesPerComponent), &zero, oRLEBuffer.BytesPerComponent);
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (10 * oRLEBuffer.BytesPerComponent), &one, oRLEBuffer.BytesPerComponent);
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (11 * oRLEBuffer.BytesPerComponent), &one, oRLEBuffer.BytesPerComponent);
+
+    oRLEBuffer.RLEData.AddUninitialized(4 * oRLEBuffer.BytesPerComponent);
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (12 * oRLEBuffer.BytesPerComponent), &one, oRLEBuffer.BytesPerComponent);
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (13 * oRLEBuffer.BytesPerComponent), &one, oRLEBuffer.BytesPerComponent);
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (14 * oRLEBuffer.BytesPerComponent), &zero, oRLEBuffer.BytesPerComponent);
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (15 * oRLEBuffer.BytesPerComponent), &one, oRLEBuffer.BytesPerComponent);
+
+    //Sequence Tile
+    oRLEBuffer.RLEPositions.Add(0); //start of sequence tile
+    oRLEBuffer.RLEPositions.Add(numPixelsInTile * -1); //end at last section of the tile
+
+    oRLEBuffer.RLEData.AddUninitialized(4 * oRLEBuffer.BytesPerComponent);
+    uint32 pointerToSequence = 0;
+    FMemory::Memcpy(oRLEBuffer.RLEData.GetData() + (16 * oRLEBuffer.BytesPerComponent), &pointerToSequence, sizeof(pointerToSequence));
+
+    oRLEBuffer.SequenceData.AddUninitialized(numPixelsInTile * 4 * oRLEBuffer.BytesPerComponent);
+    for (uint32 i = 0; i < numPixelsInTile; i++)
+    {
+        if (i&1)
+        {
+            FMemory::Memcpy(oRLEBuffer.SequenceData.GetData() + (i * 4 + 0) * oRLEBuffer.BytesPerComponent, &one, oRLEBuffer.BytesPerComponent);
+            FMemory::Memcpy(oRLEBuffer.SequenceData.GetData() + (i * 4 + 1) * oRLEBuffer.BytesPerComponent, &zero, oRLEBuffer.BytesPerComponent);
+            FMemory::Memcpy(oRLEBuffer.SequenceData.GetData() + (i * 4 + 2) * oRLEBuffer.BytesPerComponent, &zero, oRLEBuffer.BytesPerComponent);
+            FMemory::Memcpy(oRLEBuffer.SequenceData.GetData() + (i * 4 + 3) * oRLEBuffer.BytesPerComponent, &one, oRLEBuffer.BytesPerComponent);
+        }
+        else
+        {
+            FMemory::Memcpy(oRLEBuffer.SequenceData.GetData() + (i * 4 + 0) * oRLEBuffer.BytesPerComponent, &zero, oRLEBuffer.BytesPerComponent);
+            FMemory::Memcpy(oRLEBuffer.SequenceData.GetData() + (i * 4 + 1) * oRLEBuffer.BytesPerComponent, &one, oRLEBuffer.BytesPerComponent);
+            FMemory::Memcpy(oRLEBuffer.SequenceData.GetData() + (i * 4 + 2) * oRLEBuffer.BytesPerComponent, &zero, oRLEBuffer.BytesPerComponent);
+            FMemory::Memcpy(oRLEBuffer.SequenceData.GetData() + (i * 4 + 3) * oRLEBuffer.BytesPerComponent, &one, oRLEBuffer.BytesPerComponent);
+        }
+    }
+
+    if (oRLEBuffer.TileDescriptors.IsEmpty()) //a buffer must contain something otherwise we get an error.
+        oRLEBuffer.TileDescriptors.AddUninitialized();
+
+    if (oRLEBuffer.RLEPositions.IsEmpty()) //a buffer must contain something otherwise we get an error.
+        oRLEBuffer.RLEPositions.AddUninitialized();
+
+    if (oRLEBuffer.RLEData.IsEmpty()) //a buffer must contain something otherwise we get an error.
+        oRLEBuffer.RLEData.AddUninitialized();
+
+    if (oRLEBuffer.SequenceData.IsEmpty()) //a buffer must contain something otherwise we get an error.
+        oRLEBuffer.SequenceData.AddUninitialized();
 }
