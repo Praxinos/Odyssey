@@ -16,6 +16,7 @@ private:
     {
         int32 Position;
         uint32 Count;
+        bool EndsWithRepetition;
     };
 
 public:
@@ -23,6 +24,8 @@ public:
     {
         uint32 TileWidth;
         uint32 TileHeight;
+        uint32 BytesPerComponent;
+        uint32 ComponentsPerPixel;
     };
 
     struct FRLECompressedBuffer
@@ -31,6 +34,7 @@ public:
         uint32 TextureWidth;
         uint32 TileWidth;
         uint32 TileHeight;
+        uint32 ComponentsPerPixel;
         uint32 BytesPerComponent;
         TArray<FTileDescriptor> TileDescriptors;
         TArray<int32> RLEPositions;
@@ -40,7 +44,7 @@ public:
 
 public:
     // Dispatches this shader. Can be called from any thread
-    static FRLECompressedBuffer Compress(UTexture* iTexture, const FCompressionParams& Params);
+    static TSharedRef<TPromise<FOdysseyTiledRLE::FRLECompressedBuffer>> Compress(UTexture* iTexture, const FCompressionParams& Params);
 
     // Executes this shader on the render thread
     static FRDGTextureRef DecompressRenderThread(FRDGBuilder& GraphBuilder, const FRLECompressedBuffer& iBuffer, EPixelFormat iPixelFormat);
