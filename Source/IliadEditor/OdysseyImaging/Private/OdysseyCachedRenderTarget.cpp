@@ -9,6 +9,8 @@
 #include "ImageCoreUtils.h"
 #include "ImageUtils.h"
 #include "ScreenPass.h"
+#include "TextureResource.h"
+
 #include "OdysseyDiskCache.h"
 #include "OdysseyCachedRenderTargetManager.h"
 
@@ -202,7 +204,7 @@ UOdysseyCachedRenderTarget::Draw(UTexture* SourceTexture, FIntRect Rect, FIntPoi
             DECLARE_GPU_STAT(UOdysseyCachedRenderTarget_Draw);
             {
                 RDG_EVENT_SCOPE(graphBuilder, "UOdysseyCachedRenderTarget_Draw");
-                RDG_GPU_STAT_SCOPE(graphBuilder, UOdysseyCachedRenderTarget_Draw);
+                RDG_EVENT_SCOPE_STAT(graphBuilder, UOdysseyCachedRenderTarget_Draw, "UOdysseyCachedRenderTarget_Draw");
 
                 FRDGTextureRef sourceTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(source->GetResource()->TextureRHI, TEXT("Source")));
                 FRDGTextureRef destinationTexture = destination->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
@@ -313,7 +315,7 @@ UOdysseyCachedRenderTarget::Render(UTextureRenderTarget2D* Destination, FIntRect
                     DECLARE_GPU_STAT(UOdysseyCachedRenderTarget_Render_Image);
                     {
                         RDG_EVENT_SCOPE(graphBuilder, "UOdysseyCachedRenderTarget_Render_Image");
-                        RDG_GPU_STAT_SCOPE(graphBuilder, UOdysseyCachedRenderTarget_Render_Image);
+                        RDG_EVENT_SCOPE_STAT(graphBuilder, UOdysseyCachedRenderTarget_Render_Image, "UOdysseyCachedRenderTarget_Render_Image");
                         FRDGTextureRef destinationTexture = destination->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
 
 
@@ -353,7 +355,7 @@ UOdysseyCachedRenderTarget::Render(UTextureRenderTarget2D* Destination, FIntRect
                     DECLARE_GPU_STAT(UOdysseyCachedRenderTarget_Render_Empty);
                     {
                         RDG_EVENT_SCOPE(graphBuilder, "UOdysseyCachedRenderTarget_Render_Empty");
-                        RDG_GPU_STAT_SCOPE(graphBuilder, UOdysseyCachedRenderTarget_Render_Empty);
+                        RDG_EVENT_SCOPE_STAT(graphBuilder, UOdysseyCachedRenderTarget_Render_Empty, "UOdysseyCachedRenderTarget_Render_Empty");
 
                         FRDGTextureRef destinationTexture = destination->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
                         AddClearRenderTargetPass(graphBuilder, destinationTexture, FLinearColor::Transparent, destinationRect);
@@ -374,7 +376,7 @@ UOdysseyCachedRenderTarget::Render(UTextureRenderTarget2D* Destination, FIntRect
                 DECLARE_GPU_STAT(UOdysseyCachedRenderTarget_Render_RT);
                 {
                     RDG_EVENT_SCOPE(graphBuilder, "UOdysseyCachedRenderTarget_Render_RT");
-                    RDG_GPU_STAT_SCOPE(graphBuilder, UOdysseyCachedRenderTarget_Render_RT);
+                    RDG_EVENT_SCOPE_STAT(graphBuilder, UOdysseyCachedRenderTarget_Render_RT, "UOdysseyCachedRenderTarget_Render_RT");
 
                     FRDGTextureRef sourceTexture = source->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
                     FRDGTextureRef destinationTexture = destination->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
@@ -411,7 +413,7 @@ UOdysseyCachedRenderTarget::CopyRenderTargetToResetRT()
             DECLARE_GPU_STAT(UOdysseyCachedRenderTarget_CopyRenderTargetToResetRT);
             {
                 RDG_EVENT_SCOPE(graphBuilder, "UOdysseyCachedRenderTarget_CopyRenderTargetToResetRT");
-                RDG_GPU_STAT_SCOPE(graphBuilder, UOdysseyCachedRenderTarget_CopyRenderTargetToResetRT);
+                RDG_EVENT_SCOPE_STAT(graphBuilder, UOdysseyCachedRenderTarget_CopyRenderTargetToResetRT, "UOdysseyCachedRenderTarget_CopyRenderTargetToResetRT");
 
                 FRDGTextureRef sourceTexture = source->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
                 FRDGTextureRef destinationTexture = destination->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
@@ -447,7 +449,7 @@ UOdysseyCachedRenderTarget::CopyResetRTToRenderTarget()
             DECLARE_GPU_STAT(UOdysseyCachedRenderTarget_CopyResetRTToRenderTarget);
             {
                 RDG_EVENT_SCOPE(graphBuilder, "UOdysseyCachedRenderTarget_CopyResetRTToRenderTarget");
-                RDG_GPU_STAT_SCOPE(graphBuilder, UOdysseyCachedRenderTarget_CopyResetRTToRenderTarget);
+                RDG_EVENT_SCOPE_STAT(graphBuilder, UOdysseyCachedRenderTarget_CopyResetRTToRenderTarget, "UOdysseyCachedRenderTarget_CopyResetRTToRenderTarget");
 
                 FRDGTextureRef sourceTexture = source->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
                 FRDGTextureRef destinationTexture = destination->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );

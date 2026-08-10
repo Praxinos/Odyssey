@@ -8,6 +8,7 @@
 #include "RenderGraphUtils.h"
 #include "ScreenPass.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "TextureResource.h"
 
 DECLARE_STATS_GROUP(TEXT("OdysseyDecompressTiledRLEShader"), STATGROUP_OdysseyDecompressTiledRLEShader, STATCAT_Advanced);
 DECLARE_CYCLE_STAT(TEXT("OdysseyDecompressTiledRLEShader Execute"), STAT_OdysseyDecompressTiledRLEShader_Execute, STATGROUP_OdysseyDecompressTiledRLEShader);
@@ -76,7 +77,7 @@ FOdysseyTiledRLE::DecompressRenderThread(FRDGBuilder& iGraphBuilder, const FRLEC
     SCOPE_CYCLE_COUNTER(STAT_OdysseyDecompressTiledRLEShader_Execute);
     DECLARE_GPU_STAT(OdysseyDecompressTiledRLEShader);
     RDG_EVENT_SCOPE(iGraphBuilder, "OdysseyDecompressTiledRLEShader");
-    RDG_GPU_STAT_SCOPE(iGraphBuilder, OdysseyDecompressTiledRLEShader);
+    RDG_EVENT_SCOPE_STAT(iGraphBuilder, OdysseyDecompressTiledRLEShader, "OdysseyDecompressTiledRLEShader");
 
     TShaderMapRef<FOdysseyDecompressTiledRLEShader> ComputeShader(GetGlobalShaderMap(GMaxRHIFeatureLevel));
     if (!ComputeShader.IsValid())
