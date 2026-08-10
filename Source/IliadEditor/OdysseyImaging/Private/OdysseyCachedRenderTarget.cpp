@@ -70,6 +70,7 @@ UOdysseyCachedRenderTarget::BeginDraw()
     mResetRenderTarget->ClearColor = FLinearColor::Transparent;
     mResetRenderTarget->InitAutoFormat(Width, Height);
     mResetRenderTarget->UpdateResource();
+    mResetRenderTarget->UpdateResourceImmediate();
 
     CopyRenderTargetToResetRT();
 
@@ -163,6 +164,7 @@ UOdysseyCachedRenderTarget::EndDraw(bool IsUndoable)
 
     IsDrawing = false;
     mResetRenderTarget = nullptr;
+    UnloadRenderTarget();
 }
 
 bool
@@ -264,6 +266,7 @@ UOdysseyCachedRenderTarget::CopyResetRTToRenderTarget()
 void
 UOdysseyCachedRenderTarget::UnloadRenderTarget() const
 {
+    double start = FPlatformTime::Seconds() * 1000.f;
     if (IsDrawing)
         return;
 
@@ -285,11 +288,15 @@ UOdysseyCachedRenderTarget::UnloadRenderTarget() const
     eCacheState oldState = mCacheState;
     mCacheState = eCacheState::Image;
     FOdysseyCachedRenderTargetManager::Get().UpdateCacheState(this, oldState, mCacheState);
+
+    double end = FPlatformTime::Seconds() * 1000.f;
+    UE_LOG(LogTemp, Warning, TEXT("UnloadRenderTarget() in %f ms."), end-start);
 }
 
 void
 UOdysseyCachedRenderTarget::UnloadImage() const
 {
+    double start = FPlatformTime::Seconds() * 1000.f;
     if (mCacheState != eCacheState::Image)
         return;
 
@@ -310,11 +317,15 @@ UOdysseyCachedRenderTarget::UnloadImage() const
     eCacheState oldState = mCacheState;
     mCacheState = eCacheState::DDC;
     FOdysseyCachedRenderTargetManager::Get().UpdateCacheState(this, oldState, mCacheState);
+
+    double end = FPlatformTime::Seconds() * 1000.f;
+    UE_LOG(LogTemp, Warning, TEXT("UnloadImage() in %f ms."), end-start);
 }
 
 void
 UOdysseyCachedRenderTarget::LoadImage() const
 {
+    double start = FPlatformTime::Seconds() * 1000.f;
     if (mCacheState != eCacheState::DDC)
         return;
 
@@ -323,7 +334,7 @@ UOdysseyCachedRenderTarget::LoadImage() const
     {
         mImage = MakeShared<FImage>(Width, Height, mImageFormat, mImageGammaSpace);
         FUniqueBuffer Buffer = FUniqueBuffer::MakeView(mImage->GetPixelPointer(0,0), mImage->GetImageSizeBytes());
-        if ( cache.LoadInto(mId.ToString(), Buffer ) )
+        if ( !cache.LoadInto(mId.ToString(), Buffer ) )
         {
             //Empty Image
             mImage = nullptr;
@@ -333,11 +344,16 @@ UOdysseyCachedRenderTarget::LoadImage() const
     eCacheState oldState = mCacheState;
     mCacheState = eCacheState::Image;
     FOdysseyCachedRenderTargetManager::Get().UpdateCacheState(this, oldState, mCacheState);
+
+    double end = FPlatformTime::Seconds() * 1000.f;
+    UE_LOG(LogTemp, Warning, TEXT("LoadImage() in %f ms."), end-start);
 }
 
 void
 UOdysseyCachedRenderTarget::LoadRenderTarget() const
 {
+    double start = FPlatformTime::Seconds() * 1000.f;
+
     if (mCacheState == eCacheState::RenderTarget)
     {
         FOdysseyCachedRenderTargetManager::Get().Touch(this);
@@ -353,7 +369,7 @@ UOdysseyCachedRenderTarget::LoadRenderTarget() const
     mRenderTarget->ClearColor = FLinearColor::Transparent;
     mRenderTarget->InitAutoFormat(Width, Height);
     mRenderTarget->UpdateResource();
-
+    mRenderTarget->UpdateResourceImmediate();
 
     if (mImage)
     {
@@ -361,10 +377,15 @@ UOdysseyCachedRenderTarget::LoadRenderTarget() const
             [image = mImage, destination = mRenderTarget](FRHICommandListImmediate& RHICmdList)
             {
                 FTextureRHIRef destinationTexture = destination->GetRenderTargetResource()->TextureRHI;
-                FRHILockTextureArgs LockArgs = FRHILockTextureArgs::Lock2D(destinationTexture, 0, RLM_WriteOnly, false);
-                FRHILockTextureResult LockResult = RHICmdList.LockTexture(LockArgs);
-                FMemory::Memcpy(LockResult.Data, reinterpret_cast<uint8*>(image->GetPixelPointer(0,0)), image->GetImageSizeBytes());
-                RHICmdList.UnlockTexture(LockArgs);
+                FUpdateTextureRegion2D region(0, 0, 0, 0, image->SizeX, image->SizeY);
+                RHIUpdateTexture2D(
+                    destinationTexture,
+                    0,
+                    region,
+                    image->GetStrideBytes(),
+                    (const uint8*)image->GetPixelPointer(0,0)
+                );
+
             }
         );
     }
@@ -384,6 +405,9 @@ UOdysseyCachedRenderTarget::LoadRenderTarget() const
     eCacheState oldState = mCacheState;
     mCacheState = eCacheState::RenderTarget;
     FOdysseyCachedRenderTargetManager::Get().UpdateCacheState(this, oldState, mCacheState);
+
+    double end = FPlatformTime::Seconds() * 1000.f;
+    UE_LOG(LogTemp, Warning, TEXT("LoadRenderTarget() in %f ms."), end-start);
 }
 
 UOdysseyCachedRenderTarget::eCacheState
