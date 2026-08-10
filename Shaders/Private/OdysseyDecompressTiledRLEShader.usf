@@ -1,0 +1,283 @@
+#include "/Engine/Public/Platform.ush"
+
+/**
+    RLE Format for fast GPU decompression
+
+    The Format is composed of 3 buffers :
+    - TileDescriptors
+    - RLEData
+    - SequenceData
+
+    TileDescriptors is an array of FTileDesctiptor.
+    Each FTileDesctiptor decribes where to find the tile data in the RLEData buffer.
+    If FTileDesctiptor does contains a negative position, then the tile is considered empty.
+
+    RLEData is a buffer containing RLE-like data.
+    RLE Data is composed of multiple couples of data.
+    Each couple contains a position (position of the first pixel affected) and a Value.
+    The position of the next used to know the position of the mlast pixel affected.
+    Also if the next position is positive, the value represents a pixel to repeat.
+    If the next position is negative, the value represents a pointer to the SequenceData buffer.
+
+    SequenceData contains all the data that is not a repetition.
+
+    TileDescriptors : [FTileDesctiptor][FTileDesctiptor][FTileDesctiptor][FTileDesctiptor]
+                            |
+                            |
+                 -----------
+                |
+                v
+    RLEData : [+Position][Value][-Position][Pointer][+Position][Value][-Position][Pointer]
+                                    |                                       |
+                                    |                                       |
+                                    |                                       |
+                    ----------------                       -----------------
+                   |                                      |
+                   v                                      v
+    SequenceData : [                Data                 ][        Data                ]
+*/
+
+struct FTileDescriptor
+{
+    int position; //position in RLETilePositions
+    int count; //number of positions in RLETilePositions corresponding to this tile
+};
+
+uint TileWidth; //Width of 1 tile in pixels
+uint TileHeight; //Height of 1 tile in pixels
+uint TextureHeight; //Width of the final Texture
+uint TextureWidth; //Height of the final Texture
+uint ValueSize; //Size of a Pixel in 32-bits
+StructuredBuffer<FTileDescriptor> TileDescriptors; //Contains informations about tiles (which tile contains data and where to find taht data in the RLEBuffer
+StructuredBuffer<int> RLEPositions; //Contains position of each valid RLE Data in RLEData
+StructuredBuffer<uint> RLEData; //Contains position of each valid RLE Data in RLEData
+StructuredBuffer<uint> SequenceData; //Contains each valid tile data compressed in RLE
+RWTexture2D<float4> OutputTexture; //The output Texture where the uncompressed data will be stored
+
+uint2 GetNumTiles()
+{
+    return uint2 (
+        max(1, ((TextureWidth - 1) / TileWidth) + 1),
+        max(1, ((TextureHeight - 1) / TileHeight) + 1)
+    );
+}
+
+uint2 GetTileSize(uint2 iTile)
+{
+    uint2 fullTileSize = uint2(iTile.x * TileWidth, iTile.y * TileHeight);
+    return uint2(
+        fullTileSize.x - fullTileSize.x % TextureWidth,
+        fullTileSize.y - fullTileSize.y % TextureHeight
+    );
+}
+
+float4 GetRLEDataValueAt(uint OffsetInBuffer)
+{
+    if (ValueSize == 1)
+    {
+        return float4(
+            (RLEData[OffsetInBuffer * ValueSize] & 0x000000FF) / 255.0,
+            (RLEData[OffsetInBuffer * ValueSize] & 0x0000FF00) / 255.0,
+            (RLEData[OffsetInBuffer * ValueSize] & 0x00FF0000) / 255.0,
+            (RLEData[OffsetInBuffer * ValueSize] & 0xFF000000) / 255.0
+        );
+    }
+    else if (ValueSize == 2)
+    {
+        return float4(
+            f16tof32(RLEData[OffsetInBuffer * ValueSize] & 0x0000FFFF),
+            f16tof32((RLEData[OffsetInBuffer * ValueSize] & 0xFFFF0000) >> 16),
+            f16tof32(RLEData[OffsetInBuffer * ValueSize + 1] & 0x0000FFFF),
+            f16tof32((RLEData[OffsetInBuffer * ValueSize + 1] & 0x0000FFFF) >> 16)
+        );
+    }
+    else if (ValueSize == 4)
+    {
+        return float4(
+            asfloat(RLEData[OffsetInBuffer * ValueSize]),
+            asfloat(RLEData[OffsetInBuffer * ValueSize + 1]),
+            asfloat(RLEData[OffsetInBuffer * ValueSize + 2]),
+            asfloat(RLEData[OffsetInBuffer * ValueSize + 3])
+        );
+    }
+
+    return float4(0.f, 0.f, 0.f, 0.f);
+}
+
+float4 GetSequenceDataValueAt(uint OffsetInBuffer)
+{
+    if (ValueSize == 1)
+    {
+        return float4(
+            (SequenceData[OffsetInBuffer * ValueSize] & 0x000000FF) / 255.0,
+            (SequenceData[OffsetInBuffer * ValueSize] & 0x0000FF00) / 255.0,
+            (SequenceData[OffsetInBuffer * ValueSize] & 0x00FF0000) / 255.0,
+            (SequenceData[OffsetInBuffer * ValueSize] & 0xFF000000) / 255.0
+        );
+    }
+    else if (ValueSize == 2)
+    {
+        return float4(
+            f16tof32(SequenceData[OffsetInBuffer * ValueSize] & 0x0000FFFF),
+            f16tof32((SequenceData[OffsetInBuffer * ValueSize] & 0xFFFF0000) >> 16),
+            f16tof32(SequenceData[OffsetInBuffer * ValueSize + 1] & 0x0000FFFF),
+            f16tof32((SequenceData[OffsetInBuffer * ValueSize + 1] & 0x0000FFFF) >> 16)
+        );
+    }
+    else if (ValueSize == 4)
+    {
+        return float4(
+            asfloat(SequenceData[OffsetInBuffer * ValueSize]),
+            asfloat(SequenceData[OffsetInBuffer * ValueSize + 1]),
+            asfloat(SequenceData[OffsetInBuffer * ValueSize + 2]),
+            asfloat(SequenceData[OffsetInBuffer * ValueSize + 3])
+        );
+    }
+
+    return float4(0.f, 0.f, 0.f, 0.f);
+}
+
+bool GetTileDescriptor(in uint2 iTile, out FTileDescriptor oTileDescriptor)
+{
+    uint2 numTiles = GetNumTiles();
+
+    FTileDescriptor descriptor = TileDescriptors[iTile.y * numTiles.x * iTile.x];
+    if (descriptor.position < 0) //if position is negative tile is considered empty
+        return false;
+
+    oTileDescriptor = descriptor;
+    return true;
+}
+
+bool GetPixelOffsetInRLEData(in uint2 iTile, in uint2 iPositionInTile, out uint oRLEStartPosition, out uint oRLEOffset)
+{
+    FTileDescriptor tileDescriptor;
+    if (!GetTileDescriptor(iTile, tileDescriptor))
+        return false;
+
+    uint2 tileSize = GetTileSize(iTile);
+    uint pixelPosition = (iPositionInTile.y * tileSize.x) + iPositionInTile.x;
+
+    //recherche dicotomique
+    uint low = 0;
+    uint high = tileDescriptor.count - 1;
+    while (low <= high)
+    {
+        uint mid = low + (high - low) / 2;
+        uint pos = abs(RLEPositions[mid]);
+
+        if (pixelPosition == pos)
+        {
+            oRLEStartPosition = pos;
+            oRLEOffset = 0;
+            return true;
+        }
+
+        // If x greater, ignore left half
+        if (pixelPosition > pos)
+        {
+            low = mid;
+        }
+        // If x is smaller, ignore right half
+        else
+        {
+            high = mid - 1;
+        }
+    }
+
+    oRLEStartPosition = abs(RLEPositions[low]);
+    oRLEOffset = pixelPosition - oRLEStartPosition;
+    return true;
+}
+
+void ReadRLE(uint iRLEStartPosition, uint iRLEOffset, uint iTilePosition, uint Count, uint2 tile)
+{
+    uint RLEPosition = iRLEStartPosition;
+    uint RLEOffset = iRLEOffset;
+    uint count = Count;
+    uint currentTilePos = iTilePosition;
+    while (count > 0)
+    {
+        int firstPosition = RLEPositions[RLEPosition];
+        int lastPosition = RLEPositions[RLEPosition + 1];
+        int numPixels = min(abs(lastPosition) - abs(firstPosition) - RLEOffset, count);
+        if (lastPosition > 0) //Repetition
+        {
+            uint pixelValue = GetRLEDataValueAt(RLEPosition);
+            for (uint i = 0; i < numPixels; i++)
+            {
+                uint2 texturePos = uint2(
+                    tile.x * TileWidth + ((currentTilePos + i) % TileWidth),
+                    tile.y * TileHeight + ((currentTilePos + i) / TileWidth)
+                );
+                OutputTexture[texturePos] = pixelValue;
+            }
+            currentTilePos += numPixels;
+        }
+        else //Sequence
+        {
+            uint pointer = RLEData[RLEPosition * ValueSize] + RLEOffset;
+            for (uint i = 0; i < numPixels; i++)
+            {
+                uint pixelValue = GetSequenceDataValueAt(pointer + i);
+                uint2 texturePos = uint2(
+                    tile.x * TileWidth + ((currentTilePos + i) % TileWidth),
+                    tile.y * TileHeight + ((currentTilePos + i) / TileWidth)
+                );
+                OutputTexture[texturePos] = pixelValue;
+            }
+            currentTilePos += numPixels;
+        }
+        RLEPosition = RLEPosition + 1;
+        RLEOffset = 0;
+        count = count - numPixels;
+    }
+}
+
+#define NUM_THREADS_X 8
+#define NUM_THREADS_Y 8
+#define NUM_TOTAL_THREADS NUM_THREADS_X * NUM_THREADS_Y
+
+//32 * 32 * 1 = 1024 threads which is the maximum authorized amount of threads in ComputeShaders V5
+//(see: https://learn.microsoft.com/fr-fr/windows/win32/direct3dhlsl/sm5-attributes-numthreads)
+[numthreads(NUM_THREADS_X, NUM_THREADS_Y, 1)]
+void Main(
+	uint3 DispatchThreadId : SV_DispatchThreadID,
+    uint3 GroupId : SV_GroupID,
+    uint GroupIndex : SV_GroupIndex,
+	uint3 GroupThreadId : SV_GroupThreadID )
+{
+    uint2 tile = GroupId.xy;
+    uint2 tileSize = GetTileSize(tile);
+
+    uint idealThreadPixelCount = max( 1, (tileSize.x * tileSize.y) / NUM_TOTAL_THREADS );
+
+    uint firstPixel = GroupIndex * idealThreadPixelCount;
+    uint lastPixel = min((GroupIndex + 1) * idealThreadPixelCount, (tileSize.x * tileSize.y)) - 1;
+    uint threadPixelCount = firstPixel - lastPixel + 1;
+
+    if (threadPixelCount <= 0)
+        return;
+
+    uint2 posInTile = uint2(firstPixel % TileWidth, firstPixel / TileWidth);
+    uint startPos = posInTile.y * TileWidth + posInTile.x;
+
+    uint RLEStartPosition;
+    uint RLEOffset;
+
+    //If GetPixelOffsetInRLEData returns false, the tile is considered empty
+    if (!GetPixelOffsetInRLEData(tile, posInTile, RLEStartPosition, RLEOffset))
+    {
+        for (int i = firstPixel; i <= lastPixel; i++)
+        {
+            uint2 texturePos = uint2(
+                tile.x * TileWidth + ((startPos + i) % TileWidth),
+                tile.y * TileHeight + ((startPos + i) / TileWidth)
+            );
+            OutputTexture[texturePos] = float4(0.f, 0.f, 0.f, 0.f);
+        }
+        return;
+    }
+
+    ReadRLE(RLEStartPosition, RLEOffset, startPos, threadPixelCount, tile);
+}
