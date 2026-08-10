@@ -46,6 +46,7 @@ public class OdysseyImaging : ModuleRules
                 "Paper2D",
                 "Paper2DEditor",
                 "RenderCore",
+                "Renderer",
                 "RHI",
                 "TargetPlatform",
                 "TextureCompressor",
