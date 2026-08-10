@@ -50,6 +50,10 @@ uint TextureHeight; //Width of the final Texture
 uint TextureWidth; //Height of the final Texture
 uint ComponentsPerPixel; //TODO: Not used yet, defaults at 4 components per pixel
 uint BytesPerComponent; //Size of a Pixel in 32-bits
+uint RedIndex;
+uint GreenIndex;
+uint BlueIndex;
+uint AlphaIndex;
 StructuredBuffer<FTileDescriptor> TileDescriptors; //Contains informations about tiles (which tile contains data and where to find taht data in the RLEBuffer
 StructuredBuffer<int> RLEPositions; //Contains position of each valid RLE Data in RLEData
 StructuredBuffer<uint> RLEData; //Contains position of each valid RLE Data in RLEData
@@ -77,30 +81,29 @@ float4 GetRLEDataValueAt(uint OffsetInBuffer)
 {
     if (BytesPerComponent == 1)
     {
-        uint value = RLEData[OffsetInBuffer * BytesPerComponent];
         return float4(
-            ((value & 0x000000FF) >> 0) / 255.0,
-            ((value & 0x0000FF00) >> 8) / 255.0,
-            ((value & 0x00FF0000) >> 16) / 255.0,
-            ((value & 0xFF000000) >> 24) / 255.0
+            ((RLEData[OffsetInBuffer * BytesPerComponent] >> (8 * RedIndex)) & 0xFF)/ 255.0,
+            ((RLEData[OffsetInBuffer * BytesPerComponent] >> (8 * GreenIndex)) & 0xFF)/ 255.0,
+            ((RLEData[OffsetInBuffer * BytesPerComponent] >> (8 * BlueIndex)) & 0xFF)/ 255.0,
+            ((RLEData[OffsetInBuffer * BytesPerComponent] >> (8 * AlphaIndex)) & 0xFF)/ 255.0
         );
     }
     else if (BytesPerComponent == 2)
     {
         return float4(
-            f16tof32(RLEData[OffsetInBuffer * BytesPerComponent] & 0x0000FFFF),
-            f16tof32((RLEData[OffsetInBuffer * BytesPerComponent] & 0xFFFF0000) >> 16),
-            f16tof32(RLEData[OffsetInBuffer * BytesPerComponent + 1] & 0x0000FFFF),
-            f16tof32((RLEData[OffsetInBuffer * BytesPerComponent + 1] & 0x0000FFFF) >> 16)
+            f16tof32((RLEData[OffsetInBuffer * BytesPerComponent + RedIndex / 2] >> (16 * RedIndex)) & 0xFFFF),
+            f16tof32((RLEData[OffsetInBuffer * BytesPerComponent + GreenIndex / 2] >> (16 * GreenIndex)) & 0xFFFF),
+            f16tof32((RLEData[OffsetInBuffer * BytesPerComponent + BlueIndex / 2] >> (16 * BlueIndex)) & 0xFFFF),
+            f16tof32((RLEData[OffsetInBuffer * BytesPerComponent + AlphaIndex / 2] >> (16 * AlphaIndex)) & 0xFFFF)
         );
     }
     else if (BytesPerComponent == 4)
     {
         return float4(
-            asfloat(RLEData[OffsetInBuffer * BytesPerComponent]),
-            asfloat(RLEData[OffsetInBuffer * BytesPerComponent + 1]),
-            asfloat(RLEData[OffsetInBuffer * BytesPerComponent + 2]),
-            asfloat(RLEData[OffsetInBuffer * BytesPerComponent + 3])
+            asfloat(RLEData[OffsetInBuffer * BytesPerComponent + RedIndex]),
+            asfloat(RLEData[OffsetInBuffer * BytesPerComponent + GreenIndex]),
+            asfloat(RLEData[OffsetInBuffer * BytesPerComponent + BlueIndex]),
+            asfloat(RLEData[OffsetInBuffer * BytesPerComponent + AlphaIndex])
         );
     }
 
@@ -111,30 +114,29 @@ float4 GetSequenceDataValueAt(uint OffsetInBuffer)
 {
     if (BytesPerComponent == 1)
     {
-        uint value = SequenceData[OffsetInBuffer * BytesPerComponent];
         return float4(
-            ((value & 0x000000FF) >> 0) / 255.0,
-            ((value & 0x0000FF00) >> 8) / 255.0,
-            ((value & 0x00FF0000) >> 16) / 255.0,
-            ((value & 0xFF000000) >> 24) / 255.0
+            ((SequenceData[OffsetInBuffer * BytesPerComponent] >> (8 * RedIndex)) & 0xFF)/ 255.0,
+            ((SequenceData[OffsetInBuffer * BytesPerComponent] >> (8 * GreenIndex)) & 0xFF)/ 255.0,
+            ((SequenceData[OffsetInBuffer * BytesPerComponent] >> (8 * BlueIndex)) & 0xFF)/ 255.0,
+            ((SequenceData[OffsetInBuffer * BytesPerComponent] >> (8 * AlphaIndex)) & 0xFF)/ 255.0
         );
     }
     else if (BytesPerComponent == 2)
     {
         return float4(
-            f16tof32(SequenceData[OffsetInBuffer * BytesPerComponent] & 0x0000FFFF),
-            f16tof32((SequenceData[OffsetInBuffer * BytesPerComponent] & 0xFFFF0000) >> 16),
-            f16tof32(SequenceData[OffsetInBuffer * BytesPerComponent + 1] & 0x0000FFFF),
-            f16tof32((SequenceData[OffsetInBuffer * BytesPerComponent + 1] & 0x0000FFFF) >> 16)
+            f16tof32((SequenceData[OffsetInBuffer * BytesPerComponent + RedIndex / 2] >> (16 * RedIndex)) & 0xFFFF),
+            f16tof32((SequenceData[OffsetInBuffer * BytesPerComponent + GreenIndex / 2] >> (16 * GreenIndex)) & 0xFFFF),
+            f16tof32((SequenceData[OffsetInBuffer * BytesPerComponent + BlueIndex / 2] >> (16 * BlueIndex)) & 0xFFFF),
+            f16tof32((SequenceData[OffsetInBuffer * BytesPerComponent + AlphaIndex / 2] >> (16 * AlphaIndex)) & 0xFFFF)
         );
     }
     else if (BytesPerComponent == 4)
     {
         return float4(
-            asfloat(SequenceData[OffsetInBuffer * BytesPerComponent]),
-            asfloat(SequenceData[OffsetInBuffer * BytesPerComponent + 1]),
-            asfloat(SequenceData[OffsetInBuffer * BytesPerComponent + 2]),
-            asfloat(SequenceData[OffsetInBuffer * BytesPerComponent + 3])
+            asfloat(SequenceData[OffsetInBuffer * BytesPerComponent + RedIndex]),
+            asfloat(SequenceData[OffsetInBuffer * BytesPerComponent + GreenIndex]),
+            asfloat(SequenceData[OffsetInBuffer * BytesPerComponent + BlueIndex]),
+            asfloat(SequenceData[OffsetInBuffer * BytesPerComponent + AlphaIndex])
         );
     }
 

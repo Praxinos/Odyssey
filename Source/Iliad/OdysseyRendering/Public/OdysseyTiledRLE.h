@@ -26,6 +26,10 @@ public:
         uint32 TileHeight;
         uint32 BytesPerComponent;
         uint32 ComponentsPerPixel;
+        uint32 RedIndex;
+        uint32 GreenIndex;
+        uint32 BlueIndex;
+        uint32 AlphaIndex;
     };
 
     struct FRLECompressedBuffer
@@ -36,6 +40,10 @@ public:
         uint32 TileHeight;
         uint32 ComponentsPerPixel;
         uint32 BytesPerComponent;
+        uint32 RedIndex;
+        uint32 GreenIndex;
+        uint32 BlueIndex;
+        uint32 AlphaIndex;
         TArray<FTileDescriptor> TileDescriptors;
         TArray<int32> RLEPositions;
         TArray<uint8> RLEData;
