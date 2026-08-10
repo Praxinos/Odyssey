@@ -83,9 +83,9 @@ UOdysseyCachedRenderTarget::GetBytesPerChannel() const
 {
     switch(Format)
     {
-        case EOdysseyCachedRenderTargetFormat::RGBA8: return 8;
-        case EOdysseyCachedRenderTargetFormat::RGBA16F: return 16;
-        case EOdysseyCachedRenderTargetFormat::RGBA32F: return 32;
+        case EOdysseyCachedRenderTargetFormat::RGBA8: return 1;
+        case EOdysseyCachedRenderTargetFormat::RGBA16F: return 2;
+        case EOdysseyCachedRenderTargetFormat::RGBA32F: return 4;
     }
     return 8;
 }
@@ -147,6 +147,8 @@ UOdysseyCachedRenderTarget::Draw(UTexture* SourceTexture, FIntRect Rect, FIntPoi
     mIsImageCacheInvalid = true;
     mIsDDCCacheInvalid = true;
 
+    double start = FPlatformTime::Seconds() * 1000.f;
+
     ENQUEUE_RENDER_COMMAND(UOdysseyCachedRenderTarget_Draw)(
         [source = SourceTexture, destination = mRenderTarget, sourceRect, destinationRect](FRHICommandListImmediate& RHICmdList)
         {
@@ -154,19 +156,30 @@ UOdysseyCachedRenderTarget::Draw(UTexture* SourceTexture, FIntRect Rect, FIntPoi
             FRDGTextureRef sourceTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(source->GetResource()->TextureRHI, TEXT("Source")));
             FRDGTextureRef destinationTexture = destination->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
 
-            AddDrawTexturePass(
-                graphBuilder,
-                FScreenPassViewInfo(),
-                sourceTexture,
-                destinationTexture,
-                sourceRect.Min,
-                sourceRect.Size(),
-                destinationRect.Min,
-                destinationRect.Size()
-            );
+            for (int i = 0; i < 1000; i++)
+            {
+                AddDrawTexturePass(
+                    graphBuilder,
+                    FScreenPassViewInfo(),
+                    sourceTexture,
+                    destinationTexture,
+                    sourceRect.Min,
+                    sourceRect.Size(),
+                    destinationRect.Min,
+                    destinationRect.Size()
+                );
+            }
             graphBuilder.Execute();
         }
     );
+
+    FlushRenderingCommands();
+    FRenderCommandFence fence;
+    fence.BeginFence();
+    fence.Wait();
+
+    double end = FPlatformTime::Seconds() * 1000.f;
+    UE_LOG(LogTemp, Warning, TEXT("Draw() in %f ms."), end-start);
 }
 
 void
@@ -264,43 +277,47 @@ UOdysseyCachedRenderTarget::Render(UTextureRenderTarget2D* Destination, FIntRect
                     );
                     FRDGTextureRef renderTexture = graphBuilder.CreateTexture(renderTextureDesc, TEXT("UOdysseyCachedRenderTarget::RenderTexture"));
 
-                    auto* PassParameters = graphBuilder.AllocParameters<FRenderTargetParameters>();
-                    PassParameters->RenderTargets[0] = FRenderTargetBinding(renderTexture, ERenderTargetLoadAction::ENoAction);
+                    for (int i = 0; i < 100; i++)
+                    {
+                        auto* PassParameters = graphBuilder.AllocParameters<FRenderTargetParameters>();
+                        PassParameters->RenderTargets[0] = FRenderTargetBinding(renderTexture, ERenderTargetLoadAction::ENoAction);
 
-                    graphBuilder.AddPass(
-                        RDG_EVENT_NAME("OdysseyCopyFromImage"),
-                        PassParameters,
-                        ERDGPassFlags::Raster,
-                        [imageFuture, renderTexture, height, stride](FRHICommandListImmediate& RHICmdList)
-                        {
-                            const TArray<uint8>& image = imageFuture.Get();
-                            FTextureRHIRef destinationTexture = renderTexture->GetRHI();
-                            FRHILockTextureArgs LockArgs = FRHILockTextureArgs::Lock2D(destinationTexture, 0, RLM_WriteOnly, false);
-                            FRHILockTextureResult LockResult = RHICmdList.LockTexture(LockArgs);
-
-                            for (uint32 y = 0; y < height; y++)
+                        graphBuilder.AddPass(
+                            RDG_EVENT_NAME("OdysseyCopyFromImage"),
+                            PassParameters,
+                            ERDGPassFlags::Raster,
+                            [imageFuture, renderTexture, height, stride](FRHICommandListImmediate& RHICmdList)
                             {
-                                const void* src = image.GetData() + stride * y;
-                                void* dst = (uint8*)(LockResult.Data) + LockResult.Stride * y;
-                                FMemory::Memcpy(dst, src, stride);
+                                const FUniqueBuffer& image = imageFuture.Get();
+                                FTextureRHIRef destinationTexture = renderTexture->GetRHI();
+                                FRHILockTextureArgs LockArgs = FRHILockTextureArgs::Lock2D(destinationTexture, 0, RLM_WriteOnly, false);
+                                FRHILockTextureResult LockResult = RHICmdList.LockTexture(LockArgs);
+
+                                for (uint32 y = 0; y < height; y++)
+                                {
+                                    void* src = (uint8*)(image.GetData()) + stride * y;
+                                    void* dst = (uint8*)(LockResult.Data) + LockResult.Stride * y;
+                                    FMemory::Memcpy(dst, src, stride);
+                                }
+
+                                RHICmdList.UnlockTexture(LockArgs);
                             }
+                        );
 
-                            RHICmdList.UnlockTexture(LockArgs);
-                        }
-                    );
+                        FRDGTextureRef destinationTexture = destination->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
 
-                    FRDGTextureRef destinationTexture = destination->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+                        AddDrawTexturePass(
+                            graphBuilder,
+                            FScreenPassViewInfo(),
+                            renderTexture,
+                            destinationTexture,
+                            sourceRect.Min,
+                            sourceRect.Size(),
+                            destinationRect.Min,
+                            destinationRect.Size()
+                        );
+                    }
 
-                    AddDrawTexturePass(
-                        graphBuilder,
-                        FScreenPassViewInfo(),
-                        renderTexture,
-                        destinationTexture,
-                        sourceRect.Min,
-                        sourceRect.Size(),
-                        destinationRect.Min,
-                        destinationRect.Size()
-                    );
                     graphBuilder.Execute();
                 }
             );
@@ -342,6 +359,11 @@ UOdysseyCachedRenderTarget::Render(UTextureRenderTarget2D* Destination, FIntRect
         );
     }
 
+    FlushRenderingCommands();
+    FRenderCommandFence fence;
+    fence.BeginFence();
+    fence.Wait();
+
     double end = FPlatformTime::Seconds() * 1000.f;
     UE_LOG(LogTemp, Warning, TEXT("Render() in %f ms."), end-start);
 }
@@ -372,6 +394,11 @@ UOdysseyCachedRenderTarget::CopyRenderTargetToResetRT()
             graphBuilder.Execute();
         }
     );
+
+    FlushRenderingCommands();
+    FRenderCommandFence fence;
+    fence.BeginFence();
+    fence.Wait();
 }
 
 void
@@ -400,6 +427,11 @@ UOdysseyCachedRenderTarget::CopyResetRTToRenderTarget()
             graphBuilder.Execute();
         }
     );
+
+    FlushRenderingCommands();
+    FRenderCommandFence fence;
+    fence.BeginFence();
+    fence.Wait();
 }
 
 void
@@ -414,7 +446,7 @@ UOdysseyCachedRenderTarget::UnloadRenderTarget() const
 
     if (mIsImageCacheInvalid)
     {
-        TSharedRef<TPromise<TArray<uint8>>> promise = MakeShared<TPromise<TArray<uint8>>>();
+        TSharedRef<TPromise<FUniqueBuffer>> promise = MakeShared<TPromise<FUniqueBuffer>>();
 
         ENQUEUE_RENDER_COMMAND(UOdysseyCachedRenderTarget_Draw)(
             [
@@ -430,12 +462,11 @@ UOdysseyCachedRenderTarget::UnloadRenderTarget() const
                 FRHILockTextureArgs LockArgs = FRHILockTextureArgs::Lock2D(sourceTexture, 0, RLM_ReadOnly, false);
                 FRHILockTextureResult LockResult = RHICmdList.LockTexture(LockArgs);
 
-                TArray<uint8> image;
-                image.AddUninitialized(stride * height);
+                FUniqueBuffer image = FUniqueBuffer::Alloc(stride * height);
                 for (uint32 y = 0; y < height; y++)
                 {
                     void* src = (uint8*)(LockResult.Data) + LockResult.Stride * y;
-                    void* dst = image.GetData() + stride * y;
+                    void* dst = (uint8*)(image.GetData()) + stride * y;
                     FMemory::Memcpy(dst, src, stride);
                 }
                 RHICmdList.UnlockTexture(LockArgs);
@@ -454,6 +485,11 @@ UOdysseyCachedRenderTarget::UnloadRenderTarget() const
     mCacheState = eCacheState::Image;
     FOdysseyCachedRenderTargetManager::Get().UpdateCacheState(this, oldState, mCacheState);
 
+    FlushRenderingCommands();
+    FRenderCommandFence fence;
+    fence.BeginFence();
+    fence.Wait();
+
     double end = FPlatformTime::Seconds() * 1000.f;
     UE_LOG(LogTemp, Warning, TEXT("UnloadRenderTarget() in %f ms."), end-start);
 }
@@ -467,16 +503,16 @@ UOdysseyCachedRenderTarget::UnloadImage() const
 
     if (mIsDDCCacheInvalid && mImageFuture.IsValid())
     {
-        const TArray<uint8>& image = mImageFuture.Get();
+        const FUniqueBuffer& image = mImageFuture.Get();
 
         FOdysseyDiskCache cache(OdysseyCachedRenderTarget_CACHE_NAME, OdysseyCachedRenderTarget_CACHE_VERSION);
-        FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(image.GetData(), image.Num());
+        FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(image.GetData(), image.GetSize());
         cache.Save(mId.ToString(), sharedBuffer);
 
         mIsDDCCacheInvalid = false;
     }
 
-    mImageFuture = TSharedFuture<TArray<uint8>>();
+    mImageFuture = TSharedFuture<FUniqueBuffer>();
 
     eCacheState oldState = mCacheState;
     mCacheState = eCacheState::DDC;
@@ -495,27 +531,42 @@ UOdysseyCachedRenderTarget::LoadImage() const
     double start = FPlatformTime::Seconds() * 1000.f;
     double end = FPlatformTime::Seconds() * 1000.f;
     FOdysseyDiskCache cache(OdysseyCachedRenderTarget_CACHE_NAME, OdysseyCachedRenderTarget_CACHE_VERSION);
-    if (cache.ProbablyExists(mId.ToString()))
+
+    FUniqueBuffer buffer;
+    if (cache.Load(mId.ToString(), buffer))
     {
         end = FPlatformTime::Seconds() * 1000.f;
         UE_LOG(LogTemp, Warning, TEXT("#1 LoadImage() in %f ms."), end-start);
         start = FPlatformTime::Seconds() * 1000.f;
 
-        TArray<uint8> image;
-        image.AddUninitialized(GetTotalBytes());
-        FUniqueBuffer Buffer = FUniqueBuffer::MakeView(image.GetData(), image.Num());
+        TPromise<FUniqueBuffer> promise;
+        promise.SetValue(MoveTemp(buffer));
+        mImageFuture = promise.GetFuture().Share();
+
+        end = FPlatformTime::Seconds() * 1000.f;
+        UE_LOG(LogTemp, Warning, TEXT("#4 LoadImage() in %f ms."), end-start);
+        start = FPlatformTime::Seconds() * 1000.f;
+    }
+
+    /* if (cache.ProbablyExists(mId.ToString()))
+    {
+        end = FPlatformTime::Seconds() * 1000.f;
+        UE_LOG(LogTemp, Warning, TEXT("#1 LoadImage() in %f ms."), end-start);
+        start = FPlatformTime::Seconds() * 1000.f;
+
+        FUniqueBuffer image = FUniqueBuffer::Alloc(GetTotalBytes());
 
         end = FPlatformTime::Seconds() * 1000.f;
         UE_LOG(LogTemp, Warning, TEXT("#2 LoadImage() in %f ms."), end-start);
         start = FPlatformTime::Seconds() * 1000.f;
 
-        if ( cache.LoadInto(mId.ToString(), Buffer ) )
+        if ( cache.LoadInto(mId.ToString(), image ) )
         {
             end = FPlatformTime::Seconds() * 1000.f;
             UE_LOG(LogTemp, Warning, TEXT("#3 LoadImage() in %f ms."), end-start);
             start = FPlatformTime::Seconds() * 1000.f;
 
-            TPromise<TArray<uint8>> promise;
+            TPromise<FUniqueBuffer> promise;
             promise.SetValue(MoveTemp(image));
             mImageFuture = promise.GetFuture().Share();
 
@@ -523,7 +574,7 @@ UOdysseyCachedRenderTarget::LoadImage() const
             UE_LOG(LogTemp, Warning, TEXT("#4 LoadImage() in %f ms."), end-start);
             start = FPlatformTime::Seconds() * 1000.f;
         }
-    }
+    } */
 
     eCacheState oldState = mCacheState;
     mCacheState = eCacheState::Image;
@@ -555,14 +606,14 @@ UOdysseyCachedRenderTarget::LoadRenderTarget() const
         ENQUEUE_RENDER_COMMAND(UOdysseyCachedRenderTarget_Draw)(
             [imageFuture = mImageFuture, height = Height, destination = mRenderTarget, stride = GetStride()](FRHICommandListImmediate& RHICmdList)
             {
-                const TArray<uint8>& image = imageFuture.Get();
+                const FUniqueBuffer& image = imageFuture.Get();
                 FTextureRHIRef destinationTexture = destination->GetRenderTargetResource()->TextureRHI;
                 FRHILockTextureArgs LockArgs = FRHILockTextureArgs::Lock2D(destinationTexture, 0, RLM_WriteOnly, false);
                 FRHILockTextureResult LockResult = RHICmdList.LockTexture(LockArgs);
 
                 for (uint32 y = 0; y < height; y++)
                 {
-                    const void* src = image.GetData() + stride * y;
+                    void* src = (uint8*)(image.GetData()) + stride * y;
                     void* dst = (uint8*)(LockResult.Data) + LockResult.Stride * y;
                     FMemory::Memcpy(dst, src, stride);
                 }
@@ -587,6 +638,11 @@ UOdysseyCachedRenderTarget::LoadRenderTarget() const
     eCacheState oldState = mCacheState;
     mCacheState = eCacheState::RenderTarget;
     FOdysseyCachedRenderTargetManager::Get().UpdateCacheState(this, oldState, mCacheState);
+
+    FlushRenderingCommands();
+    FRenderCommandFence fence;
+    fence.BeginFence();
+    fence.Wait();
 
     double end = FPlatformTime::Seconds() * 1000.f;
     UE_LOG(LogTemp, Warning, TEXT("LoadRenderTarget() in %f ms."), end-start);
