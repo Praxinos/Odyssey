@@ -112,7 +112,8 @@ FArianeLine::CopyShape( const FCopyArgs& CopyArgs )
     }
     else
     {
-         LineCopy = CopyArgs.DrawingLayer->AllocLine( Name
+         LineCopy = CopyArgs.DrawingLayer->AllocLine( MaterialInterface
+                                                    , Name
                                                     , StartPoint
                                                     , EndPoint
                                                     , StrokeWidth

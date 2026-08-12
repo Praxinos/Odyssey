@@ -150,7 +150,8 @@ FArianeEllipse::CopyShape( const FCopyArgs& CopyArgs )
     }
     else
     {
-         EllipseCopy = CopyArgs.DrawingLayer->AllocEllipse( Name
+         EllipseCopy = CopyArgs.DrawingLayer->AllocEllipse( MaterialInterface
+                                                          , Name
                                                           , RadiusX
                                                           , RadiusY
                                                           , StrokeWidth

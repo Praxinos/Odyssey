@@ -604,6 +604,8 @@ FArianeEditor::AddPainting3DActor()
     FVector Location = View ? View->ViewLocation + ( View->GetViewDirection() * Settings->GetDistanceToNewActor() )
                             : FVector();
 
+    GetWorld()->MarkPackageDirty();
+
     return Cast<AArianePainting3DActor>(GetWorld()->SpawnActor( AArianePainting3DActor::StaticClass(), &Location ) );
 }
 

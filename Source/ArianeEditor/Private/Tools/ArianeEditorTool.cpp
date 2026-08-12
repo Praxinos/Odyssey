@@ -571,7 +571,7 @@ void UArianeEditorTool::OnPacket( const UE::StylusInput::FStylusInputPacket& iPa
     if (selectedAPI == "Wintab")
     {
         UE::StylusInput::FStylusInputPacket packetCopyWin = iPacket;
-        ConvertWintabToWindowCoordinates(packetCopyWin.X, packetCopyWin.Y);
+        //ConvertWintabToWindowCoordinates(packetCopyWin.X, packetCopyWin.Y);
 
         if (iPacket.NormalPressure == 0)
         {

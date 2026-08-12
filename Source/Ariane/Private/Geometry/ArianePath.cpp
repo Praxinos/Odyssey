@@ -730,12 +730,22 @@ FArianePath::PostEditUndo()
 {
     Super::PostEditUndo();
 
+    for( FInstancedStruct& InstancedVertex : InstancedVertices )
+    {
+        FArianeVertex* Vertex = InstancedVertex.GetMutablePtr<FArianeVertex>();
+
+        Vertex->PostEditUndo();
+
+        AddVertex( Vertex );
+    }
+
     for( FInstancedStruct& InstancedSegment : InstancedSegments )
     {
         FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
 
         Segment->PostEditUndo();
-        Segment->Link();
+
+        AddSegment( Segment );
     }
 
     if( MaterialInterface == nullptr )
@@ -755,12 +765,22 @@ FArianePath::PostLoad()
 {
     Super::PostLoad();
 
+    for( FInstancedStruct& InstancedVertex : InstancedVertices )
+    {
+        FArianeVertex* Vertex = InstancedVertex.GetMutablePtr<FArianeVertex>();
+
+        Vertex->PostEditUndo();
+
+        AddVertex( Vertex );
+    }
+
     for( FInstancedStruct& InstancedSegment : InstancedSegments )
     {
         FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
 
         Segment->PostLoad();
-        Segment->Link();
+
+        AddSegment( Segment );
     }
 
     if( MaterialInterface == nullptr )

@@ -69,22 +69,12 @@ void
 UArianeLayer::PreEditUndo()
 {
     Super::PreEditUndo();
-
-    if( ParentFolder )
-    {
-        ParentFolder->RemoveChildLayer( this );
-    }
 }
 
 void
 UArianeLayer::PostEditUndo()
 {
     Super::PostEditUndo();
-
-    if( ParentFolder )
-    {
-        ParentFolder->AddChildLayer( this );
-    }
 }
 #endif
 
@@ -92,11 +82,6 @@ void
 UArianeLayer::PostLoad()
 {
     Super::PostLoad();
-
-    if( ParentFolder )
-    {
-        ParentFolder->AddChildLayer( this );
-    }
 }
 
 /*

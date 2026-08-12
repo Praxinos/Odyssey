@@ -298,11 +298,7 @@ private:
                                             , FVector& OutHandle );
 
 protected:
-    UPROPERTY( EditAnywhere )
-    TArray<FArianeVertexID> Vertices;
 
-    UPROPERTY( EditAnywhere )
-    TArray<FArianeSegmentID> Segments;
 
     UPROPERTY( EditAnywhere )
     TArray<FInstancedStruct> InstancedVertices;
@@ -320,8 +316,9 @@ protected:
     UMaterialInterface* MaterialInterface;
 
 protected:
+    TArray<FArianeVertexID> Vertices;
+    TArray<FArianeSegmentID> Segments;
     FArianePathGeometry3D Geometry3D;
-
     TArray<FArianeSegment*> InvalidatedSegments;
     TArray<FArianeVertex*> InvalidatedVertices;
     TArray<Chain> Chains;

@@ -15,7 +15,14 @@
 
 UArianeLayerDrawing::~UArianeLayerDrawing()
 {
+}
+
+void
+UArianeLayerDrawing::BeginDestroy()
+{
     UnbindDelegates();
+
+    Super::BeginDestroy();
 }
 
 UArianeLayerDrawing::UArianeLayerDrawing()
@@ -201,11 +208,13 @@ UArianeLayerDrawing::AllocCycle( UMaterialInterface* InMaterialInterface
     // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
     GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
 
+
     return NewCycle;
 }
 
 FArianeEllipse*
-UArianeLayerDrawing::AllocEllipse( const FName& InName
+UArianeLayerDrawing::AllocEllipse( UMaterialInterface* InMaterialInterface
+                                 , const FName& InName
                                  , double RadiusX
                                  , double RadiusY
                                  , double StrokeWidth
@@ -237,11 +246,19 @@ UArianeLayerDrawing::AllocEllipse( const FName& InName
                                    , AllocationModel );
     }
 
+    Ellipse->SetMaterial( InMaterialInterface ? InMaterialInterface
+                                              : GetLayerStack()->GetPainting3DComponent()->GetDefaultMaterial() );
+
+    // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
+    GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
+
+
     return Ellipse;
 }
 
 FArianeLine*
-UArianeLayerDrawing::AllocLine( const FName& InName
+UArianeLayerDrawing::AllocLine( UMaterialInterface* InMaterialInterface
+                              , const FName& InName
                               , const FVector& StartPoint
                               , const FVector& EndPoint
                               , double StrokeWidth
@@ -273,11 +290,19 @@ UArianeLayerDrawing::AllocLine( const FName& InName
                               , AllocationModel );
     }
 
+    Line->SetMaterial( InMaterialInterface ? InMaterialInterface
+                                           : GetLayerStack()->GetPainting3DComponent()->GetDefaultMaterial() );
+
+    // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
+    GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
+
+
     return Line;
 }
 
 FArianePolygon*
-UArianeLayerDrawing::AllocPolygon( const FName& InName
+UArianeLayerDrawing::AllocPolygon( UMaterialInterface* InMaterialInterface
+                                 , const FName& InName
                                  , uint32 CornerCount
                                  , double Radius
                                  , double StrokeWidth
@@ -309,11 +334,19 @@ UArianeLayerDrawing::AllocPolygon( const FName& InName
                                     , AllocationModel );
     }
 
+    Polygon->SetMaterial( InMaterialInterface ? InMaterialInterface
+                                              : GetLayerStack()->GetPainting3DComponent()->GetDefaultMaterial() );
+
+    // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
+    GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
+
+
     return Polygon;
 }
 
 FArianeRectangle*
-UArianeLayerDrawing::AllocRectangle( const FName& InName
+UArianeLayerDrawing::AllocRectangle( UMaterialInterface* InMaterialInterface
+                                   , const FName& InName
                                    , double Width
                                    , double Height
                                    , double StrokeWidth
@@ -345,6 +378,13 @@ UArianeLayerDrawing::AllocRectangle( const FName& InName
                                         , AllocationModel );
     }
 
+    Rectangle->SetMaterial( InMaterialInterface ? InMaterialInterface
+                                                : GetLayerStack()->GetPainting3DComponent()->GetDefaultMaterial() );
+
+    // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
+    GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
+
+
     return Rectangle;
 }
 
@@ -374,6 +414,7 @@ UArianeLayerDrawing::AllocPath( UMaterialInterface* InMaterialInterface
 
     // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
     GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
+
 
     return NewPath;
 }

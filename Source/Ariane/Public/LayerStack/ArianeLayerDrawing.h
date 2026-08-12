@@ -139,22 +139,26 @@ public:
     void GetSelectedTrees( TArray<FArianeObject*>& SelectedTrees );
     void UnselectObject( FArianeObject* ObjectToSelect );
     void InvalidateCache();
-    FArianeEllipse* AllocEllipse( const FName& InName
+    FArianeEllipse* AllocEllipse( UMaterialInterface* InMaterialInterface
+                                , const FName& InName
                                 , double RadiusX
                                 , double RadiusY
                                 , double StrokeWidth
                                 , EArianeAllocationModel AllocationModel );
-    FArianeRectangle* AllocRectangle( const FName& InName
+    FArianeRectangle* AllocRectangle( UMaterialInterface* InMaterialInterface
+                                    , const FName& InName
                                     , double Width
                                     , double Height
                                     , double StrokeWidth
                                     , EArianeAllocationModel AllocationModel );
-    FArianeLine* AllocLine( const FName& InName
+    FArianeLine* AllocLine( UMaterialInterface* InMaterialInterface
+                          , const FName& InName
                           , const FVector& StartPoint
                           , const FVector& EndPoint
                           , double StrokeWidth
                           , EArianeAllocationModel AllocationModel );
-    FArianePolygon* AllocPolygon( const FName& InName
+    FArianePolygon* AllocPolygon( UMaterialInterface* InMaterialInterface
+                                , const FName& InName
                                 , uint32 CornerCount
                                 , double Radius
                                 , double StrokeWidth
@@ -165,6 +169,7 @@ public:
                             , FArianeGraph::FCycle* Cycle
                             , EArianeAllocationModel AllocationModel );
     virtual void OnUpdateTransform( EUpdateTransformFlags UpdateTransformFlags, ETeleportType TeleportType ) override;
+    virtual void BeginDestroy() override;
 
 protected:
     void BindDelegates();

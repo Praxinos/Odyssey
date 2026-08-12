@@ -31,7 +31,7 @@ FArianeCycleInvalidationFlags::AND( const FArianeObjectInvalidationFlags& RHS )
 {
     if( RHS.HasBaseClass( FArianeCycleInvalidationFlags::StaticClass() ) )
     {
-        Dummy &= ((FArianeCycleInvalidationFlags&)RHS).Dummy;
+        PointAltered &= ((FArianeCycleInvalidationFlags&)RHS).PointAltered;
     }
 
     Super::AND( RHS );
@@ -44,7 +44,7 @@ FArianeCycleInvalidationFlags::OR( const FArianeObjectInvalidationFlags& RHS )
 {
     if( RHS.HasBaseClass( FArianeCycleInvalidationFlags::StaticClass() ) )
     {
-        Dummy |= ((FArianeCycleInvalidationFlags&)RHS).Dummy;
+        PointAltered |= ((FArianeCycleInvalidationFlags&)RHS).PointAltered;
     }
 
     Super::OR( RHS );
@@ -55,7 +55,7 @@ FArianeCycleInvalidationFlags::OR( const FArianeObjectInvalidationFlags& RHS )
 FArianeCycleInvalidationFlags&
 FArianeCycleInvalidationFlags::SetAll()
 {
-    Dummy = 1;
+    PointAltered = 1;
 
     Super::SetAll();
 
@@ -67,7 +67,7 @@ FArianeCycleInvalidationFlags::Clear()
 {
     Super::Clear();
 
-    Dummy = 0;
+    PointAltered = 0;
 
     return *this;
 }
@@ -75,7 +75,7 @@ FArianeCycleInvalidationFlags::Clear()
 bool
 FArianeCycleInvalidationFlags::HasAny()
 {
-    return ( Dummy ) ? true : Super::HasAny();
+    return ( PointAltered ) ? true : Super::HasAny();
 }
 
 //--------------------- Vertex buffer
@@ -98,6 +98,22 @@ FArianeCycle::FArianeCycle()
 {
 }
 
+void
+FArianeCycle::BuildModelVertexCache()
+{
+    ModelVertexCache.Empty();
+    ModelVertexCache.Reserve( Points.Num() );
+
+    for( FArianePoint& Point : Points )
+    {
+        ModelVertexCache.Emplace( FVector3f( Point.GetPosition() )
+                                , FVector3f::Zero() // TangentX
+                                , FVector3f::Zero() // TangentZ
+                                , FVector2f::Zero()
+                                , Color );
+    }
+}
+
 FArianeCycle::FArianeCycle( UArianeLayerDrawing* InDrawingLayer
                           , const FName& InName
                           , FArianeGraph* Graph
@@ -113,7 +129,7 @@ FArianeCycle::FArianeCycle( UArianeLayerDrawing* InDrawingLayer
     , MaterialInterface ( nullptr )
     , Geometry3D ( this )
 {
-    ModelVertexCache.Empty();
+    Points.Empty();
     EarcutIndices.Empty();
 
     if( Graph && GraphCycle )
@@ -123,7 +139,7 @@ FArianeCycle::FArianeCycle( UArianeLayerDrawing* InDrawingLayer
         int32 ArraySize = GraphCycle->ContourSections.Num();
 
         Polygon[0].reserve( ArraySize );
-        ModelVertexCache.Reserve( ArraySize );
+        Points.Reserve( ArraySize );
 
         if ( ArraySize )
         {
@@ -132,11 +148,7 @@ FArianeCycle::FArianeCycle( UArianeLayerDrawing* InDrawingLayer
             FArianeGraph::FNode* FirstNode = FirstSection->Nodes[FirstNodeIndex];
 
             Polygon[0].push_back( FirstNode->Position );
-            ModelVertexCache.Emplace( FVector3f( FirstNode->OriginalPosition )
-                                    , FVector3f::Zero() // TangentX
-                                    , FVector3f::Zero() // TangentZ
-                                    , FVector2f::Zero()
-                                    , Color );
+            Points.Emplace( FVector( FirstNode->OriginalPosition ) );
 
             for( int i = 0; i < ArraySize; i++ )
             {
@@ -151,11 +163,7 @@ FArianeCycle::FArianeCycle( UArianeLayerDrawing* InDrawingLayer
                     FArianeGraph::FNode* NextNode = Section->Nodes[SectionNextNodeIndex];
 
                     Polygon[0].push_back( NextNode->Position );
-                    ModelVertexCache.Emplace( FVector3f( NextNode->OriginalPosition )
-                                            , FVector3f::Zero() // TangentX
-                                            , FVector3f::Zero() // TangentZ
-                                            , FVector2f::Zero()
-                                            , Color );
+                    Points.Emplace( FVector( NextNode->OriginalPosition ) );
                 }
             }
         }
@@ -166,8 +174,13 @@ FArianeCycle::FArianeCycle( UArianeLayerDrawing* InDrawingLayer
         // y-down/screen space). Call std::reverse on the result if you need the opposite orientation.
         std::vector<uint32> indices = mapbox::earcut<uint32>(Polygon);
         // memcpy
-        EarcutIndices.Append( &indices[0], indices.size() );
+        EarcutIndices.SetNumUninitialized( indices.size() );
+        // uint32 to int32 array. All values are >= 0 anyways.
+        // UProperty macro does not accept uint32 and we need it for the reflection system.
+        FMemory::Memcpy( EarcutIndices.GetData(), indices.data(), indices.size() * sizeof( uint32 ) );
     }
+
+    Invalidate( FArianeCycleInvalidationFlags().SetPointAltered() );
 }
 
 bool
@@ -180,21 +193,6 @@ FArianeCycle::HasBaseClass( uint32 BaseClass )
 
     return Super::HasBaseClass(BaseClass);
 }
-
-/*
-void
-FArianeCycle::PostLoad()
-{
-    //if( Geometry3D == nullptr )
-    {
-        //Geometry3D = new FArianeCycleGeometry3D( this );
-
-        InvalidationFlags = new FArianeCycleInvalidationFlags();
-
-        Material = NewObject<UMaterial>();
-    }
-}
-*/
 
 void
 FArianeCycle::Added()
@@ -356,7 +354,7 @@ FArianeCycle::PostEditUndo()
     //if( MaterialInterface )
         DrawingLayer->IncrementMaterial( MaterialInterface );
 
-    Invalidate( FArianeCycleInvalidationFlags().SetDummy() );
+    Invalidate( FArianeCycleInvalidationFlags().SetPointAltered() );
 }
 
 void
@@ -370,7 +368,7 @@ FArianeCycle::PostLoad()
     //if( MaterialInterface )
         DrawingLayer->IncrementMaterial( MaterialInterface );
 
-    Invalidate( FArianeCycleInvalidationFlags().SetDummy() );
+    Invalidate( FArianeCycleInvalidationFlags().SetPointAltered() );
 }
 
 FArianeCycleGeometry3D&
@@ -398,7 +396,7 @@ FArianeCycle::SetColor( const FColor& InColor )
     Invalidate( FArianeCycleInvalidationFlags().SetColor() );
 }
 
-TArray<uint32>&
+TArray<int32>&
 FArianeCycle::GetEarcutIndices()
 {
     return EarcutIndices;
@@ -428,24 +426,13 @@ void
 FArianeCycle::UpdateShape( EUpdateFlags UpdateFlags )
 {
     FArianeCycleInvalidationFlags* PathInvalidationFlags = static_cast<FArianeCycleInvalidationFlags*>(InvalidationFlags);
-/*
-    if( PathInvalidationFlags->VertexAddedOrRemoved
-     || PathInvalidationFlags->SegmentAddedOrRemoved )
-    {
-        FindChains();
-    }
 
-    if( PathInvalidationFlags->VertexAltered
-     || PathInvalidationFlags->VertexAddedOrRemoved
-     || PathInvalidationFlags->SegmentAltered
-     || PathInvalidationFlags->SegmentAddedOrRemoved )
+    if( PathInvalidationFlags->PointAltered )
     {
         Geometry3D.Build();
 
         UpdateBounds();
     }
-*/
-    Geometry3D.Build();
 }
 
 FArianeCycleGeometry3D::~FArianeCycleGeometry3D()
@@ -467,6 +454,14 @@ void
 FArianeCycleGeometry3D::Build()
 {
     FArianeCycle* Cycle = GetCycle();
+    TArray<int32>& SignedIndices = Cycle->GetEarcutIndices();
+    TArray<uint32> UnsignedIndices;
 
-    InitVertexFactory( Cycle->GetModelVertexCache(), Cycle->GetEarcutIndices() );
+    UnsignedIndices.SetNumUninitialized( SignedIndices.Num() );
+    // signed to unsigned. All values are >= 0 anyways.
+    FMemory::Memcpy( UnsignedIndices.GetData(), SignedIndices.GetData(), SignedIndices.Num() * sizeof( uint32 ) );
+
+    Cycle->BuildModelVertexCache();
+
+    InitVertexFactory( Cycle->GetModelVertexCache(), UnsignedIndices );
 }

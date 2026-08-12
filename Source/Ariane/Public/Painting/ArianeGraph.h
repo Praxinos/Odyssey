@@ -27,10 +27,11 @@ public:
     {
         FSection* ReturnSection;
         FNode* DepartNode;
-        FSection* DepartSection;
         uint32 DepartNodeIndex;
+        FSection* DepartSection;
         double SectionLength;
 
+        virtual ~FExplorationPair();
         FExplorationPair();
         FExplorationPair( FSection* ReturnSection
                         , FNode* DepartVertex
@@ -64,6 +65,7 @@ public:
         static uint32 StaticClass(){ return 0x336f5643; }; // crc32 FArianeGraph::FPoint
         virtual uint32 GetClass(){ return StaticClass(); };
 
+        virtual ~FPoint();
         FPoint( const FVector2D& InPosition, bool bProjected, const FVector& InOriginalPosition );
 
         FVector2D Position;
@@ -77,6 +79,7 @@ public:
         static uint32 StaticClass(){ return  0xf19b5156; }; // crc32 FArianeGraph::FNode
         virtual uint32 GetClass() override { return StaticClass(); };
 
+        virtual ~FNode();
         FNode( const FVector2D& InPosition, bool bProjected, const FVector& InOriginalPosition );
         void AddSection( FSection* Section, uint32 SectionNodeIndex );
         void RemoveSection( FSection* Section, uint32 SectionNodeIndex );
@@ -96,6 +99,7 @@ public:
 
     struct ARIANE_API FIntersection
     {
+        virtual ~FIntersection();
         FIntersection( FNode* InNode, float InEdgeT );
 
         FNode* Node;
@@ -117,6 +121,7 @@ public:
             double Edge1T;
             FVector2D Position;
 
+            virtual ~XRecord();
             XRecord( const FVector2D& InPosition
                    , FPath* InPath0
                    , FEdge* InEdge0
@@ -126,6 +131,7 @@ public:
                    , double InEdge1T );
         };
 
+        virtual ~FNodeIntersection();
         FNodeIntersection( const FVector2D& Position
                          , FEdge* InEdge0
                          , double InEdge0T
@@ -140,6 +146,7 @@ public:
 
     struct ARIANE_API FFraction
     {
+        virtual ~FFraction();
         FFraction( double InFromT, double InToT, FPoint* InPoint0, FPoint* InPoint1 );
 
         float FromT;
@@ -154,6 +161,7 @@ public:
     {
         virtual uint32 GetClass() = 0;
 
+        virtual ~FEdge();
         FEdge( FNode* InNode0
              , FNode* InNode1
              , uint32 InFractionCount
@@ -183,6 +191,7 @@ public:
         static uint32 StaticClass(){ return  0xffabad9f; }; // crc32 FArianeGraph::FEdgeLinear
         virtual uint32 GetClass() override { return StaticClass(); };
 
+        virtual ~FEdgeLinear();
         FEdgeLinear( FNode* InNode0
                    , FNode* InNode1
                    , FFraction* InFractions );
@@ -195,6 +204,7 @@ public:
         static uint32 StaticClass(){ return 0x7893373f; }; // crc32 FArianeGraph::FEdgeCubic
         virtual uint32 GetClass() override { return StaticClass(); };
 
+        virtual ~FEdgeCubic();
         FEdgeCubic( FNode* InNode0
                   , const FVector2D& Handle0Position
                   , const FVector& OriginalHandle0Position
@@ -224,6 +234,8 @@ public:
     {
         static uint32 StaticClass(){ return 0xa1735422; }; // crc32 FArianeGraph::FSection
         virtual uint32 GetClass() = 0;
+
+        virtual ~FSection();
 
        /**
          * @brief constructor
@@ -326,6 +338,7 @@ public:
         static uint32 StaticClass(){ return 0x2cb54896; }; // crc32 FArianeGraph::FSectionLinear
         virtual uint32 GetClass() override { return StaticClass(); };
 
+        virtual ~FSectionLinear();
         FSectionLinear( FEdgeLinear* InLinearEdge
                       , FNode* InNode0
                       , FNode* InNode1
@@ -344,6 +357,7 @@ public:
         static uint32 StaticClass(){ return 0xb082c558; }; // crc32 FArianeGraph::FSectionCubic
         virtual uint32 GetClass() override { return StaticClass(); };
 
+        virtual ~FSectionCubic();
         FSectionCubic( FEdgeCubic* InCubicEdge
                      , FNode* InNode0
                      , FNode* InNode1
@@ -370,6 +384,7 @@ public:
 
     struct ARIANE_API FPath
     {
+        virtual ~FPath();
         FPath( uint32 InNodeCount
              , FNode* InNodes
              , uint32 InLinearEdgeCount
@@ -404,7 +419,7 @@ public:
         /**
          * @brief destructor.
          */
-        ~FCycle();
+        virtual ~FCycle();
 
         /**
          * @brief constructor.
@@ -509,6 +524,7 @@ public:
     };
 
 public:
+    virtual ~FArianeGraph();
     FArianeGraph();
 
     void Solve( const FVector& ViewOrigin, const FPlane& ProjectionPlane, const TArray<FArianeObject*>& Objects );

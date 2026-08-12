@@ -3,6 +3,10 @@
 
 #include "ArianeGraph.h"
 
+FArianeGraph::FSectionLinear::~FSectionLinear()
+{
+}
+
 FArianeGraph::FSectionLinear::FSectionLinear( FEdgeLinear* InLinearEdge
                                             , FNode* InNode0
                                             , FNode* InNode1
