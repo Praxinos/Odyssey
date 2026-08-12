@@ -36,6 +36,7 @@ UArianeEditorPaintBucketTool::~UArianeEditorPaintBucketTool()
 UArianeEditorPaintBucketTool::UArianeEditorPaintBucketTool()
     : MaterialInterface( nullptr )
     , Graph( new FArianeGraph() )
+    , bGraphNeedsUpdate ( true )
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PaintBucket64");
 
@@ -48,10 +49,42 @@ UArianeEditorPaintBucketTool::Init( FArianeEditor* InEditor )
     Super::Init( InEditor );
 }
 
+
+void
+UArianeEditorPaintBucketTool::OnCameraMoved( const FVector& Location, const FRotator& Rotation, ELevelViewportType ViewportType, int32 ViewIndex )
+{
+    bGraphNeedsUpdate = true;
+
+    if (CameraMoveHandle.IsValid())
+    {
+        FTSTicker::GetCoreTicker().RemoveTicker(CameraMoveHandle);
+    }
+
+    CameraMoveHandle = FTSTicker::GetCoreTicker().AddTicker(
+        FTickerDelegate::CreateLambda([this](float)
+        {
+            CameraMoveHandle.Reset();
+
+            Reset();
+
+            return false;
+        }),
+        0.1f // 100 ms
+    );
+}
+
 void
 UArianeEditorPaintBucketTool::Activate()
 {
     Reset();
+
+    FEditorDelegates::OnEditorCameraMoved.AddUObject( this, &UArianeEditorPaintBucketTool::OnCameraMoved );
+}
+
+void
+UArianeEditorPaintBucketTool::Inactivate()
+{
+    FEditorDelegates::OnEditorCameraMoved.RemoveAll( this );
 }
 
 void
@@ -87,6 +120,8 @@ UArianeEditorPaintBucketTool::Reset()
                 } );
 
             Graph->Solve( CameraLocation, DrawingPlane, GraphedPaths );
+
+            bGraphNeedsUpdate = false;
         }
     }
 }
@@ -123,14 +158,18 @@ UArianeEditorPaintBucketTool::OnMouseHover( FEditorViewportClient* iViewportClie
                                           , FSceneView* View
                                           , const FArianePointerState& PointerState )
 {
+    static FArianePointerState PreviousPointerState;
     FVector RayOrigin;
     FVector RayDirection;
 
-    View->DeprojectFVector2D( FVector2D( PointerState.ViewportX, PointerState.ViewportY )
-                            , RayOrigin
-                            , RayDirection );
+    if( bGraphNeedsUpdate == false )
+    {
+        View->DeprojectFVector2D( FVector2D( PointerState.ViewportX, PointerState.ViewportY )
+                                , RayOrigin
+                                , RayDirection );
 
-    PickedCycle = Graph->PickCycle( RayOrigin, RayDirection );
+        PickedCycle = Graph->PickCycle( RayOrigin, RayDirection );
+    }
 }
 
 bool
@@ -282,7 +321,7 @@ UArianeEditorPaintBucketTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderA
     FLinearColor BgColor = GetBackgroundColor();
     FLinearColor HcColor = GetHighlightColor();
 
-    if( CanDraw() )
+    if( CanDraw() && ( bGraphNeedsUpdate == false ) )
     {
         if( PickedCycle )
         {

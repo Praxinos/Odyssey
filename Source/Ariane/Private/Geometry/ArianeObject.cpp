@@ -693,12 +693,14 @@ FArianeObject::ResetTransform()
 void
 FArianeObject::UpdateTransform()
 {
-    Traverse( [this]( FArianeObject* Object  ) -> ETraversalReturnValue
+    Traverse( []( FArianeObject* Object  ) -> ETraversalReturnValue
         {
-            FArianeObject* Parent = ParentID.GetObject();
+            FArianeObject* Parent = Object->GetParent();
 
-            WorldTransform =  Parent ? Parent->WorldTransform * LocalTransform
-                                     : GetDrawingLayer()->GetComponentTransform();
+            Object->WorldTransform =  Parent ? Object->LocalTransform * Parent->WorldTransform
+                                             : Object->GetDrawingLayer()->GetComponentTransform();
+
+//UE_LOG(LogTemp, Warning, TEXT("Object:%s - Parent:%p - Transform: %s"), *Name.ToString(), Parent, *WorldTransform.ToString());
 
             return ETraversalReturnValue::Continue;
         } );
