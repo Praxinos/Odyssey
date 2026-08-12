@@ -24,4 +24,7 @@ class ARIANEEDITOR_API SArianeEditorSceneTreeViewContextMenu
         static bool CanPaste( FArianeEditor* Editor );
         static void Group( FArianeEditor* Editor );
         static bool HasOnlySelectedPrimitives( FArianeGroup* RootGroup );
+        static void DeleteSelectedObjects( FArianeEditor* Editor );
+        static void PasteObjects( FArianeEditor* Editor );
+        static void UngroupSelectedGroups( FArianeEditor* Editor );
 };

@@ -73,6 +73,7 @@ public:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void Init( FArianeEditor* InEditor ) override;
     virtual void Activate() override;
+    virtual void Inactivate() override;
 
 protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
@@ -89,6 +90,7 @@ protected:
                          , const FLinearColor& HcColor
                          , const TArray<FArianeGraph::FSection*>& Sections );
     void Reset();
+    void OnCameraMoved( const FVector& Location, const FRotator& Rotation, ELevelViewportType ViewportType, int32 ViewIndex );
 
 public:
     UPROPERTY( EditAnywhere
@@ -99,6 +101,8 @@ public:
 protected:
     FArianeGraph* Graph;
     FArianeGraph::FCycle* PickedCycle;
+    bool bGraphNeedsUpdate;
+    FTSTicker::FDelegateHandle CameraMoveHandle;
 };
 
 // define bitwise op

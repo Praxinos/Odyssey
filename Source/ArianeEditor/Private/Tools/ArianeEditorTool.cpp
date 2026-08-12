@@ -1247,6 +1247,51 @@ UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
     bool bAnythingPicked = false;
     FVector2D HUDMousePosition = FVector2D( ViewportX, ViewportY );
 
+    // Pick segment handles
+    if( PickingFlags.PathSegmentHandle )
+    {
+        for( const FArianeSegmentID& SegmentID : Path->GetSegments() )
+        {
+            FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment();
+
+            if( Segment->GetClass() == FArianeSegmentCubic::StaticClass() )
+            {
+                FArianeSegmentCubic* CubicSegment = static_cast<FArianeSegmentCubic*>(Segment);
+
+                for( uint32 i = 0; i < 2; i++ )
+                {
+                    // TODO: hit-test with segment's bounding box.
+                    FArianeHandleSegment* Handle = CubicSegment->GetHandle( (uint32) i );
+                    const FVector& LocalHandlePosition = Handle->GetPosition();
+                    // convert handles coordinates to world coordinates. Easier to detect collision inside
+                    // the picking circle.
+                    FVector WorldHandlePosition = PathTransform.TransformPosition( LocalHandlePosition );
+                    FVector2D HUDHandlePosition;
+
+                    if( WorldToHUD( ViewportClient, View, WorldHandlePosition, HUDHandlePosition ) )
+                    {
+                        FVector2D Dif0 = HUDHandlePosition - HUDMousePosition;
+
+                        if( Dif0.Length() <= PickingRadius )
+                        {
+                            OutPickedHandles.Add( Handle );
+
+                            bAnythingPicked = true;
+
+                            break; // forbid multiple selection
+                        }
+                    }
+                }
+
+                if( bAnythingPicked )
+                {
+                   break; // forbid multiple selection
+                }
+            }
+        }
+    }
+
+    // executed after the segment handles because we want the segment handles to have priority.
     for( const FArianeVertexID& VertexID : Path->GetVertices() )
     {
         FArianeVertex* Vertex = const_cast<FArianeVertexID&>(VertexID).GetVertex();
@@ -1294,43 +1339,6 @@ UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
                         bAnythingPicked = true;
 
                         break; // forbid multiple selection
-                    }
-                }
-            }
-        }
-    }
-
-    // Pick segment handles
-    if( PickingFlags.PathSegmentHandle )
-    {
-        for( const FArianeSegmentID& SegmentID : Path->GetSegments() )
-        {
-            FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment();
-
-            if( Segment->GetClass() == FArianeSegmentCubic::StaticClass() )
-            {
-                FArianeSegmentCubic* CubicSegment = static_cast<FArianeSegmentCubic*>(Segment);
-
-                for( uint32 i = 0; i < 2; i++ )
-                {
-                    // TODO: hit-test with segment's bounding box.
-                    FArianeHandleSegment* Handle = CubicSegment->GetHandle( (uint32) i );
-                    const FVector& LocalHandlePosition = Handle->GetPosition();
-                    // convert handles coordinates to world coordinates. Easier to detect collision inside
-                    // the picking circle.
-                    FVector WorldHandlePosition = PathTransform.TransformPosition( LocalHandlePosition );
-                    FVector2D HUDHandlePosition;
-
-                    if( WorldToHUD( ViewportClient, View, WorldHandlePosition, HUDHandlePosition ) )
-                    {
-                        FVector2D Dif0 = HUDHandlePosition - HUDMousePosition;
-
-                        if( Dif0.Length() <= PickingRadius )
-                        {
-                            OutPickedHandles.Add( Handle );
-
-                            bAnythingPicked = true;
-                        }
                     }
                 }
             }

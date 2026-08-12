@@ -231,7 +231,9 @@ FArianeEditor::ClearPainting3DComponents()
             if( CurrentDrawingLayer )
             {
                 if( GEditor->IsTransactionActive() )
+                {
                     CurrentDrawingLayer->Modify();
+                }
 
                 CurrentDrawingLayer->ResetHierarchy();
             }
@@ -787,6 +789,9 @@ FArianeEditor::UngroupSelectedGroups()
         {
             FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
 
+            // for undos in case a transaction is opened by the caller
+            DrawingLayer->Modify();
+
             for( FArianeObject* SelectedObject : DrawingLayer->GetSelectedObjects() )
             {
                 if( SelectedObject != RootGroup )
@@ -823,6 +828,9 @@ FArianeEditor::GroupSelectedObjects( const FName& NewGroupName )
 
         if( DrawingLayer )
         {
+            // for undos in case a transaction is opened by the caller
+            DrawingLayer->Modify();
+
             FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
             FArianeObject* FosterParent = RootGroup;
             FArianeGroup* NewGroup = DrawingLayer->AllocGroup( NewGroupName, EArianeAllocationModel::InstancedStruct );
@@ -878,6 +886,9 @@ FArianeEditor::DeleteSelectedObjects()
         {
             FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
             TArray<FArianeObject*> ObjectsToDelete;
+
+            // for undos in case a transaction is opened by the caller
+            DrawingLayer->Modify();
 
             if( RootGroup->IsSelected() == false )
             {
@@ -1026,7 +1037,10 @@ FArianeEditor::PasteObjects()
                 Destination = ( SelectedTrees.Num() == 1 ) ? SelectedTrees[0]
                                                            : DrawingLayer->GetRootGroup();
 
-               DrawingLayer->ClearObjectSelection();
+                // for undos in case a transaction is opened by the caller
+                DrawingLayer->Modify();
+
+                DrawingLayer->ClearObjectSelection();
 
                 for( FArianeObject* CopiedObject : Clipboard.CopiedObjects )
                 {
