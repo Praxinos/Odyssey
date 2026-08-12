@@ -76,18 +76,15 @@ UArianeEditorPathEditTool::FPointDisplacement::~FPointDisplacement()
 }
 
 UArianeEditorPathEditTool::FPointDisplacement::FPointDisplacement( FArianePoint* Point
-                                                                 , const FVector4& InWorldPlane
+                                                                 , const FVector& InWorldPlaneNormal
                                                                  , const FTransform& Transform
                                                                  , const FVector& RayOrigin
                                                                  , const FVector& RayDirection )
 {
     LocalPosition = Point->GetPosition();
     WorldPosition = Transform.TransformPosition( LocalPosition );
-    WorldPlane = InWorldPlane;
-    // Plane equation Ax + By + Cz + D = 0
-    WorldPlane.W = - ( ( InWorldPlane.X * WorldPosition.X )
-                     + ( InWorldPlane.Y * WorldPosition.Y )
-                     + ( InWorldPlane.Z * WorldPosition.Z ) );
+
+    WorldPlane = FPlane( WorldPosition, InWorldPlaneNormal );
 
     FArianeCore::IntersectPlane( WorldPlane, RayOrigin, RayDirection, WorldRayPositionAtDown );
 }
@@ -328,7 +325,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
               {
                   if( /*iScene->GetCell()->ObjectHasFocus( object, traversalFlags )*/1 )
                   {
-                      if( Object->HasBaseClass( FArianePath::StaticClass() ) )
+                      if( Object->GetClass() == FArianePath::StaticClass() )
                       {
                           FArianePath* Path = static_cast<FArianePath*>(Object);
 

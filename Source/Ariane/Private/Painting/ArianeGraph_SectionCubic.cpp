@@ -7,6 +7,10 @@
 // ULIS Headers
 #include <ULIS.h>
 
+FArianeGraph::FSectionCubic::~FSectionCubic()
+{
+}
+
 FArianeGraph::FSectionCubic::FSectionCubic( FEdgeCubic* InCubicEdge
                                           , FNode* InNode0
                                           , FNode* InNode1

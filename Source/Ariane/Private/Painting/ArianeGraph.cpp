@@ -150,11 +150,15 @@ FArianeGraph::GetCycleNormalVector( TArray<uint32>& NodeIndexArray, TArray<FSect
     return Z;
 }
 
+FArianeGraph::FExplorationPair::~FExplorationPair()
+{
+}
+
 FArianeGraph::FExplorationPair::FExplorationPair()
     : ReturnSection ( nullptr )
     , DepartNode ( nullptr )
-    , DepartSection ( nullptr )
     , DepartNodeIndex ( 0 )
+    , DepartSection ( nullptr )
     , SectionLength ( 0.0f )
 {
 }
@@ -178,10 +182,19 @@ FArianeGraph::FSectionLinkInfo::GetVector()
     return Section->GetVector( SectionNodeIndex );
 }
 
+FArianeGraph::FPoint::~FPoint()
+{
+}
+
 FArianeGraph::FPoint::FPoint( const FVector2D& InPosition, bool bInProjected, const FVector& InOriginalPosition )
     : Position ( InPosition )
     , bProjected ( bInProjected )
     , OriginalPosition ( InOriginalPosition )
+{
+}
+
+
+FArianeGraph::FNode::~FNode()
 {
 }
 
@@ -331,9 +344,17 @@ FArianeGraph::FNode::UnlinkPendantSections()
     }
 }
 
+FArianeGraph::FIntersection::~FIntersection()
+{
+}
+
 FArianeGraph::FIntersection::FIntersection( FNode* InNode, float InEdgeT )
     : Node ( InNode )
     , EdgeT ( InEdgeT )
+{
+}
+
+FArianeGraph::FNodeIntersection::~FNodeIntersection()
 {
 }
 
@@ -358,6 +379,10 @@ FArianeGraph::FNodeIntersection::SelfIntersects()
     return Edges[0] == Edges[1];
 }
 
+FArianeGraph::FNodeIntersection::XRecord::~XRecord()
+{
+}
+
 FArianeGraph::FNodeIntersection::XRecord::XRecord( const FVector2D& InPosition
                                                  , FPath* InPath0
                                                  , FEdge* InEdge0
@@ -378,6 +403,10 @@ FArianeGraph::FNodeIntersection::XRecord::XRecord( const FVector2D& InPosition
     InPath1->bHasIntersections = true;
 }
 
+FArianeGraph::FFraction::~FFraction()
+{
+}
+
 FArianeGraph::FFraction::FFraction( double InFromT, double InToT, FPoint* InPoint0, FPoint* InPoint1 )
     : FromT ( InFromT )
     , ToT ( InToT )
@@ -387,6 +416,10 @@ FArianeGraph::FFraction::FFraction( double InFromT, double InToT, FPoint* InPoin
     BBox.Min.Y = FMath::Min( Points[0]->Position.Y, Points[1]->Position.Y );
     BBox.Max.X = FMath::Max( Points[0]->Position.X, Points[1]->Position.X );
     BBox.Max.Y = FMath::Max( Points[0]->Position.Y, Points[1]->Position.Y );
+}
+
+FArianeGraph::FEdge::~FEdge()
+{
 }
 
 FArianeGraph::FEdge::FEdge( FNode* InNode0
@@ -420,6 +453,10 @@ FArianeGraph::FEdge::GetOtherNode( FNode* Node )
     return nullptr;
 }
 
+FArianeGraph::FEdgeLinear::~FEdgeLinear()
+{
+}
+
 FArianeGraph::FEdgeLinear::FEdgeLinear( FNode* InNode0
                                       , FNode* InNode1
                                       , FFraction* InFractions )
@@ -436,6 +473,10 @@ FArianeGraph::FEdgeLinear::GetOriginalPosition( float T )
 {
     return Nodes[0]->OriginalPosition + ( T * ( Nodes[1]->OriginalPosition
                                               - Nodes[0]->OriginalPosition ) );
+}
+
+FArianeGraph::FEdgeCubic::~FEdgeCubic()
+{
 }
 
 FArianeGraph::FEdgeCubic::FEdgeCubic( FNode* InNode0
@@ -471,6 +512,9 @@ FArianeGraph::FEdgeCubic::GetOriginalPosition( float T )
                                                        , T );
 }
 
+FArianeGraph::FPath::~FPath()
+{
+}
 
 FArianeGraph::FPath::FPath( uint32 InNodeCount
                           , FNode* InNodes
@@ -522,6 +566,10 @@ FArianeGraph::FPath::ToNodeIndicesAndSections( TArray<uint32>& OutNodeIndices
         }
         while( Edge && ( Node != FirstNode ) );
     }
+}
+
+FArianeGraph::~FArianeGraph()
+{
 }
 
 FArianeGraph::FArianeGraph()

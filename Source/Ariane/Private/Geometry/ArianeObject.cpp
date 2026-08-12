@@ -120,9 +120,9 @@ FArianeObjectGeometry3D::~FArianeObjectGeometry3D()
 }
 
 FArianeObjectGeometry3D::FArianeObjectGeometry3D( FArianeObject* InObject )
-    : VertexCount( 0 )
+    : Object( InObject )
+    , VertexCount( 0 )
     , VertexFactory( nullptr )
-    , Object( InObject )
 {
 
 }
@@ -162,7 +162,7 @@ FArianeObjectGeometry3D::InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices
 
     ENQUEUE_RENDER_COMMAND(StaticMeshVertexBuffersLegacyInit)(
         [ this
-        ,  VerticesAsync = MoveTemp(Vertices) ] ( FRHICommandListImmediate& RHICmdList )
+        ,  VerticesAsync = CopyTemp(Vertices) ] ( FRHICommandListImmediate& RHICmdList )
         {
             FLocalVertexFactory::FDataType Data;
 
@@ -221,7 +221,7 @@ FArianeObjectGeometry3D::InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices
 
     ENQUEUE_RENDER_COMMAND(IndexBufferInit)(
         [ this
-        , IndicesAsync = MoveTemp(Indices) ] ( FRHICommandListImmediate& RHICmdList )
+        , IndicesAsync = CopyTemp(Indices) ] ( FRHICommandListImmediate& RHICmdList )
         {
             uint32 IndexCount = IndicesAsync.Num();
 
@@ -408,6 +408,9 @@ FArianeObject::Invalidate( const FArianeObjectInvalidationFlags& InInvalidationF
     }
 
     InvalidationFlags->OR( InInvalidationFlags );
+
+    GetDrawingLayer()->MarkPackageDirty();
+
 
     OnPostInvalidated.Broadcast();
 }

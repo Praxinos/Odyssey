@@ -36,8 +36,11 @@ UArianeEditorPrimitiveDrawingTool::~UArianeEditorPrimitiveDrawingTool()
 }
 
 UArianeEditorPrimitiveDrawingTool::UArianeEditorPrimitiveDrawingTool()
-    : MaterialInterface ( nullptr )
+    : PrimitiveShapeType ( EArianePrimitiveToolShapeType::Polygon )
     , StrokeWidth( 30.0f )
+    , bShowGrid ( true )
+    , MaterialInterface ( nullptr )
+    , PolygonCornerCount( 5 )
     , Uniform( false )
     , Primitive( nullptr )
     , RectangleNumber ( 0 )
@@ -45,8 +48,6 @@ UArianeEditorPrimitiveDrawingTool::UArianeEditorPrimitiveDrawingTool()
     , EllipseNumber( 0 )
     , PolygonNumber( 0 )
     , Cursor( EMouseCursor::Type::Crosshairs )
-    , PrimitiveShapeType ( EArianePrimitiveToolShapeType::Polygon )
-    , PolygonCornerCount( 5 )
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PrimitiveDrawing64");
 
@@ -175,6 +176,9 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
     if( Key == EKeys::LeftMouseButton )
     {
         UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+        ::ULIS::FColor color = Editor->GetPaintColor();
+        ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
+        FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
 
         if( Painting3DComponent )
         {
@@ -231,7 +235,8 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
                     {
                         //case EOdysseyShapeType::kEllipse:
                         case EArianePrimitiveToolShapeType::Ellipse:
-                            Primitive = DrawingLayer->AllocEllipse( *(FString("Ellipse_" + FString::FromInt( EllipseNumber++ )))
+                            Primitive = DrawingLayer->AllocEllipse( MaterialInterface
+                                                                  , *(FString("Ellipse_" + FString::FromInt( EllipseNumber++ )))
                                                                   , 0.0f
                                                                   , 0.0f
                                                                   , StrokeWidth//width.Distance()
@@ -240,7 +245,8 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
 
                         //case EOdysseyShapeType::kRectangle :
                         case EArianePrimitiveToolShapeType::Rectangle:
-                            Primitive = DrawingLayer->AllocRectangle( *(FString("Rectangle_") + FString::FromInt( RectangleNumber++ ))
+                            Primitive = DrawingLayer->AllocRectangle( MaterialInterface
+                                                                    , *(FString("Rectangle_") + FString::FromInt( RectangleNumber++ ))
                                                                     , 0.0f
                                                                     , 0.0f
                                                                     , StrokeWidth//width.Distance()
@@ -249,7 +255,8 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
 
                         //case EOdysseyShapeType::kLine:
                         case EArianePrimitiveToolShapeType::Line:
-                            Primitive = DrawingLayer->AllocLine( *(FString("Line_") + FString::FromInt( LineNumber++ ))
+                            Primitive = DrawingLayer->AllocLine( MaterialInterface
+                                                               , *(FString("Line_") + FString::FromInt( LineNumber++ ))
                                                                , FVector::Zero()
                                                                , FVector::Zero()
                                                                , StrokeWidth//width.Distance()
@@ -258,7 +265,8 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
 
                         //case EOdysseyShapeType::kPolygon:
                         case EArianePrimitiveToolShapeType::Polygon:
-                            Primitive = DrawingLayer->AllocPolygon( *(FString("Polygon_") + FString::FromInt( PolygonNumber++ ))
+                            Primitive = DrawingLayer->AllocPolygon( MaterialInterface
+                                                                  , *(FString("Polygon_") + FString::FromInt( PolygonNumber++ ))
                                                                   , PolygonCornerCount
                                                                   , 0.0f
                                                                   , StrokeWidth//width.Distance()
@@ -270,14 +278,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
                     }
 
                     ParentGroup->AppendChild( Primitive );
-
-                    //SetPathColor( Primitive );
-
-                    //Primitive->SetOpacity( 1.0f );
-                    if( MaterialInterface )
-                    {
-                        Primitive->SetMaterial( MaterialInterface );
-                    }
+                    Primitive->SetColor( ueColor );
 
                     Primitive->SetTransform( PrimitiveCoordsAtDown, LocalOrientation, FVector::One(), FVector::Zero() );
                     Primitive->UpdateTransform();

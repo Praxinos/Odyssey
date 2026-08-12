@@ -56,7 +56,7 @@ public:
 class ARIANE_API FArianeObjectGeometry3D
 {
     public:
-        ~FArianeObjectGeometry3D();
+        virtual ~FArianeObjectGeometry3D();
         FArianeObjectGeometry3D( FArianeObject* InObject );
 
         virtual void Build() = 0;
@@ -347,12 +347,16 @@ protected:
     UPROPERTY()
     EArianeAllocationModel AllocationModel;
 
+    UPROPERTY()
+    FTransform LocalTransform;
+
+    UPROPERTY()
+    FTransform WorldTransform;
+
 protected:
     FSimpleMulticastDelegate  OnPostInvalidated;
     TArray<FArianeObjectID> InvalidatedChildren;
     TArray<FArianeObjectID> Children;
-    FTransform LocalTransform;
-    FTransform WorldTransform;
     FBoxSphereBounds Bounds;
     FArianeObjectInvalidationFlags* InvalidationFlags;
     bool bSelected;

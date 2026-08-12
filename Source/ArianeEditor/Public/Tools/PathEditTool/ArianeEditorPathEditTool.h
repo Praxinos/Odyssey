@@ -62,7 +62,7 @@ GENERATED_BODY()
     {
         ~FPointDisplacement();
         FPointDisplacement( FArianePoint* Point
-                          , const FVector4& InWorldPlane
+                          , const FVector& InWorldPlaneNormal
                           , const FTransform& Transform
                           , const FVector& RayOrigin
                           , const FVector& RayDirection );
@@ -72,7 +72,7 @@ GENERATED_BODY()
         FVector LocalPosition;
         FVector WorldPosition;
         FVector WorldRayPositionAtDown;
-        FVector4 WorldPlane;
+        FPlane WorldPlane;
     };
 
 public:

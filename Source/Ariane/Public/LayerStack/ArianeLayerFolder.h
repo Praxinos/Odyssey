@@ -67,9 +67,11 @@ protected:
     UPROPERTY()
     bool bExpanded;
 
-protected:
     // Even though unreal has the list of attached Actors, it does not take the order into consideration.
     // so we have to have our own list
+    UPROPERTY()
     TArray<UArianeLayer*> ChildLayers;
+
+protected:
     TArray<UArianeLayer*> InvalidatedChildLayers;
 };

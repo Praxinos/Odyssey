@@ -17,6 +17,7 @@
 // Ariane Headers
 #include "ArianeID.h"
 #include "ArianeObject.h"
+#include "ArianePoint.h"
 #include "ArianeGraph.h"
 // Earcut headers
 #include "mapbox/earcut.hpp"
@@ -56,10 +57,10 @@ struct ARIANE_API FArianeCycleInvalidationFlags : FArianeObjectInvalidationFlags
         virtual bool HasAny() override;
 
     public:
-        FArianeCycleInvalidationFlags& SetDummy()  { Dummy  = 1; return *this; };
+        FArianeCycleInvalidationFlags& SetPointAltered()  { PointAltered  = 1; return *this; };
 
     public:
-        uint32 Dummy  : 1  = 0;
+        uint32 PointAltered  : 1  = 0;
 };
 
 class FArianeCycleVertexBuffer : public FVertexBuffer
@@ -126,12 +127,14 @@ public:
     /** Get Path Material **/
     UMaterialInterface* GetMaterial();
     FArianeCycleGeometry3D& GetGeometry3D();
-    TArray<uint32>& GetEarcutIndices();
+    TArray<int32>& GetEarcutIndices();
     TArray<FDynamicMeshVertex>& GetModelVertexCache();
+    void BuildModelVertexCache();
 
 protected:
     virtual FArianeObject* CopyShape( const FCopyArgs& CopyArgs ) override;
     virtual void CopySettings( FArianeObject* DestinationObject, const FCopyArgs& CopyArgs, bool bInvalidate ) override;
+
 
 protected:
     UPROPERTY( EditAnywhere )
@@ -146,8 +149,13 @@ protected:
     UPROPERTY( EditAnywhere )
     UMaterialInterface* MaterialInterface;
 
+    UPROPERTY( EditAnywhere )
+    TArray<int32> EarcutIndices;
+
+    UPROPERTY( EditAnywhere )
+    TArray<FArianePoint> Points;
+
 protected:
     FArianeCycleGeometry3D Geometry3D;
-    TArray<uint32> EarcutIndices;
     TArray<FDynamicMeshVertex> ModelVertexCache;
 };

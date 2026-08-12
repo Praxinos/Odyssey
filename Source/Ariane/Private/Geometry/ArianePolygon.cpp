@@ -140,7 +140,8 @@ FArianePolygon::CopyShape( const FCopyArgs& CopyArgs )
     }
     else
     {
-         PolygonCopy = CopyArgs.DrawingLayer->AllocPolygon( Name
+         PolygonCopy = CopyArgs.DrawingLayer->AllocPolygon( MaterialInterface
+                                                          , Name
                                                           , CornerCount
                                                           , Radius
                                                           , StrokeWidth

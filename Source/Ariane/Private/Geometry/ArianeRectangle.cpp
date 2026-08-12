@@ -136,7 +136,8 @@ FArianeRectangle::CopyShape( const FCopyArgs& CopyArgs )
     }
     else
     {
-         RectangleCopy = CopyArgs.DrawingLayer->AllocRectangle( Name
+         RectangleCopy = CopyArgs.DrawingLayer->AllocRectangle( MaterialInterface
+                                                              , Name
                                                               , Width
                                                               , Height
                                                               , StrokeWidth
