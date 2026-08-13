@@ -49,12 +49,12 @@ class ARIANEEDITOR_API UArianeEditorEraserTool : public UArianeEditorTool
             Flags = 0;
         }
 
-        FWayPoint( FArianeVertex* InOriginalVertex, uint32 iWayPointFlags )
+        FWayPoint( FArianeVertex* InOriginalVertex, double InT, uint32 iWayPointFlags )
         {
             //intersectionVertex = nullptr;
             OriginalVertex = InOriginalVertex;
             AssignedVertex = nullptr;
-            T = 0.0f;
+            T = InT;
             Flags = iWayPointFlags;
 
             Fragments.Reserve( 2 );
@@ -191,6 +191,7 @@ protected:
                          , FSceneView* View
                          , const FTransform& WorldTransform
                          , FArianeVertex* Vertex
+                         , double T
                          , const TArray<FColor>& Pixels
                          , TArray<FWayPoint>& oWayPointBuffer );
     uint8 GetAlpha( int32 X, int32 Y, const TArray<FColor>& Pixels );

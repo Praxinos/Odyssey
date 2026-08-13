@@ -196,6 +196,7 @@ struct ARIANE_API FArianeSegment
         void SetFractions( const TArray<FArianePoint>& FractionPoints
                          , const TArray<float>& Radii  );
         EArianeAllocationModel GetAllocationModel();
+        double GetVertexT( FArianeVertex* Vertex );
 
     protected:
         /** Update the segment's bounds */

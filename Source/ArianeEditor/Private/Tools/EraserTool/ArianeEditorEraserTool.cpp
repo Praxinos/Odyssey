@@ -183,6 +183,7 @@ UArianeEditorEraserTool::VertexToWaypoint( FEditorViewportClient* ViewportClient
                                          , FSceneView* View
                                          , const FTransform& WorldTransform
                                          , FArianeVertex* Vertex
+                                         , double T
                                          , const TArray<FColor>& Pixels
                                          , TArray<FWayPoint>& OutWayPoints )
 {
@@ -199,12 +200,14 @@ UArianeEditorEraserTool::VertexToWaypoint( FEditorViewportClient* ViewportClient
                                      , WorldTransform.TransformPosition( Vertex->GetPosition() ) );
 
         OutWayPoints.Emplace( Vertex
+                            , T
                             , FWayPoint::OutsideErasureArea
                             | FWayPoint::Original );
     }
     else
     {
         OutWayPoints.Emplace( Vertex
+                            , T
                             , FWayPoint::InsideErasureArea
                             | FWayPoint::Original );
     }
@@ -364,7 +367,7 @@ UArianeEditorEraserTool::GetPathBoundingArea( FEditorViewportClient* ViewportCli
                    , FVector( PathBox.Max.X, PathBox.Min.Y, PathBox.Max.Z )
                    , FVector( PathBox.Max.X, PathBox.Max.Y, PathBox.Min.Z )
                    , PathBox.Max };
-    FTransform PathTransform = Path->GetDrawingLayer()->GetComponentTransform();
+    FTransform PathTransform = Path->GetTransform();
     double XMin = DBL_MAX, YMin = DBL_MAX, XMax = -DBL_MAX, YMax = -DBL_MAX;
 
     for( uint32 i = 0; i < 8; i++ )
@@ -758,6 +761,8 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
 
                 ChainPath->ExportProperties( CurrentPath );
 
+                CurrentPath->UpdateTransform();
+
                 OutAddedPaths.Add( CurrentPath );
             }
 
@@ -809,6 +814,8 @@ UArianeEditorEraserTool::EraseChainSegments( FEditorViewportClient* ViewportClie
 
     if( Chain.Segments.Num() )
     {
+        FArianeSegment* FirstSegment = Chain.Segments[0];
+
         OutWayPoints.Empty();
         // reserve 4 point per segment to limit reallocations (just for performance)
         OutWayPoints.Reserve( ( Chain.Segments.Num() * 4 ) );
@@ -817,7 +824,7 @@ UArianeEditorEraserTool::EraseChainSegments( FEditorViewportClient* ViewportClie
         MetaFragmentBuffer.Reserve( Chain.Segments.Num() * 3 );
 
         // create WayPoints for each Vertex of the chain
-        VertexToWaypoint( ViewportClient, View, WorldTransform, Chain.LeadingVertex, Pixels, OutWayPoints );
+        VertexToWaypoint( ViewportClient, View, WorldTransform, Chain.LeadingVertex, FirstSegment->GetVertexT( Chain.LeadingVertex ), Pixels, OutWayPoints );
 
         // then create WayPoints at each intersection
         Chain.IterateSegments( [ this
@@ -900,7 +907,7 @@ UArianeEditorEraserTool::EraseChainSegments( FEditorViewportClient* ViewportClie
             if( Chain.LeadingVertex != OtherVertex )
             {
                 // create the last for the final vertex of the segment
-                VertexToWaypoint( ViewportClient, View, WorldTransform, OtherVertex, Pixels, OutWayPoints );
+                VertexToWaypoint( ViewportClient, View, WorldTransform, OtherVertex, Segment->GetVertexT( OtherVertex ), Pixels, OutWayPoints );
 
                 LastFragmentWayPoint0Index = OutWayPoints.Num() - 2;
                 LastFragmentWayPoint1Index = OutWayPoints.Num() - 1;

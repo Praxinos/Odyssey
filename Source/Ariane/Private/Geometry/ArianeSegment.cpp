@@ -359,6 +359,22 @@ FArianeSegment::Extract( FArianeObject* NewSegmentOwner
     return nullptr;
 }
 
+double
+FArianeSegment::GetVertexT( FArianeVertex* Vertex )
+{
+    if( Vertex == GetVertex(0) )
+    {
+        return 0.0f;
+    }
+
+    if( Vertex == GetVertex(1) )
+    {
+        return 1.0f;
+    }
+
+    return -1.0f;
+}
+
 FVector
 FArianeSegment::GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormalize )
 {

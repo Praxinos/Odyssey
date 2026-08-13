@@ -959,6 +959,8 @@ FArianeEditor::ConvertSelectedPrimitives()
                 // final step: append the converted path and remove the primitive
                 SelectedPrimitive->GetParent()->AppendChild( Path );
 
+                Path->UpdateTransform();
+
                 SelectedPrimitive->GetParent()->RemoveChild( SelectedPrimitive, true );
             }
 
