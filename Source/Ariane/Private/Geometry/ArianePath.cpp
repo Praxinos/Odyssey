@@ -1396,6 +1396,11 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
         FVector PerpendicularVector = InOutPreviousPerpendicularVector - ProjectedVector;
 
         PerpendicularVector.Normalize();
+
+        if( PerpendicularVector.IsNearlyZero() )
+        {
+            PerpendicularVector = InOutPreviousPerpendicularVector;
+        }
 /*
         UE_LOG( LogTemp, Warning, TEXT("PerpendicularVector: %X %f %f %f - TangentVector: %f %f %f ")
                                                                           , Segment
