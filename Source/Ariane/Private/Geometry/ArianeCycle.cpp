@@ -92,7 +92,6 @@ FArianeCycle::FArianeCycle()
     : FArianeCycle( nullptr
                  , FName( "Ariane Cycle" )
                  , nullptr
-                 , nullptr
                  , EArianeAllocationModel::InstancedStruct
                  , new FArianeCycleInvalidationFlags() )
 {
@@ -114,9 +113,109 @@ FArianeCycle::BuildModelVertexCache()
     }
 }
 
+// static
+inline uint32
+FArianeCycle::EvaluateSectionPointCount( FArianeGraph::FSection* Section )
+{
+    // Wevaluate the number of points a section will need for triangulation
+    // For linear sections it's easy, a cycle will need 1 point for 1 section
+    // for Cubic edge sections, it will need a percentage of the original cubic Segments fraction count. So, basically
+    // we calculate a percentage no matter what type of section this is (linear or cubc), and if the result is zero, we force it to 1.
+    double ratio = ( Section->EdgeT[1] - Section->EdgeT[0] );
+    uint32 SectionPointCount = Section->Edge->FractionCount * ratio;
+
+    return SectionPointCount ? 1 : SectionPointCount;
+}
+
+uint32
+FArianeCycle::EvaluateContourPointCount( FArianeGraph::FCycle* Cycle )
+{
+    uint32 PointCount = 0;
+
+    // for each section, we evaluate the number of points it will need for triangulation
+    for( FArianeGraph::FSection* Section : Cycle->ContourSections )
+    {
+        PointCount += EvaluateSectionPointCount( Section );
+    }
+
+    return PointCount;
+}
+
+void
+FArianeCycle::EvaluateGraphCyclePointCount( FArianeGraph::FCycle* Cycle
+                                          , std::vector<std::vector<FVector2D>>& EarcutContours
+                                          , TArray<FArianePoint>& Points )
+{
+    uint32 PointCount = 0;
+    uint32 CycleCount = 1;
+
+    EarcutContours.resize( 1 + Cycle->Children.Num() );
+
+    // for each inner cycle, we evaluate the number of points it will need for triangulation
+    for( FArianeGraph::FCycle* Child : Cycle->Children )
+    {
+        uint32 ContourPointCount = EvaluateContourPointCount( Child );
+
+        EarcutContours[CycleCount++].reserve( ContourPointCount );
+
+        PointCount += ContourPointCount;
+    }
+
+    // Add the result to this cycle's contour (the outer one)
+    Points.Reserve( EvaluateContourPointCount( Cycle ) + PointCount );
+}
+
+void
+FArianeCycle::ContourToCoords( FArianeGraph::FCycle* GraphCycle
+                             , std::vector<FVector2D>& EarcutContour
+                             , TArray<FArianePoint>& OutPoints )
+{
+    FArianeGraph::FSection* FirstSection = GraphCycle->ContourSections[0];
+    uint32 FirstNodeIndex = GraphCycle->ContourNodeIndices[0];
+    FArianeGraph::FNode* FirstNode = FirstSection->Nodes[FirstNodeIndex];
+    int32 ArraySize = GraphCycle->ContourSections.Num();
+
+    EarcutContour.push_back( FirstNode->Position );
+    OutPoints.Emplace( FVector( FirstNode->OriginalPosition ) );
+
+    for( int i = 0; i < ArraySize; i++ )
+    {
+        int n = ( i + 1 ) % ArraySize;
+        FArianeGraph::FSection* Section = GraphCycle->ContourSections[i];
+        uint32 SectionNodeIndex = GraphCycle->ContourNodeIndices[i];
+        uint32 SectionNextNodeIndex = ( SectionNodeIndex == 0 ) ? 1 : 0;
+
+        if( Section->GetClass() == FArianeGraph::FSectionLinear::StaticClass() )
+        {
+            FArianeGraph::FSectionLinear* LinearSection = static_cast<FArianeGraph::FSectionLinear*>(Section);
+            FArianeGraph::FNode* NextNode = Section->Nodes[SectionNextNodeIndex];
+
+            EarcutContour.push_back( NextNode->Position );
+            OutPoints.Emplace( FVector( NextNode->OriginalPosition ) );
+        }
+    }
+}
+
+void
+FArianeCycle::GraphCycleToCoords(  FArianeGraph::FCycle* GraphCycle
+                                 , std::vector<std::vector<FVector2D>>& EarcutContours
+                                 , TArray<FArianePoint>& OutPoints )
+{
+    uint32 CycleCount = 1;
+
+    EvaluateGraphCyclePointCount( GraphCycle, EarcutContours, OutPoints );
+
+    ContourToCoords( GraphCycle, EarcutContours[0], OutPoints );
+
+    // for each inner cycle, we evaluate the number of points it will need for triangulation
+    for( FArianeGraph::FCycle* Child : GraphCycle->Children )
+    {
+        ContourToCoords( Child, EarcutContours[CycleCount++], OutPoints );
+    }
+}
+
 FArianeCycle::FArianeCycle( UArianeLayerDrawing* InDrawingLayer
                           , const FName& InName
-                          , FArianeGraph* Graph
                           , FArianeGraph::FCycle* GraphCycle
                           , EArianeAllocationModel InAllocationModel
                           , FArianeCycleInvalidationFlags* InInvalidationFlags )
@@ -132,41 +231,11 @@ FArianeCycle::FArianeCycle( UArianeLayerDrawing* InDrawingLayer
     Points.Empty();
     EarcutIndices.Empty();
 
-    if( Graph && GraphCycle )
+    if( GraphCycle )
     {
-        std::vector<std::vector<FVector2D>> Polygon = std::vector<std::vector<FVector2D>>( 1 );
+        std::vector<std::vector<FVector2D>> Polygon;
 
-        int32 ArraySize = GraphCycle->ContourSections.Num();
-
-        Polygon[0].reserve( ArraySize );
-        Points.Reserve( ArraySize );
-
-        if ( ArraySize )
-        {
-            FArianeGraph::FSection* FirstSection = GraphCycle->ContourSections[0];
-            uint32 FirstNodeIndex = GraphCycle->ContourNodeIndices[0];
-            FArianeGraph::FNode* FirstNode = FirstSection->Nodes[FirstNodeIndex];
-
-            Polygon[0].push_back( FirstNode->Position );
-            Points.Emplace( FVector( FirstNode->OriginalPosition ) );
-
-            for( int i = 0; i < ArraySize; i++ )
-            {
-                int n = ( i + 1 ) % ArraySize;
-                FArianeGraph::FSection* Section = GraphCycle->ContourSections[i];
-                uint32 SectionNodeIndex = GraphCycle->ContourNodeIndices[i];
-                uint32 SectionNextNodeIndex = ( SectionNodeIndex == 0 ) ? 1 : 0;
-
-                if( Section->GetClass() == FArianeGraph::FSectionLinear::StaticClass() )
-                {
-                    FArianeGraph::FSectionLinear* LinearSection = static_cast<FArianeGraph::FSectionLinear*>(Section);
-                    FArianeGraph::FNode* NextNode = Section->Nodes[SectionNextNodeIndex];
-
-                    Polygon[0].push_back( NextNode->Position );
-                    Points.Emplace( FVector( NextNode->OriginalPosition ) );
-                }
-            }
-        }
+        GraphCycleToCoords( GraphCycle, Polygon, Points );
 
         // Triangulate. The result is a flat list of indices into the input vertices (numbered ring after
         // ring, so index 6 is {25, 75} here), three per triangle. Output triangles have a consistent

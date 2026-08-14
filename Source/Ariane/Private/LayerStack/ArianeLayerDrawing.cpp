@@ -191,7 +191,7 @@ UArianeLayerDrawing::AllocCycle( UMaterialInterface* InMaterialInterface
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
         InstancedObjectsAccessRW.Lock();
-        InstancedObjects.Add( FInstancedStruct::Make<FArianeCycle>( this, InName, Graph, Cycle, AllocationModel ) );
+        InstancedObjects.Add( FInstancedStruct::Make<FArianeCycle>( this, InName, Cycle, AllocationModel ) );
         InstancedObjectsAccessRW.Unlock();
 
         NewCycle = InstancedObjects.Last().GetMutablePtr<FArianeCycle>();
@@ -199,7 +199,7 @@ UArianeLayerDrawing::AllocCycle( UMaterialInterface* InMaterialInterface
 
     if( AllocationModel == EArianeAllocationModel::OperatingSystem )
     {
-        NewCycle = new FArianeCycle( this, InName, Graph, Cycle, AllocationModel );
+        NewCycle = new FArianeCycle( this, InName, Cycle, AllocationModel );
     }
 
     NewCycle->SetMaterial( InMaterialInterface ? InMaterialInterface

@@ -97,7 +97,6 @@ public:
     FArianeCycle();
     FArianeCycle( UArianeLayerDrawing* InDrawingLayer
                 , const FName& InName
-                , FArianeGraph* Graph
                 , FArianeGraph::FCycle* GraphCycle
                 , EArianeAllocationModel InAllocationModel
                 , FArianeCycleInvalidationFlags* InInvalidationFlags = nullptr );
@@ -134,7 +133,17 @@ public:
 protected:
     virtual FArianeObject* CopyShape( const FCopyArgs& CopyArgs ) override;
     virtual void CopySettings( FArianeObject* DestinationObject, const FCopyArgs& CopyArgs, bool bInvalidate ) override;
-
+    static inline uint32 EvaluateSectionPointCount( FArianeGraph::FSection* Section );
+    static uint32 EvaluateContourPointCount( FArianeGraph::FCycle* Cycle );
+    static void EvaluateGraphCyclePointCount( FArianeGraph::FCycle* Cycle
+                                            , std::vector<std::vector<FVector2D>>& EarcutContours
+                                            , TArray<FArianePoint>& Points );
+    static void ContourToCoords( FArianeGraph::FCycle* GraphCycle
+                               , std::vector<FVector2D>& EarcutContour
+                               , TArray<FArianePoint>& OutPoints );
+    static void GraphCycleToCoords(  FArianeGraph::FCycle* GraphCycle
+                                   , std::vector<std::vector<FVector2D>>& EarcutContours
+                                   , TArray<FArianePoint>& OutPoints );
 
 protected:
     UPROPERTY( EditAnywhere )

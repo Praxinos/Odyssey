@@ -527,7 +527,7 @@ public:
     virtual ~FArianeGraph();
     FArianeGraph();
 
-    void Solve( const FVector& ViewOrigin, const FPlane& ProjectionPlane, const TArray<FArianeObject*>& Objects );
+    void Solve( const FVector& ViewOrigin, const FPlane& ProjectionPlane, const TArray<FArianeObject*>& Objects, double GapTolerance );
     //Build( TArray<FOdysseyVectorObject*> Objects ); // Later
     FCycle* PickCycle( const FVector& RayOrigin, const FVector& RayDirection );
     void HighlightCycle( FCycle* Cycle );
@@ -570,6 +570,9 @@ protected:
                           , double SectionNode0EdgeT
                           , double SectionNode1EdgeT
                           , TArray<FSection*>& ShortSections );
+    void MergeCycles();
+    void OrderCycles();
+
 protected:
     static const uint32 NOCYCLE  = 0;
     static const uint32 BLOCKED  = 1;
