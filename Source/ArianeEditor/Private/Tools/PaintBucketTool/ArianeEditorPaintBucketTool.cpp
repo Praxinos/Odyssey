@@ -37,6 +37,7 @@ UArianeEditorPaintBucketTool::UArianeEditorPaintBucketTool()
     : MaterialInterface( nullptr )
     , Graph( new FArianeGraph() )
     , bGraphNeedsUpdate ( true )
+    , GapTolerance( 0.0f )
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PaintBucket64");
 
@@ -119,7 +120,7 @@ UArianeEditorPaintBucketTool::Reset()
                     return FArianeObject::ETraversalReturnValue::Continue;
                 } );
 
-            Graph->Solve( CameraLocation, DrawingPlane, GraphedPaths );
+            Graph->Solve( CameraLocation, DrawingPlane, GraphedPaths, GapTolerance );
 
             bGraphNeedsUpdate = false;
         }

@@ -134,28 +134,30 @@ UArianeEditorEraserTool::FWayFragment::FWayFragment( FArianeSegment* InSegment
 }
 
 UArianeEditorEraserTool::FWayFragment*
-UArianeEditorEraserTool::FWayFragment::GetNext()
+UArianeEditorEraserTool::FWayPoint::GetOtherFragment( FWayFragment* WayFragment )
 {
-    for( FWayFragment* candidateFragment : WayPoint1->Fragments )
+    for( FWayFragment* CandidateFragment : Fragments )
     {
-        if( candidateFragment->WayPoint0 == WayPoint1 )
+        if( CandidateFragment != WayFragment )
         {
-            return candidateFragment;
+            return CandidateFragment;
         }
     }
 
     return nullptr;
 }
 
-UArianeEditorEraserTool::FWayFragment*
-UArianeEditorEraserTool::FWayFragment::GetPrev()
+UArianeEditorEraserTool::FWayPoint*
+UArianeEditorEraserTool::FWayFragment::GetOtherWayPoint( FWayPoint* WayPoint )
 {
-    for( FWayFragment* candidateFragment : WayPoint0->Fragments )
+    if( WayPoint0 == WayPoint )
     {
-        if( candidateFragment->WayPoint1 == WayPoint0 )
-        {
-            return candidateFragment;
-        }
+        return WayPoint1;
+    }
+
+    if( WayPoint1 == WayPoint )
+    {
+        return WayPoint0;
     }
 
     return nullptr;
@@ -537,35 +539,37 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
 
 
 //static
-UArianeEditorEraserTool::FWayFragment*
-UArianeEditorEraserTool::GetStartFragment( FWayFragment* Fragment )
+UArianeEditorEraserTool::FStartingPoint
+UArianeEditorEraserTool::GetStartingPoint( FWayPoint* WayPoint, FWayFragment* Fragment )
 {
+    FWayPoint* CurrWayPoint = WayPoint;
     FWayFragment* CurrFragment = Fragment;
 
     // extend prev
     while( CurrFragment )
     {
-        FWayFragment* PrevFragment = CurrFragment->GetPrev();
+        FWayFragment* PrevFragment = CurrWayPoint->GetOtherFragment( Fragment );
 
         if( ( PrevFragment == nullptr )
          || ( PrevFragment == Fragment ) // loop prevention
          || ( ( PrevFragment->bErased == true ) &&  ( CurrFragment->bErased == false ) ) )
         {
-            return CurrFragment;
+            return FStartingPoint( CurrWayPoint, CurrFragment );
         }
 
+        CurrWayPoint = PrevFragment->GetOtherWayPoint( CurrWayPoint );
         CurrFragment = PrevFragment;
     }
 
-    return nullptr; // this case should never be met anyways. theorically
+    return FStartingPoint( CurrWayPoint, CurrFragment ); // this case should never be met anyways. theorically
 }
 
 // static
 UArianeEditorEraserTool::ESegmentAdditionFlags
-UArianeEditorEraserTool::SegmentAdditionPolicy( FWayFragment* Fragment, bool bSplit )
+UArianeEditorEraserTool::SegmentAdditionPolicy( FWayPoint* WayPoint, FWayFragment* Fragment, bool bSplit )
 {
     ESegmentAdditionFlags retFlags = ESegmentAdditionFlags::None;
-    FWayFragment* PrevFragment = Fragment->GetPrev();
+    FWayFragment* PrevFragment = WayPoint->GetOtherFragment( Fragment );
 
     if( bSplit )
     {
@@ -677,14 +681,16 @@ UArianeEditorEraserTool::AssignVertex( FArianePath* OwnerPath
 
         if( ( VertexAdditionFlags & EVertexAdditionFlags::CreateDerivedVertex ) == EVertexAdditionFlags::CreateDerivedVertex )
         {
-            //bool bHandleAligned = WayPoint.OriginalVertex->IsHandleAligned();
+            // waypoint.AssignedVertex will already be existing in case of a loop
+            if( WayPoint.AssignedVertex == nullptr )
+            {
+                WayPoint.AssignedVertex = OwnerPath->AllocVertex( FVector::Zero()
+                                                                , FVector::Zero()
+                                                                , 0.0f
+                                                                , EArianeAllocationModel::InstancedStruct );
 
-            WayPoint.AssignedVertex = OwnerPath->AllocVertex( FVector::Zero()
-                                                            , FVector::Zero()
-                                                            , 0.0f
-                                                            , EArianeAllocationModel::InstancedStruct );
-
-            OutAddedVertices.Add( WayPoint.AssignedVertex );
+                OutAddedVertices.Add( WayPoint.AssignedVertex );
+            }
         }
 
         if ((VertexAdditionFlags & EVertexAdditionFlags::KeepOriginalVertex ) == EVertexAdditionFlags::KeepOriginalVertex )
@@ -712,17 +718,20 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
 
     if( WayPoints.Num() )
     {
-        FWayPoint& FirstWayPoint = WayPoints[0];
+        FWayPoint* FirstWayPoint = &WayPoints[0];
+
         FWayFragment *FirstFragment = &WayFragments[0];
-        FWayFragment *StartFragment = GetStartFragment( FirstFragment );
-        FWayFragment *CurrFragment = StartFragment;
+        FStartingPoint StartingPoint = GetStartingPoint( FirstWayPoint, FirstFragment );
+        FWayFragment *CurrFragment = StartingPoint.WayFragment;
+        FWayPoint* CurrWayPoint = StartingPoint.WayPoint;
 
         while( CurrFragment )
         {
             FWayPoint* WayPoint0 = CurrFragment->WayPoint0;
             FWayPoint* WayPoint1 = CurrFragment->WayPoint1;
-            ESegmentAdditionFlags SegmentAdditionFlags = SegmentAdditionPolicy( CurrFragment, bSplit );
-            FWayFragment* NextFragment = CurrFragment->GetNext();
+            ESegmentAdditionFlags SegmentAdditionFlags = SegmentAdditionPolicy( CurrWayPoint, CurrFragment, bSplit );
+            FWayPoint* NextWayPoint = CurrFragment->GetOtherWayPoint( CurrWayPoint );
+            FWayFragment* NextFragment = NextWayPoint->GetOtherFragment( CurrFragment );
 
             if( VertexAdditionPolicy( WayPoint0, bSplit ) == EVertexAdditionFlags::RemoveOriginalVertex )
             {
@@ -779,16 +788,23 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
                                                          , OutRemovedVertices
                                                          , bSplit );
 
-                FArianeSegment* NewSegment = CurrFragment->Segment->Extract( CurrentPath
-                                                                           , DestVertex0
-                                                                           , CurrFragment->T0
-                                                                           , DestVertex1
-                                                                           , CurrFragment->T1 );
+                FArianeSegment* NewSegment = ( CurrFragment->T0 < CurrFragment->T1 ) ? CurrFragment->Segment->Extract( CurrentPath
+                                                                                                                     , DestVertex0
+                                                                                                                     , CurrFragment->T0
+                                                                                                                     , DestVertex1
+                                                                                                                     , CurrFragment->T1 )
+                                                                                     : CurrFragment->Segment->Extract( CurrentPath
+                                                                                                                     , DestVertex1
+                                                                                                                     , CurrFragment->T1
+                                                                                                                     , DestVertex0
+                                                                                                                     , CurrFragment->T0 );
+
                 // mark new segment for addition
                 OutAddedSegments.Add( NewSegment );
             }
 
-            CurrFragment = ( NextFragment == StartFragment ) ? nullptr : NextFragment;
+            CurrWayPoint = NextWayPoint;
+            CurrFragment = ( NextFragment == StartingPoint.WayFragment ) ? nullptr : NextFragment;
         }
     }
 }

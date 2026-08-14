@@ -94,8 +94,12 @@ protected:
 
 public:
     UPROPERTY( EditAnywhere
-             , Category = PathDrawingTool )
+             , Category = PaintBucketTool )
     UMaterialInterface* MaterialInterface;
+
+    UPROPERTY( EditAnywhere
+             , Category = PaintBucketTool )
+    double GapTolerance;
 
 
 protected:

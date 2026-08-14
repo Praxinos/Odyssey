@@ -70,6 +70,8 @@ class ARIANEEDITOR_API UArianeEditorEraserTool : public UArianeEditorTool
 
             Fragments.Reserve( 2 );
         }
+
+        FWayFragment* GetOtherFragment( FWayFragment* WayFragment );
     };
 
     struct FMetaFragment
@@ -106,8 +108,19 @@ class ARIANEEDITOR_API UArianeEditorEraserTool : public UArianeEditorTool
                     , FWayPoint* InWayPoint1
                     , bool bInErased );
 
-        FWayFragment* GetNext();
-        FWayFragment* GetPrev();
+        FWayPoint* GetOtherWayPoint( FWayPoint* WayPoint );
+    };
+
+    struct FStartingPoint
+    {
+        FStartingPoint( FWayPoint* InWayPoint, FWayFragment* InWayFagment )
+            : WayPoint ( InWayPoint )
+            , WayFragment ( InWayFagment )
+        {
+        }
+
+        FWayPoint* WayPoint;
+        FWayFragment* WayFragment;
     };
 
     struct ChainProcessor
@@ -218,8 +231,8 @@ protected:
 
     void StampBrush( FEditorViewportClient* ViewportClient );
     void ClearCanvas();
-    static FWayFragment* GetStartFragment( FWayFragment* Fragment );
-    static ESegmentAdditionFlags SegmentAdditionPolicy( FWayFragment* InFragment, bool bSplit );
+    static FStartingPoint GetStartingPoint( FWayPoint* WayPoint, FWayFragment* Fragment );
+    static ESegmentAdditionFlags SegmentAdditionPolicy( FWayPoint* WayPoint, FWayFragment* Fragment, bool bSplit );
     static EVertexAdditionFlags VertexAdditionPolicy( FWayPoint* WayPoint, bool bSplit );
     void ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
                             , FArianePath* ChainPath

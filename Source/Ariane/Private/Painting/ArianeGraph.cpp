@@ -1299,11 +1299,65 @@ FArianeGraph::Explore( FExplorationPair* ExplorationPair )
     }
 }
 
+void
+FArianeGraph::MergeCycles()
+{
+    for( FCycle *Cycle : Cycles )
+    {
+        FCycle* ParentCycle = Cycle->GetParentCycle();
+
+        if( ParentCycle )
+        {
+            ParentCycle->Merge( Cycle );
+        }
+    }
+}
+
+void
+FArianeGraph::OrderCycles()
+{
+    for( FCycle* Cycle : Cycles )
+    {
+        for( FCycle* InnerCycle : Cycles )
+        {
+           if( Cycle != InnerCycle )
+           {
+               if( InnerCycle->FitsIn( Cycle ) )
+               {
+                   FCycle* ParentCycle = InnerCycle->GetParentCycle();
+
+                   if( ParentCycle )
+                   {
+                       if( ParentCycle->FitsIn( Cycle ) == false )
+                       {
+                           InnerCycle->SetParentCycle( Cycle );
+                       }
+                   }
+                   else
+                   {
+                       InnerCycle->SetParentCycle( Cycle );
+                   }
+               }
+           }
+        }
+    }
+
+    for( FCycle* Cycle : Cycles )
+    {
+        if( Cycle->ParentCycle )
+        {
+            Cycle->ParentCycle->Children.Add( Cycle );
+        }
+    }
+}
+
 // Note: For ariane objects, there is no need for cubic segments because a projected cubic segment is not a cubic segment itself
 void
-FArianeGraph::Solve( const FVector& ViewOrigin, const FPlane& InProjectionPlane, const TArray<FArianeObject*>& Objects )
+FArianeGraph::Solve( const FVector& ViewOrigin, const FPlane& InProjectionPlane, const TArray<FArianeObject*>& Objects, double InGapTolerance )
 {
     TArray<FExplorationPair> ExplorationPairsBuffer;
+
+    GapTolerance = InGapTolerance;
 
     ProjectionPlane = InProjectionPlane;
 
@@ -1344,9 +1398,9 @@ FArianeGraph::Solve( const FVector& ViewOrigin, const FPlane& InProjectionPlane,
         Explore( &ExplorationPair );
     }
 
-    //OrderCycles();
+    OrderCycles();
 
-    //MergeCycles();
+    MergeCycles();
 }
 
 FArianeGraph::FCycle*
