@@ -50,22 +50,16 @@ TSharedPtr<IAnalyticsProvider> FOdysseyAnalyticsModule::CreateAnalyticsProvider(
 //        ConfigValues.APIKeyOdyssey = GetConfigValue.Execute( Config::GetKeyNameForAPIKey(), true );
 //        ConfigValues.APIServerOdyssey = GetConfigValue.Execute( Config::GetKeyNameForAPIServer(), true );
 //        ConfigValues.APIEndpointOdyssey = GetConfigValue.Execute( Config::GetKeyNameForAPIEndpoint(), true );
-//        ConfigValues.AppVersionOdyssey = GetConfigValue.Execute( Config::GetKeyNameForAppVersionOdyssey(), false );
-//        ConfigValues.AppVersionEngine = GetConfigValue.Execute( Config::GetKeyNameForAppVersionEngine(), false );
+//        ConfigValues.AppVersion = GetConfigValue.Execute( Config::GetKeyNameForAppVersion(), false );
 //
-//        if( ConfigValues.AppVersionOdyssey.IsEmpty() )
+//        if( ConfigValues.AppVersion.IsEmpty() )
 //        {
 //            TSharedPtr<IPlugin> plugin = IPluginManager::Get().FindPlugin( UE_PLUGIN_NAME );
 //            const FPluginDescriptor& pluginDescriptor = plugin->GetDescriptor();
 //            FString version = pluginDescriptor.VersionName;
 //            //if( pluginDescriptor.bIsBetaVersion )
 //            //    version += "-beta";
-//            ConfigValues.AppVersionOdyssey = version;
-//        }
-//
-//        if( ConfigValues.AppVersionEngine.IsEmpty() )
-//        {
-//            ConfigValues.AppVersionEngine = FEngineVersion::Current().ToString( EVersionComponent::Patch );
+//            ConfigValues.AppVersion = version;
 //        }
 //
 //        return CreateAnalyticsProvider( ConfigValues );

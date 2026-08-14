@@ -55,15 +55,10 @@ public:
         /** Odyssey API Endpoint - This is the API endpoint for the provider. */
         FString APIEndpointOdyssey;
         /**
-         * AppVersionOdyssey - defines the app version of the plugin passed to the provider.
+         * AppVersion - defines the app version of the plugin passed to the provider.
          * By default this will be the one in uplugin.
          */
-        FString AppVersionOdyssey;
-        /**
-         * AppVersionEngine - defines the app version of the editor passed to the provider.
-         * By default this will be FEngineVersion::Current().
-         */
-        FString AppVersionEngine;
+        FString AppVersion;
         /** When true (default), events are dropped if flush fails */
         bool bDropEventsOnFlushFailure = true;
         /** Maximum number of retries to attempt. */
@@ -78,11 +73,10 @@ public:
         /** Default ctor to ensure all values have their proper default. */
         Config() = default;
         /** Ctor exposing common configurables . */
-        Config(FString InAPIKeyOdyssey, FString InAPIServerOdyssey, FString InAppVersionOdyssey = FString(), FString InAppVersionEngine = FString(), float InFlushIntervalSec = -1.f, int32 InMaximumPayloadSize = -1, int32 InPreallocatedPayloadSize = -1)
+        Config(FString InAPIKeyOdyssey, FString InAPIServerOdyssey, FString InAppVersion = FString(), float InFlushIntervalSec = -1.f, int32 InMaximumPayloadSize = -1, int32 InPreallocatedPayloadSize = -1)
             : APIKeyOdyssey(MoveTemp(InAPIKeyOdyssey ))
             , APIServerOdyssey(MoveTemp(InAPIServerOdyssey ))
-            , AppVersionOdyssey(MoveTemp( InAppVersionOdyssey ))
-            , AppVersionEngine(MoveTemp( InAppVersionEngine ))
+            , AppVersion(MoveTemp( InAppVersion ))
             , FlushIntervalSec(InFlushIntervalSec)
             , MaximumPayloadSize(InMaximumPayloadSize)
             , PreallocatedPayloadSize(InPreallocatedPayloadSize)

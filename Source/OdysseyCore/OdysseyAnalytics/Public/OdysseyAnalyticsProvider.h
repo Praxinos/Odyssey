@@ -71,7 +71,6 @@ public:
 
     virtual void SetAppID( FString&& AppID ) override;
     virtual void SetAppVersion( FString&& AppVersion ) override;
-    virtual void SetAppVersionEngine( FString&& AppVersionEngine );
 
     virtual void SetUserID( const FString& InUserID ) override;
     virtual FString GetUserID() const override;

@@ -127,19 +127,14 @@ FOdysseyAnalyticsProvider::FOdysseyAnalyticsProvider( const FOdysseyAnalyticsMod
         //UE_LOGF( LogAnalytics, Warning, "AnalyticsOdyssey: APIServerOdyssey is empty for APIKey (%ls), creating as a NULL provider!", *Config.APIKeyOdyssey );
     }
 
-    if( Config.AppVersionOdyssey.IsEmpty() )
+    if( Config.AppVersion.IsEmpty() )
     {
         TSharedPtr<IPlugin> plugin = IPluginManager::Get().FindPlugin( UE_PLUGIN_NAME );
         const FPluginDescriptor& pluginDescriptor = plugin->GetDescriptor();
         FString version = pluginDescriptor.VersionName;
         //if( pluginDescriptor.bIsBetaVersion )
         //    version += "-beta";
-        Config.AppVersionOdyssey = version;
-    }
-
-    if( Config.AppVersionEngine.IsEmpty() )
-    {
-        Config.AppVersionEngine = FEngineVersion::Current().ToString( EVersionComponent::Patch );
+        Config.AppVersion = version;
     }
 
     UE_LOGF( LogAnalytics, Verbose, "[%ls] Initializing Odyssey Analytics provider", *Config.APIKeyOdyssey );
@@ -208,7 +203,7 @@ struct FProviderSessionStart_TelemetryFields
 bool FOdysseyAnalyticsProvider::StartSession( FString InSessionID, const TArray<FAnalyticsEventAttribute>& Attributes )
 {
     LLM_SCOPE_BYNAME( TEXT( "OdysseyAnalytics" ) );
-    UE_LOGF( LogAnalytics, Display, "[%ls] OdysseyAnalyticsProvider::StartSession ( APIServer = %ls%ls. AppVersion = %ls )", *Config.APIKeyOdyssey, *Config.APIServerOdyssey, *Config.APIEndpointOdyssey, *Config.AppVersionOdyssey );
+    UE_LOGF( LogAnalytics, Display, "[%ls] OdysseyAnalyticsProvider::StartSession ( APIServer = %ls%ls. AppVersion = %ls )", *Config.APIKeyOdyssey, *Config.APIServerOdyssey, *Config.APIEndpointOdyssey, *Config.AppVersion );
 
     // end/flush previous session before staring new one
     if( bSessionInProgress )
@@ -315,20 +310,18 @@ void FOdysseyAnalyticsProvider::ExecuteRequest( TArray<uint8>& Payload, OUT int3
     FString URLPath = Config.APIEndpointOdyssey;
     URLPath += TEXT( "?SessionID=" ) + FPlatformHttp::UrlEncode( SessionID );
     URLPath += TEXT( "&AppID=" ) + FPlatformHttp::UrlEncode( Config.APIKeyOdyssey );
-    URLPath += TEXT( "&AppVersionOdyssey=" ) + FPlatformHttp::UrlEncode( Config.AppVersionOdyssey );
-    URLPath += TEXT( "&AppVersionEngine=" ) + FPlatformHttp::UrlEncode( Config.AppVersionEngine );
+    URLPath += TEXT( "&AppVersion=" ) + FPlatformHttp::UrlEncode( Config.AppVersion );
     URLPath += TEXT( "&UserID=" ) + FPlatformHttp::UrlEncode( UserID );
     PayloadSize = URLPath.Len() + Payload.Num();
 
     // Recreate the URLPath for logging because we do not want to escape the parameters when logging.
     // We cannot simply UrlEncode the entire Path after logging it because UrlEncode(Params) != UrlEncode(Param1) & UrlEncode(Param2) ...
-    UE_LOGF( LogAnalytics, VeryVerbose, "[%ls] OdysseyAnalyticsProvider URL:%ls?SessionID=%ls&AppID=%ls&AppVersionOdyssey=%ls&AppVersionEngine=%ls&UserID=%ls. Payload:%.*s",
+    UE_LOGF( LogAnalytics, VeryVerbose, "[%ls] OdysseyAnalyticsProvider URL:%ls?SessionID=%ls&AppID=%ls&AppVersion=%ls&UserID=%ls. Payload:%.*s",
              *Config.APIKeyOdyssey,
              *Config.APIEndpointOdyssey,
              *SessionID,
              *Config.APIKeyOdyssey,
-             *Config.AppVersionOdyssey,
-             *Config.AppVersionEngine,
+             *Config.AppVersion,
              *UserID,
              Payload.Num(), reinterpret_cast<FGenericPlatformTypes::UTF8CHAR*>( Payload.GetData() ) );
 
@@ -426,26 +419,12 @@ void FOdysseyAnalyticsProvider::SetAppVersion( FString&& InAppVersion )
         //    InAppVersion += "-beta";
     }
 
-    if( Config.AppVersionOdyssey != InAppVersion )
+    if( Config.AppVersion != InAppVersion )
     {
-        UE_LOGF( LogAnalytics, Log, "[%ls] Updating AppVersion to %ls from old value of %ls", *Config.APIKeyOdyssey, *InAppVersion, *Config.AppVersionOdyssey );
+        UE_LOGF( LogAnalytics, Log, "[%ls] Updating AppVersion to %ls from old value of %ls", *Config.APIKeyOdyssey, *InAppVersion, *Config.AppVersion );
         // Flush any cached events that would be using the old AppVersion.
         FlushEvents();
-        Config.AppVersionOdyssey = MoveTemp( InAppVersion );
-    }
-}
-
-void FOdysseyAnalyticsProvider::SetAppVersionEngine( FString&& InAppVersion )
-{
-    if( InAppVersion.IsEmpty() )
-        InAppVersion = FEngineVersion::Current().ToString( EVersionComponent::Patch );
-
-    if( Config.AppVersionEngine != InAppVersion )
-    {
-        UE_LOGF( LogAnalytics, Log, "[%ls] Updating AppVersionEngine to %ls from old value of %ls", *Config.APIKeyOdyssey, *InAppVersion, *Config.AppVersionEngine );
-        // Flush any cached events that would be using the old AppVersion.
-        FlushEvents();
-        Config.AppVersionEngine = MoveTemp( InAppVersion );
+        Config.AppVersion = MoveTemp( InAppVersion );
     }
 }
 

@@ -141,6 +141,8 @@ struct FSessionStart_TelemetryFields
     static inline FString SessionId_KeyName_AsString = TEXT( "Session_ID" );
     static inline FString SessionStartUTC_KeyName_AsDouble = TEXT( "Session_StartUTC" );
 
+    static inline FString EngineVersion_KeyName_AsString = TEXT( "EngineVersion" );
+
     // SessionAttributes
     // - may be added in DefaultAttributes (in ALL future requests)
     // - or may be added a single time in Attributes only for the SessionStart request
@@ -242,6 +244,8 @@ FOdysseyTelemetry::StartSession()
     //double TimeZoneOffset = ( Now - NowUtc ).GetTotalSeconds();
     FString TimeZoneId = FPlatformTimeZone::GetTimeZoneId();
 
+    FString EngineVersion = FEngineVersion::Current().ToString( EVersionComponent::Patch );
+
     //---
 
     using FSessionStartFields = FSessionStart_TelemetryFields;
@@ -251,6 +255,8 @@ FOdysseyTelemetry::StartSession()
     DefaultAttributes.Emplace( FSessionStartFields::SessionStartUTC_KeyName_AsDouble, NowUtc.ToUnixTimestampDecimal() );
 
     //
+
+    SessionContextAttributes.Emplace( FSessionStartFields::EngineVersion_KeyName_AsString, EngineVersion );
 
     // Build the session context attributes. These will always be sent with the SessionStart event but can also be appended to default attributes to send with all ALL events.
     //SessionContextAttributes.Emplace( FSessionStartFields::ProjectName_KeyName_AsString, ProjectName );
