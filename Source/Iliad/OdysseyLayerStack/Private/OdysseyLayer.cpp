@@ -1585,6 +1585,13 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
         float Opacity;
     };
 
+#if WITH_EDITOR
+    UOdysseyLayerStack* layerStack = GetLayerStack();
+    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
+    TArray<UOdysseyLayer*> parents = GetParents();
+    bool bIsParentCurrentLayer = currentLayer == this || parents.Contains(currentLayer);
+#endif
+
     TArray<FChildRenderParams> childrenRenderParams;
     for ( int i = Children.Num() - 1; i >= 0; i-- )
     {
@@ -1598,8 +1605,8 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
             float opacity = child->GetOpacity();
 
 #if WITH_EDITOR
-            UOdysseyLayerStack* layerStack = child->GetLayerStack();
-            if( child != layerStack->GetCurrentLayer() && layerStack->GetDisplayOnlyCurrentLayer() )
+            bool bIsChildCurrentLayer = child == layerStack->GetCurrentLayer();
+            if( !bIsChildCurrentLayer && !bIsParentCurrentLayer && layerStack->GetDisplayOnlyCurrentLayer() && !child->CanHaveChildren() )
                 opacity = opacity * layerStack->GetOtherLayersOpacityNormalized();
 #endif
 
