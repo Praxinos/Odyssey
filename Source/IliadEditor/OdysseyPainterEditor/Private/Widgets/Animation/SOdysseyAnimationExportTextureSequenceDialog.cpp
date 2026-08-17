@@ -309,6 +309,40 @@ FOdysseyAnimationTextureSequenceExporter::ExportSource(const FSource& iSource, c
     if (!iSource.mFilename.IsEmpty())
         filename += TEXT("_") + iSource.mFilename;
 
+    FInt32Range frameRange = GetSourceRange(iSource);
+    int startFrame = frameRange.GetLowerBoundValue();
+    int endFrame = frameRange.GetUpperBoundValue();
+
+    FScopedSlowTask progressBar(endFrame - startFrame + 1);
+    TArray<FGuid> lastRenderingComposition;
+
+    for (int i = startFrame; i <= endFrame; i++)
+    {
+        progressBar.EnterProgressFrame();
+        if (mUniqueFramesOnly)
+        {
+            IOdysseyTextureRenderingAbility* textureRenderingAbility = Cast<IOdysseyTextureRenderingAbility>(iSource.mTextureRenderingAbility);
+            if (!textureRenderingAbility)
+                continue;
+
+            TArray<FGuid> renderingComposition = textureRenderingAbility->GetRenderingComposition(EOdysseyRenderingType::Render, i);
+
+            if (renderingComposition == lastRenderingComposition)
+                continue;
+
+            lastRenderingComposition = renderingComposition;
+        }
+
+        FString frameStr = FString::FromInt(i);
+        FString imageName = filename + TEXT("_");
+         for (int j = 0; j < iNumZero - frameStr.Len(); j++)
+        {
+            imageName += TEXT("0");
+        }
+        imageName += FString::Printf(TEXT("%d"), i);
+        Odyssey::ExportAsTexture(iSource.mTextureRenderingAbility, i, imageName, folder);
+    }
+
     Odyssey::ExportAsTexture(iSource.mTextureRenderingAbility, 0, filename, folder);
 }
 
