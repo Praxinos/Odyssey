@@ -23,7 +23,15 @@ public:
     ~FOdysseyTileManager() = default;
 
 private:
-    FOdysseyTileManager() = default;
+    FOdysseyTileManager()
+        : StatNumTilesUncompressed(0)
+        , StatSizeUncompressed(0)
+        , StatNumTilesCompressed(0)
+        , StatSizeCompressed(0)
+        , StatNumTilesOnDisk(0)
+        , StatSizeOnDisk(0)
+    {
+    }
 
 public:
     //All created tiles are permanently added to the Tiles array
@@ -75,6 +83,16 @@ public:
 
     bool GetTileBuffer(FTileId InTileId, FSharedBuffer& OutBuffer) const;
 
+public:
+    //Stats
+
+    int64 GetNumTilesUncompressed() const;
+    int64 GetSizeUncompressed() const;
+    int64 GetNumTilesCompressed() const;
+    int64 GetSizeCompressed() const;
+    int64 GetNumTilesOnDisk() const;
+    int64 GetSizeOnDisk() const;
+
 private:
     struct FTile
     {
@@ -115,4 +133,12 @@ private:
     TArray<FTileId> TilesToEvictCompressed;
 
     FCriticalSection PipelineMutex;
+
+    //Stats
+    TAtomic<int64> StatNumTilesUncompressed;
+    TAtomic<int64> StatSizeUncompressed;
+    TAtomic<int64> StatNumTilesCompressed;
+    TAtomic<int64> StatSizeCompressed;
+    TAtomic<int64> StatNumTilesOnDisk;
+    TAtomic<int64> StatSizeOnDisk;
 };
