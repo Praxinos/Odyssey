@@ -215,7 +215,6 @@ FOdysseyPainterEditor::InitHUD()
 {
     mToolsHUD->SetIsVisible(MakeAttributeSP(this, &FOdysseyPainterEditor::IsToolsHUDVisible));
     mRasterSelectionHUD->SetIsVisible(MakeAttributeSP(this, &FOdysseyPainterEditor::IsRasterSelectionHUDVisible));
-    mRasterSelectionHUD->AddElement(mRasterSelection->GetHUD());
     mHUDSystem->AddElement(mRasterSelectionHUD);
     mHUDSystem->AddElement(mToolsHUD);
 }
@@ -1482,7 +1481,7 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         mSource->Inactivate();
         mSource = nullptr;
 
-        mRasterSelection = nullptr;
+        mRasterSelectionHUD->RemoveElement(mRasterSelection->GetHUD());
         mRasterSelection = NewObject< UOdysseyPainterEditorRasterSelection >();
 
         mAnimationTimelinePosition->Reset();
@@ -1496,6 +1495,7 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         mSource->Activate(this);
 
         mRasterSelection->Init(mSource->Width(), mSource->Height());
+        mRasterSelectionHUD->AddElement(mRasterSelection->GetHUD());
 
         if ( mCurrentMainTool && mCurrentMainTool->IsActivable() )
         {
