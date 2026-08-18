@@ -142,6 +142,36 @@ FArianeGroup::CopyShape( const FCopyArgs& CopyArgs )
     return GroupCopy;
 }
 
+void
+FArianeGroup::UpdateBoundingBox( EUpdateFlags UpdateFlags )
+{
+    FArianeGroupInvalidationFlags* GroupInvalidationFlags = static_cast<FArianeGroupInvalidationFlags*>(InvalidationFlags);
+
+    if( ( GroupInvalidationFlags->Hierarchy )
+     || ( GroupInvalidationFlags->Children  ) )
+    {
+        // FBox(ForceInit) creates an invalid box
+        FBox CombinedBox(ForceInit);
+
+        for (FArianeObjectID& ChildID : Children)
+        {
+            FArianeObject* Child = ChildID.GetObject();
+
+            // Note: use "+=" and not "bound = bound + blah". Only += checks for the validity of the box.
+            CombinedBox += Child->GetBoundingBox().TransformBy( Child->GetLocalTransform() );
+        }
+
+        BoundingBox = CombinedBox.IsValid ? FBox(CombinedBox)
+                                          : FBox(ForceInit);
+    }
+}
+
+void
+FArianeGroup::UpdateShape( EUpdateFlags UpdateFlags )
+{
+    Super::UpdateShape( UpdateFlags );
+}
+
 /*
 void
 FArianeGroup::PostLoad()

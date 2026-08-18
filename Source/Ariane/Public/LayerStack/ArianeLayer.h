@@ -12,10 +12,38 @@
 #include "ArianeLayer.generated.h"
 
 class UArianeLayerStack;
+class UArianeLayer;
 class UArianeLayerFolder;
+class UArianeLayerDrawing;
+
+class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
+{
+    public:
+        ~FArianeGeometryProxy();
+        FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLevel, UArianeLayer* InLayer );
+
+        virtual SIZE_T GetTypeHash() const override;
+        virtual uint32 GetMemoryFootprint( void ) const override;
+
+        virtual FPrimitiveViewRelevance GetViewRelevance( const FSceneView* View ) const override;
+        virtual void GetDynamicMeshElements( const TArray<const FSceneView*>& Views
+                                           , const FSceneViewFamily& ViewFamily
+                                           , uint32 VisibilityMap
+                                           , FMeshElementCollector& Collector) const override;
+        void GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* DrawingLayer
+                                               , FMeshElementCollector& Collector
+                                               , int32 ViewIndex ) const;
+        void InitVertexFactory();
+        virtual void DrawStaticElements( FStaticPrimitiveDrawInterface * PDI ) override;
+        FMaterialRelevance GetLayerStackMaterialRelevance() const;
+
+    protected:
+        UArianeLayer* Layer;
+        FMaterialRelevance MaterialRelevance;
+};
 
 UCLASS(Abstract)
-class ARIANE_API UArianeLayer : public USceneComponent
+class ARIANE_API UArianeLayer : public UMeshComponent
 {
     GENERATED_BODY()
 
@@ -116,6 +144,8 @@ public:
     void PreEditUndo();
     void PostEditUndo();
     void PostLoad();
+    FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld );
+    virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
 
 protected:
     ETraversalReturnValue TraverseBackwards_Private( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
@@ -134,7 +164,6 @@ protected:
 
 protected:
     bool bInvalidatedInParentFolder;
-    FBoxSphereBounds Bounds;
     FArianeLayerInvalidationFlags* InvalidationFlags;
     //FOnUpdateDelegate OnPreUpdate;
     //FOnUpdateDelegate OnPostUpdate;

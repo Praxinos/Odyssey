@@ -94,6 +94,8 @@ UArianeLayerDrawing::PostLoad()
         Object->PostLoad();
     }
 
+    GetRootGroup()->UpdateTransform();
+
     Update( false );
 
     // recompute the bounding volumes or else nothing will draw
@@ -122,10 +124,22 @@ UArianeLayerDrawing::PostEditUndo()
         Object->PostEditUndo();
     }
 
+    GetRootGroup()->UpdateTransform();
+
     Update( false );
 
     // recompute the bounding volumes or else nothing will draw
     GetLayerStack()->GetPainting3DComponent()->UpdateComponentToWorld();
+}
+
+void
+UArianeLayerDrawing::OnRegister()
+{
+    Super::OnRegister();
+
+    // When PostLoad is called, the hierarchy is non-existent yet, matrices are not initalized, that's why we need to
+    // update them in OnRegister()
+    GetRootGroup()->UpdateTransform();
 }
 
 FArianeObject*
@@ -206,7 +220,7 @@ UArianeLayerDrawing::AllocCycle( UMaterialInterface* InMaterialInterface
                                                : GetLayerStack()->GetPainting3DComponent()->GetDefaultMaterial() );
 
     // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
-    GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
+    MarkRenderStateDirty();
 
 
     return NewCycle;
@@ -250,7 +264,7 @@ UArianeLayerDrawing::AllocEllipse( UMaterialInterface* InMaterialInterface
                                               : GetLayerStack()->GetPainting3DComponent()->GetDefaultMaterial() );
 
     // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
-    GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
+    MarkRenderStateDirty();
 
 
     return Ellipse;
@@ -294,7 +308,7 @@ UArianeLayerDrawing::AllocLine( UMaterialInterface* InMaterialInterface
                                            : GetLayerStack()->GetPainting3DComponent()->GetDefaultMaterial() );
 
     // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
-    GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
+    MarkRenderStateDirty();
 
 
     return Line;
@@ -338,7 +352,7 @@ UArianeLayerDrawing::AllocPolygon( UMaterialInterface* InMaterialInterface
                                               : GetLayerStack()->GetPainting3DComponent()->GetDefaultMaterial() );
 
     // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
-    GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
+    MarkRenderStateDirty();
 
 
     return Polygon;
@@ -382,7 +396,7 @@ UArianeLayerDrawing::AllocRectangle( UMaterialInterface* InMaterialInterface
                                                 : GetLayerStack()->GetPainting3DComponent()->GetDefaultMaterial() );
 
     // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
-    GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
+    MarkRenderStateDirty();
 
 
     return Rectangle;
@@ -413,7 +427,7 @@ UArianeLayerDrawing::AllocPath( UMaterialInterface* InMaterialInterface
                                               : GetLayerStack()->GetPainting3DComponent()->GetDefaultMaterial() );
 
     // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
-    GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
+    MarkRenderStateDirty();
 
 
     return NewPath;
@@ -496,7 +510,6 @@ UArianeLayerDrawing::Update( bool bInteractive )
 
     RootGroupID.GetObject()->Update( ObjectUpdateFlags, true );
 
-    UpdateBounds();
 
     Super::Update( bInteractive );
 }
@@ -554,27 +567,11 @@ UArianeLayerDrawing::DeleteInstancedObject( FArianeObject* Object )
     InstancedObjectsAccessRW.Unlock();
 }
 
-void
-UArianeLayerDrawing::UpdateBounds()
+FBoxSphereBounds
+UArianeLayerDrawing::CalcBounds( const FTransform& LocalToWorld ) const
 {
-    // ForceInit makes the box invalid and excludes it from the computation unitl it is valid
-    Bounds = FBoxSphereBounds(ForceInit);
-
-    for( FInstancedStruct& InstancedObject : InstancedObjects )
-    {
-        FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
-
-        if( Object->HasBaseClass( FArianePath::StaticClass() ) )
-        {
-            FArianePath* Path = static_cast<FArianePath*>(Object);
-            const FTransform& PathTransform = Path->GetTransform();
-            FMatrix RelativeMatrix = GetComponentTransform().ToInverseMatrixWithScale() * PathTransform.ToMatrixWithScale();
-
-            Bounds = Bounds + Path->GetBounds().TransformBy( RelativeMatrix );
-        }
-    }
+    return FBoxSphereBounds( RootGroupID.GetObject()->GetBoundingBox().TransformBy( LocalToWorld ) );
 }
-
 
 void
 UArianeLayerDrawing::OnUpdateTransform( EUpdateTransformFlags UpdateTransformFlags, ETeleportType TeleportType )

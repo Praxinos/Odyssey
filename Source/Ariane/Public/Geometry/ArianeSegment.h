@@ -145,7 +145,7 @@ struct ARIANE_API FArianeSegment
         virtual FVector GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormalize );
 
         /** Get the segment's bounds ( including polygonal geometry ) */
-        const FBoxSphereBounds& GetBounds();
+        const FBox& GetBoundingBox();
 
         /** Update the segment */
         virtual void Update();
@@ -200,7 +200,7 @@ struct ARIANE_API FArianeSegment
 
     protected:
         /** Update the segment's bounds */
-        void UpdateBounds();
+        void UpdateBoundingBox();
 
         /** Update the segment */
         void Init();
@@ -224,7 +224,7 @@ struct ARIANE_API FArianeSegment
         TArray<FFraction> Fractions;
         TArray<FDynamicMeshVertex> ModelVertexCache;
         TArray<uint32> IndexCache;
-        FBoxSphereBounds Bounds;
+        FBox BoundingBox;
         double Length;
 
     protected:

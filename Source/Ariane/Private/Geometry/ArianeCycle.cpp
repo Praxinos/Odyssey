@@ -398,18 +398,29 @@ FArianeCycle::CopyShape( const FCopyArgs& CopyArgs )
 }
 
 void
-FArianeCycle::UpdateBounds()
+FArianeCycle::UpdateBoundingBox( EUpdateFlags UpdateFlags )
 {
-    Bounds = FBoxSphereBounds(ForceInit);
+    FVector Min = FVector (  DBL_MAX,  DBL_MAX,  DBL_MAX );
+    FVector Max = FVector ( -DBL_MAX, -DBL_MAX, -DBL_MAX );
 
-/*
-    for( FArianeSegmentID& SegmentID : Segments )
+    BoundingBox = FBox(ForceInit);
+
+    for( FArianePoint& Point : Points )
     {
-        FArianeSegment* Segment = SegmentID.GetSegment();
+        FVector PointPosition = Point.GetPosition();
 
-        Bounds = Bounds + Segment->GetBounds();
+        if( PointPosition.X < Min.X ) Min.X = PointPosition.X;
+        if( PointPosition.Y < Min.Y ) Min.Y = PointPosition.Y;
+        if( PointPosition.Z < Min.Z ) Min.Z = PointPosition.Z;
+        if( PointPosition.X > Max.X ) Max.X = PointPosition.X;
+        if( PointPosition.Y > Max.Y ) Max.Y = PointPosition.Y;
+        if( PointPosition.Z > Max.Z ) Max.Z = PointPosition.Z;
+
+        BoundingBox.IsValid = 1;
     }
-*/
+
+    BoundingBox.Min = Min;
+    BoundingBox.Max = Max;
 }
 
 void
@@ -499,8 +510,6 @@ FArianeCycle::UpdateShape( EUpdateFlags UpdateFlags )
     if( PathInvalidationFlags->PointAltered )
     {
         Geometry3D.Build();
-
-        UpdateBounds();
     }
 }
 

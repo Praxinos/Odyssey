@@ -338,7 +338,7 @@ FArianeGraph::FNode::UnlinkPendantSections()
     {
         FSection* PendantSection = CurrentNode->SectionLinkInfos[0].Section;
 
-        CurrentNode->SectionLinkInfos[0].Section->Unlink( false );
+        PendantSection->Unlink( false );
 
         CurrentNode = PendantSection->GetOtherNode( CurrentNode );
     }
@@ -368,9 +368,9 @@ FArianeGraph::FNodeIntersection::FNodeIntersection( const FVector2D& InPosition
                     , FIntersection( this, InEdge1T ) }
     , Edges { InEdge0,  InEdge1 }
 {
-    // attach to edges
-    Edges[0]->Intersections.Add( &Intersections[0] );
-    Edges[1]->Intersections.Add( &Intersections[1] );
+    // attach to edges (ordered, depends on T value)
+    Edges[0]->AddIntersection( &Intersections[0] );
+    Edges[1]->AddIntersection( &Intersections[1] );
 }
 
 bool
@@ -435,6 +435,25 @@ FArianeGraph::FEdge::FEdge( FNode* InNode0
 {
     Nodes[0]->Edges[Nodes[0]->EdgeCount++] = this;
     Nodes[1]->Edges[Nodes[1]->EdgeCount++] = this;
+}
+
+void
+FArianeGraph::FEdge::AddIntersection ( FIntersection* InIntersection )
+{
+    int32 Index = Intersections.IndexOfByPredicate( [ this
+                                                    , InIntersection ]( FIntersection* Intersection )
+                                                    {
+                                                        return ( Intersection->EdgeT > InIntersection->EdgeT );
+                                                    } );
+
+    if( Index == INDEX_NONE )
+    {
+        Intersections.Add( InIntersection );
+    }
+    else
+    {
+        Intersections.Insert( InIntersection, Index );
+    }
 }
 
 FArianeGraph::FNode*
@@ -740,10 +759,10 @@ FArianeGraph::IntersectEdgeWithPath( FPath* Path, FEdge* Edge, FPath* Intersecte
         FVector2D IntersectedEdgeMaxWithTolerance( IntersectedEdgeBBox.Max.X + GapTolerance
                                                  , IntersectedEdgeBBox.Max.Y + GapTolerance );
 
-        if( ( EdgeMinWithTolerance.X < IntersectedEdgeMaxWithTolerance.X )
-         && ( EdgeMaxWithTolerance.X > IntersectedEdgeMinWithTolerance.X )
-         && ( EdgeMinWithTolerance.Y < IntersectedEdgeMaxWithTolerance.Y )
-         && ( EdgeMaxWithTolerance.Y > IntersectedEdgeMinWithTolerance.Y ) )
+        if( ( EdgeMinWithTolerance.X <= IntersectedEdgeMaxWithTolerance.X )
+         && ( EdgeMaxWithTolerance.X >= IntersectedEdgeMinWithTolerance.X )
+         && ( EdgeMinWithTolerance.Y <= IntersectedEdgeMaxWithTolerance.Y )
+         && ( EdgeMaxWithTolerance.Y >= IntersectedEdgeMinWithTolerance.Y ) )
         {
             IntersectEdges( Path
                           , Edge
@@ -1178,7 +1197,31 @@ FArianeGraph::Build()
     }
 }
 
+void
+FArianeGraph::UnlinkPendantSectionsRecursively( FSection* Section, FNode* Node )
+{
+    do
+    {
+        FNode* OtherNode = Section->GetOtherNode( Node );
 
+        Section->Unlink( false );
+
+        Node = nullptr;
+        Section = nullptr;
+
+        if( OtherNode->GetClass() != FNodeIntersection::StaticClass() )
+        {
+            if( OtherNode->SectionLinkInfos.Num() == 1 )
+            {
+                FSection* OtherSection = OtherNode->SectionLinkInfos[0].Section;
+
+                Node = OtherNode;
+                Section = OtherSection;
+            }
+        }
+    }
+    while( Node );
+}
 
 void
 FArianeGraph::SimplifyGraph()
@@ -1193,12 +1236,12 @@ FArianeGraph::SimplifyGraph()
             {
                 if( Section->Nodes[0]->SectionLinkInfos.Num() == 1 )
                 {
-                    Section->Nodes[0]->UnlinkPendantSections();
+                    UnlinkPendantSectionsRecursively( Section, Section->Nodes[0] );
                 }
 
                 if( Section->Nodes[1]->SectionLinkInfos.Num() == 1 )
                 {
-                    Section->Nodes[1]->UnlinkPendantSections();
+                    UnlinkPendantSectionsRecursively( Section, Section->Nodes[1] );
                 }
             }
         }

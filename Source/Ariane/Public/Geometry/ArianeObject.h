@@ -174,10 +174,10 @@ public:
     virtual FArianeObjectInvalidationFlags& GetInvalidationFlags();
 
     /** Get object's bounds */
-    const FBoxSphereBounds& GetBounds();
+    const FBox& GetBoundingBox() const;
 
     /** Update object's bounds */
-    virtual void UpdateBounds();
+    virtual void UpdateBoundingBox( EUpdateFlags UpdateFlags );
 
     /** Run any object-specific task required immediately after loading an object */
     virtual void PostLoad();
@@ -357,7 +357,7 @@ protected:
     FSimpleMulticastDelegate  OnPostInvalidated;
     TArray<FArianeObjectID> InvalidatedChildren;
     TArray<FArianeObjectID> Children;
-    FBoxSphereBounds Bounds;
+    FBox BoundingBox;
     FArianeObjectInvalidationFlags* InvalidationFlags;
     bool bSelected;
 };

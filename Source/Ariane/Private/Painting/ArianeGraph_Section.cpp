@@ -197,7 +197,17 @@ FArianeGraph::FSection::Unlink( bool bRestore )
 FArianeGraph::FNode*
 FArianeGraph::FSection::GetOtherNode( FNode* InNode )
 {
-    return ( InNode == Nodes[0] ) ? Nodes[1] : Nodes[0];
+    if ( InNode == Nodes[0] )
+    {
+        return Nodes[1];
+    }
+
+    if ( InNode == Nodes[1] )
+    {
+        return Nodes[0];
+    }
+
+    return nullptr;
 }
 
 FArianeGraph::FEdge*

@@ -222,9 +222,10 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
 
                         default :
                         {
-                            FQuat WorldOrientationQuat = FQuat::FindBetweenVectors( ParentGroup->GetTransform().TransformVector( FVector::UpVector )
-                                                                                  , DrawingPlane.GetSafeNormal() );
-                            FQuat LocalOrientationQuat = ParentGroupTransform.InverseTransformRotation( WorldOrientationQuat );
+                            FQuat WorldRotation = FQuat::FindBetweenNormals( FVector::UpVector, DrawingPlane.GetSafeNormal() );
+                            FTransform WorldTransform = FTransform( WorldRotation );
+                            FTransform LocalTransform = WorldTransform.GetRelativeTransform( ParentGroup->GetTransform() );
+                            FQuat LocalOrientationQuat = LocalTransform.GetRotation();
 
                             LocalOrientation = LocalOrientationQuat.Euler();
                         }
@@ -440,9 +441,9 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDrag( FEditorViewportClient* ViewportC
                                 Diff.Y = sin( Angle ) * Distance;
                             }
 */
-                            Line->SetEndPoint( FVector( StartPoint.X + Diff.X
-                                                      , StartPoint.Y + Diff.Y
-                                                      , 0.0f ) );
+                            Line->SetEndPoint( FVector( LocalCoordsAtDrag.X
+                                                      , LocalCoordsAtDrag.Y
+                                                      , LocalCoordsAtDrag.Z ) );
                         }
                         break;
 

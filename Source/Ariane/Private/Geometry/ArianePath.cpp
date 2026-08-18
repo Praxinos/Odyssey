@@ -682,15 +682,27 @@ FArianePath::CopyShape( const FCopyArgs& CopyArgs )
 }
 
 void
-FArianePath::UpdateBounds()
+FArianePath::UpdateBoundingBox( EUpdateFlags UpdateFlags )
 {
-    Bounds = FBoxSphereBounds(ForceInit);
+    FArianePathInvalidationFlags* PathInvalidationFlags = static_cast<FArianePathInvalidationFlags*>(InvalidationFlags);
 
-    for( FArianeSegmentID& SegmentID : Segments )
+    if( PathInvalidationFlags->VertexAltered
+     || PathInvalidationFlags->VertexAddedOrRemoved
+     || PathInvalidationFlags->SegmentAltered
+     || PathInvalidationFlags->SegmentAddedOrRemoved )
     {
-        FArianeSegment* Segment = SegmentID.GetSegment();
+        // FBox(ForceInit) creates an invalid box
+        FBox CombinedBox(ForceInit);
 
-        Bounds = Bounds + Segment->GetBounds();
+        for (FArianeSegmentID& SegmentID : Segments)
+        {
+            FArianeSegment* Segment = SegmentID.GetSegment();
+
+            CombinedBox += Segment->GetBoundingBox();
+        }
+
+        BoundingBox = CombinedBox.IsValid ? FBox(CombinedBox)
+                                          : FBox(ForceInit);
     }
 }
 
@@ -876,8 +888,6 @@ FArianePath::UpdateShape( EUpdateFlags UpdateFlags )
      || PathInvalidationFlags->SegmentAddedOrRemoved )
     {
         Geometry3D.Build();
-
-        UpdateBounds();
     }
 
     //PathInvalidationFlags->Clear();
