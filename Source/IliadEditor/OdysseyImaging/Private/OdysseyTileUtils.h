@@ -7,6 +7,6 @@
 
 namespace Odyssey::TileUtils {
 
-    TArray<FIntPoint> GetTilePositionsFromRect(uint32 InTileSize, const FIntRect& InRect);
+    TArray<FIntPoint> GetTilePositionsFromRect(int32 InTileSize, const FIntRect& InRect);
 
 }

@@ -5,16 +5,23 @@
 
 namespace Odyssey::TileUtils {
 
+static int32 FloorDiv(int32 Value, int32 Divisor)
+{
+    return Value >= 0
+        ? Value / Divisor
+        : (Value + 1) / Divisor - 1;
+}
+
 TArray<FIntPoint>
-GetTilePositionsFromRect(uint32 InTileSize, const FIntRect& InRect)
+GetTilePositionsFromRect(int32 InTileSize, const FIntRect& InRect)
 {
     if (InRect.Min.X >= InRect.Max.X || InRect.Min.Y >= InRect.Max.Y)
         return {};
 
-    int X1 = InRect.Min.X / InTileSize;
-    int Y1 = InRect.Min.Y / InTileSize;
-    int X2 = InRect.Max.X / InTileSize;
-    int Y2 = InRect.Max.Y / InTileSize;
+    const int32 X1 = FloorDiv(InRect.Min.X, InTileSize);
+    const int32 Y1 = FloorDiv(InRect.Min.Y, InTileSize);
+    const int32 X2 = FloorDiv(InRect.Max.X - 1, InTileSize);
+    const int32 Y2 = FloorDiv(InRect.Max.Y - 1, InTileSize);
 
     int W = X2 - X1 + 1;
     int H = Y2 - Y1 + 1;

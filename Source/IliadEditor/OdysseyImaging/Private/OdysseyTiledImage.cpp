@@ -4,8 +4,43 @@
 #include "OdysseyTiledImage.h"
 
 #include "Engine/Texture.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "RenderGraphUtils.h"
+#include "ScreenPass.h"
+#include "TextureResource.h"
 
 #include "OdysseyTileUtils.h"
+
+DECLARE_STATS_GROUP(TEXT("UOdysseyTiledImage"), STATGROUP_OdysseyTiledImage, STATCAT_Advanced);
+DECLARE_CYCLE_STAT(TEXT("UOdysseyTiledImage::Render"), STAT_Render, STATGROUP_OdysseyTiledImage);
+
+
+BEGIN_SHADER_PARAMETER_STRUCT(FWriteTileParameters, )
+    RDG_TEXTURE_ACCESS(Texture, ERHIAccess::CopyDest)
+END_SHADER_PARAMETER_STRUCT()
+
+void
+AddWriteTilePass(FRDGBuilder& GraphBuilder, FRDGTextureRef OutTexture, FSharedBuffer InBuffer)
+{
+    FWriteTileParameters* Params = GraphBuilder.AllocParameters<FWriteTileParameters>();
+    Params->Texture = OutTexture;
+
+    GraphBuilder.AddPass(
+        RDG_EVENT_NAME("UOdysseyTiledImage::AddWriteTilePass"),
+        Params,
+        ERDGPassFlags::Copy | ERDGPassFlags::NeverCull,
+        [OutTexture, InBuffer](FRHICommandList& RHICmdList)
+        {
+            const FRDGTextureDesc& Desc = OutTexture->Desc;
+            const FPixelFormatInfo& PixelFormatInfo = GPixelFormats[Desc.Format];
+            uint32 BytesPerPixel = PixelFormatInfo.BlockBytes;
+            uint32 BufferStride = BytesPerPixel * Desc.Extent.X;
+
+            FUpdateTextureRegion2D region(0, 0, 0, 0, Desc.Extent.X, Desc.Extent.Y);
+            RHICmdList.UpdateTexture2D(OutTexture->GetRHI(), 0, region, BufferStride, (const uint8*)InBuffer.GetData());
+        }
+    );
+}
 
 UOdysseyTiledImage::~UOdysseyTiledImage()
 {
@@ -42,130 +77,148 @@ UOdysseyTiledImage::GetPixelFormat() const
     return PF_B8G8R8A8;
 }
 
-/* void
-UOdysseyTiledImage::AddWriteTilePass(FRDGBuilder& GraphBuilder, FRDGTextureRef OutTexture, TSharedFuture<FSharedBuffer> InBufferFuture)
-{
-    GraphBuilder.AddPass(
-        RDG_EVENT_NAME("UOdysseyTiledImage::AddWriteTilePass"),
-        ERDGPassFlags::Copy,
-        [OutTexture, InBufferFuture](FRHICommandList& RHICmdList)
-        {
-            const FRDGTextureDesc& Desc = OutTexture->Desc;
-            const FPixelFormatInfo& PixelFormatInfo = GPixelFormats[Desc.Format];
-            uint32 BytesPerPixel = PixelFormatInfo.BlockBytes;
-            uint32 BufferStride = BytesPerPixel * Desc.Extent.X;
-
-            FSharedBuffer Buffer = InBufferFuture.Get();
-
-            FUpdateTextureRegion2D region(0, 0, 0, 0, Desc.Extent.X, Desc.Extent.Y);
-            RHICmdList.UpdateTexture2D(OutTexture->GetRHI(), 0, region, BufferStride, (const uint8*)Buffer.GetData());
-        }
-    );
-}
-
-void
-UOdysseyTiledImage::AddReadTilePass(FRDGBuilder& GraphBuilder, FRDGTextureRef InTexture, TPromise<FSharedBuffer>&& OutBufferPromise)
-{
-    GraphBuilder.AddPass(
-        RDG_EVENT_NAME("UOdysseyTiledImage::AddReadTilePass"),
-        ERDGPassFlags::Readback,
-        [InTexture, OutBufferPromise](FRHICommandList& RHICmdList)
-        {
-            const FRDGTextureDesc& Desc = InTexture->Desc;
-            const FPixelFormatInfo& PixelFormatInfo = GPixelFormats[Desc.Format];
-
-            uint32 BytesPerPixel = PixelFormatInfo.BlockBytes;
-            uint32 BufferStride = BytesPerPixel * Desc.Extent.X;
-            uint32 BufferTotalBytes = BufferStride * Desc.Extent.Y;
-
-            //Read Texture into a buffer
-            FRHILockTextureArgs LockArgs = FRHILockTextureArgs::Lock2D(InTexture->GetRHI(), 0, RLM_ReadOnly, false);
-            FRHILockTextureResult LockResult = RHICmdList.LockTexture(LockArgs);
-
-            FUniqueBuffer Buffer = FUniqueBuffer::Alloc(BufferTotalBytes);
-            for (uint32 y = 0; y < textureHeight; y++)
-            {
-                void* Src = (uint8*)(LockResult.Data) + LockResult.Stride * y;
-                void* Dst = (uint8*)(Buffer.GetData()) + BufferStride * y;
-                FMemory::Memcpy(Dst, Src, BufferStride);
-            }
-            RHICmdList.UnlockTexture(LockArgs);
-            OutBufferPromise.SetValue(Buffer.MoveToShared());
-        }
-    );
-}*/
-
 void
 UOdysseyTiledImage::CopyFromTexture(UTexture* InTexture, FIntRect InRect, FIntPoint InPosition)
 {
-    FIntRect SourceRect(0, 0, InTexture->GetSurfaceWidth(), InTexture->GetSurfaceHeight());
-    SourceRect.Clip(InRect);
-    FIntRect DestinationRect(
-        InPosition.X + (SourceRect.Min.X - InRect.Min.X),
-        InPosition.Y + (SourceRect.Min.Y - InRect.Min.Y),
-        InPosition.X + SourceRect.Size().X,
-        InPosition.X + SourceRect.Size().Y
+    FOdysseyTileManager::FGetExistingTileId GetExistingTileId = FOdysseyTileManager::FGetExistingTileId::CreateLambda(
+        [this](const FIntPoint& InTilePosition)
+        {
+            FTile* Tile = Tiles.Find(InTilePosition);
+            if (!Tile)
+                return FOdysseyTileManager::FTileId();
+
+            return Tile->Id;
+        }
     );
 
-    TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTilePositionsFromRect(TileSize, DestinationRect);
-
-    TArray<FOdysseyTileManager::FCreateOrUpdateTile> TilesInfos;
-    for (const FIntPoint& TilePos : TilePositions)
-    {
-        FOdysseyTileManager::FCreateOrUpdateTile TileInfos;
-
-        FTile* Tile = Tiles.Find(TilePos);
-        TileInfos.Pos = TilePos;
-        if (Tile)
-        {
-            TileInfos.OldTileId = Tile->Id;
-            TileInfos.IsNewTile = false;
-        }
-        else
-        {
-            TileInfos.IsNewTile = true;
-        }
-
-        TilesInfos.Add(TileInfos);
-    }
-
-    TArray<FOdysseyTileManager::FTileId> CreatedTiles = FOdysseyTileManager::Get().CreateOrUpdateTiles(
+    TArray<FOdysseyTileManager::FCreatedTile> CreatedTiles = FOdysseyTileManager::Get().CreateOrUpdateTiles(
         InTexture,
         InRect,
         InPosition,
         TileSize,
         GetPixelFormat(),
-        TilesInfos
+        GetExistingTileId
     );
 
-    check(CreatedTiles.Num() == TilePositions.Num());
-
-    for (int i = 0; i < TilePositions.Num(); i++)
+    for (const FOdysseyTileManager::FCreatedTile& CreatedTile : CreatedTiles)
     {
+        //If the created tile is not valid
+        //then we consider it is an empty tile
+        if (CreatedTile.IsEmpty())
+            continue;
+
         FTile Tile;
-        Tile.Id = CreatedTiles[i];
-        if (TilesInfos[i].IsNewTile)
-        {
-            Tiles.Add(TilePositions[i], Tile);
-        }
-        else
-        {
-            Tiles[i] = Tile;
-        }
-        //TODO: Someday, remove empty tiles
+        Tile.Id = CreatedTile.Id;
+
+        FTile& TileEntry = Tiles.FindOrAdd(CreatedTile.Pos);
+        TileEntry = Tile;
     }
 }
 
 void
-UOdysseyTiledImage::CopyFromTiledImage(UOdysseyTiledImage* TiledImage, FIntRect Rect, FIntPoint Position)
+UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InRect, FIntPoint InPosition) const
 {
+    FIntRect RenderTargetRect(0, 0, OutRenderTarget->GetSurfaceWidth(), OutRenderTarget->GetSurfaceHeight());
+    FIntRect DestinationRect(
+        InPosition,
+        InPosition + InRect.Size()
+    );
+    DestinationRect.Clip(RenderTargetRect);
 
-}
+    //Load needed Tiles
+    TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTilePositionsFromRect(TileSize, InRect);
+    TArray<FSharedBuffer> TileBuffers;
+    TileBuffers.Reserve(TilePositions.Num());
+    for (const FIntPoint& TilePosition : TilePositions)
+    {
+        FSharedBuffer TileBuffer;
+        const FTile* Tile = Tiles.Find(TilePosition);
+        if (Tile)
+            check(FOdysseyTileManager::Get().GetTileBuffer(Tile->Id, TileBuffer));
 
-void
-UOdysseyTiledImage::Render(UTextureRenderTarget2D* Destination, FIntRect Rect, FIntPoint Position) const
-{
+        TileBuffers.Add(TileBuffer);
+    }
 
+    ENQUEUE_RENDER_COMMAND(UOdysseyTiledImage_Render)(
+        [
+            OutRenderTarget,
+            TilePositions,
+            TileBuffers,
+            TileSize = TileSize,
+            TilePixelFormat = GetPixelFormat(),
+            DestinationRect,
+            SourceRect = InRect
+        ](FRHICommandListImmediate& RHICmdList)
+        {
+            SCOPE_CYCLE_COUNTER(STAT_Render);
+            DECLARE_GPU_STAT(UOdysseyTiledImage_Render);
+
+            FRDGBuilder GraphBuilder(RHICmdList);
+            FRDGTextureRef DestinationTexture = OutRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( GraphBuilder );
+
+            FIntRect TileRect(0, 0, TileSize, TileSize);
+
+            for (int i = 0; i < TilePositions.Num(); i++)
+            {
+                const FIntPoint& TilePosition = TilePositions[i];
+                const FSharedBuffer& TileBuffer = TileBuffers[i];
+
+                FIntPoint TileDstPos(TilePosition * TileRect.Size() - SourceRect.Min + DestinationRect.Min);
+                FIntRect TileDstRect(TileDstPos, TileDstPos + TileRect.Size());
+                TileDstRect.Clip(DestinationRect);
+
+                FIntPoint TileSrcPos(
+                    TileDstRect.Min.X - TileDstPos.X,
+                    TileDstRect.Min.Y - TileDstPos.Y
+                );
+                FIntRect TileSrcRect(
+                    TileSrcPos,
+                    TileSrcPos + TileDstRect.Size()
+                );
+
+                //If the buffer is null, the tile is empty
+                if (TileBuffer.IsNull())
+                {
+#ifdef UE_BUILD_DEBUG
+                    FLinearColor ClearColor = FLinearColor::Red;
+#else
+                    FLinearColor ClearColor = FLinearColor::Transparent;
+#endif
+                    AddClearRenderTargetPass(GraphBuilder, DestinationTexture, ClearColor, TileDstRect);
+                }
+                else
+                {
+                    FRDGTextureDesc TileTextureDesc = FRDGTextureDesc::Create2D(
+                        FIntPoint(TileSize, TileSize),
+                        TilePixelFormat,
+                        FClearValueBinding::Transparent,
+                        ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
+                    );
+
+                    FRDGTextureRef TileTexture = GraphBuilder.CreateTexture(TileTextureDesc, TEXT("UOdysseyTiledImage::TileTexture"));
+
+                    AddWriteTilePass(
+                        GraphBuilder,
+                        TileTexture,
+                        TileBuffer
+                    );
+
+                    AddDrawTexturePass(
+                        GraphBuilder,
+                        FScreenPassViewInfo(),
+                        TileTexture,
+                        DestinationTexture,
+                        TileSrcRect.Min,
+                        TileSrcRect.Size(),
+                        TileDstRect.Min,
+                        TileDstRect.Size()
+                    );
+                }
+            }
+
+            GraphBuilder.Execute();
+        }
+    );
 }
 
 void

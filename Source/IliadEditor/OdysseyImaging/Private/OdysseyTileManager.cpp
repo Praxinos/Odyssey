@@ -25,13 +25,22 @@ FOdysseyTileManager::Get()
     return self;
 }
 
+
+BEGIN_SHADER_PARAMETER_STRUCT(FWriteTileParameters, )
+    RDG_TEXTURE_ACCESS(Texture, ERHIAccess::CopyDest)
+END_SHADER_PARAMETER_STRUCT()
+
 //static
 void
 FOdysseyTileManager::AddWriteTilePass(FRDGBuilder& GraphBuilder, FRDGTextureRef OutTexture, FSharedBuffer InBuffer)
 {
+    FWriteTileParameters* Params = GraphBuilder.AllocParameters<FWriteTileParameters>();
+    Params->Texture = OutTexture;
+
     GraphBuilder.AddPass(
         RDG_EVENT_NAME("UOdysseyTiledImage::AddWriteTilePass"),
-        ERDGPassFlags::Copy,
+        Params,
+        ERDGPassFlags::Copy | ERDGPassFlags::NeverCull,
         [OutTexture, InBuffer](FRHICommandList& RHICmdList)
         {
             const FRDGTextureDesc& Desc = OutTexture->Desc;
@@ -45,64 +54,81 @@ FOdysseyTileManager::AddWriteTilePass(FRDGBuilder& GraphBuilder, FRDGTextureRef 
     );
 }
 
-TArray<FOdysseyTileManager::FTileId>
+TArray<FOdysseyTileManager::FCreatedTile>
 FOdysseyTileManager::CreateOrUpdateTiles(
     UTexture* InTexture,
     FIntRect InRect,
     FIntPoint InPosition,
     uint32 InTileSize,
     EPixelFormat InTileFormat,
-    const TArray<FCreateOrUpdateTile>& InTilesInfos
+    const FGetExistingTileId& InGetExistingTileId
 )
 {
-    TArray<FTileId> CreatedTiles;
-
     FIntRect SourceRect(0, 0, InTexture->GetSurfaceWidth(), InTexture->GetSurfaceHeight());
     SourceRect.Clip(InRect);
-
     FIntRect DestinationRect(
         InPosition + (SourceRect.Min - InRect.Min),
         InPosition + SourceRect.Size()
     );
 
-    for (const FCreateOrUpdateTile& TileInfos : InTilesInfos)
+    TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTilePositionsFromRect(InTileSize, DestinationRect);
+    TArray<FSharedBuffer> TileOldBuffers;
+    TArray<TSharedPtr<FRHIGPUTextureReadback>> TileReadBacks;
+    TileOldBuffers.Reserve(TilePositions.Num());
+    TileReadBacks.Reserve(TilePositions.Num());
+    for (const FIntPoint& TilePosition : TilePositions)
     {
+        FTileId OldTileId;
+        if (InGetExistingTileId.IsBound())
+            OldTileId = InGetExistingTileId.Execute(TilePosition);
+
         FSharedBuffer OldTileBuffer;
-        if (!TileInfos.IsNewTile)
-            GetTileBuffer(TileInfos.OldTileId, OldTileBuffer);
+        if (OldTileId.IsValid())
+            GetTileBuffer(OldTileId, OldTileBuffer);
 
-        FIntRect TileRect(TileInfos.Pos.X * InTileSize, TileInfos.Pos.Y * InTileSize, InTileSize, InTileSize);
-        FIntRect TileDstRect(TileRect);
-        TileDstRect.Clip(DestinationRect);
+        TileOldBuffers.Add(OldTileBuffer);
+        TileReadBacks.Add(MakeShared<FRHIGPUTextureReadback>(TEXT("FOdysseyTileManager::ReadBack")));
+    }
 
-        FIntPoint TileSrcPos(
-            SourceRect.Min.X + (TileDstRect.Min.X - DestinationRect.Min.X),
-            SourceRect.Min.Y + (TileDstRect.Min.Y - DestinationRect.Min.Y)
-        );
-        FIntRect TileSrcRect(
-            TileSrcPos,
-            TileSrcPos + TileDstRect.Size()
-        );
-        TileDstRect -= TileRect.Min;
+    ENQUEUE_RENDER_COMMAND(FOdysseyTileManager_CreateTiles)(
+        [
+            Source = InTexture,
+            TileSize = InTileSize,
+            PixelFormat = InTileFormat,
+            TilePositions,
+            TileOldBuffers,
+            TileReadBacks,
+            SourceRect,
+            DestinationRect
+        ](FRHICommandListImmediate& RHICmdList)
+        {
+            SCOPE_CYCLE_COUNTER(STAT_CreateTiles);
+            DECLARE_GPU_STAT(FOdysseyTileManager_CreateTiles);
 
-        TSharedPtr<FRHIGPUTextureReadback> ReadBack = MakeShared<FRHIGPUTextureReadback>(TEXT("FOdysseyTileManager::ReadBack"));
+            FRDGBuilder GraphBuilder(RHICmdList);
 
-        ENQUEUE_RENDER_COMMAND(FOdysseyTileManager_CreateTiles)(
-            [
-                Source = InTexture,
-                TileSize = InTileSize,
-                PixelFormat = InTileFormat,
-                ReadBack,
-                OldTileBuffer,
-                TileInfos,
-                TileSrcRect,
-                TileDstRect
-            ](FRHICommandListImmediate& RHICmdList)
+            FIntPoint TileWH(TileSize, TileSize);
+
+            for (int i = 0; i < TilePositions.Num(); i++)
             {
-                SCOPE_CYCLE_COUNTER(STAT_CreateTiles);
-                DECLARE_GPU_STAT(FOdysseyTileManager_CreateTiles);
+                const FIntPoint& TilePosition = TilePositions[i];
+                const FSharedBuffer& TileOldBuffer = TileOldBuffers[i];
+                const TSharedPtr<FRHIGPUTextureReadback>& TileReadBack = TileReadBacks[i];
 
-                FRDGBuilder GraphBuilder(RHICmdList);
+                FIntPoint TileDstPos(TilePosition.X * TileSize, TilePosition.Y * TileSize);
+                FIntRect TileDstRect(TileDstPos, TileDstPos + TileWH);
+                TileDstRect.Clip(DestinationRect);
+
+                FIntPoint TileSrcPos(
+                    SourceRect.Min.X + (TileDstRect.Min.X - DestinationRect.Min.X),
+                    SourceRect.Min.Y + (TileDstRect.Min.Y - DestinationRect.Min.Y)
+                );
+                FIntRect TileSrcRect(
+                    TileSrcPos,
+                    TileSrcPos + TileDstRect.Size()
+                );
+                TileDstRect -= TileDstPos;
+
                 FRDGTextureRef SourceTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(Source->GetResource()->TextureRHI, TEXT("FOdysseyTileManager::CreateTiles")));
                 const FRDGTextureDesc& SourceTextureDesc = SourceTexture->Desc;
 
@@ -115,7 +141,7 @@ FOdysseyTileManager::CreateOrUpdateTiles(
 
                 FRDGTextureRef TileTexture = GraphBuilder.CreateTexture(TileTextureDesc, TEXT("FOdysseyTileManager::TileTexture"));
 
-                if (TileInfos.IsNewTile)
+                if (TileOldBuffer.IsNull())
                 {
                     AddClearRenderTargetPass(GraphBuilder, TileTexture, FLinearColor::Transparent);
                 }
@@ -124,7 +150,7 @@ FOdysseyTileManager::CreateOrUpdateTiles(
                     AddWriteTilePass(
                         GraphBuilder,
                         TileTexture,
-                        OldTileBuffer
+                        TileOldBuffer
                     );
                 }
 
@@ -139,23 +165,35 @@ FOdysseyTileManager::CreateOrUpdateTiles(
                     TileDstRect.Size()
                 );
 
-                AddEnqueueCopyPass(GraphBuilder, ReadBack.Get(), TileTexture);
-
-                GraphBuilder.Execute();
+                AddEnqueueCopyPass(GraphBuilder, TileReadBack.Get(), TileTexture);
             }
-        );
 
+            GraphBuilder.Execute();
+
+            //Needed for the readback buffers to be read properly
+            //Otherwise, ReadBack->Wait() will hang indefinitely
+            RHICmdList.SubmitAndBlockUntilGPUIdle();
+        }
+    );
+
+    TArray<FCreatedTile> CreatedTiles;
+    for (int i = 0; i < TilePositions.Num(); i++)
+    {
         FTileId TileId;
         TileId.Index = Tiles.Num();
 
         FTile Tile;
-        Tile.GPUReadBack = ReadBack;
-        Tile.IsCacheInProgress = true;
+        Tile.GPUReadBack = TileReadBacks[i];
         Tiles.Add(MoveTemp(Tile));
 
         PendingTilesToReadBack.Add(TileId);
-        CreatedTiles.Add(TileId);
+
+        FCreatedTile CreatedTile;
+        CreatedTile.Id = TileId;
+        CreatedTile.Pos = TilePositions[i];
+        CreatedTiles.Add(CreatedTile);
     }
+
     return CreatedTiles;
 }
 
