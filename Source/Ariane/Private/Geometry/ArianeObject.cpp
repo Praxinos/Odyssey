@@ -563,6 +563,8 @@ FArianeObject::Update( EUpdateFlags UpdateFlags, bool Recurse )
             } );
     }
 
+    UpdateBoundingBox( UpdateFlags );
+
     if( EnumHasAllFlags( UpdateFlags, EUpdateFlags::KeepInvalidated ) == false )
     {
         InvalidationFlags->Clear();
@@ -720,16 +722,16 @@ FArianeObject::SetExpanded( bool bInExpanded )
 
 
 const
-FBoxSphereBounds&
-FArianeObject::GetBounds()
+FBox&
+FArianeObject::GetBoundingBox() const
 {
-    return Bounds;
+    return BoundingBox;
 }
 
 void
-FArianeObject::UpdateBounds()
+FArianeObject::UpdateBoundingBox( EUpdateFlags UpdateFlags )
 {
-
+    BoundingBox = FBox(ForceInit);
 }
 
 FSimpleMulticastDelegate &

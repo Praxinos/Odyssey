@@ -170,12 +170,14 @@ public:
                             , EArianeAllocationModel AllocationModel );
     virtual void OnUpdateTransform( EUpdateTransformFlags UpdateTransformFlags, ETeleportType TeleportType ) override;
     virtual void BeginDestroy() override;
+    virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
+    virtual void OnRegister() override;
 
 protected:
     void BindDelegates();
     void UnbindDelegates();
     void OnRootObjectInvalidated();
-    void UpdateBounds();
+
 
 public:
     UPROPERTY( EditAnywhere )
@@ -186,7 +188,7 @@ public:
 
 protected:
     UPROPERTY( EditAnywhere )
-    FArianeObjectID RootGroupID;
+    mutable FArianeObjectID RootGroupID;
 
     UPROPERTY( EditAnywhere )
     EArianeLayerDrawingOrigin DrawingOrigin;

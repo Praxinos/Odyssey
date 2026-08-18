@@ -137,19 +137,21 @@ UArianeLayerFolder::Update( bool bInteractive )
         return bHasAnyFlags ? false : true;
     } );
 
-    UpdateBounds();
-
     Super::Update( bInteractive );
 }
 
-void
-UArianeLayerFolder::UpdateBounds()
+FBoxSphereBounds
+UArianeLayerFolder::CalcBounds( const FTransform& LocalToWorld ) const
 {
     // ForceInit makes the box invalid and excludes it from the computation unitl it is valid
-    Bounds = FBoxSphereBounds(ForceInit);
+    FBoxSphereBounds NewBounds = FBoxSphereBounds(ForceInit);
 
+/*
     for( UArianeLayer* Child : ChildLayers )
     {
-        Bounds = Bounds + Child->GetBounds();
+        NewBounds = NewBounds +  Child->GetBounds().TransformBy( Child->GetRelativeTransform() );
     }
+*/
+
+    return NewBounds;
 }

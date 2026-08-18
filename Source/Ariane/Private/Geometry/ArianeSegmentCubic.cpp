@@ -125,7 +125,7 @@ FArianeSegmentCubic::Update()
         BuildVariable( MINRECURSE, MAXRECURSE );
     }
 
-    UpdateBounds();
+    UpdateBoundingBox();
 
     bInvalidated = false;
 }
@@ -243,7 +243,7 @@ FArianeSegmentCubic::BuildVariable( uint32 MinRecurse
         //double startU = 0.0f;
         uint32 PointCount = 2;
 
-        Bounds = FBoxSphereBounds(ForceInit);
+        BoundingBox = FBox(ForceInit);
 
         //BuildOffsetCurves();
         // offset curves must be built before the polygon cache is built, as the builidng process

@@ -360,7 +360,7 @@ UArianeEditorEraserTool::GetErasureBoundingArea( FEditorViewportClient* Viewport
 FBox2D
 UArianeEditorEraserTool::GetPathBoundingArea( FEditorViewportClient* ViewportClient, FSceneView* View, FArianePath* Path )
 {
-    const FBox& PathBox = Path->GetBounds().GetBox();
+    const FBox& PathBox = Path->GetBoundingBox();
     FVector P[8] = { PathBox.Min
                    , FVector( PathBox.Min.X, PathBox.Min.Y, PathBox.Max.Z )
                    , FVector( PathBox.Min.X, PathBox.Max.Y, PathBox.Min.Z )

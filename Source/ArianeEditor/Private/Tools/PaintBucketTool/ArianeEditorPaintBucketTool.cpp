@@ -38,6 +38,7 @@ UArianeEditorPaintBucketTool::UArianeEditorPaintBucketTool()
     , Graph( new FArianeGraph() )
     , bGraphNeedsUpdate ( true )
     , GapTolerance( 0.0f )
+    , bShowGrid ( true )
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PaintBucket64");
 
@@ -249,6 +250,28 @@ UArianeEditorPaintBucketTool::OnMouseUp( FEditorViewportClient* ViewportClient
 void
 UArianeEditorPaintBucketTool::ExtendContextMenu( FMenuBuilder& menu )
 {
+}
+
+void
+UArianeEditorPaintBucketTool::Render(IToolsContextRenderAPI* RenderAPI)
+{
+    if  ( bShowGrid )
+    {
+        UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+        //Super::OnTick( DeltaTime );
+
+        if( Painting3DComponent )
+        {
+            UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>( LayerStack->GetCurrentLayer() );
+
+            if( DrawingLayer )
+            {
+                DrawLayerOrientationGrid( RenderAPI, DrawingLayer );
+            }
+        }
+    }
 }
 
 void

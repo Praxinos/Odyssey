@@ -173,6 +173,7 @@ public:
         void CreateSections( TArray<FSection>& SectionBuffer
                            , bool bStitchShortSections
                            , TArray<FSection*>& ShortSections );
+        void AddIntersection ( FIntersection* iIntersection );
 
         //FArianeSegment* Segment;
         FNode* Nodes[2];
@@ -572,6 +573,7 @@ protected:
                           , TArray<FSection*>& ShortSections );
     void MergeCycles();
     void OrderCycles();
+    static void UnlinkPendantSectionsRecursively( FSection* Section, FNode* Node );
 
 protected:
     static const uint32 NOCYCLE  = 0;

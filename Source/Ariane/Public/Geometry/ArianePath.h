@@ -137,7 +137,7 @@ public:
     /** overriden from ArianeObject */
     virtual void UpdateShape( EUpdateFlags UpdateFlags ) override;
     /** overriden from ArianeObject */
-    virtual void UpdateBounds() override;
+    virtual void UpdateBoundingBox( EUpdateFlags UpdateFlags ) override;
     /** overriden from ArianeObject */
     virtual void PostLoad() override;
     /** overriden from ArianeObject */

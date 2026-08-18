@@ -91,6 +91,7 @@ protected:
                          , const TArray<FArianeGraph::FSection*>& Sections );
     void Reset();
     void OnCameraMoved( const FVector& Location, const FRotator& Rotation, ELevelViewportType ViewportType, int32 ViewIndex );
+    virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
 
 public:
     UPROPERTY( EditAnywhere
@@ -107,6 +108,7 @@ protected:
     FArianeGraph::FCycle* PickedCycle;
     bool bGraphNeedsUpdate;
     FTSTicker::FDelegateHandle CameraMoveHandle;
+    bool bShowGrid;
 };
 
 // define bitwise op

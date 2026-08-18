@@ -36,31 +36,7 @@ class UOdysseyPaletteEntryColor;
 class UArianePainting3DStaticMeshComponent;
 class UMaterialInstanceDynamic;
 
-class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
-{
-    public:
-        ~FArianeGeometryProxy();
-        FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLevel, UArianePainting3DComponent* InPainting3DComponent );
 
-        virtual SIZE_T GetTypeHash() const override;
-        virtual uint32 GetMemoryFootprint( void ) const override;
-
-        virtual FPrimitiveViewRelevance GetViewRelevance( const FSceneView* View ) const override;
-        virtual void GetDynamicMeshElements( const TArray<const FSceneView*>& Views
-                                           , const FSceneViewFamily& ViewFamily
-                                           , uint32 VisibilityMap
-                                           , FMeshElementCollector& Collector) const override;
-        void GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* DrawingLayer
-                                               , FMeshElementCollector& Collector
-                                               , int32 ViewIndex ) const;
-        void InitVertexFactory();
-        virtual void DrawStaticElements( FStaticPrimitiveDrawInterface * PDI ) override;
-        FMaterialRelevance GetLayerStackMaterialRelevance() const;
-
-    protected:
-        UArianePainting3DComponent* Painting3DComponent;
-        FMaterialRelevance MaterialRelevance;
-};
 
 UCLASS()
 class ARIANE_API UArianePainting3DComponent : public UMeshComponent
@@ -77,11 +53,8 @@ protected:
     virtual void BeginPlay() override;
 
 public:
-    virtual void TickComponent( float DeltaTime
-                              , ELevelTick TickType
-                              , FActorComponentTickFunction* ThisTickFunction ) override;
     virtual void PostLoad() override;
-    virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
+
 
     #if WITH_EDITOR
     virtual void PostEditChangeProperty( FPropertyChangedEvent& event ) override;

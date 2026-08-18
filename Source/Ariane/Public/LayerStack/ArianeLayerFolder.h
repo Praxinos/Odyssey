@@ -58,10 +58,11 @@ public:
      */
     void Traverse( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
 
+    virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
+
 protected:
     ETraversalReturnValue Traverse_Private( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
 
-    void UpdateBounds();
 
 protected:
     UPROPERTY()

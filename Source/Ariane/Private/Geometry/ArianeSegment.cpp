@@ -19,7 +19,7 @@ FArianeSegment::FArianeSegment( )
     , Length ( 0.0f )
     , bInvalidated ( false )
     , bAutoFractioned ( true )
-    , Bounds ( FBoxSphereBounds(ForceInit) )
+    , BoundingBox ( FBox(ForceInit) )
 {
 }
 
@@ -34,7 +34,7 @@ FArianeSegment::FArianeSegment( FArianeObject* Owner
     , Length ( 0.0f )
     , bInvalidated ( false )
     , bAutoFractioned ( true )
-    , Bounds ( FBoxSphereBounds(ForceInit) )
+    , BoundingBox ( FBox(ForceInit) )
 {
     Init();
 }
@@ -148,19 +148,19 @@ FArianeSegment::GetOtherVertex( FArianeVertex* Vertex )
     return ( Vertices[0].GetVertex() == Vertex ) ? Vertices[1].GetVertex() : Vertices[0].GetVertex();
 }
 
-const FBoxSphereBounds&
-FArianeSegment::GetBounds()
+const FBox&
+FArianeSegment::GetBoundingBox()
 {
-    return Bounds;
+    return BoundingBox;
 }
 
 void
-FArianeSegment::UpdateBounds()
+FArianeSegment::UpdateBoundingBox()
 {
     FVector Min = FVector (  DBL_MAX,  DBL_MAX,  DBL_MAX );
     FVector Max = FVector ( -DBL_MAX, -DBL_MAX, -DBL_MAX );
 
-    Bounds = FBoxSphereBounds(ForceInit);
+    BoundingBox = FBox(ForceInit);
 
     if( Length )
     {
@@ -185,9 +185,9 @@ FArianeSegment::UpdateBounds()
             if( PointMax.Z > Max.Z ) Max.Z = PointMax.Z;
         }
 
-        Bounds.Origin = ( Min + Max ) * 0.5f;
-        Bounds.BoxExtent = ( Max - Bounds.Origin );
-        Bounds.SphereRadius = Bounds.BoxExtent.Length();
+        BoundingBox.Min = Min;
+        BoundingBox.Max = Max;
+        BoundingBox.IsValid = 1;
     }
 }
 
@@ -199,7 +199,7 @@ FArianeSegment::Update()
         Length = ( GetVertex(1)->GetPosition() - GetVertex(0)->GetPosition() ).Length();
     }
 
-    UpdateBounds();
+    UpdateBoundingBox();
 
     bInvalidated = false;
 }
