@@ -140,14 +140,6 @@ UArianeLayerDrawing::PostEditUndo()
         Object->PostEditUndo();
     }
 
-    FArianeObject::Traverse( GetRootGroup()
-                           , [] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
-        {
-            UE_LOG( LogTemp, Warning, TEXT("UArianeLayerDrawing::PostEditUndo() DrawingLayer = %p"), Object->GetDrawingLayer());
-
-             return FArianeObject::ETraversalReturnValue::Continue;
-        } );
-
     GetRootGroup()->UpdateTransform();
 
     Update( false );
