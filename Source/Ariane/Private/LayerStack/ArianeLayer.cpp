@@ -364,14 +364,16 @@ FArianeGeometryProxy::GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* D
 {
     FPrimitiveDrawInterface* PDI = Collector.GetPDI(ViewIndex);
     //UMaterialInterface* MaterialInterface = GEngine->VertexColorMaterial;
+    FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
 
     DrawingLayer->InstancedObjectsAccessRW.Lock();
 
-    DrawingLayer->GetRootGroup()->Traverse( [ this
-                                            , PDI
-                                            , DrawingLayer
-                                            , ViewIndex
-                                            , &Collector ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+    FArianeObject::Traverse( RootGroup
+                           , [ this
+                             , PDI
+                             , DrawingLayer
+                             , ViewIndex
+                             , &Collector ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
     {
 
         FArianeObjectGeometry3D* Geometry3D = nullptr;

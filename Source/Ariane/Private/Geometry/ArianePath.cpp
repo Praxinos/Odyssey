@@ -818,6 +818,9 @@ FArianePath::SetColor( const FColor& InColor )
 {
     Color = InColor;
 
+    // we need to reconstruct Model Vertices
+    InvalidateAllSegments();
+
     Invalidate( FArianePathInvalidationFlags().SetColor() );
 }
 
@@ -885,7 +888,8 @@ FArianePath::UpdateShape( EUpdateFlags UpdateFlags )
     if( PathInvalidationFlags->VertexAltered
      || PathInvalidationFlags->VertexAddedOrRemoved
      || PathInvalidationFlags->SegmentAltered
-     || PathInvalidationFlags->SegmentAddedOrRemoved )
+     || PathInvalidationFlags->SegmentAddedOrRemoved
+     || PathInvalidationFlags->Color )
     {
         Geometry3D.Build();
     }
@@ -1651,4 +1655,6 @@ FArianePathGeometry3D::Build()
             InitVertexFactory( MeshVertices, MeshIndices );
         }
     }
+
+    Path->GetDrawingLayer()->MarkRenderStateDirty();
 }

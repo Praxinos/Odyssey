@@ -88,8 +88,8 @@ SArianeEditorCurrentObjectDetailsView::OnPrePainting3DComponentUpdate( bool bInt
     {
         FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
 
-        RootGroup->Traverse (
-            [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+        FArianeObject::Traverse ( RootGroup
+                                , [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
             {
                 if( Object->GetInvalidationFlags().HasAny() )
                 {

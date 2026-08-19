@@ -19,6 +19,7 @@ UArianeEditorPathProxy::UArianeEditorPathProxy()
     , PathWidthInPercent ( 100.0f )
     , PathWidthInUnits ( 2.0f )
     , Material ( nullptr )
+    , Color ( FColor::Black )
     , LineType( EArianePathLineType::Tube )
     //, Brush ( nullptr )
 {
@@ -46,6 +47,7 @@ UArianeEditorPathProxy::ImportParamFromOtherProxy( UArianeEditorObjectProxy* Oth
         PathWidthInUnits = OtherPathView->PathWidthInUnits;
         Material = OtherPathView->Material;
         LineType = OtherPathView->LineType;
+        Color = OtherPathView->Color;
         //Brush = otherPathView->Brush;
     }
 
@@ -66,6 +68,7 @@ UArianeEditorPathProxy::ImportParam( const TArray<FArianeObject*>& ModifiedObjec
 
             Material = ModifiedPath->GetMaterial();
             LineType = ModifiedPath->GetLineType();
+            Color    = ModifiedPath->GetColor();
             //JointType  = ModifiedPath->GetJointType();
             //Brush      = ModifiedPath->GetBrush();
             //MiterLimit = ModifiedPath->GetMiterLimit();
@@ -115,6 +118,9 @@ UArianeEditorPathProxy::GetPropertyBit( const FName& PropertyName )
 
     if( PropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPathProxy, LineType) )
         return PathPropertyBits.LineType;
+
+    if( PropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPathProxy, Color) )
+        return PathPropertyBits.Color;
 
     //if( PropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPathProxy, JointType) )
     //    return PathPropertyBits.JointType;
@@ -169,6 +175,10 @@ UArianeEditorPathProxy::ApplyPropertyBits( FArianeObject* Object )
         if( PathPropertyBits.LineType )
             Path->SetLineType( LineType );
 
+        if( PathPropertyBits.Color )
+            Path->SetColor( Color );
+
+
         //if( PathPropertyBits.JointType )
         //    Path->SetJointType( JointType, true );
 
@@ -202,6 +212,9 @@ UArianeEditorPathProxy::SetPropertyBit( const FName& PropertyName
 
     if( PropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPathProxy, LineType) )
         PathPropertyBits.LineType = State;
+
+    if( PropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPathProxy, Color) )
+        PathPropertyBits.Color = State;
 
     //if( iPropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPathProxy, JointType) )
     //    PathPropertyBits.JointType = iState;

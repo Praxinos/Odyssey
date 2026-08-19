@@ -14,7 +14,8 @@
 #include "ArianeRectangle.h"
 #include "ArianePolygon.h"
 #include "ArianeCore.h"
-
+//Unreal Headers
+#include "InteractiveToolManager.h"
 #include "Editor.h"
 #include "ToolMenu.h"
 #include "Framework/Application/SlateApplication.h"
@@ -231,6 +232,10 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
                         }
                         break;
                     };
+
+                    GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-primitive-tool.create","Create Primitive"));
+
+                    DrawingLayer->Modify();
 
                     switch( PrimitiveShapeType/*Shapes.GetActiveShapeType()*/ )
                     {
@@ -480,6 +485,16 @@ UArianeEditorPrimitiveDrawingTool::OnMouseUp( FEditorViewportClient* ViewportCli
 
         if( Painting3DComponent && Primitive )
         {
+            //painting3DComponent->PrintPointers();
+            UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
+
+            if( DrawingLayer )
+            {
+                GetToolManager()->EndUndoTransaction();
+            }
+
+            Primitive = nullptr;
             Painting3DComponent->Update( false );
         }
     }

@@ -392,8 +392,8 @@ SArianeEditorSceneTreeView::OnPrePainting3DComponentUpdate( bool bInteractive )
     {
         FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
 
-        RootGroup->Traverse (
-            [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+        FArianeObject::Traverse ( RootGroup
+                                , [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
             {
                 if( Object->GetInvalidationFlags().Hierarchy
                     || Object->GetInvalidationFlags().Tags )

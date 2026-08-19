@@ -111,10 +111,12 @@ UArianeEditorPaintBucketTool::Reset()
             FVector4 DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
             TArray<FArianeObject*> GraphedPaths;
             FVector CameraLocation = CameraState.Position;
+            FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
 
             GraphedPaths.Reserve( DrawingLayer->GetInstancedObjects().Num() );
 
-            DrawingLayer->GetRootGroup()->Traverse( [ &GraphedPaths ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+            FArianeObject::Traverse( RootGroup
+                                   , [ &GraphedPaths ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
                 {
                     GraphedPaths.Add( Object );
 
@@ -203,8 +205,6 @@ UArianeEditorPaintBucketTool::OnMouseUp( FEditorViewportClient* ViewportClient
         ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
         FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
 
-        GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-drawing-tool.draw-path","Draw Path"));
-
         if( Painting3DComponent )
         {
             //painting3DComponent->PrintPointers();
@@ -217,18 +217,23 @@ UArianeEditorPaintBucketTool::OnMouseUp( FEditorViewportClient* ViewportClient
                 FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
                 int PathNumber = DrawingLayer->GetInstancedObjects().Num();
 
+                GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-paint-bucket-tool.add-cycle","Add Cycle"));
+
                 DrawingLayer->Modify();
 
                 FArianeCycle* PaintedCycle = DrawingLayer->AllocCycle( MaterialInterface ? MaterialInterface
                                                                                          : Settings->GetDefaultPathDrawingMaterial()
                                                                      , *(FString( "Cycle_" ) + FString::FromInt( PathNumber ))
-                                                                     , Graph
-                                                                     , PickedCycle
                                                                      , EArianeAllocationModel::InstancedStruct );
 
                 RootGroup->AppendChild( PaintedCycle );
 
                 PaintedCycle->SetColor( ueColor );
+                PaintedCycle->UpdateTransform();
+                // ImportGraphCycle needs the transform matrix to be set, hence the call to UpdateTransform just before
+                PaintedCycle->ImportGraphCycle( PickedCycle );
+
+                GetToolManager()->EndUndoTransaction();
             }
 
             PickedCycle = nullptr;

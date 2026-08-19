@@ -34,7 +34,9 @@ UArianeLayerDrawing::UArianeLayerDrawing()
     ResetHierarchy();
 
     bWantsOnUpdateTransform = true;
+    //bWantsInitializeComponent = true;
 
+    FCoreUObjectDelegates::OnPackageLoadCompleted.AddUObject( this, &UArianeLayerDrawing::OnPackageLoaded );
 /*
     PrimaryComponentTick.bCanEverTick = true;
     PrimaryComponentTick.bStartWithTickEnabled = true;
@@ -47,6 +49,17 @@ UArianeLayerDrawing::UArianeLayerDrawing()
 */
 }
 
+void
+UArianeLayerDrawing::OnPackageLoaded( UPackage* Package )
+{
+    if (Package == GetOutermost() )
+    {
+        FCoreUObjectDelegates::OnEndLoadPackage.RemoveAll( this );
+
+        // call this once all transforms have been loaded onto UObjects
+        GetRootGroup()->UpdateTransform();
+    }
+}
 
 void
 UArianeLayerDrawing::InvalidateCache()
@@ -124,22 +137,20 @@ UArianeLayerDrawing::PostEditUndo()
         Object->PostEditUndo();
     }
 
+    FArianeObject::Traverse( GetRootGroup()
+                           , [] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+        {
+            UE_LOG( LogTemp, Warning, TEXT("UArianeLayerDrawing::PostEditUndo() DrawingLayer = %p"), Object->GetDrawingLayer());
+
+             return FArianeObject::ETraversalReturnValue::Continue;
+        } );
+
     GetRootGroup()->UpdateTransform();
 
     Update( false );
 
     // recompute the bounding volumes or else nothing will draw
     GetLayerStack()->GetPainting3DComponent()->UpdateComponentToWorld();
-}
-
-void
-UArianeLayerDrawing::OnRegister()
-{
-    Super::OnRegister();
-
-    // When PostLoad is called, the hierarchy is non-existent yet, matrices are not initalized, that's why we need to
-    // update them in OnRegister()
-    GetRootGroup()->UpdateTransform();
 }
 
 FArianeObject*
@@ -196,8 +207,6 @@ UArianeLayerDrawing::AllocGroup( const FName& InName
 FArianeCycle*
 UArianeLayerDrawing::AllocCycle( UMaterialInterface* InMaterialInterface
                                , const FName& InName
-                               , FArianeGraph* Graph
-                               , FArianeGraph::FCycle* Cycle
                                , EArianeAllocationModel AllocationModel )
 {
     FArianeCycle* NewCycle = nullptr;
@@ -205,7 +214,7 @@ UArianeLayerDrawing::AllocCycle( UMaterialInterface* InMaterialInterface
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
         InstancedObjectsAccessRW.Lock();
-        InstancedObjects.Add( FInstancedStruct::Make<FArianeCycle>( this, InName, Cycle, AllocationModel ) );
+        InstancedObjects.Add( FInstancedStruct::Make<FArianeCycle>( this, InName, AllocationModel ) );
         InstancedObjectsAccessRW.Unlock();
 
         NewCycle = InstancedObjects.Last().GetMutablePtr<FArianeCycle>();
@@ -213,7 +222,7 @@ UArianeLayerDrawing::AllocCycle( UMaterialInterface* InMaterialInterface
 
     if( AllocationModel == EArianeAllocationModel::OperatingSystem )
     {
-        NewCycle = new FArianeCycle( this, InName, Cycle, AllocationModel );
+        NewCycle = new FArianeCycle( this, InName, AllocationModel );
     }
 
     NewCycle->SetMaterial( InMaterialInterface ? InMaterialInterface
@@ -551,6 +560,8 @@ UArianeLayerDrawing::ResetHierarchy()
 
     RootGroupID.GetObject()->Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 
+    RootGroupID.GetObject()->UpdateTransform();
+
     BindDelegates();
 }
 
@@ -653,23 +664,23 @@ UArianeLayerDrawing::AppendSelectedTrees( TArray<FArianeObject*>& SelectedTrees 
         bool bHasSelectedAncestor = false;
 
         // Group only objects that have no selected ancestors
-        SelectedObject->TraverseBackwards (
-            [ SelectedObject
-            , &bHasSelectedAncestor
-            , &SelectedTrees ]( FArianeObject* TraversedObject ) -> FArianeObject::ETraversalReturnValue
+        FArianeObject::TraverseBackwards ( SelectedObject
+                                        , [ SelectedObject
+                                          , &bHasSelectedAncestor
+                                          , &SelectedTrees ]( FArianeObject* TraversedObject ) -> FArianeObject::ETraversalReturnValue
+        {
+            if( TraversedObject != SelectedObject )
             {
-                if( TraversedObject != SelectedObject )
+                if( TraversedObject->IsSelected() )
                 {
-                    if( TraversedObject->IsSelected() )
-                    {
-                        bHasSelectedAncestor = true;
+                    bHasSelectedAncestor = true;
 
-                        return FArianeObject::ETraversalReturnValue::Stop;
-                    }
+                    return FArianeObject::ETraversalReturnValue::Stop;
                 }
+            }
 
-                return FArianeObject::ETraversalReturnValue::Continue;
-            } );
+            return FArianeObject::ETraversalReturnValue::Continue;
+        } );
 
         if( bHasSelectedAncestor == false )
         {

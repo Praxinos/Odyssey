@@ -162,6 +162,8 @@ FArianeGraph::FCycle::Build()
             uint32 SectionNodeIndex = ContourNodeIndices[i];
             uint32 SectionNextNodeIndex = ( SectionNodeIndex == 0 ) ? 1 : 0;
 
+            Section->AddCycle( this );
+
             if( Section->GetClass() == FSectionLinear::StaticClass() )
             {
                 FSectionLinear* LinearSection = static_cast<FSectionLinear*>(Section);
@@ -174,8 +176,6 @@ FArianeGraph::FCycle::Build()
             {
                 FSectionCubic* CubicSection = static_cast<FSectionCubic*>(Section);
                 FVector2D* SectionBezier = CubicSection->GetBezier();
-
-                Section->AddCycle( this );
 
                 // check if we need to revert the bezier. Indeed, a cycle is a combination of sections
                 // that may not go the same way. We have to run through them the same way.

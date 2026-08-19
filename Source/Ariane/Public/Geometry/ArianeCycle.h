@@ -97,7 +97,6 @@ public:
     FArianeCycle();
     FArianeCycle( UArianeLayerDrawing* InDrawingLayer
                 , const FName& InName
-                , FArianeGraph::FCycle* GraphCycle
                 , EArianeAllocationModel InAllocationModel
                 , FArianeCycleInvalidationFlags* InInvalidationFlags = nullptr );
 
@@ -129,6 +128,7 @@ public:
     TArray<int32>& GetEarcutIndices();
     TArray<FDynamicMeshVertex>& GetModelVertexCache();
     void BuildModelVertexCache();
+    void ImportGraphCycle( FArianeGraph::FCycle* GraphCycle );
 
 protected:
     virtual FArianeObject* CopyShape( const FCopyArgs& CopyArgs ) override;
@@ -138,12 +138,12 @@ protected:
     static void EvaluateGraphCyclePointCount( FArianeGraph::FCycle* Cycle
                                             , std::vector<std::vector<FVector2D>>& EarcutContours
                                             , TArray<FArianePoint>& Points );
-    static void ContourToCoords( FArianeGraph::FCycle* GraphCycle
-                               , std::vector<FVector2D>& EarcutContour
-                               , TArray<FArianePoint>& OutPoints );
-    static void GraphCycleToCoords(  FArianeGraph::FCycle* GraphCycle
-                                   , std::vector<std::vector<FVector2D>>& EarcutContours
-                                   , TArray<FArianePoint>& OutPoints );
+    void ContourToCoords( FArianeGraph::FCycle* GraphCycle
+                        , std::vector<FVector2D>& EarcutContour
+                        , TArray<FArianePoint>& OutPoints );
+    void GraphCycleToCoords(  FArianeGraph::FCycle* GraphCycle
+                            , std::vector<std::vector<FVector2D>>& EarcutContours
+                            , TArray<FArianePoint>& OutPoints );
 
 protected:
     UPROPERTY( EditAnywhere )

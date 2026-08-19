@@ -1208,12 +1208,15 @@ UArianeEditorTool::MakePointQuadTree( FEditorViewportClient* ViewportClient
 
     for( UArianeLayerDrawing* DrawingLayer : DrawingLayers )
     {
+        FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
+
         PointQuadTreeEntries.Reserve( 200 );
 
-        DrawingLayer->GetRootGroup()->Traverse( [ ViewportClient
-                                                , View
-                                                , &ScreenRect
-                                                , &PointQuadTreeEntries ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+        FArianeObject::Traverse( RootGroup
+                               , [ ViewportClient
+                                 , View
+                                 , &ScreenRect
+                                 , &PointQuadTreeEntries ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
         {
             if( /*( iFocusedObjectsOnly == false ) || scene->GetCell()->ObjectHasFocus( object, traverseFlags )*/1 )
             {

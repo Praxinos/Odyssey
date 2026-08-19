@@ -34,6 +34,7 @@ class ARIANEEDITOR_API UArianeEditorPathProxy : public UArianeEditorObjectProxy
             bool PathWidthInUnits   : 1;
             bool Material           : 1;
             bool LineType           : 1;
+            bool Color              : 1;
             //uint32 JointType : 1;
             //uint32 MiterLimit : 1;
             //uint32 Brush : 1;
@@ -101,6 +102,11 @@ class ARIANEEDITOR_API UArianeEditorPathProxy : public UArianeEditorObjectProxy
                           , LinearDeltaSensitivity = "15"
                           , Delta = "1" ) )
         double PathWidthInUnits;
+
+        UPROPERTY( EditAnywhere
+                 , Category=Path
+                 , meta = ( ToolTip = "The color" ) )
+        FColor Color;
 
         UPROPERTY( EditAnywhere
                  , Category=Path
