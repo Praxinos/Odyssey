@@ -701,10 +701,11 @@ FArianeObject::UpdateTransform()
 {
     Traverse( this, []( FArianeObject* Object  ) -> ETraversalReturnValue
         {
+            UArianeLayerDrawing* DrawingLayer = Object->GetDrawingLayer();
             FArianeObject* Parent = Object->GetParent();
 
             Object->WorldTransform =  Parent ? Object->LocalTransform * Parent->WorldTransform
-                                             : Object->GetDrawingLayer()->GetComponentTransform();
+                                             : DrawingLayer->GetComponentTransform();
 
 //UE_LOG(LogTemp, Warning, TEXT("Object:%s - Parent:%p - Transform: %s"), *Name.ToString(), Parent, *WorldTransform.ToString());
 

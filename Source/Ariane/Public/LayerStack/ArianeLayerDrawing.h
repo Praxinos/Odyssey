@@ -170,7 +170,7 @@ public:
     virtual void BeginDestroy() override;
     virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
     //virtual void InitializeComponent() override;
-    void OnPackageLoaded( UPackage* Package );
+    void OnAssetLoaded(UObject* LoadedObject);
 
 protected:
     void BindDelegates();
