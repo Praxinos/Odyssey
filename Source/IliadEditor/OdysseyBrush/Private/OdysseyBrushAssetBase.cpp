@@ -423,7 +423,7 @@ UOdysseyBrushAssetBase::GetPressure()
 float
 UOdysseyBrushAssetBase::GetAltitude()
 {
-    return  GetAltitudeNormalized() * 90.f; // As the altitude is normalized by default, then it's the altitude which is set to the 'real' value
+    return  mPoint.altitude; // Between 0 and 90°
 }
 
 
@@ -431,7 +431,7 @@ UOdysseyBrushAssetBase::GetAltitude()
 float
 UOdysseyBrushAssetBase::GetAltitudeNormalized()
 {
-    return  mPoint.altitude; // The altitude is normalized by default
+    return  mPoint.altitude / 90.f;
 }
 
 
