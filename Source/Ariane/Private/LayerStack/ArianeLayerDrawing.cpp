@@ -34,9 +34,12 @@ UArianeLayerDrawing::UArianeLayerDrawing()
     ResetHierarchy();
 
     bWantsOnUpdateTransform = true;
+
+
+    FCoreUObjectDelegates::OnAssetLoaded.AddUObject( this, &UArianeLayerDrawing::OnAssetLoaded );
+
     //bWantsInitializeComponent = true;
 
-    FCoreUObjectDelegates::OnPackageLoadCompleted.AddUObject( this, &UArianeLayerDrawing::OnPackageLoaded );
 /*
     PrimaryComponentTick.bCanEverTick = true;
     PrimaryComponentTick.bStartWithTickEnabled = true;
@@ -50,13 +53,13 @@ UArianeLayerDrawing::UArianeLayerDrawing()
 }
 
 void
-UArianeLayerDrawing::OnPackageLoaded( UPackage* Package )
+UArianeLayerDrawing::OnAssetLoaded(UObject* LoadedObject)
 {
-    if (Package == GetOutermost() )
+    // Note: . Our FArianeObjects Transforms depend on the
+    // Layer (to compute the world Transform). but, when PostLoad is called, the Transforms are not set yet
+    // so we update the Transforms for our ArianeObjects after the Asset is loaded
+    if ( GetOutermost() )
     {
-        FCoreUObjectDelegates::OnEndLoadPackage.RemoveAll( this );
-
-        // call this once all transforms have been loaded onto UObjects
         GetRootGroup()->UpdateTransform();
     }
 }
