@@ -317,22 +317,22 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
 
         for( FArianeObject* SelectedTree : SelectedTrees )
         {
-            SelectedTree->Traverse
-            ( [ this
-              , ViewportClient
-              , View
-              , &PointerState ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
-              {
-                  if( /*iScene->GetCell()->ObjectHasFocus( object, traversalFlags )*/1 )
-                  {
-                      if( Object->GetClass() == FArianePath::StaticClass() )
-                      {
-                          FArianePath* Path = static_cast<FArianePath*>(Object);
+            FArianeObject::Traverse ( SelectedTree
+                                    , [ this
+                                      , ViewportClient
+                                      , View
+                                      , &PointerState ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+                {
+                    if( /*iScene->GetCell()->ObjectHasFocus( object, traversalFlags )*/1 )
+                    {
+                        if( Object->GetClass() == FArianePath::StaticClass() )
+                        {
+                            FArianePath* Path = static_cast<FArianePath*>(Object);
 
-                          // for widening all paths
-                          SelectedPaths.Add( Path );
+                            // for widening all paths
+                            SelectedPaths.Add( Path );
 
-                          PickPathPoints( ViewportClient
+                            PickPathPoints( ViewportClient
                                         , View
                                         , Path
                                         , PointerState.ViewportX
@@ -341,11 +341,11 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
                                         , PickedVertices
                                         , PickedHandles
                                         , EditonModeToPickingFlags() );
-                      }
-                  }
+                        }
+                    }
 
-                  return FArianeObject::ETraversalReturnValue::Continue;
-              } );
+                    return FArianeObject::ETraversalReturnValue::Continue;
+                } );
         }
 
         // Link or Unlink segment handles
@@ -939,7 +939,8 @@ UArianeEditorPathEditTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* Re
         {
             for( FArianeObject* SelectedTree : SelectedTrees )
             {
-                SelectedTree->Traverse( [ this
+                FArianeObject::Traverse( SelectedTree
+                                      , [ this
                                         , Canvas
                                         , ViewportClient
                                         , View

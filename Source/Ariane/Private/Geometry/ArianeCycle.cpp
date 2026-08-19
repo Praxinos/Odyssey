@@ -91,9 +91,23 @@ FArianeCycle::~FArianeCycle()
 FArianeCycle::FArianeCycle()
     : FArianeCycle( nullptr
                  , FName( "Ariane Cycle" )
-                 , nullptr
                  , EArianeAllocationModel::InstancedStruct
                  , new FArianeCycleInvalidationFlags() )
+{
+}
+
+FArianeCycle::FArianeCycle( UArianeLayerDrawing* InDrawingLayer
+                          , const FName& InName
+                          , EArianeAllocationModel InAllocationModel
+                          , FArianeCycleInvalidationFlags* InInvalidationFlags )
+    : FArianeObject ( InDrawingLayer
+                    , InName
+                    , InAllocationModel
+                    , InInvalidationFlags ? InInvalidationFlags
+                                          : new FArianeCycleInvalidationFlags() )
+    , Color ( 0, 0, 0, 255 )
+    , MaterialInterface ( nullptr )
+    , Geometry3D ( this )
 {
 }
 
@@ -176,7 +190,7 @@ FArianeCycle::ContourToCoords( FArianeGraph::FCycle* GraphCycle
     int32 ArraySize = GraphCycle->ContourSections.Num();
 
     EarcutContour.push_back( FirstNode->Position );
-    OutPoints.Emplace( FVector( FirstNode->OriginalPosition ) );
+    OutPoints.Emplace( WorldTransform.InverseTransformPosition( FVector( FirstNode->OriginalPosition ) ) );
 
     for( int i = 0; i < ArraySize; i++ )
     {
@@ -191,7 +205,7 @@ FArianeCycle::ContourToCoords( FArianeGraph::FCycle* GraphCycle
             FArianeGraph::FNode* NextNode = Section->Nodes[SectionNextNodeIndex];
 
             EarcutContour.push_back( NextNode->Position );
-            OutPoints.Emplace( FVector( NextNode->OriginalPosition ) );
+            OutPoints.Emplace( WorldTransform.InverseTransformPosition( FVector( NextNode->OriginalPosition ) ) );
         }
     }
 }
@@ -214,19 +228,8 @@ FArianeCycle::GraphCycleToCoords(  FArianeGraph::FCycle* GraphCycle
     }
 }
 
-FArianeCycle::FArianeCycle( UArianeLayerDrawing* InDrawingLayer
-                          , const FName& InName
-                          , FArianeGraph::FCycle* GraphCycle
-                          , EArianeAllocationModel InAllocationModel
-                          , FArianeCycleInvalidationFlags* InInvalidationFlags )
-    : FArianeObject ( InDrawingLayer
-                    , InName
-                    , InAllocationModel
-                    , InInvalidationFlags ? InInvalidationFlags
-                                          : new FArianeCycleInvalidationFlags() )
-    , Color ( 0, 0, 0, 255 )
-    , MaterialInterface ( nullptr )
-    , Geometry3D ( this )
+void
+FArianeCycle::ImportGraphCycle( FArianeGraph::FCycle* GraphCycle )
 {
     Points.Empty();
     EarcutIndices.Empty();
@@ -542,4 +545,7 @@ FArianeCycleGeometry3D::Build()
     Cycle->BuildModelVertexCache();
 
     InitVertexFactory( Cycle->GetModelVertexCache(), UnsignedIndices );
+
+    // send the vertex data to the graphic card.
+    Cycle->GetDrawingLayer()->MarkRenderStateDirty();
 }

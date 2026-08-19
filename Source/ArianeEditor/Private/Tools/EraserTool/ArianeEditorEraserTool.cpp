@@ -408,18 +408,20 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
         {
             TArray<FArianePath*> AddedPaths;
             TArray<FArianePath*> RemovedPaths;
+            FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
 
             DrawingLayer->Modify();
 
-            DrawingLayer->GetRootGroup()->Traverse( [ this
-                                                    , ViewportClient
-                                                    , View
-                                                    , ErasureArea
-                                                    , DrawingLayer
-                                                    , Pixels
-                                                    , Width
-                                                    , &AddedPaths
-                                                    , &RemovedPaths ] ( FArianeObject* TravesedObject ) -> FArianeObject::ETraversalReturnValue
+            FArianeObject::Traverse( RootGroup
+                                   , [ this
+                                     , ViewportClient
+                                     , View
+                                     , ErasureArea
+                                     , DrawingLayer
+                                     , Pixels
+                                     , Width
+                                     , &AddedPaths
+                                     , &RemovedPaths ] ( FArianeObject* TravesedObject ) -> FArianeObject::ETraversalReturnValue
             {
                 if( TravesedObject->GetClass() == FArianePath::StaticClass() )
                 {

@@ -165,13 +165,12 @@ public:
                                 , EArianeAllocationModel AllocationModel );
     FArianeCycle* AllocCycle( UMaterialInterface* InMaterialInterface
                             , const FName& InName
-                            , FArianeGraph* Graph
-                            , FArianeGraph::FCycle* Cycle
                             , EArianeAllocationModel AllocationModel );
     virtual void OnUpdateTransform( EUpdateTransformFlags UpdateTransformFlags, ETeleportType TeleportType ) override;
     virtual void BeginDestroy() override;
     virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
-    virtual void OnRegister() override;
+    //virtual void InitializeComponent() override;
+    void OnPackageLoaded( UPackage* Package );
 
 protected:
     void BindDelegates();
