@@ -571,7 +571,6 @@ void UArianeEditorTool::OnPacket( const UE::StylusInput::FStylusInputPacket& iPa
     if (selectedAPI == "Wintab")
     {
         UE::StylusInput::FStylusInputPacket packetCopyWin = iPacket;
-        //ConvertWintabToWindowCoordinates(packetCopyWin.X, packetCopyWin.Y);
 
         if (iPacket.NormalPressure == 0)
         {
@@ -609,7 +608,7 @@ void UArianeEditorTool::OnPacket( const UE::StylusInput::FStylusInputPacket& iPa
 
     // FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
 #if PLATFORM_MAC
-    UE::StylusInput::FStylusInputPacket packetCopy = iPacket;
+    UE::StylusInput::FStylusInputPacket packetCopyMac = iPacket;
 
     if (iPacket.NormalPressure == 0)
     {
@@ -633,21 +632,22 @@ void UArianeEditorTool::OnPacket( const UE::StylusInput::FStylusInputPacket& iPa
         mCurrentPenStatus = mCurrentPenStatus & ~UE::StylusInput::EPenStatus::CursorIsTouching;
     }
 
-    packetCopy.PenStatus = mCurrentPenStatus;
-    packetCopy.Type = mCurrentPacketType;
+    packetCopyMac.PenStatus = mCurrentPenStatus;
+    packetCopyMac.Type = mCurrentPacketType;
 
-    if (packetCopy.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
+    if (packetCopyMac.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
         ClearQueue();
 
-    mPacketQueue.Enqueue(packetCopy);
+    mPacketQueue.Enqueue(packetCopyMac);
     return;
-#endif
-    // FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
+#else// FIX: HAVE TO MANUALLY HANDLE UP AND DOWN UNTIL EPIC ACCEPT INTERNAL PULL REQUEST
 
     if (iPacket.Type == UE::StylusInput::EPacketType::StylusDown && mEventsConsumedSinceLastUp == 0)
+    {
         ClearQueue();
-
+    }
     mPacketQueue.Enqueue(iPacket);
+#endif
 }
 
 void UArianeEditorTool::StartStylusInputRecord(const FKey& iMouseButton)
@@ -672,15 +672,16 @@ void UArianeEditorTool::StopStylusInputRecord()
     ClearQueue();
 
     bIsRecordingStylus = false;
+    PressedKey = FKey();
 }
 
-bool
+void
 UArianeEditorTool::ReadStylusInput( eStylusEventFence iUntilEventType )
 {
     if (!bIsFocused || mPacketQueue.Num() == 0)
     {
         ClearQueue();
-        return false;
+        return;
     }
 
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
@@ -703,7 +704,7 @@ UArianeEditorTool::ReadStylusInput( eStylusEventFence iUntilEventType )
             mEventsConsumedSinceLastUp++;
 
             if (iUntilEventType == eStylusEventFence::kStylusDown)
-                return true;
+                return;
         }
         else if (packet.Type == UE::StylusInput::EPacketType::StylusUp && CanDraw())
         {
@@ -714,7 +715,7 @@ UArianeEditorTool::ReadStylusInput( eStylusEventFence iUntilEventType )
             StopStylusInputRecord();
 
             if (iUntilEventType == eStylusEventFence::kStylusUp)
-                return true;
+                return;
         }
         else if (bIsStylusDown && CanDraw())
         {
@@ -722,7 +723,7 @@ UArianeEditorTool::ReadStylusInput( eStylusEventFence iUntilEventType )
             mEventsConsumedSinceLastUp++;
         }
     }
-    return true;
+    return;
 }
 
 FArianePointerState

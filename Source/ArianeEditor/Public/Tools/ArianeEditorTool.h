@@ -218,7 +218,7 @@ private:
     virtual void OnPacket(const UE::StylusInput::FStylusInputPacket& iPacket, UE::StylusInput::IStylusInputInstance* iInstance) override;
     void StartStylusInputRecord(const FKey& iMouseButton);
     void StopStylusInputRecord();
-    bool ReadStylusInput(eStylusEventFence iUntilEventType = eStylusEventFence::kNone);
+    void ReadStylusInput(eStylusEventFence iUntilEventType = eStylusEventFence::kNone);
     FArianePointerState StylusPacketToArianePointerState(const UE::StylusInput::FStylusInputPacket& iPacket);
 
 protected:
