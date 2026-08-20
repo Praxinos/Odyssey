@@ -97,10 +97,9 @@ FArianeEditorModule::StartupModule()
     RegisterEditorMode();
 
     UToolMenus::RegisterStartupCallback( FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FArianeEditorModule::RegisterMenus ) );
+    UToolMenus::RegisterStartupCallback( FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FArianeEditorModule::RegisterToolbarButton ) );
 
     //FCoreDelegates::OnPostEngineInit.AddRaw(this, &FArianeEditorModule::OnEngineInit );
-
-    RegisterToolbarButton();
     RegisterCustomizations();
 
     FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
