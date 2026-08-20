@@ -76,9 +76,9 @@ SArianeEditorLayerStackPanel::GetEditedLayer()
         UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
         const TArray<UArianeLayer*>& SelectedLayers = LayerStack->GetSelectedLayers();
 
-        for( UArianeLayer* Layer : SelectedLayers )
+        if( SelectedLayers.Num() )
         {
-            return Layer;
+            return SelectedLayers[0];
         }
     }
 

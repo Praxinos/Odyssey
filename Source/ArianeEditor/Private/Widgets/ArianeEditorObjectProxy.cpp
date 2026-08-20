@@ -63,10 +63,12 @@ UArianeEditorObjectProxy::ImportParamFromOtherProxy( UArianeEditorObjectProxy* O
 void
 UArianeEditorObjectProxy::ImportParam( const TArray<FArianeObject*>& ModifiedObjects )
 {
-    for( FArianeObject* SelectedObject : ModifiedObjects )
+    if( ModifiedObjects.Num() )
     {
+        FArianeObject* ModifiedObject = ModifiedObjects[0];
+
         // Category "Identity"
-        Name = SelectedObject->GetName();
+        Name = ModifiedObject->GetName();
 
         // Category "Transform"
         //TranslationX = focusedObject->GetTranslationX();
@@ -79,7 +81,7 @@ UArianeEditorObjectProxy::ImportParam( const TArray<FArianeObject*>& ModifiedObj
 
         // Category "Appearance"
         //Opacity = focusedObject->GetOpacity();
-        bVisible = SelectedObject->IsVisible( false );
+        bVisible = ModifiedObject->IsVisible( false );
 
         //ForegroundColorMode = static_cast<eForegroundColorMode>(focusedObject->GetForegroundBucket().GetColorMode());
         //BackgroundColorMode = static_cast<eBackgroundColorMode>(focusedObject->GetBackgroundBucket().GetColorMode());
@@ -110,9 +112,6 @@ UArianeEditorObjectProxy::ImportParam( const TArray<FArianeObject*>& ModifiedObj
         //    BackgroundPaletteSelection.OdysseyPalette = nullptr;
         //    BackgroundPaletteSelection.OdysseyPaletteEntryColor = nullptr;
         //}
-
-
-        break; // only one
     }
 }
 
