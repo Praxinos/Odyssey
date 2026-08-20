@@ -64,6 +64,9 @@ UArianeLayerFolder::AddChildLayer( UArianeLayer* Orphan )
         // Typically called when AddChildLayer is run in a constructor
         Orphan->SetupAttachment(this);
     }
+
+    // Force Update transforms (will update the transform of the rootGroup of drawing layers)
+    Orphan->OnUpdateTransform( EUpdateTransformFlags::None, ETeleportType::None );
 }
 
 void

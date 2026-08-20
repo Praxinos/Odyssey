@@ -53,6 +53,10 @@ public:
 protected:
     UPROPERTY( EditAnywhere )
     double StrokeWidth;
+
+protected:
+    TArray<FArianeVertex*> GeneratedVertices;
+    TArray<FArianeSegmentCubic*> GeneratedSegments;
 };
 
 // define bitwise op

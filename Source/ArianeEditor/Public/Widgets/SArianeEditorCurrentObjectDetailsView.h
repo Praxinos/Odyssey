@@ -18,6 +18,7 @@ class UArianeEditorEllipseProxy;
 class UArianeEditorRectangleProxy;
 class UArianeEditorLineProxy;
 class UArianeEditorPolygonProxy;
+class UArianeEditorCycleProxy;
 
 class ARIANEEDITOR_API SArianeEditorCurrentObjectDetailsView
     : public SCompoundWidget
@@ -68,4 +69,5 @@ class ARIANEEDITOR_API SArianeEditorCurrentObjectDetailsView
         UArianeEditorRectangleProxy* RectangleProxy;
         UArianeEditorLineProxy* LineProxy;
         UArianeEditorPolygonProxy* PolygonProxy;
+        UArianeEditorCycleProxy* CycleProxy;
 };

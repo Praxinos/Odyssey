@@ -76,18 +76,65 @@ UArianeEditorPaintBucketTool::OnCameraMoved( const FVector& Location, const FRot
     );
 }
 
+
 void
-UArianeEditorPaintBucketTool::Activate()
+UArianeEditorPaintBucketTool::OnPreUpdate( bool bInteractive )
 {
-    Reset();
+}
+
+void
+UArianeEditorPaintBucketTool::OnPostUpdate( bool bInteractive )
+{
+    if( bInteractive == false )
+    {
+        Reset();
+    }
+}
+
+void
+UArianeEditorPaintBucketTool::BindDelegates()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddUObject( this, &UArianeEditorPaintBucketTool::Reset );
+
+    if( Painting3DComponent )
+    {
+        //Painting3DComponent->OnPreUpdateDelegate().AddUObject( this, &UArianeEditorPaintBucketTool::OnPreUpdate );
+        Painting3DComponent->OnPostUpdateDelegate().AddUObject( this, &UArianeEditorPaintBucketTool::OnPostUpdate );
+    }
 
     FEditorDelegates::OnEditorCameraMoved.AddUObject( this, &UArianeEditorPaintBucketTool::OnCameraMoved );
 }
 
 void
+UArianeEditorPaintBucketTool::UnbindDelegates()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
+
+    if( Painting3DComponent )
+    {
+        Painting3DComponent->OnPreUpdateDelegate().RemoveAll( this );
+        Painting3DComponent->OnPostUpdateDelegate().RemoveAll( this );
+    }
+
+    FEditorDelegates::OnEditorCameraMoved.RemoveAll( this );
+}
+
+void
+UArianeEditorPaintBucketTool::Activate()
+{
+    Reset();
+
+    BindDelegates();
+}
+
+void
 UArianeEditorPaintBucketTool::Inactivate()
 {
-    FEditorDelegates::OnEditorCameraMoved.RemoveAll( this );
+    UnbindDelegates();
 }
 
 void
