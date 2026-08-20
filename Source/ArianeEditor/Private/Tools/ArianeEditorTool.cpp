@@ -428,19 +428,23 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
         break;
 
         case EArianeLayerDrawingOrientation::LayerYZ:
+        {
             // Note: args are Pitch(Y) Yaw(Z) Roll(X)
             // but rotation order is Yaw (Z) Pitch (Y) Roll (X)
             FMatrix YZRotation = FRotationMatrix( FRotator(  0.f, 90.f, 90.f ) );
 
             WorldMatrix = YZRotation * LayerMatrix;
+        }
         break;
 
         case EArianeLayerDrawingOrientation::LayerZX:
+        {
             // Note: args are Pitch(Y) Yaw(Z) Roll(X)
             // but rotation order is Yaw (Z) Pitch (Y) Roll (X)
             FMatrix ZXRotation = FRotationMatrix( FRotator(  0.f,  0.f, 90.f ) );
 
             WorldMatrix = ZXRotation * LayerMatrix;
+        }
         break;
 
         case EArianeLayerDrawingOrientation::View :
