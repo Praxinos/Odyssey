@@ -74,8 +74,4 @@ protected :
 
     UPROPERTY( EditAnywhere )
     FVector EndPoint;
-
-protected :
-    FArianeVertex* GeneratedVertices[2];
-    FArianeSegmentCubic* GeneratedSegments[1];
 };

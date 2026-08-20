@@ -350,6 +350,8 @@ FArianeObject::AppendChild( FArianeObject* Child )
     Child->SetParent( this );
     Child->Added();
 
+    Child->UpdateTransform();
+
     InvalidateChild( Child );
 
     Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
@@ -362,6 +364,8 @@ FArianeObject::PrependChild( FArianeObject* Child )
 
     Child->SetParent( this );
     Child->Added();
+
+    Child->UpdateTransform();
 
     InvalidateChild( Child );
 

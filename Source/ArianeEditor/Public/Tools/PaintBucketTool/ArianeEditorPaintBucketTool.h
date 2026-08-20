@@ -75,6 +75,7 @@ public:
     virtual void Activate() override;
     virtual void Inactivate() override;
 
+
 protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
     void DrawCycleHUD ( FCanvas* HUDCanvas
@@ -92,6 +93,10 @@ protected:
     void Reset();
     void OnCameraMoved( const FVector& Location, const FRotator& Rotation, ELevelViewportType ViewportType, int32 ViewIndex );
     virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
+    void UnbindDelegates();
+    void BindDelegates();
+    void OnPreUpdate( bool bInteractive );
+    void OnPostUpdate( bool bInteractive );
 
 public:
     UPROPERTY( EditAnywhere

@@ -11,6 +11,7 @@
 #include "ArianeEditorRectangleProxy.h"
 #include "ArianeEditorLineProxy.h"
 #include "ArianeEditorPolygonProxy.h"
+#include "ArianeEditorCycleProxy.h"
 // Ariane Headers
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayer.h"
@@ -22,6 +23,7 @@
 #include "ArianeRectangle.h"
 #include "ArianeLine.h"
 #include "ArianePolygon.h"
+#include "ArianeCycle.h"
 // Unreal Headers
 #include "Editor.h"
 #include "IDetailPropertyRow.h"
@@ -64,6 +66,7 @@ SArianeEditorCurrentObjectDetailsView::Construct( const FArguments& InArgs, FAri
     RectangleProxy = NewObject<UArianeEditorRectangleProxy>();
     LineProxy = NewObject<UArianeEditorLineProxy>();
     PolygonProxy = NewObject<UArianeEditorPolygonProxy>();
+    CycleProxy = NewObject<UArianeEditorCycleProxy>();
 
     DetailsView->OnFinishedChangingProperties().AddSP( this, &SArianeEditorCurrentObjectDetailsView::PropertyValueChanged );
 
@@ -299,6 +302,15 @@ SArianeEditorCurrentObjectDetailsView::Update()
                     CurrentObjectProxy = PolygonProxy;
                 }
 
+                if( ObjectClass == FArianeCycle::StaticClass() )
+                {
+                    // default
+                    ObjectProxy->Update( SelectedObjects );
+                    DetailsView->SetObject( CycleProxy );
+
+                    CurrentObjectProxy = CycleProxy;
+                }
+
                 if( ObjectClass == FArianeObject::StaticClass() )
                 {
                     // default
@@ -371,6 +383,7 @@ SArianeEditorCurrentObjectDetailsView::AddReferencedObjects(FReferenceCollector&
     Collector.AddReferencedObject(RectangleProxy);
     Collector.AddReferencedObject(LineProxy);
     Collector.AddReferencedObject(PolygonProxy);
+    Collector.AddReferencedObject(CycleProxy);
 }
 
 #undef LOCTEXT_NAMESPACE

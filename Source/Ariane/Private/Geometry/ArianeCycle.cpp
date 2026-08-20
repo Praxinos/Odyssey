@@ -510,7 +510,8 @@ FArianeCycle::UpdateShape( EUpdateFlags UpdateFlags )
 {
     FArianeCycleInvalidationFlags* PathInvalidationFlags = static_cast<FArianeCycleInvalidationFlags*>(InvalidationFlags);
 
-    if( PathInvalidationFlags->PointAltered )
+    if( ( PathInvalidationFlags->PointAltered )
+     || ( PathInvalidationFlags->Color ) )
     {
         Geometry3D.Build();
     }

@@ -58,8 +58,4 @@ protected :
 
     UPROPERTY( EditAnywhere )
     double Height;
-
-protected :
-    FArianeVertex* GeneratedVertices[4];
-    FArianeSegmentCubic* GeneratedSegments[4];
 };

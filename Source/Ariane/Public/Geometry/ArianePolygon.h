@@ -60,8 +60,4 @@ protected:
 
     UPROPERTY( EditAnywhere )
     double Radius;
-
-protected:
-    TArray<FArianeVertex*> GeneratedVertices;
-    TArray<FArianeSegmentCubic*> GeneratedSegments;
 };

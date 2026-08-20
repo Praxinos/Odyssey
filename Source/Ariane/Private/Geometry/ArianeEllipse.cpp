@@ -40,31 +40,6 @@ FArianeEllipse::FArianeEllipse( UArianeLayerDrawing* InDrawingLayer
     , RadiusX( InRadiusX )
     , RadiusY( InRadiusY )
 {
-    for( uint32 i = 0; i < 4; i++ )
-    {
-        // EArianeAllocationModel::OperatingSystem means we use "new" to alloc the vertices. they won't be saved
-        // as instanced structs by the reflection system
-        GeneratedVertices[i] = AllocVertex( FVector()
-                                          , FVector::ZAxisVector
-                                          , StrokeWidth
-                                          , EArianeAllocationModel::OperatingSystem );
-    }
-
-    for( uint32 i = 0; i < 4; i++ )
-    {
-        uint32 n = ( i + 1 ) % 4;
-
-        // EArianeAllocationModel::OperatingSystem means we use "new" to alloc the vertices. they won't be saved
-        // as instanced structs by the reflection system
-        GeneratedSegments[i] = AllocCubicSegment( GeneratedVertices[i]
-                                                , GeneratedVertices[i]->GetPosition()
-                                                , GeneratedVertices[n]->GetPosition()
-                                                , GeneratedVertices[n]
-                                                , EArianeAllocationModel::OperatingSystem );
-
-        GeneratedVertices[i]->SetHandleAligned( true );
-    }
-
     ResetGeometry();
     ReshapeGeometry();
 }
@@ -83,31 +58,50 @@ FArianeEllipse::HasBaseClass( uint32 BaseClassID )
 void
 FArianeEllipse::ResetGeometry()
 {
-    Vertices.Empty();
-    Segments.Empty();
+    for( FArianeSegment* Segment : GeneratedSegments )
+    {
+        RemoveSegment( Segment ); // will auto unallocate
+    }
+
+    for( FArianeVertex* Vertex : GeneratedVertices )
+    {
+        RemoveVertex( Vertex ); // will auto unallocate
+    }
+
+    GeneratedVertices.Empty();
+    GeneratedSegments.Empty();
 
     InvalidatedVertices.Empty();
     InvalidatedSegments.Empty();
 
-    RemoveVertex ( GeneratedVertices[0], false );
-    RemoveVertex ( GeneratedVertices[1], false );
-    RemoveVertex ( GeneratedVertices[2], false );
-    RemoveVertex ( GeneratedVertices[3], false );
+    for( uint32 i = 0; i < 4; i++ )
+    {
+        // EArianeAllocationModel::OperatingSystem means we use "new" to alloc the vertices. they won't be saved
+        // as instanced structs by the reflection system
+        GeneratedVertices.Add( AllocVertex( FVector()
+                                          , FVector::ZAxisVector
+                                          , StrokeWidth
+                                          , EArianeAllocationModel::OperatingSystem ) );
 
-    RemoveSegment ( GeneratedSegments[0], false );
-    RemoveSegment ( GeneratedSegments[1], false );
-    RemoveSegment ( GeneratedSegments[2], false );
-    RemoveSegment ( GeneratedSegments[3], false );
+        AddVertex ( GeneratedVertices[i] );
+    }
 
-    AddVertex ( GeneratedVertices[0] );
-    AddVertex ( GeneratedVertices[1] );
-    AddVertex ( GeneratedVertices[2] );
-    AddVertex ( GeneratedVertices[3] );
+    for( uint32 i = 0; i < 4; i++ )
+    {
+        uint32 n = ( i + 1 ) % 4;
 
-    AddSegment ( GeneratedSegments[0] );
-    AddSegment ( GeneratedSegments[1] );
-    AddSegment ( GeneratedSegments[2] );
-    AddSegment ( GeneratedSegments[3] );
+        // EArianeAllocationModel::OperatingSystem means we use "new" to alloc the vertices. they won't be saved
+        // as instanced structs by the reflection system
+        GeneratedSegments.Add( AllocCubicSegment( GeneratedVertices[i]
+                                                , GeneratedVertices[i]->GetPosition()
+                                                , GeneratedVertices[n]->GetPosition()
+                                                , GeneratedVertices[n]
+                                                , EArianeAllocationModel::OperatingSystem ) );
+
+        GeneratedVertices[i]->SetHandleAligned( true );
+
+        AddSegment ( GeneratedSegments[i] );
+    }
 }
 
 void

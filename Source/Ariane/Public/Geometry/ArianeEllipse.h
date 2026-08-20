@@ -80,8 +80,4 @@ protected:
 
     UPROPERTY( EditAnywhere )
     double RadiusY;
-
-protected:
-    FArianeVertex* GeneratedVertices[4];
-    FArianeSegmentCubic* GeneratedSegments[4];
 };
