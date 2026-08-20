@@ -105,7 +105,7 @@ FArianeCycle::FArianeCycle( UArianeLayerDrawing* InDrawingLayer
                     , InAllocationModel
                     , InInvalidationFlags ? InInvalidationFlags
                                           : new FArianeCycleInvalidationFlags() )
-    , Color ( 0, 0, 0, 255 )
+    , Color ( FColor::Black.WithAlpha(255) )
     , MaterialInterface ( nullptr )
     , Geometry3D ( this )
 {

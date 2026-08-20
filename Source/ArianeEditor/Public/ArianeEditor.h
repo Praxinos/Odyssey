@@ -33,10 +33,10 @@ struct FArianeObject;
 UENUM()
 enum class EArianeEditorDrawingOrientation : uint8
 {
-    LayerXY = EArianeLayerDrawingOrientation::LayerXY,
-    LayerYZ = EArianeLayerDrawingOrientation::LayerYZ,
-    LayerZX = EArianeLayerDrawingOrientation::LayerZX,
-    View = EArianeLayerDrawingOrientation::View,
+    LayerXY = static_cast<uint8>(EArianeLayerDrawingOrientation::LayerXY),
+    LayerYZ = static_cast<uint8>(EArianeLayerDrawingOrientation::LayerYZ),
+    LayerZX = static_cast<uint8>(EArianeLayerDrawingOrientation::LayerZX),
+    View    = static_cast<uint8>(EArianeLayerDrawingOrientation::View),
     LayerDefined,
 };
 

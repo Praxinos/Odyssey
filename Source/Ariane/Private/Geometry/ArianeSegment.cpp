@@ -16,10 +16,10 @@ FArianeSegment::FArianeSegment( )
     , OwnerID()
     , Vertices { FArianeVertexID(), FArianeVertexID() }
     , AllocationModel( EArianeAllocationModel::InstancedStruct )
+    , BoundingBox ( FBox(ForceInit) )
     , Length ( 0.0f )
     , bInvalidated ( false )
     , bAutoFractioned ( true )
-    , BoundingBox ( FBox(ForceInit) )
 {
 }
 
@@ -31,10 +31,10 @@ FArianeSegment::FArianeSegment( FArianeObject* Owner
     , OwnerID( Owner )
     , Vertices { InVertex0, InVertex1 }
     , AllocationModel( InAllocationModel )
+    , BoundingBox ( FBox(ForceInit) )
     , Length ( 0.0f )
     , bInvalidated ( false )
     , bAutoFractioned ( true )
-    , BoundingBox ( FBox(ForceInit) )
 {
     Init();
 }

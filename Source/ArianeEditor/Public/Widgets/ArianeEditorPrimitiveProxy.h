@@ -5,6 +5,7 @@
 
 // Unreal Headers
 #include "CoreMinimal.h"
+#include "UObject/Object.h"
 // Ariane Editor Headers
 #include "ArianeEditorPathProxy.h"
 

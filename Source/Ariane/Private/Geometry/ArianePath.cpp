@@ -246,7 +246,7 @@ FArianePath::FArianePath( UArianeLayerDrawing* InDrawingLayer
                     , InInvalidationFlags ? InInvalidationFlags
                                           : new FArianePathInvalidationFlags() )
     , LineType ( EArianePathLineType::Tube )
-    , Color ( 0, 0, 0, 255 )
+    , Color ( FColor::Black.WithAlpha(255) )
     , MaterialInterface ( nullptr )
     , Geometry3D ( this )
 {

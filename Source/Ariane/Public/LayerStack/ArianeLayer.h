@@ -6,6 +6,7 @@
 
 // Unreal headers
 #include "CoreMinimal.h"
+#include "UObject/Object.h"
 // Ariane headers
 #include "ArianeLayerInvalidationFlags.h"
 
@@ -144,7 +145,7 @@ public:
     void PreEditUndo();
     void PostEditUndo();
     void PostLoad();
-    FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld );
+    virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
     virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
 
 protected:

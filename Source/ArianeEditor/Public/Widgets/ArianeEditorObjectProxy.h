@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/Object.h"
 
 #include "ArianeEditorObjectProxy.generated.h"
 
@@ -61,7 +62,7 @@ class ARIANEEDITOR_API UArianeEditorObjectProxy : public UObject
             //uint32 BackgroundPaletteSelection : 1;
         };
         uint8 raw[1];
-    } ObjectPropertyBits;
+    } FObjectPropertyBits;
 
     public:
         GENERATED_BODY()
@@ -101,7 +102,7 @@ class ARIANEEDITOR_API UArianeEditorObjectProxy : public UObject
         FArianeEditor* Editor;
 
     private:
-        ObjectPropertyBits ObjectPropertyBits;
+        FObjectPropertyBits ObjectPropertyBits;
 
     public:
 /*
