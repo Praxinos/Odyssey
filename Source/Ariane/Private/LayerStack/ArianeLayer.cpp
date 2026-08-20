@@ -188,7 +188,7 @@ UArianeLayer::GetInvalidationFlags()
 }
 
 FBoxSphereBounds
-UArianeLayer::CalcBounds( const FTransform& LocalToWorld )
+UArianeLayer::CalcBounds( const FTransform& LocalToWorld ) const
 {
     // ForceInit makes the box invalid and excludes it from the computation unitl it is valid
     FBoxSphereBounds NewBounds = FBoxSphereBounds(ForceInit);

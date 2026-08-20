@@ -438,7 +438,7 @@ UArianeLayerDrawing::AllocPath( UMaterialInterface* InMaterialInterface
 }
 
 void
-UArianeLayerDrawing::AppendUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials )
+UArianeLayerDrawing::AppendUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials ) const
 {
     OutUsedMaterials.Reserve( OutUsedMaterials.Num() + UsedMaterials.Num() );
 
@@ -449,7 +449,7 @@ UArianeLayerDrawing::AppendUsedMaterials( TArray<UMaterialInterface*>& OutUsedMa
 }
 
 void
-UArianeLayerDrawing::GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials )
+UArianeLayerDrawing::GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials, bool bGetDebugMaterials ) const
 {
     OutUsedMaterials.Empty();
 

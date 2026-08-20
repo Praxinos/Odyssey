@@ -128,9 +128,9 @@ public:
      * @OutUsedMaterials output array
      * @bEmptyFirst empty the output array first.
      */
-    void GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials );
+    virtual void GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials, bool bGetDebugMaterials = false ) const override;
 
-    void AppendUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials );
+    void AppendUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials ) const;
     void ClearObjectSelection();
     void SelectObject( FArianeObject* ObjectToSelect );
     const TArray<FArianeObject*>& GetSelectedObjects() const;

@@ -35,9 +35,10 @@ UArianeEditorPaintBucketTool::~UArianeEditorPaintBucketTool()
 
 UArianeEditorPaintBucketTool::UArianeEditorPaintBucketTool()
     : MaterialInterface( nullptr )
-    , Graph( new FArianeGraph() )
-    , bGraphNeedsUpdate ( true )
     , GapTolerance( 0.0f )
+    , Graph( new FArianeGraph() )
+    , PickedCycle( nullptr )
+    , bGraphNeedsUpdate ( true )
     , bShowGrid ( true )
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PaintBucket64");

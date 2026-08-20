@@ -6,6 +6,7 @@
 
 // Unreal headers
 #include "CoreMinimal.h"
+#include "UObject/Object.h"
 
 #include "ArianeLayerStack.generated.h"
 
