@@ -97,12 +97,12 @@ FArianeEditorModule::StartupModule()
     RegisterEditorMode();
 
     UToolMenus::RegisterStartupCallback( FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FArianeEditorModule::RegisterMenus ) );
-    UToolMenus::RegisterStartupCallback( FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FArianeEditorModule::RegisterToolbarButton ) );
+
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+    LevelEditorModule.OnLevelEditorCreated().AddRaw(this, &FArianeEditorModule::RegisterToolbarButton);
 
     //FCoreDelegates::OnPostEngineInit.AddRaw(this, &FArianeEditorModule::OnEngineInit );
     RegisterCustomizations();
-
-    FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
     // color Selector
     LevelEditorModule.OnRegisterLayoutExtensions().AddLambda([](FLayoutExtender& InExtender)
@@ -247,26 +247,23 @@ FArianeEditorModule::ActivateEdMode( AArianePainting3DActor* Painting3DActor )
 }
 
 void
-FArianeEditorModule::RegisterToolbarButton()
+FArianeEditorModule::RegisterToolbarButton(TSharedPtr<ILevelEditor> InLevelEditor)
 {
     // Extend the "File" section of the main toolbar
     UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu( "LevelEditor.LevelEditorToolBar.AssetsToolBar");
-    FToolMenuSection* ToolbarSection = ToolbarMenu->FindSection("Content");
+    FToolMenuSection& ToolbarSection = ToolbarMenu->FindOrAddSection("Content");
 
-    if( ToolbarSection )
-    {
-        FToolMenuEntry ArianeLauncherEntry = FToolMenuEntry::InitToolBarButton( TEXT("Launch Ariane")
-                                                                              , FExecuteAction::CreateLambda( [this]()
-                                                                              {
-                                                                                  ActivateEdMode( nullptr );
-                                                                                  //GetModeManager()->ActivateMode( EM_ArianeEditorViewportEdModeId );
-                                                                              } )
-                                                                             , LOCTEXT( "arianeeditor-launch.label", "Launch Ariane" )
-                                                                             , LOCTEXT( "arianeeditor-launch.tooltip", "Launch Ariane" )
-                                                                             , FSlateIcon( FArianeEditorStyle::Get().GetStyleSetName(), "ArianeEditor.EdMode24" ) );
+    FToolMenuEntry ArianeLauncherEntry = FToolMenuEntry::InitToolBarButton( TEXT("Launch Ariane")
+                                                                            , FExecuteAction::CreateLambda( [this]()
+                                                                            {
+                                                                                ActivateEdMode( nullptr );
+                                                                                //GetModeManager()->ActivateMode( EM_ArianeEditorViewportEdModeId );
+                                                                            } )
+                                                                            , LOCTEXT( "arianeeditor-launch.label", "Launch Ariane" )
+                                                                            , LOCTEXT( "arianeeditor-launch.tooltip", "Launch Ariane" )
+                                                                            , FSlateIcon( FArianeEditorStyle::Get().GetStyleSetName(), "ArianeEditor.EdMode24" ) );
 
-        ToolbarSection->AddEntry( ArianeLauncherEntry );
-    }
+    ToolbarSection.AddEntry( ArianeLauncherEntry );
 }
 
 void

@@ -46,7 +46,7 @@ private:
     void RegisterEditorMode();
     void UnregisterEditorMode();
 
-    void RegisterToolbarButton();
+    void RegisterToolbarButton(TSharedPtr<class ILevelEditor> InLevelEditor);
     void UnregisterToolbarButton();
     //void AddToolbarButton( FToolBarBuilder &builder );
     void OnEngineInit();
