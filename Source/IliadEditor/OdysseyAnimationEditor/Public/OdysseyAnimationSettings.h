@@ -6,7 +6,9 @@
 #include "CoreMinimal.h"
 #include "Misc/FrameRate.h"
 
+#include "Engine/DeveloperSettings.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "Materials/MaterialInterface.h"
 #include "OdysseyAnimation.h"
 
 #include "OdysseyAnimationSettings.generated.h"
@@ -46,4 +48,34 @@ public:
     /** The default layer type of the animation. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Animation Asset")
     TSubclassOf<class UOdysseyAnimationLayer> DefaultLayerClass = UOdysseyAnimationLayerImageRaster::StaticClass();
+};
+
+
+/**
+ * Implements the Editor's user settings.
+ */
+UCLASS(BlueprintType, config = Odyssey, meta = (DisplayName = "Odyssey - Animation Dialog"))
+class ODYSSEYANIMATIONEDITOR_API UOdysseyAnimationDialogSettings
+    : public UDeveloperSettings
+{
+    GENERATED_BODY()
+
+    virtual FName GetContainerName() const override
+    {
+        return TEXT("Editor");
+    }
+
+    virtual FName GetCategoryName() const override
+    {
+        return TEXT("Plugins");
+    }
+
+public:
+    /** The default material used if we don't open the popup window when placing a new animation in the level */
+    UPROPERTY(EditAnywhere, config, Category = "General")
+    TSoftObjectPtr<UMaterialInterface> DefaultMaterial;
+
+    /** Should we apply the default material interface to newly placed animations without opening the popup window */
+    UPROPERTY(EditAnywhere, config, Category = "General")
+    bool bApplyMaterialWithoutAsking = false;
 };

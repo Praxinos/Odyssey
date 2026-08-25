@@ -8,10 +8,15 @@
 #include "Subsystems/PlacementSubsystem.h"
 
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationActorFactory.h"
 #include "OdysseyAnimationAssetTypeActions.h"
+#include "OdysseyAnimationComponent.h"
+#include "OdysseyAnimationMaterialSelectionDialog.h"
 #include "OdysseyAnimationSettings.h"
 #include "OdysseyAnimationSettingsCustomization.h"
+#include "Materials/Material.h"
+#include "Misc/CoreDelegates.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -27,6 +32,12 @@ FOdysseyAnimationEditorModule::StartupModule()
     RegisterPlacementFactories();
 
     RegisterPropertyCustomizations();
+
+    // GEditor doesn't exists at this point, so we defer the callback "OnLevelActorAdded" to after the initialisation of GEditor
+    FCoreDelegates::GetOnPostEngineInit().AddRaw(
+        this,
+        &FOdysseyAnimationEditorModule::OnPostEngineInit
+    );
 }
 
 void
@@ -38,6 +49,23 @@ FOdysseyAnimationEditorModule::ShutdownModule()
     UnregisterPlacementFactories();
 
     UnregisterAssetTypeActions();
+
+    FCoreDelegates::GetOnPostEngineInit().RemoveAll(this);
+    if (GEditor)
+    {
+        GEditor->OnLevelActorAdded().RemoveAll( this );
+    }
+}
+
+void FOdysseyAnimationEditorModule::OnPostEngineInit()
+{
+    if (GEditor)
+    {
+        GEditor->OnLevelActorAdded().AddRaw(
+            this,
+            &FOdysseyAnimationEditorModule::OnLevelActorAdded
+        );
+    }
 }
 
 void
@@ -108,6 +136,33 @@ FOdysseyAnimationEditorModule::UnregisterPropertyCustomizations()
         PropertyModule.UnregisterCustomPropertyTypeLayout( FOdysseyAnimationSettings::StaticStruct()->GetFName() );
 
         PropertyModule.NotifyCustomizationModuleChanged();
+    }
+}
+
+void FOdysseyAnimationEditorModule::OnLevelActorAdded(AActor* iActor)
+{
+    const UOdysseyAnimationDialogSettings* Settings = GetDefault<UOdysseyAnimationDialogSettings>();
+
+    if (!iActor || !iActor->IsA<AOdysseyAnimationActor>() || iActor->HasAnyFlags(RF_Transient))
+    {
+        return;
+    }
+
+    AOdysseyAnimationActor* AnimationActor = Cast<AOdysseyAnimationActor>(iActor);
+
+    if( Settings->bApplyMaterialWithoutAsking && !Settings->DefaultMaterial.IsNull())
+    {
+        UMaterialInterface* Material = Settings->DefaultMaterial.LoadSynchronous();
+        if( Material )
+        {
+            AnimationActor->GetAnimationComponent()->SetAnimationMaterial(Material);
+        }
+    }
+    else
+    {
+        TObjectPtr<UMaterialInterface> MaterialSelection = FMaterialSelectionDialog::Show();
+
+        AnimationActor->GetAnimationComponent()->SetAnimationMaterial(MaterialSelection);
     }
 }
 
