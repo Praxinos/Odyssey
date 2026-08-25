@@ -8,6 +8,202 @@
 #include "ArianeVertex.h"
 #include "ArianeSegment.h"
 
+// Some explanations are needed here, as this is by far the most complex process
+// of Odyssey's vector features. The principles is to find cycles chordless determined by
+// the intersected paths. To do so we have a multi-step process :
+// - find intersections
+// - Build a graph by creating sections
+// - find chordless cycles by exploring sections :
+//    -> To find chordless cycles, we have to always go the same way, either
+//       always left or always right, it does not matter but we always go the same way.
+//       This is the basic principle of the method. To find the correct way, we simply compute
+//       the cross product, which will be either positive or negative relative to the direction.
+//       The only case when we take the negative-direction is when there is no positive-direction.
+//
+//         Let's say we only take the first section going to the right :
+//
+//             /              Sections B and A are both at the right side of section S
+//            /               This can be determined by computing the cross products SxA and SxB
+//           B                However, the closest section to segment S is section A. This can be
+//          /                 Determined by the dot product. The biggest dot product wins (S.A).
+//         /_____ A______
+//         o
+//         |
+//         |
+//         S
+//         |
+//         |
+//
+//          But what if there is no section going the right way ?
+//         Then we choose the section with the biggest dot product
+//
+//                 B
+//                  \         Here, the smallest dot product wins (S.B).
+//      _____ A______\
+//                   o
+//                   |
+//                   |
+//                   S
+//                   |
+//                   |
+//
+// See functions :
+//    FArianeGraph::FNode::GetCycleNextSection()
+//
+// Using these principles, we are guaranteed to always turn in the right direction.
+// Then, to tell whether or not we have found a cycle, we just check that the last node
+// we met is the same as the first node we explored the graph from.
+//
+// Another important technique is blocking the sections once they were explored in one way.
+// Indeed, a set of connected cycles always face the same direction because their vertices "turn"
+// in the same direction. It is the same as face orientation on a 3D-Mesh.
+//
+//      o______________o______________o
+//      |   ------->   |   ------->   |     What do we notice here ? Although cycles have the same
+//      |  ^        |  |  ^        |  |     orientation (cross product facing in the same direction),
+//      |  |        |  A  |        |  |     sections A, B, C, D are never "explored" twice in the same
+//      |  |        v  |  |        v  |     direction (look at the arrows above and below). We use
+//      |   <-------   |   <-------   |     this as an advantage to prevent double detection of the
+//      o_______C______o_______D______o     same cycle, which will speed up things. Each time a cycle
+//      |   ------->   |   ------->   |     is detected, its sections are blocked one-way, guaranteing
+//      |  ^        |  |  ^        |  |     that there will be no other detection. By and by, the whole
+//      |  |        |  B  |        |  |     graph exploration simplifies itself.
+//      |  |        v  |  |        v  |
+//      |   <-------   |   <-------   |
+//      o______________o______________o
+//
+// See functions:
+//     FArianeGraph::FSection::Block()
+//
+//                  Some requirements :
+//
+//         the algorithm had to work even in this case:
+//          ______________________________
+//         |                              |
+//         |           _______            |
+//         |          |       |           |
+//         |           \     /            |
+//         |            \ o /             |
+//         \             / \              /
+//          \___________/   \____________/
+//
+//          Here there are 2 chordless cycles :
+//
+//                      Cycle 1
+//          _______________________________
+//         |...............................|
+//         |............_______............|
+//         |...........|       |...........|
+//         |............\     /............|
+//         |.............\ o /.............|
+//         \............../ \............../
+//          \____________/   \____________/
+//
+//                      Cycle 2
+//                      _______
+//                     |.......|
+//                      \...../
+//                       \ o /
+//
+//  But a naive approach could first detect this cycle below, because
+// at intersection point o, there would indeed be a loop detection.
+//          _______________________________
+//         |...............................|
+//         |...............................|
+//         |...............................|
+//         |...............................|
+//         |...............o...............|
+//         \............../ \............../
+//          \____________/   \____________/
+//
+// What is the solution ? Detecting a loop only by comparing its
+// initial and final vertices is not enough, we also have to check if the
+// recursive exploration process has ended on a section that is allowed.
+// This is why we introduced the concept of exploration pairs. Exploration pairs
+// consists in a "depart section", a node, and an "return section". So, for each
+// intersection point, we first determine as many exploration pairs as sections connected
+// to this node. At intersection point o, we would have 4 exploration pairs :
+//
+//                        1.      2.        3.          4.
+//                      \                      /     \     /
+//                       \ o       o        o /       \ o /
+//                        /       / \        \
+//                       /       /   \        \
+//
+// See functions:
+//     FArianeGraph::FNode::BuildExplorationPairs()
+//
+// A cycle is detected only if the last section matches the allowed return section
+// OR, if the allowed return section was removed from the graph, then any return
+// section is allowed. Indeed, there are orphaned section (that leads to nowhere),
+// and we get rid of them because the would cause problems. E.g :
+//              o
+//              |
+//              |
+//       o______o______o
+//              |
+//              |
+//              o
+//
+// Here there is no cycle. But if we explore those sections, we would find one, and it would look
+// like this cross. So we get rid of these kind of sections. How ? Simply get rid of any section
+// whose vertices are not connected to another section. This implies that this is a multi-pass
+// process, as we can have such cases :
+//
+//              o
+//              |       <--- deletion at first pass
+//              |
+//              o
+//              |       <--- deletion at second pass
+//              |
+//       o______o______o
+//       |      |      |
+//       |      |      |      <--- keep those sections.
+//       o____  o______o
+//
+// See functions:
+//        FArianeGraph::SimplifyGraph()
+//
+// When a cycle is detected, it is not guaranteed that it will be correctly oriented. Indeed,
+// a contour can be detected as a cycle, we always took the best section possible, but the
+//  overall cycle isn't correctly oriented :
+//
+//      <-----------------------------
+//  |                                      ^
+//  |    o______________o______________o   |
+//  |    |   ------->   |   ------->   |   |
+//  |    |  ^        |  |  ^        |  |   |
+//  |    |  |        |  A  |        |  |   |
+//  |    |  |        v  |  |        v  |   |
+//  |    |   <-------   |   <-------   |   |
+//  |    o_______C______o_______D______o   |
+//  |    |   ------->   |   ------->   |   |
+//  |    |  ^        |  |  ^        |  |   |
+//  |    |  |        |  B  |        |  |   |
+//  |    |  |        v  |  |        v  |   |
+//  |    |   <-------   |   <-------   |   |
+//  |    o______________o______________o   |
+//  v
+//      ------------------------------>
+//
+// The contour cycle detected was the only possibility, but in the end
+// is not well oriented. That's why, for any cycle we find, we always
+// have to check its overall orientation anyways. This one will be discarded.
+//
+// See functions:
+//    static GetCycleNormalVector()
+//
+// Stay focused, it's not over yet !
+//
+// Once we have detected the cycles, how to deal with cycles that are the one inside the other ?
+// we have to check which one fits into which one and then merge them :
+//
+// See functions:
+//     FArianeGraph::OrderCycles()
+//     FArianeGraph::MergeCycles()
+//
+//  That's basically it !
+
 //static
 FArianeGraph::FSectionLinkInfo*
 FArianeGraph::FindNextSectionLinkInfo( FSectionLinkInfo* LastSectionLinkInfo
