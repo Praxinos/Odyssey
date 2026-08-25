@@ -998,6 +998,17 @@ UArianeEditorTool::OnClickRelease(const FInputDeviceRay& ReleasePos)
     }
 }
 
+FVector2D
+UArianeEditorTool::WorldToPlane( const FVector& WorldPosition, const FPlane& ProjectionPlane )
+{
+    FVector ProjectionPlaneOrigin = ProjectionPlane.GetOrigin();
+    // find the angle between the Z axis and the plane's normal vector in order to find the rotation matrix.
+    // we will then use it to convert 3D points coordinates in a 2D coordinate system (with Z = 0).
+    FQuat WorldToPlaneRotationQuat = FQuat::FindBetweenNormals( ProjectionPlane.GetNormal(), FVector::UpVector );
+
+    return FVector2D( WorldToPlaneRotationQuat * ( WorldPosition - ProjectionPlaneOrigin ) );
+}
+
 // static
 bool
 UArianeEditorTool::WorldToHUD( FEditorViewportClient* ViewportClient

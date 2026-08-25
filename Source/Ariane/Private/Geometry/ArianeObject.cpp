@@ -853,6 +853,25 @@ FArianeObject::IsSelected()
     return bSelected;
 }
 
+
+FArianeObject*
+FArianeObject::GetNextChild( FArianeObject* Child )
+{
+    FArianeObject* NextChild = nullptr;
+    int IndexOfChild = Children.IndexOfByPredicate( [Child] ( const FArianeObjectID& ObjectId )
+        {
+            return ( const_cast<FArianeObjectID&>(ObjectId).GetObject() == Child ) ? true : false;
+        } );
+    int IndexOfNext = IndexOfChild + 1;
+
+    if( IndexOfNext < Children.Num() )
+    {
+        return Children[IndexOfNext].GetObject();
+    }
+
+    return nullptr;
+}
+
 FArianeObject*
 FArianeObject::GetPreviousChild( FArianeObject* Child )
 {
@@ -893,18 +912,26 @@ FArianeObject::TransferChild( FArianeObject* FosterChild
 
             if( InsertAfter )
             {
-                FArianeObjectID* InsertAfterID = Children.FindByPredicate(
-                    [InsertAfter] ( FArianeObjectID& ItemID ) -> bool
+                int InsertAfterIndex = Children.IndexOfByPredicate(
+                    [InsertAfter] ( const FArianeObjectID& ItemID ) -> bool
                     {
-                       if( ItemID.Guid == InsertAfter->GetGuid() )
+                       if( const_cast<FArianeObjectID&>(ItemID).GetObject() == InsertAfter )
                        {
                            return true;
                        }
 
                        return false;
                     } );
+                int InsertIndex = InsertAfterIndex + 1;
 
-                Children.Insert( FosterChild, InsertAfterID - Children.GetData() );
+                if( InsertIndex < Children.Num() )
+                {
+                    Children.Insert( FosterChild, InsertIndex );
+                }
+                else
+                {
+                    Children.Add( FosterChild );
+                }
             }
             else
             {

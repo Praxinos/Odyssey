@@ -186,10 +186,10 @@ FArianeGraph::FPoint::~FPoint()
 {
 }
 
-FArianeGraph::FPoint::FPoint( const FVector2D& InPosition, bool bInProjected, const FVector& InOriginalPosition )
+FArianeGraph::FPoint::FPoint( const FVector2D& InPosition, bool bInProjected, const FVector& InOriginalWorlPosition )
     : Position ( InPosition )
     , bProjected ( bInProjected )
-    , OriginalPosition ( InOriginalPosition )
+    , OriginalWorlPosition ( InOriginalWorlPosition )
 {
 }
 
@@ -198,8 +198,8 @@ FArianeGraph::FNode::~FNode()
 {
 }
 
-FArianeGraph::FNode::FNode( const FVector2D& InPosition, bool bInProjected, const FVector& InOriginalPosition )
-    : FPoint( InPosition, bInProjected, InOriginalPosition )
+FArianeGraph::FNode::FNode( const FVector2D& InPosition, bool bInProjected, const FVector& InOriginalWorlPosition )
+    : FPoint( InPosition, bInProjected, InOriginalWorlPosition )
     , EdgeCount( 0 )
 {
 }
@@ -363,7 +363,7 @@ FArianeGraph::FNodeIntersection::FNodeIntersection( const FVector2D& InPosition
                                                   , double InEdge0T
                                                   , FEdge* InEdge1
                                                   , double InEdge1T )
-    : FNode ( InPosition, true, InEdge0->GetOriginalPosition( InEdge0T ) )
+    : FNode ( InPosition, true, InEdge0->GetOriginalWorlPosition( InEdge0T ) )
     , Intersections { FIntersection( this, InEdge0T )
                     , FIntersection( this, InEdge1T ) }
     , Edges { InEdge0,  InEdge1 }
@@ -488,10 +488,10 @@ FArianeGraph::FEdgeLinear::FEdgeLinear( FNode* InNode0
 }
 
 FVector
-FArianeGraph::FEdgeLinear::GetOriginalPosition( float T )
+FArianeGraph::FEdgeLinear::GetOriginalWorlPosition( float T )
 {
-    return Nodes[0]->OriginalPosition + ( T * ( Nodes[1]->OriginalPosition
-                                              - Nodes[0]->OriginalPosition ) );
+    return Nodes[0]->OriginalWorlPosition + ( T * ( Nodes[1]->OriginalWorlPosition
+                                              - Nodes[0]->OriginalWorlPosition ) );
 }
 
 FArianeGraph::FEdgeCubic::~FEdgeCubic()
@@ -522,12 +522,12 @@ FArianeGraph::FEdgeCubic::FEdgeCubic( FNode* InNode0
 }
 
 FVector
-FArianeGraph::FEdgeCubic::GetOriginalPosition( float T )
+FArianeGraph::FEdgeCubic::GetOriginalWorlPosition( float T )
 {
-    return ::ULIS::CubicBezierPointAtParameter<FVector>( Nodes[0]->OriginalPosition
+    return ::ULIS::CubicBezierPointAtParameter<FVector>( Nodes[0]->OriginalWorlPosition
                                                        , OriginalHandlePosition[0]
                                                        , OriginalHandlePosition[1]
-                                                       , Nodes[1]->OriginalPosition
+                                                       , Nodes[1]->OriginalWorlPosition
                                                        , T );
 }
 
@@ -797,13 +797,15 @@ FArianeGraph::IntersectEdgeWithPath( FPath* Path, FEdge* Edge, FPath* Intersecte
     //return intersectionCount;
 }
 
+FVector
+FArianeGraph::GetNodeWorldPositionOnPlane( FNode* Node )
+{
+    return ( LocalToWorldRotationQuat * FVector( Node->Position.X, Node->Position.Y, 0.0f ) ) + ProjectionPlaneOrigin;
+}
+
 void
 FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& Objects )
 {
-    // find the angle between the Z axis and the plane's normal vector in order to find the rotation matrix.
-    // we will then use it to convert 3D points coordinates in a 2D coordinate system (with Z = 0).
-    FQuat RotationQuat = FQuat::FindBetweenNormals( ProjectionPlane.GetNormal(), FVector::UpVector );
-    FVector ProjectionPlaneOrigin = ProjectionPlane.GetOrigin();
     FVector::ZAxisVector;
     uint32 NodeCount = 0;
     uint32 LinearEdgeCount = 0;
@@ -873,7 +875,7 @@ FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& O
                                                                                          : false;
                 Vertex->SetID( NodeBuffer.Num() );
 
-                NodeBuffer.Emplace( FVector2D( RotationQuat * ( IntersectAt - ProjectionPlaneOrigin ) )
+                NodeBuffer.Emplace( FVector2D( WorldToLocalRotationQuat * ( IntersectAt - ProjectionPlaneOrigin ) )
                                   , bProjected
                                   , VertexWorldPosition );
 
@@ -897,7 +899,7 @@ FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& O
                                                                        , RayDirection
                                                                        , IntersectAt  ) > 0.0f ) ? true
                                                                                                  : false;
-                        FVector PositionInPlaneSpace = RotationQuat * ( IntersectAt - ProjectionPlaneOrigin );
+                        FVector PositionInPlaneSpace = WorldToLocalRotationQuat * ( IntersectAt - ProjectionPlaneOrigin );
 
                         Step.ID = (uint32) NodeBuffer.Num();
 
@@ -1403,6 +1405,12 @@ FArianeGraph::Solve( const FVector& ViewOrigin, const FPlane& InProjectionPlane,
     GapTolerance = InGapTolerance;
 
     ProjectionPlane = InProjectionPlane;
+    ProjectionPlaneOrigin = ProjectionPlane.GetOrigin();
+    // find the angle between the Z axis and the plane's normal vector in order to find the rotation matrix.
+    // we will then use it to convert 3D points coordinates in a 2D coordinate system (with Z = 0).
+    WorldToLocalRotationQuat = FQuat::FindBetweenNormals( ProjectionPlane.GetNormal(), FVector::UpVector );
+    // the inverse operation
+    LocalToWorldRotationQuat = WorldToLocalRotationQuat.Inverse();
 
     // clear cycles
     for( FCycle* Cycle : Cycles )
@@ -1449,15 +1457,11 @@ FArianeGraph::Solve( const FVector& ViewOrigin, const FPlane& InProjectionPlane,
 FArianeGraph::FCycle*
 FArianeGraph::PickCycle( const FVector& RayOrigin, const FVector& RayDirection )
 {
-    // find the angle between the Z axis and the plane's normal vector in order to find the rotation matrix.
-    // we will then use it to convert 3D points coordinates in a 2D coordinate system (with Z = 0).
-    FQuat RotationQuat = FQuat::FindBetweenNormals( ProjectionPlane.GetNormal(), FVector::UpVector );
-    FVector ProjectionPlaneOrigin = ProjectionPlane.GetOrigin();
     FVector IntersectAt;
 
     if( FArianeCore::IntersectPlane( ProjectionPlane, RayOrigin, RayDirection, IntersectAt ) )
     {
-        FVector PositionInPlaneSpace = RotationQuat * ( IntersectAt - ProjectionPlaneOrigin );
+        FVector PositionInPlaneSpace = WorldToLocalRotationQuat * ( IntersectAt - ProjectionPlaneOrigin );
 
         for( FCycle* Cycle : Cycles )
         {

@@ -87,10 +87,20 @@ public:
     UPROPERTY( EditAnywhere
              , Category = PrimitiveDrawingTool
              , meta = ( ToolTip = "StrokeWidth"
-                      , ClampMin = "0.0"
+                      , ClampMin = "0.01"
                       , Delta = "0.1"
-                      , UIMin = "0.0" ) )
+                      , UIMin = "0.01" ) )
     double StrokeWidth;
+
+    UPROPERTY( EditAnywhere
+             , Category = PrimitiveDrawingTool
+             , meta = ( ToolTip  = "Uniform" ) )
+    bool Uniform;
+    bool UniformAtKeyDown;
+
+    UPROPERTY( EditAnywhere
+             , Category = PrimitiveDrawingTool )
+    EArianePathLineType LineType;
 
     UPROPERTY( EditAnywhere
              , Category = PrimitiveDrawingTool )
@@ -105,23 +115,17 @@ public:
     //FOdysseyShapes Shapes;
 
     UPROPERTY( EditAnywhere
-             , Category = Polygon
-             , meta = ( ToolTip = "Polygon corner count"
+             , Category = PrimitiveDrawingTool
+             , meta = ( ToolTip = "Division count"
                       , EditCondition = "PrimitiveShapeType == EArianePrimitiveToolShapeType::Polygon"
                       , EditConditionHides
                       , ClampMin = "3"
                       , UIMin = "3"
-                      , ClampMax = "256"
-                      , UIMax = "256" ) )
-    int PolygonCornerCount;
-
-    UPROPERTY( EditAnywhere
-             , Category = "Parameters"
-             , meta = ( ToolTip  = "Uniform" ) )
-    bool Uniform;
-    bool UniformAtKeyDown;
-
-
+                      , Delta = "1"
+                      , LinearDeltaSensitivity = "5"
+                      , ClampMax = "20"
+                      , UIMax = "20" ) )
+    int DivisionCount;
 
 protected:
     FArianePrimitive* Primitive;
@@ -132,4 +136,5 @@ protected:
     uint32 PolygonNumber;
     EMouseCursor::Type Cursor;
     FVector PrimitiveCoordsAtDown;
+    FVector IntersectAtDown;
 };

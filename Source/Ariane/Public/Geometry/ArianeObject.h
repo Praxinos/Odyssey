@@ -302,6 +302,7 @@ public:
                      , const FVector& InSkewing );
 
     void ResetTransform();
+    FArianeObject* GetNextChild( FArianeObject* Child );
 
 protected:
     /**

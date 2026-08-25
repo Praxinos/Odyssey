@@ -179,18 +179,46 @@ FArianeCycle::EvaluateGraphCyclePointCount( FArianeGraph::FCycle* Cycle
     Points.Reserve( EvaluateContourPointCount( Cycle ) + PointCount );
 }
 
+FVector
+FArianeCycle::GetNodeFittedPosition( FArianeGraph* Graph, FArianeGraph::FNode* Node, EArianeCycleFittingRule FittingRule )
+{
+    FVector FittedPosition;
+
+    switch( FittingRule )
+    {
+        case EArianeCycleFittingRule::FitToPlane :
+            FittedPosition = Graph->GetNodeWorldPositionOnPlane( Node );
+        break;
+
+        case EArianeCycleFittingRule::FitToPaths :
+            FittedPosition = Node->OriginalWorlPosition;
+        break;
+
+        default :
+            FittedPosition = FVector::Zero();
+        break;
+    }
+
+    return FittedPosition;
+}
+
 void
-FArianeCycle::ContourToCoords( FArianeGraph::FCycle* GraphCycle
+FArianeCycle::ContourToCoords( FArianeGraph* Graph
+                             , FArianeGraph::FCycle* GraphCycle
                              , std::vector<FVector2D>& EarcutContour
-                             , TArray<FArianePoint>& OutPoints )
+                             , TArray<FArianePoint>& OutPoints
+                             , EArianeCycleFittingRule FittingRule )
 {
     FArianeGraph::FSection* FirstSection = GraphCycle->ContourSections[0];
     uint32 FirstNodeIndex = GraphCycle->ContourNodeIndices[0];
     FArianeGraph::FNode* FirstNode = FirstSection->Nodes[FirstNodeIndex];
     int32 ArraySize = GraphCycle->ContourSections.Num();
+    FVector FirstNodeFittedPosition = GetNodeFittedPosition( Graph, FirstNode, FittingRule );
 
+    // Earcut will create indices on a Graph in a 2D coordinates system.
     EarcutContour.push_back( FirstNode->Position );
-    OutPoints.Emplace( WorldTransform.InverseTransformPosition( FVector( FirstNode->OriginalPosition ) ) );
+    // We will then use the indices to form triangles in the 3D corrdinates system, whether on the plane or fitted to the paths
+    OutPoints.Emplace( WorldTransform.InverseTransformPosition( FirstNodeFittedPosition ) );
 
     for( int i = 0; i < ArraySize; i++ )
     {
@@ -203,33 +231,38 @@ FArianeCycle::ContourToCoords( FArianeGraph::FCycle* GraphCycle
         {
             FArianeGraph::FSectionLinear* LinearSection = static_cast<FArianeGraph::FSectionLinear*>(Section);
             FArianeGraph::FNode* NextNode = Section->Nodes[SectionNextNodeIndex];
+            FVector NextNodeFittedPosition = GetNodeFittedPosition( Graph, NextNode, FittingRule );
 
+            // Earcut will create indices on a Graph in a 2D coordinates system.
             EarcutContour.push_back( NextNode->Position );
-            OutPoints.Emplace( WorldTransform.InverseTransformPosition( FVector( NextNode->OriginalPosition ) ) );
+            // We will then use the indices to form triangles in the 3D corrdinates system, whether on the plane or fitted to the paths
+            OutPoints.Emplace( WorldTransform.InverseTransformPosition( NextNodeFittedPosition ) );
         }
     }
 }
 
 void
-FArianeCycle::GraphCycleToCoords(  FArianeGraph::FCycle* GraphCycle
+FArianeCycle::GraphCycleToCoords(  FArianeGraph* Graph
+                                 , FArianeGraph::FCycle* GraphCycle
                                  , std::vector<std::vector<FVector2D>>& EarcutContours
-                                 , TArray<FArianePoint>& OutPoints )
+                                 , TArray<FArianePoint>& OutPoints
+                                 , EArianeCycleFittingRule FittingRule )
 {
     uint32 CycleCount = 1;
 
     EvaluateGraphCyclePointCount( GraphCycle, EarcutContours, OutPoints );
 
-    ContourToCoords( GraphCycle, EarcutContours[0], OutPoints );
+    ContourToCoords( Graph, GraphCycle, EarcutContours[0], OutPoints, FittingRule );
 
     // for each inner cycle, we evaluate the number of points it will need for triangulation
     for( FArianeGraph::FCycle* Child : GraphCycle->Children )
     {
-        ContourToCoords( Child, EarcutContours[CycleCount++], OutPoints );
+        ContourToCoords( Graph, Child, EarcutContours[CycleCount++], OutPoints, FittingRule );
     }
 }
 
 void
-FArianeCycle::ImportGraphCycle( FArianeGraph::FCycle* GraphCycle )
+FArianeCycle::ImportGraphCycle( FArianeGraph* Graph, FArianeGraph::FCycle* GraphCycle, EArianeCycleFittingRule FittingRule )
 {
     Points.Empty();
     EarcutIndices.Empty();
@@ -238,7 +271,7 @@ FArianeCycle::ImportGraphCycle( FArianeGraph::FCycle* GraphCycle )
     {
         std::vector<std::vector<FVector2D>> Polygon;
 
-        GraphCycleToCoords( GraphCycle, Polygon, Points );
+        GraphCycleToCoords( Graph, GraphCycle, Polygon, Points, FittingRule );
 
         // Triangulate. The result is a flat list of indices into the input vertices (numbered ring after
         // ring, so index 6 is {25, 75} here), three per triangle. Output triangles have a consistent
