@@ -76,9 +76,9 @@ static const TArray<FMaterialOption>& GetMaterialOptions()
         },
 
         {
-            TEXT("Lit, No DOF, Shadow Reception"),
+            TEXT("Non flat assets"),
             TEXT("Translucent light-sensitive Material with many exposed parameters to be used on non-flat Actors."),
-            TEXT("/Odyssey/Materials/Instances/MI_NonPlaneSurfaces_Anim.MI_Anim_CastShadow_AfterDOF_Lit")
+            TEXT("/Odyssey/Materials/Instances/MI_NonPlaneSurfaces_Anim.MI_NonPlaneSurfaces_Anim")
         },
 
         {
