@@ -11,6 +11,7 @@
 #include "ArianeSegment.h"
 #include "ArianeVertex.h"
 #include "ArianeGraph.h"
+#include "ArianeCycle.h" // for enums
 
 #include "ArianeEditorPaintBucketTool.generated.h"
 
@@ -107,6 +108,9 @@ public:
              , Category = PaintBucketTool )
     double GapTolerance;
 
+    UPROPERTY( EditAnywhere
+             , Category = PaintBucketTool )
+    EArianeCycleFittingRule FittingRule;
 
 protected:
     FArianeGraph* Graph;

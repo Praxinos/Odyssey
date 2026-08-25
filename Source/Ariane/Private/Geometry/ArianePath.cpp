@@ -348,8 +348,8 @@ FArianePath::AllocVertex( const FVector& InPosition
     if( InAllocationModel == EArianeAllocationModel::OperatingSystem )
     {
         NewVertex = new FArianeVertex( this
-                                     , FVector()
-                                     , FVector()
+                                     , InPosition
+                                     , InNormal
                                      , InRadius
                                      , InAllocationModel );
     }

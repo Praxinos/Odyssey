@@ -39,9 +39,10 @@ UArianeEditorPrimitiveDrawingTool::~UArianeEditorPrimitiveDrawingTool()
 UArianeEditorPrimitiveDrawingTool::UArianeEditorPrimitiveDrawingTool()
     : PrimitiveShapeType ( EArianePrimitiveToolShapeType::Polygon )
     , StrokeWidth( 30.0f )
+    , LineType ( EArianePathLineType::Flat )
     , bShowGrid ( true )
     , MaterialInterface ( nullptr )
-    , PolygonCornerCount( 5 )
+    , DivisionCount( 3 )
     , Uniform( false )
     , Primitive( nullptr )
     , RectangleNumber ( 0 )
@@ -192,7 +193,6 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
                 FArianeGroup* ParentGroup = GetParentGroup( DrawingLayer );
                 FPlane DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
                 FVector RayOrigin, RayDirection;
-                FVector IntersectAt;
                 FVector2D ViewportPosition = FVector2D( PointerState.ViewportX
                                                       , PointerState.ViewportY );
 
@@ -200,12 +200,12 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
                                         , RayOrigin
                                         , RayDirection );
 
-                if( FArianeCore::IntersectPlane( DrawingPlane, RayOrigin, RayDirection, IntersectAt  ) > 0.0f )
+                if( FArianeCore::IntersectPlane( DrawingPlane, RayOrigin, RayDirection, IntersectAtDown  ) > 0.0f )
                 {
                     const FTransform& ParentGroupTransform = ParentGroup->GetTransform();
                     FVector LocalOrientation;
 
-                    PrimitiveCoordsAtDown = ParentGroupTransform.InverseTransformPosition( IntersectAt );
+                    PrimitiveCoordsAtDown = ParentGroupTransform.InverseTransformPosition( IntersectAtDown );
 
                     switch( Editor->GetLayerDrawingOrientation( DrawingLayer ) )
                     {
@@ -273,7 +273,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
                         case EArianePrimitiveToolShapeType::Polygon:
                             Primitive = DrawingLayer->AllocPolygon( MaterialInterface
                                                                   , *(FString("Polygon_") + FString::FromInt( PolygonNumber++ ))
-                                                                  , PolygonCornerCount
+                                                                  , DivisionCount
                                                                   , 0.0f
                                                                   , StrokeWidth//width.Distance()
                                                                   , EArianeAllocationModel::InstancedStruct );
@@ -285,7 +285,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
 
                     ParentGroup->AppendChild( Primitive );
                     Primitive->SetColor( ueColor );
-
+                    Primitive->SetLineType( LineType );
                     Primitive->SetTransform( PrimitiveCoordsAtDown, LocalOrientation, FVector::One(), FVector::Zero() );
                     Primitive->UpdateTransform();
                 }
@@ -381,7 +381,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDrag( FEditorViewportClient* ViewportC
                 FArianeGroup* ParentGroup = GetParentGroup( DrawingLayer );
                 FPlane DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
                 FVector RayOrigin, RayDirection;
-                FVector IntersectAt;
+                FVector IntersectAtDrag;
                 FVector2D ViewportPosition = FVector2D( PointerState.ViewportX
                                                       , PointerState.ViewportY );
 
@@ -389,11 +389,15 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDrag( FEditorViewportClient* ViewportC
                                         , RayOrigin
                                         , RayDirection );
 
-                if( FArianeCore::IntersectPlane( DrawingPlane, RayOrigin, RayDirection, IntersectAt  ) > 0.0f )
+                if( FArianeCore::IntersectPlane( DrawingPlane, RayOrigin, RayDirection, IntersectAtDrag  ) > 0.0f )
                 {
                     const FTransform& PrimitiveTransform = Primitive->GetTransform();
-                    FVector LocalCoordsAtDrag = PrimitiveTransform.InverseTransformPosition( IntersectAt );
-                    FVector Diff = ( LocalCoordsAtDrag - FVector::Zero() );
+                    //FVector2D PlaneCoordsAtDown = WorldToPlane( IntersectAtDown, DrawingPlane );
+                    //FVector2D PlaneCoordsAtDrag = WorldToPlane( IntersectAtDrag, DrawingPlane );
+
+
+                    FVector LocalCoordsAtDown = PrimitiveTransform.InverseTransformPosition( IntersectAtDown );
+                    FVector LocalCoordsAtDrag = PrimitiveTransform.InverseTransformPosition( IntersectAtDrag );
 
                     switch( PrimitiveShapeType/*Shapes.GetActiveShapeType()*/ )
                     {
@@ -401,10 +405,11 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDrag( FEditorViewportClient* ViewportC
                         case EArianePrimitiveToolShapeType::Ellipse:
                         {
                             FArianeEllipse* Ellipse = static_cast<FArianeEllipse*>(Primitive);
+                            FVector Diff = ( LocalCoordsAtDrag - FVector::Zero() );
 
                             if( Uniform )
                             {
-                                Diff.X = Diff.Y = Diff.Length();
+                                Diff.Y = Diff.X;
                             }
 
                             Ellipse->SetRadius( Diff.X, Diff.Y );
@@ -415,10 +420,16 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDrag( FEditorViewportClient* ViewportC
                         case EArianePrimitiveToolShapeType::Rectangle:
                         {
                             FArianeRectangle* Rectangle = static_cast<FArianeRectangle*>(Primitive);
+                            const FTransform& ParentGroupTransform = ParentGroup->GetTransform();
+                            //double XMin = FMath::Min( LocalCoordsAtDown.X, LocalCoordsAtDrag.X );
+                            //double YMin = FMath::Min( LocalCoordsAtDown.Y, LocalCoordsAtDrag.Y );
+                            //double XMax = FMath::Max( LocalCoordsAtDown.X, LocalCoordsAtDrag.X );
+                            //double YMax = FMath::Max( LocalCoordsAtDown.Y, LocalCoordsAtDrag.Y );
+                            FVector Diff = LocalCoordsAtDrag - LocalCoordsAtDown;
 
                             if( Uniform )
                             {
-                                Diff.X = Diff.Y = Diff.Length();
+                                 Diff.Y = ( Diff.Y > 0.0f ) ? fabs(Diff.X) : -fabs(Diff.X);
                             }
 
                             Rectangle->SetSize( Diff.X, Diff.Y );
@@ -455,6 +466,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDrag( FEditorViewportClient* ViewportC
                         case EArianePrimitiveToolShapeType::Polygon:
                         {
                             FArianePolygon* Polygon = static_cast<FArianePolygon*>(Primitive);
+                            FVector Diff = ( LocalCoordsAtDrag - FVector::Zero() );
 
                             Polygon->SetRadius( Diff.Length() );
                         }

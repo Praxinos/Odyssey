@@ -79,6 +79,7 @@ protected:
     void OnTransformChanged( UTransformProxy* Proxy, FTransform NewTransform );
     void BindComponentDelegates();
     void UnbindComponentDelegates();
+    void ResetGizmo();
     void ClearGizmo();
     void CreateGizmo();
     void CreateOverlayWidget();

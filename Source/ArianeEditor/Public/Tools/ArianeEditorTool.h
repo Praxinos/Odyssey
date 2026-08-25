@@ -333,6 +333,7 @@ protected:
                        , TArray<FArianeVertex*>& OutPickedVertices
                        , TArray<FArianeHandleSegment*>& OutPickedHandles
                        , const FPickingFlags& PickingFlags );
+    FVector2D WorldToPlane( const FVector& WorldPosition, const FPlane& ProjectionPlane );
 
     // HUD
 protected:

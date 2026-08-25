@@ -66,11 +66,11 @@ public:
         virtual uint32 GetClass(){ return StaticClass(); };
 
         virtual ~FPoint();
-        FPoint( const FVector2D& InPosition, bool bProjected, const FVector& InOriginalPosition );
+        FPoint( const FVector2D& InPosition, bool bProjected, const FVector& InOriginalWorlPosition );
 
         FVector2D Position;
         bool bProjected;
-        FVector OriginalPosition;
+        FVector OriginalWorlPosition;
     };
 
     // a node represents a vertex or a segment's fraction point
@@ -80,7 +80,7 @@ public:
         virtual uint32 GetClass() override { return StaticClass(); };
 
         virtual ~FNode();
-        FNode( const FVector2D& InPosition, bool bProjected, const FVector& InOriginalPosition );
+        FNode( const FVector2D& InPosition, bool bProjected, const FVector& InOriginalWorlPosition );
         void AddSection( FSection* Section, uint32 SectionNodeIndex );
         void RemoveSection( FSection* Section, uint32 SectionNodeIndex );
         FSectionLinkInfo* GetSectionLinkInfo( FSection* Section, uint32 SectionNodeIndex );
@@ -169,7 +169,7 @@ public:
              , double InLength );
         FNode* GetOtherNode( FNode* Node );
 
-        virtual FVector GetOriginalPosition( float T ) = 0;
+        virtual FVector GetOriginalWorlPosition( float T ) = 0;
         void CreateSections( TArray<FSection>& SectionBuffer
                            , bool bStitchShortSections
                            , TArray<FSection*>& ShortSections );
@@ -197,7 +197,7 @@ public:
                    , FNode* InNode1
                    , FFraction* InFractions );
 
-        virtual FVector GetOriginalPosition( float T ) override;
+        virtual FVector GetOriginalWorlPosition( float T ) override;
     };
 
     struct ARIANE_API FEdgeCubic : FEdge
@@ -215,7 +215,7 @@ public:
                   , uint32 InFractionCount
                   , FFraction* InFractions );
 
-        virtual FVector GetOriginalPosition( float T ) override;
+        virtual FVector GetOriginalWorlPosition( float T ) override;
 
         FVector2D Bezier[4];
         FVector OriginalHandlePosition[2];
@@ -533,6 +533,7 @@ public:
     FCycle* PickCycle( const FVector& RayOrigin, const FVector& RayDirection );
     void HighlightCycle( FCycle* Cycle );
     const FPlane& GetProjectionPlane();
+    FVector GetNodeWorldPositionOnPlane( FNode* Node );
 
 protected:
     static FSectionLinkInfo* FindNextSectionLinkInfo( FSectionLinkInfo* LastSectionLinkInfo
@@ -581,6 +582,9 @@ protected:
     static const uint32 HASCYCLE = 2;
 
     FPlane ProjectionPlane;
+    FVector ProjectionPlaneOrigin;
+    FQuat LocalToWorldRotationQuat;
+    FQuat WorldToLocalRotationQuat;
     FCriticalSection Mutex;
     // we store everything in one buffer per type, for performance
     TArray<FPoint> PointBuffer;

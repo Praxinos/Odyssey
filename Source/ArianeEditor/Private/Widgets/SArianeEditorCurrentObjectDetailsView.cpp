@@ -256,68 +256,50 @@ SArianeEditorCurrentObjectDetailsView::Update()
             {
                 if( ObjectClass == FArianePath::StaticClass() )
                 {
-                    PathProxy->Update( SelectedObjects );
-                    DetailsView->SetObject( PathProxy );
-
                     CurrentObjectProxy = PathProxy;
                 }
 
                 if( ObjectClass == FArianeGroup::StaticClass() )
                 {
-                    GroupProxy->Update( SelectedObjects );
-                    DetailsView->SetObject( GroupProxy );
-
                     CurrentObjectProxy = GroupProxy;
                 }
 
                 if( ObjectClass == FArianeEllipse::StaticClass() )
                 {
-                    EllipseProxy->Update( SelectedObjects );
-                    DetailsView->SetObject( EllipseProxy );
-
                     CurrentObjectProxy = EllipseProxy;
                 }
 
                 if( ObjectClass == FArianeRectangle::StaticClass() )
                 {
-                    RectangleProxy->Update( SelectedObjects );
-                    DetailsView->SetObject( RectangleProxy );
-
                     CurrentObjectProxy = RectangleProxy;
                 }
 
                 if( ObjectClass == FArianeLine::StaticClass() )
                 {
-                    LineProxy->Update( SelectedObjects );
-                    DetailsView->SetObject( LineProxy );
-
                     CurrentObjectProxy = LineProxy;
                 }
 
                 if( ObjectClass == FArianePolygon::StaticClass() )
                 {
-                    PolygonProxy->Update( SelectedObjects );
-                    DetailsView->SetObject( PolygonProxy );
-
                     CurrentObjectProxy = PolygonProxy;
                 }
 
                 if( ObjectClass == FArianeCycle::StaticClass() )
                 {
                     // default
-                    ObjectProxy->Update( SelectedObjects );
-                    DetailsView->SetObject( CycleProxy );
-
                     CurrentObjectProxy = CycleProxy;
                 }
 
                 if( ObjectClass == FArianeObject::StaticClass() )
                 {
                     // default
-                    ObjectProxy->Update( SelectedObjects );
-                    DetailsView->SetObject( ObjectProxy );
-
                     CurrentObjectProxy = ObjectProxy;
+                }
+
+                if( CurrentObjectProxy )
+                {
+                    CurrentObjectProxy->Update( SelectedObjects );
+                    DetailsView->SetObject( CurrentObjectProxy );
                 }
             }
         }

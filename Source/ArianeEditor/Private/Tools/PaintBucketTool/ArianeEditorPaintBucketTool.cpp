@@ -36,6 +36,7 @@ UArianeEditorPaintBucketTool::~UArianeEditorPaintBucketTool()
 UArianeEditorPaintBucketTool::UArianeEditorPaintBucketTool()
     : MaterialInterface( nullptr )
     , GapTolerance( 0.0f )
+    , FittingRule ( EArianeCycleFittingRule::FitToPaths )
     , Graph( new FArianeGraph() )
     , PickedCycle( nullptr )
     , bGraphNeedsUpdate ( true )
@@ -279,7 +280,7 @@ UArianeEditorPaintBucketTool::OnMouseUp( FEditorViewportClient* ViewportClient
                 PaintedCycle->SetColor( ueColor );
                 PaintedCycle->UpdateTransform();
                 // ImportGraphCycle needs the transform matrix to be set, hence the call to UpdateTransform just before
-                PaintedCycle->ImportGraphCycle( PickedCycle );
+                PaintedCycle->ImportGraphCycle( Graph, PickedCycle, FittingRule );
 
                 GetToolManager()->EndUndoTransaction();
             }

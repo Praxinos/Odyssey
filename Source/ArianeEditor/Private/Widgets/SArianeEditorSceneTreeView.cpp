@@ -396,7 +396,8 @@ SArianeEditorSceneTreeView::OnPrePainting3DComponentUpdate( bool bInteractive )
                                 , [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
             {
                 if( Object->GetInvalidationFlags().Hierarchy
-                    || Object->GetInvalidationFlags().Tags )
+                 || Object->GetInvalidationFlags().Name
+                 || Object->GetInvalidationFlags().Tags )
                 {
                     bDoUpdate = true;
                 }

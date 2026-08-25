@@ -82,6 +82,13 @@ class ARIANE_API FArianeCycleGeometry3D : public FArianeObjectGeometry3D
         FArianeCycle* GetCycle();
 };
 
+UENUM(BlueprintType)
+enum class EArianeCycleFittingRule : uint8
+{
+    FitToPlane = 0,
+    FitToPaths = 1,
+};
+
 USTRUCT(BlueprintType)
 struct ARIANE_API FArianeCycle : public FArianeObject
 {
@@ -128,7 +135,7 @@ public:
     TArray<int32>& GetEarcutIndices();
     TArray<FDynamicMeshVertex>& GetModelVertexCache();
     void BuildModelVertexCache();
-    void ImportGraphCycle( FArianeGraph::FCycle* GraphCycle );
+    void ImportGraphCycle( FArianeGraph* Graph, FArianeGraph::FCycle* GraphCycle, EArianeCycleFittingRule FittingRule );
 
 protected:
     virtual FArianeObject* CopyShape( const FCopyArgs& CopyArgs ) override;
@@ -138,12 +145,17 @@ protected:
     static void EvaluateGraphCyclePointCount( FArianeGraph::FCycle* Cycle
                                             , std::vector<std::vector<FVector2D>>& EarcutContours
                                             , TArray<FArianePoint>& Points );
-    void ContourToCoords( FArianeGraph::FCycle* GraphCycle
+    void ContourToCoords( FArianeGraph* Graph
+                        , FArianeGraph::FCycle* GraphCycle
                         , std::vector<FVector2D>& EarcutContour
-                        , TArray<FArianePoint>& OutPoints );
-    void GraphCycleToCoords(  FArianeGraph::FCycle* GraphCycle
+                        , TArray<FArianePoint>& OutPoints
+                        , EArianeCycleFittingRule FittingRule );
+    void GraphCycleToCoords(  FArianeGraph* Graph
+                            , FArianeGraph::FCycle* GraphCycle
                             , std::vector<std::vector<FVector2D>>& EarcutContours
-                            , TArray<FArianePoint>& OutPoints );
+                            , TArray<FArianePoint>& OutPoints
+                            , EArianeCycleFittingRule FittingRule );
+    FVector GetNodeFittedPosition( FArianeGraph* Graph, FArianeGraph::FNode* Node, EArianeCycleFittingRule FittingRule );
 
 protected:
     UPROPERTY( EditAnywhere )

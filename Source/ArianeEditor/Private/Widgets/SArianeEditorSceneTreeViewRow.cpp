@@ -419,7 +419,6 @@ SArianeEditorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     FArianeObject* ItemObject = Item.Get()->GetObject();
     FArianeGroup* RootGroup = ItemObject->GetRootGroup();
     TArray<FArianeObject*> SelectedTrees;
-    FArianeObject* InsertObject = ItemObject;
 
     // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
     // rebuilt while it's processing stuff
@@ -431,6 +430,8 @@ SArianeEditorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     {
         GEditor->BeginTransaction(LOCTEXT("ariane-tree-view.transaction.drag-drop-object", "Drop Objects"));
 
+        RootGroup->GetDrawingLayer()->Modify();
+
         for( FArianeObject* SelectedTree : SelectedTrees )
         {
             switch( DropZone )
@@ -439,17 +440,15 @@ SArianeEditorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
                 // reverse order in order to get the most forward objet on top of the hierarchy
                 case DROPZONE_BELOW:
                 {
-                    FArianeObject* parentObject = ItemObject->GetParent();
+                    FArianeObject* ParentObject = ItemObject->GetParent() ? ItemObject->GetParent() : ItemObject;
 
                     // note: SharedEnv and Root are system objects
                     //if( parentObject->IsSystem() == false )
                     {
                         // don't drop onto the same object or else expect some infinite loop
-                        if( parentObject != SelectedTree )
+                        if( ParentObject != SelectedTree )
                         {
-                            parentObject->TransferChild( SelectedTree, parentObject->GetPreviousChild( InsertObject ) );
-
-                            InsertObject = SelectedTree;
+                            ParentObject->TransferChild( SelectedTree, ParentObject->GetPreviousChild( ItemObject ) );
                         }
                     }
                 }
@@ -467,17 +466,11 @@ SArianeEditorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
                 // reverse order in order to get the most forward objet on top of the hierarchy
                 case DROPZONE_ABOVE:
                 {
-                    FArianeObject* ParentObject = ItemObject->GetParent();
+                    FArianeObject* ParentObject = ItemObject->GetParent() ? ItemObject->GetParent() : ItemObject;
 
-                    // note: Layer and Cell are system objects
-                    //if( ParentObject->IsSystem() == false )
+                    if( ParentObject != SelectedTree )
                     {
-                        if( ParentObject != SelectedTree )
-                        {
-                            ParentObject->TransferChild( SelectedTree, InsertObject );
-
-                            InsertObject = SelectedTree;
-                        }
+                        ParentObject->TransferChild( SelectedTree, ItemObject );
                     }
                 }
                 break;
@@ -490,6 +483,8 @@ SArianeEditorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
         DropZone = DROPZONE_NONE;
 
         RootGroup->GetPainting3DComponent()->Update( false );
+
+        GEditor->EndTransaction();
 
         //TreeView->BindComponentDelegates();
     }

@@ -87,9 +87,9 @@ public:
     UPROPERTY( EditAnywhere
              , Category = PathDrawingTool
              , meta = ( ToolTip = "Size"
-                      , ClampMin = "0.0"
+                      , ClampMin = "0.01"
                       , Delta = "0.1"
-                      , UIMin = "0.0" ) )
+                      , UIMin = "0.01" ) )
     double Size;
 
     UPROPERTY( EditAnywhere
