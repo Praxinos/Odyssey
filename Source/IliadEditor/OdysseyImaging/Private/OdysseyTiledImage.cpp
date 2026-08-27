@@ -56,6 +56,9 @@ UOdysseyTiledImage::Initialize(int InTileSize, EOdysseyTiledImageFormat InFormat
     TileSize = InTileSize;
     Format = InFormat;
 
+    //DEBUG only : Allows to undo a TiledImage created in a blueprint
+    SetFlags(GetFlags() | RF_Public | RF_Transactional);
+
     Tiles.Empty();
 }
 
@@ -78,8 +81,16 @@ UOdysseyTiledImage::GetPixelFormat() const
 }
 
 void
+UOdysseyTiledImage::PostEditUndo()
+{
+    OnChanged.Broadcast();
+}
+
+void
 UOdysseyTiledImage::CopyFromTexture(UTexture* InTexture, FIntRect InRect, FIntPoint InPosition)
 {
+    Modify();
+
     FOdysseyTileManager::FGetExistingTileId GetExistingTileId = FOdysseyTileManager::FGetExistingTileId::CreateLambda(
         [this](const FIntPoint& InTilePosition)
         {
@@ -110,6 +121,8 @@ UOdysseyTiledImage::CopyFromTexture(UTexture* InTexture, FIntRect InRect, FIntPo
         FOdysseyTileId& TileId = Tiles.FindOrAdd(CreatedTile.Pos);
         TileId = CreatedTile.Id;
     }
+
+    OnChanged.Broadcast();
 }
 
 void
@@ -176,11 +189,11 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
                 //If the buffer is null, the tile is empty
                 if (TileBuffer.IsNull())
                 {
-#ifdef UE_BUILD_DEBUG
+/*#ifdef UE_BUILD_DEBUG
                     FLinearColor ClearColor = FLinearColor::Red;
-#else
+#else*/
                     FLinearColor ClearColor = FLinearColor::Transparent;
-#endif
+//#endif
                     AddClearRenderTargetPass(GraphBuilder, DestinationTexture, ClearColor, TileDstRect);
                 }
                 else
@@ -221,5 +234,5 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
 void
 UOdysseyTiledImage::Serialize(FArchive& Ar)
 {
-
+    Super::Serialize(Ar);
 }
