@@ -30,4 +30,7 @@ class UOdysseyTileManagerBlueprintLibrary : public UBlueprintFunctionLibrary
 
     UFUNCTION(BlueprintPure, Category = "Odyssey | Stats")
     static int64 GetTileManagerSizeOnDisk();
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey | Stats")
+    static void EvictAllTiles();
 };
