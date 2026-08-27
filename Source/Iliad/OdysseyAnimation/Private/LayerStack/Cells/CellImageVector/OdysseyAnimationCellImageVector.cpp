@@ -289,12 +289,13 @@ UOdysseyAnimationCellImageVector::PostLoad()
     mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), format);
     InitTexture();
 
-    mVectorCell->Invalidate( FOdysseyVectorObjectInvalidationFlags() );
-    mVectorCell->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
     // textures must be assigned to brushes in PostLoad and not in Serialize(), because the UAsset won't be fully loaded
     // and there dimensions would be 0 at that point.
     mImporterV2.PostLoadTextures();
+
+    mVectorCell->Invalidate( FOdysseyVectorObjectInvalidationFlags() );
+    mVectorCell->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
 }
 
 void
