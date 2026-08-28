@@ -113,15 +113,26 @@ UArianeLayerStack::OnComponentDestroyed( bool bDestroyingHierarchy )
 }
 
 void
-UArianeLayerStack::AddLayer( UArianeLayerFolder* FosterFolder, UArianeLayer* OrphanLayer, bool bTriggerEvent )
+UArianeLayerStack::AddLayers( UArianeLayerFolder* FosterFolder, TArray<UArianeLayer*> OrphanLayers, bool bTriggerEvent )
 {
     if( bTriggerEvent )
         OnPreHierarchyChanged.Broadcast();
 
-    FosterFolder->AddChildLayer( OrphanLayer );
+    FosterFolder->Modify();
+
+    for( UArianeLayer* OrphanLayer : OrphanLayers )
+    {
+        FosterFolder->AddChildLayer( OrphanLayer );
+    }
 
     if( bTriggerEvent )
         OnPostHierarchyChanged.Broadcast();
+}
+
+void
+UArianeLayerStack::AddLayer( UArianeLayerFolder* FosterFolder, UArianeLayer* OrphanLayer, bool bTriggerEvent )
+{
+    AddLayers( FosterFolder, { OrphanLayer}, bTriggerEvent );
 }
 
 void
@@ -219,8 +230,8 @@ UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder, 
                                                                          , RF_Transactional ); // for undos
 
     // Below 2 lines are mandatory to register the component, otherwise undos won't work (RF_TRANSACTIONAL will be erased)
-    NewDrawingLayer->SetupAttachment( ParentLayerFolder );
-    NewDrawingLayer->RegisterComponent();
+    //NewDrawingLayer->SetupAttachment( ParentLayerFolder );
+    //NewDrawingLayer->RegisterComponent();
 
     AddLayer( ParentLayerFolder, NewDrawingLayer, bTriggerEvent );
 
@@ -238,8 +249,8 @@ UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder, b
                                                                       , RF_Transactional ); // for undos
 
     // Below 2 lines are mandatory to register the component, otherwise undos won't work (RF_TRANSACTIONAL will be erased)
-    NewLayerFolder->SetupAttachment( ParentLayerFolder );
-    NewLayerFolder->RegisterComponent();
+    //NewLayerFolder->SetupAttachment( ParentLayerFolder );
+    //NewLayerFolder->RegisterComponent();
 
     AddLayer( ParentLayerFolder, NewLayerFolder, bTriggerEvent );
 

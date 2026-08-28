@@ -116,6 +116,7 @@ public:
     FOnSelectionChanged& OnPostSelectionChangedDelegate();
 
     virtual void Serialize( FArchive& Ar ) override;
+    void AddLayers( UArianeLayerFolder* FosterFolder, TArray<UArianeLayer*> OrphanLayers, bool bTriggerEvent );
 
 #if WITH_EDITOR
     void PreEditUndo();

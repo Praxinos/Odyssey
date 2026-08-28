@@ -64,7 +64,7 @@ class ARIANEEDITOR_API SArianeEditorLayerStack
 
         // actions
         void CopySelectedLayers();
-        void PasteSelectedLayers();
+        void PasteLayers();
         void RemoveSelectedLayers();
         void SelectAllLayers();
         void CutSelectedLayers();

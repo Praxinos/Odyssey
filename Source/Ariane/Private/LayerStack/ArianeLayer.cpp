@@ -70,7 +70,8 @@ UArianeLayer::GetLayerStack()
 {
     AArianePainting3DActor* Painting3DActor = Cast<AArianePainting3DActor>(GetOwner());
 
-    return Painting3DActor->GetPainting3DComponent()->GetLayerStack();
+    // Painting3DActor can be null if the layer is copied in the clipboard
+    return Painting3DActor ? Painting3DActor->GetPainting3DComponent()->GetLayerStack() : nullptr;
     //return Cast<UArianeLayerStack>(GetOuter());
 }
 
@@ -85,6 +86,11 @@ void
 UArianeLayer::PostEditUndo()
 {
     Super::PostEditUndo();
+
+    if( IsRegistered() == false )
+    {
+        RegisterComponent();
+    }
 }
 #endif
 
@@ -92,6 +98,11 @@ void
 UArianeLayer::PostLoad()
 {
     Super::PostLoad();
+
+    if( IsRegistered() == false )
+    {
+        RegisterComponent();
+    }
 }
 
 /*

@@ -91,6 +91,8 @@ UArianeLayerDrawing::PrintPointers()
 void
 UArianeLayerDrawing::PostLoad()
 {
+    UArianeLayerStack* LayerStack = GetLayerStack();
+
     Super::PostLoad();
 
     // RootObjectID won't have its cache reset after Undoing, we have to force it.
@@ -114,13 +116,19 @@ UArianeLayerDrawing::PostLoad()
 
     Update( false );
 
-    // recompute the bounding volumes or else nothing will draw
-    GetLayerStack()->GetPainting3DComponent()->UpdateComponentToWorld();
+    // layer stack can be null in case the layer is copied in the clipboard (orphan layer)
+    if( LayerStack )
+    {
+        // recompute the bounding volumes or else nothing will draw
+        GetLayerStack()->GetPainting3DComponent()->UpdateComponentToWorld();
+    }
 }
 
 void
 UArianeLayerDrawing::PostEditUndo()
 {
+    UArianeLayerStack* LayerStack = GetLayerStack();
+
     Super::PostEditUndo();
 
     // RootObjectID won't have its cache reset after Undoing, we have to force it.
@@ -144,8 +152,12 @@ UArianeLayerDrawing::PostEditUndo()
 
     Update( false );
 
-    // recompute the bounding volumes or else nothing will draw
-    GetLayerStack()->GetPainting3DComponent()->UpdateComponentToWorld();
+    // layer stack can be null in case the layer is copied in the clipboard (orphan layer)
+    if( LayerStack )
+    {
+        // recompute the bounding volumes or else nothing will draw
+        GetLayerStack()->GetPainting3DComponent()->UpdateComponentToWorld();
+    }
 }
 
 FArianeObject*
@@ -459,6 +471,7 @@ UArianeLayerDrawing::GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMater
 void
 UArianeLayerDrawing::IncrementMaterial( UMaterialInterface* MaterialInterface )
 {
+    UArianeLayerStack* LayerStack = GetLayerStack();
     uint32* value = UsedMaterials.Find( MaterialInterface );
 
     // not: do not use findOrAdd, it will not initialize value to zero.
@@ -467,8 +480,12 @@ UArianeLayerDrawing::IncrementMaterial( UMaterialInterface* MaterialInterface )
         UsedMaterials.Add( MaterialInterface, 1 );
     }
 
+    // layer stack can be null in case the layer is copied in the clipboard (orphan layer)
+    if( LayerStack )
+    {
     // we need to rebuild the proxy
-    GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
+        LayerStack->GetPainting3DComponent()->MarkRenderStateDirty();
+    }
 }
 
 void
