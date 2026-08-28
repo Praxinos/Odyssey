@@ -28,6 +28,7 @@
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayerDrawing.h"
+#include "ArianeLayerFolder.h"
 #include "ArianePainting3DActor.h"
 // Unreal
 #include "Toolkits/BaseToolkit.h"
@@ -40,8 +41,18 @@
 #include "EditorModeManager.h"
 #include "Tools/EdModeInteractiveToolsContext.h"
 #include "Widgets/Input/SSegmentedControl.h"
+#include "SEnumCombo.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
+
+
+FArianeEditor::FClipboard&
+FArianeEditor::GetClipboard()
+{
+    static FArianeEditor::FClipboard Clipboard;
+
+    return Clipboard;
+}
 
 FArianeEditor::~FArianeEditor()
 {
@@ -53,6 +64,7 @@ FArianeEditor::FArianeEditor( FArianeEditorViewportToolkit* iToolkit )
     , Name("ArianeEditor")
     , ColorType ( EOdysseyPainterEditorColorType::Raw )
     , DrawingOrientation ( EArianeEditorDrawingOrientation::View )
+    , DrawingCoordinateSystem ( EArianeEditorDrawingCoordinateSystem::Local )
 {
     HUDDrawingFlags.Mode = FArianeEditorHUD::EMode::Object;
 
@@ -105,28 +117,34 @@ FArianeEditor::ExtendToolbarSaveAssetButton( UToolMenu* iToolMenu )
     );
 }
 
+EArianeEditorDrawingCoordinateSystem
+FArianeEditor::GetDrawingCoordinateSystem()
+{
+    return DrawingCoordinateSystem;
+}
+
 EArianeLayerDrawingOrientation
 FArianeEditor::GetLayerDrawingOrientation( UArianeLayerDrawing* DrawingLayer )
 {
-    if( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerXY )
+    if( ( DrawingOrientation == EArianeEditorDrawingOrientation::XY )
      || ( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerDefined )
-       && ( DrawingLayer->GetDrawingOrientation() ==  EArianeLayerDrawingOrientation::LayerXY ) ) )
+       && ( DrawingLayer->GetDrawingOrientation() ==  EArianeLayerDrawingOrientation::XY ) ) )
     {
-        return EArianeLayerDrawingOrientation::LayerXY;
+        return EArianeLayerDrawingOrientation::XY;
     }
 
-    if( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerYZ )
+    if( ( DrawingOrientation == EArianeEditorDrawingOrientation::YZ )
      || ( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerDefined )
-       && ( DrawingLayer->GetDrawingOrientation() ==  EArianeLayerDrawingOrientation::LayerYZ ) ) )
+       && ( DrawingLayer->GetDrawingOrientation() ==  EArianeLayerDrawingOrientation::YZ ) ) )
     {
-        return EArianeLayerDrawingOrientation::LayerYZ;
+        return EArianeLayerDrawingOrientation::YZ;
     }
 
-    if( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerZX )
+    if( ( DrawingOrientation == EArianeEditorDrawingOrientation::ZX )
      || ( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerDefined )
-       && ( DrawingLayer->GetDrawingOrientation() ==  EArianeLayerDrawingOrientation::LayerZX ) ) )
+       && ( DrawingLayer->GetDrawingOrientation() ==  EArianeLayerDrawingOrientation::ZX ) ) )
     {
-        return EArianeLayerDrawingOrientation::LayerZX;
+        return EArianeLayerDrawingOrientation::ZX;
     }
 
     if( ( DrawingOrientation == EArianeEditorDrawingOrientation::View )
@@ -155,6 +173,20 @@ FArianeEditor::GetDrawingOrientationBackgroundBrush( EArianeEditorDrawingOrienta
 }
 
 TSharedRef<SWidget>
+FArianeEditor::CreateDrawingCoordinateSystemComboBox()
+{
+    return SNew(SEnumComboBox, StaticEnum<EArianeEditorDrawingCoordinateSystem>())
+          .OnEnumSelectionChanged(this, &FArianeEditor::OnDrawingCoordinateSystemChanged)
+          .CurrentValue_Lambda([this]() { return (int32)DrawingCoordinateSystem; } );
+}
+
+void
+FArianeEditor::OnDrawingCoordinateSystemChanged( int32 EnumID, ESelectInfo::Type )
+{
+    DrawingCoordinateSystem = static_cast<EArianeEditorDrawingCoordinateSystem>(EnumID);
+}
+
+TSharedRef<SWidget>
 FArianeEditor::CreateDrawingOrientationSegmentControl()
 {
     return SNew(SSegmentedControl<EArianeEditorDrawingOrientation>)
@@ -173,38 +205,38 @@ FArianeEditor::CreateDrawingOrientationSegmentControl()
                    .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.View20") )
                ]
            ]
-           + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::LayerXY )
-           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerXY.name", "Use Layer's XY Plane") )
+           + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::XY )
+           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerXY.name", "Use XY Plane") )
            [
                SNew(SBorder)
-               .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::LayerXY  )
+               .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::XY  )
                [
                    SNew(SImage)
                    .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerXY20") )
                ]
            ]
-           + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::LayerYZ )
-           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerYZ.name", "Use on the Layer's YZ Plane") )
+           + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::YZ )
+           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerYZ.name", "Use YZ Plane") )
            [
                SNew(SBorder)
-               .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::LayerYZ  )
+               .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::YZ  )
                [
                    SNew(SImage)
                    .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerYZ20") )
                ]
            ]
-           + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::LayerZX )
-           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerZX.name", "Use Layer's ZX Plane") )
+           + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::ZX )
+           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerZX.name", "Use ZX Plane") )
            [
                SNew(SBorder)
-               .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::LayerZX  )
+               .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::ZX  )
                [
                    SNew(SImage)
                    .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerZX20") )
                ]
            ]
            + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::LayerDefined )
-           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerZX.name", "Use Layer's drawing orientation") )
+           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerDefined.name", "Use Layer-defined drawing orientation") )
            [
                SNew(SBorder)
                .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::LayerDefined  )
@@ -310,6 +342,16 @@ FArianeEditor::ExtendToolbarToolParameters( UToolMenu* iToolMenu )
         FToolMenuEntry::InitWidget(
             NAME_None,
             CreateDrawingOrientationSegmentControl(),
+            FText()
+        )
+    );
+
+    FToolMenuSection& DrawingCoordinateSystemSection = iToolMenu->AddSection("DrawingCoordinateSystem");
+
+    DrawingCoordinateSystemSection.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            CreateDrawingCoordinateSystemComboBox(),
             FText()
         )
     );
@@ -758,24 +800,6 @@ FArianeEditor::GetReferencerName() const
     return "FArianeEditor";
 }
 
-const FArianeEditor::FClipboard&
-FArianeEditor::GetClipboard() const
-{
-    return Clipboard;
-}
-
-TArray<FArianeObject*>&
-FArianeEditor::FClipboard::GetCopiedObjects()
-{
-    return CopiedObjects;
-}
-
-const TArray<FArianeObject*>&
-FArianeEditor::FClipboard::GetCopiedObjects() const
-{
-    return CopiedObjects;
-}
-
 void
 FArianeEditor::UngroupSelectedGroups()
 {
@@ -973,6 +997,7 @@ void
 FArianeEditor::CopySelectedObjects()
 {
     UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
+    FClipboard& Clipboard = GetClipboard();
 
     if( Painting3DComponent )
     {
@@ -1015,6 +1040,7 @@ void
 FArianeEditor::PasteObjects()
 {
     UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
+    FClipboard& Clipboard = GetClipboard();
 
     if( Painting3DComponent )
     {
@@ -1056,6 +1082,74 @@ FArianeEditor::PasteObjects()
                 Painting3DComponent->Update( false );
             }
         }
+    }
+}
+
+void
+FArianeEditor::CopySelectedLayers()
+{
+    UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
+    FClipboard& Clipboard = GetClipboard();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+        TArray<UArianeLayer*> SelectedTrees;
+
+        LayerStack->GetSelectedTrees( SelectedTrees );
+
+        Clipboard.CopiedLayers.Empty();
+
+        for( UArianeLayer* Layer : SelectedTrees )
+        {
+            UArianeLayer* LayerCopy = DuplicateObject<UArianeLayer>(Layer, GetTransientPackage());
+
+            Clipboard.CopiedLayers.Add( LayerCopy );
+        }
+
+        //Painting3DComponent.Get()->CopySelectedLayers();
+    }
+}
+
+void
+FArianeEditor::PasteLayers()
+{
+    UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
+    FClipboard& Clipboard = GetClipboard();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+        TArray<UArianeLayer*> SelectedTrees;
+        TArray<UArianeLayer*> LayerCopies;
+        UArianeLayerFolder* ReceiverFolder = LayerStack->GetRootFolder();
+
+        LayerStack->GetSelectedTrees( SelectedTrees );
+
+        if( SelectedTrees.Num() == 1 )
+        {
+            UArianeLayer* SelectedLayer = SelectedTrees[0];
+            UArianeLayerFolder* SelectedFolder = Cast<UArianeLayerFolder>(SelectedLayer);
+
+            if( SelectedFolder )
+            {
+                ReceiverFolder = SelectedFolder;
+            }
+        }
+
+        for( UArianeLayer* Layer : Clipboard.CopiedLayers )
+        {
+                                                                           // The outer must be the AActor or else the TEDS system could crash
+            UArianeLayer* LayerCopy = DuplicateObject<UArianeLayer>( Layer, Painting3DComponent->GetOwner() );
+
+            LayerCopy->RegisterComponent();
+
+            LayerCopies.Add( LayerCopy );
+        }
+
+        LayerStack->AddLayers( ReceiverFolder, LayerCopies, true );
+
+        Painting3DComponent->Update( false );
     }
 }
 

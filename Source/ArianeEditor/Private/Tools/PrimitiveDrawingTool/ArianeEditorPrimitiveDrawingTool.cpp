@@ -191,6 +191,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
             if( DrawingLayer )
             {
                 FArianeGroup* ParentGroup = GetParentGroup( DrawingLayer );
+                //const FTransform& ParentGroupTransform = ParentGroup->GetTransform();
                 FPlane DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
                 FVector RayOrigin, RayDirection;
                 FVector2D ViewportPosition = FVector2D( PointerState.ViewportX

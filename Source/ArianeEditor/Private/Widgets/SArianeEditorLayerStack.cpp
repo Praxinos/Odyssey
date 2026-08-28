@@ -218,12 +218,13 @@ SArianeEditorLayerStack::DeleteSelectedItem()
             ParentFolder->Modify();
         }
 
-        LayerStack->Modify();
-
         for( UArianeLayer* Layer : SelectedTrees )
         {
             Layer->GetParentFolder()->RemoveChildLayer( Layer );
         }
+
+        LayerStack->Modify();
+        LayerStack->ClearLayerSelection( true );
 
         GEditor->EndTransaction();
 
@@ -442,7 +443,9 @@ SArianeEditorLayerStack::SelectAllLayers()
 
     if( Painting3DComponent )
     {
-        Painting3DComponent->GetLayerStack()->SelectAllLayers();
+        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+
+        LayerStack->SelectAllLayers();
     }
 }
 
@@ -453,7 +456,13 @@ SArianeEditorLayerStack::RemoveSelectedLayers()
 
     if( Painting3DComponent )
     {
-        Painting3DComponent->GetLayerStack()->RemoveSelectedLayers();
+        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+
+        GEditor->BeginTransaction(LOCTEXT("ariane-layer-stack.remove-selected-layers","Remove Selected Layers"));
+
+        LayerStack->RemoveSelectedLayers();
+
+        GEditor->EndTransaction();
     }
 }
 
@@ -467,60 +476,50 @@ SArianeEditorLayerStack::CutSelectedLayers()
 void
 SArianeEditorLayerStack::CopySelectedLayers()
 {
-    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-
-    if( Painting3DComponent )
-    {
-        //Painting3DComponent.Get()->CopySelectedLayers();
-    }
+    Editor->CopySelectedLayers();
 }
 
 void
-SArianeEditorLayerStack::PasteSelectedLayers()
+SArianeEditorLayerStack::PasteLayers()
 {
-    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-
-    if( Painting3DComponent )
-    {
-        //PasteLayers();
-    }
+    Editor->PasteLayers();
 }
 
 void
 SArianeEditorLayerStack::MapActionsToCommandList()
 {
-/*
     CommandList->MapAction(
         FGenericCommands::Get().SelectAll,
-        FExecuteAction::CreateRaw( this, &SArianeEditorLayerStack::SelectAll )
+        FExecuteAction::CreateRaw( this, &SArianeEditorLayerStack::SelectAllLayers )
     );
 
     CommandList->MapAction(
         FGenericCommands::Get().Delete,
-        FExecuteAction::CreateRaw( this, &SArianeEditorLayerStack::DeleteObjects )
+        FExecuteAction::CreateRaw( this, &SArianeEditorLayerStack::RemoveSelectedLayers )
     );
 
     CommandList->MapAction(
         FGenericCommands::Get().Cut,
-        FExecuteAction::CreateRaw( this, &SArianeEditorLayerStack::CutObjects )
+        FExecuteAction::CreateRaw( this, &SArianeEditorLayerStack::CutSelectedLayers )
     );
 
     CommandList->MapAction(
         FGenericCommands::Get().Copy,
-        FExecuteAction::CreateRaw( this, &SArianeEditorLayerStack::CopyObjects )
+        FExecuteAction::CreateRaw( this, &SArianeEditorLayerStack::CopySelectedLayers )
     );
 
     CommandList->MapAction(
         FGenericCommands::Get().Paste,
-        FExecuteAction::CreateRaw( this, &SArianeEditorLayerStack::PasteObjects )
+        FExecuteAction::CreateRaw( this, &SArianeEditorLayerStack::PasteLayers )
     );
 
     CommandList->MapAction(
         FGenericCommands::Get().Rename,
         FExecuteAction::CreateRaw( this, &SArianeEditorLayerStack::RenameSelectedItem )
     );
-*/
 }
+
+
 /*
 void
 SArianeEditorLayerStack::OnPainting3DComponentChanged()

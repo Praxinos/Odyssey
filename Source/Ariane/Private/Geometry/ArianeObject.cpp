@@ -155,94 +155,99 @@ void
 FArianeObjectGeometry3D::InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices
                                           , TArray<uint32>& Indices )
 {
-    if( VertexFactory == nullptr )
+    UWorld* World = Object->GetDrawingLayer()->GetWorld();
+
+    if( World )
     {
-        VertexFactory = new FLocalVertexFactory( Object->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->GetWorld()->GetFeatureLevel(), "Object Vertex Factory" );
-    }
-
-    ENQUEUE_RENDER_COMMAND(StaticMeshVertexBuffersLegacyInit)(
-        [ this
-        ,  VerticesAsync = CopyTemp(Vertices) ] ( FRHICommandListImmediate& RHICmdList )
+        if( VertexFactory == nullptr )
         {
-            FLocalVertexFactory::FDataType Data;
+            VertexFactory = new FLocalVertexFactory( World->GetFeatureLevel(), "Object Vertex Factory" );
+        }
 
-            VertexCount = VerticesAsync.Num();
-
-            if( PositionBuffer.IsInitialized() == false ) PositionBuffer.InitResource( RHICmdList );
-            if( StaticMeshVB.IsInitialized()   == false ) StaticMeshVB.InitResource( RHICmdList );
-            if( ColorBuffer.IsInitialized()    == false ) ColorBuffer.InitResource( RHICmdList );
-
-            if( VertexCount )
+        ENQUEUE_RENDER_COMMAND(StaticMeshVertexBuffersLegacyInit)(
+            [ this
+            ,  VerticesAsync = CopyTemp(Vertices) ] ( FRHICommandListImmediate& RHICmdList )
             {
-                PositionBuffer.Init( VertexCount );
-                StaticMeshVB.Init( VertexCount, 1 );
-                ColorBuffer.Init( VertexCount );
+                FLocalVertexFactory::FDataType Data;
 
-                for ( uint32 i = 0; i < VertexCount; ++i )
+                VertexCount = VerticesAsync.Num();
+
+                if( PositionBuffer.IsInitialized() == false ) PositionBuffer.InitResource( RHICmdList );
+                if( StaticMeshVB.IsInitialized()   == false ) StaticMeshVB.InitResource( RHICmdList );
+                if( ColorBuffer.IsInitialized()    == false ) ColorBuffer.InitResource( RHICmdList );
+
+                if( VertexCount )
                 {
-                    FVector3f TangentX = VerticesAsync[i].TangentX.ToFVector3f();
-                    FVector3f TangentZ = VerticesAsync[i].TangentZ.ToFVector3f();
+                    PositionBuffer.Init( VertexCount );
+                    StaticMeshVB.Init( VertexCount, 1 );
+                    ColorBuffer.Init( VertexCount );
 
-                    PositionBuffer.VertexPosition( i ) = VerticesAsync[i].Position;
-                    ColorBuffer.VertexColor( i ) = VerticesAsync[i].Color;
-                    StaticMeshVB.SetVertexUV( i, 0, VerticesAsync[i].TextureCoordinate[0] );
-                    StaticMeshVB.SetVertexTangents( i, TangentX, TangentX.Cross( TangentZ ), TangentZ );
-                }
+                    for ( uint32 i = 0; i < VertexCount; ++i )
+                    {
+                        FVector3f TangentX = VerticesAsync[i].TangentX.ToFVector3f();
+                        FVector3f TangentZ = VerticesAsync[i].TangentZ.ToFVector3f();
 
-                // Copy RAM to VRAM
-                PositionBuffer.UpdateRHI( RHICmdList );
-                StaticMeshVB.UpdateRHI( RHICmdList );
-                ColorBuffer.UpdateRHI( RHICmdList );
+                        PositionBuffer.VertexPosition( i ) = VerticesAsync[i].Position;
+                        ColorBuffer.VertexColor( i ) = VerticesAsync[i].Color;
+                        StaticMeshVB.SetVertexUV( i, 0, VerticesAsync[i].TextureCoordinate[0] );
+                        StaticMeshVB.SetVertexTangents( i, TangentX, TangentX.Cross( TangentZ ), TangentZ );
+                    }
 
-                PositionBuffer.BindPositionVertexBuffer( VertexFactory, Data );
-                StaticMeshVB.BindTangentVertexBuffer( VertexFactory, Data );
-                StaticMeshVB.BindPackedTexCoordVertexBuffer( VertexFactory, Data );
-                ColorBuffer.BindColorVertexBuffer( VertexFactory, Data );
+                    // Copy RAM to VRAM
+                    PositionBuffer.UpdateRHI( RHICmdList );
+                    StaticMeshVB.UpdateRHI( RHICmdList );
+                    ColorBuffer.UpdateRHI( RHICmdList );
 
-                VertexFactory->SetData( RHICmdList, Data );
+                    PositionBuffer.BindPositionVertexBuffer( VertexFactory, Data );
+                    StaticMeshVB.BindTangentVertexBuffer( VertexFactory, Data );
+                    StaticMeshVB.BindPackedTexCoordVertexBuffer( VertexFactory, Data );
+                    ColorBuffer.BindColorVertexBuffer( VertexFactory, Data );
 
-                // Init / update the factory after SetData
-                if (!VertexFactory->IsInitialized()) {
-                    VertexFactory->InitResource(RHICmdList);
-                } else {
-                    VertexFactory->UpdateRHI(RHICmdList);
-                }
-            }
-            else
-            {
-                if (VertexFactory->IsInitialized()) VertexFactory->ReleaseResource();
-                if (PositionBuffer.IsInitialized()) PositionBuffer.ReleaseResource();
-                if (StaticMeshVB.IsInitialized()) StaticMeshVB.ReleaseResource();
-                if (ColorBuffer.IsInitialized()) ColorBuffer.ReleaseResource();
+                    VertexFactory->SetData( RHICmdList, Data );
 
-                VertexCount = 0;
-            }
-        } );
-
-    ENQUEUE_RENDER_COMMAND(IndexBufferInit)(
-        [ this
-        , IndicesAsync = CopyTemp(Indices) ] ( FRHICommandListImmediate& RHICmdList )
-        {
-            uint32 IndexCount = IndicesAsync.Num();
-
-            if( IndexCount )
-            {
-                IndexBuffer.SetIndices( IndicesAsync, EIndexBufferStride::Type::Force32Bit );
-
-                if( IndexBuffer.IsInitialized() )
-                {
-                    IndexBuffer.UpdateRHI( RHICmdList );
+                    // Init / update the factory after SetData
+                    if (!VertexFactory->IsInitialized()) {
+                        VertexFactory->InitResource(RHICmdList);
+                    } else {
+                        VertexFactory->UpdateRHI(RHICmdList);
+                    }
                 }
                 else
                 {
-                    IndexBuffer.InitResource( RHICmdList );
+                    if (VertexFactory->IsInitialized()) VertexFactory->ReleaseResource();
+                    if (PositionBuffer.IsInitialized()) PositionBuffer.ReleaseResource();
+                    if (StaticMeshVB.IsInitialized()) StaticMeshVB.ReleaseResource();
+                    if (ColorBuffer.IsInitialized()) ColorBuffer.ReleaseResource();
+
+                    VertexCount = 0;
                 }
-            }
-            else
+            } );
+
+        ENQUEUE_RENDER_COMMAND(IndexBufferInit)(
+            [ this
+            , IndicesAsync = CopyTemp(Indices) ] ( FRHICommandListImmediate& RHICmdList )
             {
-                if( IndexBuffer.IsInitialized() ) IndexBuffer.ReleaseResource();
-            }
-        } );
+                uint32 IndexCount = IndicesAsync.Num();
+
+                if( IndexCount )
+                {
+                    IndexBuffer.SetIndices( IndicesAsync, EIndexBufferStride::Type::Force32Bit );
+
+                    if( IndexBuffer.IsInitialized() )
+                    {
+                        IndexBuffer.UpdateRHI( RHICmdList );
+                    }
+                    else
+                    {
+                        IndexBuffer.InitResource( RHICmdList );
+                    }
+                }
+                else
+                {
+                    if( IndexBuffer.IsInitialized() ) IndexBuffer.ReleaseResource();
+                }
+            } );
+    }
 }
 
 ///---------------------------------------------------------

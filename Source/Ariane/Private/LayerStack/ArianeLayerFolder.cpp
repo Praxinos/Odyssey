@@ -63,7 +63,9 @@ UArianeLayerFolder::AddChildLayer( UArianeLayer* Orphan )
     {
         // Typically called when AddChildLayer is run in a constructor
         Orphan->SetupAttachment(this);
+        Orphan->RegisterComponent();
     }
+
 
     // Force Update transforms (will update the transform of the rootGroup of drawing layers)
     Orphan->OnUpdateTransform( EUpdateTransformFlags::None, ETeleportType::None );
@@ -81,6 +83,7 @@ UArianeLayerFolder::RemoveChildLayer( UArianeLayer* Child )
     Invalidate( FArianeLayerFolderInvalidationFlags().SetHierarchy() );
 
     Child->DetachFromComponent( FDetachmentTransformRules::KeepWorldTransform );
+    Child->UnregisterComponent();
 
     // Rename() is used to define the parent object
     Child->Rename( nullptr, nullptr );

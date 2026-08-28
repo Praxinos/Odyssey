@@ -20,8 +20,8 @@ enum class EArianeLayerDrawingOrigin : uint8
 UENUM()
 enum class EArianeLayerDrawingOrientation : uint8
 {
-    LayerXY,
-    LayerYZ,
-    LayerZX,
+    XY,
+    YZ,
+    ZX,
     View,
 };

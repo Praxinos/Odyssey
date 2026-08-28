@@ -402,8 +402,10 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
     IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
     FPrimitiveDrawInterface* PDI = RenderAPI->GetPrimitiveDrawInterface();
     ULineBatchComponent* LineBatcher = GetWorld()->GetLineBatcher( UWorld::ELineBatcherType::World );
-    FTransform LayerTransform = DrawingLayer->GetComponentTransform();
-    FMatrix LayerMatrix = LayerTransform.ToMatrixWithScale();;
+    //FTransform LayerTransform = DrawingLayer->GetComponentTransform();
+    //FMatrix LayerMatrix = LayerTransform.ToMatrixWithScale();;
+    FPlane DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
+    FQuat WorldToPlaneRotationQuat = FQuat::FindBetweenNormals( FVector::ZAxisVector, DrawingPlane.GetNormal() );
     FMatrix WorldMatrix;
     float AdjustedThickness = 2.0f;
     FViewCameraState CameraState;
@@ -423,27 +425,15 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
 
     switch( Editor->GetLayerDrawingOrientation( DrawingLayer ) )
     {
-        case EArianeLayerDrawingOrientation::LayerXY:
-            WorldMatrix = LayerMatrix;
-        break;
-
-        case EArianeLayerDrawingOrientation::LayerYZ:
+        case EArianeLayerDrawingOrientation::XY:
+        case EArianeLayerDrawingOrientation::YZ:
+        case EArianeLayerDrawingOrientation::ZX:
         {
-            // Note: args are Pitch(Y) Yaw(Z) Roll(X)
-            // but rotation order is Yaw (Z) Pitch (Y) Roll (X)
-            FMatrix YZRotation = FRotationMatrix( FRotator(  0.f, 90.f, 90.f ) );
+            FTransform LayerTranslationTransform;
 
-            WorldMatrix = YZRotation * LayerMatrix;
-        }
-        break;
+            LayerTranslationTransform.SetTranslation( DrawingLayer->GetComponentLocation() );
 
-        case EArianeLayerDrawingOrientation::LayerZX:
-        {
-            // Note: args are Pitch(Y) Yaw(Z) Roll(X)
-            // but rotation order is Yaw (Z) Pitch (Y) Roll (X)
-            FMatrix ZXRotation = FRotationMatrix( FRotator(  0.f,  0.f, 90.f ) );
-
-            WorldMatrix = ZXRotation * LayerMatrix;
+            WorldMatrix = FTransform(WorldToPlaneRotationQuat).ToMatrixNoScale() * LayerTranslationTransform.ToMatrixNoScale();
         }
         break;
 
@@ -476,7 +466,7 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
 
             LayerTranslationTransform.SetTranslation( DrawingLayer->GetComponentLocation() );
 
-            WorldMatrix = ViewAlignedRot * LayerTranslationTransform.ToMatrixNoScale();
+            WorldMatrix = FTransform(ViewAlignedRot).ToMatrixNoScale() * LayerTranslationTransform.ToMatrixNoScale();
             // --- End
         }
         break;
@@ -858,7 +848,7 @@ FPlane
 UArianeEditorTool::GetDrawingPlane( FEditorViewportClient* ViewportClient, UArianeLayerDrawing* DrawingLayer )
 {
     IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
-    const FTransform& LayerWorldTransform = DrawingLayer->GetComponentTransform();
+    FTransform CoordSystemTransform;
     FVector LayerWorldPosition = DrawingLayer->GetComponentLocation();
     FViewCameraState CameraState;
 
@@ -868,20 +858,52 @@ UArianeEditorTool::GetDrawingPlane( FEditorViewportClient* ViewportClient, UAria
     FVector CameraDirection = CameraState.Orientation.GetForwardVector();
     FVector PlaneWorldDirection = FVector( 0.0f, 0.0f, 0.0f ) ;
 
+    switch ( Editor->GetDrawingCoordinateSystem() )
+    {
+        case EArianeEditorDrawingCoordinateSystem::World :
+            CoordSystemTransform = FTransform( FQuat(), DrawingLayer->GetComponentLocation(), FVector::One() );
+        break;
+
+        case EArianeEditorDrawingCoordinateSystem::Layer :
+            CoordSystemTransform = DrawingLayer->GetComponentTransform();
+        break;
+
+        case EArianeEditorDrawingCoordinateSystem::CommonAncestor :
+            CoordSystemTransform = FTransform::Identity;
+        break;
+
+        case EArianeEditorDrawingCoordinateSystem::Local :
+        {
+            const TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetSelectedObjects();
+
+            if( SelectedObjects.Num() == 1 )
+            {
+                FArianeObject* SelectedObject = SelectedObjects[0];
+                const FTransform& SelectedObjectTransform = SelectedObject->GetTransform();
+
+                CoordSystemTransform = FTransform( SelectedObjectTransform.GetRotation()
+                                                 , DrawingLayer->GetComponentLocation()
+                                                 , FVector::One() );
+            }
+        }
+        break;
+
+        default :
+        break;
+    }
+
     switch ( Editor->GetLayerDrawingOrientation( DrawingLayer ) )
     {
-        case EArianeLayerDrawingOrientation::LayerXY :
-        PlaneWorldDirection = LayerWorldTransform.TransformVector( FVector( 0.0f, 0.0f, 1.0f ) );
-
+        case EArianeLayerDrawingOrientation::XY :
+            PlaneWorldDirection = CoordSystemTransform.TransformVector( FVector( 0.0f, 0.0f, 1.0f ) );
         break;
 
-        case EArianeLayerDrawingOrientation::LayerYZ :
-        PlaneWorldDirection = LayerWorldTransform.TransformVector( FVector( 1.0f, 0.0f, 0.0f ) );
-
+        case EArianeLayerDrawingOrientation::YZ :
+            PlaneWorldDirection = CoordSystemTransform.TransformVector( FVector( 1.0f, 0.0f, 0.0f ) );
         break;
 
-        case EArianeLayerDrawingOrientation::LayerZX :
-        PlaneWorldDirection = LayerWorldTransform.TransformVector( FVector( 0.0f, 1.0f, 0.0f ) );
+        case EArianeLayerDrawingOrientation::ZX :
+            PlaneWorldDirection = CoordSystemTransform.TransformVector( FVector( 0.0f, 1.0f, 0.0f ) );
 
         break;
 

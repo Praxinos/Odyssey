@@ -217,7 +217,7 @@ SArianeEditorSceneTreeViewContextMenu::CanUngroup( FArianeGroup* RootGroup )
 bool
 SArianeEditorSceneTreeViewContextMenu::CanPaste( FArianeEditor* Editor )
 {
-    return Editor->GetClipboard().GetCopiedObjects().Num() ? true : false;
+    return Editor->GetClipboard().CopiedObjects.Num() ? true : false;
 }
 
 #undef LOCTEXT_NAMESPACE

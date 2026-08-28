@@ -28,17 +28,28 @@ class UArianePainting3DComponent;
 class UInteractiveToolManager;
 class UArianeEditorToolBuilder;
 class UArianeLayerDrawing;
+class UArianeLayer;
 struct FArianeObject;
 
 UENUM()
 enum class EArianeEditorDrawingOrientation : uint8
 {
-    LayerXY = static_cast<uint8>(EArianeLayerDrawingOrientation::LayerXY),
-    LayerYZ = static_cast<uint8>(EArianeLayerDrawingOrientation::LayerYZ),
-    LayerZX = static_cast<uint8>(EArianeLayerDrawingOrientation::LayerZX),
+    XY = static_cast<uint8>(EArianeLayerDrawingOrientation::XY),
+    YZ = static_cast<uint8>(EArianeLayerDrawingOrientation::YZ),
+    ZX = static_cast<uint8>(EArianeLayerDrawingOrientation::ZX),
     View    = static_cast<uint8>(EArianeLayerDrawingOrientation::View),
     LayerDefined,
 };
+
+UENUM()
+enum class EArianeEditorDrawingCoordinateSystem : uint8
+{
+    World,
+    Layer,
+    CommonAncestor,
+    Local,
+};
+
 
 /**
  * Base class for a Painting Editor
@@ -51,14 +62,9 @@ class ARIANEEDITOR_API FArianeEditor
 public:
     struct ARIANEEDITOR_API FClipboard
     {
-        friend class FArianeEditor;
-
     public :
-        TArray<FArianeObject*>& GetCopiedObjects();
-        const TArray<FArianeObject*>& GetCopiedObjects() const;
-
-    protected:
         TArray<FArianeObject*> CopiedObjects;
+        TArray<UArianeLayer*> CopiedLayers;
     };
 
 public:
@@ -235,8 +241,9 @@ public:
     virtual FColor GetHUDForegroundColor() override;
     void SetCurrentPainting3DComponent( UArianePainting3DComponent* InPainting3DComponent );
     EArianeLayerDrawingOrientation GetLayerDrawingOrientation( UArianeLayerDrawing* DrawingLayer );
+    EArianeEditorDrawingCoordinateSystem GetDrawingCoordinateSystem();
 
-    const FClipboard& GetClipboard() const;
+    static FClipboard& GetClipboard();
 
     void GroupSelectedObjects( const FName& NewGroupName );
     void UngroupSelectedGroups();
@@ -244,6 +251,8 @@ public:
     void CopySelectedObjects();
     void PasteObjects();
     void ConvertSelectedPrimitives();
+    void CopySelectedLayers();
+    void PasteLayers();
 
 protected:
     /**
@@ -265,10 +274,12 @@ protected:
     void ExtendToolbarToolParameters( UToolMenu* iToolMenu );
     void SetDrawingOrientation( EArianeEditorDrawingOrientation InDrawingOrientation);
     TSharedRef<SWidget> CreateDrawingOrientationSegmentControl();
+    TSharedRef<SWidget> CreateDrawingCoordinateSystemComboBox();
     const FSlateBrush* GetDrawingOrientationBackgroundBrush( EArianeEditorDrawingOrientation InDrawingOrientation ) const;
     void ClearPainting3DComponents();
     void OnEditorSelectionChanged( UObject* NewSelection );
     void AddToolBuilder( UArianeEditorToolBuilder* ToolBuilder );
+    void OnDrawingCoordinateSystemChanged( int32, ESelectInfo::Type );
 
 
 protected:
@@ -291,5 +302,5 @@ protected:
     EOdysseyPainterEditorColorType ColorType;
     FArianeEditorHUD::FDrawingFlags HUDDrawingFlags;
     EArianeEditorDrawingOrientation DrawingOrientation;
-    FClipboard Clipboard;
+    EArianeEditorDrawingCoordinateSystem DrawingCoordinateSystem;
 };
