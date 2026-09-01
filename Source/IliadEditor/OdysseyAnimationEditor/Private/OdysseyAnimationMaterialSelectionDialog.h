@@ -10,5 +10,5 @@ class FMaterialSelectionDialog
 {
 public:
 
-    static TObjectPtr<UMaterialInterface> Show();
+    static TObjectPtr<UMaterialInterface> Show(const FString iDuplicatePackagePath);
 };

@@ -26,8 +26,7 @@ private:
     void RegisterPropertyCustomizations();
     void UnregisterPropertyCustomizations();
 
-    void OnPostEngineInit();
-    void OnLevelActorAdded(AActor* iActor);
+    void OnNewActorsDropped(const TArray<UObject*>& DroppedObjects, const TArray<AActor*>& NewActors);
 private:
     /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
     TSharedPtr<IAssetTypeActions> mOdysseyTypeActions;

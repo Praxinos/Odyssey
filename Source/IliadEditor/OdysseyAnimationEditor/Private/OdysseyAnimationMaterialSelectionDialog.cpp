@@ -24,6 +24,7 @@
 
 #include "OdysseyAnimationSettings.h"
 #include "AssetToolsModule.h"
+#include "Widgets/Layout/SExpandableArea.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -79,37 +80,13 @@ static const TArray<FMaterialOption>& GetMaterialOptions()
             TEXT("Non flat assets"),
             TEXT("Translucent light-sensitive Material with many exposed parameters to be used on non-flat Actors."),
             TEXT("/Odyssey/Materials/Instances/MI_NonPlaneSurfaces_Anim.MI_NonPlaneSurfaces_Anim")
-        },
-
-        {
-            TEXT("Storyboard, Lit, DOF, Shadow Reception"),
-            TEXT("Translucent light-sensitive Material that receives shadows and is sensitive to Depth of Field & Motion Blur, with an activable grid. Ideal for Storyboards."),
-            TEXT("/Odyssey/Materials/Instances/MI_SB_Lit_SurfaceShadow_BeforeDOF.MI_SB_Lit_SurfaceShadow_BeforeDOF")
-        },
-
-        {
-            TEXT("Storyboard, Unlit, No DOF, No Shadow"),
-            TEXT("Translucent Material that ignores lights, shadows, Depth of Field and Motion Blur, with an activable grid. Ideal for Storyboards."),
-            TEXT("/Odyssey/Materials/Instances/MI_SB_Unlit_NoShadow_AfterDOF.MI_SB_Unlit_NoShadow_AfterDOF")
-        },
-
-        {
-            TEXT("Sprite, Lit"),
-            TEXT("Masked light-sensitive Material for 2D Sprites."),
-            TEXT("/Odyssey/Materials/Instances/MI_Sprite_Lit.MI_Sprite_Lit")
-        },
-
-        {
-            TEXT("Sprite, Unlit"),
-            TEXT("Masked Material for 2D Sprites that ignores lights from the 3D Level."),
-            TEXT("/Odyssey/Materials/Instances/MI_Sprite_Unlit.MI_Sprite_Unlit")
         }
     };
 
     return Options;
 }
 
-TObjectPtr<UMaterialInterface> FMaterialSelectionDialog::Show()
+TObjectPtr<UMaterialInterface> FMaterialSelectionDialog::Show(const FString iDuplicatePackagePath)
 {
     UOdysseyAnimationDialogSettings* Settings = GetMutableDefault<UOdysseyAnimationDialogSettings>();
 
@@ -124,77 +101,94 @@ TObjectPtr<UMaterialInterface> FMaterialSelectionDialog::Show()
 
     TSharedRef<SWindow> Window = SNew(SWindow)
         .Title(FText::FromString(TEXT("Select Material for your animation")))
-        .SizingRule(ESizingRule::UserSized)
-        .ClientSize(FVector2D(950.0f, 670.0f))
+        .SizingRule(ESizingRule::Autosized)
         .SupportsMaximize(false)
         .SupportsMinimize(false)
         .HasCloseButton(false);
 
     // Material default options
 
-    TSharedRef<SVerticalBox> OptionsBox = SNew(SVerticalBox);
+    TSharedRef<SVerticalBox> DefaultOptionBox = SNew(SVerticalBox);
+    TSharedRef<SVerticalBox> AdvancedOptionsBox = SNew(SVerticalBox);
 
-    for (const FMaterialOption& Option : GetMaterialOptions())
+    const TArray<FMaterialOption>& MaterialOptions = GetMaterialOptions();
+
+    for (int32 Index = 0; Index < MaterialOptions.Num(); ++Index)
     {
-        OptionsBox->AddSlot()
-            .AutoHeight()
-            .Padding(8.0f)
+        const FMaterialOption& Option = MaterialOptions[Index];
+
+        TSharedRef<SWidget> OptionWidget =
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            .FillWidth(0.35f)
+            .VAlign(VAlign_Center)
+            .Padding(0.0f, 0.0f, 15.0f, 0.0f)
             [
-                SNew(SHorizontalBox)
-                    +SHorizontalBox::Slot()
-                    .FillWidth(0.35f)
+                SNew(SButton)
+                    .ContentPadding(FMargin(12.0f, 8.0f))
+                    .HAlign(HAlign_Center)
                     .VAlign(VAlign_Center)
-                    .Padding(0.0f, 0.0f, 15.0f, 0.0f)
+                    .OnClicked_Lambda(
+                        [
+                            &Window,
+                            &MaterialSelected,
+                            Option
+                        ]()
+                        {
+                            UMaterialInterface* Material =
+                                LoadObject<UMaterialInterface>(
+                                    nullptr,
+                                    *Option.MaterialPath
+                                );
+
+                            if (Material)
+                            {
+                                MaterialSelected = Material;
+                                Window->RequestDestroyWindow();
+                            }
+
+                            return FReply::Handled();
+                        })
                     [
-                        SNew(SButton)
-                            .ContentPadding(FMargin(12.0f, 8.0f))
-                            .HAlign(HAlign_Center)
-                            .VAlign(VAlign_Center)
-                            .OnClicked_Lambda(
-                                [
-                                    &Window,
-                                    &MaterialSelected,
-                                    Option
-                                ]()
-                                {
-                                    UMaterialInterface* Material =
-                                        LoadObject<UMaterialInterface>(
-                                            nullptr,
-                                            *Option.MaterialPath
-                                        );
-
-                                    if (Material)
-                                    {
-                                        MaterialSelected = Material;
-
-                                        Window->RequestDestroyWindow();
-                                    }
-
-                                    return FReply::Handled();
-                                })
-                            [
-                                SNew(STextBlock)
-                                    .Text(FText::FromString(Option.Name))
-                                    .Justification(ETextJustify::Center)
-                            ]
+                        SNew(STextBlock)
+                            .Text(FText::FromString(Option.Name))
+                            .Justification(ETextJustify::Left)
                     ]
-                    +SHorizontalBox::Slot()
-                    .FillWidth(0.65f)
-                    .VAlign(VAlign_Center)
+            ]
+
+        + SHorizontalBox::Slot()
+            .FillWidth(0.65f)
+            .VAlign(VAlign_Center)
+            [
+                SNew(SVerticalBox)
+                    + SVerticalBox::Slot()
+                    .AutoHeight()
                     [
-                        SNew(SVerticalBox)
-                            // Description
-                            + SVerticalBox::Slot()
-                            .AutoHeight()
-                            [
-                                SNew(STextBlock)
-                                    .Text(FText::FromString(Option.Description))
-                                    .AutoWrapText(true)
-                            ]
+                        SNew(STextBlock)
+                            .Text(FText::FromString(Option.Description))
+                            .AutoWrapText(true)
                     ]
+            ];
+
+        if (Index == 0)
+        {
+            DefaultOptionBox->AddSlot()
+                .AutoHeight()
+                .Padding(8.0f)
+                [
+                    OptionWidget
                 ];
+        }
+        else
+        {
+            AdvancedOptionsBox->AddSlot()
+                .AutoHeight()
+                .Padding(8.0f)
+                [
+                    OptionWidget
+                ];
+        }
     }
-
     // Material Asset Picker
 
     TSharedRef<SWidget> MaterialPicker =
@@ -235,46 +229,77 @@ TObjectPtr<UMaterialInterface> FMaterialSelectionDialog::Show()
         [
             //Options
             SNew(SVerticalBox)
-                +SVerticalBox::Slot()
-                .FillHeight(1.0f)
+                + SVerticalBox::Slot()
+                .AutoHeight()
                 [
-                    SNew(SScrollBox)
-                        + SScrollBox::Slot()
+                    DefaultOptionBox
+                ]
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                [
+                    SNew(SExpandableArea)
+                        .AreaTitle(FText::FromString(TEXT("Advanced")))
+                        .InitiallyCollapsed(true)
+                        .Padding(8.0f)
+                        .BodyContent()
                         [
-                            OptionsBox
+                            SNew(SVerticalBox)
+                                + SVerticalBox::Slot()
+                                [
+                                    AdvancedOptionsBox
+                                ]
+                                //Material Picker
+                                + SVerticalBox::Slot()
+                                .AutoHeight()
+                                [
+                                    SNew(SHorizontalBox)
+                                        + SHorizontalBox::Slot()
+                                        .AutoWidth()
+                                        .VAlign(VAlign_Center)
+                                        .Padding(0.0f, 3.0f, 0.0f, 0.0f)
+                                        [
+                                            SNew(STextBlock)
+                                                .Text(FText::FromString("Custom material"))
+                                                .Font(FAppStyle::GetFontStyle("SmallFont"))
+                                                .ColorAndOpacity(
+                                                    FSlateColor::UseSubduedForeground()
+                                                )
+                                        ]
+                                    + SHorizontalBox::Slot()
+                                        .FillWidth(1.0f)
+                                        [
+                                            MaterialPicker
+                                        ]
+                                        // Apply
+                                        + SHorizontalBox::Slot()
+                                        .AutoWidth()
+                                        .Padding(5.0f, 0.0f)
+                                        [
+                                            SNew(SButton)
+                                                .Text(FText::FromString(TEXT("Apply")))
+                                                .IsEnabled_Lambda(
+                                                    [&MaterialSelected]()
+                                                    {
+                                                        return MaterialSelected != nullptr;
+                                                    })
+                                                .OnClicked_Lambda(
+                                                    [
+                                                        &Window
+                                                    ]()
+                                                    {
+                                                        Window->RequestDestroyWindow();
+                                                        return FReply::Handled();
+                                                    })
+                                        ]
+                                ]
                         ]
                 ]
-
             //Separator
             +SVerticalBox::Slot()
                 .AutoHeight()
                 .Padding(0.0f, 8.0f)
                 [
                     SNew(SSeparator)
-                ]
-
-            //Material Picker
-            +SVerticalBox::Slot()
-                .AutoHeight()
-                [
-                    SNew(SHorizontalBox)
-                        + SHorizontalBox::Slot()
-                        .AutoWidth()
-                        .VAlign(VAlign_Center)
-                        .Padding(0.0f, 3.0f, 0.0f, 0.0f)
-                        [
-                            SNew(STextBlock)
-                                .Text(FText::FromString("Custom material"))
-                                .Font(FAppStyle::GetFontStyle("SmallFont"))
-                                .ColorAndOpacity(
-                                    FSlateColor::UseSubduedForeground()
-                                )
-                        ]
-                        + SHorizontalBox::Slot()
-                        .FillWidth(1.0f)
-                        [
-                            MaterialPicker
-                        ]
                 ]
             + SVerticalBox::Slot()
                 .Padding(0.0f, 8.0f)
@@ -328,28 +353,9 @@ TObjectPtr<UMaterialInterface> FMaterialSelectionDialog::Show()
                                         .Text(FText::FromString(TEXT("Remember my choice")))
                                 ]
                         ]
-
-                    // Apply
-                    + SHorizontalBox::Slot()
-                        .AutoWidth()
-                        .Padding(5.0f, 0.0f)
-                        [
-                            SNew(SButton)
-                                .Text(FText::FromString(TEXT("Apply")))
-                                .OnClicked_Lambda(
-                                    [
-                                        &Window
-                                    ]()
-                                    {
-                                        Window->RequestDestroyWindow();
-                                        return FReply::Handled();
-                                    })
-                        ]
                 ]
         ]
     );
-
-    //Displays Widget in window
 
     FSlateApplication::Get().AddModalWindow(
         Window,
@@ -358,19 +364,17 @@ TObjectPtr<UMaterialInterface> FMaterialSelectionDialog::Show()
     );
 
     //Copy material at the root of the content browser if needed
-
     if( *bCopyMaterial && MaterialSelected != nullptr )
     {
         FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
 
-        const FString PackagePath = TEXT("/Game");
         const FString AssetName = MaterialSelected->GetName();
 
         FString UniquePackageName;
         FString UniqueAssetName;
 
         AssetToolsModule.Get().CreateUniqueAssetName(
-            PackagePath / AssetName,
+            iDuplicatePackagePath / AssetName,
             TEXT(""),
             UniquePackageName,
             UniqueAssetName
@@ -379,7 +383,7 @@ TObjectPtr<UMaterialInterface> FMaterialSelectionDialog::Show()
         UObject* DuplicatedObject =
             AssetToolsModule.Get().DuplicateAsset(
                 UniqueAssetName,
-                PackagePath,
+                iDuplicatePackagePath,
                 MaterialSelected
             );
 

@@ -17,6 +17,7 @@
 #include "OdysseyAnimationSettingsCustomization.h"
 #include "Materials/Material.h"
 #include "Misc/CoreDelegates.h"
+#include "Editor.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -33,10 +34,9 @@ FOdysseyAnimationEditorModule::StartupModule()
 
     RegisterPropertyCustomizations();
 
-    // GEditor doesn't exists at this point, so we defer the callback "OnLevelActorAdded" to after the initialisation of GEditor
-    FCoreDelegates::GetOnPostEngineInit().AddRaw(
+    FEditorDelegates::OnNewActorsDropped.AddRaw(
         this,
-        &FOdysseyAnimationEditorModule::OnPostEngineInit
+        &FOdysseyAnimationEditorModule::OnNewActorsDropped
     );
 }
 
@@ -50,22 +50,7 @@ FOdysseyAnimationEditorModule::ShutdownModule()
 
     UnregisterAssetTypeActions();
 
-    FCoreDelegates::GetOnPostEngineInit().RemoveAll(this);
-    if (GEditor)
-    {
-        GEditor->OnLevelActorAdded().RemoveAll( this );
-    }
-}
-
-void FOdysseyAnimationEditorModule::OnPostEngineInit()
-{
-    if (GEditor)
-    {
-        GEditor->OnLevelActorAdded().AddRaw(
-            this,
-            &FOdysseyAnimationEditorModule::OnLevelActorAdded
-        );
-    }
+    FEditorDelegates::OnNewActorsDropped.RemoveAll(this);
 }
 
 void
@@ -139,30 +124,42 @@ FOdysseyAnimationEditorModule::UnregisterPropertyCustomizations()
     }
 }
 
-void FOdysseyAnimationEditorModule::OnLevelActorAdded(AActor* iActor)
+void FOdysseyAnimationEditorModule::OnNewActorsDropped(
+    const TArray<UObject*>& DroppedObjects,
+    const TArray<AActor*>& NewActors)
 {
     const UOdysseyAnimationDialogSettings* Settings = GetDefault<UOdysseyAnimationDialogSettings>();
 
-    if (!iActor || !iActor->IsA<AOdysseyAnimationActor>() || iActor->HasAnyFlags(RF_Transient))
-    {
-        return;
-    }
+    TArray<AOdysseyAnimationActor*> AnimationActors;
 
-    AOdysseyAnimationActor* AnimationActor = Cast<AOdysseyAnimationActor>(iActor);
-
-    if( Settings->bApplyMaterialWithoutAsking && !Settings->DefaultMaterial.IsNull())
+    for (AActor* Actor : NewActors)
     {
-        UMaterialInterface* Material = Settings->DefaultMaterial.LoadSynchronous();
-        if( Material )
+        if (!Actor || !Actor->IsA<AOdysseyAnimationActor>() || Actor->HasAnyFlags(RF_Transient))
         {
-            AnimationActor->GetAnimationComponent()->SetAnimationMaterial(Material);
+            continue;
         }
+        AOdysseyAnimationActor* AnimationActor = Cast<AOdysseyAnimationActor>(Actor);
+        AnimationActors.Add(AnimationActor);
     }
-    else
-    {
-        TObjectPtr<UMaterialInterface> MaterialSelection = FMaterialSelectionDialog::Show();
 
-        AnimationActor->GetAnimationComponent()->SetAnimationMaterial(MaterialSelection);
+    if( AnimationActors.Num() != 0 )
+    {
+        if (Settings->bApplyMaterialWithoutAsking && !Settings->DefaultMaterial.IsNull())
+        {
+            UMaterialInterface* Material = Settings->DefaultMaterial.LoadSynchronous();
+            if (Material)
+            {
+                for(AOdysseyAnimationActor* AnimationActor : AnimationActors)
+                    AnimationActor->GetAnimationComponent()->SetAnimationMaterial(Material);
+            }
+        }
+        else
+        {
+            const FString DuplicatePackagePath = FPackageName::GetLongPackagePath(AnimationActors[0]->GetAnimationComponent()->GetAnimation()->GetOutermost()->GetName());
+            TObjectPtr<UMaterialInterface> MaterialSelection = FMaterialSelectionDialog::Show(DuplicatePackagePath);
+            for (AOdysseyAnimationActor* AnimationActor : AnimationActors)
+                AnimationActor->GetAnimationComponent()->SetAnimationMaterial(MaterialSelection);
+        }
     }
 }
 
