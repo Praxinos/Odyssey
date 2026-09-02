@@ -8,6 +8,7 @@
 
 UArianeLayerFolder::~UArianeLayerFolder()
 {
+    delete InvalidationFlags;
 }
 
 UArianeLayerFolder::UArianeLayerFolder()
@@ -144,20 +145,4 @@ UArianeLayerFolder::Update( bool bInteractive )
     } );
 
     Super::Update( bInteractive );
-}
-
-FBoxSphereBounds
-UArianeLayerFolder::CalcBounds( const FTransform& LocalToWorld ) const
-{
-    // ForceInit makes the box invalid and excludes it from the computation unitl it is valid
-    FBoxSphereBounds NewBounds = FBoxSphereBounds(ForceInit);
-
-/*
-    for( UArianeLayer* Child : ChildLayers )
-    {
-        NewBounds = NewBounds +  Child->GetBounds().TransformBy( Child->GetRelativeTransform() );
-    }
-*/
-
-    return NewBounds;
 }

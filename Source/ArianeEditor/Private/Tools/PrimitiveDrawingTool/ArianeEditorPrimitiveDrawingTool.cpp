@@ -7,6 +7,7 @@
 #include "ArianeEditorStyle.h"
 //Ariane Headers
 #include "ArianeLayerStack.h"
+#include "ArianeImage.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeGroup.h"
 #include "ArianeLine.h"
@@ -151,7 +152,7 @@ UArianeEditorPrimitiveDrawingTool::OnKeyUpGlobal( const FKeyEvent& InKeyEvent )
 FArianeGroup*
 UArianeEditorPrimitiveDrawingTool::GetParentGroup( UArianeLayerDrawing* DrawingLayer )
 {
-    TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetSelectedObjects();
+    TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetImage()->GetSelectedObjects();
 
     if( SelectedObjects.Num() == 1 )
     {
@@ -161,7 +162,7 @@ UArianeEditorPrimitiveDrawingTool::GetParentGroup( UArianeLayerDrawing* DrawingL
        }
     }
 
-    return DrawingLayer->GetRootGroup();
+    return DrawingLayer->GetImage()->GetRootGroup();
 }
 
 bool
@@ -236,48 +237,48 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
 
                     GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-primitive-tool.create","Create Primitive"));
 
-                    DrawingLayer->Modify();
+                    DrawingLayer->GetImage()->Modify();
 
                     switch( PrimitiveShapeType/*Shapes.GetActiveShapeType()*/ )
                     {
                         //case EOdysseyShapeType::kEllipse:
                         case EArianePrimitiveToolShapeType::Ellipse:
-                            Primitive = DrawingLayer->AllocEllipse( MaterialInterface
-                                                                  , *(FString("Ellipse_" + FString::FromInt( EllipseNumber++ )))
-                                                                  , 0.0f
-                                                                  , 0.0f
-                                                                  , StrokeWidth//width.Distance()
-                                                                  , EArianeAllocationModel::InstancedStruct );
+                            Primitive = DrawingLayer->GetImage()->AllocEllipse( MaterialInterface
+                                                                              , *(FString("Ellipse_" + FString::FromInt( EllipseNumber++ )))
+                                                                              , 0.0f
+                                                                              , 0.0f
+                                                                              , StrokeWidth//width.Distance()
+                                                                              , EArianeAllocationModel::InstancedStruct );
                         break;
 
                         //case EOdysseyShapeType::kRectangle :
                         case EArianePrimitiveToolShapeType::Rectangle:
-                            Primitive = DrawingLayer->AllocRectangle( MaterialInterface
-                                                                    , *(FString("Rectangle_") + FString::FromInt( RectangleNumber++ ))
-                                                                    , 0.0f
-                                                                    , 0.0f
-                                                                    , StrokeWidth//width.Distance()
-                                                                    , EArianeAllocationModel::InstancedStruct );
+                            Primitive = DrawingLayer->GetImage()->AllocRectangle( MaterialInterface
+                                                                              , *(FString("Rectangle_") + FString::FromInt( RectangleNumber++ ))
+                                                                              , 0.0f
+                                                                              , 0.0f
+                                                                              , StrokeWidth//width.Distance()
+                                                                              , EArianeAllocationModel::InstancedStruct );
                         break;
 
                         //case EOdysseyShapeType::kLine:
                         case EArianePrimitiveToolShapeType::Line:
-                            Primitive = DrawingLayer->AllocLine( MaterialInterface
-                                                               , *(FString("Line_") + FString::FromInt( LineNumber++ ))
-                                                               , FVector::Zero()
-                                                               , FVector::Zero()
-                                                               , StrokeWidth//width.Distance()
-                                                               , EArianeAllocationModel::InstancedStruct );
+                            Primitive = DrawingLayer->GetImage()->AllocLine( MaterialInterface
+                                                                              , *(FString("Line_") + FString::FromInt( LineNumber++ ))
+                                                                              , FVector::Zero()
+                                                                              , FVector::Zero()
+                                                                              , StrokeWidth//width.Distance()
+                                                                              , EArianeAllocationModel::InstancedStruct );
                         break;
 
                         //case EOdysseyShapeType::kPolygon:
                         case EArianePrimitiveToolShapeType::Polygon:
-                            Primitive = DrawingLayer->AllocPolygon( MaterialInterface
-                                                                  , *(FString("Polygon_") + FString::FromInt( PolygonNumber++ ))
-                                                                  , DivisionCount
-                                                                  , 0.0f
-                                                                  , StrokeWidth//width.Distance()
-                                                                  , EArianeAllocationModel::InstancedStruct );
+                            Primitive = DrawingLayer->GetImage()->AllocPolygon( MaterialInterface
+                                                                              , *(FString("Polygon_") + FString::FromInt( PolygonNumber++ ))
+                                                                              , DivisionCount
+                                                                              , 0.0f
+                                                                              , StrokeWidth//width.Distance()
+                                                                              , EArianeAllocationModel::InstancedStruct );
                         break;
 
                         default:

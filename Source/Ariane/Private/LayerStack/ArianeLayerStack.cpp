@@ -5,6 +5,7 @@
 #include "ArianeLayerStack.h"
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerDrawing.h"
+#include "ArianeImage.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianeGroup.h"
 
@@ -234,6 +235,11 @@ UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder, 
     //NewDrawingLayer->RegisterComponent();
 
     AddLayer( ParentLayerFolder, NewDrawingLayer, bTriggerEvent );
+
+UE_LOG(LogTemp, Warning,
+    TEXT("Drawing registered: %d / Image registered: %d"),
+    NewDrawingLayer->IsRegistered(),
+    NewDrawingLayer->GetImage()->IsRegistered());
 
     return NewDrawingLayer;
 }

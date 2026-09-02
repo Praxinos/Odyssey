@@ -39,7 +39,7 @@ class UMaterialInstanceDynamic;
 
 
 UCLASS()
-class ARIANE_API UArianePainting3DComponent : public UMeshComponent
+class ARIANE_API UArianePainting3DComponent : public USceneComponent
 {
     GENERATED_BODY()
 
@@ -78,13 +78,13 @@ public:
     virtual void OnRegister() override;
     //const TArray<UMaterialInterface*>& GetUsedMaterials();
     // overrides UMeshComponent::GetNumMaterials()
-    virtual int32 GetNumMaterials() const override;
+    //virtual int32 GetNumMaterials() const override;
     // overrides UMeshComponent::GetMaterial()
-    virtual UMaterialInterface* GetMaterial(int32 ElementIndex) const override;
+    //virtual UMaterialInterface* GetMaterial(int32 ElementIndex) const override;
     // overrides UMeshComponent::SetMaterial()
-    virtual void SetMaterial( int32 ElementIndex, UMaterialInterface* Material ) override;
+    //virtual void SetMaterial( int32 ElementIndex, UMaterialInterface* Material ) override;
     // overrides UMeshComponent::GetUsedMaterials()
-    virtual void GetUsedMaterials(TArray<UMaterialInterface*>& OutMaterials, bool bGetDebugMaterials = false) const override;
+    //virtual void GetUsedMaterials(TArray<UMaterialInterface*>& OutMaterials, bool bGetDebugMaterials = false) const override;
 
     void Init();
     FOnUpdateDelegate& OnPreUpdateDelegate();
@@ -116,7 +116,7 @@ protected:
 protected:
     UOdysseyPaletteEntryColor* CurrentPaletteColorEntry;
     FGuid CurrentPaletteSet;
-    TArray<UMaterialInterface*> UsedMaterials;
+    //TArray<UMaterialInterface*> UsedMaterials;
     FOnUpdateDelegate OnPreUpdate;
     FOnUpdateDelegate OnPostUpdate;
     IArianePainting3DComponentEditorInterface* EditorInterface;

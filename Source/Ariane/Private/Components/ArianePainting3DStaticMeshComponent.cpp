@@ -7,6 +7,7 @@
 #include "ArianePath.h"
 #include "ArianeGroup.h"
 #include "ArianeSegment.h"
+#include "ArianeImage.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerFolder.h"
@@ -92,10 +93,10 @@ UArianePainting3DStaticMeshComponent::ConvertPathToStaticMesh( FMeshDescriptionB
 
 // static
 void
-UArianePainting3DStaticMeshComponent::ConvertLayerToStaticMesh( FMeshDescriptionBuilder& MeshDescriptionBuilder
+UArianePainting3DStaticMeshComponent::ConvertImageToStaticMesh( FMeshDescriptionBuilder& MeshDescriptionBuilder
                                                               , UArianeLayerDrawing* DrawingLayer )
 {
-    FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
+    FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
 
     FArianeObject::Traverse( RootGroup
                            , [ &MeshDescriptionBuilder ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
@@ -140,22 +141,30 @@ UArianePainting3DStaticMeshComponent::ConvertToStaticMesh()
         MeshDescriptionBuilder.SetNumUVLayers(1);
 
         TArray<UMaterialInterface*> MaterialInterfaces;
-        Painting3DComponent->GetUsedMaterials( MaterialInterfaces );
-        for( int32 i = 0; i < MaterialInterfaces.Num(); i++ )
-        {
-            UMaterialInterface *MaterialInterface = MaterialInterfaces[i];
-            ConvertedStaticMesh->GetStaticMaterials().Add( FStaticMaterial( MaterialInterface
-                                                                          , MaterialInterface->GetFName() ) );
-        }
+
 
         LayerStack->GetRootFolder()->Traverse(
-            [ &MeshDescriptionBuilder ]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
+            [ &MaterialInterfaces
+            , ConvertedStaticMesh
+            , &MeshDescriptionBuilder ]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
             {
                 UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Layer);
 
                 if( DrawingLayer )
                 {
-                    ConvertLayerToStaticMesh( MeshDescriptionBuilder, DrawingLayer );
+                    UArianeImage* Image = DrawingLayer->GetImage();
+
+                    Image->GetUsedMaterials( MaterialInterfaces );
+
+                    for( int32 i = 0; i < MaterialInterfaces.Num(); i++ )
+                    {
+                        UMaterialInterface *MaterialInterface = MaterialInterfaces[i];
+
+                        ConvertedStaticMesh->GetStaticMaterials().Add( FStaticMaterial( MaterialInterface
+                                                                                      , MaterialInterface->GetFName() ) );
+                    }
+
+                    ConvertImageToStaticMesh( MeshDescriptionBuilder, DrawingLayer );
                 }
 
                 return UArianeLayerFolder::ETraversalReturnValue::Continue;

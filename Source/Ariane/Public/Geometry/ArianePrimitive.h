@@ -11,6 +11,8 @@
 
 #include "ArianePrimitive.generated.h"
 
+class UArianeImage;
+
 struct ARIANE_API FArianePrimitiveInvalidationFlags : FArianePathInvalidationFlags
 {
     private:
@@ -37,7 +39,7 @@ public:
 
     virtual ~FArianePrimitive();
     FArianePrimitive();
-    FArianePrimitive( UArianeLayerDrawing* InDrawingLayer
+    FArianePrimitive( UArianeImage* InImage
                     , const FName& InName
                     , double InStrokeWidth
                     , EArianeAllocationModel InAllocationModel

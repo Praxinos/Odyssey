@@ -4,6 +4,7 @@
 #include "ArianeRectangle.h"
 #include "ArianeVertex.h"
 #include "ArianeSegmentCubic.h"
+#include "ArianeImage.h"
 #include "ArianeLayerDrawing.h"
 
 // https://stackoverflow.com/a/27863181
@@ -24,13 +25,13 @@ FArianeRectangle::FArianeRectangle()
 {
 }
 
-FArianeRectangle::FArianeRectangle( UArianeLayerDrawing* InDrawingLayer
+FArianeRectangle::FArianeRectangle( UArianeImage* InImage
                                   , const FName& InName
                                   , double InWidth
                                   , double InHeight
                                   , double InStrokeWidth
                                   , EArianeAllocationModel InAllocationModel )
-    : FArianePrimitive( InDrawingLayer
+    : FArianePrimitive( InImage
                       , InName
                       , InStrokeWidth
                       , InAllocationModel
@@ -140,12 +141,12 @@ FArianeRectangle::CopyShape( const FCopyArgs& CopyArgs )
     }
     else
     {
-         RectangleCopy = CopyArgs.DrawingLayer->AllocRectangle( MaterialInterface
-                                                              , Name
-                                                              , Width
-                                                              , Height
-                                                              , StrokeWidth
-                                                              , CopyArgs.AllocationModel );
+         RectangleCopy = CopyArgs.Image->AllocRectangle( MaterialInterface
+                                                       , Name
+                                                       , Width
+                                                       , Height
+                                                       , StrokeWidth
+                                                       , CopyArgs.AllocationModel );
     }
 
     return RectangleCopy;

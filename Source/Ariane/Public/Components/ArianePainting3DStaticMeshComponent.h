@@ -25,7 +25,7 @@ public:
     void ConvertToStaticMesh();
 
 private:
-    static void ConvertLayerToStaticMesh( FMeshDescriptionBuilder& MeshDescriptionBuilder
+    static void ConvertImageToStaticMesh( FMeshDescriptionBuilder& MeshDescriptionBuilder
                                         , UArianeLayerDrawing* DrawingLayer );
     static void ConvertPathToStaticMesh( FMeshDescriptionBuilder& MeshDescriptionBuilder
                                         , FArianePath* Path );

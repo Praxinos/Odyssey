@@ -3,6 +3,7 @@
 
 // Ariane headers
 #include "ArianeID.h"
+#include "ArianeImage.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeVertex.h"
 #include "ArianeSegment.h"
@@ -11,13 +12,13 @@
 #include "ArianeTag.h"
 
 FArianeObjectID::FArianeObjectID()
-    : DrawingLayer( nullptr )
+    : Image( nullptr )
     , CachedObject( nullptr )
 {
 }
 
 FArianeObjectID::FArianeObjectID( FArianeObject* Object )
-    : DrawingLayer( nullptr )
+    : Image( nullptr )
     , CachedObject( nullptr )
 {
     if( Object )
@@ -29,7 +30,7 @@ FArianeObjectID::FArianeObjectID( FArianeObject* Object )
 
         if( Object->GetAllocationModel() == EArianeAllocationModel::InstancedStruct )
         {
-            DrawingLayer = Object->GetDrawingLayer();
+            Image = Object->GetImage();
 
             Guid = Object->GetGuid();
         }
@@ -39,11 +40,11 @@ FArianeObjectID::FArianeObjectID( FArianeObject* Object )
 FArianeObject*
 FArianeObjectID::GetObject()
 {
-    if( DrawingLayer )
+    if( Image )
     {
         if( CachedObject == nullptr )
         {
-            CachedObject = DrawingLayer->GetObject( Guid );
+            CachedObject = Image->GetObject( Guid );
         }
     }
 
@@ -60,13 +61,13 @@ FArianeObjectID::InvalidateCache()
 ///////////////////////// VertexID
 
 FArianeVertexID::FArianeVertexID()
-    : DrawingLayer( nullptr )
+    : Image( nullptr )
     , CachedVertex( nullptr )
 {
 }
 
 FArianeVertexID::FArianeVertexID( FArianeVertex* Vertex )
-    : DrawingLayer( nullptr )
+    : Image( nullptr )
     , CachedVertex( nullptr )
 {
     if( Vertex )
@@ -78,7 +79,7 @@ FArianeVertexID::FArianeVertexID( FArianeVertex* Vertex )
 
         if( Vertex->GetAllocationModel() == EArianeAllocationModel::InstancedStruct )
         {
-            DrawingLayer = Vertex->GetOwner()->GetDrawingLayer();
+            Image = Vertex->GetOwner()->GetImage();
 
             Guid = Vertex->GetGuid();
 
@@ -92,7 +93,7 @@ FArianeVertexID::GetVertex()
 {
     if( CachedVertex == nullptr )
     {
-        FArianeObject* OwnerObject = DrawingLayer->GetObject( OwnerGuid );
+        FArianeObject* OwnerObject = Image->GetObject( OwnerGuid );
 
         if( OwnerObject )
         {
@@ -114,13 +115,13 @@ FArianeVertexID::InvalidateCache()
 ////////////////////// SegmentID
 
 FArianeSegmentID::FArianeSegmentID()
-    : DrawingLayer( nullptr )
+    : Image( nullptr )
     , CachedSegment( nullptr )
 {
 }
 
 FArianeSegmentID::FArianeSegmentID( FArianeSegment* Segment )
-    : DrawingLayer( nullptr )
+    : Image( nullptr )
     , CachedSegment( nullptr )
 {
     if( Segment )
@@ -132,7 +133,7 @@ FArianeSegmentID::FArianeSegmentID( FArianeSegment* Segment )
 
         if( Segment->GetAllocationModel() == EArianeAllocationModel::InstancedStruct )
         {
-            DrawingLayer = Segment->GetOwner()->GetDrawingLayer();
+            Image = Segment->GetOwner()->GetImage();
 
             Guid = Segment->GetGuid();
 
@@ -146,7 +147,7 @@ FArianeSegmentID::GetSegment()
 {
     if( CachedSegment == nullptr )
     {
-        FArianeObject* OwnerObject = DrawingLayer->GetObject( OwnerGuid );
+        FArianeObject* OwnerObject = Image->GetObject( OwnerGuid );
 
         if( OwnerObject )
         {
@@ -168,13 +169,13 @@ FArianeSegmentID::InvalidateCache()
 ///////////////////////// TagID
 
 FArianeTagID::FArianeTagID()
-    : DrawingLayer( nullptr )
+    : Image( nullptr )
     , CachedTag( nullptr )
 {
 }
 
 FArianeTagID::FArianeTagID( FArianeTag* Tag )
-    : DrawingLayer( nullptr )
+    : Image( nullptr )
     , CachedTag( nullptr )
 {
     if( Tag )
@@ -186,7 +187,7 @@ FArianeTagID::FArianeTagID( FArianeTag* Tag )
 
         if( Tag->GetAllocationModel() == EArianeAllocationModel::InstancedStruct )
         {
-            DrawingLayer = Tag->GetOwner()->GetDrawingLayer();
+            Image = Tag->GetOwner()->GetImage();
 
             Guid = Tag->GetGuid();
 
@@ -200,7 +201,7 @@ FArianeTagID::GetTag()
 {
     if( CachedTag == nullptr )
     {
-        FArianeObject* OwnerObject = DrawingLayer->GetObject( OwnerGuid );
+        FArianeObject* OwnerObject = Image->GetObject( OwnerGuid );
 
         if( OwnerObject )
         {

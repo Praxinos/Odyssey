@@ -6,6 +6,7 @@
 #include "ArianeVertex.h"
 #include "ArianeSegment.h"
 #include "ArianeSegmentCubic.h"
+#include "ArianeImage.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
@@ -236,11 +237,11 @@ FArianePath::FArianePath()
 {
 }
 
-FArianePath::FArianePath( UArianeLayerDrawing* InDrawingLayer
+FArianePath::FArianePath( UArianeImage* InImage
                         , const FName& InName
                         , EArianeAllocationModel InAllocationModel
                         , FArianePathInvalidationFlags* InInvalidationFlags )
-    : FArianeObject ( InDrawingLayer
+    : FArianeObject ( InImage
                     , InName
                     , InAllocationModel
                     , InInvalidationFlags ? InInvalidationFlags
@@ -281,18 +282,18 @@ FArianePath::PostLoad()
 void
 FArianePath::Added()
 {
-    if( MaterialInterface && DrawingLayer )
+    if( MaterialInterface && Image )
     {
-        DrawingLayer->IncrementMaterial( MaterialInterface );
+        Image->IncrementMaterial( MaterialInterface );
     }
 }
 
 void
 FArianePath::Removed()
 {
-    if( MaterialInterface && DrawingLayer )
+    if( MaterialInterface && Image )
     {
-        DrawingLayer->DecrementMaterial( MaterialInterface );
+        Image->DecrementMaterial( MaterialInterface );
     }
 }
 
@@ -306,15 +307,15 @@ void
 FArianePath::SetMaterial( UMaterialInterface* InMaterialInterface )
 {
     // remove the current material from the used material list
-    if( MaterialInterface && DrawingLayer )
+    if( MaterialInterface && Image )
     {
-        DrawingLayer->DecrementMaterial( MaterialInterface );
+        Image->DecrementMaterial( MaterialInterface );
     }
 
     // add the new material to the used material list
-    if( InMaterialInterface && DrawingLayer )
+    if( InMaterialInterface && Image )
     {
-        DrawingLayer->IncrementMaterial( InMaterialInterface );
+        Image->IncrementMaterial( InMaterialInterface );
     }
 
     MaterialInterface = InMaterialInterface;
@@ -614,7 +615,7 @@ FArianePath::CopyShape( const FCopyArgs& CopyArgs )
     FArianePath* PathCopy = nullptr;
     uint32 VertexID = 0;
 
-    PathCopy = CopyArgs.DrawingLayer->AllocPath( nullptr, Name, CopyArgs.AllocationModel );
+    PathCopy = CopyArgs.Image->AllocPath( nullptr, Name, CopyArgs.AllocationModel );
 
     LookupTable.Reserve ( Vertices.Num() );
 
@@ -764,7 +765,7 @@ FArianePath::PostEditUndo()
         MaterialInterface = GEngine->VertexColorMaterial;
 
     //if( MaterialInterface )
-        DrawingLayer->IncrementMaterial( MaterialInterface );
+        Image->IncrementMaterial( MaterialInterface );
 
     Invalidate( FArianePathInvalidationFlags().SetSegmentAltered()
                                               .SetSegmentAddedOrRemoved()
@@ -799,7 +800,7 @@ FArianePath::PostLoad()
         MaterialInterface = GEngine->VertexColorMaterial;
 
     //if( MaterialInterface )
-        DrawingLayer->IncrementMaterial( MaterialInterface );
+        Image->IncrementMaterial( MaterialInterface );
 
     Invalidate( FArianePathInvalidationFlags().SetSegmentAltered()
                                               .SetSegmentAddedOrRemoved()
@@ -1384,7 +1385,7 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
         }
         else
         {
-            FVector RightVector = Path->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->GetRightVector();
+            FVector RightVector = Path->GetImage()->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->GetRightVector();
 
             InOutPreviousPerpendicularVector = SegmentVector.Cross( RightVector );
             InOutPreviousPerpendicularVector.Normalize();
@@ -1656,5 +1657,5 @@ FArianePathGeometry3D::Build()
         }
     }
 
-    Path->GetDrawingLayer()->MarkRenderStateDirty();
+    Path->GetImage()->GetDrawingLayer()->MarkRenderStateDirty();
 }

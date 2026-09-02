@@ -12,6 +12,7 @@
 #include "ArianeVertex.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayerDrawing.h"
+#include "ArianeImage.h"
 #include "ArianeSegmentCubic.h"
 
 // Unreal headers
@@ -408,9 +409,9 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
         {
             TArray<FArianePath*> AddedPaths;
             TArray<FArianePath*> RemovedPaths;
-            FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
+            FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
 
-            DrawingLayer->Modify();
+            DrawingLayer->GetImage()->Modify();
 
             FArianeObject::Traverse( RootGroup
                                    , [ this
@@ -764,9 +765,9 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
 
             if( ( SegmentAdditionFlags & ESegmentAdditionFlags::CreateNewPath ) == ESegmentAdditionFlags::CreateNewPath )
             {
-                CurrentPath = DrawingLayer->AllocPath( ChainPath->GetMaterial()
-                                                     , ChainPath->GetName()
-                                                     , EArianeAllocationModel::InstancedStruct );
+                CurrentPath = DrawingLayer->GetImage()->AllocPath( ChainPath->GetMaterial()
+                                                                 , ChainPath->GetName()
+                                                                 , EArianeAllocationModel::InstancedStruct );
                 // for postprocessing. the path is not added to the parent yet
                 CurrentPath->SetParent( ChainPath->GetParent() );
 

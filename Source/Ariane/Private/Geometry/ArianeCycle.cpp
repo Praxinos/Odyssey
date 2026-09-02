@@ -3,6 +3,7 @@
 
 // Ariane headers
 #include "ArianeCycle.h"
+#include "ArianeImage.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
@@ -96,11 +97,11 @@ FArianeCycle::FArianeCycle()
 {
 }
 
-FArianeCycle::FArianeCycle( UArianeLayerDrawing* InDrawingLayer
+FArianeCycle::FArianeCycle( UArianeImage* InImage
                           , const FName& InName
                           , EArianeAllocationModel InAllocationModel
                           , FArianeCycleInvalidationFlags* InInvalidationFlags )
-    : FArianeObject ( InDrawingLayer
+    : FArianeObject ( InImage
                     , InName
                     , InAllocationModel
                     , InInvalidationFlags ? InInvalidationFlags
@@ -302,18 +303,18 @@ FArianeCycle::HasBaseClass( uint32 BaseClass )
 void
 FArianeCycle::Added()
 {
-    if( MaterialInterface && DrawingLayer )
+    if( MaterialInterface && Image )
     {
-        DrawingLayer->IncrementMaterial( MaterialInterface );
+        Image->IncrementMaterial( MaterialInterface );
     }
 }
 
 void
 FArianeCycle::Removed()
 {
-    if( MaterialInterface && DrawingLayer )
+    if( MaterialInterface && Image )
     {
-        DrawingLayer->DecrementMaterial( MaterialInterface );
+        Image->DecrementMaterial( MaterialInterface );
     }
 }
 
@@ -327,15 +328,15 @@ void
 FArianeCycle::SetMaterial( UMaterialInterface* InMaterialInterface )
 {
     // remove the current material from the used material list
-    if( MaterialInterface && DrawingLayer )
+    if( MaterialInterface && Image )
     {
-        DrawingLayer->DecrementMaterial( MaterialInterface );
+        Image->DecrementMaterial( MaterialInterface );
     }
 
     // add the new material to the used material list
-    if( InMaterialInterface && DrawingLayer )
+    if( InMaterialInterface && Image )
     {
-        DrawingLayer->IncrementMaterial( InMaterialInterface );
+        Image->IncrementMaterial( InMaterialInterface );
     }
 
     MaterialInterface = InMaterialInterface;
@@ -468,7 +469,7 @@ FArianeCycle::PostEditUndo()
         MaterialInterface = GEngine->VertexColorMaterial;
 
     //if( MaterialInterface )
-        DrawingLayer->IncrementMaterial( MaterialInterface );
+        Image->IncrementMaterial( MaterialInterface );
 
     Invalidate( FArianeCycleInvalidationFlags().SetPointAltered() );
 }
@@ -482,7 +483,7 @@ FArianeCycle::PostLoad()
         MaterialInterface = GEngine->VertexColorMaterial;
 
     //if( MaterialInterface )
-        DrawingLayer->IncrementMaterial( MaterialInterface );
+        Image->IncrementMaterial( MaterialInterface );
 
     Invalidate( FArianeCycleInvalidationFlags().SetPointAltered() );
 }
@@ -581,5 +582,5 @@ FArianeCycleGeometry3D::Build()
     InitVertexFactory( Cycle->GetModelVertexCache(), UnsignedIndices );
 
     // send the vertex data to the graphic card.
-    Cycle->GetDrawingLayer()->MarkRenderStateDirty();
+    Cycle->GetImage()->GetDrawingLayer()->MarkRenderStateDirty();
 }

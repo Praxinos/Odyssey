@@ -30,12 +30,12 @@ FArianePrimitive::FArianePrimitive()
 {
 }
 
-FArianePrimitive::FArianePrimitive( UArianeLayerDrawing* InDrawingLayer
+FArianePrimitive::FArianePrimitive( UArianeImage* InImage
                                   , const FName& InName
                                   , double InStrokeWidth
                                   , EArianeAllocationModel InAllocationModel
                                   , FArianePrimitiveInvalidationFlags* InInvalidationflags )
-    : FArianePath( InDrawingLayer
+    : FArianePath( InImage
                  , InName
                  , InAllocationModel
                  , InInvalidationflags ? InInvalidationflags
@@ -64,7 +64,7 @@ FArianePrimitive::Convert( EConversionFlags ConversionFlags )
                    | ( EnumHasAllFlags( ConversionFlags, EConversionFlags::Bezier ) ? ECopyFlags::AsBezier
                                                                                     : ECopyFlags::AsPolyline );
     CopyArgs.AllocationModel = AllocationModel;
-    CopyArgs.DrawingLayer = DrawingLayer;
+    CopyArgs.Image = Image;
 
     FArianePath* Path = static_cast<FArianePath*>(this->Copy( CopyArgs ) );
 

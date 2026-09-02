@@ -5,6 +5,7 @@
 #include "ArianeVertex.h"
 #include "ArianeSegmentCubic.h"
 #include "ArianeLayerDrawing.h"
+#include "ArianeImage.h"
 
 // https://stackoverflow.com/a/27863181
 // https://stackoverflow.com/questions/1734745/how-to-create-circle-with-b%c3%a9zier-curves
@@ -24,13 +25,13 @@ FArianePolygon::FArianePolygon()
 {
 }
 
-FArianePolygon::FArianePolygon( UArianeLayerDrawing* InDrawingLayer
+FArianePolygon::FArianePolygon( UArianeImage* InImage
                               , const FName& InName
                               , uint32 InCornerCount
                               , double InRadius
                               , double InStrokeWidth
                               , EArianeAllocationModel InAllocationModel )
-    : FArianePrimitive( InDrawingLayer
+    : FArianePrimitive( InImage
                       , InName
                       , InStrokeWidth
                       , InAllocationModel
@@ -140,12 +141,12 @@ FArianePolygon::CopyShape( const FCopyArgs& CopyArgs )
     }
     else
     {
-         PolygonCopy = CopyArgs.DrawingLayer->AllocPolygon( MaterialInterface
-                                                          , Name
-                                                          , CornerCount
-                                                          , Radius
-                                                          , StrokeWidth
-                                                          , CopyArgs.AllocationModel );
+         PolygonCopy = CopyArgs.Image->AllocPolygon( MaterialInterface
+                                                   , Name
+                                                   , CornerCount
+                                                   , Radius
+                                                   , StrokeWidth
+                                                   , CopyArgs.AllocationModel );
     }
 
     return PolygonCopy;

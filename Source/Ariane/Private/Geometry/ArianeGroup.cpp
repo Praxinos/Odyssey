@@ -3,6 +3,7 @@
 
 // Ariane headers
 #include "ArianeGroup.h"
+#include "ArianeImage.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
@@ -89,10 +90,10 @@ FArianeGroup::FArianeGroup()
     //MaterialInterface = GEngine->VertexColorMaterial;
 }
 
-FArianeGroup::FArianeGroup( UArianeLayerDrawing* InDrawingLayer
+FArianeGroup::FArianeGroup( UArianeImage* InImage
                           , const FName& InName
                           , EArianeAllocationModel InAllocationModel   )
-    : FArianeObject ( InDrawingLayer, InName, InAllocationModel )
+    : FArianeObject ( InImage, InName, InAllocationModel )
 #if WITH_EDITOR
     , HUDForegroundColor( FColor::Black )
     , bUseEditorHUDForegroundColor( true )
@@ -136,7 +137,7 @@ FArianeGroup::CopyShape( const FCopyArgs& CopyArgs )
 {
     FArianeGroup* GroupCopy = nullptr;
 
-    GroupCopy = CopyArgs.DrawingLayer->AllocGroup( Name, CopyArgs.AllocationModel );
+    GroupCopy = CopyArgs.Image->AllocGroup( Name, CopyArgs.AllocationModel );
 
 
     return GroupCopy;
@@ -233,7 +234,7 @@ FArianeGroup::UseEditorHUDForegroundColor( bool bInUseEditorHUDForegroundColor )
 FColor
 FArianeGroup::GetHUDForegroundColor()
 {
-    return bUseEditorHUDForegroundColor ? DrawingLayer->GetLayerStack()->GetPainting3DComponent()->GetHUDForegroundColor()
+    return bUseEditorHUDForegroundColor ? Image->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->GetHUDForegroundColor()
                                         : HUDForegroundColor;
 }
 

@@ -17,6 +17,7 @@ struct FArianeObject;
 struct FArianeGroup;
 struct FArianeTag;
 class UArianeLayerDrawing;
+class UArianeImage;
 
 struct ARIANE_API FArianeObjectInvalidationFlags
 {
@@ -97,7 +98,7 @@ public:
     {
         ECopyFlags Flags = {}; // init as zero
         EArianeAllocationModel AllocationModel;
-        UArianeLayerDrawing* DrawingLayer = nullptr;
+        UArianeImage* Image = nullptr;
     };
 
     enum class ETraversalReturnValue{ Continue, IgnoreChildren, Stop };
@@ -127,7 +128,7 @@ public:
     virtual ~FArianeObject();
 
     FArianeObject();
-    FArianeObject( UArianeLayerDrawing* InDrawingLayer
+    FArianeObject( UArianeImage* InImage
                  , const FName& InName
                  , EArianeAllocationModel InAllocationModel
                  , FArianeObjectInvalidationFlags* InInvalidationFlags = nullptr );
@@ -232,10 +233,10 @@ public:
     virtual bool IsVisible( bool bInHierarchical );
 
     /** Get the drawing layer this object belongs to */
-    UArianeLayerDrawing* GetDrawingLayer();
+    UArianeImage* GetImage();
 
     /** Set the drawing layer this object belongs to */
-    void SetDrawingLayer( UArianeLayerDrawing* InLayer );
+    void SetImage( UArianeImage* InImage );
 
     FSimpleMulticastDelegate & GetOnPostInvalidatedDelegate();
 
@@ -331,7 +332,7 @@ protected:
     FArianeObjectID ParentID;
 
     UPROPERTY( EditAnywhere )
-    UArianeLayerDrawing* DrawingLayer;
+    UArianeImage* Image;
 
     UPROPERTY( EditAnywhere )
     bool bVisible;

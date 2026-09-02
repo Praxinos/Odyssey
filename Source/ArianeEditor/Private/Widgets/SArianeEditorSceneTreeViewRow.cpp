@@ -13,6 +13,7 @@
 #include "ArianeEllipse.h"
 #include "ArianeLine.h"
 #include "ArianePolygon.h"
+#include "ArianeImage.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
@@ -98,7 +99,7 @@ SArianeEditorSceneTreeViewRow::OnCheckBoxStateChanged( ECheckBoxState iState )
         break;
     }
 
-    Item->GetObject()->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->Update( false );
+    Item->GetObject()->GetImage()->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->Update( false );
 
     TreeView->BindComponentDelegates();
 }
@@ -424,13 +425,13 @@ SArianeEditorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     // rebuilt while it's processing stuff
     //TreeView->UnbindComponentDelegates();
 
-    RootGroup->GetDrawingLayer()->GetSelectedTrees( SelectedTrees );
+    RootGroup->GetImage()->GetSelectedTrees( SelectedTrees );
 
     if( RootGroup->IsSelected() == false )
     {
         GEditor->BeginTransaction(LOCTEXT("ariane-tree-view.transaction.drag-drop-object", "Drop Objects"));
 
-        RootGroup->GetDrawingLayer()->Modify();
+        RootGroup->GetImage()->GetDrawingLayer()->Modify();
 
         for( FArianeObject* SelectedTree : SelectedTrees )
         {

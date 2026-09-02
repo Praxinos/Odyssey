@@ -8,6 +8,7 @@
 #include "ArianeEditorStyle.h"
 // Ariane headers
 #include "ArianePainting3DComponent.h"
+#include "ArianeImage.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerFolder.h"
 #include "ArianePath.h"
@@ -83,7 +84,7 @@ UArianeEditorPathDrawingTool::Inactivate()
 FArianeGroup*
 UArianeEditorPathDrawingTool::GetParentGroup( UArianeLayerDrawing* DrawingLayer )
 {
-    TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetSelectedObjects();
+    TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetImage()->GetSelectedObjects();
 
     if( SelectedObjects.Num() == 1 )
     {
@@ -93,7 +94,7 @@ UArianeEditorPathDrawingTool::GetParentGroup( UArianeLayerDrawing* DrawingLayer 
        }
     }
 
-    return DrawingLayer->GetRootGroup();
+    return DrawingLayer->GetImage()->GetRootGroup();
 }
 
 bool
@@ -126,14 +127,14 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
             {
                 // choose between the root group and the selected group if any
                 FArianeGroup* ParentGroup = GetParentGroup( DrawingLayer );
-                int PathNumber = DrawingLayer->GetInstancedObjects().Num();
+                int PathNumber = DrawingLayer->GetImage()->GetInstancedObjects().Num();
 
-                DrawingLayer->Modify();
+                DrawingLayer->GetImage()->Modify();
 
-                EditedPath = DrawingLayer->AllocPath( MaterialInterface ? MaterialInterface
-                                                                        : Settings->GetDefaultPathDrawingMaterial()
-                                                     , *(FString( "Path_" ) + FString::FromInt( PathNumber ))
-                                                     , EArianeAllocationModel::InstancedStruct );
+                EditedPath = DrawingLayer->GetImage()->AllocPath( MaterialInterface ? MaterialInterface
+                                                                                    : Settings->GetDefaultPathDrawingMaterial()
+                                                                                    , *(FString( "Path_" ) + FString::FromInt( PathNumber ))
+                                                                                    , EArianeAllocationModel::InstancedStruct );
 
                 ParentGroup->AppendChild( EditedPath );
                 EditedPath->UpdateTransform();
