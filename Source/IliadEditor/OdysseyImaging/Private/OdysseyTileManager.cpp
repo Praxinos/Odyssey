@@ -20,12 +20,114 @@
 DECLARE_STATS_GROUP(TEXT("FOdysseyTileManager"), STATGROUP_OdysseyTileManager, STATCAT_Advanced);
 DECLARE_CYCLE_STAT(TEXT("FOdysseyTileManager::CreateTiles"), STAT_CreateTiles, STATGROUP_OdysseyTileManager);
 
+/*static*/ FCriticalSection FOdysseyTileManager::FTileData::Mutex;
+/*static*/ FCriticalSection FOdysseyTileManager::FTileData::CacheOnDiskMutex;
+
+/*static*/ TDoubleLinkedList<TSharedPtr<FOdysseyTileManager::FTileData>> FOdysseyTileManager::FTileData::UncompressedLRU;
+/*static*/ TDoubleLinkedList<TSharedPtr<FOdysseyTileManager::FTileData>> FOdysseyTileManager::FTileData::CompressedLRU;
+
+FOdysseyTileManagerStats::FOdysseyTileManagerStats()
+    : NumTilesUncompressed(0)
+    , SizeUncompressed(0)
+    , NumTilesCompressed(0)
+    , SizeCompressed(0)
+    , NumTilesOnDisk(0)
+    , SizeOnDisk(0)
+{
+
+}
+
+void
+FOdysseyTileManagerStats::AddUncompressed(const FSharedBuffer& InBuffer)
+{
+    NumTilesUncompressed++;
+    SizeUncompressed += InBuffer.GetSize();
+}
+
+void
+FOdysseyTileManagerStats::AddCompressed(const FCompressedBuffer& InBuffer)
+{
+    NumTilesCompressed++;
+    SizeCompressed += InBuffer.GetCompressedSize();
+}
+
+void
+FOdysseyTileManagerStats::AddCachedOnDisk(int64 InSizeOnDisk)
+{
+    NumTilesOnDisk++;
+    SizeOnDisk += InSizeOnDisk;
+}
+
+void
+FOdysseyTileManagerStats::RemoveUncompressed(const FSharedBuffer& InBuffer)
+{
+    NumTilesUncompressed--;
+    SizeUncompressed -= InBuffer.GetSize();
+}
+
+void
+FOdysseyTileManagerStats::RemoveCompressed(const FCompressedBuffer& InBuffer)
+{
+    NumTilesCompressed--;
+    SizeCompressed -= InBuffer.GetCompressedSize();
+}
+
+void
+FOdysseyTileManagerStats::RemoveCachedOnDisk(int64 InSizeOnDisk)
+{
+    NumTilesOnDisk--;
+    SizeOnDisk -= InSizeOnDisk;
+}
+
+int64
+FOdysseyTileManagerStats::GetNumTilesUncompressed() const
+{
+    return NumTilesUncompressed;
+}
+
+int64
+FOdysseyTileManagerStats::GetSizeUncompressed() const
+{
+    return SizeUncompressed;
+}
+
+int64
+FOdysseyTileManagerStats::GetNumTilesCompressed() const
+{
+    return NumTilesCompressed;
+}
+
+int64
+FOdysseyTileManagerStats::GetSizeCompressed() const
+{
+    return SizeCompressed;
+}
+
+int64
+FOdysseyTileManagerStats::GetNumTilesOnDisk() const
+{
+    return NumTilesOnDisk;
+}
+
+int64
+FOdysseyTileManagerStats::GetSizeOnDisk() const
+{
+    return SizeOnDisk;
+}
+
 //static
 FOdysseyTileManager&
 FOdysseyTileManager::Get()
 {
     static FOdysseyTileManager self;
     return self;
+}
+
+//static
+FString
+FOdysseyTileManager::GetCacheOnDiskPath()
+{
+    return FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("Temp"), TEXT("OdysseyTileManager"), TEXT("TempCache.dat"));
 }
 
 void
@@ -40,12 +142,6 @@ FOdysseyTileManager::Finalize()
 {
     FString CacheDirectory = FPaths::GetPath(GetCacheOnDiskPath());
     IFileManager::Get().DeleteDirectory(*CacheDirectory, false, true);
-}
-
-FString
-FOdysseyTileManager::GetCacheOnDiskPath() const
-{
-    return FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("Temp"), TEXT("OdysseyTileManager"), TEXT("TempCache.dat"));
 }
 
 BEGIN_SHADER_PARAMETER_STRUCT(FWriteTileParameters, )
@@ -329,29 +425,27 @@ FOdysseyTileManager::LoadTileFromReadBack(FOdysseyTileId InTileId)
 
                 GPUReadBack->Unlock();
 
-                StatNumTilesUncompressed++;
-                StatSizeUncompressed += Buffer.GetSize();
-
-                TSharedPtr<FTileData> TileData = MakeShared<FTileData>();
-                TileData->UncompressedBuffer = Buffer;
-
+                //Compare Buffer to other buffers
+                FIoHash Hash = FIoHashBuilder::HashBuffer(Buffer.GetView());
+                TArray<TSharedPtr<FTileData>> TilesData;
+                HashToTileData.MultiFind(Hash, TilesData, false);
+                for (TSharedPtr<FTileData> TileData : TilesData)
                 {
-                    FScopeLock Lock(&TilesDataMutex);
-                    TilesData.Add(TileData);
+                    FSharedBuffer TileDataBuffer;
+                    if(!TileData->GetUncompressedBuffer(TileDataBuffer))
+                        continue;
+
+                    if (TileDataBuffer.GetView().EqualBytes(Buffer.GetView()))
+                    {
+                        Promise.SetValue(TileData);
+                        return;
+                    }
                 }
 
-                TouchTileData(TileData);
-
+                //Create a new TileData
+                TSharedPtr<FTileData> TileData = FTileData::FromUncompressedBuffer(Buffer);
+                HashToTileData.Add(Hash, TileData);
                 Promise.SetValue(TileData);
-
-                //Go to next pipeline step
-                Async(
-                    EAsyncExecution::ThreadPool,
-                    [this, TileData]()
-                    {
-                        CompressTile(TileData);
-                    }
-                );
             }
         }
     );
@@ -379,82 +473,20 @@ FOdysseyTileManager::GetTileBuffer(FOdysseyTileId InTileId, FSharedBuffer& OutBu
         LoadTileFromReadBack(InTileId);
 
     //Here we get the tile data index
-    //Tile.TileDataIndex is a future, so it will block current thread until GPU Readback is done
+    //Tile.TileData is a future, so it will block current thread until GPU Readback is done
     TSharedPtr<FTileData> TileData = Tile.TileData.Get();
     if (!TileData)
         return false;
 
-    if (TileData->UncompressedBuffer.IsNull())
-    {
-        if (TileData->CompressedBuffer.IsNull())
-        {
-            FScopeLock Lock(&CacheOnDiskMutex);
-
-            FString FilePath = GetCacheOnDiskPath();
-            const TUniquePtr<FArchive> Ar(IFileManager::Get().CreateFileReader(*FilePath, FILEWRITE_Append));
-            if (!Ar)
-                return false;
-
-            Ar->Seek(TileData->DiskCacheOffset);
-            *Ar << TileData->CompressedBuffer;
-
-            if (!TileData->CompressedBuffer.IsNull())
-            {
-                StatNumTilesCompressed++;
-                StatSizeCompressed += TileData->CompressedBuffer.GetCompressedSize();
-            }
-            Ar->Close();
-        }
-
-        TileData->UncompressedBuffer = TileData->CompressedBuffer.Decompress();
-
-        if (!TileData->UncompressedBuffer.IsNull())
-        {
-            StatNumTilesUncompressed++;
-            StatSizeUncompressed += TileData->UncompressedBuffer.GetSize();
-        }
-    }
-
-    TouchTileData(TileData);
-    OutBuffer = TileData->UncompressedBuffer;
-
-    return true;
+    return TileData->GetUncompressedBuffer(OutBuffer);
 }
 
-void
-FOdysseyTileManager::CompressTile(TSharedPtr<FTileData> InTileData)
+FOdysseyTileManagerStats&
+FOdysseyTileManager::GetStats()
 {
-    InTileData->CompressedBuffer = FCompressedBuffer::Compress(InTileData->UncompressedBuffer);
-    StatNumTilesCompressed++;
-    StatSizeCompressed += InTileData->CompressedBuffer.GetCompressedSize();
-
-    Async(
-        EAsyncExecution::ThreadPool,
-        [this, InTileData]()
-        {
-            CacheTileOnDisk(InTileData);
-        }
-    );
+    return Stats;
 }
 
-void
-FOdysseyTileManager::CacheTileOnDisk(TSharedPtr<FTileData> InTileData)
-{
-    FScopeLock Lock(&CacheOnDiskMutex);
-
-    FString FilePath = GetCacheOnDiskPath();
-
-    const TUniquePtr<FArchive> Ar(IFileManager::Get().CreateFileWriter(*FilePath, FILEWRITE_Append));
-    if (!Ar)
-        return;
-
-    InTileData->DiskCacheOffset = Ar->Tell();
-    *Ar << InTileData->CompressedBuffer;
-
-    StatNumTilesOnDisk++;
-    StatSizeOnDisk = Ar->TotalSize();
-    Ar->Close();
-}
 
 void
 FOdysseyTileManager::Tick(float DeltaTime)
@@ -468,45 +500,214 @@ FOdysseyTileManager::Tick(float DeltaTime)
     EvictTiles();
 }
 
-int64
-FOdysseyTileManager::GetNumTilesUncompressed() const
+void
+FOdysseyTileManager::EvictTiles()
 {
-    return StatNumTilesUncompressed;
-}
-
-int64
-FOdysseyTileManager::GetSizeUncompressed() const
-{
-    return StatSizeUncompressed;
-}
-
-int64
-FOdysseyTileManager::GetNumTilesCompressed() const
-{
-    return StatNumTilesCompressed;
-}
-
-int64
-FOdysseyTileManager::GetSizeCompressed() const
-{
-    return StatSizeCompressed;
-}
-int64
-FOdysseyTileManager::GetNumTilesOnDisk() const
-{
-    return StatNumTilesOnDisk;
-}
-
-int64
-FOdysseyTileManager::GetSizeOnDisk() const
-{
-    return StatSizeOnDisk;
+    uint64 MaxUncompressedSize = UOdysseyTileManagerSettings::Get()->MaxUncompressedSize * 1000 * 1000;
+    uint64 MaxCompressedSize = UOdysseyTileManagerSettings::Get()->MaxCompressedSize * 1000 * 1000;
+    FTileData::EvictTiles(MaxUncompressedSize, MaxCompressedSize);
 }
 
 void
-FOdysseyTileManager::TouchTileData(TSharedPtr<FTileData> InTileData)
+FOdysseyTileManager::EvictAllTiles()
 {
-    FScopeLock Lock(&LRUMutex);
+    FTileData::EvictTiles(0, 0);
+}
+
+TSharedRef<FOdysseyTileManager::FTileData>
+FOdysseyTileManager::FTileData::FromUncompressedBuffer(const FSharedBuffer& InUncompressedBuffer)
+{
+    TSharedRef<FTileData> TileData = MakeShared<FTileData>();
+    TileData->UncompressedBuffer = InUncompressedBuffer;
+
+    FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
+    TileStats.AddUncompressed(TileData->UncompressedBuffer);
+
+    Touch(TileData);
+
+    //Go to next pipeline step
+    Async(
+        EAsyncExecution::ThreadPool,
+        [TileData]()
+        {
+            TileData->Compress();
+        }
+    );
+
+    return TileData;
+}
+
+TSharedRef<FOdysseyTileManager::FTileData>
+FOdysseyTileManager::FTileData::FromCompressedBuffer(const FCompressedBuffer& InCompressedBuffer)
+{
+    TSharedRef<FTileData> TileData = MakeShared<FTileData>();
+    TileData->CompressedBuffer = InCompressedBuffer;
+
+    FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
+    TileStats.AddCompressed(TileData->CompressedBuffer);
+
+    Touch(TileData);
+
+    Async(
+        EAsyncExecution::ThreadPool,
+        [TileData]()
+        {
+            TileData->CacheOnDisk();
+        }
+    );
+
+    return TileData;
+}
+
+bool
+FOdysseyTileManager::FTileData::GetUncompressedBuffer(FSharedBuffer& OutBuffer) const
+{
+    FScopeLock Lock(&Mutex);
+    if (!LoadUncompressedBuffer())
+        return false;
+
+    Touch(ConstCastSharedRef<FOdysseyTileManager::FTileData>(AsShared()));
+    OutBuffer = UncompressedBuffer;
+
+    return true;
+}
+
+bool
+FOdysseyTileManager::FTileData::GetCompressedBuffer(FCompressedBuffer& OutBuffer) const
+{
+    FScopeLock Lock(&Mutex);
+    if (!LoadCompressedBuffer())
+        return false;
+
+    Touch(ConstCastSharedRef<FOdysseyTileManager::FTileData>(AsShared()));
+    OutBuffer = CompressedBuffer;
+    return true;
+}
+
+bool
+FOdysseyTileManager::FTileData::LoadUncompressedBuffer() const
+{
+    if (UncompressedBuffer.IsNull())
+    {
+        if (!LoadCompressedBuffer())
+            return false;
+
+        UncompressedBuffer = CompressedBuffer.Decompress();
+
+        if (!UncompressedBuffer.IsNull())
+        {
+            FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
+            TileStats.AddUncompressed(UncompressedBuffer);
+        }
+    }
+
+    return true;
+}
+
+bool
+FOdysseyTileManager::FTileData::LoadCompressedBuffer() const
+{
+    if (CompressedBuffer.IsNull())
+    {
+        FScopeLock Lock(&CacheOnDiskMutex);
+
+        FString FilePath = GetCacheOnDiskPath();
+        const TUniquePtr<FArchive> Ar(IFileManager::Get().CreateFileReader(*FilePath, FILEWRITE_Append));
+        if (!Ar)
+            return false;
+
+        Ar->Seek(DiskCacheOffset);
+        *Ar << CompressedBuffer;
+
+        if (!CompressedBuffer.IsNull())
+        {
+            FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
+            TileStats.AddCompressed(CompressedBuffer);
+        }
+        Ar->Close();
+    }
+    return true;
+}
+
+void
+FOdysseyTileManager::FTileData::Compress()
+{
+    CompressedBuffer = FCompressedBuffer::Compress(UncompressedBuffer);
+
+    FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
+    TileStats.AddCompressed(CompressedBuffer);
+
+    Async(
+        EAsyncExecution::ThreadPool,
+        [self = AsShared()]()
+        {
+            self->CacheOnDisk();
+        }
+    );
+}
+
+void
+FOdysseyTileManager::FTileData::CacheOnDisk()
+{
+    FScopeLock Lock(&CacheOnDiskMutex);
+
+    FString FilePath = FOdysseyTileManager::GetCacheOnDiskPath();
+
+    const TUniquePtr<FArchive> Ar(IFileManager::Get().CreateFileWriter(*FilePath, FILEWRITE_Append));
+    if (!Ar)
+        return;
+
+    DiskCacheOffset = Ar->Tell();
+    *Ar << CompressedBuffer;
+
+    FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
+    TileStats.AddCachedOnDisk(Ar->TotalSize() - DiskCacheOffset);
+
+    Ar->Close();
+}
+
+void
+FOdysseyTileManager::FTileData::EvictUncompressed()
+{
+    //Eviction is not permitted if Caching is not yet finished
+    if (DiskCacheOffset == INDEX_NONE)
+        return;
+
+    TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* Node = UncompressedLRUNode;
+    if (!Node)
+        return;
+
+    FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
+    TileStats.RemoveUncompressed(UncompressedBuffer);
+
+    UncompressedBuffer = FSharedBuffer();
+    UncompressedLRUNode = nullptr;
+    UncompressedLRU.RemoveNode(Node);
+}
+
+void
+FOdysseyTileManager::FTileData::EvictCompressed()
+{
+    //Eviction is not permitted if Caching is not yet finished
+    if (DiskCacheOffset == INDEX_NONE)
+        return;
+
+    TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* Node = CompressedLRUNode;
+    if (!Node)
+        return;
+
+    FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
+    TileStats.RemoveCompressed(CompressedBuffer);
+
+    CompressedBuffer = FCompressedBuffer();
+    CompressedLRUNode = nullptr;
+    CompressedLRU.RemoveNode(Node);
+}
+
+void
+FOdysseyTileManager::FTileData::Touch(TSharedRef<FOdysseyTileManager::FTileData> InTileData)
+{
+    FScopeLock Lock(&Mutex);
 
     if (InTileData->UncompressedLRUNode)
     {
@@ -526,57 +727,14 @@ FOdysseyTileManager::TouchTileData(TSharedPtr<FTileData> InTileData)
 }
 
 void
-FOdysseyTileManager::EvictUncompressed(TSharedPtr<FTileData> InTileData)
+FOdysseyTileManager::FTileData::EvictTiles(uint64 InMaxUncompressedSize, uint64 InMaxCompressedSize)
 {
-    //Eviction is not permitted if Caching is not yet finished
-    if (InTileData->DiskCacheOffset == INDEX_NONE)
-        return;
+    FScopeLock Lock(&Mutex);
 
-    TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* Node = InTileData->UncompressedLRUNode;
-    if (!Node)
-        return;
+    FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
 
-    StatNumTilesUncompressed--;
-    StatSizeUncompressed -= InTileData->UncompressedBuffer.GetSize();
-
-    InTileData->UncompressedBuffer = FSharedBuffer();
-    InTileData->UncompressedLRUNode = nullptr;
-    UncompressedLRU.RemoveNode(Node);
-}
-
-void
-FOdysseyTileManager::EvictCompressed(TSharedPtr<FTileData> InTileData)
-{
-    //Eviction is not permitted if Caching is not yet finished
-    if (InTileData->DiskCacheOffset == INDEX_NONE)
-        return;
-
-    TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* Node = InTileData->CompressedLRUNode;
-    if (!Node)
-        return;
-
-    StatNumTilesCompressed--;
-    StatSizeCompressed -= InTileData->CompressedBuffer.GetCompressedSize();
-
-    InTileData->CompressedBuffer = FCompressedBuffer();
-    InTileData->CompressedLRUNode = nullptr;
-    CompressedLRU.RemoveNode(Node);
-}
-
-void
-FOdysseyTileManager::EvictTiles()
-{
-    uint64 MaxUncompressedSize = UOdysseyTileManagerSettings::Get()->MaxUncompressedSize * 1000 * 1000;
-    uint64 MaxCompressedSize = UOdysseyTileManagerSettings::Get()->MaxCompressedSize * 1000 * 1000;
-    EvictTiles(MaxUncompressedSize, MaxCompressedSize);
-}
-
-void
-FOdysseyTileManager::EvictTiles(uint64 InMaxUncompressedSize, uint64 InMaxCompressedSize)
-{
-    FScopeLock Lock(&LRUMutex);
     TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* NodeUncompressed = UncompressedLRU.GetTail();
-    while (NodeUncompressed && (uint64)StatSizeUncompressed > InMaxUncompressedSize)
+    while (NodeUncompressed && (uint64)TileStats.GetSizeUncompressed() > InMaxUncompressedSize)
     {
         TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* Node = NodeUncompressed;
         if (!Node)
@@ -585,11 +743,11 @@ FOdysseyTileManager::EvictTiles(uint64 InMaxUncompressedSize, uint64 InMaxCompre
         NodeUncompressed = Node->GetPrevNode();
 
         TSharedPtr<FTileData> TileData = Node->GetValue();
-        EvictUncompressed(TileData);
+        TileData->EvictUncompressed();
     }
 
     TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* NodeCompressed = CompressedLRU.GetTail();
-    while (NodeCompressed && (uint64)StatSizeCompressed > InMaxCompressedSize)
+    while (NodeCompressed && (uint64)TileStats.GetSizeCompressed() > InMaxCompressedSize)
     {
         TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* Node = NodeCompressed;
         if (!Node)
@@ -598,12 +756,6 @@ FOdysseyTileManager::EvictTiles(uint64 InMaxUncompressedSize, uint64 InMaxCompre
         NodeCompressed = Node->GetPrevNode();
 
         TSharedPtr<FTileData> TileData = Node->GetValue();
-        EvictCompressed(TileData);
+        TileData->EvictCompressed();
     }
-}
-
-void
-FOdysseyTileManager::EvictAllTiles()
-{
-    EvictTiles(0, 0);
 }
