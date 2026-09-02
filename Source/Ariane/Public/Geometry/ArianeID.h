@@ -13,6 +13,7 @@ struct FArianeSegment;
 struct FArianeVertex;
 struct FArianeTag;
 class UArianeLayerDrawing;
+class UArianeImage;
 
 USTRUCT(BlueprintType)
 struct ARIANE_API FArianeObjectID
@@ -29,7 +30,7 @@ struct ARIANE_API FArianeObjectID
 
     public:
         UPROPERTY( EditAnywhere )
-        UArianeLayerDrawing* DrawingLayer;
+        UArianeImage* Image;
 
         UPROPERTY( EditAnywhere )
         FGuid Guid;
@@ -53,7 +54,7 @@ struct ARIANE_API FArianeVertexID
 
     public:
         UPROPERTY( EditAnywhere )
-        UArianeLayerDrawing* DrawingLayer;
+        UArianeImage* Image;
 
         UPROPERTY( EditAnywhere )
         FGuid Guid;
@@ -81,7 +82,7 @@ struct ARIANE_API FArianeSegmentID
 
     public:
         UPROPERTY( EditAnywhere )
-        UArianeLayerDrawing* DrawingLayer;
+        UArianeImage* Image;
 
         UPROPERTY( EditAnywhere )
         FGuid Guid;
@@ -108,7 +109,7 @@ struct ARIANE_API FArianeTagID
 
     public:
         UPROPERTY( EditAnywhere )
-        UArianeLayerDrawing* DrawingLayer;
+        UArianeImage* Image;
 
         UPROPERTY( EditAnywhere )
         FGuid Guid;

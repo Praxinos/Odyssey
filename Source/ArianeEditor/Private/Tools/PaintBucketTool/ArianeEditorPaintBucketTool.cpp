@@ -12,6 +12,7 @@
 #include "ArianeGroup.h"
 #include "ArianeGraph.h"
 #include "ArianeLayerStack.h"
+#include "ArianeImage.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeSegmentCubic.h"
 
@@ -160,9 +161,9 @@ UArianeEditorPaintBucketTool::Reset()
             FVector4 DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
             TArray<FArianeObject*> GraphedPaths;
             FVector CameraLocation = CameraState.Position;
-            FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
+            FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
 
-            GraphedPaths.Reserve( DrawingLayer->GetInstancedObjects().Num() );
+            GraphedPaths.Reserve( DrawingLayer->GetImage()->GetInstancedObjects().Num() );
 
             FArianeObject::Traverse( RootGroup
                                    , [ &GraphedPaths ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
@@ -263,17 +264,17 @@ UArianeEditorPaintBucketTool::OnMouseUp( FEditorViewportClient* ViewportClient
             if( DrawingLayer )
             {
                 // choose between the root group and the selected group if any
-                FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
-                int PathNumber = DrawingLayer->GetInstancedObjects().Num();
+                FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
+                int PathNumber = DrawingLayer->GetImage()->GetInstancedObjects().Num();
 
                 GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-paint-bucket-tool.add-cycle","Add Cycle"));
 
-                DrawingLayer->Modify();
+                DrawingLayer->GetImage()->Modify();
 
-                FArianeCycle* PaintedCycle = DrawingLayer->AllocCycle( MaterialInterface ? MaterialInterface
-                                                                                         : Settings->GetDefaultPathDrawingMaterial()
-                                                                     , *(FString( "Cycle_" ) + FString::FromInt( PathNumber ))
-                                                                     , EArianeAllocationModel::InstancedStruct );
+                FArianeCycle* PaintedCycle = DrawingLayer->GetImage()->AllocCycle( MaterialInterface ? MaterialInterface
+                                                                                                     : Settings->GetDefaultPathDrawingMaterial()
+                                                                                 , *(FString( "Cycle_" ) + FString::FromInt( PathNumber ))
+                                                                                 , EArianeAllocationModel::InstancedStruct );
 
                 RootGroup->AppendChild( PaintedCycle );
 

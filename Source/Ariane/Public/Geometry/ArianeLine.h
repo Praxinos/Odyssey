@@ -22,7 +22,7 @@
 
 struct FArianeSegmentCubic;
 struct FArianeVertex;
-class UArianeLayerDrawing;
+class UArianeImage;
 
 USTRUCT(BlueprintType)
 struct ARIANE_API FArianeLine : public FArianePrimitive
@@ -44,7 +44,7 @@ public:
     /**
      * @brief constructor.
      */
-    FArianeLine( UArianeLayerDrawing* InDrawingLayer
+    FArianeLine( UArianeImage* InImage
                , const FName& InName
                , const FVector& InStartPoint
                , const FVector& InEndPoint

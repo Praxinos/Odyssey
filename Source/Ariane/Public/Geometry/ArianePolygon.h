@@ -13,6 +13,7 @@
 
 struct FArianeVertex;
 struct FArianeSegmentCubic;
+class UArianeImage;
 
 USTRUCT(BlueprintType)
 struct ARIANE_API FArianePolygon : public FArianePrimitive
@@ -32,7 +33,7 @@ public:
     /**
      * @brief constructor.
      */
-        FArianePolygon( UArianeLayerDrawing* InDrawingLayer
+        FArianePolygon( UArianeImage* InImage
                       , const FName& InName
                       , uint32 InCornerCount
                       , double InRadius

@@ -702,7 +702,7 @@ FArianeGraph::FEdgeCubic::FEdgeCubic( FNode* InNode0
                                     , FNode* InNode1
                                     , uint32 InFractionCount
                                     , FFraction* InFractions )
-    : FEdge( InNode0, InNode1, 1, InFractions, 0.0f )
+    : FEdge( InNode0, InNode1, InFractionCount, InFractions, 0.0f )
 {
     Bezier[0] = InNode0->Position;
     Bezier[1] = Handle0Position;

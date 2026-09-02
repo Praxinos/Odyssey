@@ -11,6 +11,7 @@
 // Ariane Headers
 #include "ArianeGroup.h"
 #include "ArianeLayer.h"
+#include "ArianeImage.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerFolder.h"
 #include "ArianePainting3DComponent.h"
@@ -198,7 +199,7 @@ SArianeEditorSceneTreeView::GetRootGroup()
 
         if( DrawingLayer )
         {
-            return DrawingLayer->GetRootGroup();
+            return DrawingLayer->GetImage()->GetRootGroup();
         }
     }
 
@@ -273,7 +274,7 @@ SArianeEditorSceneTreeView::OnSelectionChanged( TSharedPtr<FSceneTreeViewItem> I
 
             TArray<TSharedPtr<FSceneTreeViewItem>> selectedItems = GetSelectedItems();
 
-            RootGroup->GetDrawingLayer()->ClearObjectSelection();
+            RootGroup->GetImage()->ClearObjectSelection();
 
             for( TSharedPtr<FSceneTreeViewItem> selectedItem : selectedItems )
             {
@@ -281,7 +282,7 @@ SArianeEditorSceneTreeView::OnSelectionChanged( TSharedPtr<FSceneTreeViewItem> I
 
                 if( SelectedObject->IsSelected() == false )
                 {
-                    SelectedObject->GetDrawingLayer()->SelectObject( SelectedObject );
+                    SelectedObject->GetImage()->SelectObject( SelectedObject );
                 }
             }
         }
@@ -390,7 +391,7 @@ SArianeEditorSceneTreeView::OnPrePainting3DComponentUpdate( bool bInteractive )
     // as needing an update
     if( DrawingLayer )
     {
-        FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
+        FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
 
         FArianeObject::Traverse ( RootGroup
                                 , [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue

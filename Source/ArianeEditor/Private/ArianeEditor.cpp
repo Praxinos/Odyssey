@@ -27,6 +27,7 @@
 #include "ArianeGroup.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
+#include "ArianeImage.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerFolder.h"
 #include "ArianePainting3DActor.h"
@@ -264,10 +265,10 @@ FArianeEditor::ClearPainting3DComponents()
             {
                 if( GEditor->IsTransactionActive() )
                 {
-                    CurrentDrawingLayer->Modify();
+                    CurrentDrawingLayer->GetImage()->Modify();
                 }
 
-                CurrentDrawingLayer->ResetHierarchy();
+                CurrentDrawingLayer->GetImage()->ResetHierarchy();
             }
 
             Painting3DComponent->Update( false );
@@ -811,12 +812,12 @@ FArianeEditor::UngroupSelectedGroups()
 
         if( DrawingLayer )
         {
-            FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
+            FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
 
             // for undos in case a transaction is opened by the caller
-            DrawingLayer->Modify();
+            DrawingLayer->GetImage()->Modify();
 
-            for( FArianeObject* SelectedObject : DrawingLayer->GetSelectedObjects() )
+            for( FArianeObject* SelectedObject : DrawingLayer->GetImage()->GetSelectedObjects() )
             {
                 if( SelectedObject != RootGroup )
                 {
@@ -853,16 +854,16 @@ FArianeEditor::GroupSelectedObjects( const FName& NewGroupName )
         if( DrawingLayer )
         {
             // for undos in case a transaction is opened by the caller
-            DrawingLayer->Modify();
+            DrawingLayer->GetImage()->Modify();
 
-            FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
+            FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
             FArianeObject* FosterParent = RootGroup;
-            FArianeGroup* NewGroup = DrawingLayer->AllocGroup( NewGroupName, EArianeAllocationModel::InstancedStruct );
+            FArianeGroup* NewGroup = DrawingLayer->GetImage()->AllocGroup( NewGroupName, EArianeAllocationModel::InstancedStruct );
             TArray<FArianeObject*> ObjectsToRegroup;
 
             if( RootGroup->IsSelected() == false )
             {
-                DrawingLayer->GetSelectedTrees( ObjectsToRegroup );
+                DrawingLayer->GetImage()->GetSelectedTrees( ObjectsToRegroup );
 
                 // Check if they all belong to the same parent
                 if( ObjectsToRegroup.Num() >= 2 )
@@ -908,18 +909,18 @@ FArianeEditor::DeleteSelectedObjects()
 
         if( DrawingLayer )
         {
-            FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
+            FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
             TArray<FArianeObject*> ObjectsToDelete;
 
             // for undos in case a transaction is opened by the caller
-            DrawingLayer->Modify();
+            DrawingLayer->GetImage()->Modify();
 
             if( RootGroup->IsSelected() == false )
             {
-                DrawingLayer->GetSelectedTrees( ObjectsToDelete );
+                DrawingLayer->GetImage()->GetSelectedTrees( ObjectsToDelete );
 
                 // We need to clear the selection because ObjectsToDelete may not contain all selected objects
-                DrawingLayer->ClearObjectSelection();
+                DrawingLayer->GetImage()->ClearObjectSelection();
 
                 for( FArianeObject* ObjectToDelete : ObjectsToDelete )
                 {
@@ -945,9 +946,9 @@ FArianeEditor::ConvertSelectedPrimitives()
         {
             TArray<FArianePrimitive*> PrimitivesToConvert;
 
-            PrimitivesToConvert.Reserve( DrawingLayer->GetSelectedObjects().Num() );
+            PrimitivesToConvert.Reserve( DrawingLayer->GetImage()->GetSelectedObjects().Num() );
 
-            for( FArianeObject* SelectedObject : DrawingLayer->GetSelectedObjects() )
+            for( FArianeObject* SelectedObject : DrawingLayer->GetImage()->GetSelectedObjects() )
             {
                 if( SelectedObject->HasBaseClass( FArianePrimitive::StaticClass() ) )
                 {
@@ -1007,13 +1008,13 @@ FArianeEditor::CopySelectedObjects()
         {
             TArray<FArianeObject*> ObjectsToCopy;
 
-            DrawingLayer->GetSelectedTrees( ObjectsToCopy );
+            DrawingLayer->GetImage()->GetSelectedTrees( ObjectsToCopy );
 
             if( ObjectsToCopy.Num() )
             {
                 FArianeObject::FCopyArgs CopyArgs;
 
-                CopyArgs.DrawingLayer = DrawingLayer;
+                CopyArgs.Image = DrawingLayer->GetImage();
                 CopyArgs.AllocationModel = EArianeAllocationModel::OperatingSystem;
 
                 // free copied objects
@@ -1051,24 +1052,24 @@ FArianeEditor::PasteObjects()
             if( Clipboard.CopiedObjects.Num() )
             {
                 TArray<FArianeObject*> SelectedTrees;
-                FArianeObject* Destination = DrawingLayer->GetRootGroup();
+                FArianeObject* Destination = DrawingLayer->GetImage()->GetRootGroup();
                 FArianeObject::FCopyArgs CopyArgs = FArianeObject::FCopyArgs();
 
                 // ECopyFlags::AllocByLayer means the allocation will be made as FInstancedstruct, thus saved by
                 // Unreal Engine's serialization
                 CopyArgs.Flags = FArianeObject::ECopyFlags::Rename;
                 CopyArgs.AllocationModel = EArianeAllocationModel::InstancedStruct;
-                CopyArgs.DrawingLayer = DrawingLayer;
+                CopyArgs.Image = DrawingLayer->GetImage();
 
-                DrawingLayer->GetSelectedTrees( SelectedTrees );
+                DrawingLayer->GetImage()->GetSelectedTrees( SelectedTrees );
 
                 Destination = ( SelectedTrees.Num() == 1 ) ? SelectedTrees[0]
-                                                           : DrawingLayer->GetRootGroup();
+                                                           : DrawingLayer->GetImage()->GetRootGroup();
 
                 // for undos in case a transaction is opened by the caller
-                DrawingLayer->Modify();
+                DrawingLayer->GetImage()->Modify();
 
-                DrawingLayer->ClearObjectSelection();
+                DrawingLayer->GetImage()->ClearObjectSelection();
 
                 for( FArianeObject* CopiedObject : Clipboard.CopiedObjects )
                 {
@@ -1076,7 +1077,7 @@ FArianeEditor::PasteObjects()
 
                     Destination->AppendChild( PasteObject );
 
-                    DrawingLayer->SelectObject( PasteObject );
+                    DrawingLayer->GetImage()->SelectObject( PasteObject );
                 }
 
                 Painting3DComponent->Update( false );

@@ -7,6 +7,7 @@
 #include "ArianeEditorStyle.h"
 // Ariane headers
 #include "ArianePainting3DComponent.h"
+#include "ArianeImage.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerFolder.h"
 #include "ArianePath.h"
@@ -142,7 +143,7 @@ UArianeEditorPathEditTool::Reset()
 
     if( DrawingLayer )
     {
-        DrawingLayer->GetSelectedTrees( SelectedTrees );
+        DrawingLayer->GetImage()->GetSelectedTrees( SelectedTrees );
     }
 }
 
@@ -355,7 +356,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
 
             //-------------- undo ---------------//
             GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.transaction.align-point-selection","Align Point Selection"));
-            DrawingLayer->Modify();
+            DrawingLayer->GetImage()->Modify();
 
             Vertex->SetHandleAligned( Vertex->IsHandleAligned() ? false : true );
 
@@ -368,13 +369,13 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
             {
                 case EArianePathEditToolEditionMode::VertexHandle :
                     GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-vertex-handles","Edit Vertex Handles"));
-                    DrawingLayer->Modify();
+                    DrawingLayer->GetImage()->Modify();
                 break;
 
                 case EArianePathEditToolEditionMode::Vertex :
                 {
                     GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-vertices","Edit Vertices"));
-                    DrawingLayer->Modify();
+                    DrawingLayer->GetImage()->Modify();
 
                     TArray<FArianeSegment*> AlteredSegments;
 
@@ -404,7 +405,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
 
                 case EArianePathEditToolEditionMode::SegmentHandle :
                     GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-handles","Edit Handles"));
-                    DrawingLayer->Modify();
+                    DrawingLayer->GetImage()->Modify();
                 break;
 
                 default:
@@ -466,7 +467,7 @@ UArianeEditorPathEditTool::OnMouseDown( FEditorViewportClient* ViewportClient
                 //mPathEditHUD->SetCutLineP0( iPointInTexture.x, iPointInTexture.y );
                 //mPathEditHUD->SetCutLineP1( iPointInTexture.x, iPointInTexture.y );
 
-                DrawingLayer->Modify();
+                DrawingLayer->GetImage()->Modify();
 
                 switch( EditionMode )
                 {
@@ -705,9 +706,9 @@ UArianeEditorPathEditTool::OnMouseUpDeletePoint( const TArray<FArianePoint*>& Pi
                 AlteredPathRecord->VertexArray.Add( Vertex );
             }
 
-            if( DrawingLayers.Find( Owner->GetDrawingLayer() ) == INDEX_NONE )
+            if( DrawingLayers.Find( Owner->GetImage()->GetDrawingLayer() ) == INDEX_NONE )
             {
-                DrawingLayers.Add( Owner->GetDrawingLayer() );
+                DrawingLayers.Add( Owner->GetImage()->GetDrawingLayer() );
             }
         }
     }
@@ -717,7 +718,7 @@ UArianeEditorPathEditTool::OnMouseUpDeletePoint( const TArray<FArianePoint*>& Pi
     // Snapshot for undos
     for( UArianeLayerDrawing* DrawingLayer : DrawingLayers )
     {
-        DrawingLayer->Modify();
+        DrawingLayer->GetImage()->Modify();
     }
 
     for( FAlteredPathRecord& AlteredPathRecord : AlteredPathRecords )

@@ -24,7 +24,7 @@ struct FArianeSegment;
 struct FArianeSegmentCubic;
 struct FArianeVertex;
 class UMaterial;
-class UArianeLayerDrawing;
+class UArianeImage;
 struct FArianePath;
 class UMaterialInterface;
 
@@ -128,7 +128,7 @@ public:
 public:
     virtual ~FArianePath();
     FArianePath();
-    FArianePath( UArianeLayerDrawing* InDrawingLayer
+    FArianePath( UArianeImage* InImage
                , const FName& InName
                , EArianeAllocationModel InAllocationModel
                , FArianePathInvalidationFlags* InInvalidationFlags = nullptr );

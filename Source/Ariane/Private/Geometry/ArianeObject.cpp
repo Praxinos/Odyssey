@@ -6,6 +6,7 @@
 #include "ArianeGroup.h"
 #include "ArianeTag.h"
 #include "ArianePainting3DComponent.h"
+#include "ArianeImage.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerStack.h"
 // Unreal headers
@@ -155,7 +156,7 @@ void
 FArianeObjectGeometry3D::InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices
                                           , TArray<uint32>& Indices )
 {
-    UWorld* World = Object->GetDrawingLayer()->GetWorld();
+    UWorld* World = Object->GetImage()->GetWorld();
 
     if( World )
     {
@@ -274,14 +275,14 @@ FArianeObject::FArianeObject()
 {
 }
 
-FArianeObject::FArianeObject( UArianeLayerDrawing* InDrawingLayer
+FArianeObject::FArianeObject( UArianeImage* InImage
                             , const FName& InName
                             , EArianeAllocationModel InAllocationModel
                             , FArianeObjectInvalidationFlags* InInvalidationFlags )
     : Name ( InName )
     , Guid ( FGuid::NewGuid() )
     , ParentID ( FArianeObjectID() )
-    , DrawingLayer( InDrawingLayer )
+    , Image( InImage )
     , bVisible ( true )
     , bExpanded ( true )
     , AllocationModel ( InAllocationModel  )
@@ -338,12 +339,12 @@ FArianeObject::RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstan
 
     if( ChildToRemove->IsSelected() )
     {
-        DrawingLayer->UnselectObject( ChildToRemove );
+        Image->UnselectObject( ChildToRemove );
     }
 
     if( bRemoveFromInstancedObjects )
     {
-        DrawingLayer->DeleteInstancedObject( ChildToRemove );
+        Image->DeleteInstancedObject( ChildToRemove );
     }
 }
 
@@ -418,7 +419,7 @@ FArianeObject::Invalidate( const FArianeObjectInvalidationFlags& InInvalidationF
 
     InvalidationFlags->OR( InInvalidationFlags );
 
-    GetDrawingLayer()->MarkPackageDirty();
+    GetImage()->MarkPackageDirty();
 
 
     OnPostInvalidated.Broadcast();
@@ -710,11 +711,11 @@ FArianeObject::UpdateTransform()
 {
     Traverse( this, []( FArianeObject* Object  ) -> ETraversalReturnValue
         {
-            UArianeLayerDrawing* DrawingLayer = Object->GetDrawingLayer();
+            UArianeImage* Image = Object->GetImage();
             FArianeObject* Parent = Object->GetParent();
 
             Object->WorldTransform =  Parent ? Object->LocalTransform * Parent->WorldTransform
-                                             : DrawingLayer->GetComponentTransform();
+                                             : Image->GetComponentTransform();
 
 //UE_LOG(LogTemp, Warning, TEXT("Object:%s - Parent:%p - Transform: %s"), *Name.ToString(), Parent, *WorldTransform.ToString());
 
@@ -725,7 +726,7 @@ FArianeObject::UpdateTransform()
 UArianePainting3DComponent*
 FArianeObject::GetPainting3DComponent()
 {
-    return DrawingLayer ? DrawingLayer->GetLayerStack()->GetPainting3DComponent() : nullptr;
+    return Image ? Image->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent() : nullptr;
 }
 
 void
@@ -754,16 +755,16 @@ FArianeObject::GetOnPostInvalidatedDelegate()
     return OnPostInvalidated;
 }
 
-UArianeLayerDrawing*
-FArianeObject::GetDrawingLayer()
+UArianeImage*
+FArianeObject::GetImage()
 {
-    return DrawingLayer;
+    return Image;
 }
 
 void
-FArianeObject::SetDrawingLayer( UArianeLayerDrawing* InDrawingLayer )
+FArianeObject::SetImage( UArianeImage* InImage )
 {
-    DrawingLayer = InDrawingLayer;
+    Image = InImage;
 }
 
 TArray<FArianeObjectID>&
@@ -1011,7 +1012,7 @@ FArianeObject::CopySettings( FArianeObject* DestinationObject, const FCopyArgs& 
 FArianeObject*
 FArianeObject::CopyShape( const FCopyArgs& CopyArgs )
 {
-    FArianeObject* ObjectCopy = CopyArgs.DrawingLayer->AllocObject( Name, CopyArgs.AllocationModel );
+    FArianeObject* ObjectCopy = CopyArgs.Image->AllocObject( Name, CopyArgs.AllocationModel );
 
     return ObjectCopy;
 }
@@ -1084,7 +1085,7 @@ FArianeObject::AddTag( FArianeTag* Tag )
 FArianeGroup*
 FArianeObject::GetRootGroup()
 {
-    return DrawingLayer ? DrawingLayer->GetRootGroup() : nullptr;
+    return Image ? Image->GetRootGroup() : nullptr;
 }
 
 #ifdef WITH_EDITOR
@@ -1096,7 +1097,7 @@ FArianeObject::GetHUDForegroundColor()
                                              , true );
 
     return Group ? Group->GetHUDForegroundColor()
-                 : DrawingLayer->GetLayerStack()->GetPainting3DComponent()->GetHUDForegroundColor();
+                 : Image->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->GetHUDForegroundColor();
 }
 #endif
 

@@ -17,34 +17,8 @@ class UArianeLayer;
 class UArianeLayerFolder;
 class UArianeLayerDrawing;
 
-class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
-{
-    public:
-        ~FArianeGeometryProxy();
-        FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLevel, UArianeLayer* InLayer );
-
-        virtual SIZE_T GetTypeHash() const override;
-        virtual uint32 GetMemoryFootprint( void ) const override;
-
-        virtual FPrimitiveViewRelevance GetViewRelevance( const FSceneView* View ) const override;
-        virtual void GetDynamicMeshElements( const TArray<const FSceneView*>& Views
-                                           , const FSceneViewFamily& ViewFamily
-                                           , uint32 VisibilityMap
-                                           , FMeshElementCollector& Collector) const override;
-        void GetDrawingLayerDynamicMeshElements( UArianeLayerDrawing* DrawingLayer
-                                               , FMeshElementCollector& Collector
-                                               , int32 ViewIndex ) const;
-        void InitVertexFactory();
-        virtual void DrawStaticElements( FStaticPrimitiveDrawInterface * PDI ) override;
-        FMaterialRelevance GetLayerStackMaterialRelevance() const;
-
-    protected:
-        UArianeLayer* Layer;
-        FMaterialRelevance MaterialRelevance;
-};
-
 UCLASS(Abstract)
-class ARIANE_API UArianeLayer : public UMeshComponent
+class ARIANE_API UArianeLayer : public USceneComponent
 {
     GENERATED_BODY()
 
@@ -101,12 +75,6 @@ public:
     void SetInvalidatedInParentFolder( bool bInInvalidatedInParentFolder );
 
     /**
-     * @brief Get the boundaries of the layer (i.e its content)
-     * @return the boundaries
-     */
-    const FBoxSphereBounds& GetBounds();
-
-    /**
      * @brief Get the layer stack associated to this layer
      * @return the layer stack
      */
@@ -145,8 +113,7 @@ public:
     void PreEditUndo();
     void PostEditUndo();
     void PostLoad();
-    virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
-    virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
+
 
 protected:
     ETraversalReturnValue TraverseBackwards_Private( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );

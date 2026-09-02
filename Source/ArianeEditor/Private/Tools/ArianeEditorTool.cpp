@@ -10,6 +10,7 @@
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayerDrawing.h"
+#include "ArianeImage.h"
 #include "ArianeVertex.h"
 #include "ArianeSegment.h"
 #include "ArianeSegmentCubic.h"
@@ -874,7 +875,7 @@ UArianeEditorTool::GetDrawingPlane( FEditorViewportClient* ViewportClient, UAria
 
         case EArianeEditorDrawingCoordinateSystem::Local :
         {
-            const TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetSelectedObjects();
+            const TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetImage()->GetSelectedObjects();
 
             if( SelectedObjects.Num() == 1 )
             {
@@ -1246,7 +1247,7 @@ UArianeEditorTool::MakePointQuadTree( FEditorViewportClient* ViewportClient
 
     for( UArianeLayerDrawing* DrawingLayer : DrawingLayers )
     {
-        FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
+        FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
 
         PointQuadTreeEntries.Reserve( 200 );
 

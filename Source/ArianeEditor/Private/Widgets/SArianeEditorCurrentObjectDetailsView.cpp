@@ -15,6 +15,7 @@
 // Ariane Headers
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayer.h"
+#include "ArianeImage.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerStack.h"
 #include "ArianeObject.h"
@@ -89,7 +90,7 @@ SArianeEditorCurrentObjectDetailsView::OnPrePainting3DComponentUpdate( bool bInt
     // as needing an update
     if( DrawingLayer )
     {
-        FArianeGroup* RootGroup = DrawingLayer->GetRootGroup();
+        FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
 
         FArianeObject::Traverse ( RootGroup
                                 , [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
@@ -221,7 +222,7 @@ SArianeEditorCurrentObjectDetailsView::GetRootGroup()
 
         if( DrawingLayer )
         {
-            return DrawingLayer->GetRootGroup();
+            return DrawingLayer->GetImage()->GetRootGroup();
         }
     }
 
@@ -242,12 +243,12 @@ SArianeEditorCurrentObjectDetailsView::Update()
 
         if( DrawingLayer )
         {
-            TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetSelectedObjects();
+            TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetImage()->GetSelectedObjects();
 
             if( SelectedObjects.IsEmpty() )
             {
                 // Use the root group as the default object
-                SelectedObjects.Add( DrawingLayer->GetRootGroup() );
+                SelectedObjects.Add( DrawingLayer->GetImage()->GetRootGroup() );
             }
 
            uint32 ObjectClass = FArianeObject::GetCommonClass( SelectedObjects );
@@ -320,11 +321,11 @@ SArianeEditorCurrentObjectDetailsView::PropertyValueChanged( const FPropertyChan
 
         if( DrawingLayer && CurrentObjectProxy )
         {
-            TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetSelectedObjects();
+            TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetImage()->GetSelectedObjects();
             FArianeGroup* RootGroup = GetRootGroup();
 
             // for undos
-            DrawingLayer->Modify();
+            DrawingLayer->GetImage()->Modify();
 
             // Unregister this widget's updates when the scene is updated. We don't want this widget to be
             // rebuilt while it's processing stuff
@@ -333,7 +334,7 @@ SArianeEditorCurrentObjectDetailsView::PropertyValueChanged( const FPropertyChan
             if( SelectedObjects.IsEmpty() )
             {
                 // Use the root group as the default object
-                SelectedObjects.Add( DrawingLayer->GetRootGroup() );
+                SelectedObjects.Add( DrawingLayer->GetImage()->GetRootGroup() );
             }
 
             CurrentObjectProxy->ValidateProperties( SelectedObjects, true );

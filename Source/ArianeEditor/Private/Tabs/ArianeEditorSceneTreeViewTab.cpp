@@ -12,6 +12,7 @@
 // Ariane Headers
 #include "ArianeLayerStack.h"
 #include "ArianeLayerDrawing.h"
+#include "ArianeImage.h"
 #include "ArianePainting3DComponent.h"
 // Unreal Headers
 #include "Widgets/Layout/SWidgetSwitcher.h"
@@ -89,7 +90,7 @@ FArianeEditorSceneTreeViewTab::GetRootGroup() const
 
         if( DrawingLayer )
         {
-            return DrawingLayer->GetRootGroup();
+            return DrawingLayer->GetImage()->GetRootGroup();
         }
     }
 

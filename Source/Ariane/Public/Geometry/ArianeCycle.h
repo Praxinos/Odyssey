@@ -102,7 +102,7 @@ public:
 public:
     virtual ~FArianeCycle();
     FArianeCycle();
-    FArianeCycle( UArianeLayerDrawing* InDrawingLayer
+    FArianeCycle( UArianeImage* InImage
                 , const FName& InName
                 , EArianeAllocationModel InAllocationModel
                 , FArianeCycleInvalidationFlags* InInvalidationFlags = nullptr );

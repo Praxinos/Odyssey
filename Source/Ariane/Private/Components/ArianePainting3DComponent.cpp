@@ -101,6 +101,7 @@ UArianePainting3DComponent::OnRegister()
     //DefaultMaterial->SetVectorParameterValue(FName("EmissiveColor"), FLinearColor::Black);
 }
 
+/*
 void
 UArianePainting3DComponent::GetUsedMaterials( TArray<UMaterialInterface*>& OutMaterials, bool bGetDebugMaterials ) const
 {
@@ -125,6 +126,7 @@ UArianePainting3DComponent::GetUsedMaterials( TArray<UMaterialInterface*>& OutMa
             return UArianeLayerFolder::ETraversalReturnValue::Continue;
         } );
 }
+
 
 int32
 UArianePainting3DComponent::GetNumMaterials() const
@@ -158,6 +160,7 @@ UArianePainting3DComponent::SetMaterial( int32 ElementIndex, UMaterialInterface*
         MarkRenderStateDirty();
     }
 }
+*/
 
 void
 UArianePainting3DComponent::Init()
