@@ -14,6 +14,24 @@
 DECLARE_STATS_GROUP(TEXT("UOdysseyTiledImage"), STATGROUP_OdysseyTiledImage, STATCAT_Advanced);
 DECLARE_CYCLE_STAT(TEXT("UOdysseyTiledImage::Render"), STAT_Render, STATGROUP_OdysseyTiledImage);
 
+UOdysseyTiledImageFactoryNew::UOdysseyTiledImageFactoryNew()
+{
+    bCreateNew = true;
+    bEditAfterNew = true;
+    SupportedClass = UOdysseyTiledImage::StaticClass();
+}
+
+UObject*
+UOdysseyTiledImageFactoryNew::FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn )
+{
+    return NewObject<UOdysseyTiledImage>( iParent, iName, iFlags | RF_Transactional );
+}
+
+bool
+UOdysseyTiledImageFactoryNew::ShouldShowInNewMenu() const
+{
+    return false;
+}
 
 BEGIN_SHADER_PARAMETER_STRUCT(FWriteTileParameters, )
     RDG_TEXTURE_ACCESS(Texture, ERHIAccess::CopyDest)
@@ -231,8 +249,85 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
     );
 }
 
+struct FOdysseyTiledImageObjectVersion
+{
+    enum Type
+    {
+        // Before any version changes were made
+        SerializeTiles,
+
+        // -----<new versions can be added above this line>-------------------------------------------------
+        VersionPlusOne,
+        LatestVersion = VersionPlusOne - 1
+    };
+
+    // The GUID for this custom version number
+    const static FGuid GUID;
+
+private:
+    FOdysseyTiledImageObjectVersion() {}
+};
+
+const FGuid FOdysseyTiledImageObjectVersion::GUID(0x369704bc, 0xd2364b57, 0x8d73527e, 0x2fe77950);
+FDevVersionRegistration GRegisterOdysseyTiledImageObjectVersion(FOdysseyTiledImageObjectVersion::GUID, FOdysseyTiledImageObjectVersion::LatestVersion, TEXT("OdysseyTiledImage"));
+
 void
 UOdysseyTiledImage::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
+
+    //We don't need to save Tiles data for undo or when cooking
+    //(even if UOdysseyTiledImage will probably never be cooked)
+    if (Ar.IsTransacting() || Ar.IsCooking())
+        return;
+
+    //As we are doing a custom serialization
+    //We use an identifiable version to prevent future problems
+    //if this custom serialization is changed
+    Ar.UsingCustomVersion(FOdysseyTiledImageObjectVersion::GUID);
+
+
+        TArray<FIntPoint> TilePositions;
+        TArray<FCompressedBuffer> TileCompressedBuffers;
+        TArray<FIoHash> TileHashes;
+
+    if( Ar.IsSaving() )
+    {
+        for (const auto& Element : Tiles)
+        {
+            const FIntPoint& TilePosition = Element.Key;
+            const FOdysseyTileId& TileId = Element.Value;
+
+            FCompressedBuffer CompressedBuffer;
+            if (!FOdysseyTileManager::Get().GetTileCompressedBuffer(TileId, CompressedBuffer))
+                continue;
+
+            FIoHash Hash;
+            if (!FOdysseyTileManager::Get().GetTileHash(TileId, Hash))
+                continue;
+
+            TilePositions.Add(TilePosition);
+            TileCompressedBuffers.Add(CompressedBuffer);
+            TileHashes.Add(Hash);
+        }
+    }
+
+    Ar << TilePositions;
+    Ar << TileCompressedBuffers;
+    Ar << TileHashes;
+
+    if( Ar.IsLoading() )
+    {
+        Tiles.Reserve(TilePositions.Num());
+
+        for (int i = 0; i < TilePositions.Num(); i++)
+        {
+            const FIntPoint& TilePosition = TilePositions[i];
+            const FCompressedBuffer& TileCompressedBuffer = TileCompressedBuffers[i];
+            const FIoHash& TileHash = TileHashes[i];
+
+            FOdysseyTileId TileId = FOdysseyTileManager::Get().CreateTile(TileHash, TileCompressedBuffer);
+            Tiles.Add(TilePosition, TileId);
+        }
+    }
 }
