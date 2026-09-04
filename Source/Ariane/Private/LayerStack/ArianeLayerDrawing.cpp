@@ -112,3 +112,28 @@ UArianeLayerDrawing::GetImage()
 {
     return Image;
 }
+
+void
+UArianeLayerDrawing::SetImage( UArianeImage* InImage )
+{
+    if( Image )
+    {
+        Image->DetachFromComponent( FDetachmentTransformRules::KeepRelativeTransform );
+        Image->UnregisterComponent();
+    }
+
+    if( InImage )
+    {
+        if ( InImage->IsRegistered() )
+        {
+            InImage->AttachToComponent( this,  FAttachmentTransformRules::KeepRelativeTransform );
+        }
+        else
+        {
+            InImage->SetupAttachment(this);
+            InImage->RegisterComponent();
+        }
+    }
+
+    Image = InImage;
+}

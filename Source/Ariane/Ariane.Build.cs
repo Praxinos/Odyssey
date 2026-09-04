@@ -28,6 +28,7 @@ public class Ariane : ModuleRules
                 Path.Combine(ModuleDirectory, "Private", "Components"),
                 Path.Combine(ModuleDirectory, "Private", "Actors"),
                 Path.Combine(ModuleDirectory, "Private", "Image"),
+                Path.Combine(ModuleDirectory, "Private", "Animation"),
                 Path.Combine(ModuleDirectory, "Private", "Geometry"),
                 Path.Combine(ModuleDirectory, "Private", "Painting"),
                 Path.Combine(ModuleDirectory, "Private", "LayerStack"),
@@ -41,6 +42,7 @@ public class Ariane : ModuleRules
                 Path.Combine(ModuleDirectory, "Public", "Components"),
                 Path.Combine(ModuleDirectory, "Public", "Actors"),
                 Path.Combine(ModuleDirectory, "Public", "Image"),
+                Path.Combine(ModuleDirectory, "Public", "Animation"),
                 Path.Combine(ModuleDirectory, "Public", "Geometry"),
                 Path.Combine(ModuleDirectory, "Public", "Painting"),
                 Path.Combine(ModuleDirectory, "Public", "LayerStack"),
@@ -71,6 +73,10 @@ public class Ariane : ModuleRules
                 "MeshConversion", //  FMeshDescriptionBuilder
                 "GeometryCore",
                 "GeometryFramework",
+                "Sequencer",
+                "LevelSequence",
+                "MovieScene",
+                "MovieSceneTracks",
                 "OdysseyPalette",
                 "ULIS",
                 "blend2d", // for Cycles
@@ -91,6 +97,10 @@ public class Ariane : ModuleRules
                 "MeshConversion", //  FMeshDescriptionBuilder
                 "GeometryCore",
                 "GeometryFramework",
+                "Sequencer",
+                "LevelSequence",
+                "MovieScene",
+                "MovieSceneTracks",
                 "OdysseyPalette",
                 //"OdysseyMedia",
                 //"OdysseyRendering",

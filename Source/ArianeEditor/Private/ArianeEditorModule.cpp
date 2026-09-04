@@ -11,7 +11,10 @@
 #include "ArianeEditorLayerStackTab.h"
 #include "ArianeEditorSceneTreeViewTab.h"
 #include "ArianePainting3DComponentCustomization.h"
+#include "ArianeEditorImageMovieSceneTrack.h"
 #include "ArianeEditorStyle.h"
+#include "ArianeEditorViewportEdMode.h"
+
 // Ariane headers
 #include "ArianePainting3DActor.h"
 #include "ArianePainting3DComponent.h"
@@ -20,6 +23,8 @@
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerStack.h"
+#include "ArianeImageMovieSceneSection.h"
+
 // Unreal headers
 #include "AssetToolsModule.h"
 #include "CoreMinimal.h"
@@ -36,8 +41,8 @@
 #include "Framework/Docking/TabManager.h"
 #include "Selection.h"
 #include "MeshUtilities.h" // for conversion to static mesh
-
-#include "ArianeEditorViewportEdMode.h"
+#include "ISequencerModule.h"
+#include "SequencerChannelInterface.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -142,6 +147,13 @@ FArianeEditorModule::StartupModule()
 
     RegisterSettings();
 
+
+    // for Ariane Image tracks in the sequencer
+    ISequencerModule& SequencerModule = FModuleManager::LoadModuleChecked<ISequencerModule>("Sequencer");
+    ImageTrackHandle = SequencerModule.RegisterTrackEditor(FOnCreateTrackEditor::CreateStatic( &FArianeEditorImageMovieSceneTrack::CreateTrackEditor ) );
+
+    SequencerModule.RegisterChannelInterface<FArianeImageMovieSceneChannel>();
+
 /* Gary
     RegisterBrushOverrides(); //First thing to do, as it modifies the Brush CDO
     RegisterCommands();
@@ -171,6 +183,11 @@ FArianeEditorModule::ShutdownModule()
     UnregisterSettings();
 
     FArianeEditorStyle::Unregister();
+
+
+    // for Ariane Image tracks in the sequencer
+    ISequencerModule& SequencerModule = FModuleManager::GetModuleChecked<ISequencerModule>("Sequencer");
+    SequencerModule.UnRegisterTrackEditor( ImageTrackHandle );
 
 /* Gary
     UnregisterBrushOverrides();

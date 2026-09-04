@@ -251,7 +251,7 @@ SArianeEditorCurrentObjectDetailsView::Update()
                 SelectedObjects.Add( DrawingLayer->GetImage()->GetRootGroup() );
             }
 
-           uint32 ObjectClass = FArianeObject::GetCommonClass( SelectedObjects );
+            uint32 ObjectClass = FArianeObject::GetCommonClass( SelectedObjects );
 
             if( ObjectClass )
             {
