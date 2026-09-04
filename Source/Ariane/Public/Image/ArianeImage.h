@@ -50,7 +50,7 @@ class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
 };
 
 
-UCLASS()
+UCLASS( BlueprintType, Blueprintable, EditInlineNew, meta=(BlueprintSpawnableComponent) )
 class ARIANE_API UArianeImage : public UMeshComponent
 {
     GENERATED_BODY()

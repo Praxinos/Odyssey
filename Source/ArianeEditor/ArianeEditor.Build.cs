@@ -62,7 +62,11 @@ public class ArianeEditor : ModuleRules
                 "ToolWidgets",
                 "UnrealEd",
                 "ViewportInteraction",
-
+                "Sequencer",
+                "LevelSequence",
+                "MovieScene",
+                "MovieSceneTracks",
+                "MovieSceneTools", // FKeyframeTrackEditor
                 "InteractiveToolsFramework",
                 //"OdysseyAnimation",
                 //"OdysseyAnimationTracks",
@@ -132,6 +136,7 @@ public class ArianeEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Private", "Tools"),
                 Path.Combine(ModuleDirectory, "Private", "Styles"),
                 Path.Combine(ModuleDirectory, "Private", "Widgets"),
+                Path.Combine(ModuleDirectory, "Private", "Animation"),
                 Path.Combine(ModuleDirectory, "Private", "Customizations"),
             }
         );
@@ -150,6 +155,7 @@ public class ArianeEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Public", "Tools"),
                 Path.Combine(ModuleDirectory, "Public", "Styles"),
                 Path.Combine(ModuleDirectory, "Public", "Widgets"),
+                Path.Combine(ModuleDirectory, "Public", "Animation"),
                 Path.Combine(ModuleDirectory, "Public", "Customizations"),
             }
         );

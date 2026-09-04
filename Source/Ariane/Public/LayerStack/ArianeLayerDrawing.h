@@ -64,6 +64,7 @@ public:
 
     //virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
     UArianeImage* GetImage();
+    void SetImage( UArianeImage* InImage );
     virtual void OnRegister() override;
 
 protected:
