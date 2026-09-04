@@ -77,6 +77,7 @@ private:
 
 private:
     FDelegateHandle mExtendLevelEditorLayout;
+    FDelegateHandle ImageTrackHandle;
 /* Gary
     TArray<FOdysseyPainterEditor*> mOpenedEditors;
 */
