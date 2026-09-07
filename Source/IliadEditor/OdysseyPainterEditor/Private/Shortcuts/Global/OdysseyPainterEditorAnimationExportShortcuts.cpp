@@ -136,7 +136,7 @@ FOdysseyPainterEditorAnimationExportShortcuts::Action_ImportImageSequence()
         , LOCTEXT("animation.import-images.dialog.title", "Select Images to import").ToString()
         , FString() //Allows the dialog to open in the last folder the dialog opened
         , animation->GetName()
-        , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg|Any (.*)|*.*")
+        , TEXT("Image Files (*.png;*.bmp;*.tga;*.jpg;*.jpeg)|*.png;*.bmp;*.tga;*.jpg;*.jpeg")
         , EFileDialogFlags::Multiple
         , filenames
     );
