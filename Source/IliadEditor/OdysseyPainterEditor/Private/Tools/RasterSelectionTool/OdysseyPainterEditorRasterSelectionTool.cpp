@@ -75,6 +75,10 @@ UOdysseyPainterEditorRasterSelectionTool::GetTooltip() const
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return false;
+
     UOdysseyPainterEditorTool::OnMouseDown(iPointInTexture, iKey);
 
     if (iKey != EKeys::LeftMouseButton)
@@ -92,12 +96,20 @@ void UOdysseyPainterEditorRasterSelectionTool::OnMouseHover(const FOdysseyPoint&
 
 void UOdysseyPainterEditorRasterSelectionTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return;
+
     FOdysseyPoint point = iPointInTexture;
     Shapes.GetActiveShape()->OnMouseDrag(point);
 }
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return false;
+
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
@@ -151,6 +163,16 @@ UOdysseyPainterEditorRasterSelectionTool::Deselect()
 {
     TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->Clear();
+}
+
+TOptional<FMouseCursor>
+UOdysseyPainterEditorRasterSelectionTool::GetMouseCursorOverride() const
+{
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return FMouseCursor(EMouseCursor::SlashedCircle);
+
+    return Super::GetMouseCursorOverride();
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::Tick(float iDeltaTime)

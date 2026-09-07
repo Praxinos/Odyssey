@@ -89,15 +89,6 @@ UOdysseyPainterEditorVectorCutTool::UnloadVector( FOdysseyVectorGroupPaint* iSce
     return 0;
 }
 
-TOptional<FMouseCursor> UOdysseyPainterEditorVectorCutTool::GetMouseCursorOverride() const
-{
-    //FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    //if( mediaProvider.IsLocked() )
-    //    return FMouseCursor( EMouseCursor::SlashedCircle );
-
-    return Super::GetMouseCursorOverride();
-}
-
 void
 UOdysseyPainterEditorVectorCutTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                       , const FOdysseyPoint& iPointInTexture )

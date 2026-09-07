@@ -58,6 +58,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Actions", CallInEditor)
     void Deselect();
 
+protected:
+    TOptional<FMouseCursor> GetMouseCursorOverride() const override;
+
 private:
     // Internal - Callbacks
     void OnShapeBegin();

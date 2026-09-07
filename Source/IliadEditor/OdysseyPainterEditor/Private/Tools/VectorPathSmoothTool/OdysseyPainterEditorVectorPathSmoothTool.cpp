@@ -188,7 +188,6 @@ void
 UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture )
 {
-
     mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 }
 

@@ -542,6 +542,10 @@ bool
 UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
                                                 , const FKey& iKey )
 {
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return false;
+
     UOdysseyPainterEditorTool::OnMouseDown(iPointInTexture, iKey);
 
     if( bMouseEventViaHUD )
@@ -667,6 +671,10 @@ UOdysseyPainterEditorVectorBaseTool::FilterMouseEvent( eMouseEventName iCurrentM
 void
 UOdysseyPainterEditorVectorBaseTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
 {
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return;
+
     if( bMouseEventViaHUD )
     {
         // do nothing
@@ -680,6 +688,10 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDrag( const FOdysseyPoint& iPointInT
 void
 UOdysseyPainterEditorVectorBaseTool::OnMouseDragViaHUD( const FOdysseyPoint& iPointInTexture )
 {
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return;
+
     // workaround for buggy stylus drivers
     //if( FilterMouseEvent( eMouseEventName::MouseDrag ) == false )
     //    return;
@@ -695,6 +707,10 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDragViaHUD( const FOdysseyPoint& iPo
 bool
 UOdysseyPainterEditorVectorBaseTool::OnMouseClick( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return false;
+
     if( bMouseEventViaHUD )
     {
         // do nothing
@@ -710,6 +726,10 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseClick( const FOdysseyPoint& iPointIn
 bool
 UOdysseyPainterEditorVectorBaseTool::OnMouseClickViaHUD( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return false;
+
     if( mWorkingCell )
     {
         bool handled = OnMouseClickVector( mWorkingCell->GetScene(), iPointInTexture, iKey );
@@ -745,6 +765,10 @@ bool
 UOdysseyPainterEditorVectorBaseTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
                                               , const FKey& iKey )
 {
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return false;
+
     if( bMouseEventViaHUD )
     {
         // do nothing
@@ -761,6 +785,10 @@ bool
 UOdysseyPainterEditorVectorBaseTool::OnMouseUpViaHUD( const FOdysseyPoint& iPointInTexture
                                                     , const FKey& iKey )
 {
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return false;
+
     // workaround for buggy stylus drivers
     //if( FilterMouseEvent( eMouseEventName::MouseUp ) == false )
     //    return false;
@@ -1807,11 +1835,15 @@ UOdysseyPainterEditorVectorBaseTool::MakeTest( FOdysseyVectorGroupPaint* iScene 
 
 TOptional<FMouseCursor> UOdysseyPainterEditorVectorBaseTool::GetMouseCursorOverride() const
 {
-    //TODO: to much problem with tool subclasses which mainly don't take locked layer into account
-    // So for the moment, just comment it and only Path and Primitive drawing tools will manage it
-    //FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    //if( mediaProvider.IsLocked() )
-    //    return FMouseCursor( EMouseCursor::SlashedCircle );
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return FMouseCursor(EMouseCursor::SlashedCircle);
+
+    // working group can be null if were are not on a cell
+    FOdysseyVectorGroup* workingGroup = GetWorkingGroup();
+
+    if (workingGroup && !workingGroup->IsVisible(true))
+        return FMouseCursor(EMouseCursor::SlashedCircle);
 
     return TOptional<FMouseCursor>();
 }

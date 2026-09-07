@@ -85,8 +85,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorCutTool : public UOdys
                      , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray );
 
     protected:
-        virtual TOptional<FMouseCursor> GetMouseCursorOverride() const override;
-
         uint64 OnMouseUpVectorObjectMode( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
                                         , const FKey& iKey );

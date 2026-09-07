@@ -83,9 +83,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
         virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
 
-    protected:
-        virtual TOptional<FMouseCursor> GetMouseCursorOverride() const override;
-
     private:
         void AddSize(int iAmount);
         FOdysseyVectorVertex* PickVertex( FOdysseyVectorGroupPaint* iScene

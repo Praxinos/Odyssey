@@ -369,21 +369,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
     return true;
 }
 
-TOptional<FMouseCursor> UOdysseyPainterEditorVectorPathDrawingTool::GetMouseCursorOverride() const
-{
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if( mediaProvider.IsLocked() )
-        return FMouseCursor( EMouseCursor::SlashedCircle );
-
-    // working group can be null if were are not on a cell
-    FOdysseyVectorGroup* workingGroup = GetWorkingGroup();
-
-    if( workingGroup && !workingGroup->IsVisible( true ) )
-        return FMouseCursor( EMouseCursor::SlashedCircle );
-
-    return Super::GetMouseCursorOverride();
-}
-
 void
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                               , const FOdysseyPoint& iPointInTexture )
