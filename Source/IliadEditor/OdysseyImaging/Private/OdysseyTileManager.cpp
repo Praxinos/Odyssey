@@ -147,7 +147,6 @@ FOdysseyTileManager::Finalize()
 {
     FString CacheDirectory = FPaths::GetPath(GetCacheOnDiskPath());
 
-    //TODO: Add Cache Barrier before deleting the directory
     WaitUntilAllTilesAreCached(false);
 
     IFileManager::Get().DeleteDirectory(*CacheDirectory, false, true);
@@ -199,10 +198,12 @@ FOdysseyTileManager::CreateOrUpdateTiles(
     );
 
     TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTilePositionsFromRect(InTileSize, DestinationRect);
-    TArray<FSharedBuffer> TileOldBuffers;
+    TArray<uint64> TileIndexes;
+    TArray<TFuture<FTextureRHIRef>> TileOldTextures;
     TArray<TSharedPtr<FRHIGPUTextureReadback>> TileReadBacks;
     TArray<TSharedPtr<FRHIGPUBufferReadback>> TileIsEmptyReadBacks;
-    TileOldBuffers.Reserve(TilePositions.Num());
+    TileIndexes.Reserve(TilePositions.Num());
+    TileOldTextures.Reserve(TilePositions.Num());
     TileReadBacks.Reserve(TilePositions.Num());
     TileIsEmptyReadBacks.Reserve(TilePositions.Num());
 
@@ -216,11 +217,19 @@ FOdysseyTileManager::CreateOrUpdateTiles(
         if (InGetExistingTileId.IsBound())
             OldTileId = InGetExistingTileId.Execute(TilePosition);
 
-        FSharedBuffer OldTileBuffer;
+        TFuture<FTextureRHIRef> OldTileTexture;
         if (OldTileId.IsValid())
-            GetTileBuffer(OldTileId, OldTileBuffer);
+        {
+            OldTileTexture = GetTileTexture(OldTileId, InTileSize, InTileFormat);
+        }
+        else
+        {
+            TPromise<FTextureRHIRef> Promise;
+            OldTileTexture = Promise.GetFuture();
+            Promise.SetValue(FTextureRHIRef());
+        }
 
-        TileOldBuffers.Add(OldTileBuffer);
+        TileOldTextures.Add(MoveTemp(OldTileTexture));
 
         Tile.GPUReadBack = MakeShared<FRHIGPUTextureReadback>(TEXT("FOdysseyTileManager::ReadBack"));
         TileReadBacks.Add(Tile.GPUReadBack);
@@ -228,7 +237,11 @@ FOdysseyTileManager::CreateOrUpdateTiles(
         Tile.GPUIsEmptyReadBack = MakeShared<FRHIGPUBufferReadback>(TEXT("FOdysseyTileManager::IsEmptyReadBack"));
         TileIsEmptyReadBacks.Add(Tile.GPUIsEmptyReadBack);
 
+        Tile.TempTexture = Tile.TempTexturePromise.GetFuture();
+
         FOdysseyTileId TileId = RegisterTile(MoveTemp(Tile));
+
+        TileIndexes.Add(TileId.Index);
         PendingTilesToReadBack.Add(TileId);
 
         FCreatedTile CreatedTile;
@@ -239,30 +252,49 @@ FOdysseyTileManager::CreateOrUpdateTiles(
 
     ENQUEUE_RENDER_COMMAND(FOdysseyTileManager_CreateTiles)(
         [
+            this,
             Source = InTexture,
             TileSize = InTileSize,
             PixelFormat = InTileFormat,
+            TileIndexes,
             TilePositions,
-            TileOldBuffers,
+            TileOldTextures = MoveTemp(TileOldTextures),
             TileReadBacks,
             TileIsEmptyReadBacks,
             SourceRect,
             DestinationRect
-        ](FRHICommandListImmediate& RHICmdList)
+        ](FRHICommandListImmediate& RHICmdList) mutable
         {
             SCOPE_CYCLE_COUNTER(STAT_CreateTiles);
             DECLARE_GPU_STAT(FOdysseyTileManager_CreateTiles);
 
-            FRDGBuilder GraphBuilder(RHICmdList);
-
             FIntPoint TileWH(TileSize, TileSize);
 
+            //Step1 : Create the Tile Textures
+            TArray<FTextureRHIRef> TileTextureRHIs;
+            for (int i = 0; i < TilePositions.Num(); i++)
+            {
+                const FRHITextureCreateDesc CreateDesc = FRHITextureCreateDesc::Create2D(TEXT("FOdysseyTileManager::TileTexture"))
+                    .SetExtent(TileWH)
+                    .SetFormat(PixelFormat)
+                    .SetClearValue(FClearValueBinding::Transparent)
+                    .SetFlags(ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable);
+
+                TileTextureRHIs.Add(RHICmdList.CreateTexture(CreateDesc));
+            }
+
+            //Step2 :
+            // - Draw in the Tile Textures
+            // - Initiate "IsEmpty" ReadBack
+            // - Initiate "Pixels" ReadBack
+            FRDGBuilder GraphBuilder(RHICmdList);
             for (int i = 0; i < TilePositions.Num(); i++)
             {
                 const FIntPoint& TilePosition = TilePositions[i];
-                const FSharedBuffer& TileOldBuffer = TileOldBuffers[i];
+                const FTextureRHIRef& TileOldTextureRHI = TileOldTextures[i].Get();
                 const TSharedPtr<FRHIGPUTextureReadback>& TileReadBack = TileReadBacks[i];
                 const TSharedPtr<FRHIGPUBufferReadback>& TileIsEmptyReadBack = TileIsEmptyReadBacks[i];
+                FTextureRHIRef TileTextureRHI = TileTextureRHIs[i];
 
                 FIntPoint TileDstPos(TilePosition.X * TileSize, TilePosition.Y * TileSize);
                 FIntRect TileDstRect(TileDstPos, TileDstPos + TileWH);
@@ -279,28 +311,21 @@ FOdysseyTileManager::CreateOrUpdateTiles(
                 TileDstRect -= TileDstPos;
 
                 FRDGTextureRef SourceTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(Source->GetResource()->TextureRHI, TEXT("FOdysseyTileManager::CreateTiles")));
-                const FRDGTextureDesc& SourceTextureDesc = SourceTexture->Desc;
+                FRDGTextureRef TileTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(TileTextureRHI, TEXT("FOdysseyTileManager::TileTexture")));
 
-                FRDGTextureDesc TileTextureDesc = FRDGTextureDesc::Create2D(
-                    FIntPoint(TileSize, TileSize),
-                    PixelFormat,
-                    FClearValueBinding::Transparent,
-                    ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
-                );
-
-                FRDGTextureRef TileTexture = GraphBuilder.CreateTexture(TileTextureDesc, TEXT("FOdysseyTileManager::TileTexture"));
-
-                if (TileOldBuffer.IsNull())
+                if (TileOldTextureRHI.IsValid())
                 {
-                    AddClearRenderTargetPass(GraphBuilder, TileTexture, FLinearColor::Transparent);
+                    FRDGTextureRef TileOldTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(TileOldTextureRHI, TEXT("FOdysseyTileManager::TileOldTexture")));
+                    AddDrawTexturePass(
+                        GraphBuilder,
+                        FScreenPassViewInfo(),
+                        TileOldTexture,
+                        TileTexture
+                    );
                 }
                 else
                 {
-                    AddWriteTilePass(
-                        GraphBuilder,
-                        TileTexture,
-                        TileOldBuffer
-                    );
+                    AddClearRenderTargetPass(GraphBuilder, TileTexture, FLinearColor::Transparent);
                 }
 
                 AddDrawTexturePass(
@@ -323,8 +348,25 @@ FOdysseyTileManager::CreateOrUpdateTiles(
 
                 AddEnqueueCopyPass(GraphBuilder, TileReadBack.Get(), TileTexture);
             }
-
             GraphBuilder.Execute();
+
+            //Step 3 : Fullfil the TileTexture Promises
+
+            {
+                //Lock Tiles to avoid array mutation
+                //while accessing it
+                FScopeLock Lock(&TilesMutex);
+                for (int i = 0; i < TileTextureRHIs.Num(); i++)
+                {
+                    //We only validate the TileTexture once the GraphBuilder has been executed
+                    //It ensures the TileTexture will be filled with the right pixels data
+                    //even if the texture is immediately used
+                    uint64 TileIndex = TileIndexes[i];
+                    FTile& Tile = Tiles[TileIndex];
+
+                    Tile.TempTexturePromise.SetValue(TileTextureRHIs[i]);
+                }
+            }
 
             //Needed for the readback buffers to be read properly
             //Otherwise, ReadBack->Wait() can hang indefinitely
@@ -379,6 +421,9 @@ FOdysseyTileManager::CreateTile(const FIoHash& InHash, const FCompressedBuffer& 
     }
 
     FTile Tile;
+    Tile.TempTexture = Tile.TempTexturePromise.GetFuture();
+    Tile.TempTexturePromise.SetValue(FTextureRHIRef());
+
     TPromise<TSharedPtr<FTileData>> Promise;
     Tile.TileData = Promise.GetFuture();
     Promise.SetValue(TileData);
@@ -391,7 +436,7 @@ FOdysseyTileId
 FOdysseyTileManager::RegisterTile(FTile&& InTile)
 {
     FOdysseyTileId TileId;
-    FScopeLock Lock(&FreeTilesMutex);
+    FScopeLock Lock(&TilesMutex);
     if (FreeTiles.Num() > 0)
     {
         TileId.Index = FreeTiles[0];
@@ -456,6 +501,16 @@ FOdysseyTileManager::LoadTileFromReadBack(FOdysseyTileId InTileId)
             TileIndex = InTileId.Index
         ](FRHICommandListImmediate& RHICmdList) mutable
         {
+            ON_SCOPE_EXIT
+            {
+                //Lock Tiles to avoid array mutation
+                //while accessing it
+                FScopeLock Lock(&TilesMutex);
+                TPromise<FTextureRHIRef> Promise;
+                Tiles[TileIndex].TempTexture = Promise.GetFuture();
+                Promise.SetValue(FTextureRHIRef());
+            };
+
             const FRHIGPUMask GPUMask = RHICmdList.GetGPUMask();
 
             //Is Empty ReadBack
@@ -469,7 +524,7 @@ FOdysseyTileManager::LoadTileFromReadBack(FOdysseyTileId InTileId)
 
                 if (IsEmpty) //Is Empty
                 {
-                    FScopeLock Lock(&FreeTilesMutex);
+                    FScopeLock Lock(&TilesMutex);
                     FreeTiles.Add(TileIndex);
                     Promise.SetValue(nullptr);
                     return;
@@ -525,6 +580,93 @@ FOdysseyTileManager::LoadTileFromReadBack(FOdysseyTileId InTileId)
             }
         }
     );
+}
+
+TFuture<FTextureRHIRef>
+FOdysseyTileManager::GetTileTexture(FOdysseyTileId InTileId, uint32 InTileSize, EPixelFormat InTileFormat) const
+{
+    check(IsInGameThread());
+
+    TPromise<FTextureRHIRef> Promise;
+    TFuture<FTextureRHIRef> Future = Promise.GetFuture();
+
+    //Check if TileIndex is out of bounds
+    if (InTileId.Index >= (uint64)Tiles.Num())
+    {
+        Promise.SetValue(FTextureRHIRef());
+        return Future;
+    }
+
+    //Retrieve Tile
+    const FTile& Tile = Tiles[InTileId.Index];
+
+    //Check if Tile.Generation corresponds to TileId.Generation
+    //indicating the tile is indeed the one corresponding to the TileId
+    //Otherwise, it indicates the tile corresponding to the TileId was empty
+    //and freed
+    if (Tile.Generation != InTileId.Generation)
+    {
+        Promise.SetValue(FTextureRHIRef());
+        return Future;
+    }
+
+    //Check if the Tile has a TempTexture
+    //Indicating the Tile's ReadBack has not yet finished
+    //Rely on TempTexture if it exists
+    FTextureRHIRef TextureRHI = Tile.TempTexture.Get();
+    if (TextureRHI.IsValid())
+    {
+        Promise.SetValue(TextureRHI);
+        return Future;
+    }
+
+    //TempTexture is Null indicating ReadBack has finished
+    //The Tile's Buffer should be available
+    //Rely on the Tile's Buffer to create a TextureRHIRef
+    FSharedBuffer Buffer;
+    if (!GetTileBuffer(InTileId, Buffer))
+    {
+        //Tile's Buffer could not be retrieved
+        //indicating an empty Tile
+        Promise.SetValue(FTextureRHIRef());
+        return Future;
+    }
+
+    ENQUEUE_RENDER_COMMAND(FOdysseyTileManager_GetTileTexture)(
+        [
+            Buffer,
+            PixelFormat = InTileFormat,
+            TileSize = InTileSize,
+            Promise = MoveTemp(Promise)
+        ](FRHICommandListImmediate& RHICmdList) mutable
+        {
+            FIntPoint TileWH(TileSize, TileSize);
+
+            const FRHITextureCreateDesc CreateDesc = FRHITextureCreateDesc::Create2D(TEXT("FOdysseyTileManager::TileTexture"))
+                .SetExtent(TileWH)
+                .SetFormat(PixelFormat)
+                .SetClearValue(FClearValueBinding::Transparent)
+                .SetFlags(ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable);
+
+            FTextureRHIRef TextureRHI = RHICmdList.CreateTexture(CreateDesc);
+
+            FRDGBuilder GraphBuilder(RHICmdList);
+
+            FRDGTextureRef TileTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(TextureRHI, TEXT("FOdysseyTileManager::TileTexture")));
+
+            AddWriteTilePass(
+                GraphBuilder,
+                TileTexture,
+                Buffer
+            );
+
+            GraphBuilder.Execute();
+
+            Promise.SetValue(TextureRHI);
+        }
+    );
+
+    return Future;
 }
 
 bool
