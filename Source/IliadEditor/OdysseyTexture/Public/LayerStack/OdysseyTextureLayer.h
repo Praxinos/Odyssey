@@ -43,7 +43,7 @@ private:
     void UpdateTextureSize();
 
 private:
-    UPROPERTY(NonTransactional)
+    UPROPERTY(NonTransactional, DuplicateTransient)
     mutable TObjectPtr<UTexture2D> Texture; //mutable is temporary, will be removed when layers will be 100% GPU based and there's no more dependency on ULIS
 
 #if WITH_EDITORONLY_DATA
