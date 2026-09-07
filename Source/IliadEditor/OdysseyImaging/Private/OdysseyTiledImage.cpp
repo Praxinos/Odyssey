@@ -33,33 +33,6 @@ UOdysseyTiledImageFactoryNew::ShouldShowInNewMenu() const
     return false;
 }
 
-BEGIN_SHADER_PARAMETER_STRUCT(FWriteTileParameters, )
-    RDG_TEXTURE_ACCESS(Texture, ERHIAccess::CopyDest)
-END_SHADER_PARAMETER_STRUCT()
-
-void
-AddWriteTilePass(FRDGBuilder& GraphBuilder, FRDGTextureRef OutTexture, FSharedBuffer InBuffer)
-{
-    FWriteTileParameters* Params = GraphBuilder.AllocParameters<FWriteTileParameters>();
-    Params->Texture = OutTexture;
-
-    GraphBuilder.AddPass(
-        RDG_EVENT_NAME("UOdysseyTiledImage::AddWriteTilePass"),
-        Params,
-        ERDGPassFlags::Copy | ERDGPassFlags::NeverCull,
-        [OutTexture, InBuffer](FRHICommandList& RHICmdList)
-        {
-            const FRDGTextureDesc& Desc = OutTexture->Desc;
-            const FPixelFormatInfo& PixelFormatInfo = GPixelFormats[Desc.Format];
-            uint32 BytesPerPixel = PixelFormatInfo.BlockBytes;
-            uint32 BufferStride = BytesPerPixel * Desc.Extent.X;
-
-            FUpdateTextureRegion2D region(0, 0, 0, 0, Desc.Extent.X, Desc.Extent.Y);
-            RHICmdList.UpdateTexture2D(OutTexture->GetRHI(), 0, region, BufferStride, (const uint8*)InBuffer.GetData());
-        }
-    );
-}
-
 UOdysseyTiledImage::~UOdysseyTiledImage()
 {
 }
@@ -155,23 +128,27 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
 
     //Load needed Tiles
     TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTilePositionsFromRect(TileSize, InRect);
-    TArray<FSharedBuffer> TileBuffers;
-    TileBuffers.Reserve(TilePositions.Num());
+    TArray<TFuture<FTextureRHIRef>> TileTextures;
+    TileTextures.Reserve(TilePositions.Num());
     for (const FIntPoint& TilePosition : TilePositions)
     {
-        FSharedBuffer TileBuffer;
         const FOdysseyTileId* TileId = Tiles.Find(TilePosition);
         if (TileId)
-            FOdysseyTileManager::Get().GetTileBuffer(*TileId, TileBuffer);
-
-        TileBuffers.Add(TileBuffer);
+        {
+            TFuture<FTextureRHIRef> TileTexture = FOdysseyTileManager::Get().GetTileTexture(*TileId, TileSize, GetPixelFormat());
+            TileTextures.Add(MoveTemp(TileTexture));
+        }
+        else
+        {
+            TileTextures.AddDefaulted();
+        }
     }
 
     ENQUEUE_RENDER_COMMAND(UOdysseyTiledImage_Render)(
         [
             OutRenderTarget,
             TilePositions,
-            TileBuffers,
+            TileTextures = MoveTemp(TileTextures),
             TileSize = TileSize,
             TilePixelFormat = GetPixelFormat(),
             DestinationRect,
@@ -189,8 +166,6 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
             for (int i = 0; i < TilePositions.Num(); i++)
             {
                 const FIntPoint& TilePosition = TilePositions[i];
-                const FSharedBuffer& TileBuffer = TileBuffers[i];
-
                 FIntPoint TileDstPos(TilePosition * TileRect.Size() - SourceRect.Min + DestinationRect.Min);
                 FIntRect TileDstRect(TileDstPos, TileDstPos + TileRect.Size());
                 TileDstRect.Clip(DestinationRect);
@@ -205,31 +180,13 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
                 );
 
                 //If the buffer is null, the tile is empty
-                if (TileBuffer.IsNull())
-                {
-/*#ifdef UE_BUILD_DEBUG
-                    FLinearColor ClearColor = FLinearColor::Red;
-#else*/
-                    FLinearColor ClearColor = FLinearColor::Transparent;
-//#endif
-                    AddClearRenderTargetPass(GraphBuilder, DestinationTexture, ClearColor, TileDstRect);
-                }
-                else
-                {
-                    FRDGTextureDesc TileTextureDesc = FRDGTextureDesc::Create2D(
-                        FIntPoint(TileSize, TileSize),
-                        TilePixelFormat,
-                        FClearValueBinding::Transparent,
-                        ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
-                    );
+                FTextureRHIRef TileTextureRHI;
+                if (TileTextures[i].IsValid())
+                    TileTextureRHI = TileTextures[i].Get();
 
-                    FRDGTextureRef TileTexture = GraphBuilder.CreateTexture(TileTextureDesc, TEXT("UOdysseyTiledImage::TileTexture"));
-
-                    AddWriteTilePass(
-                        GraphBuilder,
-                        TileTexture,
-                        TileBuffer
-                    );
+                if (TileTextureRHI.IsValid())
+                {
+                    FRDGTextureRef TileTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(TileTextureRHI, TEXT("UOdysseyTiledImage::TileTexture")));
 
                     AddDrawTexturePass(
                         GraphBuilder,
@@ -241,6 +198,15 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
                         TileDstRect.Min,
                         TileDstRect.Size()
                     );
+                }
+                else
+                {
+/*#ifdef UE_BUILD_DEBUG
+                    FLinearColor ClearColor = FLinearColor::Red;
+#else*/
+                    FLinearColor ClearColor = FLinearColor::Transparent;
+//#endif
+                    AddClearRenderTargetPass(GraphBuilder, DestinationTexture, ClearColor, TileDstRect);
                 }
             }
 
