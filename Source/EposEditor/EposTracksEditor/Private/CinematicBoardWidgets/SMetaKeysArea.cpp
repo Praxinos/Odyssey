@@ -309,7 +309,10 @@ SMetaKeysArea::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent
         checkNoEntry();
     }
 
-    return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
+    // Process as handled so when a simple click is done in a metakey area, it won't deselect the selected actor
+    // https://github.com/Praxinos/Odyssey-Issues/issues/596
+    return FReply::Handled();
+    //return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
 }
 
 void
