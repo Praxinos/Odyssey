@@ -44,7 +44,6 @@ class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
                                            , FMeshElementCollector& Collector) const override;
         void GetImageDynamicMeshElements( FMeshElementCollector& Collector
                                         , int32 ViewIndex ) const;
-        void InitVertexFactory();
         virtual void DrawStaticElements( FStaticPrimitiveDrawInterface * PDI ) override;
 
     protected:
@@ -56,6 +55,9 @@ UCLASS()
 class ARIANE_API UArianeLayerDrawing : public UArianeLayer
 {
     GENERATED_BODY()
+
+
+    DECLARE_MULTICAST_DELEGATE( FOnImageChanged );
 
 public:
     ~UArianeLayerDrawing();
@@ -89,7 +91,7 @@ public:
 
     //virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
     UArianeImage* GetImage();
-    void SetImage( UArianeImage* InImage );
+    void SetImage( UArianeImage* InImage, bool bTriggerEvent = true );
     virtual void OnRegister() override;
     void OnAssetLoaded(UObject* LoadedObject);
 
@@ -97,6 +99,8 @@ public:
     virtual void OnUpdateTransform( EUpdateTransformFlags UpdateTransformFlags, ETeleportType TeleportType ) override;
     virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
     virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
+    FOnImageChanged& OnPreImageChangedDelegate();
+    FOnImageChanged& OnPostImageChangedDelegate();
 
 protected:
     void BindDelegates();
@@ -113,4 +117,8 @@ protected:
 
     UPROPERTY( EditAnywhere )
     EArianeLayerDrawingOrientation DrawingOrientation;
+
+protected:
+    FOnImageChanged OnPreImageChanged;
+    FOnImageChanged OnPostImageChanged;
 };

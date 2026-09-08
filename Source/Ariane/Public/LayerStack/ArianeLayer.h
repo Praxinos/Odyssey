@@ -116,6 +116,7 @@ public:
     void PreEditUndo();
     void PostEditUndo();
     void PostLoad();
+    uint32 GetWorldTransformVersion() const;
 
 
 protected:
@@ -139,7 +140,6 @@ protected:
     //FOnUpdateDelegate OnPreUpdate;
     //FOnUpdateDelegate OnPostUpdate;
 
-#if WITH_EDITORONLY_DATA
     FOnTransformChanged OnTransformChanged;
-#endif
+    uint32 WorldTransformVersion;
 };

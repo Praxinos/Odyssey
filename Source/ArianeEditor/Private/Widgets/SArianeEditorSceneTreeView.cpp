@@ -424,13 +424,46 @@ SArianeEditorSceneTreeView::OnPostPainting3DComponentUpdate( bool bInteractive )
 }
 
 void
+SArianeEditorSceneTreeView::OnPostImageChanged()
+{
+    Update();
+}
+
+void
 SArianeEditorSceneTreeView::OnPreLayerStackSelectionChanged()
 {
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        if( DrawingLayer )
+        {
+            // commented-out: nothing to do on Pre. Left there for consistency
+            //DrawingLayer->OnPreImageChangedDelegate().RemoveAll( this );
+            DrawingLayer->OnPostImageChangedDelegate().RemoveAll( this );
+        }
+    }
 }
 
 void
 SArianeEditorSceneTreeView::OnPostLayerStackSelectionChanged()
 {
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        if( DrawingLayer )
+        {
+            // commented-out: nothing to do on Pre. Left there for consistency
+            //DrawingLayer->OnPreImageChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPreImageChanged );
+            DrawingLayer->OnPostImageChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPostImageChanged );
+        }
+    }
+
     Update();
 }
 

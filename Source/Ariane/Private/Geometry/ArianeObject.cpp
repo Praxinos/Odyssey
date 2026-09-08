@@ -153,14 +153,13 @@ FArianeObjectGeometry3D::GetVertexFactory()
 }
 
 void
-FArianeObjectGeometry3D::InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices
-                                          , TArray<uint32>& Indices )
+FArianeObjectGeometry3D::InitVertexFactory()
 {
     // DrawingLayer can be null in orphan Images (animation keys)
     UWorld* World = Object->GetImage()->GetDrawingLayer().IsValid() ? Object->GetImage()->GetDrawingLayer()->GetWorld()
                                                                     : nullptr ;
 
-    if( World )
+    if( World && MeshVertices.Num() && MeshIndices.Num() )
     {
         if( VertexFactory == nullptr )
         {
@@ -169,7 +168,7 @@ FArianeObjectGeometry3D::InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices
 
         ENQUEUE_RENDER_COMMAND(StaticMeshVertexBuffersLegacyInit)(
             [ this
-            ,  VerticesAsync = CopyTemp(Vertices) ] ( FRHICommandListImmediate& RHICmdList )
+            ,  VerticesAsync = CopyTemp(MeshVertices) ] ( FRHICommandListImmediate& RHICmdList )
             {
                 FLocalVertexFactory::FDataType Data;
 
@@ -228,7 +227,7 @@ FArianeObjectGeometry3D::InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices
 
         ENQUEUE_RENDER_COMMAND(IndexBufferInit)(
             [ this
-            , IndicesAsync = CopyTemp(Indices) ] ( FRHICommandListImmediate& RHICmdList )
+            , IndicesAsync = CopyTemp(MeshIndices) ] ( FRHICommandListImmediate& RHICmdList )
             {
                 uint32 IndexCount = IndicesAsync.Num();
 
@@ -288,6 +287,7 @@ FArianeObject::FArianeObject( UArianeImage* InImage
     , bVisible ( true )
     , bExpanded ( true )
     , AllocationModel ( InAllocationModel  )
+    , WorldTransformVersion( 0 )
     , InvalidationFlags ( InInvalidationFlags ? InInvalidationFlags
                                               : new FArianeObjectInvalidationFlags() )
     , bSelected ( false )
@@ -719,13 +719,17 @@ FArianeObject::UpdateTransform()
 
             if( DrawingLayer )
             {
-                Object->WorldTransform = Parent ? Object->LocalTransform * Parent->WorldTransform
-                                                : Image->GetDrawingLayer()->GetComponentTransform();
-            }
-            else
-            {
-                Object->WorldTransform = Parent ? Object->LocalTransform * Parent->WorldTransform
-                                                : Object->LocalTransform;
+                const FTransform& ParentWorldTransform = Parent ? Parent->WorldTransform
+                                                                : DrawingLayer->GetComponentTransform();
+                uint32 ParentWorldTransformVersion = Parent ? Parent->WorldTransformVersion
+                                                            : DrawingLayer->GetWorldTransformVersion();
+
+                if( Object->WorldTransformVersion != ParentWorldTransformVersion )
+                {
+                    Object->WorldTransform = Object->LocalTransform * ParentWorldTransform;
+
+                    Object->WorldTransformVersion = ParentWorldTransformVersion;
+                }
             }
 
 //UE_LOG(LogTemp, Warning, TEXT("Object:%s - Parent:%p - Transform: %s"), *Name.ToString(), Parent, *WorldTransform.ToString());

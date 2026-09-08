@@ -1526,9 +1526,10 @@ FArianePathGeometry3D::Build()
     FArianePath* Path = GetPath();
     uint32 TotalModelVertexCount = 0;
     uint32 TotalIndexCount = 0;
-    TArray<FDynamicMeshVertex> MeshVertices;
-    TArray<uint32> MeshIndices;
     FVector PreviousPerpendicularVector = FVector::Zero();
+
+    MeshVertices.Empty();
+    MeshIndices.Empty();
 
     for( const FArianePath::Chain& Chain : Path->GetChains() )
     {
@@ -1643,17 +1644,6 @@ FArianePathGeometry3D::Build()
 
             TotalModelVertexCount += SegmentModelVertexCache.Num();
             TotalIndexCount += SegmentIndices.Num();
-        }
-    }
-
-    //if( ModelVertices.Num() )
-    {
-        //VertexBuffers.InitModelBuffers( ModelVertices );
-        //IndexBuffer.SetIndices( Indices, EIndexBufferStride::Type::Force32Bit );
-
-        //if( MeshVertices.Num() )
-        {
-            InitVertexFactory( MeshVertices, MeshIndices );
         }
     }
 

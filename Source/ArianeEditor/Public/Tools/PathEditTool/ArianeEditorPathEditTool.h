@@ -163,6 +163,9 @@ protected:
     void ResetQuadTree();
     void BindDelegates();
     void UnbindDelegates();
+    void OnPreLayerStackSelectionChanged();
+    void OnPostLayerStackSelectionChanged();
+    void OnPostImageChanged();
 
 public:
     UPROPERTY( EditAnywhere

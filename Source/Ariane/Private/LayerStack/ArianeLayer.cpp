@@ -25,6 +25,7 @@ UArianeLayer::UArianeLayer()
     , bSelected ( false )
     , bInvalidatedInParentFolder ( false )
     , InvalidationFlags ( nullptr )
+    , WorldTransformVersion( 0 )
 {
     // for Transform operations
     SetMobility(EComponentMobility::Movable);
@@ -210,9 +211,17 @@ UArianeLayer::GetOnTransformChangedDelegate()
     return OnTransformChanged;
 }
 
+uint32
+UArianeLayer::GetWorldTransformVersion() const
+{
+    return WorldTransformVersion;
+}
+
 void
 UArianeLayer::OnUpdateTransform(EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport)
 {
+    WorldTransformVersion++;
+
     OnTransformChanged.Broadcast();
 }
 
