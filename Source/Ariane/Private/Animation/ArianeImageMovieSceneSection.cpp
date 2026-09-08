@@ -6,6 +6,7 @@
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneChannelData.h"
 #include "ArianeImage.h"
+#include "ArianeGroup.h"
 #include "ArianeLayerDrawing.h"
 #include "MovieScene.h"
 #include "MovieSceneTrack.h"
@@ -103,7 +104,10 @@ namespace Sequencer
             NewKeyData = ChannelData.GetValues()[ExistingIndex];
             if (!NewKeyData.Image)
             {
-                NewKeyData.Image = NewObject<UArianeImage>(DrawingLayer, UArianeImage::StaticClass(), NAME_None, RF_Transactional);
+                NewKeyData.Image = NewObject<UArianeImage>(InSectionToKey, UArianeImage::StaticClass(), NAME_None, RF_Transactional);
+
+                NewKeyData.Image->GetRootGroup()->UpdateTransform();
+                DrawingLayer->Update( false );
             }
             ChannelData.GetValues()[ExistingIndex] = NewKeyData;
 
@@ -123,7 +127,10 @@ namespace Sequencer
             //else
             {
                 // Si pas de clé avant, on crée une image vierge de zéro
-                NewKeyData.Image = NewObject<UArianeImage>(DrawingLayer, UArianeImage::StaticClass(), NAME_None, RF_Transactional);
+                NewKeyData.Image = NewObject<UArianeImage>(InSectionToKey, UArianeImage::StaticClass(), NAME_None, RF_Transactional);
+
+                NewKeyData.Image->GetRootGroup()->UpdateTransform();
+                DrawingLayer->Update( false );
             }
 
             // On injecte le temps et la donnée unique directement dans le tableau d'Unreal
@@ -211,6 +218,10 @@ UArianeImageMovieSceneSection::UArianeImageMovieSceneSection()
     ChannelMetaData.Name = TEXT("ArianeImageSpawnTrack");
     ChannelMetaData.DisplayText = NSLOCTEXT("Ariane", "ArianeImageSpawnTrack_Text", "Image Key");
 #endif
+
+    // Force la section à restaurer l'état d'origine à la fin de la lecture
+    // ou lors de la fermeture du Séquenceur.
+SetCompletionMode(EMovieSceneCompletionMode::RestoreState);
 
     // 2. Le mécanisme officiel d'Unreal : On crée le conteneur de préparation
     FMovieSceneChannelProxyData ProxyData;

@@ -18,7 +18,7 @@ class UArianeLayerFolder;
 class UArianeLayerDrawing;
 
 UCLASS(Abstract)
-class ARIANE_API UArianeLayer : public USceneComponent
+class ARIANE_API UArianeLayer : public UMeshComponent
 {
     GENERATED_BODY()
 

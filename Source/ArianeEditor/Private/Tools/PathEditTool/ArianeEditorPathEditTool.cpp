@@ -706,9 +706,9 @@ UArianeEditorPathEditTool::OnMouseUpDeletePoint( const TArray<FArianePoint*>& Pi
                 AlteredPathRecord->VertexArray.Add( Vertex );
             }
 
-            if( DrawingLayers.Find( Owner->GetImage()->GetDrawingLayer() ) == INDEX_NONE )
+            if( DrawingLayers.Find( Owner->GetImage()->GetDrawingLayer().Get() ) == INDEX_NONE )
             {
-                DrawingLayers.Add( Owner->GetImage()->GetDrawingLayer() );
+                DrawingLayers.Add( Owner->GetImage()->GetDrawingLayer().Get() );
             }
         }
     }

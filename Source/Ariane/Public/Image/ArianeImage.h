@@ -25,33 +25,9 @@ struct FArianeLine;
 struct FArianePolygon;
 class UArianeLayerDrawing;
 
-class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
-{
-    public:
-        ~FArianeGeometryProxy();
-        FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLevel, UArianeImage* InImage );
 
-        virtual SIZE_T GetTypeHash() const override;
-        virtual uint32 GetMemoryFootprint( void ) const override;
-
-        virtual FPrimitiveViewRelevance GetViewRelevance( const FSceneView* View ) const override;
-        virtual void GetDynamicMeshElements( const TArray<const FSceneView*>& Views
-                                           , const FSceneViewFamily& ViewFamily
-                                           , uint32 VisibilityMap
-                                           , FMeshElementCollector& Collector) const override;
-        void GetImageDynamicMeshElements( FMeshElementCollector& Collector
-                                        , int32 ViewIndex ) const;
-        void InitVertexFactory();
-        virtual void DrawStaticElements( FStaticPrimitiveDrawInterface * PDI ) override;
-
-    protected:
-        UArianeImage* Image;
-        FMaterialRelevance MaterialRelevance;
-};
-
-
-UCLASS( BlueprintType, Blueprintable, EditInlineNew, meta=(BlueprintSpawnableComponent) )
-class ARIANE_API UArianeImage : public UMeshComponent
+UCLASS()
+class ARIANE_API UArianeImage : public UObject
 {
     GENERATED_BODY()
 
@@ -128,7 +104,7 @@ public:
      * @OutUsedMaterials output array
      * @bEmptyFirst empty the output array first.
      */
-    virtual void GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials, bool bGetDebugMaterials = false ) const override;
+    void GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials, bool bGetDebugMaterials = false ) const;
 
     void AppendUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials ) const;
     void ClearObjectSelection();
@@ -166,13 +142,11 @@ public:
     FArianeCycle* AllocCycle( UMaterialInterface* InMaterialInterface
                             , const FName& InName
                             , EArianeAllocationModel AllocationModel );
-    virtual void OnUpdateTransform( EUpdateTransformFlags UpdateTransformFlags, ETeleportType TeleportType ) override;
     virtual void BeginDestroy() override;
-    virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
     //virtual void InitializeComponent() override;
-    void OnAssetLoaded(UObject* LoadedObject);
-    UArianeLayerDrawing* GetDrawingLayer();
-    virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
+
+    void SetDrawingLayer( TWeakObjectPtr<UArianeLayerDrawing> InDrawingLayer );
+    TWeakObjectPtr<UArianeLayerDrawing> GetDrawingLayer();
 
 protected:
     void BindDelegates();
@@ -190,6 +164,8 @@ public:
 protected:
     UPROPERTY( EditAnywhere )
     mutable FArianeObjectID RootGroupID;
+
+    TWeakObjectPtr<UArianeLayerDrawing> DrawingLayer;
 
 protected:
     TMap<UMaterialInterface*, uint32> UsedMaterials;
