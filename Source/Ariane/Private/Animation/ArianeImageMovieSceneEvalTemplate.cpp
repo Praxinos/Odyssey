@@ -3,6 +3,7 @@
 
 #include "ArianeImageMovieSceneEvalTemplate.h"
 #include "ArianeImage.h"
+#include "ArianeGroup.h"
 #include "ArianeLayerDrawing.h"
 #include "Evaluation/MovieSceneAnimTypeID.h"
 
@@ -23,6 +24,7 @@ struct FArianeImagePreAnimatedToken : IMovieScenePreAnimatedToken
             // On restaure l'ancienne image sauvegardée avant l'animation
             DrawingLayer->SetImage(OldImage.Get());
 
+            DrawingLayer->GetImage()->GetRootGroup()->UpdateTransform();
             DrawingLayer->Update( false );
         }
     }
@@ -69,6 +71,7 @@ void FArianeImageExecutionToken::Execute( const FMovieSceneContext& Context
     if ( BoundObjects.Num() > 0 )
     {
         UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>( BoundObjects[0].Get() );
+        EMovieScenePlayerStatus::Type PlaybackStatus = Player.GetPlaybackStatus();
 
         // LA CORRECTION : Enregistrer l'état actuel (l'image par défaut) avant de la modifier.
         // On utilise le 'PreAnimatedState' du Player.
@@ -76,10 +79,19 @@ void FArianeImageExecutionToken::Execute( const FMovieSceneContext& Context
                                    , GetArianeImageAnimTypeID()
                                    , FArianeImagePreAnimatedTokenProducer () );
 
+        UE_LOG( LogTemp, Warning, TEXT("PlaybackStatus:%d"), PlaybackStatus );
 
-        if ( DrawingLayer && ( DrawingLayer->GetImage() != KeyData.Image ) )
+        if ( DrawingLayer )
         {
-            DrawingLayer->SetImage(KeyData.Image);
+            bool bInteractive =( ( PlaybackStatus == EMovieScenePlayerStatus::Type::Scrubbing )
+                              || ( PlaybackStatus == EMovieScenePlayerStatus::Type::Playing   ) ) ? true : false;
+
+        UE_LOG( LogTemp, Warning, TEXT("bInteractive:%d"), bInteractive );
+
+            DrawingLayer->SetImage( KeyData.Image, bInteractive ? false : true );
+
+            DrawingLayer->GetImage()->GetRootGroup()->UpdateTransform();
+            DrawingLayer->Update( bInteractive );
         }
     }
 }

@@ -96,6 +96,7 @@ class ARIANEEDITOR_API SArianeEditorSceneTreeView
         void OnPreLayerStackSelectionChanged();
         void OnPre3DPaintingComponentSelectionChanged();
         void OnPost3DPaintingComponentSelectionChanged();
+        void OnPostImageChanged();
 
     protected:
         FArianeEditor* Editor;

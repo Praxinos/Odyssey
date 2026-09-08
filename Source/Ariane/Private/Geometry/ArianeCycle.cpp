@@ -112,22 +112,6 @@ FArianeCycle::FArianeCycle( UArianeImage* InImage
 {
 }
 
-void
-FArianeCycle::BuildModelVertexCache()
-{
-    ModelVertexCache.Empty();
-    ModelVertexCache.Reserve( Points.Num() );
-
-    for( FArianePoint& Point : Points )
-    {
-        ModelVertexCache.Emplace( FVector3f( Point.GetPosition() )
-                                , FVector3f::Zero() // TangentX
-                                , FVector3f::Zero() // TangentZ
-                                , FVector2f::Zero()
-                                , Color );
-    }
-}
-
 // static
 inline uint32
 FArianeCycle::EvaluateSectionPointCount( FArianeGraph::FSection* Section )
@@ -519,12 +503,6 @@ FArianeCycle::GetEarcutIndices()
     return EarcutIndices;
 }
 
-TArray<FDynamicMeshVertex>&
-FArianeCycle::GetModelVertexCache()
-{
-    return ModelVertexCache;
-}
-
 void
 FArianeCycle::ExportProperties( FArianeObject* DestObject )
 {
@@ -551,6 +529,12 @@ FArianeCycle::UpdateShape( EUpdateFlags UpdateFlags )
     }
 }
 
+TArray<FArianePoint>&
+FArianeCycle::GetPoints()
+{
+    return Points;
+}
+
 FArianeCycleGeometry3D::~FArianeCycleGeometry3D()
 {
 }
@@ -565,21 +549,29 @@ FArianeCycleGeometry3D::GetCycle()
 {
     return static_cast<FArianeCycle*>(Object);
 }
-
 void
 FArianeCycleGeometry3D::Build()
 {
     FArianeCycle* Cycle = GetCycle();
     TArray<int32>& SignedIndices = Cycle->GetEarcutIndices();
-    TArray<uint32> UnsignedIndices;
 
-    UnsignedIndices.SetNumUninitialized( SignedIndices.Num() );
+    MeshVertices.Empty();
+    MeshIndices.Empty();
+
+    MeshVertices.Reserve( Cycle->GetPoints().Num() );
+    MeshIndices.SetNumUninitialized( SignedIndices.Num() );
+
     // signed to unsigned. All values are >= 0 anyways.
-    FMemory::Memcpy( UnsignedIndices.GetData(), SignedIndices.GetData(), SignedIndices.Num() * sizeof( uint32 ) );
+    FMemory::Memcpy( MeshIndices.GetData(), SignedIndices.GetData(), SignedIndices.Num() * sizeof( uint32 ) );
 
-    Cycle->BuildModelVertexCache();
-
-    InitVertexFactory( Cycle->GetModelVertexCache(), UnsignedIndices );
+    for( FArianePoint& Point : Cycle->GetPoints() )
+    {
+        MeshVertices.Emplace( FVector3f( Point.GetPosition() )
+                            , FVector3f::Zero() // TangentX
+                            , FVector3f::Zero() // TangentZ
+                            , FVector2f::Zero()
+                            , Cycle->GetColor() );
+    }
 
     // DrawingLayer can be null in animation keys
     if( Cycle->GetImage()->GetDrawingLayer().IsValid() )
