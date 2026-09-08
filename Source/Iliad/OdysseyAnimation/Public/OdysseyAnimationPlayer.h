@@ -210,7 +210,7 @@ private:
     * Otherwise, loop between the animation bounds (even if PlayRange is EOdysseyAnimationPlayerPlayRange::Infinite)
     */
     UPROPERTY( EditAnywhere, Category="Animation" )
-    bool IsLoopingInPlayRange = false;
+    bool IsLoopingInPlayRange = true;
 
     /**
      * Defines the frame Range to play
