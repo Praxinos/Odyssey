@@ -71,6 +71,7 @@ public class EposSequence : ModuleRules
                 "EposNote",
                 "OdysseyAnimation",
                 "OdysseyAnimationTracks",
+                "OdysseyTelemetry",
             }
             );
 

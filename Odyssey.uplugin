@@ -101,6 +101,16 @@
     ],
     "Modules": [
         {
+            "Name": "OdysseyAnalytics",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        },
+        {
+            "Name": "OdysseyTelemetry",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        },
+        {
             "Name": "OdysseyCommonWidgets",
             "Type": "Editor",
             "LoadingPhase": "Default"

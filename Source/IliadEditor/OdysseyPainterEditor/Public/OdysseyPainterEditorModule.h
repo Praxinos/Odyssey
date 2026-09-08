@@ -64,6 +64,8 @@ private:
     void RegisterAssetTypeActions();
     void UnregisterAssetTypeActions();
 
+    void RegisterTelemetry();
+    void UnregisterTelemetry();
 
 private:
     /** All created asset type actions. Cached here so that we can unregister them during shutdown. */

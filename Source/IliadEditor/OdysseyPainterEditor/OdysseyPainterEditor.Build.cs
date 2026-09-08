@@ -94,6 +94,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyTexture",
                 "OdysseyVector",
                 "OdysseyWidgets",
+                "OdysseyTelemetry",
 
                 "blend2d"
             }

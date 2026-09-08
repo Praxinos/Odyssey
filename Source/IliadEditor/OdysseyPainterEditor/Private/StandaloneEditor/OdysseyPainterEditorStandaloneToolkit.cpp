@@ -23,6 +23,7 @@
 #include "OdysseyPainterEditorAnimationLayout.h"
 #include "OdysseyPainterEditorTextureLayout.h"
 #include "OdysseyPainterEditorFlipbookLayout.h"
+#include "OdysseyTelemetry.h"
 
 #include "Engine/Texture2D.h"
 #include "PaperFlipbook.h"
@@ -36,6 +37,15 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPainterEditorStandaloneToolkit::~FOdysseyPainterEditorStandaloneToolkit()
 {
+    {
+        using FAssetEditionFields = FAssetEdition_TelemetryFields;
+
+        TArray<FAnalyticsEventAttribute> Attributes;
+        Attributes.Emplace( FAssetEditionFields::EditorName_KeyName_AsString, GetToolkitFName() );
+        Attributes.Emplace( FAssetEditionFields::SessionDuration_KeyName_AsDouble, ( FDateTime::UtcNow() - SessionStartTime ).GetTotalSeconds() );
+
+        FOdysseyTelemetry::Get().RecordEvent( FAssetEditionFields::KeyName, Attributes );
+    }
 }
 
 FOdysseyPainterEditorStandaloneToolkit::FOdysseyPainterEditorStandaloneToolkit(UObject* iEditedObject)
@@ -60,6 +70,8 @@ FOdysseyPainterEditorStandaloneToolkit::FOdysseyPainterEditorStandaloneToolkit(U
         mTitle = LOCTEXT("flipbook-painting-editor.name", "Flipbook Painting Editor");
         mWorldCentricTabPrefix = LOCTEXT( "flipbook-painting-editor.world-centric-tab-prefix", "Flipbook " ).ToString();
     }
+
+    SessionStartTime = FDateTime::UtcNow();
 }
 
 void

@@ -3,12 +3,17 @@
 
 #include "OdysseyPaletteModule.h"
 
+#include "OdysseyTelemetryModule.h"
+#include "Palette/OdysseyPalette.h"
+
 void FOdysseyPaletteModule::StartupModule()
 {
+    FOdysseyTelemetryModule::Get().RegisterAssetClassToTrackForCreation( UOdysseyPalette::StaticClass() );
 }
 
 void FOdysseyPaletteModule::ShutdownModule()
 {
+    FOdysseyTelemetryModule::Get().UnregisterAssetClassToTrackForCreation( UOdysseyPalette::StaticClass() );
 }
 
 IMPLEMENT_MODULE(FOdysseyPaletteModule, OdysseyPalette);

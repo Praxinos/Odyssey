@@ -27,6 +27,7 @@
 #include "Palette/OdysseyPaletteEntryColor.h"
 #include "Palette/OdysseyPaletteEntryFolder.h"
 #include "PaletteEditor/OdysseyPaletteEditorToolMenuContext.h"
+#include "OdysseyTelemetry.h"
 #include "Widgets/SOdysseyPaletteTreeView.h"
 #include "Widgets/SOdysseyPaletteSetComboBox.h"
 
@@ -38,6 +39,15 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPaletteEditorToolkit::~FOdysseyPaletteEditorToolkit()
 {
+    {
+        using FAssetEditionFields = FAssetEdition_TelemetryFields;
+
+        TArray<FAnalyticsEventAttribute> Attributes;
+        Attributes.Emplace( FAssetEditionFields::EditorName_KeyName_AsString, GetToolkitFName() );
+        Attributes.Emplace( FAssetEditionFields::SessionDuration_KeyName_AsDouble, ( FDateTime::UtcNow() - SessionStartTime ).GetTotalSeconds() );
+
+        FOdysseyTelemetry::Get().RecordEvent( FAssetEditionFields::KeyName, Attributes );
+    }
 }
 
 FOdysseyPaletteEditorToolkit::FOdysseyPaletteEditorToolkit(UOdysseyPalette* iPalette)
@@ -55,7 +65,10 @@ FOdysseyPaletteEditorToolkit::FOdysseyPaletteEditorToolkit(UOdysseyPalette* iPal
         mPalette->MarkPackageDirty();
         mPalette->NeedsSavingAfterUpgrade = false;
     }
+
     //---
+
+    SessionStartTime = FDateTime::UtcNow();
 }
 
 void

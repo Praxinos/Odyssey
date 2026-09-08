@@ -28,6 +28,9 @@ public:
     EPOSSEQUENCE_API void RegisterNamingFormatter( UNamingFormatter* iFormatter );
     EPOSSEQUENCE_API void UnregisterNamingFormatter( UNamingFormatter* iFormatter );
 
+    void RegisterTelemetry();
+    void UnregisterTelemetry();
+
 public:
     template<typename Formatter>
     UNamingFormatter* GetNamingFormatter()

@@ -8,6 +8,7 @@
 
 #include "ULISLoaderModule.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "OdysseyTelemetry.h"
 #include "Texture/SOdysseyTextureConfigureWindow.h"
 
 #include <ULIS>
@@ -56,6 +57,15 @@ UObject*
 UOdysseyTextureFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn )
 {
     check(iClass->IsChildOf(UTexture2D::StaticClass()));
+
+    {
+        using FAssetAddedFields = FAssetAdded_TelemetryFields;
+
+        TArray<FAnalyticsEventAttribute> Attributes;
+        Attributes.Emplace( FAssetAddedFields::AssetClassPath_KeyName_AsString, iClass->GetPathName() );
+
+        FOdysseyTelemetry::Get().RecordEvent( FAssetAddedFields::KeyName, Attributes );
+    }
 
     return mTextureConfiguration.CreateTexture(iParent, iName, iFlags | RF_Transactional);
 }

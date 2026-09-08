@@ -41,6 +41,7 @@
 #include "OdysseyToolCollectionAssetTypeActions.h"
 #include "Tools/OutOfPegsTool/OdysseyPainterEditorAnimationOutOfPegsTool.h"
 #include "StandaloneEditor/OdysseyPainterEditorStandaloneToolkit.h"
+#include "OdysseyTelemetryModule.h"
 #include "OdysseyViewportCommands.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -100,6 +101,7 @@ FOdysseyPainterEditorModule::StartupModule()
     RegisterEditorMode();
     RegisterPropertyModuleCustomizations();
     RegisterAssetTypeActions();
+    RegisterTelemetry();
 
     FOdysseyVectorBrushCustomization::Register();
     FOdysseyVectorObjectViewPaletteCustomization::Register();
@@ -117,6 +119,7 @@ FOdysseyPainterEditorModule::ShutdownModule()
     UnregisterEditorMode();
     UnregisterPropertyModuleCustomizations();
     UnregisterAssetTypeActions();
+    UnregisterTelemetry();
 
     FOdysseyVectorBrushCustomization::Unregister();
     FOdysseyVectorObjectViewPaletteCustomization::Unregister();
@@ -300,6 +303,20 @@ FOdysseyPainterEditorModule::UnregisterAssetTypeActions()
 
     IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
     assetTools.UnregisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
+}
+
+//---
+
+void
+FOdysseyPainterEditorModule::RegisterTelemetry()
+{
+    FOdysseyTelemetryModule::Get().RegisterAssetClassToTrackForCreation( UOdysseyToolCollection::StaticClass() );
+}
+
+void
+FOdysseyPainterEditorModule::UnregisterTelemetry()
+{
+    FOdysseyTelemetryModule::Get().UnregisterAssetClassToTrackForCreation( UOdysseyToolCollection::StaticClass() );
 }
 
 

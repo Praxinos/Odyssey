@@ -56,4 +56,8 @@ private:
 
     TSharedPtr<SButton> mRefreshButton;
     TSharedPtr<SOdysseyPaletteTreeView> mTreeView;
+
+private:
+    // Telemetry
+    FDateTime SessionStartTime;
 };

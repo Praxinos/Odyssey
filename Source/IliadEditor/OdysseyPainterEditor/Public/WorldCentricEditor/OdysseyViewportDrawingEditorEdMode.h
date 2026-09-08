@@ -61,4 +61,8 @@ private:
 private:
     TSharedPtr<FOdysseyViewportDrawingEditorToolkit> mViewportDrawingEditorToolkit;
     TSharedPtr<FOdysseyViewportDrawingEditorExtension> mViewportDrawingEditorExtension;
+
+private:
+    // Telemetry
+    FDateTime SessionStartTime;
 };

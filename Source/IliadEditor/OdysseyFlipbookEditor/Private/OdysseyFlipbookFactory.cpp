@@ -4,6 +4,7 @@
 #include "OdysseyFlipbookFactory.h"
 
 #include "Materials/MaterialInterface.h"
+#include "OdysseyTelemetry.h"
 #include "PaperFlipbook.h"
 
 //---
@@ -19,6 +20,15 @@ UOdysseyFlipbookFactory::UOdysseyFlipbookFactory( const FObjectInitializer& iObj
 UObject*
 UOdysseyFlipbookFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn )
 {
+    {
+        using FAssetAddedFields = FAssetAdded_TelemetryFields;
+
+        TArray<FAnalyticsEventAttribute> Attributes;
+        Attributes.Emplace( FAssetAddedFields::AssetClassPath_KeyName_AsString, iClass->GetPathName() );
+
+        FOdysseyTelemetry::Get().RecordEvent( FAssetAddedFields::KeyName, Attributes );
+    }
+
     UPaperFlipbook* flipbook = Cast<UPaperFlipbook>(UPaperFlipbookFactory::FactoryCreateNew( UPaperFlipbook::StaticClass(), iParent, iName, iFlags, iContext, iWarn ));
     FScopedFlipbookMutator mutator(flipbook);
     mutator.FramesPerSecond = 24.0f;

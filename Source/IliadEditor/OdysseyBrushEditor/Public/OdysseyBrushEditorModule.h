@@ -22,4 +22,19 @@ public:
     // End of IModuleInterface interface
 
     TSharedPtr< FAssetTypeActions_OdysseyBrush >  OdysseyBrushAssetTypeActions;
+
+private:
+    void RegisterTelemetry();
+    void UnregisterTelemetry();
+
+    void OnAssetEditorOpened( UObject* iObject );
+    void OnAssetEditorClosed( UObject* iObject, IAssetEditorInstance* iAssetEditorInstance );
+
+private:
+    struct FSessionInfo
+    {
+        FDateTime SessionStartTime;
+        FName EditorName; // During close, iAssetEditorInstance is (may be) partially destroyed, that's why the editor name is stored inside open
+    };
+    TMap<UObject*, FSessionInfo> SessionInfoByObject;
 };

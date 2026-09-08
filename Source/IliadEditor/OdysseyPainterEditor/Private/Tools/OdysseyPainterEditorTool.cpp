@@ -19,6 +19,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "OdysseyPainterEditorToolInputProcessor.h"
+#include "OdysseyTelemetry.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -119,7 +120,21 @@ UOdysseyPainterEditorTool::Activate()
     Load();
 
     mMouseCursor.UpdateCursor();
+
+    SessionStartTime = FDateTime::UtcNow();
 }
+
+// MUST END with "_TelemetryFields" (to find all of them easily)
+// MUST BE synchronized with web code
+struct FToolActive_TelemetryFields
+{
+    static inline FString KeyName = TEXT( "ToolActive" );
+
+    // Attributes
+    static inline FString ToolClass_KeyName_AsString = TEXT( "ToolClass" );
+    static inline FString IsTemporary_KeyName_AsBool = TEXT( "IsTemporary" );
+    static inline FString SessionDuration_KeyName_AsDouble = TEXT( "SessionDuration" );
+};
 
 void
 UOdysseyPainterEditorTool::Inactivate()
@@ -134,6 +149,17 @@ UOdysseyPainterEditorTool::Inactivate()
 
     Unload();
     mIsActivated = false;
+
+    {
+        using FToolActiveFields = FToolActive_TelemetryFields;
+
+        TArray<FAnalyticsEventAttribute> Attributes;
+        Attributes.Emplace( FToolActiveFields::ToolClass_KeyName_AsString, GetClass()->GetPathName() );
+        Attributes.Emplace( FToolActiveFields::IsTemporary_KeyName_AsBool, mIsTemporaryTool );
+        Attributes.Emplace( FToolActiveFields::SessionDuration_KeyName_AsDouble, ( FDateTime::UtcNow() - SessionStartTime ).GetTotalSeconds() );
+
+        FOdysseyTelemetry::Get().RecordEvent( FToolActiveFields::KeyName, Attributes );
+    }
 }
 
 void

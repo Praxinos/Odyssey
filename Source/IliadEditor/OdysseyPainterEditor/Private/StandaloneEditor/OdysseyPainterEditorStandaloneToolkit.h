@@ -47,4 +47,8 @@ private:
     FName mLayoutName;
     FString mWorldCentricTabPrefix;
     TSharedPtr<FOdysseyPainterEditor> mEditor;
+
+private:
+    // Telemetry
+    FDateTime SessionStartTime;
 };
