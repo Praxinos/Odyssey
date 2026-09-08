@@ -36,6 +36,19 @@ UOdysseyAnimationTimelineTrack::AddNewSection(FFrameNumber KeyTime, UOdysseyAnim
         FInt32Range frameRange = iAnimation->GetFrameRange();
         FFrameNumber animationLeftBoundFrame( frameRange.GetLowerBoundValue() );
 
+        // Compute the range (as it is done in InitialPlacement())
+        TRange<FFrameNumber> animationRange = TRange<FFrameNumber>( KeyTime, KeyTime + animationDuration );
+        check( animationDuration == UE::MovieScene::DiscreteSize( animationRange ) );
+
+        // Get the playback range of the moviescene
+        // And increase the upper bound of the animation range (if needed) to the playback upper bound
+        // So when dropping an animation actor, the section will go to the playback upper bound (if needed),
+        // and won't be only a 1 frame section for a 1 frame animation
+        TRange<FFrameNumber> playbackRange = movieScene->GetPlaybackRange();
+        if( TRangeBound<FFrameNumber>::MaxUpper( animationRange.GetUpperBound(), playbackRange.GetUpperBound() ) == playbackRange.GetUpperBound() )
+            animationRange.SetUpperBound( playbackRange.GetUpperBound() );
+        animationDuration = UE::MovieScene::DiscreteSize( animationRange );
+
         NewSection->SetStartFrameOffset( FFrameRate::TransformTime( animationLeftBoundFrame, animationFrameRate, movieScene->GetDisplayRate() ).GetFrame() );
         NewSection->InitialPlacement( Sections, KeyTime, animationDuration, false );
     }
