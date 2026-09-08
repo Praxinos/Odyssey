@@ -1657,5 +1657,9 @@ FArianePathGeometry3D::Build()
         }
     }
 
-    Path->GetImage()->GetDrawingLayer()->MarkRenderStateDirty();
+    // DrawingLayer can be null in animation keys
+    if( Path->GetImage()->GetDrawingLayer().IsValid() )
+    {
+        Path->GetImage()->GetDrawingLayer()->MarkRenderStateDirty();
+    }
 }

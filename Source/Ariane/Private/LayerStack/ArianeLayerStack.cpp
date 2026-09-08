@@ -236,11 +236,6 @@ UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder, 
 
     AddLayer( ParentLayerFolder, NewDrawingLayer, bTriggerEvent );
 
-UE_LOG(LogTemp, Warning,
-    TEXT("Drawing registered: %d / Image registered: %d"),
-    NewDrawingLayer->IsRegistered(),
-    NewDrawingLayer->GetImage()->IsRegistered());
-
     return NewDrawingLayer;
 }
 
