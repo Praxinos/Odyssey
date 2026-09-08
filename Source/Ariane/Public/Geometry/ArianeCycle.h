@@ -133,9 +133,8 @@ public:
     UMaterialInterface* GetMaterial();
     FArianeCycleGeometry3D& GetGeometry3D();
     TArray<int32>& GetEarcutIndices();
-    TArray<FDynamicMeshVertex>& GetModelVertexCache();
-    void BuildModelVertexCache();
     void ImportGraphCycle( FArianeGraph* Graph, FArianeGraph::FCycle* GraphCycle, EArianeCycleFittingRule FittingRule );
+    TArray<FArianePoint>& GetPoints();
 
 protected:
     virtual FArianeObject* CopyShape( const FCopyArgs& CopyArgs ) override;

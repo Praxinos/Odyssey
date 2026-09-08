@@ -56,6 +56,7 @@ class ARIANEEDITOR_API SArianeEditorCurrentObjectDetailsView
         void OnPostLayerStackHierarchyChanged();
         void OnPrePainting3DComponentUpdate( bool bInteractive );
         void OnPostPainting3DComponentUpdate( bool bInteractive );
+        void OnPostImageChanged();
 
     protected:
         FArianeEditor* Editor;

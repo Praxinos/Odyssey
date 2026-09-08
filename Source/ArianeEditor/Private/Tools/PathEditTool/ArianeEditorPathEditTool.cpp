@@ -148,6 +148,48 @@ UArianeEditorPathEditTool::Reset()
 }
 
 void
+UArianeEditorPathEditTool::OnPostImageChanged()
+{
+    Reset();
+}
+
+void
+UArianeEditorPathEditTool::OnPreLayerStackSelectionChanged()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        if( DrawingLayer )
+        {
+            // commented-out: nothing to do on Pre. Left there for consistency
+            //DrawingLayer->OnPreImageChangedDelegate().RemoveAll( this );
+            DrawingLayer->OnPostImageChangedDelegate().RemoveAll( this );
+        }
+    }
+}
+
+void
+UArianeEditorPathEditTool::OnPostLayerStackSelectionChanged()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        if( DrawingLayer )
+        {
+            // commented-out: nothing to do on Pre. Left there for consistency
+            //DrawingLayer->OnPreImageChangedDelegate().AddSP( this, &UArianeEditorPathEditTool::OnPreImageChanged );
+            DrawingLayer->OnPostImageChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPostImageChanged );
+        }
+    }
+}
+
+void
 UArianeEditorPathEditTool::BindDelegates()
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
@@ -155,6 +197,9 @@ UArianeEditorPathEditTool::BindDelegates()
     if( Painting3DComponent )
     {
         Painting3DComponent->OnPostUpdateDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPostUpdate );
+
+        Painting3DComponent->GetLayerStack()->OnPreSelectionChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPreLayerStackSelectionChanged );
+        Painting3DComponent->GetLayerStack()->OnPostSelectionChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPostLayerStackSelectionChanged );
     }
 
     Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::Reset );

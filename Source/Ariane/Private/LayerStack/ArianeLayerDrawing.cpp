@@ -37,6 +37,26 @@ FArianeGeometryProxy::FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLeve
 
     DrawingLayer->GetImage()->GetUsedMaterials( MaterialInterfaces );
 
+    FArianeObject::Traverse( DrawingLayer->GetImage()->GetRootGroup()
+                           , []( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+        {
+            if( Object->HasBaseClass( FArianePath::StaticClass() ) )
+            {
+                FArianePath* Path = static_cast<FArianePath*>( Object );
+
+                Path->GetGeometry3D().InitVertexFactory();
+            }
+
+            if( Object->HasBaseClass( FArianeCycle::StaticClass() ) )
+            {
+                FArianeCycle* Cycle = static_cast<FArianeCycle*>( Object );
+
+                Cycle->GetGeometry3D().InitVertexFactory();
+            }
+
+            return FArianeObject::ETraversalReturnValue::Continue;
+        } );
+
     // MaterialRelevance is used by GetViewRelevance and is necessary to render all kinds of materials
     for( UMaterialInterface* MaterialInterface : MaterialInterfaces )
     {
@@ -402,6 +422,8 @@ UArianeLayerDrawing::CalcBounds( const FTransform& LocalToWorld ) const
 void
 UArianeLayerDrawing::OnUpdateTransform( EUpdateTransformFlags UpdateTransformFlags, ETeleportType TeleportType )
 {
+    Super::OnUpdateTransform( UpdateTransformFlags, TeleportType );
+
     Image->GetRootGroup()->UpdateTransform();
 }
 
@@ -414,6 +436,8 @@ UArianeLayerDrawing::OnRegister()
     {
         RegisterComponent();
     }
+
+    WorldTransformVersion++;
 }
 
 void
@@ -476,9 +500,28 @@ UArianeLayerDrawing::GetImage()
 }
 
 void
-UArianeLayerDrawing::SetImage( UArianeImage* InImage )
+UArianeLayerDrawing::SetImage( UArianeImage* InImage, bool bTriggerEvent )
 {
-    Image = InImage;
+    if( bTriggerEvent )
+        OnPreImageChanged.Broadcast();
 
+    Image = InImage;
     Image->SetDrawingLayer( this );
+
+    MarkRenderStateDirty();
+
+    if( bTriggerEvent )
+        OnPostImageChanged.Broadcast();
+}
+
+UArianeLayerDrawing::FOnImageChanged&
+UArianeLayerDrawing::OnPreImageChangedDelegate()
+{
+    return OnPreImageChanged;
+}
+
+UArianeLayerDrawing::FOnImageChanged&
+UArianeLayerDrawing::OnPostImageChangedDelegate()
+{
+    return OnPostImageChanged;
 }

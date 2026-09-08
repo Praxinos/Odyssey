@@ -6,6 +6,7 @@
 // Unreal headers
 #include "CoreMinimal.h"
 #include "StructUtils/InstancedStruct.h"
+#include "DynamicMeshBuilder.h"
 // Ariane Headers
 #include "ArianeID.h"
 #include "ArianeCoreEnums.h"
@@ -66,10 +67,13 @@ class ARIANE_API FArianeObjectGeometry3D
         const FRawStaticIndexBuffer& GetIndexBuffer() const;
         FArianeObject* GetObject();
         FLocalVertexFactory* GetVertexFactory();
-        void InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices, TArray<uint32>& Indices );
+        void InitVertexFactory();
 
     protected:
         FArianeObject* Object;
+
+        TArray<FDynamicMeshVertex> MeshVertices;
+        TArray<uint32> MeshIndices;
 
         uint32 VertexCount;
         FPositionVertexBuffer PositionBuffer;
@@ -352,8 +356,9 @@ protected:
     UPROPERTY()
     FTransform LocalTransform;
 
-    UPROPERTY()
+
     FTransform WorldTransform;
+    uint32 WorldTransformVersion;
 
 protected:
     FSimpleMulticastDelegate  OnPostInvalidated;
