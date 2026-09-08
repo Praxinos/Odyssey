@@ -10,6 +10,7 @@
 #include "OdysseyShape.h"
 #include "OdysseyPaintEngine.h"
 #include "OdysseyInterpolationTypes.h"
+#include "OdysseyPainterEditorRasterDrawingToolWorker.h"
 #include "OdysseyPainterEditorRasterEraserTool.generated.h"
 
 class FOdysseyPaintEngine;
@@ -44,6 +45,8 @@ public:
     virtual bool HasRadius() const override;
     virtual void SetRadius(float Radius = false) override;
     virtual float GetRadius() const override;
+
+    virtual void Tick(float iDeltaTime) override;
 
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
@@ -145,6 +148,7 @@ protected:
     FOdysseyBlendParameters             mBlendParameters;
     TSharedPtr<IOdysseyInterpolation>   mInterpolator;
     FOdysseyPoint mLastPoint;
+    FOdysseyPainterEditorRasterDrawingToolWorker mWorker;
     //---
 
     //Internal

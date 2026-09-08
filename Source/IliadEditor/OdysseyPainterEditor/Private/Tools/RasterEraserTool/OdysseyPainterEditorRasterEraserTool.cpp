@@ -173,6 +173,14 @@ UOdysseyPainterEditorRasterEraserTool::GetRasterBlockFromEditor(bool iCreate) co
     return mediaRasters[0]->GetRasterBlock();
 }
 
+void
+UOdysseyPainterEditorRasterEraserTool::Tick(float iDeltaTime)
+{
+    Shapes.GetActiveShape()->Tick(iDeltaTime);
+    mWorker.ExecuteFor(1000 / 60); //60fps
+    mPaintEngine.Update(mBlendParameters);
+}
+
 bool
 UOdysseyPainterEditorRasterEraserTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
@@ -582,13 +590,14 @@ UOdysseyPainterEditorRasterEraserTool::OnShapeInteractive(const TArray<FOdysseyP
         TArray<FOdysseyPoint> interpolatedPoints = InterpolateTo(point);
         for ( const FOdysseyPoint& interpolatedPoint : interpolatedPoints )
         {
-            Stamp(interpolatedPoint);
+            mWorker.Push([this, interpolatedPoint]()
+                {
+                    Stamp(interpolatedPoint);
+                });
         }
     }
 
     Flush();
-
-    mPaintEngine.Update(mBlendParameters);
 }
 
 void
@@ -612,6 +621,7 @@ UOdysseyPainterEditorRasterEraserTool::OnShapeCommit(const TArray<FOdysseyPoint>
     mPaintEngine.Update(mBlendParameters);
 
     Flush();
+    mWorker.Finish();
     Commit();
     mTransaction = nullptr; //Finish the undo transaction
 
