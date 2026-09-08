@@ -156,7 +156,9 @@ void
 FArianeObjectGeometry3D::InitVertexFactory( TArray<FDynamicMeshVertex>& Vertices
                                           , TArray<uint32>& Indices )
 {
-    UWorld* World = Object->GetImage()->GetWorld();
+    // DrawingLayer can be null in orphan Images (animation keys)
+    UWorld* World = Object->GetImage()->GetDrawingLayer().IsValid() ? Object->GetImage()->GetDrawingLayer()->GetWorld()
+                                                                    : nullptr ;
 
     if( World )
     {
@@ -713,9 +715,18 @@ FArianeObject::UpdateTransform()
         {
             UArianeImage* Image = Object->GetImage();
             FArianeObject* Parent = Object->GetParent();
+            UArianeLayerDrawing* DrawingLayer = Image->GetDrawingLayer().Get();
 
-            Object->WorldTransform =  Parent ? Object->LocalTransform * Parent->WorldTransform
-                                             : Image->GetComponentTransform();
+            if( DrawingLayer )
+            {
+                Object->WorldTransform = Parent ? Object->LocalTransform * Parent->WorldTransform
+                                                : Image->GetDrawingLayer()->GetComponentTransform();
+            }
+            else
+            {
+                Object->WorldTransform = Parent ? Object->LocalTransform * Parent->WorldTransform
+                                                : Object->LocalTransform;
+            }
 
 //UE_LOG(LogTemp, Warning, TEXT("Object:%s - Parent:%p - Transform: %s"), *Name.ToString(), Parent, *WorldTransform.ToString());
 

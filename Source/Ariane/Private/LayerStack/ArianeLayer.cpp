@@ -93,11 +93,6 @@ void
 UArianeLayer::PostLoad()
 {
     Super::PostLoad();
-
-    if( IsRegistered() == false )
-    {
-        RegisterComponent();
-    }
 }
 
 /*

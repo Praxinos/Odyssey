@@ -133,7 +133,7 @@ SArianeEditorSceneTreeViewContextMenu::DeleteSelectedObjects( FArianeEditor* Edi
 bool
 SArianeEditorSceneTreeViewContextMenu::HasOnlySelectedPrimitives( FArianeGroup* RootGroup )
 {
-    UArianeLayerDrawing* DrawingLayer = RootGroup->GetImage()->GetDrawingLayer();
+    UArianeLayerDrawing* DrawingLayer = RootGroup->GetImage()->GetDrawingLayer().Get();
 
     for( FArianeObject* SelectedObject : DrawingLayer->GetImage()->GetSelectedObjects() )
     {

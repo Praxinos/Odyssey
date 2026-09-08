@@ -581,6 +581,10 @@ FArianeCycleGeometry3D::Build()
 
     InitVertexFactory( Cycle->GetModelVertexCache(), UnsignedIndices );
 
-    // send the vertex data to the graphic card.
-    Cycle->GetImage()->GetDrawingLayer()->MarkRenderStateDirty();
+    // DrawingLayer can be null in animation keys
+    if( Cycle->GetImage()->GetDrawingLayer().IsValid() )
+    {
+        // send the vertex data to the graphic card.
+        Cycle->GetImage()->GetDrawingLayer()->MarkRenderStateDirty();
+    }
 }

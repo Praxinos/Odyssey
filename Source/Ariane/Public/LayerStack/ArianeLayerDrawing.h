@@ -26,6 +26,31 @@ struct FArianeRectangle;
 struct FArianeLine;
 struct FArianePolygon;
 
+class UArianeLayerDrawing;
+
+class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
+{
+    public:
+        ~FArianeGeometryProxy();
+        FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLevel, UArianeLayerDrawing* DrawingLayer );
+
+        virtual SIZE_T GetTypeHash() const override;
+        virtual uint32 GetMemoryFootprint( void ) const override;
+
+        virtual FPrimitiveViewRelevance GetViewRelevance( const FSceneView* View ) const override;
+        virtual void GetDynamicMeshElements( const TArray<const FSceneView*>& Views
+                                           , const FSceneViewFamily& ViewFamily
+                                           , uint32 VisibilityMap
+                                           , FMeshElementCollector& Collector) const override;
+        void GetImageDynamicMeshElements( FMeshElementCollector& Collector
+                                        , int32 ViewIndex ) const;
+        void InitVertexFactory();
+        virtual void DrawStaticElements( FStaticPrimitiveDrawInterface * PDI ) override;
+
+    protected:
+        UArianeLayerDrawing* DrawingLayer;
+        FMaterialRelevance MaterialRelevance;
+};
 
 UCLASS()
 class ARIANE_API UArianeLayerDrawing : public UArianeLayer
@@ -66,11 +91,18 @@ public:
     UArianeImage* GetImage();
     void SetImage( UArianeImage* InImage );
     virtual void OnRegister() override;
+    void OnAssetLoaded(UObject* LoadedObject);
+
+    virtual void GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials, bool bGetDebugMaterials = false ) const override;
+    virtual void OnUpdateTransform( EUpdateTransformFlags UpdateTransformFlags, ETeleportType TeleportType ) override;
+    virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
+    virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
 
 protected:
     void BindDelegates();
     void UnbindDelegates();
     void OnRootObjectInvalidated();
+    virtual void BeginDestroy() override;
 
 protected:
     UPROPERTY( EditAnywhere, Instanced, Interp )
