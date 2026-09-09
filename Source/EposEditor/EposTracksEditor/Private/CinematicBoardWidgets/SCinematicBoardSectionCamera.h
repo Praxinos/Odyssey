@@ -25,6 +25,10 @@ public:
     // Construct the widget
     void Construct(const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection);
 
+    virtual FReply OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual FReply OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+    virtual FReply OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+
 private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
     TAttribute<EVisibility>             mOptionalWidgetsVisibility;

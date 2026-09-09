@@ -717,21 +717,6 @@ SCinematicBoardSectionAnimationTitle::OnMouseButtonDown( const FGeometry& MyGeom
 FReply
 SCinematicBoardSectionAnimationTitle::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
-    if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
-    {
-        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-        UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
-        UMovieSceneSection* section_object = board_section->GetSectionObject();
-        ISequencer* sequencer = board_section->GetSequencer().Get();
-
-        if( MouseEvent.IsControlDown() )
-            BoardSequenceTools::SelectMultiAnimation( sequencer, subsection_object, mBinding.GetGuid() );
-        else
-            BoardSequenceTools::SelectSingleAnimation( sequencer, subsection_object, mBinding.GetGuid() );
-
-        return FReply::Handled();
-    }
-
     return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
 }
 
@@ -3128,7 +3113,21 @@ SCinematicBoardSectionAnimation::OnMouseButtonDown( const FGeometry& MyGeometry,
 FReply
 SCinematicBoardSectionAnimation::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
-    if( MouseEvent.GetEffectingButton() == EKeys::RightMouseButton )
+    if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    {
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        UMovieSceneSection* section_object = board_section->GetSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        if( MouseEvent.IsControlDown() )
+            BoardSequenceTools::SelectMultiAnimation( sequencer, subsection_object, mBinding.GetGuid() );
+        else
+            BoardSequenceTools::SelectSingleAnimation( sequencer, subsection_object, mBinding.GetGuid() );
+
+        return FReply::Handled();
+    }
+    else if( MouseEvent.GetEffectingButton() == EKeys::RightMouseButton )
     {
         FMenuBuilder menu_builder( true, nullptr );
         BuildContextMenu( menu_builder );
