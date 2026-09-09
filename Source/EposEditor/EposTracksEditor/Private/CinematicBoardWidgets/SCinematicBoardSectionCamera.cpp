@@ -265,30 +265,6 @@ SCinematicBoardSectionCameraTitle::OnMouseButtonDown( const FGeometry& MyGeometr
 FReply
 SCinematicBoardSectionCameraTitle::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
-    if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
-    {
-        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
-        UMovieSceneSection* section_object = board_section->GetSectionObject();
-        ISequencer* sequencer = board_section->GetSequencer().Get();
-
-        // Must be done first to spawn all actors in this section (via the delegate on section selection in the toolkit)
-        // To unselect section(s)
-        sequencer->EmptySelection();
-        // And then select the current one
-        sequencer->SelectSection( section_object );
-
-        FGuid camera_binding = BoardSequenceHelpers::GetCameraBinding( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
-        ACineCameraActor* camera = BoardSequenceHelpers::GetCameraSpawned( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), camera_binding );
-
-        // To unselect all actors
-        GEditor->SelectNone( true, true );
-        // And then select the current one
-        GEditor->SelectActor( camera, true, true );
-
-        return FReply::Handled();
-    }
-
     return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
 }
 
@@ -587,6 +563,25 @@ SCinematicBoardSectionCamera::OnMouseButtonUp( const FGeometry& MyGeometry, cons
 {
     if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
     {
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        UMovieSceneSection* section_object = board_section->GetSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        // Must be done first to spawn all actors in this section (via the delegate on section selection in the toolkit)
+        // To unselect section(s)
+        sequencer->EmptySelection();
+        // And then select the current one
+        sequencer->SelectSection( section_object );
+
+        FGuid camera_binding = BoardSequenceHelpers::GetCameraBinding( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+        ACineCameraActor* camera = BoardSequenceHelpers::GetCameraSpawned( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), camera_binding );
+
+        // To unselect all actors
+        GEditor->SelectNone( true, true );
+        // And then select the current one
+        GEditor->SelectActor( camera, true, true );
+
         return FReply::Handled();
     }
 
