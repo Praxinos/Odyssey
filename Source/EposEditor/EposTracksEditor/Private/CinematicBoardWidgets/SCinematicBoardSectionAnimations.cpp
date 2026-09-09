@@ -441,9 +441,7 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
     LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction::CreateLambda( DetachAnimation ),
-            FCanExecuteAction::CreateLambda( CanDetachAnimation ),
-            FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [=](){ return CanDetachAnimation(); } )
+            FCanExecuteAction::CreateLambda( CanDetachAnimation )
         ),
         NAME_None,
         FText::GetEmpty(),
