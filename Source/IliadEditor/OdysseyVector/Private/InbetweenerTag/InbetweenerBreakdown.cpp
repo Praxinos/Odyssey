@@ -18,7 +18,11 @@
 
 FInbetweenerBreakdown::~FInbetweenerBreakdown()
 {
-    delete mGrid;
+    if( mGrid != nullptr )
+    {
+        delete mGrid;
+        mGrid = nullptr;
+    }
 }
 
 FInbetweenerBreakdown::FInbetweenerBreakdown( FOdysseyVectorTagInbetweener* iInbetweenerTag )

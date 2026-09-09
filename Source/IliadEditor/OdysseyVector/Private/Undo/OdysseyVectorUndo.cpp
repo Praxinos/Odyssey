@@ -678,7 +678,7 @@ FSnapshotInbetweenerBreakdown::Clean( eSnapshotState iKeepState )
     // it means it was non-existent when the snapshot was taken
     if( GetState( iKeepState ) == nullptr )
     {
-        delete mBreakdown;
+        mBreakdown = nullptr;
     }
 }
 
