@@ -19,6 +19,7 @@ public:
 public:
     //Common Shortcuts
     void Action_ActivateTool(UOdysseyPainterEditorTool* iTool);
+    void Action_ActivateTemporaryTool(UOdysseyPainterEditorTool* iTool);
     void Action_ActivateColorPickerTool();
     void Action_ActivateDrawingTool();
     void Action_ActivateSelectionTool();
@@ -27,10 +28,12 @@ public:
     void Action_ActivatePrimitiveDrawingTool();
     void Action_ActivateEraserTool();
     void Action_ActivateWarpTool();
+    void Action_ActivateTemporaryColorPickerTool();
     void Action_SetToolRadius();
     void Action_InactivateTemporaryTool();
 
     bool CanAction_ActivateTool(UOdysseyPainterEditorTool* iTool);
+    bool CanAction_ActivateTemporaryTool(UOdysseyPainterEditorTool* iTool);
     bool CanAction_ActivateColorPickerTool();
     bool CanAction_ActivateDrawingTool();
     bool CanAction_ActivateSelectionTool();
@@ -39,6 +42,7 @@ public:
     bool CanAction_ActivatePrimitiveDrawingTool();
     bool CanAction_ActivateEraserTool();
     bool CanAction_ActivateWarpTool();
+    bool CanAction_ActivateTemporaryColorPickerTool();
     bool CanAction_SetToolRadius();
     bool CanAction_InactivateTemporaryTool();
 

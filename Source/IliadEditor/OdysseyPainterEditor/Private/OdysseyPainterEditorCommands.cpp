@@ -48,7 +48,6 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( DecreaseBrushSize, BrushStrokesShortcuts, "Decrease Brush Size", "Decrease Brush Size by 1",                                         EUserInterfaceActionType::Button, FInputChord( EKeys::Subtract ) );
     UI_BUNDLE_COMMAND( ToggleEraserButton, BrushStrokesShortcuts, "Toggle current Brush to Eraser", "Toggle current Brush to Eraser",                       EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( GetBrushPack, BrushStrokesShortcuts, "Get more brushes ...", "Get more brushes ...",                                                 EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( PickColorInViewport, BrushStrokesShortcuts, "Color Picker", "Hold the key to Pick a color in the viewport",                          EUserInterfaceActionType::None, FInputChord(EKeys::I));
 
 
 // Brush Alpha Mode Shortcuts Category
@@ -112,6 +111,8 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( ActivatePrimitiveDrawingTool, ToolsShortcuts, "Activate Primitive Drawing Tool", "Activates the Primitive Drawing Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::U));
     UI_BUNDLE_COMMAND( ActivateEraserTool, ToolsShortcuts, "Activate Eraser Tool", "Activates the Eraser Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::E));
     UI_BUNDLE_COMMAND( ActivateWarpTool, ToolsShortcuts, "Activate Warp Tool", "Activates the Warp Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::W));
+
+    UI_BUNDLE_COMMAND( ActivateTemporaryColorPickerTool, ToolsShortcuts, "Activate Color Picker Temporarily", "Activates the Color Picker Tool Temporarily", EUserInterfaceActionType::Button, FInputChord( EKeys::I ) );
 
     //TODO: rename this shortcut label (and tooltip) to something: "Inactivate Temporary Tool (Out of Peg,...)"
     // once more than 1 temporary tool will be available

@@ -68,11 +68,6 @@ public:
     /** Action for inverting the current raster selection */
     TSharedPtr<FUICommandInfo> InvertSelection;
 
-    //Viewport Actions
-
-    /** Action to pick a color in the viewport */
-    TSharedPtr<FUICommandInfo> PickColorInViewport;
-
 
     //Brush actions
 
@@ -254,6 +249,8 @@ public:
     TSharedPtr<FUICommandInfo> ActivatePrimitiveDrawingTool;
     TSharedPtr<FUICommandInfo> ActivateEraserTool;
     TSharedPtr<FUICommandInfo> ActivateWarpTool;
+
+    TSharedPtr<FUICommandInfo> ActivateTemporaryColorPickerTool;
 
     TSharedPtr<FUICommandInfo> InactivateTemporaryTool;
 

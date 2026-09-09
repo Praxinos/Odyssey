@@ -79,6 +79,11 @@ FOdysseyPainterEditorGlobalToolsShortcuts::MapActionsToCommandList(TSharedRef<FU
     );
 
     iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().ActivateTemporaryColorPickerTool,
+        FExecuteAction::CreateRaw( this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTemporaryColorPickerTool )
+    );
+
+    iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().InactivateTemporaryTool,
         FExecuteAction::CreateRaw( this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_InactivateTemporaryTool )
     );
@@ -175,6 +180,18 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool(UOdysseyPainterEd
 }
 
 void
+FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTemporaryTool( UOdysseyPainterEditorTool* iTool )
+{
+    if( !mEditor )
+        return;
+
+    if( !iTool->IsActivable() || iTool->IsActivated() )
+        return;
+
+    mEditor->ActivateTemporaryTool( iTool );
+}
+
+void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateColorPickerTool()
 {
     if (!mEditor)
@@ -250,6 +267,15 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateWarpTool()
         return;
 
     Action_ActivateTool(mEditor->GetVectorGridTool());
+}
+
+void
+FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTemporaryColorPickerTool()
+{
+    if( !mEditor )
+        return;
+
+    Action_ActivateTemporaryTool( mEditor->GetTemporaryColorPickerTool() );
 }
 
 void

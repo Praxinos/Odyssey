@@ -181,6 +181,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
     , mVectorMatchingTool(nullptr)
     , mVectorChartTool(nullptr)
     , mOutOfPegsTool(nullptr)
+    , mTemporaryColorPickerTool( nullptr )
     , mRecentTools( NewObject<UOdysseyToolCollection>(GetTransientPackage(), NAME_None, RF_Transient) )
     , mAnimationFlipSystem(MakeShared<FOdysseyPainterEditorAnimationFlipSystem>(this))
 {
@@ -246,7 +247,11 @@ FOdysseyPainterEditor::InitTools()
     mVectorMatchingTool = AddMainTool<UOdysseyPainterEditorVectorMatchingTool>();
     mVectorChartTool = AddMainTool<UOdysseyPainterEditorVectorChartTool>();
     mVectorTrajectoryTool = AddMainTool<UOdysseyPainterEditorVectorTrajectoryTool>();
+
     mOutOfPegsTool = AddTemporaryTool<UOdysseyPainterEditorAnimationOutOfPegsTool>();
+    mTemporaryColorPickerTool = AddTemporaryTool<UOdysseyPainterEditorColorPickerTool>();
+    mTemporaryColorPickerTool->mIsTemporaryTool = true;
+
     mRasterDrawingTool->SetBrushContexts(&mBrushContexts);
 }
 
@@ -1036,6 +1041,12 @@ FOdysseyPainterEditor::GetOutOfPegsTool() const
     return mOutOfPegsTool;
 }
 
+UOdysseyPainterEditorColorPickerTool*
+FOdysseyPainterEditor::GetTemporaryColorPickerTool() const
+{
+    return mTemporaryColorPickerTool;
+}
+
 TArray<FOdysseyBrushContext*>&
 FOdysseyPainterEditor::GetBrushContexts()
 {
@@ -1106,6 +1117,12 @@ FOdysseyPainterEditor::PaintColor() const
 
 UOdysseyPainterEditorTool* FOdysseyPainterEditor::GetEditorToolOfClass(UClass* iToolClass)
 {
+    // As there are now 2 color picker (the real tool and the temporary tool)
+    // and they are of the same class UOdysseyPainterEditorColorPickerTool
+    // just return nullptr when the there is a temporary tool activated
+    if( mCurrentTemporaryTool )
+        return nullptr;
+
     if( iToolClass == UOdysseyPainterEditorRasterDrawingTool::StaticClass() )
         return mRasterDrawingTool;
     else if( iToolClass == UOdysseyPainterEditorRasterEraserTool::StaticClass() )
@@ -1154,8 +1171,6 @@ UOdysseyPainterEditorTool* FOdysseyPainterEditor::GetEditorToolOfClass(UClass* i
         return mVectorChartTool;
     else if( iToolClass == UOdysseyPainterEditorVectorTrajectoryTool::StaticClass() )
         return mVectorTrajectoryTool;
-    else if (iToolClass == UOdysseyPainterEditorAnimationOutOfPegsTool::StaticClass())
-        return mOutOfPegsTool;
     else
         return nullptr;
 }
