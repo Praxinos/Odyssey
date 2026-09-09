@@ -576,4 +576,27 @@ SCinematicBoardSectionCamera::Construct( const FArguments& InArgs, TSharedRef<FC
     ];
 }
 
+FReply
+SCinematicBoardSectionCamera::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    return SCompoundWidget::OnMouseButtonDown( MyGeometry, MouseEvent );
+}
+
+FReply
+SCinematicBoardSectionCamera::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    {
+        return FReply::Handled();
+    }
+
+    return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
+}
+
+FReply
+SCinematicBoardSectionCamera::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
+{
+    return SCompoundWidget::OnMouseMove( MyGeometry, MouseEvent );
+}
+
 #undef LOCTEXT_NAMESPACE

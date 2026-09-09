@@ -3140,6 +3140,11 @@ SCinematicBoardSectionAnimation::OnMouseButtonUp( const FGeometry& MyGeometry, c
         return FReply::Handled();
     }
 
+    if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    {
+        return FReply::Handled();
+    }
+
     return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
 }
 
