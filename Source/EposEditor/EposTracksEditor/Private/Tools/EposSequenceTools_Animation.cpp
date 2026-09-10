@@ -932,7 +932,9 @@ ShotSequenceTools::DeleteAnimation( ISequencer& iSequencer, UMovieSceneSequence*
 
     //---
 
-    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemRemoved );
+    // Refresh all immediately to avoid delegate accessing no more valid bindings, ...
+    // (But I don't know if it would be to the delegates to always check the validity of its (their) object(s) ? Or assuming that if the delegate exists via the widget, its object must be valid ?)
+    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
 }
 
 //---
