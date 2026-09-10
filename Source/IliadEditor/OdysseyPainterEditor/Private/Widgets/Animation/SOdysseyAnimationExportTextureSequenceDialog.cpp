@@ -342,8 +342,6 @@ FOdysseyAnimationTextureSequenceExporter::ExportSource(const FSource& iSource, c
         imageName += FString::Printf(TEXT("%d"), i);
         Odyssey::ExportAsTexture(iSource.mTextureRenderingAbility, i, imageName, folder);
     }
-
-    Odyssey::ExportAsTexture(iSource.mTextureRenderingAbility, 0, filename, folder);
 }
 
 #undef LOCTEXT_NAMESPACE
