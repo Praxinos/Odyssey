@@ -19,6 +19,26 @@ FOdysseyHUDCircle::FOdysseyHUDCircle(const FVector2D& iCenterPoint, float iRadiu
     mRadius = iRadius;
 }
 
+TArray<FVector2D> GenerateCirclePoints(const FVector2D& InCenter, float InRadius, uint32 InNumSides)
+{
+    TArray<FVector2D> Points;
+
+    if (InNumSides <= 2)
+        return Points;
+
+    const float AngleDelta = 2.0f * UE_PI / InNumSides;
+    FVector2D LastPoint = InCenter + FVector2D(InRadius, 0);
+
+    for(uint32 SideIndex = 0; SideIndex < InNumSides; SideIndex++)
+    {
+        const FVector2D Point = InCenter + FVector2D(FMath::Cos(AngleDelta * (SideIndex + 1)) * InRadius, FMath::Sin(AngleDelta * (SideIndex + 1))* InRadius);
+        Points.Add(Point);
+        LastPoint = Point;
+    }
+
+    return Points;
+}
+
 void
 FOdysseyHUDCircle::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 {
@@ -28,24 +48,22 @@ FOdysseyHUDCircle::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
     if (customization.mSegmentLength <= 0.f || customization.mGapLength < 0.f)
         return;
 
-    ::ULIS::TArray<::ULIS::FVec2I> points;
-    ::ULIS::GenerateCirclePoints(::ULIS::FVec2I(0, 0), mRadius, points);
+    /* ::ULIS::TArray<::ULIS::FVec2I> points;
+    ::ULIS::GenerateCirclePoints(::ULIS::FVec2I(0, 0), mRadius, points); */
 
-    if (points.Size() < 2)
-        return;
-
+    TArray<FVector2D> points = GenerateCirclePoints(FVector2D(0, 0), mRadius, 50);
     InitDrawCustomizedLine(iParams.mCanvas, customization, FLinearColor::Black);
 
-    for (int i = 1; i < points.Size(); i++)
+    for (int i = 1; i < points.Num(); i++)
     {
-        FVector2D startPoint = FVector2D(points[i - 1].x, points[i - 1].y) + mCenterPoint;
-        FVector2D endPoint = FVector2D(points[i].x, points[i].y) + mCenterPoint;
+        FVector2D startPoint = FVector2D(points[i - 1].X, points[i - 1].Y) + mCenterPoint;
+        FVector2D endPoint = FVector2D(points[i].X, points[i].Y) + mCenterPoint;
 
         DrawCustomizedLine(iParams, startPoint, endPoint);
     }
 
-    FVector2D startPoint = FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y) + mCenterPoint;
-    FVector2D endPoint = FVector2D(points[0].x, points[0].y) + mCenterPoint;
+    FVector2D startPoint = FVector2D(points[points.Num() - 1].X, points[points.Num() - 1].Y) + mCenterPoint;
+    FVector2D endPoint = FVector2D(points[0].X, points[0].Y) + mCenterPoint;
 
     DrawCustomizedLine(iParams, startPoint, endPoint);
 

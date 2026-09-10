@@ -443,6 +443,13 @@ TOptional<FMouseCursor> UOdysseyPainterEditorTool::GetMouseCursorOverride() cons
 
 FMouseCursor UOdysseyPainterEditorTool::GetMouseCursor() const
 {
+    if (mIsRIMActive)
+    {
+        FMouseCursor cursor(EMouseCursor::None);
+        mMouseCursor.UpdateCursor();
+        return cursor;
+    }
+
     TOptional<FMouseCursor> cursorOverride = GetMouseCursorOverride();
     if( cursorOverride )
     {
@@ -552,7 +559,16 @@ UOdysseyPainterEditorTool::StartRadiusInteractiveModifier()
     //by removing customization and make its behaviour directly part of the HUD system
     FOdysseyHUDElement::FHUDCustomization customization;
     customization.mColors.Add(FLinearColor::Red);
+    customization.mColors.Add(FLinearColor::Gray);
+    customization.mSegmentLength = 5;
     mRIMHUD->SetCustomization(customization);
+
+    FOdysseyHUDElement::FHUDCustomization LineCustomization;
+    LineCustomization.mColors.Add(FLinearColor::Gray);
+    LineCustomization.mColors.Add(FLinearColor::Black);
+    LineCustomization.mSegmentLength = 5;
+    mRIMHorizontalHUD->SetCustomization(LineCustomization);
+    mRIMVerticalHUD->SetCustomization(LineCustomization);
 
     //Replace the HUD with the RIMHUD
     mRootHUD->RemoveElement(mHUD);
@@ -590,6 +606,11 @@ UOdysseyPainterEditorTool::EndRIM()
 
     EndInteractiveMode();
     SetRadius(GetRadius()); //Force a non interactive call to validate the Radius
+
+    //TODO: It would be nice to set the mouse cursor to the start mouse position
+    // But right now mRIMStartMousePosition is the position of the mouse in the texture
+    // and we need the position of the mouse on screen.
+    //FSlateApplication::Get().SetCursorPos(mRIMStartMousePosition);
 
     mIsRIMActive = false;
 
@@ -656,6 +677,7 @@ UOdysseyPainterEditorTool::RIMOnMouseMove(const FOdysseyPoint& iPointInTexture)
 {
     FVector2D center = GetRIMCenter(iPointInTexture);
 
+    mRIMStartMousePosition = iPointInTexture;
     mRIMHUD->SetCenter(center);
     mRIMHorizontalHUD->SetStartPoint(mRIMHUD->GetCenter() + FVector2D(-mRIMHUD->GetRadius(), 0));
     mRIMHorizontalHUD->SetEndPoint(mRIMHUD->GetCenter() + FVector2D(mRIMHUD->GetRadius(), 0));
@@ -693,22 +715,27 @@ UOdysseyPainterEditorTool::RIMOnMouseDrag(const FOdysseyPoint& iPointInTexture)
 
     auto ComputeDeltaSizeFromMouseDelta = []( float iX ) -> float
         {
-            return FMath::Sign( iX ) *  0.0008f * FMath::Square( iX );
+            return iX / 2.f;
         };
 
-    float distance = FMath::TruncToFloat( ComputeDeltaSizeFromMouseDelta( mouseDelta.X ) * 2.f ) / 2.f; // *2 / 2 to increase/decrease radius of 0.5, then size increase/decrease of 1
+    //float distance = FMath::TruncToFloat( ComputeDeltaSizeFromMouseDelta( mouseDelta.X ) * 2.f ) / 2.f; // *2 / 2 to increase/decrease radius of 0.5, then size increase/decrease of 1
+    float distance = ComputeDeltaSizeFromMouseDelta( mouseDelta.X );
     //UE_LOG( LogTemp, Warning, TEXT( "distance: %f" ), distance );
 
     float radius = FMath::Clamp( mRIMStartRadius + distance, 1.f, 2000.f );
-
-    mRIMHUD->SetRadius( radius );
-    //UE_LOG( LogTemp, Warning, TEXT( "hud radius: %f" ), mRIMHUD->GetRadius() );
-
-    mRIMHorizontalHUD->SetStartPoint(mRIMHUD->GetCenter() + FVector2D(-mRIMHUD->GetRadius(), 0));
-    mRIMHorizontalHUD->SetEndPoint(mRIMHUD->GetCenter() + FVector2D(mRIMHUD->GetRadius(), 0));
-    mRIMVerticalHUD->SetStartPoint(mRIMHUD->GetCenter() + FVector2D(0, -mRIMHUD->GetRadius()));
-    mRIMVerticalHUD->SetEndPoint(mRIMHUD->GetCenter() + FVector2D(0, mRIMHUD->GetRadius()));
+    //UE_LOG( LogTemp, Warning, TEXT( "hud radius: %f" ), radius );
 
     SetRadius(radius);
+
+    //Retrieve the actual radius of the Tool, because the tool can clamp of adjust the radius in SetRadius()
+    radius = GetRadius();
+    mRIMHUD->SetRadius( radius );
+
+    mRIMHorizontalHUD->SetStartPoint(mRIMHUD->GetCenter() + FVector2D(-radius, 0));
+    mRIMHorizontalHUD->SetEndPoint(mRIMHUD->GetCenter() + FVector2D(radius, 0));
+    mRIMVerticalHUD->SetStartPoint(mRIMHUD->GetCenter() + FVector2D(0, -radius));
+    mRIMVerticalHUD->SetEndPoint(mRIMHUD->GetCenter() + FVector2D(0, radius));
+
+
     //UE_LOG( LogTemp, Warning, TEXT( "tool radius: %f" ), GetRadius() );
 }
