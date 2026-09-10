@@ -119,9 +119,14 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
         const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
 
         if( !IsFocusedSequenceSameAs( sequencer, subsection_object ) )
-            return EVisibility::Hidden;
+            return EVisibility::Collapsed;
 
-        return BoardSequenceTools::CanCreateCamera( sequencer, section_object->GetInclusiveStartFrame() ) ? EVisibility::Visible : EVisibility::Hidden;
+        // This camera toolbar is collapsed when not visible
+        // because:
+        // - when camera popup button is NOT visible
+        // - and when take popup button is visible
+        // take button popup must be centered
+        return BoardSequenceTools::CanCreateCamera( sequencer, section_object->GetInclusiveStartFrame() ) ? EVisibility::Visible : EVisibility::Collapsed;
     };
 
     TSharedRef< SWidget > middle_toolbar = MiddleToolbarBuilder.MakeWidget();
@@ -152,6 +157,41 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 
     //---
 
+    TSharedRef<SWidget> middleVertical = SNew( SVerticalBox )
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign( HAlign_Center )
+        [
+            top_toolbar
+        ]
+
+        + SVerticalBox::Slot()
+        .FillHeight( 1 )
+        .HAlign( HAlign_Center )
+        .VAlign( VAlign_Center )
+        [
+            middle_toolbar
+        ]
+        ;
+
+    TSharedRef<SWidget> middleHorizontal = SNew( SHorizontalBox )
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .HAlign( HAlign_Center )
+        .VAlign( VAlign_Center )
+        [
+            top_toolbar
+        ]
+
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .HAlign( HAlign_Center )
+        .VAlign( VAlign_Center )
+        [
+            middle_toolbar
+        ]
+        ;
+
     ChildSlot
     [
         SNew( SOverlay )
@@ -178,38 +218,23 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
             .AutoWidth()
             .VAlign( VAlign_Fill )
             [
-                SNew( SVerticalBox )
+                SNew( SWidgetSwitcher )
+                .WidgetIndex_Lambda( []()
+                                        {
+                                            return GetDefault<UMovieSceneUserThumbnailSettings>()->bDrawThumbnails;
+                                        } )
 
-                + SVerticalBox::Slot()
-                .AutoHeight()
-                .HAlign( HAlign_Center )
+                // index 0 = !bDrawThumbnails
+                + SWidgetSwitcher::Slot()
                 [
-                    top_toolbar
+                    middleHorizontal
                 ]
 
-                + SVerticalBox::Slot()
-                .FillHeight( 1 )
-                .HAlign( HAlign_Center )
-                .VAlign( VAlign_Center )
+                // index 1 = bDrawThumbnails
+                + SWidgetSwitcher::Slot()
                 [
-                    middle_toolbar
+                    middleVertical
                 ]
-                // No more needed as the creation button of camera is inside the popup
-                //+ SVerticalBox::Slot()
-                //.AutoHeight()
-                //[
-                //    SNew( STextBlock )
-                //    .Text( LOCTEXT( "CreateCameraInfo", "Don't forget to setup\nyour camera settings" ) )
-                //    .ColorAndOpacity( FLinearColor( .5f, .5f, .0f ) )
-                //    .ShadowColorAndOpacity( FLinearColor::Black )
-                //    .ShadowOffset( FVector2D( 1.f, 1.f ) )
-                //    .Visibility_Lambda( [this]()
-                //                        {
-                //                            return BoardSequenceTools::CanCreateCamera( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSectionObject()->GetInclusiveStartFrame() )
-                //                                && mOptionalWidgetsVisibility.Get() == EVisibility::Visible
-                //                                ? EVisibility::Visible : EVisibility::Collapsed;
-                //                        } )
-                //]
             ]
             + SHorizontalBox::Slot()
             [
@@ -783,6 +808,12 @@ SCinematicBoardSectionThumbnails::CreatePopupEntryNewSectionWithDurationText( FT
         ];
 }
 
+namespace ThumbnailsRowConstants
+{
+    const float FilmBorderHeight = 7.f;
+    const FVector2d FilmBorderPadding( 1.f, 4.f );
+}
+
 FVector2D
 SCinematicBoardSectionThumbnails::ComputeDesiredSize( float ) const //override
 {
@@ -790,7 +821,8 @@ SCinematicBoardSectionThumbnails::ComputeDesiredSize( float ) const //override
 
     auto* Settings = GetDefault<UMovieSceneUserThumbnailSettings>();
     size.Y = Settings->bDrawThumbnails ? Settings->ThumbnailSize.Y : SequencerSectionConstants::DefaultSectionHeight;
-    size.Y = size.Y + 2 * SequencerSectionConstants::DefaultSectionHeight /* top/bottom film-border */;
+    // Remove extra "padding" to have the smaller height possible when just containing buttons
+    //size.Y = size.Y + 2 * SequencerSectionConstants::DefaultSectionHeight /* top/bottom film-border */;
 
     return size;
 }
@@ -884,14 +916,18 @@ SCinematicBoardSectionThumbnails::OnPaint( const FPaintArgs& Args, const FGeomet
     FSlateDrawElement::MakeBox(
         painter.DrawElements,
         painter.LayerId++,
-        painter.SectionGeometry.ToPaintGeometry( FVector2D( localSectionSize.X - 2.f, 7.f ), FSlateLayoutTransform( FVector2D( 1.f, 4.f ) ) ),
+        painter.SectionGeometry.ToPaintGeometry(
+            FVector2D( localSectionSize.X - 2 * ThumbnailsRowConstants::FilmBorderPadding.X, ThumbnailsRowConstants::FilmBorderHeight ),
+            FSlateLayoutTransform( FVector2D( ThumbnailsRowConstants::FilmBorderPadding.X, ThumbnailsRowConstants::FilmBorderPadding.Y ) ) ),
         filmBorder
     );
 
     FSlateDrawElement::MakeBox(
         painter.DrawElements,
         painter.LayerId++,
-        painter.SectionGeometry.ToPaintGeometry( FVector2D( localSectionSize.X - 2.f, 7.f ), FSlateLayoutTransform( FVector2D( 1.f, localSectionSize.Y - 11.f ) ) ),
+        painter.SectionGeometry.ToPaintGeometry(
+            FVector2D( localSectionSize.X - 2 * ThumbnailsRowConstants::FilmBorderPadding.X, ThumbnailsRowConstants::FilmBorderHeight ),
+            FSlateLayoutTransform( FVector2D( ThumbnailsRowConstants::FilmBorderPadding.X, localSectionSize.Y - ( ThumbnailsRowConstants::FilmBorderPadding.Y + ThumbnailsRowConstants::FilmBorderHeight ) ) ) ),
         filmBorder
     );
 
