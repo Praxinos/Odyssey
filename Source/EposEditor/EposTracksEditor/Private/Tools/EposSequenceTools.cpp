@@ -698,7 +698,10 @@ ShotSequenceTools::UpdateChannel( TSharedPtr<ISequencer> iSequencer, AActor* iAc
             FTransformData newTransformData( iActor->GetActorTransform() );
 
             UMovieScene3DAttachTrack* attachTrack = sequence->GetMovieScene()->FindTrack<UMovieScene3DAttachTrack>( binding );
-            if( attachTrack && EnumHasAnyFlags( iChannelsToApply, EMovieSceneTransformChannel::Translation ) )
+            //bool hasParentActor = iActor->GetParentActor();
+            bool hasParentActor = !!iActor->GetAttachParentActor();
+            if( EnumHasAnyFlags( iChannelsToApply, EMovieSceneTransformChannel::Translation )
+                && ( attachTrack || hasParentActor ) )
             {
                 FTransform world_actor_transform = iActor->GetActorTransform();
                 FTransform relative_transform = world_actor_transform.GetRelativeTransform( iCamera->GetActorTransform() );
