@@ -249,6 +249,8 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
         .OnTreeViewScrolled(InArgs._OnTreeViewScrolled)
     );
 
+    RefreshAllExpansionStates();
+
     //Menus
     CreateContextMenu();
 }
