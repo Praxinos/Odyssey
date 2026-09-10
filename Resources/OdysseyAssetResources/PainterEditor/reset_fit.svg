@@ -1,41 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 122.9 122.9">
+<svg id="Calque_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 122.9 123.16">
+  <!-- Generator: Adobe Illustrator 30.5.1, SVG Export Plug-In . SVG Version: 2.1.4 Build 3)  -->
   <defs>
     <style>
-      .cls-1 {
+      .st0 {
         fill: #0a9;
       }
 
-      .cls-2 {
-        display: none;
-        fill: #fff;
-      }
-
-      .cls-3 {
+      .st1 {
         fill: #d0d0d0;
       }
     </style>
   </defs>
-  <!-- Generator: Adobe Illustrator 28.7.1, SVG Export Plug-In . SVG Version: 1.2.0 Build 142)  -->
-  <g>
-    <g id="Layer_1">
-      <rect class="cls-2" y=".1" width="41.6" height="18"/>
-      <rect class="cls-3" y=".1" width="37.6" height="14"/>
-      <rect class="cls-2" x="81.3" y=".1" width="41.6" height="18"/>
-      <rect class="cls-3" x="85.3" y=".1" width="37.6" height="14"/>
-      <rect class="cls-2" x="81.3" y="104.9" width="41.6" height="18"/>
-      <rect class="cls-3" x="85.3" y="108.9" width="37.6" height="14"/>
-      <rect class="cls-2" y="104.9" width="41.6" height="18"/>
-      <rect class="cls-3" y="108.9" width="37.6" height="14"/>
-      <rect class="cls-2" y="81.3" width="18" height="41.6"/>
-      <rect class="cls-3" x=".1" y="85.3" width="14" height="37.6"/>
-      <rect class="cls-2" width="18" height="41.6"/>
-      <rect class="cls-3" x=".1" y=".1" width="14" height="37.6"/>
-      <rect class="cls-2" x="104.9" width="18" height="41.6"/>
-      <rect class="cls-3" x="108.9" width="14" height="37.6"/>
-      <rect class="cls-2" x="104.9" y="81.3" width="18" height="41.6"/>
-      <rect class="cls-3" x="108.9" y="85.3" width="14" height="37.6"/>
-      <circle class="cls-1" cx="61.5" cy="61.5" r="15"/>
-    </g>
+  <g id="Layer_1">
+    <rect class="st1" width="111.56" height="11.34"/>
+    <rect class="st1" y="11.34" width="11.34" height="111.56"/>
+    <rect class="st1" x="111.56" width="11.34" height="111.82"/>
+    <rect class="st1" x="11.34" y="111.82" width="111.56" height="11.34"/>
   </g>
+  <rect class="st0" x="90.06" y="19.03" width="14" height="30.7"/>
+  <rect class="st0" x="81.71" y="10.68" width="14" height="30.7" transform="translate(62.68 114.75) rotate(-90)"/>
+  <rect class="st0" x="19.23" y="73.37" width="14" height="30.7" transform="translate(52.45 177.43) rotate(-180)"/>
+  <rect class="st0" x="27.57" y="81.71" width="14" height="30.7" transform="translate(131.64 62.49) rotate(90)"/>
 </svg>
