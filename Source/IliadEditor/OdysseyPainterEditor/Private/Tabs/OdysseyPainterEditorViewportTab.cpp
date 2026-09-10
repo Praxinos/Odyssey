@@ -77,9 +77,9 @@ FOdysseyPainterEditorViewportTab::CreateWidget()
 
     //TODO: store it somewhere ? here ? toolkit ?
     // But must be filled as lambda, as animation is not valid when the widget is created
-    UOdysseyAnimationNamingTokensContext* AnimationNamingTokenContext = NewObject<UOdysseyAnimationNamingTokensContext>();
-    UOdysseyAnimationPlayerNamingTokensContext* AnimationPlayerNamingTokenContext = NewObject<UOdysseyAnimationPlayerNamingTokensContext>();
-    UOdysseyViewportNamingTokensContext* ViewportNamingTokenContext = NewObject<UOdysseyViewportNamingTokensContext>();
+    TStrongObjectPtr<UOdysseyAnimationNamingTokensContext> AnimationNamingTokenContext(NewObject<UOdysseyAnimationNamingTokensContext>());
+    TStrongObjectPtr<UOdysseyAnimationPlayerNamingTokensContext> AnimationPlayerNamingTokenContext(NewObject<UOdysseyAnimationPlayerNamingTokensContext>());
+    TStrongObjectPtr<UOdysseyViewportNamingTokensContext> ViewportNamingTokenContext(NewObject<UOdysseyViewportNamingTokensContext>());
 
     SAssignNew( mViewport, SOdysseyViewport )
         .Texture( this, &FOdysseyPainterEditorViewportTab::Texture )
@@ -101,13 +101,13 @@ FOdysseyPainterEditorViewportTab::CreateWidget()
                                           TArray<UObject*> contexts;
 
                                           AnimationNamingTokenContext->Animation = mEditor->GetAnimation();
-                                          contexts.Add( AnimationNamingTokenContext );
+                                          contexts.Add( AnimationNamingTokenContext.Get() );
 
                                           AnimationPlayerNamingTokenContext->AnimationPlayer = mEditor->GetAnimationPlayer();
-                                          contexts.Add( AnimationPlayerNamingTokenContext );
+                                          contexts.Add( AnimationPlayerNamingTokenContext.Get() );
 
                                           ViewportNamingTokenContext->ViewportWidget = mViewport;
-                                          contexts.Add( ViewportNamingTokenContext );
+                                          contexts.Add( ViewportNamingTokenContext.Get() );
 
                                           return contexts;
                                       } )
