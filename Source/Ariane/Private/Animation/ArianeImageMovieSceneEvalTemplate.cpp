@@ -55,8 +55,14 @@ FMovieSceneAnimTypeID GetArianeImageAnimTypeID()
     return TypeID;
 }
 
-FArianeImageExecutionToken::FArianeImageExecutionToken( const FArianeImageKeyData& InKeyData, const FMovieSceneEvaluationOperand& InOperand )
-    : KeyData(InKeyData), StoredOperand( InOperand )
+FArianeImageExecutionToken::FArianeImageExecutionToken( const FArianeImageKeyData* InKeyData
+                                                      , const FArianeImageKeyData* InNextKeyData
+                                                      , float InT
+                                                      , const FMovieSceneEvaluationOperand& InOperand )
+    : KeyData(InKeyData)
+    , NextKeyData(InNextKeyData)
+    , T ( InT )
+    , StoredOperand( InOperand )
 {
 }
 
@@ -79,16 +85,14 @@ void FArianeImageExecutionToken::Execute( const FMovieSceneContext& Context
                                    , GetArianeImageAnimTypeID()
                                    , FArianeImagePreAnimatedTokenProducer () );
 
-        UE_LOG( LogTemp, Warning, TEXT("PlaybackStatus:%d"), PlaybackStatus );
-
         if ( DrawingLayer )
         {
             bool bInteractive =( ( PlaybackStatus == EMovieScenePlayerStatus::Type::Scrubbing )
                               || ( PlaybackStatus == EMovieScenePlayerStatus::Type::Playing   ) ) ? true : false;
 
-        UE_LOG( LogTemp, Warning, TEXT("bInteractive:%d"), bInteractive );
+            DrawingLayer->SetImage( KeyData->Image, bInteractive ? false : true );
 
-            DrawingLayer->SetImage( KeyData.Image, bInteractive ? false : true );
+            DrawingLayer->GetImage()->Animate( KeyData, NextKeyData, T );
 
             DrawingLayer->GetImage()->GetRootGroup()->UpdateTransform();
             DrawingLayer->Update( bInteractive );
@@ -100,8 +104,9 @@ FArianeImageMovieSceneEvalTemplate::FArianeImageMovieSceneEvalTemplate()
 {
 }
 
-FArianeImageMovieSceneEvalTemplate::FArianeImageMovieSceneEvalTemplate( const UArianeImageMovieSceneSection& Section )
+FArianeImageMovieSceneEvalTemplate::FArianeImageMovieSceneEvalTemplate( const UArianeImageMovieSceneSection* InSection )
     : FMovieSceneEvalTemplate()
+    , Section( InSection )
 {
 }
 
@@ -120,15 +125,50 @@ FArianeImageMovieSceneEvalTemplate::Evaluate( const FMovieSceneEvaluationOperand
     const UArianeImageMovieSceneSection* ArianeSection = Cast<UArianeImageMovieSceneSection>(GetSourceSection());
     if (!ArianeSection) return;
 
-    FArianeImageKeyData ActiveKeyData;
+    // 1. Obtenir le temps actuel du Sequencer
+    const FFrameTime CurrentTime = Context.GetTime();
 
-    // =========================================================================
-    // LE MAILLON MANQUANT : On force l'appel au Evaluate du Canal !
-    // C'est cette ligne qui va enfin allumer votre breakpoint dans le Channel.
-    // =========================================================================
-    if (ArianeSection->ImageChannel.Evaluate(Context.GetTime(), ActiveKeyData))
+    // 2. Récupérer l'accès aux données de votre canal
+    // Note : On assume ici que vous avez stocké votre canal 'MyChannel' dans le template lors de sa compilation
+    TMovieSceneChannelData<const FArianeImageKeyData> ChannelData = Section->ImageChannel.GetData();
+
+    // Le tableau des temps géré par votre canal
+    TArrayView<const FFrameNumber> Times = ChannelData.GetTimes();
+    // Le tableau de vos structures de données
+    TArrayView<const FArianeImageKeyData> Values = ChannelData.GetValues();
+
+    const FArianeImageKeyData* KeyDataA = nullptr;
+    const FArianeImageKeyData* KeyDataB = nullptr;
+    float Alpha = 0.0f;
+
+    if (Times.Num() > 0)
+    {
+        // 3. Recherche binaire sur le tableau natif des FFrameNumber
+        int32 Index = Algo::LowerBound(Times, CurrentTime.GetFrame()) - 1;
+        Index = FMath::Clamp(Index, 0, Times.Num() - 1);
+
+        // Clé Actuelle (Borne inférieure)
+        KeyDataA = &Values[Index];
+
+        // 4. Clé Suivante (Borne supérieure) s'il y en a une, pour calculer le Lerp
+        if (Index + 1 < Times.Num())
+        {
+            KeyDataB = &Values[Index + 1];
+
+            // 5. Calcul de l'Alpha d'interpolation entre les deux frames
+            float FrameA = Times[Index].Value;
+            float FrameB = Times[Index + 1].Value;
+
+            if (FrameB > FrameA)
+            {
+                Alpha = (CurrentTime.AsDecimal() - FrameA) / (FrameB - FrameA);
+            }
+        }
+    }
+
+    if ( KeyDataA )
     {
         // On encapsule la structure trouvée dans le jeton d'exécution et on l'envoie au moteur
-        ExecutionTokens.Add( FArianeImageExecutionToken( ActiveKeyData, Operand ) );
+        ExecutionTokens.Add( FArianeImageExecutionToken( KeyDataA, KeyDataB, Alpha, Operand ) );
     }
 };

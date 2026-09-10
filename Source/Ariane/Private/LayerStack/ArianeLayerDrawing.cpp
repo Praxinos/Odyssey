@@ -37,26 +37,6 @@ FArianeGeometryProxy::FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLeve
 
     DrawingLayer->GetImage()->GetUsedMaterials( MaterialInterfaces );
 
-    FArianeObject::Traverse( DrawingLayer->GetImage()->GetRootGroup()
-                           , []( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
-        {
-            if( Object->HasBaseClass( FArianePath::StaticClass() ) )
-            {
-                FArianePath* Path = static_cast<FArianePath*>( Object );
-
-                Path->GetGeometry3D().InitVertexFactory();
-            }
-
-            if( Object->HasBaseClass( FArianeCycle::StaticClass() ) )
-            {
-                FArianeCycle* Cycle = static_cast<FArianeCycle*>( Object );
-
-                Cycle->GetGeometry3D().InitVertexFactory();
-            }
-
-            return FArianeObject::ETraversalReturnValue::Continue;
-        } );
-
     // MaterialRelevance is used by GetViewRelevance and is necessary to render all kinds of materials
     for( UMaterialInterface* MaterialInterface : MaterialInterfaces )
     {
@@ -180,6 +160,16 @@ FArianeGeometryProxy::GetImageDynamicMeshElements( FMeshElementCollector& Collec
 
         if( Geometry3D && MaterialInterface )
         {
+            FVertexFactory* VertexFactory = Geometry3D->GetVertexFactory();
+
+            // VertexFactory can be null at start because our meshes are create before the world exists
+            // and the World is needed to get the Feature Level. So, if the vertex factory is null, we try to
+            // init it again
+            if( VertexFactory == nullptr )
+            {
+                Geometry3D->InitVertexFactory();
+            }
+
             if( MaterialInterface->GetRenderProxy()
              && Object->IsVisible( true )
              //&& Path->GetSegments().Num()
@@ -190,10 +180,11 @@ FArianeGeometryProxy::GetImageDynamicMeshElements( FMeshElementCollector& Collec
                 FMeshBatch& MeshBatch = Collector.AllocateMesh();
                 FMeshBatchElement& BatchElement = MeshBatch.Elements[0];
 
+
                 BatchElement.IndexBuffer = &Geometry3D->GetIndexBuffer();
 
                 //Mesh.bWireframe = bWireframe;
-                MeshBatch.VertexFactory = Geometry3D->GetVertexFactory();
+                MeshBatch.VertexFactory = VertexFactory;
                 MeshBatch.MaterialRenderProxy = MaterialInterface->GetRenderProxy();;
 
                 //The LocalVertexFactory uses a uniform buffer to pass primitve data like the local to world transform for this frame and for the previous one
@@ -431,11 +422,6 @@ void
 UArianeLayerDrawing::OnRegister()
 {
     Super::OnRegister();
-
-    if( IsRegistered() == false )
-    {
-        RegisterComponent();
-    }
 
     WorldTransformVersion++;
 }

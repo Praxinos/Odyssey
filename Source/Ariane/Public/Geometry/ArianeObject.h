@@ -19,6 +19,7 @@ struct FArianeGroup;
 struct FArianeTag;
 class UArianeLayerDrawing;
 class UArianeImage;
+struct FArianeKeyedObject;
 
 struct ARIANE_API FArianeObjectInvalidationFlags
 {
@@ -308,6 +309,7 @@ public:
 
     void ResetTransform();
     FArianeObject* GetNextChild( FArianeObject* Child );
+    virtual void Animate( const FArianeKeyedObject* KeyedObject, const FArianeKeyedObject* NextKeyedObject, float T );
 
 protected:
     /**
