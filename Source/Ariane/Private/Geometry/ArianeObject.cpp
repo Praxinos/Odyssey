@@ -9,6 +9,7 @@
 #include "ArianeImage.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerStack.h"
+#include "ArianeKeyedObject.h"
 // Unreal headers
 #include "StructUtils/InstancedStruct.h"
 
@@ -144,6 +145,12 @@ FArianeObject*
 FArianeObjectGeometry3D::GetObject()
 {
      return Object;
+}
+
+void
+FArianeObject::Animate( const FArianeKeyedObject* KeyedObject, const FArianeKeyedObject* NextKeyedObject, float T )
+{
+
 }
 
 FLocalVertexFactory*

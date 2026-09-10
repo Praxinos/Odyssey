@@ -285,6 +285,7 @@ public:
                      , TArray<FArianeVertex*>* OutRemovedVertices
                      , TArray<FArianeSegment*>* OutRemovedSegments
                      , TArray<FArianeSegment*>* OutAddedSegments );
+    virtual void Animate( const FArianeKeyedObject* KeyedObject, const FArianeKeyedObject* NextKeyedObject, float T ) override;
 
 protected:
     void FindChains();

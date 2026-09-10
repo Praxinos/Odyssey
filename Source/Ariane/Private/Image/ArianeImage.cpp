@@ -14,6 +14,7 @@
 #include "ArianeLine.h"
 #include "ArianePolygon.h"
 #include "ArianeVertex.h"
+#include "ArianeImageKeyData.h"
 
 UArianeImage::~UArianeImage()
 {
@@ -55,6 +56,12 @@ TWeakObjectPtr<UArianeLayerDrawing>
 UArianeImage::GetDrawingLayer()
 {
     return DrawingLayer;
+}
+
+// called when the world starts to exist (the drawing layer is registered). This is required by InitVertexFactory().
+void
+UArianeImage::OnRegisterLayer()
+{
 }
 
 void
@@ -179,6 +186,27 @@ UArianeImage::GetObject( const FGuid& InGuid )
     }
 
     return nullptr;
+}
+
+void
+UArianeImage::Animate( const FArianeImageKeyData* KeyData, const FArianeImageKeyData* NextKeyData, float T )
+{
+    FArianeObject::Traverse( GetRootGroup()
+                           , [ KeyData
+                             , NextKeyData
+                             , T ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+        {
+            const FArianeKeyedObject* KeyedObject = const_cast<FArianeImageKeyData*>(KeyData)->GetKeyedObject( Object->GetGuid() );
+            const FArianeKeyedObject* NextKeyedObject = NextKeyData ? const_cast<FArianeImageKeyData*>(NextKeyData)->GetKeyedObject( Object->GetGuid() )
+                                                                    : KeyedObject;
+
+            if( KeyedObject )
+            {
+                Object->Animate( KeyedObject, NextKeyedObject, T );
+            }
+
+            return FArianeObject::ETraversalReturnValue::Continue;
+        } );
 }
 
 FArianeObject*
