@@ -32,8 +32,6 @@ UArianeLayerDrawing*
 UArianeImageMovieSceneTrack::GetDrawingLayer( ISequencer& InSequencer )
 {
     FGuid ObjectGuid = FindObjectBindingGuid();
-
-    // On demande à l'éditeur Sequencer de résoudre l'adresse dans la timeline actuelle
     FMovieSceneSequenceID SequenceID = InSequencer.GetFocusedTemplateID();
     TArrayView<TWeakObjectPtr<>> BoundObjects = InSequencer.FindBoundObjects(ObjectGuid, SequenceID);
 
@@ -48,5 +46,5 @@ UArianeImageMovieSceneTrack::GetDrawingLayer( ISequencer& InSequencer )
 FMovieSceneEvalTemplatePtr
 UArianeImageMovieSceneTrack::CreateTemplateForSection(const UMovieSceneSection& InSection) const
 {
-    return FArianeImageMovieSceneEvalTemplate(*CastChecked<UArianeImageMovieSceneSection>(&InSection));
+    return FArianeImageMovieSceneEvalTemplate(CastChecked<UArianeImageMovieSceneSection>(&InSection));
 }

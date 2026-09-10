@@ -573,6 +573,8 @@ FArianeCycleGeometry3D::Build()
                             , Cycle->GetColor() );
     }
 
+    InitVertexFactory();
+
     // DrawingLayer can be null in animation keys
     if( Cycle->GetImage()->GetDrawingLayer().IsValid() )
     {

@@ -7,6 +7,7 @@
 #include "ArianeSegment.h"
 #include "ArianeSegmentCubic.h"
 #include "ArianeImage.h"
+#include "ArianeKeyedPath.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
@@ -920,6 +921,66 @@ FArianePath::InvalidateAllVertices()
     Invalidate( FArianePathInvalidationFlags().SetVertexAltered() );
 }
 
+void
+FArianePath::Animate( const FArianeKeyedObject* KeyedObject, const FArianeKeyedObject* NextKeyedObject, float T )
+{
+    const FArianeKeyedPath* KeyedPath = static_cast<const FArianeKeyedPath*>(KeyedObject);
+    const FArianeKeyedPath* NextKeyedPath = static_cast<const FArianeKeyedPath*>(NextKeyedObject);
+
+    Super::Animate( KeyedObject, NextKeyedObject, T );
+
+    if( NextKeyedPath && ( T > 0.0f ) )
+    {
+        FColor KeyedColor = KeyedPath->GetKeyedColor();
+        FColor NextKeyedColor = NextKeyedPath->GetKeyedColor();
+        FColor AnimColor = FColor( KeyedColor.R + ( NextKeyedColor.R - KeyedColor.R ) * T
+                                 , KeyedColor.G + ( NextKeyedColor.G - KeyedColor.G ) * T
+                                 , KeyedColor.B + ( NextKeyedColor.B - KeyedColor.B ) * T
+                                 , KeyedColor.A + ( NextKeyedColor.A - KeyedColor.A ) * T );
+
+        SetColor( AnimColor );
+
+        for( FArianeVertexID& VertexID : Vertices )
+        {
+            FArianeVertex* Vertex = VertexID.GetVertex();
+            const FArianeKeyedVertex* KeyedVertex = const_cast<FArianeKeyedPath*>(KeyedPath)->GetKeyedVertex( Vertex->GetGuid() );
+            const FArianeKeyedVertex* NextKeyedVertex = const_cast<FArianeKeyedPath*>(NextKeyedPath)->GetKeyedVertex( Vertex->GetGuid() );
+
+            if( KeyedVertex && NextKeyedVertex )
+            {
+                FVector DeltaPosition = NextKeyedVertex->GetPosition() - KeyedVertex->GetPosition();
+                double DeltaRadius = NextKeyedVertex->GetRadius() - KeyedVertex->GetRadius();
+
+                Vertex->SetPosition( KeyedVertex->GetPosition() + ( DeltaPosition * T ) );
+                Vertex->SetRadius( KeyedVertex->GetRadius() + ( DeltaRadius * T ) );
+            }
+        }
+
+        for( FArianeSegmentID& SegmentID : Segments )
+        {
+            FArianeSegment* Segment = SegmentID.GetSegment();
+            const FArianeKeyedSegment* KeyedSegment = const_cast<FArianeKeyedPath*>(KeyedPath)->GetKeyedSegment( Segment->GetGuid() );
+            const FArianeKeyedSegment* NextKeyedSegment = const_cast<FArianeKeyedPath*>(NextKeyedPath)->GetKeyedSegment( Segment->GetGuid() );
+
+            if( KeyedSegment && NextKeyedSegment )
+            {
+                if( Segment->GetClass() == FArianeSegmentCubic::StaticClass() )
+                {
+                    const FArianeKeyedSegmentCubic* KeyedCubicSegment = static_cast<const FArianeKeyedSegmentCubic*>(KeyedSegment);
+                    const FArianeKeyedSegmentCubic* NextKeyedCubicSegment = static_cast<const FArianeKeyedSegmentCubic*>(NextKeyedSegment);
+
+                    FArianeSegmentCubic* CubicSegment = static_cast<FArianeSegmentCubic*>(Segment);
+                    FVector Handle0DeltaPosition = NextKeyedCubicSegment->GetHandlePosition(0) - KeyedCubicSegment->GetHandlePosition(0);
+                    FVector Handle1DeltaPosition = NextKeyedCubicSegment->GetHandlePosition(1) - KeyedCubicSegment->GetHandlePosition(1);
+
+                    CubicSegment->GetHandle((uint32)0)->SetPosition( KeyedCubicSegment->GetHandlePosition(0) + ( Handle0DeltaPosition * T ) );
+                    CubicSegment->GetHandle((uint32)1)->SetPosition( KeyedCubicSegment->GetHandlePosition(1) + ( Handle1DeltaPosition * T ) );
+                }
+            }
+        }
+    }
+}
+
 FArianePathGeometry3D&
 FArianePath::GetGeometry3D()
 {
@@ -1646,6 +1707,8 @@ FArianePathGeometry3D::Build()
             TotalIndexCount += SegmentIndices.Num();
         }
     }
+
+    InitVertexFactory();
 
     // DrawingLayer can be null in animation keys
     if( Path->GetImage()->GetDrawingLayer().IsValid() )

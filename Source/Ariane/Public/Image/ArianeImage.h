@@ -24,7 +24,7 @@ struct FArianeRectangle;
 struct FArianeLine;
 struct FArianePolygon;
 class UArianeLayerDrawing;
-
+struct FArianeImageKeyData;
 
 UCLASS()
 class ARIANE_API UArianeImage : public UObject
@@ -147,6 +147,8 @@ public:
 
     void SetDrawingLayer( TWeakObjectPtr<UArianeLayerDrawing> InDrawingLayer );
     TWeakObjectPtr<UArianeLayerDrawing> GetDrawingLayer();
+    void OnRegisterLayer();
+    void Animate( const FArianeImageKeyData* KeyData, const FArianeImageKeyData* NextKeyData, float T );
 
 protected:
     void BindDelegates();

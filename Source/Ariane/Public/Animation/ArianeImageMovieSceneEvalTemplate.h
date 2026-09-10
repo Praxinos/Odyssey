@@ -12,10 +12,15 @@
 
 struct FArianeImageExecutionToken : IMovieSceneExecutionToken
 {
-    FArianeImageKeyData KeyData;
+    const FArianeImageKeyData* KeyData;
+    const FArianeImageKeyData* NextKeyData;
+    float T;
     FMovieSceneEvaluationOperand StoredOperand;
 
-    FArianeImageExecutionToken(const FArianeImageKeyData& InKeyData, const FMovieSceneEvaluationOperand& InOperand);
+    FArianeImageExecutionToken( const FArianeImageKeyData* InKeyData
+                              , const FArianeImageKeyData* InNextKeyData
+                              , float InT
+                              , const FMovieSceneEvaluationOperand& InOperand );
     virtual void Execute( const FMovieSceneContext& Context
                         , const FMovieSceneEvaluationOperand& Operand
                         , FPersistentEvaluationData& PersistentData
@@ -28,7 +33,7 @@ struct ARIANE_API FArianeImageMovieSceneEvalTemplate : public FMovieSceneEvalTem
     GENERATED_BODY()
 
     FArianeImageMovieSceneEvalTemplate();
-    FArianeImageMovieSceneEvalTemplate( const UArianeImageMovieSceneSection& Section );
+    FArianeImageMovieSceneEvalTemplate( const UArianeImageMovieSceneSection* InSection );
 
     virtual UScriptStruct& GetScriptStructImpl() const override;
 
@@ -38,4 +43,7 @@ struct ARIANE_API FArianeImageMovieSceneEvalTemplate : public FMovieSceneEvalTem
                          , const FPersistentEvaluationData& PersistentData
                          , FMovieSceneExecutionTokens& ExecutionTokens ) const override;
 
+protected:
+    UPROPERTY()
+    const UArianeImageMovieSceneSection* Section;
 };
