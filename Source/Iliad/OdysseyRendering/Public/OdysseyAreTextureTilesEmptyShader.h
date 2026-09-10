@@ -10,10 +10,12 @@ class FRHIGPUBufferReadback;
 
 namespace Odyssey::Shaders {
 
-    ODYSSEYRENDERING_API void AddIsTextureEmptyPass(
+    ODYSSEYRENDERING_API void AddAreTextureTilesEmptyPass(
         FRDGBuilder& GraphBuilder,
         ERHIFeatureLevel::Type InFeatureLevel,
         FRDGTextureRef InTexture,
+        const TArray<FIntPoint>& InTilePositions,
+        uint32 InTileSize,
         TSharedPtr<FRHIGPUBufferReadback> InReadBack
     );
 
