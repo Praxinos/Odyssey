@@ -178,6 +178,13 @@ FMouseCursor::InitializeCustomCursorMap()
     AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::Circle, "circle.cursor" );
     AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::CircleClockwise, "circle-clockwise.cursor" );
     AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::CircleAntiClockwise, "circle-anticlockwise.cursor" );
+    AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::Lock, "lock.cursor" );
+    AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::Scissor, "scissor.cursor" );
+    AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::HandWithLeftRightArrow, "hand-left-right-arrow.cursor" );
+    AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::ArrowNS, "arrow-N-S.cursor" );
+    AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::ArrowEW, "arrow-E-W.cursor" );
+    AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::ArrowSE_NW, "arrow-SE-NW.cursor" );
+    AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::ArrowSW_NE, "arrow-SW-NE.cursor" );
     // Make corresponding the cursor id to the cursor file (like for svg in styling)
     // cursor file DON'T have extension ! (because different files are used for each OS)
 }

@@ -18,6 +18,13 @@ enum class EMouseCursorCustom: uint8
     Circle,
     CircleClockwise,
     CircleAntiClockwise,
+    Lock,
+    Scissor,
+    HandWithLeftRightArrow,
+    ArrowNS,
+    ArrowEW,
+    ArrowSE_NW,
+    ArrowSW_NE,
 
     // When adding new entry, don't forget to add the corresponding cursor file in FMouseCursor::InitializeCustomCursorMap()
 };
