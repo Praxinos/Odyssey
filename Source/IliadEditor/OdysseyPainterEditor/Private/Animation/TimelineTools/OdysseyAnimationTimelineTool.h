@@ -7,6 +7,8 @@
 #include "Layout/Geometry.h"
 #include "Input/Events.h"
 #include "Input/Reply.h"
+
+#include "OdysseyMouseCursor.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
 
 class FOdysseyAnimationTimelineTool
@@ -46,6 +48,8 @@ public:
 
     virtual FReply OnKeyDown(const FKeyEvent& iKeyEvent);
     virtual FReply OnKeyUp(const FKeyEvent& iKeyEvent);
+
+    virtual FMouseCursor GetMouseCursor() const;
 
 public:
     float MousePositionToFrame(float iX) const;

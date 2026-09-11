@@ -110,4 +110,10 @@ FOdysseyAnimationTimelineMoveTool::OnMouseButtonUp(const FMouseEventParams& iPar
     return FReply::Unhandled();
 }
 
+FMouseCursor
+FOdysseyAnimationTimelineMoveTool::GetMouseCursor() const //override
+{
+    return EMouseCursorCustom::HandWithLeftRightArrow;
+}
+
 #undef LOCTEXT_NAMESPACE

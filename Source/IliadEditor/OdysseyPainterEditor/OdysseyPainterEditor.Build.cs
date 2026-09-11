@@ -66,7 +66,6 @@ public class OdysseyPainterEditor : ModuleRules
                 "Paper2D",
                 "Paper2DEditor",
                 "PropertyEditor",
-                "Projects",
                 "RHI",
                 "RenderCore",
                 "Renderer",

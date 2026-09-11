@@ -69,4 +69,10 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
     return FReply::Handled();
 }
 
+FMouseCursor
+FOdysseyAnimationTimelineCutTool::GetMouseCursor() const //override
+{
+    return EMouseCursorCustom::Scissor;
+}
+
 #undef LOCTEXT_NAMESPACE

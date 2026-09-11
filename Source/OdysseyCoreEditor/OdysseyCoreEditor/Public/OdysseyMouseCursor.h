@@ -18,28 +18,22 @@ enum class EMouseCursorCustom: uint8
     Circle,
     CircleClockwise,
     CircleAntiClockwise,
+    Lock,
+    Scissor,
+    HandWithLeftRightArrow,
+    ArrowNS,
+    ArrowEW,
+    ArrowSE_NW,
+    ArrowSW_NE,
 
     // When adding new entry, don't forget to add the corresponding cursor file in FMouseCursor::InitializeCustomCursorMap()
 };
 
-class FMouseCursor
+class ODYSSEYCOREEDITOR_API FMouseCursor
 {
-private:
-    // Hide this constructor to dev, only constructor with initializer must be used
-    // BUT we need to allow UCLASS() class where FMouseCursor needs to be used as class member
-    // (at this time only UOdysseyPainterEditorTool use FMouseCursor)
-    // So make that UCLASS a friend
-    //
-    // If one day FMouseCursor needs to be used in a more general way/context (and maybe moved in OdysseyCore)
-    // this must be re-think ...
-    //
-    // but unfortunately, in any case, the only other way to hide this constructor in "client" UCLASS(),
-    // without making all the client UCLASS a friend,
-    // would be to use an indirection (like TOptional<FMouseCursor>, ...)
-    FMouseCursor() = default;
-    friend class UOdysseyPainterEditorTool;
-
 public:
+    // Avoid using it, prefer to use the one with parameter !
+    FMouseCursor();
     FMouseCursor( EMouseCursor::Type iMouseCursor );
     FMouseCursor( EMouseCursorCustom iMouseCursor );
 

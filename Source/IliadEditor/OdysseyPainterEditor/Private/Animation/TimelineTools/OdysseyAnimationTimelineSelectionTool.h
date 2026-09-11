@@ -25,6 +25,8 @@ public:
 
     virtual FReply OnKeyDown(const FKeyEvent& iKeyEvent) override;
 
+    virtual FMouseCursor GetMouseCursor() const override;
+
 private:
     FReply OnDefaultSelectionMouseButtonDown(const FMouseEventParams& iParams);
     FReply OnDefaultSelectionMouseButtonUp(const FMouseEventParams& iParams);

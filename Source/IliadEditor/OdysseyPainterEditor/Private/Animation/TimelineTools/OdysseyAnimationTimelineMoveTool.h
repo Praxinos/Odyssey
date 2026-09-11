@@ -21,6 +21,8 @@ public:
     virtual FReply OnMouseMove(const FMouseEventParams& iParams) override;
     virtual FReply OnDragDetected(const FMouseEventParams& iParams) override;
 
+    virtual FMouseCursor GetMouseCursor() const override;
+
 private:
     bool mOffsettingLayer;
     struct

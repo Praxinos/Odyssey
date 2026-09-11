@@ -1,7 +1,7 @@
 // IDDN.FR.001.060015.015.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-#include "Tools/OdysseyPainterEditorToolMouseCursor.h"
+#include "OdysseyMouseCursor.h"
 
 #include "Framework/Application/SlateApplication.h"
 #include "HAL/FileManager.h"
@@ -13,6 +13,12 @@
 //---
 
 /*static*/ TMap<EMouseCursorCustom, void*> FMouseCursor::smMouseCursorCustomMap;
+
+FMouseCursor::FMouseCursor()
+    : mMouseCursorNative( EMouseCursor::Default )
+    , mMouseCursorCustom()
+{
+}
 
 FMouseCursor::FMouseCursor( EMouseCursor::Type iMouseCursor )
     : mMouseCursorNative( iMouseCursor )
@@ -156,7 +162,7 @@ FMouseCursor::InitializeCustomCursorMap()
 
             //---
 
-            FString cursorPath = IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) / TEXT( "PainterEditor" ) / TEXT( "ToolsCursor" );
+            FString cursorPath = IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) / TEXT( "Cursor" );
 
             FString cursorFilenameWithoutExtension = FindFilename( cursorPath, iCursorName );
             FVector2D hotspot = GetHotSpot( cursorFilenameWithoutExtension );
@@ -172,6 +178,13 @@ FMouseCursor::InitializeCustomCursorMap()
     AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::Circle, "circle.cursor" );
     AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::CircleClockwise, "circle-clockwise.cursor" );
     AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::CircleAntiClockwise, "circle-anticlockwise.cursor" );
+    AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::Lock, "lock.cursor" );
+    AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::Scissor, "scissor.cursor" );
+    AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::HandWithLeftRightArrow, "hand-left-right-arrow.cursor" );
+    AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::ArrowNS, "arrow-N-S.cursor" );
+    AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::ArrowEW, "arrow-E-W.cursor" );
+    AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::ArrowSE_NW, "arrow-SE-NW.cursor" );
+    AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::ArrowSW_NE, "arrow-SW-NE.cursor" );
     // Make corresponding the cursor id to the cursor file (like for svg in styling)
     // cursor file DON'T have extension ! (because different files are used for each OS)
 }

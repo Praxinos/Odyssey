@@ -9,8 +9,8 @@
 
 #include "Input/OdysseyPoint.h"
 #include "OdysseyHUDElement.h"
+#include "OdysseyMouseCursor.h"
 #include "OdysseyPainterEditor.h"
-#include "OdysseyPainterEditorToolMouseCursor.h"
 #include "OdysseyStyle.h"
 
 #include "OdysseyPainterEditorTool.generated.h"

@@ -109,6 +109,12 @@ FOdysseyAnimationTimelineSelectionTool::OnKeyDown(const FKeyEvent& iKeyEvent)
     return FReply::Unhandled();
 }
 
+FMouseCursor
+FOdysseyAnimationTimelineSelectionTool::GetMouseCursor() const //override
+{
+    return EMouseCursor::Default;
+}
+
 //--------------------
 // Default
 //--------------------

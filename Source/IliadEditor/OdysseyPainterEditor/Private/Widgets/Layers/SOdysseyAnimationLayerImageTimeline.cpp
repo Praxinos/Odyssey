@@ -452,6 +452,28 @@ SOdysseyAnimationLayerImageTimeline::OnKeyUp( const FGeometry& iGeometry, const 
     return mTool->OnKeyUp(iKeyEvent);
 }
 
+FCursorReply
+SOdysseyAnimationLayerImageTimeline::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
+{
+    static EOdysseyTimelineTool mode = EOdysseyTimelineTool::None;
+    static FMouseCursor mouseCursor( EMouseCursor::Default );
+    if( mode != FOdysseyAnimationTimelineTools::Get().GetCurrentTool() )
+    {
+        mode = FOdysseyAnimationTimelineTools::Get().GetCurrentTool();
+        mouseCursor = EMouseCursor::Default;
+
+        TSharedPtr<FOdysseyAnimationTimelineTool> tool = FOdysseyAnimationTimelineTools::Get().CreateTool( mTimelinePosition.ToSharedRef(), mLayer->GetLayerStack()->GetCellSelection() );
+        if( tool )
+            mouseCursor = tool->GetMouseCursor();
+    }
+
+    //---
+
+    mouseCursor.UpdateCursor();
+
+    return FCursorReply::Cursor( mouseCursor.GetMouseCursorNative() );
+}
+
 int32
 SOdysseyAnimationLayerImageTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
