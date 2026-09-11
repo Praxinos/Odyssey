@@ -14,6 +14,12 @@
 
 /*static*/ TMap<EMouseCursorCustom, void*> FMouseCursor::smMouseCursorCustomMap;
 
+FMouseCursor::FMouseCursor()
+    : mMouseCursorNative( EMouseCursor::Default )
+    , mMouseCursorCustom()
+{
+}
+
 FMouseCursor::FMouseCursor( EMouseCursor::Type iMouseCursor )
     : mMouseCursorNative( iMouseCursor )
     , mMouseCursorCustom()
