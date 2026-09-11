@@ -46,7 +46,9 @@ FArianeEditorImageMovieSceneTrack::AddTrack(TArray<FGuid> ObjectBindings)
     TSharedPtr<ISequencer> Sequencer = GetSequencer();
     UMovieScene* MovieScene = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene();
 
-    FScopedTransaction AddTrackTransaction(NSLOCTEXT("Ariane", "ariane-editor-add-image-track", "Add Ariane Image Track"));
+    FScopedTransaction AddTrackTransaction(NSLOCTEXT( "Ariane"
+                                                    , "ariane-editor-add-image-track"
+                                                    , "Add Ariane Image Track"));
 
     for ( const FGuid& Binding : ObjectBindings )
     {
@@ -54,12 +56,14 @@ FArianeEditorImageMovieSceneTrack::AddTrack(TArray<FGuid> ObjectBindings)
         {
             MovieScene->Modify();
 
-            UMovieSceneTrack* NewTrack = MovieScene->AddTrack(UArianeImageMovieSceneTrack::StaticClass(), Binding);
+            UArianeImageMovieSceneTrack* NewTrack = Cast<UArianeImageMovieSceneTrack>( MovieScene->AddTrack(UArianeImageMovieSceneTrack::StaticClass(), Binding ) );
 
-            if (NewTrack)
+            if ( NewTrack )
             {
-                NewTrack->Modify();
                 UMovieSceneSection* NewSection = NewTrack->CreateNewSection();
+                static const FName ImagePropertyName("Image");
+
+                NewTrack->SetPropertyNameAndPath( ImagePropertyName, ImagePropertyName.ToString() );
 
                 if ( NewSection )
                 {
