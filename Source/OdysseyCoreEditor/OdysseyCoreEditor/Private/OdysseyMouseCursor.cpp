@@ -162,7 +162,7 @@ FMouseCursor::InitializeCustomCursorMap()
 
             //---
 
-            FString cursorPath = IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) / TEXT( "PainterEditor" ) / TEXT( "ToolsCursor" );
+            FString cursorPath = IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) / TEXT( "Cursor" );
 
             FString cursorFilenameWithoutExtension = FindFilename( cursorPath, iCursorName );
             FVector2D hotspot = GetHotSpot( cursorFilenameWithoutExtension );
