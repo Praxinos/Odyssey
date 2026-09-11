@@ -78,7 +78,7 @@ public:
     static FString GetCacheOnDiskPath();
 
 private:
-    struct FTileAtlas;
+    class FTileAtlas;
 
 public:
     //Public structs/classes
@@ -115,16 +115,27 @@ public:
 private:
     //Private structs/classes
 
-    struct FTileAtlas
+    class FTileAtlas
     {
+    public:
         FTileAtlas() = default;
-        FTileAtlas(FRHICommandList& InRHICmdList, uint32 InTileSize, EPixelFormat InTileFormat);
+        FTileAtlas(FRHICommandList& InRHICmdList, uint32 InTileSize, EPixelFormat InTileFormat, uint32 InNumTiles);
 
+    public:
+        FTextureRHIRef GetTexture() const { return Texture; };
+        uint32 GetWidthInTiles() const { return WidthInTiles; };
+        uint32 GetHeightInTiles() const { return HeightInTiles; };
+
+        FIntRect GetTileRect(uint32 InTileIndexInAtlas) const;
+        FIntPoint GetTilePosition(uint32 InTileIndexInAtlas) const;
+
+    private:
         FTextureRHIRef Texture;
-        TArray<uint32> FreeTileIndexes;
 
+        uint32 WidthInTiles;
+        uint32 HeightInTiles;
         uint32 TileSize;
-        EPixelFormat TileFormat;
+        //EPixelFormat TileFormat;
     };
 
     /**
@@ -228,17 +239,28 @@ private:
         TFuture<TSharedPtr<FTileTextureHandle>> TempTexture;
 
         EGPUReadBackState GPUReadBackState;
-        TSharedPtr<FRHIGPUTextureReadback> GPUReadBack;
 
-        struct FIsEmptyReadBack
+        struct FPartialBufferReadBack
         {
             TSharedPtr<FRHIGPUBufferReadback> ReadBack;
             uint32 ResultSize;
             uint32 ResultIndex;
         };
 
-        TUniquePtr<TPromise<FIsEmptyReadBack>> GPUIsEmptyReadBackPromise;
-        TFuture<FIsEmptyReadBack> GPUIsEmptyReadBack;
+        struct FPartialTextureReadBack
+        {
+            TSharedPtr<FRHIGPUTextureReadback> ReadBack;
+            FIntPoint PositionInPixels;
+            uint32 BytesPerPixel;
+            uint32 BytesPerTextureRow;
+            uint32 TileSize;
+        };
+
+        TUniquePtr<TPromise<FPartialBufferReadBack>> GPUIsEmptyReadBackPromise;
+        TFuture<FPartialBufferReadBack> GPUIsEmptyReadBack;
+
+        TUniquePtr<TPromise<FPartialTextureReadBack>> GPUReadBackPromise;
+        TFuture<FPartialTextureReadBack> GPUReadBack;
         TPromise<TSharedPtr<FTileData>> TileDataPromise;
         TFuture<TSharedPtr<FTileData>> TileData;
     };
@@ -284,11 +306,11 @@ public:
     FOdysseyTileId CreateTile(const FIoHash& InHash, const FCompressedBuffer& InCompressedBuffer);
 
     /**
-     * Returns a FTextureRHIRef containing the Tile's Texture
+     * Returns, for each TileId, a FTextureRHIRef containing the Tile's Texture
      * The returned FTextureRHIRef can be invalid, indicating an empty texture
      * Please check FTextureRHIRef::IsValid() before using it
      */
-    TFuture<TSharedPtr<FTileTextureHandle>> GetTileTexture(FOdysseyTileId InTileId, uint32 InTileSize, EPixelFormat InTileFormat) const;
+    TArray<TFuture<TSharedPtr<FTileTextureHandle>>> GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, uint32 InTileSize, EPixelFormat InTileFormat) const;
 
     bool GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer);
     bool GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer) const;
@@ -313,9 +335,6 @@ private:
     void CacheTileOnDisk(TSharedPtr<FTileData> InTileData);
 
     static void AddWriteTilePass(FRDGBuilder& GraphBuilder, FRDGTextureRef OutAtlasTexture, FIntPoint TilePositionInAtlas, uint32 InTileSize, FSharedBuffer InBuffer);
-
-    TSharedPtr<FTileTextureHandle> ReserveTileTexture(FRHICommandList& InRHICmdList, uint32 InTileSize, EPixelFormat InTileFormat);
-    void ReleaseTileTexture(TSharedRef<FTileAtlas> InAtlas, uint32 TileIndexInAtlas);
 
 private:
     // FTickableGameObject implementation
