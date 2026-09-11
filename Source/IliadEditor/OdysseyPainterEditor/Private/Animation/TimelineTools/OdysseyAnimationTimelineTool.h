@@ -8,8 +8,8 @@
 #include "Input/Events.h"
 #include "Input/Reply.h"
 
+#include "OdysseyMouseCursor.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
-#include "OdysseyPainterEditorToolMouseCursor.h"
 
 class FOdysseyAnimationTimelineTool
 {

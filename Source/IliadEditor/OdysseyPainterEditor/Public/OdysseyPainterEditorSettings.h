@@ -9,7 +9,7 @@
 #include "UObject/ObjectMacros.h"
 
 #include "OdysseyBrushBlueprint.h"
-#include "Tools/OdysseyPainterEditorToolMouseCursor.h"
+#include "OdysseyMouseCursor.h"
 #include "UObject/TemplateString.h"
 
 #include "OdysseyPainterEditorSettings.generated.h"

@@ -22,7 +22,7 @@ enum class EMouseCursorCustom: uint8
     // When adding new entry, don't forget to add the corresponding cursor file in FMouseCursor::InitializeCustomCursorMap()
 };
 
-class FMouseCursor
+class ODYSSEYCOREEDITOR_API FMouseCursor
 {
 public:
     // Avoid using it, prefer to use the one with parameter !

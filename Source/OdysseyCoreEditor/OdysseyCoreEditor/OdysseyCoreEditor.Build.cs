@@ -66,6 +66,7 @@ public class OdysseyCoreEditor : ModuleRules
                 "ToolMenus",
 
                 // [RUNTIME] plugin dependencies
+                "Projects",
 
                 // [EDITOR] engine dependencies
                 "EditorSubsystem",
