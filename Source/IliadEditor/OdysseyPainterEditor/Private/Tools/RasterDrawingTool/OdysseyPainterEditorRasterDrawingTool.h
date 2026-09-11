@@ -91,6 +91,9 @@ public:
     void SetBrushContexts(TArray<FOdysseyBrushContext*>* iContexts);
 
     // Recreates the brush instance
+    void RecreateBrushInstance(bool iApplyOverrides);
+
+    // Refresh the brush instance based on the existing one in UProperties
     void RefreshBrushInstance(bool iApplyOverrides);
 
     void SetBaseSize(float iValue);
@@ -198,6 +201,7 @@ public:
     /** The brush. */
     UPROPERTY(
         EditInstanceOnly,
+        Instanced,
         Category="Brush",
         meta = (
           EditInline

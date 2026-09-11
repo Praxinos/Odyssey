@@ -145,7 +145,7 @@ void
 UOdysseyPainterEditorRasterDrawingTool::Reset()
 {
     Super::Reset();
-    RefreshBrushInstance(true);
+    RecreateBrushInstance(true);
 }
 
 void
@@ -378,7 +378,7 @@ void UOdysseyPainterEditorRasterDrawingTool::BindShortcuts(TSharedPtr<FUICommand
     #define MAP_ACTION(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorRasterDrawingTool::__VA_ARGS__ ) );
     #define MAP_ACTION_REPEAT(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorRasterDrawingTool::__VA_ARGS__ ), EUIActionRepeatMode::RepeatEnabled );
 
-    MAP_ACTION(painterEditorToolCommands.RefreshBrush, RefreshBrushInstance, true)
+    MAP_ACTION(painterEditorToolCommands.RecreateBrush, RecreateBrushInstance, true)
     MAP_ACTION_REPEAT(painterEditorToolCommands.IncreaseBrushSize, AddSize, 1)
     MAP_ACTION_REPEAT(painterEditorToolCommands.DecreaseBrushSize, AddSize, -1)
     MAP_ACTION(painterEditorToolCommands.SetAlphaModeNormal, SetAlphaMode, ::ULIS::eAlphaMode::Alpha_Normal )
@@ -631,10 +631,24 @@ UOdysseyPainterEditorRasterDrawingTool::SetBrushContexts(TArray<FOdysseyBrushCon
 }
 
 void
-UOdysseyPainterEditorRasterDrawingTool::RefreshBrushInstance(bool iApplyOverrides)
+UOdysseyPainterEditorRasterDrawingTool::RecreateBrushInstance(bool iApplyOverrides)
 {
     DestroyBrushInstance();
     CreateBrushInstance(iApplyOverrides);
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::RefreshBrushInstance(bool iApplyOverrides)
+{
+    if (!BrushInstance)
+        return;
+
+    if (iApplyOverrides)
+        ApplyOverrides(BrushInstance);
+
+    ConfigureBrushInstance(BrushInstance);
+    BrushInstance->ExecuteSelected();
+    BrushInstance->ExecuteStateChanged();
 }
 
 void
@@ -724,7 +738,7 @@ UOdysseyPainterEditorRasterDrawingTool::CreateBrushInstance(bool iApplyOverrides
     if (!Brush)
         return;
 
-    BrushInstance = NewObject< UOdysseyBrushAssetBase >(GetTransientPackage(), Brush->GeneratedClass);
+    BrushInstance = NewObject< UOdysseyBrushAssetBase >(this, Brush->GeneratedClass);
     //Apply Overrides before setting the brushInstance in the strokeEngine properties
     //To avoid BrushInstance->StateChanged() being called each time a value changes due to overrides
     if (iApplyOverrides)
@@ -794,7 +808,7 @@ UOdysseyPainterEditorRasterDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* i
 void
 UOdysseyPainterEditorRasterDrawingTool::BrushChanged()
 {
-    RefreshBrushInstance(true);
+    RecreateBrushInstance(true);
 }
 
 void

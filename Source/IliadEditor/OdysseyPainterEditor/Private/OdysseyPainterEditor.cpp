@@ -3751,14 +3751,11 @@ void FOdysseyPainterEditor::SaveMainToolToRecentTools()
     if( mRecentTools->ContainsSimilarToolConfiguration( mCurrentMainTool->GetClass(), mCurrentMainTool ) )
         return;
 
-    TObjectPtr<UOdysseyPainterEditorTool> toolSnapshot;
-    toolSnapshot = DuplicateObject< UOdysseyPainterEditorTool >(mCurrentMainTool, mRecentTools);
-
     FIconToolConfiguration iconToolConfig;
     iconToolConfig.mIconSource = EToolIconSource::Style;
     iconToolConfig.mIconStyleSet = mCurrentMainTool->mIconStyleSet;
 
-    mRecentTools->AddToolConfiguration( mCurrentMainTool->GetClass(), toolSnapshot, iconToolConfig );
+    UOdysseyPainterEditorToolConfiguration* config = mRecentTools->AddToolConfiguration(mCurrentMainTool->GetClass(), mCurrentMainTool, iconToolConfig);
 
     if( mRecentTools->GetToolConfigurations().Num() > 10 )
         mRecentTools->RemoveToolConfigurationAtIndex( 0 );

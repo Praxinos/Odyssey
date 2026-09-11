@@ -72,7 +72,7 @@ public:
     //Brush actions
 
     /** Action to refresh the brush back to its original overidden parameters */
-    TSharedPtr<FUICommandInfo> RefreshBrush;
+    TSharedPtr<FUICommandInfo> RecreateBrush;
 
     //Top Bar actions
     /** Action to increase size by 1 */
