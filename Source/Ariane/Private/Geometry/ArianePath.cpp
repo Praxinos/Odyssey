@@ -250,7 +250,10 @@ FArianePath::FArianePath( UArianeImage* InImage
     , LineType ( EArianePathLineType::Tube )
     , Color ( FColor::Black.WithAlpha(255) )
     , MaterialInterface ( nullptr )
+    , DynamicMaterialInstance ( nullptr )
     , Geometry3D ( this )
+    , CubicSegmentCount( 0 )
+    , LinearSegmentCount( 0 )
 {
 }
 
@@ -263,6 +266,18 @@ FArianePath::HasBaseClass( uint32 BaseClass )
     }
 
     return Super::HasBaseClass(BaseClass);
+}
+
+uint32
+FArianePath::GetCubicSegmentCount()
+{
+    return CubicSegmentCount;
+}
+
+uint32
+FArianePath::GetLinearSegmentCount()
+{
+    return LinearSegmentCount;
 }
 
 /*
@@ -283,43 +298,51 @@ FArianePath::PostLoad()
 void
 FArianePath::Added()
 {
-    if( MaterialInterface && Image )
+    if( DynamicMaterialInstance && Image )
     {
-        Image->IncrementMaterial( MaterialInterface );
+        Image->IncrementMaterial( DynamicMaterialInstance );
     }
 }
 
 void
 FArianePath::Removed()
 {
-    if( MaterialInterface && Image )
+    if( DynamicMaterialInstance && Image )
     {
-        Image->DecrementMaterial( MaterialInterface );
+        Image->DecrementMaterial( DynamicMaterialInstance );
     }
 }
 
 UMaterialInterface*
 FArianePath::GetMaterial()
 {
-    return MaterialInterface;
+    return /*MaterialInterface*/DynamicMaterialInstance;
 }
 
 void
 FArianePath::SetMaterial( UMaterialInterface* InMaterialInterface )
 {
-    // remove the current material from the used material list
-    if( MaterialInterface && Image )
-    {
-        Image->DecrementMaterial( MaterialInterface );
-    }
-
-    // add the new material to the used material list
-    if( InMaterialInterface && Image )
-    {
-        Image->IncrementMaterial( InMaterialInterface );
-    }
-
     MaterialInterface = InMaterialInterface;
+
+    if( MaterialInterface )
+    {
+        // remove the current material from the used material list
+        if( DynamicMaterialInstance && Image )
+        {
+            Image->DecrementMaterial( DynamicMaterialInstance );
+        }
+
+        DynamicMaterialInstance = UMaterialInstanceDynamic::Create( MaterialInterface, Image );
+        // The Color parameter exists for the default Ariane Material
+        DynamicMaterialInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor(Color));
+
+        // add the new material to the used material list
+        if( DynamicMaterialInstance && Image )
+        {
+            Image->IncrementMaterial( DynamicMaterialInstance );
+        }
+
+    }
 }
 
 const TArray<FArianePath::Chain>&
@@ -527,6 +550,16 @@ FArianePath::AddSegment( FArianeSegment* Segment )
 
     Segments.Add( FArianeSegmentID( Segment ) );
 
+    if( Segment->GetClass() == FArianeSegment::StaticClass() )
+    {
+        LinearSegmentCount++;
+    }
+
+    if( Segment->GetClass() == FArianeSegmentCubic::StaticClass() )
+    {
+        CubicSegmentCount++;
+    }
+
     Segment->Invalidate();
 
     Invalidate( FArianePathInvalidationFlags().SetSegmentAddedOrRemoved() );
@@ -539,6 +572,16 @@ FArianePath::RemoveSegment( FArianeSegment* Segment, bool bUnallocate )
     {
         return ( Segment == SegmentID.GetSegment() ) ? true : false;
     } );
+
+    if( Segment->GetClass() == FArianeSegment::StaticClass() )
+    {
+        LinearSegmentCount--;
+    }
+
+    if( Segment->GetClass() == FArianeSegmentCubic::StaticClass() )
+    {
+        CubicSegmentCount--;
+    }
 
     InvalidatedSegments.Remove( Segment );
 
@@ -763,10 +806,11 @@ FArianePath::PostEditUndo()
     }
 
     if( MaterialInterface == nullptr )
+    {
         MaterialInterface = GEngine->VertexColorMaterial;
+    }
 
-    //if( MaterialInterface )
-        Image->IncrementMaterial( MaterialInterface );
+    SetMaterial ( MaterialInterface );
 
     Invalidate( FArianePathInvalidationFlags().SetSegmentAltered()
                                               .SetSegmentAddedOrRemoved()
@@ -798,10 +842,11 @@ FArianePath::PostLoad()
     }
 
     if( MaterialInterface == nullptr )
+    {
         MaterialInterface = GEngine->VertexColorMaterial;
+    }
 
-    //if( MaterialInterface )
-        Image->IncrementMaterial( MaterialInterface );
+    SetMaterial ( MaterialInterface );
 
     Invalidate( FArianePathInvalidationFlags().SetSegmentAltered()
                                               .SetSegmentAddedOrRemoved()
@@ -820,8 +865,11 @@ FArianePath::SetColor( const FColor& InColor )
 {
     Color = InColor;
 
+    // The Color parameter exists for the default Ariane Material
+    DynamicMaterialInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor(Color));
+
     // we need to reconstruct Model Vertices
-    InvalidateAllSegments();
+    //InvalidateAllSegments();
 
     Invalidate( FArianePathInvalidationFlags().SetColor() );
 }

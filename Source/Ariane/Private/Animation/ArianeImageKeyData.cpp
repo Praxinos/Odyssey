@@ -25,27 +25,26 @@ FArianeImageKeyData::RecordGeometry( UArianeImage* RecordedImage )
 
             return FArianeObject::ETraversalReturnValue::Continue;
         } );
+
+    BuildLookup();
 }
 
 FArianeKeyedObject*
 FArianeImageKeyData::GetKeyedObject( const FGuid& ObjectGuid )
 {
-    for( FInstancedStruct& InstancedKeyedObject : InstancedKeyedObjects )
-    {
-        FArianeKeyedObject* KeyedObject = InstancedKeyedObject.GetMutablePtr<FArianeKeyedObject>();
+    FArianeKeyedObject** FoundObject = nullptr;
 
-        if( KeyedObject->GetGuid() == ObjectGuid )
-        {
-            return KeyedObject;
-        }
-    }
+    FoundObject = KeyedObjectLookup.Find( ObjectGuid );
 
-    return nullptr;
+
+    return FoundObject ? *FoundObject : nullptr;
 }
 
 void
 FArianeImageKeyData::PostLoad()
 {
+    BuildLookup();
+
     for( FInstancedStruct& InstancedKeyedObject : InstancedKeyedObjects )
     {
         FArianeKeyedObject* KeyedObject = InstancedKeyedObject.GetMutablePtr<FArianeKeyedObject>();
@@ -57,10 +56,26 @@ FArianeImageKeyData::PostLoad()
 void
 FArianeImageKeyData::PostEditUndo()
 {
+    BuildLookup();
+
     for( FInstancedStruct& InstancedKeyedObject : InstancedKeyedObjects )
     {
         FArianeKeyedObject* KeyedObject = InstancedKeyedObject.GetMutablePtr<FArianeKeyedObject>();
 
         KeyedObject->PostEditUndo();
+    }
+}
+
+void
+FArianeImageKeyData::BuildLookup()
+{
+    KeyedObjectLookup.Empty();
+    KeyedObjectLookup.Reserve( InstancedKeyedObjects.Num() );
+
+    for( FInstancedStruct& InstancedKeyedObject : InstancedKeyedObjects )
+    {
+        FArianeKeyedObject* KeyedObject = InstancedKeyedObject.GetMutablePtr<FArianeKeyedObject>();
+
+        KeyedObjectLookup.Add( KeyedObject->GetGuid(), KeyedObject );
     }
 }

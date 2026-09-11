@@ -32,6 +32,10 @@ public:
     const FColor& GetKeyedColor() const;
 
 protected:
+    void BuildVertexLookup();
+    void BuildSegmentLookup();
+
+protected:
     UPROPERTY( EditAnywhere )
     TArray<FArianeKeyedVertex> KeyedVertices;
 
@@ -44,5 +48,6 @@ protected:
     UPROPERTY( EditAnywhere )
     FColor KeyedColor;
 
-    TArray<FArianeKeyedSegment*> KeyedSegments;
+    TMap<FGuid, FArianeKeyedVertex*> KeyedVertexLookup;
+    TMap<FGuid, FArianeKeyedSegment*> KeyedSegmentLookup;
 };

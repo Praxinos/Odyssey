@@ -26,12 +26,18 @@ public:
     void PostLoad();
     void PostEditUndo();
 
+protected:
+    void BuildLookup();
+
+public:
     UPROPERTY(EditAnywhere, Instanced, Category = "Ariane")
     UArianeImage* Image = nullptr;
 
 protected:
     UPROPERTY( EditAnywhere )
     TArray<FInstancedStruct> InstancedKeyedObjects;
+
+    TMap<FGuid, FArianeKeyedObject*> KeyedObjectLookup;
 };
 
 #if WITH_EDITOR

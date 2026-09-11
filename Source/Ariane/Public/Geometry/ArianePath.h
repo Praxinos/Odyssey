@@ -287,6 +287,9 @@ public:
                      , TArray<FArianeSegment*>* OutAddedSegments );
     virtual void Animate( const FArianeKeyedObject* KeyedObject, const FArianeKeyedObject* NextKeyedObject, float T ) override;
 
+    uint32 GetCubicSegmentCount();
+    uint32 GetLinearSegmentCount();
+
 protected:
     void FindChains();
     virtual FArianeObject* CopyShape( const FCopyArgs& CopyArgs ) override;
@@ -316,6 +319,9 @@ protected:
     UPROPERTY( EditAnywhere )
     UMaterialInterface* MaterialInterface;
 
+    UPROPERTY( EditAnywhere, Transient )
+    UMaterialInstanceDynamic* DynamicMaterialInstance;
+
 protected:
     TArray<FArianeVertexID> Vertices;
     TArray<FArianeSegmentID> Segments;
@@ -323,4 +329,6 @@ protected:
     TArray<FArianeSegment*> InvalidatedSegments;
     TArray<FArianeVertex*> InvalidatedVertices;
     TArray<Chain> Chains;
+    uint32 CubicSegmentCount;
+    uint32 LinearSegmentCount;
 };

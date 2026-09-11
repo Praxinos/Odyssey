@@ -170,6 +170,7 @@ protected:
     TWeakObjectPtr<UArianeLayerDrawing> DrawingLayer;
 
 protected:
+    // counter to determine how many times the material is used (i.e by how many objects)
     TMap<UMaterialInterface*, uint32> UsedMaterials;
 
     // Temp

@@ -109,7 +109,7 @@ protected:
     virtual void BeginDestroy() override;
 
 protected:
-    UPROPERTY( EditAnywhere, Instanced, Interp )
+    UPROPERTY( EditAnywhere, Instanced )
     UArianeImage* Image;
 
     UPROPERTY( EditAnywhere )

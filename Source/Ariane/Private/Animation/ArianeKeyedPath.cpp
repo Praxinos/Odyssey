@@ -20,9 +20,8 @@ FArianeKeyedPath::FArianeKeyedPath( FArianePath* Path )
     , KeyedColor ( Path->GetColor() )
 {
     KeyedVertices.Reserve( Path->GetVertices().Num() );
-    //KeyedCubicSegments.Reserve( Path->GetCubicSegmentCount() );
-    //KeyedLinearSegments.Reserve( Path->GetLinearSegmentCount() );
-    KeyedSegments.Reserve( Path->GetSegments().Num() );
+    KeyedCubicSegments.Reserve( Path->GetCubicSegmentCount() );
+    KeyedLinearSegments.Reserve( Path->GetLinearSegmentCount() );
 
     for( FArianeVertexID& VertexID : Path->GetVertices() )
     {
@@ -37,45 +36,34 @@ FArianeKeyedPath::FArianeKeyedPath( FArianePath* Path )
         {
             FArianeSegmentCubic* CubicSegment = static_cast<FArianeSegmentCubic*>(Segment);
 
-            KeyedSegments.Add( &KeyedCubicSegments.Emplace_GetRef( CubicSegment ) );
+            &KeyedCubicSegments.Emplace_GetRef( CubicSegment );
         }
     }
+
+    BuildVertexLookup();
+    BuildSegmentLookup();
 }
 
 FArianeKeyedVertex*
 FArianeKeyedPath::GetKeyedVertex( const FGuid& VertexGuid )
 {
-    for( FArianeKeyedVertex& KeyedVertex : KeyedVertices )
-    {
-        if( KeyedVertex.GetGuid() == VertexGuid )
-        {
-            return &KeyedVertex;
-        }
-    }
+    FArianeKeyedVertex** FoundVertex = nullptr;
 
-    return nullptr;
+    FoundVertex = KeyedVertexLookup.Find( VertexGuid );
+
+
+    return FoundVertex ? *FoundVertex : nullptr;
 }
 
 FArianeKeyedSegment*
 FArianeKeyedPath::GetKeyedSegment( const FGuid& SegmentGuid )
 {
-    for( FArianeKeyedSegment& KeyedLinearSegment : KeyedLinearSegments )
-    {
-        if( KeyedLinearSegment.GetGuid() == SegmentGuid )
-        {
-            return &KeyedLinearSegment;
-        }
-    }
+    FArianeKeyedSegment** FoundSegment = nullptr;
 
-    for( FArianeKeyedSegmentCubic& KeyedCubicSegment : KeyedCubicSegments )
-    {
-        if( KeyedCubicSegment.GetGuid() == SegmentGuid )
-        {
-            return &KeyedCubicSegment;
-        }
-    }
+    FoundSegment = KeyedSegmentLookup.Find( SegmentGuid );
 
-    return nullptr;
+
+    return FoundSegment ? *FoundSegment : nullptr;
 }
 
 const FColor&
@@ -88,10 +76,40 @@ void
 FArianeKeyedPath::PostLoad()
 {
     Super::PostLoad();
+
+    BuildVertexLookup();
+    BuildSegmentLookup();
 }
 
 void
 FArianeKeyedPath::PostEditUndo()
 {
     Super::PostEditUndo();
+
+    BuildVertexLookup();
+    BuildSegmentLookup();
+}
+
+void
+FArianeKeyedPath::BuildVertexLookup()
+{
+    KeyedVertexLookup.Empty();
+    KeyedVertexLookup.Reserve( KeyedVertices.Num() );
+
+    for( FArianeKeyedVertex& KeyedVertex : KeyedVertices )
+    {
+        KeyedVertexLookup.Add( KeyedVertex.GetGuid(), &KeyedVertex );
+    }
+}
+
+void
+FArianeKeyedPath::BuildSegmentLookup()
+{
+    KeyedSegmentLookup.Empty();
+    KeyedSegmentLookup.Reserve( KeyedCubicSegments.Num() + KeyedLinearSegments.Num() );
+
+    for( FArianeKeyedSegmentCubic& KeyedCubicSegment : KeyedCubicSegments )
+    {
+        KeyedSegmentLookup.Add( KeyedCubicSegment.GetGuid(), &KeyedCubicSegment );
+    }
 }
