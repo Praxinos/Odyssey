@@ -32,37 +32,38 @@ namespace Sequencer
         // 2. Recherche : est-ce qu'une clé existe déjà à cette frame exacte ?
         int32 ExistingIndex = Algo::BinarySearch(ChannelData.GetTimes(), InTime);
 
+        // If the key already exists, we update it completely
         if ( ExistingIndex != INDEX_NONE )
         {
             FArianeImageKeyData* CurrentKeyData = nullptr;
 
-            // CAS A : L'utilisateur clique sur un losange EXISTANT -> On fait une mise à jour
             CurrentKeyData = &ChannelData.GetValues()[ExistingIndex];
 
             // note: DrawingLayer->GetImage() holds the current key's image
             CurrentKeyData->Image = DuplicateObject(DrawingLayer->GetImage(), InSectionToKey);
             CurrentKeyData->RecordGeometry( CurrentKeyData->Image );
 
-            //CurrentKeyData->Image->GetRootGroup()->UpdateTransform();
-            //DrawingLayer->Update( false );
+            CurrentKeyData->Image->GetRootGroup()->UpdateTransform();
+            // Note: will also update GUI via delegates if any is registered
+            DrawingLayer->Update( false );
 
             return ChannelData.GetHandle(ExistingIndex);
         }
-        else
+        else // or else create a new key
         {
-            // CAS B : L'utilisateur clique dans le vide -> VRAIE CRÉATION d'une clé unique !
-            // On cherche le losange précédent pour cloner son contenu (pour ne pas perdre les tracés précédents)
-            const int32 PrevIndex = Algo::UpperBound(ChannelData.GetTimes(), InTime) - 1;
-            // On injecte le temps et la donnée unique directement dans le tableau d'Unreal
-            int32 NewKeyIndex = ChannelData.AddKey(InTime, FArianeImageKeyData());
+            int32 NewKeyIndex = ChannelData.AddKey( InTime, FArianeImageKeyData() );
+            // we work on the pointer in order not to copy member variable, especially arrays of instanced struct
             FArianeImageKeyData* CurrentKeyData = &ChannelData.GetValues()[NewKeyIndex];
 
+            // By duplicating the image, we also retrieve the same IDs for objects, vertices, segments etc...
+            // this will allow any interpolated object to find its counter part in the other key by searching by Guid
             CurrentKeyData->Image = DuplicateObject(DrawingLayer->GetImage(), InSectionToKey);
 
             CurrentKeyData->RecordGeometry( CurrentKeyData->Image );
 
-            //CurrentKeyData->Image->GetRootGroup()->UpdateTransform();
-            //DrawingLayer->Update( false );
+            CurrentKeyData->Image->GetRootGroup()->UpdateTransform();
+            // Note: will also update GUI via delegates if any is registered
+            DrawingLayer->Update( false );
 
             return ChannelData.GetHandle(NewKeyIndex);
         }
