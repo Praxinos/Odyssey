@@ -61,3 +61,9 @@ FOdysseyAnimationTimelineTool::FrameToMousePosition(float iFrame) const
 {
     return iFrame * mTimelinePosition->GetFrameSize();
 }
+
+FMouseCursor
+FOdysseyAnimationTimelineTool::GetMouseCursor() const
+{
+    return EMouseCursor::Default;
+}

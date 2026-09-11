@@ -73,6 +73,8 @@ public:
     virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
     virtual FReply OnKeyUp( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
 
+    virtual FCursorReply OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
+
 private:
     FReply OnSubRowMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent, FName iRow);
     FReply OnSubRowMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent, FName iRow);
