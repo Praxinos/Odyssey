@@ -123,21 +123,15 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
 
     //Load needed Tiles
     TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTilePositionsFromRect(TileSize, InRect);
-    TArray<TFuture<TSharedPtr<FOdysseyTileManager::FTileTextureHandle>>> TileTextureHandles;
-    TileTextureHandles.Reserve(TilePositions.Num());
+    TArray<FOdysseyTileId> TileIds;
+    TileIds.Reserve(TilePositions.Num());
     for (const FIntPoint& TilePosition : TilePositions)
     {
         const FOdysseyTileId* TileId = Tiles.Find(TilePosition);
-        if (TileId)
-        {
-            TFuture<TSharedPtr<FOdysseyTileManager::FTileTextureHandle>> TileTextureHandle = FOdysseyTileManager::Get().GetTileTexture(*TileId, TileSize, GetPixelFormat());
-            TileTextureHandles.Add(MoveTemp(TileTextureHandle));
-        }
-        else
-        {
-            TileTextureHandles.AddDefaulted();
-        }
+        TileIds.Add(TileId ? *TileId : FOdysseyTileId());
     }
+
+    TArray<TFuture<TSharedPtr<FOdysseyTileManager::FTileTextureHandle>>> TileTextureHandles = FOdysseyTileManager::Get().GetTileTextures(TileIds, TileSize, GetPixelFormat());
 
     ENQUEUE_RENDER_COMMAND(UOdysseyTiledImage_Render)(
         [
@@ -155,6 +149,7 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
             FRDGBuilder GraphBuilder(RHICmdList);
             FRDGTextureRef DestinationTexture = OutRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( GraphBuilder );
 
+            const FGlobalShaderMap* ShaderMap = GetGlobalShaderMap(GMaxRHIFeatureLevel);
             FIntRect TileRect(0, 0, TileSize, TileSize);
 
             for (int i = 0; i < TilePositions.Num(); i++)
@@ -198,7 +193,7 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
                         TileSrcRect.Min + TileTexturePosition,
                         TileSrcRect.Size(),
                         TileDstRect.Min,
-                        TileDstRect.Size()
+                        TileSrcRect.Size()
                     );
                 }
                 else
@@ -246,7 +241,7 @@ UOdysseyTiledImage::Serialize(FArchive& Ar)
 
     Super::Serialize(Ar);
 
-    //We don't need to save Tiles data for undo or when cooking
+    //We don't need to save Tiles data for undo
     //(even if UOdysseyTiledImage will probably never be cooked)
     if (Ar.IsTransacting() || !Ar.IsPersistent())
         return;
@@ -287,7 +282,7 @@ UOdysseyTiledImage::Serialize(FArchive& Ar)
 
     if( Ar.IsLoading() )
     {
-        Tiles.Reserve(TilePositions.Num());
+        Tiles.Empty(TilePositions.Num());
 
         for (int i = 0; i < TilePositions.Num(); i++)
         {
