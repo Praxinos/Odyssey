@@ -198,21 +198,16 @@ FOdysseyTileManager::CreateOrUpdateTiles(
     );
 
     TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTilePositionsFromRect(InTileSize, DestinationRect);
-    TArray<uint64> TileIndexes;
+    TArray<TSharedPtr<FTile>> NewTiles;
     TArray<TFuture<FTextureRHIRef>> TileOldTextures;
-    TArray<TSharedPtr<FRHIGPUTextureReadback>> TileReadBacks;
-    TArray<TSharedPtr<FRHIGPUBufferReadback>> TileIsEmptyReadBacks;
-    TileIndexes.Reserve(TilePositions.Num());
+    NewTiles.Reserve(TilePositions.Num());
     TileOldTextures.Reserve(TilePositions.Num());
-    TileReadBacks.Reserve(TilePositions.Num());
-    TileIsEmptyReadBacks.Reserve(TilePositions.Num());
 
     TArray<FOdysseyTileManager::FCreatedTile> CreatedTiles;
 
     for (const FIntPoint& TilePosition : TilePositions)
     {
-        FTile Tile;
-
+        //Try to retrieve the previous content of the tile we are updating
         FOdysseyTileId OldTileId;
         if (InGetExistingTileId.IsBound())
             OldTileId = InGetExistingTileId.Execute(TilePosition);
@@ -228,42 +223,30 @@ FOdysseyTileManager::CreateOrUpdateTiles(
             OldTileTexture = Promise.GetFuture();
             Promise.SetValue(FTextureRHIRef());
         }
-
         TileOldTextures.Add(MoveTemp(OldTileTexture));
 
-        Tile.GPUReadBack = MakeShared<FRHIGPUTextureReadback>(TEXT("FOdysseyTileManager::ReadBack"));
-        TileReadBacks.Add(Tile.GPUReadBack);
-
-        Tile.GPUIsEmptyReadBack = MakeShared<FRHIGPUBufferReadback>(TEXT("FOdysseyTileManager::IsEmptyReadBack"));
-        TileIsEmptyReadBacks.Add(Tile.GPUIsEmptyReadBack);
-
-        Tile.TempTexture = Tile.TempTexturePromise.GetFuture();
-
-        FOdysseyTileId TileId = RegisterTile(MoveTemp(Tile));
-
-        TileIndexes.Add(TileId.Index);
-        PendingTilesToReadBack.Add(TileId);
+        //Create a new tile representing the new version of the updated tile
+        TSharedPtr<FTile> Tile = CreateNewTile();
+        NewTiles.Add(Tile);
+        PendingTilesToReadBack.Add(Tile);
 
         FCreatedTile CreatedTile;
-        CreatedTile.Id = TileId;
+        CreatedTile.Id = Tile->Id;
         CreatedTile.Pos = TilePosition;
         CreatedTiles.Add(CreatedTile);
     }
 
     ENQUEUE_RENDER_COMMAND(FOdysseyTileManager_CreateTiles)(
         [
-            this,
             Source = InTexture,
             TileSize = InTileSize,
             PixelFormat = InTileFormat,
-            TileIndexes,
+            NewTiles,
             TilePositions,
             TileOldTextures = MoveTemp(TileOldTextures),
-            TileReadBacks,
-            TileIsEmptyReadBacks,
             SourceRect,
             DestinationRect
-        ](FRHICommandListImmediate& RHICmdList) mutable
+        ](FRHICommandListImmediate& RHICmdList)
         {
             SCOPE_CYCLE_COUNTER(STAT_CreateTiles);
             DECLARE_GPU_STAT(FOdysseyTileManager_CreateTiles);
@@ -290,11 +273,13 @@ FOdysseyTileManager::CreateOrUpdateTiles(
             FRDGBuilder GraphBuilder(RHICmdList);
             for (int i = 0; i < TilePositions.Num(); i++)
             {
+                const TSharedPtr<FTile>& NewTile = NewTiles[i];
                 const FIntPoint& TilePosition = TilePositions[i];
-                const FTextureRHIRef& TileOldTextureRHI = TileOldTextures[i].Get();
-                const TSharedPtr<FRHIGPUTextureReadback>& TileReadBack = TileReadBacks[i];
-                const TSharedPtr<FRHIGPUBufferReadback>& TileIsEmptyReadBack = TileIsEmptyReadBacks[i];
+                FTextureRHIRef TileOldTextureRHI;
                 FTextureRHIRef TileTextureRHI = TileTextureRHIs[i];
+
+                if (TileOldTextures[i].IsValid())
+                    TileOldTextureRHI = TileOldTextures[i].Get();
 
                 FIntPoint TileDstPos(TilePosition.X * TileSize, TilePosition.Y * TileSize);
                 FIntRect TileDstRect(TileDstPos, TileDstPos + TileWH);
@@ -343,29 +328,21 @@ FOdysseyTileManager::CreateOrUpdateTiles(
                     GraphBuilder,
                     GMaxRHIFeatureLevel,
                     TileTexture,
-                    TileIsEmptyReadBack
+                    NewTile->GPUIsEmptyReadBack
                 );
 
-                AddEnqueueCopyPass(GraphBuilder, TileReadBack.Get(), TileTexture);
+                AddEnqueueCopyPass(GraphBuilder, NewTile->GPUReadBack.Get(), TileTexture);
             }
             GraphBuilder.Execute();
 
             //Step 3 : Fullfil the TileTexture Promises
-
+            for (int i = 0; i < TileTextureRHIs.Num(); i++)
             {
-                //Lock Tiles to avoid array mutation
-                //while accessing it
-                FScopeLock Lock(&TilesMutex);
-                for (int i = 0; i < TileTextureRHIs.Num(); i++)
-                {
-                    //We only validate the TileTexture once the GraphBuilder has been executed
-                    //It ensures the TileTexture will be filled with the right pixels data
-                    //even if the texture is immediately used
-                    uint64 TileIndex = TileIndexes[i];
-                    FTile& Tile = Tiles[TileIndex];
-
-                    Tile.TempTexturePromise.SetValue(TileTextureRHIs[i]);
-                }
+                //We only validate the TileTexture once the GraphBuilder has been executed
+                //It ensures the TileTexture will be filled with the right pixels data
+                //even if the texture is immediately used
+                const TSharedPtr<FTile>& NewTile = NewTiles[i];
+                NewTile->TempTexturePromise.SetValue(TileTextureRHIs[i]);
             }
 
             //Needed for the readback buffers to be read properly
@@ -420,113 +397,90 @@ FOdysseyTileManager::CreateTile(const FIoHash& InHash, const FCompressedBuffer& 
         }
     }
 
-    FTile Tile;
-    Tile.TempTexture = Tile.TempTexturePromise.GetFuture();
-    Tile.TempTexturePromise.SetValue(FTextureRHIRef());
-
-    TPromise<TSharedPtr<FTileData>> Promise;
-    Tile.TileData = Promise.GetFuture();
-    Promise.SetValue(TileData);
-
-    FOdysseyTileId TileId = RegisterTile(MoveTemp(Tile));
-    return TileId;
+    TSharedPtr<FTile> Tile = CreateNewTile(TileData);
+    return Tile->Id;
 }
 
-FOdysseyTileId
-FOdysseyTileManager::RegisterTile(FTile&& InTile)
+template<typename... ArgsType>
+TSharedPtr<FOdysseyTileManager::FTile>
+FOdysseyTileManager::CreateNewTile(ArgsType&&... Args)
 {
-    FOdysseyTileId TileId;
-    FScopeLock Lock(&TilesMutex);
-    if (FreeTiles.Num() > 0)
+    TSharedPtr<FTile> Tile;
     {
-        TileId.Index = FreeTiles[0];
-        TileId.Generation = Tiles[TileId.Index].Generation + 1;
-        Tiles[TileId.Index] = MoveTemp(InTile);
-        Tiles[TileId.Index].Generation = TileId.Generation;
-
-        FreeTiles.RemoveAtSwap(0);
+        FScopeLock Lock(&FreeTilesMutex);
+        FOdysseyTileId TileId;
+        if (FreeTiles.Num() > 0)
+        {
+            //Retrieve the first FreeTile
+            TileId = FreeTiles[0];
+            FreeTiles.RemoveAtSwap(0);
+        }
+        else
+        {
+            //Create a brand new Tile
+            TileId.Index = Tiles.Num();
+            TileId.Generation = 0;
+            Tiles.AddDefaulted();
+        }
+        Tile = MakeShared<FTile>(TileId);
+        Tiles[TileId.Index] = Tile;
+        Tile->Initialize(Forward<ArgsType>(Args)...);
     }
-    else
-    {
-        TileId.Index = Tiles.Num();
-        TileId.Generation = 0;
-        Tiles.Add(MoveTemp(InTile));
-        Tiles[TileId.Index].Generation = 0;
-    }
 
-    return TileId;
+    return Tile;
 }
 
 void
-FOdysseyTileManager::TryLoadTileFromReadBack(FOdysseyTileId InTileId)
+FOdysseyTileManager::TryLoadTileFromReadBack(TSharedPtr<FTile> InTile)
 {
-    FTile& Tile = Tiles[InTileId.Index];
-
-    if (!Tile.GPUReadBack.IsValid() ||
-        !Tile.GPUIsEmptyReadBack.IsValid())
+    if (!InTile->GPUReadBack.IsValid() ||
+        !InTile->GPUIsEmptyReadBack.IsValid())
         return;
 
-    if (!Tile.GPUReadBack->IsReady() ||
-        !Tile.GPUIsEmptyReadBack->IsReady())
+    if (!InTile->GPUReadBack->IsReady() ||
+        !InTile->GPUIsEmptyReadBack->IsReady())
         return;
 
-    LoadTileFromReadBack(InTileId);
+    LoadTileFromReadBack(InTile);
 
 }
 
 void
-FOdysseyTileManager::LoadTileFromReadBack(FOdysseyTileId InTileId)
+FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
 {
-    PendingTilesToReadBack.RemoveSwap(InTileId);
-    FTile& Tile = Tiles[InTileId.Index];
-
-    if (Tile.Generation != InTileId.Generation)
-        return;
-
-    TPromise<TSharedPtr<FTileData>> Promise;
-    Tile.TileData = Promise.GetFuture();
-
-    TSharedPtr<FRHIGPUTextureReadback> GPUReadBack = Tile.GPUReadBack;
-    TSharedPtr<FRHIGPUBufferReadback> GPUIsEmptyReadBack = Tile.GPUIsEmptyReadBack;
-
-    Tile.GPUReadBack.Reset();
-    Tile.GPUIsEmptyReadBack.Reset();
+    PendingTilesToReadBack.RemoveSwap(InTile);
 
     ENQUEUE_RENDER_COMMAND(FOdysseyTileManager_CreateTiles)(
         [
-            this,
-            Promise = MoveTemp(Promise),
-            GPUReadBack,
-            GPUIsEmptyReadBack,
-            TileIndex = InTileId.Index
+            this, //To access HashToTileData and Mutexes
+            InTile
         ](FRHICommandListImmediate& RHICmdList) mutable
         {
-            ON_SCOPE_EXIT
-            {
-                //Lock Tiles to avoid array mutation
-                //while accessing it
-                FScopeLock Lock(&TilesMutex);
-                TPromise<FTextureRHIRef> Promise;
-                Tiles[TileIndex].TempTexture = Promise.GetFuture();
-                Promise.SetValue(FTextureRHIRef());
-            };
-
             const FRHIGPUMask GPUMask = RHICmdList.GetGPUMask();
 
             //Is Empty ReadBack
             {
                 // This blocks the render thread until the GPU has completed
                 // the readback copy.
-                GPUIsEmptyReadBack->Wait(RHICmdList, GPUMask);
-                uint32* Data = (uint32*)GPUIsEmptyReadBack->Lock(4);
+                InTile->GPUIsEmptyReadBack->Wait(RHICmdList, GPUMask);
+                uint32* Data = (uint32*)InTile->GPUIsEmptyReadBack->Lock(4);
                 bool IsEmpty = Data[0] != 0;
-                GPUIsEmptyReadBack->Unlock();
+                InTile->GPUIsEmptyReadBack->Unlock();
 
                 if (IsEmpty) //Is Empty
                 {
-                    FScopeLock Lock(&TilesMutex);
-                    FreeTiles.Add(TileIndex);
-                    Promise.SetValue(nullptr);
+                    //We have 2 locks here
+                    //1 to Modify FreeTiles
+                    //1 to the Tile itself
+                    FScopeLock Lock(&FreeTilesMutex);
+                    FScopeLock TileLock(&InTile->Mutex);
+
+                    InTile->TempTexture.Reset();
+                    InTile->TileDataPromise.SetValue(nullptr);
+
+                    FOdysseyTileId TileId = InTile->Id;
+                    TileId.Generation++;
+                    FreeTiles.Add(TileId);
                     return;
                 }
             }
@@ -536,27 +490,27 @@ FOdysseyTileManager::LoadTileFromReadBack(FOdysseyTileId InTileId)
 
                 // This blocks the render thread until the GPU has completed
                 // the readback copy.
-                GPUReadBack->Wait(RHICmdList, GPUMask);
+                InTile->GPUReadBack->Wait(RHICmdList, GPUMask);
 
                 // At this point Lock() is safe.
                 int32 Width = 0;
                 int32 Height = 0;
 
-                void* Data = GPUReadBack->Lock(Width, &Height);
+                void* Data = InTile->GPUReadBack->Lock(Width, &Height);
 
                 FSharedBuffer Buffer = FSharedBuffer::Clone(
                     Data,
-                    GPUReadBack->GetGPUSizeBytes()
+                    InTile->GPUReadBack->GetGPUSizeBytes()
                 );
 
-                GPUReadBack->Unlock();
+                InTile->GPUReadBack->Unlock();
 
                 //Compare Buffer to other buffers
                 FIoHash Hash = FIoHashBuilder::HashBuffer(Buffer.GetView());
                 TArray<TSharedPtr<FTileData>> TilesData;
 
                 {
-                    FScopeLock Lock(&HashToTileDataMutex);
+                    FScopeLock HashToTileDataLock(&HashToTileDataMutex);
                     HashToTileData.MultiFind(Hash, TilesData, false);
 
                     for (TSharedPtr<FTileData> TileData : TilesData)
@@ -567,7 +521,9 @@ FOdysseyTileManager::LoadTileFromReadBack(FOdysseyTileId InTileId)
 
                         if (TileDataBuffer.GetView().EqualBytes(Buffer.GetView()))
                         {
-                            Promise.SetValue(TileData);
+                            FScopeLock TileLock(&InTile->Mutex);
+                            InTile->TempTexture.Reset();
+                            InTile->TileDataPromise.SetValue(TileData);
                             return;
                         }
                     }
@@ -575,7 +531,12 @@ FOdysseyTileManager::LoadTileFromReadBack(FOdysseyTileId InTileId)
                     //Create a new TileData
                     TSharedPtr<FTileData> TileData = FTileData::FromUncompressedBuffer(Hash, Buffer);
                     HashToTileData.Add(Hash, TileData);
-                    Promise.SetValue(TileData);
+
+                    {
+                        FScopeLock TileLock(&InTile->Mutex);
+                        InTile->TempTexture.Reset();
+                        InTile->TileDataPromise.SetValue(TileData);
+                    }
                 }
             }
         }
@@ -598,13 +559,16 @@ FOdysseyTileManager::GetTileTexture(FOdysseyTileId InTileId, uint32 InTileSize, 
     }
 
     //Retrieve Tile
-    const FTile& Tile = Tiles[InTileId.Index];
+    TSharedPtr<FTile> Tile = Tiles[InTileId.Index];
 
-    //Check if Tile.Generation corresponds to TileId.Generation
-    //indicating the tile is indeed the one corresponding to the TileId
-    //Otherwise, it indicates the tile corresponding to the TileId was empty
-    //and freed
-    if (Tile.Generation != InTileId.Generation)
+    //We read the tile here
+    //We lock its mutex to ensure it is not modified by another thread
+    FScopeLock TileLock(&Tile->Mutex);
+
+    //If Tile.Id does not correspond to TileId
+    //it indicates the tile corresponding to the TileId was empty
+    //and freed.
+    if (Tile->Id != InTileId)
     {
         Promise.SetValue(FTextureRHIRef());
         return Future;
@@ -613,18 +577,35 @@ FOdysseyTileManager::GetTileTexture(FOdysseyTileId InTileId, uint32 InTileSize, 
     //Check if the Tile has a TempTexture
     //Indicating the Tile's ReadBack has not yet finished
     //Rely on TempTexture if it exists
-    FTextureRHIRef TextureRHI = Tile.TempTexture.Get();
-    if (TextureRHI.IsValid())
+    if (Tile->TempTexture.IsValid())
     {
-        Promise.SetValue(TextureRHI);
-        return Future;
+        FTextureRHIRef TextureRHI = Tile->TempTexture.Get();
+        if (TextureRHI.IsValid())
+        {
+            Promise.SetValue(TextureRHI);
+            return Future;
+        }
     }
+
+    //We rely directly on FTileData which is guaranteed to be valid here
+    //Because TempTexture is Null or Invalid, indicating ReadBack has finished
+    //
+    //We don't rely on FTile anymore
+    //So we can release the lock here
+    TileLock.Unlock();
 
     //TempTexture is Null indicating ReadBack has finished
     //The Tile's Buffer should be available
     //Rely on the Tile's Buffer to create a TextureRHIRef
+    TSharedPtr<FTileData> TileData = Tile->TileData.Get();
+    if (!TileData)
+    {
+        Promise.SetValue(FTextureRHIRef());
+        return Future;
+    }
+
     FSharedBuffer Buffer;
-    if (!GetTileBuffer(InTileId, Buffer))
+    if (!TileData->GetUncompressedBuffer(Buffer))
     {
         //Tile's Buffer could not be retrieved
         //indicating an empty Tile
@@ -670,37 +651,6 @@ FOdysseyTileManager::GetTileTexture(FOdysseyTileId InTileId, uint32 InTileSize, 
 }
 
 bool
-FOdysseyTileManager::GetTileBuffer(FOdysseyTileId InTileId, FSharedBuffer& OutBuffer) const
-{
-    return const_cast<FOdysseyTileManager*>(this)->GetTileBuffer(InTileId, OutBuffer);
-}
-
-bool
-FOdysseyTileManager::GetTileBuffer(FOdysseyTileId InTileId, FSharedBuffer& OutBuffer)
-{
-    check(IsInGameThread());
-    if (InTileId.Index >= (uint64)Tiles.Num())
-        return false;
-
-    const FTile& Tile = Tiles[InTileId.Index];
-
-    if (Tile.Generation != InTileId.Generation)
-        return false;
-
-    //If readback is still valid, we need to start reading back
-    if (Tile.GPUReadBack.IsValid())
-        LoadTileFromReadBack(InTileId);
-
-    //Here we get the tile data index
-    //Tile.TileData is a future, so it will block current thread until GPU Readback is done
-    TSharedPtr<FTileData> TileData = Tile.TileData.Get();
-    if (!TileData)
-        return false;
-
-    return TileData->GetUncompressedBuffer(OutBuffer);
-}
-
-bool
 FOdysseyTileManager::GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer) const
 {
     return const_cast<FOdysseyTileManager*>(this)->GetTileCompressedBuffer(InTileId, OutBuffer);
@@ -712,18 +662,28 @@ FOdysseyTileManager::GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompresse
     if (InTileId.Index >= (uint64)Tiles.Num())
         return false;
 
-    const FTile& Tile = Tiles[InTileId.Index];
+    TSharedPtr<FTile> Tile = Tiles[InTileId.Index];
 
-    if (Tile.Generation != InTileId.Generation)
+    //We read the tile here
+    //We lock its mutex to ensure it is not modified by another thread
+    FScopeLock TileLock(&Tile->Mutex);
+
+    //If Tile.Id does not correspond to TileId
+    //it indicates the tile corresponding to the TileId was empty
+    //and freed.
+    if (Tile->Id != InTileId)
         return false;
 
     //If readback is still valid, we need to start reading back
-    if (Tile.GPUReadBack.IsValid())
-        LoadTileFromReadBack(InTileId);
+    if (Tile->GPUReadBack.IsValid())
+        LoadTileFromReadBack(Tile);
 
-    //Here we get the tile data index
-    //Tile.TileData is a future, so it will block current thread until GPU Readback is done
-    TSharedPtr<FTileData> TileData = Tile.TileData.Get();
+    //We don't rely on FTile anymore
+    //So we can release the lock here
+    TileLock.Unlock();
+
+    //Tile->TileData is a future, so it will block current thread until GPU Readback is done
+    TSharedPtr<FTileData> TileData = Tile->TileData.Get();
     if (!TileData)
         return false;
 
@@ -736,18 +696,28 @@ FOdysseyTileManager::GetTileHash(FOdysseyTileId InTileId, FIoHash& OutHash)
     if (InTileId.Index >= (uint64)Tiles.Num())
         return false;
 
-    const FTile& Tile = Tiles[InTileId.Index];
+    TSharedPtr<FTile> Tile = Tiles[InTileId.Index];
 
-    if (Tile.Generation != InTileId.Generation)
+    //We read the tile here
+    //We lock its mutex to ensure it is not modified by another thread
+    FScopeLock TileLock(&Tile->Mutex);
+
+    //If Tile.Id does not correspond to TileId
+    //it indicates the tile corresponding to the TileId was empty
+    //and freed.
+    if (Tile->Id != InTileId)
         return false;
 
     //If readback is still valid, we need to start reading back
-    if (Tile.GPUReadBack.IsValid())
-        LoadTileFromReadBack(InTileId);
+    if (Tile->GPUReadBack.IsValid())
+        LoadTileFromReadBack(Tile);
 
-    //Here we get the tile data index
-    //Tile.TileData is a future, so it will block current thread until GPU Readback is done
-    TSharedPtr<FTileData> TileData = Tile.TileData.Get();
+    //We don't rely on FTile anymore
+    //So we can release the lock here
+    TileLock.Unlock();
+
+    //Tile->TileData is a future, so it will block current thread until GPU Readback is done
+    TSharedPtr<FTileData> TileData = Tile->TileData.Get();
     if (!TileData)
         return false;
 
@@ -764,12 +734,14 @@ FOdysseyTileManager::GetStats()
 void
 FOdysseyTileManager::WaitUntilAllTilesAreCached(bool InEvictTiles)
 {
-    for (FTile& Tile : Tiles)
+    for (TSharedPtr<FTile>& Tile : Tiles)
     {
-        TSharedPtr<FTileData> TileData = Tile.TileData.Get();
+        //Calling Tile.TileData.Get() waits until GPU Readback is finished
+        TSharedPtr<FTileData> TileData = Tile->TileData.Get();
         if (!TileData)
             continue;
 
+        //Then wait until the caching process is finished
         TileData->WaitUntilCachedOnDisk();
     }
 
@@ -780,10 +752,12 @@ FOdysseyTileManager::WaitUntilAllTilesAreCached(bool InEvictTiles)
 void
 FOdysseyTileManager::Tick(float DeltaTime)
 {
-    TArray<FOdysseyTileId> LocalPendingTilesToReadBack = PendingTilesToReadBack;
-    for (FOdysseyTileId TileId : LocalPendingTilesToReadBack)
+    //PendingTilesToReadBack is modified by LoadTileFromReadBack()
+    //So we copy into a local variable to avoid iterating over a changing Array
+    TArray<TSharedPtr<FTile>> LocalPendingTilesToReadBack = PendingTilesToReadBack;
+    for (TSharedPtr<FTile> Tile : LocalPendingTilesToReadBack)
     {
-        TryLoadTileFromReadBack(TileId);
+        TryLoadTileFromReadBack(Tile);
     }
 
     EvictTiles();
@@ -801,6 +775,32 @@ void
 FOdysseyTileManager::EvictAllTiles()
 {
     FTileData::EvictTiles(0, 0);
+}
+
+/*************************************
+ * FTile
+ *************************************/
+
+FOdysseyTileManager::FTile::FTile(const FOdysseyTileId& InId)
+    : Id(InId)
+{
+}
+
+void
+FOdysseyTileManager::FTile::Initialize()
+{
+    TempTexture = TempTexturePromise.GetFuture();
+    TileData = TileDataPromise.GetFuture();
+
+    GPUReadBack = MakeShared<FRHIGPUTextureReadback>(TEXT("FOdysseyTileManager::FTile::GPUReadBack"));
+    GPUIsEmptyReadBack = MakeShared<FRHIGPUBufferReadback>(TEXT("FOdysseyTileManager::FTile::GPUIsEmptyReadBack"));
+}
+
+void
+FOdysseyTileManager::FTile::Initialize(TSharedPtr<FTileData> InTileData)
+{
+    TileData = TileDataPromise.GetFuture();
+    TileDataPromise.SetValue(InTileData);
 }
 
 TSharedRef<FOdysseyTileManager::FTileData>
