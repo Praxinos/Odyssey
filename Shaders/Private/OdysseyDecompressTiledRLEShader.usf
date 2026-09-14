@@ -47,7 +47,7 @@ uint TileWidth; //Width of 1 tile in pixels
 uint TileHeight; //Height of 1 tile in pixels
 uint TextureHeight; //Width of the final Texture
 uint TextureWidth; //Height of the final Texture
-uint ValueSize; //Size of a Pixel in 32-bits
+uint BytesPerComponent; //Size of a Pixel in 32-bits
 StructuredBuffer<FTileDescriptor> TileDescriptors; //Contains informations about tiles (which tile contains data and where to find taht data in the RLEBuffer
 StructuredBuffer<int> RLEPositions; //Contains position of each valid RLE Data in RLEData
 StructuredBuffer<uint> RLEData; //Contains position of each valid RLE Data in RLEData
@@ -73,31 +73,31 @@ uint2 GetTileSize(uint2 iTile)
 
 float4 GetRLEDataValueAt(uint OffsetInBuffer)
 {
-    if (ValueSize == 1)
+    if (BytesPerComponent == 1)
     {
         return float4(
-            (RLEData[OffsetInBuffer * ValueSize] & 0x000000FF) / 255.0,
-            (RLEData[OffsetInBuffer * ValueSize] & 0x0000FF00) / 255.0,
-            (RLEData[OffsetInBuffer * ValueSize] & 0x00FF0000) / 255.0,
-            (RLEData[OffsetInBuffer * ValueSize] & 0xFF000000) / 255.0
+            (RLEData[OffsetInBuffer * BytesPerComponent] & 0x000000FF) / 255.0,
+            (RLEData[OffsetInBuffer * BytesPerComponent] & 0x0000FF00) / 255.0,
+            (RLEData[OffsetInBuffer * BytesPerComponent] & 0x00FF0000) / 255.0,
+            (RLEData[OffsetInBuffer * BytesPerComponent] & 0xFF000000) / 255.0
         );
     }
-    else if (ValueSize == 2)
+    else if (BytesPerComponent == 2)
     {
         return float4(
-            f16tof32(RLEData[OffsetInBuffer * ValueSize] & 0x0000FFFF),
-            f16tof32((RLEData[OffsetInBuffer * ValueSize] & 0xFFFF0000) >> 16),
-            f16tof32(RLEData[OffsetInBuffer * ValueSize + 1] & 0x0000FFFF),
-            f16tof32((RLEData[OffsetInBuffer * ValueSize + 1] & 0x0000FFFF) >> 16)
+            f16tof32(RLEData[OffsetInBuffer * BytesPerComponent] & 0x0000FFFF),
+            f16tof32((RLEData[OffsetInBuffer * BytesPerComponent] & 0xFFFF0000) >> 16),
+            f16tof32(RLEData[OffsetInBuffer * BytesPerComponent + 1] & 0x0000FFFF),
+            f16tof32((RLEData[OffsetInBuffer * BytesPerComponent + 1] & 0x0000FFFF) >> 16)
         );
     }
-    else if (ValueSize == 4)
+    else if (BytesPerComponent == 4)
     {
         return float4(
-            asfloat(RLEData[OffsetInBuffer * ValueSize]),
-            asfloat(RLEData[OffsetInBuffer * ValueSize + 1]),
-            asfloat(RLEData[OffsetInBuffer * ValueSize + 2]),
-            asfloat(RLEData[OffsetInBuffer * ValueSize + 3])
+            asfloat(RLEData[OffsetInBuffer * BytesPerComponent]),
+            asfloat(RLEData[OffsetInBuffer * BytesPerComponent + 1]),
+            asfloat(RLEData[OffsetInBuffer * BytesPerComponent + 2]),
+            asfloat(RLEData[OffsetInBuffer * BytesPerComponent + 3])
         );
     }
 
@@ -106,31 +106,31 @@ float4 GetRLEDataValueAt(uint OffsetInBuffer)
 
 float4 GetSequenceDataValueAt(uint OffsetInBuffer)
 {
-    if (ValueSize == 1)
+    if (BytesPerComponent == 1)
     {
         return float4(
-            (SequenceData[OffsetInBuffer * ValueSize] & 0x000000FF) / 255.0,
-            (SequenceData[OffsetInBuffer * ValueSize] & 0x0000FF00) / 255.0,
-            (SequenceData[OffsetInBuffer * ValueSize] & 0x00FF0000) / 255.0,
-            (SequenceData[OffsetInBuffer * ValueSize] & 0xFF000000) / 255.0
+            (SequenceData[OffsetInBuffer * BytesPerComponent] & 0x000000FF) / 255.0,
+            (SequenceData[OffsetInBuffer * BytesPerComponent] & 0x0000FF00) / 255.0,
+            (SequenceData[OffsetInBuffer * BytesPerComponent] & 0x00FF0000) / 255.0,
+            (SequenceData[OffsetInBuffer * BytesPerComponent] & 0xFF000000) / 255.0
         );
     }
-    else if (ValueSize == 2)
+    else if (BytesPerComponent == 2)
     {
         return float4(
-            f16tof32(SequenceData[OffsetInBuffer * ValueSize] & 0x0000FFFF),
-            f16tof32((SequenceData[OffsetInBuffer * ValueSize] & 0xFFFF0000) >> 16),
-            f16tof32(SequenceData[OffsetInBuffer * ValueSize + 1] & 0x0000FFFF),
-            f16tof32((SequenceData[OffsetInBuffer * ValueSize + 1] & 0x0000FFFF) >> 16)
+            f16tof32(SequenceData[OffsetInBuffer * BytesPerComponent] & 0x0000FFFF),
+            f16tof32((SequenceData[OffsetInBuffer * BytesPerComponent] & 0xFFFF0000) >> 16),
+            f16tof32(SequenceData[OffsetInBuffer * BytesPerComponent + 1] & 0x0000FFFF),
+            f16tof32((SequenceData[OffsetInBuffer * BytesPerComponent + 1] & 0x0000FFFF) >> 16)
         );
     }
-    else if (ValueSize == 4)
+    else if (BytesPerComponent == 4)
     {
         return float4(
-            asfloat(SequenceData[OffsetInBuffer * ValueSize]),
-            asfloat(SequenceData[OffsetInBuffer * ValueSize + 1]),
-            asfloat(SequenceData[OffsetInBuffer * ValueSize + 2]),
-            asfloat(SequenceData[OffsetInBuffer * ValueSize + 3])
+            asfloat(SequenceData[OffsetInBuffer * BytesPerComponent]),
+            asfloat(SequenceData[OffsetInBuffer * BytesPerComponent + 1]),
+            asfloat(SequenceData[OffsetInBuffer * BytesPerComponent + 2]),
+            asfloat(SequenceData[OffsetInBuffer * BytesPerComponent + 3])
         );
     }
 
@@ -215,7 +215,7 @@ void ReadRLE(uint iRLEStartPosition, uint iRLEOffset, uint iTilePosition, uint C
         }
         else //Sequence
         {
-            uint pointer = RLEData[RLEPosition * ValueSize] + RLEOffset;
+            uint pointer = RLEData[RLEPosition * BytesPerComponent] + RLEOffset;
             for (uint i = 0; i < numPixels; i++)
             {
                 float4 pixelValue = GetSequenceDataValueAt(pointer + i);

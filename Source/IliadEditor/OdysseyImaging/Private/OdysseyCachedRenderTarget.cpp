@@ -315,15 +315,12 @@ UOdysseyCachedRenderTarget::Render(UTextureRenderTarget2D* Destination, FIntRect
                             }
                         ); */
 
-                        FOdysseyTiledRLE::FRLEBuffer rleBuffer;
-                        FOdysseyTiledRLE::FCompressionParams compressionParams;
-                        compressionParams.TextureHeight = height;
-                        compressionParams.TextureWidth = width;
-                        compressionParams.TileWidth = 64;
-                        compressionParams.TileHeight = 64;
-                        compressionParams.PixelFormat = pixelFormat;
+                        //TEST:
+                        FOdysseyTiledRLE::FRLECompressedBuffer RLEBuffer;
+                        FOdysseyTiledRLE::TestDecompressTiledRLEShader(width, height, RLEBuffer);
+                        //TEST:
 
-                        FRDGTextureRef renderTexture = FOdysseyTiledRLE::DecompressRenderThread(graphBuilder, rleBuffer, compressionParams);
+                        FRDGTextureRef renderTexture = FOdysseyTiledRLE::DecompressRenderThread(graphBuilder, RLEBuffer, pixelFormat);
 
                         AddDrawTexturePass(
                             graphBuilder,
