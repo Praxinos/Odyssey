@@ -3755,7 +3755,7 @@ void FOdysseyPainterEditor::SaveMainToolToRecentTools()
     iconToolConfig.mIconSource = EToolIconSource::Style;
     iconToolConfig.mIconStyleSet = mCurrentMainTool->mIconStyleSet;
 
-    UOdysseyPainterEditorToolConfiguration* config = mRecentTools->AddToolConfiguration(mCurrentMainTool->GetClass(), mCurrentMainTool, iconToolConfig);
+    mRecentTools->AddToolConfiguration(mCurrentMainTool->GetClass(), mCurrentMainTool, iconToolConfig);
 
     if( mRecentTools->GetToolConfigurations().Num() > 10 )
         mRecentTools->RemoveToolConfigurationAtIndex( 0 );
