@@ -9,6 +9,14 @@
 
 #include "OdysseyCachedRenderTarget.generated.h"
 
+UENUM(BlueprintType)
+enum class EOdysseyCachedRenderTargetFormat : uint8
+{
+    RGBA8,
+    RGBA16F,
+    RGBA32F,
+};
+
 /**
  * Class allowing drawing on a Texture2D view Tiless
  * Also includes an efficient Undo system
@@ -38,7 +46,7 @@ public:
 
 public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Rendering|CachedRenderTarget")
-    void Initialize(int Width, int Height, ETextureRenderTargetFormat Format);
+    void Initialize(int Width, int Height, EOdysseyCachedRenderTargetFormat Format);
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|CachedRenderTarget")
     int GetWidth() const;
@@ -47,7 +55,25 @@ public:
     int GetHeight() const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|CachedRenderTarget")
-    ETextureRenderTargetFormat GetFormat() const;
+    EOdysseyCachedRenderTargetFormat GetFormat() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|CachedRenderTarget")
+    EPixelFormat GetPixelFormat() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|CachedRenderTarget")
+    int GetChannelsPerPixel() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|CachedRenderTarget")
+    int GetBytesPerChannel() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|CachedRenderTarget")
+    int GetBytesPerPixel() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|CachedRenderTarget")
+    int GetStride() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|CachedRenderTarget")
+    int GetTotalBytes() const;
 
     /**
      * Starts the drawing process on this texture
@@ -153,7 +179,7 @@ private:
     /**
      *
      */
-    ETextureRenderTargetFormat Format = RTF_RGBA8;
+    EOdysseyCachedRenderTargetFormat Format = EOdysseyCachedRenderTargetFormat::RGBA8;
 
     /**
      * Is the drawing process active
@@ -185,9 +211,9 @@ private:
      * Only present between calls to BeginDraw() and EndDraw()
      */
     mutable TStrongObjectPtr<UTextureRenderTarget2D> mRenderTarget;
-    mutable TSharedPtr<FImage> mImage;
-    mutable ERawImageFormat::Type mImageFormat;
-    mutable EGammaSpace mImageGammaSpace;
+    //mutable TSharedPtr<FImage> mImage;
+
+    mutable TSharedFuture<TArray<uint8>> mImageFuture;
     mutable eCacheState mCacheState = eCacheState::DDC;
     mutable bool mIsImageCacheInvalid = false;
     mutable bool mIsDDCCacheInvalid = false;
