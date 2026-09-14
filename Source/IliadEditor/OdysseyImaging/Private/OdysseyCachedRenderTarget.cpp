@@ -11,7 +11,6 @@
 #include "ScreenPass.h"
 #include "OdysseyDiskCache.h"
 #include "OdysseyCachedRenderTargetManager.h"
-#include "OdysseyTiledRLE.h"
 
 #define OdysseyCachedRenderTarget_CACHE_NAME TEXT("OdysseyCachedRenderTarget")
 #define OdysseyCachedRenderTarget_CACHE_VERSION TEXT("70ED9EAACC22420B8F1738352E5F3592")
@@ -23,7 +22,6 @@ DECLARE_CYCLE_STAT(TEXT("OdysseyCachedRenderTarget Render_Empty"), STAT_UOdyssey
 DECLARE_CYCLE_STAT(TEXT("OdysseyCachedRenderTarget Render_RT"), STAT_UOdysseyCachedRenderTarget_Render_RT, STATGROUP_OdysseyCachedRenderTarget);
 DECLARE_CYCLE_STAT(TEXT("OdysseyCachedRenderTarget CopyRenderTargetToResetRT"), STAT_UOdysseyCachedRenderTarget_CopyRenderTargetToResetRT, STATGROUP_OdysseyCachedRenderTarget);
 DECLARE_CYCLE_STAT(TEXT("OdysseyCachedRenderTarget CopyResetRTToRenderTarget"), STAT_UOdysseyCachedRenderTarget_CopyResetRTToRenderTarget, STATGROUP_OdysseyCachedRenderTarget);
-DECLARE_CYCLE_STAT(TEXT("OdysseyCachedRenderTarget UnloadRenderTarget"), STAT_UOdysseyCachedRenderTarget_UnloadRenderTarget, STATGROUP_OdysseyCachedRenderTarget);
 DECLARE_CYCLE_STAT(TEXT("OdysseyCachedRenderTarget LoadRenderTarget"), STAT_UOdysseyCachedRenderTarget_LoadRenderTarget, STATGROUP_OdysseyCachedRenderTarget);
 DECLARE_CYCLE_STAT(TEXT("OdysseyCachedRenderTarget LoadRenderTarget_Empty"), STAT_UOdysseyCachedRenderTarget_LoadRenderTarget_Empty, STATGROUP_OdysseyCachedRenderTarget);
 
@@ -71,7 +69,7 @@ UOdysseyCachedRenderTarget::GetPixelFormat() const
 {
     switch(Format)
     {
-        case EOdysseyCachedRenderTargetFormat::RGBA8: return PF_B8G8R8A8;
+        case EOdysseyCachedRenderTargetFormat::RGBA8: return PF_R8G8B8A8;
         case EOdysseyCachedRenderTargetFormat::RGBA16F: return PF_FloatRGBA;
         case EOdysseyCachedRenderTargetFormat::RGBA32F: return PF_A32B32G32R32F;
     }
@@ -79,7 +77,7 @@ UOdysseyCachedRenderTarget::GetPixelFormat() const
 }
 
 int
-UOdysseyCachedRenderTarget::GetChannelsPerPixel() const
+UOdysseyCachedRenderTarget::GetComponentsPerPixel() const
 {
     switch(Format)
     {
@@ -91,7 +89,7 @@ UOdysseyCachedRenderTarget::GetChannelsPerPixel() const
 }
 
 int
-UOdysseyCachedRenderTarget::GetBytesPerChannel() const
+UOdysseyCachedRenderTarget::GetBytesPerComponent() const
 {
     switch(Format)
     {
@@ -105,7 +103,7 @@ UOdysseyCachedRenderTarget::GetBytesPerChannel() const
 int
 UOdysseyCachedRenderTarget::GetBytesPerPixel() const
 {
-    return GetChannelsPerPixel() * GetBytesPerChannel();
+    return GetComponentsPerPixel() * GetBytesPerComponent();
 }
 
 int
@@ -259,11 +257,11 @@ UOdysseyCachedRenderTarget::Render(UTextureRenderTarget2D* Destination, FIntRect
 
     if (mCacheState == eCacheState::Image)
     {
-        if (mImageFuture.IsValid())
+        if (mRLECompressedBufferFuture.IsValid())
         {
             ENQUEUE_RENDER_COMMAND(UOdysseyCachedRenderTarget_Render_Image)(
                 [
-                    //imageFuture = mImageFuture,
+                    RLECompressedBufferFuture = mRLECompressedBufferFuture,
                     width = Width,
                     height = Height,
                     destination = Destination,
@@ -280,44 +278,14 @@ UOdysseyCachedRenderTarget::Render(UTextureRenderTarget2D* Destination, FIntRect
                     {
                         RDG_EVENT_SCOPE(graphBuilder, "UOdysseyCachedRenderTarget_Render_Image");
                         RDG_GPU_STAT_SCOPE(graphBuilder, UOdysseyCachedRenderTarget_Render_Image);
-
-                        /*FRDGTextureDesc renderTextureDesc = FRDGTextureDesc::Create2D(
-                            FIntPoint(width, height),
-                            pixelFormat,
-                            FClearValueBinding::Transparent,
-                            ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
-                        );
-                        FRDGTextureRef renderTexture = graphBuilder.CreateTexture(renderTextureDesc, TEXT("UOdysseyCachedRenderTarget::RenderTexture"));*/
                         FRDGTextureRef destinationTexture = destination->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
 
-                        /* auto* PassParameters = graphBuilder.AllocParameters<FRenderTargetParameters>();
-                        PassParameters->RenderTargets[0] = FRenderTargetBinding(renderTexture, ERenderTargetLoadAction::ENoAction);
 
-                        graphBuilder.AddPass(
-                            RDG_EVENT_NAME("OdysseyCopyFromImage"),
-                            PassParameters,
-                            ERDGPassFlags::Raster,
-                            [imageFuture, renderTexture, height, stride](FRHICommandListImmediate& RHICmdList)
-                            {
-                                const FUniqueBuffer& image = imageFuture.Get();
-                                FTextureRHIRef destinationTexture = renderTexture->GetRHI();
-                                FRHILockTextureArgs LockArgs = FRHILockTextureArgs::Lock2D(destinationTexture, 0, RLM_WriteOnly, false);
-                                FRHILockTextureResult LockResult = RHICmdList.LockTexture(LockArgs);
-
-                                for (uint32 y = 0; y < height; y++)
-                                {
-                                    void* src = (uint8*)(image.GetData()) + stride * y;
-                                    void* dst = (uint8*)(LockResult.Data) + LockResult.Stride * y;
-                                    FMemory::Memcpy(dst, src, stride);
-                                }
-
-                                RHICmdList.UnlockTexture(LockArgs);
-                            }
-                        ); */
+                        const FOdysseyTiledRLE::FRLECompressedBuffer& RLEBuffer = RLECompressedBufferFuture.Get();
 
                         //TEST:
-                        FOdysseyTiledRLE::FRLECompressedBuffer RLEBuffer;
-                        FOdysseyTiledRLE::TestDecompressTiledRLEShader(width, height, RLEBuffer);
+                        //FOdysseyTiledRLE::FRLECompressedBuffer RLEBuffer;
+                        //FOdysseyTiledRLE::TestDecompressTiledRLEShader(width, height, RLEBuffer);
                         //TEST:
 
                         FRDGTextureRef renderTexture = FOdysseyTiledRLE::DecompressRenderThread(graphBuilder, RLEBuffer, pixelFormat);
@@ -475,40 +443,15 @@ UOdysseyCachedRenderTarget::UnloadRenderTarget() const
 
     if (mIsImageCacheInvalid)
     {
-        TSharedRef<TPromise<FUniqueBuffer>> promise = MakeShared<TPromise<FUniqueBuffer>>();
+        FOdysseyTiledRLE::FCompressionParams compressionParams;
 
-        ENQUEUE_RENDER_COMMAND(UOdysseyCachedRenderTarget_UnloadRenderTarget)(
-            [
-                promise,
-                width = Width,
-                height = Height,
-                source = mRenderTarget,
-                pixelFormat = GetPixelFormat(),
-                stride = GetStride()
-            ](FRHICommandListImmediate& RHICmdList)
-            {
-                SCOPE_CYCLE_COUNTER(STAT_UOdysseyCachedRenderTarget_UnloadRenderTarget);
-                DECLARE_GPU_STAT(UOdysseyCachedRenderTarget_UnloadRenderTarget);
+        compressionParams.TileWidth = 64;
+        compressionParams.TileHeight = 64;
+        compressionParams.BytesPerComponent = GetBytesPerComponent();
+        compressionParams.ComponentsPerPixel = 4;
 
-                FTextureRHIRef sourceTexture = source->GetResource()->TextureRHI;
-                FRHILockTextureArgs LockArgs = FRHILockTextureArgs::Lock2D(sourceTexture, 0, RLM_ReadOnly, false);
-                FRHILockTextureResult LockResult = RHICmdList.LockTexture(LockArgs);
-
-                FUniqueBuffer image = FUniqueBuffer::Alloc(stride * height);
-                for (uint32 y = 0; y < height; y++)
-                {
-                    void* src = (uint8*)(LockResult.Data) + LockResult.Stride * y;
-                    void* dst = (uint8*)(image.GetData()) + stride * y;
-                    FMemory::Memcpy(dst, src, stride);
-                }
-                RHICmdList.UnlockTexture(LockArgs);
-
-                promise->SetValue(MoveTemp(image));
-            }
-        );
-
-        mImageFuture = promise->GetFuture().Share();
-
+        TSharedRef<TPromise<FOdysseyTiledRLE::FRLECompressedBuffer>> promise = FOdysseyTiledRLE::Compress(mRenderTarget.Get(), compressionParams);
+        mRLECompressedBufferFuture = promise->GetFuture().Share();
         mIsImageCacheInvalid = false;
     }
     mRenderTarget = nullptr;
@@ -524,18 +467,18 @@ UOdysseyCachedRenderTarget::UnloadImage() const
     if (mCacheState != eCacheState::Image)
         return;
 
-    if (mIsDDCCacheInvalid && mImageFuture.IsValid())
+    /*if (mIsDDCCacheInvalid && mRLECompressedBufferFuture.IsValid())
     {
-        const FUniqueBuffer& image = mImageFuture.Get();
+        const FOdysseyTiledRLE::FRLECompressedBuffer& image = mRLECompressedBufferFuture.Get();
 
         FOdysseyDiskCache cache(OdysseyCachedRenderTarget_CACHE_NAME, OdysseyCachedRenderTarget_CACHE_VERSION);
         FSharedBuffer sharedBuffer = FSharedBuffer::MakeView(image.GetData(), image.GetSize());
         cache.Save(mId.ToString(), sharedBuffer);
 
         mIsDDCCacheInvalid = false;
-    }
+    }*/
 
-    mImageFuture = TSharedFuture<FUniqueBuffer>();
+    mRLECompressedBufferFuture = TSharedFuture<FOdysseyTiledRLE::FRLECompressedBuffer>();
 
     eCacheState oldState = mCacheState;
     mCacheState = eCacheState::DDC;
@@ -548,14 +491,14 @@ UOdysseyCachedRenderTarget::LoadImage() const
     if (mCacheState != eCacheState::DDC)
         return;
 
-    FOdysseyDiskCache cache(OdysseyCachedRenderTarget_CACHE_NAME, OdysseyCachedRenderTarget_CACHE_VERSION);
+    /* FOdysseyDiskCache cache(OdysseyCachedRenderTarget_CACHE_NAME, OdysseyCachedRenderTarget_CACHE_VERSION);
     FUniqueBuffer buffer;
     if (cache.Load(mId.ToString(), buffer))
     {
         TPromise<FUniqueBuffer> promise;
         promise.SetValue(MoveTemp(buffer));
-        mImageFuture = promise.GetFuture().Share();
-    }
+        mRLECompressedBufferFuture = promise.GetFuture().Share();
+    } */
 
     eCacheState oldState = mCacheState;
     mCacheState = eCacheState::Image;
@@ -580,29 +523,9 @@ UOdysseyCachedRenderTarget::LoadRenderTarget() const
     mRenderTarget->InitCustomFormat(Width, Height, GetPixelFormat(), true);
     mRenderTarget->UpdateResourceImmediate();
 
-    if (mImageFuture.IsValid())
+    if (mRLECompressedBufferFuture.IsValid())
     {
-        ENQUEUE_RENDER_COMMAND(UOdysseyCachedRenderTarget_LoadRenderTarget)(
-            [imageFuture = mImageFuture, height = Height, destination = mRenderTarget, stride = GetStride()](FRHICommandListImmediate& RHICmdList)
-            {
-                SCOPE_CYCLE_COUNTER(STAT_UOdysseyCachedRenderTarget_LoadRenderTarget);
-                DECLARE_GPU_STAT(UOdysseyCachedRenderTarget_LoadRenderTarget);
-
-                const FUniqueBuffer& image = imageFuture.Get();
-                FTextureRHIRef destinationTexture = destination->GetRenderTargetResource()->TextureRHI;
-                FRHILockTextureArgs LockArgs = FRHILockTextureArgs::Lock2D(destinationTexture, 0, RLM_WriteOnly, false);
-                FRHILockTextureResult LockResult = RHICmdList.LockTexture(LockArgs);
-
-                for (uint32 y = 0; y < height; y++)
-                {
-                    void* src = (uint8*)(image.GetData()) + stride * y;
-                    void* dst = (uint8*)(LockResult.Data) + LockResult.Stride * y;
-                    FMemory::Memcpy(dst, src, stride);
-                }
-
-                RHICmdList.UnlockTexture(LockArgs);
-            }
-        );
+        FOdysseyTiledRLE::DecompressGameThread(mRLECompressedBufferFuture.Get(), mRenderTarget.Get());
     }
     else
     {
