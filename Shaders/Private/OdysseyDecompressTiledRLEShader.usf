@@ -40,7 +40,7 @@
 struct FTileDescriptor
 {
     int position; //position in RLETilePositions
-    int count; //number of positions in RLETilePositions corresponding to this tile
+    uint count; //number of positions in RLETilePositions corresponding to this tile
 };
 
 uint TileWidth; //Width of 1 tile in pixels
@@ -64,10 +64,10 @@ uint2 GetNumTiles()
 
 uint2 GetTileSize(uint2 iTile)
 {
-    uint2 fullTileSize = uint2(iTile.x * TileWidth, iTile.y * TileHeight);
+    uint2 endTilePos = uint2((iTile.x + 1) * TileWidth, (iTile.y + 1) * TileHeight);
     return uint2(
-        fullTileSize.x - fullTileSize.x % TextureWidth,
-        fullTileSize.y - fullTileSize.y % TextureHeight
+        TileWidth - max(0, int(endTilePos.x - TextureWidth)),
+        TileHeight - max(0, int(endTilePos.y - TextureHeight))
     );
 }
 
@@ -141,7 +141,7 @@ bool GetTileDescriptor(in uint2 iTile, out FTileDescriptor oTileDescriptor)
 {
     uint2 numTiles = GetNumTiles();
 
-    FTileDescriptor descriptor = TileDescriptors[iTile.y * numTiles.x * iTile.x];
+    FTileDescriptor descriptor = TileDescriptors[iTile.y * numTiles.x + iTile.x];
     if (descriptor.position < 0) //if position is negative tile is considered empty
         return false;
 
@@ -149,49 +149,48 @@ bool GetTileDescriptor(in uint2 iTile, out FTileDescriptor oTileDescriptor)
     return true;
 }
 
-bool GetPixelOffsetInRLEData(in uint2 iTile, in uint2 iPositionInTile, out uint oRLEStartPosition, out uint oRLEOffset)
+bool GetPixelOffsetInRLEData(in uint2 iTile, in uint iPixelPosition, out uint oRLEStartPosition, out uint oRLEOffset)
 {
     FTileDescriptor tileDescriptor;
     if (!GetTileDescriptor(iTile, tileDescriptor))
         return false;
 
-    uint2 tileSize = GetTileSize(iTile);
-    uint pixelPosition = (iPositionInTile.y * tileSize.x) + iPositionInTile.x;
-
     //recherche dicotomique
-    uint low = 0;
-    uint high = tileDescriptor.count - 1;
+    uint low = abs(tileDescriptor.position);
+    uint high = abs(tileDescriptor.position) + tileDescriptor.count - 1;
     while (low <= high)
     {
         uint mid = low + (high - low) / 2;
         uint pos = abs(RLEPositions[mid]);
+        uint posNext = abs(RLEPositions[mid + 1]);
 
-        if (pixelPosition == pos)
+        if (iPixelPosition >= pos && iPixelPosition < posNext)
         {
-            oRLEStartPosition = pos;
+            oRLEStartPosition = mid;
             oRLEOffset = 0;
             return true;
         }
 
-        // If x greater, ignore left half
-        if (pixelPosition > pos)
-        {
-            low = mid;
-        }
         // If x is smaller, ignore right half
-        else
+        if (iPixelPosition < posNext)
         {
             high = mid - 1;
         }
+        // If x greater, ignore left half
+        else
+        {
+            low = mid + 1;
+        }
     }
 
-    oRLEStartPosition = abs(RLEPositions[low]);
-    oRLEOffset = pixelPosition - oRLEStartPosition;
-    return true;
+    //Should not happen
+    return false;
 }
 
 void ReadRLE(uint iRLEStartPosition, uint iRLEOffset, uint iTilePosition, uint Count, uint2 tile)
 {
+    uint2 tileSize = GetTileSize(tile);
+
     uint RLEPosition = iRLEStartPosition;
     uint RLEOffset = iRLEOffset;
     uint count = Count;
@@ -200,15 +199,15 @@ void ReadRLE(uint iRLEStartPosition, uint iRLEOffset, uint iTilePosition, uint C
     {
         int firstPosition = RLEPositions[RLEPosition];
         int lastPosition = RLEPositions[RLEPosition + 1];
-        int numPixels = min(abs(lastPosition) - abs(firstPosition) - RLEOffset, count);
+        uint numPixels = min(abs(lastPosition) - abs(firstPosition) - RLEOffset, count);
         if (lastPosition > 0) //Repetition
         {
-            uint pixelValue = GetRLEDataValueAt(RLEPosition);
+            float4 pixelValue = GetRLEDataValueAt(RLEPosition);
             for (uint i = 0; i < numPixels; i++)
             {
                 uint2 texturePos = uint2(
-                    tile.x * TileWidth + ((currentTilePos + i) % TileWidth),
-                    tile.y * TileHeight + ((currentTilePos + i) / TileWidth)
+                    tile.x * TileWidth + ((currentTilePos + i) % tileSize.x),
+                    tile.y * TileHeight + ((currentTilePos + i) / tileSize.y)
                 );
                 OutputTexture[texturePos] = pixelValue;
             }
@@ -219,10 +218,10 @@ void ReadRLE(uint iRLEStartPosition, uint iRLEOffset, uint iTilePosition, uint C
             uint pointer = RLEData[RLEPosition * ValueSize] + RLEOffset;
             for (uint i = 0; i < numPixels; i++)
             {
-                uint pixelValue = GetSequenceDataValueAt(pointer + i);
+                float4 pixelValue = GetSequenceDataValueAt(pointer + i);
                 uint2 texturePos = uint2(
-                    tile.x * TileWidth + ((currentTilePos + i) % TileWidth),
-                    tile.y * TileHeight + ((currentTilePos + i) / TileWidth)
+                    tile.x * TileWidth + ((currentTilePos + i) % tileSize.x),
+                    tile.y * TileHeight + ((currentTilePos + i) / tileSize.y)
                 );
                 OutputTexture[texturePos] = pixelValue;
             }
@@ -236,7 +235,7 @@ void ReadRLE(uint iRLEStartPosition, uint iRLEOffset, uint iTilePosition, uint C
 
 #define NUM_THREADS_X 8
 #define NUM_THREADS_Y 8
-#define NUM_TOTAL_THREADS NUM_THREADS_X * NUM_THREADS_Y
+#define NUM_TOTAL_THREADS (NUM_THREADS_X * NUM_THREADS_Y)
 
 //32 * 32 * 1 = 1024 threads which is the maximum authorized amount of threads in ComputeShaders V5
 //(see: https://learn.microsoft.com/fr-fr/windows/win32/direct3dhlsl/sm5-attributes-numthreads)
@@ -250,34 +249,82 @@ void Main(
     uint2 tile = GroupId.xy;
     uint2 tileSize = GetTileSize(tile);
 
-    uint idealThreadPixelCount = max( 1, (tileSize.x * tileSize.y) / NUM_TOTAL_THREADS );
+/*
+    Example of repartition of pixels by thread
 
-    uint firstPixel = GroupIndex * idealThreadPixelCount;
-    uint lastPixel = min((GroupIndex + 1) * idealThreadPixelCount, (tileSize.x * tileSize.y)) - 1;
-    uint threadPixelCount = firstPixel - lastPixel + 1;
+    GroupIndex       =>   0    1    2    3    | numPixelsPerTile | minThreadPixelCount | maxThreadPixelCount |
+    threadPixelCount => [ 1 ][ 0 ][ 0 ][ 0 ]  | 1                | 0                   | 1
+    threadPixelCount => [ 1 ][ 1 ][ 0 ][ 0 ]  | 2                | 0                   | 1
+    threadPixelCount => [ 1 ][ 1 ][ 1 ][ 0 ]  | 3                | 0                   | 1
+    threadPixelCount => [ 1 ][ 1 ][ 1 ][ 1 ]  | 4                | 0                   | 1
+    threadPixelCount => [ 2 ][ 1 ][ 1 ][ 1 ]  | 5                | 1                   | 2
+    threadPixelCount => [ 2 ][ 2 ][ 1 ][ 1 ]  | 6                | 1                   | 2
+    threadPixelCount => [ 2 ][ 2 ][ 2 ][ 1 ]  | 7                | 1                   | 2
+    threadPixelCount => [ 2 ][ 2 ][ 2 ][ 2 ]  | 8                | 1                   | 2
+    threadPixelCount => [ 3 ][ 2 ][ 2 ][ 2 ]  | 9                | 2                   | 3
+    threadPixelCount => [ 3 ][ 3 ][ 2 ][ 2 ]  | 10               | 2                   | 3
+    threadPixelCount => [ 3 ][ 3 ][ 3 ][ 2 ]  | 11               | 2                   | 3
+    threadPixelCount => [ 3 ][ 3 ][ 3 ][ 3 ]  | 12               | 2                   | 3
+*/
 
-    if (threadPixelCount <= 0)
+    uint numPixelsPerTile = tileSize.x * tileSize.y;
+    if (numPixelsPerTile <= 0) //Makes no sense to have negative or null amount of pixels to process
         return;
 
-    uint2 posInTile = uint2(firstPixel % TileWidth, firstPixel / TileWidth);
-    uint startPos = posInTile.y * TileWidth + posInTile.x;
+    uint minThreadPixelCount = (numPixelsPerTile - 1) / NUM_TOTAL_THREADS;
+    uint maxThreadPixelCount = minThreadPixelCount + 1;
+    uint threadPixelCount = maxThreadPixelCount;
+    if ((GroupIndex * maxThreadPixelCount) + (NUM_TOTAL_THREADS - GroupIndex) * minThreadPixelCount >= numPixelsPerTile)
+        threadPixelCount = minThreadPixelCount;
 
-    uint RLEStartPosition;
-    uint RLEOffset;
+    if (threadPixelCount <= 0) //No pixel to process for this thread
+        return;
+
+    uint numThreadAtMaxPixelCount = numPixelsPerTile - (NUM_TOTAL_THREADS * minThreadPixelCount);
+    uint firstPixel = min(GroupIndex, numThreadAtMaxPixelCount) * maxThreadPixelCount + max(0, int(GroupIndex - numThreadAtMaxPixelCount)) * minThreadPixelCount;
+    uint lastPixel = firstPixel + threadPixelCount - 1;
+
+    uint RLEStartPosition = 1;
+    uint RLEOffset = 1;
 
     //If GetPixelOffsetInRLEData returns false, the tile is considered empty
-    if (!GetPixelOffsetInRLEData(tile, posInTile, RLEStartPosition, RLEOffset))
+    if (!GetPixelOffsetInRLEData(tile, firstPixel, RLEStartPosition, RLEOffset))
     {
-        for (int i = firstPixel; i <= lastPixel; i++)
+        for (uint i = firstPixel; i <= lastPixel; i++)
         {
             uint2 texturePos = uint2(
-                tile.x * TileWidth + ((startPos + i) % TileWidth),
-                tile.y * TileHeight + ((startPos + i) / TileWidth)
+                tile.x * TileWidth + (i % tileSize.x),
+                tile.y * TileHeight + (i / tileSize.x)
             );
-            OutputTexture[texturePos] = float4(0.f, 0.f, 0.f, 0.f);
+            OutputTexture[texturePos] = float4(1.f, 0.f, 0.f, 1.f);
         }
         return;
     }
 
-    ReadRLE(RLEStartPosition, RLEOffset, startPos, threadPixelCount, tile);
+    /* for (uint y = 0; y < TileHeight; y++)
+    {
+        for (uint x = 0; x < TileWidth; x++)
+        {
+            uint2 texturePos = uint2(
+                min( TextureWidth - 1, tile.x * TileWidth + x),
+                min( TextureHeight - 1, tile.y * TileHeight + y)
+            );
+            OutputTexture[texturePos] = float4(1.f, 0.f, 0.f, 1.f);
+        }
+    }*/
+
+    /*for (uint y = 0; y < TileHeight/NUM_THREADS_Y; y++)
+    {
+        for (uint x = 0; x < TileWidth/NUM_THREADS_X; x++)
+        {
+            OutputTexture[DispatchThreadId.xy * uint2(TileWidth/NUM_THREADS_X, TileHeight/NUM_THREADS_Y) + uint2(x, y)] = float4(
+                float(RLEStartPosition),
+                float(RLEOffset),
+                0.f,
+                1.f
+            );
+        }
+    }*/
+
+    ReadRLE(RLEStartPosition, RLEOffset, firstPixel, threadPixelCount, tile);
 }
