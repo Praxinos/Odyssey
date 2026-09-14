@@ -54,6 +54,7 @@ public class OdysseyRendering : ModuleRules
                 "Core",
                 "CoreUObject",
                 "Engine",
+                "ImageCore",
                 "InputCore",
                 "Projects",
                 "RawMesh",
