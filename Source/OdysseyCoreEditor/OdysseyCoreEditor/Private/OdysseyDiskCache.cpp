@@ -19,8 +19,47 @@ FOdysseyDiskCache::FOdysseyDiskCache(const FString& iCacheName, const FString& i
 {
 }
 
+bool
+FOdysseyDiskCache::ProbablyExists(const FString& iId) const
+{
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyDiskCache::Load);
+
+    bool success = false;
+
+    // put code you want to time here.
+
+    //Load Block from DDC
+    FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
+        *mCacheName,
+        *mCacheVersion, //a GUID identifying the version of the key
+        iId
+    );
+
+    UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Blocking);
+    UE::DerivedData::GetCache().GetValue(
+        {
+            UE::DerivedData::FCacheGetValueRequest
+            {
+                UE::FSharedString(TEXT("FOdysseyDiskCache")),
+                UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
+                UE::DerivedData::ECachePolicy::Local | UE::DerivedData::ECachePolicy::SkipData | UE::DerivedData::ECachePolicy::SkipMeta
+            }
+        },
+        getOwner,
+        [&](UE::DerivedData::FCacheGetValueResponse&& iResponse)
+        {
+            if (iResponse.Status != UE::DerivedData::EStatus::Ok)
+                return;
+
+            success = true;
+        }
+    );
+    getOwner.Wait();
+    return success;
+}
+
 void
-FOdysseyDiskCache::Save(const FString& iId, const FSharedBuffer& iBuffer)
+FOdysseyDiskCache::Save(const FString& iId, const FSharedBuffer& iBuffer) const
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyDiskCache::Save);
     FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
@@ -50,7 +89,7 @@ FOdysseyDiskCache::Save(const FString& iId, const FSharedBuffer& iBuffer)
 }
 
 bool
-FOdysseyDiskCache::Load(const FString& iId, FUniqueBuffer& oBuffer)
+FOdysseyDiskCache::Load(const FString& iId, FUniqueBuffer& oBuffer) const
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyDiskCache::Load);
 
@@ -98,8 +137,57 @@ FOdysseyDiskCache::Load(const FString& iId, FUniqueBuffer& oBuffer)
     return success;
 }
 
+bool
+FOdysseyDiskCache::LoadInto(const FString& iId, FUniqueBuffer& oBuffer) const
+{
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyDiskCache::Load);
+
+    bool success = false;
+
+    // put code you want to time here.
+
+    //Load Block from DDC
+    FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
+        *mCacheName,
+        *mCacheVersion, //a GUID identifying the version of the key
+        iId
+    );
+
+    UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Blocking);
+    UE::DerivedData::GetCache().GetValue(
+        {
+            UE::DerivedData::FCacheGetValueRequest
+            {
+                UE::FSharedString(TEXT("FOdysseyDiskCache")),
+                UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
+                UE::DerivedData::ECachePolicy::Local
+            }
+        },
+        getOwner,
+        [&](UE::DerivedData::FCacheGetValueResponse&& iResponse)
+        {
+            if (iResponse.Status != UE::DerivedData::EStatus::Ok)
+                return;
+
+            if ( !iResponse.Value.HasData() || iResponse.Value.GetRawSize() == 1) //assume the block is empty, see RemoveValueFromCache()
+                return;
+
+            if (iResponse.Value.GetRawSize() != oBuffer.GetSize())
+                return;
+
+            if ( !iResponse.Value.GetData().TryDecompressTo(oBuffer) )
+                return;
+
+            //oBuffer = uniqueBuffer.MoveToShared();
+            success = true;
+        }
+    );
+    getOwner.Wait();
+    return success;
+}
+
 void
-FOdysseyDiskCache::Remove(const FString& iId)
+FOdysseyDiskCache::Remove(const FString& iId) const
 {
     FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
         *mCacheName,
