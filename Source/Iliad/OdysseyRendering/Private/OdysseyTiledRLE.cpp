@@ -6,6 +6,7 @@
 #include "RenderGraphBuilder.h"
 #include "RenderGraphEvent.h"
 #include "RenderGraphUtils.h"
+#include "ScreenPass.h"
 #include "Engine/TextureRenderTarget2D.h"
 
 DECLARE_STATS_GROUP(TEXT("OdysseyDecompressTiledRLEShader"), STATGROUP_OdysseyDecompressTiledRLEShader, STATCAT_Advanced);
@@ -137,10 +138,19 @@ FOdysseyTiledRLE::DecompressGameThread(const FRLECompressedBuffer& iBuffer, UTex
     EPixelFormat pixelFormat = oTexture->GetFormat();
 
     ENQUEUE_RENDER_COMMAND(SceneDrawCompletion)(
-    [iBuffer, pixelFormat](FRHICommandListImmediate& RHICmdList)
+    [oTexture, iBuffer, pixelFormat](FRHICommandListImmediate& RHICmdList)
     {
         FRDGBuilder graphBuilder(RHICmdList);
         FRDGTextureRef outputTexture = DecompressRenderThread(graphBuilder, iBuffer, pixelFormat);
+        FRDGTextureRef destinationTexture = oTexture->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+
+        AddDrawTexturePass(
+            graphBuilder,
+            FScreenPassViewInfo(),
+            outputTexture,
+            destinationTexture
+        );
+
         graphBuilder.Execute();
     });
 }

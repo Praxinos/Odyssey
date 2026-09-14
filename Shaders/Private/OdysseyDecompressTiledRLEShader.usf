@@ -334,10 +334,13 @@ void Main(
                 tile.x * TileWidth + (i % tileSize.x),
                 tile.y * TileHeight + (i / tileSize.x)
             );
-            if (texturePos.x & 1)
+
+            OutputTexture[texturePos] = float4(0.f, 0.f, 0.f, 0.f);
+
+            /*if (texturePos.x & 1) //Debug Empty tiles
             {
                 OutputTexture[texturePos] = float4(1.f, 0.f, 0.f, 1.f);
-            }
+            }*/
         }
 
         /* uint i = 0;
