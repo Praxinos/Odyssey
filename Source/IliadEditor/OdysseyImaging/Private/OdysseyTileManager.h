@@ -40,17 +40,15 @@ public:
     struct FTileId
     {
         FTileId()
-            : Index(0xFFFFFFFF) //Invalid Index by default
-        {
-        }
-
-        FTileId(uint32 InIndex)
-            : Index(InIndex)
+            : Index(INDEX_NONE) //Invalid Index by default
+            , Generation(INDEX_NONE)
         {
         }
 
         uint32 Index;
-        bool IsValid() const { return Index != 0xFFFFFFFF; };
+        uint32 Generation;
+        bool IsValid() const { return Index != INDEX_NONE && Generation != INDEX_NONE; };
+        bool operator==(const FTileId&) const = default;
     };
 
     struct FCreatedTile
@@ -97,6 +95,7 @@ private:
     struct FTile
     {
         TSharedPtr<FRHIGPUTextureReadback> GPUReadBack;
+        TSharedPtr<FRHIGPUBufferReadback> GPUIsEmptyReadBack;
         FCompressedBuffer CompressedBuffer;
 
         //mutable because it can be loaded while we read the tile
@@ -123,16 +122,16 @@ private:
 private:
     TArray<FTile> Tiles;
 
+    FCriticalSection FreeTilesMutex;
+    TArray<FTileId> FreeTiles;
+
     //Caching pipeline
+    FCriticalSection PipelineMutex;
     TArray<FTileId> PendingTilesToReadBack;
-    TArray<FTileId> PendingTilesToCompress;
-    TArray<FTileId> PendingTilesToCacheOnDisk;
 
     //Tiles eviction pipeline
     TArray<FTileId> TilesToEvictUncompressed;
     TArray<FTileId> TilesToEvictCompressed;
-
-    FCriticalSection PipelineMutex;
 
     //Stats
     TAtomic<int64> StatNumTilesUncompressed;

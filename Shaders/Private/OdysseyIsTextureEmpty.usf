@@ -1,0 +1,59 @@
+#include "/Engine/Public/Platform.ush"
+
+Texture2D<float4> InputTexture;
+
+//Determines if the whole texture is empty (contains only null alpha values)
+//This value is only written by the first thread of each thread group to avoid contention
+RWBuffer<uint> TextureIsEmpty;
+
+//Determines if the current thread group is empty (contains only null alpha values)
+//This value is written by all threads
+//But each thread group has its own GroupIsEmpty variable
+//This limits contention to the number of thread groups instead of the number of threads
+groupshared uint GroupIsEmpty;
+
+[numthreads(8, 8, 1)]
+void MainCS(
+    uint3 DispatchThreadId : SV_DispatchThreadID,
+    uint3 GroupThreadId    : SV_GroupThreadID)
+{
+    // One thread initializes the shared flag.
+    if (GroupThreadId.x == 0 && GroupThreadId.y == 0)
+    {
+        GroupIsEmpty = 1;
+    }
+
+    // Make sure initialization is visible to all threads.
+    GroupMemoryBarrierWithGroupSync();
+
+    // Don't access outside the texture.
+    uint Width;
+    uint Height;
+    InputTexture.GetDimensions(Width, Height);
+
+    if (DispatchThreadId.x < Width &&
+        DispatchThreadId.y < Height)
+    {
+        float Alpha = InputTexture[DispatchThreadId.xy].a;
+
+        if (Alpha > 0.0f)
+        {
+            // Atomic operation is only on groupshared memory.
+            uint Unused;
+            InterlockedAnd(GroupIsEmpty, 0, Unused);
+        }
+    }
+
+    // Make sure all threads have finished updating GroupHasAlpha.
+    GroupMemoryBarrierWithGroupSync();
+
+    // Only one thread per group touches the global result.
+    if (GroupThreadId.x == 0 && GroupThreadId.y == 0)
+    {
+        if (GroupIsEmpty == 0)
+        {
+            uint Unused;
+            InterlockedAnd(TextureIsEmpty[0], 0, Unused);
+        }
+    }
+}
