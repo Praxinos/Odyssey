@@ -93,6 +93,9 @@ FOdysseyDiskCache::Load(const FString& iId, FUniqueBuffer& oBuffer) const
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyDiskCache::Load);
 
+    double start = FPlatformTime::Seconds() * 1000.f;
+    double end = FPlatformTime::Seconds() * 1000.f;
+
     bool success = false;
 
     // put code you want to time here.
@@ -103,6 +106,10 @@ FOdysseyDiskCache::Load(const FString& iId, FUniqueBuffer& oBuffer) const
         *mCacheVersion, //a GUID identifying the version of the key
         iId
     );
+
+    end = FPlatformTime::Seconds() * 1000.f;
+    UE_LOG(LogTemp, Warning, TEXT("#1 FOdysseyDiskCache::Load() in %f ms."), end-start);
+    start = FPlatformTime::Seconds() * 1000.f;
 
     UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Blocking);
     UE::DerivedData::GetCache().GetValue(
@@ -117,17 +124,32 @@ FOdysseyDiskCache::Load(const FString& iId, FUniqueBuffer& oBuffer) const
         getOwner,
         [&, this](UE::DerivedData::FCacheGetValueResponse&& iResponse)
         {
+            end = FPlatformTime::Seconds() * 1000.f;
+            UE_LOG(LogTemp, Warning, TEXT("#2 FOdysseyDiskCache::Load() in %f ms."), end-start);
+            start = FPlatformTime::Seconds() * 1000.f;
+
             if (iResponse.Status != UE::DerivedData::EStatus::Ok)
                 return;
 
             if ( !iResponse.Value.HasData() || iResponse.Value.GetRawSize() == 1) //assume the block is empty, see RemoveValueFromCache()
                 return;
 
-            //FUniqueBuffer uniqueBuffer = FUniqueBuffer::MakeView(oBlock->Bits(), oBlock->BytesTotal());
+            end = FPlatformTime::Seconds() * 1000.f;
+            UE_LOG(LogTemp, Warning, TEXT("#3 FOdysseyDiskCache::Load() in %f ms."), end-start);
+            start = FPlatformTime::Seconds() * 1000.f;
 
             oBuffer = FUniqueBuffer::Alloc(iResponse.Value.GetRawSize());
+
+            end = FPlatformTime::Seconds() * 1000.f;
+            UE_LOG(LogTemp, Warning, TEXT("#4 FOdysseyDiskCache::Load() in %f ms."), end-start);
+            start = FPlatformTime::Seconds() * 1000.f;
+
             if ( !iResponse.Value.GetData().TryDecompressTo(oBuffer) )
                 return;
+
+            end = FPlatformTime::Seconds() * 1000.f;
+            UE_LOG(LogTemp, Warning, TEXT("#5 FOdysseyDiskCache::Load() in %f ms."), end-start);
+            start = FPlatformTime::Seconds() * 1000.f;
 
             //oBuffer = uniqueBuffer.MoveToShared();
             success = true;
