@@ -470,6 +470,9 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
     args.Command = FOdysseyViewportCommands::Get().ResetViewportFit;
     toolbarBuilder.AddToolBarButton( args );
 
+    args.Command = FOdysseyViewportCommands::Get().ResetViewportAll;
+    toolbarBuilder.AddToolBarButton( args );
+
     toolbarBuilder.AddSeparator();
 
     // Flip
@@ -491,10 +494,6 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
                                          //---
 
                                          settingsMenu.BeginSection( "SettingsMiscSection", LOCTEXT( "viewport.settings-section.advanced.label", "Misc" ) );
-
-                                         settingsMenu.AddMenuEntry( FOdysseyViewportCommands::Get().ResetViewportAll );
-
-                                         settingsMenu.AddSeparator( "SettingsMiscSeparator" );
 
                                          {
                                              FMenuEntryParams params;
