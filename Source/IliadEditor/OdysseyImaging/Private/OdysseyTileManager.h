@@ -119,6 +119,13 @@ public:
 
     FOdysseyTileId CreateTile(const FIoHash& InHash, const FCompressedBuffer& InCompressedBuffer);
 
+    /**
+     * Returns a FTextureRHIRef containing the Tile's Texture
+     * The returned FTextureRHIRef can be invalid, indicating an empty texture
+     * Please check FTextureRHIRef::IsValid() before using it
+     */
+    TFuture<FTextureRHIRef> GetTileTexture(FOdysseyTileId InTileId, uint32 InTileSize, EPixelFormat InTileFormat) const;
+
     bool GetTileBuffer(FOdysseyTileId InTileId, FSharedBuffer& OutBuffer);
     bool GetTileBuffer(FOdysseyTileId InTileId, FSharedBuffer& OutBuffer) const;
 
@@ -217,6 +224,8 @@ private:
          * Which also allows us to differentiate Tiles indentified by the same Index but different Generation
         */
         uint64 Generation;
+        TPromise<FTextureRHIRef> TempTexturePromise;
+        TFuture<FTextureRHIRef> TempTexture;
         TSharedPtr<FRHIGPUTextureReadback> GPUReadBack;
         TSharedPtr<FRHIGPUBufferReadback> GPUIsEmptyReadBack;
         TFuture<TSharedPtr<FTileData>> TileData;
@@ -237,7 +246,7 @@ private:
     virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(FOdysseyTileManager, STATGROUP_Tickables); }
 
 private:
-    FCriticalSection FreeTilesMutex;
+    FCriticalSection TilesMutex;
     FCriticalSection HashToTileDataMutex;
 
     TArray64<FTile> Tiles;
