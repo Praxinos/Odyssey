@@ -987,7 +987,7 @@ SCinematicBoardSectionAnimationTransformKeys::GetAreaTooltipText() const //overr
     FText animation_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( mBinding.GetGuid() ) : FText::GetEmpty();
 
     FText animation_text = FText::Format( LOCTEXT( "tooltip-animation-transform-area-animation-name", "Animation: {0}" ), animation_track_text );
-    FText num_keys_text = FText::Format( LOCTEXT( "tooltip-animation-transform-area-num-keys", "Keys: {0}" ), GetMetaChannel()->NumMetaKeys() );
+    FText num_keys_text = FText::Format( LOCTEXT( "tooltip-animation-transform-area-num-keys", "Keys: {0}" ), GetMetaChannel() ? GetMetaChannel()->NumMetaKeys() : 0 );
 
     return FText::Join( FText::FromString( TEXT( "\n" ) ), animation_text, num_keys_text );
 }
@@ -1907,7 +1907,7 @@ SCinematicBoardSectionAnimationTimelineKeys::GetAreaTooltipText() const //overri
     FText animation_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( mBinding.GetGuid() ) : FText::GetEmpty();
 
     FText animation_text = FText::Format( LOCTEXT( "tooltip-animation-timeline-area-animation-name", "Animation: {0}" ), animation_track_text );
-    FText num_keys_text = FText::Format( LOCTEXT( "tooltip-animation-timeline-area-num-keys", "Keys: {0}" ), GetMetaChannel()->NumMetaKeys() );
+    FText num_keys_text = FText::Format( LOCTEXT( "tooltip-animation-timeline-area-num-keys", "Keys: {0}" ), GetMetaChannel() ? GetMetaChannel()->NumMetaKeys() : 0 );
 
     return FText::Join( FText::FromString( TEXT( "\n" ) ), animation_text, num_keys_text );
 }
@@ -2779,7 +2779,12 @@ SCinematicBoardSectionAnimationOpacityKeys::GetAreaTooltipText() const //overrid
     FText animation_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( mBinding.GetGuid() ) : FText::GetEmpty();
 
     FText animation_text = FText::Format( LOCTEXT( "tooltip-animation-opacity-area-animation-name", "Animation: {0}" ), animation_track_text );
-    FText num_keys_text = FText::Format( LOCTEXT( "tooltip-animation-opacity-area-num-keys", "Keys: {0}" ), GetMetaChannel()->NumMetaKeys() );
+    // Check MetaChannel validity in case of:
+    // - right click on the opacity track
+    // - waiting the tooltip appears
+    // - delete animation
+    // - assert as the tooltip tries to update its text with no more meta-channel available
+    FText num_keys_text = FText::Format( LOCTEXT( "tooltip-animation-opacity-area-num-keys", "Keys: {0}" ), GetMetaChannel() ? GetMetaChannel()->NumMetaKeys() : 0 );
 
     return FText::Join( FText::FromString( TEXT( "\n" ) ), animation_text, num_keys_text );
 }
