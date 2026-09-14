@@ -65,13 +65,6 @@ private:
      */
     EOdysseyTiledImageFormat Format = EOdysseyTiledImageFormat::RGBA8;
 
-    struct FTile
-    {
-        FOdysseyTileManager::FTileId Id;
-        UE::Serialization::FEditorBulkData BulkData;
-    };
-
-
     /** TODO:
      * Replace this map with a structure
      * optimized for binary searching
@@ -90,6 +83,6 @@ private:
      * }
     */
 
-
-    TMap<FIntPoint, FTile> Tiles;
+    UPROPERTY(Transient)
+    TMap<FIntPoint, FOdysseyTileId> Tiles;
 };

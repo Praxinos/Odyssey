@@ -83,11 +83,11 @@ UOdysseyTiledImage::CopyFromTexture(UTexture* InTexture, FIntRect InRect, FIntPo
     FOdysseyTileManager::FGetExistingTileId GetExistingTileId = FOdysseyTileManager::FGetExistingTileId::CreateLambda(
         [this](const FIntPoint& InTilePosition)
         {
-            FTile* Tile = Tiles.Find(InTilePosition);
-            if (!Tile)
-                return FOdysseyTileManager::FTileId();
+            FOdysseyTileId* TileId = Tiles.Find(InTilePosition);
+            if (!TileId)
+                return FOdysseyTileId();
 
-            return Tile->Id;
+            return *TileId;
         }
     );
 
@@ -107,11 +107,8 @@ UOdysseyTiledImage::CopyFromTexture(UTexture* InTexture, FIntRect InRect, FIntPo
         if (CreatedTile.IsEmpty())
             continue;
 
-        FTile Tile;
-        Tile.Id = CreatedTile.Id;
-
-        FTile& TileEntry = Tiles.FindOrAdd(CreatedTile.Pos);
-        TileEntry = Tile;
+        FOdysseyTileId& TileId = Tiles.FindOrAdd(CreatedTile.Pos);
+        TileId = CreatedTile.Id;
     }
 }
 
@@ -132,9 +129,9 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
     for (const FIntPoint& TilePosition : TilePositions)
     {
         FSharedBuffer TileBuffer;
-        const FTile* Tile = Tiles.Find(TilePosition);
-        if (Tile)
-            check(FOdysseyTileManager::Get().GetTileBuffer(Tile->Id, TileBuffer));
+        const FOdysseyTileId* TileId = Tiles.Find(TilePosition);
+        if (TileId)
+            FOdysseyTileManager::Get().GetTileBuffer(*TileId, TileBuffer);
 
         TileBuffers.Add(TileBuffer);
     }
