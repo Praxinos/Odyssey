@@ -80,6 +80,7 @@ UOdysseyTiledImage::PostEditUndo()
 void
 UOdysseyTiledImage::CopyFromTexture(UTexture* InTexture, FIntRect InRect, FIntPoint InPosition)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyTiledImage::CopyFromTexture);
     Modify();
 
     FOdysseyTileManager::FGetExistingTileId GetExistingTileId = FOdysseyTileManager::FGetExistingTileId::CreateLambda(
@@ -119,6 +120,8 @@ UOdysseyTiledImage::CopyFromTexture(UTexture* InTexture, FIntRect InRect, FIntPo
 void
 UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InRect, FIntPoint InPosition) const
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyTiledImage::Render);
+
     FIntRect RenderTargetRect(0, 0, OutRenderTarget->GetSurfaceWidth(), OutRenderTarget->GetSurfaceHeight());
     FIntRect DestinationRect(
         InPosition,
@@ -240,6 +243,8 @@ FDevVersionRegistration GRegisterOdysseyTiledImageObjectVersion(FOdysseyTiledIma
 void
 UOdysseyTiledImage::Serialize(FArchive& Ar)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyTiledImage::Serialize);
+
     Super::Serialize(Ar);
 
     //We don't need to save Tiles data for undo or when cooking
