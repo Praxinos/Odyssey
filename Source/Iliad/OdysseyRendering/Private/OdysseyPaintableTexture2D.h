@@ -4,8 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyBlendingMode.h"
-#include "OdysseyTiledRenderTarget.h"
+#include "OdysseyTiledImage.h"
 
 #include "OdysseyPaintableTexture2D.generated.h"
 
@@ -15,7 +14,7 @@
  *
  * Usage:
  *
- * BeginDraw() -> Draw() -> Reset -> EndDraw()
+ * BeginDraw() -> Draw() -> CommitDraw() -> EndDraw()
  *
  */
 UCLASS(BlueprintType)
@@ -28,9 +27,6 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Rendering|PaintableTexture2D")
     void Initialize(int Width, int Height, ETextureRenderTargetFormat Format);
 
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Rendering|PaintableTexture2D")
-    void SetBlendParamters( EOdysseyBlendingMode BlendMode, EOdysseyAlphaMode AlphaMode, float Opacity, bool PreserveAlpha );
-
     UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|PaintableTexture2D")
     int GetWidth() const;
 
@@ -40,43 +36,13 @@ public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|PaintableTexture2D")
     ETextureRenderTargetFormat GetFormat() const;
 
-    UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|PaintableTexture2D")
-    EOdysseyBlendingMode GetBlendMode() const;
-
-    UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|PaintableTexture2D")
-    EOdysseyAlphaMode GetAlphaMode() const;
-
-    UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|PaintableTexture2D")
-    float GetOpacity() const;
-
-    UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|PaintableTexture2D")
-    bool GetPreserveAlpha() const;
-
     /**
      * Starts the drawing process on this texture
-     * Creates the needed Tiless
+     * Creates the needed Tiles
      * Don't forget to Stop the drawing process using EndDraw()
      */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Rendering|PaintableTexture2D")
     void BeginDraw();
-
-    /**
-     * Starts to register an undo
-     */
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Rendering|PaintableTexture2D")
-    void BeginUndoRecording();
-
-    /**
-     * Stops to register an undo
-     */
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Rendering|PaintableTexture2D")
-    void EndUndoRecording();
-
-    /**
-     * Cancel registering an undo
-     */
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Rendering|PaintableTexture2D")
-    void CancelUndoRecording();
 
     /**
      * Draws pixels in SourceRect from Source in WetTiles at DestinationPosition
@@ -84,10 +50,7 @@ public:
      * Does not commit the result of the blend in Texture
      */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Rendering|PaintableTexture2D")
-    void Draw(UTexture* SourceTexture, FIntRect SourceRect, FIntPoint DestinationPosition);
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Rendering|PaintableTexture2D")
-    void Dry();
+    void Draw(UTexture* SourceTexture, FIntRect Rect, FIntPoint Position);
 
     /**
      * Cancels all the calls of Draw() since the last call of CommitDraw() or BeginDraw()
@@ -100,7 +63,7 @@ public:
     void ResetDraw();
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Rendering|PaintableTexture2D")
-    void CommitDraw();
+    void CommitDraw(bool IsUndoable);
 
     /**
      * Stops the drawing process and commits what has been drawn into Texture
@@ -110,7 +73,7 @@ public:
      * Can only be called after BeginDraw() has been called
      */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Rendering|PaintableTexture2D")
-    void EndDraw();
+    void EndDraw(bool IsUndoable);
 
     /**
      *  Returns wether the drawing process is active or not (see BeginDraw(), EndDraw() CancelDraw())
@@ -118,23 +81,25 @@ public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|PaintableTexture2D")
     bool GetIsDrawing() const;
 
-    UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|PaintableTexture2D")
-    UTexture2D* GetTexture() const;
+    /**
+     *  Renders the texture into a render target
+     */
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Rendering|PaintableTexture2D")
+    void Render(UTextureRenderTarget2D* Destination, FIntRect Rect, FIntPoint Position) const;
 
 protected:
     /**
-     * Allows to commit what has been drawn as a Source of this Texture before saving
-     * Calls CommitToSource()
-     */
+     * Allows to commit what has been drawn into mImage before saving
+     * Calls CommitRenderTargetToImage
+    */
     virtual void PreSave(FObjectPreSaveContext SaveContext) override;
-
 private:
     /**
-     * commit what has been drawn as a Source of this Texture
+     * Commits what has been drawn into mImage
      */
-    void CommitToSource();
-
-    void UpdateTexture();
+    void CommitRenderTargetToImage();
+    void CopyRenderTargetToUndoRT();
+    void CopyUndoRTToRenderTarget();
 
 private:
     /**
@@ -158,35 +123,38 @@ private:
     bool IsDrawing = false;
 
     /**
-     *
+     * Render Target  on which we draw
+     * Only present between calls to BeginDraw() and EndDraw()
      */
-    EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
+    TStrongObjectPtr<UTextureRenderTarget2D> mRenderTarget;
 
     /**
-     *
+     * Render Target  on which we draw
+     * Only present between calls to BeginDraw() and EndDraw()
+     * Updated on CommitDraw()
      */
-    EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal;
+    TStrongObjectPtr<UTextureRenderTarget2D> mUndoRenderTarget;
 
     /**
-     *
-     */
-    float Opacity = 1.0f;
+     * Contains invalid tiles state before calling CommitDraw()
+     * When CommitDraw() is called, copies mEditedTiles
+    */
+    FOdysseyInvalidTileMap mResetTiles;
 
     /**
-     *
-     */
-    bool PreserveAlpha = false;
+     * Contains invalid tiles in RenderTarget compared to UndoRenderTarget
+    */
+    FOdysseyInvalidTileMap mUndoTiles;
 
     /**
-     * The final texture, is updated in realtime
+     * Contains invalid tiles in RenderTarget since BeginDraw() has been called
      */
-    UPROPERTY()
-    TObjectPtr<UTexture2D> Texture;
+    FOdysseyInvalidTileMap mEditedTiles;
 
-    FOdysseyTiledRenderTarget WetTiles;
-    FOdysseyTiledRenderTarget DryTiles;
-    FOdysseyTiledRenderTarget OriginalTiles;
-
-    FOdysseyTiledRenderTarget CancellableWetTiles;
-    FOdysseyTiledRenderTarget CancellableDryTiles;
+    /**
+     * The current image, but stored on RAM
+     * Contains valid data only when RenderTarget does not exist
+     * Contains the data that will be saved by Serialize()
+     */
+    FOdysseyTiledImage mImage;
 };
