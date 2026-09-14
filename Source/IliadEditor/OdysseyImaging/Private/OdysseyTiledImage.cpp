@@ -11,9 +11,6 @@
 
 #include "OdysseyTileUtils.h"
 
-DECLARE_STATS_GROUP(TEXT("UOdysseyTiledImage"), STATGROUP_OdysseyTiledImage, STATCAT_Advanced);
-DECLARE_CYCLE_STAT(TEXT("UOdysseyTiledImage::Render"), STAT_Render, STATGROUP_OdysseyTiledImage);
-
 UOdysseyTiledImageFactoryNew::UOdysseyTiledImageFactoryNew()
 {
     bCreateNew = true;
@@ -105,11 +102,6 @@ UOdysseyTiledImage::CopyFromTexture(UTexture* InTexture, FIntRect InRect, FIntPo
 
     for (const FOdysseyTileManager::FCreatedTile& CreatedTile : CreatedTiles)
     {
-        //If the created tile is not valid
-        //then we consider it is an empty tile
-        if (CreatedTile.IsEmpty())
-            continue;
-
         FOdysseyTileId& TileId = Tiles.FindOrAdd(CreatedTile.Pos);
         TileId = CreatedTile.Id;
     }
@@ -131,19 +123,19 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
 
     //Load needed Tiles
     TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTilePositionsFromRect(TileSize, InRect);
-    TArray<TFuture<FTextureRHIRef>> TileTextures;
-    TileTextures.Reserve(TilePositions.Num());
+    TArray<TFuture<TSharedPtr<FOdysseyTileManager::FTileTextureHandle>>> TileTextureHandles;
+    TileTextureHandles.Reserve(TilePositions.Num());
     for (const FIntPoint& TilePosition : TilePositions)
     {
         const FOdysseyTileId* TileId = Tiles.Find(TilePosition);
         if (TileId)
         {
-            TFuture<FTextureRHIRef> TileTexture = FOdysseyTileManager::Get().GetTileTexture(*TileId, TileSize, GetPixelFormat());
-            TileTextures.Add(MoveTemp(TileTexture));
+            TFuture<TSharedPtr<FOdysseyTileManager::FTileTextureHandle>> TileTextureHandle = FOdysseyTileManager::Get().GetTileTexture(*TileId, TileSize, GetPixelFormat());
+            TileTextureHandles.Add(MoveTemp(TileTextureHandle));
         }
         else
         {
-            TileTextures.AddDefaulted();
+            TileTextureHandles.AddDefaulted();
         }
     }
 
@@ -151,15 +143,14 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
         [
             OutRenderTarget,
             TilePositions,
-            TileTextures = MoveTemp(TileTextures),
+            TileTextureHandles = MoveTemp(TileTextureHandles),
             TileSize = TileSize,
             TilePixelFormat = GetPixelFormat(),
             DestinationRect,
             SourceRect = InRect
         ](FRHICommandListImmediate& RHICmdList)
         {
-            SCOPE_CYCLE_COUNTER(STAT_Render);
-            DECLARE_GPU_STAT(UOdysseyTiledImage_Render);
+            TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::TiledImage::Render);
 
             FRDGBuilder GraphBuilder(RHICmdList);
             FRDGTextureRef DestinationTexture = OutRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( GraphBuilder );
@@ -183,9 +174,17 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
                 );
 
                 //If the buffer is null, the tile is empty
+                TSharedPtr<FOdysseyTileManager::FTileTextureHandle> TileTextureHandle;
+                if (TileTextureHandles[i].IsValid())
+                    TileTextureHandle = TileTextureHandles[i].Get();
+
                 FTextureRHIRef TileTextureRHI;
-                if (TileTextures[i].IsValid())
-                    TileTextureRHI = TileTextures[i].Get();
+                FIntPoint TileTexturePosition;
+                if (TileTextureHandle.IsValid())
+                {
+                    TileTextureRHI = TileTextureHandle->GetTextureRHI();
+                    TileTexturePosition = TileTextureHandle->GetPositionInTexture();
+                }
 
                 if (TileTextureRHI.IsValid())
                 {
@@ -196,7 +195,7 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
                         FScreenPassViewInfo(),
                         TileTexture,
                         DestinationTexture,
-                        TileSrcRect.Min,
+                        TileSrcRect.Min + TileTexturePosition,
                         TileSrcRect.Size(),
                         TileDstRect.Min,
                         TileDstRect.Size()
