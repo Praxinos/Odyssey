@@ -8,37 +8,37 @@
 int64
 UOdysseyTileManagerBlueprintLibrary::GetTileManagerNumTilesUncompressed()
 {
-    return FOdysseyTileManager::Get().GetNumTilesUncompressed();
+    return FOdysseyTileManager::Get().GetStats().GetNumTilesUncompressed();
 }
 
 int64
 UOdysseyTileManagerBlueprintLibrary::GetTileManagerSizeUncompressed()
 {
-    return FOdysseyTileManager::Get().GetSizeUncompressed();
+    return FOdysseyTileManager::Get().GetStats().GetSizeUncompressed();
 }
 
 int64
 UOdysseyTileManagerBlueprintLibrary::GetTileManagerNumTilesCompressed()
 {
-    return FOdysseyTileManager::Get().GetNumTilesCompressed();
+    return FOdysseyTileManager::Get().GetStats().GetNumTilesCompressed();
 }
 
 int64
 UOdysseyTileManagerBlueprintLibrary::GetTileManagerSizeCompressed()
 {
-    return FOdysseyTileManager::Get().GetSizeCompressed();
+    return FOdysseyTileManager::Get().GetStats().GetSizeCompressed();
 }
 
 int64
 UOdysseyTileManagerBlueprintLibrary::GetTileManagerNumTilesOnDisk()
 {
-    return FOdysseyTileManager::Get().GetNumTilesOnDisk();
+    return FOdysseyTileManager::Get().GetStats().GetNumTilesOnDisk();
 }
 
 int64
 UOdysseyTileManagerBlueprintLibrary::GetTileManagerSizeOnDisk()
 {
-    return FOdysseyTileManager::Get().GetSizeOnDisk();
+    return FOdysseyTileManager::Get().GetStats().GetSizeOnDisk();
 }
 
 void
