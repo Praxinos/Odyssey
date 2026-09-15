@@ -606,6 +606,7 @@ UOdysseyAnimation::PreSave(FObjectPreSaveContext SaveContext)
 
         UTexture2D* texture = Cast<UTexture2D>(renderTarget->ConstructTexture(this, Name, RF_Public, CTF_Default));
         texture->PreSave(SaveContext);
+        texture->BlockOnAnyAsyncBuild();
 
         FOdysseyAnimationFrame frame;
         frame.Texture = texture;
