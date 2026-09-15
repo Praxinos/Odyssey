@@ -1229,6 +1229,10 @@ ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AAct
         old_parameters.Add( parameter );
     }
 
+    // Only modifying it during committed modification (spinbox commit)
+    if( iSequencer )
+        ioCamera->GetCineCameraComponent()->Modify();
+
     ioCamera->GetCineCameraComponent()->SetCurrentFocalLength( iNewFocalLength );
 
     for( const FParameterCache& old_parameter : old_parameters )

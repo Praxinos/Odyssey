@@ -788,6 +788,10 @@ ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* i
 
     FVector new_camera_view_size = ActorHelpers::ComputeSizeOfCameraView( iCamera, iNewDistance );
 
+    // Only modifying it during committed modification (spinbox commit)
+    if( iSequencer )
+        ioActor->Modify();
+
     FVector new_animation_location = iCamera->GetActorLocation() + ( ioActor->GetActorLocation() - iCamera->GetActorLocation() ).GetSafeNormal() * iNewDistance;
     ioActor->SetActorLocation( new_animation_location );
 
@@ -848,6 +852,10 @@ ShotSequenceTools::FitActorToCameraView( AActor* ioActor, const ACineCameraActor
     UScalingComponent* scaling_component = ioActor->FindComponentByClass<UScalingComponent>();
     if( scaling_component )
         scale = scaling_component->ComputeScaleWithScaleAndMargin( new_camera_view_size );
+
+    // Only modifying it during committed modification (spinbox commit)
+    if( iSequencer )
+        ioActor->Modify();
 
     ioActor->SetActorScale3D( scale );
 
