@@ -58,6 +58,9 @@ FOdysseyVectorImportV2::ReadBrush( FOdysseyVectorBrush& iBrush, uint64 iChunkEnd
 
                     if( texture )
                     {
+                        //Set texture immediately (if possible). If the texture isn't fully loaded, mBrushTextureMultiMap will set the brush texture on PostLoadTextures().
+                        iBrush.SetTexture(texture);
+
                         mBrushTextureMultiMap.insert( std::pair<UTexture2D*,FOdysseyVectorBrush*>( texture, &iBrush ) );
                     }
                 }
