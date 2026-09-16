@@ -64,7 +64,7 @@ FArianeEditorPathTracer::Flush( FSceneView* View
                               , FArianeVertex* FirstSegmentVertex
                               , FArianeVertex* LastSegmentVertex ) // for loops
 {
-    if( CubicPath )
+    if( CubicPath && CubicPath->GetSegments().Num() )
     {
         FArianeSegmentCubic* CurrentCubicSegment = static_cast<FArianeSegmentCubic*>(CubicPath->GetSegments().Last().GetSegment());
 

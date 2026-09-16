@@ -32,41 +32,11 @@ SArianeEditorLayerStackContextMenu::CreateWidget( SArianeEditorLayerStack* TreeV
           , LOCTEXT("layer-stack-tree-view.context-menu.delete.tooltip", "Delete")
           , FSlateIcon()
           , FUIAction( FExecuteAction::CreateRaw( TreeView, &SArianeEditorLayerStack::DeleteSelectedItem )
-                     , FCanExecuteAction::CreateStatic( &SArianeEditorLayerStackContextMenu::CanDeleteSelectedLayers, Editor ) ) );
+                     , FCanExecuteAction::CreateRaw( TreeView, &SArianeEditorLayerStack::CanDeleteSelectedLayers ) ) );
     }
     Menu.EndSection();
 
     return Menu.MakeWidget();
-}
-
-// static
-bool
-SArianeEditorLayerStackContextMenu::CanDeleteSelectedLayers( FArianeEditor* Editor )
-{
-    UArianePainting3DComponent* CurrentPainting3DComponent = Editor->GetCurrentPainting3DComponent();
-
-    if( CurrentPainting3DComponent )
-    {
-        UArianeLayerStack* LayerStack = CurrentPainting3DComponent->GetLayerStack();
-        TArray<UArianeLayer*> SelectedTrees;
-        uint32 SelectedElderLayerCount = 0;
-
-        LayerStack->GetSelectedTrees( SelectedTrees );
-
-        // check if we are about to delete all top-most layers, which is forbidden (leave at least one)
-        for( UArianeLayer* ElderLayer : LayerStack->GetRootFolder()->GetChildLayers() )
-        {
-            if( SelectedTrees.Contains( ElderLayer ) )
-            {
-                SelectedElderLayerCount++;
-            }
-        }
-
-        return ( SelectedElderLayerCount == LayerStack->GetRootFolder()->GetChildLayers().Num() ) ? false
-                                                                                                  : true;
-    }
-
-    return false;
 }
 
 #undef LOCTEXT_NAMESPACE

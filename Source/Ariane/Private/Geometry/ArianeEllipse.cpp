@@ -144,7 +144,7 @@ FArianeEllipse::CopyShape( const FCopyArgs& CopyArgs )
     }
     else
     {
-         EllipseCopy = CopyArgs.Image->AllocEllipse( MaterialInterface
+         EllipseCopy = CopyArgs.Image->AllocEllipse( DynamicMaterialInstance->GetMaterial()
                                                    , Name
                                                    , RadiusX
                                                    , RadiusY

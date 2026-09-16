@@ -117,7 +117,7 @@ FArianeLine::CopyShape( const FCopyArgs& CopyArgs )
     }
     else
     {
-         LineCopy = CopyArgs.Image->AllocLine( MaterialInterface
+         LineCopy = CopyArgs.Image->AllocLine( DynamicMaterialInstance->GetMaterial()
                                              , Name
                                              , StartPoint
                                              , EndPoint

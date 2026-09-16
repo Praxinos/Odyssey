@@ -170,7 +170,7 @@ UArianeEditorPathProxy::ApplyPropertyBits( FArianeObject* Object )
         }
 
         if( PathPropertyBits.Material )
-            Path->SetMaterial( Material );
+            Path->SetMaterial( Material.Get() );
 
         if( PathPropertyBits.LineType )
             Path->SetLineType( LineType );

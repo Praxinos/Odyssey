@@ -276,7 +276,8 @@ SArianeEditorCurrentObjectDetailsView::Update()
 
         if( DrawingLayer )
         {
-            TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetImage()->GetSelectedObjects();
+            // work on a copy because we may add the root group in the array
+            TArray<FArianeObject*> SelectedObjects = DrawingLayer->GetImage()->GetSelectedObjects();
 
             if( SelectedObjects.IsEmpty() )
             {

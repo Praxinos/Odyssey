@@ -13,15 +13,44 @@
 // Unreal Headers
 #include "IStructureDetailsView.h"
 #include "Styling/AppStyle.h"
+#include "IDetailCustomization.h"
+#include "DetailLayoutBuilder.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
+
+// this will filter what we choose to display for the UArianeLayer class and derived classes
+class FArianeLayerFilteredDetails : public IDetailCustomization
+{
+public:
+    static TSharedRef<IDetailCustomization> MakeInstance()
+    {
+        return MakeShared<FArianeLayerFilteredDetails>();
+    }
+
+    virtual void CustomizeDetails(IDetailLayoutBuilder& DetailBuilder) override
+    {
+        TArray<FName> CategoryNames;
+
+        DetailBuilder.GetCategoryNames(CategoryNames);
+
+        // We only display some sections in that view and not the whole parameters of a UMeshComponent
+        static const TSet<FName> Keep = { "DrawingLayerOptions", "TransformCommon" };
+
+        for (const FName& Category : CategoryNames)
+        {
+            if (!Keep.Contains(Category))
+            {
+                DetailBuilder.HideCategory(Category);
+            }
+        }
+    }
+};
 
 SArianeEditorLayerStackPanel::~SArianeEditorLayerStackPanel()
 {
 }
 
 SArianeEditorLayerStackPanel::SArianeEditorLayerStackPanel()
-    : CurrentView ( nullptr )
 {
 }
 
@@ -50,8 +79,8 @@ SArianeEditorLayerStackPanel::OnPost3DPaintingComponentSelectionChanged()
 
         LayerStack->OnPreSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnPreLayerSelectionChanged );
         LayerStack->OnPostSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnPostLayerSelectionChanged );
-        // Refresh the details view
-        //OnPostLayerSelectionChanged();
+        // Refresh the details view now
+        OnPostLayerSelectionChanged();
     }
 }
 
@@ -91,11 +120,6 @@ void
 SArianeEditorLayerStackPanel::OnTransformChanged()
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-
-    if( CurrentView )
-    {
-        CurrentView->ImportLayerProperties( GetEditedLayer() );
-    }
 }
 
 void
@@ -103,24 +127,13 @@ SArianeEditorLayerStackPanel::OnPostLayerSelectionChanged()
 {
     UArianeLayer* EditedLayer =  GetEditedLayer();
 
-    CurrentView = nullptr;
     LayerDetailsView->SetObject( nullptr );
 
     if( EditedLayer )
     {
         EditedLayer->GetOnTransformChangedDelegate().AddSP( this, &SArianeEditorLayerStackPanel::OnTransformChanged );
 
-        if( EditedLayer->GetClass() == UArianeLayerDrawing::StaticClass() )
-        {
-            CurrentView = LayerDrawingView;
-        }
-        else
-        {
-            CurrentView = LayerView;
-        }
-
-        CurrentView->ImportLayerProperties( EditedLayer );
-        LayerDetailsView->SetObject( CurrentView );
+        LayerDetailsView->SetObject( EditedLayer );
     }
 }
 
@@ -133,12 +146,6 @@ SArianeEditorLayerStackPanel::Construct(const FArguments& InArgs, FArianeEditor*
 
     Editor = InEditor;
 
-    LayerView = NewObject<UArianeEditorLayerView>();
-    LayerDrawingView = NewObject<UArianeEditorLayerDrawingView>();
-
-    LayerView->SetEditor( Editor );
-    LayerDrawingView->SetEditor( Editor );
-
     DetailsViewArgs.bUpdatesFromSelection = false;
     DetailsViewArgs.bLockable = false;
     DetailsViewArgs.bAllowSearch = false;
@@ -146,6 +153,11 @@ SArianeEditorLayerStackPanel::Construct(const FArguments& InArgs, FArianeEditor*
 
     LayerDetailsView = EditorModule.CreateDetailView( DetailsViewArgs );
     LayerDetailsView->SetObject( nullptr );
+
+    LayerDetailsView->RegisterInstancedCustomPropertyLayout(
+        UArianeLayer::StaticClass(),
+        FOnGetDetailCustomizationInstance::CreateStatic(&FArianeLayerFilteredDetails::MakeInstance)
+    );
 
     ChildSlot
     [
@@ -286,8 +298,6 @@ void
 SArianeEditorLayerStackPanel::AddReferencedObjects( FReferenceCollector& Collector )
 {
     // Prevent UObjects from being garbage collected
-    Collector.AddReferencedObject( LayerView );
-    Collector.AddReferencedObject( LayerDrawingView );
 }
 
 FString

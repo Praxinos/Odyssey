@@ -107,15 +107,18 @@ protected:
     void UnbindDelegates();
     void OnRootObjectInvalidated();
     virtual void BeginDestroy() override;
+    virtual void PropertyChanged( const FName& iPropertyName
+                                , const FName& iMemberPropertyName
+                                , const FName& iCategory ) override;
 
 protected:
     UPROPERTY( EditAnywhere, Instanced )
     UArianeImage* Image;
 
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category = DrawingLayerOptions )
     EArianeLayerDrawingOrigin DrawingOrigin;
 
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category = DrawingLayerOptions )
     EArianeLayerDrawingOrientation DrawingOrientation;
 
 protected:

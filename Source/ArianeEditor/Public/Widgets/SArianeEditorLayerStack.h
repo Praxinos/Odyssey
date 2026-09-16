@@ -44,6 +44,8 @@ class ARIANEEDITOR_API SArianeEditorLayerStack
         TSharedPtr<FArianeEditorLayerRowItem> GetRootItem();
         FArianeEditor* GetEditor() const;
 
+        bool CanDeleteSelectedLayers();
+
     protected:
         /**
          * @brief Called when the treeview asks for the children of a specific item

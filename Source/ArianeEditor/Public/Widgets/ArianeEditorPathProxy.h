@@ -112,7 +112,7 @@ class ARIANEEDITOR_API UArianeEditorPathProxy : public UArianeEditorObjectProxy
         UPROPERTY( EditAnywhere
                  , Category=Path
                  , meta = ( ToolTip = "The material to use along the path." ) )
-        UMaterialInterface* Material;
+        TWeakObjectPtr<UMaterialInterface> Material;
 
         UPROPERTY( EditAnywhere
                  , Category=Path
