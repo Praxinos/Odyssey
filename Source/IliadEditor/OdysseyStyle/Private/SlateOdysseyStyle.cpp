@@ -390,6 +390,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyLayerStack.Visible16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/visible", mIcon16x16 ) );
     Set( "OdysseyLayerStack.Locked16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/locked", mIcon16x16 ) );
     Set( "OdysseyLayerStack.OptionsHeader16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/options_header", mIcon16x16 ) );
+    Set( "OdysseyLayerStack.ColumnHeader.InheritsAlpha", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/inherits_alpha_header", mIcon16x16 ) );
 
     Set("LayerStack.DisplayOptionsToggle", FCheckBoxStyle()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
@@ -428,6 +429,21 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/locked", mIcon16x16))
         .SetCheckedHoveredImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/locked", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/locked", mIcon16x16))
+        .SetUndeterminedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
+        .SetUndeterminedHoveredImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
+        .SetUndeterminedPressedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
+    );
+
+    Set("LayerStack.InheritsAlphaToggle", FCheckBoxStyle()
+        .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
+        .SetForegroundColor(FLinearColor(0, 0, 0, 0))
+        .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
+        .SetUncheckedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/inherits_alpha_off", mIcon16x16))
+        .SetUncheckedHoveredImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/inherits_alpha_off", mIcon16x16))
+        .SetUncheckedPressedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/inherits_alpha_off", mIcon16x16))
+        .SetCheckedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/inherits_alpha_on", mIcon16x16))
+        .SetCheckedHoveredImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/inherits_alpha_on", mIcon16x16))
+        .SetCheckedPressedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/inherits_alpha_on", mIcon16x16))
         .SetUndeterminedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
         .SetUndeterminedHoveredImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
         .SetUndeterminedPressedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))

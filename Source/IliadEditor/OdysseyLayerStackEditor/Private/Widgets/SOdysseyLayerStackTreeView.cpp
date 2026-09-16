@@ -175,6 +175,21 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
         );
 
         headerRow->AddColumn(
+            SHeaderRow::Column("InheritsAlpha")
+            .FixedWidth(24.f)
+            .HAlignHeader(HAlign_Center)
+            .VAlignHeader(VAlign_Center)
+            .HAlignCell(HAlign_Center)
+            .VAlignCell(VAlign_Top)
+            .HeaderContentPadding(FMargin(0))
+            [
+                SNew(SImage)
+                .ColorAndOpacity(FSlateColor::UseForeground())
+                .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.ColumnHeader.InheritsAlpha"))
+            ]
+        );
+
+        headerRow->AddColumn(
             SHeaderRow::Column("DisplayOptions")
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)

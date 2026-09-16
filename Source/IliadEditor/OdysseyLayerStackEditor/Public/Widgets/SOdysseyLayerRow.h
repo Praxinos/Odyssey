@@ -37,6 +37,7 @@ protected:
     TSharedRef<SWidget> GenerateMainRowIsActivatedWidget();
     TSharedRef<SWidget> GenerateMainRowIsLockedWidget();
     TSharedRef<SWidget> GenerateMainRowDisplayOptionsWidget();
+    TSharedRef<SWidget> GenerateMainRowInheritsAlphaWidget();
 
     TSharedRef<SWidget> GenerateMainRowHeaderWidget();
     TSharedRef<SWidget> GenerateLayerNameWidget();
@@ -71,6 +72,9 @@ private:
 private:
     void OnDisplayOptionsCheckBoxStateChanged(ECheckBoxState iState);
     ECheckBoxState GetDisplayOptionsCheckBoxState() const;
+
+    void OnInheritsAlphaCheckBoxStateChanged(ECheckBoxState iState);
+    ECheckBoxState GetInheritsAlphaCheckBoxState() const;
 
 private:
     TSharedPtr<SInlineEditableTextBlock> mNameWidget = nullptr;
