@@ -58,7 +58,24 @@ UArianeLayerStack::PostEditUndo()
 {
     Super::PostEditUndo();
 
-    // trigger an event
+    OnPreSelectionChanged.Broadcast();
+    OnPreHierarchyChanged.Broadcast();
+
+    SelectedLayers.Empty();
+
+    // At that step layers are only marked "selected" but not in the list of selected layers
+    UArianeLayerFolder::Traverse( RootFolder
+                                , [this]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
+        {
+            if( Layer->IsSelected() )
+            {
+                SelectedLayers.Add( Layer );
+            }
+
+            return UArianeLayerFolder::ETraversalReturnValue::Continue;
+        } );
+
+    OnPostSelectionChanged.Broadcast();
     OnPostHierarchyChanged.Broadcast();
 }
 #endif
@@ -68,7 +85,24 @@ UArianeLayerStack::PostLoad()
 {
     Super::PostLoad();
 
-    //SelectLayer( RootFolder->GetChildLayers()[0], true );
+    OnPreSelectionChanged.Broadcast();
+    OnPreHierarchyChanged.Broadcast();
+
+    SelectedLayers.Empty();
+
+    // At that step layers are only marked "selected" but not in the list of selected layers
+    UArianeLayerFolder::Traverse( RootFolder
+                                , [this]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
+        {
+            if( Layer->IsSelected() )
+            {
+                SelectedLayers.Add( Layer );
+            }
+
+            return UArianeLayerFolder::ETraversalReturnValue::Continue;
+        } );
+
+    OnPostSelectionChanged.Broadcast();
     OnPostHierarchyChanged.Broadcast();
 }
 
@@ -79,6 +113,7 @@ UArianeLayerStack::RemoveSelectedLayers()
 
     for( UArianeLayer* Layer : SelectedLayers )
     {
+        Layer->GetParentFolder()->Modify();
         Layer->Modify();
 
         Layer->GetParentFolder()->RemoveChildLayer( Layer );
@@ -90,7 +125,8 @@ UArianeLayerStack::RemoveSelectedLayers()
 void
 UArianeLayerStack::GetLayers( TArray<UArianeLayer*>& OutLayers )
 {
-    RootFolder->Traverse( [ &OutLayers ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
+    UArianeLayerFolder::Traverse( RootFolder
+                               , [ &OutLayers ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
     {
         OutLayers.Add( Layer );
 

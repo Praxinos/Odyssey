@@ -86,6 +86,29 @@ FArianeEditor::PostInit()
     // Set the CurrentPainting3DComponent
     // It will also trigger an event which will allow our widget to refresh at start
     OnEditorSelectionChanged( GEditor->GetSelectedActors() );
+
+    // remeber the last tool used. this is needed because when we save the assets, all tools are deselected.
+    // We will then use the saved tool identifier to activate the last used tool after a save.
+    GetToolManager()->OnToolEnded.AddSP( this, &FArianeEditor::OnToolEnded );
+    FCoreUObjectDelegates::OnObjectPreSave.AddSP(this, &FArianeEditor::OnObjectPreSave);
+}
+
+void
+FArianeEditor::OnToolEnded( UInteractiveToolManager* Manager, UInteractiveTool *Tool )
+{
+    // Remember the last tool used
+     Tool->GetName( LastActiveToolIdentifier );
+}
+
+void
+FArianeEditor::OnObjectPreSave( UObject* SavedObject, FObjectPreSaveContext Context )
+{
+    // Restore the last tool used , as Unreal will unselect all tools before saving
+    if (!LastActiveToolIdentifier.IsEmpty() && !GetToolManager()->HasActiveTool(EToolSide::Left))
+    {
+        GetToolManager()->SelectActiveToolType(EToolSide::Left, LastActiveToolIdentifier);
+        GetToolManager()->ActivateTool(EToolSide::Left);
+    }
 }
 
 FArianeEditorViewportToolkit*
@@ -858,18 +881,19 @@ FArianeEditor::GroupSelectedObjects( const FName& NewGroupName )
 
             FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
             FArianeObject* FosterParent = RootGroup;
-            FArianeGroup* NewGroup = DrawingLayer->GetImage()->AllocGroup( NewGroupName, EArianeAllocationModel::InstancedStruct );
             TArray<FArianeObject*> ObjectsToRegroup;
 
             if( RootGroup->IsSelected() == false )
             {
                 DrawingLayer->GetImage()->GetSelectedTrees( ObjectsToRegroup );
 
-                // Check if they all belong to the same parent
                 if( ObjectsToRegroup.Num() >= 2 )
                 {
+                    FArianeGroup* NewGroup = DrawingLayer->GetImage()->AllocGroup( NewGroupName, EArianeAllocationModel::InstancedStruct );
+
                     FosterParent = ObjectsToRegroup[0]->GetParent();
 
+                    // Check if they all belong to the same parent
                     for( int32 i = 1; i < ObjectsToRegroup.Num(); i++ )
                     {
                         FArianeObject* SelectedObject = ObjectsToRegroup[i];
@@ -882,17 +906,17 @@ FArianeEditor::GroupSelectedObjects( const FName& NewGroupName )
                             break;
                         }
                     }
+
+                    // Final step
+                    FosterParent->AppendChild( NewGroup );
+
+                    for( FArianeObject* ObjectToRegroup : ObjectsToRegroup )
+                    {
+                        NewGroup->TransferChild( ObjectToRegroup, nullptr );
+                    }
+
+                    Painting3DComponent->Update( false );
                 }
-
-                // Final step
-                FosterParent->AppendChild( NewGroup );
-
-                for( FArianeObject* ObjectToRegroup : ObjectsToRegroup )
-                {
-                    NewGroup->TransferChild( ObjectToRegroup, nullptr );
-                }
-
-                Painting3DComponent->Update( false );
             }
         }
     }

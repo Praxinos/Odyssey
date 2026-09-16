@@ -400,6 +400,11 @@ UArianeEditorPathDrawingTool::OnMouseUp( FEditorViewportClient* ViewportClient
                     PathTracer.Flush( View
                                     , Vertex0
                                     , nullptr );
+
+                    if( EditedPath->GetSegments().Num() == 0 )
+                    {
+                        EditedPath->GetParent()->RemoveChild( EditedPath, true );
+                    }
                 }
                 break;
 

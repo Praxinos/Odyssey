@@ -90,10 +90,11 @@ UArianeLayerFolder::RemoveChildLayer( UArianeLayer* Child )
     Child->Rename( nullptr, nullptr );
 }
 
+// static
 UArianeLayerFolder::ETraversalReturnValue
-UArianeLayerFolder::Traverse_Private( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback )
+UArianeLayerFolder::Traverse_Private( UArianeLayerFolder* FolderLayer, TFunction<ETraversalReturnValue(UArianeLayer*)> Callback )
 {
-    ETraversalReturnValue Ret = Callback( this );
+    ETraversalReturnValue Ret = Callback( FolderLayer );
 
     if( Ret == ETraversalReturnValue::Stop )
     {
@@ -102,11 +103,11 @@ UArianeLayerFolder::Traverse_Private( TFunction<ETraversalReturnValue(UArianeLay
 
     if( ( Ret == ETraversalReturnValue::IgnoreChildren ) == 0 )
     {
-        for( UArianeLayer* Child : ChildLayers )
+        for( UArianeLayer* Child : FolderLayer->ChildLayers )
         {
             UArianeLayerFolder* ChildFolder = Cast<UArianeLayerFolder>(Child);
-            ETraversalReturnValue ChildRet = ChildFolder ? ChildFolder->Traverse_Private( Callback )
-                                                        : Callback( Child );
+            ETraversalReturnValue ChildRet = ChildFolder ? Traverse_Private( ChildFolder, Callback )
+                                                         : Callback( Child );
 
             if( ChildRet == ETraversalReturnValue::Stop )
             {
@@ -118,10 +119,11 @@ UArianeLayerFolder::Traverse_Private( TFunction<ETraversalReturnValue(UArianeLay
     return Ret;
 }
 
+// static
 void
-UArianeLayerFolder::Traverse( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback )
+UArianeLayerFolder::Traverse( UArianeLayerFolder* FolderLayer, TFunction<ETraversalReturnValue(UArianeLayer*)> Callback )
 {
-    Traverse_Private( Callback );
+    Traverse_Private( FolderLayer, Callback );
 }
 
 void

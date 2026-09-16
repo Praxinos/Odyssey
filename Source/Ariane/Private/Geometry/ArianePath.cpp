@@ -249,7 +249,6 @@ FArianePath::FArianePath( UArianeImage* InImage
                                           : new FArianePathInvalidationFlags() )
     , LineType ( EArianePathLineType::Tube )
     , Color ( FColor::Black.WithAlpha(255) )
-    , MaterialInterface ( nullptr )
     , DynamicMaterialInstance ( nullptr )
     , Geometry3D ( this )
     , CubicSegmentCount( 0 )
@@ -322,9 +321,7 @@ FArianePath::GetMaterial()
 void
 FArianePath::SetMaterial( UMaterialInterface* InMaterialInterface )
 {
-    MaterialInterface = InMaterialInterface;
-
-    if( MaterialInterface )
+    if( InMaterialInterface )
     {
         // remove the current material from the used material list
         if( DynamicMaterialInstance && Image )
@@ -332,7 +329,7 @@ FArianePath::SetMaterial( UMaterialInterface* InMaterialInterface )
             Image->DecrementMaterial( DynamicMaterialInstance );
         }
 
-        DynamicMaterialInstance = UMaterialInstanceDynamic::Create( MaterialInterface, Image );
+        DynamicMaterialInstance = UMaterialInstanceDynamic::Create( InMaterialInterface, Image );
         // The Color parameter exists for the default Ariane Material
         DynamicMaterialInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor(Color));
 
@@ -644,7 +641,7 @@ FArianePath::CopySettings( FArianeObject* DestinationObject, const FCopyArgs& Co
 
     DestinationPath->LineType = LineType;
     DestinationPath->Color = Color;
-    DestinationPath->MaterialInterface = MaterialInterface;
+    DestinationPath->DynamicMaterialInstance = DuplicateObject<UMaterialInstanceDynamic>(DynamicMaterialInstance, Image);
 
     if( bInvalidate )
     {
@@ -805,12 +802,14 @@ FArianePath::PostEditUndo()
         AddSegment( Segment );
     }
 
-    if( MaterialInterface == nullptr )
+    if( DynamicMaterialInstance == nullptr )
     {
-        MaterialInterface = GEngine->VertexColorMaterial;
-    }
+        UMaterial* DefaultMaterial = Cast<UMaterial>( StaticLoadObject( UMaterial::StaticClass()
+                                                                      , nullptr
+                                                                      , TEXT("/Odyssey/Materials/ArianeDefaultMaterial.ArianeDefaultMaterial") ) );
 
-    SetMaterial ( MaterialInterface );
+        SetMaterial( DefaultMaterial );
+    }
 
     Invalidate( FArianePathInvalidationFlags().SetSegmentAltered()
                                               .SetSegmentAddedOrRemoved()
@@ -841,12 +840,14 @@ FArianePath::PostLoad()
         AddSegment( Segment );
     }
 
-    if( MaterialInterface == nullptr )
+    if( DynamicMaterialInstance == nullptr )
     {
-        MaterialInterface = GEngine->VertexColorMaterial;
-    }
+        UMaterial* DefaultMaterial = Cast<UMaterial>( StaticLoadObject( UMaterial::StaticClass()
+                                                                      , nullptr
+                                                                      , TEXT("/Odyssey/Materials/ArianeDefaultMaterial.ArianeDefaultMaterial") ) );
 
-    SetMaterial ( MaterialInterface );
+        SetMaterial( DefaultMaterial );
+    }
 
     Invalidate( FArianePathInvalidationFlags().SetSegmentAltered()
                                               .SetSegmentAddedOrRemoved()

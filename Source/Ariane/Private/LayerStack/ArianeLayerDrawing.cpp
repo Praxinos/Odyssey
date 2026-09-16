@@ -511,3 +511,16 @@ UArianeLayerDrawing::OnPostImageChangedDelegate()
 {
     return OnPostImageChanged;
 }
+
+void
+UArianeLayerDrawing::PropertyChanged( const FName& PropertyName
+                                    , const FName& MemberPropertyName
+                                    , const FName& Category )
+{
+    Super::PropertyChanged( PropertyName, MemberPropertyName, Category );
+
+    /*if( MemberPropertyName == GET_MEMBER_NAME_CHECKED(USceneComponent, RelativeLocation) )
+    {
+
+    }*/
+}

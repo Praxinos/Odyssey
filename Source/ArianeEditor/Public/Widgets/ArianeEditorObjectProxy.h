@@ -72,7 +72,7 @@ class ARIANEEDITOR_API UArianeEditorObjectProxy : public UObject
         UArianeEditorObjectProxy();
 
         void Update( const TArray<FArianeObject*>& ModifiedObjects );
-        void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
+        virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
         void ValidateProperties( TArray<FArianeObject*>& ModifiedObjects, bool bClearBits );
 

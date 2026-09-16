@@ -14,7 +14,4 @@ class ARIANEEDITOR_API SArianeEditorLayerStackContextMenu
     public:
         // FOdysseyEditorTab interface
         static TSharedPtr<SWidget> CreateWidget( SArianeEditorLayerStack* iTreeView );
-
-    protected:
-        static bool CanDeleteSelectedLayers( FArianeEditor* Editor );
 };

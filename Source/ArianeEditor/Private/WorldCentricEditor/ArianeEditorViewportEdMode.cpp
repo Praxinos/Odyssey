@@ -16,6 +16,7 @@
 #include "Slate/SceneViewport.h"
 #include "GameFramework/InputDeviceSubsystem.h"
 #include "GenericPlatform/GenericPlatformInputDeviceMapper.h"
+#include "Tools/EdModeInteractiveToolsContext.h"
 
 /* Gary
 

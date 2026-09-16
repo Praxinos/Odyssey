@@ -9,8 +9,6 @@
 // Ariane Headers
 #include "ArianeLayer.h"
 #include "ArianeLayerDrawing.h"
-#include "ArianeEditorLayerView.h"
-#include "ArianeEditorLayerDrawingView.h"
 
 class FArianeEditor;
 class UArianeEditorTool;
@@ -52,8 +50,5 @@ protected:
 
 protected:
     FArianeEditor* Editor;
-    UArianeEditorLayerView* CurrentView;;
-    UArianeEditorLayerView* LayerView;
-    UArianeEditorLayerDrawingView* LayerDrawingView;
     TSharedPtr<IDetailsView> LayerDetailsView;
 };

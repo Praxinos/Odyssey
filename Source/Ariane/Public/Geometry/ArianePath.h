@@ -317,9 +317,6 @@ protected:
     FColor Color;
 
     UPROPERTY( EditAnywhere )
-    UMaterialInterface* MaterialInterface;
-
-    UPROPERTY( EditAnywhere, Transient )
     UMaterialInstanceDynamic* DynamicMaterialInstance;
 
 protected:

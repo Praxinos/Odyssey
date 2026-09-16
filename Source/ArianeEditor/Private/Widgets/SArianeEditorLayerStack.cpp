@@ -452,17 +452,20 @@ SArianeEditorLayerStack::SelectAllLayers()
 void
 SArianeEditorLayerStack::RemoveSelectedLayers()
 {
-    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-
-    if( Painting3DComponent )
+    if ( CanDeleteSelectedLayers() )
     {
-        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+        UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
-        GEditor->BeginTransaction(LOCTEXT("ariane-layer-stack.remove-selected-layers","Remove Selected Layers"));
+        if( Painting3DComponent )
+        {
+            UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
 
-        LayerStack->RemoveSelectedLayers();
+            GEditor->BeginTransaction(LOCTEXT("ariane-layer-stack.remove-selected-layers","Remove Selected Layers"));
 
-        GEditor->EndTransaction();
+            LayerStack->RemoveSelectedLayers();
+
+            GEditor->EndTransaction();
+        }
     }
 }
 
@@ -494,8 +497,14 @@ SArianeEditorLayerStack::MapActionsToCommandList()
     );
 
     CommandList->MapAction(
-        FGenericCommands::Get().Delete,
-        FExecuteAction::CreateRaw( this, &SArianeEditorLayerStack::RemoveSelectedLayers )
+        FGenericCommands::Get().Delete
+      // commented out: The shortcut will be passed to the next widget if CanDeleteSelectedLayers() returns false
+      // which will end up in a behavior we d'ont want (deletion of the Actor). We then run CanDeleteSelectedLayers
+      // in RemoveSelectedLayers()
+      // --
+      //, FUIAction( FExecuteAction::CreateRaw( this, &SArianeEditorLayerStack::DeleteSelectedItem )
+      //           , FCanExecuteAction::CreateRaw( this, &SArianeEditorLayerStack::CanDeleteSelectedLayers ) )
+        , FExecuteAction::CreateRaw( this, &SArianeEditorLayerStack::RemoveSelectedLayers )
     );
 
     CommandList->MapAction(
@@ -519,6 +528,34 @@ SArianeEditorLayerStack::MapActionsToCommandList()
     );
 }
 
+bool
+SArianeEditorLayerStack::CanDeleteSelectedLayers()
+{
+    UArianePainting3DComponent* CurrentPainting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if( CurrentPainting3DComponent )
+    {
+        UArianeLayerStack* LayerStack = CurrentPainting3DComponent->GetLayerStack();
+        TArray<UArianeLayer*> SelectedTrees;
+        uint32 SelectedElderLayerCount = 0;
+
+        LayerStack->GetSelectedTrees( SelectedTrees );
+
+        // check if we are about to delete all top-most layers, which is forbidden (leave at least one)
+        for( UArianeLayer* ElderLayer : LayerStack->GetRootFolder()->GetChildLayers() )
+        {
+            if( SelectedTrees.Contains( ElderLayer ) )
+            {
+                SelectedElderLayerCount++;
+            }
+        }
+
+        return ( SelectedElderLayerCount == LayerStack->GetRootFolder()->GetChildLayers().Num() ) ? false
+                                                                                                  : true;
+    }
+
+    return false;
+}
 
 /*
 void

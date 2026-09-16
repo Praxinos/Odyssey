@@ -31,15 +31,17 @@ UArianeLayer::UArianeLayer()
     SetMobility(EComponentMobility::Movable);
 
     bWantsOnUpdateTransform = true;
+
 /*
     PrimaryComponentTick.bCanEverTick = true;
     PrimaryComponentTick.bStartWithTickEnabled = true;
     PrimaryComponentTick.SetTickFunctionEnable(true);
+    bTickInEditor = true;
+
 
     bAutoRegister = true;
     bWantsInitializeComponent = true;
     bAutoActivate = true;
-    bTickInEditor = true;
 */
 }
 
@@ -212,6 +214,8 @@ UArianeLayer::GetWorldTransformVersion() const
 void
 UArianeLayer::OnUpdateTransform(EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport)
 {
+    Super::OnUpdateTransform( UpdateTransformFlags, Teleport );
+
     WorldTransformVersion++;
 
     OnTransformChanged.Broadcast();
@@ -244,4 +248,36 @@ void
 UArianeLayer::TraverseBackwards( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback )
 {
     TraverseBackwards_Private( Callback );
+}
+
+void
+UArianeLayer::PostEditChangeProperty (FPropertyChangedEvent & PropertyChangedEvent)
+{
+    FProperty* PropertyThatChanged = PropertyChangedEvent.Property;
+
+    Super::PostEditChangeProperty( PropertyChangedEvent );
+
+    if(PropertyThatChanged)
+    {
+        PropertyChanged( PropertyChangedEvent.GetPropertyName()
+                       , PropertyChangedEvent.MemberProperty->GetFName()
+                       , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
+    }
+}
+
+void
+UArianeLayer::PropertyChanged( const FName& PropertyName
+                             , const FName& MemberPropertyName
+                             , const FName& Category )
+{
+    if( ( MemberPropertyName == "RelativeLocation" )
+      ||( MemberPropertyName == "RelativeRotation" )
+      ||( MemberPropertyName == "RelativeScale3D"  ) )
+    {
+        // Force Update transforms (will update the transform of the rootGroup of drawing layers)
+        // as it seems UActorcomponent::bRegistered is set to false when a component is edited via the GUI
+        // and bRegistered is a boolean that decides if OnupdateTransform should be called or not in
+        // USceneComponent::PropagateTransformUpdate()
+        OnUpdateTransform( EUpdateTransformFlags::None, ETeleportType::None );
+    }
 }

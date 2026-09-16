@@ -143,10 +143,10 @@ UArianePainting3DStaticMeshComponent::ConvertToStaticMesh()
         TArray<UMaterialInterface*> MaterialInterfaces;
 
 
-        LayerStack->GetRootFolder()->Traverse(
-            [ &MaterialInterfaces
-            , ConvertedStaticMesh
-            , &MeshDescriptionBuilder ]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
+        UArianeLayerFolder::Traverse( LayerStack->GetRootFolder()
+                                    , [ &MaterialInterfaces
+                                      , ConvertedStaticMesh
+                                      , &MeshDescriptionBuilder ]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
             {
                 UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Layer);
 

@@ -56,12 +56,12 @@ public:
      * @brief Recursively execute a function
      * @param Callback the function to run
      */
-    void Traverse( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
+    static void Traverse( UArianeLayerFolder* FolderLayer, TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
 
     //virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
 
 protected:
-    ETraversalReturnValue Traverse_Private( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
+    static ETraversalReturnValue Traverse_Private( UArianeLayerFolder* FolderLayer, TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
 
 
 protected:

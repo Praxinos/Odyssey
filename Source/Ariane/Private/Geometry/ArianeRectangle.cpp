@@ -141,7 +141,7 @@ FArianeRectangle::CopyShape( const FCopyArgs& CopyArgs )
     }
     else
     {
-         RectangleCopy = CopyArgs.Image->AllocRectangle( MaterialInterface
+         RectangleCopy = CopyArgs.Image->AllocRectangle( DynamicMaterialInstance->GetMaterial()
                                                        , Name
                                                        , Width
                                                        , Height

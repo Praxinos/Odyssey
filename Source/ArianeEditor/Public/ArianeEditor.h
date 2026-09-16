@@ -13,6 +13,8 @@
 // Odyssey Headers
 #include "OdysseyPainterEditorColorType.h"
 #include "InteractiveTool.h"
+#include "InteractiveToolManager.h"
+#include "UObject/ObjectSaveContext.h"
 // ULIS Headers
 #include <ULIS>
 
@@ -280,6 +282,8 @@ protected:
     void OnEditorSelectionChanged( UObject* NewSelection );
     void AddToolBuilder( UArianeEditorToolBuilder* ToolBuilder );
     void OnDrawingCoordinateSystemChanged( int32, ESelectInfo::Type );
+    void OnToolEnded( UInteractiveToolManager* Manager, UInteractiveTool *Tool );
+    void OnObjectPreSave( UObject* SavedObject, FObjectPreSaveContext Context );
 
 
 protected:
@@ -303,4 +307,5 @@ protected:
     FArianeEditorHUD::FDrawingFlags HUDDrawingFlags;
     EArianeEditorDrawingOrientation DrawingOrientation;
     EArianeEditorDrawingCoordinateSystem DrawingCoordinateSystem;
+    FString LastActiveToolIdentifier;
 };

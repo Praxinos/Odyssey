@@ -114,10 +114,14 @@ public:
     void PostEditUndo();
     void PostLoad();
     uint32 GetWorldTransformVersion() const;
+    virtual void PostEditChangeProperty (FPropertyChangedEvent & PropertyChangedEvent) override;
 
 
 protected:
     ETraversalReturnValue TraverseBackwards_Private( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
+    virtual void PropertyChanged( const FName& iPropertyName
+                                , const FName& iMemberPropertyName
+                                , const FName& iCategory );
 
 protected:
     UPROPERTY()
@@ -127,7 +131,7 @@ protected:
     bool bLocked;
 
 #if WITH_EDITORONLY_DATA
-    UPROPERTY(Transient)
+    UPROPERTY()
     bool bSelected;
 #endif
 
