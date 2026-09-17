@@ -227,14 +227,14 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyTexture.ExportTexture_16", new IMAGE_BRUSH("OdysseyTexture/ExportTexture_16", mIcon16x16));
 
     // OdysseyBrush
-    Set( "ClassIcon.OdysseyBrush", new IMAGE_BRUSH( "Brush/OdysseyBrushDefaultThumbnail_16", mIcon16x16 ) );
-    Set( "ClassThumbnail.OdysseyBrush", new IMAGE_BRUSH( "Brush/OdysseyBrushDefaultThumbnail_64", mIcon64x64 ) );
-    Set( "ClassIcon.OdysseyBrushAssetBase", new IMAGE_BRUSH( "Brush/OdysseyBrushDefaultThumbnail_16", mIcon16x16 ) );
-    Set( "ClassThumbnail.OdysseyBrushAssetBase", new IMAGE_BRUSH( "Brush/OdysseyBrushDefaultThumbnail_64", mIcon64x64 ) );
+    Set( "ClassIcon.OdysseyBrush", new IMAGE_BRUSH_SVG("Brush/OdysseyBrushDefaultThumbnail_small", mIcon16x16 ) );
+    Set( "ClassThumbnail.OdysseyBrush", new IMAGE_BRUSH_SVG("Brush/OdysseyBrushDefaultThumbnail_", mIcon128x128 ) );
+    Set( "ClassIcon.OdysseyBrushAssetBase", new IMAGE_BRUSH_SVG( "Brush/OdysseyBrushDefaultThumbnail_small", mIcon16x16 ) );
+    Set( "ClassThumbnail.OdysseyBrushAssetBase", new IMAGE_BRUSH_SVG( "Brush/OdysseyBrushDefaultThumbnail", mIcon128x128 ) );
 
     // OdysseyPalette
-    Set("ClassIcon.OdysseyPalette", new IMAGE_BRUSH( "OdysseyPalette/OdysseyPaletteDefaultThumbnail_16", mIcon16x16 ));
-    Set("ClassThumbnail.OdysseyPalette", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteDefaultThumbnail_64", mIcon64x64));
+    Set("ClassIcon.OdysseyPalette", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteDefaultThumbnail_small", mIcon16x16 ));
+    Set("ClassThumbnail.OdysseyPalette", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteDefaultThumbnail", mIcon128x128));
     Set("OdysseyPalette.EntryColor", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteEntryColor", mIcon16x16));
     Set("OdysseyPalette.AddColor", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddColor", mIcon24x24));
     Set("OdysseyPalette.Row", FTableRowStyle(mCoreTableRowStyle)
@@ -567,8 +567,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     );
 
     //Animation
-    Set( "ClassIcon.OdysseyAnimation", new IMAGE_BRUSH( "OdysseyAnimation/OdysseyAnimationDefaultThumbnail_16", mIcon16x16 ) );
-    Set( "ClassThumbnail.OdysseyAnimation", new IMAGE_BRUSH( "OdysseyAnimation/OdysseyAnimationDefaultThumbnail_64", mIcon64x64 ) );
+    Set( "ClassIcon.OdysseyAnimation", new IMAGE_BRUSH_SVG("OdysseyAnimation/OdysseyAnimationDefaultThumbnail_small", mIcon16x16 ) );
+    Set( "ClassThumbnail.OdysseyAnimation", new IMAGE_BRUSH_SVG("OdysseyAnimation/OdysseyAnimationDefaultThumbnail", mIcon128x128 ) );
 
     Set("TimelineHeader.backgroundColorEven", FLinearColor(1.0f, 1.0f, 1.0f, 0.05f));
     Set("TimelineHeader.backgroundColorOdd", FLinearColor(0.0f, 0.0f, 0.0f, 0.05f));

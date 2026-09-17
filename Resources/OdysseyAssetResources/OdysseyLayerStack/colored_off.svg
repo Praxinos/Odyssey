@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Calque_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 108.6 108.6">
+  <!-- Generator: Adobe Illustrator 30.5.1, SVG Export Plug-In . SVG Version: 2.1.4 Build 3)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #9c9c9c;
+      }
+
+      .st0, .st1, .st2 {
+        isolation: isolate;
+      }
+
+      .st1 {
+        fill: #d0d0d0;
+      }
+
+      .st2 {
+        fill: #686868;
+      }
+    </style>
+  </defs>
+  <circle class="st1" cx="34.64" cy="34.64" r="34.64"/>
+  <circle class="st0" cx="54.3" cy="73.96" r="34.64"/>
+  <circle class="st2" cx="73.96" cy="34.64" r="34.64"/>
+</svg>
