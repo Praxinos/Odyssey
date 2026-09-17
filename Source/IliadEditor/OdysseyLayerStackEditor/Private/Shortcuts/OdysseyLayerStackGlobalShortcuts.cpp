@@ -19,6 +19,34 @@ FOdysseyLayerStackGlobalShortcuts::FOdysseyLayerStackGlobalShortcuts(TAttribute<
 }
 
 void
+FOdysseyLayerStackGlobalShortcuts::GetSelectedLayers(TSet<UOdysseyLayer*>& OutSelectedLayers, UOdysseyLayer*& OutCurrentLayer ) const
+{
+    OutSelectedLayers.Empty();
+
+    UOdysseyLayerStack* layerStack = mLayerStack.Get();
+    if (!layerStack)
+        return;
+
+    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
+    if (!currentLayer)
+        return;
+
+    OutCurrentLayer = layerStack->GetCurrentLayer();
+
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        if( layerStack->IsLayerSelected( layer ) )
+            OutSelectedLayers.Add( layer );
+    }
+    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
+    // But too much interrogations to fix it (as many callbacks can be called.
+    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
+    // So, at least for now, just always add it.
+    //check( selected_layers.Contains( OutCurrentLayer ) );
+    OutSelectedLayers.Add( OutCurrentLayer );
+}
+
+void
 FOdysseyLayerStackGlobalShortcuts::MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList)
 {
     iCommandList->MapAction(
@@ -39,6 +67,28 @@ FOdysseyLayerStackGlobalShortcuts::MapActionsToCommandList(TSharedRef<FUICommand
     iCommandList->MapAction(
         FOdysseyLayerStackEditorCommands::Get().CloseFolderLayer,
         FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_CloseFolderLayer)
+    );
+
+    //---
+
+    iCommandList->MapAction(
+        FOdysseyLayerStackEditorCommands::Get().ToggleLayerActivated,
+        FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_ToggleLayerActivated)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyLayerStackEditorCommands::Get().ToggleLayerLocked,
+        FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_ToggleLayerLocked)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyLayerStackEditorCommands::Get().ToggleLayerInheritsAlpha,
+        FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_ToggleLayerInheritsAlpha)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyLayerStackEditorCommands::Get().ToggleLayerLighttable,
+        FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_ToggleLayerLighttable)
     );
 
     //---
@@ -194,31 +244,17 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToPreviousLayer()
 void
 FOdysseyLayerStackGlobalShortcuts::Action_OpenFolderLayer()
 {
-    UOdysseyLayerStack* layerStack = mLayerStack.Get();
-    if (!layerStack)
-        return;
+    UOdysseyLayer* currentLayer = nullptr;
+    TSet<UOdysseyLayer*> selectedLayers;
+    GetSelectedLayers(selectedLayers, currentLayer);
 
-    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
-    if (!currentLayer)
+    if (!currentLayer || selectedLayers.IsEmpty())
         return;
 
     if (currentLayer->GetChildren().Num() <= 0)
         return;
 
-    TSet<UOdysseyLayer*> selected_layers;
-    for( UOdysseyLayer* layer : layerStack->GetLayers() )
-    {
-        if( layerStack->IsLayerSelected( layer ) )
-            selected_layers.Add( layer );
-    }
-    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
-    // But too much interrogations to fix it (as many callbacks can be called.
-    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
-    // So, at least for now, just always add it.
-    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
-    selected_layers.Add( layerStack->GetCurrentLayer() );
-
-    for( UOdysseyLayer* layer : selected_layers )
+    for( UOdysseyLayer* layer : selectedLayers )
     {
         layer->SetDisplayChildren( true );
     }
@@ -227,33 +263,100 @@ FOdysseyLayerStackGlobalShortcuts::Action_OpenFolderLayer()
 void
 FOdysseyLayerStackGlobalShortcuts::Action_CloseFolderLayer()
 {
-    UOdysseyLayerStack* layerStack = mLayerStack.Get();
-    if (!layerStack)
-        return;
+    UOdysseyLayer* currentLayer = nullptr;
+    TSet<UOdysseyLayer*> selectedLayers;
+    GetSelectedLayers(selectedLayers, currentLayer);
 
-    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
-    if (!currentLayer)
+    if (!currentLayer || selectedLayers.IsEmpty())
         return;
 
     if (currentLayer->GetChildren().Num() <= 0)
         return;
 
-    TSet<UOdysseyLayer*> selected_layers;
-    for( UOdysseyLayer* layer : layerStack->GetLayers() )
-    {
-        if( layerStack->IsLayerSelected( layer ) )
-            selected_layers.Add( layer );
-    }
-    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
-    // But too much interrogations to fix it (as many callbacks can be called.
-    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
-    // So, at least for now, just always add it.
-    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
-    selected_layers.Add( layerStack->GetCurrentLayer() );
-
-    for( UOdysseyLayer* layer : selected_layers )
+    for( UOdysseyLayer* layer : selectedLayers )
     {
         layer->SetDisplayChildren( false );
+    }
+}
+
+void
+FOdysseyLayerStackGlobalShortcuts::Action_ToggleLayerActivated()
+{
+    UOdysseyLayer* currentLayer = nullptr;
+    TSet<UOdysseyLayer*> selectedLayers;
+    GetSelectedLayers(selectedLayers, currentLayer);
+
+    if (!currentLayer || selectedLayers.IsEmpty())
+        return;
+
+    FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.toggle-layer-activated", "Activate/Inactivate Selected Layers" ) );
+
+    bool Value = !currentLayer->IsActivated();
+    for( UOdysseyLayer* layer : selectedLayers )
+    {
+        layer->SetIsActivated(Value);
+    }
+}
+
+void
+FOdysseyLayerStackGlobalShortcuts::Action_ToggleLayerLocked()
+{
+    UOdysseyLayer* currentLayer = nullptr;
+    TSet<UOdysseyLayer*> selectedLayers;
+    GetSelectedLayers(selectedLayers, currentLayer);
+
+    if (!currentLayer || selectedLayers.IsEmpty())
+        return;
+
+    FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.toggle-layer-locked", "Lock/Unlock Selected Layers" ) );
+
+    bool Value = !currentLayer->IsLocked();
+
+    for( UOdysseyLayer* layer : selectedLayers )
+    {
+        layer->SetIsLocked(Value);
+    }
+}
+
+void
+FOdysseyLayerStackGlobalShortcuts::Action_ToggleLayerInheritsAlpha()
+{
+    UOdysseyLayer* currentLayer = nullptr;
+    TSet<UOdysseyLayer*> selectedLayers;
+    GetSelectedLayers(selectedLayers, currentLayer);
+
+    if (!currentLayer || selectedLayers.IsEmpty())
+        return;
+
+    FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.toggle-layer-inherits-alpha", "Toggle Selected Layers' Alpha Inheritance" ) );
+
+    bool Value = !currentLayer->GetInheritsAlpha();
+
+    for( UOdysseyLayer* layer : selectedLayers )
+    {
+        layer->SetInheritsAlpha(Value);
+    }
+}
+
+void
+FOdysseyLayerStackGlobalShortcuts::Action_ToggleLayerLighttable()
+{
+    UOdysseyLayer* currentLayer = nullptr;
+    TSet<UOdysseyLayer*> selectedLayers;
+    GetSelectedLayers(selectedLayers, currentLayer);
+
+    if (!currentLayer || selectedLayers.IsEmpty())
+        return;
+
+    FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.toggle-layer-lighttable", "Toggle Selected Layers' Lighttable" ) );
+
+    bool Value = !currentLayer->GetLighttable().bIsActivated;
+
+    for( UOdysseyLayer* layer : selectedLayers )
+    {
+        FOdysseyLighttable LT = layer->GetLighttable();
+        LT.bIsActivated = Value;
+        layer->SetLighttable(LT);
     }
 }
 
@@ -266,7 +369,6 @@ FOdysseyLayerStackGlobalShortcuts::Action_LockAllLayers()
 
     FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.lock-all-layers", "Lock All Layers" ) );
 
-    TSet<UOdysseyLayer*> selected_layers;
     for( UOdysseyLayer* layer : layerStack->GetLayers() )
     {
         layer->SetIsLocked( true );
@@ -281,7 +383,6 @@ FOdysseyLayerStackGlobalShortcuts::Action_UnlockAllLayers()
 
     FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.unlock-all-layers", "Unock All Layers" ) );
 
-    TSet<UOdysseyLayer*> selected_layers;
     for( UOdysseyLayer* layer : layerStack->GetLayers() )
     {
         layer->SetIsLocked( false );
@@ -296,7 +397,6 @@ FOdysseyLayerStackGlobalShortcuts::Action_ActivateAllLayers()
 
     FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.activate-all-layers", "Activate All Layers" ) );
 
-    TSet<UOdysseyLayer*> selected_layers;
     for( UOdysseyLayer* layer : layerStack->GetLayers() )
     {
         layer->SetIsActivated( true );
@@ -311,7 +411,6 @@ FOdysseyLayerStackGlobalShortcuts::Action_InactivateAllLayers()
 
     FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.inactivate-all-layers", "Inactivate All Layers" ) );
 
-    TSet<UOdysseyLayer*> selected_layers;
     for( UOdysseyLayer* layer : layerStack->GetLayers() )
     {
         layer->SetIsActivated( false );
@@ -355,7 +454,6 @@ FOdysseyLayerStackGlobalShortcuts::Action_CollapseAllLayers()
 
     FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.collapse-all-layers", "Collapse All Layers" ) );
 
-    TSet<UOdysseyLayer*> selected_layers;
     for( UOdysseyLayer* layer : layerStack->GetLayers() )
     {
         layer->SetDisplayOptions( false );
@@ -370,7 +468,6 @@ FOdysseyLayerStackGlobalShortcuts::Action_UncollapseAllLayers()
 
     FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.uncollapse-all-layers", "Uncollapse All Layers" ) );
 
-    TSet<UOdysseyLayer*> selected_layers;
     for( UOdysseyLayer* layer : layerStack->GetLayers() )
     {
         layer->SetDisplayOptions( true );
@@ -385,7 +482,6 @@ FOdysseyLayerStackGlobalShortcuts::Action_OpenAllFolderLayers()
 
     FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.open-all-folder-layers", "Open All Folder Layers" ) );
 
-    TSet<UOdysseyLayer*> selected_layers;
     for( UOdysseyLayer* layer : layerStack->GetLayers() )
     {
         layer->SetDisplayChildren( true );
@@ -400,7 +496,6 @@ FOdysseyLayerStackGlobalShortcuts::Action_CloseAllFolderLayers()
 
     FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.close-all-folder-layers", "Close All Folder Layers" ) );
 
-    TSet<UOdysseyLayer*> selected_layers;
     for( UOdysseyLayer* layer : layerStack->GetLayers() )
     {
         layer->SetDisplayChildren( false );

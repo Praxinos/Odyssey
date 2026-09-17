@@ -31,6 +31,11 @@ FOdysseyLayerStackEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( OpenFolderLayer, LayerStackShortcuts, "Open Folder Layer", "Open Folder Layer", EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( CloseFolderLayer, LayerStackShortcuts, "Close Folder Layer", "Close Folder Layer", EUserInterfaceActionType::Button, FInputChord() );
 
+    UI_BUNDLE_COMMAND( ToggleLayerActivated, LayerStackShortcuts, "Activate/Inactivate Layer", "Activate/Inactivate selected Layers", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( ToggleLayerLocked, LayerStackShortcuts, "Lock/Unlock Layer", "Lock / Unlock selected Layers", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( ToggleLayerInheritsAlpha, LayerStackShortcuts, "Toggle Layer's Alpha Inheritance", "Toggles selected Layers' Alpha Inheritance (Clipping Mask)", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( ToggleLayerLighttable, LayerStackShortcuts, "Toggle Layer's Lighttable", "Activates/Inactivates selected Layers' Lighttable", EUserInterfaceActionType::Button, FInputChord() );
+
     UI_BUNDLE_COMMAND( LockAllLayers,           LayerStackShortcuts, "Lock All Layers",             "Lock all layers",                  EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( UnlockAllLayers,         LayerStackShortcuts, "Unlock All Layers",           "Unlock all layers",                EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( ActivateAllLayers,       LayerStackShortcuts, "Activate All Layers",         "Activate all layers",              EUserInterfaceActionType::Button, FInputChord() );

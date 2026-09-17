@@ -380,6 +380,12 @@ UOdysseyLayer::GetPostBehaviourFrame(EOdysseyLayerImagePostBehaviour iBehaviour,
     return frame;
 }
 
+bool
+UOdysseyLayer::GetInheritsAlpha() const
+{
+    return bInheritsAlpha;
+}
+
 const TArray<UOdysseyLayerCell*>&
 UOdysseyLayer::GetCells() const
 {
@@ -1033,6 +1039,18 @@ UOdysseyLayer::SetPostBehaviour(EOdysseyLayerImagePostBehaviour Value)
 }
 
 void
+UOdysseyLayer::SetInheritsAlpha(bool InheritsAlpha)
+{
+    if( !IsEditable() )
+        return;
+
+    Modify();
+    bInheritsAlpha = InheritsAlpha;
+
+    RenderingChanged();
+}
+
+void
 UOdysseyLayer::AddChild(UOdysseyLayer* Layer, int IndexInParent)
 {
     AddChildren({Layer}, IndexInParent);
@@ -1582,6 +1600,7 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
     {
         IOdysseyTextureRenderingAbility::FRenderFunction RenderFunction;
         EOdysseyBlendingMode BlendMode;
+        EOdysseyAlphaMode AlphaMode;
         float Opacity;
     };
 
@@ -1614,6 +1633,7 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
                 {
                     childRenderFunction,
                     child->GetBlendMode(),
+                    child->GetInheritsAlpha() ? EOdysseyAlphaMode::kBack : EOdysseyAlphaMode::kNormal,
                     opacity
                 }
             );
@@ -1657,7 +1677,7 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
                     iDstRect,
                     FMatrix::Identity,
                     childRenderParams.BlendMode,
-                    EOdysseyAlphaMode::kNormal,
+                    childRenderParams.AlphaMode,
                     childRenderParams.Opacity,
                     EOdysseyAntiAliasing::AnisotropicLinear
                 );
@@ -1775,7 +1795,8 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
     }
 
     if ( changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode))
-        || changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity)))
+        || changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity))
+        || changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayer, bInheritsAlpha)))
     {
         RenderingChanged();
     }
@@ -1811,6 +1832,9 @@ UOdysseyLayer::HasLighttable() const
 void
 UOdysseyLayer::SetLighttable(FOdysseyLighttable Value)
 {
+    if (!bHasLighttable)
+        return;
+
     Lighttable = Value;
     RenderingCompositionChanged(); //Composition could change if lighttable or a key is activated/inactivated
     RenderingChanged(); //ImageRendering changes without a composition change when any other param is changed
@@ -1820,6 +1844,9 @@ UOdysseyLayer::SetLighttable(FOdysseyLighttable Value)
 void
 UOdysseyLayer::SetLighttableInteractive(FOdysseyLighttable Value)
 {
+    if (!bHasLighttable)
+        return;
+
     Lighttable = Value;
     RenderingCompositionChanged(true); //Composition could change if lighttable or a key is activated/inactivated
     RenderingChanged(true); //ImageRendering changes without a composition change when any other param is changed

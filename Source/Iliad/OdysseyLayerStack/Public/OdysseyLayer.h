@@ -125,6 +125,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetPostBehaviour(EOdysseyLayerImagePostBehaviour Value);
 
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    void SetInheritsAlpha(bool InheritsAlpha = true);
+
 public:
     //Getters
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
@@ -195,6 +198,9 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     const TArray<UOdysseyLayerCell*>& GetCells() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
+    bool GetInheritsAlpha() const;
 
 public:
     // Advanced Getters
@@ -419,6 +425,9 @@ protected:
 
     UPROPERTY()
     TArray<TObjectPtr<UOdysseyLayerCell>> Cells;
+
+    UPROPERTY()
+    bool bInheritsAlpha = false;
 
 private:
     mutable TArray<FInt32Range> mCellsFrameRanges;

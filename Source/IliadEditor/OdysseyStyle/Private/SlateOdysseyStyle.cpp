@@ -227,14 +227,14 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyTexture.ExportTexture_16", new IMAGE_BRUSH("OdysseyTexture/ExportTexture_16", mIcon16x16));
 
     // OdysseyBrush
-    Set( "ClassIcon.OdysseyBrush", new IMAGE_BRUSH( "Brush/OdysseyBrushDefaultThumbnail_16", mIcon16x16 ) );
-    Set( "ClassThumbnail.OdysseyBrush", new IMAGE_BRUSH( "Brush/OdysseyBrushDefaultThumbnail_64", mIcon64x64 ) );
-    Set( "ClassIcon.OdysseyBrushAssetBase", new IMAGE_BRUSH( "Brush/OdysseyBrushDefaultThumbnail_16", mIcon16x16 ) );
-    Set( "ClassThumbnail.OdysseyBrushAssetBase", new IMAGE_BRUSH( "Brush/OdysseyBrushDefaultThumbnail_64", mIcon64x64 ) );
+    Set( "ClassIcon.OdysseyBrush", new IMAGE_BRUSH_SVG("Brush/OdysseyBrushDefaultThumbnail_small", mIcon16x16 ) );
+    Set( "ClassThumbnail.OdysseyBrush", new IMAGE_BRUSH_SVG("Brush/OdysseyBrushDefaultThumbnail_", mIcon128x128 ) );
+    Set( "ClassIcon.OdysseyBrushAssetBase", new IMAGE_BRUSH_SVG( "Brush/OdysseyBrushDefaultThumbnail_small", mIcon16x16 ) );
+    Set( "ClassThumbnail.OdysseyBrushAssetBase", new IMAGE_BRUSH_SVG( "Brush/OdysseyBrushDefaultThumbnail", mIcon128x128 ) );
 
     // OdysseyPalette
-    Set("ClassIcon.OdysseyPalette", new IMAGE_BRUSH( "OdysseyPalette/OdysseyPaletteDefaultThumbnail_16", mIcon16x16 ));
-    Set("ClassThumbnail.OdysseyPalette", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteDefaultThumbnail_64", mIcon64x64));
+    Set("ClassIcon.OdysseyPalette", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteDefaultThumbnail_small", mIcon16x16 ));
+    Set("ClassThumbnail.OdysseyPalette", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteDefaultThumbnail", mIcon128x128));
     Set("OdysseyPalette.EntryColor", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteEntryColor", mIcon16x16));
     Set("OdysseyPalette.AddColor", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddColor", mIcon24x24));
     Set("OdysseyPalette.Row", FTableRowStyle(mCoreTableRowStyle)
@@ -390,6 +390,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyLayerStack.Visible16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/visible", mIcon16x16 ) );
     Set( "OdysseyLayerStack.Locked16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/locked", mIcon16x16 ) );
     Set( "OdysseyLayerStack.OptionsHeader16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/options_header", mIcon16x16 ) );
+    Set( "OdysseyLayerStack.ColumnHeader.InheritsAlpha", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/inherits_alpha_header", mIcon16x16 ) );
 
     Set("LayerStack.DisplayOptionsToggle", FCheckBoxStyle()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
@@ -428,6 +429,21 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/locked", mIcon16x16))
         .SetCheckedHoveredImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/locked", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/locked", mIcon16x16))
+        .SetUndeterminedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
+        .SetUndeterminedHoveredImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
+        .SetUndeterminedPressedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
+    );
+
+    Set("LayerStack.InheritsAlphaToggle", FCheckBoxStyle()
+        .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
+        .SetForegroundColor(FLinearColor(0, 0, 0, 0))
+        .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
+        .SetUncheckedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/inherits_alpha_off", mIcon16x16))
+        .SetUncheckedHoveredImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/inherits_alpha_off", mIcon16x16))
+        .SetUncheckedPressedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/inherits_alpha_off", mIcon16x16))
+        .SetCheckedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/inherits_alpha_on", mIcon16x16))
+        .SetCheckedHoveredImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/inherits_alpha_on", mIcon16x16))
+        .SetCheckedPressedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/inherits_alpha_on", mIcon16x16))
         .SetUndeterminedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
         .SetUndeterminedHoveredImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
         .SetUndeterminedPressedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
@@ -551,8 +567,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     );
 
     //Animation
-    Set( "ClassIcon.OdysseyAnimation", new IMAGE_BRUSH( "OdysseyAnimation/OdysseyAnimationDefaultThumbnail_16", mIcon16x16 ) );
-    Set( "ClassThumbnail.OdysseyAnimation", new IMAGE_BRUSH( "OdysseyAnimation/OdysseyAnimationDefaultThumbnail_64", mIcon64x64 ) );
+    Set( "ClassIcon.OdysseyAnimation", new IMAGE_BRUSH_SVG("OdysseyAnimation/OdysseyAnimationDefaultThumbnail_small", mIcon16x16 ) );
+    Set( "ClassThumbnail.OdysseyAnimation", new IMAGE_BRUSH_SVG("OdysseyAnimation/OdysseyAnimationDefaultThumbnail", mIcon128x128 ) );
 
     Set("TimelineHeader.backgroundColorEven", FLinearColor(1.0f, 1.0f, 1.0f, 0.05f));
     Set("TimelineHeader.backgroundColorOdd", FLinearColor(0.0f, 0.0f, 0.0f, 0.05f));

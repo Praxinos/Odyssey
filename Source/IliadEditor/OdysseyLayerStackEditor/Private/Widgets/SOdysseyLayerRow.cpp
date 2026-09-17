@@ -63,6 +63,10 @@ SOdysseyLayerRow::GenerateWidget( const FName& iRow, const FName& iColumn )
         {
             return GenerateMainRowDisplayOptionsWidget();
         }
+        else if (iColumn == "InheritsAlpha")
+        {
+            return GenerateMainRowInheritsAlphaWidget();
+        }
         else if (iColumn == "Header")
         {
             return GenerateMainRowHeaderWidget();
@@ -292,6 +296,24 @@ SOdysseyLayerRow::GenerateMainRowIsLockedWidget()
         ];
 }
 
+TSharedRef<SWidget>
+SOdysseyLayerRow::GenerateMainRowInheritsAlphaWidget()
+{
+    const FCheckBoxStyle* InheritsAlphaToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("LayerStack.InheritsAlphaToggle");
+
+    return SNew(SBox)
+        .VAlign(VAlign_Center)
+        [
+            SNew(SCheckBox)
+            .ToolTipText( LOCTEXT("layer.inherits-alpha.tooltip.", "Inherit Alpha (Clipping Mask)\nWhen activated the layer inherits Alpha from the layers underneath.") )
+            .IsFocusable(false)
+            .IsEnabled_Lambda([this](){ return GetLayer()->IsEditable();})
+            .Style(InheritsAlphaToggleStyle)
+            .OnCheckStateChanged(this, &SOdysseyLayerRow::OnInheritsAlphaCheckBoxStateChanged)
+            .IsChecked(this, &SOdysseyLayerRow::GetInheritsAlphaCheckBoxState)
+        ];
+}
+
 void
 SOdysseyLayerRow::OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState)
 {
@@ -392,6 +414,47 @@ SOdysseyLayerRow::GetIsLockedCheckBoxEnabled() const
         return false;
 
     return !GetLayer()->GetParent()->IsLockedRecursively();
+}
+
+//-
+
+void
+SOdysseyLayerRow::OnInheritsAlphaCheckBoxStateChanged(ECheckBoxState iState)
+{
+    TSet<UOdysseyLayer*> selected_layers;
+    UOdysseyLayerStack* layerStack = GetLayer()->GetLayerStack();
+    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    {
+        if( layerStack->IsLayerSelected( layer ) )
+            selected_layers.Add( layer );
+    }
+    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
+    // But too much interrogations to fix it (as many callbacks can be called.
+    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
+    // So, at least for now, just always add it.
+    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
+    selected_layers.Add( layerStack->GetCurrentLayer() );
+
+    // If the focused layer is outside the selection, just change it
+    UOdysseyLayer* focusedLayer = GetLayer();
+    if( !selected_layers.Contains( focusedLayer ) )
+    {
+        selected_layers.Empty();
+        selected_layers.Add( focusedLayer );
+    }
+
+    FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-inherits-alpha", "Change Layer Inherits Alpha"));
+
+    for( UOdysseyLayer* layer : selected_layers )
+    {
+        layer->SetInheritsAlpha( iState == ECheckBoxState::Checked );
+    }
+}
+
+ECheckBoxState
+SOdysseyLayerRow::GetInheritsAlphaCheckBoxState() const
+{
+    return GetLayer()->GetInheritsAlpha() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 //---
