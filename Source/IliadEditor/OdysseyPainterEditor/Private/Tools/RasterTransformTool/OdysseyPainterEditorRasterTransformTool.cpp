@@ -379,18 +379,15 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
     if (mediaRasters.Num() <= 0)
         return;
 
-    TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
-    ::ULIS::FRectI boundingBox = rasterSelection->GetMaskBoundingRect();
-
-    if (boundingBox.Area() <= 0)
-        boundingBox = ::ULIS::FRectI::FromMinMax(0, 0, mediaRasters[0]->GetRasterBlock()->GetWidth(), mediaRasters[0]->GetRasterBlock()->GetHeight());
+    if (mSelectionBoundingBox.Area() <= 0)
+        mSelectionBoundingBox = ::ULIS::FRectI::FromMinMax(0, 0, mediaRasters[0]->GetRasterBlock()->GetWidth(), mediaRasters[0]->GetRasterBlock()->GetHeight());
 
     mTransformAreaHUD = MakeShared<FOdysseyHUDPolygon>();
     TArray<FVector2D>& areaPoints = mTransformAreaHUD->GetPoints();
-    areaPoints.Add( FVector2D( boundingBox.x, boundingBox.y ) );
-    areaPoints.Add( FVector2D( boundingBox.x + boundingBox.w, boundingBox.y ) );
-    areaPoints.Add( FVector2D( boundingBox.x + boundingBox.w, boundingBox.y + boundingBox.h ) );
-    areaPoints.Add( FVector2D( boundingBox.x, boundingBox.y + boundingBox.h ) );
+    areaPoints.Add( FVector2D( mSelectionBoundingBox.x, mSelectionBoundingBox.y ) );
+    areaPoints.Add( FVector2D( mSelectionBoundingBox.x + mSelectionBoundingBox.w, mSelectionBoundingBox.y ) );
+    areaPoints.Add( FVector2D( mSelectionBoundingBox.x + mSelectionBoundingBox.w, mSelectionBoundingBox.y + mSelectionBoundingBox.h ) );
+    areaPoints.Add( FVector2D( mSelectionBoundingBox.x, mSelectionBoundingBox.y + mSelectionBoundingBox.h ) );
 
     mTransformToolHUD->EmptyElements(); //Deleting the HUD of the selection to create the one for the transform
     mTransformToolHUD->AddElement(mTransformAreaHUD);
@@ -399,7 +396,7 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
     TSharedPtr<FOdysseyHUDHandle> handleTopRight = MakeShared<FOdysseyHUDHandle>(areaPoints[1]);
     TSharedPtr<FOdysseyHUDHandle> handleBottomRight = MakeShared<FOdysseyHUDHandle>(areaPoints[2]);
     TSharedPtr<FOdysseyHUDHandle> handleBottomLeft = MakeShared<FOdysseyHUDHandle>(areaPoints[3]);
-    TSharedPtr<FOdysseyHUDHandle> pivot = MakeShared<FOdysseyHUDHandle>(FVector2D(boundingBox.x + boundingBox.w / 2, boundingBox.y + boundingBox.h / 2));
+    TSharedPtr<FOdysseyHUDHandle> pivot = MakeShared<FOdysseyHUDHandle>(FVector2D(mSelectionBoundingBox.x + mSelectionBoundingBox.w / 2, mSelectionBoundingBox.y + mSelectionBoundingBox.h / 2));
 
     handleTopLeft->OnDragged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnTopLeftHandleDragged);
     handleTopRight->OnDragged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnTopRightHandleDragged);
@@ -433,7 +430,7 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
 
     mRasterMutator.SetRasterBlock(rasterBlock);
     mRasterMutator.EditTilesFromRects(
-        { boundingBox },
+        { mSelectionBoundingBox },
         [&, referenceBlock = mSelectionBlock](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
         {
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
@@ -442,7 +439,7 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
                 *referenceBlock,
                 *iBlock,
                 referenceBlock->Rect(),
-                ::ULIS::FVec2I(boundingBox.x, boundingBox.y),
+                ::ULIS::FVec2I(mSelectionBoundingBox.x, mSelectionBoundingBox.y),
                 ::ULIS::Blend_Normal,
                 ::ULIS::Alpha_Sub,
                 1.f,
@@ -464,7 +461,7 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
         *mSelectionBlock,
         *paintBlock,
         mSelectionBlock->Rect(),
-        ::ULIS::FVec2I(boundingBox.x, boundingBox.y),
+        ::ULIS::FVec2I(mSelectionBoundingBox.x, mSelectionBoundingBox.y),
         ::ULIS::Blend_Normal,
         ::ULIS::Alpha_Normal,
         1.f,
@@ -728,85 +725,88 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
             if (source)
                 source->RecordCurrentFrameUndo();
 
-            // --- Change the raster selection to cover the transformed pixels only ---
-            FOdysseyRasterBlockMutator mutator(GetEditor()->RasterSelection()->GetRasterBlock());
+            // --- Change the raster selection (if it exists) to cover the transformed pixels only ---
+            if( !GetEditor()->RasterSelection()->IsEmpty() )
+            {
+                FOdysseyRasterBlockMutator mutator(GetEditor()->RasterSelection()->GetRasterBlock());
 
-            ::ULIS::FRectI boundingRect = ::ULIS::FRectI::FromXYWH(0, 0, GetEditor()->RasterSelection()->GetBlock()->Width(), GetEditor()->RasterSelection()->GetBlock()->Height());
-            mutator.EditTilesFromRects(
-                { boundingRect },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-                {
-                    TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+                ::ULIS::FRectI boundingRect = ::ULIS::FRectI::FromXYWH(0, 0, GetEditor()->RasterSelection()->GetBlock()->Width(), GetEditor()->RasterSelection()->GetBlock()->Height());
+                mutator.EditTilesFromRects(
+                    { boundingRect },
+                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                    {
+                        TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
 
-                    ::ULIS::eFormat format = iBlock->Format();
-                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+                        ::ULIS::eFormat format = iBlock->Format();
+                        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
-                    TSharedPtr<::ULIS::FBlock> baseSelectionBlock = MakeShareable(new ::ULIS::FBlock(iBlock->Width(), iBlock->Height(), format));
+                        TSharedPtr<::ULIS::FBlock> baseSelectionBlock = MakeShareable(new ::ULIS::FBlock(iBlock->Width(), iBlock->Height(), format));
 
-                    ::ULIS::FRectI selectionBoundingBox = rasterSelection->GetMaskBoundingRect();
+                        ::ULIS::FRectI selectionBoundingBox = rasterSelection->GetMaskBoundingRect();
 
-                    TArray<FVector2D> basePoints;
-                    basePoints.Add(FVector2D(selectionBoundingBox.x, selectionBoundingBox.y));
-                    basePoints.Add(FVector2D(selectionBoundingBox.x + selectionBoundingBox.w, selectionBoundingBox.y));
-                    basePoints.Add(FVector2D(selectionBoundingBox.x + selectionBoundingBox.w, selectionBoundingBox.y + selectionBoundingBox.h));
-                    basePoints.Add(FVector2D(selectionBoundingBox.x, selectionBoundingBox.y + selectionBoundingBox.h));
+                        TArray<FVector2D> basePoints;
+                        basePoints.Add(FVector2D(selectionBoundingBox.x, selectionBoundingBox.y));
+                        basePoints.Add(FVector2D(selectionBoundingBox.x + selectionBoundingBox.w, selectionBoundingBox.y));
+                        basePoints.Add(FVector2D(selectionBoundingBox.x + selectionBoundingBox.w, selectionBoundingBox.y + selectionBoundingBox.h));
+                        basePoints.Add(FVector2D(selectionBoundingBox.x, selectionBoundingBox.y + selectionBoundingBox.h));
 
-                    TArray<FVector2D> vertices = mTransformAreaHUD->GetPoints();
+                        TArray<FVector2D> vertices = mTransformAreaHUD->GetPoints();
 
-                    FOdysseyMatrix transformation = UOdysseyTransformProxyLibrary::MakePerspectiveMatrix(
-                        basePoints[0],
-                        basePoints[1],
-                        basePoints[2],
-                        basePoints[3],
-                        vertices[0],
-                        vertices[1],
-                        vertices[2],
-                        vertices[3]
-                    );
+                        FOdysseyMatrix transformation = UOdysseyTransformProxyLibrary::MakePerspectiveMatrix(
+                            basePoints[0],
+                            basePoints[1],
+                            basePoints[2],
+                            basePoints[3],
+                            vertices[0],
+                            vertices[1],
+                            vertices[2],
+                            vertices[3]
+                        );
 
-                    ctx.Copy(
-                        *iBlock,
-                        *baseSelectionBlock);
+                        ctx.Copy(
+                            *iBlock,
+                            *baseSelectionBlock);
 
-                    ctx.Finish();
+                        ctx.Finish();
 
-                    ctx.Clear(
-                        *iBlock,
-                        iBlock->Rect());
+                        ctx.Clear(
+                            *iBlock,
+                            iBlock->Rect());
 
-                    ctx.Finish();
+                        ctx.Finish();
 
-                    // This is a very slow operation unfortunately
-                    ctx.TransformPerspective(
-                        *baseSelectionBlock
-                        , *iBlock
-                        , ::ULIS::FRectI::Auto
-                        , transformation.m);
+                        // This is a very slow operation unfortunately
+                        ctx.TransformPerspective(
+                            *baseSelectionBlock
+                            , *iBlock
+                            , ::ULIS::FRectI::Auto
+                            , transformation.m);
 
-                    ctx.Finish();
+                        ctx.Finish();
 
-                    ctx.FilterInto(
-                        [this](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
-                        {
-                            for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+                        ctx.FilterInto(
+                            [this](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
                             {
-                                if (iSrcPixel.GreyF() != 0.f)
-                                    iDstPixel.SetGreyF(1.f);
+                                for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+                                {
+                                    if (iSrcPixel.GreyF() != 0.f)
+                                        iDstPixel.SetGreyF(1.f);
+                                }
                             }
-                        }
-                        , *iBlock
-                        , *iBlock
-                    );
+                            , *iBlock
+                            , *iBlock
+                        );
 
-                    ctx.Finish();
+                        ctx.Finish();
 
-                    return { };
-                }
-            );
-            // --- Change the raster selection to cover the transformed pixels only ---
-            mutator.Commit();
+                        return { };
+                    }
+                );
+                // --- Change the raster selection to cover the transformed pixels only ---
+                mutator.Commit();
+            }
+            GetEditor()->RasterSelection()->OnChanged().Broadcast();
         }
-        GetEditor()->RasterSelection()->OnChanged().Broadcast();
     }
     ClearTransform();
 }
@@ -1129,71 +1129,90 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection( bool iCreateNew
         }
         else //If we have no selection, by default, transform tool will select the smallest block that contains all pixels in the layer/frame
         {
-            ::ULIS::FRectI boundingRect;
             TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
             TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = rasterBlock->GetBlock();
 
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
 
-            ctx.AnalyzeSmallestVisibleRect( *block, &boundingRect );
+            ctx.AnalyzeSmallestVisibleRect( *block, &mSelectionBoundingBox);
             ctx.Finish();
 
-            TArray<FVector2D> polyPoints;
+            /*TArray<FVector2D> polyPoints;
             polyPoints.Add(FVector2D(boundingRect.x, boundingRect.y));
             polyPoints.Add(FVector2D(boundingRect.x + boundingRect.w, boundingRect.y));
             polyPoints.Add(FVector2D(boundingRect.x + boundingRect.w, boundingRect.y + boundingRect.h));
             polyPoints.Add(FVector2D(boundingRect.x, boundingRect.y + boundingRect.h));
 
-            mEditor->RasterSelection()->Add(polyPoints);
+            mEditor->RasterSelection()->Add(polyPoints);*/
         }
     }
-
-    ::ULIS::FRectI boundingBox = rasterSelection->GetMaskBoundingRect();
+    else
+    {
+        mSelectionBoundingBox = rasterSelection->GetMaskBoundingRect();
+    }
 
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = rasterBlock->GetBlock();
 
-    mSelectionBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, rasterBlock->GetFormat());
+    mSelectionBlock = MakeShared<::ULIS::FBlock>(mSelectionBoundingBox.w, mSelectionBoundingBox.h, rasterBlock->GetFormat());
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
     ::ULIS::FEvent clearEvent, copyEvent;
     ctx.Clear(*mSelectionBlock);
     ctx.Finish();
 
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = mEditor->RasterSelection()->GetBlock();
-
-    if (maskBlock)
+    if(mEditor->RasterSelection()->IsEmpty())
     {
         ctx.Copy(
             *block,
             *mSelectionBlock,
-            boundingBox,
-            ::ULIS::FVec2I(0,0),
+            mSelectionBoundingBox,
+            ::ULIS::FVec2I(0, 0),
             ::ULIS::FSchedulePolicy::MultiScanlines,
             0,
             nullptr,
-            &copyEvent
+            nullptr
         );
 
-        ctx.FilterInto(
-            [](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
-            {
-                for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
-                {
-                    iDstPixel.SetAlphaF(iDstPixel.AlphaF() * iSrcPixel.GreyF());
-                }
-            }
-                , *maskBlock
-                , *mSelectionBlock
-                , boundingBox
-                , ::ULIS::FVec2I(0,0)
-                , ::ULIS::FSchedulePolicy::MultiScanlines
-                , 1
-                , &copyEvent
-                , nullptr
-                );
-
         ctx.Finish();
+    }
+    else
+    {
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = mEditor->RasterSelection()->GetBlock();
+
+        if (maskBlock)
+        {
+            ctx.Copy(
+                *block,
+                *mSelectionBlock,
+                mSelectionBoundingBox,
+                ::ULIS::FVec2I(0,0),
+                ::ULIS::FSchedulePolicy::MultiScanlines,
+                0,
+                nullptr,
+                &copyEvent
+            );
+
+            ctx.FilterInto(
+                [](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
+                {
+                    for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+                    {
+                        iDstPixel.SetAlphaF(iDstPixel.AlphaF() * iSrcPixel.GreyF());
+                    }
+                }
+                    , *maskBlock
+                    , *mSelectionBlock
+                    , mSelectionBoundingBox
+                    , ::ULIS::FVec2I(0,0)
+                    , ::ULIS::FSchedulePolicy::MultiScanlines
+                    , 1
+                    , &copyEvent
+                    , nullptr
+                    );
+
+            ctx.Finish();
+        }
     }
 }
 
