@@ -305,6 +305,7 @@ SOdysseyLayerRow::GenerateMainRowInheritsAlphaWidget()
         .VAlign(VAlign_Center)
         [
             SNew(SCheckBox)
+            .ToolTipText( LOCTEXT("layer.inherits-alpha.tooltip.", "Inherit Alpha (Clipping Mask)\nWhen activated the layer inherits Alpha from the layers underneath.") )
             .IsFocusable(false)
             .IsEnabled_Lambda([this](){ return GetLayer()->IsEditable();})
             .Style(InheritsAlphaToggleStyle)
