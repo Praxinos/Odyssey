@@ -1683,18 +1683,47 @@ FBoardSequenceCustomization::OnGlobalTimeChanged()
             AActor* actor_to_select = BoardSequenceTools::GuessActorToSelect( sequencer.Get(), framenumber );
             if( actor_to_select )
             {
-                sequencer->EmptySelection();
-                sequencer->SelectSection( subsection );
-
+                // Must be set before reseting sequencer selection (otherwise an "Select None" undo is created)
                 GEditor->SelectNone( true /*bNoteSelectionChange*/, true /*bDeselectBSPSurfs*/ );
+
+                // At this step, the time may already have been changed by:
+                // - a sequencer->SelectSection()
+                //   (in board or animation title bar widget, and the behavior of those functions
+                //   can't be changed, as we can click on any another camera/animation in any other board section,
+                //   so the problem must be managed here)
+                // -> ToolkitHelpers::HandleOnSelectionChangedSections()
+                // -> OnGlobalTimeChanged()
+                // and if:
+                // - sequencer->SelectSection() is called again here
+                //   (not really a problem because when in FSequencer::SynchronizeExternalSelectionWithSequencerSelection(),
+                //   no actor is already selected)
+                // - FOLLOWING BY a GEditor->SelectActor()
+                //   (that's the future problem)
+                // at the end of the original sequencer->SelectSection(), during selection delegate and so on
+                // - an actor (actor_to_select) is now selected
+                // - and then when FSequencer::SynchronizeExternalSelectionWithSequencerSelection() is called,
+                //   it will create a "Select None" undo (line#7160) because an actor (actor_to_select) is selected
+                //
+                // So, to avoid this problem, don't select the section if it is already selected
+                // To keep it still called when a scrub in the timeline is done, as the current section must be selected in this case
+                TArray<UMovieSceneSection*> alreadySelectedSections;
+                sequencer->GetSelectedSections( alreadySelectedSections );
+                if( !alreadySelectedSections.Contains( subsection ) )
+                {
+                    sequencer->EmptySelection();
+                    sequencer->SelectSection( subsection );
+                }
+
                 // Do not notify, otherwise it lags
                 // But as we filter on NOT scrubbing and NOT playing, we can enable notification
                 GEditor->SelectActor( actor_to_select, true /*bInSelected*/, true /*bNotify*/, true /*bSelectEvenIfHidden*/ );
+
             }
             else
             {
-                sequencer->EmptySelection();
+                // Must be set before reseting sequencer selection (otherwise a "Select None" undo is created)
                 GEditor->SelectNone( true /*bNoteSelectionChange*/, true /*bDeselectBSPSurfs*/ );
+                sequencer->EmptySelection();
             }
         }
     }

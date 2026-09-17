@@ -226,7 +226,11 @@ public:
     EVisibility GetMoveAndScaleActorVisibility() const;
 
     float GetMoveAndScaleActorDistance() const;
-    void SetMoveAndScaleActorDistance( float iDistance, bool iInteractive );
+    void BeginMoveAndScaleActorDistanceTransaction();
+    void SetMoveAndScaleActorDistanceInteractive( float iNewDistance );
+    void EndMoveAndScaleActorDistanceTransaction( float iNewDistance );
+    void SetMoveAndScaleActorDistanceCommitted( float iNewDistance, ETextCommit::Type iCommitType );
+    void SetMoveAndScaleActorDistance( float iNewDistance, bool iInteractive );
 
     template<typename T> void HideAllActors();
     template<typename T> void ShowAllActors();
@@ -246,7 +250,11 @@ public:
     EVisibility GetCameraFocalLengthVisibility() const;
 
     float GetCameraFocalLength() const;
-    void SetCameraFocalLength( float iFocalLength, bool iInteractive );
+    void BeginCameraFocalLengthTransaction();
+    void SetCameraFocalLengthInteractive( float iNewFocalLength );
+    void EndCameraFocalLengthTransaction( float iNewFocalLength );
+    void SetCameraFocalLengthCommitted( float iNewFocalLength, ETextCommit::Type iCommitType );
+    void SetCameraFocalLength( float iNewFocalLength, bool iInteractive );
 
     void AddViewportRotation( float iDeltaRotation ); // in degrees
 

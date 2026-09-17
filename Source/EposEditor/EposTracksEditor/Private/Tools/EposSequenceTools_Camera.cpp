@@ -165,11 +165,14 @@ ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iS
         iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
     }
 
-    // Must be done after the inner/outer sequence switch (that's why it is in its own block)
+    // The selection management must be done after the inner/outer sequence switch (that's why the sequence switch is in its own block)
     // Otherwise it resets the selection if GEditor->SelectActor() is called inside CameraAdded()
     // Furthermore the hidden flag must also be set to true now
-    iSequencer.EmptySelection();
+
+    // Must be set before reseting sequencer selection (otherwise a "Select None" undo is created)
     GEditor->SelectNone( true /*bNoteSelectionChange*/, true /*bDeselectBSPSurfs*/ );
+
+    iSequencer.EmptySelection();
     if( actors.Num() )
         GEditor->SelectActor( actors[0], true /*bInSelected*/, true /*bNotify*/, true /*bSelectEvenIfHidden*/ );
 
@@ -1202,10 +1205,6 @@ ShotSequenceTools::GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSe
 bool
 ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AActor>> ioActors, ACineCameraActor* ioCamera, float iNewFocalLength, EScaleActor iScaleType, TSharedPtr<ISequencer> iSequencer )
 {
-    //const FScopedTransaction transaction( LOCTEXT( "transaction.set-camera-focal-length-and-scale-actor", "Set Camera Focal Length and Scale Actor" ) );
-
-    //---
-
     struct FParameterCache
     {
         TWeakObjectPtr<AActor> mActor;
@@ -1229,9 +1228,7 @@ ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AAct
         old_parameters.Add( parameter );
     }
 
-    // Only modifying it during committed modification (spinbox commit)
-    if( iSequencer )
-        ioCamera->GetCineCameraComponent()->Modify();
+    ioCamera->GetCineCameraComponent()->Modify();
 
     ioCamera->GetCineCameraComponent()->SetCurrentFocalLength( iNewFocalLength );
 
@@ -1268,11 +1265,8 @@ ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AAct
             default: checkNoEntry();
         }
 
-        if( iSequencer )
-        {
             if( update_channels )
                 UpdateChannel( iSequencer, old_parameter.mActor.Get(), ioCamera, EMovieSceneTransformChannel::Scale );
-        }
     }
 
     return true;

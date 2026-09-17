@@ -457,11 +457,15 @@ ShotSequenceTools::CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence*
         iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
     }
 
-    // Must be done after the inner/outer sequence switch
-    // Otherwise it resets the selection if GEditor->SelectActor() is called inside SpawnAndBindAnimation()
+    // The selection management must be done after the inner/outer sequence switch (that's why the sequence switch is in its own block)
+    // Otherwise it resets the selection if GEditor->SelectActor() is called inside CameraAdded()
     // Furthermore the hidden flag must also be set to true now
-    iSequencer.EmptySelection();
+
+    // Must be set before reseting sequencer selection (otherwise a "Select None" undo is created)
     GEditor->SelectNone( true /*bNoteSelectionChange*/, true /*bDeselectBSPSurfs*/ );
+
+    iSequencer.EmptySelection();
+
     GEditor->SelectActor( animation_actor, true /*bInSelected*/, true /*bNotify*/, true /*bSelectEvenIfHidden*/ );
 
     if( start_sequence_in_storyboard )
@@ -1132,10 +1136,19 @@ ShotSequenceTools::SelectSingleAnimation( ISequencer& iSequencer, UMovieSceneSub
     // Section selection must be done first, to call our callback in toolkit helpers which change the current frame (when section selection changed)
     // otherwise spawnable won't be loaded and so not found
 
+    // To unselect all actors
+    // Must be set before reseting sequencer selection (otherwise a "Select None" undo is created)
+    GEditor->SelectNone( true, true );
+
     // To unselect section(s)
     iSequencer.EmptySelection();
     // And then select the current one
     iSequencer.SelectSection( iParentSection );
+
+    // Unselect again all actors, because the SelectSection() will have certainly already select an actor (actor to guess in FBoardSequenceCustomization)
+    // via the delegate ToolkitHelpers::HandleOnSelectionChangedSections() -> OnGlobalTimeChanged()
+    // so, just reset actor selection to select the one we want here
+    GEditor->SelectNone( true, true );
 
     //---
 
@@ -1147,8 +1160,6 @@ ShotSequenceTools::SelectSingleAnimation( ISequencer& iSequencer, UMovieSceneSub
     for( auto object : objects )
         animations.Add( Cast<AOdysseyAnimationActor>( object ) );
 
-    // To unselect all actors
-    GEditor->SelectNone( true, true );
     // And then select the current one(s)
     for( auto animation : animations )
         GEditor->SelectActor( animation, true /* bInSelected */, true /* bNotify */, true /* bSelectEvenIfHidden */ );
@@ -1191,10 +1202,19 @@ ShotSequenceTools::SelectMultiAnimation( ISequencer& iSequencer, UMovieSceneSubS
     // Section selection must be done first, to call our callback in toolkit helpers which change the current frame (when section selection changed)
     // otherwise spawnable won't be loaded and so not found
 
+    // To unselect all actors
+    // Must be set before reseting sequencer selection (otherwise a "Select None" undo is created)
+    GEditor->SelectNone( true, true );
+
     // To unselect section(s)
     iSequencer.EmptySelection();
     // And then select the current one
     iSequencer.SelectSection( iParentSection );
+
+    // Unselect again all actors, because the SelectSection() will have certainly already select an actor (actor to guess in FBoardSequenceCustomization)
+    // via the delegate ToolkitHelpers::HandleOnSelectionChangedSections() -> OnGlobalTimeChanged()
+    // so, just reset actor selection to select to one we want here
+    GEditor->SelectNone( true, true );
 
     //---
 
@@ -1216,8 +1236,6 @@ ShotSequenceTools::SelectMultiAnimation( ISequencer& iSequencer, UMovieSceneSubS
             animation_actors_selected.Add( animation_self );
     }
 
-    // To unselect all actors
-    GEditor->SelectNone( true, true );
     // And then select the current one(s)
     for( AOdysseyAnimationActor* animation_selected : animation_actors_selected )
         GEditor->SelectActor( animation_selected, true /* bInSelected */, true /* bNotify */, true /* bSelectEvenIfHidden */ );

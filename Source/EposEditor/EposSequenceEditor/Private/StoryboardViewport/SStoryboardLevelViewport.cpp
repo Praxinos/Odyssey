@@ -1272,8 +1272,10 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                     .Delta( 1.f )
                                     .SliderExponent( 0.8f )
                                     .Value( this, &SStoryboardLevelViewport::GetMoveAndScaleActorDistance )
-                                    .OnValueChanged( this, &SStoryboardLevelViewport::SetMoveAndScaleActorDistance, true )
-                                    .OnValueCommitted_Lambda( [this]( float iNewValue, ETextCommit::Type iType ) { SetMoveAndScaleActorDistance( iNewValue, false ); } )
+                                    .OnBeginSliderMovement( this, &SStoryboardLevelViewport::BeginMoveAndScaleActorDistanceTransaction )
+                                    .OnValueChanged( this, &SStoryboardLevelViewport::SetMoveAndScaleActorDistanceInteractive )
+                                    .OnEndSliderMovement( this, &SStoryboardLevelViewport::EndMoveAndScaleActorDistanceTransaction )
+                                    .OnValueCommitted( this, &SStoryboardLevelViewport::SetMoveAndScaleActorDistanceCommitted )
                                 ]
 
                                 //+ SHorizontalBox::Slot()
@@ -1382,8 +1384,10 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                     .Delta( 1.f )
                                     .SliderExponent( 0.8f )
                                     .Value( this, &SStoryboardLevelViewport::GetCameraFocalLength )
-                                    .OnValueChanged( this, &SStoryboardLevelViewport::SetCameraFocalLength, true )
-                                    .OnValueCommitted_Lambda( [this]( float iNewValue, ETextCommit::Type iType ) { SetCameraFocalLength( iNewValue, false ); } )
+                                    .OnBeginSliderMovement( this, &SStoryboardLevelViewport::BeginCameraFocalLengthTransaction )
+                                    .OnValueChanged( this, &SStoryboardLevelViewport::SetCameraFocalLengthInteractive )
+                                    .OnEndSliderMovement( this, &SStoryboardLevelViewport::EndCameraFocalLengthTransaction )
+                                    .OnValueCommitted( this, &SStoryboardLevelViewport::SetCameraFocalLengthCommitted )
                                 ]
 
                                 + SHorizontalBox::Slot()
@@ -2168,14 +2172,61 @@ SStoryboardLevelViewport::GetMoveAndScaleActorDistance() const
     return distance;
 }
 void
-SStoryboardLevelViewport::SetMoveAndScaleActorDistance( float iDistance, bool iInteractive )
+SStoryboardLevelViewport::BeginMoveAndScaleActorDistanceTransaction()
 {
     if( !mActorToMove.IsValid() )
         return;
 
+    GEditor->BeginTransaction( LOCTEXT( "transaction.move-and-scale-actor-distance", "Move and Scale Actor Distance" ) );
+}
+void
+SStoryboardLevelViewport::EndMoveAndScaleActorDistanceTransaction( float iNewDistance )
+{
+    if( !mActorToMove.IsValid() )
+        return;
+
+    check( GetMoveAndScaleActorDistance() == iNewDistance );
+
+    SetMoveAndScaleActorDistance( iNewDistance, false );
+
+    GEditor->EndTransaction();
+}
+
+void
+SStoryboardLevelViewport::SetMoveAndScaleActorDistanceInteractive( float iNewDistance )
+{
+    if( !mActorToMove.IsValid() )
+        return;
+
+    SetMoveAndScaleActorDistance( iNewDistance, true );
+}
+
+void
+SStoryboardLevelViewport::SetMoveAndScaleActorDistanceCommitted( float iNewDistance, ETextCommit::Type iCommitType )
+{
+    if( iCommitType == ETextCommit::OnCleared )
+        return;
+
+    if( !mActorToMove.IsValid() )
+        return;
+
+    if( GetMoveAndScaleActorDistance() == iNewDistance )
+        return;
+
+    const FScopedTransaction transaction( LOCTEXT( "transaction.move-and-scale-actor-distance", "Move and Scale Actor Distance" ) );
+
+    SetMoveAndScaleActorDistance( iNewDistance, false );
+}
+
+
+void
+SStoryboardLevelViewport::SetMoveAndScaleActorDistance( float iNewDistance, bool iInteractive )
+{
+    check( mActorToMove.IsValid() );
+
     ACineCameraActor* camera = Cast<ACineCameraActor>( mActorToMove->GetAttachParentActor() );
 
-    ShotSequenceTools::MoveAndScaleActor( mActorToMove.Get(), camera, iDistance, mScaleActorType, iInteractive ? nullptr : mCurrentSquencer.Pin() );
+    ShotSequenceTools::MoveAndScaleActor( mActorToMove.Get(), camera, iNewDistance, mScaleActorType, iInteractive ? nullptr : mCurrentSquencer.Pin() );
 }
 
 void
@@ -2521,10 +2572,57 @@ SStoryboardLevelViewport::GetCameraFocalLength() const
     return focal_length;
 }
 void
-SStoryboardLevelViewport::SetCameraFocalLength( float iFocalLength, bool iInteractive )
+SStoryboardLevelViewport::BeginCameraFocalLengthTransaction()
 {
     if( !mCameraToFocalLength.IsValid() )
         return;
+
+    GEditor->BeginTransaction( LOCTEXT( "transaction.set-camera-focal-length-and-scale-actor", "Set Camera Focal Length and Scale Actor" ) );
+}
+
+void
+SStoryboardLevelViewport::EndCameraFocalLengthTransaction( float iNewFocalLength )
+{
+    if( !mCameraToFocalLength.IsValid() )
+        return;
+
+    check( GetCameraFocalLength() == iNewFocalLength );
+
+    SetCameraFocalLength( iNewFocalLength, false );
+
+    GEditor->EndTransaction();
+}
+
+void
+SStoryboardLevelViewport::SetCameraFocalLengthInteractive( float iNewFocalLength )
+{
+    if( !mCameraToFocalLength.IsValid() )
+        return;
+
+    SetCameraFocalLength( iNewFocalLength, true );
+}
+
+void
+SStoryboardLevelViewport::SetCameraFocalLengthCommitted( float iNewFocalLength, ETextCommit::Type iCommitType )
+{
+    if( iCommitType == ETextCommit::OnCleared )
+        return;
+
+    if( !mCameraToFocalLength.IsValid() )
+        return;
+
+    if( GetCameraFocalLength() == iNewFocalLength )
+        return;
+
+    const FScopedTransaction transaction( LOCTEXT( "transaction.set-camera-focal-length-and-scale-actor", "Set Camera Focal Length and Scale Actor" ) );
+
+    SetCameraFocalLength( iNewFocalLength, false );
+}
+
+void
+SStoryboardLevelViewport::SetCameraFocalLength( float iNewFocalLength, bool iInteractive )
+{
+    check( mCameraToFocalLength.IsValid() );
 
     TArray<AActor*> children;
     mCameraToFocalLength->GetAttachedActors( children );
@@ -2537,7 +2635,7 @@ SStoryboardLevelViewport::SetCameraFocalLength( float iFocalLength, bool iIntera
             actors.Add( child );
     }
 
-    ShotSequenceTools::SetCameraFocalLengthAndScaleActor( actors, mCameraToFocalLength.Get(), iFocalLength, mScaleActorType, iInteractive ? nullptr : mCurrentSquencer.Pin() );
+    ShotSequenceTools::SetCameraFocalLengthAndScaleActor( actors, mCameraToFocalLength.Get(), iNewFocalLength, mScaleActorType, iInteractive ? nullptr : mCurrentSquencer.Pin() );
 }
 
 ECheckBoxState

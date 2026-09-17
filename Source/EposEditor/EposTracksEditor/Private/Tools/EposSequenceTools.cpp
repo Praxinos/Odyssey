@@ -788,9 +788,7 @@ ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* i
 
     FVector new_camera_view_size = ActorHelpers::ComputeSizeOfCameraView( iCamera, iNewDistance );
 
-    // Only modifying it during committed modification (spinbox commit)
-    if( iSequencer )
-        ioActor->Modify();
+    ioActor->Modify();
 
     FVector new_animation_location = iCamera->GetActorLocation() + ( ioActor->GetActorLocation() - iCamera->GetActorLocation() ).GetSafeNormal() * iNewDistance;
     ioActor->SetActorLocation( new_animation_location );
@@ -821,12 +819,9 @@ ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* i
         default: checkNoEntry();
     }
 
-    if( iSequencer )
-    {
-        UpdateChannel( iSequencer, ioActor, iCamera, EMovieSceneTransformChannel::Translation );
-        if( update_channels )
-            UpdateChannel( iSequencer, ioActor, iCamera, EMovieSceneTransformChannel::Scale );
-    }
+    UpdateChannel( iSequencer, ioActor, iCamera, EMovieSceneTransformChannel::Translation );
+    if( update_channels )
+        UpdateChannel( iSequencer, ioActor, iCamera, EMovieSceneTransformChannel::Scale );
 
     return true;
 }
@@ -845,6 +840,8 @@ ShotSequenceTools::FitActorToCameraView( AActor* ioActor, const ACineCameraActor
     if( !CanFitActorToCameraView( ioActor, iCamera ) )
         return false;
 
+    const FScopedTransaction transaction( LOCTEXT( "transaction.fit-actor-to-camera-view", "Fit Actor to Camera View" ) );
+
     float distance = FVector::Distance( iCamera->GetActorLocation(), ioActor->GetActorLocation() );
     FVector new_camera_view_size = ActorHelpers::ComputeSizeOfCameraView( iCamera, distance );
 
@@ -853,9 +850,7 @@ ShotSequenceTools::FitActorToCameraView( AActor* ioActor, const ACineCameraActor
     if( scaling_component )
         scale = scaling_component->ComputeScaleWithScaleAndMargin( new_camera_view_size );
 
-    // Only modifying it during committed modification (spinbox commit)
-    if( iSequencer )
-        ioActor->Modify();
+    ioActor->Modify();
 
     ioActor->SetActorScale3D( scale );
 

@@ -568,16 +568,21 @@ SCinematicBoardSectionCamera::OnMouseButtonUp( const FGeometry& MyGeometry, cons
         UMovieSceneSection* section_object = board_section->GetSectionObject();
         ISequencer* sequencer = board_section->GetSequencer().Get();
 
-        // Must be done first to spawn all actors in this section (via the delegate on section selection in the toolkit)
-        // To unselect section(s)
+        // To unselect all actors
+        // Must be set before reseting sequencer selection (otherwise a "Select None" undo is created)
+        GEditor->SelectNone( true, true );
+
+        // Selecting the wanted section must be done before trying to get an actor in this section, to spawn actors in this section
+        // (via the delegate on section selection in the toolkit)
         sequencer->EmptySelection();
-        // And then select the current one
         sequencer->SelectSection( section_object );
 
         FGuid camera_binding = BoardSequenceHelpers::GetCameraBinding( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
         ACineCameraActor* camera = BoardSequenceHelpers::GetCameraSpawned( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID(), camera_binding );
 
-        // To unselect all actors
+        // Unselect again all actors, because the SelectSection() will have certainly already select an actor (actor to guess in FBoardSequenceCustomization)
+        // via the delegate ToolkitHelpers::HandleOnSelectionChangedSections() -> OnGlobalTimeChanged()
+        // so, just reset actor selection to select the one we want here
         GEditor->SelectNone( true, true );
         // And then select the current one
         GEditor->SelectActor( camera, true, true );

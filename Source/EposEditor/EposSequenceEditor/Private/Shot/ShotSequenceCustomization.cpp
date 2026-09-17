@@ -1319,18 +1319,20 @@ FShotSequenceCustomization::OnGlobalTimeChanged()
             AActor* actor_to_select = ShotSequenceTools::GuessActorToSelect( sequencer.Get(), framenumber );
             if( actor_to_select )
             {
-                sequencer->EmptySelection();
-                //sequencer->SelectSection( subsection );
-
+                // Must be set before reseting sequencer selection (otherwise a "Select None" undo is created)
                 GEditor->SelectNone( true /*bNoteSelectionChange*/, true /*bDeselectBSPSurfs*/ );
+
+                sequencer->EmptySelection();
+
                 // Do not notify, otherwise it lags
                 // But as we filter on NOT scrubbing and NOT playing, we can enable notification
                 GEditor->SelectActor( actor_to_select, true /*bInSelected*/, true /*bNotify*/, true /*bSelectEvenIfHidden*/ );
             }
             else
             {
-                sequencer->EmptySelection();
+                // Must be set before reseting sequencer selection (otherwise a "Select None" undo is created)
                 GEditor->SelectNone( true /*bNoteSelectionChange*/, true /*bDeselectBSPSurfs*/ );
+                sequencer->EmptySelection();
             }
         }
     }
