@@ -27,6 +27,11 @@ public:
     void Action_OpenFolderLayer();
     void Action_CloseFolderLayer();
 
+    void Action_ToggleLayerActivated();
+    void Action_ToggleLayerLocked();
+    void Action_ToggleLayerInheritsAlpha();
+    void Action_ToggleLayerLighttable();
+
     void Action_LockAllLayers();
     void Action_UnlockAllLayers();
     void Action_ActivateAllLayers();
@@ -48,6 +53,9 @@ public:
 public:
     //Shortcuts
     virtual void MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList) override;
+
+private:
+    void GetSelectedLayers(TSet<UOdysseyLayer*>& OutSelectedLayers, UOdysseyLayer*& OutCurrentlayer ) const;
 
 private:
     TAttribute<UOdysseyLayerStack*> mLayerStack;

@@ -1832,6 +1832,9 @@ UOdysseyLayer::HasLighttable() const
 void
 UOdysseyLayer::SetLighttable(FOdysseyLighttable Value)
 {
+    if (!bHasLighttable)
+        return;
+
     Lighttable = Value;
     RenderingCompositionChanged(); //Composition could change if lighttable or a key is activated/inactivated
     RenderingChanged(); //ImageRendering changes without a composition change when any other param is changed
@@ -1841,6 +1844,9 @@ UOdysseyLayer::SetLighttable(FOdysseyLighttable Value)
 void
 UOdysseyLayer::SetLighttableInteractive(FOdysseyLighttable Value)
 {
+    if (!bHasLighttable)
+        return;
+
     Lighttable = Value;
     RenderingCompositionChanged(true); //Composition could change if lighttable or a key is activated/inactivated
     RenderingChanged(true); //ImageRendering changes without a composition change when any other param is changed
