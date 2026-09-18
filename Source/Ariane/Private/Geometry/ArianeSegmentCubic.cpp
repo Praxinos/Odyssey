@@ -316,7 +316,8 @@ FArianeSegmentCubic::Extract( FArianeObject* NewSegmentOwner
                             , FArianeVertex* NewSegmentVertex0
                             , float T0
                             , FArianeVertex* NewSegmentVertex1
-                            , float T1 )
+                            , float T1
+                            , EArianeAllocationModel InAllocationModel )
 {
     FArianeVertex* Vertex0 = Vertices[0].GetVertex();
     FArianeVertex* Vertex1 = Vertices[1].GetVertex();
@@ -351,7 +352,7 @@ FArianeSegmentCubic::Extract( FArianeObject* NewSegmentOwner
                                                                         , Bezier[1]
                                                                         , Bezier[2]
                                                                         , NewSegmentVertex1
-                                                                        , AllocationModel );
+                                                                        , InAllocationModel );
 }
 
 FVector

@@ -122,6 +122,25 @@ UArianeLayerStack::RemoveSelectedLayers()
     ClearLayerSelection( true );
 }
 
+uint32
+UArianeLayerStack::GetDrawingLayerCount()
+{
+    uint32 DrawingLayerCount = 0;
+
+    UArianeLayerFolder::Traverse( RootFolder
+                                 , [ &DrawingLayerCount ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
+    {
+        if( Cast<UArianeLayerDrawing>(Layer) )
+        {
+            DrawingLayerCount++;
+        }
+
+        return UArianeLayerFolder::ETraversalReturnValue::Continue;
+    } );
+
+    return DrawingLayerCount;
+}
+
 void
 UArianeLayerStack::GetLayers( TArray<UArianeLayer*>& OutLayers )
 {
@@ -262,8 +281,9 @@ UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder, 
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
                                                                            // The outer must be the AActor or else the TEDS system could crash
+    FName LayerName = FName( *FString::Printf(TEXT("Drawing Layer %d"), GetDrawingLayerCount() + 1 ) );
     UArianeLayerDrawing* NewDrawingLayer = NewObject<UArianeLayerDrawing>( GetPainting3DComponent()->GetOwner()
-                                                                         , NAME_None
+                                                                         , LayerName
                                                                          , RF_Transactional ); // for undos
 
     // Below 2 lines are mandatory to register the component, otherwise undos won't work (RF_TRANSACTIONAL will be erased)

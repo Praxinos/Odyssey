@@ -299,9 +299,11 @@ SArianeEditorSceneTreeView::SelectAll()
 {
     if( RootItem )
     {
-        FArianeGroup* RootGroup = static_cast<FArianeGroup*>(RootItem.Get()->GetObject());
+        GEditor->BeginTransaction( LOCTEXT("ariane-scene-tree-view.transaction.select-all-objects", "Select All Objects") );
 
-        //FArianeEditor::SelectAllObjects( Editor, RootGroup );
+        Editor->SelectAllObjects();
+
+        GEditor->EndTransaction();
     }
 }
 
@@ -312,7 +314,14 @@ SArianeEditorSceneTreeView::DeleteObjects()
     {
         FArianeGroup* RootGroup = static_cast<FArianeGroup*>(RootItem.Get()->GetObject());
 
-        //FArianeEditor::DeleteObjects( Editor, RootGroup );
+        if( RootGroup->IsSelected() == false )
+        {
+            GEditor->BeginTransaction( LOCTEXT("ariane-scene-tree-view.transaction.delete-selected-objects", "Delete Selected Objects") );
+
+            Editor->DeleteSelectedObjects();
+
+            GEditor->EndTransaction();
+        }
     }
 }
 
@@ -330,7 +339,7 @@ SArianeEditorSceneTreeView::CopyObjects()
     {
         FArianeGroup* RootGroup = static_cast<FArianeGroup*>(RootItem.Get()->GetObject());
 
-        //FArianeEditor::CopyObjects( RootGroup  );
+        Editor->CopySelectedObjects();
     }
 }
 
@@ -339,9 +348,11 @@ SArianeEditorSceneTreeView::PasteObjects()
 {
     if( RootItem )
     {
-        FArianeGroup* RootGroup = static_cast<FArianeGroup*>(RootItem.Get()->GetObject());
+        GEditor->BeginTransaction( LOCTEXT("ariane-scene-tree-view.transaction.paste-objects", "Paste Objects") );
 
-        //FArianeEditor::PasteObjects( Editor, RootGroup );
+        Editor->PasteObjects();
+
+        GEditor->EndTransaction();
     }
 }
 
@@ -383,29 +394,31 @@ void
 SArianeEditorSceneTreeView::OnPrePainting3DComponentUpdate( bool bInteractive )
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-    UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-    // Note: Painting3DComponent cannot be null since it is supposed to exist at that step. Do not check for its validity.
-
-    // the bInteractive is voluntarily ignored. During a MouseDown, the flag is set but we still need to mark the widget
-    // as needing an update
-    if( DrawingLayer )
+    if( Painting3DComponent )
     {
-        FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        FArianeObject::Traverse ( RootGroup
-                                , [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
-            {
-                if( Object->GetInvalidationFlags().Hierarchy
-                 || Object->GetInvalidationFlags().Name
-                 || Object->GetInvalidationFlags().Tags )
+        // the bInteractive is voluntarily ignored. During a MouseDown, the flag is set but we still need to mark the widget
+        // as needing an update
+        if( DrawingLayer )
+        {
+            FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
+
+            FArianeObject::Traverse ( RootGroup
+                                    , [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
                 {
-                    bDoUpdate = true;
-                }
+                    if( Object->GetInvalidationFlags().Hierarchy
+                     || Object->GetInvalidationFlags().Name
+                     || Object->GetInvalidationFlags().Tags )
+                    {
+                        bDoUpdate = true;
+                    }
 
-                return bDoUpdate ? FArianeObject::ETraversalReturnValue::Stop
-                                    : FArianeObject::ETraversalReturnValue::Continue;
-            } );
+                    return bDoUpdate ? FArianeObject::ETraversalReturnValue::Stop
+                                        : FArianeObject::ETraversalReturnValue::Continue;
+                } );
+        }
     }
 }
 

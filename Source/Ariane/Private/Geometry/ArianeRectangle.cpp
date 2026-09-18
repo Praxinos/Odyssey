@@ -39,8 +39,6 @@ FArianeRectangle::FArianeRectangle( UArianeImage* InImage
     , Width( InWidth )
     , Height( InHeight )
 {
-    ResetGeometry();
-    ReshapeGeometry();
 }
 
 bool

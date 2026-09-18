@@ -333,7 +333,8 @@ FArianeSegment::Extract( FArianeObject* NewSegmentOwner
                        , FArianeVertex* NewSegmentVertex0
                        , float T0
                        , FArianeVertex* NewSegmentVertex1
-                       , float T1 )
+                       , float T1
+                       , EArianeAllocationModel InAllocationModel )
 {
     FVector DeltaPosition = GetVertex(1)->GetPosition() - GetVertex(0)->GetPosition();
     FVector DeltaNormal = GetVertex(1)->GetNormal() - GetVertex(0)->GetNormal();
@@ -353,7 +354,7 @@ FArianeSegment::Extract( FArianeObject* NewSegmentOwner
 
         return Path->AllocSegment( NewSegmentVertex0
                                  , NewSegmentVertex1
-                                 , Path->GetAllocationModel() );
+                                 , InAllocationModel );
     }
 
     return nullptr;

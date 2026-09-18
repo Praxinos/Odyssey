@@ -11,6 +11,7 @@
 #include "ArianePainting3DComponent.h"
 #include "ArianePainting3DActor.h"
 #include "ArianeLayer.h"
+#include "ArianeLayerDrawing.h"
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerStack.h"
 
@@ -315,6 +316,29 @@ SArianeEditorLayerStack::ExpandTree( const TSharedPtr<FArianeEditorLayerRowItem>
     }
 }
 
+UArianeLayerDrawing*
+SArianeEditorLayerStack::GetAnyDrawingLayer( UArianeLayerStack* LayerStack )
+{
+    UArianeLayerDrawing* ChosenDrawingLayer = nullptr;
+
+    UArianeLayerFolder::Traverse( LayerStack->GetRootFolder()
+                                , [ &ChosenDrawingLayer ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
+        {
+            UArianeLayerDrawing * DrawingLayer = Cast<UArianeLayerDrawing>(Layer);
+
+            if( DrawingLayer )
+            {
+                ChosenDrawingLayer = DrawingLayer;
+
+                return UArianeLayerFolder::ETraversalReturnValue::Stop;
+            }
+
+            return UArianeLayerFolder::ETraversalReturnValue::Continue;
+        } );
+
+    return ChosenDrawingLayer;
+}
+
 void
 SArianeEditorLayerStack::Update()
 {
@@ -326,7 +350,26 @@ SArianeEditorLayerStack::Update()
 
     if( Painting3DComponent )
     {
-        RootItem = MakeShareable(new FArianeEditorLayerRowItem( Painting3DComponent->GetLayerStack()->GetRootFolder(), true ) );
+        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+
+        // First check a layer is selected, otherwise select one.
+        if( LayerStack->GetSelectedLayers().Num() == 0 )
+        {
+
+            // Unbind Delegates or else this function will re-enter itself on layer selection
+            UnbindDelegates();
+
+            UArianeLayerDrawing* DrawingLayer = GetAnyDrawingLayer( LayerStack );
+
+            if( DrawingLayer )
+            {
+                LayerStack->SelectLayer( DrawingLayer, true );
+            }
+
+            BindDelegates();
+        }
+
+        RootItem = MakeShareable(new FArianeEditorLayerRowItem( LayerStack->GetRootFolder(), true ) );
 
         BuildTree( RootItem );
 

@@ -826,7 +826,7 @@ FArianePath::PostLoad()
     {
         FArianeVertex* Vertex = InstancedVertex.GetMutablePtr<FArianeVertex>();
 
-        Vertex->PostEditUndo();
+        Vertex->PostLoad();
 
         AddVertex( Vertex );
     }

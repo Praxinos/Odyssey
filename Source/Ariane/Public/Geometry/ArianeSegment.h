@@ -180,13 +180,15 @@ struct ARIANE_API FArianeSegment
          * @param T0 parametric value for the endpoint 0
          * @param NewSegmentVertex1 the vertex 1 to attach to the new segment
          * @param T0 parametric value for the endpoint 1
+         * @param InAllocationModel Allocate as InstanceSegmzents (serialized) or Operating system (volatile)
          * @return the newly created segment
          */
         virtual FArianeSegment* Extract( FArianeObject* NewSegmentOwner
                                        , FArianeVertex* NewSegmentVertex0
                                        , float T0
                                        , FArianeVertex* NewSegmentVertex1
-                                       , float T1 );
+                                       , float T1
+                                       , EArianeAllocationModel InAllocationModel );
 
         /** Get segment length **/
         double GetLength();

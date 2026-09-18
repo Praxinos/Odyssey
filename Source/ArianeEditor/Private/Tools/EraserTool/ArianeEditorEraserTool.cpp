@@ -8,6 +8,7 @@
 // Ariane headers
 #include "ArianePainting3DComponent.h"
 #include "ArianePath.h"
+#include "ArianePrimitive.h"
 #include "ArianeGroup.h"
 #include "ArianeVertex.h"
 #include "ArianeLayerStack.h"
@@ -35,6 +36,7 @@ UArianeEditorEraserTool::~UArianeEditorEraserTool()
 UArianeEditorEraserTool::UArianeEditorEraserTool()
     : Size( 20.0f )
     , bSplit ( true )
+    , PrimitiveBehaviour ( EArianeEditorEraserToolPrimitiveBehaviour::ConvertToPath )
     , CanvasRenderTarget ( nullptr )
     , Brush( nullptr )
 {
@@ -386,6 +388,67 @@ UArianeEditorEraserTool::GetPathBoundingArea( FEditorViewportClient* ViewportCli
     return ( XMin < XMax ) ? FBox2D( FVector2D( XMin, YMin ), FVector2D( XMax, YMax ) ) : FBox2D();
 }
 
+void
+UArianeEditorEraserTool::ParseChainProcessors( UArianeLayerDrawing* DrawingLayer
+                                             , FArianePath* ChainPath
+                                             , TArray<ChainProcessor>& ChainProcessors
+                                             , TArray<FArianePath*>& AddedPaths
+                                             , TArray<FArianePath*>& RemovedPaths )
+{
+    for( ChainProcessor& ChainProcessor : ChainProcessors )
+    {
+        // proceed now we know we have hit anything
+        // determine which vertices / segments will be deleted and which will be kept
+        // it differs in SPLIT and NOSPLIT modes. SPLIT modes removes only those erased,
+        // split removes all
+        ParseChainWayPoints( DrawingLayer
+                            , ChainPath
+                            , ChainProcessor.WayPoints
+                            , ChainProcessor.WayFragments
+                            , AddedPaths
+                            , ChainProcessor.AddedVertices
+                            , ChainProcessor.AddedSegments
+                            , ChainProcessor.RemovedVertices
+                            , ChainProcessor.RemovedSegments );
+
+        for( FArianeSegment* RemovedSegment : ChainProcessor.RemovedSegments )
+        {
+            // Remove and Free
+            static_cast<FArianePath*>(RemovedSegment->GetOwner())->RemoveSegment( RemovedSegment, true );
+        }
+
+        for( FArianeVertex* RemovedVertex : ChainProcessor.RemovedVertices )
+        {
+            // Remove and Free
+            static_cast<FArianePath*>(RemovedVertex->GetOwner())->RemoveVertex( RemovedVertex, true );
+        }
+
+        for( FArianeVertex* AddedVertex : ChainProcessor.AddedVertices )
+        {
+            // Add
+            static_cast<FArianePath*>(AddedVertex->GetOwner())->AddVertex( AddedVertex );
+        }
+
+        for( FArianeSegment* AddedSegment : ChainProcessor.AddedSegments )
+        {
+            // Add
+            static_cast<FArianePath*>(AddedSegment->GetOwner())->AddSegment( AddedSegment );
+        }
+    }
+
+    if( bSplit )
+    {
+        RemovedPaths.Add( ChainPath );
+    }
+    else // bSplit == false
+    {
+        if( ( ChainPath->GetSegments().Num() == 0 ) && ( ChainPath->GetVertices().Num() == 0 ) )
+        {
+            RemovedPaths.Add( ChainPath );
+        }
+    }
+}
+
 bool
 UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
                                    , FSceneView* View
@@ -424,7 +487,7 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
                                      , &AddedPaths
                                      , &RemovedPaths ] ( FArianeObject* TravesedObject ) -> FArianeObject::ETraversalReturnValue
             {
-                if( TravesedObject->GetClass() == FArianePath::StaticClass() )
+                if( TravesedObject->HasBaseClass( FArianePath::StaticClass() ) )
                 {
                     FArianePath* Path = static_cast<FArianePath*>( TravesedObject );
                     FBox2D PathBox = GetPathBoundingArea( ViewportClient, View, Path );
@@ -455,60 +518,47 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
 
                         if( bPathHit )
                         {
-                            for( ChainProcessor& ChainProcessor : ChainProcessors )
+                            if( Path->GetClass() == FArianePath::StaticClass() )
                             {
-                                // proceed now we know we have hit anything
-                                // determine which vertices / segments will be deleted and which will be kept
-                                // it differs in SPLIT and NOSPLIT modes. SPLIT modes removes only those erased,
-                                // split removes all
-                                ParseChainWayPoints( DrawingLayer
-                                                   , Path
-                                                   , ChainProcessor.WayPoints
-                                                   , ChainProcessor.WayFragments
-                                                   , AddedPaths
-                                                   , ChainProcessor.AddedVertices
-                                                   , ChainProcessor.AddedSegments
-                                                   , ChainProcessor.RemovedVertices
-                                                   , ChainProcessor.RemovedSegments );
-
-                                for( FArianeSegment* RemovedSegment : ChainProcessor.RemovedSegments )
-                                {
-                                    // Remove and Free
-                                    static_cast<FArianePath*>(RemovedSegment->GetOwner())->RemoveSegment( RemovedSegment, true );
-                                }
-
-                                for( FArianeVertex* RemovedVertex : ChainProcessor.RemovedVertices )
-                                {
-                                    // Remove and Free
-                                    static_cast<FArianePath*>(RemovedVertex->GetOwner())->RemoveVertex( RemovedVertex, true );
-                                }
-
-                                for( FArianeVertex* AddedVertex : ChainProcessor.AddedVertices )
-                                {
-                                    // Add
-                                    static_cast<FArianePath*>(AddedVertex->GetOwner())->AddVertex( AddedVertex );
-                                }
-
-                                for( FArianeSegment* AddedSegment : ChainProcessor.AddedSegments )
-                                {
-                                    // Add
-                                    static_cast<FArianePath*>(AddedSegment->GetOwner())->AddSegment( AddedSegment );
-                                }
+                                ParseChainProcessors( DrawingLayer
+                                                    , Path
+                                                    , ChainProcessors
+                                                    , AddedPaths
+                                                    , RemovedPaths );
                             }
 
-                            if( bSplit )
+                            // Erase the whoile primitive
+                            if( Path->HasBaseClass( FArianePrimitive::StaticClass() ) )
                             {
-                                if( bPathHit )
+                                FArianePrimitive* Primitive = static_cast<FArianePrimitive*>(Path);
+
+                                switch( PrimitiveBehaviour )
                                 {
-                                    RemovedPaths.Add( Path );
-                                }
-                            }
-                            else // bSplit == false
-                            {
-                                if( ( Path->GetSegments().Num() == 0 ) && ( Path->GetVertices().Num() == 0 ) )
-                                {
-                                    RemovedPaths.Add( Path );
-                                }
+                                    case EArianeEditorEraserToolPrimitiveBehaviour::Delete :
+                                        RemovedPaths.Add( Primitive );
+                                    break;
+
+                                    case EArianeEditorEraserToolPrimitiveBehaviour::ConvertToPath :
+                                    {
+                                        bool bSaveSplit = bSplit;
+
+                                        // forcing bSplit to true to force the creation of a Path from
+                                        // the primitive
+                                        bSplit = true;
+                                        ParseChainProcessors( DrawingLayer
+                                                            , Path
+                                                            , ChainProcessors
+                                                            , AddedPaths
+                                                            , RemovedPaths );
+                                        bSplit = bSaveSplit;
+                                    }
+                                    break;
+
+                                    // do nothing, same for the default behaviour, left for clarity
+                                    case EArianeEditorEraserToolPrimitiveBehaviour::Keep :
+                                    default :
+                                    break;
+                                };
                             }
                         }
                     }
@@ -551,7 +601,7 @@ UArianeEditorEraserTool::GetStartingPoint( FWayPoint* WayPoint, FWayFragment* Fr
     // extend prev
     while( CurrFragment )
     {
-        FWayFragment* PrevFragment = CurrWayPoint->GetOtherFragment( Fragment );
+        FWayFragment* PrevFragment = CurrWayPoint->GetOtherFragment( CurrFragment );
 
         if( ( PrevFragment == nullptr )
          || ( PrevFragment == Fragment ) // loop prevention
@@ -795,12 +845,14 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
                                                                                                                      , DestVertex0
                                                                                                                      , CurrFragment->T0
                                                                                                                      , DestVertex1
-                                                                                                                     , CurrFragment->T1 )
+                                                                                                                     , CurrFragment->T1
+                                                                                                                     , EArianeAllocationModel::InstancedStruct )
                                                                                      : CurrFragment->Segment->Extract( CurrentPath
                                                                                                                      , DestVertex1
                                                                                                                      , CurrFragment->T1
                                                                                                                      , DestVertex0
-                                                                                                                     , CurrFragment->T0 );
+                                                                                                                     , CurrFragment->T0
+                                                                                                                     , EArianeAllocationModel::InstancedStruct );
 
                 // mark new segment for addition
                 OutAddedSegments.Add( NewSegment );

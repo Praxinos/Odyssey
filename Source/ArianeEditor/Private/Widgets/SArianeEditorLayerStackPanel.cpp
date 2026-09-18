@@ -88,12 +88,16 @@ void
 SArianeEditorLayerStackPanel::OnPreLayerSelectionChanged()
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-    UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-    const TArray<UArianeLayer*>& SelectedLayers = LayerStack->GetSelectedLayers();
 
-    for( UArianeLayer* Layer : SelectedLayers )
+    if( Painting3DComponent )
     {
-        Layer->GetOnTransformChangedDelegate().RemoveAll( this );
+        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+        const TArray<UArianeLayer*>& SelectedLayers = LayerStack->GetSelectedLayers();
+
+        for( UArianeLayer* Layer : SelectedLayers )
+        {
+            Layer->GetOnTransformChangedDelegate().RemoveAll( this );
+        }
     }
 }
 
@@ -161,79 +165,77 @@ SArianeEditorLayerStackPanel::Construct(const FArguments& InArgs, FArianeEditor*
 
     ChildSlot
     [
-        SNew(SVerticalBox)
-        .Visibility_Lambda( [InEditor]() -> EVisibility
-            {
-                return InEditor->GetCurrentPainting3DComponent() ? EVisibility::Visible : EVisibility::Hidden;
-            } )
-        + SVerticalBox::Slot()
-        .AutoHeight()
+        SNew(SSplitter)
+        .Orientation( EOrientation::Orient_Vertical )
+        +SSplitter::Slot()
         [
-            SNew(SHorizontalBox)
-            + SHorizontalBox::Slot()
-            .AutoWidth()
+            SNew(SVerticalBox)
+            .Visibility_Lambda( [InEditor]() -> EVisibility
+                {
+                    return InEditor->GetCurrentPainting3DComponent() ? EVisibility::Visible : EVisibility::Hidden;
+                } )
+            + SVerticalBox::Slot()
+            .AutoHeight()
             [
-                SNew(SButton)
-                .ContentPadding(FMargin(4.0f, 2.0f))
-                .OnClicked(FOnClicked::CreateSP(this, &SArianeEditorLayerStackPanel::NewLayer))
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .AutoWidth()
                 [
-                    SNew(SHorizontalBox)
-                    + SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .VAlign(VAlign_Center)
+                    SNew(SButton)
+                    .ContentPadding(FMargin(4.0f, 2.0f))
+                    .OnClicked(FOnClicked::CreateSP(this, &SArianeEditorLayerStackPanel::NewLayer))
                     [
-                        SNew(SImage)
-                        .Image(FArianeEditorStyle::Get().GetBrush( "ArianeEditor.Layers16" ))
-                    ]
+                        SNew(SHorizontalBox)
+                        + SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign(VAlign_Center)
+                        [
+                            SNew(SImage)
+                            .Image(FArianeEditorStyle::Get().GetBrush( "ArianeEditor.Layers16" ))
+                        ]
 
-                    + SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .VAlign(VAlign_Center)
+                        + SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign(VAlign_Center)
+                        [
+                            SNew(STextBlock)
+                            .Text(FText::FromString(TEXT("+")))
+                            .ColorAndOpacity(FSlateColor(FLinearColor::Green))
+                        ]
+                    ]
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SNew(SButton)
+                    .OnClicked(FOnClicked::CreateSP(this, &SArianeEditorLayerStackPanel::NewFolderLayer))
                     [
-                        SNew(STextBlock)
-                        .Text(FText::FromString(TEXT("+")))
-                        .ColorAndOpacity(FSlateColor(FLinearColor::Green))
+                        SNew(SHorizontalBox)
+                        + SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign(VAlign_Center)
+                        [
+                            SNew(SImage)
+                            .Image(FAppStyle::Get().GetBrush("ContentBrowser.AssetTreeFolderClosed"))
+                        ]
+
+                        + SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign(VAlign_Center)
+                        [
+                            SNew(STextBlock)
+                            .Text(FText::FromString(TEXT("+")))
+                            .ColorAndOpacity(FSlateColor(FLinearColor::Green))
+                        ]
                     ]
                 ]
             ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            [
-                SNew(SButton)
-                .OnClicked(FOnClicked::CreateSP(this, &SArianeEditorLayerStackPanel::NewFolderLayer))
-                [
-                    SNew(SHorizontalBox)
-                    + SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .VAlign(VAlign_Center)
-                    [
-                        SNew(SImage)
-                        .Image(FAppStyle::Get().GetBrush("ContentBrowser.AssetTreeFolderClosed"))
-                    ]
-
-                    + SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .VAlign(VAlign_Center)
-                    [
-                        SNew(STextBlock)
-                        .Text(FText::FromString(TEXT("+")))
-                        .ColorAndOpacity(FSlateColor(FLinearColor::Green))
-                    ]
-                ]
-            ]
-        ]
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        [
-            SNew(SScrollBox)
-            + SScrollBox::Slot()
-            .AutoSize()
+            + SVerticalBox::Slot()
             [
                 SNew( SArianeEditorLayerStack, Editor )
             ]
         ]
-        + SVerticalBox::Slot()
-        .AutoHeight()
+        +SSplitter::Slot()
         [
             LayerDetailsView.ToSharedRef()
         ]

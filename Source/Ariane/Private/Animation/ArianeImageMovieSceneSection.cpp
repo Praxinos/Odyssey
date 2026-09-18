@@ -57,7 +57,7 @@ namespace Sequencer
 
             // By duplicating the image, we also retrieve the same IDs for objects, vertices, segments etc...
             // this will allow any interpolated object to find its counter part in the other key by searching by Guid
-            CurrentKeyData->Image = DuplicateObject(DrawingLayer->GetImage(), InSectionToKey);
+            CurrentKeyData->Image = DuplicateObject( DrawingLayer->GetImage(), InSectionToKey);
 
             CurrentKeyData->RecordGeometry( CurrentKeyData->Image );
 

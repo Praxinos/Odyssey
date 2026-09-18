@@ -38,8 +38,6 @@ FArianeLine::FArianeLine( UArianeImage* InImage
     , StartPoint( InStartPoint )
     , EndPoint( InEndPoint )
 {
-    ResetGeometry();
-    ReshapeGeometry();
 }
 
 bool

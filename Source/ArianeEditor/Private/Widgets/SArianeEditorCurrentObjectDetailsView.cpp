@@ -82,27 +82,29 @@ void
 SArianeEditorCurrentObjectDetailsView::OnPrePainting3DComponentUpdate( bool bInteractive )
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-    UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-    // Note: Painting3DComponent cannot be null since it is supposed to exist at that step. Do not check for its validity.
-
-    // the bInteractive is voluntarily ignored. During a MouseDown, the flag is set but we still need to mark the widget
-    // as needing an update
-    if( DrawingLayer )
+    if( Painting3DComponent )
     {
-        FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        FArianeObject::Traverse ( RootGroup
-                                , [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
-            {
-                if( Object->GetInvalidationFlags().HasAny() )
+        // the bInteractive is voluntarily ignored. During a MouseDown, the flag is set but we still need to mark the widget
+        // as needing an update
+        if( DrawingLayer )
+        {
+            FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
+
+            FArianeObject::Traverse ( RootGroup
+                                    , [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
                 {
-                    bDoUpdate = true;
-                }
+                    if( Object->GetInvalidationFlags().HasAny() )
+                    {
+                        bDoUpdate = true;
+                    }
 
-                return bDoUpdate ? FArianeObject::ETraversalReturnValue::Stop
-                                 : FArianeObject::ETraversalReturnValue::Continue;
-            } );
+                    return bDoUpdate ? FArianeObject::ETraversalReturnValue::Stop
+                                     : FArianeObject::ETraversalReturnValue::Continue;
+                } );
+        }
     }
 }
 

@@ -87,7 +87,8 @@ public:
                                         , FArianeVertex* NewSegmentVertex0
                                         , float T0
                                         , FArianeVertex* NewSegmentVertex1
-                                        , float T1 ) override;
+                                        , float T1
+                                        , EArianeAllocationModel InAllocationModel ) override;
     virtual FVector GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormalize ) override;
     virtual FVector GetTangentVectorAt( double T, bool bNormalize ) override;
 

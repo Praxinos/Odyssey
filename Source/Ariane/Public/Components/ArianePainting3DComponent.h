@@ -109,6 +109,10 @@ protected:
     UPROPERTY()
     UMaterialInstanceDynamic* DefaultMaterial;
 
+    // for conversions to static mesh
+    UPROPERTY(Transient)
+    UArianePainting3DStaticMeshComponent* StaticMeshComponent;
+
     UPROPERTY()
     int FileVersion = 1;
 
@@ -120,5 +124,4 @@ protected:
     FOnUpdateDelegate OnPreUpdate;
     FOnUpdateDelegate OnPostUpdate;
     IArianePainting3DComponentEditorInterface* EditorInterface;
-    UArianePainting3DStaticMeshComponent* StaticMeshComponent;
 };

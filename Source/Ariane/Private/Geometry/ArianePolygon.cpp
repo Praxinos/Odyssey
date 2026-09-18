@@ -17,7 +17,7 @@ FArianePolygon::~FArianePolygon()
 
 FArianePolygon::FArianePolygon()
     : FArianePolygon( nullptr
-                    , FName ( "Ariane Polygon" )
+                    , FName ( "Ariane Default Polygon" )
                     , 3
                     , 0.0f
                     , 0.0f
@@ -39,8 +39,6 @@ FArianePolygon::FArianePolygon( UArianeImage* InImage
     , CornerCount( InCornerCount < 3 ? 3 : InCornerCount )
     , Radius ( InRadius )
 {
-    ResetGeometry();
-    ReshapeGeometry();
 }
 
 bool

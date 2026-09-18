@@ -40,8 +40,6 @@ FArianeEllipse::FArianeEllipse( UArianeImage* InImage
     , RadiusX( InRadiusX )
     , RadiusY( InRadiusY )
 {
-    ResetGeometry();
-    ReshapeGeometry();
 }
 
 bool

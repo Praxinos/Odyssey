@@ -66,6 +66,9 @@ public:
     /** Run any object-specific task required immediately after undoing / redoing */
     virtual void PostEditUndo(){};
 
+    /** Run any object-specific task required immediately after loading */
+    virtual void PostLoad(){};
+
 protected:
     /**
         * @brief Set the handle's position

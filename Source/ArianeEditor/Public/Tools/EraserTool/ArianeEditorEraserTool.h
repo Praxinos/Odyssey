@@ -21,6 +21,14 @@ struct FArianeVertex;
 class FEditorViewportClient;
 class UArianeLayerDrawing;
 
+UENUM(BlueprintType)
+enum class EArianeEditorEraserToolPrimitiveBehaviour : uint8
+{
+    ConvertToPath = 0,
+    Delete = 1,
+    Keep = 2,
+};
+
 UCLASS()
 class ARIANEEDITOR_API UArianeEditorEraserTool : public UArianeEditorTool
 {
@@ -250,19 +258,27 @@ protected:
                                       , bool bSplit );
     FBox2D GetPathBoundingArea( FEditorViewportClient* ViewportClient, FSceneView* View, FArianePath* Path );
     FBox2D GetErasureBoundingArea( FEditorViewportClient* ViewportClient, FSceneView* View );
+    void ParseChainProcessors( UArianeLayerDrawing* DrawingLayer
+                             , FArianePath* ChainPath
+                             , TArray<ChainProcessor>& ChainProcessors
+                             , TArray<FArianePath*>& AddedPaths
+                             , TArray<FArianePath*>& RemovedPaths );
 
 public:
     UPROPERTY( EditAnywhere
-             , Category=EraserTool
+             , Category = EraserTool
              , meta = ( ToolTip = "Size"
                       , ClampMin = "0.0"
                       , UIMin = "0.0" ) )
     int Size;
 
     UPROPERTY( EditAnywhere
-             , Category=EraserTool )
+             , Category = EraserTool )
     bool bSplit;
 
+    UPROPERTY( EditAnywhere
+             , Category = EraserTool )
+    EArianeEditorEraserToolPrimitiveBehaviour PrimitiveBehaviour;
 
 protected:
     UPROPERTY() // prevent GC

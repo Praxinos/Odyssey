@@ -109,6 +109,8 @@ UArianeImage::PostLoad()
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
 
+        Object->SetImage( this );
+
         Object->PostLoad();
     }
 
@@ -150,6 +152,8 @@ UArianeImage::PostEditUndo()
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
+
+        Object->SetImage( this );
 
         Object->PostEditUndo();
     }
@@ -218,6 +222,8 @@ UArianeImage::AllocObject( const FName& InName, EArianeAllocationModel Allocatio
 
     FArianeObject* NewObject = InstancedObjects.Last().GetMutablePtr<FArianeObject>();
 
+    NewObject->PostLoad();
+
     return NewObject;
 }
 
@@ -240,6 +246,9 @@ UArianeImage::AllocGroup( const FName& InName
     {
         NewGroup = new FArianeGroup( this, InName, AllocationModel );
     }
+
+    NewGroup->PostLoad();
+
 
     return NewGroup;
 }
@@ -266,6 +275,7 @@ UArianeImage::AllocCycle( UMaterialInterface* InMaterialInterface
         NewCycle = new FArianeCycle( this, InName, AllocationModel );
     }
 
+    NewCycle->PostLoad();
     NewCycle->SetMaterial( InMaterialInterface ? InMaterialInterface
                                                : LayerStack->GetPainting3DComponent()->GetDefaultMaterial() );
 
@@ -311,6 +321,7 @@ UArianeImage::AllocEllipse( UMaterialInterface* InMaterialInterface
                                    , AllocationModel );
     }
 
+    Ellipse->PostLoad();
     Ellipse->SetMaterial( InMaterialInterface ? InMaterialInterface
                                               : LayerStack->GetPainting3DComponent()->GetDefaultMaterial() );
 
@@ -356,6 +367,7 @@ UArianeImage::AllocLine( UMaterialInterface* InMaterialInterface
                               , AllocationModel );
     }
 
+    Line->PostLoad();
     Line->SetMaterial( InMaterialInterface ? InMaterialInterface
                                            : LayerStack->GetPainting3DComponent()->GetDefaultMaterial() );
 
@@ -401,6 +413,7 @@ UArianeImage::AllocPolygon( UMaterialInterface* InMaterialInterface
                                     , AllocationModel );
     }
 
+    Polygon->PostLoad();
     Polygon->SetMaterial( InMaterialInterface ? InMaterialInterface
                                               : LayerStack->GetPainting3DComponent()->GetDefaultMaterial() );
 
@@ -446,6 +459,7 @@ UArianeImage::AllocRectangle( UMaterialInterface* InMaterialInterface
                                         , AllocationModel );
     }
 
+    Rectangle->PostLoad();
     Rectangle->SetMaterial( InMaterialInterface ? InMaterialInterface
                                                 : LayerStack->GetPainting3DComponent()->GetDefaultMaterial() );
 
@@ -478,6 +492,7 @@ UArianeImage::AllocPath( UMaterialInterface* InMaterialInterface
         NewPath = new FArianePath( this, InName, AllocationModel );
     }
 
+    NewPath->PostLoad();
     NewPath->SetMaterial( InMaterialInterface ? InMaterialInterface
                                               : LayerStack->GetPainting3DComponent()->GetDefaultMaterial() );
 

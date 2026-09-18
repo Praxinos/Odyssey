@@ -338,9 +338,6 @@ protected:
     FArianeObjectID ParentID;
 
     UPROPERTY( EditAnywhere )
-    UArianeImage* Image;
-
-    UPROPERTY( EditAnywhere )
     bool bVisible;
 
     UPROPERTY( EditAnywhere )
@@ -363,6 +360,7 @@ protected:
     uint32 WorldTransformVersion;
 
 protected:
+    UArianeImage* Image;
     FSimpleMulticastDelegate  OnPostInvalidated;
     TArray<FArianeObjectID> InvalidatedChildren;
     TArray<FArianeObjectID> Children;
