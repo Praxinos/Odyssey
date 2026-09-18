@@ -7,6 +7,7 @@
 
 namespace Odyssey {
 
+#if WITH_EDITORONLY_DATA
 void
 ResizeTexture2D( UTexture2D* InOutTexture, uint32 InNewWidth, uint32 InNewHeight )
 {
@@ -47,5 +48,5 @@ ResizeTexture2D( UTexture2D* InOutTexture, uint32 InNewWidth, uint32 InNewHeight
     Source.Init(NewImage);
     InOutTexture->PostEditChange();
 }
-
+#endif
 }

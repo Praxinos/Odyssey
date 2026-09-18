@@ -45,13 +45,14 @@ UOdysseyLayerCell::UpdateTextureSize()
 
     uint32 layerWidth = rect.Width();
     uint32 layerHeight = rect.Height();
-
+#if WITH_EDITORONLY_DATA
     uint32 textureWidth = Texture->Source.GetSizeX();
     uint32 textureHeight = Texture->Source.GetSizeY();
     if ( textureWidth != layerWidth || textureHeight != layerHeight)
     {
         Odyssey::ResizeTexture2D(Texture, layerWidth, layerHeight);
     }
+#endif
 }
 
 void

@@ -8,5 +8,7 @@
 class UTexture2D;
 
 namespace Odyssey {
+#if WITH_EDITORONLY_DATA
     ODYSSEYCORE_API void ResizeTexture2D( UTexture2D* InOutTexture, uint32 InNewWidth, uint32 InNewHeight );
+#endif
 }
