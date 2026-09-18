@@ -12,6 +12,7 @@
 #include "Interfaces/IPluginManager.h"
 #include "Misc/TimeGuard.h"
 #include "PlatformHttp.h"
+#include "Stats/Stats.h"
 
 //---
 

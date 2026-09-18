@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 
 #include "AnalyticsProviderETEventCache.h"
+#include "Containers/Ticker.h"
 #include "IAnalyticsProviderET.h"
 #include "Interfaces/IHttpResponse.h"
 #include "Interfaces/IHttpRequest.h"

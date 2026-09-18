@@ -6,6 +6,7 @@
 #include "Analytics.h"
 #include "AnalyticsProviderETEventCache.h"
 #include "AnalyticsTracer.h"
+#include "AssetRegistry/AssetData.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "BuildSettings.h"
 #include "HttpModule.h"
@@ -13,7 +14,9 @@
 #include "Interfaces/IPluginManager.h"
 #include "Internationalization/Culture.h"
 #include "Internationalization/Internationalization.h"
+#include "Misc/App.h"
 #include "Misc/EngineVersion.h"
+#include "Misc/PackageName.h"
 
 #include "OdysseyTelemetryLog.h"
 #include "OdysseyTelemetryModule.h"
