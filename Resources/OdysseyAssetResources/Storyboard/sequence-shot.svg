@@ -1,22 +1,38 @@
-<svg id="Layer_1" data-name="Layer 1" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 120 120">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke: #d0d0d0;
+      }
 
-<!-- Circle -->
-<circle stroke="white" stroke-width="4" cx="60" cy="60" r="20" />
+      .cls-1, .cls-2 {
+        fill: none;
+        stroke-width: 2px;
+      }
 
-<!-- target -->
-<path stroke="white" stroke-width="4" d="
-    M60,30v20
-    M60,90v-20
-    M30,60h20
-    M90,60h-20
-    "/>
-    
-<!-- 4 corners -->
-<path stroke="white" stroke-width="4" d="
-    M30,15h-25v25
-    M5,80v25h25
-    M90,105h25v-25
-    M90,15h25v25
-    "/>
+      .cls-3 {
+        fill: url(#Dégradé_sans_nom_9);
+        opacity: .25;
+      }
 
+      .cls-2 {
+        stroke: #fff;
+      }
+    </style>
+    <linearGradient id="Dégradé_sans_nom_9" data-name="Dégradé sans nom 9" x1="-2" y1="95.97" x2="122.2" y2="24.26" gradientUnits="userSpaceOnUse">
+      <stop offset=".05" stop-color="#fff"/>
+      <stop offset=".08" stop-color="#f1f1f1"/>
+      <stop offset=".26" stop-color="#a9a9a9"/>
+      <stop offset=".43" stop-color="#6c6c6c"/>
+      <stop offset=".59" stop-color="#3d3d3d"/>
+      <stop offset=".72" stop-color="#1c1c1c"/>
+      <stop offset=".84" stop-color="#070707"/>
+      <stop offset=".91" stop-color="#000"/>
+    </linearGradient>
+  </defs>
+  <circle class="cls-1" cx="60" cy="60" r="20"/>
+  <path class="cls-2" d="M30,15H5v25M5,80v25h25M90,105h25v-25M90,15h25v25"/>
+  <rect class="cls-3" x="3.97" y="13.92" width="112.26" height="92.39"/>
+  <path class="cls-2" d="M60,30v20M60,90v-20M30,60h20M90,60h-20"/>
 </svg>
