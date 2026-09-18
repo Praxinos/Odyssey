@@ -31,6 +31,7 @@ class UInteractiveToolManager;
 class UArianeEditorToolBuilder;
 class UArianeLayerDrawing;
 class UArianeLayer;
+struct FArianePrimitive;
 struct FArianeObject;
 
 UENUM()
@@ -255,6 +256,7 @@ public:
     void ConvertSelectedPrimitives();
     void CopySelectedLayers();
     void PasteLayers();
+    void SelectAllObjects();
 
 protected:
     /**
@@ -284,7 +286,8 @@ protected:
     void OnDrawingCoordinateSystemChanged( int32, ESelectInfo::Type );
     void OnToolEnded( UInteractiveToolManager* Manager, UInteractiveTool *Tool );
     void OnObjectPreSave( UObject* SavedObject, FObjectPreSaveContext Context );
-
+    static void ConvertPrimitives( UArianePainting3DComponent* Painting3DComponent
+                                 , TArray<FArianePrimitive*>& PrimitivesToConvert );
 
 protected:
     FSimpleDelegate OnRegenerateToolbarAndMenus;

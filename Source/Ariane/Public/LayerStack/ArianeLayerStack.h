@@ -117,6 +117,7 @@ public:
 
     virtual void Serialize( FArchive& Ar ) override;
     void AddLayers( UArianeLayerFolder* FosterFolder, TArray<UArianeLayer*> OrphanLayers, bool bTriggerEvent );
+    uint32 GetDrawingLayerCount();
 
 #if WITH_EDITOR
     void PreEditUndo();

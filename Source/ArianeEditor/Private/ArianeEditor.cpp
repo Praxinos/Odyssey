@@ -671,10 +671,27 @@ FArianeEditor::AddPainting3DActor()
     // Create the actor at some distance away from the camera
     FVector Location = View ? View->ViewLocation + ( View->GetViewDirection() * Settings->GetDistanceToNewActor() )
                             : FVector();
+    ULevel* CurrentLevel = GetWorld()->GetCurrentLevel();
+
+    GEditor->BeginTransaction(LOCTEXT("ariane-editor-.new-actor","New Painting3D Actor"));
+
+    CurrentLevel->Modify();
+
+    AArianePainting3DActor* Painting3DActor = Cast<AArianePainting3DActor>( GetWorld()->SpawnActor( AArianePainting3DActor::StaticClass()
+                                                                                                  , &Location ) );
+    UArianePainting3DComponent* Painting3DComponent = Painting3DActor->GetPainting3DComponent();
+
+    // Add a default layer
+    UArianeLayerDrawing* DrawingLayer = Painting3DComponent->GetLayerStack()->CreateDrawingLayer( nullptr, true );
+    // And select it
+    Painting3DComponent->GetLayerStack()->ClearLayerSelection( false );
+    Painting3DComponent->GetLayerStack()->SelectLayer( DrawingLayer, true );
+
+    GEditor->EndTransaction();
 
     GetWorld()->MarkPackageDirty();
 
-    return Cast<AArianePainting3DActor>(GetWorld()->SpawnActor( AArianePainting3DActor::StaticClass(), &Location ) );
+    return Painting3DActor;
 }
 
 void
@@ -923,6 +940,40 @@ FArianeEditor::GroupSelectedObjects( const FName& NewGroupName )
 }
 
 void
+FArianeEditor::SelectAllObjects()
+{
+    UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        if( DrawingLayer )
+        {
+            FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
+
+            // for undos in case a transaction is opened by the caller
+            DrawingLayer->GetImage()->Modify();
+
+            FArianeObject::Traverse( RootGroup
+                                   , [ DrawingLayer ] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+                {
+                    if( Object->IsSelected() == false )
+                    {
+                        DrawingLayer->GetImage()->SelectObject( Object );
+                    }
+
+                    return FArianeObject::ETraversalReturnValue::Continue;
+                } );
+
+            // Will trigger an Update event, signaling the listenning widgets that something has changed.
+            // here the selection flag has changed.
+            Painting3DComponent->Update( false );
+        }
+    }
+}
+
+void
 FArianeEditor::DeleteSelectedObjects()
 {
     UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
@@ -958,6 +1009,44 @@ FArianeEditor::DeleteSelectedObjects()
 }
 
 void
+FArianeEditor::ConvertPrimitives( UArianePainting3DComponent* Painting3DComponent
+                                , TArray<FArianePrimitive*>& PrimitivesToConvert )
+{
+    for( FArianePrimitive* PrimitiveToConvert : PrimitivesToConvert )
+    {
+        TArray<FArianeObjectID> Children;
+        FArianePath* Path;
+
+        Children = PrimitiveToConvert->GetChildren();
+
+        // first step: remove the children first or else the conversion will convert all children primitives
+        // even the one that were not selected
+        for( FArianeObjectID& ChildID : Children )
+        {
+            PrimitiveToConvert->RemoveChild( ChildID.GetObject(), false ); // remove but do not free the child
+        }
+
+        // second step: convert
+        Path = PrimitiveToConvert->Convert( FArianePrimitive::EConversionFlags::Bezier );
+
+        // third step: append children
+        for( FArianeObjectID& ChildID : Children )
+        {
+            Path->AppendChild( ChildID.GetObject() );
+        }
+
+        // final step: append the converted path and remove the primitive
+        PrimitiveToConvert->GetParent()->AppendChild( Path );
+
+        Path->UpdateTransform();
+
+        PrimitiveToConvert->GetParent()->RemoveChild( PrimitiveToConvert, true );
+    }
+
+    Painting3DComponent->Update( false );
+}
+
+void
 FArianeEditor::ConvertSelectedPrimitives()
 {
     UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
@@ -969,6 +1058,9 @@ FArianeEditor::ConvertSelectedPrimitives()
         if( DrawingLayer )
         {
             TArray<FArianePrimitive*> PrimitivesToConvert;
+
+            // for undos in case a transaction is opened by the caller
+            DrawingLayer->GetImage()->Modify();
 
             PrimitivesToConvert.Reserve( DrawingLayer->GetImage()->GetSelectedObjects().Num() );
 
@@ -982,38 +1074,7 @@ FArianeEditor::ConvertSelectedPrimitives()
                 }
             }
 
-            for( FArianePrimitive* SelectedPrimitive : PrimitivesToConvert )
-            {
-                TArray<FArianeObjectID> Children;
-                FArianePath* Path;
-
-                Children = SelectedPrimitive->GetChildren();
-
-                // first step: remove the children first or else the conversion will convert all children primitives
-                // even the one that were not selected
-                for( FArianeObjectID& ChildID : Children )
-                {
-                    SelectedPrimitive->RemoveChild( ChildID.GetObject(), false ); // remove but do not free the child
-                }
-
-                // second step: convert
-                Path = SelectedPrimitive->Convert( FArianePrimitive::EConversionFlags::Bezier );
-
-                // third step: append children
-                for( FArianeObjectID& ChildID : Children )
-                {
-                    Path->AppendChild( ChildID.GetObject() );
-                }
-
-                // final step: append the converted path and remove the primitive
-                SelectedPrimitive->GetParent()->AppendChild( Path );
-
-                Path->UpdateTransform();
-
-                SelectedPrimitive->GetParent()->RemoveChild( SelectedPrimitive, true );
-            }
-
-            Painting3DComponent->Update( false );
+            ConvertPrimitives( Painting3DComponent, PrimitivesToConvert );
         }
     }
 }
@@ -1098,6 +1159,8 @@ FArianeEditor::PasteObjects()
                 for( FArianeObject* CopiedObject : Clipboard.CopiedObjects )
                 {
                     FArianeObject* PasteObject = CopiedObject->Copy( CopyArgs );
+
+                    PasteObject->SetImage(  DrawingLayer->GetImage() );
 
                     Destination->AppendChild( PasteObject );
 

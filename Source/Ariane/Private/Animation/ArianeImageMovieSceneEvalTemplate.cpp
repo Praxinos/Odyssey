@@ -85,7 +85,7 @@ void FArianeImageExecutionToken::Execute( const FMovieSceneContext& Context
                                    , GetArianeImageAnimTypeID()
                                    , FArianeImagePreAnimatedTokenProducer () );
 
-        if ( DrawingLayer )
+        if ( KeyData->Image && DrawingLayer )
         {
             bool bInteractive =( ( PlaybackStatus == EMovieScenePlayerStatus::Type::Scrubbing )
                               || ( PlaybackStatus == EMovieScenePlayerStatus::Type::Playing   ) ) ? true : false;

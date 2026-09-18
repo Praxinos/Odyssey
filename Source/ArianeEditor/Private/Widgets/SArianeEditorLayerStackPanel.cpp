@@ -86,12 +86,16 @@ void
 SArianeEditorLayerStackPanel::OnPreLayerSelectionChanged()
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-    UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-    const TArray<UArianeLayer*>& SelectedLayers = LayerStack->GetSelectedLayers();
 
-    for( UArianeLayer* Layer : SelectedLayers )
+    if( Painting3DComponent )
     {
-        Layer->GetOnTransformChangedDelegate().RemoveAll( this );
+        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+        const TArray<UArianeLayer*>& SelectedLayers = LayerStack->GetSelectedLayers();
+
+        for( UArianeLayer* Layer : SelectedLayers )
+        {
+            Layer->GetOnTransformChangedDelegate().RemoveAll( this );
+        }
     }
 }
 
@@ -159,30 +163,28 @@ SArianeEditorLayerStackPanel::Construct(const FArguments& InArgs, FArianeEditor*
 
     ChildSlot
     [
-        SNew(SVerticalBox)
-        .Visibility_Lambda( [InEditor]() -> EVisibility
-            {
-                return InEditor->GetCurrentPainting3DComponent() ? EVisibility::Visible : EVisibility::Hidden;
-            } )
-        + SVerticalBox::Slot()
-        .AutoHeight()
+        SNew(SSplitter)
+        .Orientation( EOrientation::Orient_Vertical )
+        +SSplitter::Slot()
         [
-            SNew( SButton )
-                .Text( LOCTEXT("layer-stack-panel-new-layer","New Layer") )
-                .OnClicked( FOnClicked::CreateSP( this, &SArianeEditorLayerStackPanel::NewLayer ) )
-        ]
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        [
-            SNew(SScrollBox)
-            + SScrollBox::Slot()
-            .AutoSize()
+            SNew(SVerticalBox)
+            .Visibility_Lambda( [InEditor]() -> EVisibility
+                {
+                    return InEditor->GetCurrentPainting3DComponent() ? EVisibility::Visible : EVisibility::Hidden;
+                } )
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                SNew( SButton )
+                    .Text( LOCTEXT("layer-stack-panel-new-layer","New Layer") )
+                    .OnClicked( FOnClicked::CreateSP( this, &SArianeEditorLayerStackPanel::NewLayer ) )
+            ]
+            + SVerticalBox::Slot()
             [
                 SNew( SArianeEditorLayerStack, Editor )
             ]
         ]
-        + SVerticalBox::Slot()
-        .AutoHeight()
+        +SSplitter::Slot()
         [
             LayerDetailsView.ToSharedRef()
         ]

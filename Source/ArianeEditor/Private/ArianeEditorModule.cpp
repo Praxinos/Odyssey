@@ -246,14 +246,6 @@ FArianeEditorModule::ActivateEdMode( AArianePainting3DActor* Painting3DActor )
             if( Painting3DActor == nullptr )
             {
                 Painting3DActor = ArianeToolkit->GetEditor().AddPainting3DActor();
-
-                UArianeLayerStack* LayerStack = Painting3DActor->GetPainting3DComponent()->GetLayerStack();
-                UArianeLayerFolder* RootFolder = LayerStack->GetRootFolder();
-                UArianeLayerDrawing* NewDrawingLayer = LayerStack->CreateDrawingLayer( RootFolder, true );
-
-                NewDrawingLayer->Rename( TEXT("Drawing Layer") );
-
-                LayerStack->SelectLayer( NewDrawingLayer, true );
             }
 
             // Select the actor

@@ -16,7 +16,7 @@ SArianeEditorMasterPanel::Construct( const FArguments& InArgs, FArianeEditor* In
     [
         SNew(SVerticalBox)
         +SVerticalBox::Slot()
-        .AutoHeight()
+        //.AutoHeight()
         [
             SNew(SArianeEditorToolPanel, InEditor)
         ]

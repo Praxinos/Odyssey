@@ -607,6 +607,9 @@ FArianeObject::SetTranslation( const FVector& InTranslation )
 {
     LocalTransform.SetTranslation( InTranslation );
 
+    // reset world Transform. It wil lbe updated at the next call to UpdateTransform();
+    WorldTransformVersion = 0;
+
     Invalidate( FArianeObjectInvalidationFlags().SetTransform() );
 }
 
@@ -623,6 +626,9 @@ FArianeObject::SetRotation( const FVector& InRotation )
 
     LocalTransform.SetRotation( Rotator.Quaternion() );
 
+    // reset world Transform. It wil lbe updated at the next call to UpdateTransform();
+    WorldTransformVersion = 0;
+
     Invalidate( FArianeObjectInvalidationFlags().SetTransform() );
 }
 
@@ -636,6 +642,9 @@ void
 FArianeObject::SetScaling( const FVector& InScaling )
 {
     LocalTransform.SetScale3D( InScaling );
+
+    // reset world Transform. It wil lbe updated at the next call to UpdateTransform();
+    WorldTransformVersion = 0;
 
     Invalidate( FArianeObjectInvalidationFlags().SetTransform() );
 }
@@ -704,6 +713,8 @@ FArianeObject::SetTransform( const FVector& InTranslation
     SetRotation( InRotation );
     SetScaling( InScaling );
     //Skew = InSkew ;
+    // reset world Transform. It wil lbe updated at the next call to UpdateTransform();
+    WorldTransformVersion = 0;
 }
 
 void

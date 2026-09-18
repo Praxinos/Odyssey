@@ -285,11 +285,11 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
                         break;
                     }
 
-                    ParentGroup->AppendChild( Primitive );
                     Primitive->SetColor( ueColor );
                     Primitive->SetLineType( LineType );
                     Primitive->SetTransform( PrimitiveCoordsAtDown, LocalOrientation, FVector::One(), FVector::Zero() );
-                    Primitive->UpdateTransform();
+                    // will also update the transform
+                    ParentGroup->AppendChild( Primitive );
                 }
             }
 

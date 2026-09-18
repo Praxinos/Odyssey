@@ -5,6 +5,7 @@
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerFolderInvalidationFlags.h"
 #include "ArianeLayerStack.h"
+#include "ArianePainting3DActor.h"
 
 UArianeLayerFolder::~UArianeLayerFolder()
 {
@@ -50,6 +51,8 @@ UArianeLayerFolder::GetChildLayers()
 void
 UArianeLayerFolder::AddChildLayer( UArianeLayer* Orphan )
 {
+    AArianePainting3DActor* Painting3DActor = Cast<AArianePainting3DActor>(GetOwner());
+
     Orphan->SetParentFolder( this );
 
     ChildLayers.Add( Orphan );
@@ -67,6 +70,7 @@ UArianeLayerFolder::AddChildLayer( UArianeLayer* Orphan )
         Orphan->RegisterComponent();
     }
 
+    Painting3DActor->AddInstanceComponent(Orphan);
 
     // Force Update transforms (will update the transform of the rootGroup of drawing layers)
     Orphan->OnUpdateTransform( EUpdateTransformFlags::None, ETeleportType::None );
@@ -75,6 +79,8 @@ UArianeLayerFolder::AddChildLayer( UArianeLayer* Orphan )
 void
 UArianeLayerFolder::RemoveChildLayer( UArianeLayer* Child )
 {
+    AArianePainting3DActor* Painting3DActor = Cast<AArianePainting3DActor>(GetOwner());
+
     Child->SetParentFolder( nullptr );
 
     ChildLayers.Remove( Child );
@@ -88,6 +94,8 @@ UArianeLayerFolder::RemoveChildLayer( UArianeLayer* Child )
 
     // Rename() is used to define the parent object
     Child->Rename( nullptr, nullptr );
+
+    Painting3DActor->RemoveInstanceComponent(Child);
 }
 
 // static

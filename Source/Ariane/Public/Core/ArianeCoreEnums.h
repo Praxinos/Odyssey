@@ -9,5 +9,6 @@ UENUM()
 enum class EArianeAllocationModel : uint8
 {
     InstancedStruct = 0, // allocated via FInstancedStruct
-    OperatingSystem = 1 // allocated via new
+    OperatingSystem = 1, // allocated via new
+    Embedded = 2 // member variable within parent struct/class
 };
