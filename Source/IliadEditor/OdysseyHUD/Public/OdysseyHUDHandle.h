@@ -38,6 +38,8 @@ public:
     bool IsPositionLocked() const;
     void IsPositionLocked(bool iIsPositionLocked);
 
+    bool IsHovered() const;
+
     void SetPosition(const FVector2D& iPosition);
     const FVector2D& GetPosition() const;
 

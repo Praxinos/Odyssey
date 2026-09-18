@@ -96,6 +96,11 @@ FOdysseyHUDHandle::IsPositionLocked(bool iIsPositionLocked)
     mIsPositionLocked = iIsPositionLocked;
 }
 
+bool FOdysseyHUDHandle::IsHovered() const
+{
+    return mIsHovered;
+}
+
 void FOdysseyHUDHandle::SetPosition(const FVector2D& iPosition)
 {
     mPosition = iPosition;

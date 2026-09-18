@@ -152,6 +152,9 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseHover(const FOdysseyPoint&
         case EOdysseyTransformCapture::Rotation:
             mMouseCursor = EMouseCursorCustom::CircleClockwise;
             break;
+        case EOdysseyTransformCapture::Sides:
+            mMouseCursor = EMouseCursor::CardinalCross;
+            break;
         default:
             mMouseCursor = EMouseCursor::Crosshairs;
     }
@@ -483,6 +486,10 @@ EOdysseyTransformCapture UOdysseyPainterEditorRasterTransformTool::DetectCapture
     if (FGeomTools2D::IsPointInPolygon( iPoint, mTransformAreaHUD->GetPoints()))
     {
         return EOdysseyTransformCapture::Inside;
+    }
+    else if(mHandles[0]->IsHovered() || mHandles[1]->IsHovered() || mHandles[2]->IsHovered() || mHandles[3]->IsHovered())
+    {
+        return EOdysseyTransformCapture::Sides;
     }
     else
     {
