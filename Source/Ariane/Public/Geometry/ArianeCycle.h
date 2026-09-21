@@ -167,7 +167,7 @@ protected:
     FColor Color;
 
     UPROPERTY( EditAnywhere )
-    UMaterialInstanceDynamic* DynamicMaterialInstance;
+    UMaterialInterface* Material;
 
     UPROPERTY( EditAnywhere )
     TArray<int32> EarcutIndices;

@@ -249,11 +249,25 @@ FArianePath::FArianePath( UArianeImage* InImage
                                           : new FArianePathInvalidationFlags() )
     , LineType ( EArianePathLineType::Tube )
     , Color ( FColor::Black.WithAlpha(255) )
-    , DynamicMaterialInstance ( nullptr )
+    , Material ( nullptr )
     , Geometry3D ( this )
     , CubicSegmentCount( 0 )
     , LinearSegmentCount( 0 )
 {
+}
+
+FArianePath&
+FArianePath::operator=(const FArianePath& Other)
+{
+    InstancedVertices = Other.InstancedVertices;
+    InstancedSegments = Other.InstancedSegments;
+    LineType = Other.LineType;
+    Color = Other.Color;
+    Material = Other.Material;
+    CubicSegmentCount = Other.CubicSegmentCount;
+    LinearSegmentCount = Other.LinearSegmentCount;
+
+    return *this;
 }
 
 bool
@@ -297,46 +311,44 @@ FArianePath::PostLoad()
 void
 FArianePath::Added()
 {
-    if( DynamicMaterialInstance && Image )
+    if( Material && Image )
     {
-        Image->IncrementMaterial( DynamicMaterialInstance );
+        Image->IncrementMaterial( Material );
     }
 }
 
 void
 FArianePath::Removed()
 {
-    if( DynamicMaterialInstance && Image )
+    if( Material && Image )
     {
-        Image->DecrementMaterial( DynamicMaterialInstance );
+        Image->DecrementMaterial( Material );
     }
 }
 
 UMaterialInterface*
 FArianePath::GetMaterial()
 {
-    return /*MaterialInterface*/DynamicMaterialInstance;
+    return Material;
 }
 
 void
 FArianePath::SetMaterial( UMaterialInterface* InMaterialInterface )
 {
-    if( InMaterialInterface )
+    // remove the current material from the used material list
+    if( Material && Image )
     {
-        // remove the current material from the used material list
-        if( DynamicMaterialInstance && Image )
-        {
-            Image->DecrementMaterial( DynamicMaterialInstance );
-        }
+        Image->DecrementMaterial( Material );
+    }
 
-        DynamicMaterialInstance = UMaterialInstanceDynamic::Create( InMaterialInterface, Image );
-        // The Color parameter exists for the default Ariane Material
-        DynamicMaterialInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor(Color));
+    Material = InMaterialInterface;
 
+    if( Material )
+    {
         // add the new material to the used material list
-        if( DynamicMaterialInstance && Image )
+        if( Material && Image )
         {
-            Image->IncrementMaterial( DynamicMaterialInstance );
+            Image->IncrementMaterial( Material );
         }
 
     }
@@ -641,7 +653,7 @@ FArianePath::CopySettings( FArianeObject* DestinationObject, const FCopyArgs& Co
 
     DestinationPath->LineType = LineType;
     DestinationPath->Color = Color;
-    DestinationPath->DynamicMaterialInstance = DuplicateObject<UMaterialInstanceDynamic>(DynamicMaterialInstance, Image);
+    DestinationPath->Material = Material;
 
     if( bInvalidate )
     {
@@ -802,7 +814,7 @@ FArianePath::PostEditUndo()
         AddSegment( Segment );
     }
 
-    if( DynamicMaterialInstance == nullptr )
+    if( Material == nullptr )
     {
         UMaterial* DefaultMaterial = Cast<UMaterial>( StaticLoadObject( UMaterial::StaticClass()
                                                                       , nullptr
@@ -840,7 +852,7 @@ FArianePath::PostLoad()
         AddSegment( Segment );
     }
 
-    if( DynamicMaterialInstance == nullptr )
+    if( Material == nullptr )
     {
         UMaterial* DefaultMaterial = Cast<UMaterial>( StaticLoadObject( UMaterial::StaticClass()
                                                                       , nullptr
@@ -867,7 +879,7 @@ FArianePath::SetColor( const FColor& InColor )
     Color = InColor;
 
     // The Color parameter exists for the default Ariane Material
-    DynamicMaterialInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor(Color));
+    //DynamicMaterialInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor(Color));
 
     // we need to reconstruct Model Vertices
     //InvalidateAllSegments();
@@ -1536,11 +1548,6 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
                                                                           , TangentVector.Y
                                                                           , TangentVector.Z );
 */
-        if( TangentVector.IsNearlyZero() || PerpendicularVector.IsNearlyZero() )
-        {
-            UE_LOG( LogTemp, Warning, TEXT("BuildSegmentAsTube"));
-        }
-
         if( PerpendicularVector.IsZero() == false )
         {
             float AngleInDegrees = 0.0f;

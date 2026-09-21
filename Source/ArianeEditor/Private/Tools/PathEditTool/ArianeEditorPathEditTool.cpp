@@ -144,6 +144,12 @@ UArianeEditorPathEditTool::Reset()
     if( DrawingLayer )
     {
         DrawingLayer->GetImage()->GetSelectedTrees( SelectedTrees );
+
+        // if nothing is selected, select the whole root group
+        if( SelectedTrees.IsEmpty() )
+        {
+            SelectedTrees.Add( DrawingLayer->GetImage()->GetRootGroup() );
+        }
     }
 }
 

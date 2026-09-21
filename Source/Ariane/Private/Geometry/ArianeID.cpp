@@ -88,6 +88,17 @@ FArianeVertexID::FArianeVertexID( FArianeVertex* Vertex )
     }
 }
 
+FArianeVertexID&
+FArianeVertexID::operator=(const FArianeVertexID& Other)
+{
+    Image = Other.Image;
+    Guid = Other.Guid;
+    OwnerGuid = Other.OwnerGuid;
+    CachedVertex = Other.Image ? nullptr : Other.CachedVertex;
+
+    return *this;
+}
+
 FArianeVertex*
 FArianeVertexID::GetVertex()
 {

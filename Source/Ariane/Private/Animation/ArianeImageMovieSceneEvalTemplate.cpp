@@ -144,8 +144,7 @@ FArianeImageMovieSceneEvalTemplate::Evaluate( const FMovieSceneEvaluationOperand
     if (Times.Num() > 0)
     {
         // 3. Recherche binaire sur le tableau natif des FFrameNumber
-        int32 Index = ChannelData.FindKey(CurrentTime.GetFrame());
-
+        int32 Index = Algo::LowerBound(Times, CurrentTime.GetFrame()) - 1;
         Index = FMath::Clamp(Index, 0, Times.Num() - 1);
 
         // Clé Actuelle (Borne inférieure)
