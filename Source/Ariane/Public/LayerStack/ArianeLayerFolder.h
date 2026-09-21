@@ -70,7 +70,6 @@ protected:
 
     // Even though unreal has the list of attached Actors, it does not take the order into consideration.
     // so we have to have our own list. "Instanced" keyword will allow deep copy
-
     UPROPERTY(Instanced)
     TArray<UArianeLayer*> ChildLayers;
 

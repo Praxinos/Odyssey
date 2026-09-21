@@ -58,6 +58,7 @@ FArianeEditor::GetClipboard()
 FArianeEditor::~FArianeEditor()
 {
     USelection::SelectionChangedEvent.RemoveAll( this );
+    FCoreUObjectDelegates::OnObjectPreSave.RemoveAll(this);
 }
 
 FArianeEditor::FArianeEditor( FArianeEditorViewportToolkit* iToolkit )
@@ -104,7 +105,8 @@ void
 FArianeEditor::OnObjectPreSave( UObject* SavedObject, FObjectPreSaveContext Context )
 {
     // Restore the last tool used , as Unreal will unselect all tools before saving
-    if (!LastActiveToolIdentifier.IsEmpty() && !GetToolManager()->HasActiveTool(EToolSide::Left))
+    if ( ( LastActiveToolIdentifier.IsEmpty() == false )
+      && ( GetToolManager()->HasActiveTool(EToolSide::Left) == false ) )
     {
         GetToolManager()->SelectActiveToolType(EToolSide::Left, LastActiveToolIdentifier);
         GetToolManager()->ActivateTool(EToolSide::Left);

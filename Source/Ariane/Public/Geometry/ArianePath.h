@@ -133,6 +133,8 @@ public:
                , EArianeAllocationModel InAllocationModel
                , FArianePathInvalidationFlags* InInvalidationFlags = nullptr );
 
+    FArianePath& operator=(const FArianePath& Other);
+
 public:
     /** overriden from ArianeObject */
     virtual void UpdateShape( EUpdateFlags UpdateFlags ) override;
@@ -317,7 +319,7 @@ protected:
     FColor Color;
 
     UPROPERTY( EditAnywhere )
-    UMaterialInstanceDynamic* DynamicMaterialInstance;
+    UMaterialInterface* Material;
 
 protected:
     TArray<FArianeVertexID> Vertices;

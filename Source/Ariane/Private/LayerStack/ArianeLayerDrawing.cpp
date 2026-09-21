@@ -14,6 +14,7 @@
 #include "ArianeRectangle.h"
 #include "ArianeLine.h"
 #include "ArianePolygon.h"
+#include "EditorModes.h"
 
 // for debugging purpose
 static TAutoConsoleVariable<bool> CVarShowArianeNormals( TEXT("r.Ariane.ShowNormals")
@@ -141,6 +142,7 @@ FArianeGeometryProxy::GetImageDynamicMeshElements( FMeshElementCollector& Collec
 
         FArianeObjectGeometry3D* Geometry3D = nullptr;
         UMaterialInterface* MaterialInterface = nullptr;
+        FColor ObjectColor = FColor::Black;
 
         if( Object->HasBaseClass( FArianePath::StaticClass() ) )
         {
@@ -148,6 +150,7 @@ FArianeGeometryProxy::GetImageDynamicMeshElements( FMeshElementCollector& Collec
 
             Geometry3D = &Path->GetGeometry3D();
             MaterialInterface = Path->GetMaterial();
+            ObjectColor = Path->GetColor();
         }
 
         if( Object->HasBaseClass( FArianeCycle::StaticClass() ) )
@@ -156,6 +159,7 @@ FArianeGeometryProxy::GetImageDynamicMeshElements( FMeshElementCollector& Collec
 
             Geometry3D = &Cycle->GetGeometry3D();
             MaterialInterface = Cycle->GetMaterial();
+            ObjectColor = Cycle->GetColor();
         }
 
         if( Geometry3D && MaterialInterface )
@@ -179,13 +183,18 @@ FArianeGeometryProxy::GetImageDynamicMeshElements( FMeshElementCollector& Collec
                 // Allocate a mesh batch and get a ref to the first element
                 FMeshBatch& MeshBatch = Collector.AllocateMesh();
                 FMeshBatchElement& BatchElement = MeshBatch.Elements[0];
-
+                FLinearColor ElementColor = FLinearColor(ObjectColor);
 
                 BatchElement.IndexBuffer = &Geometry3D->GetIndexBuffer();
 
+                // Temporary proxy to store the color of the object (lighter than a UMaterialInstanceDynamic)
+                FDynamicColoredMaterialRenderProxy& MaterialProxy = Collector.AllocateOneFrameResource<FDynamicColoredMaterialRenderProxy>(
+                    MaterialInterface->GetRenderProxy()
+                  , FLinearColor(ObjectColor) );
+
                 //Mesh.bWireframe = bWireframe;
                 MeshBatch.VertexFactory = VertexFactory;
-                MeshBatch.MaterialRenderProxy = MaterialInterface->GetRenderProxy();;
+                MeshBatch.MaterialRenderProxy = &MaterialProxy;
 
                 //The LocalVertexFactory uses a uniform buffer to pass primitve data like the local to world transform for this frame and for the previous one
                 //Most of this data can be fetched using the helper function below
@@ -232,8 +241,6 @@ FArianeGeometryProxy::GetImageDynamicMeshElements( FMeshElementCollector& Collec
 
                 //Add the batch to the collector
                 Collector.AddMesh( ViewIndex, MeshBatch );
-
-
             }
         }
 

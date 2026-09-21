@@ -284,7 +284,7 @@ UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder, 
     FName LayerName = FName( *FString::Printf(TEXT("Drawing Layer %d"), GetDrawingLayerCount() + 1 ) );
     UArianeLayerDrawing* NewDrawingLayer = NewObject<UArianeLayerDrawing>( GetPainting3DComponent()->GetOwner()
                                                                          , LayerName
-                                                                         , RF_Transactional ); // for undos
+                                                                         , RF_Transactional | RF_Public ); // for undos
 
     // Below 2 lines are mandatory to register the component, otherwise undos won't work (RF_TRANSACTIONAL will be erased)
     //NewDrawingLayer->SetupAttachment( ParentLayerFolder );
@@ -303,7 +303,7 @@ UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder, b
                                                                         // The outer must be the AActor or else the TEDS system could crash
     UArianeLayerFolder* NewLayerFolder = NewObject<UArianeLayerFolder>( GetPainting3DComponent()->GetOwner()
                                                                       , NAME_None
-                                                                      , RF_Transactional ); // for undos
+                                                                      , RF_Transactional | RF_Public  ); // for undos
 
     // Below 2 lines are mandatory to register the component, otherwise undos won't work (RF_TRANSACTIONAL will be erased)
     //NewLayerFolder->SetupAttachment( ParentLayerFolder );

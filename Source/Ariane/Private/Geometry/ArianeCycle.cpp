@@ -107,7 +107,7 @@ FArianeCycle::FArianeCycle( UArianeImage* InImage
                     , InInvalidationFlags ? InInvalidationFlags
                                           : new FArianeCycleInvalidationFlags() )
     , Color ( FColor::Black.WithAlpha(255) )
-    , DynamicMaterialInstance( nullptr )
+    , Material( nullptr )
     , Geometry3D ( this )
 {
 }
@@ -287,48 +287,44 @@ FArianeCycle::HasBaseClass( uint32 BaseClass )
 void
 FArianeCycle::Added()
 {
-    if( DynamicMaterialInstance && Image )
+    if( Material && Image )
     {
-        Image->IncrementMaterial( DynamicMaterialInstance );
+        Image->IncrementMaterial( Material );
     }
 }
 
 void
 FArianeCycle::Removed()
 {
-    if( DynamicMaterialInstance && Image )
+    if( Material && Image )
     {
-        Image->DecrementMaterial( DynamicMaterialInstance );
+        Image->DecrementMaterial( Material );
     }
 }
 
 UMaterialInterface*
 FArianeCycle::GetMaterial()
 {
-    return /*MaterialInterface*/DynamicMaterialInstance;
+    return Material;
 }
 
 void
 FArianeCycle::SetMaterial( UMaterialInterface* InMaterialInterface )
 {
-    InMaterialInterface;
-
-    if( InMaterialInterface )
+    // remove the current material from the used material list
+    if( Material && Image )
     {
-        // remove the current material from the used material list
-        if( DynamicMaterialInstance && Image )
-        {
-            Image->DecrementMaterial( DynamicMaterialInstance );
-        }
+        Image->DecrementMaterial( Material );
+    }
 
-        DynamicMaterialInstance = UMaterialInstanceDynamic::Create( InMaterialInterface, Image );
-        // The Color parameter exists for the default Ariane Material
-        DynamicMaterialInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor(Color));
+    Material = InMaterialInterface;
 
+    if( Material )
+    {
         // add the new material to the used material list
-        if( DynamicMaterialInstance && Image )
+        if( Material && Image )
         {
-            Image->IncrementMaterial( DynamicMaterialInstance );
+            Image->IncrementMaterial( Material );
         }
 
     }
@@ -342,7 +338,7 @@ FArianeCycle::CopySettings( FArianeObject* DestinationObject, const FCopyArgs& C
     Super::CopySettings( DestinationObject, CopyArgs, false );
 
     DestinationCycle->Color = Color;
-    DestinationCycle->DynamicMaterialInstance = DuplicateObject<UMaterialInstanceDynamic>(DynamicMaterialInstance, Image);
+    DestinationCycle->Material = Material;
 
     if( bInvalidate )
     {
@@ -455,7 +451,7 @@ FArianeCycle::PostEditUndo()
 {
     Super::PostEditUndo();
 
-    if( DynamicMaterialInstance == nullptr )
+    if( Material == nullptr )
     {
         UMaterial* DefaultMaterial = Cast<UMaterial>( StaticLoadObject( UMaterial::StaticClass()
                                                                       , nullptr
@@ -472,7 +468,7 @@ FArianeCycle::PostLoad()
 {
     Super::PostLoad();
 
-    if( DynamicMaterialInstance == nullptr )
+    if( Material == nullptr )
     {
         UMaterial* DefaultMaterial = Cast<UMaterial>( StaticLoadObject( UMaterial::StaticClass()
                                                                       , nullptr
@@ -500,9 +496,6 @@ void
 FArianeCycle::SetColor( const FColor& InColor )
 {
     Color = InColor;
-
-    // The Color parameter exists for the default Ariane Material
-    DynamicMaterialInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor(Color));
 
     Invalidate( FArianeCycleInvalidationFlags().SetColor() );
 }

@@ -139,7 +139,7 @@ FArianePolygon::CopyShape( const FCopyArgs& CopyArgs )
     }
     else
     {
-         PolygonCopy = CopyArgs.Image->AllocPolygon( DynamicMaterialInstance->GetMaterial()
+         PolygonCopy = CopyArgs.Image->AllocPolygon( Material
                                                    , Name
                                                    , CornerCount
                                                    , Radius

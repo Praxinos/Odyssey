@@ -49,6 +49,8 @@ struct ARIANE_API FArianeVertexID
         FArianeVertexID();
         FArianeVertexID( FArianeVertex* InVertex );
 
+        FArianeVertexID& operator=(const FArianeVertexID& Other);
+
         FArianeVertex* GetVertex();
         void InvalidateCache();
 
