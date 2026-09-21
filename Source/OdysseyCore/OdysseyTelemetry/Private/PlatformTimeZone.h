@@ -1,6 +1,8 @@
 // IDDN.FR.001.060015.015.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
+#pragma once
+
 #include "CoreMinimal.h"
 
 // It's a custom class as there is no other way to get the timezone via any ue API
