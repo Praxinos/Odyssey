@@ -29,7 +29,7 @@ END_SHADER_PARAMETER_STRUCT()
 class ODYSSEYRENDERING_API FOdysseyBlendColorShader : public FBatchedElementParameters
 {
 public:
-    FOdysseyBlendColorShader(FOdysseyBlendColorShaderParameters* iPixelShaderParams, EOdysseyBlendingMode iBlendMode);
+    FOdysseyBlendColorShader(FOdysseyBlendColorShaderParameters* iPixelShaderParams);
 
 public:
     /** Binds vertex and pixel shaders for this element */
@@ -43,13 +43,12 @@ public:
         FLinearColor iForegroundColor,
         FRDGTextureRef iDestinationTexture,
         const FIntRect& iDstRect,
-        EOdysseyBlendingMode iBlendMode,
-        EOdysseyAlphaMode iAlphaMode,
+        EOdysseyColorBlendMode iBlendMode,
+        EOdysseyAlphaBlendMode iAlphaMode,
         float iOpacity
     );
 
 public:
     /** Shader parameters */
     FOdysseyBlendColorShaderParameters* mPixelShaderParams;
-    EOdysseyBlendingMode mBlendMode;
 };

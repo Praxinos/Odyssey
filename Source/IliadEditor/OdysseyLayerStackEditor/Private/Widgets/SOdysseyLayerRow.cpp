@@ -196,9 +196,9 @@ SOdysseyLayerRow::CreateBlendModesMenu()
     FMenuBuilder menu( true, commandList );
 
     menu.BeginSection("Context Menu");
-    for ( TSharedPtr<FUICommandInfo> commandInfo : FOdysseyLayerStackEditorCommands::Get().SetCurrentLayerBlendMode )
+    for ( TPair<TSharedPtr<FUICommandInfo>, EOdysseyBlendMode> Pair : FOdysseyLayerStackEditorCommands::Get().SetCurrentLayerBlendMode )
     {
-        menu.AddMenuEntry( commandInfo );
+        menu.AddMenuEntry( Pair.Key );
     }
     menu.EndSection();
 
@@ -233,7 +233,7 @@ SOdysseyLayerRow::GenerateBlendRowHeaderWidget()
           .Padding(FMargin(1.f, 0, 0, 0))
           .VAlign(VAlign_Center)
           [
-              //SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
+              //SNew(SEnumComboBox, StaticEnum<EOdysseyBlendMode>())
               SNew(SComboButton)
               .IsEnabled_Lambda([this](){ return GetLayer()->IsEditable();})
               .OnGetMenuContent( this, &SOdysseyLayerRow::CreateBlendModesMenu )
@@ -570,7 +570,7 @@ SOdysseyLayerRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSe
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-blend-mode", "Change Layer BlendMode"));
-    GetLayer()->SetBlendMode(EOdysseyBlendingMode(iValue));
+    GetLayer()->SetBlendMode(EOdysseyBlendMode(iValue));
 }
 
 void

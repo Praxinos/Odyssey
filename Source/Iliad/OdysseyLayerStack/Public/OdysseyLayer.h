@@ -111,7 +111,7 @@ public:
     void SetIsActivated(bool Value);
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    void SetBlendMode(EOdysseyBlendingMode Value);
+    void SetBlendMode(EOdysseyBlendMode Value);
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetOpacity(float Value);
@@ -179,7 +179,7 @@ public:
     bool IsActivatedRecursively() const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
-    EOdysseyBlendingMode GetBlendMode() const;
+    EOdysseyBlendMode GetBlendMode() const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     float GetOpacity() const;
@@ -403,7 +403,7 @@ protected:
     bool bIsLocked = false;
 
     UPROPERTY()
-    EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
+    EOdysseyBlendMode BlendMode = EOdysseyBlendMode::Normal;
 
     UPROPERTY()
     float Opacity = 1.0f;

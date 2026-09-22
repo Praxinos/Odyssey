@@ -28,7 +28,7 @@ END_SHADER_PARAMETER_STRUCT()
 class ODYSSEYRENDERING_API FOdysseyBlendShader : public FBatchedElementParameters
 {
 public:
-    FOdysseyBlendShader(FOdysseyBlendShaderParameters* iPixelShaderParams, EOdysseyBlendingMode iBlendMode);
+    FOdysseyBlendShader(FOdysseyBlendShaderParameters* iPixelShaderParams);
 
 public:
     /** Binds vertex and pixel shaders for this element */
@@ -47,8 +47,8 @@ public:
 
         const FMatrix& iTransform,
 
-        EOdysseyBlendingMode iBlendMode,
-        EOdysseyAlphaMode iAlphaMode,
+        EOdysseyColorBlendMode iBlendMode,
+        EOdysseyAlphaBlendMode iAlphaMode,
         float iOpacity,
         EOdysseyAntiAliasing iAntiAliasing
     );
@@ -56,5 +56,4 @@ public:
 public:
     /** Shader parameters */
     FOdysseyBlendShaderParameters* mPixelShaderParams;
-    EOdysseyBlendingMode mBlendMode;
 };

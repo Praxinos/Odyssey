@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Framework/Commands/Commands.h"
+#include "OdysseyBlendMode.h"
 
 /**
  * Holds the UI commands for the OdysseyPainterEditorToolkit widget.
@@ -13,6 +14,7 @@ class FOdysseyLayerStackEditorCommands
     : public TCommands<FOdysseyLayerStackEditorCommands>
 {
 public:
+
     /**
      * Default constructor.
      */
@@ -47,7 +49,7 @@ public:
     TSharedPtr<FUICommandInfo> CloseAllFolderLayers;
 
     /** Action for changing the current layer's blending mode */
-    TArray<TSharedPtr<FUICommandInfo>> SetCurrentLayerBlendMode;
+    TArray<TPair<TSharedPtr<FUICommandInfo>, EOdysseyBlendMode>> SetCurrentLayerBlendMode;
     TSharedPtr<FUICommandInfo> SetCurrentLayerBlendModeToNextBlendMode;
     TSharedPtr<FUICommandInfo> SetCurrentLayerBlendModeToPreviousBlendMode;
 };

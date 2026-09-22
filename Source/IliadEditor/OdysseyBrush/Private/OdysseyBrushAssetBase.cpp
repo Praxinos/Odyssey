@@ -762,7 +762,7 @@ UOdysseyBrushAssetBase::DebugStamp()
 
 //static
 void
-UOdysseyBrushAssetBase::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow, bool iAntiAliasing, EOdysseyBlendingMode BlendingMode, EOdysseyAlphaMode AlphaMode )
+UOdysseyBrushAssetBase::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow, bool iAntiAliasing, EOdysseyColorBlendMode BlendMode, EOdysseyAlphaBlendMode AlphaMode )
 {
     if( !mEditedBlock)
         return;
@@ -810,7 +810,7 @@ UOdysseyBrushAssetBase::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, f
     params.mEvent = eventConv;
     params.mFlow = Flow;
     params.mAntiAliasing = iAntiAliasing;
-    params.mBlendingMode = BlendingMode;
+    params.mBlendMode = BlendMode;
     params.mAlphaMode = AlphaMode;
 
     ctx.Finish();
@@ -849,7 +849,7 @@ UOdysseyBrushAssetBase::StampInternal(FStampParams iStampParams)
                 , *mEditedBlock
                 , iStampParams.mRects[i]
                 , position
-                , ::ULIS::eBlendMode(iStampParams.mBlendingMode)
+                , ::ULIS::eBlendMode(iStampParams.mBlendMode)
                 , ::ULIS::eAlphaMode(iStampParams.mAlphaMode)
                 , FMath::Clamp(iStampParams.mFlow, 0.f, 1.f)
                 , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
@@ -865,7 +865,7 @@ UOdysseyBrushAssetBase::StampInternal(FStampParams iStampParams)
                 , *mEditedBlock
                 , iStampParams.mRects[i]
                 , position
-                , ::ULIS::eBlendMode(iStampParams.mBlendingMode)
+                , ::ULIS::eBlendMode(iStampParams.mBlendMode)
                 , ::ULIS::eAlphaMode(iStampParams.mAlphaMode)
                 , FMath::Clamp(iStampParams.mFlow, 0.f, 1.f)
                 , ::ULIS::FSchedulePolicy::AsyncCacheEfficient

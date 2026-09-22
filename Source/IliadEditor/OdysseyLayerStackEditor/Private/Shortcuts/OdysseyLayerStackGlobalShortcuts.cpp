@@ -154,11 +154,11 @@ FOdysseyLayerStackGlobalShortcuts::MapActionsToCommandList(TSharedRef<FUICommand
       , FCanExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::CanAction_AlterLayer)
     );
 
-    for (int i = 0; EOdysseyBlendingMode blendMode : TEnumRange<EOdysseyBlendingMode>())
+    for (TPair<TSharedPtr<FUICommandInfo>, EOdysseyBlendMode> Pair : FOdysseyLayerStackEditorCommands::Get().SetCurrentLayerBlendMode)
     {
         iCommandList->MapAction(
-            FOdysseyLayerStackEditorCommands::Get().SetCurrentLayerBlendMode[i++],
-            FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_SetCurrentLayerBlendMode, blendMode),
+            Pair.Key,
+            FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_SetCurrentLayerBlendMode, Pair.Value),
             FCanExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::CanAction_AlterLayer)
         );
     }
@@ -544,9 +544,9 @@ FOdysseyLayerStackGlobalShortcuts::Action_SetCurrentLayerBlendModeToNextBlendMod
 
     for( UOdysseyLayer* layer : selected_layers )
     {
-        EOdysseyBlendingMode currentBlendMode = layer->GetBlendMode();
-        int8 nextBlendingModeInt = ( static_cast<int8>( currentBlendMode ) + 1 ) % static_cast<int8>( EOdysseyBlendingMode::kBlendingMode_Count );
-        EOdysseyBlendingMode nextBlendMode = static_cast<EOdysseyBlendingMode>( nextBlendingModeInt );
+        EOdysseyBlendMode currentBlendMode = layer->GetBlendMode();
+        int8 nextBlendModeInt = ( static_cast<int8>( currentBlendMode ) + 1 ) % static_cast<int8>( EOdysseyBlendMode::BlendMode_Count );
+        EOdysseyBlendMode nextBlendMode = static_cast<EOdysseyBlendMode>( nextBlendModeInt );
 
         layer->SetBlendMode( nextBlendMode );
     }
@@ -594,16 +594,16 @@ FOdysseyLayerStackGlobalShortcuts::Action_SetCurrentLayerBlendModeToPreviousBlen
 
     for( UOdysseyLayer* layer : selected_layers )
     {
-        EOdysseyBlendingMode currentBlendMode = layer->GetBlendMode();
-        int8 prevBlendingModeInt = ( static_cast<int8>( currentBlendMode ) - 1 + static_cast<int8>( EOdysseyBlendingMode::kBlendingMode_Count ) ) % static_cast<int8>( EOdysseyBlendingMode::kBlendingMode_Count );
-        EOdysseyBlendingMode prevBlendMode = static_cast<EOdysseyBlendingMode>( prevBlendingModeInt );
+        EOdysseyBlendMode currentBlendMode = layer->GetBlendMode();
+        int8 prevBlendModeInt = ( static_cast<int8>( currentBlendMode ) - 1 + static_cast<int8>( EOdysseyBlendMode::BlendMode_Count ) ) % static_cast<int8>( EOdysseyBlendMode::BlendMode_Count );
+        EOdysseyBlendMode prevBlendMode = static_cast<EOdysseyBlendMode>( prevBlendModeInt );
 
         layer->SetBlendMode( prevBlendMode );
     }
 }
 
 void
-FOdysseyLayerStackGlobalShortcuts::Action_SetCurrentLayerBlendMode(EOdysseyBlendingMode iBlendMode)
+FOdysseyLayerStackGlobalShortcuts::Action_SetCurrentLayerBlendMode(EOdysseyBlendMode iBlendMode)
 {
     UOdysseyLayerStack* layerStack = mLayerStack.Get();
     if ( !layerStack )

@@ -180,8 +180,8 @@ UOdysseyTextureLayer::BuildRenderPipelineInternal(
             iSrcRect,
             iDstRect,
             iSrcTransform,
-            EOdysseyBlendingMode::kNormal,
-            EOdysseyAlphaMode::kNormal,
+            EOdysseyColorBlendMode::Normal,
+            EOdysseyAlphaBlendMode::Normal,
             1.f,
             EOdysseyAntiAliasing::Anisotropic
         );

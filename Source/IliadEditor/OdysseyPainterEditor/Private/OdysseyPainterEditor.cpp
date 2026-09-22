@@ -553,8 +553,6 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
     //Need to rethink the commands and shortcuts to put them in the right place and not in GUI
     MAP_ACTION(painterEditorCommands.ClearCurrentLayer, ClearCurrentLayerOrSelection)
 
-    MAP_ACTION(painterEditorCommands.ToggleEraserButton, ToggleEraserButton)
-
     #undef MAP_ACTION
 
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
@@ -634,16 +632,6 @@ FOdysseyPainterEditor::ClearCurrentLayerOrSelection()
 
     if( mSource )
         mSource->Clear();
-}
-
-void
-FOdysseyPainterEditor::ToggleEraserButton()
-{
-    if( GetCurrentTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()) )
-    {
-        UOdysseyPainterEditorRasterDrawingTool* currentTool = Cast< UOdysseyPainterEditorRasterDrawingTool>(GetCurrentTool());
-        currentTool->BlendParameters.bEraserMode = !currentTool->BlendParameters.bEraserMode;
-    }
 }
 
 void

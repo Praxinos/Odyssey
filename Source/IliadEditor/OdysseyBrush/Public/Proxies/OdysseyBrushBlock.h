@@ -127,8 +127,8 @@ public:
             , float Opacity = 1.f
             , EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA
             , EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8
-            , EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal
-            , EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal);
+            , EOdysseyColorBlendMode BlendingMode = EOdysseyColorBlendMode::Normal
+            , EOdysseyAlphaBlendMode AlphaMode = EOdysseyAlphaBlendMode::Normal);
 
     //Fills the given Sample with thge given Color. Requires an Odyssey Brush Color input.
     UFUNCTION( BlueprintPure
@@ -172,8 +172,8 @@ public:
                                    , float Opacity = 1.f
                                    , EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA
                                    , EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8
-                                   , EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal
-                                   , EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal);
+                                   , EOdysseyColorBlendMode BlendingMode = EOdysseyColorBlendMode::Normal
+                                   , EOdysseyAlphaBlendMode AlphaMode = EOdysseyAlphaBlendMode::Normal);
 
     //Adjust the alpha component of each pixel in the given Block according to the given curve
     //Abscissa represents the actual alpha value.

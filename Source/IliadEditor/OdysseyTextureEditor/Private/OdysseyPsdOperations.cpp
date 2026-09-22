@@ -1076,7 +1076,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             imageLayer->SetOpacity((float)mLayersInfo[i].mOpacity / 255.0);
             imageLayer->SetIsAlphaLocked(mLayersInfo[i].mFlags & 0x01);
             imageLayer->SetIsActivated(!(mLayersInfo[i].mFlags & 0x02));
-            imageLayer->SetBlendMode((EOdysseyBlendingMode)GetBlendingModeFromPSD(mLayersInfo[i].mBlendModeKey));
+            imageLayer->SetBlendMode((EOdysseyBlendMode)GetBlendModeFromPSD(mLayersInfo[i].mBlendModeKey));
 
             FOdysseyRasterBlockMutator mutator(imageLayer->GetRasterBlock());
             mutator.Copy(layerBlock, { layerBlock->Rect() });
@@ -1099,7 +1099,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             folderLayer->SetLayerName(FText::FromName(layerName));
             folderLayer->SetOpacity((float)mLayersInfo[i].mOpacity / 255.0);
             folderLayer->SetIsActivated(!(mLayersInfo[i].mFlags & 0x02));
-            folderLayer->SetBlendMode((EOdysseyBlendingMode)GetBlendingModeFromPSD(mLayersInfo[i].mBlendModeKey));
+            folderLayer->SetBlendMode((EOdysseyBlendMode)GetBlendModeFromPSD(mLayersInfo[i].mBlendModeKey));
 
             currentRoot = folderLayer;
 
@@ -1406,7 +1406,7 @@ void FOdysseyPsdOperations::lerp24BitsInto32Bits(uint32_t* ioSrc,uint32_t length
     }
 }
 
-::ULIS::eBlendMode FOdysseyPsdOperations::GetBlendingModeFromPSD(char iBlendModeKey[5])
+::ULIS::eBlendMode FOdysseyPsdOperations::GetBlendModeFromPSD(char iBlendModeKey[5])
 {
     if( strcmp( iBlendModeKey, "norm" ) == 0 ) { return ::ULIS::eBlendMode::Blend_Normal; }
     if( strcmp( iBlendModeKey, "diss" ) == 0 ) { return ::ULIS::eBlendMode::Blend_Dissolve; }

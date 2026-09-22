@@ -41,7 +41,7 @@ UOdysseyPainterEditorRasterEraserTool::UOdysseyPainterEditorRasterEraserTool()
     , mPaintEngine()
     , mStampBlock(nullptr)
     , mStampBlockMask(nullptr)
-    , mBlendParameters(true, EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode::kNormal, Opacity)
+    , mBlendParameters(EOdysseyBlendMode::Normal, Opacity)
     , mShapeHUD(MakeShared<FOdysseyHUDElement>())
 {
     mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Eraser64"));
@@ -497,7 +497,7 @@ UOdysseyPainterEditorRasterEraserTool::SizeChanged()
 void
 UOdysseyPainterEditorRasterEraserTool::OpacityChanged()
 {
-    mBlendParameters.Opacity = Opacity;
+    mBlendParameters.SetOpacity(Opacity);
 }
 
 void

@@ -95,8 +95,8 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
                 srcRect,
                 FIntRect(X, Y, Width, Height), // destRect
                 FMatrix::Identity,
-                EOdysseyBlendingMode::kNormal,
-                EOdysseyAlphaMode::kNormal,
+                EOdysseyColorBlendMode::Normal,
+                EOdysseyAlphaBlendMode::Normal,
                 1.0f,
                 EOdysseyAntiAliasing::Trilinear
             );

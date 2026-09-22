@@ -239,6 +239,9 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
                 FRDGTextureRef layerTexture = layerRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
                 FRDGTextureRef destinationTexture = destinationRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
 
+                EOdysseyColorBlendMode ColorBlendMode = GetColorBlendModeFromBlendMode(layer->GetBlendMode());
+                EOdysseyAlphaBlendMode AlphaBlendMode = GetAlphaBlendModeFromBlendMode(layer->GetBlendMode());
+
                 FOdysseyBlendShader::BlendRect(
                     graphBuilder,
                     featureLevel,
@@ -248,8 +251,8 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
                     rect,
                     rect,
                     FMatrix::Identity,
-                    layer->GetBlendMode(),
-                    EOdysseyAlphaMode::kNormal,
+                    ColorBlendMode,
+                    layer->GetInheritsAlpha() ? EOdysseyAlphaBlendMode::Back : AlphaBlendMode,
                     layer->GetOpacity(),
                     EOdysseyAntiAliasing::NearestNeighbor
                 );

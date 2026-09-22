@@ -153,7 +153,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPoi
     TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
     ::ULIS::FPixel sourceColor = sourceBlock->Pixel(iPointInTexture.x, iPointInTexture.y);
     ::ULIS::FColor dstColor = GetEditor()->PaintColor().GetValue();
-    dstColor.SetAlphaF(BlendParameters.Opacity / 100.f);
+    dstColor.SetAlphaF(BlendParameters.GetOpacity() / 100.f);
     TSharedPtr<::ULIS::FBlock> sourceMaskBlock = CreateSourceMaskBlock(sourceBlock, sourceColor);
     TSharedPtr<::ULIS::FBlock> maskBlock = MakeShared<::ULIS::FBlock>(block->Width(), block->Height(), ::ULIS::Format_G8);
 
