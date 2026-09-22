@@ -76,7 +76,7 @@ FOdysseyBlendParameters::PostSerialize(const FArchive& Ar)
         if (bEraserMode_DEPRECATED)
         {
             CompositeColorBlendMode = EOdysseyColorBlendMode::Back;
-            CompositeAlphaBlendMode = EOdysseyAlphaBlendMode::Mask;
+            CompositeAlphaBlendMode = EOdysseyAlphaBlendMode::Erase;
         }
         else
         {

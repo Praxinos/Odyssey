@@ -11,7 +11,7 @@ GetColorBlendModeFromBlendMode(EOdysseyBlendMode InBlendMode)
         case EOdysseyBlendMode::Normal: return EOdysseyColorBlendMode::Normal; break;
         case EOdysseyBlendMode::Behind: return EOdysseyColorBlendMode::Behind; break;
 
-        case EOdysseyBlendMode::Mask: return EOdysseyColorBlendMode::Back; break;
+        case EOdysseyBlendMode::Erase: return EOdysseyColorBlendMode::Back; break;
         case EOdysseyBlendMode::Stencil: return EOdysseyColorBlendMode::Back; break;
 
         case EOdysseyBlendMode::Darken: return EOdysseyColorBlendMode::Darken; break;
@@ -71,8 +71,8 @@ GetAlphaBlendModeFromBlendMode(EOdysseyBlendMode InBlendMode)
         case EOdysseyBlendMode::Normal: return EOdysseyAlphaBlendMode::Normal;
         case EOdysseyBlendMode::Behind: return EOdysseyAlphaBlendMode::Normal;
 
-        case EOdysseyBlendMode::Mask: return EOdysseyAlphaBlendMode::Mask;
-        case EOdysseyBlendMode::Stencil: return EOdysseyAlphaBlendMode::Stencil;
+        case EOdysseyBlendMode::Erase: return EOdysseyAlphaBlendMode::Erase;
+        case EOdysseyBlendMode::Stencil: return EOdysseyAlphaBlendMode::Multiply;
 
         case EOdysseyBlendMode::Darken: return EOdysseyAlphaBlendMode::Normal;
         case EOdysseyBlendMode::Multiply: return EOdysseyAlphaBlendMode::Normal;

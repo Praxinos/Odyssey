@@ -65,21 +65,20 @@ float ensureNonZero( float iValue )
 // AlphaBlendMode
 #define ODYSSEY_ALPHABLENDMODE_Normal 0
 
-#define ODYSSEY_ALPHABLENDMODE_Mask 1
-#define ODYSSEY_ALPHABLENDMODE_Stencil 2
+#define ODYSSEY_ALPHABLENDMODE_Erase 1
 
-#define ODYSSEY_ALPHABLENDMODE_Top 3
-#define ODYSSEY_ALPHABLENDMODE_Back 4
+#define ODYSSEY_ALPHABLENDMODE_Top 2
+#define ODYSSEY_ALPHABLENDMODE_Back 3
 
-#define ODYSSEY_ALPHABLENDMODE_Sub 5
-#define ODYSSEY_ALPHABLENDMODE_Add 6
-#define ODYSSEY_ALPHABLENDMODE_Mul 7
+#define ODYSSEY_ALPHABLENDMODE_Substract 4
+#define ODYSSEY_ALPHABLENDMODE_Add 5
+#define ODYSSEY_ALPHABLENDMODE_Multiply 6
 
-#define ODYSSEY_ALPHABLENDMODE_Min 8
-#define ODYSSEY_ALPHABLENDMODE_Max 9
+#define ODYSSEY_ALPHABLENDMODE_Min 7
+#define ODYSSEY_ALPHABLENDMODE_Max 8
 
-#define ODYSSEY_ALPHABLENDMODE_Dissolve 10
-#define ODYSSEY_ALPHABLENDMODE_BayerDither8x8 11
+#define ODYSSEY_ALPHABLENDMODE_Dissolve 9
+#define ODYSSEY_ALPHABLENDMODE_BayerDither8x8 10
 
 float GetBayerDither8x8(uint2 iDstPos)
 {
@@ -707,7 +706,7 @@ float AlphaTop(float iCb, float iCs) {
     return iCs;
 }
 
-float AlphaSub(float iCb, float iCs) {
+float AlphaSubstract(float iCb, float iCs) {
     return iCb > iCs ? iCb - iCs : 0;
 }
 
@@ -715,7 +714,7 @@ float AlphaAdd(float iCb, float iCs) {
     return (1.f - iCb) > iCs ? iCb + iCs : 1.f;
 }
 
-float AlphaMul(float iCb, float iCs) {
+float AlphaMultiply(float iCb, float iCs) {
     return iCb * iCs;
 }
 
@@ -747,7 +746,7 @@ float AlphaBlend(float iCb, float iCs, uint iAlphaBlend, uint2 iDstPos)
         }
         break;
 
-        case ODYSSEY_ALPHABLENDMODE_Mask:
+        case ODYSSEY_ALPHABLENDMODE_Erase:
         {
             return AlphaErase(iCb, iCs);
         }
@@ -765,9 +764,9 @@ float AlphaBlend(float iCb, float iCs, uint iAlphaBlend, uint2 iDstPos)
         }
         break;
 
-        case ODYSSEY_ALPHABLENDMODE_Sub:
+        case ODYSSEY_ALPHABLENDMODE_Substract:
         {
-            return AlphaSub(iCb, iCs);
+            return AlphaSubstract(iCb, iCs);
         }
         break;
 
@@ -777,9 +776,9 @@ float AlphaBlend(float iCb, float iCs, uint iAlphaBlend, uint2 iDstPos)
         }
         break;
 
-        case ODYSSEY_ALPHABLENDMODE_Mul:
+        case ODYSSEY_ALPHABLENDMODE_Multiply:
         {
-            return AlphaMul(iCb, iCs);
+            return AlphaMultiply(iCb, iCs);
         }
         break;
 

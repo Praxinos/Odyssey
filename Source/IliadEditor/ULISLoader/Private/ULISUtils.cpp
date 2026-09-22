@@ -265,7 +265,7 @@ GetULISBlendingModeFromBlendMode(EOdysseyColorBlendMode InColorBlendMode, EOdyss
             OutAlphaMode = ::ULIS::Alpha_Normal;
         break;
 
-        case EOdysseyAlphaBlendMode::Mask:
+        case EOdysseyAlphaBlendMode::Erase:
             OutAlphaMode = ::ULIS::Alpha_Erase;
         break;
 
@@ -277,7 +277,7 @@ GetULISBlendingModeFromBlendMode(EOdysseyColorBlendMode InColorBlendMode, EOdyss
             OutAlphaMode = ::ULIS::Alpha_Back;
         break;
 
-        case EOdysseyAlphaBlendMode::Sub:
+        case EOdysseyAlphaBlendMode::Substract:
             OutAlphaMode = ::ULIS::Alpha_Sub;
         break;
 
@@ -285,7 +285,7 @@ GetULISBlendingModeFromBlendMode(EOdysseyColorBlendMode InColorBlendMode, EOdyss
             OutAlphaMode = ::ULIS::Alpha_Add;
         break;
 
-        case EOdysseyAlphaBlendMode::Mul:
+        case EOdysseyAlphaBlendMode::Multiply:
             OutAlphaMode = ::ULIS::Alpha_Mul;
         break;
 

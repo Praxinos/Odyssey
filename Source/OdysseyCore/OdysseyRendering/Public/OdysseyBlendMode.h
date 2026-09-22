@@ -82,15 +82,14 @@ enum class EOdysseyAlphaBlendMode : uint8
 {
     Normal,
 
-    Mask,
-    Stencil,
+    Erase,
 
     Top,
     Back,
 
-    Sub,
+    Substract,
     Add,
-    Mul,
+    Multiply,
 
     Min,
     Max,
@@ -122,7 +121,7 @@ enum class EOdysseyBlendMode : uint8
     Normal,
     Behind,
 
-    Mask,
+    Erase,
     Stencil,
 
     Darken,

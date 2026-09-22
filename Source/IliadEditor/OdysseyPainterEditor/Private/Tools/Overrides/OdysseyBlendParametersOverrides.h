@@ -58,12 +58,29 @@ public:
     UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_IsComposite" ) )
     bool       bIsComposite;
 
-    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_BlendMode" ) )
+    UPROPERTY( EditAnywhere, Category="Modifiers",
+        meta = (
+            editcondition = "bOverride_BlendMode",
+            InvalidEnumValues="Stencil"
+        )
+    )
     EOdysseyBlendMode       BlendMode;
 
-    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( DisplayName="Color Blend Mode", editcondition = "bOverride_CompositeColorBlendMode" ) )
+    UPROPERTY( EditAnywhere, Category="Modifiers",
+        meta = (
+            DisplayName="Color Blend Mode",
+            editcondition = "bOverride_CompositeColorBlendMode",
+            InvalidEnumValues="Top,Back"
+        )
+    )
     EOdysseyColorBlendMode       CompositeColorBlendMode;
 
-    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( DisplayName="Alpha Blend Mode", editcondition = "bOverride_CompositeAlphaBlendMode" ) )
+    UPROPERTY( EditAnywhere, Category="Modifiers",
+        meta = (
+            DisplayName="Alpha Blend Mode",
+            editcondition = "bOverride_CompositeAlphaBlendMode",
+            InvalidEnumValues="Stencil,Min,Multiply,Top"
+        )
+    )
     EOdysseyAlphaBlendMode       CompositeAlphaBlendMode;
 };

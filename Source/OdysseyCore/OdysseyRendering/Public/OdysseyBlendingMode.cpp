@@ -188,7 +188,7 @@ GetColorAndAlphaBlendModesFromDeprecatedBlendingMode(EOdysseyBlendingMode InBlen
         break;
 
         case EOdysseyAlphaMode::kErase:
-            OutAlphaBlendMode = EOdysseyAlphaBlendMode::Mask;
+            OutAlphaBlendMode = EOdysseyAlphaBlendMode::Erase;
         break;
 
         case EOdysseyAlphaMode::kTop:
@@ -200,7 +200,7 @@ GetColorAndAlphaBlendModesFromDeprecatedBlendingMode(EOdysseyBlendingMode InBlen
         break;
 
         case EOdysseyAlphaMode::kSub:
-            OutAlphaBlendMode = EOdysseyAlphaBlendMode::Sub;
+            OutAlphaBlendMode = EOdysseyAlphaBlendMode::Substract;
         break;
 
         case EOdysseyAlphaMode::kAdd:
@@ -208,7 +208,7 @@ GetColorAndAlphaBlendModesFromDeprecatedBlendingMode(EOdysseyBlendingMode InBlen
         break;
 
         case EOdysseyAlphaMode::kMul:
-            OutAlphaBlendMode = EOdysseyAlphaBlendMode::Mul;
+            OutAlphaBlendMode = EOdysseyAlphaBlendMode::Multiply;
         break;
 
         case EOdysseyAlphaMode::kMin:

@@ -62,13 +62,33 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending")
     bool bIsComposite = false;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending", meta=(EditCondition="!bIsComposite", EditConditionHides))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending",
+        meta=(
+            EditCondition="!bIsComposite",
+            EditConditionHides,
+            InvalidEnumValues="Stencil"
+        )
+    )
     EOdysseyBlendMode BlendMode;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending", meta=(DisplayName="Color Blend Mode", EditCondition="bIsComposite", EditConditionHides))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending",
+        meta=(
+            DisplayName="Color Blend Mode",
+            EditCondition="bIsComposite",
+            EditConditionHides,
+            InvalidEnumValues="Top,Back"
+        )
+    )
     EOdysseyColorBlendMode CompositeColorBlendMode;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending", meta=(DisplayName="Alpha Blend Mode", EditCondition="bIsComposite", EditConditionHides))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending",
+        meta=(
+            DisplayName="Alpha Blend Mode",
+            EditCondition="bIsComposite",
+            EditConditionHides,
+            InvalidEnumValues="Stencil,Min,Multiply,Top"
+        )
+    )
     EOdysseyAlphaBlendMode CompositeAlphaBlendMode;
 
     /** The opacity. */
