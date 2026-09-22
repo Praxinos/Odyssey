@@ -10,7 +10,7 @@ UOdysseyBlendParametersOverrides::UOdysseyBlendParametersOverrides()
     , bOverride_CompositeColorBlendMode   ( false )
     , bOverride_CompositeAlphaBlendMode   ( false )
     , Opacity               ( 100 )
-    , IsComposite ( true )
+    , bIsComposite ( true )
     , BlendMode   ( EOdysseyBlendMode::Normal )
     , CompositeColorBlendMode   ( EOdysseyColorBlendMode::Normal )
     , CompositeAlphaBlendMode   ( EOdysseyAlphaBlendMode::Normal )
@@ -54,7 +54,7 @@ UOdysseyBlendParametersOverrides::Serialize(FArchive& Ar)
         bOverride_CompositeColorBlendMode = bOverride_BlendingMode_DEPRECATED;
         bOverride_CompositeAlphaBlendMode = bOverride_AlphaMode_DEPRECATED;
 
-        IsComposite = bOverride_BlendingMode_DEPRECATED | bOverride_AlphaMode_DEPRECATED;
+        bIsComposite = bOverride_BlendingMode_DEPRECATED | bOverride_AlphaMode_DEPRECATED;
         GetColorAndAlphaBlendModesFromDeprecatedBlendingMode(BlendingMode_DEPRECATED, AlphaMode_DEPRECATED, CompositeColorBlendMode, CompositeAlphaBlendMode);
     }
 }

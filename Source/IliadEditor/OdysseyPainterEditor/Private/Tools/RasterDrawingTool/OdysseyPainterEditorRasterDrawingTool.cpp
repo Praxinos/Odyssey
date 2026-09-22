@@ -761,7 +761,7 @@ UOdysseyPainterEditorRasterDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* i
             BlendParameters.SetOpacity(blendParametersOverrides->Opacity);
 
         if (blendParametersOverrides->bOverride_IsComposite)
-            BlendParameters.SetIsComposite(blendParametersOverrides->IsComposite);
+            BlendParameters.SetIsComposite(blendParametersOverrides->bIsComposite);
 
         if (blendParametersOverrides->bOverride_BlendMode)
             BlendParameters.SetBlendMode(blendParametersOverrides->BlendMode);

@@ -56,14 +56,14 @@ public:
     float  Opacity;
 
     UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_IsComposite" ) )
-    bool       IsComposite;
+    bool       bIsComposite;
 
-    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_BlendMode && !IsComposite" ) )
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_BlendMode" ) )
     EOdysseyBlendMode       BlendMode;
 
-    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( DisplayName="Color Blend Mode", editcondition = "bOverride_CompositeColorBlendMode && IsComposite" ) )
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( DisplayName="Color Blend Mode", editcondition = "bOverride_CompositeColorBlendMode" ) )
     EOdysseyColorBlendMode       CompositeColorBlendMode;
 
-    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( DisplayName="Alpha Blend Mode", editcondition = "bOverride_CompositeAlphaBlendMode && IsComposite" ) )
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( DisplayName="Alpha Blend Mode", editcondition = "bOverride_CompositeAlphaBlendMode" ) )
     EOdysseyAlphaBlendMode       CompositeAlphaBlendMode;
 };
