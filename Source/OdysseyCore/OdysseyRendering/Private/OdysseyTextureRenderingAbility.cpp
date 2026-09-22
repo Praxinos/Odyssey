@@ -191,8 +191,8 @@ IOdysseyTextureRenderingAbility::RenderAndResize_GameThread(UTextureRenderTarget
                 iSrcRect,
                 iDstRect,
                 FMatrix::Identity,
-                EOdysseyBlendingMode::kNormal,
-                EOdysseyAlphaMode::kNormal,
+                EOdysseyColorBlendMode::Normal,
+                EOdysseyAlphaBlendMode::Normal,
                 1.0f,
                 EOdysseyAntiAliasing::Anisotropic
             );

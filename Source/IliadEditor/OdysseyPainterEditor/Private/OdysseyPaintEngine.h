@@ -61,8 +61,6 @@ private:
 
     void OnBlockPtrChanged();
 
-    FOdysseyBlendParameters AdjustBlendParameters(const FOdysseyBlendParameters& iBlendParameters);
-
     void OnBeforeRedoUndo( const FTransactionContext& TransactionContext );
 
 private:

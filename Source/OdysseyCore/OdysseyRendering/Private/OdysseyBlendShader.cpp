@@ -42,8 +42,8 @@ void FOdysseyBlendShader::BlendRect(
 
     const FMatrix& iTransform,
 
-    EOdysseyBlendingMode iBlendMode,
-    EOdysseyAlphaMode iAlphaMode,
+    EOdysseyColorBlendMode iBlendMode,
+    EOdysseyAlphaBlendMode iAlphaMode,
     float iOpacity,
     EOdysseyAntiAliasing iAntiAliasing
 )
@@ -90,7 +90,7 @@ void FOdysseyBlendShader::BlendRect(
     shaderParameters->AlphaMode = (uint32)iAlphaMode;
 
     //Create Shader
-    TRefCountPtr< FOdysseyBlendShader > blendShader(new FOdysseyBlendShader(shaderParameters, iBlendMode));
+    TRefCountPtr< FOdysseyBlendShader > blendShader(new FOdysseyBlendShader(shaderParameters));
 
     FIntPoint foregroundTextureSize = foregroundTexture->Desc.Extent;
     FIntPoint destinationTextureSize = destinationTexture->Desc.Extent;
@@ -167,9 +167,8 @@ void FOdysseyBlendShader::BlendRect(
     );
 }
 
-FOdysseyBlendShader::FOdysseyBlendShader(FOdysseyBlendShaderParameters* iPixelShaderParams, EOdysseyBlendingMode iBlendMode)
+FOdysseyBlendShader::FOdysseyBlendShader(FOdysseyBlendShaderParameters* iPixelShaderParams)
     : mPixelShaderParams(iPixelShaderParams)
-    , mBlendMode(iBlendMode)
 {
 }
 

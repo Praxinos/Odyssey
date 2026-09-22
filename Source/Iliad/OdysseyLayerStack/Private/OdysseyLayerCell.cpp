@@ -414,8 +414,8 @@ UOdysseyLayerCell::BuildRenderPipelineInternal(
             iSrcRect,
             iDstRect,
             transform,
-            EOdysseyBlendingMode::kNormal,
-            EOdysseyAlphaMode::kNormal,
+            EOdysseyColorBlendMode::Normal,
+            EOdysseyAlphaBlendMode::Normal,
             1.f,
             EOdysseyAntiAliasing::Anisotropic
         );

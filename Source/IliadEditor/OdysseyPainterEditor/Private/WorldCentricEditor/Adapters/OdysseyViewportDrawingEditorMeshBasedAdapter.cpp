@@ -391,7 +391,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
                 , *mStrokeBufferSurfaceTexture2DEditable->Block()
                 , iStampParams.mRects[0]
                 , ::ULIS::FVec2F(0,0)
-                , ::ULIS::eBlendMode(iStampParams.mBlendingMode)
+                , ::ULIS::eBlendMode(iStampParams.mBlendMode)
                 , ::ULIS::eAlphaMode(iStampParams.mAlphaMode)
                 , FMath::Clamp(iStampParams.mFlow, 0.f, 1.f)
                 , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
@@ -407,7 +407,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
                 , *mStrokeBufferSurfaceTexture2DEditable->Block()
                 , iStampParams.mRects[0]
                 , ::ULIS::FVec2F(0, 0)
-                , ::ULIS::eBlendMode(iStampParams.mBlendingMode)
+                , ::ULIS::eBlendMode(iStampParams.mBlendMode)
                 , ::ULIS::eAlphaMode(iStampParams.mAlphaMode)
                 , FMath::Clamp(iStampParams.mFlow, 0.f, 1.f)
                 , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
@@ -615,7 +615,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
                         , *ioDest
                         , iRect
                         , iPos
-                        , ::ULIS::eBlendMode(iStampParams.mBlendingMode)
+                        , ::ULIS::eBlendMode(iStampParams.mBlendMode)
                         , ::ULIS::eAlphaMode(iStampParams.mAlphaMode)
                         , FMath::Clamp(iStampParams.mFlow, 0.f, 1.f)
                         , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
@@ -631,7 +631,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
                         *ioDest,
                         iRect,
                         iPos,
-                        ::ULIS::eBlendMode(iStampParams.mBlendingMode),
+                        ::ULIS::eBlendMode(iStampParams.mBlendMode),
                         ::ULIS::eAlphaMode(iStampParams.mAlphaMode),
                         FMath::Clamp(iStampParams.mFlow, 0.f, 1.f),
                         ::ULIS::FSchedulePolicy::AsyncCacheEfficient,

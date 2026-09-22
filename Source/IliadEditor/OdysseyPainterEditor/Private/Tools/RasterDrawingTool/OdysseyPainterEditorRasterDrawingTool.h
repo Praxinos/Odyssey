@@ -146,8 +146,9 @@ private:
 
     //Adds some amound to the brush size
     void AddSize(int iAmount);
-    void SetAlphaMode(::ULIS::eAlphaMode iAlphaMode);
-    void SetBlendMode(::ULIS::eBlendMode iBlendMode);
+    void SetAlphaBlendMode(EOdysseyAlphaBlendMode InAlphaBlendMode);
+    void SetColorBlendMode(EOdysseyColorBlendMode InColorBlendMode);
+    void SetBlendMode(EOdysseyBlendMode iBlendMode);
 
     //Creates the Brush Instance and applies brush overrides if asked
     void CreateBrushInstance(bool iApplyOverrides);
@@ -182,8 +183,6 @@ private:
 
     TArray<FOdysseyPoint> InterpolateTo(const FOdysseyPoint& iPoint);
     void ResetInterpolation();
-
-    void AddBlendingModeToolbarMenuEntry(FMenuBuilder& iMenuBuilder, EOdysseyBlendingMode iBlendingMode);
 
 public:
     friend class SOdysseyPainterEditorRasterDrawingToolBrushSelector;

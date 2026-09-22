@@ -302,8 +302,8 @@ UOdysseyBlockProxyFunctionLibrary::BlendColor(
     , float Opacity
     , EOdysseyColorModel ColorModel
     , EOdysseyChannelDepth ChannelDepth
-    , EOdysseyBlendingMode BlendingMode
-    , EOdysseyAlphaMode AlphaMode
+    , EOdysseyColorBlendMode BlendMode
+    , EOdysseyAlphaBlendMode AlphaMode
 )
 {
     if( !Sample.IsValid() )
@@ -327,7 +327,7 @@ UOdysseyBlockProxyFunctionLibrary::BlendColor(
             Color.GetValue()
         , *dst
         , Area.IsInitialized() ? Area.GetValue() : dst->Rect()
-        , ::ULIS::eBlendMode( BlendingMode )
+        , ::ULIS::eBlendMode( BlendMode )
         , ::ULIS::eAlphaMode( AlphaMode )
         , Opacity
         , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
@@ -413,8 +413,8 @@ UOdysseyBlockProxyFunctionLibrary::Blend(
     , float Opacity
     , EOdysseyColorModel ColorModel
     , EOdysseyChannelDepth ChannelDepth
-    , EOdysseyBlendingMode BlendingMode
-    , EOdysseyAlphaMode AlphaMode
+    , EOdysseyColorBlendMode BlendMode
+    , EOdysseyAlphaBlendMode AlphaMode
 )
 {
     //Top and back must be valid
@@ -498,7 +498,7 @@ UOdysseyBlockProxyFunctionLibrary::Blend(
         , *dst
         , src->Rect()
         , ::ULIS::FVec2F( OffsetX, OffsetY )
-        , ::ULIS::eBlendMode( BlendingMode )
+        , ::ULIS::eBlendMode( BlendMode )
         , ::ULIS::eAlphaMode( AlphaMode )
         , Opacity
         , ::ULIS::FSchedulePolicy::AsyncCacheEfficient

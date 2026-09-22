@@ -20,8 +20,8 @@ UOdysseyShadersBlueprintLibrary::Blend(
     FIntRect SourceRect,
     FIntRect DestinationRect,
     FMatrix Transform,
-    EOdysseyBlendingMode BlendMode,
-    EOdysseyAlphaMode AlphaMode,
+    EOdysseyColorBlendMode BlendMode,
+    EOdysseyAlphaBlendMode AlphaMode,
     float Opacity,
     EOdysseyAntiAliasing AntiAliasing
 )

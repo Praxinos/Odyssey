@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyBlendMode.h"
 #include <ULIS>
 
 namespace ULISUtils
@@ -29,4 +30,6 @@ namespace ULISUtils
 
     ULISLOADER_API TArray<::ULIS::FRectI> ToULISRectIs(const TArray<FIntRect>& iRects);
     ULISLOADER_API TArray<FIntRect> ToIntRects(const TArray<::ULIS::FRectI>& iRects);
+
+    ULISLOADER_API void GetULISBlendingModeFromBlendMode(EOdysseyColorBlendMode InColorBlendMode, EOdysseyAlphaBlendMode InAlphaBlendMode, ::ULIS::eBlendMode& OutBlendMode, ::ULIS::eAlphaMode& OutAlphaMode);
 }

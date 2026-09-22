@@ -80,35 +80,19 @@ FOdysseyPaintEngine::SetMaskBlock(TSharedPtr<::ULIS::FBlock> iMaskBlock)
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------- Paint Engine API
 
-FOdysseyBlendParameters
-FOdysseyPaintEngine::AdjustBlendParameters(const FOdysseyBlendParameters& iBlendParameters)
-{
-    FOdysseyBlendParameters blendParameters = iBlendParameters;
-    if (blendParameters.bEraserMode)
-    {
-        blendParameters.AlphaMode = EOdysseyAlphaMode(::ULIS::eAlphaMode::Alpha_Erase);
-        blendParameters.BlendingMode = EOdysseyBlendingMode(::ULIS::eBlendMode::Blend_Back);
-    }
-
-    return blendParameters;
-}
-
 void
 FOdysseyPaintEngine::Update(const FOdysseyBlendParameters& iBlendParameters)
 {
     if (!mRasterBlock)
         return;
 
-    //Apply bEraserMode if active
-    FOdysseyBlendParameters blendParameters = AdjustBlendParameters(iBlendParameters);
-
     //If blend parameters are different from the previous one used
     //Force refreshing all edited tiles, instead of just newly edited tiles
-    if ( blendParameters != mPreviousBlendParameters )
+    if ( iBlendParameters != mPreviousBlendParameters )
         mInvalidRects.Append(::ULISUtils::ToULISRectIs(mRasterBlockMutator.GetInvalidTileMap().InvalidRects()));
 
     //Update the EditedBlock content
-    if (!UpdateEditedBlock(blendParameters))
+    if (!UpdateEditedBlock(iBlendParameters))
         return;
 }
 
@@ -273,7 +257,10 @@ FOdysseyPaintEngine::UpdateEditedBlock(const FOdysseyBlendParameters& iBlendPara
 
 
                 ::ULIS::FEvent blendEvent;
-                ctx.Blend(*mPaintBlock, *iBlock, rect, rect.Position(), ::ULIS::eBlendMode(iBlendParameters.BlendingMode), ::ULIS::eAlphaMode(iBlendParameters.AlphaMode), iBlendParameters.Opacity / 100.f, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, eventMask.Num(), eventMask.GetData(), &blendEvent);
+                ::ULIS::eBlendMode blendMode;
+                ::ULIS::eAlphaMode alphaMode;
+                ULISUtils::GetULISBlendingModeFromBlendMode(iBlendParameters.GetColorBlendMode(), iBlendParameters.GetAlphaBlendMode(), blendMode, alphaMode);
+                ctx.Blend(*mPaintBlock, *iBlock, rect, rect.Position(), blendMode, alphaMode, iBlendParameters.GetOpacity() / 100.f, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, eventMask.Num(), eventMask.GetData(), &blendEvent);
                 events.Add(blendEvent);
             }
             return events;

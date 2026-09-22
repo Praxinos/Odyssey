@@ -4,10 +4,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyBrushAssetBase.h"
 #include "UObject/ObjectMacros.h"
 #include "OdysseyBlendingMode.h"
-#include "OdysseyBlendParameters.h"
+#include "OdysseyBlendMode.h"
 #include "OdysseyBlendParametersOverrides.generated.h"
 
 /////////////////////////////////////////////////////
@@ -20,30 +19,74 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyBlendParametersOverrides : public UObject
 public:
     UOdysseyBlendParametersOverrides();
 
+    virtual void Serialize(FArchive& Ar) override;
+
+private:
+    //Deprecated values
+    UPROPERTY()
+    bool    bOverride_BlendingMode_DEPRECATED;
+    UPROPERTY()
+    bool    bOverride_AlphaMode_DEPRECATED;
+    UPROPERTY()
+    EOdysseyBlendingMode    BlendingMode_DEPRECATED;
+    UPROPERTY()
+    EOdysseyAlphaMode       AlphaMode_DEPRECATED;
+
 public:
     /** Enable Modifier Opacity Override. */
     UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_Opacity;
 
-    /** Enable Modifier BlendingMode Override. */
     UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
-    bool    bOverride_BlendingMode;
+    bool    bOverride_IsComposite;
 
-    /** Enable Modifier AlphaMode Override. */
     UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
-    bool    bOverride_AlphaMode;
+    bool    bOverride_EraserMode;
+
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
+    bool    bOverride_BlendMode;
+
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
+    bool    bOverride_CompositeColorBlendMode;
+
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
+    bool    bOverride_CompositeAlphaBlendMode;
 
     /////////////////////////////////////////////////////
     // Overrides Values
     /** Modifier Opacity Override Value. */
-    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", editcondition = "bOverride_Opacity" ) )
+    UPROPERTY()
     float  Opacity;
 
-    /** Modifier BlendingMode Override Value. */
-    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_BlendingMode" ) )
-    EOdysseyBlendingMode    BlendingMode;
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_EraserMode" ) )
+    bool       bEraserMode;
 
-    /** Modifier AlphaMode Override Value. */
-    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_AlphaMode" ) )
-    EOdysseyAlphaMode       AlphaMode;
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_IsComposite" ) )
+    bool       bIsComposite;
+
+    UPROPERTY( EditAnywhere, Category="Modifiers",
+        meta = (
+            editcondition = "bOverride_BlendMode",
+            InvalidEnumValues="Stencil"
+        )
+    )
+    EOdysseyBlendMode       BlendMode;
+
+    UPROPERTY( EditAnywhere, Category="Modifiers",
+        meta = (
+            DisplayName="Color Blend Mode",
+            editcondition = "bOverride_CompositeColorBlendMode",
+            InvalidEnumValues="Top,Back"
+        )
+    )
+    EOdysseyColorBlendMode       CompositeColorBlendMode;
+
+    UPROPERTY( EditAnywhere, Category="Modifiers",
+        meta = (
+            DisplayName="Alpha Blend Mode",
+            editcondition = "bOverride_CompositeAlphaBlendMode",
+            InvalidEnumValues="Min,Multiply,Top"
+        )
+    )
+    EOdysseyAlphaBlendMode       CompositeAlphaBlendMode;
 };

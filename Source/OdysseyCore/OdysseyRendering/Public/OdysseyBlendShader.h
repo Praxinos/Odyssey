@@ -3,18 +3,17 @@
 
 #pragma once
 
+#include "BatchedElements.h"
+#include "RenderGraphFwd.h"
 #include "OdysseyBlendingMode.h"
 #include "OdysseyAntiAliasing.h"
-#include "BatchedElements.h"
-#include "RHI.h"
-#include "RenderGraphFwd.h"
 #include "ShaderParameterMacros.h"
 
 class FRDGBuilder;
-class FTexture;
 
-BEGIN_SHADER_PARAMETER_STRUCT(FOdysseyBlendColorShaderParameters, )
-    SHADER_PARAMETER(FVector4f, Color)
+BEGIN_SHADER_PARAMETER_STRUCT(FOdysseyBlendShaderParameters, )
+    SHADER_PARAMETER_RDG_TEXTURE(Texture2D, SourceTexture)
+    SHADER_PARAMETER_SAMPLER(SamplerState, SourceTextureSampler)
 
     SHADER_PARAMETER_RDG_TEXTURE(Texture2D, DestinationTexture)
     SHADER_PARAMETER_SAMPLER(SamplerState, DestinationTextureSampler)
@@ -26,10 +25,10 @@ BEGIN_SHADER_PARAMETER_STRUCT(FOdysseyBlendColorShaderParameters, )
     RENDER_TARGET_BINDING_SLOTS()
 END_SHADER_PARAMETER_STRUCT()
 
-class ODYSSEYRENDERING_API FOdysseyBlendColorShader : public FBatchedElementParameters
+class ODYSSEYRENDERING_API FOdysseyBlendShader : public FBatchedElementParameters
 {
 public:
-    FOdysseyBlendColorShader(FOdysseyBlendColorShaderParameters* iPixelShaderParams, EOdysseyBlendingMode iBlendMode);
+    FOdysseyBlendShader(FOdysseyBlendShaderParameters* iPixelShaderParams);
 
 public:
     /** Binds vertex and pixel shaders for this element */
@@ -40,16 +39,21 @@ public:
         FRDGBuilder& iGraphBuilder,
         ERHIFeatureLevel::Type iFeatureLevel,
         FRDGTextureRef iBackgroundTexture,
-        FLinearColor iForegroundColor,
+        FRDGTextureRef iForegroundTexture,
         FRDGTextureRef iDestinationTexture,
+
+        const FIntRect& iSrcRect,
         const FIntRect& iDstRect,
-        EOdysseyBlendingMode iBlendMode,
-        EOdysseyAlphaMode iAlphaMode,
-        float iOpacity
+
+        const FMatrix& iTransform,
+
+        EOdysseyColorBlendMode iBlendMode,
+        EOdysseyAlphaBlendMode iAlphaMode,
+        float iOpacity,
+        EOdysseyAntiAliasing iAntiAliasing
     );
 
 public:
     /** Shader parameters */
-    FOdysseyBlendColorShaderParameters* mPixelShaderParams;
-    EOdysseyBlendingMode mBlendMode;
+    FOdysseyBlendShaderParameters* mPixelShaderParams;
 };

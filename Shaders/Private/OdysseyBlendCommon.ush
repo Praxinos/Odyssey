@@ -11,105 +11,139 @@ float ensureNonZero( float iValue )
     return iValue;
 }
 
-// BlendMode Seperarable
-#define ODYSSEY_BLENDINGMODE_Normal 0
-#define ODYSSEY_BLENDINGMODE_Top 1
-#define ODYSSEY_BLENDINGMODE_Back 2
-#define ODYSSEY_BLENDINGMODE_Behind 3
-#define ODYSSEY_BLENDINGMODE_Dissolve 4
-#define ODYSSEY_BLENDINGMODE_BayerDither8x8 5
-#define ODYSSEY_BLENDINGMODE_Darken 6
-#define ODYSSEY_BLENDINGMODE_Multiply 7
-#define ODYSSEY_BLENDINGMODE_ColorBurn 8
-#define ODYSSEY_BLENDINGMODE_LinearBurn 9
-#define ODYSSEY_BLENDINGMODE_DarkerColor 10
-#define ODYSSEY_BLENDINGMODE_Lighten 11
-#define ODYSSEY_BLENDINGMODE_Screen 12
-#define ODYSSEY_BLENDINGMODE_ColorDodge 13
-#define ODYSSEY_BLENDINGMODE_LinearDodge 14
-#define ODYSSEY_BLENDINGMODE_LighterColor 15
-#define ODYSSEY_BLENDINGMODE_Overlay 16
-#define ODYSSEY_BLENDINGMODE_SoftLight 17
-#define ODYSSEY_BLENDINGMODE_HardLight 18
-#define ODYSSEY_BLENDINGMODE_VividLight 19
-#define ODYSSEY_BLENDINGMODE_LinearLight 20
-#define ODYSSEY_BLENDINGMODE_PinLight 21
-#define ODYSSEY_BLENDINGMODE_HardMix 22
-#define ODYSSEY_BLENDINGMODE_Phoenix 23
-#define ODYSSEY_BLENDINGMODE_Reflect 24
-#define ODYSSEY_BLENDINGMODE_Glow 25
-#define ODYSSEY_BLENDINGMODE_Difference 26
-#define ODYSSEY_BLENDINGMODE_Exclusion 27
-#define ODYSSEY_BLENDINGMODE_Add 28
-#define ODYSSEY_BLENDINGMODE_Substract 29
-#define ODYSSEY_BLENDINGMODE_Divide 30
-#define ODYSSEY_BLENDINGMODE_Average 31
-#define ODYSSEY_BLENDINGMODE_Negation 32
-#define ODYSSEY_BLENDINGMODE_Hue 33
-#define ODYSSEY_BLENDINGMODE_Saturation 34
-#define ODYSSEY_BLENDINGMODE_Color 35
-#define ODYSSEY_BLENDINGMODE_Luminosity 36
-#define ODYSSEY_BLENDINGMODE_PartialDerivative 37
-#define ODYSSEY_BLENDINGMODE_WhiteOut 38
-#define ODYSSEY_BLENDINGMODE_AngleCorrected 39
+// ColorBlendMode Seperarable
+#define ODYSSEY_COLORBLENDMODE_Normal 0
+#define ODYSSEY_COLORBLENDMODE_Behind 1
 
-// AlphaMode
-#define ODYSSEY_ALPHAMODE_Normal 0
-#define ODYSSEY_ALPHAMODE_Erase 1
-#define ODYSSEY_ALPHAMODE_Top 2
-#define ODYSSEY_ALPHAMODE_Back 3
-#define ODYSSEY_ALPHAMODE_Sub 4
-#define ODYSSEY_ALPHAMODE_Add 5
-#define ODYSSEY_ALPHAMODE_Mul 6
-#define ODYSSEY_ALPHAMODE_Min 7
-#define ODYSSEY_ALPHAMODE_Max 8
+#define ODYSSEY_COLORBLENDMODE_Top 2
+#define ODYSSEY_COLORBLENDMODE_Back 3
+
+#define ODYSSEY_COLORBLENDMODE_Darken 4
+#define ODYSSEY_COLORBLENDMODE_Multiply 5
+#define ODYSSEY_COLORBLENDMODE_ColorBurn 6
+#define ODYSSEY_COLORBLENDMODE_LinearBurn 7
+#define ODYSSEY_COLORBLENDMODE_DarkerColor 8
+
+#define ODYSSEY_COLORBLENDMODE_Lighten 9
+#define ODYSSEY_COLORBLENDMODE_Screen 10
+#define ODYSSEY_COLORBLENDMODE_ColorDodge 11
+#define ODYSSEY_COLORBLENDMODE_LinearDodge 12
+#define ODYSSEY_COLORBLENDMODE_LighterColor 13
+
+#define ODYSSEY_COLORBLENDMODE_Overlay 14
+#define ODYSSEY_COLORBLENDMODE_SoftLight 15
+#define ODYSSEY_COLORBLENDMODE_HardLight 16
+#define ODYSSEY_COLORBLENDMODE_VividLight 17
+#define ODYSSEY_COLORBLENDMODE_LinearLight 18
+#define ODYSSEY_COLORBLENDMODE_PinLight 19
+#define ODYSSEY_COLORBLENDMODE_HardMix 20
+
+#define ODYSSEY_COLORBLENDMODE_Phoenix 21
+#define ODYSSEY_COLORBLENDMODE_Reflect 22
+#define ODYSSEY_COLORBLENDMODE_Glow 23
+
+#define ODYSSEY_COLORBLENDMODE_Difference 24
+#define ODYSSEY_COLORBLENDMODE_Exclusion 25
+#define ODYSSEY_COLORBLENDMODE_Add 26
+#define ODYSSEY_COLORBLENDMODE_Substract 27
+#define ODYSSEY_COLORBLENDMODE_Divide 28
+#define ODYSSEY_COLORBLENDMODE_Average 29
+#define ODYSSEY_COLORBLENDMODE_Negation 30
+
+#define ODYSSEY_COLORBLENDMODE_Hue 31
+#define ODYSSEY_COLORBLENDMODE_Saturation 32
+#define ODYSSEY_COLORBLENDMODE_Color 33
+#define ODYSSEY_COLORBLENDMODE_Luminosity 34
+
+#define ODYSSEY_COLORBLENDMODE_PartialDerivative 35
+#define ODYSSEY_COLORBLENDMODE_WhiteOut 36
+#define ODYSSEY_COLORBLENDMODE_AngleCorrected 37
+
+#define ODYSSEY_COLORBLENDMODE_Dissolve 38
+#define ODYSSEY_COLORBLENDMODE_BayerDither8x8 39
+
+// AlphaBlendMode
+#define ODYSSEY_ALPHABLENDMODE_Normal 0
+
+#define ODYSSEY_ALPHABLENDMODE_Erase 1
+
+#define ODYSSEY_ALPHABLENDMODE_Top 2
+#define ODYSSEY_ALPHABLENDMODE_Back 3
+
+#define ODYSSEY_ALPHABLENDMODE_Substract 4
+#define ODYSSEY_ALPHABLENDMODE_Add 5
+#define ODYSSEY_ALPHABLENDMODE_Multiply 6
+
+#define ODYSSEY_ALPHABLENDMODE_Min 7
+#define ODYSSEY_ALPHABLENDMODE_Max 8
+
+#define ODYSSEY_ALPHABLENDMODE_Dissolve 9
+#define ODYSSEY_ALPHABLENDMODE_BayerDither8x8 10
+
+float GetBayerDither8x8(uint2 iDstPos)
+{
+    float gBayer8x8Matrix[64] = {
+        0.015625f, 0.765625f, 0.203125f, 0.953125f, 0.0625f, 0.8125f, 0.25f, 1.0f,
+        0.515625f, 0.265625f, 0.703125f, 0.453125f, 0.5625f, 0.3125f, 0.75f, 0.5f,
+        0.140625f, 0.890625f, 0.078125f, 0.828125f, 0.1875f, 0.9375f, 0.125f, 0.875f,
+        0.640625f, 0.390625f, 0.578125f, 0.328125f, 0.6875f, 0.4375f, 0.625f, 0.375f,
+        0.046875f, 0.796875f, 0.234375f, 0.984375f, 0.03125f, 0.78125f, 0.21875f, 0.96875f,
+        0.546875f, 0.296875f, 0.734375f, 0.484375f, 0.53125f, 0.28125f, 0.71875f, 0.46875f,
+        0.171875f, 0.921875f, 0.109375f, 0.859375f, 0.15625f, 0.90625f, 0.09375f, 0.84375f,
+        0.671875f, 0.421875f, 0.609375f, 0.359375f, 0.65625f, 0.40625f, 0.59375f, 0.34375f
+    };
+
+    uint bayerX = iDstPos.x % 8;
+    uint bayerY = iDstPos.y % 8;
+    return gBayer8x8Matrix[bayerY * 8 + bayerX];
+}
 
 bool IsBlendSeparable(uint iBlendingMode)
 {
     switch (iBlendingMode)
     {
-        case ODYSSEY_BLENDINGMODE_Normal:
-        case ODYSSEY_BLENDINGMODE_Top:
-        case ODYSSEY_BLENDINGMODE_Back:
-        case ODYSSEY_BLENDINGMODE_Behind:
-        case ODYSSEY_BLENDINGMODE_Darken:
-        case ODYSSEY_BLENDINGMODE_Multiply:
-        case ODYSSEY_BLENDINGMODE_ColorBurn:
-        case ODYSSEY_BLENDINGMODE_LinearBurn:
-        case ODYSSEY_BLENDINGMODE_Lighten:
-        case ODYSSEY_BLENDINGMODE_Screen:
-        case ODYSSEY_BLENDINGMODE_ColorDodge:
-        case ODYSSEY_BLENDINGMODE_LinearDodge:
-        case ODYSSEY_BLENDINGMODE_Overlay:
-        case ODYSSEY_BLENDINGMODE_SoftLight:
-        case ODYSSEY_BLENDINGMODE_HardLight:
-        case ODYSSEY_BLENDINGMODE_VividLight:
-        case ODYSSEY_BLENDINGMODE_LinearLight:
-        case ODYSSEY_BLENDINGMODE_PinLight:
-        case ODYSSEY_BLENDINGMODE_HardMix:
-        case ODYSSEY_BLENDINGMODE_Phoenix:
-        case ODYSSEY_BLENDINGMODE_Reflect:
-        case ODYSSEY_BLENDINGMODE_Glow:
-        case ODYSSEY_BLENDINGMODE_Difference:
-        case ODYSSEY_BLENDINGMODE_Exclusion:
-        case ODYSSEY_BLENDINGMODE_Add:
-        case ODYSSEY_BLENDINGMODE_Substract:
-        case ODYSSEY_BLENDINGMODE_Divide:
-        case ODYSSEY_BLENDINGMODE_Average:
-        case ODYSSEY_BLENDINGMODE_Negation:
+        case ODYSSEY_COLORBLENDMODE_Normal:
+        case ODYSSEY_COLORBLENDMODE_Top:
+        case ODYSSEY_COLORBLENDMODE_Back:
+        case ODYSSEY_COLORBLENDMODE_Behind:
+        case ODYSSEY_COLORBLENDMODE_Darken:
+        case ODYSSEY_COLORBLENDMODE_Multiply:
+        case ODYSSEY_COLORBLENDMODE_ColorBurn:
+        case ODYSSEY_COLORBLENDMODE_LinearBurn:
+        case ODYSSEY_COLORBLENDMODE_Lighten:
+        case ODYSSEY_COLORBLENDMODE_Screen:
+        case ODYSSEY_COLORBLENDMODE_ColorDodge:
+        case ODYSSEY_COLORBLENDMODE_LinearDodge:
+        case ODYSSEY_COLORBLENDMODE_Overlay:
+        case ODYSSEY_COLORBLENDMODE_SoftLight:
+        case ODYSSEY_COLORBLENDMODE_HardLight:
+        case ODYSSEY_COLORBLENDMODE_VividLight:
+        case ODYSSEY_COLORBLENDMODE_LinearLight:
+        case ODYSSEY_COLORBLENDMODE_PinLight:
+        case ODYSSEY_COLORBLENDMODE_HardMix:
+        case ODYSSEY_COLORBLENDMODE_Phoenix:
+        case ODYSSEY_COLORBLENDMODE_Reflect:
+        case ODYSSEY_COLORBLENDMODE_Glow:
+        case ODYSSEY_COLORBLENDMODE_Difference:
+        case ODYSSEY_COLORBLENDMODE_Exclusion:
+        case ODYSSEY_COLORBLENDMODE_Add:
+        case ODYSSEY_COLORBLENDMODE_Substract:
+        case ODYSSEY_COLORBLENDMODE_Divide:
+        case ODYSSEY_COLORBLENDMODE_Average:
+        case ODYSSEY_COLORBLENDMODE_Negation:
+        case ODYSSEY_COLORBLENDMODE_Dissolve:
+        case ODYSSEY_COLORBLENDMODE_BayerDither8x8:
             return true;
 
-        case ODYSSEY_BLENDINGMODE_Dissolve:       // Misc Blend
-        case ODYSSEY_BLENDINGMODE_BayerDither8x8: // Misc Blend
-        case ODYSSEY_BLENDINGMODE_DarkerColor:
-        case ODYSSEY_BLENDINGMODE_LighterColor:
-        case ODYSSEY_BLENDINGMODE_Hue:
-        case ODYSSEY_BLENDINGMODE_Saturation:
-        case ODYSSEY_BLENDINGMODE_Color:
-        case ODYSSEY_BLENDINGMODE_Luminosity:
-        case ODYSSEY_BLENDINGMODE_PartialDerivative:
-        case ODYSSEY_BLENDINGMODE_WhiteOut:
-        case ODYSSEY_BLENDINGMODE_AngleCorrected:
+        case ODYSSEY_COLORBLENDMODE_DarkerColor:
+        case ODYSSEY_COLORBLENDMODE_LighterColor:
+        case ODYSSEY_COLORBLENDMODE_Hue:
+        case ODYSSEY_COLORBLENDMODE_Saturation:
+        case ODYSSEY_COLORBLENDMODE_Color:
+        case ODYSSEY_COLORBLENDMODE_Luminosity:
+        case ODYSSEY_COLORBLENDMODE_PartialDerivative:
+        case ODYSSEY_COLORBLENDMODE_WhiteOut:
+        case ODYSSEY_COLORBLENDMODE_AngleCorrected:
             return false;
     }
 
@@ -371,6 +405,18 @@ float BlendGlow(float iCb, float iCs)
     return BlendReflect(iCs, iCb);
 }
 
+float BlendDissolve(float iCb, float iCs, float iCsA, uint2 iDstPos)
+{
+    float randomAlpha = RandFast(iDstPos);
+    return randomAlpha < iCsA ? iCs : iCb;
+}
+
+float BlendBayerDither8x8(float iCb, float iCs, float iCsA, uint2 iDstPos)
+{
+    float bayerEl = GetBayerDither8x8(iDstPos);
+    return (iCsA >= bayerEl) ? iCs : iCb;
+}
+
 //--------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------- DarkerColor
 float3 BlendDarkerColor(float3 iCs, float3 iCb) {
@@ -449,181 +495,193 @@ float3 BlendAngleCorrected(float3 iCs, float3 iCb) {
     return res;
 }
 
-float BlendComponent(float iCb, float iCs, uint iBlendingMode)
+float BlendComponent(float iCb, float iCs, float iCbA, float iCsA, uint iBlendingMode, uint2 iDstPos)
 {
     switch (iBlendingMode)
     {
-        case ODYSSEY_BLENDINGMODE_Normal:
+        case ODYSSEY_COLORBLENDMODE_Normal:
         {
             return BlendNormal(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Top:
+        case ODYSSEY_COLORBLENDMODE_Top:
         {
             return BlendTop(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Back:
+        case ODYSSEY_COLORBLENDMODE_Back:
         {
             return BlendBack(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Behind:
+        case ODYSSEY_COLORBLENDMODE_Behind:
         {
             return BlendBehind(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Darken:
+        case ODYSSEY_COLORBLENDMODE_Darken:
         {
             return BlendDarken(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Multiply:
+        case ODYSSEY_COLORBLENDMODE_Multiply:
         {
             return BlendMultiply(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_ColorBurn:
+        case ODYSSEY_COLORBLENDMODE_ColorBurn:
         {
             return BlendColorBurn(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_LinearBurn:
+        case ODYSSEY_COLORBLENDMODE_LinearBurn:
         {
             return BlendLinearBurn(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Lighten:
+        case ODYSSEY_COLORBLENDMODE_Lighten:
         {
             return BlendLighten(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Screen:
+        case ODYSSEY_COLORBLENDMODE_Screen:
         {
             return BlendScreen(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_ColorDodge:
+        case ODYSSEY_COLORBLENDMODE_ColorDodge:
         {
             return BlendColorDodge(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_LinearDodge:
+        case ODYSSEY_COLORBLENDMODE_LinearDodge:
         {
             return BlendLinearDodge(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Overlay:
+        case ODYSSEY_COLORBLENDMODE_Overlay:
         {
             return BlendOverlay(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_SoftLight:
+        case ODYSSEY_COLORBLENDMODE_SoftLight:
         {
             return BlendSoftLight(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_HardLight:
+        case ODYSSEY_COLORBLENDMODE_HardLight:
         {
             return BlendHardLight(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_VividLight:
+        case ODYSSEY_COLORBLENDMODE_VividLight:
         {
             return BlendVividLight(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_LinearLight:
+        case ODYSSEY_COLORBLENDMODE_LinearLight:
         {
             return BlendLinearLight(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_PinLight:
+        case ODYSSEY_COLORBLENDMODE_PinLight:
         {
             return BlendPinLight(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_HardMix:
+        case ODYSSEY_COLORBLENDMODE_HardMix:
         {
             return BlendHardMix(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Phoenix:
+        case ODYSSEY_COLORBLENDMODE_Phoenix:
         {
             return BlendPhoenix(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Reflect:
+        case ODYSSEY_COLORBLENDMODE_Reflect:
         {
             return BlendReflect(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Glow:
+        case ODYSSEY_COLORBLENDMODE_Glow:
         {
             return BlendGlow(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Difference:
+        case ODYSSEY_COLORBLENDMODE_Difference:
         {
             return BlendDifference(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Exclusion:
+        case ODYSSEY_COLORBLENDMODE_Exclusion:
         {
             return BlendExclusion(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Add:
+        case ODYSSEY_COLORBLENDMODE_Add:
         {
             return BlendAdd(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Substract:
+        case ODYSSEY_COLORBLENDMODE_Substract:
         {
             return BlendSubstract(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Divide:
+        case ODYSSEY_COLORBLENDMODE_Divide:
         {
             return BlendDivide(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Average:
+        case ODYSSEY_COLORBLENDMODE_Average:
         {
             return BlendAverage(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Negation:
+        case ODYSSEY_COLORBLENDMODE_Negation:
         {
             return BlendNegation(iCb, iCs);
+        }
+        break;
+
+        case ODYSSEY_COLORBLENDMODE_Dissolve:
+        {
+            return BlendDissolve(iCb, iCs, iCsA, iDstPos);
+        }
+        break;
+
+        case ODYSSEY_COLORBLENDMODE_BayerDither8x8:
+        {
+            return BlendBayerDither8x8(iCb, iCs, iCsA, iDstPos);
         }
         break;
     }
@@ -648,7 +706,7 @@ float AlphaTop(float iCb, float iCs) {
     return iCs;
 }
 
-float AlphaSub(float iCb, float iCs) {
+float AlphaSubstract(float iCb, float iCs) {
     return iCb > iCs ? iCb - iCs : 0;
 }
 
@@ -656,7 +714,7 @@ float AlphaAdd(float iCb, float iCs) {
     return (1.f - iCb) > iCs ? iCb + iCs : 1.f;
 }
 
-float AlphaMul(float iCb, float iCs) {
+float AlphaMultiply(float iCb, float iCs) {
     return iCb * iCs;
 }
 
@@ -668,61 +726,83 @@ float AlphaMax(float iCb, float iCs) {
     return max(iCs, iCb);
 }
 
-float AlphaBlend(float iCb, float iCs, uint iAlphaBlend)
+float AlphaDissolve(float iCb, float iCs, uint2 iDstPos) {
+    float randomAlpha = RandFast(iDstPos);
+    return (randomAlpha < iCs) ? iCs : iCb;
+}
+
+float AlphaBayerDither8x8(float iCb, float iCs, uint2 iDstPos) {
+    float bayerEl = GetBayerDither8x8(iDstPos);
+    return (iCs >= bayerEl) ? iCs : iCb;
+}
+
+float AlphaBlend(float iCb, float iCs, uint iAlphaBlend, uint2 iDstPos)
 {
     switch (iAlphaBlend)
     {
-        case ODYSSEY_ALPHAMODE_Normal:
+        case ODYSSEY_ALPHABLENDMODE_Normal:
         {
             return AlphaNormal(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_ALPHAMODE_Erase:
+        case ODYSSEY_ALPHABLENDMODE_Erase:
         {
             return AlphaErase(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_ALPHAMODE_Top:
+        case ODYSSEY_ALPHABLENDMODE_Top:
         {
             return AlphaTop(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_ALPHAMODE_Back:
+        case ODYSSEY_ALPHABLENDMODE_Back:
         {
             return AlphaBack(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_ALPHAMODE_Sub:
+        case ODYSSEY_ALPHABLENDMODE_Substract:
         {
-            return AlphaSub(iCb, iCs);
+            return AlphaSubstract(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_ALPHAMODE_Add:
+        case ODYSSEY_ALPHABLENDMODE_Add:
         {
             return AlphaAdd(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_ALPHAMODE_Mul:
+        case ODYSSEY_ALPHABLENDMODE_Multiply:
         {
-            return AlphaMul(iCb, iCs);
+            return AlphaMultiply(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_ALPHAMODE_Min:
+        case ODYSSEY_ALPHABLENDMODE_Min:
         {
             return AlphaMin(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_ALPHAMODE_Max:
+        case ODYSSEY_ALPHABLENDMODE_Max:
         {
             return AlphaMax(iCb, iCs);
+        }
+        break;
+
+        case ODYSSEY_ALPHABLENDMODE_Dissolve:
+        {
+            return AlphaDissolve(iCb, iCs, iDstPos);
+        }
+        break;
+
+        case ODYSSEY_ALPHABLENDMODE_BayerDither8x8:
+        {
+            return AlphaBayerDither8x8(iCb, iCs, iDstPos);
         }
         break;
     }
@@ -730,7 +810,7 @@ float AlphaBlend(float iCb, float iCs, uint iAlphaBlend)
     return 0.f;
 }
 
-float4 BlendSeparable(float4 iCb, float4 iCs, float iOpacity, uint iBlendMode, uint iAlphaMode)
+float4 BlendSeparable(float4 iCb, float4 iCs, float iOpacity, uint iBlendMode, uint iAlphaMode, uint2 iDstPos)
 {
     float4 outColor = float4(0.f, 0.f, 0.f, 0.f);
 
@@ -746,11 +826,11 @@ float4 BlendSeparable(float4 iCb, float4 iCs, float iOpacity, uint iBlendMode, u
     float comp = AlphaNormal(cbA, csA);
     comp = comp == 0.f ? 0.f : csA / comp;
 
-    outColor.x = (1.0f - comp ) * cbR + comp  * ((1.0f - cbA) * csR + cbA * BlendComponent(cbR, csR, iBlendMode));
-    outColor.y = (1.0f - comp ) * cbG + comp  * ((1.0f - cbA) * csG + cbA * BlendComponent(cbG, csG, iBlendMode));
-    outColor.z = (1.0f - comp ) * cbB + comp  * ((1.0f - cbA) * csB + cbA * BlendComponent(cbB, csB, iBlendMode));
+    outColor.x = (1.0f - comp ) * cbR + comp  * ((1.0f - cbA) * csR + cbA * BlendComponent(cbR, csR, cbA, csA, iBlendMode, iDstPos));
+    outColor.y = (1.0f - comp ) * cbG + comp  * ((1.0f - cbA) * csG + cbA * BlendComponent(cbG, csG, cbA, csA, iBlendMode, iDstPos));
+    outColor.z = (1.0f - comp ) * cbB + comp  * ((1.0f - cbA) * csB + cbA * BlendComponent(cbB, csB, cbA, csA, iBlendMode, iDstPos));
 
-    outColor.w = AlphaBlend(cbA, csA, iAlphaMode);
+    outColor.w = AlphaBlend(cbA, csA, iAlphaMode, iDstPos);
 
     return outColor;
 }
@@ -759,55 +839,55 @@ float3 BlendNonSeparableComponents(float3 iCb, float3 iCs, uint iBlendMode)
 {
     switch (iBlendMode)
     {
-        case ODYSSEY_BLENDINGMODE_DarkerColor:
+        case ODYSSEY_COLORBLENDMODE_DarkerColor:
         {
             return BlendDarkerColor(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_LighterColor:
+        case ODYSSEY_COLORBLENDMODE_LighterColor:
         {
             return BlendLighterColor(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Hue:
+        case ODYSSEY_COLORBLENDMODE_Hue:
         {
             return BlendHue(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Saturation:
+        case ODYSSEY_COLORBLENDMODE_Saturation:
         {
             return BlendSaturation(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Color:
+        case ODYSSEY_COLORBLENDMODE_Color:
         {
             return BlendColor(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_Luminosity:
+        case ODYSSEY_COLORBLENDMODE_Luminosity:
         {
             return BlendLuminosity(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_PartialDerivative:
+        case ODYSSEY_COLORBLENDMODE_PartialDerivative:
         {
             return BlendPartialDerivative(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_WhiteOut:
+        case ODYSSEY_COLORBLENDMODE_WhiteOut:
         {
             return BlendWhiteOut(iCb, iCs);
         }
         break;
 
-        case ODYSSEY_BLENDINGMODE_AngleCorrected:
+        case ODYSSEY_COLORBLENDMODE_AngleCorrected:
         {
             return BlendAngleCorrected(iCb, iCs);
         }
@@ -816,7 +896,7 @@ float3 BlendNonSeparableComponents(float3 iCb, float3 iCs, uint iBlendMode)
     return float3(0, 0, 0);
 }
 
-float4 BlendNonSeparable(float4 iCb, float4 iCs, float iOpacity, uint iBlendMode, uint iAlphaMode)
+float4 BlendNonSeparable(float4 iCb, float4 iCs, float iOpacity, uint iBlendMode, uint iAlphaMode, uint2 iDstPos)
 {
     float4 outColor = float4(0.f, 0.f, 0.f, 0.f);
 
@@ -839,60 +919,15 @@ float4 BlendNonSeparable(float4 iCb, float4 iCs, float iOpacity, uint iBlendMode
     outColor.x = (1.0f - comp) * cbR + comp * ((1.0f - cbA) * csR + cbA * components.x);
     outColor.y = (1.0f - comp) * cbG + comp * ((1.0f - cbA) * csG + cbA * components.y);
     outColor.z = (1.0f - comp) * cbB + comp * ((1.0f - cbA) * csB + cbA * components.z);
-    outColor.w = AlphaBlend(cbA, csA, iAlphaMode);
+    outColor.w = AlphaBlend(cbA, csA, iAlphaMode, iDstPos);
 
     return outColor;
 }
 
 float4 Blend(float4 iCb, float4 iCs, float iOpacity, uint iBlendMode, uint iAlphaMode, uint2 iDstPos)
 {
-    if (iBlendMode == ODYSSEY_BLENDINGMODE_Dissolve)
-    {
-        float4 outColor = iCb;
-
-        float csA = iCs.w * iOpacity;
-        float cbA = iCb.w;
-
-        float randomAlpha = RandFast(iDstPos);
-        if (randomAlpha < csA) {
-            outColor = iCs;
-            outColor.w = AlphaBlend(cbA, csA, iAlphaMode);
-        }
-        return outColor;
-    }
-
-    if (iBlendMode == ODYSSEY_BLENDINGMODE_BayerDither8x8)
-    {
-        float gBayer8x8Matrix[64] = {
-            0.015625f, 0.765625f, 0.203125f, 0.953125f, 0.0625f, 0.8125f, 0.25f, 1.0f,
-            0.515625f, 0.265625f, 0.703125f, 0.453125f, 0.5625f, 0.3125f, 0.75f, 0.5f,
-            0.140625f, 0.890625f, 0.078125f, 0.828125f, 0.1875f, 0.9375f, 0.125f, 0.875f,
-            0.640625f, 0.390625f, 0.578125f, 0.328125f, 0.6875f, 0.4375f, 0.625f, 0.375f,
-            0.046875f, 0.796875f, 0.234375f, 0.984375f, 0.03125f, 0.78125f, 0.21875f, 0.96875f,
-            0.546875f, 0.296875f, 0.734375f, 0.484375f, 0.53125f, 0.28125f, 0.71875f, 0.46875f,
-            0.171875f, 0.921875f, 0.109375f, 0.859375f, 0.15625f, 0.90625f, 0.09375f, 0.84375f,
-            0.671875f, 0.421875f, 0.609375f, 0.359375f, 0.65625f, 0.40625f, 0.59375f, 0.34375f
-        };
-
-        float4 outColor = iCb;
-
-        float csA = iCs.w * iOpacity;
-        float cbA = iCb.w;
-
-        uint bayerX = iDstPos.x % 8;
-        uint bayerY = iDstPos.y % 8;
-        float bayerEl = gBayer8x8Matrix[bayerY * 8 + bayerX];
-        if (csA >= bayerEl) {
-
-            outColor = iCs;
-            outColor.w = AlphaBlend(cbA, csA, iAlphaMode);
-        }
-
-        return outColor;
-    }
-
     if (IsBlendSeparable(iBlendMode))
-        return BlendSeparable(iCb, iCs, iOpacity, iBlendMode, iAlphaMode);
+        return BlendSeparable(iCb, iCs, iOpacity, iBlendMode, iAlphaMode, iDstPos);
 
-    return BlendNonSeparable(iCb, iCs, iOpacity, iBlendMode, iAlphaMode);
+    return BlendNonSeparable(iCb, iCs, iOpacity, iBlendMode, iAlphaMode, iDstPos);
 }

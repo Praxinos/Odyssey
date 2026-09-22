@@ -903,7 +903,7 @@ UOdysseyLayer::ShouldDisplayCellNames() const
 }
 #endif
 
-EOdysseyBlendingMode
+EOdysseyBlendMode
 UOdysseyLayer::GetBlendMode() const
 {
     return BlendMode;
@@ -1207,7 +1207,7 @@ UOdysseyLayer::SetDisplayCellNames(bool Value)
 #endif
 
 void
-UOdysseyLayer::SetBlendMode(EOdysseyBlendingMode Value)
+UOdysseyLayer::SetBlendMode(EOdysseyBlendMode Value)
 {
     if( !IsEditable() )
         return;
@@ -1368,8 +1368,8 @@ UOdysseyLayer::BuildRenderPipelineInternal(
                     iDstRect,
                     iDstRect,
                     FMatrix::Identity,
-                    EOdysseyBlendingMode::kNormal,
-                    EOdysseyAlphaMode::kNormal,
+                    EOdysseyColorBlendMode::Normal,
+                    EOdysseyAlphaBlendMode::Normal,
                     1.0f,
                     EOdysseyAntiAliasing::AnisotropicLinear
                 );
@@ -1384,8 +1384,8 @@ UOdysseyLayer::BuildRenderPipelineInternal(
                 iDstRect,
                 iDstRect,
                 FMatrix::Identity,
-                EOdysseyBlendingMode::kNormal,
-                EOdysseyAlphaMode::kNormal,
+                EOdysseyColorBlendMode::Normal,
+                EOdysseyAlphaBlendMode::Normal,
                 1.0f,
                 EOdysseyAntiAliasing::AnisotropicLinear
             );
@@ -1401,8 +1401,8 @@ UOdysseyLayer::BuildRenderPipelineInternal(
                     iDstRect,
                     iDstRect,
                     FMatrix::Identity,
-                    EOdysseyBlendingMode::kNormal,
-                    EOdysseyAlphaMode::kNormal,
+                    EOdysseyColorBlendMode::Normal,
+                    EOdysseyAlphaBlendMode::Normal,
                     1.0f,
                     EOdysseyAntiAliasing::AnisotropicLinear
                 );
@@ -1536,8 +1536,8 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                     FLinearColor::Black,
                     keyTexture,
                     iDstRect,
-                    EOdysseyBlendingMode::kSaturation,
-                    EOdysseyAlphaMode::kBack,
+                    EOdysseyColorBlendMode::Saturation,
+                    EOdysseyAlphaBlendMode::Back,
                     1.f
                 );
 
@@ -1549,8 +1549,8 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                     FLinearColor::Black,
                     keyTexture,
                     iDstRect,
-                    EOdysseyBlendingMode::kLuminosity,
-                    EOdysseyAlphaMode::kBack,
+                    EOdysseyColorBlendMode::Luminosity,
+                    EOdysseyAlphaBlendMode::Back,
                     1.f - keyRenderParams.Contrast
                 );
 
@@ -1561,8 +1561,8 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                     keyRenderParams.Color,
                     keyTexture,
                     iDstRect,
-                    EOdysseyBlendingMode::kScreen,
-                    EOdysseyAlphaMode::kBack,
+                    EOdysseyColorBlendMode::Screen,
+                    EOdysseyAlphaBlendMode::Back,
                     1.f
                 );
 
@@ -1575,8 +1575,8 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                     iDstRect,
                     iDstRect,
                     FMatrix::Identity,
-                    EOdysseyBlendingMode::kNormal,
-                    EOdysseyAlphaMode::kNormal,
+                    EOdysseyColorBlendMode::Normal,
+                    EOdysseyAlphaBlendMode::Normal,
                     keyRenderParams.Opacity,
                     EOdysseyAntiAliasing::AnisotropicLinear
                 );
@@ -1599,8 +1599,8 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
     struct FChildRenderParams
     {
         IOdysseyTextureRenderingAbility::FRenderFunction RenderFunction;
-        EOdysseyBlendingMode BlendMode;
-        EOdysseyAlphaMode AlphaMode;
+        EOdysseyColorBlendMode BlendMode;
+        EOdysseyAlphaBlendMode AlphaMode;
         float Opacity;
     };
 
@@ -1629,11 +1629,14 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
                 opacity = opacity * layerStack->GetOtherLayersOpacityNormalized();
 #endif
 
+            EOdysseyColorBlendMode ColorBlendMode = GetColorBlendModeFromBlendMode(child->GetBlendMode());
+            EOdysseyAlphaBlendMode AlphaBlendMode = GetAlphaBlendModeFromBlendMode(child->GetBlendMode());
+
             childrenRenderParams.Add(
                 {
                     childRenderFunction,
-                    child->GetBlendMode(),
-                    child->GetInheritsAlpha() ? EOdysseyAlphaMode::kBack : EOdysseyAlphaMode::kNormal,
+                    ColorBlendMode,
+                    child->GetInheritsAlpha() ? EOdysseyAlphaBlendMode::Back : AlphaBlendMode,
                     opacity
                 }
             );

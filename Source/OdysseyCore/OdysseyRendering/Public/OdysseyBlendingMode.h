@@ -6,9 +6,13 @@
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
 #include "Misc/EnumRange.h"
+
+#include "OdysseyBlendMode.h"
+
 #include "OdysseyBlendingMode.generated.h"
 
-UENUM( BlueprintType )
+//UE_DEPRECATED(5.8, "Use EOdysseyBlendMode / EOdysseyColorBlendMode / EOdysseyAlphaBlendMode instead")
+UENUM(meta = (Deprecated))
 enum class EOdysseyBlendingMode : uint8
 {
       kNormal               UMETA( DisplayName = "Normal"               )
@@ -57,7 +61,8 @@ enum class EOdysseyBlendingMode : uint8
 
 ENUM_RANGE_BY_COUNT(EOdysseyBlendingMode, EOdysseyBlendingMode::kBlendingMode_Count)
 
-UENUM( BlueprintType )
+//UE_DEPRECATED(5.8, "Use EOdysseyBlendMode / EOdysseyColorBlendMode / EOdysseyAlphaBlendMode instead")
+UENUM(meta = (Deprecated))
 enum class EOdysseyAlphaMode : uint8
 {
       kNormal           UMETA( DisplayName = "Normal"   )
@@ -74,3 +79,5 @@ enum class EOdysseyAlphaMode : uint8
 };
 
 ENUM_RANGE_BY_COUNT(EOdysseyAlphaMode, EOdysseyAlphaMode::kAlphaMode_Count)
+
+ODYSSEYRENDERING_API void GetColorAndAlphaBlendModesFromDeprecatedBlendingMode(EOdysseyBlendingMode InBlendingMode, EOdysseyAlphaMode InAlphaMode, EOdysseyColorBlendMode& OutColorBlendMode, EOdysseyAlphaBlendMode& OutAlphaBlendMode);

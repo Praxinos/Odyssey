@@ -171,8 +171,8 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
                             rect,
                             rect,
                             FMatrix::Identity,
-                            EOdysseyBlendingMode::kAdd,
-                            EOdysseyAlphaMode::kAdd,
+                            EOdysseyColorBlendMode::Add,
+                            EOdysseyAlphaBlendMode::Add,
                             1.f - (float(j) / float(crossFadelength)),
                             EOdysseyAntiAliasing::NearestNeighbor
                         );
@@ -186,8 +186,8 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
                             rect,
                             rect,
                             FMatrix::Identity,
-                            EOdysseyBlendingMode::kAdd,
-                            EOdysseyAlphaMode::kAdd,
+                            EOdysseyColorBlendMode::Add,
+                            EOdysseyAlphaBlendMode::Add,
                             float(j) / float(crossFadelength),
                             EOdysseyAntiAliasing::NearestNeighbor
                         );
@@ -245,8 +245,8 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
                             rect,
                             rect,
                             FMatrix::Identity,
-                            EOdysseyBlendingMode::kAdd,
-                            EOdysseyAlphaMode::kAdd,
+                            EOdysseyColorBlendMode::Add,
+                            EOdysseyAlphaBlendMode::Add,
                             1.f - (float(j) / float(crossFadelength)),
                             EOdysseyAntiAliasing::NearestNeighbor
                         );

@@ -600,7 +600,7 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
                         , *ioDest
                         , iRect
                         , iPos
-                        , ::ULIS::eBlendMode(iStampParams.mBlendingMode)
+                        , ::ULIS::eBlendMode(iStampParams.mBlendMode)
                         , ::ULIS::eAlphaMode(iStampParams.mAlphaMode)
                         , FMath::Clamp(iStampParams.mFlow, 0.f, 1.f)
                         , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
@@ -616,7 +616,7 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
                         *ioDest,
                         iRect,
                         iPos,
-                        ::ULIS::eBlendMode(iStampParams.mBlendingMode),
+                        ::ULIS::eBlendMode(iStampParams.mBlendMode),
                         ::ULIS::eAlphaMode(iStampParams.mAlphaMode),
                         FMath::Clamp(iStampParams.mFlow, 0.f, 1.f),
                         ::ULIS::FSchedulePolicy::AsyncCacheEfficient,

@@ -113,7 +113,7 @@ private:
 
     void lerp24BitsInto32Bits( uint32_t* ioSrc,uint32_t length );
 
-    ::ULIS::eBlendMode GetBlendingModeFromPSD( char iBlendModeKey[5] );
+    ::ULIS::eBlendMode GetBlendModeFromPSD( char iBlendModeKey[5] );
     void CreateLayerStack();
 
 public:

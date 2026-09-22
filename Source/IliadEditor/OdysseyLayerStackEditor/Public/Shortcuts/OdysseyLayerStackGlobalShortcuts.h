@@ -44,7 +44,7 @@ public:
     void Action_OpenAllFolderLayers();
     void Action_CloseAllFolderLayers();
 
-    void Action_SetCurrentLayerBlendMode(EOdysseyBlendingMode iBlendMode);
+    void Action_SetCurrentLayerBlendMode(EOdysseyBlendMode iBlendMode);
     void Action_SetCurrentLayerBlendModeToNextBlendMode();
     void Action_SetCurrentLayerBlendModeToPreviousBlendMode();
 
