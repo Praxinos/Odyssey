@@ -5,7 +5,8 @@
 #include "Serialization/CustomVersion.h"
 
 FOdysseyBlendParameters::FOdysseyBlendParameters()
-    : bIsComposite(false)
+    : bEraserMode(false)
+    , bIsComposite(false)
     , BlendMode(EOdysseyBlendMode::Normal)
     , CompositeColorBlendMode(EOdysseyColorBlendMode::Normal)
     , CompositeAlphaBlendMode(EOdysseyAlphaBlendMode::Normal)
@@ -14,7 +15,8 @@ FOdysseyBlendParameters::FOdysseyBlendParameters()
 }
 
 FOdysseyBlendParameters::FOdysseyBlendParameters(EOdysseyBlendMode InBlendMode, float InOpacity)
-    : bIsComposite(false)
+    : bEraserMode(false)
+    , bIsComposite(false)
     , BlendMode(InBlendMode)
     , CompositeColorBlendMode(EOdysseyColorBlendMode::Normal)
     , CompositeAlphaBlendMode(EOdysseyAlphaBlendMode::Normal)
@@ -23,7 +25,8 @@ FOdysseyBlendParameters::FOdysseyBlendParameters(EOdysseyBlendMode InBlendMode, 
 }
 
 FOdysseyBlendParameters::FOdysseyBlendParameters(EOdysseyColorBlendMode InColorBlendMode, EOdysseyAlphaBlendMode InAlphaBlendMode, float InOpacity)
-    : bIsComposite(true)
+    : bEraserMode(false)
+    , bIsComposite(true)
     , BlendMode(EOdysseyBlendMode::Normal)
     , CompositeColorBlendMode(InColorBlendMode)
     , CompositeAlphaBlendMode(InAlphaBlendMode)
@@ -72,14 +75,9 @@ FOdysseyBlendParameters::PostSerialize(const FArchive& Ar)
 
     if (Ar.CustomVer(GOdysseyBlendParametersCustomVersion.GUID) < FOdysseyBlendParametersCustomVersion::NewBlendModes)
     {
-        bIsComposite = true;
-        if (bEraserMode_DEPRECATED)
+        if (!bEraserMode)
         {
-            CompositeColorBlendMode = EOdysseyColorBlendMode::Back;
-            CompositeAlphaBlendMode = EOdysseyAlphaBlendMode::Erase;
-        }
-        else
-        {
+            bIsComposite = true;
             GetColorAndAlphaBlendModesFromDeprecatedBlendingMode(BlendingMode_DEPRECATED, AlphaMode_DEPRECATED, CompositeColorBlendMode, CompositeAlphaBlendMode);
         }
     }
@@ -106,12 +104,18 @@ FOdysseyBlendParameters::SetBlendMode(EOdysseyBlendMode InBlendMode)
 EOdysseyBlendMode
 FOdysseyBlendParameters::GetBlendMode() const
 {
+    if (bEraserMode)
+        return EOdysseyBlendMode::Erase;
+
     return BlendMode;
 }
 
 EOdysseyColorBlendMode
 FOdysseyBlendParameters::GetColorBlendMode() const
 {
+    if (bEraserMode)
+        return GetColorBlendModeFromBlendMode(EOdysseyBlendMode::Erase);
+
     if (bIsComposite)
         return CompositeColorBlendMode;
 
@@ -121,6 +125,9 @@ FOdysseyBlendParameters::GetColorBlendMode() const
 EOdysseyAlphaBlendMode
 FOdysseyBlendParameters::GetAlphaBlendMode() const
 {
+    if (bEraserMode)
+        return GetAlphaBlendModeFromBlendMode(EOdysseyBlendMode::Erase);
+
     if (bIsComposite)
         return CompositeAlphaBlendMode;
 
@@ -137,6 +144,18 @@ bool
 FOdysseyBlendParameters::GetIsComposite() const
 {
     return bIsComposite;
+}
+
+void
+FOdysseyBlendParameters::SetEraserMode(bool InEraserMode)
+{
+    bEraserMode = InEraserMode;
+}
+
+bool
+FOdysseyBlendParameters::GetEraserMode() const
+{
+    return bEraserMode;
 }
 
 void
@@ -166,7 +185,8 @@ FOdysseyBlendParameters::GetCompositeAlphaBlendMode() const
 bool
 FOdysseyBlendParameters::operator==(const FOdysseyBlendParameters& Other) const
 {
-    return bIsComposite == Other.bIsComposite
+    return bEraserMode == Other.bEraserMode
+        && bIsComposite == Other.bIsComposite
         && BlendMode == Other.BlendMode
         && CompositeColorBlendMode == Other.CompositeColorBlendMode
         && CompositeAlphaBlendMode == Other.CompositeAlphaBlendMode

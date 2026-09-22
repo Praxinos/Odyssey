@@ -43,6 +43,10 @@ public:
      */
     void SetIsComposite(bool InIsComposite);
     bool GetIsComposite() const;
+
+    void SetEraserMode(bool InEraserMode);
+    bool GetEraserMode() const;
+
     void SetCompositeColorBlendMode(EOdysseyColorBlendMode InColorBlendMode);
     void SetCompositeAlphaBlendMode(EOdysseyAlphaBlendMode InAlphaBlendMode);
     EOdysseyColorBlendMode GetCompositeColorBlendMode() const;
@@ -50,21 +54,21 @@ public:
 
 private:
     //Deprecated properties
-
-    UPROPERTY()
-    bool bEraserMode_DEPRECATED;
     UPROPERTY()
     EOdysseyBlendingMode BlendingMode_DEPRECATED;
     UPROPERTY()
     EOdysseyAlphaMode AlphaMode_DEPRECATED;
 
 protected:
+    UPROPERTY(EditAnywhere, Category="Blending")
+    bool bEraserMode = false;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending")
     bool bIsComposite = false;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending",
         meta=(
-            EditCondition="!bIsComposite",
+            EditCondition="!bIsComposite && !bEraserMode",
             EditConditionHides,
             InvalidEnumValues="Stencil"
         )
@@ -74,7 +78,7 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending",
         meta=(
             DisplayName="Color Blend Mode",
-            EditCondition="bIsComposite",
+            EditCondition="bIsComposite && !bEraserMode",
             EditConditionHides,
             InvalidEnumValues="Top,Back"
         )
@@ -84,7 +88,7 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending",
         meta=(
             DisplayName="Alpha Blend Mode",
-            EditCondition="bIsComposite",
+            EditCondition="bIsComposite && !bEraserMode",
             EditConditionHides,
             InvalidEnumValues="Min,Multiply,Top"
         )

@@ -378,6 +378,7 @@ private:
     //TODO: Move these shortcuts in FOdysseyAnimationGlobalShortcuts files
     void SwitchTabletAPI();
     void ClearCurrentLayerOrSelection();
+    void ToggleEraserButton();
 
     bool IsToolsHUDVisible() const;
     bool IsRasterSelectionHUDVisible() const;

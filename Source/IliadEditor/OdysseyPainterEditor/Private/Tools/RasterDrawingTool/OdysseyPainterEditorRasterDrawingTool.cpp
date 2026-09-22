@@ -523,7 +523,7 @@ UOdysseyPainterEditorRasterDrawingTool::ExtendToolbar( UToolMenu* iToolMenu )
         )
     );
 
-    /*section.AddEntry(
+    section.AddEntry(
         FToolMenuEntry::InitToolBarButton(
             NAME_None,
             FUIAction(
@@ -531,19 +531,19 @@ UOdysseyPainterEditorRasterDrawingTool::ExtendToolbar( UToolMenu* iToolMenu )
                     [this]()
                     {
                         FOdysseyBlendParameters value = BlendParameters;
-                        value.bEraserMode = !value.bEraserMode;
+                        value.SetEraserMode(!value.GetEraserMode());
                         FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), value);
                     }
                 ),
                 FCanExecuteAction::CreateLambda([](){ return true;}),
-                FIsActionChecked::CreateLambda([this](){ return BlendParameters.bEraserMode;})
+                FIsActionChecked::CreateLambda([this](){ return BlendParameters.GetEraserMode();})
             ),
             FText(),
             LOCTEXT("raster-drawing-tool.toolbar.eraser-mode.tooltip", "Toggles the tool Eraser Mode"),
             FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Eraser32"),
             EUserInterfaceActionType::ToggleButton
         )
-    );*/
+    );
 }
 
 //--------------------------------------------------------------------------------------
@@ -762,6 +762,9 @@ UOdysseyPainterEditorRasterDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* i
 
         if (blendParametersOverrides->bOverride_IsComposite)
             BlendParameters.SetIsComposite(blendParametersOverrides->bIsComposite);
+
+        if (blendParametersOverrides->bOverride_EraserMode)
+            BlendParameters.SetEraserMode(blendParametersOverrides->bEraserMode);
 
         if (blendParametersOverrides->bOverride_BlendMode)
             BlendParameters.SetBlendMode(blendParametersOverrides->BlendMode);

@@ -87,6 +87,9 @@ public:
     TArray<TPair<TSharedPtr<FUICommandInfo>, EOdysseyColorBlendMode>> SetToolColorBlendMode;
     TArray<TPair<TSharedPtr<FUICommandInfo>, EOdysseyAlphaBlendMode>> SetToolAlphaBlendMode;
 
+    /** Action to toggle the eraser button */
+    TSharedPtr<FUICommandInfo> ToggleEraserButton;
+
     //Switch tablet API
 
     /** Action to switch tablet API */

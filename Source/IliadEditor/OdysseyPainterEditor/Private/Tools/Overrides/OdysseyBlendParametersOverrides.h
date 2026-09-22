@@ -41,6 +41,9 @@ public:
     bool    bOverride_IsComposite;
 
     UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
+    bool    bOverride_EraserMode;
+
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_BlendMode;
 
     UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
@@ -54,6 +57,9 @@ public:
     /** Modifier Opacity Override Value. */
     UPROPERTY()
     float  Opacity;
+
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_EraserMode" ) )
+    bool       bEraserMode;
 
     UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_IsComposite" ) )
     bool       bIsComposite;
