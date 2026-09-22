@@ -51,6 +51,9 @@ FOdysseyLayerStackEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( SetCurrentLayerBlendModeToPreviousBlendMode, LayerBlendModeShortcuts, "Set Current Layer Blend Mode To Previous Blend Mode", "Sets the current layer blend mode to the previous blend mode", EUserInterfaceActionType::Button, FInputChord() );
     for (EOdysseyBlendMode blendMode : TEnumRange<EOdysseyBlendMode>())
     {
+        if (blendMode == EOdysseyBlendMode::Behind)
+            continue;
+
         FText blendModeText = UEnum::GetDisplayValueAsText(blendMode);
 
         TSharedPtr<FUICommandInfo> commandInfo = FUICommandInfoDecl(

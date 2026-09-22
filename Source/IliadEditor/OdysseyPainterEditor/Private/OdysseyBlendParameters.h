@@ -86,7 +86,7 @@ protected:
             DisplayName="Alpha Blend Mode",
             EditCondition="bIsComposite",
             EditConditionHides,
-            InvalidEnumValues="Stencil,Min,Multiply,Top"
+            InvalidEnumValues="Min,Multiply,Top"
         )
     )
     EOdysseyAlphaBlendMode CompositeAlphaBlendMode;

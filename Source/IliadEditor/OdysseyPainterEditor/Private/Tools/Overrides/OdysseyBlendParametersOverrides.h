@@ -79,7 +79,7 @@ public:
         meta = (
             DisplayName="Alpha Blend Mode",
             editcondition = "bOverride_CompositeAlphaBlendMode",
-            InvalidEnumValues="Stencil,Min,Multiply,Top"
+            InvalidEnumValues="Min,Multiply,Top"
         )
     )
     EOdysseyAlphaBlendMode       CompositeAlphaBlendMode;

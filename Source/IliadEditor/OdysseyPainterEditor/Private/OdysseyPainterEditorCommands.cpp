@@ -54,6 +54,9 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     const UEnum* BlendModeEnum = StaticEnum<EOdysseyBlendMode>();
     for (EOdysseyBlendMode Mode : TEnumRange<EOdysseyBlendMode>())
     {
+        if (Mode == EOdysseyBlendMode::Stencil)
+            continue;
+
         FText BlendModeName = BlendModeEnum->GetDisplayNameTextByValue(static_cast<int64>(Mode));
         TSharedPtr<FUICommandInfo> commandInfo = FUICommandInfoDecl(
               this->AsShared()
@@ -72,6 +75,10 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     const UEnum* ColorBlendModeEnum = StaticEnum<EOdysseyColorBlendMode>();
     for (EOdysseyColorBlendMode Mode : TEnumRange<EOdysseyColorBlendMode>())
     {
+        if (Mode == EOdysseyColorBlendMode::Top ||
+            Mode == EOdysseyColorBlendMode::Back)
+            continue;
+
         FText ColorBlendModeName = ColorBlendModeEnum->GetDisplayNameTextByValue(static_cast<int64>(Mode));
         TSharedPtr<FUICommandInfo> commandInfo = FUICommandInfoDecl(
               this->AsShared()
@@ -90,6 +97,11 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     const UEnum* AlphaBlendModeEnum = StaticEnum<EOdysseyAlphaBlendMode>();
     for (EOdysseyAlphaBlendMode Mode : TEnumRange<EOdysseyAlphaBlendMode>())
     {
+        if ( Mode == EOdysseyAlphaBlendMode::Min ||
+             Mode == EOdysseyAlphaBlendMode::Multiply ||
+             Mode == EOdysseyAlphaBlendMode::Top )
+            continue;
+
         FText AlphaBlendModeName = AlphaBlendModeEnum->GetDisplayNameTextByValue(static_cast<int64>(Mode));
         TSharedPtr<FUICommandInfo> commandInfo = FUICommandInfoDecl(
               this->AsShared()
