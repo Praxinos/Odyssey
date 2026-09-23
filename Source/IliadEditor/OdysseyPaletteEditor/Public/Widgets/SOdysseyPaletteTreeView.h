@@ -13,7 +13,7 @@ class UOdysseyPalette;
 class UOdysseyPaletteEntryColor;
 class FOdysseyVectorCell;
 class FExtender;
-class FUICommandList;
+class FOdysseyCommandList;
 
 /**
  * Implements the Palette widget
@@ -182,7 +182,7 @@ protected:
     FDelegateHandle mUndoHandle;
     FDelegateHandle mRedoHandle;
 
-    TSharedRef<FUICommandList> mCommandList;
+    TSharedRef<FOdysseyCommandList> mCommandList;
 
     bool mIsRenamePending = false;
     bool mDisplayDropZone = false;

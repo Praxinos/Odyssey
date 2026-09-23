@@ -30,6 +30,7 @@
 #include "OdysseyViewportDrawingEditorToolkit.h"
 #include "Adapters/IOdysseyViewportDrawingEditorAdapter.h"
 #include "OdysseyTelemetry.h"
+#include "OdysseyCommandList.h"
 
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
@@ -133,6 +134,21 @@ bool FOdysseyViewportDrawingEditorEdMode::InputKey(FEditorViewportClient* iViewp
 {
     if (!IsEditingEnabled())
         return false;
+
+    if (iEvent != IE_Released)
+    {
+        TSharedRef<FUICommandList> ToolkitCommands = GetToolkit()->GetToolkitCommands();
+        if( ToolkitCommands->ProcessCommandBindings( iKey, FSlateApplication::Get().GetModifierKeys(), (iEvent == EInputEvent::IE_Repeat) ) )
+        {
+            return true;
+        }
+
+        TSharedRef<FOdysseyCommandList> OdysseyCommandList = StaticCastSharedRef<FOdysseyCommandList>(ToolkitCommands);
+        if (OdysseyCommandList->HasActionForKeyEvent( iKey, FSlateApplication::Get().GetModifierKeys(), (iEvent == EInputEvent::IE_Repeat) ))
+        {
+            return true;
+        }
+    }
 
     IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
     if (!adapter)

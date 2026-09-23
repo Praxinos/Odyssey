@@ -12,6 +12,7 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationLayerImageVector.h"
+#include "OdysseyCommandList.h"
 // From module OdysseyPainterEditor
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyPainterEditor.h"
@@ -48,7 +49,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::~SOdysseyAnimationLayerIm
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::SOdysseyAnimationLayerImageVectorTimelineInbetweening()
     : mForwardArrowBrush( FOdysseyStyle::GetBrush( "Animation.Timeline.Inbetweening.Forward16") )
     , mBackwardArrowBrush( FOdysseyStyle::GetBrush( "Animation.Timeline.Inbetweening.Backward16") )
-    , mCommandList(MakeShared<FUICommandList>())
+    , mCommandList(MakeShared<FOdysseyCommandList>())
 {
     MapActionsToCommandList();
 }
@@ -108,6 +109,13 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnKeyDown( const FGeometr
 {
     if (mCommandList->ProcessCommandBindings(iKeyEvent))
         return FReply::Handled();
+
+    //If Odyssey encountered a shortcut that could not be executed
+    //then don't let Unreal have a chance to execute a shorcut of its own.
+    if (mCommandList->HasActionForKeyEvent(iKeyEvent))
+    {
+        return FReply::Handled();
+    }
 
     return SListView<TSharedPtr<FInbetweeningListViewItem>>::OnKeyDown( iGeometry, iKeyEvent );
 }

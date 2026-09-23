@@ -59,6 +59,7 @@
 #include "FilmOverlayToolkit2.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "OdysseyAnimationActor.h"
+#include "OdysseyCommandList.h"
 #include "ScalingComponent.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrackInstance.h"
 #include "StoryNote.h"
@@ -1604,7 +1605,7 @@ END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void
 SStoryboardLevelViewport::CreateCommandList()
 {
-    CommandList = MakeShareable( new FUICommandList );
+    CommandList = MakeShareable( new FOdysseyCommandList() );
     //CommandList = ViewportWidget->GetCommandList();
 
     CommandList->MapAction(
@@ -2840,6 +2841,13 @@ FReply SStoryboardLevelViewport::OnKeyDown( const FGeometry& MyGeometry, const F
     }
 
     if (CommandList->ProcessCommandBindings(InKeyEvent))
+    {
+        return FReply::Handled();
+    }
+
+    //If Odyssey encountered a shortcut that could not be executed
+    //then don't let Unreal have a chance to execute a shorcut of its own.
+    if (CommandList->HasActionForKeyEvent(InKeyEvent))
     {
         return FReply::Handled();
     }

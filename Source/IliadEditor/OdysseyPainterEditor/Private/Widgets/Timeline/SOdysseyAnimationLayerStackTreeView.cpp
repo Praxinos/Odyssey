@@ -10,6 +10,7 @@
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineShortcuts.h"
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyAnimationLayerStack.h"
+#include "OdysseyCommandList.h"
 #include "SOdysseyAnimationTimelineToolSelector.h"
 #include "Widgets/SOdysseyLayerStackAddLayerButton.h"
 #include "OdysseyAnimationCellImageRaster.h"
@@ -100,6 +101,13 @@ SOdysseyAnimationLayerStackTreeView::OnKeyDown( const FGeometry& iGeometry, cons
 {
     if (mTimelineShortcuts->GetCommandList()->ProcessCommandBindings(iKeyEvent))
         return FReply::Handled();
+
+    //If Odyssey encountered a shortcut that could not be executed
+    //then don't let Unreal have a chance to execute a shorcut of its own.
+    if (mTimelineShortcuts->GetCommandList()->HasActionForKeyEvent(iKeyEvent))
+    {
+        return FReply::Handled();
+    }
 
     return SOdysseyLayerStackTreeView::OnKeyDown(iGeometry, iKeyEvent);
 }

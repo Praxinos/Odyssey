@@ -16,6 +16,7 @@
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 
 #include "Commands/OdysseyLayerStackEditorCommands.h"
+#include "OdysseyCommandList.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyLayerStackFunctionLibrary.h"
 #include "OdysseyStyle.h"
@@ -55,7 +56,7 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
     mLayerStack = InArgs._LayerStack;
     mLayerStackShortcuts = MakeShared<FOdysseyLayerStackShortcuts>(SharedThis(this), mLayerStack);
     mLayerStackGlobalShortcuts = MakeShared<FOdysseyLayerStackGlobalShortcuts>( mLayerStack );
-    mCommandList = MakeShared<FUICommandList>();
+    mCommandList = MakeShared<FOdysseyCommandList>();
     mCommandList->Append( mLayerStackShortcuts->GetCommandList() );
     mLayerStackGlobalShortcuts->MapActionsToCommandList( mCommandList.ToSharedRef() );
 
@@ -351,6 +352,13 @@ SOdysseyLayerStackTreeView::OnKeyDown( const FGeometry& iGeometry, const FKeyEve
     if (mCommandList->ProcessCommandBindings(iKeyEvent))
         return FReply::Handled();
 
+    //If Odyssey encountered a shortcut that could not be executed
+    //then don't let Unreal have a chance to execute a shorcut of its own.
+    if (mCommandList->HasActionForKeyEvent(iKeyEvent))
+    {
+        return FReply::Handled();
+    }
+
     return STreeView<UOdysseyLayer*>::OnKeyDown(iGeometry, iKeyEvent);
 }
 
@@ -581,7 +589,7 @@ SOdysseyLayerStackTreeView::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStac
 }
 
 // ContextMenu
-TSharedPtr<FUICommandList>
+TSharedPtr<FOdysseyCommandList>
 SOdysseyLayerStackTreeView::GetCommandList() const
 {
     return mCommandList;

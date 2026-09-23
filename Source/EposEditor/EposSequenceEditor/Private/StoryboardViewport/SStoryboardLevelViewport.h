@@ -23,7 +23,7 @@ class ACineCameraActor;
 class FAssetEditorViewportLayout;
 class FEposSequenceEditorToolkit;
 class FLevelViewportLayout;
-class FUICommandList;
+class FOdysseyCommandList;
 class ILevelEditor;
 class ISequencer;
 class SBox;
@@ -173,7 +173,7 @@ public:
         return OverlayWidget;
     }
 
-    TSharedPtr<FUICommandList> GetCommandList()
+    TSharedPtr<FOdysseyCommandList> GetCommandList()
     {
         return CommandList;
     }
@@ -300,7 +300,7 @@ private:
     TWeakPtr<ISequencer> mCurrentSquencer;
 
     /** Commandlist used in the viewport (Maps commands to viewport specific actions) */
-    TSharedPtr<FUICommandList> CommandList;
+    TSharedPtr<FOdysseyCommandList> CommandList;
 
     /** Slot for transport controls */
     TSharedPtr<SBox> TransportControlsContainer, TimeRangeContainer;

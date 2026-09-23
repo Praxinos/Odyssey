@@ -6,6 +6,7 @@
 #include "Editor.h"
 #include "Framework/Commands/GenericCommands.h"
 
+#include "OdysseyCommandList.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorEngine.h"
@@ -50,7 +51,7 @@ SOdysseyPainterEditorVectorSceneTreeView::~SOdysseyPainterEditorVectorSceneTreeV
 
 SOdysseyPainterEditorVectorSceneTreeView::SOdysseyPainterEditorVectorSceneTreeView()
     : mScene(*this, nullptr)
-    , mCommandList(MakeShared<FUICommandList>())
+    , mCommandList(MakeShared<FOdysseyCommandList>())
 {
     MapActionsToCommandList();
 
@@ -154,6 +155,13 @@ SOdysseyPainterEditorVectorSceneTreeView::OnKeyDown( const FGeometry& iGeometry,
 {
     if (mCommandList->ProcessCommandBindings(iKeyEvent))
         return FReply::Handled();
+
+    //If Odyssey encountered a shortcut that could not be executed
+    //then don't let Unreal have a chance to execute a shorcut of its own.
+    if (mCommandList->HasActionForKeyEvent(iKeyEvent))
+    {
+        return FReply::Handled();
+    }
 
     return STreeView<TSharedPtr<FVectorSceneTreeViewItem>>::OnKeyDown( iGeometry, iKeyEvent );
 }

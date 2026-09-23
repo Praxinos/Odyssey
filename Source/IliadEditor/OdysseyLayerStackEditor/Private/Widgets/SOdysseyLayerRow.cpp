@@ -14,6 +14,7 @@
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 
+#include "OdysseyCommandList.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyLayerStackEditorCommands.h"
 #include "OdysseyLayerStackShortcuts.h"

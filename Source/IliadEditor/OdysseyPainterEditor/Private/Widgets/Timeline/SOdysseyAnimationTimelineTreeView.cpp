@@ -12,7 +12,7 @@
 #include "SOdysseyAnimationLayerImageRasterTimeline.h"
 #include "SOdysseyAnimationLayerImageVectorTimeline.h"
 #include "LayerFolder/OdysseyAnimationLayerFolder.h"
-#include "Framework/Commands/UICommandList.h"
+#include "OdysseyCommandList.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -67,6 +67,13 @@ SOdysseyAnimationTimelineTreeView::OnKeyDown( const FGeometry& iGeometry, const 
 {
     if (mTimelineShortcuts->GetCommandList()->ProcessCommandBindings(iKeyEvent))
         return FReply::Handled();
+
+    //If Odyssey encountered a shortcut that could not be executed
+    //then don't let Unreal have a chance to execute a shorcut of its own.
+    if (mTimelineShortcuts->GetCommandList()->HasActionForKeyEvent(iKeyEvent))
+    {
+        return FReply::Handled();
+    }
 
     return SCompoundWidget::OnKeyDown(iGeometry, iKeyEvent);
 }

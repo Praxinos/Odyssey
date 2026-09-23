@@ -13,7 +13,7 @@ class FOdysseyVectorLayer;
 class UOdysseyAnimationLayerImageVector;
 class FOdysseyPainterEditor;
 class FOdysseyVectorGroupPaint;
-class FUICommandList;
+class FOdysseyCommandList;
 struct FOdysseyVectorObjectInvalidationFlags;
 
 //////////////////////////////////////////////////////////////////////////
@@ -58,6 +58,6 @@ class SOdysseyAnimationTimelineInbetweeningHeader
     protected:
         UOdysseyAnimationLayerImageVector* mAnimationLayerImageVector;
         TArray<TSharedPtr<FInbetweeningListViewItem>> mItemsSource;
-        TSharedRef<FUICommandList> mCommandList;
+        TSharedRef<FOdysseyCommandList> mCommandList;
         FOnTransactCurrentFrame mOnTransactCurrentFrame;
 };

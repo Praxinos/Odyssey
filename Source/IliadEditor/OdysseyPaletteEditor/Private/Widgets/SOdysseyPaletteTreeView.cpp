@@ -18,6 +18,7 @@
 
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationLayerImageVector.h"
+#include "OdysseyCommandList.h"
 #include "OdysseyLayer.h"
 #include "OdysseyPalette.h"
 #include "OdysseyPaletteEntryColor.h"
@@ -69,7 +70,7 @@ SOdysseyPaletteTreeView::SOdysseyPaletteTreeView()
     , mCurrentColorEntryAttribute(*this, nullptr)
     , mCurrentColorEntry(nullptr)
     , mSelectedEntry(nullptr)
-    , mCommandList(MakeShared<FUICommandList>())
+    , mCommandList(MakeShared<FOdysseyCommandList>())
 {
     MapActionsToCommandList();
     UOdysseyPalette::OnHierarchyChanged().AddRaw(this, &SOdysseyPaletteTreeView::OnPaletteHierarchyChanged);
@@ -189,8 +190,18 @@ SOdysseyPaletteTreeView::OnPaint( const FPaintArgs& Args, const FGeometry& Allot
 FReply
 SOdysseyPaletteTreeView::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
 {
-    if (!mIsReadOnly && mCommandList->ProcessCommandBindings(iKeyEvent))
-        return FReply::Handled();
+    if (!mIsReadOnly)
+    {
+        if (mCommandList->ProcessCommandBindings(iKeyEvent))
+            return FReply::Handled();
+
+        //If Odyssey encountered a shortcut that could not be executed
+        //then don't let Unreal have a chance to execute a shorcut of its own.
+        if (mCommandList->HasActionForKeyEvent(iKeyEvent))
+        {
+            return FReply::Handled();
+        }
+    }
 
     return STreeView<UOdysseyPaletteEntry*>::OnKeyDown(iGeometry, iKeyEvent);
 }

@@ -20,6 +20,7 @@
 #include "OdysseyPainterEditorAnimationTimelineTab.h"
 #include "OdysseyPainterEditorColorSelectorTab.h"
 #include "OdysseyPainterEditorLayerStackTab.h"
+#include "OdysseyCommandList.h"
 #include "Widgets/SOdysseyViewportDrawingEditorMasterTab.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
@@ -41,6 +42,19 @@ FOdysseyViewportDrawingEditorToolkit::FOdysseyViewportDrawingEditorToolkit(FEdMo
     , mEdMode(iEdMode)
     , mTabSaved(false)
 {
+    ToolkitCommands = MakeShared<FOdysseyCommandList>();
+}
+
+bool
+FOdysseyViewportDrawingEditorToolkit::ProcessCommandBindings( const FKeyEvent& InKeyEvent ) const
+{
+    if( ToolkitCommands->ProcessCommandBindings( InKeyEvent ) )
+    {
+        return true;
+    }
+
+    TSharedRef<FOdysseyCommandList> OdysseyCommandList = StaticCastSharedRef<FOdysseyCommandList>(ToolkitCommands);
+    return OdysseyCommandList->HasActionForKeyEvent( InKeyEvent );
 }
 
 TSharedPtr<FOdysseyPainterEditor>

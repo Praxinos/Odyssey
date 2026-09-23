@@ -30,6 +30,7 @@ public:
 
     virtual TSharedPtr<SWidget> GetInlineContent() const override;
     virtual FEdMode* GetEditorMode() const override;
+    virtual bool ProcessCommandBindings( const FKeyEvent& InKeyEvent ) const override;
 
     /** IToolkit interface */
     virtual FName GetToolkitFName() const override;

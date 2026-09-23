@@ -141,6 +141,7 @@ public class EposSequenceEditor : ModuleRules
                 "EposNamingConvention",
                 "libharu",
                 "OdysseyAnimationEditor",
+                "OdysseyCoreEditor",
                 "OdysseyPainterEditor",
             }
             );

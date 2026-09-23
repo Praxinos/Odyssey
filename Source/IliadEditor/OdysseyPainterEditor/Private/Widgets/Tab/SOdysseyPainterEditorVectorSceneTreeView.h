@@ -14,7 +14,7 @@ class FVectorSceneTreeViewItem;
 class FOdysseyVectorLayer;
 class UOdysseyLayerStack;
 class FOdysseyVectorObject;
-class FUICommandList;
+class FOdysseyCommandList;
 struct FOdysseyVectorObjectInvalidationFlags;
 
 
@@ -99,5 +99,5 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
 
         TSharedPtr<FVectorSceneTreeViewItem> mRootItem;
         TArray<TSharedPtr<FVectorSceneTreeViewItem>> mItemsSource;
-        TSharedRef<FUICommandList> mCommandList;
+        TSharedRef<FOdysseyCommandList> mCommandList;
 };

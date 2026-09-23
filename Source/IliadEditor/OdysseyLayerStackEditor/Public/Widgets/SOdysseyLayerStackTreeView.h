@@ -12,7 +12,7 @@ class FExtender;
 class FOdysseyLayerStackGlobalShortcuts;
 class FOdysseyLayerStackShortcuts;
 class UOdysseyLayerStack;
-class FUICommandList;
+class FOdysseyCommandList;
 
 /**
  * Implements the Layer stack widget
@@ -48,7 +48,7 @@ public:
     UOdysseyLayerStack* GetLayerStack() const;
     void SetIsRenamePending(bool iValue);
     TSharedPtr<FOdysseyLayerStackDragDropOperation> CreateDragDropOperation() const;
-    TSharedPtr<FUICommandList> GetCommandList() const;
+    TSharedPtr<FOdysseyCommandList> GetCommandList() const;
 
 protected:
     //SWidget overrides
@@ -174,6 +174,6 @@ protected:
 
     TSharedPtr<FOdysseyLayerStackShortcuts> mLayerStackShortcuts;
     TSharedPtr<FOdysseyLayerStackGlobalShortcuts> mLayerStackGlobalShortcuts;
-    TSharedPtr<FUICommandList> mCommandList;
+    TSharedPtr<FOdysseyCommandList> mCommandList;
 
 };

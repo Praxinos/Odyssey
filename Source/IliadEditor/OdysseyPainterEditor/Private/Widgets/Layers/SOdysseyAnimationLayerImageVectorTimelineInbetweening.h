@@ -18,7 +18,7 @@ class FOdysseyPainterEditorAnimationTimelinePosition;
 class FOdysseyPainterEditor;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorLayer;
-class FUICommandList;
+class FOdysseyCommandList;
 struct FOdysseyVectorObjectInvalidationFlags;
 
 //////////////////////////////////////////////////////////////////////////
@@ -75,5 +75,5 @@ class SOdysseyAnimationLayerImageVectorTimelineInbetweening
         const FSlateBrush *mForwardArrowBrush;
         const FSlateBrush *mBackwardArrowBrush;
         TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
-        TSharedRef<FUICommandList> mCommandList;
+        TSharedRef<FOdysseyCommandList> mCommandList;
 };

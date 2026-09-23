@@ -7,6 +7,7 @@
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageRasterShortcuts.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
 #include "OdysseyAnimationLayerStack.h"
+#include "OdysseyCommandList.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -15,7 +16,7 @@ FOdysseyAnimationTimelineShortcuts::FOdysseyAnimationTimelineShortcuts(
     const TAttribute<int>& iCurrentFrame,
     const FOnTransactCurrentFrame& iOnTransactCurrentFrame
 )
-    : mCommandList(MakeShared<FUICommandList>())
+    : mCommandList(MakeShared<FOdysseyCommandList>())
     , mCellsShortcuts(MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(iAnimation, iCurrentFrame, iOnTransactCurrentFrame))
     , mCellImageRasterShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(iAnimation))
     , mCellImageStaggerShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(iAnimation))
@@ -23,7 +24,7 @@ FOdysseyAnimationTimelineShortcuts::FOdysseyAnimationTimelineShortcuts(
     MapActionsToCommandList();
 }
 
-TSharedRef<FUICommandList>
+TSharedRef<FOdysseyCommandList>
 FOdysseyAnimationTimelineShortcuts::GetCommandList() const
 {
     return mCommandList;

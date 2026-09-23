@@ -7,7 +7,7 @@
 #include "Misc/Attribute.h"
 
 class UOdysseyAnimation;
-class FUICommandList;
+class FOdysseyCommandList;
 class FOdysseyAnimationTimelineCellsShortcuts;
 class FOdysseyAnimationTimelineCellImageRasterShortcuts;
 class FOdysseyAnimationTimelineCellImageStaggerShortcuts;
@@ -25,14 +25,14 @@ public:
     );
 
 public:
-    TSharedRef<FUICommandList> GetCommandList() const;
+    TSharedRef<FOdysseyCommandList> GetCommandList() const;
 
 private:
     //Shortcuts
     void MapActionsToCommandList();
 
 private:
-    TSharedRef<FUICommandList> mCommandList;
+    TSharedRef<FOdysseyCommandList> mCommandList;
     TSharedRef<FOdysseyAnimationTimelineCellsShortcuts> mCellsShortcuts;
     TSharedRef<FOdysseyAnimationTimelineCellImageRasterShortcuts> mCellImageRasterShortcuts;
     TSharedRef<FOdysseyAnimationTimelineCellImageStaggerShortcuts> mCellImageStaggerShortcuts;

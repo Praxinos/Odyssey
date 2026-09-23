@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 using System;
+using System.IO;
 using UnrealBuildTool;
 
 public class OdysseyCoreEditor : ModuleRules
@@ -35,12 +36,12 @@ public class OdysseyCoreEditor : ModuleRules
             OptimizeCode = CodeOptimization.Never;
         }
 
-        //Module's own include paths
-        PrivateIncludePaths.AddRange
-        (
-            new string[]
-            {
-            }
+        PrivateIncludePaths.AddRange(
+            Directory.GetDirectories(ModuleDirectory, "Private/*", SearchOption.AllDirectories)
+        );
+
+        PublicIncludePaths.AddRange(
+            Directory.GetDirectories(ModuleDirectory, "Public/*", SearchOption.AllDirectories)
         );
 
         //Dependencies
@@ -61,6 +62,7 @@ public class OdysseyCoreEditor : ModuleRules
                 // [RUNTIME] engine dependencies
                 "Core",
                 "CoreUObject",
+                "InputCore",
                 "Slate",
                 "SlateCore",
                 "ToolMenus",
