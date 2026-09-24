@@ -51,13 +51,13 @@ SArianeEditorColorSelectorPanel::Construct(const FArguments& InArgs, FArianeEdit
             + SSegmentedControl<EOdysseyPainterEditorColorType>::Slot(EOdysseyPainterEditorColorType::Raw)
             .Text(LOCTEXT("color-selector.color-type.raw.name", "Raw"))
             .ToolTip(LOCTEXT("color-selector.color-type.raw.tooltip", "Switch to Raw colors"))
-            .Icon(FOdysseyStyle::GetBrush( "ArianeEditor.ColorSelector.ColorType.Raw" ))
+            .Icon(FOdysseyStyle::GetBrush( "PainterEditor.ColorSelector.ColorType.Raw" ))
 
             //Color Type: INDEXED
             + SSegmentedControl<EOdysseyPainterEditorColorType>::Slot(EOdysseyPainterEditorColorType::Indexed)
             .Text(LOCTEXT("color-selector.color-type.indexed.name", "Indexed"))
             .ToolTip(LOCTEXT("color-selector.color-type.indexed.tooltip", "Switch to Indexed colors"))
-            .Icon(FOdysseyStyle::GetBrush( "ArianeEditor.ColorSelector.ColorType.Indexed" ))
+            .Icon(FOdysseyStyle::GetBrush( "PainterEditor.ColorSelector.ColorType.Indexed" ))
         ]
         +SScrollBox::Slot()
         .AutoSize()
@@ -68,7 +68,7 @@ SArianeEditorColorSelectorPanel::Construct(const FArguments& InArgs, FArianeEdit
             .AutoHeight()
             [
                 SNew( SHorizontalBox )
-                + SHorizontalBox::Slot()
+                /*+ SHorizontalBox::Slot()
                 .AutoWidth()
                 [
                     //SAssignNew(mColorWheelExpanderArrow, SButton)
@@ -86,7 +86,7 @@ SArianeEditorColorSelectorPanel::Construct(const FArguments& InArgs, FArianeEdit
                         //.Image( this, &SArianeEditorColorSelectorPanel::GetColorWheelExpanderArrowImage )
                         .ColorAndOpacity( FSlateColor::UseSubduedForeground() )
                     ]
-                ]
+                ]*/
                 + SHorizontalBox::Slot()
                 .AutoWidth()
                 [
@@ -119,7 +119,7 @@ SArianeEditorColorSelectorPanel::Construct(const FArguments& InArgs, FArianeEdit
             .AutoHeight()
             [
                 SNew( SHorizontalBox )
-                + SHorizontalBox::Slot()
+                /*+ SHorizontalBox::Slot()
                 .AutoWidth()
                 [
                     //SAssignNew(mColorSlidersExpanderArrow, SButton)
@@ -137,7 +137,7 @@ SArianeEditorColorSelectorPanel::Construct(const FArguments& InArgs, FArianeEdit
                         //.Image( this, &SArianeEditorColorSelectorPanel::GetColorSlidersExpanderArrowImage )
                         .ColorAndOpacity( FSlateColor::UseSubduedForeground() )
                     ]
-                ]
+                ]*/
                 + SHorizontalBox::Slot()
                 .AutoWidth()
                 [
@@ -163,7 +163,7 @@ SArianeEditorColorSelectorPanel::Construct(const FArguments& InArgs, FArianeEdit
             .AutoHeight()
             [
                 SNew( SHorizontalBox )
-                + SHorizontalBox::Slot()
+                /*+ SHorizontalBox::Slot()
                 .AutoWidth()
                 [
                     //SAssignNew(mHexadecimalExpanderArrow, SButton)
@@ -181,7 +181,7 @@ SArianeEditorColorSelectorPanel::Construct(const FArguments& InArgs, FArianeEdit
                         //.Image( this, &SArianeEditorColorSelectorPanel::GetHexadecimalExpanderArrowImage )
                         .ColorAndOpacity( FSlateColor::UseSubduedForeground() )
                     ]
-                ]
+                ]*/
                 + SHorizontalBox::Slot()
                 .AutoWidth()
                 [
@@ -207,7 +207,7 @@ SArianeEditorColorSelectorPanel::Construct(const FArguments& InArgs, FArianeEdit
             .AutoHeight()
             [
                 SNew( SHorizontalBox )
-                + SHorizontalBox::Slot()
+                /*+ SHorizontalBox::Slot()
                 .AutoWidth()
                 [
                     //SAssignNew(mColorPaletteExpanderArrow, SButton)
@@ -225,7 +225,7 @@ SArianeEditorColorSelectorPanel::Construct(const FArguments& InArgs, FArianeEdit
                         //.Image( this, &SArianeEditorColorSelectorPanel::GetColorPaletteExpanderArrowImage )
                         .ColorAndOpacity( FSlateColor::UseSubduedForeground() )
                     ]
-                ]
+                ]*/
                 + SHorizontalBox::Slot()
                 .AutoWidth()
                 [

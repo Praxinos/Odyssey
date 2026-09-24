@@ -80,7 +80,9 @@ FArianeEditorStyle::Init()
     // Ariane Layer Stack
     Set( "ArianeEditor.Layers16", new IMAGE_BRUSH_SVG( "PainterEditor/layers", Icon16x16 ) );
     Set( "ArianeEditor.LayerStack.Visible16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/visible", Icon16x16 ) );
+    Set( "ArianeEditor.LayerStack.NotVisible16", new IMAGE_BRUSH_SVG("OdysseyLayerStack/not_visible", Icon16x16));
     Set( "ArianeEditor.LayerStack.Locked16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/locked", Icon16x16 ) );
+    Set( "ArianeEditor.LayerStack.Unlocked16", new IMAGE_BRUSH_SVG("OdysseyLayerStack/unlocked", Icon16x16));
 
     {
         FSlateColor selectedRow(FStyleColors::Select.GetSpecifiedColor().CopyWithNewOpacity(0.3f));
@@ -111,25 +113,25 @@ FArianeEditorStyle::Init()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
         .SetForegroundColor(FLinearColor(0, 0, 0, 0))
         .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
-        .SetUncheckedImage(*FAppStyle::Get().GetBrush("Level.NotVisibleIcon16x"))
-        .SetUncheckedHoveredImage(*FAppStyle::Get().GetBrush("Level.NotVisibleIcon16x"))
-        .SetUncheckedPressedImage(*FAppStyle::Get().GetBrush("Level.NotVisibleIcon16x"))
+        .SetUncheckedImage(*GetBrush("ArianeEditor.LayerStack.NotVisible16"))
+        .SetUncheckedHoveredImage(*GetBrush("ArianeEditor.LayerStack.NotVisible16"))
+        .SetUncheckedPressedImage(*GetBrush("ArianeEditor.LayerStack.NotVisible16"))
         //.SetCheckedImage(FSlateNoResource())
-        .SetCheckedImage(*FAppStyle::Get().GetBrush("Level.VisibleIcon16x"))
-        .SetCheckedHoveredImage(*FAppStyle::Get().GetBrush("Level.VisibleIcon16x"))
-        .SetCheckedPressedImage(*FAppStyle::Get().GetBrush("Level.VisibleIcon16x"))
+        .SetCheckedImage(*GetBrush("ArianeEditor.LayerStack.Visible16"))
+        .SetCheckedHoveredImage(*GetBrush("ArianeEditor.LayerStack.Visible16"))
+        .SetCheckedPressedImage(*GetBrush("ArianeEditor.LayerStack.Visible16"))
     );
 
     Set("ArianeEditor.LayerStack.IsLockedToggle", FCheckBoxStyle()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
         .SetForegroundColor(FLinearColor(0, 0, 0, 0))
         .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
-        .SetUncheckedImage(*FAppStyle::Get().GetBrush("Level.UnlockedIcon16x"))
-        .SetUncheckedHoveredImage(*FAppStyle::Get().GetBrush("Level.UnlockedIcon16x"))
-        .SetUncheckedPressedImage(*FAppStyle::Get().GetBrush("Level.UnlockedIcon16x"))
-        .SetCheckedImage(*FAppStyle::Get().GetBrush("Level.LockedIcon16x"))
-        .SetCheckedHoveredImage(*FAppStyle::Get().GetBrush("Level.LockedIcon16x"))
-        .SetCheckedPressedImage(*FAppStyle::Get().GetBrush("Level.LockedIcon16x"))
+        .SetUncheckedImage(*GetBrush("ArianeEditor.LayerStack.Unlocked16"))
+        .SetUncheckedHoveredImage(*GetBrush("ArianeEditor.LayerStack.Unlocked16"))
+        .SetUncheckedPressedImage(*GetBrush("ArianeEditor.LayerStack.Unlocked16"))
+        .SetCheckedImage(*GetBrush("ArianeEditor.LayerStack.Locked16"))
+        .SetCheckedHoveredImage(*GetBrush("ArianeEditor.LayerStack.Locked16"))
+        .SetCheckedPressedImage(*GetBrush("ArianeEditor.LayerStack.Locked16"))
     );
 
     //LayerStack
@@ -164,6 +166,10 @@ FArianeEditorStyle::Init()
     // Ariane Editor Scene Tree View
     Set( "ArianeEditor.SceneTreeView.Paintgroup", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/paintgroup", Icon16x16 ) );
     Set( "ArianeEditor.SceneTreeView.Path", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/path", Icon16x16 ) );
+    Set( "ArianeEditor.SceneTreeView.Ellipse", new IMAGE_BRUSH_SVG("OdysseyVectorSceneTreeView/primitive_ellipse", Icon16x16));
+    Set( "ArianeEditor.SceneTreeView.Line", new IMAGE_BRUSH_SVG("OdysseyVectorSceneTreeView/primitive_line", Icon16x16));
+    Set( "ArianeEditor.SceneTreeView.Polygon", new IMAGE_BRUSH_SVG("OdysseyVectorSceneTreeView/primitive_polygone", Icon16x16));
+    Set( "ArianeEditor.SceneTreeView.Rectangle", new IMAGE_BRUSH_SVG("OdysseyVectorSceneTreeView/primitive_rectangle", Icon16x16));
     Set( "ArianeEditor.SceneTreeView.Group", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/group", Icon16x16 ) );
     Set( "ArianeEditor.SceneTreeView.MenuIcon", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/MenuIcon", Icon16x16 ) );
 
