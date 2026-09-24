@@ -558,6 +558,10 @@ UOdysseyLayer::RemoveCells(const TArray<UOdysseyLayerCell*>& iCells)
     if( !IsEditable() )
         return;
 
+    UOdysseyLayerStack* layerStack = GetLayerStack();
+    if(!layerStack)
+        return;
+
     Modify();
 
     TArray<UOdysseyLayerCell*> cells;
@@ -574,6 +578,8 @@ UOdysseyLayer::RemoveCells(const TArray<UOdysseyLayerCell*>& iCells)
     }
 
     Cells.RemoveAll([&](UOdysseyLayerCell* iCell) { return cells.Contains(iCell); });
+    layerStack->GetCellSelection()->CleanSelectedCells();
+
     CellsChanged();
 }
 
@@ -581,6 +587,10 @@ void
 UOdysseyLayer::RemoveCellAtIndex(int Index)
 {
     if( !IsEditable() )
+        return;
+
+    UOdysseyLayerStack* layerStack = GetLayerStack();
+    if(!layerStack)
         return;
 
     if (Index < 0 || Index >= Cells.Num())
@@ -592,6 +602,7 @@ UOdysseyLayer::RemoveCellAtIndex(int Index)
         Cells[Index]->IndexInLayer = INDEX_NONE;
 
     Cells.RemoveAt(Index);
+    layerStack->GetCellSelection()->CleanSelectedCells();
     CellsChanged();
 }
 
@@ -601,9 +612,15 @@ UOdysseyLayer::RemoveAllCells()
     if( !IsEditable() )
         return;
 
+    UOdysseyLayerStack* layerStack = GetLayerStack();
+    if(!layerStack)
+        return;
+
     Modify();
 
     Cells.Empty();
+    layerStack->GetCellSelection()->CleanSelectedCells();
+
     CellsChanged();
 }
 

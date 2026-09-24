@@ -4,24 +4,25 @@
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellsShortcuts.h"
 
 #include "Algo/Accumulate.h"
+#include "Dialogs/Dialogs.h"
+#include "Framework/Commands/GenericCommands.h"
+#include "ScopedTransaction.h"
+#include "Widgets/Input/SNumericEntryBox.h"
 
-#include "OdysseyAnimationLayerStack.h"
-#include "OdysseyAnimationLayer.h"
+#include "OdysseyAnimation.h"
 #include "OdysseyAnimationCell.h"
 #include "OdysseyAnimationCellClipboardData.h"
-#include "OdysseyLayerCellImageStagger.h"
-#include "Framework/Commands/GenericCommands.h"
+#include "OdysseyAnimationCurrentFrameMutator.h"
+#include "OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationLayer.h"
 #include "OdysseyCoreEditorModule.h"
-#include "OdysseyPainterEditorModule.h"
-#include "Dialogs/Dialogs.h"
-#include "Widgets/Input/SNumericEntryBox.h"
+#include "OdysseyLayerCellImageStagger.h"
+#include "OdysseyLayerCellSelection.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
-#include "OdysseyAnimation.h"
-#include "OdysseyLayerCellSelection.h"
+#include "OdysseyPainterEditorModule.h"
+#include "OdysseyPainterEditorSettings.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "ScopedTransaction.h"
-#include "OdysseyAnimationCurrentFrameMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -235,14 +236,99 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
     if (!layer->IsEditable())
         return;
 
-    const TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return;
+
+    selectedCells.Sort(
+        []( const UOdysseyLayerCell& iA, const UOdysseyLayerCell& iB ) -> bool
+        {
+            return iA.GetIndexInLayer() < iB.GetIndexInLayer();
+        }
+    );
+
+    struct FCellToExtend
+    {
+        UOdysseyLayerCell* Cell = nullptr;
+        int Exposure = 0;
+    };
+    TArray<FCellToExtend> CellsToExtend;
+    float Offset = layer->GetCellsOffset();
+
+    if (UOdysseyPainterEditorSettings::Get()->CellDeletionBehaviour == EOdysseyCellDeletionBehaviour::PreserveBounds)
+    {
+        for (int i = 0; i < selectedCells.Num(); i++)
+        {
+            UOdysseyLayerCell* SelectedCell = selectedCells[i];
+            if (!SelectedCell)
+                continue;
+
+            int SelectedCellIndexInLayer = SelectedCell->GetIndexInLayer();
+            if (SelectedCellIndexInLayer == INDEX_NONE)
+                continue;
+
+            if (SelectedCellIndexInLayer == layer->GetCells().Num() - 1)
+            {
+                if (CellsToExtend.IsEmpty())
+                {
+                    Offset = layer->GetCellsOffset();
+                }
+                else
+                {
+                    CellsToExtend.RemoveAt(CellsToExtend.Num() - 1);
+                }
+                continue;
+            }
+
+            int PreviousCellIndexInLayer = SelectedCellIndexInLayer - 1;
+            if (PreviousCellIndexInLayer < 0)
+            {
+                Offset += SelectedCell->GetExposure();
+                continue;
+            }
+
+            UOdysseyLayerCell* PreviousCell = layer->GetCells()[PreviousCellIndexInLayer];
+            if (!PreviousCell)
+                continue;
+
+
+            if (i != 0)
+            {
+                if (PreviousCell == selectedCells[i - 1])
+                {
+                    if (CellsToExtend.IsEmpty())
+                    {
+                        Offset += SelectedCell->GetExposure();
+                    }
+                    else
+                    {
+                        CellsToExtend.Last().Exposure += SelectedCell->GetExposure();
+                    }
+                    continue;
+                }
+            }
+
+            FCellToExtend CellToExtend;
+            CellToExtend.Cell = PreviousCell;
+            CellToExtend.Exposure = PreviousCell->GetExposure() + SelectedCell->GetExposure();
+            CellsToExtend.Add(CellToExtend);
+        }
+    }
 
 #if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.remove-frame", "Remove Frames"));
 #endif
     mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
+
+    if (UOdysseyPainterEditorSettings::Get()->CellDeletionBehaviour == EOdysseyCellDeletionBehaviour::PreserveBounds)
+    {
+        layer->SetCellsOffset(Offset);
+        for (const FCellToExtend& CellToExtend : CellsToExtend)
+        {
+            CellToExtend.Cell->SetExposure(CellToExtend.Exposure);
+        }
+    }
+
     layer->RemoveCells(selectedCells);
     if (layer->GetCells().IsEmpty())
         layer->AddCell(layer->GetDefaultCellClass());

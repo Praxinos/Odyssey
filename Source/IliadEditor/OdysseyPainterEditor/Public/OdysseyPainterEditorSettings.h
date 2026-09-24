@@ -29,7 +29,14 @@ UENUM()
 enum EOdysseyPainterEditorVolumeViewMode
 {
     kOdysseyPainterEditorVolumeViewMode_DepthSlices UMETA(DisplayName="Depth Slices"),
-    kOdysseyPainterEditorVolumeViewMode_VolumeTrace UMETA(DisplayName="Trace Into Volume"),
+    kOdysseyPainterEditorVolumeViewMode_VolumeTrace UMETA(DisplayName="Trace Into Volume")
+};
+
+UENUM()
+enum class EOdysseyCellDeletionBehaviour
+{
+    Legacy UMETA(Tooltip="(Legacy) Deletes cells itself without caring about cells offset or layer bounds"),
+    PreserveBounds UMETA(Tooltip="(Default) Deletes cells by making sure the layer bounds stay the same, by extending previous cells")
 };
 
 USTRUCT(BlueprintType)
@@ -227,6 +234,9 @@ public:
       */
     UPROPERTY(config, EditAnywhere, Category=Defaults, meta=(GetOptions="GetCursorOptions") )
     FString ToolMouseCursor = TEXT( "Cross" );
+
+    UPROPERTY(config, EditAnywhere, Category=Defaults)
+    EOdysseyCellDeletionBehaviour CellDeletionBehaviour = EOdysseyCellDeletionBehaviour::PreserveBounds;
 
 public:
      FMouseCursor GetToolMouseCursor() const;
