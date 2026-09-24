@@ -18,6 +18,8 @@
 #include "Widgets/SNullWidget.h"
 #include "Toolkits/BaseToolkit.h"
 #include "Framework/Docking/LayoutExtender.h"
+#include "Tools/EdModeInteractiveToolsContext.h"
+#include "EditorModeManager.h"
 
 /* Gary
 #include "OdysseyStyle.h"
@@ -140,6 +142,9 @@ FArianeEditorViewportToolkit::Init( const TSharedPtr<IToolkitHost>& iInitToolkit
 
     Editor->RegisterTabSpawners();
     Editor->RegisterTools();
+
+    UModeManagerInteractiveToolsContext* ToolsContext = GetEditorMode()->GetEditorModeTools()->GetInteractiveToolsContext();
+    ToolsContext->SetDeactivateToolsOnSaveWorld(false);
 
     // We create the Widgets now that we can can register to some delegates that they need to refresh themselves
     // just before Editor->Init() is called and will broadcast the delegates.
