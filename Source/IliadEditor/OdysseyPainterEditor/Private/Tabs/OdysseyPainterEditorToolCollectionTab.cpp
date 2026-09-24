@@ -45,7 +45,7 @@ FOdysseyPainterEditorToolCollectionTab::~FOdysseyPainterEditorToolCollectionTab(
 }
 
 FOdysseyPainterEditorToolCollectionTab::FOdysseyPainterEditorToolCollectionTab(FOdysseyPainterEditor* iEditor)
-    : FOdysseyEditorTab(LOCTEXT( "tool-collection-tab.name", "ToolCollection" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Tools" ))
+    : FOdysseyEditorTab(LOCTEXT( "tool-collection-tab.name", "ToolCollection" ), FSlateIcon( "OdysseyStyle", "PainterEditor.ToolCollection16" ))
     , mEditor(iEditor)
 {
 }

@@ -280,6 +280,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.Viewport16", new IMAGE_BRUSH_SVG( "PainterEditor/viewport", mIcon16x16 ) );
 
     Set( "PainterEditor.Mesh16", new IMAGE_BRUSH_SVG( "PainterEditor/mesh_selector", mIcon16x16 ) );
+    Set( "PainterEditor.ToolCollection16", new IMAGE_BRUSH_SVG("PainterEditor/tool_collection_tab", mIcon16x16));
 
     Set("PainterEditor.FlipVertical32", new IMAGE_BRUSH_SVG("PainterEditor/flip_vertical", mIcon32x32));        // In OdysseyPainterEditorRasterTransformTool.cpp
     Set("PainterEditor.FlipHorizontal32", new IMAGE_BRUSH_SVG("PainterEditor/flip_horizontal", mIcon32x32));
