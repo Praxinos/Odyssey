@@ -5,16 +5,22 @@
 
 #include "AnimatedRange.h"
 #include "CineCameraActor.h"
+#include "CineCameraComponent.h"
+#include "Containers/ArrayBuilder.h"
 #include "Engine/Selection.h"
 #include "ISequencer.h"
+#include "KeyPropertyParams.h"
 #include "LevelEditorViewport.h"
 #include "MovieScene.h"
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneTimeHelpers.h"
 #include "Sections/MovieSceneSubSection.h"
+#include "TrackEditors/PropertyTrackEditors/RegisteredPropertyTrackEditor.h"
 #include "Tracks/MovieScene3DAttachTrack.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
+#include "Widgets/Layout/SScrollBar.h"
+#include "Containers/Ticker.h"
 
 #include "ActorHelpers.h"
 #include "Board/BoardSequence.h"
@@ -662,6 +668,168 @@ ShotSequenceTools::AddKeysToSection( ISequencer& iSequencer, UMovieSceneSection*
 
 //static
 void
+ShotSequenceTools::UpdateChannel( TSharedPtr<ISequencer> iSequencer, UObject* iObject, FProperty* iProperty )
+{
+    if( !iSequencer.IsValid() )
+        return;
+
+    ISequencer* sequencer = iSequencer.Get();
+    UMovieSceneSequence* sequence = sequencer->GetFocusedMovieSceneSequence();
+    FMovieSceneSequenceID sequence_id = sequencer->GetFocusedTemplateID();
+    FFrameNumber frame = sequencer->GetLocalTime().Time.GetFrame();
+
+    if( sequence->IsA<UBoardSequence>() )
+    {
+        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequence, sequence_id, frame );
+        sequence = result.mInnerSequence;
+        sequence_id = result.mInnerSequenceId;
+        frame = result.mInnerTime.GetFrame();
+    }
+
+    FGuid binding = sequencer->FindObjectId( *iObject, sequence_id );
+    // Can't find the actor or component
+    if( !binding.IsValid() )
+        return;
+
+    //---
+
+    UMovieScenePropertyTrack* PropertyTrackOfProperty = nullptr;
+
+    for( UMovieSceneTrack* Track : sequence->GetMovieScene()->FindTracks( UMovieScenePropertyTrack::StaticClass(), binding ) )
+    {
+        UMovieScenePropertyTrack* PropertyTrack = Cast<UMovieScenePropertyTrack>( Track );
+
+        if( !PropertyTrack )
+            continue;
+
+        if( PropertyTrack->GetPropertyName() == iProperty->GetFName() )
+        {
+            PropertyTrackOfProperty = PropertyTrack;
+            break;
+        }
+    }
+
+    // Can't find the property track corresponding to the property
+    if( !PropertyTrackOfProperty )
+        return;
+
+    TArray<UObject*> ObjectsThatChanged;
+    ObjectsThatChanged.Add( iObject );
+    //ObjectsThatChanged.Add( iCamera->GetCineCameraComponent() );
+    TSharedRef<FPropertyPath> PropertyPath = FPropertyPath::CreateEmpty();
+    TSharedRef<FPropertyPath> StructPathToKey = FPropertyPath::CreateEmpty();
+    //FProperty* FocalLengthProperty =
+    //    FindFProperty<FProperty>(
+    //        UCineCameraComponent::StaticClass(),
+    //        GET_MEMBER_NAME_CHECKED(
+    //            UCineCameraComponent,
+    //            CurrentFocalLength
+    //        )
+    //    );
+
+    if( iProperty )
+    {
+        PropertyPath->AddProperty( FPropertyInfo( iProperty ) );
+    }
+
+    {
+        cTemporarySwitchInner switch_to( *iSequencer, sequence_id );
+
+        if( iSequencer->CanKeyProperty( FCanKeyPropertyParams( iObject->GetClass(), *PropertyPath ) ) )
+        {
+            // key property
+            FKeyPropertyParams KeyPropertyParams(
+                TArrayBuilder<UObject*>().Add( iObject ),
+                *PropertyPath,
+                ESequencerKeyMode::AutoKey );
+
+            iSequencer->KeyProperty( KeyPropertyParams );
+        }
+    }
+
+    //---
+
+    //UMovieScenePropertyTrack* FocalLengthTrack = nullptr;
+
+    //for( UMovieSceneTrack* Track : sequence->GetMovieScene()->FindTracks( UMovieScenePropertyTrack::StaticClass(), bindingCameraComponent ) )
+    //{
+    //    UMovieScenePropertyTrack* PropertyTrack =
+    //        Cast<UMovieScenePropertyTrack>( Track );
+
+    //    if( !PropertyTrack )
+    //        continue;
+
+    //    //UE_LOG(
+    //    //    LogTemp,
+    //    //    Log,
+    //    //    TEXT( "Property: %s, Path: %s" ),
+    //    //    *PropertyTrack->GetPropertyName().ToString(),
+    //    //    *PropertyTrack->GetPropertyPath()
+    //    //);
+
+    //    if( PropertyTrack->GetPropertyName() == TEXT("CurrentFocalLength") )
+    //    {
+    //        FocalLengthTrack = PropertyTrack;
+    //        break;
+    //    }
+    //}
+
+
+    //TArray<UObject*> ObjectsThatChanged;
+    //ObjectsThatChanged.Add( iCamera->GetCineCameraComponent() );
+    //TSharedRef<FPropertyPath> PropertyPath = FPropertyPath::CreateEmpty();
+    //TSharedRef<FPropertyPath> StructPathToKey = FPropertyPath::CreateEmpty();
+    //FProperty* FocalLengthProperty =
+    //    FindFProperty<FProperty>(
+    //        UCineCameraComponent::StaticClass(),
+    //        GET_MEMBER_NAME_CHECKED(
+    //            UCineCameraComponent,
+    //            CurrentFocalLength
+    //        )
+    //    );
+
+    //if( FocalLengthProperty )
+    //{
+    //    PropertyPath->AddProperty( FPropertyInfo( FocalLengthProperty ) );
+    //}
+
+    //ESequencerKeyMode KeyMode = ESequencerKeyMode::AutoKey; //TODO
+
+    //// 7. Build property-change parameters.
+    //FPropertyChangedParams Params(
+    //    ObjectsThatChanged,
+    //    *PropertyPath,
+    //    *StructPathToKey,
+    //    KeyMode
+    //);
+
+    //TSharedPtr<ISequencerTrackEditor> trackEditor = iSequencer->GetTrackEditor( FocalLengthTrack );
+    //FPropertyTrackEditor<UMovieScenePropertyTrack>* propertyEditor = StaticCast<FPropertyTrackEditor<UMovieScenePropertyTrack>*>( trackEditor.Get() );
+
+    //// 8. Ask the concrete property track editor
+    ////    to generate the appropriate channel setters.
+    //FGeneratedTrackKeys GeneratedKeys;
+
+    //propertyEditor->GenerateKeysFromPropertyChanged(
+    //    Params,
+    //    FocalLengthTrack->GetAllSections()[0],
+    //    GeneratedKeys
+    //);
+
+    ////FRegisteredPropertyTrackEditor::GenerateKeysFromPropertyChanged(
+    ////    FRegisteredPropertyTrackEditor::FindMatchingPropertyDefinition( FocalLengthProperty ),
+    ////    *iSequencer,
+    ////    Params,
+    ////    FocalLengthTrack->GetAllSections()[0],
+    ////    GeneratedKeys
+    ////);
+
+    //---
+
+}
+
+//static
+void
 ShotSequenceTools::UpdateChannel( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const ACineCameraActor* iCamera, EMovieSceneTransformChannel iChannelsToApply )
 {
     if( !iSequencer.IsValid() )
@@ -681,6 +849,9 @@ ShotSequenceTools::UpdateChannel( TSharedPtr<ISequencer> iSequencer, AActor* iAc
     }
 
     FGuid binding = sequencer->FindObjectId( *iActor, sequence_id );
+    FGuid bindingCameraComponent = sequencer->FindObjectId( *iCamera->GetCineCameraComponent(), sequence_id );
+
+    //---
 
     // Update the default transform channel to take care of the attach track
     UMovieScene3DTransformTrack* transformTrack = Cast<UMovieScene3DTransformTrack>( sequence->GetMovieScene()->FindTrack<UMovieScene3DTransformTrack>( binding ) );

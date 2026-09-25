@@ -1232,6 +1232,9 @@ ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AAct
 
     ioCamera->GetCineCameraComponent()->SetCurrentFocalLength( iNewFocalLength );
 
+    FProperty* FocalLengthProperty = FindFProperty<FProperty>( UCineCameraComponent::StaticClass(), GET_MEMBER_NAME_CHECKED( UCineCameraComponent, CurrentFocalLength ) );
+    UpdateChannel( iSequencer, ioCamera->GetCineCameraComponent(), FocalLengthProperty );
+
     for( const FParameterCache& old_parameter : old_parameters )
     {
         check( old_parameter.mActor.IsValid() );

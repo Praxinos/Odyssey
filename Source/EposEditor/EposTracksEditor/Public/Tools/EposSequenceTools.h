@@ -776,6 +776,7 @@ private:
     static bool AddKeysToSection( ISequencer& iSequencer, UMovieSceneSection* Section, FFrameNumber KeyTime, const FGeneratedTrackKeys& Keys, ESequencerKeyMode KeyMode, EKeyFrameTrackEditorSetDefault SetDefault );
 
     static void UpdateChannel( TSharedPtr<ISequencer> iSequencer, AActor* ioActor, const ACineCameraActor* iCamera, EMovieSceneTransformChannel iChannelsToApply );
+    static void UpdateChannel( TSharedPtr<ISequencer> iSequencer, UObject* iObject, FProperty* iProperty );
 
 // Inside EposSequenceTools_Camera
 public:
