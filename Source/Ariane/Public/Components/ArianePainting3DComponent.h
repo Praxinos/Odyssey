@@ -47,7 +47,7 @@ class ARIANE_API UArianePainting3DComponent : public USceneComponent
 
 public:
     ~UArianePainting3DComponent();
-    UArianePainting3DComponent();
+    UArianePainting3DComponent(const FObjectInitializer& ObjectInitializer);
 
 protected:
     virtual void BeginPlay() override;
@@ -95,18 +95,19 @@ public:
     void ConvertToStaticMesh();
     UArianePainting3DStaticMeshComponent* GetStaticMeshComponent();
     UMaterialInstanceDynamic* GetDefaultMaterial();
+    virtual void PostInitProperties() override;
 
 private:
     virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
 
 protected:
-    UPROPERTY()
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Instanced, meta = (AllowPrivateAccess = "true"))
     UArianeLayerStack* LayerStack;
 
     UPROPERTY()
     TArray<UOdysseyPaletteSet*> PaletteSets;
 
-    UPROPERTY()
+    UPROPERTY(Transient)
     UMaterialInstanceDynamic* DefaultMaterial;
 
     // for conversions to static mesh

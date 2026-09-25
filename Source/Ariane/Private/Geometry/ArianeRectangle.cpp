@@ -34,8 +34,7 @@ FArianeRectangle::FArianeRectangle( UArianeImage* InImage
     : FArianePrimitive( InImage
                       , InName
                       , InStrokeWidth
-                      , InAllocationModel
-                      , new FArianePrimitiveInvalidationFlags() )
+                      , InAllocationModel )
     , Width( InWidth )
     , Height( InHeight )
 {

@@ -31,6 +31,17 @@ UArianeLayerFolder::UArianeLayerFolder()
 }
 
 void
+UArianeLayerFolder::OnRegister()
+{
+    Super::OnRegister();
+
+    for (UArianeLayer* ChildLayer : ChildLayers )
+    {
+        ChildLayer->RegisterComponent();
+    }
+}
+
+void
 UArianeLayerFolder::SetExpanded( bool bInExpanded )
 {
     bExpanded = bInExpanded;

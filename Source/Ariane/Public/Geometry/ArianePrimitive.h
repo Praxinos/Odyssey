@@ -13,10 +13,10 @@
 
 class UArianeImage;
 
-struct ARIANE_API FArianePrimitiveInvalidationFlags : FArianePathInvalidationFlags
+USTRUCT(BlueprintType)
+struct ARIANE_API FArianePrimitiveInvalidationFlags : public FArianePathInvalidationFlags
 {
-    private:
-        typedef FArianePathInvalidationFlags Super;
+GENERATED_BODY()
 
     public:
         static const uint32 StaticClass() { return  0x8dae07e0; }; // value is crc32 FArianePrimitiveInvalidationFlags
@@ -42,8 +42,7 @@ public:
     FArianePrimitive( UArianeImage* InImage
                     , const FName& InName
                     , double InStrokeWidth
-                    , EArianeAllocationModel InAllocationModel
-                    , FArianePrimitiveInvalidationFlags* InInvalidationflags = nullptr );
+                    , EArianeAllocationModel InAllocationModel );
     void SetStrokeWidth( double InStrokeWidth );
     double GetStrokeWidth();
     FArianePath* Convert( EConversionFlags ConversionFlags );
@@ -51,6 +50,7 @@ public:
     virtual void ResetGeometry() PURE_VIRTUAL(FArianePrimitive::ResetGeometry,);
     virtual void PostEditUndo() override;
     virtual void PostLoad() override;
+    virtual FArianePrimitiveInvalidationFlags& GetInvalidationFlags() override;
 
 protected:
     UPROPERTY( EditAnywhere )

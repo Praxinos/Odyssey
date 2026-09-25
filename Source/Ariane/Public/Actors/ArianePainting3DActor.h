@@ -18,17 +18,22 @@ class ARIANE_API AArianePainting3DActor : public AActor
 
 public:
     ~AArianePainting3DActor();
-    AArianePainting3DActor();
+    AArianePainting3DActor(const FObjectInitializer& ObjectInitializer);
 
 
     virtual void BeginPlay() override;
     virtual void PostActorCreated() override;
     virtual void PostLoad() override;
     virtual void Tick(float DeltaTime) override;
+    virtual void PostDuplicate(EDuplicateMode::Type DuplicateMode) override;
+    virtual void PostInitProperties() override;
 
     UArianePainting3DComponent* GetPainting3DComponent();
 
 protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Painting 3D", meta = (AllowPrivateAccess = "true"))
+    void EnsureNestedComponentsArePublic();
+
+protected:
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Painting 3D", Instanced, meta = (AllowPrivateAccess = "true"))
     UArianePainting3DComponent* Painting3DComponent;
 };

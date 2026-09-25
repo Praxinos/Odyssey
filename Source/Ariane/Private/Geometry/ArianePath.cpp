@@ -233,20 +233,16 @@ FArianePath::~FArianePath()
 FArianePath::FArianePath()
     : FArianePath( nullptr
                  , FName( "Ariane Path" )
-                 , EArianeAllocationModel::InstancedStruct
-                 , new FArianePathInvalidationFlags() )
+                 , EArianeAllocationModel::InstancedStruct )
 {
 }
 
 FArianePath::FArianePath( UArianeImage* InImage
                         , const FName& InName
-                        , EArianeAllocationModel InAllocationModel
-                        , FArianePathInvalidationFlags* InInvalidationFlags )
+                        , EArianeAllocationModel InAllocationModel )
     : FArianeObject ( InImage
                     , InName
-                    , InAllocationModel
-                    , InInvalidationFlags ? InInvalidationFlags
-                                          : new FArianePathInvalidationFlags() )
+                    , InAllocationModel )
     , LineType ( EArianePathLineType::Tube )
     , Color ( FColor::Black.WithAlpha(255) )
     , Material ( nullptr )
@@ -268,6 +264,21 @@ FArianePath::operator=(const FArianePath& Other)
     LinearSegmentCount = Other.LinearSegmentCount;
 
     return *this;
+}
+
+FArianePathInvalidationFlags&
+FArianePath::GetInvalidationFlags()
+{
+    FArianePathInvalidationFlags* InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianePathInvalidationFlags>();
+
+    if( InvalidationFlagsPtr == nullptr )
+    {
+        InvalidationFlags = FInstancedStruct::Make<FArianePathInvalidationFlags>();
+
+        InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianePathInvalidationFlags>();
+    }
+
+    return *InvalidationFlagsPtr;
 }
 
 bool
@@ -738,7 +749,7 @@ FArianePath::CopyShape( const FCopyArgs& CopyArgs )
 void
 FArianePath::UpdateBoundingBox( EUpdateFlags UpdateFlags )
 {
-    FArianePathInvalidationFlags* PathInvalidationFlags = static_cast<FArianePathInvalidationFlags*>(InvalidationFlags);
+    FArianePathInvalidationFlags* PathInvalidationFlags = &GetInvalidationFlags();
 
     if( PathInvalidationFlags->VertexAltered
      || PathInvalidationFlags->VertexAddedOrRemoved
@@ -938,7 +949,7 @@ FArianePath::FindChains()
 void
 FArianePath::UpdateShape( EUpdateFlags UpdateFlags )
 {
-    FArianePathInvalidationFlags* PathInvalidationFlags = static_cast<FArianePathInvalidationFlags*>(InvalidationFlags);
+    FArianePathInvalidationFlags* PathInvalidationFlags = &GetInvalidationFlags();
 
     //FArianeObject::Update( Recurse , false );
 

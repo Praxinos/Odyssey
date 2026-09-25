@@ -58,6 +58,7 @@ public:
     virtual void CopySettings( FArianeObject* DestinationObject, const FCopyArgs& CopyArgs, bool bInvalidate ) override;
     virtual void UpdateShape( EUpdateFlags UpdateFlags ) override;
     virtual void UpdateBoundingBox( EUpdateFlags UpdateFlags ) override;
+    virtual FArianeGroupInvalidationFlags& GetInvalidationFlags() override;
 
 public:
     /** overriden from ArianeObject */

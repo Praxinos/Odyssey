@@ -97,6 +97,8 @@ class ARIANEEDITOR_API SArianeEditorSceneTreeView
         void OnPre3DPaintingComponentSelectionChanged();
         void OnPost3DPaintingComponentSelectionChanged();
         void OnPostImageChanged();
+        void OnPreImageChanged();
+        UArianeLayerDrawing* GetCurrentDrawingLayer();
 
     protected:
         FArianeEditor* Editor;

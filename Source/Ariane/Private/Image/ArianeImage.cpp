@@ -5,6 +5,7 @@
 #include "ArianeImage.h"
 #include "ArianeLayerDrawing.h"
 #include "ArianeLayerStack.h"
+#include "ArianePainting3DActor.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianePath.h"
 #include "ArianeGroup.h"
@@ -15,6 +16,8 @@
 #include "ArianePolygon.h"
 #include "ArianeVertex.h"
 #include "ArianeImageKeyData.h"
+
+#define LOCTEXT_NAMESPACE "Ariane"
 
 UArianeImage::~UArianeImage()
 {
@@ -47,6 +50,68 @@ UArianeImage::UArianeImage()
 }
 
 void
+UArianeImage::RebindObjects()
+{
+    RootGroupID.Image = this;
+    RootGroupID.InvalidateCache();
+
+    for (FInstancedStruct& InstancedStruct : InstancedObjects)
+    {
+        FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
+
+        Object->SetImage(this);
+    }
+}
+
+void
+UArianeImage::Serialize(FArchive& Ar)
+{
+    Super::Serialize(Ar);
+
+    // Call PostSerialze on FInstancedStruct. It doesn't work when I tried to use TStructOpsTypeTraits::WithPostSerialize
+    // probably due to the nature of FInstancedStructs I guess.
+    for (FInstancedStruct& InstancedStruct : InstancedObjects)
+    {
+        FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
+
+        Object->PostSerialize(Ar);
+    }
+
+    UE_LOG( LogTemp, Warning, TEXT("----UArianeImage::Serialize::Begin - Image:%p"), this );
+
+    RebindObjects();
+
+    PrintPointers();
+
+    UE_LOG( LogTemp, Warning, TEXT("----UArianeImage::Serialize::End - Image:%p"), this );
+}
+
+void
+UArianeImage::OnRegisterLayer()
+{
+//UE_LOG(LogTemp, Warning, TEXT("name:%s this:%s RootGroup Image:%s"),
+//    *GetName(), *GetFullName(), RootGroupID.Image ? *RootGroupID.Image->GetFullName() : TEXT("NULL"));
+
+    RootGroupID.Image = this;
+    RootGroupID.InvalidateCache();
+
+    UE_LOG( LogTemp, Warning, TEXT("----UArianeImage::OnRegisterLayer::Begin - Image:%p"), this );
+
+    PrintPointers();
+
+    for( FInstancedStruct& InstancedObject : InstancedObjects )
+    {
+        FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
+
+        //Object->SetImage( this );
+    }
+
+    UE_LOG( LogTemp, Warning, TEXT("----UArianeImage::OnRegisterLayer::End - Image:%p"), this );
+
+    PrintPointers();
+}
+
+void
 UArianeImage::SetDrawingLayer( TWeakObjectPtr<UArianeLayerDrawing> InDrawingLayer )
 {
     DrawingLayer = InDrawingLayer;
@@ -56,12 +121,6 @@ TWeakObjectPtr<UArianeLayerDrawing>
 UArianeImage::GetDrawingLayer()
 {
     return DrawingLayer;
-}
-
-// called when the world starts to exist (the drawing layer is registered). This is required by InitVertexFactory().
-void
-UArianeImage::OnRegisterLayer()
-{
 }
 
 void
@@ -78,14 +137,44 @@ UArianeImage::GetRootGroup()
 }
 
 void
+UArianeImage::PostDuplicate( EDuplicateMode::Type DuplicateMode )
+{
+    AArianePainting3DActor* Painting3DActor =  GetTypedOuter<AArianePainting3DActor>();
+
+    Super::PostDuplicate( DuplicateMode );
+
+    RootGroupID.Image = this;
+    RootGroupID.InvalidateCache();
+
+    UE_LOG( LogTemp, Warning, TEXT("----UArianeImage::PostDuplicate::Begin - Image:%p"), this );
+
+    PrintPointers();
+
+    for( FInstancedStruct& InstancedStruct : InstancedObjects )
+    {
+        FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
+
+        //Object->SetImage( this );
+
+        //Object->PostLoad();
+    }
+
+    UE_LOG( LogTemp, Warning, TEXT("----UArianeImage::PostDuplicate::End - Image:%p"), this );
+
+    PrintPointers();
+}
+
+void
 UArianeImage::PrintPointers()
 {
-    for( FInstancedStruct& InstancedObject : InstancedObjects )
+    for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
-        FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
+        FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
 
-        UE_LOG( LogTemp, Warning, TEXT("PTR:%llu"), (uint64) Object );
+        UE_LOG( LogTemp, Warning, TEXT("UArianeImage::PrintPointers - Object.Image:%p"), Object->GetImage() );
     }
+
+    //RootGroupID.GetObject()->PrintPointers( true );
 }
 
 void
@@ -94,6 +183,13 @@ UArianeImage::PostLoad()
     UArianeLayerDrawing* DrawingLayerPtr = GetDrawingLayer().Get();
 
     Super::PostLoad();
+
+    RootGroupID.Image = this;
+    RootGroupID.InvalidateCache();
+
+    UE_LOG( LogTemp, Warning, TEXT("UArianeImage::PostLoad::Begin - Image:%p"), this );
+
+    PrintPointers();
 
     // RootObjectID won't have its cache reset after Undoing, we have to force it.
     InvalidateCache();
@@ -109,7 +205,7 @@ UArianeImage::PostLoad()
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
 
-        Object->SetImage( this );
+        //Object->SetImage( this );
 
         Object->PostLoad();
     }
@@ -130,6 +226,10 @@ UArianeImage::PostLoad()
             LayerStack->GetPainting3DComponent()->UpdateComponentToWorld();
         }
     }
+
+    UE_LOG( LogTemp, Warning, TEXT("UArianeImage::PostLoad::End - Image:%p"), this );
+
+    PrintPointers();
 }
 
 void
@@ -730,3 +830,5 @@ UArianeImage::GetSelectedTrees( TArray<FArianeObject*>& SelectedTrees )
 
     AppendSelectedTrees( SelectedTrees );
 }
+
+#undef LOCTEXT_NAMESPACE

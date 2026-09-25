@@ -59,6 +59,7 @@ public:
     static void Traverse( UArianeLayerFolder* FolderLayer, TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
 
     //virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
+    virtual void OnRegister() override;
 
 protected:
     static ETraversalReturnValue Traverse_Private( UArianeLayerFolder* FolderLayer, TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
@@ -73,6 +74,6 @@ protected:
     UPROPERTY(Instanced)
     TArray<UArianeLayer*> ChildLayers;
 
-protected:
+    UPROPERTY(Transient)
     TArray<UArianeLayer*> InvalidatedChildLayers;
 };

@@ -7,6 +7,7 @@
 #include "ArianeLayerDrawing.h"
 #include "ArianeImage.h"
 #include "ArianePainting3DComponent.h"
+#include "ArianePainting3DActor.h"
 #include "ArianeGroup.h"
 
 UArianeLayerStack::~UArianeLayerStack()
@@ -21,8 +22,8 @@ UArianeLayerStack::UArianeLayerStack()
     //ObjectInitializer.DoNotCreateDefaultSubobject(TEXT("Drawing Layer"));
 
     // init the root folder
-    RootFolder = CreateDefaultSubobject<UArianeLayerFolder>(TEXT("Root Folder"));
-    RootFolder->SetupAttachment(this);
+    //RootFolder = CreateDefaultSubobject<UArianeLayerFolder>(TEXT("Root Folder"));
+    //RootFolder->SetupAttachment(this);
 }
 
 void
@@ -34,7 +35,39 @@ UArianeLayerStack::Serialize( FArchive& Ar )
 UArianePainting3DComponent*
 UArianeLayerStack::GetPainting3DComponent()
 {
+    AArianePainting3DActor* Painting3DActor = Cast<AArianePainting3DActor>(GetOwner());
+
+    return Painting3DActor->GetPainting3DComponent();
+}
+
+/*
+UArianePainting3DComponent*
+UArianeLayerStack::GetPainting3DComponent()
+{
     return Cast<UArianePainting3DComponent>(GetOuter());
+}
+*/
+
+void
+UArianeLayerStack::OnRegister()
+{
+    Super::OnRegister();
+
+    if( RootFolder == nullptr )
+    {
+        RootFolder = NewObject<UArianeLayerFolder>( this
+                                                  , "Root Folder"
+                                                  , RF_Transactional | RF_Public );
+
+        RootFolder->AttachToComponent( this,  FAttachmentTransformRules::KeepWorldTransform );
+    }
+
+    RootFolder->RegisterComponent();
+}
+
+void
+UArianeLayerStack::Init()
+{
 }
 
 UArianeLayerFolder*
@@ -84,6 +117,8 @@ void
 UArianeLayerStack::PostLoad()
 {
     Super::PostLoad();
+
+    Init();
 
     OnPreSelectionChanged.Broadcast();
     OnPreHierarchyChanged.Broadcast();
@@ -186,6 +221,15 @@ UArianeLayerStack::AddLayers( UArianeLayerFolder* FosterFolder, TArray<UArianeLa
 }
 
 void
+UArianeLayerStack::Update( bool bInteractive )
+{
+    if( RootFolder )
+    {
+        RootFolder->Update( bInteractive );
+    }
+}
+
+void
 UArianeLayerStack::AddLayer( UArianeLayerFolder* FosterFolder, UArianeLayer* OrphanLayer, bool bTriggerEvent )
 {
     AddLayers( FosterFolder, { OrphanLayer}, bTriggerEvent );
@@ -282,7 +326,7 @@ UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder, 
                                                                 : RootFolder;
                                                                            // The outer must be the AActor or else the TEDS system could crash
     FName LayerName = FName( *FString::Printf(TEXT("Drawing Layer %d"), GetDrawingLayerCount() + 1 ) );
-    UArianeLayerDrawing* NewDrawingLayer = NewObject<UArianeLayerDrawing>( GetPainting3DComponent()->GetOwner()
+    UArianeLayerDrawing* NewDrawingLayer = NewObject<UArianeLayerDrawing>( this
                                                                          , LayerName
                                                                          , RF_Transactional | RF_Public ); // for undos
 
@@ -301,7 +345,7 @@ UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder, b
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
                                                                         // The outer must be the AActor or else the TEDS system could crash
-    UArianeLayerFolder* NewLayerFolder = NewObject<UArianeLayerFolder>( GetPainting3DComponent()->GetOwner()
+    UArianeLayerFolder* NewLayerFolder = NewObject<UArianeLayerFolder>( this
                                                                       , NAME_None
                                                                       , RF_Transactional | RF_Public  ); // for undos
 

@@ -149,6 +149,9 @@ public:
     TWeakObjectPtr<UArianeLayerDrawing> GetDrawingLayer();
     void OnRegisterLayer();
     void Animate( const FArianeImageKeyData* KeyData, const FArianeImageKeyData* NextKeyData, float T );
+    virtual void PostDuplicate( EDuplicateMode::Type DuplicateMode ) override;
+    virtual void Serialize(FArchive& Ar) override;
+    void RebindObjects();
 
 protected:
     void BindDelegates();
@@ -167,6 +170,7 @@ protected:
     UPROPERTY( EditAnywhere )
     mutable FArianeObjectID RootGroupID;
 
+    UPROPERTY( EditAnywhere )
     TWeakObjectPtr<UArianeLayerDrawing> DrawingLayer;
 
 protected:

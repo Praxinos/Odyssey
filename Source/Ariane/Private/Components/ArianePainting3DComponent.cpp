@@ -4,6 +4,7 @@
 // Ariane headers
 #include "ArianePainting3DComponent.h"
 #include "ArianePainting3DStaticMeshComponent.h"
+#include "ArianeImage.h"
 #include "ArianePath.h"
 #include "ArianeCycle.h"
 #include "ArianeSegment.h"
@@ -26,19 +27,21 @@
 // testing
 #include "Components/LineBatchComponent.h"
 
+#define LOCTEXT_NAMESPACE "ArianeEditor"
+
 UArianePainting3DComponent::~UArianePainting3DComponent()
 {
 }
 
-UArianePainting3DComponent::UArianePainting3DComponent()
-    : LayerStack ( nullptr )
+UArianePainting3DComponent::UArianePainting3DComponent(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer)
+    , LayerStack ( nullptr )
     , DefaultMaterial ( nullptr )
     , CurrentPaletteColorEntry ( nullptr )
     , EditorInterface ( nullptr )
 {
-    LayerStack = CreateDefaultSubobject<UArianeLayerStack>(TEXT("LayerStack"));
-
-    LayerStack->SetupAttachment( this );
+    //LayerStack = ObjectInitializer.CreateDefaultSubobject<UArianeLayerStack>(this, TEXT("LayerStack"));
+    //LayerStack->SetupAttachment( this );
 
     PrimaryComponentTick.bCanEverTick = true;
     PrimaryComponentTick.bStartWithTickEnabled = true;
@@ -88,6 +91,12 @@ UArianePainting3DComponent::GetDefaultMaterial()
 }
 
 void
+UArianePainting3DComponent::PostInitProperties()
+{
+    Super::PostInitProperties();
+}
+
+void
 UArianePainting3DComponent::OnRegister()
 {
     UMaterial* BaseMaterial = Cast<UMaterial>( StaticLoadObject( UMaterial::StaticClass()
@@ -96,9 +105,43 @@ UArianePainting3DComponent::OnRegister()
 
     Super::OnRegister();
 
-    DefaultMaterial = UMaterialInstanceDynamic::Create( BaseMaterial, this );
-    // disable emission
-    //DefaultMaterial->SetVectorParameterValue(FName("EmissiveColor"), FLinearColor::Black);
+    if( LayerStack == nullptr )
+    {
+        LayerStack = NewObject<UArianeLayerStack>( this
+                                                 , "LayerStack"
+                                                 , RF_Transactional | RF_Public );
+
+        LayerStack->AttachToComponent( this,  FAttachmentTransformRules::KeepWorldTransform );
+    }
+
+    LayerStack->RegisterComponent();
+
+    if( DefaultMaterial == nullptr )
+    {
+        DefaultMaterial = UMaterialInstanceDynamic::Create( BaseMaterial, this );
+        // disable emission
+        //DefaultMaterial->SetVectorParameterValue(FName("EmissiveColor"), FLinearColor::Black);
+    }
+
+
+     UArianeLayerFolder::Traverse( LayerStack->GetRootFolder()
+                                   , [this]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
+        {
+            UArianeLayerDrawing* MyDrawingLayer = Cast<UArianeLayerDrawing>(Layer);
+
+            if (MyDrawingLayer)
+            {
+                UArianeImage* Image = MyDrawingLayer->GetImage();
+
+                UE_LOG(LogTemp, Warning, TEXT("[ChainCheck] Comp: %p | Stack: %p (Outer: %p) | Layer: %p (Outer: %p) | Image: %p (Outer: %p)"),
+                    this,
+                    LayerStack, LayerStack->GetOuter(),
+                    Layer, Layer->GetOuter(),
+                    Image, Image->GetOuter());
+            }
+
+        return UArianeLayerFolder::ETraversalReturnValue::Continue;
+    } );
 }
 
 /*
@@ -165,8 +208,6 @@ UArianePainting3DComponent::SetMaterial( int32 ElementIndex, UMaterialInterface*
 void
 UArianePainting3DComponent::Init()
 {
-    //LayerStack->Init();
-
     Update( false );
 }
 
@@ -176,6 +217,7 @@ UArianePainting3DComponent::PostLoad()
     Super::PostLoad();
 
     Init();
+    //Update( false );
 }
 
 void
@@ -203,7 +245,7 @@ UArianePainting3DComponent::OnComponentDestroyed( bool bDestroyingHierarchy )
 {
     Super::OnComponentDestroyed( bDestroyingHierarchy );
 
-    LayerStack->OnComponentDestroyed( bDestroyingHierarchy );
+    //LayerStack->OnComponentDestroyed( bDestroyingHierarchy );
 }
 
 FBoxSphereBounds
@@ -212,7 +254,10 @@ UArianePainting3DComponent::CalcBounds(const FTransform& LocalToWorld) const
     //FBoxSphereBounds RetBounds = Super::CalcBounds( FTransform::Identity );
     FBoxSphereBounds RetBounds = FBoxSphereBounds(ForceInit);
 
-    RetBounds = /*RetBounds +*/ LayerStack->GetRootFolder()->GetBounds();
+    if( LayerStack )
+    {
+        RetBounds = /*RetBounds +*/ LayerStack->GetBounds();
+    }
 
     return RetBounds.TransformBy( LocalToWorld );
 }
@@ -232,15 +277,18 @@ UArianePainting3DComponent::OnPostUpdateDelegate()
 void
 UArianePainting3DComponent::Update( bool bInteractive )
 {
-    OnPreUpdate.Broadcast( bInteractive );
+    if( LayerStack )
+    {
+        OnPreUpdate.Broadcast( bInteractive );
 
-    LayerStack->GetRootFolder()->Update( bInteractive );
+        LayerStack->Update( bInteractive );
 
-    // will call CalcBounds (nb: calling UMeshComponent::UpdateBounds() does not work sometimes, especially when then
-    // path starts empty but this works.
-    UpdateComponentToWorld();
+        // will call CalcBounds (nb: calling UMeshComponent::UpdateBounds() does not work sometimes, especially when then
+        // path starts empty but this works.
+        UpdateComponentToWorld();
 
-    OnPostUpdate.Broadcast( bInteractive );
+        OnPostUpdate.Broadcast( bInteractive );
+    }
 
 //UpdateBounds();
 //MarkRenderTransformDirty();
@@ -326,3 +374,5 @@ UArianePainting3DComponent::ConvertToStaticMesh()
 {
     StaticMeshComponent->ConvertToStaticMesh();
 }
+
+#undef LOCTEXT_NAMESPACE

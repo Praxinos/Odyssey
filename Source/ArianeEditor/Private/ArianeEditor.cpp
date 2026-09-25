@@ -69,10 +69,6 @@ FArianeEditor::FArianeEditor( FArianeEditorViewportToolkit* iToolkit )
     , DrawingCoordinateSystem ( EArianeEditorDrawingCoordinateSystem::Local )
 {
     HUDDrawingFlags.Mode = FArianeEditorHUD::EMode::Object;
-
-    // Component selection is managed by ArianeEditor in order to emulate a Pre/Post Selection event behavior
-    USelection::SelectionChangedEvent.AddRaw( this, &FArianeEditor::OnEditorSelectionChanged );
-
 }
 
 const FArianeEditorHUD::FDrawingFlags&
@@ -87,6 +83,9 @@ FArianeEditor::PostInit()
     // Set the CurrentPainting3DComponent
     // It will also trigger an event which will allow our widget to refresh at start
     OnEditorSelectionChanged( GEditor->GetSelectedActors() );
+
+    // Component selection is managed by ArianeEditor in order to emulate a Pre/Post Selection event behavior
+    USelection::SelectionChangedEvent.AddRaw( this, &FArianeEditor::OnEditorSelectionChanged );
 
     // remeber the last tool used. this is needed because when we save the assets, all tools are deselected.
     // We will then use the saved tool identifier to activate the last used tool after a save.
@@ -108,8 +107,10 @@ FArianeEditor::OnObjectPreSave( UObject* SavedObject, FObjectPreSaveContext Cont
     if ( ( LastActiveToolIdentifier.IsEmpty() == false )
       && ( GetToolManager()->HasActiveTool(EToolSide::Left) == false ) )
     {
-        GetToolManager()->SelectActiveToolType(EToolSide::Left, LastActiveToolIdentifier);
-        GetToolManager()->ActivateTool(EToolSide::Left);
+        if( GetToolManager()->SelectActiveToolType(EToolSide::Left, LastActiveToolIdentifier) )
+        {
+            GetToolManager()->ActivateTool(EToolSide::Left);
+        }
     }
 }
 

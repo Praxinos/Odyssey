@@ -84,8 +84,6 @@ FArianeGroup::FArianeGroup()
     , bUseEditorHUDForegroundColor( true )
 #endif
 {
-    InvalidationFlags = new FArianeGroupInvalidationFlags();
-
     // Default material interface. color only
     //MaterialInterface = GEngine->VertexColorMaterial;
 }
@@ -99,10 +97,23 @@ FArianeGroup::FArianeGroup( UArianeImage* InImage
     , bUseEditorHUDForegroundColor( true )
 #endif
 {
-    InvalidationFlags = new FArianeGroupInvalidationFlags();
-
     // Default material interface. color only
     //MaterialInterface = GEngine->VertexColorMaterial;
+}
+
+FArianeGroupInvalidationFlags&
+FArianeGroup::GetInvalidationFlags()
+{
+    FArianeGroupInvalidationFlags* InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianeGroupInvalidationFlags>();
+
+    if( InvalidationFlagsPtr == nullptr )
+    {
+        InvalidationFlags = FInstancedStruct::Make<FArianeGroupInvalidationFlags>();
+
+        InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianeGroupInvalidationFlags>();
+    }
+
+    return *InvalidationFlagsPtr;
 }
 
 bool
@@ -146,7 +157,7 @@ FArianeGroup::CopyShape( const FCopyArgs& CopyArgs )
 void
 FArianeGroup::UpdateBoundingBox( EUpdateFlags UpdateFlags )
 {
-    FArianeGroupInvalidationFlags* GroupInvalidationFlags = static_cast<FArianeGroupInvalidationFlags*>(InvalidationFlags);
+    FArianeGroupInvalidationFlags* GroupInvalidationFlags = &GetInvalidationFlags();
 
     if( ( GroupInvalidationFlags->Hierarchy )
      || ( GroupInvalidationFlags->Children  ) )
