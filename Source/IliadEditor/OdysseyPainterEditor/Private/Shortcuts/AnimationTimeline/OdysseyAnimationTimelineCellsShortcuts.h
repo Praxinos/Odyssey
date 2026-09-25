@@ -35,6 +35,11 @@ public:
     void Action_SelectAll();
     void Action_Delete();
     void Action_CreateStaggerCell( EOdysseyLayerCellImageStaggerBehaviour iBehavior );
+    void Action_AddCellsBefore();
+    void Action_AddCellsAfter();
+private:
+    void Action_AddCellsBeforeOrAfter( int32 iNumberOfCellsToAddBeforeOrAfter);
+public:
     void Action_IncreaseCellExposure();
     void Action_DecreaseCellExposure();
     void Action_SetCellExposure();
@@ -46,6 +51,8 @@ public:
     bool CanAction_SelectAll();
     bool CanAction_Delete();
     bool CanAction_CreateStaggerCell();
+    bool CanAction_AddCellsBefore();
+    bool CanAction_AddCellsAfter();
     bool CanAction_IncreaseCellExposure();
     bool CanAction_DecreaseCellExposure();
     bool CanAction_SetCellExposure();

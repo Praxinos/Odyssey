@@ -9,12 +9,18 @@
 #include "Framework/Docking/TabManager.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Framework/MultiBox/MultiBoxExtender.h"
+#include "ISinglePropertyView.h"
 #include "Layout/WidgetPath.h"
 #include "Misc/MessageDialog.h"
+#include "Modules/ModuleManager.h"
+#include "PropertyCustomizationHelpers.h"
+#include "PropertyEditorModule.h"
+#include "PropertyHandle.h"
 #include "ScopedTransaction.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Input/SButton.h"
+#include "Widgets/Input/SSpinBox.h"
 #include "Widgets/Layout/SEnableBox.h"
 
 #include "OdysseyLayerCellImageStagger.h"
@@ -36,6 +42,7 @@
 #include "TimelineTools/OdysseyAnimationTimelineTools.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "OdysseyLayerCellSelection.h"
+#include "OdysseyPainterEditorAnimationUserSettings.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorMassModifierView.h"
 #include "Widgets/SOdysseyEvents.h"
 #include "OdysseyVectorGroupPaint.h"
@@ -423,18 +430,32 @@ SOdysseyAnimationLayerImageTimeline::OnMainSubRowMouseButtonUp(const FGeometry& 
 }
 
 FReply
-SOdysseyAnimationLayerImageTimeline::OnContextMenuMinusButtonClicked()
+SOdysseyAnimationLayerImageTimeline::OnContextMenuRemoveOneExposureButtonClicked()
 {
     mAnimationTimelineCellsShortcuts->Action_DecreaseCellExposure();
     return FReply::Handled();
 }
 
 FReply
-SOdysseyAnimationLayerImageTimeline::OnContextMenuPlusButtonClicked()
+SOdysseyAnimationLayerImageTimeline::OnContextMenuAddOneExposureButtonClicked()
 {
     mAnimationTimelineCellsShortcuts->Action_IncreaseCellExposure();
     return FReply::Handled();
 }
+
+FReply
+SOdysseyAnimationLayerImageTimeline::OnContextMenuAddCellsBeforeClicked()
+{
+    mAnimationTimelineCellsShortcuts->Action_AddCellsBefore();
+    return FReply::Handled();
+}
+FReply
+SOdysseyAnimationLayerImageTimeline::OnContextMenuAddCellsAfterClicked()
+{
+    mAnimationTimelineCellsShortcuts->Action_AddCellsAfter();
+    return FReply::Handled();
+}
+
 
 FReply
 SOdysseyAnimationLayerImageTimeline::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
@@ -705,6 +726,24 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
     mAnimationTimelineCellImageStaggerShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(mLayer->GetAnimation());
     mAnimationTimelineCellImageStaggerShortcuts->MapActionsToCommandList(CommandList);
 
+    //---
+
+    MenuBuilder.BeginSection("Selection", LOCTEXT("timeline-cells.context-menu.selection-section.name", "Selection"));
+        MenuBuilder.AddMenuEntry(FGenericCommands::Get().SelectAll);
+    MenuBuilder.EndSection();
+
+    //---
+
+    MenuBuilder.BeginSection("Common", LOCTEXT("timeline-cells.context-menu.common-section.name", "Common"));
+        MenuBuilder.AddMenuEntry(FGenericCommands::Get().Cut);
+        MenuBuilder.AddMenuEntry(FGenericCommands::Get().Copy);
+        MenuBuilder.AddMenuEntry(FGenericCommands::Get().Paste);
+        MenuBuilder.AddSeparator();
+        MenuBuilder.AddMenuEntry(FGenericCommands::Get().Delete);
+    MenuBuilder.EndSection();
+
+    //---
+
     //TODO: harmonize with shortcuts ? see comment below
     auto IsReadOnly = [this]()
         {
@@ -730,69 +769,10 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
             return false;
         };
 
-    MenuBuilder.AddWidget(
-        SNew(SHorizontalBox)
-        +SHorizontalBox::Slot()
-        .Padding(FMargin(4, 0, 2, 0))
-        [
-            SNew(SButton)
-            .OnClicked(this, &SOdysseyAnimationLayerImageTimeline::OnContextMenuMinusButtonClicked)
-            [
-                SNew(STextBlock)
-                .Text(FText::FromString(TEXT("-")))
-                .Justification(ETextJustify::Center)
-            ]
-        ]
-        +SHorizontalBox::Slot()
-        .Padding(FMargin(2, 0, 4, 0))
-        [
-            SNew(SButton)
-            .OnClicked(this, &SOdysseyAnimationLayerImageTimeline::OnContextMenuPlusButtonClicked)
-            [
-                SNew(STextBlock)
-                .Text(FText::FromString(TEXT("+")))
-                .Justification(ETextJustify::Center)
-            ]
-        ],
-        FText(),
-        true,
-        false
-    );
-    //MenuBuilder.EndSection();
-
-    MenuBuilder.BeginSection("Selection", LOCTEXT("timeline-cells.context-menu.selection-section.name", "Selection"));
-        MenuBuilder.AddMenuEntry(FGenericCommands::Get().SelectAll);
-    MenuBuilder.EndSection();
-
-    MenuBuilder.BeginSection("Common", LOCTEXT("timeline-cells.context-menu.common-section.name", "Common"));
-        MenuBuilder.AddMenuEntry(FGenericCommands::Get().Cut);
-        MenuBuilder.AddMenuEntry(FGenericCommands::Get().Copy);
-        MenuBuilder.AddMenuEntry(FGenericCommands::Get().Paste);
-        MenuBuilder.AddSeparator("");
-        MenuBuilder.AddMenuEntry(FGenericCommands::Get().Delete);
-    MenuBuilder.EndSection();
-
     MenuBuilder.BeginSection("Cells", LOCTEXT("timeline-cells.context-menu.cells-section.name", "Cells"));
-        MenuBuilder.AddSubMenu(
-            LOCTEXT( "timeline-cells.context-menu.create-stagger-cell.name", "Stagger" ),
-            LOCTEXT( "timeline-cells.context-menu.create-stagger-cell.tooltip", "Create stagger cell from selected cells" ),
-            FNewMenuDelegate::CreateLambda( [this]( FMenuBuilder& ioMenuBuilder )
-                                            {
-                                                ioMenuBuilder.AddMenuEntry(FOdysseyPainterEditorAnimationCommands::Get().CreateStaggerCellLoop, NAME_None, LOCTEXT("timeline-cells.context-menu.stagger-cell-loop.name", "Loop"));
-                                                ioMenuBuilder.AddMenuEntry(FOdysseyPainterEditorAnimationCommands::Get().CreateStaggerCellPingPong, NAME_None, LOCTEXT("timeline-cells.context-menu.stagger-cell-pingpong.name", "Ping-Pong"));
-                                                ioMenuBuilder.AddMenuEntry(FOdysseyPainterEditorAnimationCommands::Get().CreateStaggerCellRandom, NAME_None, LOCTEXT("timeline-cells.context-menu.stagger-cell-random.name", "Random"));
-                                            } ),
-            false, // bInOpenSubMenuOnClick
-            FSlateIcon(),
-            true, // bInShouldCloseWindowAfterMenuSelection
-            "CreateStagger"
-        );
-        MenuBuilder.AddMenuEntry(FOdysseyPainterEditorAnimationCommands::Get().ConvertToReferenceCells);
-        MenuBuilder.AddMenuEntry(
-            FOdysseyPainterEditorAnimationCommands::Get().SetCellExposure,
-            NAME_None,
-            LOCTEXT("timeline-cells.context-menu.set-selected-cells-exposure.name", "Set Exposure")
-        );
+        //PATCH: Without this separator, the following AddEditableText() will be added at the end of the previous section oO
+        // maybe try to investigate ... one day ... -_-
+        MenuBuilder.AddSeparator( NAME_None, EVisibility::Collapsed );
         //TODO: add functions to shortcuts ? but it must be 2 distinct functions: 1 for shortcut with modal request and 1 for the popup menu here with a string/text as parameter
         // and the first one must call the second one
         MenuBuilder.AddEditableText(
@@ -846,6 +826,22 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
             LOCTEXT("timeline-cells.context-menu.cell-mark.tooltip", "Set a mark on the selected cells"),
             FNewMenuDelegate::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::BuildCellsMarksSubMenu, iClickedFrame)
         );
+        MenuBuilder.AddSubMenu(
+            LOCTEXT( "timeline-cells.context-menu.create-stagger-cell.name", "Stagger" ),
+            LOCTEXT( "timeline-cells.context-menu.create-stagger-cell.tooltip", "Create stagger cell from selected cells" ),
+            FNewMenuDelegate::CreateLambda( [this]( FMenuBuilder& ioMenuBuilder )
+                                            {
+                                                ioMenuBuilder.AddMenuEntry(FOdysseyPainterEditorAnimationCommands::Get().CreateStaggerCellLoop, NAME_None, LOCTEXT("timeline-cells.context-menu.stagger-cell-loop.name", "Loop"));
+                                                ioMenuBuilder.AddMenuEntry(FOdysseyPainterEditorAnimationCommands::Get().CreateStaggerCellPingPong, NAME_None, LOCTEXT("timeline-cells.context-menu.stagger-cell-pingpong.name", "Ping-Pong"));
+                                                ioMenuBuilder.AddMenuEntry(FOdysseyPainterEditorAnimationCommands::Get().CreateStaggerCellRandom, NAME_None, LOCTEXT("timeline-cells.context-menu.stagger-cell-random.name", "Random"));
+                                                ioMenuBuilder.AddSeparator();
+                                                ioMenuBuilder.AddMenuEntry( FOdysseyPainterEditorAnimationCommands::Get().ConvertToReferenceCells );
+                                            } ),
+            false, // bInOpenSubMenuOnClick
+            FSlateIcon(),
+            true, // bInShouldCloseWindowAfterMenuSelection
+            "CreateStagger"
+        );
         MenuBuilder.AddMenuEntry(
               FOdysseyPainterEditorAnimationCommands::Get().ReverseSelectedCells
             , NAME_None
@@ -855,10 +851,120 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
         );
     MenuBuilder.EndSection();
 
+    //---
+
+    UOdysseyPainterEditorAnimationUserSettings* Settings = GetMutableDefault<UOdysseyPainterEditorAnimationUserSettings>();
+
+    FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+
+    FSinglePropertyParams Params;
+    Params.NamePlacement = EPropertyNamePlacement::Hidden;
+    Params.bHideResetToDefault = true;
+
+    TSharedPtr<ISinglePropertyView> PropertyView = PropertyEditorModule.CreateSingleProperty( Settings, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorAnimationUserSettings, NumberOfCellsToAdd ), Params );
+
+    MenuBuilder.BeginSection( "AddCells", LOCTEXT( "timeline-cells.context-menu.add-cells-section.name", "Add Cells" ) );
+
+        MenuBuilder.AddWidget(
+            SNew( SHorizontalBox )
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .Padding( FMargin( 4, 0, 2, 0 ) )
+            [
+                SNew( SButton )
+                .ToolTipText_Lambda( []() -> FText
+                                     {
+                                         static FText format = LOCTEXT( "timeline-cells.context-menu.add-cells-before.tooltip", "Add {0} {1}|plural(one=cell,other=cells) before current cell(s)" );
+
+                                         int32 numberOfCellsToAdd = GetDefault<UOdysseyPainterEditorAnimationUserSettings>()->NumberOfCellsToAdd;
+                                         return FText::Format( format, numberOfCellsToAdd, numberOfCellsToAdd );
+                                     } )
+                .OnClicked( this, &SOdysseyAnimationLayerImageTimeline::OnContextMenuAddCellsBeforeClicked )
+                [
+                    SNew( SImage )
+                    .Image( FOdysseyStyle::GetBrush( "Animation.Layer.AddCellsBefore" ) )
+                ]
+            ]
+            + SHorizontalBox::Slot()
+            .FillWidth( 1 )
+            .HAlign( HAlign_Fill )
+            //.Padding( FMargin( 4, 0, 2, 0 ) )
+            [
+                PropertyView.ToSharedRef()
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .Padding( FMargin( 2, 0, 4, 0 ) )
+            [
+                SNew( SButton )
+                .ToolTipText_Lambda( []() -> FText
+                                     {
+                                         static FText format = LOCTEXT( "timeline-cells.context-menu.add-cells-after.tooltip", "Add {0} {1}|plural(one=cell,other=cells) after current cell(s)" );
+
+                                         int32 numberOfCellsToAdd = GetDefault<UOdysseyPainterEditorAnimationUserSettings>()->NumberOfCellsToAdd;
+                                         return FText::Format( format, numberOfCellsToAdd, numberOfCellsToAdd );
+                                     } )
+                .OnClicked( this, &SOdysseyAnimationLayerImageTimeline::OnContextMenuAddCellsAfterClicked )
+                [
+                    SNew( SImage )
+                    .Image( FOdysseyStyle::GetBrush( "Animation.Layer.AddCellsAfter" ) )
+                ]
+            ],
+            FText(),
+            true,
+            false
+        );
+
+    MenuBuilder.EndSection();
+
+    //---
+
+    MenuBuilder.BeginSection( "SetExposure", LOCTEXT( "timeline-cells.context-menu.set-exposure-section.name", "Set Exposure" ) );
+
+        MenuBuilder.AddWidget(
+            SNew( SHorizontalBox )
+            + SHorizontalBox::Slot()
+            .Padding( FMargin( 4, 0, 2, 0 ) )
+            [
+                SNew( SButton )
+                .OnClicked( this, &SOdysseyAnimationLayerImageTimeline::OnContextMenuRemoveOneExposureButtonClicked )
+                [
+                    SNew( STextBlock )
+                    .Text( FText::FromString( TEXT( "-1" ) ) )
+                    .Justification( ETextJustify::Center )
+                ]
+            ]
+            + SHorizontalBox::Slot()
+            .Padding( FMargin( 2, 0, 4, 0 ) )
+            [
+                SNew( SButton )
+                .OnClicked( this, &SOdysseyAnimationLayerImageTimeline::OnContextMenuAddOneExposureButtonClicked )
+                [
+                    SNew( STextBlock )
+                    .Text( FText::FromString( TEXT( "+1" ) ) )
+                    .Justification( ETextJustify::Center )
+                ]
+            ],
+            FText(),
+            true,
+            false
+        );
+
+        MenuBuilder.AddMenuEntry(
+            FOdysseyPainterEditorAnimationCommands::Get().SetCellExposure,
+            NAME_None,
+            LOCTEXT("timeline-cells.context-menu.set-selected-cells-exposure.name", "Set Exposure")
+        );
+
+    MenuBuilder.EndSection();
+
+    //---
+
     //TODO: move it to vector class ... ?!
     if( mLayer->GetClass() == UOdysseyAnimationLayerImageVector::StaticClass() )
     {
         MenuBuilder.BeginSection("More", LOCTEXT("timeline-cells.context-menu.mass-modifier.name", "Mass Modifier"));
+
         MenuBuilder.AddMenuEntry(
               LOCTEXT("timeline-cells.context-menu.mass-modifier.name", "Mass Modifier")
             , LOCTEXT("timeline-cells.context-menu.mass-modifier.tooltip", "Mass Modifier")
@@ -867,15 +973,6 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
 
         MenuBuilder.EndSection();
     }
-
-    MenuBuilder.BeginSection( "AddCells", LOCTEXT( "timeline-cells.context-menu.add-cells-section.name", "Add Cells" ) );
-
-    MenuBuilder.EndSection();
-
-
-    MenuBuilder.BeginSection( "SetExposure", LOCTEXT( "timeline-cells.context-menu.set-exposure-section.name", "Set Exposure" ) );
-
-    MenuBuilder.EndSection();
 }
 
 FReply

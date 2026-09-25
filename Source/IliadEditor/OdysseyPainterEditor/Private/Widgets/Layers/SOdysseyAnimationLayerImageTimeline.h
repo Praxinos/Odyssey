@@ -135,8 +135,11 @@ private:
 
     void BuildCellsMarksSubMenu(FMenuBuilder& iMenuBuilder, FFrameNumber iClickedFrame);
 
-    FReply OnContextMenuMinusButtonClicked();
-    FReply OnContextMenuPlusButtonClicked();
+    FReply OnContextMenuAddCellsBeforeClicked();
+    FReply OnContextMenuAddCellsAfterClicked();
+
+    FReply OnContextMenuRemoveOneExposureButtonClicked();
+    FReply OnContextMenuAddOneExposureButtonClicked();
 
     EVisibility GetRowDisabledColorVisibility(FName iRow) const;
     const FSlateBrush* GetRowDisabledColorValue(FName iRow) const;

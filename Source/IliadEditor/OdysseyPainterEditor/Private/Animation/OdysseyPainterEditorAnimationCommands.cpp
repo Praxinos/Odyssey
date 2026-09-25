@@ -66,6 +66,8 @@ FOdysseyPainterEditorAnimationCommands::RegisterCommands()
 
     UI_BUNDLE_COMMAND( BreakCell, TimelineShortcuts, "Break Cell", "Breaks Cell at Current Frame in Current Layer", EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( BreakAndClearCell, TimelineShortcuts, "Break & Clear Cell", "Breaks & Clear Cell at Current Frame in Current Layer", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( AddCellsBefore, TimelineShortcuts, "Add Cell(s) Before Current Cell", "Add New Cells Before Current Cell", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( AddCellsAfter, TimelineShortcuts, "Add Cell(s) After Current Cell", "Add New Cells After Current Cell", EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( IncreaseCellExposure, TimelineShortcuts, "Increase Cell Exposure", "Increase Current or Selected Cells Exposure by 1 frame", EUserInterfaceActionType::Button, FInputChord(EKeys::Add));
     UI_BUNDLE_COMMAND( DecreaseCellExposure, TimelineShortcuts, "Decrease Cell Exposure", "Decrease Current or Selected Cells Exposure by 1 frame", EUserInterfaceActionType::Button, FInputChord(EKeys::Subtract));
     UI_BUNDLE_COMMAND( SetCellExposure, TimelineShortcuts, "Set Cell Exposure", "Set Current or Selected Cells Exposure", EUserInterfaceActionType::Button, FInputChord());

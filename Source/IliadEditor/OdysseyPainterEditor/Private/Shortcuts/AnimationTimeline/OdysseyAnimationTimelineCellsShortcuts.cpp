@@ -20,6 +20,7 @@
 #include "OdysseyLayerCellSelection.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
+#include "OdysseyPainterEditorAnimationUserSettings.h"
 #include "OdysseyPainterEditorModule.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -92,6 +93,18 @@ FOdysseyAnimationTimelineCellsShortcuts::MapActionsToCommandList(TSharedRef<FUIC
         FOdysseyPainterEditorAnimationCommands::Get().ReverseSelectedCells,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_ReverseSelectedCells),
         FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_ReverseSelectedCells)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorAnimationCommands::Get().AddCellsBefore,
+        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_AddCellsBefore ),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_AddCellsBefore )
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorAnimationCommands::Get().AddCellsAfter,
+        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_AddCellsAfter ),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_AddCellsAfter )
     );
 
     iCommandList->MapAction(
@@ -400,6 +413,84 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_CreateStaggerCell( EOdysseyLayer
         staggerCell->SetExposure( exposure );
         staggerCell->SetBehaviour( iBehavior );
         staggerCell->SetReach( reach, false );
+    }
+}
+
+void
+FOdysseyAnimationTimelineCellsShortcuts::Action_AddCellsBefore()
+{
+    const UOdysseyPainterEditorAnimationUserSettings* settings = GetDefault<UOdysseyPainterEditorAnimationUserSettings>();
+    Action_AddCellsBeforeOrAfter( -settings->NumberOfCellsToAdd );
+}
+void
+FOdysseyAnimationTimelineCellsShortcuts::Action_AddCellsAfter()
+{
+    const UOdysseyPainterEditorAnimationUserSettings* settings = GetDefault<UOdysseyPainterEditorAnimationUserSettings>();
+    Action_AddCellsBeforeOrAfter( settings->NumberOfCellsToAdd );
+}
+
+void
+FOdysseyAnimationTimelineCellsShortcuts::Action_AddCellsBeforeOrAfter( int32 iNumberOfCellsToAddBeforeOrAfter )
+{
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if( !animation )
+        return;
+
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( animation->GetLayerStack() );
+    if( !layerStack )
+        return;
+
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>( layerStack->GetCurrentLayer() );
+    if( !layer )
+        return;
+
+    if( !layer->IsEditable() )
+        return;
+
+    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    if( selectedCells.IsEmpty() )
+    {
+        UOdysseyLayerCell* cell = layer->GetCellAtFrame( mCurrentFrame.Get() );
+        if( !cell )
+            return;
+
+        selectedCells.Add( cell );
+    }
+
+    FScopedTransaction ScopedTransaction( iNumberOfCellsToAddBeforeOrAfter < 0
+                                          ? LOCTEXT( "timeline-cells.transaction.add-cells-before", "Add new cell(s) before current cell" )
+                                          : LOCTEXT( "timeline-cells.transaction.add-cells-after", "Add new cell(s) after current cell" )
+    );
+
+    // Before
+    if( iNumberOfCellsToAddBeforeOrAfter < 0 )
+    {
+        mOnTransactCurrentFrame.ExecuteIfBound( selectedCells[0]->GetFrameRange().GetLowerBoundValue() );
+
+        for( UOdysseyLayerCell* cell : selectedCells )
+        {
+            int index = INDEX_NONE;
+            bool found = layer->GetCells().Find( cell, index );
+            if( !found )
+                continue;
+
+            layer->AddCells( layer->GetDefaultCellClass(), index, -iNumberOfCellsToAddBeforeOrAfter );
+        }
+    }
+    // After
+    else
+    {
+        mOnTransactCurrentFrame.ExecuteIfBound( selectedCells[0]->GetFrameRange().GetLowerBoundValue() );
+
+        for( UOdysseyLayerCell* cell : selectedCells )
+        {
+            int index = INDEX_NONE;
+            bool found = layer->GetCells().Find( cell, index );
+            if( !found )
+                continue;
+
+            layer->AddCells( layer->GetDefaultCellClass(), index + 1, iNumberOfCellsToAddBeforeOrAfter );
+        }
     }
 }
 
@@ -735,6 +826,63 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_CreateStaggerCell()
 
     if (selectedCells.IsEmpty())
         return false;
+
+    return true;
+}
+
+bool
+FOdysseyAnimationTimelineCellsShortcuts::CanAction_AddCellsBefore()
+{
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if( !animation )
+        return false;
+
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( animation->GetLayerStack() );
+    if( !layerStack )
+        return false;
+
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>( layerStack->GetCurrentLayer() );
+    if( !layer )
+        return false;
+
+    if( !layer->IsEditable() )
+        return false;
+
+    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    if( selectedCells.IsEmpty() )
+    {
+        UOdysseyLayerCell* cell = layer->GetCellAtFrame( mCurrentFrame.Get() );
+        if( !cell )
+            return false;
+    }
+
+    return true;
+}
+bool
+FOdysseyAnimationTimelineCellsShortcuts::CanAction_AddCellsAfter()
+{
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if( !animation )
+        return false;
+
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( animation->GetLayerStack() );
+    if( !layerStack )
+        return false;
+
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>( layerStack->GetCurrentLayer() );
+    if( !layer )
+        return false;
+
+    if( !layer->IsEditable() )
+        return false;
+
+    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    if( selectedCells.IsEmpty() )
+    {
+        UOdysseyLayerCell* cell = layer->GetCellAtFrame( mCurrentFrame.Get() );
+        if( !cell )
+            return false;
+    }
 
     return true;
 }
