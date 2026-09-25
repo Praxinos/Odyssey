@@ -278,15 +278,13 @@ FArianeObject::~FArianeObject()
 FArianeObject::FArianeObject()
     : FArianeObject( nullptr
                    , FName( "Ariane Object" )
-                   , EArianeAllocationModel::InstancedStruct
-                   , new FArianeObjectInvalidationFlags() )
+                   , EArianeAllocationModel::InstancedStruct )
 {
 }
 
 FArianeObject::FArianeObject( UArianeImage* InImage
                             , const FName& InName
-                            , EArianeAllocationModel InAllocationModel
-                            , FArianeObjectInvalidationFlags* InInvalidationFlags )
+                            , EArianeAllocationModel InAllocationModel )
     : Name ( InName )
     , Guid ( FGuid::NewGuid() )
     , ParentID ( FArianeObjectID() )
@@ -295,17 +293,34 @@ FArianeObject::FArianeObject( UArianeImage* InImage
     , bExpanded ( true )
     , AllocationModel ( InAllocationModel  )
     , WorldTransformVersion( 0 )
-    , InvalidationFlags ( InInvalidationFlags ? InInvalidationFlags
-                                              : new FArianeObjectInvalidationFlags() )
     , bSelected ( false )
-
 {
 }
 
 FArianeObjectInvalidationFlags&
 FArianeObject::GetInvalidationFlags()
 {
-    return *InvalidationFlags;
+    FArianeObjectInvalidationFlags* InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianeObjectInvalidationFlags>();
+
+    if( InvalidationFlagsPtr == nullptr )
+    {
+        InvalidationFlags = FInstancedStruct::Make<FArianeObjectInvalidationFlags>();
+
+        InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianeObjectInvalidationFlags>();
+    }
+
+    return *InvalidationFlagsPtr;
+}
+
+void
+FArianeObject::PostSerialize(const FArchive& Ar)
+{
+    WorldTransform = FTransform();
+    WorldTransformVersion = 0;
+    Children.Empty();
+    InvalidatedChildren.Empty();
+    BoundingBox = FBox(ForceInit);
+    bSelected = false;
 }
 
 EArianeAllocationModel
@@ -426,7 +441,7 @@ FArianeObject::Invalidate( const FArianeObjectInvalidationFlags& InInvalidationF
         ParentID.GetObject()->InvalidateChild( this );
     }
 
-    InvalidationFlags->OR( InInvalidationFlags );
+    GetInvalidationFlags().OR( InInvalidationFlags );
 
     GetImage()->MarkPackageDirty();
 
@@ -590,7 +605,7 @@ FArianeObject::Update( EUpdateFlags UpdateFlags, bool Recurse )
 
     if( EnumHasAllFlags( UpdateFlags, EUpdateFlags::KeepInvalidated ) == false )
     {
-        InvalidationFlags->Clear();
+        GetInvalidationFlags().Clear();
     }
 
     return InvalidatedChildren.Num() ? false : true;
@@ -788,6 +803,30 @@ FArianeObject::GetOnPostInvalidatedDelegate()
     return OnPostInvalidated;
 }
 
+void
+FArianeObject::PrintPointers( bool bRecurse )
+{
+    FArianeObject::Traverse( this
+                            , [bRecurse]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+    {
+        UE_LOG( LogTemp, Warning, TEXT("UArianeImage::PrintPointers - Object->ParentID.Image:%p"), Object->ParentID.Image );
+
+        for( FArianeObjectID& ChildID : Object->Children )
+        {
+            UE_LOG( LogTemp, Warning, TEXT("UArianeImage::PrintPointers - ChildID.Image:%p"), ChildID.Image );
+        }
+
+        if( Object->GetClass() == FArianePath::StaticClass() )
+        {
+            //FArianePath* Path = static_cast<FArianePath*>( Object );
+
+        }
+
+        return bRecurse ? FArianeObject::ETraversalReturnValue::Continue
+                        : FArianeObject::ETraversalReturnValue::Stop;
+    } );
+}
+
 UArianeImage*
 FArianeObject::GetImage()
 {
@@ -798,6 +837,9 @@ void
 FArianeObject::SetImage( UArianeImage* InImage )
 {
     Image = InImage;
+
+    ParentID.Image = Image;
+    ParentID.InvalidateCache();
 }
 
 TArray<FArianeObjectID>&

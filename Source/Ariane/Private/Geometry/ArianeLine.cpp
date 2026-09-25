@@ -33,8 +33,7 @@ FArianeLine::FArianeLine( UArianeImage* InImage
     : FArianePrimitive( InImage
                       , InName
                       , InStrokeWidth
-                      , InAllocationModel
-                      , new FArianePrimitiveInvalidationFlags() )
+                      , InAllocationModel )
     , StartPoint( InStartPoint )
     , EndPoint( InEndPoint )
 {

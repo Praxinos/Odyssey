@@ -69,10 +69,10 @@ class ARIANE_API FArianePathGeometry3D : public FArianeObjectGeometry3D
                                   , double T );
 };
 
-struct ARIANE_API FArianePathInvalidationFlags : FArianeObjectInvalidationFlags
+USTRUCT(BlueprintType)
+struct ARIANE_API FArianePathInvalidationFlags : public FArianeObjectInvalidationFlags
 {
-    private:
-        typedef FArianeObjectInvalidationFlags Super;
+GENERATED_BODY()
 
     public:
         static const uint32 StaticClass() { return 0xb2a965bc; }; // value is crc32 FArianePathInvalidationFlags
@@ -130,8 +130,7 @@ public:
     FArianePath();
     FArianePath( UArianeImage* InImage
                , const FName& InName
-               , EArianeAllocationModel InAllocationModel
-               , FArianePathInvalidationFlags* InInvalidationFlags = nullptr );
+               , EArianeAllocationModel InAllocationModel );
 
     FArianePath& operator=(const FArianePath& Other);
 
@@ -291,6 +290,7 @@ public:
 
     uint32 GetCubicSegmentCount();
     uint32 GetLinearSegmentCount();
+    virtual FArianePathInvalidationFlags& GetInvalidationFlags() override;
 
 protected:
     void FindChains();

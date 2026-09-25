@@ -25,23 +25,34 @@ FArianePrimitive::FArianePrimitive()
     : FArianePrimitive( nullptr
                       , FName( "Ariane Primitive" )
                       , 0.0f
-                      , EArianeAllocationModel::InstancedStruct
-                      , new FArianePrimitiveInvalidationFlags() )
+                      , EArianeAllocationModel::InstancedStruct )
 {
 }
 
 FArianePrimitive::FArianePrimitive( UArianeImage* InImage
                                   , const FName& InName
                                   , double InStrokeWidth
-                                  , EArianeAllocationModel InAllocationModel
-                                  , FArianePrimitiveInvalidationFlags* InInvalidationflags )
+                                  , EArianeAllocationModel InAllocationModel )
     : FArianePath( InImage
                  , InName
-                 , InAllocationModel
-                 , InInvalidationflags ? InInvalidationflags
-                                       : new FArianePrimitiveInvalidationFlags() )
+                 , InAllocationModel )
     , StrokeWidth ( InStrokeWidth )
 {
+}
+
+FArianePrimitiveInvalidationFlags&
+FArianePrimitive::GetInvalidationFlags()
+{
+    FArianePrimitiveInvalidationFlags* InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianePrimitiveInvalidationFlags>();
+
+    if( InvalidationFlagsPtr == nullptr )
+    {
+        InvalidationFlags = FInstancedStruct::Make<FArianePrimitiveInvalidationFlags>();
+
+        InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianePrimitiveInvalidationFlags>();
+    }
+
+    return *InvalidationFlagsPtr;
 }
 
 bool

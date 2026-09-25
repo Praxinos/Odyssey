@@ -92,24 +92,35 @@ FArianeCycle::~FArianeCycle()
 FArianeCycle::FArianeCycle()
     : FArianeCycle( nullptr
                  , FName( "Ariane Cycle" )
-                 , EArianeAllocationModel::InstancedStruct
-                 , new FArianeCycleInvalidationFlags() )
+                 , EArianeAllocationModel::InstancedStruct )
 {
 }
 
 FArianeCycle::FArianeCycle( UArianeImage* InImage
                           , const FName& InName
-                          , EArianeAllocationModel InAllocationModel
-                          , FArianeCycleInvalidationFlags* InInvalidationFlags )
+                          , EArianeAllocationModel InAllocationModel )
     : FArianeObject ( InImage
                     , InName
-                    , InAllocationModel
-                    , InInvalidationFlags ? InInvalidationFlags
-                                          : new FArianeCycleInvalidationFlags() )
+                    , InAllocationModel )
     , Color ( FColor::Black.WithAlpha(255) )
     , Material( nullptr )
     , Geometry3D ( this )
 {
+}
+
+FArianeCycleInvalidationFlags&
+FArianeCycle::GetInvalidationFlags()
+{
+    FArianeCycleInvalidationFlags* InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianeCycleInvalidationFlags>();
+
+    if( InvalidationFlagsPtr == nullptr )
+    {
+        InvalidationFlags = FInstancedStruct::Make<FArianeCycleInvalidationFlags>();
+
+        InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianeCycleInvalidationFlags>();
+    }
+
+    return *InvalidationFlagsPtr;
 }
 
 // static
@@ -523,7 +534,7 @@ FArianeCycle::ExportProperties( FArianeObject* DestObject )
 void
 FArianeCycle::UpdateShape( EUpdateFlags UpdateFlags )
 {
-    FArianeCycleInvalidationFlags* PathInvalidationFlags = static_cast<FArianeCycleInvalidationFlags*>(InvalidationFlags);
+    FArianeCycleInvalidationFlags* PathInvalidationFlags = &GetInvalidationFlags();
 
     if( ( PathInvalidationFlags->PointAltered )
      || ( PathInvalidationFlags->Color ) )

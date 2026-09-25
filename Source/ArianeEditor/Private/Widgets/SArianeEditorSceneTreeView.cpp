@@ -95,6 +95,11 @@ void
 SArianeEditorSceneTreeView::OnPre3DPaintingComponentSelectionChanged()
 {
     UnbindComponentDelegates();
+
+    //ItemsSource.Empty();
+    //ClearSelection();
+
+    //ClearRootItemsSource();
 }
 
 void
@@ -211,7 +216,6 @@ SArianeEditorSceneTreeView::Update()
 {
     ItemsSource.Empty();
     ClearSelection();
-    RequestTreeRefresh();
 
     FArianeGroup* RootGroup = GetRootGroup();
 
@@ -226,6 +230,8 @@ SArianeEditorSceneTreeView::Update()
         // Expand items if need
         ExpandTree( RootItem );
     }
+
+    RequestTreeRefresh();
 }
 
 void
@@ -437,6 +443,15 @@ SArianeEditorSceneTreeView::OnPostPainting3DComponentUpdate( bool bInteractive )
 }
 
 void
+SArianeEditorSceneTreeView::OnPreImageChanged()
+{
+    //ItemsSource.Empty();
+    //ClearSelection();
+    // Immediate rebuild or else expect some crashes from old references
+    //ClearExpandedItems();
+}
+
+void
 SArianeEditorSceneTreeView::OnPostImageChanged()
 {
     Update();
@@ -453,11 +468,15 @@ SArianeEditorSceneTreeView::OnPreLayerStackSelectionChanged()
 
         if( DrawingLayer )
         {
-            // commented-out: nothing to do on Pre. Left there for consistency
-            //DrawingLayer->OnPreImageChangedDelegate().RemoveAll( this );
+            DrawingLayer->OnPreImageChangedDelegate().RemoveAll( this );
             DrawingLayer->OnPostImageChangedDelegate().RemoveAll( this );
         }
     }
+
+    //ItemsSource.Empty();
+    //ClearSelection();
+    // Immediate rebuild or else expect some crashes from old references
+    //ClearExpandedItems();
 }
 
 void
@@ -471,8 +490,7 @@ SArianeEditorSceneTreeView::OnPostLayerStackSelectionChanged()
 
         if( DrawingLayer )
         {
-            // commented-out: nothing to do on Pre. Left there for consistency
-            //DrawingLayer->OnPreImageChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPreImageChanged );
+            DrawingLayer->OnPreImageChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPreImageChanged );
             DrawingLayer->OnPostImageChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPostImageChanged );
         }
     }
@@ -480,9 +498,31 @@ SArianeEditorSceneTreeView::OnPostLayerStackSelectionChanged()
     Update();
 }
 
+UArianeLayerDrawing*
+SArianeEditorSceneTreeView::GetCurrentDrawingLayer()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        if( DrawingLayer )
+        {
+            return DrawingLayer;
+        }
+    }
+
+    return nullptr;
+}
+
 void
 SArianeEditorSceneTreeView::OnPreLayerStackHierarchyChanged()
 {
+    //ItemsSource.Empty();
+    //ClearSelection();
+    // Immediate rebuild or else expect some crashes from old references
+    //ClearExpandedItems();
 }
 
 void
@@ -498,6 +538,8 @@ SArianeEditorSceneTreeView::BindComponentDelegates()
 
     if( Painting3DComponent )
     {
+        UArianeLayerDrawing* DrawingLayer = GetCurrentDrawingLayer();
+
         Painting3DComponent->GetLayerStack()->OnPreHierarchyChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPreLayerStackHierarchyChanged );
         Painting3DComponent->GetLayerStack()->OnPostHierarchyChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPostLayerStackHierarchyChanged );
 
@@ -506,6 +548,12 @@ SArianeEditorSceneTreeView::BindComponentDelegates()
 
         Painting3DComponent->OnPreUpdateDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPrePainting3DComponentUpdate );
         Painting3DComponent->OnPostUpdateDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPostPainting3DComponentUpdate );
+
+        if( DrawingLayer )
+        {
+            DrawingLayer->OnPreImageChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPreImageChanged );
+            DrawingLayer->OnPostImageChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPostImageChanged );
+        }
     }
 }
 
@@ -516,6 +564,8 @@ SArianeEditorSceneTreeView::UnbindComponentDelegates()
 
     if( Painting3DComponent )
     {
+        UArianeLayerDrawing* DrawingLayer = GetCurrentDrawingLayer();
+
         Painting3DComponent->GetLayerStack()->OnPreHierarchyChangedDelegate().RemoveAll( this );
         Painting3DComponent->GetLayerStack()->OnPostHierarchyChangedDelegate().RemoveAll( this );
 
@@ -524,6 +574,12 @@ SArianeEditorSceneTreeView::UnbindComponentDelegates()
 
         Painting3DComponent->OnPreUpdateDelegate().RemoveAll( this );
         Painting3DComponent->OnPostUpdateDelegate().RemoveAll( this );
+
+        if( DrawingLayer )
+        {
+            DrawingLayer->OnPreImageChangedDelegate().RemoveAll( this );
+            DrawingLayer->OnPostImageChangedDelegate().RemoveAll( this );
+        }
     }
 }
 

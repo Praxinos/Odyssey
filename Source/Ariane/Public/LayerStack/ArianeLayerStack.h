@@ -118,6 +118,10 @@ public:
     virtual void Serialize( FArchive& Ar ) override;
     void AddLayers( UArianeLayerFolder* FosterFolder, TArray<UArianeLayer*> OrphanLayers, bool bTriggerEvent );
     uint32 GetDrawingLayerCount();
+    void Init();
+    void Update( bool bInteractive );
+    virtual void OnRegister() override;
+    void SetRootFolder( UArianeLayerFolder* RootFolder );
 
 #if WITH_EDITOR
     void PreEditUndo();
@@ -128,10 +132,10 @@ protected:
     void SelectLayer_Private( UArianeLayer* Layer );
 
 protected:
-    UPROPERTY()
+    UPROPERTY(Instanced)
     UArianeLayerFolder* RootFolder;
 
-    //UPROPERTY(Transient)
+    UPROPERTY(Transient)
     TArray<UArianeLayer*> SelectedLayers;
 
 protected:

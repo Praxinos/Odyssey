@@ -34,8 +34,7 @@ FArianePolygon::FArianePolygon( UArianeImage* InImage
     : FArianePrimitive( InImage
                       , InName
                       , InStrokeWidth
-                      , InAllocationModel
-                      , new FArianePrimitiveInvalidationFlags() )
+                      , InAllocationModel )
     , CornerCount( InCornerCount < 3 ? 3 : InCornerCount )
     , Radius ( InRadius )
 {

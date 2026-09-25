@@ -104,8 +104,7 @@ public:
     FArianeCycle();
     FArianeCycle( UArianeImage* InImage
                 , const FName& InName
-                , EArianeAllocationModel InAllocationModel
-                , FArianeCycleInvalidationFlags* InInvalidationFlags = nullptr );
+                , EArianeAllocationModel InAllocationModel );
 
 public:
     /** overriden from ArianeObject */
@@ -135,6 +134,7 @@ public:
     TArray<int32>& GetEarcutIndices();
     void ImportGraphCycle( FArianeGraph* Graph, FArianeGraph::FCycle* GraphCycle, EArianeCycleFittingRule FittingRule );
     TArray<FArianePoint>& GetPoints();
+    virtual FArianeCycleInvalidationFlags& GetInvalidationFlags() override;
 
 protected:
     virtual FArianeObject* CopyShape( const FCopyArgs& CopyArgs ) override;

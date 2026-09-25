@@ -11,13 +11,14 @@ AArianePainting3DActor::~AArianePainting3DActor()
 {
 }
 
-AArianePainting3DActor::AArianePainting3DActor()
+AArianePainting3DActor::AArianePainting3DActor(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer)
 {
-    Painting3DComponent = CreateDefaultSubobject<UArianePainting3DComponent>(TEXT("Painting3DComponent"));
+    Painting3DComponent = ObjectInitializer.CreateDefaultSubobject<UArianePainting3DComponent>(this,TEXT("Painting3DComponent"));
 
     PrimaryActorTick.bCanEverTick = true;
 
-    RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComp"));
+    RootComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this,TEXT("RootComponent"));
 
     Painting3DComponent->SetupAttachment( RootComponent );
 
@@ -38,9 +39,42 @@ AArianePainting3DActor::PostActorCreated()
 }
 
 void
+AArianePainting3DActor::EnsureNestedComponentsArePublic()
+{
+    TArray<UActorComponent*> AllComponents;
+    GetComponents(AllComponents, /*bIncludeFromChildActors=*/true);
+
+    for (UActorComponent* Comp : AllComponents)
+    {
+        if (Comp && !Comp->HasAnyFlags(RF_Public))
+        {
+            Comp->SetFlags(RF_Public);
+
+            // ensure they all have this actor as owner
+            Comp->Rename( nullptr, this, REN_DontCreateRedirectors );
+        }
+    }
+}
+
+void
+AArianePainting3DActor::PostInitProperties()
+{
+    Super::PostInitProperties();
+    //EnsureNestedComponentsArePublic();
+}
+
+void AArianePainting3DActor::PostDuplicate(EDuplicateMode::Type DuplicateMode)
+{
+    Super::PostDuplicate(DuplicateMode);
+    //EnsureNestedComponentsArePublic();
+}
+
+void
 AArianePainting3DActor::PostLoad()
 {
     Super::PostLoad();
+
+    //EnsureNestedComponentsArePublic();
 
     Painting3DComponent->Init();
 }

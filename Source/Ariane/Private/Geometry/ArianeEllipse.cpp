@@ -35,8 +35,7 @@ FArianeEllipse::FArianeEllipse( UArianeImage* InImage
     : FArianePrimitive( InImage
                       , InName
                       , InStrokeWidth
-                      , InAllocationModel
-                      , new FArianePrimitiveInvalidationFlags() )
+                      , InAllocationModel )
     , RadiusX( InRadiusX )
     , RadiusY( InRadiusY )
 {

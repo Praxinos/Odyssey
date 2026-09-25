@@ -21,8 +21,11 @@ class UArianeLayerDrawing;
 class UArianeImage;
 struct FArianeKeyedObject;
 
+USTRUCT(BlueprintType)
 struct ARIANE_API FArianeObjectInvalidationFlags
 {
+GENERATED_BODY()
+
 public:
     static const uint32 StaticClass() { return 0xd8793c00; }; // value is crc32 FArianeObjectInvalidationFlags
     virtual uint32 GetClass() { return StaticClass(); };
@@ -135,8 +138,7 @@ public:
     FArianeObject();
     FArianeObject( UArianeImage* InImage
                  , const FName& InName
-                 , EArianeAllocationModel InAllocationModel
-                 , FArianeObjectInvalidationFlags* InInvalidationFlags = nullptr );
+                 , EArianeAllocationModel InAllocationModel );
 
     /**
         * @brief Add a child to this object at the end of the list of children.
@@ -310,6 +312,8 @@ public:
     void ResetTransform();
     FArianeObject* GetNextChild( FArianeObject* Child );
     virtual void Animate( const FArianeKeyedObject* KeyedObject, const FArianeKeyedObject* NextKeyedObject, float T );
+    void PrintPointers( bool bRecurse );
+    virtual void PostSerialize(const FArchive& Ar);
 
 protected:
     /**
@@ -355,18 +359,23 @@ protected:
     UPROPERTY()
     FTransform LocalTransform;
 
+    UPROPERTY()
+    UArianeImage* Image;
 
+    UPROPERTY()
+    FInstancedStruct InvalidationFlags;
+
+    // declarations to be ignored during the duplication process
+protected:
     FTransform WorldTransform;
     uint32 WorldTransformVersion;
+    TArray<FArianeObjectID> Children;
+    TArray<FArianeObjectID> InvalidatedChildren;
+    FBox BoundingBox;
+    bool bSelected;
 
 protected:
-    UArianeImage* Image;
     FSimpleMulticastDelegate  OnPostInvalidated;
-    TArray<FArianeObjectID> InvalidatedChildren;
-    TArray<FArianeObjectID> Children;
-    FBox BoundingBox;
-    FArianeObjectInvalidationFlags* InvalidationFlags;
-    bool bSelected;
 };
 
 // define bitwise op

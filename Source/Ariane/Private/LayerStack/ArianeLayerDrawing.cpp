@@ -357,10 +357,6 @@ UArianeLayerDrawing::UArianeLayerDrawing()
 {
     InvalidationFlags = new FArianeLayerInvalidationFlags();
 
-    Image = CreateDefaultSubobject<UArianeImage>( "Default Image" );
-
-    SetImage( Image );
-
     bWantsOnUpdateTransform = true;
 
     FCoreUObjectDelegates::OnAssetLoaded.AddUObject( this, &UArianeLayerDrawing::OnAssetLoaded );
@@ -380,6 +376,26 @@ UArianeLayerDrawing::UArianeLayerDrawing()
 }
 
 void
+UArianeLayerDrawing::OnRegister()
+{
+    UArianeImage* DefaultImage = Image;
+
+    Super::OnRegister();
+
+    if ( DefaultImage == nullptr )
+    {
+        DefaultImage = NewObject<UArianeImage>(this, TEXT("DefaultImage"), RF_Transactional | RF_Public);
+    }
+
+    SetImage( DefaultImage );
+
+    Image->OnRegisterLayer();
+
+
+    WorldTransformVersion++;
+}
+
+void
 UArianeLayerDrawing::BeginDestroy()
 {
     FCoreUObjectDelegates::OnAssetLoaded.RemoveAll( this );
@@ -393,7 +409,7 @@ UArianeLayerDrawing::OnAssetLoaded(UObject* LoadedObject)
     // Note: . Our FArianeObjects Transforms depend on the
     // Layer (to compute the world Transform). but, when PostLoad is called, the Transforms are not set yet
     // so we update the Transforms for our ArianeObjects after the Asset is loaded
-    if ( GetOutermost() )
+    if ( GetOutermost() == LoadedObject )
     {
         Image->GetRootGroup()->UpdateTransform();
     }
@@ -414,7 +430,14 @@ UArianeLayerDrawing::CreateSceneProxy()
 FBoxSphereBounds
 UArianeLayerDrawing::CalcBounds( const FTransform& LocalToWorld ) const
 {
-    return FBoxSphereBounds( Image->GetRootGroup()->GetBoundingBox().TransformBy( LocalToWorld ) );
+    FBoxSphereBounds RetBounds = FBoxSphereBounds(ForceInit);
+
+    if( Image )
+    {
+        RetBounds = Image->GetRootGroup()->GetBoundingBox();
+    }
+
+    return FBoxSphereBounds( RetBounds.TransformBy( LocalToWorld ) );
 }
 
 void
@@ -423,14 +446,6 @@ UArianeLayerDrawing::OnUpdateTransform( EUpdateTransformFlags UpdateTransformFla
     Super::OnUpdateTransform( UpdateTransformFlags, TeleportType );
 
     Image->GetRootGroup()->UpdateTransform();
-}
-
-void
-UArianeLayerDrawing::OnRegister()
-{
-    Super::OnRegister();
-
-    WorldTransformVersion++;
 }
 
 void

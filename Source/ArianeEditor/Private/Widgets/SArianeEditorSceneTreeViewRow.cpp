@@ -149,7 +149,8 @@ SArianeEditorSceneTreeViewRow::GenerateWidgetForColumn ( const FName& InColumnNa
                    SNew( SColorBlock )
                   .Color_Lambda( [this]
                                  {
-                                     FLinearColor LinearHUDColor = FLinearColor( Item->GetObject()->GetHUDForegroundColor() );
+                                     FLinearColor LinearHUDColor = Item->GetObject()->GetImage()->GetDrawingLayer().Get() ? FLinearColor( Item->GetObject()->GetHUDForegroundColor() )
+                                                                                                                          : FLinearColor() ;
 
                                      return LinearHUDColor;
                                  } )
