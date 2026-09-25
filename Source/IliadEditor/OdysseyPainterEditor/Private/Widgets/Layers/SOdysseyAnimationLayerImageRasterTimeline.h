@@ -8,6 +8,7 @@
 
 class UOdysseyAnimationLayerImageRaster;
 class FOdysseyAnimationTimelineCellImageRasterShortcuts;
+class FExtender;
 class FUICommandList;
 
 /**
@@ -23,7 +24,8 @@ public:
 
 protected:
     //Context Menu
-    virtual void BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder, FFrameNumber iClickedFrame) override;
+    virtual void BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder, FFrameNumber iClickedFrame, TSharedRef<FExtender> MenuExtender) override;
+    void AddCellsMenuEntries( FMenuBuilder& MenuBuilder );
 
 private:
     virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyLayerCell* iCell) override;

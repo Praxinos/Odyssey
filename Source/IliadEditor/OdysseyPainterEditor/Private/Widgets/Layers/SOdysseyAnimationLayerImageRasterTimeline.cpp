@@ -63,13 +63,23 @@ SOdysseyAnimationLayerImageRasterTimeline::OnPreviewMouseButtonDown(const FGeome
 }
 
 void
-SOdysseyAnimationLayerImageRasterTimeline::BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder, FFrameNumber iClickedFrame)
+SOdysseyAnimationLayerImageRasterTimeline::BuildContextMenu( TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder, FFrameNumber iClickedFrame, TSharedRef<FExtender> MenuExtender )
 {
-    SOdysseyAnimationLayerImageTimeline::BuildContextMenu(CommandList, MenuBuilder, iClickedFrame);
+    mAnimationTimelineCellImageRasterShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>( mLayer->GetAnimation() );
+    mAnimationTimelineCellImageRasterShortcuts->MapActionsToCommandList( CommandList );
 
-    mAnimationTimelineCellImageRasterShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(mLayer->GetAnimation());
-    mAnimationTimelineCellImageRasterShortcuts->MapActionsToCommandList(CommandList);
+    MenuExtender->AddMenuExtension(
+        "Cells",
+        EExtensionHook::After,
+        CommandList,
+        FMenuExtensionDelegate::CreateSP( this, &SOdysseyAnimationLayerImageRasterTimeline::AddCellsMenuEntries ) );
 
+    SOdysseyAnimationLayerImageTimeline::BuildContextMenu( CommandList, MenuBuilder, iClickedFrame, MenuExtender );
+}
+
+void
+SOdysseyAnimationLayerImageRasterTimeline::AddCellsMenuEntries( FMenuBuilder& MenuBuilder )
+{
     MenuBuilder.AddMenuEntry(
         FOdysseyPainterEditorAnimationCommands::Get().CrossFade,
         NAME_None,

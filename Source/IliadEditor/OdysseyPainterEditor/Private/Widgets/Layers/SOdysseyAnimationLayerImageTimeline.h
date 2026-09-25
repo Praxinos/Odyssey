@@ -11,6 +11,7 @@
 #include "SOdysseyAnimationLayerTimeline.h"
 
 class UOdysseyAnimationLayer;
+class FExtender;
 class FOdysseyAnimationTimelineCellsShortcuts;
 class FOdysseyAnimationTimelineCellImageStaggerShortcuts;
 class SOdysseyLayerStackTreeView;
@@ -101,10 +102,9 @@ public:
 
 protected:
     virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyLayerCell* iCell) = 0;
-    virtual void BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder, FFrameNumber iClickedFrame);
+    virtual void BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder, FFrameNumber iClickedFrame, TSharedRef<FExtender> MenuExtender);
     FReply MassModifierAcceptProperties( TSharedRef<SOdysseyPainterEditorVectorMassModifierView> iObjectView);
-    void MassModifierWindowClosed( const TSharedRef<SWindow>& iWindow
-                                 , TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView );
+    void MassModifierWindowClosed( const TSharedRef<SWindow>& iWindow, TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView );
     void MassModifier();
 
 protected:
@@ -156,7 +156,7 @@ protected:
 
     enum eDragState
     {
-        kDrag_None, //The drop will do nothin
+        kDrag_None, //The drop will do nothing
         kDrag_Move, //The drop will move the selected cells
         kDrag_Copy, //The drop will copy the selected cells
     };

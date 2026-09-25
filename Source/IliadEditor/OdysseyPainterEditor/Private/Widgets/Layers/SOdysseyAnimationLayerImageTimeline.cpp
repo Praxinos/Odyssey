@@ -8,6 +8,7 @@
 #include "Framework/Commands/GenericCommands.h"
 #include "Framework/Docking/TabManager.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Framework/MultiBox/MultiBoxExtender.h"
 #include "Layout/WidgetPath.h"
 #include "Misc/MessageDialog.h"
 #include "ScopedTransaction.h"
@@ -408,9 +409,10 @@ SOdysseyAnimationLayerImageTimeline::OnMainSubRowMouseButtonUp(const FGeometry& 
 
         //Open the context menu
         TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
-        FMenuBuilder menuBuilder(true, commandList);
+        TSharedRef<FExtender> MenuExtender = MakeShared<FExtender>();
+        FMenuBuilder menuBuilder(true, commandList, MenuExtender);
 
-        BuildContextMenu(commandList, menuBuilder, frame);
+        BuildContextMenu(commandList, menuBuilder, frame, MenuExtender);
 
         TSharedRef<SWidget> menuContents = menuBuilder.MakeWidget();
         FWidgetPath widgetPath = iEvent.GetEventPath() != nullptr ? *iEvent.GetEventPath() : FWidgetPath();
@@ -695,7 +697,7 @@ SOdysseyAnimationLayerImageTimeline::FrameToMousePosition(float iFrame) const
 }
 
 void
-SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder, FFrameNumber iClickedFrame)
+SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder, FFrameNumber iClickedFrame, TSharedRef<FExtender> MenuExtender)
 {
     mAnimationTimelineCellsShortcuts = MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(mLayer->GetAnimation(), mCurrentFrame, mOnTransactCurrentFrame);
     mAnimationTimelineCellsShortcuts->MapActionsToCommandList(CommandList);
@@ -853,6 +855,7 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
         );
     MenuBuilder.EndSection();
 
+    //TODO: move it to vector class ... ?!
     if( mLayer->GetClass() == UOdysseyAnimationLayerImageVector::StaticClass() )
     {
         MenuBuilder.BeginSection("More", LOCTEXT("timeline-cells.context-menu.mass-modifier.name", "Mass Modifier"));
@@ -864,6 +867,15 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
 
         MenuBuilder.EndSection();
     }
+
+    MenuBuilder.BeginSection( "AddCells", LOCTEXT( "timeline-cells.context-menu.add-cells-section.name", "Add Cells" ) );
+
+    MenuBuilder.EndSection();
+
+
+    MenuBuilder.BeginSection( "SetExposure", LOCTEXT( "timeline-cells.context-menu.set-exposure-section.name", "Set Exposure" ) );
+
+    MenuBuilder.EndSection();
 }
 
 FReply
