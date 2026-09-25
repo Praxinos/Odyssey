@@ -10,6 +10,7 @@
 #include "ArianeEditorColorSelectorTab.h"
 #include "ArianeEditorLayerStackTab.h"
 #include "ArianeEditorSceneTreeViewTab.h"
+#include "ArianeLayerDrawingOrientationCustomization.h"
 #include "ArianePainting3DComponentCustomization.h"
 #include "ArianeEditorStyle.h"
 // Ariane headers
@@ -479,6 +480,13 @@ FArianeEditorModule::RegisterCustomizations()
         UArianePainting3DComponent::StaticClass()->GetFName(),
         FOnGetDetailCustomizationInstance::CreateStatic(&FArianePainting3DComponentCustomization::MakeInstance)
     );
+
+    PropertyModule.RegisterCustomPropertyTypeLayout(
+        "EArianeLayerDrawingOrientation",
+        FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FArianeLayerDrawingOrientationCustomization::MakeInstance)
+    );
+
+    PropertyModule.NotifyCustomizationModuleChanged();
 }
 
 void
@@ -487,6 +495,10 @@ FArianeEditorModule::UnregisterCustomization()
     FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
     PropertyModule.UnregisterCustomPropertyTypeLayout( UArianePainting3DComponent::StaticClass()->GetFName() );
+
+    PropertyModule.UnregisterCustomPropertyTypeLayout("EArianeLayerDrawingOrientation");
+
+    PropertyModule.NotifyCustomizationModuleChanged();
 }
 
 IMPLEMENT_MODULE( FArianeEditorModule, ArianeEditor );
