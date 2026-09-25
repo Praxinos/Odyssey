@@ -43,6 +43,7 @@ public:
 
 protected:
     FReply NewLayer();
+    FReply NewFolderLayer();
     void OnPreLayerSelectionChanged();
     void OnPostLayerSelectionChanged();
     void OnPre3DPaintingComponentSelectionChanged();

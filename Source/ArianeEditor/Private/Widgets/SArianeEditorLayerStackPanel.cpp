@@ -5,12 +5,14 @@
 #include "SArianeEditorLayerStackPanel.h"
 #include "SArianeEditorLayerStack.h"
 #include "ArianeEditor.h"
+#include "ArianeEditorStyle.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayer.h"
 #include "ArianeLayerFolder.h"
 // Unreal Headers
 #include "IStructureDetailsView.h"
+#include "Styling/AppStyle.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -155,9 +157,59 @@ SArianeEditorLayerStackPanel::Construct(const FArguments& InArgs, FArianeEditor*
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew( SButton )
-                .Text( LOCTEXT("layer-stack-panel-new-layer","New Layer") )
-                .OnClicked( FOnClicked::CreateSP( this, &SArianeEditorLayerStackPanel::NewLayer ) )
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                SNew(SButton)
+                .ContentPadding(FMargin(4.0f, 2.0f))
+                .OnClicked(FOnClicked::CreateSP(this, &SArianeEditorLayerStackPanel::NewLayer))
+                [
+                    SNew(SHorizontalBox)
+                    + SHorizontalBox::Slot()
+                    .AutoWidth()
+                    .VAlign(VAlign_Center)
+                    [
+                        SNew(SImage)
+                        .Image(FArianeEditorStyle::Get().GetBrush( "ArianeEditor.Layers16" ))
+                    ]
+
+                + SHorizontalBox::Slot()
+                    .AutoWidth()
+                    .VAlign(VAlign_Center)
+                    [
+                        SNew(STextBlock)
+                        .Text(FText::FromString(TEXT("+")))
+                        .ColorAndOpacity(FSlateColor(FLinearColor::Green))
+                    ]
+                ]
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                SNew(SButton)
+                .OnClicked(FOnClicked::CreateSP(this, &SArianeEditorLayerStackPanel::NewFolderLayer))
+                .IsEnabled(false)
+                [
+                    SNew(SHorizontalBox)
+                    + SHorizontalBox::Slot()
+                    .AutoWidth()
+                    .VAlign(VAlign_Center)
+                    [
+                        SNew(SImage)
+                        .Image(FAppStyle::Get().GetBrush("ContentBrowser.AssetTreeFolderClosed"))
+                    ]
+
+                + SHorizontalBox::Slot()
+                    .AutoWidth()
+                    .VAlign(VAlign_Center)
+                    [
+                        SNew(STextBlock)
+                        .Text(FText::FromString(TEXT("+")))
+                        .ColorAndOpacity(FSlateColor(FLinearColor::Green))
+                    ]
+                ]
+            ]
         ]
         + SVerticalBox::Slot()
         .AutoHeight()
@@ -205,6 +257,12 @@ SArianeEditorLayerStackPanel::NewLayer()
         GEditor->EndTransaction();
     }
 
+    return FReply::Handled();
+}
+
+FReply
+SArianeEditorLayerStackPanel::NewFolderLayer()
+{
     return FReply::Handled();
 }
 
