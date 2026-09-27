@@ -3,6 +3,7 @@
 
 // Ariane headers
 #include "ArianeVertex.h"
+#include "ArianeImage.h"
 #include "ArianePath.h"
 #include "ArianeSegment.h"
 #include "ArianePainting3DComponent.h"
@@ -15,6 +16,7 @@ FArianeVertex::FArianeVertex()
     : Radius( 0.0f )
     , Normal ( FVector::Zero() )
     , AllocationModel( EArianeAllocationModel::InstancedStruct )
+    , Image ( nullptr )
 {
 }
 
@@ -30,8 +32,23 @@ FArianeVertex::FArianeVertex( FArianeObject* Owner
     , Normal ( InNormal )
     , bHandleAligned( true )
     , AllocationModel( InAllocationModel )
+    , Image ( Owner->GetImage() )
     , bChained( false )
 {
+}
+
+void
+FArianeVertex::SetImage( UArianeImage* InImage )
+{
+    Image = InImage;
+
+    Segments.Empty();
+}
+
+UArianeImage*
+FArianeVertex::GetImage()
+{
+    return Image;
 }
 
 EArianeAllocationModel
@@ -66,7 +83,7 @@ FArianeVertex::GetNormal()
 FArianeObject*
 FArianeVertex::GetOwner()
 {
-    return OwnerID.GetObject();
+    return OwnerID.GetObject( Image );
 }
 
 void
@@ -147,11 +164,11 @@ FArianeVertex::SetPosition_Private( const FVector& InPosition )
 FArianeSegment*
 FArianeVertex::GetOtherSegment( FArianeSegment* Segment )
 {
-    for( FArianeSegment* otherSegment : Segments )
+    for( FArianeSegment* OtherSegment : Segments )
     {
-        if( otherSegment != Segment )
+        if( OtherSegment != Segment )
         {
-            return otherSegment;
+            return OtherSegment;
         }
     }
 
@@ -207,7 +224,7 @@ FArianeVertex::ArrayToSegmentArray( const TArray<FArianeVertex*>& InVertices
 
         for( const FArianeSegmentID& SegmentID : Vertex->GetSegments() )
         {
-            FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment();
+            FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment( Vertex->GetImage() );
 
             if( OutSegments.Find( Segment ) == INDEX_NONE )
             {

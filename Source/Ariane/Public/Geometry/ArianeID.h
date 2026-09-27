@@ -5,6 +5,8 @@
 
 // Unreal headers
 #include "CoreMinimal.h"
+// Ariane Header
+#include "ArianeCoreEnums.h"
 
 #include "ArianeID.generated.h"
 
@@ -25,17 +27,18 @@ struct ARIANE_API FArianeObjectID
         FArianeObjectID();
         FArianeObjectID( FArianeObject* Object );
 
-        FArianeObject* GetObject();
-        void InvalidateCache();
+        FArianeObject* GetObject( UArianeImage* Image );
+        FGuid GetGuid() const;
 
-    public:
-        UPROPERTY( EditAnywhere )
-        UArianeImage* Image;
-
+    protected:
         UPROPERTY( EditAnywhere )
         FGuid Guid;
 
+        UPROPERTY( EditAnywhere )
+        EArianeAllocationModel AllocationModel;
+
     protected:
+        FGuid CachedImageAllocatorGuid;
         FArianeObject* CachedObject;
 };
 
@@ -49,22 +52,20 @@ struct ARIANE_API FArianeVertexID
         FArianeVertexID();
         FArianeVertexID( FArianeVertex* InVertex );
 
-        FArianeVertexID& operator=(const FArianeVertexID& Other);
+        FArianeVertex* GetVertex( UArianeImage* Image );
 
-        FArianeVertex* GetVertex();
-        void InvalidateCache();
-
-    public:
+    protected:
         UPROPERTY( EditAnywhere )
-        UArianeImage* Image;
+        FArianeObjectID OwnerID;
 
         UPROPERTY( EditAnywhere )
         FGuid Guid;
 
         UPROPERTY( EditAnywhere )
-        FGuid OwnerGuid;
+        EArianeAllocationModel AllocationModel;
 
     protected:
+        FGuid CachedObjectAllocatorGuid;
         FArianeVertex* CachedVertex;
 };
 
@@ -79,20 +80,20 @@ struct ARIANE_API FArianeSegmentID
         FArianeSegmentID();
         FArianeSegmentID( FArianeSegment* InSegment );
 
-        FArianeSegment* GetSegment();
-        void InvalidateCache();
+        FArianeSegment* GetSegment( UArianeImage* Image );
 
     public:
         UPROPERTY( EditAnywhere )
-        UArianeImage* Image;
+        FArianeObjectID OwnerID;
 
         UPROPERTY( EditAnywhere )
         FGuid Guid;
 
         UPROPERTY( EditAnywhere )
-        FGuid OwnerGuid;
+        EArianeAllocationModel AllocationModel;
 
     protected:
+        FGuid CachedObjectAllocatorGuid;
         FArianeSegment* CachedSegment;
 };
 
@@ -106,19 +107,19 @@ struct ARIANE_API FArianeTagID
         FArianeTagID();
         FArianeTagID( FArianeTag* InTag );
 
-        FArianeTag* GetTag();
-        void InvalidateCache();
+        FArianeTag* GetTag( UArianeImage* Image );
 
     public:
         UPROPERTY( EditAnywhere )
-        UArianeImage* Image;
+        FArianeObjectID OwnerID;
 
         UPROPERTY( EditAnywhere )
         FGuid Guid;
 
         UPROPERTY( EditAnywhere )
-        FGuid OwnerGuid;
+        EArianeAllocationModel AllocationModel;
 
     protected:
+        FGuid CachedObjectAllocatorGuid;
         FArianeTag* CachedTag;
 };

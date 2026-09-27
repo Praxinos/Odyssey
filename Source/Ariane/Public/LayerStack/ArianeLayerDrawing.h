@@ -101,6 +101,7 @@ public:
     virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
     FOnImageChanged& OnPreImageChangedDelegate();
     FOnImageChanged& OnPostImageChangedDelegate();
+    virtual void Serialize(FArchive& Ar ) override;
 
 protected:
     void BindDelegates();

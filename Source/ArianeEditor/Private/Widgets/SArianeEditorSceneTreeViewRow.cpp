@@ -276,7 +276,7 @@ SArianeEditorSceneTreeViewRow::GenerateWidgetForColumn ( const FName& InColumnNa
 
         for( FArianeTagID& TagID : Object->GetTags() )
         {
-            FArianeTag* ObjectTag = TagID.GetTag();
+            FArianeTag* ObjectTag = TagID.GetTag( Object->GetImage() );
 /*
             if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
             {

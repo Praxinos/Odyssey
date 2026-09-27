@@ -153,22 +153,21 @@ SArianeEditorSceneTreeView::GetEditor() const
 }
 
 void
-SArianeEditorSceneTreeView::BuildTree( const TSharedPtr<FSceneTreeViewItem> InItem )
+SArianeEditorSceneTreeView::BuildTree( UArianeImage* Image, const TSharedPtr<FSceneTreeViewItem> InItem )
 {
-    const TArray<FArianeObjectID>& Children = InItem.Get()->GetObject()->GetChildren();
+    TArray<FArianeObject*>& Children = InItem.Get()->GetObject()->GetChildren();
 
     InItem.Get()->Children.Empty();
 
-    for( const FArianeObjectID& ChildID : Children )
+    for( FArianeObject* Child : Children )
     {
-        FArianeObject* Child = const_cast<FArianeObjectID&>(ChildID).GetObject();
         TSharedPtr<FSceneTreeViewItem> ChildItem = MakeShareable(new FSceneTreeViewItem(Child, true ));
 
         //InItem.Get()->mChildren.Add( childItem );
         // reverse order in order to get the most forward objet on top of the hierarchy
         InItem.Get()->Children.Insert( ChildItem, 0 );
 
-        BuildTree( ChildItem );
+        BuildTree( Image, ChildItem );
     }
 }
 
@@ -221,9 +220,10 @@ SArianeEditorSceneTreeView::Update()
 
     if( RootGroup )
     {
+        UArianeImage* Image = RootGroup->GetImage();
         RootItem = MakeShareable(new FSceneTreeViewItem(RootGroup, true ));
 
-        BuildTree( RootItem );
+        BuildTree( Image, RootItem );
 
         ItemsSource.Add( RootItem );
 

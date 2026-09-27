@@ -14,6 +14,7 @@ class UArianeLayer;
 class UArianeLayerDrawing;
 class UArianeLayerStack;
 class FUICommandList;
+class  UArianeImage;
 
 #define VSTV_OBJECT_VISIBLE     "Visible"
 #define VSTV_OBJECT_HUDCOLOR    "HUD Color"
@@ -68,7 +69,7 @@ class ARIANEEDITOR_API SArianeEditorSceneTreeView
         void OnSelectionChanged( TSharedPtr<FSceneTreeViewItem> iItem, ESelectInfo::Type SelectInfo );
         void OnExpansionChanged( TSharedPtr<FSceneTreeViewItem> iItem, bool mExpanded );
         void ExpandTree( const TSharedPtr<FSceneTreeViewItem> iItem );
-        void BuildTree( const TSharedPtr<FSceneTreeViewItem> iItem );
+        void BuildTree(  UArianeImage* Image, const TSharedPtr<FSceneTreeViewItem> iItem );
         //void SelectTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem );
 
         void MapActionsToCommandList();

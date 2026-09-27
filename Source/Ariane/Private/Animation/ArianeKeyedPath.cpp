@@ -23,15 +23,13 @@ FArianeKeyedPath::FArianeKeyedPath( FArianePath* Path )
     KeyedCubicSegments.Reserve( Path->GetCubicSegmentCount() );
     KeyedLinearSegments.Reserve( Path->GetLinearSegmentCount() );
 
-    for( FArianeVertexID& VertexID : Path->GetVertices() )
+    for( FArianeVertex* Vertex : Path->GetVertices() )
     {
-        KeyedVertices.Emplace( VertexID.GetVertex() );
+        KeyedVertices.Emplace( Vertex );
     }
 
-    for( FArianeSegmentID& SegmentID : Path->GetSegments() )
+    for( FArianeSegment* Segment : Path->GetSegments() )
     {
-        FArianeSegment* Segment = SegmentID.GetSegment();
-
         if( Segment->GetClass() == FArianeSegmentCubic::StaticClass() )
         {
             FArianeSegmentCubic* CubicSegment = static_cast<FArianeSegmentCubic*>(Segment);

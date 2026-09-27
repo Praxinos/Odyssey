@@ -204,10 +204,8 @@ void FArianePathVertexBuffer::InitRHI(FRHICommandListBase& RHICmdList)
 FArianePath::~FArianePath()
 {
     // free mallocated segments.
-    for( FArianeSegmentID& SegmentID : Segments )
+    for( FArianeSegment* Segment : Segments )
     {
-        FArianeSegment* Segment = SegmentID.GetSegment();
-
         if( Segment->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
         {
             delete Segment;
@@ -217,10 +215,8 @@ FArianePath::~FArianePath()
     Segments.Empty();
 
     // free mallocated vertices
-    for( FArianeVertexID& VertexID : Vertices )
+    for( FArianeVertex* Vertex : Vertices )
     {
-        FArianeVertex* Vertex = VertexID.GetVertex();
-
         if( Vertex->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
         {
             delete Vertex;
@@ -252,6 +248,59 @@ FArianePath::FArianePath( UArianeImage* InImage
 {
 }
 
+void
+FArianePath::ResetImage( UArianeImage* InImage )
+{
+    Super::ResetImage( InImage );
+
+    Vertices.Empty();
+    Segments.Empty();
+    InvalidatedSegments.Empty();
+    InvalidatedVertices.Empty();
+    //Geometry3D = FArianePathGeometry3D( this );
+    Chains.Empty();
+    CubicSegmentCount = 0;
+    LinearSegmentCount = 0;
+
+    for( FInstancedStruct& InstancedVertex : InstancedVertices )
+    {
+        FArianeVertex* Vertex = InstancedVertex.GetMutablePtr<FArianeVertex>();
+
+        Vertex->SetImage( InImage );
+    }
+
+    for( FInstancedStruct& InstancedSegment : InstancedSegments )
+    {
+        FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
+
+        Segment->SetImage( InImage );
+    }
+}
+
+void
+FArianePath::PostSerialize()
+{
+    Super::PostSerialize();
+
+    for( FInstancedStruct& InstancedVertex : InstancedVertices )
+    {
+        FArianeVertex* Vertex = InstancedVertex.GetMutablePtr<FArianeVertex>();
+
+        AddVertex( Vertex );
+    }
+
+    for( FInstancedStruct& InstancedSegment : InstancedSegments )
+    {
+        FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
+
+        AddSegment( Segment );
+    }
+
+    InvalidateAllVertices();
+    InvalidateAllSegments();
+}
+
+/*
 FArianePath&
 FArianePath::operator=(const FArianePath& Other)
 {
@@ -265,17 +314,18 @@ FArianePath::operator=(const FArianePath& Other)
 
     return *this;
 }
+*/
 
 FArianePathInvalidationFlags&
 FArianePath::GetInvalidationFlags()
 {
-    FArianePathInvalidationFlags* InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianePathInvalidationFlags>();
+    FArianePathInvalidationFlags* InvalidationFlagsPtr = InstancedInvalidationFlags.GetMutablePtr<FArianePathInvalidationFlags>();
 
     if( InvalidationFlagsPtr == nullptr )
     {
-        InvalidationFlags = FInstancedStruct::Make<FArianePathInvalidationFlags>();
+        InstancedInvalidationFlags = FInstancedStruct::Make<FArianePathInvalidationFlags>();
 
-        InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianePathInvalidationFlags>();
+        InvalidationFlagsPtr = InstancedInvalidationFlags.GetMutablePtr<FArianePathInvalidationFlags>();
     }
 
     return *InvalidationFlagsPtr;
@@ -405,10 +455,7 @@ FArianePath::AllocVertex( const FVector& InPosition
 void
 FArianePath::RemoveVertex( FArianeVertex* Vertex, bool bUnallocate )
 {
-    Vertices.RemoveAll( [Vertex]( FArianeVertexID& VertexID ) -> bool
-    {
-        return ( Vertex == VertexID.GetVertex() ) ? true : false;
-    } );
+    Vertices.Remove( Vertex );
 
     Invalidate( FArianePathInvalidationFlags().SetVertexAddedOrRemoved() );
 
@@ -553,7 +600,7 @@ FArianePath::AllocCubicSegment( FArianeVertex* Vertex0
 void
 FArianePath::AddVertex( FArianeVertex* Vertex )
 {
-    Vertices.Add( FArianeVertexID( Vertex ) );
+    Vertices.Add( Vertex );
 
     Vertex->Invalidate();
 
@@ -568,7 +615,7 @@ FArianePath::AddSegment( FArianeSegment* Segment )
     Segment->GetVertex(0)->Invalidate(); // will invalidate all connected segments for smoothing
     Segment->GetVertex(1)->Invalidate(); // will invalidate all connected segments for smoothing
 
-    Segments.Add( FArianeSegmentID( Segment ) );
+    Segments.Add( Segment );
 
     if( Segment->GetClass() == FArianeSegment::StaticClass() )
     {
@@ -588,10 +635,7 @@ FArianePath::AddSegment( FArianeSegment* Segment )
 void
 FArianePath::RemoveSegment( FArianeSegment* Segment, bool bUnallocate )
 {
-    Segments.RemoveAll( [Segment]( FArianeSegmentID& SegmentID ) -> bool
-    {
-        return ( Segment == SegmentID.GetSegment() ) ? true : false;
-    } );
+    Segments.Remove( Segment );
 
     if( Segment->GetClass() == FArianeSegment::StaticClass() )
     {
@@ -626,7 +670,7 @@ FArianePath::RemoveSegment( FArianeSegment* Segment, bool bUnallocate )
     }
 }
 
-TArray<FArianeSegmentID>&
+TArray<FArianeSegment*>&
 FArianePath::GetSegments()
 {
     return Segments;
@@ -638,7 +682,7 @@ FArianePath::GetInvalidatedSegments()
     return InvalidatedSegments;
 }
 
-TArray<FArianeVertexID>&
+TArray<FArianeVertex*>&
 FArianePath::GetVertices()
 {
     return Vertices;
@@ -647,10 +691,8 @@ FArianePath::GetVertices()
 void
 FArianePath::AlterRadius( double RatioRadius )
 {
-    for( FArianeVertexID& VertexID : Vertices )
+    for( FArianeVertex* Vertex : Vertices )
     {
-        FArianeVertex* Vertex = VertexID.GetVertex();
-
         Vertex->SetRadius( Vertex->GetRadius() * RatioRadius );
     }
 }
@@ -684,9 +726,8 @@ FArianePath::CopyShape( const FCopyArgs& CopyArgs )
     LookupTable.Reserve ( Vertices.Num() );
 
     // Copy Geometry. First, vertices.
-    for( FArianeVertexID& OriginalVertexID : Vertices )
+    for( FArianeVertex* OriginalVertex : Vertices )
     {
-        FArianeVertex* OriginalVertex = OriginalVertexID.GetVertex();
         FVector OriginalVertexPosition = OriginalVertex->GetPosition();
         FVector OriginalVertexNormal = OriginalVertex->GetNormal();
         double OriginalVertexRadius = OriginalVertex->GetRadius();
@@ -706,9 +747,8 @@ FArianePath::CopyShape( const FCopyArgs& CopyArgs )
     }
 
     // Copy Geometry. Second, segments.
-    for( FArianeSegmentID& OriginalSegmentID : Segments )
+    for( FArianeSegment* OriginalSegment : Segments )
     {
-        FArianeSegment* OriginalSegment = OriginalSegmentID.GetSegment();
         FArianeVertex* Vertex0 = static_cast<FArianeVertex*>( OriginalSegment->GetVertex((uint32)0) );
         FArianeVertex* Vertex1 = static_cast<FArianeVertex*>( OriginalSegment->GetVertex((uint32)1) );
         FArianeSegment* NewSegment = nullptr;
@@ -759,10 +799,8 @@ FArianePath::UpdateBoundingBox( EUpdateFlags UpdateFlags )
         // FBox(ForceInit) creates an invalid box
         FBox CombinedBox(ForceInit);
 
-        for (FArianeSegmentID& SegmentID : Segments)
+        for (FArianeSegment* Segment : Segments)
         {
-            FArianeSegment* Segment = SegmentID.GetSegment();
-
             CombinedBox += Segment->GetBoundingBox();
         }
 
@@ -812,8 +850,6 @@ FArianePath::PostEditUndo()
         FArianeVertex* Vertex = InstancedVertex.GetMutablePtr<FArianeVertex>();
 
         Vertex->PostEditUndo();
-
-        AddVertex( Vertex );
     }
 
     for( FInstancedStruct& InstancedSegment : InstancedSegments )
@@ -821,8 +857,6 @@ FArianePath::PostEditUndo()
         FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
 
         Segment->PostEditUndo();
-
-        AddSegment( Segment );
     }
 
     if( Material == nullptr )
@@ -850,8 +884,6 @@ FArianePath::PostLoad()
         FArianeVertex* Vertex = InstancedVertex.GetMutablePtr<FArianeVertex>();
 
         Vertex->PostLoad();
-
-        AddVertex( Vertex );
     }
 
     for( FInstancedStruct& InstancedSegment : InstancedSegments )
@@ -859,8 +891,6 @@ FArianePath::PostLoad()
         FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
 
         Segment->PostLoad();
-
-        AddSegment( Segment );
     }
 
     if( Material == nullptr )
@@ -918,30 +948,26 @@ FArianePath::FindChains()
     Chains.Empty();
 
     // Clean
-    for( FArianeVertexID& VertexID : Vertices )
+    for( FArianeVertex* Vertex : Vertices )
     {
-        VertexID.GetVertex()->SetChained( false );
+        Vertex->SetChained( false );
     }
 
     // Mark Vertices with valence 1 in priority
-    for( FArianeVertexID& VertexID : Vertices )
+    for( FArianeVertex* Vertex : Vertices )
     {
-        FArianeVertex* Vertex = VertexID.GetVertex();
-
         if( ( Vertex->IsChained() == false ) && ( Vertex->GetSegments().Num() == 1 ) )
         {
-            Chains.Emplace( this, VertexID.GetVertex() );
+            Chains.Emplace( this, Vertex );
         }
     }
 
     // if there are still some unmarked vertices, this normally means there are in a loop
-    for( FArianeVertexID& VertexID : Vertices )
+    for( FArianeVertex* Vertex : Vertices )
     {
-        FArianeVertex* Vertex = VertexID.GetVertex();
-
         if( ( Vertex->IsChained() == false ) && ( Vertex->GetSegments().Num() == 2 ) )
         {
-            Chains.Emplace( this, VertexID.GetVertex() );
+            Chains.Emplace( this, Vertex );
         }
     }
 }
@@ -976,18 +1002,18 @@ FArianePath::UpdateShape( EUpdateFlags UpdateFlags )
 void
 FArianePath::InvalidateAllSegments()
 {
-    for( FArianeSegmentID& SegmentID : Segments )
+    for( FArianeSegment* Segment : Segments )
     {
-        SegmentID.GetSegment()->Invalidate();
+        Segment->Invalidate();
     }
 }
 
 void
 FArianePath::InvalidateAllVertices()
 {
-    for( FArianeVertexID& VertexID : Vertices )
+    for( FArianeVertex* Vertex : Vertices )
     {
-        InvalidatedVertices.Add( VertexID.GetVertex() );
+        InvalidatedVertices.Add( Vertex );
     }
 
     Invalidate( FArianePathInvalidationFlags().SetVertexAltered() );
@@ -1012,9 +1038,8 @@ FArianePath::Animate( const FArianeKeyedObject* KeyedObject, const FArianeKeyedO
 
         SetColor( AnimColor );
 
-        for( FArianeVertexID& VertexID : Vertices )
+        for( FArianeVertex* Vertex : Vertices )
         {
-            FArianeVertex* Vertex = VertexID.GetVertex();
             const FArianeKeyedVertex* KeyedVertex = const_cast<FArianeKeyedPath*>(KeyedPath)->GetKeyedVertex( Vertex->GetGuid() );
             const FArianeKeyedVertex* NextKeyedVertex = const_cast<FArianeKeyedPath*>(NextKeyedPath)->GetKeyedVertex( Vertex->GetGuid() );
 
@@ -1028,9 +1053,8 @@ FArianePath::Animate( const FArianeKeyedObject* KeyedObject, const FArianeKeyedO
             }
         }
 
-        for( FArianeSegmentID& SegmentID : Segments )
+        for( FArianeSegment* Segment : Segments )
         {
-            FArianeSegment* Segment = SegmentID.GetSegment();
             const FArianeKeyedSegment* KeyedSegment = const_cast<FArianeKeyedPath*>(KeyedPath)->GetKeyedSegment( Segment->GetGuid() );
             const FArianeKeyedSegment* NextKeyedSegment = const_cast<FArianeKeyedPath*>(NextKeyedPath)->GetKeyedSegment( Segment->GetGuid() );
 
@@ -1100,7 +1124,7 @@ FArianePath::DeleteVertex( const TArray<FArianeVertex*>& VerticesToRemove
                          , TArray<FArianeSegment*>* OutRemovedSegments
                          , TArray<FArianeSegment*>* OutAddedSegments )
 {
-    uint32 SegmentClass = Segments.Num() ? Segments[0].GetSegment()->GetClass()
+    uint32 SegmentClass = Segments.Num() ? Segments[0]->GetClass()
                                          : FArianeSegment::StaticClass();
 
     // only used internally by FOdysseyVectorPath::DeletePoint(). Declare in CPP file
@@ -1325,7 +1349,6 @@ FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
     {
         FArianeVertex* Vertex = Segment->GetVertex( static_cast<uint32>(T) );
         FVector AverageVector = FVector::Zero();
-        const TArray<FArianeSegment*> ConnectedSegments = Vertex->GetSegments();
 
         if( Vertex->GetSegments().Num() == 2 )
         {
@@ -1652,6 +1675,7 @@ void
 FArianePathGeometry3D::Build()
 {
     FArianePath* Path = GetPath();
+    UArianeImage* Image = Path->GetImage();
     uint32 TotalModelVertexCount = 0;
     uint32 TotalIndexCount = 0;
     FVector PreviousPerpendicularVector = FVector::Zero();
@@ -1733,10 +1757,8 @@ FArianePathGeometry3D::Build()
 
     Path->GetInvalidatedSegments().Empty();
 
-    for( FArianeSegmentID& SegmentID : Path->GetSegments() )
+    for( FArianeSegment* Segment : Path->GetSegments() )
     {
-        FArianeSegment* Segment = SegmentID.GetSegment();
-
         TotalModelVertexCount += Segment->GetModelVertexCache().Num();
         TotalIndexCount += Segment->GetIndexCache().Num();
     }
@@ -1747,10 +1769,8 @@ FArianePathGeometry3D::Build()
     TotalModelVertexCount = 0;
     TotalIndexCount = 0;
 
-    for( FArianeSegmentID& SegmentID : Path->GetSegments() )
+    for( FArianeSegment* Segment : Path->GetSegments() )
     {
-        FArianeSegment* Segment = SegmentID.GetSegment();
-
         if( Segment->GetIndexCache().Num() )
         {
             const TArray<FDynamicMeshVertex>& SegmentModelVertexCache = Segment->GetModelVertexCache();

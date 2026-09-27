@@ -130,7 +130,8 @@ protected:
     FArianeEditorHUD::FDrawingFlags EditonModeToHUDDrawingFlags();
     FPickingFlags EditonModeToPickingFlags();
 
-    static void BuildSegmentAdjustments( const TArray<FArianeSegment*>& Segments
+    static void BuildSegmentAdjustments( UArianeLayerDrawing* DrawingLayer
+                                       , const TArray<FArianeSegment*>& Segments
                                        , TArray<FSegmentAdjustment>& OutSegmentAdjustments );
     void OnMouseDownPickPoint( FEditorViewportClient* ViewportClient
                              , FSceneView* View

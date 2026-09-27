@@ -245,6 +245,7 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* ViewportClient
 
         if( DrawingLayer )
         {
+            UArianeImage* Image = DrawingLayer->GetImage();
             const FTransform& PathTransform = EditedPath->GetTransform();
             // note: we could do that at MouseDown
             FPlane DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
@@ -261,7 +262,7 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* ViewportClient
             {
                 FVector localCoords = PathTransform.Inverse().TransformFVector4( IntersectAt );
                 FVector localNormal = PathTransform.Inverse().TransformVector( FVector( DrawingPlane ) );
-                FArianeVertex *Vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last().GetVertex()
+                FArianeVertex *Vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last()
                                                                          : nullptr;
 
 ///////////////////////
@@ -388,7 +389,8 @@ UArianeEditorPathDrawingTool::OnMouseUp( FEditorViewportClient* ViewportClient
     {
         if( Painting3DComponent )
         {
-            FArianeVertex *Vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last().GetVertex()
+            UArianeImage* Image = EditedPath->GetImage();
+            FArianeVertex *Vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last()
                                                                      : nullptr;
             FVector2D ViewportPosition = FVector2D( PointerState.ViewportX
                                                   , PointerState.ViewportY );

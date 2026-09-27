@@ -1222,11 +1222,10 @@ UArianeEditorTool::MapPath( FEditorViewportClient* ViewportClient
                           , TArray<FPointQuadTreeEntry>& OutPointQuadTreeEntries )
 {
     const FTransform& PathTransform = Path->GetTransform();
+    UArianeImage* Image = Path->GetImage();
 
-    for( FArianeVertexID& VertexID : Path->GetVertices() )
+    for( FArianeVertex* Vertex : Path->GetVertices() )
     {
-        FArianeVertex* Vertex = VertexID.GetVertex();
-
         FVector LocalVertexPosition = Vertex->GetPosition();
         FVector WorldVertexPosition = PathTransform.TransformPosition( Vertex->GetPosition() );
         FVector2D HUDVertexPosition;
@@ -1309,13 +1308,14 @@ UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
     const FTransform& PathTransform = Path->GetTransform();
     bool bAnythingPicked = false;
     FVector2D HUDMousePosition = FVector2D( ViewportX, ViewportY );
+    UArianeImage* Image = Path->GetImage();
 
     // Pick segment handles
     if( PickingFlags.PathSegmentHandle )
     {
         for( const FArianeSegmentID& SegmentID : Path->GetSegments() )
         {
-            FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment();
+            FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment( Image );
 
             if( Segment->GetClass() == FArianeSegmentCubic::StaticClass() )
             {
@@ -1357,7 +1357,7 @@ UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
     // executed after the segment handles because we want the segment handles to have priority.
     for( const FArianeVertexID& VertexID : Path->GetVertices() )
     {
-        FArianeVertex* Vertex = const_cast<FArianeVertexID&>(VertexID).GetVertex();
+        FArianeVertex* Vertex = const_cast<FArianeVertexID&>(VertexID).GetVertex( Image );
 
         // Pick vertex
         if ( PickingFlags.PathVertex )
@@ -1799,7 +1799,8 @@ UArianeEditorTool::DrawPathHUD( FCanvas* Canvas
     {
         for( const FArianeSegmentID& SegmentID : Path->GetSegments() )
         {
-            FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment();
+            UArianeImage* Image = Path->GetImage();
+            FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment( Image );
 
             if( Segment->GetClass() == FArianeSegmentCubic::StaticClass() )
             {
@@ -1818,7 +1819,8 @@ UArianeEditorTool::DrawPathHUD( FCanvas* Canvas
     // Points and Point size handles
     for( const FArianeVertexID& VertexID : Path->GetVertices() )
     {
-        FArianeVertex* Vertex = const_cast<FArianeVertexID&>(VertexID).GetVertex();
+        UArianeImage* Image = Path->GetImage();
+        FArianeVertex* Vertex = const_cast<FArianeVertexID&>(VertexID).GetVertex( Image );
         uint32 Valence = Vertex->GetSegments().Num();
 
         if( HUDDrawingFlags.PathVertex || ( ( Valence == 0 ) && HUDDrawingFlags.PathVertexValence0 ) )

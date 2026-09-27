@@ -104,13 +104,13 @@ FArianeGroup::FArianeGroup( UArianeImage* InImage
 FArianeGroupInvalidationFlags&
 FArianeGroup::GetInvalidationFlags()
 {
-    FArianeGroupInvalidationFlags* InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianeGroupInvalidationFlags>();
+    FArianeGroupInvalidationFlags* InvalidationFlagsPtr = InstancedInvalidationFlags.GetMutablePtr<FArianeGroupInvalidationFlags>();
 
     if( InvalidationFlagsPtr == nullptr )
     {
-        InvalidationFlags = FInstancedStruct::Make<FArianeGroupInvalidationFlags>();
+        InstancedInvalidationFlags = FInstancedStruct::Make<FArianeGroupInvalidationFlags>();
 
-        InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianeGroupInvalidationFlags>();
+        InvalidationFlagsPtr = InstancedInvalidationFlags.GetMutablePtr<FArianeGroupInvalidationFlags>();
     }
 
     return *InvalidationFlagsPtr;
@@ -165,10 +165,8 @@ FArianeGroup::UpdateBoundingBox( EUpdateFlags UpdateFlags )
         // FBox(ForceInit) creates an invalid box
         FBox CombinedBox(ForceInit);
 
-        for (FArianeObjectID& ChildID : Children)
+        for (FArianeObject* Child : Children)
         {
-            FArianeObject* Child = ChildID.GetObject();
-
             // Note: use "+=" and not "bound = bound + blah". Only += checks for the validity of the box.
             CombinedBox += Child->GetBoundingBox().TransformBy( Child->GetLocalTransform() );
         }

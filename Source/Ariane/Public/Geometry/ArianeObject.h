@@ -209,7 +209,7 @@ public:
     FVector GetScaling();
 
     /** Get object's Guid */
-    const FGuid& GetGuid();
+    FGuid GetGuid();
 
     /**
         * @brief Run a function to each object of the object tree
@@ -243,7 +243,7 @@ public:
     UArianeImage* GetImage();
 
     /** Set the drawing layer this object belongs to */
-    void SetImage( UArianeImage* InImage );
+    virtual void ResetImage( UArianeImage* InImage );
 
     FSimpleMulticastDelegate & GetOnPostInvalidatedDelegate();
 
@@ -265,8 +265,8 @@ public:
     virtual FColor GetHUDForegroundColor();
 #endif
     FArianeObject* GetAncestorByClass( uint32 iClass, bool iBaseClass, bool iSelf );
-    TArray<FArianeObjectID>& GetChildren();
-    const TArray<FArianeObjectID>& GetChildren() const;
+    TArray<FArianeObject*>& GetChildren();
+    const TArray<FArianeObject*>& GetChildren() const;
 
     void SetExpanded( bool bInExpanded );
     bool IsExpanded();
@@ -312,8 +312,8 @@ public:
     void ResetTransform();
     FArianeObject* GetNextChild( FArianeObject* Child );
     virtual void Animate( const FArianeKeyedObject* KeyedObject, const FArianeKeyedObject* NextKeyedObject, float T );
-    void PrintPointers( bool bRecurse );
-    virtual void PostSerialize(const FArchive& Ar);
+    const FGuid& GetAllocatorGuid();
+    virtual void PostSerialize();
 
 protected:
     /**
@@ -341,6 +341,7 @@ protected:
     UPROPERTY( EditAnywhere )
     FArianeObjectID ParentID;
 
+protected:
     UPROPERTY( EditAnywhere )
     bool bVisible;
 
@@ -350,31 +351,48 @@ protected:
     UPROPERTY( EditAnywhere )
     TArray<FArianeTagID> Tags;
 
-    UPROPERTY()
+    UPROPERTY( EditAnywhere )
     TArray<FInstancedStruct> InstancedTags;
 
-    UPROPERTY()
+    UPROPERTY( EditAnywhere )
     EArianeAllocationModel AllocationModel;
 
-    UPROPERTY()
+    UPROPERTY( EditAnywhere )
     FTransform LocalTransform;
 
-    UPROPERTY()
-    UArianeImage* Image;
+public:
+/*
+    // declarations to be reset during the serialization process
+    struct FObjectTransientData
+    {
+        FInstancedStruct InstancedInvalidationFlags;
+        UArianeImage* Image;
+        // Random Guid used for safe pointer resolution. See ArianeID.h
+        FGuid AllocatorGuid = FGuid::NewGuid();
+        FTransform WorldTransform;
+        uint32 WorldTransformVersion;
+        TArray<FArianeObject*> InvalidatedChildren;
+        TArray<FArianeObjectID> Children;
+        FBox BoundingBox;
+        bool bSelected;
+        FSimpleMulticastDelegate  OnPostInvalidated;
+    };
 
-    UPROPERTY()
-    FInstancedStruct InvalidationFlags;
+    virtual FObjectTransientData& GetTransientData();
+*/
+    void ResetTransientData();
 
-    // declarations to be ignored during the duplication process
 protected:
+    FInstancedStruct InstancedInvalidationFlags;
+    UArianeImage* Image;
+    // Random Guid used for safe pointer resolution. See ArianeID.h
+    FGuid AllocatorGuid = FGuid::NewGuid();
     FTransform WorldTransform;
     uint32 WorldTransformVersion;
-    TArray<FArianeObjectID> Children;
-    TArray<FArianeObjectID> InvalidatedChildren;
+    TArray<FArianeObject*> InvalidatedChildren;
+    TArray<FArianeObject*> Children;
     FBox BoundingBox;
     bool bSelected;
-
-protected:
     FSimpleMulticastDelegate  OnPostInvalidated;
 };
 

@@ -213,8 +213,8 @@ void
 FArianeSegmentCubic::BuildVariable( uint32 MinRecurse
                                   , uint32 MaxRecurse )
 {
-    FArianeVertex* Vertex0 = Vertices[0].GetVertex();
-    FArianeVertex* Vertex1 = Vertices[1].GetVertex();
+    FArianeVertex* Vertex0 = Vertices[0].GetVertex( Image );
+    FArianeVertex* Vertex1 = Vertices[1].GetVertex( Image );
     TArray<FSubPoint> SubPoints;
     //static std::mutex mutex;
     FVector Bezier[4] = { Vertex0->GetPosition()
@@ -304,10 +304,10 @@ FArianeSegmentCubic::BuildVariable( uint32 MinRecurse
 FVector
 FArianeSegmentCubic::GetPointAt( double T )
 {
-    return ::ULIS::CubicBezierPointAtParameter( Vertices[0].GetVertex()->GetPosition()
+    return ::ULIS::CubicBezierPointAtParameter( Vertices[0].GetVertex( Image )->GetPosition()
                                               , Handle0.GetPosition()
                                               , Handle1.GetPosition()
-                                              , Vertices[1].GetVertex()->GetPosition()
+                                              , Vertices[1].GetVertex( Image )->GetPosition()
                                               , T );
 }
 
@@ -319,8 +319,8 @@ FArianeSegmentCubic::Extract( FArianeObject* NewSegmentOwner
                             , float T1
                             , EArianeAllocationModel InAllocationModel )
 {
-    FArianeVertex* Vertex0 = Vertices[0].GetVertex();
-    FArianeVertex* Vertex1 = Vertices[1].GetVertex();
+    FArianeVertex* Vertex0 = Vertices[0].GetVertex( Image );
+    FArianeVertex* Vertex1 = Vertices[1].GetVertex( Image );
     FVector DeltaNormal = Vertex1->GetNormal() - Vertex0->GetNormal();
     double DeltaRadius = Vertex1->GetRadius() - Vertex0->GetRadius();
     FVector Bezier[4] = { Vertex0->GetPosition()
@@ -358,12 +358,12 @@ FArianeSegmentCubic::Extract( FArianeObject* NewSegmentOwner
 FVector
 FArianeSegmentCubic::GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormalize )
 {
-    if( Vertex == Vertices[0].GetVertex() )
+    if( Vertex == Vertices[0].GetVertex( Image ) )
     {
         return GetTangentVectorAt( 0.0f, bNormalize );
     }
 
-    if( Vertex == Vertices[1].GetVertex() )
+    if( Vertex == Vertices[1].GetVertex( Image ) )
     {
         return -GetTangentVectorAt( 1.0f, bNormalize );
     }
@@ -374,15 +374,15 @@ FArianeSegmentCubic::GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNo
 FVector
 FArianeSegmentCubic::GetTangentVectorAt( double T, bool bNormalize )
 {
-    FVector Tangent = ::ULIS::CubicBezierTangentAtParameter( Vertices[0].GetVertex()->GetPosition()
+    FVector Tangent = ::ULIS::CubicBezierTangentAtParameter( Vertices[0].GetVertex( Image )->GetPosition()
                                                            , Handle0.GetPosition()
                                                            , Handle1.GetPosition()
-                                                           , Vertices[1].GetVertex()->GetPosition()
+                                                           , Vertices[1].GetVertex( Image )->GetPosition()
                                                            , T );
 
     if( Tangent.IsNearlyZero() )
     {
-        Tangent = ( Vertices[1].GetVertex()->GetPosition() - Vertices[0].GetVertex()->GetPosition() );
+        Tangent = ( Vertices[1].GetVertex( Image )->GetPosition() - Vertices[0].GetVertex( Image )->GetPosition() );
     }
 
     if( bNormalize )
@@ -396,7 +396,7 @@ FArianeSegmentCubic::GetTangentVectorAt( double T, bool bNormalize )
 FVector
 FArianeSegmentCubic::GetHandleVector( FArianeVertex* Vertex, bool bNormalize )
 {
-    return GetHandleVector( ( Vertices[0].GetVertex() == Vertex ) ? 0 : 1, bNormalize );
+    return GetHandleVector( ( Vertices[0].GetVertex( Image ) == Vertex ) ? 0 : 1, bNormalize );
 }
 
 FVector

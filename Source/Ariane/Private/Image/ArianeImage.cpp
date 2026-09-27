@@ -49,41 +49,44 @@ UArianeImage::UArianeImage()
 */
 }
 
-void
-UArianeImage::RebindObjects()
+FGuid
+UArianeImage::GetAllocatorGuid()
 {
-    RootGroupID.Image = this;
-    RootGroupID.InvalidateCache();
-
-    for (FInstancedStruct& InstancedStruct : InstancedObjects)
-    {
-        FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
-
-        Object->SetImage(this);
-    }
+    return AllocatorGuid;
 }
 
 void
-UArianeImage::Serialize(FArchive& Ar)
+UArianeImage::RebindObjects()
+{
+    AllocatorGuid = FGuid::NewGuid();
+}
+
+void UArianeImage::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
 
-    // Call PostSerialze on FInstancedStruct. It doesn't work when I tried to use TStructOpsTypeTraits::WithPostSerialize
-    // probably due to the nature of FInstancedStructs I guess.
-    for (FInstancedStruct& InstancedStruct : InstancedObjects)
+    UE_LOG( LogTemp, Warning, TEXT("UArianeImage::Serialize - Image=%p"), this )
+
+    AllocatorGuid = FGuid::NewGuid();
+
+    //if ( Ar.IsLoading() || Ar.IsTransacting() )
     {
-        FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
+        for (FInstancedStruct& InstancedStruct : InstancedObjects)
+        {
+            FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
 
-        Object->PostSerialize(Ar);
+            Object->ResetImage( this );
+        }
+
+        for (FInstancedStruct& InstancedStruct : InstancedObjects)
+        {
+            FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
+
+            Object->PostSerialize();
+        }
+
+        RootGroupID.GetObject( this )->Update( FArianeObject::EUpdateFlags::None, true );
     }
-
-    UE_LOG( LogTemp, Warning, TEXT("----UArianeImage::Serialize::Begin - Image:%p"), this );
-
-    RebindObjects();
-
-    PrintPointers();
-
-    UE_LOG( LogTemp, Warning, TEXT("----UArianeImage::Serialize::End - Image:%p"), this );
 }
 
 void
@@ -91,7 +94,7 @@ UArianeImage::OnRegisterLayer()
 {
 //UE_LOG(LogTemp, Warning, TEXT("name:%s this:%s RootGroup Image:%s"),
 //    *GetName(), *GetFullName(), RootGroupID.Image ? *RootGroupID.Image->GetFullName() : TEXT("NULL"));
-
+/*
     RootGroupID.Image = this;
     RootGroupID.InvalidateCache();
 
@@ -109,6 +112,7 @@ UArianeImage::OnRegisterLayer()
     UE_LOG( LogTemp, Warning, TEXT("----UArianeImage::OnRegisterLayer::End - Image:%p"), this );
 
     PrintPointers();
+*/
 }
 
 void
@@ -123,45 +127,10 @@ UArianeImage::GetDrawingLayer()
     return DrawingLayer;
 }
 
-void
-UArianeImage::InvalidateCache()
-{
-    // RootObjectID won't have its cache reset after Undoing, we have to force it.
-    RootGroupID.InvalidateCache();
-}
-
 FArianeGroup*
 UArianeImage::GetRootGroup()
 {
-    return static_cast<FArianeGroup*>(RootGroupID.GetObject());
-}
-
-void
-UArianeImage::PostDuplicate( EDuplicateMode::Type DuplicateMode )
-{
-    AArianePainting3DActor* Painting3DActor =  GetTypedOuter<AArianePainting3DActor>();
-
-    Super::PostDuplicate( DuplicateMode );
-
-    RootGroupID.Image = this;
-    RootGroupID.InvalidateCache();
-
-    UE_LOG( LogTemp, Warning, TEXT("----UArianeImage::PostDuplicate::Begin - Image:%p"), this );
-
-    PrintPointers();
-
-    for( FInstancedStruct& InstancedStruct : InstancedObjects )
-    {
-        FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
-
-        //Object->SetImage( this );
-
-        //Object->PostLoad();
-    }
-
-    UE_LOG( LogTemp, Warning, TEXT("----UArianeImage::PostDuplicate::End - Image:%p"), this );
-
-    PrintPointers();
+    return static_cast<FArianeGroup*>(RootGroupID.GetObject( this ));
 }
 
 void
@@ -173,8 +142,6 @@ UArianeImage::PrintPointers()
 
         UE_LOG( LogTemp, Warning, TEXT("UArianeImage::PrintPointers - Object.Image:%p"), Object->GetImage() );
     }
-
-    //RootGroupID.GetObject()->PrintPointers( true );
 }
 
 void
@@ -183,16 +150,6 @@ UArianeImage::PostLoad()
     UArianeLayerDrawing* DrawingLayerPtr = GetDrawingLayer().Get();
 
     Super::PostLoad();
-
-    RootGroupID.Image = this;
-    RootGroupID.InvalidateCache();
-
-    UE_LOG( LogTemp, Warning, TEXT("UArianeImage::PostLoad::Begin - Image:%p"), this );
-
-    PrintPointers();
-
-    // RootObjectID won't have its cache reset after Undoing, we have to force it.
-    InvalidateCache();
 
     BindDelegates();
 
@@ -204,8 +161,6 @@ UArianeImage::PostLoad()
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
-
-        //Object->SetImage( this );
 
         Object->PostLoad();
     }
@@ -226,10 +181,6 @@ UArianeImage::PostLoad()
             LayerStack->GetPainting3DComponent()->UpdateComponentToWorld();
         }
     }
-
-    UE_LOG( LogTemp, Warning, TEXT("UArianeImage::PostLoad::End - Image:%p"), this );
-
-    PrintPointers();
 }
 
 void
@@ -238,9 +189,6 @@ UArianeImage::PostEditUndo()
     UArianeLayerDrawing* DrawingLayerPtr = GetDrawingLayer().Get();
 
     Super::PostEditUndo();
-
-    // RootObjectID won't have its cache reset after Undoing, we have to force it.
-    InvalidateCache();
 
     BindDelegates();
 
@@ -252,8 +200,6 @@ UArianeImage::PostEditUndo()
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
-
-        Object->SetImage( this );
 
         Object->PostEditUndo();
     }
@@ -686,7 +632,7 @@ UArianeImage::Update( bool bInteractive )
         ObjectUpdateFlags = FArianeObject::EUpdateFlags::Interactive;
     }
 
-    RootGroupID.GetObject()->Update( ObjectUpdateFlags, true );
+    RootGroupID.GetObject( this )->Update( ObjectUpdateFlags, true );
 }
 
 void
@@ -702,18 +648,18 @@ UArianeImage::OnRootObjectInvalidated()
 void
 UArianeImage::BindDelegates()
 {
-    if( RootGroupID.GetObject() )
+    if( RootGroupID.GetObject( this ) )
     {
-        RootGroupID.GetObject()->GetOnPostInvalidatedDelegate().AddUObject( this, &UArianeImage::OnRootObjectInvalidated );
+        RootGroupID.GetObject( this )->GetOnPostInvalidatedDelegate().AddUObject( this, &UArianeImage::OnRootObjectInvalidated );
     }
 }
 
 void
 UArianeImage::UnbindDelegates()
 {
-    if( RootGroupID.GetObject() )
+    if( RootGroupID.GetObject( this ) )
     {
-        RootGroupID.GetObject()->GetOnPostInvalidatedDelegate().RemoveAll( this );
+        RootGroupID.GetObject( this )->GetOnPostInvalidatedDelegate().RemoveAll( this );
     }
 }
 
@@ -728,9 +674,9 @@ UArianeImage::ResetHierarchy()
 
     RootGroupID = FArianeObjectID( AllocGroup( "Root Group", EArianeAllocationModel::InstancedStruct ) );
 
-    RootGroupID.GetObject()->Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
+    RootGroupID.GetObject( this )->Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 
-    RootGroupID.GetObject()->UpdateTransform();
+    RootGroupID.GetObject( this )->UpdateTransform();
 
     BindDelegates();
 }
