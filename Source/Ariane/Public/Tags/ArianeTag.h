@@ -56,6 +56,7 @@ protected:
     EArianeAllocationModel AllocationModel;
 
 protected:
+    UArianeImage* Image;
     uint32 Flags;
     bool bShared;
 };

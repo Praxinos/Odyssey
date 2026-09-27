@@ -856,11 +856,12 @@ FArianeEditor::UngroupSelectedGroups()
         if( DrawingLayer )
         {
             FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
+            UArianeImage* Image = DrawingLayer->GetImage();
 
             // for undos in case a transaction is opened by the caller
-            DrawingLayer->GetImage()->Modify();
+            Image->Modify();
 
-            for( FArianeObject* SelectedObject : DrawingLayer->GetImage()->GetSelectedObjects() )
+            for( FArianeObject* SelectedObject : Image->GetSelectedObjects() )
             {
                 if( SelectedObject != RootGroup )
                 {
@@ -868,12 +869,10 @@ FArianeEditor::UngroupSelectedGroups()
                     {
                         FArianeGroup* SelectedGroup = static_cast<FArianeGroup*>(SelectedObject);
                         // we work on a copy of the array because the hierarchy will be modified
-                        TArray<FArianeObjectID> ChildrenIDs = SelectedGroup->GetChildren();
+                        TArray<FArianeObject*> Children = SelectedGroup->GetChildren();
 
-                        for( FArianeObjectID& ChildID : ChildrenIDs )
+                        for( FArianeObject* Child : Children )
                         {
-                            FArianeObject* Child = ChildID.GetObject();
-
                             SelectedGroup->GetParent()->TransferChild( Child, nullptr );
                         }
                     }
@@ -1017,25 +1016,26 @@ FArianeEditor::ConvertPrimitives( UArianePainting3DComponent* Painting3DComponen
 {
     for( FArianePrimitive* PrimitiveToConvert : PrimitivesToConvert )
     {
-        TArray<FArianeObjectID> Children;
+        UArianeImage *Image = PrimitiveToConvert->GetImage();
+        TArray<FArianeObject*> Children;
         FArianePath* Path;
 
         Children = PrimitiveToConvert->GetChildren();
 
         // first step: remove the children first or else the conversion will convert all children primitives
         // even the one that were not selected
-        for( FArianeObjectID& ChildID : Children )
+        for( FArianeObject* Child : Children )
         {
-            PrimitiveToConvert->RemoveChild( ChildID.GetObject(), false ); // remove but do not free the child
+            PrimitiveToConvert->RemoveChild( Child, false ); // remove but do not free the child
         }
 
         // second step: convert
         Path = PrimitiveToConvert->Convert( FArianePrimitive::EConversionFlags::Bezier );
 
         // third step: append children
-        for( FArianeObjectID& ChildID : Children )
+        for( FArianeObject* Child : Children )
         {
-            Path->AppendChild( ChildID.GetObject() );
+            Path->AppendChild( Child );
         }
 
         // final step: append the converted path and remove the primitive
@@ -1163,7 +1163,7 @@ FArianeEditor::PasteObjects()
                 {
                     FArianeObject* PasteObject = CopiedObject->Copy( CopyArgs );
 
-                    PasteObject->SetImage(  DrawingLayer->GetImage() );
+                    PasteObject->ResetImage(  DrawingLayer->GetImage() );
 
                     Destination->AppendChild( PasteObject );
 

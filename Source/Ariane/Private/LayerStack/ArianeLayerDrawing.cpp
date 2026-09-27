@@ -253,9 +253,8 @@ FArianeGeometryProxy::GetImageDynamicMeshElements( FMeshElementCollector& Collec
             {
                 const FTransform& PathTransform = Path->GetTransform();
 
-                for ( FArianeVertexID& VertexID : Path->GetVertices() )
+                for ( FArianeVertex* Vertex : Path->GetVertices() )
                 {
-                    FArianeVertex* Vertex = VertexID.GetVertex();
                     FVector VertexWorldPosition = PathTransform.TransformPosition( Vertex->GetPosition() );
                     FVector VertexWorldNormal = PathTransform.TransformVector( Vertex->GetNormal() );
 
@@ -374,6 +373,11 @@ UArianeLayerDrawing::UArianeLayerDrawing()
     bTickInEditor = true;
 */
 }
+
+void
+UArianeLayerDrawing::Serialize(FArchive& Ar )
+{
+    Super::Serialize( Ar );}
 
 void
 UArianeLayerDrawing::OnRegister()

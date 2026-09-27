@@ -14,6 +14,7 @@
 
 #include "ArianeSegment.generated.h"
 
+class UArianeImage;
 struct FArianeObject;
 struct FArianeVertex;
 
@@ -199,6 +200,8 @@ struct ARIANE_API FArianeSegment
                          , const TArray<float>& Radii  );
         EArianeAllocationModel GetAllocationModel();
         double GetVertexT( FArianeVertex* Vertex );
+        void SetImage( UArianeImage* InImage );
+        UArianeImage* GetImage();
 
     protected:
         /** Update the segment's bounds */
@@ -221,6 +224,8 @@ struct ARIANE_API FArianeSegment
         EArianeAllocationModel AllocationModel;
 
     protected:
+        // Needed to resolve the fake-pointers FArianeXXXXID
+        UArianeImage* Image;
         TArray<FArianePoint> FractionPoints;
         TArray<FFractionStep> FractionSteps;
         TArray<FFraction> Fractions;
@@ -228,8 +233,6 @@ struct ARIANE_API FArianeSegment
         TArray<uint32> IndexCache;
         FBox BoundingBox;
         double Length;
-
-    protected:
         bool bInvalidated : 1;
         bool bAutoFractioned : 1;
 };

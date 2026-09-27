@@ -12,219 +12,151 @@
 #include "ArianeTag.h"
 
 FArianeObjectID::FArianeObjectID()
-    : Image( nullptr )
+    : CachedImageAllocatorGuid( FGuid() )
     , CachedObject( nullptr )
 {
 }
 
 FArianeObjectID::FArianeObjectID( FArianeObject* Object )
-    : Image( nullptr )
-    , CachedObject( nullptr )
+    : CachedImageAllocatorGuid( FGuid() )
+    , CachedObject( Object )
+    , AllocationModel( Object ? Object->GetAllocationModel() : EArianeAllocationModel::InstancedStruct )
+    , Guid ( Object ? Object->GetGuid() : FGuid() )
 {
-    if( Object )
-    {
-        if( Object->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
-        {
-            CachedObject = Object;
-        }
-
-        if( Object->GetAllocationModel() == EArianeAllocationModel::InstancedStruct )
-        {
-            Image = Object->GetImage();
-
-            Guid = Object->GetGuid();
-        }
-    }
 }
 
 FArianeObject*
-FArianeObjectID::GetObject()
+FArianeObjectID::GetObject( UArianeImage* Image )
 {
-    if( Image )
+    if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
-        if( CachedObject == nullptr )
+        if( Image->GetAllocatorGuid() != CachedImageAllocatorGuid )
         {
             CachedObject = Image->GetObject( Guid );
+            CachedImageAllocatorGuid = Image->GetAllocatorGuid();
         }
     }
 
     return CachedObject;
 }
 
-void
-FArianeObjectID::InvalidateCache()
+FGuid
+FArianeObjectID::GetGuid() const
 {
-    CachedObject = nullptr;
+    return Guid;
 }
-
 
 ///////////////////////// VertexID
 
 FArianeVertexID::FArianeVertexID()
-    : Image( nullptr )
+    : OwnerID( FArianeObjectID() )
+    , CachedObjectAllocatorGuid ( FGuid() )
     , CachedVertex( nullptr )
 {
 }
 
 FArianeVertexID::FArianeVertexID( FArianeVertex* Vertex )
-    : Image( nullptr )
-    , CachedVertex( nullptr )
+    : OwnerID( Vertex->GetOwner() )
+    , CachedObjectAllocatorGuid ( FGuid() )
+    , CachedVertex( Vertex )
+    , AllocationModel( Vertex->GetAllocationModel() )
+    , Guid ( Vertex->GetGuid() )
 {
-    if( Vertex )
-    {
-        if( Vertex->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
-        {
-            CachedVertex = Vertex;
-        }
-
-        if( Vertex->GetAllocationModel() == EArianeAllocationModel::InstancedStruct )
-        {
-            Image = Vertex->GetOwner()->GetImage();
-
-            Guid = Vertex->GetGuid();
-
-            OwnerGuid = Vertex->GetOwner()->GetGuid();
-        }
-    }
-}
-
-FArianeVertexID&
-FArianeVertexID::operator=(const FArianeVertexID& Other)
-{
-    Image = Other.Image;
-    Guid = Other.Guid;
-    OwnerGuid = Other.OwnerGuid;
-    CachedVertex = Other.Image ? nullptr : Other.CachedVertex;
-
-    return *this;
 }
 
 FArianeVertex*
-FArianeVertexID::GetVertex()
+FArianeVertexID::GetVertex( UArianeImage* Image )
 {
-    if( CachedVertex == nullptr )
+    if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
-        FArianeObject* OwnerObject = Image->GetObject( OwnerGuid );
+        FArianeObject* OwnerObject = OwnerID.GetObject( Image );
 
-        if( OwnerObject )
+        if( OwnerObject->GetAllocatorGuid() != CachedObjectAllocatorGuid )
         {
-            FArianePath* Path = static_cast<FArianePath*>(OwnerObject);
+            if( OwnerObject->HasBaseClass( FArianePath::StaticClass() ) )
+            {
+                FArianePath* Path = static_cast<FArianePath*>(OwnerObject);
 
-            CachedVertex = Path->GetVertexByGuid( Guid );
+                CachedVertex = Path->GetVertexByGuid( Guid );
+                CachedObjectAllocatorGuid = OwnerObject->GetAllocatorGuid();
+            }
         }
     }
 
     return CachedVertex;
 };
 
-void
-FArianeVertexID::InvalidateCache()
-{
-    CachedVertex = nullptr;
-}
-
 ////////////////////// SegmentID
 
 FArianeSegmentID::FArianeSegmentID()
-    : Image( nullptr )
+    : OwnerID( FArianeObjectID() )
+    , CachedObjectAllocatorGuid ( FGuid() )
     , CachedSegment( nullptr )
 {
 }
 
 FArianeSegmentID::FArianeSegmentID( FArianeSegment* Segment )
-    : Image( nullptr )
-    , CachedSegment( nullptr )
+    : OwnerID( Segment->GetOwner() )
+    , CachedObjectAllocatorGuid ( FGuid() )
+    , CachedSegment( Segment )
+    , AllocationModel( Segment->GetAllocationModel() )
+    , Guid ( Segment->GetGuid() )
 {
-    if( Segment )
-    {
-        if( Segment->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
-        {
-            CachedSegment = Segment;
-        }
-
-        if( Segment->GetAllocationModel() == EArianeAllocationModel::InstancedStruct )
-        {
-            Image = Segment->GetOwner()->GetImage();
-
-            Guid = Segment->GetGuid();
-
-            OwnerGuid = Segment->GetOwner()->GetGuid();
-        }
-    }
 }
 
 FArianeSegment*
-FArianeSegmentID::GetSegment()
+FArianeSegmentID::GetSegment( UArianeImage* Image )
 {
-    if( CachedSegment == nullptr )
+    if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
-        FArianeObject* OwnerObject = Image->GetObject( OwnerGuid );
+        FArianeObject* OwnerObject = OwnerID.GetObject( Image );
 
-        if( OwnerObject )
+        if( OwnerObject->GetAllocatorGuid() != CachedObjectAllocatorGuid )
         {
-            FArianePath* Path = static_cast<FArianePath*>(OwnerObject);
+            if( OwnerObject->HasBaseClass( FArianePath::StaticClass() ) )
+            {
+                FArianePath* Path = static_cast<FArianePath*>(OwnerObject);
 
-            CachedSegment = Path->GetSegmentByGuid( Guid );
+                CachedSegment = Path->GetSegmentByGuid( Guid );
+                CachedObjectAllocatorGuid = OwnerObject->GetAllocatorGuid();
+            }
         }
     }
 
     return CachedSegment;
 };
 
-void
-FArianeSegmentID::InvalidateCache()
-{
-    CachedSegment = nullptr;
-}
-
 ///////////////////////// TagID
 
 FArianeTagID::FArianeTagID()
-    : Image( nullptr )
+    : OwnerID( FArianeObjectID() )
+    , CachedObjectAllocatorGuid ( FGuid() )
     , CachedTag( nullptr )
 {
 }
 
 FArianeTagID::FArianeTagID( FArianeTag* Tag )
-    : Image( nullptr )
-    , CachedTag( nullptr )
+    : OwnerID( Tag->GetOwner() )
+    , CachedObjectAllocatorGuid ( FGuid() )
+    , CachedTag( Tag )
+    , AllocationModel( Tag->GetAllocationModel() )
+    , Guid ( Tag->GetGuid() )
 {
-    if( Tag )
-    {
-        if( Tag->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
-        {
-            CachedTag = Tag;
-        }
-
-        if( Tag->GetAllocationModel() == EArianeAllocationModel::InstancedStruct )
-        {
-            Image = Tag->GetOwner()->GetImage();
-
-            Guid = Tag->GetGuid();
-
-            OwnerGuid = Tag->GetOwner()->GetGuid();
-        }
-    }
 }
 
 FArianeTag*
-FArianeTagID::GetTag()
+FArianeTagID::GetTag( UArianeImage* Image )
 {
-    if( CachedTag == nullptr )
+    if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
-        FArianeObject* OwnerObject = Image->GetObject( OwnerGuid );
+        FArianeObject* OwnerObject = OwnerID.GetObject( Image );
 
-        if( OwnerObject )
+        if( OwnerObject->GetAllocatorGuid() != CachedObjectAllocatorGuid )
         {
             CachedTag = OwnerObject->GetTagByGuid( Guid );
+            CachedObjectAllocatorGuid = OwnerObject->GetAllocatorGuid();
         }
     }
 
     return CachedTag;
 };
-
-void
-FArianeTagID::InvalidateCache()
-{
-    CachedTag = nullptr;
-}

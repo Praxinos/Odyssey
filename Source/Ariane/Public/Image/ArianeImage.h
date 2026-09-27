@@ -114,7 +114,6 @@ public:
     void AppendSelectedTrees( TArray<FArianeObject*>& SelectedTrees );
     void GetSelectedTrees( TArray<FArianeObject*>& SelectedTrees );
     void UnselectObject( FArianeObject* ObjectToSelect );
-    void InvalidateCache();
     FArianeEllipse* AllocEllipse( UMaterialInterface* InMaterialInterface
                                 , const FName& InName
                                 , double RadiusX
@@ -149,9 +148,9 @@ public:
     TWeakObjectPtr<UArianeLayerDrawing> GetDrawingLayer();
     void OnRegisterLayer();
     void Animate( const FArianeImageKeyData* KeyData, const FArianeImageKeyData* NextKeyData, float T );
-    virtual void PostDuplicate( EDuplicateMode::Type DuplicateMode ) override;
     virtual void Serialize(FArchive& Ar) override;
     void RebindObjects();
+    FGuid GetAllocatorGuid();
 
 protected:
     void BindDelegates();
@@ -174,6 +173,8 @@ protected:
     TWeakObjectPtr<UArianeLayerDrawing> DrawingLayer;
 
 protected:
+    // Random Guid used for safe pointer resolution. See ArianeID.h
+    FGuid AllocatorGuid = FGuid::NewGuid();
     // counter to determine how many times the material is used (i.e by how many objects)
     TMap<UMaterialInterface*, uint32> UsedMaterials;
 

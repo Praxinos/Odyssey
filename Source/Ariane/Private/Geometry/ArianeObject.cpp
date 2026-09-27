@@ -266,7 +266,7 @@ FArianeObject::~FArianeObject()
     // free mallocated Tags.
     for( FArianeTagID& TagID : Tags )
     {
-        FArianeTag* Tag = TagID.GetTag();
+        FArianeTag* Tag = TagID.GetTag( Image );
 
         if( Tag->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
         {
@@ -297,30 +297,57 @@ FArianeObject::FArianeObject( UArianeImage* InImage
 {
 }
 
+const FGuid&
+FArianeObject::GetAllocatorGuid()
+{
+    return AllocatorGuid;
+}
+
 FArianeObjectInvalidationFlags&
 FArianeObject::GetInvalidationFlags()
 {
-    FArianeObjectInvalidationFlags* InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianeObjectInvalidationFlags>();
+    FArianeObjectInvalidationFlags* InvalidationFlagsPtr = InstancedInvalidationFlags.GetMutablePtr<FArianeObjectInvalidationFlags>();
 
     if( InvalidationFlagsPtr == nullptr )
     {
-        InvalidationFlags = FInstancedStruct::Make<FArianeObjectInvalidationFlags>();
+        InstancedInvalidationFlags = FInstancedStruct::Make<FArianeObjectInvalidationFlags>();
 
-        InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianeObjectInvalidationFlags>();
+        InvalidationFlagsPtr = InstancedInvalidationFlags.GetMutablePtr<FArianeObjectInvalidationFlags>();
     }
 
     return *InvalidationFlagsPtr;
 }
 
-void
-FArianeObject::PostSerialize(const FArchive& Ar)
+/*
+FArianeObject::FObjectTransientData&
+FArianeObject::GetTransientData()
 {
+    FObjectTransientData* TransientDataPtr = InstancedTransientData.GetMutablePtr<FObjectTransientData>();
+
+    if( TransientDataPtr == nullptr )
+    {
+        InstancedTransientData = FInstancedStruct::Make<FObjectTransientData>();
+
+        TransientDataPtr = InstancedTransientData.GetMutablePtr<FObjectTransientData>();
+    }
+
+    return *TransientDataPtr;
+}
+*/
+
+void
+FArianeObject::ResetImage( UArianeImage* InImage )
+{
+    InstancedInvalidationFlags.Reset();
+    Image = InImage;
+    AllocatorGuid = FGuid::NewGuid();
     WorldTransform = FTransform();
     WorldTransformVersion = 0;
-    Children.Empty();
     InvalidatedChildren.Empty();
+    Children.Empty();
     BoundingBox = FBox(ForceInit);
     bSelected = false;
+    //OnPostInvalidated.Clear();
 }
 
 EArianeAllocationModel
@@ -343,15 +370,9 @@ FArianeObject::HasBaseClass( uint32 BaseClass )
 void
 FArianeObject::RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstancedObjects )
 {
-    Children.RemoveAll( [ ChildToRemove ](  FArianeObjectID& ChildObjectID ) -> bool
-    {
-        return ( ChildToRemove->GetGuid() == ChildObjectID.Guid );
-    } );
+    Children.Remove( ChildToRemove );
 
-    InvalidatedChildren.RemoveAll( [ ChildToRemove ](  FArianeObjectID& ChildObjectID ) -> bool
-    {
-        return ( ChildToRemove->GetGuid() == ChildObjectID.Guid );
-    } );
+    InvalidatedChildren.Remove( ChildToRemove );
 
     Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 
@@ -375,7 +396,7 @@ FArianeObject::RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstan
 void
 FArianeObject::AppendChild( FArianeObject* Child )
 {
-    Children.Add( FArianeObjectID( Child ) );
+    Children.Add( Child );
 
     Child->SetParent( this );
     Child->Added();
@@ -390,7 +411,7 @@ FArianeObject::AppendChild( FArianeObject* Child )
 void
 FArianeObject::PrependChild( FArianeObject* Child )
 {
-    Children.Insert( FArianeObjectID( Child ), 0 );
+    Children.Insert( Child, 0 );
 
     Child->SetParent( this );
     Child->Added();
@@ -405,12 +426,12 @@ FArianeObject::PrependChild( FArianeObject* Child )
 void
 FArianeObject::InsertChild( FArianeObject* Child, FArianeObject* InsertAfter )
 {
-    int FoundObjectIndex = Children.IndexOfByPredicate( [Child]( const FArianeObjectID& ObjectID ) -> bool
+    int FoundObjectIndex = Children.IndexOfByPredicate( [Child]( const FArianeObject* Object ) -> bool
                                                         {
-                                                            return ( ObjectID.Guid == Child->Guid ) ? true : false;
+                                                            return ( Object == Child ) ? true : false;
                                                         } );
 
-    Children.Insert( FArianeObjectID( Child ), FoundObjectIndex + 1 );
+    Children.Insert( Child, FoundObjectIndex + 1 );
 
     Child->SetParent( this );
     Child->Added();
@@ -422,12 +443,9 @@ void
 FArianeObject::InvalidateChild( FArianeObject* Child )
 {
 
-    if( InvalidatedChildren.FindByPredicate( [Child]( const FArianeObjectID& ObjectID ) -> bool
-                                             {
-                                                 return ( ObjectID.Guid == Child->Guid ) ? true : false;
-                                             } ) == nullptr )
+    if( InvalidatedChildren.Find( Child ) == INDEX_NONE )
     {
-        InvalidatedChildren.Add( FArianeObjectID( Child ) );
+        InvalidatedChildren.Add( Child );
     }
 
     Invalidate( FArianeObjectInvalidationFlags().SetChildren() );
@@ -436,9 +454,9 @@ FArianeObject::InvalidateChild( FArianeObject* Child )
 void
 FArianeObject::Invalidate( const FArianeObjectInvalidationFlags& InInvalidationFlags )
 {
-    if ( ParentID.GetObject() )
+    if ( ParentID.GetObject( Image ) )
     {
-        ParentID.GetObject()->InvalidateChild( this );
+        ParentID.GetObject( Image )->InvalidateChild( this );
     }
 
     GetInvalidationFlags().OR( InInvalidationFlags );
@@ -452,13 +470,13 @@ FArianeObject::Invalidate( const FArianeObjectInvalidationFlags& InInvalidationF
 void
 FArianeObject::GetInvalidatedChildren( TArray<FArianeObject*> OutInvalidatedObjects, bool bRecurse )
 {
-    for( FArianeObjectID& InvalidatedObject : InvalidatedChildren )
+    for( FArianeObject* InvalidatedObject : InvalidatedChildren )
     {
-        OutInvalidatedObjects.Add( InvalidatedObject.GetObject() );
+        OutInvalidatedObjects.Add( InvalidatedObject );
 
         if( bRecurse )
         {
-            InvalidatedObject.GetObject()->GetInvalidatedChildren( OutInvalidatedObjects, bRecurse );
+            InvalidatedObject->GetInvalidatedChildren( OutInvalidatedObjects, bRecurse );
         }
     }
 }
@@ -466,6 +484,7 @@ FArianeObject::GetInvalidatedChildren( TArray<FArianeObject*> OutInvalidatedObje
 FArianeObject::ETraversalReturnValue
 FArianeObject::Traverse_Private( FArianeObject* Object, TFunction<ETraversalReturnValue(FArianeObject*)> Callback )
 {
+    UArianeImage* Image = Object->GetImage();
     ETraversalReturnValue Ret = Callback( Object );
 
     if( Ret == ETraversalReturnValue::Stop )
@@ -475,9 +494,8 @@ FArianeObject::Traverse_Private( FArianeObject* Object, TFunction<ETraversalRetu
 
     if( ( Ret == ETraversalReturnValue::IgnoreChildren ) == 0 )
     {
-        for( FArianeObjectID& ChildID : Object->GetChildren() )
+        for( FArianeObject* Child : Object->GetChildren() )
         {
-            FArianeObject* Child = ChildID.GetObject();
             ETraversalReturnValue ChildRet = Traverse_Private( Child, Callback );
 
             if( ChildRet == ETraversalReturnValue::Stop )
@@ -594,10 +612,11 @@ FArianeObject::Update( EUpdateFlags UpdateFlags, bool Recurse )
 
     if( Recurse )
     {
-        InvalidatedChildren.RemoveAll( [ &UpdateFlags
-                                       , &Recurse](  FArianeObjectID& InvalidatedChildID )
+        InvalidatedChildren.RemoveAll( [ this
+                                       , &UpdateFlags
+                                       , &Recurse](  FArianeObject* InvalidatedChildID )
             {
-                return InvalidatedChildID.GetObject()->Update( UpdateFlags, Recurse );
+                return InvalidatedChildID->Update( UpdateFlags, Recurse );
             } );
     }
 
@@ -803,52 +822,19 @@ FArianeObject::GetOnPostInvalidatedDelegate()
     return OnPostInvalidated;
 }
 
-void
-FArianeObject::PrintPointers( bool bRecurse )
-{
-    FArianeObject::Traverse( this
-                            , [bRecurse]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
-    {
-        UE_LOG( LogTemp, Warning, TEXT("UArianeImage::PrintPointers - Object->ParentID.Image:%p"), Object->ParentID.Image );
-
-        for( FArianeObjectID& ChildID : Object->Children )
-        {
-            UE_LOG( LogTemp, Warning, TEXT("UArianeImage::PrintPointers - ChildID.Image:%p"), ChildID.Image );
-        }
-
-        if( Object->GetClass() == FArianePath::StaticClass() )
-        {
-            //FArianePath* Path = static_cast<FArianePath*>( Object );
-
-        }
-
-        return bRecurse ? FArianeObject::ETraversalReturnValue::Continue
-                        : FArianeObject::ETraversalReturnValue::Stop;
-    } );
-}
-
 UArianeImage*
 FArianeObject::GetImage()
 {
     return Image;
 }
 
-void
-FArianeObject::SetImage( UArianeImage* InImage )
-{
-    Image = InImage;
-
-    ParentID.Image = Image;
-    ParentID.InvalidateCache();
-}
-
-TArray<FArianeObjectID>&
+TArray<FArianeObject*>&
 FArianeObject::GetChildren()
 {
     return Children;
 }
 
-const TArray<FArianeObjectID>&
+const TArray<FArianeObject*>&
 FArianeObject::GetChildren() const
 {
     return Children;
@@ -871,7 +857,7 @@ FArianeObject::GetName()
 FArianeObject*
 FArianeObject::GetAncestorByClass( uint32 iClass, bool bHasBaseObjectClass, bool bSelf )
 {
-    FArianeObject* Ancestor = bSelf ? this : ParentID.GetObject();
+    FArianeObject* Ancestor = bSelf ? this : ParentID.GetObject( Image );
 
     while ( Ancestor )
     {
@@ -939,15 +925,15 @@ FArianeObject*
 FArianeObject::GetNextChild( FArianeObject* Child )
 {
     FArianeObject* NextChild = nullptr;
-    int IndexOfChild = Children.IndexOfByPredicate( [Child] ( const FArianeObjectID& ObjectId )
+    int IndexOfChild = Children.IndexOfByPredicate( [this, Child] ( const FArianeObjectID& ObjectId )
         {
-            return ( const_cast<FArianeObjectID&>(ObjectId).GetObject() == Child ) ? true : false;
+            return ( const_cast<FArianeObjectID&>(ObjectId).GetObject( Image ) == Child ) ? true : false;
         } );
     int IndexOfNext = IndexOfChild + 1;
 
     if( IndexOfNext < Children.Num() )
     {
-        return Children[IndexOfNext].GetObject();
+        return Children[IndexOfNext];
     }
 
     return nullptr;
@@ -958,10 +944,8 @@ FArianeObject::GetPreviousChild( FArianeObject* Child )
 {
     FArianeObject* PreviousItem = nullptr;
 
-    for( FArianeObjectID& ItemID : Children )
+    for( FArianeObject* Item : Children )
     {
-        FArianeObject* Item = ItemID.GetObject();
-
         if( Item == Child )
         {
             return PreviousItem;
@@ -994,9 +978,9 @@ FArianeObject::TransferChild( FArianeObject* FosterChild
             if( InsertAfter )
             {
                 int InsertAfterIndex = Children.IndexOfByPredicate(
-                    [InsertAfter] ( const FArianeObjectID& ItemID ) -> bool
+                    [this,InsertAfter] ( const FArianeObjectID& ItemID ) -> bool
                     {
-                       if( const_cast<FArianeObjectID&>(ItemID).GetObject() == InsertAfter )
+                       if( const_cast<FArianeObjectID&>(ItemID).GetObject( Image ) == InsertAfter )
                        {
                            return true;
                        }
@@ -1106,9 +1090,8 @@ FArianeObject::Copy( const FCopyArgs& CopyArgs
         CopySettings( ObjectCopy, CopyArgs, true );
 
         // recurse
-        for( FArianeObjectID& ChildID : Children )
+        for( FArianeObject* Child : Children )
         {
-            FArianeObject* Child = ChildID.GetObject();
             FCopyArgs ChildCopyArgs = CopyArgs;
 
             // We only rename the first item of the tree, that's why we reset the flag
@@ -1124,7 +1107,7 @@ FArianeObject::Copy( const FCopyArgs& CopyArgs
         {
             for( FArianeTagID& TagID : Tags )
             {
-                FArianeTag* Tag = TagID.GetTag();
+                FArianeTag* Tag = TagID.GetTag( Image );
 
                 FArianeTag* TagCopy = Tag->Copy( ObjectCopy );
 
@@ -1185,14 +1168,14 @@ FArianeObject::SetVisible( bool bInVisible )
 bool
 FArianeObject::IsVisible( bool bInHierarchical )
 {
-    FArianeObject* Parent = ParentID.GetObject();
+    FArianeObject* Parent = ParentID.GetObject( Image );
 
     //return ( ( DrawingLayer == nullptr ) || DrawingLayer->IsVisible() == true ) ? true : false;
     return ( bInHierarchical && Parent ) ? bVisible && Parent->IsVisible( bInHierarchical )
                                          : bVisible;
 }
 
-const FGuid&
+FGuid
 FArianeObject::GetGuid()
 {
     return Guid;
@@ -1208,7 +1191,7 @@ FArianeObject::ExportProperties( FArianeObject* DestObject )
 FArianeObject*
 FArianeObject::GetParent()
 {
-    return ParentID.GetObject();
+    return ParentID.GetObject( Image );
 }
 
 void
@@ -1220,17 +1203,18 @@ FArianeObject::SetParent( FArianeObject* Parent )
 void
 FArianeObject::PostEditUndo()
 {
-    if( ParentID.GetObject() )
-    {
-        ParentID.GetObject()->AppendChild( this );
-    }
 }
 
 void
 FArianeObject::PostLoad()
 {
-    if( ParentID.GetObject() )
+}
+
+void
+FArianeObject::PostSerialize()
+{
+    if( GetParent() )
     {
-        ParentID.GetObject()->AppendChild( this );
+        GetParent()->AppendChild( this );
     }
 }

@@ -66,11 +66,12 @@ FArianeEditorPathTracer::Flush( FSceneView* View
 {
     if( CubicPath && CubicPath->GetSegments().Num() )
     {
-        FArianeSegmentCubic* CurrentCubicSegment = static_cast<FArianeSegmentCubic*>(CubicPath->GetSegments().Last().GetSegment());
+        UArianeImage* Image = CubicPath->GetImage();
+        FArianeSegmentCubic* CurrentCubicSegment = static_cast<FArianeSegmentCubic*>(CubicPath->GetSegments().Last());
 
         // forbid path with a single vertex that has a segment that loops on itself
         if ( ( CubicPath->GetVertices().Num() == 1 )
-          && ( CubicPath->GetVertices()[0].GetVertex() == LastSegmentVertex ) )
+          && ( CubicPath->GetVertices()[0] == LastSegmentVertex ) )
         {
             Reset();
 

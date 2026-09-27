@@ -142,15 +142,14 @@ UArianeEditorPathProxy::ApplyPropertyBits( FArianeObject* Object )
     if( Object->HasBaseClass( FArianePath::StaticClass() ) )
     {
         FArianePath* Path = static_cast<FArianePath*>(Object);
+        UArianeImage* Image = Path->GetImage();
 
         if( WideningMode == EArianeEditorPathProxyWideningMode::Percent )
         {
             if( PathPropertyBits.PathWidthInPercent )
             {
-                for( FArianeVertexID& VertexID : Path->GetVertices() )
+                for( FArianeVertex* Vertex : Path->GetVertices() )
                 {
-                    FArianeVertex* Vertex = VertexID.GetVertex();
-
                     Vertex->SetRadius( Vertex->GetRadius() * PathWidthInPercent * 0.01f );
                 }
             }
@@ -160,10 +159,8 @@ UArianeEditorPathProxy::ApplyPropertyBits( FArianeObject* Object )
         {
             if( PathPropertyBits.PathWidthInUnits )
             {
-                for( FArianeVertexID& VertexID : Path->GetVertices() )
+                for( FArianeVertex* Vertex : Path->GetVertices() )
                 {
-                    FArianeVertex* Vertex = VertexID.GetVertex();
-
                     Vertex->SetRadius( PathWidthInUnits );
                 }
             }

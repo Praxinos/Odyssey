@@ -328,14 +328,17 @@ UArianeEditorPathEditTool::OnKeyUpGlobal( const FKeyEvent& InKeyEvent )
 
 // static
 void
-UArianeEditorPathEditTool::BuildSegmentAdjustments( const TArray<FArianeSegment*>& Segments
+UArianeEditorPathEditTool::BuildSegmentAdjustments( UArianeLayerDrawing* DrawingLayer
+                                                  , const TArray<FArianeSegment*>& Segments
                                                   , TArray<FSegmentAdjustment>& OutSegmentAdjustments )
 {
+    UArianeImage* Image = DrawingLayer->GetImage();
+
     OutSegmentAdjustments.Reserve( Segments.Num() );
 
     for( const FArianeSegmentID& SegmentID : Segments )
     {
-        FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment();
+        FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment(Image);
 
         OutSegmentAdjustments.Emplace( Segment );
     }
@@ -433,14 +436,14 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
                     // static call
                     FArianeVertex::ArrayToSegmentArray( PickedVertices, AlteredSegments, false );
                     // static call
-                    BuildSegmentAdjustments( AlteredSegments, SegmentAdjustments );
+                    BuildSegmentAdjustments( DrawingLayer, AlteredSegments, SegmentAdjustments );
 
                     // Control points must move with the point. Store them in the iPickedHandleArray
                     for( FArianeVertex* Vertex : PickedVertices )
                     {
                         for( const FArianeSegmentID& SegmentID : Vertex->GetSegments() )
                         {
-                            FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment();
+                            FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment( DrawingLayer->GetImage() );
 
                             if( Segment->GetClass() == FArianeSegmentCubic::StaticClass() )
                             {

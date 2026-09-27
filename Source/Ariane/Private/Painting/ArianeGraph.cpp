@@ -1026,10 +1026,8 @@ FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& O
             NodeCount += Path->GetVertices().Num();
 
             // for each "sub-segment" (a fraction), we create an edge, beacause projected Bezier Segment won't be Beizer anymore
-            for( FArianeSegmentID& SegmentID : Path->GetSegments() )
+            for( FArianeSegment* Segment : Path->GetSegments() )
             {
-                FArianeSegment* Segment = SegmentID.GetSegment();
-
                 NodeCount += Segment->GetFractionCount() - 1;
                 FractionCount += Segment->GetFractionCount();
                 LinearEdgeCount += Segment->GetFractionCount(); // for 3D objects, there are as many edges as fractions
@@ -1058,9 +1056,8 @@ FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& O
             uint32 PathLinearEdgeCount = 0;
             uint32 PathCubicEdgeCount = 0;
 
-            for( FArianeVertexID& VertexID : Path->GetVertices() )
+            for( FArianeVertex* Vertex : Path->GetVertices() )
             {
-                FArianeVertex* Vertex = VertexID.GetVertex();
                 FVector VertexWorldPosition = PathTransform.TransformPosition( Vertex->GetPosition() );
                 FVector RayDirection = VertexWorldPosition - ViewOrigin;
                 FVector IntersectAt;
@@ -1078,10 +1075,8 @@ FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& O
                 PathNodeCount++;
             }
 
-            for( FArianeSegmentID& SegmentID : Path->GetSegments() )
+            for( FArianeSegment* Segment : Path->GetSegments() )
             {
-                FArianeSegment* Segment = SegmentID.GetSegment();
-
                 // In theory we could create the edges and the nodes in a single for loop, but this optimizations will come later
                 for( FArianeSegment::FFractionStep& Step : Segment->GetFractionSteps() )
                 {

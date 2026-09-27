@@ -21,15 +21,14 @@ void
 UArianePainting3DStaticMeshComponent::ConvertPathToStaticMesh( FMeshDescriptionBuilder& MeshDescriptionBuilder
                                                              , FArianePath* Path )
 {
+    UArianeImage* Image = Path->GetImage();
     TArray<int32> MeshVertexIDs;
     uint32 PathVertexCount = 0;
     uint32 PathIndexCount = 0;
 
     // Count the number of vertices for allocation
-    for ( FArianeSegmentID& SegmentID : Path->GetSegments() )
+    for ( FArianeSegment* Segment : Path->GetSegments() )
     {
-        FArianeSegment* Segment = SegmentID.GetSegment();
-
         PathVertexCount += Segment->GetModelVertexCache().Num();
         PathIndexCount += Segment->GetIndexCache().Num();
     }
@@ -37,10 +36,8 @@ UArianePainting3DStaticMeshComponent::ConvertPathToStaticMesh( FMeshDescriptionB
     // allocate memory IDs;
     MeshVertexIDs.Reserve( PathVertexCount );
 
-    for ( FArianeSegmentID& SegmentID : Path->GetSegments() )
+    for ( FArianeSegment* Segment : Path->GetSegments() )
     {
-        FArianeSegment* Segment = SegmentID.GetSegment();
-
         for( const FDynamicMeshVertex& DynamicMeshVertex : Segment->GetModelVertexCache() )
         {
             int32 MeshVertexID = MeshDescriptionBuilder.AppendVertex( FVector( DynamicMeshVertex.Position ) );
@@ -54,9 +51,8 @@ UArianePainting3DStaticMeshComponent::ConvertPathToStaticMesh( FMeshDescriptionB
     // Allocate a polygon group
     FPolygonGroupID PolygonGroup = MeshDescriptionBuilder.AppendPolygonGroup( Path->GetMaterial()->GetFName() );
 
-    for ( FArianeSegmentID& SegmentID : Path->GetSegments() )
+    for ( FArianeSegment* Segment : Path->GetSegments() )
     {
-        FArianeSegment* Segment = SegmentID.GetSegment();
         const TArray<uint32>& SegmentIndexCache = Segment->GetIndexCache();
         const TArray<FDynamicMeshVertex>& SegmentModelVertexCache = Segment->GetModelVertexCache();
 

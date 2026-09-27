@@ -43,13 +43,13 @@ FArianePrimitive::FArianePrimitive( UArianeImage* InImage
 FArianePrimitiveInvalidationFlags&
 FArianePrimitive::GetInvalidationFlags()
 {
-    FArianePrimitiveInvalidationFlags* InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianePrimitiveInvalidationFlags>();
+    FArianePrimitiveInvalidationFlags* InvalidationFlagsPtr = InstancedInvalidationFlags.GetMutablePtr<FArianePrimitiveInvalidationFlags>();
 
     if( InvalidationFlagsPtr == nullptr )
     {
-        InvalidationFlags = FInstancedStruct::Make<FArianePrimitiveInvalidationFlags>();
+        InstancedInvalidationFlags = FInstancedStruct::Make<FArianePrimitiveInvalidationFlags>();
 
-        InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianePrimitiveInvalidationFlags>();
+        InvalidationFlagsPtr = InstancedInvalidationFlags.GetMutablePtr<FArianePrimitiveInvalidationFlags>();
     }
 
     return *InvalidationFlagsPtr;

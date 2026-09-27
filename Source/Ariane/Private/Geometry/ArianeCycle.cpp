@@ -111,13 +111,13 @@ FArianeCycle::FArianeCycle( UArianeImage* InImage
 FArianeCycleInvalidationFlags&
 FArianeCycle::GetInvalidationFlags()
 {
-    FArianeCycleInvalidationFlags* InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianeCycleInvalidationFlags>();
+    FArianeCycleInvalidationFlags* InvalidationFlagsPtr = InstancedInvalidationFlags.GetMutablePtr<FArianeCycleInvalidationFlags>();
 
     if( InvalidationFlagsPtr == nullptr )
     {
-        InvalidationFlags = FInstancedStruct::Make<FArianeCycleInvalidationFlags>();
+        InstancedInvalidationFlags = FInstancedStruct::Make<FArianeCycleInvalidationFlags>();
 
-        InvalidationFlagsPtr = InvalidationFlags.GetMutablePtr<FArianeCycleInvalidationFlags>();
+        InvalidationFlagsPtr = InstancedInvalidationFlags.GetMutablePtr<FArianeCycleInvalidationFlags>();
     }
 
     return *InvalidationFlagsPtr;

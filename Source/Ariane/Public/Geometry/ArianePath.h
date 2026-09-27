@@ -132,7 +132,7 @@ public:
                , const FName& InName
                , EArianeAllocationModel InAllocationModel );
 
-    FArianePath& operator=(const FArianePath& Other);
+    //FArianePath& operator=(const FArianePath& Other);
 
 public:
     /** overriden from ArianeObject */
@@ -198,13 +198,13 @@ public:
     void RemoveSegment( FArianeSegment* Segment, bool bUnallocate = true );
 
     /** Get all the vertices added to this path */
-    TArray<FArianeVertexID>& GetVertices();
+    TArray<FArianeVertex*>& GetVertices();
 
     /** Get all the invalidated vertices */
     TArray<FArianeSegment*>& GetInvalidatedVertices();
 
     /** Get all the segments added to this path */
-    TArray<FArianeSegmentID>& GetSegments();
+    TArray<FArianeSegment*>& GetSegments();
 
     /** Get all the invalidated segments */
     TArray<FArianeSegment*>& GetInvalidatedSegments();
@@ -291,6 +291,8 @@ public:
     uint32 GetCubicSegmentCount();
     uint32 GetLinearSegmentCount();
     virtual FArianePathInvalidationFlags& GetInvalidationFlags() override;
+    virtual void ResetImage( UArianeImage* InImage ) override;
+    virtual void PostSerialize() override;
 
 protected:
     void FindChains();
@@ -322,11 +324,11 @@ protected:
     UMaterialInterface* Material;
 
 protected:
-    TArray<FArianeVertexID> Vertices;
-    TArray<FArianeSegmentID> Segments;
-    FArianePathGeometry3D Geometry3D;
+    TArray<FArianeVertex*> Vertices;
+    TArray<FArianeSegment*> Segments;
     TArray<FArianeSegment*> InvalidatedSegments;
     TArray<FArianeVertex*> InvalidatedVertices;
+    FArianePathGeometry3D Geometry3D;
     TArray<Chain> Chains;
     uint32 CubicSegmentCount;
     uint32 LinearSegmentCount;
