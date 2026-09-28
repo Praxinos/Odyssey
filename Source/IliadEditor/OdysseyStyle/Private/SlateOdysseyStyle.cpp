@@ -687,6 +687,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.Layer.AddCellsBefore", new IMAGE_BRUSH_SVG("OdysseyAnimation/Layer/AddCellsBefore", mIcon16x16));
     Set("Animation.Layer.AddCellsAfter", new IMAGE_BRUSH_SVG("OdysseyAnimation/Layer/AddCellsAfter", mIcon16x16));
 
+    Set("Animation.Layer.IncreaseExposures", new IMAGE_BRUSH_SVG("OdysseyAnimation/Layer/IncreaseExposures", mIcon16x16));
+    Set("Animation.Layer.DecreaseExposures", new IMAGE_BRUSH_SVG("OdysseyAnimation/Layer/DecreaseExposures", mIcon16x16));
+
     Set("Animation.CellImageStagger.Reach.SpinBoxStyle", FSpinBoxStyle(FAppStyle::Get().GetWidgetStyle<FSpinBoxStyle>("SpinBox"))
         .SetBackgroundBrush(FSlateNoResource())
         .SetHoveredBackgroundBrush(FSlateRoundedBoxBrush(FStyleColors::Dropdown, 4.0f))

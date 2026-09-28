@@ -138,8 +138,8 @@ private:
     FReply OnContextMenuAddCellsBeforeClicked();
     FReply OnContextMenuAddCellsAfterClicked();
 
-    FReply OnContextMenuRemoveOneExposureButtonClicked();
-    FReply OnContextMenuAddOneExposureButtonClicked();
+    FReply OnContextMenuDecreaseNExposureButtonClicked();
+    FReply OnContextMenuIncreaseNExposureButtonClicked();
 
     EVisibility GetRowDisabledColorVisibility(FName iRow) const;
     const FSlateBrush* GetRowDisabledColorValue(FName iRow) const;

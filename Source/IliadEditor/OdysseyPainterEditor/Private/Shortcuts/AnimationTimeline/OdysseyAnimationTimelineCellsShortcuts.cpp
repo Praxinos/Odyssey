@@ -109,20 +109,32 @@ FOdysseyAnimationTimelineCellsShortcuts::MapActionsToCommandList(TSharedRef<FUIC
 
     iCommandList->MapAction(
         FOdysseyPainterEditorAnimationCommands::Get().IncreaseCellExposure,
-        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellExposure),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_IncreaseCellExposure)
+        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseOneCellExposure),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_ManageCellExposure )
     );
 
     iCommandList->MapAction(
         FOdysseyPainterEditorAnimationCommands::Get().DecreaseCellExposure,
-        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellExposure),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_DecreaseCellExposure)
+        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseOneCellExposure),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_ManageCellExposure )
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorAnimationCommands::Get().IncreaseNCellExposure,
+        FExecuteAction::CreateRaw( this, &FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseNCellExposure ),
+        FCanExecuteAction::CreateRaw( this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_ManageCellExposure )
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorAnimationCommands::Get().DecreaseNCellExposure,
+        FExecuteAction::CreateRaw( this, &FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseNCellExposure ),
+        FCanExecuteAction::CreateRaw( this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_ManageCellExposure )
     );
 
     iCommandList->MapAction(
         FOdysseyPainterEditorAnimationCommands::Get().SetCellExposure,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_SetCellExposure)
+        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_ManageCellExposure )
     );
 }
 
@@ -495,46 +507,33 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_AddCellsBeforeOrAfter( int32 iNu
 }
 
 void
-FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellExposure()
+FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseOneCellExposure()
 {
-    UOdysseyAnimation* animation = mAnimation.Get();
-    if (!animation)
-        return;
-
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
-    if (!layerStack)
-        return;
-
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
-    if (!layer)
-        return;
-
-    if (!layer->IsEditable())
-        return;
-
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
-    if (selectedCells.IsEmpty())
-    {
-        UOdysseyLayerCell* cell = layer->GetCellAtFrame(mCurrentFrame.Get());
-        if (!cell)
-            return;
-
-        selectedCells.Add(cell);
-    }
-
-#if WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.increase-selected-cells-exposure", "Increase Selected Cells Exposure"));
-#endif
-
-    mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
-    for (UOdysseyLayerCell* selectedCell : selectedCells)
-    {
-        selectedCell->SetExposure(selectedCell->GetExposure() + 1);
-    }
+    Action_IncreaseOrDecreaseCellExposure( 1 );
 }
 
 void
-FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellExposure()
+FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseOneCellExposure()
+{
+    Action_IncreaseOrDecreaseCellExposure( -1 );
+}
+
+void
+FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseNCellExposure()
+{
+    const UOdysseyPainterEditorAnimationUserSettings* settings = GetDefault<UOdysseyPainterEditorAnimationUserSettings>();
+    Action_IncreaseOrDecreaseCellExposure( settings->NumberOfExposuresToIncreaseOrDecrease );
+}
+
+void
+FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseNCellExposure()
+{
+    const UOdysseyPainterEditorAnimationUserSettings* settings = GetDefault<UOdysseyPainterEditorAnimationUserSettings>();
+    Action_IncreaseOrDecreaseCellExposure( -settings->NumberOfExposuresToIncreaseOrDecrease );
+}
+
+void
+FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseOrDecreaseCellExposure( int32 iNumberOfExposuresToAddOrRemove )
 {
     UOdysseyAnimation* animation = mAnimation.Get();
     if (!animation)
@@ -561,13 +560,17 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellExposure()
         selectedCells.Add(cell);
     }
 
-#if WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.decrease-selected-cells-exposure", "Decrease Selected Cells Exposure"));
-#endif
-    mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
-    for (UOdysseyLayerCell* selectedCell : selectedCells)
+    FScopedTransaction ScopedTransaction( iNumberOfExposuresToAddOrRemove < 0
+                                          ? LOCTEXT( "timeline-cells.transaction.decrease-selected-cells-exposure", "Decrease Selected Cells Exposure" )
+                                          : LOCTEXT( "timeline-cells.transaction.increase-selected-cells-exposure", "Increase Selected Cells Exposure" ) );
+
+    mOnTransactCurrentFrame.ExecuteIfBound( selectedCells[0]->GetFrameRange().GetLowerBoundValue() );
+
+    for( UOdysseyLayerCell* selectedCell : selectedCells )
     {
-        selectedCell->SetExposure(FMath::Max(1, selectedCell->GetExposure() - 1));
+        // - Max() is to make safe removing exposures
+        // - only use '+' as iNumberOfExposuresToAddOrRemove is signed when removing exposures
+        selectedCell->SetExposure( FMath::Max( 1, selectedCell->GetExposure() + iNumberOfExposuresToAddOrRemove ) );
     }
 }
 
@@ -888,65 +891,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_AddCellsAfter()
 }
 
 bool
-FOdysseyAnimationTimelineCellsShortcuts::CanAction_IncreaseCellExposure()
-{
-    UOdysseyAnimation* animation = mAnimation.Get();
-    if (!animation)
-        return false;
-
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
-    if (!layerStack)
-        return false;
-
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
-    if (!layer)
-        return false;
-
-    if (!layer->IsEditable())
-        return false;
-
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
-    if (selectedCells.IsEmpty())
-    {
-        UOdysseyLayerCell* cell = layer->GetCellAtFrame(mCurrentFrame.Get());
-        if (!cell)
-            return false;
-    }
-
-    return true;
-}
-
-bool
-FOdysseyAnimationTimelineCellsShortcuts::CanAction_DecreaseCellExposure()
-{
-    UOdysseyAnimation* animation = mAnimation.Get();
-    if (!animation)
-        return false;
-
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
-    if (!layerStack)
-        return false;
-
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
-    if (!layer)
-        return false;
-
-    if (!layer->IsEditable())
-        return false;
-
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
-    if (selectedCells.IsEmpty())
-    {
-        UOdysseyLayerCell* cell = layer->GetCellAtFrame(mCurrentFrame.Get());
-        if (!cell)
-            return false;
-    }
-
-    return true;
-}
-
-bool
-FOdysseyAnimationTimelineCellsShortcuts::CanAction_SetCellExposure()
+FOdysseyAnimationTimelineCellsShortcuts::CanAction_ManageCellExposure()
 {
     UOdysseyAnimation* animation = mAnimation.Get();
     if (!animation)

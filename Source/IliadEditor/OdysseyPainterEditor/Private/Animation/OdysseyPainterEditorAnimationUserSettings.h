@@ -45,4 +45,8 @@ public:
     /** Number of cells to add before or after the current cells */
     UPROPERTY(config, EditAnywhere, Category="Animation Timeline", meta = (LinearDeltaSensitivity="1", ClampMin=1, ClampMax=100, UIMin=1, UIMax=20))
     int32 NumberOfCellsToAdd = 1;
+
+    /** Number of exposures to increase or decrease the current cells */
+    UPROPERTY(config, EditAnywhere, Category="Animation Timeline", meta = (LinearDeltaSensitivity="1", ClampMin=1, ClampMax=100, UIMin=1, UIMax=20))
+    int32 NumberOfExposuresToIncreaseOrDecrease = 1;
 };

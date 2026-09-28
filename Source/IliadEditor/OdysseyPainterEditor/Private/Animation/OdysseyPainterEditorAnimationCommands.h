@@ -81,6 +81,8 @@ public:
 
     TSharedPtr<FUICommandInfo> IncreaseCellExposure;
     TSharedPtr<FUICommandInfo> DecreaseCellExposure;
+    TSharedPtr<FUICommandInfo> IncreaseNCellExposure;
+    TSharedPtr<FUICommandInfo> DecreaseNCellExposure;
     TSharedPtr<FUICommandInfo> SetCellExposure;
 
     /** Action to pan/Zoom the timeline */

@@ -426,20 +426,23 @@ SOdysseyAnimationLayerImageTimeline::OnMainSubRowMouseButtonUp(const FGeometry& 
         FSlateApplication::Get().PushMenu(mEventWidgets["Main"].ToSharedRef(), widgetPath, menuContents, iEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
         return FReply::Handled();
     }
+
     return FReply::Unhandled().ReleaseMouseCapture();
 }
 
 FReply
-SOdysseyAnimationLayerImageTimeline::OnContextMenuRemoveOneExposureButtonClicked()
+SOdysseyAnimationLayerImageTimeline::OnContextMenuDecreaseNExposureButtonClicked()
 {
-    mAnimationTimelineCellsShortcuts->Action_DecreaseCellExposure();
+    mAnimationTimelineCellsShortcuts->Action_DecreaseNCellExposure();
+
     return FReply::Handled();
 }
 
 FReply
-SOdysseyAnimationLayerImageTimeline::OnContextMenuAddOneExposureButtonClicked()
+SOdysseyAnimationLayerImageTimeline::OnContextMenuIncreaseNExposureButtonClicked()
 {
-    mAnimationTimelineCellsShortcuts->Action_IncreaseCellExposure();
+    mAnimationTimelineCellsShortcuts->Action_IncreaseNCellExposure();
+
     return FReply::Handled();
 }
 
@@ -447,12 +450,14 @@ FReply
 SOdysseyAnimationLayerImageTimeline::OnContextMenuAddCellsBeforeClicked()
 {
     mAnimationTimelineCellsShortcuts->Action_AddCellsBefore();
+
     return FReply::Handled();
 }
 FReply
 SOdysseyAnimationLayerImageTimeline::OnContextMenuAddCellsAfterClicked()
 {
     mAnimationTimelineCellsShortcuts->Action_AddCellsAfter();
+
     return FReply::Handled();
 }
 
@@ -857,11 +862,11 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
 
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
 
-    FSinglePropertyParams Params;
-    Params.NamePlacement = EPropertyNamePlacement::Hidden;
-    Params.bHideResetToDefault = true;
+    FSinglePropertyParams CellsParams;
+    CellsParams.NamePlacement = EPropertyNamePlacement::Hidden;
+    CellsParams.bHideResetToDefault = true;
 
-    TSharedPtr<ISinglePropertyView> PropertyView = PropertyEditorModule.CreateSingleProperty( Settings, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorAnimationUserSettings, NumberOfCellsToAdd ), Params );
+    TSharedPtr<ISinglePropertyView> CellsPropertyView = PropertyEditorModule.CreateSingleProperty( Settings, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorAnimationUserSettings, NumberOfCellsToAdd ), CellsParams );
 
     MenuBuilder.BeginSection( "AddCells", LOCTEXT( "timeline-cells.context-menu.add-cells-section.name", "Add Cells" ) );
 
@@ -874,7 +879,7 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
                 SNew( SButton )
                 .ToolTipText_Lambda( []() -> FText
                                      {
-                                         static FText format = LOCTEXT( "timeline-cells.context-menu.add-cells-before.tooltip", "Add {0} {1}|plural(one=cell,other=cells) before current cell(s)" );
+                                         static FText format = LOCTEXT( "timeline-cells.context-menu.add-cells-before.tooltip", "Add {0} {1}|plural(one=cell,other=cells) before current or selected cells" );
 
                                          int32 numberOfCellsToAdd = GetDefault<UOdysseyPainterEditorAnimationUserSettings>()->NumberOfCellsToAdd;
                                          return FText::Format( format, numberOfCellsToAdd, numberOfCellsToAdd );
@@ -888,10 +893,19 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
             + SHorizontalBox::Slot()
             .FillWidth( 1 )
             .HAlign( HAlign_Fill )
-            //.Padding( FMargin( 4, 0, 2, 0 ) )
             [
-                PropertyView.ToSharedRef()
+                CellsPropertyView.ToSharedRef()
             ]
+            //+ SHorizontalBox::Slot()
+            //.FillWidth( .7 )
+            //.HAlign( HAlign_Fill )
+            //.VAlign( VAlign_Center )
+            //[
+            //    SNew( STextBlock )
+            //    //TODO: if needed, make it as lambda with static format
+            //    .Text( FText::Format( LOCTEXT( "timeline-cells.context-menu.cells-unit", "{0}|plural(one=cell,other=cells)" ), GetDefault<UOdysseyPainterEditorAnimationUserSettings>()->NumberOfCellsToAdd ) )
+            //    //.Text( LOCTEXT( "timeline-cells.context-menu.cells-unit", "cell" ) )
+            //]
             + SHorizontalBox::Slot()
             .AutoWidth()
             .Padding( FMargin( 2, 0, 4, 0 ) )
@@ -899,7 +913,7 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
                 SNew( SButton )
                 .ToolTipText_Lambda( []() -> FText
                                      {
-                                         static FText format = LOCTEXT( "timeline-cells.context-menu.add-cells-after.tooltip", "Add {0} {1}|plural(one=cell,other=cells) after current cell(s)" );
+                                         static FText format = LOCTEXT( "timeline-cells.context-menu.add-cells-after.tooltip", "Add {0} {1}|plural(one=cell,other=cells) after current or selected cells" );
 
                                          int32 numberOfCellsToAdd = GetDefault<UOdysseyPainterEditorAnimationUserSettings>()->NumberOfCellsToAdd;
                                          return FText::Format( format, numberOfCellsToAdd, numberOfCellsToAdd );
@@ -919,36 +933,76 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
 
     //---
 
-    MenuBuilder.BeginSection( "SetExposure", LOCTEXT( "timeline-cells.context-menu.set-exposure-section.name", "Set Exposure" ) );
+    FSinglePropertyParams ExposuresParams;
+    ExposuresParams.NamePlacement = EPropertyNamePlacement::Hidden;
+    ExposuresParams.bHideResetToDefault = true;
+
+    TSharedPtr<ISinglePropertyView> ExposuresPropertyView = PropertyEditorModule.CreateSingleProperty( Settings, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorAnimationUserSettings, NumberOfExposuresToIncreaseOrDecrease ), ExposuresParams );
+
+    MenuBuilder.BeginSection( "AddExposure", LOCTEXT( "timeline-cells.context-menu.add-exposure-section.name", "Add Exposure" ) );
 
         MenuBuilder.AddWidget(
             SNew( SHorizontalBox )
             + SHorizontalBox::Slot()
+            .AutoWidth()
             .Padding( FMargin( 4, 0, 2, 0 ) )
             [
                 SNew( SButton )
-                .OnClicked( this, &SOdysseyAnimationLayerImageTimeline::OnContextMenuRemoveOneExposureButtonClicked )
+                .ToolTipText_Lambda( []() -> FText
+                                     {
+                                         static FText format = LOCTEXT( "timeline-cells.context-menu.remove-exposure.tooltip", "Remove {0} {1}|plural(one=exposure,other=exposures) to current or selected cells" );
+
+                                         int32 numberOfExposuresToAddOrRemove = GetDefault<UOdysseyPainterEditorAnimationUserSettings>()->NumberOfExposuresToIncreaseOrDecrease;
+                                         return FText::Format( format, numberOfExposuresToAddOrRemove, numberOfExposuresToAddOrRemove );
+                                     } )
+                .OnClicked( this, &SOdysseyAnimationLayerImageTimeline::OnContextMenuDecreaseNExposureButtonClicked )
                 [
-                    SNew( STextBlock )
-                    .Text( FText::FromString( TEXT( "-1" ) ) )
-                    .Justification( ETextJustify::Center )
+                    SNew( SImage )
+                    .Image( FOdysseyStyle::GetBrush( "Animation.Layer.DecreaseExposures" ) )
                 ]
             ]
             + SHorizontalBox::Slot()
+            .FillWidth( 1 )
+            .HAlign( HAlign_Fill )
+            [
+                ExposuresPropertyView.ToSharedRef()
+            ]
+            //+ SHorizontalBox::Slot()
+            //.FillWidth( .7 )
+            //.HAlign( HAlign_Fill )
+            //.VAlign( VAlign_Center )
+            //[
+            //    SNew( STextBlock )
+            //    .Text( LOCTEXT( "timeline-cells.context-menu.exposures-unit", "exp." ) )
+            //]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
             .Padding( FMargin( 2, 0, 4, 0 ) )
             [
                 SNew( SButton )
-                .OnClicked( this, &SOdysseyAnimationLayerImageTimeline::OnContextMenuAddOneExposureButtonClicked )
+                .ToolTipText_Lambda( []() -> FText
+                                     {
+                                         static FText format = LOCTEXT( "timeline-cells.context-menu.add-exposure.tooltip", "Add {0} {1}|plural(one=exposure,other=exposures) to current or selected cells" );
+
+                                         int32 numberOfExposuresToAddOrRemove = GetDefault<UOdysseyPainterEditorAnimationUserSettings>()->NumberOfExposuresToIncreaseOrDecrease;
+                                         return FText::Format( format, numberOfExposuresToAddOrRemove, numberOfExposuresToAddOrRemove );
+                                     } )
+                .OnClicked( this, &SOdysseyAnimationLayerImageTimeline::OnContextMenuIncreaseNExposureButtonClicked )
                 [
-                    SNew( STextBlock )
-                    .Text( FText::FromString( TEXT( "+1" ) ) )
-                    .Justification( ETextJustify::Center )
+                    SNew( SImage )
+                    .Image( FOdysseyStyle::GetBrush( "Animation.Layer.IncreaseExposures" ) )
                 ]
             ],
             FText(),
             true,
             false
         );
+
+    MenuBuilder.EndSection();
+
+    //---
+
+    MenuBuilder.BeginSection( "SetExposure", LOCTEXT( "timeline-cells.context-menu.set-exposure-section.name", "Set Exposure" ) );
 
         MenuBuilder.AddMenuEntry(
             FOdysseyPainterEditorAnimationCommands::Get().SetCellExposure,
