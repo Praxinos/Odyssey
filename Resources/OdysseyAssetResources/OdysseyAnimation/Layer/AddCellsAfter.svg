@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 256 256">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 256">
   <defs>
     <style>
       .cls-1 {
@@ -17,7 +17,7 @@
         id="lined-border"
         x="14"
         y="14"
-        width="110"
+        width="245"
         height="226"
         fill="none"
       />
@@ -26,9 +26,9 @@
     <g id="dotted-rectangle">
       <rect
         id="dotted-border"
-        x="140"
+        x="280"
         y="14"
-        width="106"
+        width="210"
         height="226"
         fill="none"
         stroke-dasharray="20"
@@ -36,18 +36,16 @@
 
       <g id="plus">
         <line
-          id="plus-horizontal"
-          x1="168"
-          y1="122"
-          x2="224"
-          y2="122"
+            x1="350"
+            y1="122"
+            x2="454"
+            y2="122"
         />
         <line
-          id="plus-vertical"
-          x1="196"
-          y1="94"
-          x2="196"
-          y2="150"
+          x1="403"
+          y1="74"
+          x2="403"
+          y2="170"
         />
       </g>
     </g>
