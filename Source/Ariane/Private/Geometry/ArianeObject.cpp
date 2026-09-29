@@ -463,8 +463,12 @@ FArianeObject::Invalidate( const FArianeObjectInvalidationFlags& InInvalidationF
 
     GetImage()->MarkPackageDirty();
 
+    if( ParentID.GetObject( Image ) == nullptr )
+    {
+        Image->Invalidate();
+    }
 
-    OnPostInvalidated.Broadcast();
+    //OnPostInvalidated.Broadcast();
 }
 
 void
@@ -614,13 +618,14 @@ FArianeObject::Update( EUpdateFlags UpdateFlags, bool Recurse )
     {
         InvalidatedChildren.RemoveAll( [ this
                                        , &UpdateFlags
-                                       , &Recurse](  FArianeObject* InvalidatedChildID )
+                                       , &Recurse](  FArianeObject* InvalidatedChild )
             {
-                return InvalidatedChildID->Update( UpdateFlags, Recurse );
+                return InvalidatedChild->Update( UpdateFlags, Recurse );
             } );
     }
 
     UpdateBoundingBox( UpdateFlags );
+
 
     if( EnumHasAllFlags( UpdateFlags, EUpdateFlags::KeepInvalidated ) == false )
     {
@@ -816,11 +821,13 @@ FArianeObject::UpdateBoundingBox( EUpdateFlags UpdateFlags )
     BoundingBox = FBox(ForceInit);
 }
 
+/*
 FSimpleMulticastDelegate &
 FArianeObject::GetOnPostInvalidatedDelegate()
 {
     return OnPostInvalidated;
 }
+*/
 
 UArianeImage*
 FArianeObject::GetImage()

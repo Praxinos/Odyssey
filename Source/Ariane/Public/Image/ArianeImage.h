@@ -151,6 +151,8 @@ public:
     virtual void Serialize(FArchive& Ar) override;
     void RebindObjects();
     FGuid GetAllocatorGuid();
+    void Invalidate();
+    void Reset();
 
 protected:
     void BindDelegates();

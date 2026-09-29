@@ -26,7 +26,7 @@ UArianeImage::~UArianeImage()
 void
 UArianeImage::BeginDestroy()
 {
-    UnbindDelegates();
+    //UnbindDelegates();
 
     Super::BeginDestroy();
 }
@@ -64,55 +64,35 @@ UArianeImage::RebindObjects()
 void UArianeImage::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
+}
 
-    UE_LOG( LogTemp, Warning, TEXT("UArianeImage::Serialize - Image=%p"), this )
-
+void
+UArianeImage::Reset()
+{
     AllocatorGuid = FGuid::NewGuid();
 
-    //if ( Ar.IsLoading() || Ar.IsTransacting() )
+    for (FInstancedStruct& InstancedStruct : InstancedObjects)
     {
-        for (FInstancedStruct& InstancedStruct : InstancedObjects)
-        {
-            FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
+        FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
 
-            Object->ResetImage( this );
-        }
-
-        for (FInstancedStruct& InstancedStruct : InstancedObjects)
-        {
-            FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
-
-            Object->PostSerialize();
-        }
-
-        RootGroupID.GetObject( this )->Update( FArianeObject::EUpdateFlags::None, true );
+        Object->ResetImage( this );
     }
+
+    for (FInstancedStruct& InstancedStruct : InstancedObjects)
+    {
+        FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
+
+        Object->PostSerialize();
+    }
+
+    RootGroupID.GetObject( this )->UpdateTransform();
+    RootGroupID.GetObject( this )->Update( FArianeObject::EUpdateFlags::None, true );
 }
 
 void
 UArianeImage::OnRegisterLayer()
 {
-//UE_LOG(LogTemp, Warning, TEXT("name:%s this:%s RootGroup Image:%s"),
-//    *GetName(), *GetFullName(), RootGroupID.Image ? *RootGroupID.Image->GetFullName() : TEXT("NULL"));
-/*
-    RootGroupID.Image = this;
-    RootGroupID.InvalidateCache();
-
-    UE_LOG( LogTemp, Warning, TEXT("----UArianeImage::OnRegisterLayer::Begin - Image:%p"), this );
-
-    PrintPointers();
-
-    for( FInstancedStruct& InstancedObject : InstancedObjects )
-    {
-        FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
-
-        //Object->SetImage( this );
-    }
-
-    UE_LOG( LogTemp, Warning, TEXT("----UArianeImage::OnRegisterLayer::End - Image:%p"), this );
-
-    PrintPointers();
-*/
+    Reset();
 }
 
 void
@@ -151,7 +131,9 @@ UArianeImage::PostLoad()
 
     Super::PostLoad();
 
-    BindDelegates();
+    Reset();
+
+    //BindDelegates();
 
     // Empty the map before reloading. Each path will populate or increment the attached value.
     UsedMaterials.Empty();
@@ -190,7 +172,7 @@ UArianeImage::PostEditUndo()
 
     Super::PostEditUndo();
 
-    BindDelegates();
+    //BindDelegates();
 
     // Empty the map before reloading. Each path will populate or increment the attached value.
     UsedMaterials.Empty();
@@ -636,15 +618,16 @@ UArianeImage::Update( bool bInteractive )
 }
 
 void
-UArianeImage::OnRootObjectInvalidated()
+UArianeImage::Invalidate()
 {
     // DrawingLayer can be null for orphan images (stored in animation keys)
     if( DrawingLayer.IsValid() )
     {
-        DrawingLayer->Invalidate( FArianeLayerInvalidationFlags() );
+        DrawingLayer->Invalidate();
     }
 }
 
+/*
 void
 UArianeImage::BindDelegates()
 {
@@ -662,11 +645,12 @@ UArianeImage::UnbindDelegates()
         RootGroupID.GetObject( this )->GetOnPostInvalidatedDelegate().RemoveAll( this );
     }
 }
+*/
 
 void
 UArianeImage::ResetHierarchy()
 {
-    UnbindDelegates( );
+    //UnbindDelegates( );
 
     InstancedObjects.Empty();
     UsedMaterials.Empty();
@@ -678,7 +662,7 @@ UArianeImage::ResetHierarchy()
 
     RootGroupID.GetObject( this )->UpdateTransform();
 
-    BindDelegates();
+    //BindDelegates();
 }
 
 void

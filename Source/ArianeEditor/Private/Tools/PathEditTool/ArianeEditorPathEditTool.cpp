@@ -369,7 +369,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
     if( Painting3DComponent )
     {
         UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
-
+UE_LOG(LogTemp, Warning, TEXT("UArianeEditorPathEditTool::OnMouseDownPickPoint - DrawingLayerImage=%p"), DrawingLayer->GetImage());
         for( FArianeObject* SelectedTree : SelectedTrees )
         {
             FArianeObject::Traverse ( SelectedTree
@@ -658,7 +658,7 @@ UArianeEditorPathEditTool::OnMouseDrag( FEditorViewportClient* ViewportClient
                 {
                     FArianeVertex *Vertex = PickedVertices[i];
                     FPointDisplacement& PointDisplacement = PickedVertexDisplacements[i];
-
+UE_LOG(LogTemp, Warning, TEXT("UArianeEditorPathEditTool::DisplacePoint - WorkingImage=%p Image=%p"), Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer())->GetImage(), Vertex->GetOwner()->GetImage());
                     DisplacePoint( Vertex
                                  , PointDisplacement
                                  , Vertex->GetOwner()->GetTransform()

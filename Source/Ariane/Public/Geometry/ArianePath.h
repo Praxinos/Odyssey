@@ -328,7 +328,7 @@ protected:
     TArray<FArianeSegment*> Segments;
     TArray<FArianeSegment*> InvalidatedSegments;
     TArray<FArianeVertex*> InvalidatedVertices;
-    FArianePathGeometry3D Geometry3D;
+    FArianePathGeometry3D* Geometry3D;
     TArray<Chain> Chains;
     uint32 CubicSegmentCount;
     uint32 LinearSegmentCount;

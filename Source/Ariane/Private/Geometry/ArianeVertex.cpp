@@ -42,6 +42,7 @@ FArianeVertex::SetImage( UArianeImage* InImage )
 {
     Image = InImage;
 
+    bChained = false;
     Segments.Empty();
 }
 

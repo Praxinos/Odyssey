@@ -20,11 +20,11 @@ UArianeLayer::~UArianeLayer()
 
 UArianeLayer::UArianeLayer()
     : //bVisible ( true )
-      ParentFolder( nullptr )
-    , bLocked ( false )
+      //ParentFolder( nullptr )
+      bLocked ( false )
     , bSelected ( false )
     , bInvalidatedInParentFolder ( false )
-    , InvalidationFlags ( nullptr )
+    , bInvalidated ( false )
     , WorldTransformVersion( 0 )
 {
     // for Transform operations
@@ -152,21 +152,25 @@ UArianeLayer::IsSelectedInEditor() const
 }
 #endif
 
+/*
 void
 UArianeLayer::SetParentFolder( UArianeLayerFolder* InParentFolder )
 {
     ParentFolder = InParentFolder;
 }
+*/
 
 UArianeLayerFolder*
 UArianeLayer::GetParentFolder()
 {
-    return ParentFolder;
+    return Cast<UArianeLayerFolder>(GetAttachParent()) /*ParentFolder*/;
 }
 
 void
-UArianeLayer::Invalidate( const FArianeLayerInvalidationFlags& InInvalidationFlags )
+UArianeLayer::Invalidate()
 {
+    UArianeLayerFolder* ParentFolder = GetParentFolder();
+
     if( ParentFolder && ( bInvalidatedInParentFolder == false ) )
     {
         ParentFolder->InvalidateChildLayer( this );
@@ -174,21 +178,21 @@ UArianeLayer::Invalidate( const FArianeLayerInvalidationFlags& InInvalidationFla
         bInvalidatedInParentFolder = true;
     }
 
-    InvalidationFlags->OR( InInvalidationFlags );
+    bInvalidated = true;
 
     //GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
     MarkPackageDirty();
 }
 
+bool
+UArianeLayer::IsInvalidated()
+{
+    return bInvalidated;
+}
+
 void UArianeLayer::SetInvalidatedInParentFolder( bool bInInvalidatedInParentFolder )
 {
     bInvalidatedInParentFolder = bInInvalidatedInParentFolder;
-}
-
-FArianeLayerInvalidationFlags*
-UArianeLayer::GetInvalidationFlags()
-{
-    return InvalidationFlags;
 }
 
 void
@@ -224,6 +228,7 @@ UArianeLayer::OnUpdateTransform(EUpdateTransformFlags UpdateTransformFlags, ETel
 UArianeLayer::ETraversalReturnValue
 UArianeLayer::TraverseBackwards_Private( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback )
 {
+    UArianeLayerFolder* ParentFolder = GetParentFolder();
     ETraversalReturnValue Ret = Callback( this );
 
     if( Ret == ETraversalReturnValue::Stop )

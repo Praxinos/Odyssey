@@ -98,12 +98,6 @@ public:
     */
     UArianePainting3DComponent* GetPainting3DComponent();
 
-    /**
-    * @brief Get all layers of all type
-    * @param the Painting3D Component
-    */
-    void GetLayers( TArray<UArianeLayer*>& OutLayers );
-
     void AddLayer( UArianeLayerFolder* FosterFolder, UArianeLayer* OrphanLayer, bool bTriggerEvent );
 
     void AppendSelectedTrees( TArray<UArianeLayer*>& SelectedTrees );
@@ -121,7 +115,7 @@ public:
     void Init();
     void Update( bool bInteractive );
     virtual void OnRegister() override;
-    void SetRootFolder( UArianeLayerFolder* RootFolder );
+    virtual void PostDuplicate( EDuplicateMode::Type DuplicateMode ) override;
 
 #if WITH_EDITOR
     void PreEditUndo();
@@ -133,7 +127,7 @@ protected:
 
 protected:
     UPROPERTY(Instanced)
-    UArianeLayerFolder* RootFolder;
+    TArray<UArianeLayer*> Layers;
 
     UPROPERTY(Transient)
     TArray<UArianeLayer*> SelectedLayers;
