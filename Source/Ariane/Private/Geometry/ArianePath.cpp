@@ -242,7 +242,7 @@ FArianePath::FArianePath( UArianeImage* InImage
     , LineType ( EArianePathLineType::Tube )
     , Color ( FColor::Black.WithAlpha(255) )
     , Material ( nullptr )
-    , Geometry3D ( this )
+    , Geometry3D ( new FArianePathGeometry3D( this ) )
     , CubicSegmentCount( 0 )
     , LinearSegmentCount( 0 )
 {
@@ -257,7 +257,7 @@ FArianePath::ResetImage( UArianeImage* InImage )
     Segments.Empty();
     InvalidatedSegments.Empty();
     InvalidatedVertices.Empty();
-    //Geometry3D = FArianePathGeometry3D( this );
+    Geometry3D = new FArianePathGeometry3D( this );
     Chains.Empty();
     CubicSegmentCount = 0;
     LinearSegmentCount = 0;
@@ -991,7 +991,7 @@ FArianePath::UpdateShape( EUpdateFlags UpdateFlags )
      || PathInvalidationFlags->SegmentAddedOrRemoved
      || PathInvalidationFlags->Color )
     {
-        Geometry3D.Build();
+        Geometry3D->Build();
     }
 
     //PathInvalidationFlags->Clear();
@@ -1080,7 +1080,7 @@ FArianePath::Animate( const FArianeKeyedObject* KeyedObject, const FArianeKeyedO
 FArianePathGeometry3D&
 FArianePath::GetGeometry3D()
 {
-    return Geometry3D;
+    return *Geometry3D;
 }
 
 // static

@@ -122,26 +122,6 @@ UArianePainting3DComponent::OnRegister()
         // disable emission
         //DefaultMaterial->SetVectorParameterValue(FName("EmissiveColor"), FLinearColor::Black);
     }
-
-
-     UArianeLayerFolder::Traverse( LayerStack->GetRootFolder()
-                                   , [this]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
-        {
-            UArianeLayerDrawing* MyDrawingLayer = Cast<UArianeLayerDrawing>(Layer);
-
-            if (MyDrawingLayer)
-            {
-                UArianeImage* Image = MyDrawingLayer->GetImage();
-
-                UE_LOG(LogTemp, Warning, TEXT("[ChainCheck] Comp: %p | Stack: %p (Outer: %p) | Layer: %p (Outer: %p) | Image: %p (Outer: %p)"),
-                    this,
-                    LayerStack, LayerStack->GetOuter(),
-                    Layer, Layer->GetOuter(),
-                    Image, Image->GetOuter());
-            }
-
-        return UArianeLayerFolder::ETraversalReturnValue::Continue;
-    } );
 }
 
 /*

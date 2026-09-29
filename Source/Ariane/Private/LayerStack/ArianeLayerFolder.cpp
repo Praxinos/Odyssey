@@ -9,13 +9,11 @@
 
 UArianeLayerFolder::~UArianeLayerFolder()
 {
-    delete InvalidationFlags;
 }
 
 UArianeLayerFolder::UArianeLayerFolder()
     : bExpanded ( true )
 {
-    InvalidationFlags = new FArianeLayerFolderInvalidationFlags();
 /*
     ResetHierarchy();
 
@@ -64,11 +62,11 @@ UArianeLayerFolder::AddChildLayer( UArianeLayer* Orphan )
 {
     AArianePainting3DActor* Painting3DActor = Cast<AArianePainting3DActor>(GetOwner());
 
-    Orphan->SetParentFolder( this );
+    //Orphan->SetParentFolder( this );
 
     ChildLayers.Add( Orphan );
 
-    Invalidate( FArianeLayerFolderInvalidationFlags().SetHierarchy() );
+    Invalidate();
 
     if ( Orphan->IsRegistered() )
     {
@@ -92,13 +90,13 @@ UArianeLayerFolder::RemoveChildLayer( UArianeLayer* Child )
 {
     AArianePainting3DActor* Painting3DActor = Cast<AArianePainting3DActor>(GetOwner());
 
-    Child->SetParentFolder( nullptr );
+    //Child->SetParentFolder( nullptr );
 
     ChildLayers.Remove( Child );
 
     InvalidatedChildLayers.Remove( Child );
 
-    Invalidate( FArianeLayerFolderInvalidationFlags().SetHierarchy() );
+    Invalidate();
 
     Child->DetachFromComponent( FDetachmentTransformRules::KeepRelativeTransform );
     Child->UnregisterComponent();
@@ -158,7 +156,7 @@ UArianeLayerFolder::Update( bool bInteractive )
     {
         Layer->Update( bInteractive );
 
-        bool bHasAnyFlags = Layer->GetInvalidationFlags()->HasAny();
+        bool bHasAnyFlags = Layer->IsInvalidated();
         // if the layer has any flag, it will remain in the list of invalidated layers
         Layer->SetInvalidatedInParentFolder( bHasAnyFlags );
 

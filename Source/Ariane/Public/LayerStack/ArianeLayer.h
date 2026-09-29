@@ -53,9 +53,8 @@ public:
 
     /**
      * @brief Invalidate the layer
-     * @param InInvalidationFlags invalidation flags
      */
-    virtual void Invalidate( const FArianeLayerInvalidationFlags& InInvalidationFlags );
+    virtual void Invalidate( );
 
     /**
      * @brief Update the layer
@@ -99,7 +98,7 @@ public:
      * @brief Set the parent folder
      * @param InParentFolder the parent folder
      */
-    void SetParentFolder( UArianeLayerFolder* InParentFolder );
+    //void SetParentFolder( UArianeLayerFolder* InParentFolder );
 
     /**
      * @brief Get the parent folder
@@ -110,7 +109,7 @@ public:
     /** The delegate run when the transform is changed **/
     UArianeLayer::FOnTransformChanged& GetOnTransformChangedDelegate();
 
-    FArianeLayerInvalidationFlags* GetInvalidationFlags();
+    bool IsInvalidated();
 
     void TraverseBackwards( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
     void PreEditUndo();
@@ -127,8 +126,8 @@ protected:
                                 , const FName& iCategory );
 
 protected:
-    UPROPERTY()
-    UArianeLayerFolder* ParentFolder;
+    //UPROPERTY()
+    //UArianeLayerFolder* ParentFolder;
 
     UPROPERTY()
     bool bLocked;
@@ -139,11 +138,18 @@ protected:
 #endif
 
 protected:
-    bool bInvalidatedInParentFolder;
-    FArianeLayerInvalidationFlags* InvalidationFlags;
+    UPROPERTY( Transient, DuplicateTransient )
+    uint32 WorldTransformVersion;
+
+    UPROPERTY( Transient, DuplicateTransient )
+    bool bInvalidated = false;
+
+    UPROPERTY( Transient, DuplicateTransient )
+    bool bInvalidatedInParentFolder = false;
+
+protected:
     //FOnUpdateDelegate OnPreUpdate;
     //FOnUpdateDelegate OnPostUpdate;
-
+    // should NOT be restored or copied
     FOnTransformChanged OnTransformChanged;
-    uint32 WorldTransformVersion;
 };

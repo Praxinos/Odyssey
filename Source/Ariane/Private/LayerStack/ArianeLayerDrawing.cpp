@@ -346,7 +346,6 @@ FArianeGeometryProxy::GetMemoryFootprint( void ) const
 
 UArianeLayerDrawing::~UArianeLayerDrawing()
 {
-    delete InvalidationFlags;
 }
 
 UArianeLayerDrawing::UArianeLayerDrawing()
@@ -354,8 +353,6 @@ UArianeLayerDrawing::UArianeLayerDrawing()
     , DrawingOrigin ( EArianeLayerDrawingOrigin::Layer )
     , DrawingOrientation ( EArianeLayerDrawingOrientation::View )
 {
-    InvalidationFlags = new FArianeLayerInvalidationFlags();
-
     bWantsOnUpdateTransform = true;
 
     FCoreUObjectDelegates::OnAssetLoaded.AddUObject( this, &UArianeLayerDrawing::OnAssetLoaded );
@@ -377,7 +374,8 @@ UArianeLayerDrawing::UArianeLayerDrawing()
 void
 UArianeLayerDrawing::Serialize(FArchive& Ar )
 {
-    Super::Serialize( Ar );}
+    Super::Serialize( Ar );
+}
 
 void
 UArianeLayerDrawing::OnRegister()
@@ -385,6 +383,9 @@ UArianeLayerDrawing::OnRegister()
     UArianeImage* DefaultImage = Image;
 
     Super::OnRegister();
+
+    // Force computation of the world Transform in FArianeObject::UpdateTransform
+    WorldTransformVersion++;
 
     if ( DefaultImage == nullptr )
     {
@@ -394,9 +395,6 @@ UArianeLayerDrawing::OnRegister()
     SetImage( DefaultImage );
 
     Image->OnRegisterLayer();
-
-
-    WorldTransformVersion++;
 }
 
 void
@@ -470,7 +468,7 @@ UArianeLayerDrawing::Update( bool bInteractive )
 void
 UArianeLayerDrawing::OnRootObjectInvalidated()
 {
-    Invalidate( FArianeLayerInvalidationFlags() );
+    Invalidate();
 }
 
 /*

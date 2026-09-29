@@ -245,7 +245,7 @@ public:
     /** Set the drawing layer this object belongs to */
     virtual void ResetImage( UArianeImage* InImage );
 
-    FSimpleMulticastDelegate & GetOnPostInvalidatedDelegate();
+    //FSimpleMulticastDelegate & GetOnPostInvalidatedDelegate();
 
     /** Called when the object is added to a parent object */
     virtual void Added(){};
@@ -360,31 +360,14 @@ protected:
     UPROPERTY( EditAnywhere )
     FTransform LocalTransform;
 
-public:
-/*
-    // declarations to be reset during the serialization process
-    struct FObjectTransientData
-    {
-        FInstancedStruct InstancedInvalidationFlags;
-        UArianeImage* Image;
-        // Random Guid used for safe pointer resolution. See ArianeID.h
-        FGuid AllocatorGuid = FGuid::NewGuid();
-        FTransform WorldTransform;
-        uint32 WorldTransformVersion;
-        TArray<FArianeObject*> InvalidatedChildren;
-        TArray<FArianeObjectID> Children;
-        FBox BoundingBox;
-        bool bSelected;
-        FSimpleMulticastDelegate  OnPostInvalidated;
-    };
-
-    virtual FObjectTransientData& GetTransientData();
-*/
-    void ResetTransientData();
-
 protected:
-    FInstancedStruct InstancedInvalidationFlags;
+    // Declared UPROPERTY to prevent GC.
+    // Transient because it's revalidated on UArianeImage::Serialize due to the fact that the reflection system
+    // does not update the pointer on spawnable conversion, I don't know why.
+    UPROPERTY( Transient )
     UArianeImage* Image;
+
+    FInstancedStruct InstancedInvalidationFlags;
     // Random Guid used for safe pointer resolution. See ArianeID.h
     FGuid AllocatorGuid = FGuid::NewGuid();
     FTransform WorldTransform;
@@ -393,7 +376,7 @@ protected:
     TArray<FArianeObject*> Children;
     FBox BoundingBox;
     bool bSelected;
-    FSimpleMulticastDelegate  OnPostInvalidated;
+    //FSimpleMulticastDelegate  OnPostInvalidated;
 };
 
 // define bitwise op

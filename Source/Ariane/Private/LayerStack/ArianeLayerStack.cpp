@@ -16,7 +16,6 @@ UArianeLayerStack::~UArianeLayerStack()
 
 // Legacy compatibility
 UArianeLayerStack::UArianeLayerStack()
-    : RootFolder ( nullptr )
 {
     // Do not load the default drawing layer. this was a bad legacy design
     //ObjectInitializer.DoNotCreateDefaultSubobject(TEXT("Drawing Layer"));
@@ -27,9 +26,15 @@ UArianeLayerStack::UArianeLayerStack()
 }
 
 void
+UArianeLayerStack::PostDuplicate( EDuplicateMode::Type DuplicateMode )
+{
+    Super::PostDuplicate( DuplicateMode );
+}
+
+void
 UArianeLayerStack::Serialize( FArchive& Ar )
 {
-    Super::Serialize(Ar);
+    Super::Serialize( Ar );
 }
 
 UArianePainting3DComponent*
@@ -51,6 +56,8 @@ UArianeLayerStack::GetPainting3DComponent()
 void
 UArianeLayerStack::OnRegister()
 {
+    UArianeLayerFolder* RootFolder = GetRootFolder();
+
     Super::OnRegister();
 
     if( RootFolder == nullptr )
@@ -60,6 +67,8 @@ UArianeLayerStack::OnRegister()
                                                   , RF_Transactional | RF_Public );
 
         RootFolder->AttachToComponent( this,  FAttachmentTransformRules::KeepWorldTransform );
+
+        Layers.Add( RootFolder );
     }
 
     RootFolder->RegisterComponent();
@@ -73,7 +82,7 @@ UArianeLayerStack::Init()
 UArianeLayerFolder*
 UArianeLayerStack::GetRootFolder()
 {
-    return RootFolder;
+    return Layers.Num() ? Cast<UArianeLayerFolder>(Layers[0]) : nullptr;
 }
 
 #if WITH_EDITOR
@@ -89,6 +98,8 @@ UArianeLayerStack::PreEditUndo()
 void
 UArianeLayerStack::PostEditUndo()
 {
+    UArianeLayerFolder* RootFolder = GetRootFolder();
+
     Super::PostEditUndo();
 
     OnPreSelectionChanged.Broadcast();
@@ -116,6 +127,8 @@ UArianeLayerStack::PostEditUndo()
 void
 UArianeLayerStack::PostLoad()
 {
+    UArianeLayerFolder* RootFolder = GetRootFolder();
+
     Super::PostLoad();
 
     Init();
@@ -125,17 +138,20 @@ UArianeLayerStack::PostLoad()
 
     SelectedLayers.Empty();
 
-    // At that step layers are only marked "selected" but not in the list of selected layers
-    UArianeLayerFolder::Traverse( RootFolder
-                                , [this]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
-        {
-            if( Layer->IsSelected() )
+    if( RootFolder )
+    {
+        // At that step layers are only marked "selected" but not in the list of selected layers
+        UArianeLayerFolder::Traverse( RootFolder
+                                    , [this]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
             {
-                SelectedLayers.Add( Layer );
-            }
+                if( Layer->IsSelected() )
+                {
+                    SelectedLayers.Add( Layer );
+                }
 
-            return UArianeLayerFolder::ETraversalReturnValue::Continue;
-        } );
+                return UArianeLayerFolder::ETraversalReturnValue::Continue;
+            } );
+    }
 
     OnPostSelectionChanged.Broadcast();
     OnPostHierarchyChanged.Broadcast();
@@ -160,6 +176,7 @@ UArianeLayerStack::RemoveSelectedLayers()
 uint32
 UArianeLayerStack::GetDrawingLayerCount()
 {
+    UArianeLayerFolder* RootFolder = GetRootFolder();
     uint32 DrawingLayerCount = 0;
 
     UArianeLayerFolder::Traverse( RootFolder
@@ -177,29 +194,8 @@ UArianeLayerStack::GetDrawingLayerCount()
 }
 
 void
-UArianeLayerStack::GetLayers( TArray<UArianeLayer*>& OutLayers )
-{
-    UArianeLayerFolder::Traverse( RootFolder
-                               , [ &OutLayers ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
-    {
-        OutLayers.Add( Layer );
-
-        return UArianeLayerFolder::ETraversalReturnValue::Continue;
-    } );
-}
-
-void
 UArianeLayerStack::OnComponentDestroyed( bool bDestroyingHierarchy )
 {
-    TArray<UArianeLayer*> Layers;
-
-    GetLayers( Layers );
-/*
-    for ( UArianeLayer* Layer : Layers )
-    {
-        Layer->Destroy();
-    }
-*/
     Super::OnComponentDestroyed( bDestroyingHierarchy );
 }
 
@@ -214,6 +210,8 @@ UArianeLayerStack::AddLayers( UArianeLayerFolder* FosterFolder, TArray<UArianeLa
     for( UArianeLayer* OrphanLayer : OrphanLayers )
     {
         FosterFolder->AddChildLayer( OrphanLayer );
+
+        Layers.Add( OrphanLayer );
     }
 
     if( bTriggerEvent )
@@ -223,6 +221,8 @@ UArianeLayerStack::AddLayers( UArianeLayerFolder* FosterFolder, TArray<UArianeLa
 void
 UArianeLayerStack::Update( bool bInteractive )
 {
+    UArianeLayerFolder* RootFolder = GetRootFolder();
+
     if( RootFolder )
     {
         RootFolder->Update( bInteractive );
@@ -238,6 +238,8 @@ UArianeLayerStack::AddLayer( UArianeLayerFolder* FosterFolder, UArianeLayer* Orp
 void
 UArianeLayerStack::SelectAllLayers()
 {
+    UArianeLayerFolder* RootFolder = GetRootFolder();
+
     SelectedLayers.Empty();
 
     SelectLayer( RootFolder, true );
@@ -322,6 +324,7 @@ UArianeLayerStack::GetSelectedLayers()
 UArianeLayerDrawing*
 UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder, bool bTriggerEvent )
 {
+    UArianeLayerFolder* RootFolder = GetRootFolder();
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
                                                                            // The outer must be the AActor or else the TEDS system could crash
@@ -342,6 +345,7 @@ UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder, 
 UArianeLayerFolder*
 UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder, bool bTriggerEvent )
 {
+    UArianeLayerFolder* RootFolder = GetRootFolder();
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
                                                                         // The outer must be the AActor or else the TEDS system could crash
