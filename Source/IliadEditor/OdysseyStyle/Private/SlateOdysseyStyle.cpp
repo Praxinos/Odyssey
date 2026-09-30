@@ -82,6 +82,7 @@ public:
     const FVector2D mIcon24x24;
     const FVector2D mIcon25x25;
     const FVector2D mIcon30x30;
+    const FVector2D mIcon32x16;
     const FVector2D mIcon32x32;
     const FVector2D mIcon40x40;
     const FVector2D mIcon48x48;
@@ -121,6 +122,7 @@ FOdysseyStyleDefault::FOdysseyStyleDefault()
     , mIcon24x24( 24.0f, 24.0f )
     , mIcon25x25( 25.0f, 25.0f )
     , mIcon30x30( 30.0f, 30.0f )
+    , mIcon32x16( 32.0f, 16.0f )
     , mIcon32x32( 32.0f, 32.0f )
     , mIcon40x40( 40.0f, 40.0f )
     , mIcon48x48( 48.0f, 48.0f )
@@ -188,6 +190,7 @@ void
 FOdysseyStyleDefault::SetupGeneralStyles()
 {
     mCoreTableRowStyle = FAppStyle::Get().GetWidgetStyle<FTableRowStyle>("TableView.Row");
+    mButton = FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "Button" );
     mComboButton = FAppStyle::Get().GetWidgetStyle< FComboButtonStyle >( "ComboButton" );
 }
 
@@ -848,6 +851,32 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyImportTexturePositioning.Alignment.BottomLeft", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-bottomLeft", mIcon16x16));
     Set( "OdysseyImportTexturePositioning.Alignment.Bottom", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-bottom", mIcon16x16));
     Set( "OdysseyImportTexturePositioning.Alignment.BottomRight", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-bottomRight", mIcon16x16));
+
+
+    SetCoreContentRoot( FPaths::EngineContentDir() / TEXT( "Slate" ) );
+    {
+        FToolBarStyle InnerMenuToolBarStyle = FStarshipCoreStyle::GetCoreStyle().GetWidgetStyle<FToolBarStyle>( "SlimToolBar" );
+
+        InnerMenuToolBarStyle.SetBackground( FSlateNoResource() );
+        InnerMenuToolBarStyle.SetButtonPadding( FMargin( 2, 0 ) );
+        InnerMenuToolBarStyle.SetBackgroundPadding( 0 );
+        InnerMenuToolBarStyle.SetIconSize( mIcon16x16 );
+        InnerMenuToolBarStyle.SetButtonStyle( mButton
+                                              .SetNormalPadding( FMargin( 8.f, 4.f, 8.f, 4.f ) )
+                                              .SetPressedPadding( FMargin( 8.f, 5.f, 8.f, 3.f ) )
+        );
+        InnerMenuToolBarStyle.SetWrapButtonStyle( InnerMenuToolBarStyle.WrapButtonStyle
+                                                  .SetWrapButtonPadding( FMargin( 0.0 ) )
+                                                  .SetComboButtonStyle( InnerMenuToolBarStyle.ComboButtonStyle
+                                                                        .SetButtonStyle( InnerMenuToolBarStyle.ComboButtonStyle.ButtonStyle
+                                                                                         .SetNormal( FSlateNoResource() ) ) )
+        );
+        InnerMenuToolBarStyle.SetShowLabels( false );
+        Set( "InnerMenuToolBar", InnerMenuToolBarStyle );
+
+        InnerMenuToolBarStyle.SetIconSize( mIcon32x16 );
+        Set( "InnerMenuToolBar.LargeIcon", InnerMenuToolBarStyle );
+    }
 }
 
 
@@ -891,6 +920,16 @@ FOdysseyStyleDefault::SetupOdysseyCommands()
     Set( "LayerStackEditorCommands.DisplayOnlyCurrentLayer", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/display_only_current_layer", mIcon16x16 ) );
     Set( "LayerStackEditorCommands.CollapseAllLayers", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/options_hidden", mIcon16x16 ) );
     Set( "LayerStackEditorCommands.UncollapseAllLayers", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/options_displayed", mIcon16x16 ) );
+
+    Set( "OdysseyPainterEditorAnimationCommands.AddCellsBefore", new IMAGE_BRUSH_SVG( "OdysseyAnimation/Layer/AddCellsBefore", mIcon20x20 ) );
+    Set( "OdysseyPainterEditorAnimationCommands.AddCellsBefore.Small", new IMAGE_BRUSH_SVG( "OdysseyAnimation/Layer/AddCellsBefore", mIcon20x20 ) );
+    Set( "OdysseyPainterEditorAnimationCommands.AddCellsAfter", new IMAGE_BRUSH_SVG( "OdysseyAnimation/Layer/AddCellsAfter", mIcon20x20 ) );
+    Set( "OdysseyPainterEditorAnimationCommands.AddCellsAfter.Small", new IMAGE_BRUSH_SVG( "OdysseyAnimation/Layer/AddCellsAfter", mIcon20x20 ) );
+
+    Set( "OdysseyPainterEditorAnimationCommands.IncreaseNCellExposure", new IMAGE_BRUSH_SVG( "OdysseyAnimation/Layer/IncreaseExposures", mIcon20x20 ) );
+    Set( "OdysseyPainterEditorAnimationCommands.IncreaseNCellExposure.Small", new IMAGE_BRUSH_SVG( "OdysseyAnimation/Layer/IncreaseExposures", mIcon20x20 ) );
+    Set( "OdysseyPainterEditorAnimationCommands.DecreaseNCellExposure", new IMAGE_BRUSH_SVG( "OdysseyAnimation/Layer/DecreaseExposures", mIcon20x20 ) );
+    Set( "OdysseyPainterEditorAnimationCommands.DecreaseNCellExposure.Small", new IMAGE_BRUSH_SVG( "OdysseyAnimation/Layer/DecreaseExposures", mIcon20x20 ) );
 
     {
         FTemporarySetContentRoot tmp( *this, FPaths::EngineContentDir() / TEXT( "Slate" ) );

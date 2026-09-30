@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 256">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+        stroke: #fff;
+        stroke-width: 20;
+      }
+    </style>
+  </defs>
+
+  <g id="root" class="cls-1">
+    <rect
+        x="12"
+        y="12"
+        width="484"
+        height="232"
+        fill="none"
+        stroke-dasharray="20"
+    />
+
+    <g id="minus">
+        <line
+            x1="350"
+            y1="122"
+            x2="454"
+            y2="122"
+        />
+    </g>
+
+    <path
+        d="M128 12 H12 V244 H128"
+        fill="none"
+    />
+
+  </g>
+
+</svg>

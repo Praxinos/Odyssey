@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 256">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+        stroke: #fff;
+        stroke-width: 20;
+      }
+    </style>
+  </defs>
+
+  <g id="root" class="cls-1">
+
+    <g id="dotted-rectangle">
+      <rect
+        id="dotted-border"
+        x="14"
+        y="14"
+        width="245"
+        height="226"
+        fill="none"
+        stroke-dasharray="20"
+      />
+
+      <g id="plus">
+        <line
+          id="plus-horizontal"
+          x1="90"
+          y1="122"
+          x2="190"
+          y2="122"
+        />
+        <line
+          id="plus-vertical"
+          x1="140"
+          y1="65"
+          x2="140"
+          y2="180"
+        />
+      </g>
+    </g>
+
+    <g id="lined-rectangle">
+      <rect
+        id="lined-border"
+        x="280"
+        y="14"
+        width="210"
+        height="226"
+        fill="none"
+      />
+    </g>
+
+  </g>
+
+  </g>
+</svg>

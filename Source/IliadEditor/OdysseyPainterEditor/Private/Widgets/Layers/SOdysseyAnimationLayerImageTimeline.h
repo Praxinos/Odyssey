@@ -11,13 +11,13 @@
 #include "SOdysseyAnimationLayerTimeline.h"
 
 class UOdysseyAnimationLayer;
+class FExtender;
 class FOdysseyAnimationTimelineCellsShortcuts;
 class FOdysseyAnimationTimelineCellImageStaggerShortcuts;
 class SOdysseyLayerStackTreeView;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 class FOdysseyAnimationTimelineTool;
 class FOdysseyPainterEditor;
-class SOdysseyPainterEditorVectorMassModifierView;
 class FOdysseyVectorGroupPaint;
 class SOdysseyEvents;
 class FUICommandList;
@@ -101,11 +101,7 @@ public:
 
 protected:
     virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyLayerCell* iCell) = 0;
-    virtual void BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder, FFrameNumber iClickedFrame);
-    FReply MassModifierAcceptProperties( TSharedRef<SOdysseyPainterEditorVectorMassModifierView> iObjectView);
-    void MassModifierWindowClosed( const TSharedRef<SWindow>& iWindow
-                                 , TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView );
-    void MassModifier();
+    virtual void BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder, FFrameNumber iClickedFrame, TSharedRef<FExtender> MenuExtender);
 
 protected:
     bool GetShowCellsHandles() const;
@@ -135,11 +131,16 @@ private:
 
     void BuildCellsMarksSubMenu(FMenuBuilder& iMenuBuilder, FFrameNumber iClickedFrame);
 
-    FReply OnContextMenuMinusButtonClicked();
-    FReply OnContextMenuPlusButtonClicked();
-
     EVisibility GetRowDisabledColorVisibility(FName iRow) const;
     const FSlateBrush* GetRowDisabledColorValue(FName iRow) const;
+
+    uint32 GetCurrentExposure() const;
+    void BeginSetCurrentExposureTransaction();
+    void SetCurrentExposureInteractive( uint32 iNewExposure );
+    void EndSetCurrentExposureTransaction( uint32 iNewExposure );
+    void SetCurrentExposureCommitted( uint32 iNewExposure, ETextCommit::Type iCommitType );
+    void SetCurrentExposure( uint32 iNewExposure );
+    bool IsCurrentExposureEnabled() const;
 
 protected:
     UOdysseyAnimationLayer* mLayer;
@@ -156,7 +157,7 @@ protected:
 
     enum eDragState
     {
-        kDrag_None, //The drop will do nothin
+        kDrag_None, //The drop will do nothing
         kDrag_Move, //The drop will move the selected cells
         kDrag_Copy, //The drop will copy the selected cells
     };
