@@ -180,6 +180,8 @@ GetSelectedOrAllAnimationBindings( TSharedPtr<ISequencer> iSequencer )
         return TArray<FGuid>();
 
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, focusedSequence, focusedSequenceId, localFrameNumber );
+    if( !result.mInnerSequence )
+        return TArray<FGuid>();
 
     TArray<FGuid> animation_bindings_selected_sorted;
     ShotSequenceTools::SortBindings( animation_bindings_selected.Array(), result.mInnerSequence->GetMovieScene(), &animation_bindings_selected_sorted );

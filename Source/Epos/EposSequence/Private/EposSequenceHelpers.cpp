@@ -118,7 +118,14 @@ BoardSequenceHelpers::GetInnerSequence( IMovieScenePlayer& iPlayer, const UMovie
         }
         );
 
-    result.mInnerSequenceId = innerSequenceID ? *innerSequenceID : FMovieSceneSequenceID();
+    result.mInnerSequenceId = innerSequenceID ? *innerSequenceID : MovieSceneSequenceID::Invalid;
+
+    if( result.mInnerSequenceId == MovieSceneSequenceID::Invalid )
+    {
+        // In case of invalid sequence id, assume that other values are also invalid
+        result.mInnerSequence = nullptr;
+        result.mInnerMovieScene = nullptr;
+    }
 
     return result;
 }
