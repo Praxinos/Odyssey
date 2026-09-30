@@ -4,6 +4,7 @@
 #include "SOdysseyAnimationLayerImageTimeline.h"
 
 #include "Algo/Accumulate.h"
+#include "Editor.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "Framework/Docking/TabManager.h"
@@ -940,10 +941,23 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
 
     MenuBuilder.BeginSection( "SetExposure", LOCTEXT( "timeline-cells.context-menu.set-exposure-section.name", "Set Exposure" ) );
 
-        MenuBuilder.AddMenuEntry(
-            FOdysseyPainterEditorAnimationCommands::Get().SetCellExposure,
-            NAME_None,
-            LOCTEXT("timeline-cells.context-menu.set-selected-cells-exposure.name", "Set Exposure")
+        MenuBuilder.AddWidget(
+            SNew( SSpinBox<uint32> )
+            .ToolTipText( LOCTEXT( "timeline-cells.context-menu.set-exposure.tooltip", "Set the exposure of the current or selected cells." ) )
+            .Justification( ETextJustify::Center )
+            .MinDesiredWidth( 50.f )
+            //.PreventThrottling( true ) // To refresh the viewport during value change
+            .Delta( 1.f )
+            //.SliderExponent( 0.8f )
+            .IsEnabled( this, &SOdysseyAnimationLayerImageTimeline::IsCurrentExposureEnabled )
+            .Value( this, &SOdysseyAnimationLayerImageTimeline::GetCurrentExposure )
+            .OnBeginSliderMovement( this, &SOdysseyAnimationLayerImageTimeline::BeginSetCurrentExposureTransaction )
+            .OnValueChanged( this, &SOdysseyAnimationLayerImageTimeline::SetCurrentExposureInteractive )
+            .OnEndSliderMovement( this, &SOdysseyAnimationLayerImageTimeline::EndSetCurrentExposureTransaction )
+            .OnValueCommitted( this, &SOdysseyAnimationLayerImageTimeline::SetCurrentExposureCommitted ),
+            LOCTEXT( "timeline-cells.context-menu.set-exposure.label", "Set Exposure" ),
+            //FText::GetEmpty(),
+            true /* NoIndent */
         );
 
     MenuBuilder.EndSection();
@@ -962,6 +976,100 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
             , FUIAction( FExecuteAction::CreateSP( this, &SOdysseyAnimationLayerImageTimeline::MassModifier ) ) );
 
         MenuBuilder.EndSection();
+    }
+}
+
+bool
+SOdysseyAnimationLayerImageTimeline::IsCurrentExposureEnabled() const
+{
+    TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    if( selectedCells.IsEmpty() )
+    {
+        UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
+        if( !cell )
+            return false;
+
+        selectedCells.Add( cell );
+    }
+
+    return !!selectedCells.Num();
+}
+uint32
+SOdysseyAnimationLayerImageTimeline::GetCurrentExposure() const
+{
+    UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
+
+    TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    if( selectedCells.IsEmpty() )
+    {
+        if( !cell )
+            return 0u;
+
+        selectedCells.Add( cell );
+    }
+    check( selectedCells.Num() );
+
+    return selectedCells.Contains( cell ) ? cell->GetExposure() : selectedCells[0]->GetExposure();
+}
+void
+SOdysseyAnimationLayerImageTimeline::BeginSetCurrentExposureTransaction()
+{
+    if( !mLayer->IsEditable() )
+        return;
+
+    GEditor->BeginTransaction( LOCTEXT( "timeline-cells.transaction.set-selected-cells-exposure", "Set Selected Cells Exposure" ) );
+}
+void
+SOdysseyAnimationLayerImageTimeline::SetCurrentExposureInteractive( uint32 iNewExposure )
+{
+    if( !mLayer->IsEditable() )
+        return;
+
+    SetCurrentExposure( iNewExposure );
+}
+void
+SOdysseyAnimationLayerImageTimeline::EndSetCurrentExposureTransaction( uint32 iNewExposure )
+{
+    if( !mLayer->IsEditable() )
+        return;
+
+    SetCurrentExposure( iNewExposure );
+
+    GEditor->EndTransaction();
+}
+void
+SOdysseyAnimationLayerImageTimeline::SetCurrentExposureCommitted( uint32 iNewExposure, ETextCommit::Type iCommitType )
+{
+    if( iCommitType == ETextCommit::OnCleared )
+        return;
+
+    if( !mLayer->IsEditable() )
+        return;
+
+    FScopedTransaction ScopedTransaction( LOCTEXT( "timeline-cells.transaction.set-selected-cells-exposure", "Set Selected Cells Exposure" ) );
+
+    SetCurrentExposure( iNewExposure );
+}
+void
+SOdysseyAnimationLayerImageTimeline::SetCurrentExposure( uint32 iNewExposure )
+{
+    check( mLayer->IsEditable() );
+
+    TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    if( selectedCells.IsEmpty() )
+    {
+        UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
+        if( !cell )
+            return;
+
+        selectedCells.Add( cell );
+    }
+
+    mOnTransactCurrentFrame.ExecuteIfBound( selectedCells[0]->GetFrameRange().GetLowerBoundValue() );
+
+    for( UOdysseyLayerCell* selectedCell : selectedCells )
+    {
+        selectedCell->SetExposure( FMath::Max( 1u, iNewExposure ) );
     }
 }
 

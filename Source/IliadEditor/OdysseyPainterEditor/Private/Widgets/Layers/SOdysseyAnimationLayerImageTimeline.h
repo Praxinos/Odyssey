@@ -138,6 +138,14 @@ private:
     EVisibility GetRowDisabledColorVisibility(FName iRow) const;
     const FSlateBrush* GetRowDisabledColorValue(FName iRow) const;
 
+    uint32 GetCurrentExposure() const;
+    void BeginSetCurrentExposureTransaction();
+    void SetCurrentExposureInteractive( uint32 iNewExposure );
+    void EndSetCurrentExposureTransaction( uint32 iNewExposure );
+    void SetCurrentExposureCommitted( uint32 iNewExposure, ETextCommit::Type iCommitType );
+    void SetCurrentExposure( uint32 iNewExposure );
+    bool IsCurrentExposureEnabled() const;
+
 protected:
     UOdysseyAnimationLayer* mLayer;
     TAttribute<int> mCurrentFrame;
