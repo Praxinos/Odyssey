@@ -7,6 +7,7 @@
 
 class UOdysseyAnimationLayerImageVector;
 class SOdysseyAnimationLayerImageVectorTimelineInbetweening;
+class SOdysseyPainterEditorVectorMassModifierView;
 
 /**
  * Implements a layer row widget
@@ -27,10 +28,17 @@ private:
     virtual FReply OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
     EVisibility IsInbetweeningTimelineVisible() const;
 
+    virtual void BuildContextMenu( TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder, FFrameNumber iClickedFrame, TSharedRef<FExtender> MenuExtender ) override;
+    void AddCellsMenuEntries( FMenuBuilder& MenuBuilder );
+
 protected:
     virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
     virtual EVisibility GetRowVisibility(FName iRow) const override;
     TSharedRef<SWidget> GenerateInbetweeningRowTimelineWidget();
+
+    FReply MassModifierAcceptProperties( TSharedRef<SOdysseyPainterEditorVectorMassModifierView> iObjectView );
+    void MassModifierWindowClosed( const TSharedRef<SWindow>& iWindow, TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView );
+    void MassModifier();
 
 private:
     TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> mInbetweeningListView;

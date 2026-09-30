@@ -18,7 +18,6 @@ class SOdysseyLayerStackTreeView;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 class FOdysseyAnimationTimelineTool;
 class FOdysseyPainterEditor;
-class SOdysseyPainterEditorVectorMassModifierView;
 class FOdysseyVectorGroupPaint;
 class SOdysseyEvents;
 class FUICommandList;
@@ -103,9 +102,6 @@ public:
 protected:
     virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyLayerCell* iCell) = 0;
     virtual void BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder, FFrameNumber iClickedFrame, TSharedRef<FExtender> MenuExtender);
-    FReply MassModifierAcceptProperties( TSharedRef<SOdysseyPainterEditorVectorMassModifierView> iObjectView);
-    void MassModifierWindowClosed( const TSharedRef<SWindow>& iWindow, TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView );
-    void MassModifier();
 
 protected:
     bool GetShowCellsHandles() const;
