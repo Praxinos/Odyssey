@@ -174,7 +174,7 @@ SArianeEditorLayerStackPanel::Construct(const FArguments& InArgs, FArianeEditor*
                         .Image(FArianeEditorStyle::Get().GetBrush( "ArianeEditor.Layers16" ))
                     ]
 
-                + SHorizontalBox::Slot()
+                    + SHorizontalBox::Slot()
                     .AutoWidth()
                     .VAlign(VAlign_Center)
                     [
@@ -189,7 +189,6 @@ SArianeEditorLayerStackPanel::Construct(const FArguments& InArgs, FArianeEditor*
             [
                 SNew(SButton)
                 .OnClicked(FOnClicked::CreateSP(this, &SArianeEditorLayerStackPanel::NewFolderLayer))
-                .IsEnabled(false)
                 [
                     SNew(SHorizontalBox)
                     + SHorizontalBox::Slot()
@@ -200,7 +199,7 @@ SArianeEditorLayerStackPanel::Construct(const FArguments& InArgs, FArianeEditor*
                         .Image(FAppStyle::Get().GetBrush("ContentBrowser.AssetTreeFolderClosed"))
                     ]
 
-                + SHorizontalBox::Slot()
+                    + SHorizontalBox::Slot()
                     .AutoWidth()
                     .VAlign(VAlign_Center)
                     [
@@ -263,6 +262,23 @@ SArianeEditorLayerStackPanel::NewLayer()
 FReply
 SArianeEditorLayerStackPanel::NewFolderLayer()
 {
+    UArianePainting3DComponent* CurrentPainting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if (CurrentPainting3DComponent)
+    {
+        GEditor->BeginTransaction(LOCTEXT("ariane-layer-stack-panel.new-layer-folder", "New Layer folder"));
+
+        CurrentPainting3DComponent->GetLayerStack()->Modify();
+        CurrentPainting3DComponent->GetLayerStack()->GetRootFolder()->Modify();
+
+        UArianeLayerFolder* FolderLayer = CurrentPainting3DComponent->GetLayerStack()->CreateFolderLayer(nullptr, true);
+
+        CurrentPainting3DComponent->GetLayerStack()->ClearLayerSelection(false);
+        CurrentPainting3DComponent->GetLayerStack()->SelectLayer(FolderLayer, true);
+
+        GEditor->EndTransaction();
+    }
+
     return FReply::Handled();
 }
 

@@ -83,11 +83,11 @@ UArianeLayerFolder::RemoveChildLayer( UArianeLayer* Child )
 
     Invalidate( FArianeLayerFolderInvalidationFlags().SetHierarchy() );
 
-    Child->DetachFromComponent( FDetachmentTransformRules::KeepWorldTransform );
+    Child->DetachFromComponent( FDetachmentTransformRules::KeepRelativeTransform );
     Child->UnregisterComponent();
 
     // Rename() is used to define the parent object
-    Child->Rename( nullptr, nullptr );
+    Child->Rename( *Child->GetFName().ToString(), nullptr );
 }
 
 UArianeLayerFolder::ETraversalReturnValue

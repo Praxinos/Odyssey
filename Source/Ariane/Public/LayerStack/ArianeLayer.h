@@ -48,6 +48,9 @@ public:
      */
     bool IsLocked( bool bHierarchical );
 
+    /** Returns true if this component is visible in the current context */
+    virtual bool IsVisible() const override;
+
     /**
      * @brief Invalidate the layer
      * @param InInvalidationFlags invalidation flags

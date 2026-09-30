@@ -275,7 +275,7 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
 
         if ( Cast<UArianeLayerFolder>(Layer) )
         {
-            objectIcon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.Layers16" );
+            objectIcon = FAppStyle::Get().GetBrush("ContentBrowser.AssetTreeFolderClosed");
         }
         else
         if ( Cast<UArianeLayerDrawing>(Layer) )
@@ -349,7 +349,15 @@ SArianeEditorLayerRow::OnMouseButtonDown( const FGeometry & MyGeometry
                                         , const FPointerEvent & MouseEvent )
 {
     const TSharedPtr< SArianeEditorLayerStack > treeView = StaticCastSharedPtr<SArianeEditorLayerStack>(OwnerTablePtr.Pin());
-    UArianeLayer* Layer = Item.Get()->GetLayer();
+    //UArianeLayer* Layer = Item.Get()->GetLayer();
+
+    if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+    {
+        if (treeView.IsValid())
+        {
+            treeView->SetSelection(Item);
+        }
+    }
 
     return SMultiColumnTableRow::OnMouseButtonDown( MyGeometry, MouseEvent );
 }
@@ -409,9 +417,8 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
                 // don't drop onto the same object or else expect some infinite loop
                 if( ParentFolder != SelectedLayer )
                 {
-                    //ParentFolder->TransferChild( SelectedLayer, ParentFolder->GetPreviousChild( insertObject ) );
-
-                    //insertObject = SelectedLayer;
+                    SelectedLayer->GetParentFolder()->RemoveChildLayer(SelectedLayer);
+                    ParentFolder->AddChildLayer( SelectedLayer );
                 }
             }
             break;
@@ -424,7 +431,8 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
                     // don't drop onto the same object or else expect some infinite loop
                     if( ItemLayerFolder != SelectedLayer )
                     {
-                        //ItemLayerFolder->TransferChild( SelectedLayer, nullptr );
+                        SelectedLayer->GetParentFolder()->RemoveChildLayer(SelectedLayer);
+                        ItemLayerFolder->AddChildLayer(SelectedLayer);
                     }
                 }
             break;
@@ -437,9 +445,8 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
 
                 if( ParentFolder != SelectedLayer )
                 {
-                    //ParentFolder->TransferChild( SelectedLayer, insertObject );
-
-                    //insertObject = SelectedLayer;
+                    SelectedLayer->GetParentFolder()->RemoveChildLayer(SelectedLayer);
+                    ParentFolder->AddChildLayer(SelectedLayer);
                 }
             }
             break;
@@ -450,6 +457,7 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
     }
 
     DropZone = DROPZONE_NONE;
+    TreeView->Update();
 
     return FReply::Handled();
 }

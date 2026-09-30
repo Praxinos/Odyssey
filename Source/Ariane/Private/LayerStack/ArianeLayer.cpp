@@ -140,6 +140,14 @@ UArianeLayer::IsLocked( bool bHierarchical )
     return bLocked;
 }
 
+bool UArianeLayer::IsVisible() const
+{
+    if( ParentFolder )
+        return USceneComponent::IsVisible() && ParentFolder->IsVisible();
+    else
+        return USceneComponent::IsVisible();
+}
+
 #if WITH_EDITOR
 void
 UArianeLayer::SetSelected( bool bInSelected )
