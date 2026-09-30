@@ -3,6 +3,10 @@
 
 #include "OdysseyCommandList.h"
 
+#include "Framework/Application/SlateApplication.h"
+#include "Framework/Commands/InputBindingManager.h"
+#include "Input/Events.h"
+
 bool
 FOdysseyCommandList::HasActionForKeyEvent( const FKey Key, const FModifierKeysState& ModifierKeysState, const bool bRepeat ) const
 {
