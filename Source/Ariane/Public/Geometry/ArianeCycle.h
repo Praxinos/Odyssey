@@ -155,13 +155,12 @@ protected:
                             , TArray<FArianePoint>& OutPoints
                             , EArianeCycleFittingRule FittingRule );
     FVector GetNodeFittedPosition( FArianeGraph* Graph, FArianeGraph::FNode* Node, EArianeCycleFittingRule FittingRule );
+    virtual void ResetImage( UArianeImage* InImage ) override;
+    virtual void PostReset() override;
 
 protected:
     UPROPERTY( EditAnywhere )
     TArray<FVector> Vertices;
-
-    UPROPERTY( EditAnywhere )
-    TArray<int> Indices;
 
     UPROPERTY( EditAnywhere )
     FColor Color;
@@ -176,6 +175,6 @@ protected:
     TArray<FArianePoint> Points;
 
 protected:
-    FArianeCycleGeometry3D Geometry3D;
+    FArianeCycleGeometry3D* Geometry3D;
     TArray<FDynamicMeshVertex> ModelVertexCache;
 };

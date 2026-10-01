@@ -12,7 +12,9 @@
 #include "ArianeTag.h"
 
 FArianeObjectID::FArianeObjectID()
-    : CachedImageAllocatorGuid( FGuid() )
+    : Guid ( FGuid() )
+    , AllocationModel (  EArianeAllocationModel::Unknown  )
+    , CachedImageAllocatorGuid( FGuid() )
     , CachedObject( nullptr )
 {
 }
@@ -50,6 +52,8 @@ FArianeObjectID::GetGuid() const
 
 FArianeVertexID::FArianeVertexID()
     : OwnerID( FArianeObjectID() )
+    , Guid ( FGuid() )
+    , AllocationModel (  EArianeAllocationModel::Unknown  )
     , CachedObjectAllocatorGuid ( FGuid() )
     , CachedVertex( nullptr )
 {
@@ -57,10 +61,10 @@ FArianeVertexID::FArianeVertexID()
 
 FArianeVertexID::FArianeVertexID( FArianeVertex* Vertex )
     : OwnerID( Vertex->GetOwner() )
+    , Guid ( Vertex->GetGuid() )
+    , AllocationModel( Vertex->GetAllocationModel() )
     , CachedObjectAllocatorGuid ( FGuid() )
     , CachedVertex( Vertex )
-    , AllocationModel( Vertex->GetAllocationModel() )
-    , Guid ( Vertex->GetGuid() )
 {
 }
 
@@ -90,6 +94,8 @@ FArianeVertexID::GetVertex( UArianeImage* Image )
 
 FArianeSegmentID::FArianeSegmentID()
     : OwnerID( FArianeObjectID() )
+    , Guid ( FGuid() )
+    , AllocationModel (  EArianeAllocationModel::Unknown  )
     , CachedObjectAllocatorGuid ( FGuid() )
     , CachedSegment( nullptr )
 {
@@ -97,10 +103,10 @@ FArianeSegmentID::FArianeSegmentID()
 
 FArianeSegmentID::FArianeSegmentID( FArianeSegment* Segment )
     : OwnerID( Segment->GetOwner() )
+    , Guid ( Segment->GetGuid() )
+    , AllocationModel( Segment->GetAllocationModel() )
     , CachedObjectAllocatorGuid ( FGuid() )
     , CachedSegment( Segment )
-    , AllocationModel( Segment->GetAllocationModel() )
-    , Guid ( Segment->GetGuid() )
 {
 }
 
@@ -130,6 +136,8 @@ FArianeSegmentID::GetSegment( UArianeImage* Image )
 
 FArianeTagID::FArianeTagID()
     : OwnerID( FArianeObjectID() )
+    , Guid ( FGuid() )
+    , AllocationModel( EArianeAllocationModel::Unknown )
     , CachedObjectAllocatorGuid ( FGuid() )
     , CachedTag( nullptr )
 {
@@ -137,10 +145,10 @@ FArianeTagID::FArianeTagID()
 
 FArianeTagID::FArianeTagID( FArianeTag* Tag )
     : OwnerID( Tag->GetOwner() )
+    , Guid ( Tag->GetGuid() )
+    , AllocationModel( Tag->GetAllocationModel() )
     , CachedObjectAllocatorGuid ( FGuid() )
     , CachedTag( Tag )
-    , AllocationModel( Tag->GetAllocationModel() )
-    , Guid ( Tag->GetGuid() )
 {
 }
 

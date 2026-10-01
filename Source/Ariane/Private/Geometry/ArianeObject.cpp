@@ -1218,7 +1218,7 @@ FArianeObject::PostLoad()
 }
 
 void
-FArianeObject::PostSerialize()
+FArianeObject::PostReset()
 {
     if( GetParent() )
     {

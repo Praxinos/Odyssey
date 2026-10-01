@@ -102,6 +102,8 @@ public:
     FOnImageChanged& OnPreImageChangedDelegate();
     FOnImageChanged& OnPostImageChangedDelegate();
     virtual void Serialize(FArchive& Ar ) override;
+    virtual void PreSave(FObjectPreSaveContext Context) override;
+    virtual void PostLoad() override;
 
 protected:
     void BindDelegates();

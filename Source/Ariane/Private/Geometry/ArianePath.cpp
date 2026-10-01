@@ -278,9 +278,9 @@ FArianePath::ResetImage( UArianeImage* InImage )
 }
 
 void
-FArianePath::PostSerialize()
+FArianePath::PostReset()
 {
-    Super::PostSerialize();
+    Super::PostReset();
 
     for( FInstancedStruct& InstancedVertex : InstancedVertices )
     {
@@ -294,6 +294,11 @@ FArianePath::PostSerialize()
         FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
 
         AddSegment( Segment );
+    }
+
+    if ( Material )
+    {
+        Image->IncrementMaterial( Material );
     }
 
     InvalidateAllVertices();

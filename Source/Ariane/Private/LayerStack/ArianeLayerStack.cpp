@@ -56,9 +56,11 @@ UArianeLayerStack::GetPainting3DComponent()
 void
 UArianeLayerStack::OnRegister()
 {
-    UArianeLayerFolder* RootFolder = GetRootFolder();
+    AArianePainting3DActor* Painting3DActor = Cast<AArianePainting3DActor>(GetOwner());
 
     Super::OnRegister();
+
+    UArianeLayerFolder* RootFolder = GetRootFolder();
 
     if( RootFolder == nullptr )
     {
@@ -67,6 +69,8 @@ UArianeLayerStack::OnRegister()
                                                   , RF_Transactional | RF_Public );
 
         RootFolder->AttachToComponent( this,  FAttachmentTransformRules::KeepWorldTransform );
+
+        Painting3DActor->AddInstanceComponent(RootFolder);
 
         Layers.Add( RootFolder );
     }
