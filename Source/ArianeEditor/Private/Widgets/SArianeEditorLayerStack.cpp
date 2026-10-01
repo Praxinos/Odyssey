@@ -353,7 +353,8 @@ SArianeEditorLayerStack::OnGenerateRow( TSharedPtr<FArianeEditorLayerRowItem> iI
 {
     UArianeLayer* Layer = iItem->GetLayer();
 
-    return SNew( SArianeEditorLayerRow, iOwnerTable, iItem );
+    return SNew( SArianeEditorLayerRow, iOwnerTable, iItem )
+           .Padding( FMargin(0.f, 6.f, 0.f, 6.f));
 }
 
 void
