@@ -211,11 +211,9 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
     {
         const FCheckBoxStyle* isTransformedToggleStyle = &FArianeEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>("ArianeEditor.LayerStack.IsTransformedToggle");
 
-        ColumnWidget = SNew(SHorizontalBox)
-                       + SHorizontalBox::Slot()
-                       .AutoWidth()
-                       .HAlign( EHorizontalAlignment::HAlign_Center )
-                       .VAlign( EVerticalAlignment::VAlign_Center )
+        ColumnWidget = SNew(SBox)
+                       .HAlign(HAlign_Center)
+                       .VAlign(VAlign_Center)
                        [
                            SNew( SCheckBox )
                           .IsEnabled( Item.Get()->IsSensitive() )
@@ -235,11 +233,9 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
     {
         const FCheckBoxStyle* isVisibleToggleStyle = &FArianeEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>("ArianeEditor.LayerStack.IsVisibleToggle");
 
-        ColumnWidget = SNew(SHorizontalBox)
-                       + SHorizontalBox::Slot()
-                       .AutoWidth()
-                       .HAlign( EHorizontalAlignment::HAlign_Center )
-                       .VAlign( EVerticalAlignment::VAlign_Center )
+        ColumnWidget = SNew(SBox)
+                       .HAlign(HAlign_Center)
+                       .VAlign(VAlign_Center)
                        [
                            SNew( SCheckBox )
                           .IsEnabled( Item.Get()->IsSensitive() )
@@ -254,11 +250,9 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
     {
         const FCheckBoxStyle* isLockedToggleStyle = &FArianeEditorStyle::Get().GetWidgetStyle<FCheckBoxStyle>("ArianeEditor.LayerStack.IsLockedToggle");
 
-        ColumnWidget = SNew(SHorizontalBox)
-                       + SHorizontalBox::Slot()
-                       .AutoWidth()
-                       .HAlign( EHorizontalAlignment::HAlign_Center )
-                       .VAlign( EVerticalAlignment::VAlign_Center )
+        ColumnWidget = SNew(SBox)
+                       .HAlign(HAlign_Center)
+                       .VAlign(VAlign_Center)
                        [
                            SNew( SCheckBox )
                           .IsEnabled( Item.Get()->IsSensitive() )
