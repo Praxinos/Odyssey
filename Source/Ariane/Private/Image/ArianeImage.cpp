@@ -71,6 +71,11 @@ UArianeImage::Reset()
 {
     AllocatorGuid = FGuid::NewGuid();
 
+    // Empty the map before reloading. Each path will populate or increment the attached value.
+    UsedMaterials.Empty();
+    // Empty the selection
+    SelectedObjects.Empty();
+
     for (FInstancedStruct& InstancedStruct : InstancedObjects)
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
@@ -82,7 +87,7 @@ UArianeImage::Reset()
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
 
-        Object->PostSerialize();
+        Object->PostReset();
     }
 
     RootGroupID.GetObject( this )->UpdateTransform();
@@ -172,12 +177,9 @@ UArianeImage::PostEditUndo()
 
     Super::PostEditUndo();
 
-    //BindDelegates();
+    Reset();
 
-    // Empty the map before reloading. Each path will populate or increment the attached value.
-    UsedMaterials.Empty();
-    // Empty the selection
-    SelectedObjects.Empty();
+    //BindDelegates();
 
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
@@ -625,6 +627,8 @@ UArianeImage::Invalidate()
     {
         DrawingLayer->Invalidate();
     }
+
+    MarkPackageDirty();
 }
 
 /*

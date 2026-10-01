@@ -14,7 +14,9 @@
 #include "ArianeRectangle.h"
 #include "ArianeLine.h"
 #include "ArianePolygon.h"
+// Unreal headers
 #include "EditorModes.h"
+#include "UObject/ObjectSaveContext.h"
 
 // for debugging purpose
 static TAutoConsoleVariable<bool> CVarShowArianeNormals( TEXT("r.Ariane.ShowNormals")
@@ -357,6 +359,10 @@ UArianeLayerDrawing::UArianeLayerDrawing()
 
     FCoreUObjectDelegates::OnAssetLoaded.AddUObject( this, &UArianeLayerDrawing::OnAssetLoaded );
 
+    //Image = CreateDefaultSubobject<UArianeImage>("Subobject Image");
+
+    //Image->SetDrawingLayer( this );
+
     //bWantsInitializeComponent = true;
 
 /*
@@ -371,10 +377,44 @@ UArianeLayerDrawing::UArianeLayerDrawing()
 */
 }
 
+void UArianeLayerDrawing::PreSave(FObjectPreSaveContext Context)
+{
+UE_LOG(LogTemp, Warning, TEXT("BEFORE PreSave FLAGS Layer=0x%x Image=0x%x Stack=0x%x Owner=0x%x Path=%s"),
+    (uint32)GetFlags(),
+    Image ? (uint32)Image->GetFlags() : 0,
+    GetAttachParent() ? (uint32)GetAttachParent()->GetFlags() : 0,
+    GetOwner() ? (uint32)GetOwner()->GetFlags() : 0,
+    *GetPathName());
+
+    Super::PreSave(Context);
+
+UE_LOG(LogTemp, Warning, TEXT("AFTER PreSave FLAGS Layer=0x%x Image=0x%x Stack=0x%x Owner=0x%x Path=%s"),
+    (uint32)GetFlags(),
+    Image ? (uint32)Image->GetFlags() : 0,
+    GetAttachParent() ? (uint32)GetAttachParent()->GetFlags() : 0,
+    GetOwner() ? (uint32)GetOwner()->GetFlags() : 0,
+    *GetPathName());
+}
+
 void
 UArianeLayerDrawing::Serialize(FArchive& Ar )
 {
-    Super::Serialize( Ar );
+    // for some currently UNKOWN reason, the UPROPERTY Image is set to Transient when loading the asset as
+    // a spawnable from the level sequence. We have to clear the TRANSIENT flag if we wan't the image to be
+    // saved in case there is a modification via ArianeEditor. the question should be asked to Epic Games.
+    // That took days to troubleshoot :(
+    if ( Ar.IsSaving() && Image )
+    {
+        Image->ClearFlags(RF_Transient);
+    }
+
+    Super::Serialize(Ar);
+}
+
+void
+UArianeLayerDrawing::PostLoad()
+{
+    Super::PostLoad();
 }
 
 void

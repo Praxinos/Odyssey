@@ -313,7 +313,7 @@ public:
     FArianeObject* GetNextChild( FArianeObject* Child );
     virtual void Animate( const FArianeKeyedObject* KeyedObject, const FArianeKeyedObject* NextKeyedObject, float T );
     const FGuid& GetAllocatorGuid();
-    virtual void PostSerialize();
+    virtual void PostReset();
 
 protected:
     /**

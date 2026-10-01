@@ -174,11 +174,14 @@ protected:
     UPROPERTY( EditAnywhere )
     TWeakObjectPtr<UArianeLayerDrawing> DrawingLayer;
 
+    // counter to determine how many times the material is used (i.e by how many objects)
+    UPROPERTY( Transient )
+    TMap<UMaterialInterface*, uint32> UsedMaterials;
+
 protected:
     // Random Guid used for safe pointer resolution. See ArianeID.h
     FGuid AllocatorGuid = FGuid::NewGuid();
-    // counter to determine how many times the material is used (i.e by how many objects)
-    TMap<UMaterialInterface*, uint32> UsedMaterials;
+
 
     // Temp
     TArray<FArianeObject*> SelectedObjects;

@@ -292,7 +292,7 @@ public:
     uint32 GetLinearSegmentCount();
     virtual FArianePathInvalidationFlags& GetInvalidationFlags() override;
     virtual void ResetImage( UArianeImage* InImage ) override;
-    virtual void PostSerialize() override;
+    virtual void PostReset() override;
 
 protected:
     void FindChains();

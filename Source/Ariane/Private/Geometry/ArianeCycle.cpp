@@ -104,7 +104,7 @@ FArianeCycle::FArianeCycle( UArianeImage* InImage
                     , InAllocationModel )
     , Color ( FColor::Black.WithAlpha(255) )
     , Material( nullptr )
-    , Geometry3D ( this )
+    , Geometry3D ( new FArianeCycleGeometry3D( this ) )
 {
 }
 
@@ -121,6 +121,28 @@ FArianeCycle::GetInvalidationFlags()
     }
 
     return *InvalidationFlagsPtr;
+}
+
+void
+FArianeCycle::ResetImage( UArianeImage* InImage )
+{
+    Super::ResetImage( InImage );
+
+    Geometry3D = new FArianeCycleGeometry3D( this );
+    ModelVertexCache.Empty();
+}
+
+void
+FArianeCycle::PostReset()
+{
+    Super::PostReset();
+
+    Invalidate( FArianeCycleInvalidationFlags().SetColor() );
+
+    if ( Material )
+    {
+        Image->IncrementMaterial( Material );
+    }
 }
 
 // static
@@ -360,74 +382,8 @@ FArianeCycle::CopySettings( FArianeObject* DestinationObject, const FCopyArgs& C
 FArianeObject*
 FArianeCycle::CopyShape( const FCopyArgs& CopyArgs )
 {
-    TArray<FArianeVertex*> LookupTable;
     FArianeCycle* CycleCopy = nullptr;
-    uint32 VertexID = 0;
-/*
-    PathCopy = CopyArgs.DrawingLayer->AllocPath( nullptr, Name, CopyArgs.AllocationModel );
 
-    LookupTable.Reserve ( Vertices.Num() );
-
-    // Copy Geometry. First, vertices.
-    for( FArianeVertexID& OriginalVertexID : Vertices )
-    {
-        FArianeVertex* OriginalVertex = OriginalVertexID.GetVertex();
-        FVector OriginalVertexPosition = OriginalVertex->GetPosition();
-        FVector OriginalVertexNormal = OriginalVertex->GetNormal();
-        double OriginalVertexRadius = OriginalVertex->GetRadius();
-        FArianeVertex* NewVertex = PathCopy->AllocVertex( OriginalVertexPosition
-                                                        , OriginalVertexNormal
-                                                        , OriginalVertexRadius
-                                                        , CopyArgs.AllocationModel );
-
-        // Don't check if NewVertex is null, it must not be.
-        NewVertex->SetHandleAligned( OriginalVertex->IsHandleAligned() );
-
-        LookupTable.Add( NewVertex );
-
-        OriginalVertex->SetID( VertexID++ );
-
-        PathCopy->AddVertex( NewVertex );
-    }
-
-    // Copy Geometry. Second, segments.
-    for( FArianeSegmentID& OriginalSegmentID : Segments )
-    {
-        FArianeSegment* OriginalSegment = OriginalSegmentID.GetSegment();
-        FArianeVertex* Vertex0 = static_cast<FArianeVertex*>( OriginalSegment->GetVertex((uint32)0) );
-        FArianeVertex* Vertex1 = static_cast<FArianeVertex*>( OriginalSegment->GetVertex((uint32)1) );
-        FArianeSegment* NewSegment = nullptr;
-
-        if( OriginalSegment->GetClass() == FArianeSegmentCubic::StaticClass() )
-        {
-            FArianeSegmentCubic* OriginalCubicSegment = static_cast<FArianeSegmentCubic*>(OriginalSegment);
-            FArianeHandleSegment* OriginalHandle0 = OriginalCubicSegment->GetHandle((uint32)0);
-            FArianeHandleSegment* OriginalHandle1 = OriginalCubicSegment->GetHandle((uint32)1);
-            FVector OriginalHandle0Position = OriginalHandle0->GetPosition();
-            FVector OriginalHandle1Position = OriginalHandle1->GetPosition();
-
-            NewSegment = PathCopy->AllocCubicSegment ( LookupTable[Vertex0->GetID()]
-                                                     , OriginalHandle0Position.X
-                                                     , OriginalHandle0Position.Y
-                                                     , OriginalHandle0Position.Z
-                                                     , OriginalHandle1Position.X
-                                                     , OriginalHandle1Position.Y
-                                                     , OriginalHandle1Position.Z
-                                                     , LookupTable[Vertex1->GetID()]
-                                                     , CopyArgs.AllocationModel );
-        }
-
-        if( OriginalSegment->GetClass() == FArianeSegment::StaticClass() )
-        {
-            NewSegment = PathCopy->AllocSegment ( LookupTable[Vertex0->GetID()]
-                                                , LookupTable[Vertex1->GetID()]
-                                                , CopyArgs.AllocationModel );
-        }
-
-        // Don't check if NewSegment is null, it must not be.
-        PathCopy->AddSegment( NewSegment );
-    }
-*/
     return CycleCopy;
 }
 
@@ -494,7 +450,7 @@ FArianeCycle::PostLoad()
 FArianeCycleGeometry3D&
 FArianeCycle::GetGeometry3D()
 {
-    return Geometry3D;
+    return *Geometry3D;
 }
 
 const FColor&
@@ -534,12 +490,12 @@ FArianeCycle::ExportProperties( FArianeObject* DestObject )
 void
 FArianeCycle::UpdateShape( EUpdateFlags UpdateFlags )
 {
-    FArianeCycleInvalidationFlags* PathInvalidationFlags = &GetInvalidationFlags();
+    FArianeCycleInvalidationFlags* CyceInvalidationFlags = &GetInvalidationFlags();
 
-    if( ( PathInvalidationFlags->PointAltered )
-     || ( PathInvalidationFlags->Color ) )
+    if( ( CyceInvalidationFlags->PointAltered )
+     || ( CyceInvalidationFlags->Color ) )
     {
-        Geometry3D.Build();
+        Geometry3D->Build();
     }
 }
 

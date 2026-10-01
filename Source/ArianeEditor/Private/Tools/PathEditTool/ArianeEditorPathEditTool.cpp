@@ -369,101 +369,107 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
     if( Painting3DComponent )
     {
         UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
-UE_LOG(LogTemp, Warning, TEXT("UArianeEditorPathEditTool::OnMouseDownPickPoint - DrawingLayerImage=%p"), DrawingLayer->GetImage());
-        for( FArianeObject* SelectedTree : SelectedTrees )
+
+        if( DrawingLayer )
         {
-            FArianeObject::Traverse ( SelectedTree
-                                    , [ this
-                                      , ViewportClient
-                                      , View
-                                      , &PointerState ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
-                {
-                    if( /*iScene->GetCell()->ObjectHasFocus( object, traversalFlags )*/1 )
-                    {
-                        if( Object->GetClass() == FArianePath::StaticClass() )
-                        {
-                            FArianePath* Path = static_cast<FArianePath*>(Object);
+            UArianeImage* Image = DrawingLayer->GetImage();
 
-                            // for widening all paths
-                            SelectedPaths.Add( Path );
-
-                            PickPathPoints( ViewportClient
-                                        , View
-                                        , Path
-                                        , PointerState.ViewportX
-                                        , PointerState.ViewportY
-                                        , PickingRadius
-                                        , PickedVertices
-                                        , PickedHandles
-                                        , EditonModeToPickingFlags() );
-                        }
-                    }
-
-                    return FArianeObject::ETraversalReturnValue::Continue;
-                } );
-        }
-
-        // Link or Unlink segment handles
-        if( ( EditionMode == EArianePathEditToolEditionMode::SegmentHandle ) &&  ( PickedVertices.Num() == 1 ) )
-        {
-            FArianeVertex* Vertex = PickedVertices[0];
-
-            //-------------- undo ---------------//
-            GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.transaction.align-point-selection","Align Point Selection"));
-            DrawingLayer->GetImage()->Modify();
-
-            Vertex->SetHandleAligned( Vertex->IsHandleAligned() ? false : true );
-
-            GetToolManager()->EndUndoTransaction();
-        }
-        // Else, save point coordinates before changing them
-        else
-        {
-            switch( EditionMode )
+            for( FArianeObject* SelectedTree : SelectedTrees )
             {
-                case EArianePathEditToolEditionMode::VertexHandle :
-                    GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-vertex-handles","Edit Vertex Handles"));
-                    DrawingLayer->GetImage()->Modify();
-                break;
-
-                case EArianePathEditToolEditionMode::Vertex :
-                {
-                    GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-vertices","Edit Vertices"));
-                    DrawingLayer->GetImage()->Modify();
-
-                    TArray<FArianeSegment*> AlteredSegments;
-
-                    // static call
-                    FArianeVertex::ArrayToSegmentArray( PickedVertices, AlteredSegments, false );
-                    // static call
-                    BuildSegmentAdjustments( DrawingLayer, AlteredSegments, SegmentAdjustments );
-
-                    // Control points must move with the point. Store them in the iPickedHandleArray
-                    for( FArianeVertex* Vertex : PickedVertices )
+                FArianeObject::Traverse ( SelectedTree
+                                        , [ this
+                                          , ViewportClient
+                                          , View
+                                          , &PointerState ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
                     {
-                        for( const FArianeSegmentID& SegmentID : Vertex->GetSegments() )
+                        if( /*iScene->GetCell()->ObjectHasFocus( object, traversalFlags )*/1 )
                         {
-                            FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment( DrawingLayer->GetImage() );
-
-                            if( Segment->GetClass() == FArianeSegmentCubic::StaticClass() )
+                            if( Object->GetClass() == FArianePath::StaticClass() )
                             {
-                                FArianeSegmentCubic* CubicSegment = static_cast<FArianeSegmentCubic*>(Segment);
-                                FArianeHandleSegment* Handle = CubicSegment->GetHandle( Vertex );
+                                FArianePath* Path = static_cast<FArianePath*>(Object);
 
-                                PickedHandles.Add( Handle );
+                                // for widening all paths
+                                SelectedPaths.Add( Path );
+
+                                PickPathPoints( ViewportClient
+                                            , View
+                                            , Path
+                                            , PointerState.ViewportX
+                                            , PointerState.ViewportY
+                                            , PickingRadius
+                                            , PickedVertices
+                                            , PickedHandles
+                                            , EditonModeToPickingFlags() );
+                            }
+                        }
+
+                        return FArianeObject::ETraversalReturnValue::Continue;
+                    } );
+            }
+
+            // Link or Unlink segment handles
+            if( ( EditionMode == EArianePathEditToolEditionMode::SegmentHandle ) &&  ( PickedVertices.Num() == 1 ) )
+            {
+                FArianeVertex* Vertex = PickedVertices[0];
+
+                //-------------- undo ---------------//
+                GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.transaction.align-point-selection","Align Point Selection"));
+                Image->Modify();
+
+                Vertex->SetHandleAligned( Vertex->IsHandleAligned() ? false : true );
+
+                GetToolManager()->EndUndoTransaction();
+            }
+            // Else, save point coordinates before changing them
+            else
+            {
+                switch( EditionMode )
+                {
+                    case EArianePathEditToolEditionMode::VertexHandle :
+                        GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-vertex-handles","Edit Vertex Handles"));
+                        Image->Modify();
+                    break;
+
+                    case EArianePathEditToolEditionMode::Vertex :
+                    {
+                        GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-vertices","Edit Vertices"));
+
+                        Image->Modify();
+
+                        TArray<FArianeSegment*> AlteredSegments;
+
+                        // static call
+                        FArianeVertex::ArrayToSegmentArray( PickedVertices, AlteredSegments, false );
+                        // static call
+                        BuildSegmentAdjustments( DrawingLayer, AlteredSegments, SegmentAdjustments );
+
+                        // Control points must move with the point. Store them in the iPickedHandleArray
+                        for( FArianeVertex* Vertex : PickedVertices )
+                        {
+                            for( const FArianeSegmentID& SegmentID : Vertex->GetSegments() )
+                            {
+                                FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment( Image );
+
+                                if( Segment->GetClass() == FArianeSegmentCubic::StaticClass() )
+                                {
+                                    FArianeSegmentCubic* CubicSegment = static_cast<FArianeSegmentCubic*>(Segment);
+                                    FArianeHandleSegment* Handle = CubicSegment->GetHandle( Vertex );
+
+                                    PickedHandles.Add( Handle );
+                                }
                             }
                         }
                     }
+                    break;
+
+                    case EArianePathEditToolEditionMode::SegmentHandle :
+                        GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-handles","Edit Handles"));
+                        Image->Modify();
+                    break;
+
+                    default:
+                    break;
                 }
-                break;
-
-                case EArianePathEditToolEditionMode::SegmentHandle :
-                    GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-handles","Edit Handles"));
-                    DrawingLayer->GetImage()->Modify();
-                break;
-
-                default:
-                break;
             }
         }
 
@@ -658,7 +664,7 @@ UArianeEditorPathEditTool::OnMouseDrag( FEditorViewportClient* ViewportClient
                 {
                     FArianeVertex *Vertex = PickedVertices[i];
                     FPointDisplacement& PointDisplacement = PickedVertexDisplacements[i];
-UE_LOG(LogTemp, Warning, TEXT("UArianeEditorPathEditTool::DisplacePoint - WorkingImage=%p Image=%p"), Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer())->GetImage(), Vertex->GetOwner()->GetImage());
+
                     DisplacePoint( Vertex
                                  , PointDisplacement
                                  , Vertex->GetOwner()->GetTransform()

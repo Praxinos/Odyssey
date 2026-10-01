@@ -101,6 +101,7 @@ void FArianeImageExecutionToken::Execute( const FMovieSceneContext& Context
 }
 
 FArianeImageMovieSceneEvalTemplate::FArianeImageMovieSceneEvalTemplate()
+    : Section ( nullptr )
 {
 }
 
