@@ -106,10 +106,6 @@ public:
 
     UPROPERTY( EditAnywhere
              , Category = PathDrawingTool )
-    bool bShowGrid;
-
-    UPROPERTY( EditAnywhere
-             , Category = PathDrawingTool )
     UMaterialInterface* MaterialInterface;
 
 

@@ -36,7 +36,6 @@ UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
     , bPressureSensitivity( false )
     , LineType ( EArianePathLineType::Flat )
     , SegmentType ( EArianeEditorPathDrawingToolSegmentType::CubicBezier )
-    , bShowGrid ( true )
     , MaterialInterface ( nullptr )
     , EditedPath(nullptr)
     , Cursor( EMouseCursor::Type::Crosshairs )
@@ -206,7 +205,7 @@ void
 //UArianeEditorTool::OnTick(float DeltaTime)
 UArianeEditorPathDrawingTool::Render(IToolsContextRenderAPI* RenderAPI)
 {
-    if  ( bShowGrid )
+    if  ( Editor->GetShowGrid() )
     {
         UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 

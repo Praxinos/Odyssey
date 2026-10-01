@@ -242,6 +242,7 @@ public:
     void SetCurrentPainting3DComponent( UArianePainting3DComponent* InPainting3DComponent );
     EArianeLayerDrawingOrientation GetLayerDrawingOrientation( UArianeLayerDrawing* DrawingLayer );
     EArianeEditorDrawingCoordinateSystem GetDrawingCoordinateSystem();
+    bool GetShowGrid() const;
 
     static FClipboard& GetClipboard();
 
@@ -303,4 +304,5 @@ protected:
     FArianeEditorHUD::FDrawingFlags HUDDrawingFlags;
     EArianeEditorDrawingOrientation DrawingOrientation;
     EArianeEditorDrawingCoordinateSystem DrawingCoordinateSystem;
+    bool bShowGrid;
 };

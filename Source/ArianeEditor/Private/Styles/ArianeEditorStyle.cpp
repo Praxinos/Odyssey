@@ -156,6 +156,9 @@ FArianeEditorStyle::Init()
         );
     }
 
+    // Ariane Show Grid
+    Set( "ArianeEditor.TopBar.Grid64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/grid_tool", Icon64x64 ) );
+
     // Ariane Editor Drawing Orientation
     Set( "ArianeEditor.DrawingOrientation.View20", new IMAGE_BRUSH_SVG( "ArianeEditor/drawing_orientation_view", Icon20x20 ) );
     Set( "ArianeEditor.DrawingOrientation.LayerXY20", new IMAGE_BRUSH_SVG( "ArianeEditor/drawing_orientation_xy", Icon20x20 ) );

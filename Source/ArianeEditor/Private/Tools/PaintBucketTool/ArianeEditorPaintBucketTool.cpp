@@ -41,7 +41,6 @@ UArianeEditorPaintBucketTool::UArianeEditorPaintBucketTool()
     , Graph( new FArianeGraph() )
     , PickedCycle( nullptr )
     , bGraphNeedsUpdate ( true )
-    , bShowGrid ( true )
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PaintBucket64");
 
@@ -310,7 +309,7 @@ UArianeEditorPaintBucketTool::ExtendContextMenu( FMenuBuilder& menu )
 void
 UArianeEditorPaintBucketTool::Render(IToolsContextRenderAPI* RenderAPI)
 {
-    if  ( bShowGrid )
+    if  ( Editor->GetShowGrid() )
     {
         UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 

@@ -66,6 +66,7 @@ FArianeEditor::FArianeEditor( FArianeEditorViewportToolkit* iToolkit )
     , ColorType ( EOdysseyPainterEditorColorType::Raw )
     , DrawingOrientation ( EArianeEditorDrawingOrientation::View )
     , DrawingCoordinateSystem ( EArianeEditorDrawingCoordinateSystem::Local )
+    , bShowGrid(true)
 {
     HUDDrawingFlags.Mode = FArianeEditorHUD::EMode::Object;
 
@@ -122,6 +123,11 @@ EArianeEditorDrawingCoordinateSystem
 FArianeEditor::GetDrawingCoordinateSystem()
 {
     return DrawingCoordinateSystem;
+}
+
+bool FArianeEditor::GetShowGrid() const
+{
+    return bShowGrid;
 }
 
 EArianeLayerDrawingOrientation
@@ -334,6 +340,33 @@ FArianeEditor::ExtendToolbarToolParameters( UToolMenu* iToolMenu )
             LOCTEXT("ariane-top-tab-.clear", "Clear selected Painting3D actors."),
             FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Clear32"),
             EUserInterfaceActionType::Button
+        )
+    );
+
+    FToolMenuSection& showGridSection = iToolMenu->AddSection("ShowGrid");
+
+    clearCanvasSection.AddEntry(
+        FToolMenuEntry::InitToolBarButton(
+            "ShowGrid",
+            FUIAction(
+                FExecuteAction::CreateLambda(
+                    [this]()
+                    {
+                        bShowGrid = !bShowGrid;
+                    }
+                ),
+                FCanExecuteAction(),
+                FIsActionChecked::CreateLambda(
+                    [this]()
+                    {
+                        return bShowGrid;
+                    }
+                )
+            ),
+            FText(),
+            LOCTEXT("ariane-show-grid-toggle", "Show Grid"),
+            FSlateIcon("ArianeEditorStyle", "ArianeEditor.TopBar.Grid64"),
+            EUserInterfaceActionType::ToggleButton
         )
     );
 

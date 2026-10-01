@@ -104,10 +104,6 @@ public:
 
     UPROPERTY( EditAnywhere
              , Category = PrimitiveDrawingTool )
-    bool bShowGrid;
-
-    UPROPERTY( EditAnywhere
-             , Category = PrimitiveDrawingTool )
     UMaterialInterface* MaterialInterface;
 
     //UPROPERTY( EditAnywhere

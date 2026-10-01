@@ -117,7 +117,6 @@ protected:
     FArianeGraph::FCycle* PickedCycle;
     bool bGraphNeedsUpdate;
     FTSTicker::FDelegateHandle CameraMoveHandle;
-    bool bShowGrid;
 };
 
 // define bitwise op
