@@ -165,16 +165,23 @@ FOdysseyImportTexturesParameters::GetTextureScaledSize(int iSourceTextureIndex) 
     {
         case EOdysseyImportTextureScaling::None: break;
 
-        case EOdysseyImportTextureScaling::Scale:
+        case EOdysseyImportTextureScaling::Full:
         {
-            size = FVector2D(mDestinationWidth, mDestinationHeight);
+            if( ScalingFullFit )
+            {
+                float ratio = FMath::Min( float( mDestinationWidth ) / sourceTexture->GetSurfaceWidth(), float( mDestinationHeight ) / sourceTexture->GetSurfaceHeight() );
+                size = FVector2D( sourceTexture->GetSurfaceWidth() * ratio, sourceTexture->GetSurfaceHeight() * ratio );
+            }
+            else
+            {
+                size = FVector2D( mDestinationWidth, mDestinationHeight );
+            }
         }
         break;
 
-        case EOdysseyImportTextureScaling::ScaleAndFit:
+        case EOdysseyImportTextureScaling::Custom:
         {
-            float ratio = FMath::Min(float(mDestinationWidth) / sourceTexture->GetSurfaceWidth(), float(mDestinationHeight) / sourceTexture->GetSurfaceHeight());
-            size = FVector2D(sourceTexture->GetSurfaceWidth() * ratio, sourceTexture->GetSurfaceHeight() * ratio);
+            size = FVector2D( sourceTexture->GetSurfaceWidth() * ScalingCustomSize.X, sourceTexture->GetSurfaceHeight() * ScalingCustomSize.Y );
         }
         break;
     }
@@ -422,6 +429,18 @@ FOdysseyImportTexturesParameters::GetScaling() const
     return mScaling;
 }
 
+bool
+FOdysseyImportTexturesParameters::GetScalingFullFit() const
+{
+    return ScalingFullFit;
+}
+
+FVector2D
+FOdysseyImportTexturesParameters::GetScalingCustomSize() const
+{
+    return ScalingCustomSize;
+}
+
 EOdysseyAntiAliasing
 FOdysseyImportTexturesParameters::GetResamplingMethod() const
 {
@@ -480,6 +499,19 @@ void
 FOdysseyImportTexturesParameters::SetScaling(EOdysseyImportTextureScaling iScaling)
 {
     mScaling = iScaling;
+}
+
+void
+FOdysseyImportTexturesParameters::SetScalingFullFit( bool iFit )
+{
+    ScalingFullFit = iFit;
+}
+
+void
+FOdysseyImportTexturesParameters::SetScalingCustomSize( FVector2D iSize )
+{
+    ScalingCustomSize.X = FMath::Max( iSize.X, .01f );
+    ScalingCustomSize.Y = FMath::Max( iSize.Y, .01f );
 }
 
 void

@@ -7,6 +7,7 @@
 #include "Widgets/SCompoundWidget.h"
 
 #include "OdysseyImportTexturesParameters.h"
+
 class SOdysseyImportTexturePositioning : public SCompoundWidget
 {
 public:
@@ -29,10 +30,27 @@ private:
     int32 GetScaling() const;
     void OnScalingEnumSelectionChanged(int32, ESelectInfo::Type);
 
+    int32 GetScalingOptionsWidgetIndex() const;
+    EVisibility GetScalingOptionsVisibility() const;
+
+    ECheckBoxState IsScalingFullFitChecked() const;
+    void OnScalingFullFitChanged( ECheckBoxState iNewState );
+
+    ECheckBoxState IsScalingCustomLockChecked() const;
+    void OnScalingCustomLockChanged( ECheckBoxState iNewState );
+
+    float GetScalingCustomX() const;
+    void SetScalingCustomX( float iNewValue );
+
+    float GetScalingCustomY() const;
+    void SetScalingCustomY( float iNewValue );
+
     int32 GetResamplingMethod() const;
     void OnResamplingMethodEnumSelectionChanged(int32, ESelectInfo::Type);
 
 private:
     FOdysseyImportTexturesParameters* mData;
     FSimpleDelegate mOnChanged;
+
+    bool ScalingCustomLock = true;
 };

@@ -852,6 +852,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyImportTexturePositioning.Alignment.Bottom", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-bottom", mIcon16x16));
     Set( "OdysseyImportTexturePositioning.Alignment.BottomRight", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-bottomRight", mIcon16x16));
 
+    Set( "OdysseyImportTexturePositioning.Scaling.Lock", new IMAGE_BRUSH_SVG( "PainterEditor/Import/scaling-lock", mIcon16x16 ) );
+    Set( "OdysseyImportTexturePositioning.Scaling.Unlock", new IMAGE_BRUSH_SVG( "PainterEditor/Import/scaling-unlock", mIcon16x16 ) );
 
     SetCoreContentRoot( FPaths::EngineContentDir() / TEXT( "Slate" ) );
     {
