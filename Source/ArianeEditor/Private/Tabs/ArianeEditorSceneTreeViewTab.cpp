@@ -56,6 +56,10 @@ TSharedPtr<SWidget>
 FArianeEditorSceneTreeViewTab::CreateWidget()
 {
     return SNew(SWidgetSwitcher)
+        .IsEnabled_Lambda([this]()
+        {
+            return (Editor->GetCurrentPainting3DComponent() != nullptr);
+        })
         .WidgetIndex(this, &FArianeEditorSceneTreeViewTab::WidgetIndex)
         +SWidgetSwitcher::Slot()
         [

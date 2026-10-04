@@ -40,7 +40,11 @@ FArianeEditorColorSelectorTab::GetId() const
 TSharedPtr<SWidget>
 FArianeEditorColorSelectorTab::CreateWidget()
 {
-    return SNew( SArianeEditorColorSelectorPanel, Editor );
+    return SNew( SArianeEditorColorSelectorPanel, Editor )
+           .IsEnabled_Lambda([this]()
+           {
+                return (Editor->GetCurrentPainting3DComponent() != nullptr);
+           });
 }
 
 void

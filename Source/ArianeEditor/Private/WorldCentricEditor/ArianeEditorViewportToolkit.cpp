@@ -531,7 +531,11 @@ FArianeEditorViewportToolkit::OnEditorClose()
 TSharedPtr<SWidget>
 FArianeEditorViewportToolkit::GetInlineContent() const
 {
-    return SNew(SArianeEditorMasterPanel, const_cast<FArianeEditor*>( Editor.Get()) );
+    return SNew(SArianeEditorMasterPanel, const_cast<FArianeEditor*>( Editor.Get()) )
+           .IsEnabled_Lambda([this]()
+           {
+                return (Editor->GetCurrentPainting3DComponent() != nullptr);
+           });
 }
 
 

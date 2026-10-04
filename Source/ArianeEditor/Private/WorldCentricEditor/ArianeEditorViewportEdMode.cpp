@@ -6,16 +6,21 @@
 #include "ArianeEditorViewportToolkit.h"
 #include "ArianeEditorTool.h"
 #include "ArianeEditor.h"
+#include "ArianePainting3DActor.h"
 // Odyssey
 #include "IOdysseyStylusInputModule.h"
 // Unreal
+#include "CanvasTypes.h"
+#include "CanvasItem.h"
 #include "EdMode.h"
 #include "EditorModeManager.h"
 #include "LevelEditorViewport.h"
 #include "SEditorViewport.h"
+#include "Selection.h"
 #include "Slate/SceneViewport.h"
 #include "GameFramework/InputDeviceSubsystem.h"
 #include "GenericPlatform/GenericPlatformInputDeviceMapper.h"
+
 
 /* Gary
 
@@ -87,7 +92,7 @@ FArianeEditorViewportEdMode::Tick( FEditorViewportClient* ViewportClient, float 
     ViewportToolkit->GetEditor().Tick( DeltaTime );
 }
 
-void FArianeEditorViewportEdMode::Render(const FSceneView* View,FViewport* Viewport,FPrimitiveDrawInterface* PDI)
+void FArianeEditorViewportEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI)
 {
 }
 
@@ -617,20 +622,71 @@ FArianeEditorViewportEdMode::GetEditor() const
 }
 */
 
-#ifdef unused
 void
 FArianeEditorViewportEdMode::DrawHUD ( FEditorViewportClient* ViewportClient
                                      , FViewport* Viewport
                                      , const FSceneView* View
                                      , FCanvas* Canvas )
 {
-    TSharedPtr<FArianeEditorViewportToolkit> viewportToolkit = GetArianeEditorViewportToolkit();
+    FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);
+
+    /*TSharedPtr<FArianeEditorViewportToolkit> viewportToolkit = GetArianeEditorViewportToolkit();
 
     if( viewportToolkit->GetEditor().GetCurrentTool() )
     {
         UArianeEditorTool* currenTool = viewportToolkit->GetEditor().GetCurrentTool();
 
         currenTool->DrawHUD( ViewportClient, Viewport, View, Canvas  );
+    }*/
+
+    bool bHasValidSelection = false;
+
+    USelection* SelectedActors = GEditor->GetSelectedActors();
+
+    for (FSelectionIterator It(*SelectedActors); It; ++It)
+    {
+        AArianePainting3DActor* Actor = Cast<AArianePainting3DActor>(*It);
+        if (Actor)
+        {
+            bHasValidSelection = true;
+            break;
+        }
+    }
+
+    if (!bHasValidSelection)
+    {
+        FText Message = LOCTEXT( "SelectArianeActor", "Please select an Ariane Actor in your Outliner" );
+
+        UFont* Font = GEngine->GetLargeFont();
+        FCanvasTextItem TextItem( FVector2D::ZeroVector,
+                                  Message,
+                                  Font,
+                                  FLinearColor::Yellow );
+
+        TextItem.EnableShadow( FLinearColor::Black );
+
+        int32 textSizeX = 0;
+        int32 textSizeY = 0;
+        Font->GetStringHeightAndWidth( *Message.ToString(), textSizeY, textSizeX );
+
+        float PaddingX = 10.0f;
+        float PaddingY = 6.0f;
+
+        const FVector2D BoxSize( PaddingX * 2.0f + textSizeX, PaddingY * 2.0f + textSizeY);
+
+        const FVector2D ViewportSize( Viewport->GetSizeXY().X, Viewport->GetSizeXY().Y );
+
+        const FVector2D BoxPosition( (ViewportSize.X - BoxSize.X) * 0.5f, 60.0f );
+
+        // Background
+        FCanvasTileItem Background( BoxPosition, BoxSize, FLinearColor(0.f, 0.f, 0.f, 0.85f) );
+
+        Canvas->DrawItem(Background);
+
+        // Text
+        TextItem.Position = FVector2D( BoxPosition.X + PaddingX, BoxPosition.Y + PaddingY );
+
+        Canvas->DrawItem(TextItem);
     }
 
 /* Gary
@@ -652,6 +708,5 @@ FArianeEditorViewportEdMode::DrawHUD ( FEditorViewportClient* ViewportClient
     GetEditor()->HUDSystem()->Draw(params);
 */
 }
-#endif
 
 #undef LOCTEXT_NAMESPACE

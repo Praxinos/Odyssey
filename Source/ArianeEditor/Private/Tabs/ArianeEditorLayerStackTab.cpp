@@ -42,7 +42,11 @@ FArianeEditorLayerStackTab::GetId() const
 TSharedPtr<SWidget>
 FArianeEditorLayerStackTab::CreateWidget()
 {
-    return SNew(SArianeEditorLayerStackPanel, Editor );
+    return SNew(SArianeEditorLayerStackPanel, Editor )
+           .IsEnabled_Lambda([this]()
+           {
+                return (Editor->GetCurrentPainting3DComponent() != nullptr);
+           });
 }
 
 void
