@@ -6,19 +6,19 @@
 
 #include "CoreMinimal.h"
 #include "Evaluation/MovieSceneEvalTemplate.h"
-#include "ArianeImageMovieSceneSection.h"
+#include "ArianeDrawingMovieSceneSection.h"
 
-#include "ArianeImageMovieSceneEvalTemplate.generated.h"
+#include "ArianeDrawingMovieSceneEvalTemplate.generated.h"
 
-struct FArianeImageExecutionToken : IMovieSceneExecutionToken
+struct FArianeDrawingExecutionToken : IMovieSceneExecutionToken
 {
-    const FArianeImageKeyData* KeyData;
-    const FArianeImageKeyData* NextKeyData;
+    const FArianeDrawingKeyData* KeyData;
+    const FArianeDrawingKeyData* NextKeyData;
     float T;
     FMovieSceneEvaluationOperand StoredOperand;
 
-    FArianeImageExecutionToken( const FArianeImageKeyData* InKeyData
-                              , const FArianeImageKeyData* InNextKeyData
+    FArianeDrawingExecutionToken( const FArianeDrawingKeyData* InKeyData
+                              , const FArianeDrawingKeyData* InNextKeyData
                               , float InT
                               , const FMovieSceneEvaluationOperand& InOperand );
     virtual void Execute( const FMovieSceneContext& Context
@@ -28,16 +28,16 @@ struct FArianeImageExecutionToken : IMovieSceneExecutionToken
 };
 
 USTRUCT()
-struct ARIANE_API FArianeImageMovieSceneEvalTemplate : public FMovieSceneEvalTemplate
+struct ARIANE_API FArianeDrawingMovieSceneEvalTemplate : public FMovieSceneEvalTemplate
 {
     GENERATED_BODY()
 
-    FArianeImageMovieSceneEvalTemplate();
-    FArianeImageMovieSceneEvalTemplate( const UArianeImageMovieSceneSection* InSection );
+    FArianeDrawingMovieSceneEvalTemplate();
+    FArianeDrawingMovieSceneEvalTemplate( const UArianeDrawingMovieSceneSection* InSection );
 
     virtual UScriptStruct& GetScriptStructImpl() const override;
 
-    // executes at each frame to  apply the correct ArianeImage to the Layer
+    // executes at each frame to  apply the correct ArianeDrawing to the Layer
     virtual void Evaluate( const FMovieSceneEvaluationOperand& Operand
                          , const FMovieSceneContext& Context
                          , const FPersistentEvaluationData& PersistentData
@@ -45,5 +45,5 @@ struct ARIANE_API FArianeImageMovieSceneEvalTemplate : public FMovieSceneEvalTem
 
 protected:
     UPROPERTY()
-    const UArianeImageMovieSceneSection* Section;
+    const UArianeDrawingMovieSceneSection* Section;
 };

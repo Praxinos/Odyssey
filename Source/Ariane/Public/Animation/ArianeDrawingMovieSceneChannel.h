@@ -12,30 +12,30 @@
 #include "ScopedTransaction.h"
 #include "Channels/MovieSceneChannelData.h"
 // Ariane Headers
-#include "ArianeImageKeyData.h"
-#include "ArianeImage.h"
+#include "ArianeDrawingKeyData.h"
+#include "ArianeDrawing.h"
 
-#include "ArianeImageMovieSceneChannel.generated.h"
+#include "ArianeDrawingMovieSceneChannel.generated.h"
 
 USTRUCT()
-struct ARIANE_API FArianeImageMovieSceneChannel : public FMovieSceneChannel
+struct ARIANE_API FArianeDrawingMovieSceneChannel : public FMovieSceneChannel
 {
     GENERATED_BODY()
 
-    using CurveValueType = FArianeImageKeyData;
+    using CurveValueType = FArianeDrawingKeyData;
 
-    TMovieSceneChannelData<FArianeImageKeyData> GetData()
+    TMovieSceneChannelData<FArianeDrawingKeyData> GetData()
     {
-        return TMovieSceneChannelData<FArianeImageKeyData>(&Times, &Values, this, &KeyHandles);
+        return TMovieSceneChannelData<FArianeDrawingKeyData>(&Times, &Values, this, &KeyHandles);
     }
 
-    TMovieSceneChannelData<const FArianeImageKeyData> GetData() const
+    TMovieSceneChannelData<const FArianeDrawingKeyData> GetData() const
     {
-        return TMovieSceneChannelData<const FArianeImageKeyData>(&Times, &Values);
+        return TMovieSceneChannelData<const FArianeDrawingKeyData>(&Times, &Values);
     }
 
     // Gets the key <= time
-    bool Evaluate(FFrameTime InTime, FArianeImageKeyData& OutValue) const;
+    bool Evaluate(FFrameTime InTime, FArianeDrawingKeyData& OutValue) const;
 
     // Implements FMovieSceneChannel::GetKeys
     virtual void GetKeys(const TRange<FFrameNumber>& WithinRange, TArray<FFrameNumber>* OutKeyTimes, TArray<FKeyHandle>* OutKeyHandles) override;
@@ -60,8 +60,8 @@ struct ARIANE_API FArianeImageMovieSceneChannel : public FMovieSceneChannel
     // Implements FMovieSceneChannel::Offset
     virtual void Offset(FFrameNumber DeltaPosition) override;
 
-    void SetDefault(FArianeImageKeyData InDefault) { DefaultValue = MoveTemp(InDefault); }
-    TOptional<FArianeImageKeyData> GetDefault() const { return DefaultValue; }
+    void SetDefault(FArianeDrawingKeyData InDefault) { DefaultValue = MoveTemp(InDefault); }
+    TOptional<FArianeDrawingKeyData> GetDefault() const { return DefaultValue; }
     void RemoveDefault() { DefaultValue.Reset(); }
     bool HasDefault() const { return DefaultValue.IsSet(); }
 
@@ -73,10 +73,10 @@ private:
     TArray<FFrameNumber> Times;
 
     UPROPERTY(meta = (KeyValues))
-    TArray<FArianeImageKeyData> Values;
+    TArray<FArianeDrawingKeyData> Values;
 
     FMovieSceneKeyHandleMap KeyHandles;
 
 private:
-    TOptional<FArianeImageKeyData> DefaultValue;
+    TOptional<FArianeDrawingKeyData> DefaultValue;
 };

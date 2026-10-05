@@ -11,8 +11,8 @@
 #include "ArianeEditor.h"
 // Ariane Headers
 #include "ArianeLayerStack.h"
-#include "ArianeLayerDrawing.h"
-#include "ArianeImage.h"
+#include "ArianeLayerVector.h"
+#include "ArianeDrawing.h"
 #include "ArianePainting3DComponent.h"
 // Unreal Headers
 #include "Widgets/Layout/SWidgetSwitcher.h"
@@ -90,11 +90,11 @@ FArianeEditorSceneTreeViewTab::GetRootGroup() const
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            return DrawingLayer->GetImage()->GetRootGroup();
+            return VectorLayer->GetDrawing()->GetRootGroup();
         }
     }
 

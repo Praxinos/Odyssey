@@ -21,7 +21,7 @@ class UArianePainting3DComponent;
 class UCanvasRenderTarget2D;
 struct FArianeVertex;
 class FEditorViewportClient;
-class UArianeLayerDrawing;
+class UArianeLayerVector;
 
 UCLASS()
 class ARIANEEDITOR_API UArianeEditorPaintBucketTool : public UArianeEditorTool

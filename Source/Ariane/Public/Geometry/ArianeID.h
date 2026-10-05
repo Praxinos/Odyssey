@@ -14,8 +14,8 @@ struct FArianeObject;
 struct FArianeSegment;
 struct FArianeVertex;
 struct FArianeTag;
-class UArianeLayerDrawing;
-class UArianeImage;
+class UArianeLayerVector;
+class UArianeDrawing;
 
 USTRUCT(BlueprintType)
 struct ARIANE_API FArianeObjectID
@@ -27,7 +27,7 @@ struct ARIANE_API FArianeObjectID
         FArianeObjectID();
         FArianeObjectID( FArianeObject* Object );
 
-        FArianeObject* GetObject( UArianeImage* Image );
+        FArianeObject* GetObject( UArianeDrawing* Drawing );
         FGuid GetGuid() const;
 
     protected:
@@ -38,7 +38,7 @@ struct ARIANE_API FArianeObjectID
         EArianeAllocationModel AllocationModel;
 
     protected:
-        FGuid CachedImageAllocatorGuid;
+        FGuid CachedDrawingAllocatorGuid;
         FArianeObject* CachedObject;
 };
 
@@ -52,7 +52,7 @@ struct ARIANE_API FArianeVertexID
         FArianeVertexID();
         FArianeVertexID( FArianeVertex* InVertex );
 
-        FArianeVertex* GetVertex( UArianeImage* Image );
+        FArianeVertex* GetVertex( UArianeDrawing* Drawing );
 
     protected:
         UPROPERTY( EditAnywhere )
@@ -80,7 +80,7 @@ struct ARIANE_API FArianeSegmentID
         FArianeSegmentID();
         FArianeSegmentID( FArianeSegment* InSegment );
 
-        FArianeSegment* GetSegment( UArianeImage* Image );
+        FArianeSegment* GetSegment( UArianeDrawing* Drawing );
 
     public:
         UPROPERTY( EditAnywhere )
@@ -107,7 +107,7 @@ struct ARIANE_API FArianeTagID
         FArianeTagID();
         FArianeTagID( FArianeTag* InTag );
 
-        FArianeTag* GetTag( UArianeImage* Image );
+        FArianeTag* GetTag( UArianeDrawing* Drawing );
 
     public:
         UPROPERTY( EditAnywhere )

@@ -27,8 +27,8 @@
 #include "ArianeGroup.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
-#include "ArianeImage.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeLayerFolder.h"
 #include "ArianePainting3DActor.h"
 // Unreal
@@ -156,39 +156,39 @@ bool FArianeEditor::GetShowGrid() const
     return bShowGrid;
 }
 
-EArianeLayerDrawingOrientation
-FArianeEditor::GetLayerDrawingOrientation( UArianeLayerDrawing* DrawingLayer )
+EArianeLayerVectorDrawingOrientation
+FArianeEditor::GetLayerDrawingOrientation( UArianeLayerVector* VectorLayer )
 {
     if( ( DrawingOrientation == EArianeEditorDrawingOrientation::XY )
      || ( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerDefined )
-       && ( DrawingLayer->GetDrawingOrientation() ==  EArianeLayerDrawingOrientation::XY ) ) )
+       && ( VectorLayer->GetDrawingOrientation() ==  EArianeLayerVectorDrawingOrientation::XY ) ) )
     {
-        return EArianeLayerDrawingOrientation::XY;
+        return EArianeLayerVectorDrawingOrientation::XY;
     }
 
     if( ( DrawingOrientation == EArianeEditorDrawingOrientation::YZ )
      || ( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerDefined )
-       && ( DrawingLayer->GetDrawingOrientation() ==  EArianeLayerDrawingOrientation::YZ ) ) )
+       && ( VectorLayer->GetDrawingOrientation() ==  EArianeLayerVectorDrawingOrientation::YZ ) ) )
     {
-        return EArianeLayerDrawingOrientation::YZ;
+        return EArianeLayerVectorDrawingOrientation::YZ;
     }
 
     if( ( DrawingOrientation == EArianeEditorDrawingOrientation::ZX )
      || ( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerDefined )
-       && ( DrawingLayer->GetDrawingOrientation() ==  EArianeLayerDrawingOrientation::ZX ) ) )
+       && ( VectorLayer->GetDrawingOrientation() ==  EArianeLayerVectorDrawingOrientation::ZX ) ) )
     {
-        return EArianeLayerDrawingOrientation::ZX;
+        return EArianeLayerVectorDrawingOrientation::ZX;
     }
 
     if( ( DrawingOrientation == EArianeEditorDrawingOrientation::View )
      || ( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerDefined )
-       && ( DrawingLayer->GetDrawingOrientation() ==  EArianeLayerDrawingOrientation::View ) ) )
+       && ( VectorLayer->GetDrawingOrientation() ==  EArianeLayerVectorDrawingOrientation::View ) ) )
     {
-        return EArianeLayerDrawingOrientation::View;
+        return EArianeLayerVectorDrawingOrientation::View;
     }
 
     // should not de reached anyways
-    return EArianeLayerDrawingOrientation::View;
+    return EArianeLayerVectorDrawingOrientation::View;
 }
 
 void
@@ -291,16 +291,16 @@ FArianeEditor::ClearPainting3DComponents()
 
         if( Painting3DComponent )
         {
-            UArianeLayerDrawing* CurrentDrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+            UArianeLayerVector* CurrentVectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-            if( CurrentDrawingLayer )
+            if( CurrentVectorLayer )
             {
                 if( GEditor->IsTransactionActive() )
                 {
-                    CurrentDrawingLayer->GetImage()->Modify();
+                    CurrentVectorLayer->GetDrawing()->Modify();
                 }
 
-                CurrentDrawingLayer->GetImage()->ResetHierarchy();
+                CurrentVectorLayer->GetDrawing()->ResetHierarchy();
             }
 
             Painting3DComponent->Update( false );
@@ -718,10 +718,10 @@ FArianeEditor::AddPainting3DActor()
     UArianePainting3DComponent* Painting3DComponent = Painting3DActor->GetPainting3DComponent();
 
     // Add a default layer
-    UArianeLayerDrawing* DrawingLayer = Painting3DComponent->GetLayerStack()->CreateDrawingLayer( nullptr, true );
+    UArianeLayerVector* VectorLayer = Painting3DComponent->GetLayerStack()->CreateVectorLayer( nullptr, true );
     // And select it
     Painting3DComponent->GetLayerStack()->ClearLayerSelection( false );
-    Painting3DComponent->GetLayerStack()->SelectLayer( DrawingLayer, true );
+    Painting3DComponent->GetLayerStack()->SelectLayer( VectorLayer, true );
 
     GEditor->EndTransaction();
 
@@ -884,17 +884,17 @@ FArianeEditor::UngroupSelectedGroups()
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
-            UArianeImage* Image = DrawingLayer->GetImage();
+            FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
+            UArianeDrawing* Drawing = VectorLayer->GetDrawing();
 
             // for undos in case a transaction is opened by the caller
-            Image->Modify();
+            Drawing->Modify();
 
-            for( FArianeObject* SelectedObject : Image->GetSelectedObjects() )
+            for( FArianeObject* SelectedObject : Drawing->GetSelectedObjects() )
             {
                 if( SelectedObject != RootGroup )
                 {
@@ -924,24 +924,24 @@ FArianeEditor::GroupSelectedObjects( const FName& NewGroupName )
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
             // for undos in case a transaction is opened by the caller
-            DrawingLayer->GetImage()->Modify();
+            VectorLayer->GetDrawing()->Modify();
 
-            FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
+            FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
             FArianeObject* FosterParent = RootGroup;
             TArray<FArianeObject*> ObjectsToRegroup;
 
             if( RootGroup->IsSelected() == false )
             {
-                DrawingLayer->GetImage()->GetSelectedTrees( ObjectsToRegroup );
+                VectorLayer->GetDrawing()->GetSelectedTrees( ObjectsToRegroup );
 
                 if( ObjectsToRegroup.Num() >= 2 )
                 {
-                    FArianeGroup* NewGroup = DrawingLayer->GetImage()->AllocGroup( NewGroupName, EArianeAllocationModel::InstancedStruct );
+                    FArianeGroup* NewGroup = VectorLayer->GetDrawing()->AllocGroup( NewGroupName, EArianeAllocationModel::InstancedStruct );
 
                     FosterParent = ObjectsToRegroup[0]->GetParent();
 
@@ -981,21 +981,21 @@ FArianeEditor::SelectAllObjects()
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
+            FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
 
             // for undos in case a transaction is opened by the caller
-            DrawingLayer->GetImage()->Modify();
+            VectorLayer->GetDrawing()->Modify();
 
             FArianeObject::Traverse( RootGroup
-                                   , [ DrawingLayer ] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+                                   , [ VectorLayer ] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
                 {
                     if( Object->IsSelected() == false )
                     {
-                        DrawingLayer->GetImage()->SelectObject( Object );
+                        VectorLayer->GetDrawing()->SelectObject( Object );
                     }
 
                     return FArianeObject::ETraversalReturnValue::Continue;
@@ -1015,22 +1015,22 @@ FArianeEditor::DeleteSelectedObjects()
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
+            FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
             TArray<FArianeObject*> ObjectsToDelete;
 
             // for undos in case a transaction is opened by the caller
-            DrawingLayer->GetImage()->Modify();
+            VectorLayer->GetDrawing()->Modify();
 
             if( RootGroup->IsSelected() == false )
             {
-                DrawingLayer->GetImage()->GetSelectedTrees( ObjectsToDelete );
+                VectorLayer->GetDrawing()->GetSelectedTrees( ObjectsToDelete );
 
                 // We need to clear the selection because ObjectsToDelete may not contain all selected objects
-                DrawingLayer->GetImage()->ClearObjectSelection();
+                VectorLayer->GetDrawing()->ClearObjectSelection();
 
                 for( FArianeObject* ObjectToDelete : ObjectsToDelete )
                 {
@@ -1049,7 +1049,7 @@ FArianeEditor::ConvertPrimitives( UArianePainting3DComponent* Painting3DComponen
 {
     for( FArianePrimitive* PrimitiveToConvert : PrimitivesToConvert )
     {
-        UArianeImage *Image = PrimitiveToConvert->GetImage();
+        UArianeDrawing *Image = PrimitiveToConvert->GetDrawing();
         TArray<FArianeObject*> Children;
         FArianePath* Path;
 
@@ -1089,18 +1089,18 @@ FArianeEditor::ConvertSelectedPrimitives()
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
             TArray<FArianePrimitive*> PrimitivesToConvert;
 
             // for undos in case a transaction is opened by the caller
-            DrawingLayer->GetImage()->Modify();
+            VectorLayer->GetDrawing()->Modify();
 
-            PrimitivesToConvert.Reserve( DrawingLayer->GetImage()->GetSelectedObjects().Num() );
+            PrimitivesToConvert.Reserve( VectorLayer->GetDrawing()->GetSelectedObjects().Num() );
 
-            for( FArianeObject* SelectedObject : DrawingLayer->GetImage()->GetSelectedObjects() )
+            for( FArianeObject* SelectedObject : VectorLayer->GetDrawing()->GetSelectedObjects() )
             {
                 if( SelectedObject->HasBaseClass( FArianePrimitive::StaticClass() ) )
                 {
@@ -1123,19 +1123,19 @@ FArianeEditor::CopySelectedObjects()
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
             TArray<FArianeObject*> ObjectsToCopy;
 
-            DrawingLayer->GetImage()->GetSelectedTrees( ObjectsToCopy );
+            VectorLayer->GetDrawing()->GetSelectedTrees( ObjectsToCopy );
 
             if( ObjectsToCopy.Num() )
             {
                 FArianeObject::FCopyArgs CopyArgs;
 
-                CopyArgs.Image = DrawingLayer->GetImage();
+                CopyArgs.Drawing = VectorLayer->GetDrawing();
                 CopyArgs.AllocationModel = EArianeAllocationModel::OperatingSystem;
 
                 // free copied objects
@@ -1166,41 +1166,41 @@ FArianeEditor::PasteObjects()
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
             if( Clipboard.CopiedObjects.Num() )
             {
                 TArray<FArianeObject*> SelectedTrees;
-                FArianeObject* Destination = DrawingLayer->GetImage()->GetRootGroup();
+                FArianeObject* Destination = VectorLayer->GetDrawing()->GetRootGroup();
                 FArianeObject::FCopyArgs CopyArgs = FArianeObject::FCopyArgs();
 
                 // ECopyFlags::AllocByLayer means the allocation will be made as FInstancedstruct, thus saved by
                 // Unreal Engine's serialization
                 CopyArgs.Flags = FArianeObject::ECopyFlags::Rename;
                 CopyArgs.AllocationModel = EArianeAllocationModel::InstancedStruct;
-                CopyArgs.Image = DrawingLayer->GetImage();
+                CopyArgs.Drawing = VectorLayer->GetDrawing();
 
-                DrawingLayer->GetImage()->GetSelectedTrees( SelectedTrees );
+                VectorLayer->GetDrawing()->GetSelectedTrees( SelectedTrees );
 
                 Destination = ( SelectedTrees.Num() == 1 ) ? SelectedTrees[0]
-                                                           : DrawingLayer->GetImage()->GetRootGroup();
+                                                           : VectorLayer->GetDrawing()->GetRootGroup();
 
                 // for undos in case a transaction is opened by the caller
-                DrawingLayer->GetImage()->Modify();
+                VectorLayer->GetDrawing()->Modify();
 
-                DrawingLayer->GetImage()->ClearObjectSelection();
+                VectorLayer->GetDrawing()->ClearObjectSelection();
 
                 for( FArianeObject* CopiedObject : Clipboard.CopiedObjects )
                 {
                     FArianeObject* PasteObject = CopiedObject->Copy( CopyArgs );
 
-                    PasteObject->ResetImage(  DrawingLayer->GetImage() );
+                    PasteObject->ResetDrawing(  VectorLayer->GetDrawing() );
 
                     Destination->AppendChild( PasteObject );
 
-                    DrawingLayer->GetImage()->SelectObject( PasteObject );
+                    VectorLayer->GetDrawing()->SelectObject( PasteObject );
                 }
 
                 Painting3DComponent->Update( false );

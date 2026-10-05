@@ -16,7 +16,7 @@ FArianeSegment::FArianeSegment( )
     , OwnerID()
     , Vertices { FArianeVertexID(), FArianeVertexID() }
     , AllocationModel( EArianeAllocationModel::InstancedStruct )
-    , Image ( nullptr )
+    , Drawing ( nullptr )
     , BoundingBox ( FBox(ForceInit) )
     , Length ( 0.0f )
     , bInvalidated ( false )
@@ -32,7 +32,7 @@ FArianeSegment::FArianeSegment( FArianeObject* Owner
     , OwnerID( Owner )
     , Vertices { InVertex0, InVertex1 }
     , AllocationModel( InAllocationModel )
-    , Image ( Owner->GetImage() )
+    , Drawing ( Owner->GetDrawing() )
     , BoundingBox ( FBox(ForceInit) )
     , Length ( 0.0f )
     , bInvalidated ( false )
@@ -42,9 +42,9 @@ FArianeSegment::FArianeSegment( FArianeObject* Owner
 }
 
 void
-FArianeSegment::SetImage( UArianeImage* InImage )
+FArianeSegment::SetDrawing( UArianeDrawing* InDrawing )
 {
-    Image = InImage;
+    Drawing = InDrawing;
 
     FractionPoints.Empty();
     FractionSteps.Empty();
@@ -57,10 +57,10 @@ FArianeSegment::SetImage( UArianeImage* InImage )
     bAutoFractioned = true;
 }
 
-UArianeImage*
-FArianeSegment::GetImage()
+UArianeDrawing*
+FArianeSegment::GetDrawing()
 {
-    return Image;
+    return Drawing;
 }
 
 EArianeAllocationModel
@@ -95,27 +95,27 @@ FArianeSegment::PostEditUndo()
 FArianeObject*
 FArianeSegment::GetOwner()
 {
-    return OwnerID.GetObject( Image );
+    return OwnerID.GetObject( Drawing );
 }
 
 void
 FArianeSegment::Link()
 {
-    Vertices[0].GetVertex( Image )->AddSegment( this );
-    Vertices[1].GetVertex( Image )->AddSegment( this );
+    Vertices[0].GetVertex( Drawing )->AddSegment( this );
+    Vertices[1].GetVertex( Drawing )->AddSegment( this );
 }
 
 void
 FArianeSegment::Unlink()
 {
-    Vertices[0].GetVertex( Image )->RemoveSegment( this );
-    Vertices[1].GetVertex( Image )->RemoveSegment( this );
+    Vertices[0].GetVertex( Drawing )->RemoveSegment( this );
+    Vertices[1].GetVertex( Drawing )->RemoveSegment( this );
 }
 
 FArianeVertex*
 FArianeSegment::GetVertex( uint32 Index )
 {
-    return Vertices[Index].GetVertex( GetOwner()->GetImage() );
+    return Vertices[Index].GetVertex( GetOwner()->GetDrawing() );
 }
 
 void
@@ -164,13 +164,13 @@ FArianeSegment::GetIndexCache()
 FArianeVertex*
 FArianeSegment::GetOtherVertex( FArianeVertex* Vertex )
 {
-    if( ( Vertices[0].GetVertex( Image ) != Vertex ) && ( Vertices[1].GetVertex( Image ) != Vertex )  )
+    if( ( Vertices[0].GetVertex( Drawing ) != Vertex ) && ( Vertices[1].GetVertex( Drawing ) != Vertex )  )
     {
         return nullptr;
     }
 
-    return ( Vertices[0].GetVertex( Image ) == Vertex ) ? Vertices[1].GetVertex( Image )
-                                                        : Vertices[0].GetVertex( Image );
+    return ( Vertices[0].GetVertex( Drawing ) == Vertex ) ? Vertices[1].GetVertex( Drawing )
+                                                        : Vertices[0].GetVertex( Drawing );
 }
 
 const FBox&
@@ -260,11 +260,11 @@ FArianeSegment::SetFractions( const TArray<FArianePoint>& InFractionPoints
         FractionSteps.Reserve( FractionStepCount );
         Fractions.Reserve( FractionStepCount - 1 );
 
-        FFractionStep* Step0 = &FractionSteps.Emplace_GetRef( Vertices[0].GetVertex( Image )
+        FFractionStep* Step0 = &FractionSteps.Emplace_GetRef( Vertices[0].GetVertex( Drawing )
                                                             , 0
-                                                            , Vertices[0].GetVertex( Image )->GetRadius() );
+                                                            , Vertices[0].GetVertex( Drawing )->GetRadius() );
 
-        Vertices[0].GetVertex( Image )->SetPosition( FractionPoints[0].GetPosition() );
+        Vertices[0].GetVertex( Drawing )->SetPosition( FractionPoints[0].GetPosition() );
 
         for( int32 i = 1, n = 2; i < FractionPoints.Num() - 1; i++, n++ )
         {
@@ -275,11 +275,11 @@ FArianeSegment::SetFractions( const TArray<FArianePoint>& InFractionPoints
             Step0 = Step1;
         }
 
-        FFractionStep* Step1 = &FractionSteps.Emplace_GetRef( Vertices[1].GetVertex( Image )
+        FFractionStep* Step1 = &FractionSteps.Emplace_GetRef( Vertices[1].GetVertex( Drawing )
                                                             , 1
-                                                            , Vertices[1].GetVertex( Image )->GetRadius() );
+                                                            , Vertices[1].GetVertex( Drawing )->GetRadius() );
 
-        Vertices[1].GetVertex( Image )->SetPosition( FractionPoints.Last().GetPosition() );
+        Vertices[1].GetVertex( Drawing )->SetPosition( FractionPoints.Last().GetPosition() );
 
         Length += Fractions.Emplace_GetRef( Step0, Step1 ).Length;
     }
@@ -296,11 +296,11 @@ FArianeSegment::IsInvalidated()
 void
 FArianeSegment::Invalidate()
 {
-    if( OwnerID.GetObject( Image ) && ( bInvalidated == false ) )
+    if( OwnerID.GetObject( Drawing ) && ( bInvalidated == false ) )
     {
-        if( OwnerID.GetObject( Image )->HasBaseClass( FArianePath::StaticClass() ) )
+        if( OwnerID.GetObject( Drawing )->HasBaseClass( FArianePath::StaticClass() ) )
         {
-            FArianePath* Path = static_cast<FArianePath*>( OwnerID.GetObject( Image ) );
+            FArianePath* Path = static_cast<FArianePath*>( OwnerID.GetObject( Drawing ) );
 
             Path->InvalidateSegment( this );
 
@@ -315,8 +315,8 @@ FArianeSegment::Init()
     Fractions.Empty();
     FractionSteps.Empty();
 
-    FractionSteps.Emplace( Vertices[0].GetVertex( Image ), 0.0f, Vertices[0].GetVertex( Image )->GetRadius() );
-    FractionSteps.Emplace( Vertices[1].GetVertex( Image ), 1.0f, Vertices[1].GetVertex( Image )->GetRadius() );
+    FractionSteps.Emplace( Vertices[0].GetVertex( Drawing ), 0.0f, Vertices[0].GetVertex( Drawing )->GetRadius() );
+    FractionSteps.Emplace( Vertices[1].GetVertex( Drawing ), 1.0f, Vertices[1].GetVertex( Drawing )->GetRadius() );
 
     Fractions.Emplace( &FractionSteps[0], &FractionSteps[1] );
 
@@ -406,14 +406,14 @@ FArianeSegment::GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormali
 {
     FVector RetVector;
 
-    if( Vertex == Vertices[0].GetVertex( Image ) )
+    if( Vertex == Vertices[0].GetVertex( Drawing ) )
     {
-        RetVector = Vertices[1].GetVertex( Image )->GetPosition() - Vertices[0].GetVertex( Image )->GetPosition();
+        RetVector = Vertices[1].GetVertex( Drawing )->GetPosition() - Vertices[0].GetVertex( Drawing )->GetPosition();
     }
 
-    if( Vertex == Vertices[1].GetVertex( Image ) )
+    if( Vertex == Vertices[1].GetVertex( Drawing ) )
     {
-        RetVector = Vertices[0].GetVertex( Image )->GetPosition() - Vertices[1].GetVertex( Image )->GetPosition();
+        RetVector = Vertices[0].GetVertex( Drawing )->GetPosition() - Vertices[1].GetVertex( Drawing )->GetPosition();
     }
 
     if( bNormalize && ( RetVector.SquaredLength() != 0.0f ) )
@@ -427,7 +427,7 @@ FArianeSegment::GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormali
 FVector
 FArianeSegment::GetTangentVectorAt( double T, bool bNormalize )
 {
-    FVector RetVector = ( Vertices[1].GetVertex( Image )->GetPosition() - Vertices[0].GetVertex( Image )->GetPosition() );
+    FVector RetVector = ( Vertices[1].GetVertex( Drawing )->GetPosition() - Vertices[0].GetVertex( Drawing )->GetPosition() );
 
     if( bNormalize && ( RetVector.SquaredLength() != 0.0f ) )
     {

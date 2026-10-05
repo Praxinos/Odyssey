@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "IPropertyTypeCustomization.h"
 
-class ARIANEEDITOR_API FArianeLayerDrawingOrientationCustomization : public IPropertyTypeCustomization
+class ARIANEEDITOR_API FArianeLayerVectorDrawingOrientationCustomization : public IPropertyTypeCustomization
 {
 public:
     static TSharedRef<IPropertyTypeCustomization> MakeInstance();

@@ -12,7 +12,7 @@
 #include "ArianeLayer.h"
 #include "ArianeCoreEnums.h"
 #include "ArianeGraph.h"
-#include "ArianeImage.generated.h"
+#include "ArianeDrawing.generated.h"
 
 struct FArianeObject;
 struct FArianeGroup;
@@ -23,17 +23,17 @@ struct FArianeEllipse;
 struct FArianeRectangle;
 struct FArianeLine;
 struct FArianePolygon;
-class UArianeLayerDrawing;
-struct FArianeImageKeyData;
+class UArianeLayerVector;
+struct FArianeDrawingKeyData;
 
 UCLASS()
-class ARIANE_API UArianeImage : public UObject
+class ARIANE_API UArianeDrawing : public UObject
 {
     GENERATED_BODY()
 
 public:
-    ~UArianeImage();
-    UArianeImage();
+    ~UArianeDrawing();
+    UArianeDrawing();
 
     virtual void Update( bool bInteractive );
     virtual void PostEditUndo() override;
@@ -144,10 +144,10 @@ public:
     virtual void BeginDestroy() override;
     //virtual void InitializeComponent() override;
 
-    void SetDrawingLayer( TWeakObjectPtr<UArianeLayerDrawing> InDrawingLayer );
-    TWeakObjectPtr<UArianeLayerDrawing> GetDrawingLayer();
+    void SetVectorLayer( TWeakObjectPtr<UArianeLayerVector> InVectorLayer );
+    TWeakObjectPtr<UArianeLayerVector> GetVectorLayer();
     void OnRegisterLayer();
-    void Animate( const FArianeImageKeyData* KeyData, const FArianeImageKeyData* NextKeyData, float T );
+    void Animate( const FArianeDrawingKeyData* KeyData, const FArianeDrawingKeyData* NextKeyData, float T );
     virtual void Serialize(FArchive& Ar) override;
     void RebindObjects();
     FGuid GetAllocatorGuid();
@@ -172,7 +172,7 @@ protected:
     mutable FArianeObjectID RootGroupID;
 
     UPROPERTY( EditAnywhere )
-    TWeakObjectPtr<UArianeLayerDrawing> DrawingLayer;
+    TWeakObjectPtr<UArianeLayerVector> VectorLayer;
 
     // counter to determine how many times the material is used (i.e by how many objects)
     UPROPERTY( Transient )

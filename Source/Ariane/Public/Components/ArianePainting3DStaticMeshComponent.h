@@ -11,7 +11,7 @@
 #include "ArianePainting3DStaticMeshComponent.generated.h"
 
 class FMeshDescriptionBuilder;
-class UArianeLayerDrawing;
+class UArianeLayerVector;
 class UStaticMesh;
 struct FArianePath;
 
@@ -25,8 +25,8 @@ public:
     void ConvertToStaticMesh();
 
 private:
-    static void ConvertImageToStaticMesh( FMeshDescriptionBuilder& MeshDescriptionBuilder
-                                        , UArianeLayerDrawing* DrawingLayer );
+    static void ConvertDrawingToStaticMesh( FMeshDescriptionBuilder& MeshDescriptionBuilder
+                                        , UArianeLayerVector* VectorLayer );
     static void ConvertPathToStaticMesh( FMeshDescriptionBuilder& MeshDescriptionBuilder
                                         , FArianePath* Path );
 };

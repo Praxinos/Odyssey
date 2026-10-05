@@ -11,17 +11,17 @@
 // Ariane Headers
 #include "ArianeKeyedObject.h"
 
-#include "ArianeImageKeyData.generated.h"
+#include "ArianeDrawingKeyData.generated.h"
 
-class UArianeImage;
+class UArianeDrawing;
 
 USTRUCT(BlueprintType)
-struct FArianeImageKeyData
+struct FArianeDrawingKeyData
 {
     GENERATED_BODY()
 
 public:
-    void RecordGeometry( UArianeImage* RecordedImage );
+    void RecordGeometry( UArianeDrawing* RecordedDrawing );
     FArianeKeyedObject* GetKeyedObject( const FGuid& ObjectGuid );
     void PostLoad();
     void PostEditUndo();
@@ -31,7 +31,7 @@ protected:
 
 public:
     UPROPERTY(EditAnywhere, Instanced, Category = "Ariane")
-    UArianeImage* Image = nullptr;
+    UArianeDrawing* Drawing = nullptr;
 
 protected:
     UPROPERTY( EditAnywhere )
@@ -44,9 +44,9 @@ protected:
 namespace MovieSceneClipboard
 {
     template<>
-    inline FName GetKeyTypeName<FArianeImageKeyData>()
+    inline FName GetKeyTypeName<FArianeDrawingKeyData>()
     {
-        return "ArianeImageKeyData";
+        return "ArianeDrawingKeyData";
     }
 }
 #endif

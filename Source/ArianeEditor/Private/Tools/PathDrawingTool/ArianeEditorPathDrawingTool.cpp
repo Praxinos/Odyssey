@@ -8,8 +8,8 @@
 #include "ArianeEditorStyle.h"
 // Ariane headers
 #include "ArianePainting3DComponent.h"
-#include "ArianeImage.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeLayerFolder.h"
 #include "ArianePath.h"
 #include "ArianeGroup.h"
@@ -81,9 +81,9 @@ UArianeEditorPathDrawingTool::Inactivate()
 }
 
 FArianeGroup*
-UArianeEditorPathDrawingTool::GetParentGroup( UArianeLayerDrawing* DrawingLayer )
+UArianeEditorPathDrawingTool::GetParentGroup( UArianeLayerVector* VectorLayer )
 {
-    TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetImage()->GetSelectedObjects();
+    TArray<FArianeObject*>& SelectedObjects = VectorLayer->GetDrawing()->GetSelectedObjects();
 
     if( SelectedObjects.Num() == 1 )
     {
@@ -93,7 +93,7 @@ UArianeEditorPathDrawingTool::GetParentGroup( UArianeLayerDrawing* DrawingLayer 
        }
     }
 
-    return DrawingLayer->GetImage()->GetRootGroup();
+    return VectorLayer->GetDrawing()->GetRootGroup();
 }
 
 bool
@@ -120,17 +120,17 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
         {
             //painting3DComponent->PrintPointers();
             UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
+            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(LayerStack->GetCurrentLayer());
 
-            if( DrawingLayer )
+            if( VectorLayer )
             {
                 // choose between the root group and the selected group if any
-                FArianeGroup* ParentGroup = GetParentGroup( DrawingLayer );
-                int PathNumber = DrawingLayer->GetImage()->GetInstancedObjects().Num();
+                FArianeGroup* ParentGroup = GetParentGroup( VectorLayer );
+                int PathNumber = VectorLayer->GetDrawing()->GetInstancedObjects().Num();
 
-                DrawingLayer->GetImage()->Modify();
+                VectorLayer->GetDrawing()->Modify();
 
-                EditedPath = DrawingLayer->GetImage()->AllocPath( MaterialInterface ? MaterialInterface
+                EditedPath = VectorLayer->GetDrawing()->AllocPath( MaterialInterface ? MaterialInterface
                                                                                     : Settings->GetDefaultPathDrawingMaterial()
                                                                                     , *(FString( "Path_" ) + FString::FromInt( PathNumber ))
                                                                                     , EArianeAllocationModel::InstancedStruct );
@@ -170,11 +170,11 @@ UArianeEditorPathDrawingTool::OnMouseHover( FEditorViewportClient* ViewportClien
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
+            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
             FVector RayOrigin, RayDirection;
             FVector IntersectAt;
             FVector2D ViewportPosition = FVector2D( ViewportClient->Viewport->GetMouseX()
@@ -214,11 +214,11 @@ UArianeEditorPathDrawingTool::Render(IToolsContextRenderAPI* RenderAPI)
         if( Painting3DComponent )
         {
             UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>( LayerStack->GetCurrentLayer() );
+            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>( LayerStack->GetCurrentLayer() );
 
-            if( DrawingLayer )
+            if( VectorLayer )
             {
-                DrawLayerOrientationGrid( RenderAPI, DrawingLayer );
+                DrawLayerOrientationGrid( RenderAPI, VectorLayer );
             }
         }
     }
@@ -241,14 +241,14 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* ViewportClient
     if( Painting3DComponent )
     {
         //painting3DComponent->PrintPointers();
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            UArianeImage* Image = DrawingLayer->GetImage();
+            UArianeDrawing* Image = VectorLayer->GetDrawing();
             const FTransform& PathTransform = EditedPath->GetTransform();
             // note: we could do that at MouseDown
-            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
+            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
             FVector RayOrigin, RayDirection;
             FVector IntersectAt;
             FVector2D ViewportPosition = FVector2D( PointerState.ViewportX
@@ -389,7 +389,7 @@ UArianeEditorPathDrawingTool::OnMouseUp( FEditorViewportClient* ViewportClient
     {
         if( Painting3DComponent )
         {
-            UArianeImage* Image = EditedPath->GetImage();
+            UArianeDrawing* Image = EditedPath->GetDrawing();
             FArianeVertex *Vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last()
                                                                      : nullptr;
             FVector2D ViewportPosition = FVector2D( PointerState.ViewportX

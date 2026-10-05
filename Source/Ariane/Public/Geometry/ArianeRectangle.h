@@ -32,7 +32,7 @@ public:
     /**
      * @brief constructor.
      */
-    FArianeRectangle( UArianeImage* InImage
+    FArianeRectangle( UArianeDrawing* InDrawing
                     , const FName& InName
                     , double InRadiusX
                     , double InRadiusY

@@ -7,10 +7,10 @@
 // Unreal headers
 #include "CoreMinimal.h"
 
-#include "ArianeLayerDrawingEnums.generated.h"
+#include "ArianeLayerVectorEnums.generated.h"
 
 UENUM()
-enum class EArianeLayerDrawingOrigin : uint8
+enum class EArianeLayerVectorDrawingOrigin : uint8
 {
     Layer,
     //View,
@@ -18,7 +18,7 @@ enum class EArianeLayerDrawingOrigin : uint8
 };
 
 UENUM()
-enum class EArianeLayerDrawingOrientation : uint8
+enum class EArianeLayerVectorDrawingOrientation : uint8
 {
     XY,
     YZ,

@@ -11,7 +11,7 @@
 
 #include "ArianePrimitive.generated.h"
 
-class UArianeImage;
+class UArianeDrawing;
 
 USTRUCT(BlueprintType)
 struct ARIANE_API FArianePrimitiveInvalidationFlags : public FArianePathInvalidationFlags
@@ -39,7 +39,7 @@ public:
 
     virtual ~FArianePrimitive();
     FArianePrimitive();
-    FArianePrimitive( UArianeImage* InImage
+    FArianePrimitive( UArianeDrawing* InDrawing
                     , const FName& InName
                     , double InStrokeWidth
                     , EArianeAllocationModel InAllocationModel );

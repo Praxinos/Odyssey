@@ -1,19 +1,19 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-#include "ArianeImageKeyData.h"
-#include "ArianeImage.h"
+#include "ArianeDrawingKeyData.h"
+#include "ArianeDrawing.h"
 #include "ArianeObject.h"
 #include "ArianeGroup.h"
 #include "ArianePath.h"
 #include "ArianeKeyedPath.h"
 
 void
-FArianeImageKeyData::RecordGeometry( UArianeImage* RecordedImage )
+FArianeDrawingKeyData::RecordGeometry( UArianeDrawing* RecordedDrawing )
 {
     InstancedKeyedObjects.Empty();
 
-    FArianeObject::Traverse( RecordedImage->GetRootGroup()
+    FArianeObject::Traverse( RecordedDrawing->GetRootGroup()
                            , [this]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
         {
             if( Object->GetClass() == FArianePath::StaticClass() )
@@ -30,7 +30,7 @@ FArianeImageKeyData::RecordGeometry( UArianeImage* RecordedImage )
 }
 
 FArianeKeyedObject*
-FArianeImageKeyData::GetKeyedObject( const FGuid& ObjectGuid )
+FArianeDrawingKeyData::GetKeyedObject( const FGuid& ObjectGuid )
 {
     FArianeKeyedObject** FoundObject = nullptr;
 
@@ -41,7 +41,7 @@ FArianeImageKeyData::GetKeyedObject( const FGuid& ObjectGuid )
 }
 
 void
-FArianeImageKeyData::PostLoad()
+FArianeDrawingKeyData::PostLoad()
 {
     BuildLookup();
 
@@ -54,7 +54,7 @@ FArianeImageKeyData::PostLoad()
 }
 
 void
-FArianeImageKeyData::PostEditUndo()
+FArianeDrawingKeyData::PostEditUndo()
 {
     BuildLookup();
 
@@ -67,7 +67,7 @@ FArianeImageKeyData::PostEditUndo()
 }
 
 void
-FArianeImageKeyData::BuildLookup()
+FArianeDrawingKeyData::BuildLookup()
 {
     KeyedObjectLookup.Empty();
     KeyedObjectLookup.Reserve( InstancedKeyedObjects.Num() );

@@ -4,8 +4,8 @@
 // Ariane headers
 #include "ArianeLayerStack.h"
 #include "ArianeLayerFolder.h"
-#include "ArianeLayerDrawing.h"
-#include "ArianeImage.h"
+#include "ArianeLayerVector.h"
+#include "ArianeDrawing.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianePainting3DActor.h"
 #include "ArianeGroup.h"
@@ -144,6 +144,9 @@ UArianeLayerStack::PostLoad()
 
     if( RootFolder )
     {
+        //fix after a change in the naming of th UArianeLayerVector class.
+        //RootFolder->GetChildLayers().Empty();
+
         // At that step layers are only marked "selected" but not in the list of selected layers
         UArianeLayerFolder::Traverse( RootFolder
                                     , [this]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
@@ -178,23 +181,23 @@ UArianeLayerStack::RemoveSelectedLayers()
 }
 
 uint32
-UArianeLayerStack::GetDrawingLayerCount()
+UArianeLayerStack::GetVectorLayerCount()
 {
     UArianeLayerFolder* RootFolder = GetRootFolder();
-    uint32 DrawingLayerCount = 0;
+    uint32 VectorLayerCount = 0;
 
     UArianeLayerFolder::Traverse( RootFolder
-                                 , [ &DrawingLayerCount ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
+                                 , [ &VectorLayerCount ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
     {
-        if( Cast<UArianeLayerDrawing>(Layer) )
+        if( Cast<UArianeLayerVector>(Layer) )
         {
-            DrawingLayerCount++;
+            VectorLayerCount++;
         }
 
         return UArianeLayerFolder::ETraversalReturnValue::Continue;
     } );
 
-    return DrawingLayerCount;
+    return VectorLayerCount;
 }
 
 void
@@ -325,25 +328,25 @@ UArianeLayerStack::GetSelectedLayers()
     return SelectedLayers;
 }
 
-UArianeLayerDrawing*
-UArianeLayerStack::CreateDrawingLayer( UArianeLayerFolder* InParentLayerFolder, bool bTriggerEvent )
+UArianeLayerVector*
+UArianeLayerStack::CreateVectorLayer( UArianeLayerFolder* InParentLayerFolder, bool bTriggerEvent )
 {
     UArianeLayerFolder* RootFolder = GetRootFolder();
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
                                                                            // The outer must be the AActor or else the TEDS system could crash
-    FName LayerName = FName( *FString::Printf(TEXT("Drawing Layer %d"), GetDrawingLayerCount() + 1 ) );
-    UArianeLayerDrawing* NewDrawingLayer = NewObject<UArianeLayerDrawing>( this
+    FName LayerName = FName( *FString::Printf(TEXT("Drawing Layer %d"), GetVectorLayerCount() + 1 ) );
+    UArianeLayerVector* NewVectorLayer = NewObject<UArianeLayerVector>( this
                                                                          , LayerName
                                                                          , RF_Transactional | RF_Public ); // for undos
 
     // Below 2 lines are mandatory to register the component, otherwise undos won't work (RF_TRANSACTIONAL will be erased)
-    //NewDrawingLayer->SetupAttachment( ParentLayerFolder );
-    //NewDrawingLayer->RegisterComponent();
+    //NewVectorLayer->SetupAttachment( ParentLayerFolder );
+    //NewVectorLayer->RegisterComponent();
 
-    AddLayer( ParentLayerFolder, NewDrawingLayer, bTriggerEvent );
+    AddLayer( ParentLayerFolder, NewVectorLayer, bTriggerEvent );
 
-    return NewDrawingLayer;
+    return NewVectorLayer;
 }
 
 UArianeLayerFolder*

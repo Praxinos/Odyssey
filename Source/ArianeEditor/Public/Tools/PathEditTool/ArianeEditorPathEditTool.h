@@ -130,7 +130,7 @@ protected:
     FArianeEditorHUD::FDrawingFlags EditonModeToHUDDrawingFlags();
     FPickingFlags EditonModeToPickingFlags();
 
-    static void BuildSegmentAdjustments( UArianeLayerDrawing* DrawingLayer
+    static void BuildSegmentAdjustments( UArianeLayerVector* VectorLayer
                                        , const TArray<FArianeSegment*>& Segments
                                        , TArray<FSegmentAdjustment>& OutSegmentAdjustments );
     void OnMouseDownPickPoint( FEditorViewportClient* ViewportClient
@@ -166,13 +166,13 @@ protected:
     void UnbindEditorDelegates();
     void OnPreLayerStackSelectionChanged( UArianeLayerStack* LayerStack );
     void OnPostLayerStackSelectionChanged( UArianeLayerStack* LayerStack );
-    void OnPostImageChanged( UArianeLayerDrawing* DrawingLayer );
+    void OnPostDrawingChanged( UArianeLayerVector* VectorLayer );
     void BindComponentDelegates( UArianePainting3DComponent* Painting3DComponent );
     void UnbindComponentDelegates( UArianePainting3DComponent* Painting3DComponent );
     void BindLayerStackDelegates( UArianeLayerStack* LayerStack );
     void UnbindLayerStackDelegates( UArianeLayerStack* LayerStack );
-    void BindDrawingLayerDelegates( UArianeLayerDrawing* DrawingLayer );
-    void UnbindDrawingLayerDelegates( UArianeLayerDrawing* DrawingLayer );
+    void BindVectorLayerDelegates( UArianeLayerVector* VectorLayer );
+    void UnbindVectorLayerDelegates( UArianeLayerVector* VectorLayer );
 
 public:
     UPROPERTY( EditAnywhere

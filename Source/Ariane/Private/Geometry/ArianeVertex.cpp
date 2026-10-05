@@ -3,7 +3,7 @@
 
 // Ariane headers
 #include "ArianeVertex.h"
-#include "ArianeImage.h"
+#include "ArianeDrawing.h"
 #include "ArianePath.h"
 #include "ArianeSegment.h"
 #include "ArianePainting3DComponent.h"
@@ -16,7 +16,7 @@ FArianeVertex::FArianeVertex()
     : Radius( 0.0f )
     , Normal ( FVector::Zero() )
     , AllocationModel( EArianeAllocationModel::InstancedStruct )
-    , Image ( nullptr )
+    , Drawing ( nullptr )
 {
 }
 
@@ -32,24 +32,24 @@ FArianeVertex::FArianeVertex( FArianeObject* Owner
     , Normal ( InNormal )
     , bHandleAligned( true )
     , AllocationModel( InAllocationModel )
-    , Image ( Owner->GetImage() )
+    , Drawing ( Owner->GetDrawing() )
     , bChained( false )
 {
 }
 
 void
-FArianeVertex::SetImage( UArianeImage* InImage )
+FArianeVertex::SetDrawing( UArianeDrawing* InDrawing )
 {
-    Image = InImage;
+    Drawing = InDrawing;
 
     bChained = false;
     Segments.Empty();
 }
 
-UArianeImage*
-FArianeVertex::GetImage()
+UArianeDrawing*
+FArianeVertex::GetDrawing()
 {
-    return Image;
+    return Drawing;
 }
 
 EArianeAllocationModel
@@ -84,7 +84,7 @@ FArianeVertex::GetNormal()
 FArianeObject*
 FArianeVertex::GetOwner()
 {
-    return OwnerID.GetObject( Image );
+    return OwnerID.GetObject( Drawing );
 }
 
 void
@@ -225,7 +225,7 @@ FArianeVertex::ArrayToSegmentArray( const TArray<FArianeVertex*>& InVertices
 
         for( const FArianeSegmentID& SegmentID : Vertex->GetSegments() )
         {
-            FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment( Vertex->GetImage() );
+            FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment( Vertex->GetDrawing() );
 
             if( OutSegments.Find( Segment ) == INDEX_NONE )
             {

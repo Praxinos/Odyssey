@@ -16,7 +16,7 @@ class UArianePainting3DComponent;
 class UCanvasRenderTarget2D;
 struct FArianeVertex;
 class FEditorViewportClient;
-class UArianeLayerDrawing;
+class UArianeLayerVector;
 class UTransformProxy;
 class UCombinedTransformGizmo;
 class UArianeLayer;

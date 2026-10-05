@@ -8,7 +8,7 @@
 // Ariane headers
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeLayerFolder.h"
 
 // Unreal headers

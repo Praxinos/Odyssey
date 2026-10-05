@@ -11,10 +11,10 @@ struct FArianeGroup;
 struct FArianeObject;
 class FSceneTreeViewItem;
 class UArianeLayer;
-class UArianeLayerDrawing;
+class UArianeLayerVector;
 class UArianeLayerStack;
 class FUICommandList;
-class  UArianeImage;
+class  UArianeDrawing;
 
 #define VSTV_OBJECT_VISIBLE     "Visible"
 #define VSTV_OBJECT_HUDCOLOR    "HUD Color"
@@ -69,7 +69,7 @@ class ARIANEEDITOR_API SArianeEditorSceneTreeView
         void OnSelectionChanged( TSharedPtr<FSceneTreeViewItem> iItem, ESelectInfo::Type SelectInfo );
         void OnExpansionChanged( TSharedPtr<FSceneTreeViewItem> iItem, bool mExpanded );
         void ExpandTree( const TSharedPtr<FSceneTreeViewItem> iItem );
-        void BuildTree(  UArianeImage* Image, const TSharedPtr<FSceneTreeViewItem> iItem );
+        void BuildTree(  UArianeDrawing* Image, const TSharedPtr<FSceneTreeViewItem> iItem );
         //void SelectTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem );
 
         void MapActionsToCommandList();
@@ -97,9 +97,9 @@ class ARIANEEDITOR_API SArianeEditorSceneTreeView
         void OnPreLayerStackSelectionChanged();
         void OnPre3DPaintingComponentSelectionChanged();
         void OnPost3DPaintingComponentSelectionChanged();
-        void OnPostImageChanged();
-        void OnPreImageChanged();
-        UArianeLayerDrawing* GetCurrentDrawingLayer();
+        void OnPostDrawingChanged();
+        void OnPreDrawingChanged();
+        UArianeLayerVector* GetCurrentVectorLayer();
 
     protected:
         FArianeEditor* Editor;

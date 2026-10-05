@@ -8,7 +8,7 @@
 #include "IDetailsView.h"
 // Ariane Headers
 #include "ArianeLayer.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeLayerVector.h"
 
 class FArianeEditor;
 class UArianeEditorTool;

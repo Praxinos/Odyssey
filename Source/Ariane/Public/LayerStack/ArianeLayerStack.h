@@ -11,7 +11,7 @@
 #include "ArianeLayerStack.generated.h"
 
 class UArianeLayer;
-class UArianeLayerDrawing;
+class UArianeLayerVector;
 class UArianeLayerFolder;
 class UArianeLayerFolder;
 class UArianePainting3DComponent;
@@ -82,7 +82,7 @@ public:
     * @param bTriggerEvent trigger layer stack changed event
     * @return the newly created layer
     */
-    UArianeLayerDrawing* CreateDrawingLayer( UArianeLayerFolder* ParentLayerFolder, bool bTriggerEvent );
+    UArianeLayerVector* CreateVectorLayer( UArianeLayerFolder* ParentLayerFolder, bool bTriggerEvent );
 
     /**
     * @brief Create a new folder layer
@@ -111,7 +111,7 @@ public:
 
     virtual void Serialize( FArchive& Ar ) override;
     void AddLayers( UArianeLayerFolder* FosterFolder, TArray<UArianeLayer*> OrphanLayers, bool bTriggerEvent );
-    uint32 GetDrawingLayerCount();
+    uint32 GetVectorLayerCount();
     void Init();
     void Update( bool bInteractive );
     virtual void OnRegister() override;

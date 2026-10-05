@@ -4,7 +4,7 @@
 // Ariane headers
 #include "ArianePainting3DComponent.h"
 #include "ArianePainting3DStaticMeshComponent.h"
-#include "ArianeImage.h"
+#include "ArianeDrawing.h"
 #include "ArianePath.h"
 #include "ArianeCycle.h"
 #include "ArianeSegment.h"
@@ -12,7 +12,7 @@
 #include "ArianeGroup.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayerFolder.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeLayerVector.h"
 // Unreal headers
 #include "Engine/EngineBaseTypes.h"
 #include "StaticMeshResources.h"
@@ -135,15 +135,15 @@ UArianePainting3DComponent::GetUsedMaterials( TArray<UMaterialInterface*>& OutMa
 
     LayerStack->GetRootFolder()->Traverse( [ &OutMaterials ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
         {
-            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Layer);
+            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Layer);
 
-            if( DrawingLayer )
+            if( VectorLayer )
             {
-                TArray<UMaterialInterface*> DrawingLayerUsedMaterials;
+                TArray<UMaterialInterface*> VectorLayerUsedMaterials;
 
-                DrawingLayer->GetUsedMaterials( DrawingLayerUsedMaterials );
+                VectorLayer->GetUsedMaterials( VectorLayerUsedMaterials );
 
-                OutMaterials.Append( DrawingLayerUsedMaterials );
+                OutMaterials.Append( VectorLayerUsedMaterials );
             }
 
             return UArianeLayerFolder::ETraversalReturnValue::Continue;

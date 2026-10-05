@@ -31,7 +31,7 @@ class FSceneView;
 class FStylusState;
 struct FSlateBrush;
 class UArianeLayer;
-class UArianeLayerDrawing;
+class UArianeLayerVector;
 class FArianeEditorToolInputProcessor;
 
 UCLASS(Abstract)
@@ -229,9 +229,9 @@ protected:
     /**
      * @brief Get a layer's drawing plane
      * @param ViewportClient
-     * @param DrawingLayer the layer from get the plane from
+     * @param VectorLayer the layer from get the plane from
      */
-    FPlane GetDrawingPlane( FEditorViewportClient* ViewportClient, UArianeLayerDrawing* DrawingLayer );
+    FPlane GetDrawingPlane( FEditorViewportClient* ViewportClient, UArianeLayerVector* VectorLayer );
 
     /**
      * @brief Get the active viewport client
@@ -242,9 +242,9 @@ protected:
     /**
      * @brief Draw the layer orientation grid
      * @param RenderAPI
-     * @param DrawingLayer
+     * @param VectorLayer
      */
-    void DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, UArianeLayerDrawing* DrawingLayer );
+    void DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, UArianeLayerVector* VectorLayer );
 
     /**
      * @brief Get the current layer
@@ -322,7 +322,7 @@ protected:
 
     void MakePointQuadTree( FEditorViewportClient* ViewportClient
                           , FSceneView* View
-                          , TArray<UArianeLayerDrawing*> DrawingLayers
+                          , TArray<UArianeLayerVector*> VectorLayers
                           , bool bFocusedObjectsOnly );
 
     static void GetVertexHandlePositions( FArianeVertex* Vertex, FVector OutVertexHandlePositions[2] );

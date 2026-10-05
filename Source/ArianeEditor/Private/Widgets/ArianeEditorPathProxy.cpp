@@ -142,7 +142,7 @@ UArianeEditorPathProxy::ApplyPropertyBits( FArianeObject* Object )
     if( Object->HasBaseClass( FArianePath::StaticClass() ) )
     {
         FArianePath* Path = static_cast<FArianePath*>(Object);
-        UArianeImage* Image = Path->GetImage();
+        UArianeDrawing* Image = Path->GetDrawing();
 
         if( WideningMode == EArianeEditorPathProxyWideningMode::Percent )
         {

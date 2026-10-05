@@ -17,8 +17,8 @@ class UArianePainting3DComponent;
 struct FArianeObject;
 struct FArianeGroup;
 struct FArianeTag;
-class UArianeLayerDrawing;
-class UArianeImage;
+class UArianeLayerVector;
+class UArianeDrawing;
 struct FArianeKeyedObject;
 
 USTRUCT(BlueprintType)
@@ -106,7 +106,7 @@ public:
     {
         ECopyFlags Flags = {}; // init as zero
         EArianeAllocationModel AllocationModel;
-        UArianeImage* Image = nullptr;
+        UArianeDrawing* Drawing = nullptr;
     };
 
     enum class ETraversalReturnValue{ Continue, IgnoreChildren, Stop };
@@ -136,7 +136,7 @@ public:
     virtual ~FArianeObject();
 
     FArianeObject();
-    FArianeObject( UArianeImage* InImage
+    FArianeObject( UArianeDrawing* InDrawing
                  , const FName& InName
                  , EArianeAllocationModel InAllocationModel );
 
@@ -240,10 +240,10 @@ public:
     virtual bool IsVisible( bool bInHierarchical );
 
     /** Get the drawing layer this object belongs to */
-    UArianeImage* GetImage();
+    UArianeDrawing* GetDrawing();
 
     /** Set the drawing layer this object belongs to */
-    virtual void ResetImage( UArianeImage* InImage );
+    virtual void ResetDrawing( UArianeDrawing* InDrawing );
 
     //FSimpleMulticastDelegate & GetOnPostInvalidatedDelegate();
 
@@ -362,10 +362,10 @@ protected:
 
 protected:
     // Declared UPROPERTY to prevent GC.
-    // Transient because it's revalidated on UArianeImage::Serialize due to the fact that the reflection system
+    // Transient because it's revalidated on UArianeDrawing::Serialize due to the fact that the reflection system
     // does not update the pointer on spawnable conversion, I don't know why.
     UPROPERTY( Transient )
-    UArianeImage* Image;
+    UArianeDrawing* Drawing;
 
     FInstancedStruct InstancedInvalidationFlags;
     // Random Guid used for safe pointer resolution. See ArianeID.h

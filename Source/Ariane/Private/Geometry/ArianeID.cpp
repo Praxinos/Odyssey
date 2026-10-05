@@ -3,8 +3,8 @@
 
 // Ariane headers
 #include "ArianeID.h"
-#include "ArianeImage.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeVertex.h"
 #include "ArianeSegment.h"
 #include "ArianeObject.h"
@@ -14,13 +14,13 @@
 FArianeObjectID::FArianeObjectID()
     : Guid ( FGuid() )
     , AllocationModel (  EArianeAllocationModel::Unknown  )
-    , CachedImageAllocatorGuid( FGuid() )
+    , CachedDrawingAllocatorGuid( FGuid() )
     , CachedObject( nullptr )
 {
 }
 
 FArianeObjectID::FArianeObjectID( FArianeObject* Object )
-    : CachedImageAllocatorGuid( FGuid() )
+    : CachedDrawingAllocatorGuid( FGuid() )
     , CachedObject( Object )
     , AllocationModel( Object ? Object->GetAllocationModel() : EArianeAllocationModel::InstancedStruct )
     , Guid ( Object ? Object->GetGuid() : FGuid() )
@@ -28,14 +28,14 @@ FArianeObjectID::FArianeObjectID( FArianeObject* Object )
 }
 
 FArianeObject*
-FArianeObjectID::GetObject( UArianeImage* Image )
+FArianeObjectID::GetObject( UArianeDrawing* Drawing )
 {
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
-        if( Image->GetAllocatorGuid() != CachedImageAllocatorGuid )
+        if( Drawing->GetAllocatorGuid() != CachedDrawingAllocatorGuid )
         {
-            CachedObject = Image->GetObject( Guid );
-            CachedImageAllocatorGuid = Image->GetAllocatorGuid();
+            CachedObject = Drawing->GetObject( Guid );
+            CachedDrawingAllocatorGuid = Drawing->GetAllocatorGuid();
         }
     }
 
@@ -69,11 +69,11 @@ FArianeVertexID::FArianeVertexID( FArianeVertex* Vertex )
 }
 
 FArianeVertex*
-FArianeVertexID::GetVertex( UArianeImage* Image )
+FArianeVertexID::GetVertex( UArianeDrawing* Drawing )
 {
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
-        FArianeObject* OwnerObject = OwnerID.GetObject( Image );
+        FArianeObject* OwnerObject = OwnerID.GetObject( Drawing );
 
         if( OwnerObject->GetAllocatorGuid() != CachedObjectAllocatorGuid )
         {
@@ -111,11 +111,11 @@ FArianeSegmentID::FArianeSegmentID( FArianeSegment* Segment )
 }
 
 FArianeSegment*
-FArianeSegmentID::GetSegment( UArianeImage* Image )
+FArianeSegmentID::GetSegment( UArianeDrawing* Drawing )
 {
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
-        FArianeObject* OwnerObject = OwnerID.GetObject( Image );
+        FArianeObject* OwnerObject = OwnerID.GetObject( Drawing );
 
         if( OwnerObject->GetAllocatorGuid() != CachedObjectAllocatorGuid )
         {
@@ -153,11 +153,11 @@ FArianeTagID::FArianeTagID( FArianeTag* Tag )
 }
 
 FArianeTag*
-FArianeTagID::GetTag( UArianeImage* Image )
+FArianeTagID::GetTag( UArianeDrawing* Drawing )
 {
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
-        FArianeObject* OwnerObject = OwnerID.GetObject( Image );
+        FArianeObject* OwnerObject = OwnerID.GetObject( Drawing );
 
         if( OwnerObject->GetAllocatorGuid() != CachedObjectAllocatorGuid )
         {

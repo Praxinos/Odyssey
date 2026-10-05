@@ -11,8 +11,8 @@
 // Ariane Headers
 #include "ArianeGroup.h"
 #include "ArianeLayer.h"
-#include "ArianeImage.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeLayerFolder.h"
 #include "ArianePainting3DComponent.h"
 // Unreal Headers
@@ -153,7 +153,7 @@ SArianeEditorSceneTreeView::GetEditor() const
 }
 
 void
-SArianeEditorSceneTreeView::BuildTree( UArianeImage* Image, const TSharedPtr<FSceneTreeViewItem> InItem )
+SArianeEditorSceneTreeView::BuildTree( UArianeDrawing* Image, const TSharedPtr<FSceneTreeViewItem> InItem )
 {
     TArray<FArianeObject*>& Children = InItem.Get()->GetObject()->GetChildren();
 
@@ -199,11 +199,11 @@ SArianeEditorSceneTreeView::GetRootGroup()
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            return DrawingLayer->GetImage()->GetRootGroup();
+            return VectorLayer->GetDrawing()->GetRootGroup();
         }
     }
 
@@ -220,7 +220,7 @@ SArianeEditorSceneTreeView::Update()
 
     if( RootGroup )
     {
-        UArianeImage* Image = RootGroup->GetImage();
+        UArianeDrawing* Image = RootGroup->GetDrawing();
         RootItem = MakeShareable(new FSceneTreeViewItem(RootGroup, true ));
 
         BuildTree( Image, RootItem );
@@ -280,7 +280,7 @@ SArianeEditorSceneTreeView::OnSelectionChanged( TSharedPtr<FSceneTreeViewItem> I
 
             TArray<TSharedPtr<FSceneTreeViewItem>> selectedItems = GetSelectedItems();
 
-            RootGroup->GetImage()->ClearObjectSelection();
+            RootGroup->GetDrawing()->ClearObjectSelection();
 
             for( TSharedPtr<FSceneTreeViewItem> selectedItem : selectedItems )
             {
@@ -288,7 +288,7 @@ SArianeEditorSceneTreeView::OnSelectionChanged( TSharedPtr<FSceneTreeViewItem> I
 
                 if( SelectedObject->IsSelected() == false )
                 {
-                    SelectedObject->GetImage()->SelectObject( SelectedObject );
+                    SelectedObject->GetDrawing()->SelectObject( SelectedObject );
                 }
             }
         }
@@ -403,13 +403,13 @@ SArianeEditorSceneTreeView::OnPrePainting3DComponentUpdate( bool bInteractive )
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
         // the bInteractive is voluntarily ignored. During a MouseDown, the flag is set but we still need to mark the widget
         // as needing an update
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
+            FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
 
             FArianeObject::Traverse ( RootGroup
                                     , [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
@@ -443,7 +443,7 @@ SArianeEditorSceneTreeView::OnPostPainting3DComponentUpdate( bool bInteractive )
 }
 
 void
-SArianeEditorSceneTreeView::OnPreImageChanged()
+SArianeEditorSceneTreeView::OnPreDrawingChanged()
 {
     //ItemsSource.Empty();
     //ClearSelection();
@@ -452,7 +452,7 @@ SArianeEditorSceneTreeView::OnPreImageChanged()
 }
 
 void
-SArianeEditorSceneTreeView::OnPostImageChanged()
+SArianeEditorSceneTreeView::OnPostDrawingChanged()
 {
     Update();
 }
@@ -464,12 +464,12 @@ SArianeEditorSceneTreeView::OnPreLayerStackSelectionChanged()
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            DrawingLayer->OnPreImageChangedDelegate().RemoveAll( this );
-            DrawingLayer->OnPostImageChangedDelegate().RemoveAll( this );
+            VectorLayer->OnPreDrawingChangedDelegate().RemoveAll( this );
+            VectorLayer->OnPostDrawingChangedDelegate().RemoveAll( this );
         }
     }
 
@@ -486,30 +486,30 @@ SArianeEditorSceneTreeView::OnPostLayerStackSelectionChanged()
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            DrawingLayer->OnPreImageChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPreImageChanged );
-            DrawingLayer->OnPostImageChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPostImageChanged );
+            VectorLayer->OnPreDrawingChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPreDrawingChanged );
+            VectorLayer->OnPostDrawingChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPostDrawingChanged );
         }
     }
 
     Update();
 }
 
-UArianeLayerDrawing*
-SArianeEditorSceneTreeView::GetCurrentDrawingLayer()
+UArianeLayerVector*
+SArianeEditorSceneTreeView::GetCurrentVectorLayer()
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            return DrawingLayer;
+            return VectorLayer;
         }
     }
 
@@ -538,7 +538,7 @@ SArianeEditorSceneTreeView::BindComponentDelegates()
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = GetCurrentDrawingLayer();
+        UArianeLayerVector* VectorLayer = GetCurrentVectorLayer();
 
         Painting3DComponent->GetLayerStack()->OnPreHierarchyChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPreLayerStackHierarchyChanged );
         Painting3DComponent->GetLayerStack()->OnPostHierarchyChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPostLayerStackHierarchyChanged );
@@ -549,10 +549,10 @@ SArianeEditorSceneTreeView::BindComponentDelegates()
         Painting3DComponent->OnPreUpdateDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPrePainting3DComponentUpdate );
         Painting3DComponent->OnPostUpdateDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPostPainting3DComponentUpdate );
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            DrawingLayer->OnPreImageChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPreImageChanged );
-            DrawingLayer->OnPostImageChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPostImageChanged );
+            VectorLayer->OnPreDrawingChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPreDrawingChanged );
+            VectorLayer->OnPostDrawingChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPostDrawingChanged );
         }
     }
 }
@@ -564,7 +564,7 @@ SArianeEditorSceneTreeView::UnbindComponentDelegates()
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = GetCurrentDrawingLayer();
+        UArianeLayerVector* VectorLayer = GetCurrentVectorLayer();
 
         Painting3DComponent->GetLayerStack()->OnPreHierarchyChangedDelegate().RemoveAll( this );
         Painting3DComponent->GetLayerStack()->OnPostHierarchyChangedDelegate().RemoveAll( this );
@@ -575,10 +575,10 @@ SArianeEditorSceneTreeView::UnbindComponentDelegates()
         Painting3DComponent->OnPreUpdateDelegate().RemoveAll( this );
         Painting3DComponent->OnPostUpdateDelegate().RemoveAll( this );
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            DrawingLayer->OnPreImageChangedDelegate().RemoveAll( this );
-            DrawingLayer->OnPostImageChangedDelegate().RemoveAll( this );
+            VectorLayer->OnPreDrawingChangedDelegate().RemoveAll( this );
+            VectorLayer->OnPostDrawingChangedDelegate().RemoveAll( this );
         }
     }
 }

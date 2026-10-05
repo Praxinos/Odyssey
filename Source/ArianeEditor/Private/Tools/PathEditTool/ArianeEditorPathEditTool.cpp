@@ -7,8 +7,8 @@
 #include "ArianeEditorStyle.h"
 // Ariane headers
 #include "ArianePainting3DComponent.h"
-#include "ArianeImage.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeLayerFolder.h"
 #include "ArianePath.h"
 #include "ArianeGroup.h"
@@ -135,26 +135,26 @@ UArianeEditorPathEditTool::ResetQuadTree()
 void
 UArianeEditorPathEditTool::Reset()
 {
-    UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(GetCurrentLayer());
+    UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(GetCurrentLayer());
 
     ResetQuadTree();
 
     SelectedTrees.Empty();
 
-    if( DrawingLayer )
+    if( VectorLayer )
     {
-        DrawingLayer->GetImage()->GetSelectedTrees( SelectedTrees );
+        VectorLayer->GetDrawing()->GetSelectedTrees( SelectedTrees );
 
         // if nothing is selected, select the whole root group
         if( SelectedTrees.IsEmpty() )
         {
-            SelectedTrees.Add( DrawingLayer->GetImage()->GetRootGroup() );
+            SelectedTrees.Add( VectorLayer->GetDrawing()->GetRootGroup() );
         }
     }
 }
 
 void
-UArianeEditorPathEditTool::OnPostImageChanged( UArianeLayerDrawing* DrawingLayer )
+UArianeEditorPathEditTool::OnPostDrawingChanged( UArianeLayerVector* VectorLayer )
 {
     Reset();
 }
@@ -162,66 +162,66 @@ UArianeEditorPathEditTool::OnPostImageChanged( UArianeLayerDrawing* DrawingLayer
 void
 UArianeEditorPathEditTool::OnPreLayerStackSelectionChanged( UArianeLayerStack* LayerStack )
 {
-    UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
+    UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(LayerStack->GetCurrentLayer());
 
-    if( DrawingLayer )
+    if( VectorLayer )
     {
-        UnbindDrawingLayerDelegates( DrawingLayer );
+        UnbindVectorLayerDelegates( VectorLayer );
     }
 }
 
 void
 UArianeEditorPathEditTool::OnPostLayerStackSelectionChanged( UArianeLayerStack* LayerStack )
 {
-    UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
+    UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(LayerStack->GetCurrentLayer());
 
-    if( DrawingLayer )
+    if( VectorLayer )
     {
-        BindDrawingLayerDelegates( DrawingLayer );
+        BindVectorLayerDelegates( VectorLayer );
     }
 }
 
 void
-UArianeEditorPathEditTool::BindDrawingLayerDelegates( UArianeLayerDrawing* DrawingLayer )
+UArianeEditorPathEditTool::BindVectorLayerDelegates( UArianeLayerVector* VectorLayer )
 {
     // commented-out: nothing to do on Pre. Left there for consistency
-    //DrawingLayer->OnPreImageChangedDelegate().AddSP( this, &UArianeEditorPathEditTool::OnPreImageChanged );
-    DrawingLayer->OnPostImageChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPostImageChanged, DrawingLayer );
+    //VectorLayer->OnPreImageChangedDelegate().AddSP( this, &UArianeEditorPathEditTool::OnPreImageChanged );
+    VectorLayer->OnPostDrawingChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPostDrawingChanged, VectorLayer );
 }
 
 void
-UArianeEditorPathEditTool::UnbindDrawingLayerDelegates( UArianeLayerDrawing* DrawingLayer )
+UArianeEditorPathEditTool::UnbindVectorLayerDelegates( UArianeLayerVector* VectorLayer )
 {
     // commented-out: nothing to do on Pre. Left there for consistency
-    //DrawingLayer->OnPreImageChangedDelegate().RemoveAll( this );
-    DrawingLayer->OnPostImageChangedDelegate().RemoveAll( this );
+    //VectorLayer->OnPreImageChangedDelegate().RemoveAll( this );
+    VectorLayer->OnPostDrawingChangedDelegate().RemoveAll( this );
 }
 
 void
 UArianeEditorPathEditTool::BindLayerStackDelegates( UArianeLayerStack* LayerStack )
 {
-    UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
+    UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(LayerStack->GetCurrentLayer());
 
     LayerStack->OnPreSelectionChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPreLayerStackSelectionChanged, LayerStack );
     LayerStack->OnPostSelectionChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPostLayerStackSelectionChanged, LayerStack );
 
-    if( DrawingLayer )
+    if( VectorLayer )
     {
-        BindDrawingLayerDelegates ( DrawingLayer );
+        BindVectorLayerDelegates ( VectorLayer );
     }
 }
 
 void
 UArianeEditorPathEditTool::UnbindLayerStackDelegates( UArianeLayerStack* LayerStack )
 {
-    UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
+    UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(LayerStack->GetCurrentLayer());
 
     LayerStack->OnPreSelectionChangedDelegate().RemoveAll( this );
     LayerStack->OnPostSelectionChangedDelegate().RemoveAll( this );
 
-    if( DrawingLayer )
+    if( VectorLayer )
     {
-        BindDrawingLayerDelegates ( DrawingLayer );
+        BindVectorLayerDelegates ( VectorLayer );
     }
 }
 
@@ -320,11 +320,11 @@ UArianeEditorPathEditTool::OnKeyDownGlobal( const FKeyEvent& InKeyEvent )
                                                                         || FSlateApplication::Get().GetModifierKeys().IsCommandDown() ) )
         {
             FEditorViewportClient* ViewportClient = GetActiveViewportClient();
-            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(GetCurrentLayer());
+            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(GetCurrentLayer());
 
             EditionMode  = EArianePathEditToolEditionMode::Alter;
 
-            if( ViewportClient && DrawingLayer )
+            if( ViewportClient && VectorLayer )
             {
                 ResetQuadTree();
             }
@@ -377,11 +377,11 @@ UArianeEditorPathEditTool::OnKeyUpGlobal( const FKeyEvent& InKeyEvent )
 
 // static
 void
-UArianeEditorPathEditTool::BuildSegmentAdjustments( UArianeLayerDrawing* DrawingLayer
+UArianeEditorPathEditTool::BuildSegmentAdjustments( UArianeLayerVector* VectorLayer
                                                   , const TArray<FArianeSegment*>& Segments
                                                   , TArray<FSegmentAdjustment>& OutSegmentAdjustments )
 {
-    UArianeImage* Image = DrawingLayer->GetImage();
+    UArianeDrawing* Image = VectorLayer->GetDrawing();
 
     OutSegmentAdjustments.Reserve( Segments.Num() );
 
@@ -417,11 +417,11 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            UArianeImage* Image = DrawingLayer->GetImage();
+            UArianeDrawing* Image = VectorLayer->GetDrawing();
 
             for( FArianeObject* SelectedTree : SelectedTrees )
             {
@@ -490,7 +490,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
                         // static call
                         FArianeVertex::ArrayToSegmentArray( PickedVertices, AlteredSegments, false );
                         // static call
-                        BuildSegmentAdjustments( DrawingLayer, AlteredSegments, SegmentAdjustments );
+                        BuildSegmentAdjustments( VectorLayer, AlteredSegments, SegmentAdjustments );
 
                         // Control points must move with the point. Store them in the iPickedHandleArray
                         for( FArianeVertex* Vertex : PickedVertices )
@@ -548,7 +548,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
                                              , RayDirection );
         }
 
-        DrawingLayer->Update( true );
+        VectorLayer->Update( true );
     }
 }
 
@@ -567,16 +567,16 @@ UArianeEditorPathEditTool::OnMouseDown( FEditorViewportClient* ViewportClient
         {
             //painting3DComponent->PrintPointers();
             UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
+            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(LayerStack->GetCurrentLayer());
 
-            if( DrawingLayer )
+            if( VectorLayer )
             {
                 //mPointInTextureAtDown = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
 
                 //mPathEditHUD->SetCutLineP0( iPointInTexture.x, iPointInTexture.y );
                 //mPathEditHUD->SetCutLineP1( iPointInTexture.x, iPointInTexture.y );
 
-                DrawingLayer->GetImage()->Modify();
+                VectorLayer->GetDrawing()->Modify();
 
                 switch( EditionMode )
                 {
@@ -774,7 +774,7 @@ UArianeEditorPathEditTool::OnMouseUpDeletePoint( const TArray<FArianePoint*>& Pi
         }
     };
 
-    TArray<UArianeLayerDrawing*> DrawingLayers;
+    TArray<UArianeLayerVector*> VectorLayers;
     TArray<FArianePath*> RemovedPaths;
     TArray<FArianeVertex*> RemovedVertices;
     TArray<FArianeSegment*> RemovedSegments;
@@ -815,9 +815,9 @@ UArianeEditorPathEditTool::OnMouseUpDeletePoint( const TArray<FArianePoint*>& Pi
                 AlteredPathRecord->VertexArray.Add( Vertex );
             }
 
-            if( DrawingLayers.Find( Owner->GetImage()->GetDrawingLayer().Get() ) == INDEX_NONE )
+            if( VectorLayers.Find( Owner->GetDrawing()->GetVectorLayer().Get() ) == INDEX_NONE )
             {
-                DrawingLayers.Add( Owner->GetImage()->GetDrawingLayer().Get() );
+                VectorLayers.Add( Owner->GetDrawing()->GetVectorLayer().Get() );
             }
         }
     }
@@ -825,9 +825,9 @@ UArianeEditorPathEditTool::OnMouseUpDeletePoint( const TArray<FArianePoint*>& Pi
     GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.delete-vertex","Delete Vertex"));
 
     // Snapshot for undos
-    for( UArianeLayerDrawing* DrawingLayer : DrawingLayers )
+    for( UArianeLayerVector* VectorLayer : VectorLayers )
     {
-        DrawingLayer->GetImage()->Modify();
+        VectorLayer->GetDrawing()->Modify();
     }
 
     for( FAlteredPathRecord& AlteredPathRecord : AlteredPathRecords )
@@ -853,11 +853,11 @@ void
 UArianeEditorPathEditTool::RebuildQuadTree( FEditorViewportClient* ViewportClient
                                           , FSceneView* View )
 {
-    UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(GetCurrentLayer());
+    UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(GetCurrentLayer());
 
-    if( DrawingLayer )
+    if( VectorLayer )
     {
-        MakePointQuadTree( ViewportClient, View, {DrawingLayer}, true );
+        MakePointQuadTree( ViewportClient, View, {VectorLayer}, true );
     }
 }
 
@@ -1043,9 +1043,9 @@ UArianeEditorPathEditTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* Re
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
             for( FArianeObject* SelectedTree : SelectedTrees )
             {

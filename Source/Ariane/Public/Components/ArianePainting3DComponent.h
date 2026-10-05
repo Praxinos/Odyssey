@@ -28,7 +28,7 @@ class FArianePathGeometry3D;
 struct FArianeSegment;
 class UArianeLayerFolder;
 class UArianeLayer;
-class UArianeLayerDrawing;
+class UArianeLayerVector;
 class UArianeLayerStack;
 class UOdysseyPalette;
 class UOdysseyPaletteSet;

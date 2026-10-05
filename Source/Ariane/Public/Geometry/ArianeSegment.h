@@ -14,7 +14,7 @@
 
 #include "ArianeSegment.generated.h"
 
-class UArianeImage;
+class UArianeDrawing;
 struct FArianeObject;
 struct FArianeVertex;
 
@@ -200,8 +200,8 @@ struct ARIANE_API FArianeSegment
                          , const TArray<float>& Radii  );
         EArianeAllocationModel GetAllocationModel();
         double GetVertexT( FArianeVertex* Vertex );
-        void SetImage( UArianeImage* InImage );
-        UArianeImage* GetImage();
+        void SetDrawing( UArianeDrawing* InDrawing );
+        UArianeDrawing* GetDrawing();
 
     protected:
         /** Update the segment's bounds */
@@ -225,7 +225,7 @@ struct ARIANE_API FArianeSegment
 
     protected:
         // Needed to resolve the fake-pointers FArianeXXXXID
-        UArianeImage* Image;
+        UArianeDrawing* Drawing;
         TArray<FArianePoint> FractionPoints;
         TArray<FFractionStep> FractionSteps;
         TArray<FFraction> Fractions;

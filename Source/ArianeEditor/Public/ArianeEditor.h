@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 // Ariane Headers
 #include "ArianePainting3DComponentEditorInterface.h"
-#include "ArianeLayerDrawingEnums.h"
+#include "ArianeLayerVectorEnums.h"
 // Ariane Editor Headers
 #include "ArianeEditorHUD.h"
 // Odyssey Headers
@@ -29,7 +29,7 @@ class AArianePainting3DActor;
 class UArianePainting3DComponent;
 class UInteractiveToolManager;
 class UArianeEditorToolBuilder;
-class UArianeLayerDrawing;
+class UArianeLayerVector;
 class UArianeLayer;
 struct FArianePrimitive;
 struct FArianeObject;
@@ -37,10 +37,10 @@ struct FArianeObject;
 UENUM()
 enum class EArianeEditorDrawingOrientation : uint8
 {
-    XY = static_cast<uint8>(EArianeLayerDrawingOrientation::XY),
-    YZ = static_cast<uint8>(EArianeLayerDrawingOrientation::YZ),
-    ZX = static_cast<uint8>(EArianeLayerDrawingOrientation::ZX),
-    View    = static_cast<uint8>(EArianeLayerDrawingOrientation::View),
+    XY = static_cast<uint8>(EArianeLayerVectorDrawingOrientation::XY),
+    YZ = static_cast<uint8>(EArianeLayerVectorDrawingOrientation::YZ),
+    ZX = static_cast<uint8>(EArianeLayerVectorDrawingOrientation::ZX),
+    View    = static_cast<uint8>(EArianeLayerVectorDrawingOrientation::View),
     LayerDefined,
 };
 
@@ -243,7 +243,7 @@ public:
     // immplements IArianePainting3DComponentEditorInterface::GetHUDForegroundColor
     virtual FColor GetHUDForegroundColor() override;
     void SetCurrentPainting3DComponent( UArianePainting3DComponent* InPainting3DComponent );
-    EArianeLayerDrawingOrientation GetLayerDrawingOrientation( UArianeLayerDrawing* DrawingLayer );
+    EArianeLayerVectorDrawingOrientation GetLayerDrawingOrientation( UArianeLayerVector* VectorLayer );
     EArianeEditorDrawingCoordinateSystem GetDrawingCoordinateSystem();
     bool GetShowGrid() const;
 

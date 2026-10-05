@@ -2,8 +2,8 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 // Ariane headers
-#include "ArianeImage.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DActor.h"
 #include "ArianePainting3DComponent.h"
@@ -15,23 +15,23 @@
 #include "ArianeLine.h"
 #include "ArianePolygon.h"
 #include "ArianeVertex.h"
-#include "ArianeImageKeyData.h"
+#include "ArianeDrawingKeyData.h"
 
 #define LOCTEXT_NAMESPACE "Ariane"
 
-UArianeImage::~UArianeImage()
+UArianeDrawing::~UArianeDrawing()
 {
 }
 
 void
-UArianeImage::BeginDestroy()
+UArianeDrawing::BeginDestroy()
 {
     //UnbindDelegates();
 
     Super::BeginDestroy();
 }
 
-UArianeImage::UArianeImage()
+UArianeDrawing::UArianeDrawing()
 {
     ResetHierarchy();
 
@@ -50,24 +50,24 @@ UArianeImage::UArianeImage()
 }
 
 FGuid
-UArianeImage::GetAllocatorGuid()
+UArianeDrawing::GetAllocatorGuid()
 {
     return AllocatorGuid;
 }
 
 void
-UArianeImage::RebindObjects()
+UArianeDrawing::RebindObjects()
 {
     AllocatorGuid = FGuid::NewGuid();
 }
 
-void UArianeImage::Serialize(FArchive& Ar)
+void UArianeDrawing::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
 }
 
 void
-UArianeImage::Reset()
+UArianeDrawing::Reset()
 {
     AllocatorGuid = FGuid::NewGuid();
 
@@ -80,7 +80,7 @@ UArianeImage::Reset()
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
 
-        Object->ResetImage( this );
+        Object->ResetDrawing( this );
     }
 
     for (FInstancedStruct& InstancedStruct : InstancedObjects)
@@ -95,44 +95,44 @@ UArianeImage::Reset()
 }
 
 void
-UArianeImage::OnRegisterLayer()
+UArianeDrawing::OnRegisterLayer()
 {
     Reset();
 }
 
 void
-UArianeImage::SetDrawingLayer( TWeakObjectPtr<UArianeLayerDrawing> InDrawingLayer )
+UArianeDrawing::SetVectorLayer( TWeakObjectPtr<UArianeLayerVector> InVectorLayer )
 {
-    DrawingLayer = InDrawingLayer;
+    VectorLayer = InVectorLayer;
 }
 
-TWeakObjectPtr<UArianeLayerDrawing>
-UArianeImage::GetDrawingLayer()
+TWeakObjectPtr<UArianeLayerVector>
+UArianeDrawing::GetVectorLayer()
 {
-    return DrawingLayer;
+    return VectorLayer;
 }
 
 FArianeGroup*
-UArianeImage::GetRootGroup()
+UArianeDrawing::GetRootGroup()
 {
     return static_cast<FArianeGroup*>(RootGroupID.GetObject( this ));
 }
 
 void
-UArianeImage::PrintPointers()
+UArianeDrawing::PrintPointers()
 {
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
 
-        UE_LOG( LogTemp, Warning, TEXT("UArianeImage::PrintPointers - Object.Image:%p"), Object->GetImage() );
+        UE_LOG( LogTemp, Warning, TEXT("UArianeDrawing::PrintPointers - Object.Drawing:%p"), Object->GetDrawing() );
     }
 }
 
 void
-UArianeImage::PostLoad()
+UArianeDrawing::PostLoad()
 {
-    UArianeLayerDrawing* DrawingLayerPtr = GetDrawingLayer().Get();
+    UArianeLayerVector* VectorLayerPtr = GetVectorLayer().Get();
 
     Super::PostLoad();
 
@@ -156,10 +156,10 @@ UArianeImage::PostLoad()
 
     Update( false );
 
-    // Not all Images have drawing layers, especially those stored in a Level Sequence
-    if( DrawingLayerPtr )
+    // Not all Drawings have drawing layers, especially those stored in a Level Sequence
+    if( VectorLayerPtr )
     {
-        UArianeLayerStack* LayerStack = DrawingLayerPtr->GetLayerStack();
+        UArianeLayerStack* LayerStack = VectorLayerPtr->GetLayerStack();
 
         // layer stack can be null in case the layer is copied in the clipboard (orphan layer)
         if( LayerStack )
@@ -171,9 +171,9 @@ UArianeImage::PostLoad()
 }
 
 void
-UArianeImage::PostEditUndo()
+UArianeDrawing::PostEditUndo()
 {
-    UArianeLayerDrawing* DrawingLayerPtr = GetDrawingLayer().Get();
+    UArianeLayerVector* VectorLayerPtr = GetVectorLayer().Get();
 
     Super::PostEditUndo();
 
@@ -192,10 +192,10 @@ UArianeImage::PostEditUndo()
 
     Update( false );
 
-    // Not all Images have drawing layers, especially those stored in a Level Sequence
-    if( DrawingLayerPtr )
+    // Not all Drawings have drawing layers, especially those stored in a Level Sequence
+    if( VectorLayerPtr )
     {
-        UArianeLayerStack* LayerStack = DrawingLayerPtr->GetLayerStack();
+        UArianeLayerStack* LayerStack = VectorLayerPtr->GetLayerStack();
 
         // layer stack can be null in case the layer is copied in the clipboard (orphan layer)
         if( LayerStack )
@@ -207,7 +207,7 @@ UArianeImage::PostEditUndo()
 }
 
 FArianeObject*
-UArianeImage::GetObject( const FGuid& InGuid )
+UArianeDrawing::GetObject( const FGuid& InGuid )
 {
     for( FInstancedStruct& InstancedObject : InstancedObjects )
     {
@@ -223,15 +223,15 @@ UArianeImage::GetObject( const FGuid& InGuid )
 }
 
 void
-UArianeImage::Animate( const FArianeImageKeyData* KeyData, const FArianeImageKeyData* NextKeyData, float T )
+UArianeDrawing::Animate( const FArianeDrawingKeyData* KeyData, const FArianeDrawingKeyData* NextKeyData, float T )
 {
     FArianeObject::Traverse( GetRootGroup()
                            , [ KeyData
                              , NextKeyData
                              , T ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
         {
-            const FArianeKeyedObject* KeyedObject = const_cast<FArianeImageKeyData*>(KeyData)->GetKeyedObject( Object->GetGuid() );
-            const FArianeKeyedObject* NextKeyedObject = NextKeyData ? const_cast<FArianeImageKeyData*>(NextKeyData)->GetKeyedObject( Object->GetGuid() )
+            const FArianeKeyedObject* KeyedObject = const_cast<FArianeDrawingKeyData*>(KeyData)->GetKeyedObject( Object->GetGuid() );
+            const FArianeKeyedObject* NextKeyedObject = NextKeyData ? const_cast<FArianeDrawingKeyData*>(NextKeyData)->GetKeyedObject( Object->GetGuid() )
                                                                     : KeyedObject;
 
             if( KeyedObject )
@@ -244,7 +244,7 @@ UArianeImage::Animate( const FArianeImageKeyData* KeyData, const FArianeImageKey
 }
 
 FArianeObject*
-UArianeImage::AllocObject( const FName& InName, EArianeAllocationModel AllocationModel )
+UArianeDrawing::AllocObject( const FName& InName, EArianeAllocationModel AllocationModel )
 {
     InstancedObjectsAccessRW.Lock();
     InstancedObjects.Add( FInstancedStruct::Make<FArianeObject>( this, InName, EArianeAllocationModel::InstancedStruct ) );
@@ -258,7 +258,7 @@ UArianeImage::AllocObject( const FName& InName, EArianeAllocationModel Allocatio
 }
 
 FArianeGroup*
-UArianeImage::AllocGroup( const FName& InName
+UArianeDrawing::AllocGroup( const FName& InName
                                , EArianeAllocationModel AllocationModel )
 {
     FArianeGroup* NewGroup = nullptr;
@@ -284,11 +284,11 @@ UArianeImage::AllocGroup( const FName& InName
 }
 
 FArianeCycle*
-UArianeImage::AllocCycle( UMaterialInterface* InMaterialInterface
+UArianeDrawing::AllocCycle( UMaterialInterface* InMaterialInterface
                         , const FName& InName
                         , EArianeAllocationModel AllocationModel )
 {
-    UArianeLayerStack* LayerStack = GetDrawingLayer()->GetLayerStack();
+    UArianeLayerStack* LayerStack = GetVectorLayer()->GetLayerStack();
     FArianeCycle* NewCycle = nullptr;
 
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
@@ -310,21 +310,21 @@ UArianeImage::AllocCycle( UMaterialInterface* InMaterialInterface
                                                : LayerStack->GetPainting3DComponent()->GetDefaultMaterial() );
 
     // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
-    DrawingLayer->MarkRenderStateDirty();
+    VectorLayer->MarkRenderStateDirty();
 
 
     return NewCycle;
 }
 
 FArianeEllipse*
-UArianeImage::AllocEllipse( UMaterialInterface* InMaterialInterface
+UArianeDrawing::AllocEllipse( UMaterialInterface* InMaterialInterface
                                  , const FName& InName
                                  , double RadiusX
                                  , double RadiusY
                                  , double StrokeWidth
                                  , EArianeAllocationModel AllocationModel )
 {
-    UArianeLayerStack* LayerStack = GetDrawingLayer()->GetLayerStack();
+    UArianeLayerStack* LayerStack = GetVectorLayer()->GetLayerStack();
     FArianeEllipse* Ellipse = nullptr;
 
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
@@ -356,21 +356,21 @@ UArianeImage::AllocEllipse( UMaterialInterface* InMaterialInterface
                                               : LayerStack->GetPainting3DComponent()->GetDefaultMaterial() );
 
     // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
-    DrawingLayer->MarkRenderStateDirty();
+    VectorLayer->MarkRenderStateDirty();
 
 
     return Ellipse;
 }
 
 FArianeLine*
-UArianeImage::AllocLine( UMaterialInterface* InMaterialInterface
+UArianeDrawing::AllocLine( UMaterialInterface* InMaterialInterface
                               , const FName& InName
                               , const FVector& StartPoint
                               , const FVector& EndPoint
                               , double StrokeWidth
                               , EArianeAllocationModel AllocationModel )
 {
-    UArianeLayerStack* LayerStack = GetDrawingLayer()->GetLayerStack();
+    UArianeLayerStack* LayerStack = GetVectorLayer()->GetLayerStack();
     FArianeLine* Line = nullptr;
 
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
@@ -402,21 +402,21 @@ UArianeImage::AllocLine( UMaterialInterface* InMaterialInterface
                                            : LayerStack->GetPainting3DComponent()->GetDefaultMaterial() );
 
     // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
-    DrawingLayer->MarkRenderStateDirty();
+    VectorLayer->MarkRenderStateDirty();
 
 
     return Line;
 }
 
 FArianePolygon*
-UArianeImage::AllocPolygon( UMaterialInterface* InMaterialInterface
+UArianeDrawing::AllocPolygon( UMaterialInterface* InMaterialInterface
                                  , const FName& InName
                                  , uint32 CornerCount
                                  , double Radius
                                  , double StrokeWidth
                                  , EArianeAllocationModel AllocationModel )
 {
-    UArianeLayerStack* LayerStack = GetDrawingLayer()->GetLayerStack();
+    UArianeLayerStack* LayerStack = GetVectorLayer()->GetLayerStack();
     FArianePolygon* Polygon = nullptr;
 
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
@@ -448,21 +448,21 @@ UArianeImage::AllocPolygon( UMaterialInterface* InMaterialInterface
                                               : LayerStack->GetPainting3DComponent()->GetDefaultMaterial() );
 
     // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
-    DrawingLayer->MarkRenderStateDirty();
+    VectorLayer->MarkRenderStateDirty();
 
 
     return Polygon;
 }
 
 FArianeRectangle*
-UArianeImage::AllocRectangle( UMaterialInterface* InMaterialInterface
+UArianeDrawing::AllocRectangle( UMaterialInterface* InMaterialInterface
                                    , const FName& InName
                                    , double Width
                                    , double Height
                                    , double StrokeWidth
                                    , EArianeAllocationModel AllocationModel )
 {
-    UArianeLayerStack* LayerStack = GetDrawingLayer()->GetLayerStack();
+    UArianeLayerStack* LayerStack = GetVectorLayer()->GetLayerStack();
     FArianeRectangle* Rectangle = nullptr;
 
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
@@ -494,18 +494,18 @@ UArianeImage::AllocRectangle( UMaterialInterface* InMaterialInterface
                                                 : LayerStack->GetPainting3DComponent()->GetDefaultMaterial() );
 
     // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
-    DrawingLayer->MarkRenderStateDirty();
+    VectorLayer->MarkRenderStateDirty();
 
 
     return Rectangle;
 }
 
 FArianePath*
-UArianeImage::AllocPath( UMaterialInterface* InMaterialInterface
+UArianeDrawing::AllocPath( UMaterialInterface* InMaterialInterface
                               , const FName& InName
                               , EArianeAllocationModel AllocationModel )
 {
-    UArianeLayerStack* LayerStack = GetDrawingLayer()->GetLayerStack();
+    UArianeLayerStack* LayerStack = GetVectorLayer()->GetLayerStack();
     FArianePath* NewPath = nullptr;
 
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
@@ -527,14 +527,14 @@ UArianeImage::AllocPath( UMaterialInterface* InMaterialInterface
                                               : LayerStack->GetPainting3DComponent()->GetDefaultMaterial() );
 
     // Will force the creation of a render proxy, which will retrieve all the materials used to draw the meshes.
-    DrawingLayer->MarkRenderStateDirty();
+    VectorLayer->MarkRenderStateDirty();
 
 
     return NewPath;
 }
 
 void
-UArianeImage::AppendUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials ) const
+UArianeDrawing::AppendUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials ) const
 {
     OutUsedMaterials.Reserve( OutUsedMaterials.Num() + UsedMaterials.Num() );
 
@@ -545,7 +545,7 @@ UArianeImage::AppendUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials
 }
 
 void
-UArianeImage::GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials, bool bGetDebugMaterials ) const
+UArianeDrawing::GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials, bool bGetDebugMaterials ) const
 {
     OutUsedMaterials.Empty();
 
@@ -553,7 +553,7 @@ UArianeImage::GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials, b
 }
 
 void
-UArianeImage::IncrementMaterial( UMaterialInterface* MaterialInterface )
+UArianeDrawing::IncrementMaterial( UMaterialInterface* MaterialInterface )
 {
     uint32* value = UsedMaterials.Find( MaterialInterface );
 
@@ -563,16 +563,16 @@ UArianeImage::IncrementMaterial( UMaterialInterface* MaterialInterface )
         UsedMaterials.Add( MaterialInterface, 1 );
     }
 
-    // DrawingLayer can be null for orphan Images (stored in animation keys)
-    if( DrawingLayer.IsValid() )
+    // VectorLayer can be null for orphan Drawings (stored in animation keys)
+    if( VectorLayer.IsValid() )
     {
         // we need to rebuild the proxy
-        DrawingLayer->MarkRenderStateDirty();
+        VectorLayer->MarkRenderStateDirty();
     }
 }
 
 void
-UArianeImage::DecrementMaterial( UMaterialInterface* MaterialInterface )
+UArianeDrawing::DecrementMaterial( UMaterialInterface* MaterialInterface )
 {
     uint32* value = UsedMaterials.Find( MaterialInterface );
 
@@ -585,29 +585,29 @@ UArianeImage::DecrementMaterial( UMaterialInterface* MaterialInterface )
         UsedMaterials.Remove( MaterialInterface );
     }
 
-    // DrawingLayer can be null for orphan Images (stored in animation keys)
-    if( DrawingLayer.IsValid() )
+    // VectorLayer can be null for orphan Drawings (stored in animation keys)
+    if( VectorLayer.IsValid() )
     {
         // we need to rebuild the proxy
-        DrawingLayer->MarkRenderStateDirty();
+        VectorLayer->MarkRenderStateDirty();
     }
 }
 
 const
 TArray<FInstancedStruct>&
-UArianeImage::GetInstancedObjects() const
+UArianeDrawing::GetInstancedObjects() const
 {
     return InstancedObjects;
 }
 
 TArray<FInstancedStruct>&
-UArianeImage::GetInstancedObjects()
+UArianeDrawing::GetInstancedObjects()
 {
     return InstancedObjects;
 }
 
 void
-UArianeImage::Update( bool bInteractive )
+UArianeDrawing::Update( bool bInteractive )
 {
     FArianeObject::EUpdateFlags ObjectUpdateFlags = FArianeObject::EUpdateFlags::None;
 
@@ -620,12 +620,12 @@ UArianeImage::Update( bool bInteractive )
 }
 
 void
-UArianeImage::Invalidate()
+UArianeDrawing::Invalidate()
 {
-    // DrawingLayer can be null for orphan images (stored in animation keys)
-    if( DrawingLayer.IsValid() )
+    // VectorLayer can be null for orphan images (stored in animation keys)
+    if( VectorLayer.IsValid() )
     {
-        DrawingLayer->Invalidate();
+        VectorLayer->Invalidate();
     }
 
     MarkPackageDirty();
@@ -633,16 +633,16 @@ UArianeImage::Invalidate()
 
 /*
 void
-UArianeImage::BindDelegates()
+UArianeDrawing::BindDelegates()
 {
     if( RootGroupID.GetObject( this ) )
     {
-        RootGroupID.GetObject( this )->GetOnPostInvalidatedDelegate().AddUObject( this, &UArianeImage::OnRootObjectInvalidated );
+        RootGroupID.GetObject( this )->GetOnPostInvalidatedDelegate().AddUObject( this, &UArianeDrawing::OnRootObjectInvalidated );
     }
 }
 
 void
-UArianeImage::UnbindDelegates()
+UArianeDrawing::UnbindDelegates()
 {
     if( RootGroupID.GetObject( this ) )
     {
@@ -652,7 +652,7 @@ UArianeImage::UnbindDelegates()
 */
 
 void
-UArianeImage::ResetHierarchy()
+UArianeDrawing::ResetHierarchy()
 {
     //UnbindDelegates( );
 
@@ -670,7 +670,7 @@ UArianeImage::ResetHierarchy()
 }
 
 void
-UArianeImage::DeleteInstancedObject( FArianeObject* Object )
+UArianeDrawing::DeleteInstancedObject( FArianeObject* Object )
 {
     InstancedObjectsAccessRW.Lock();
 
@@ -683,7 +683,7 @@ UArianeImage::DeleteInstancedObject( FArianeObject* Object )
 }
 
 void
-UArianeImage::ClearObjectSelection()
+UArianeDrawing::ClearObjectSelection()
 {
     SelectedObjects.RemoveAll(
         []( FArianeObject* SelectedObject )
@@ -695,7 +695,7 @@ UArianeImage::ClearObjectSelection()
 }
 
 void
-UArianeImage::UnselectObject( FArianeObject* ObjectToSelect )
+UArianeDrawing::UnselectObject( FArianeObject* ObjectToSelect )
 {
     SelectedObjects.Remove( ObjectToSelect );
 
@@ -703,7 +703,7 @@ UArianeImage::UnselectObject( FArianeObject* ObjectToSelect )
 }
 
 void
-UArianeImage::SelectObject( FArianeObject* ObjectToSelect )
+UArianeDrawing::SelectObject( FArianeObject* ObjectToSelect )
 {
     SelectedObjects.Add( ObjectToSelect );
 
@@ -711,19 +711,19 @@ UArianeImage::SelectObject( FArianeObject* ObjectToSelect )
 }
 
 const TArray<FArianeObject*>&
-UArianeImage::GetSelectedObjects() const
+UArianeDrawing::GetSelectedObjects() const
 {
     return SelectedObjects;
 }
 
 TArray<FArianeObject*>&
-UArianeImage::GetSelectedObjects()
+UArianeDrawing::GetSelectedObjects()
 {
     return SelectedObjects;
 }
 
 void
-UArianeImage::AppendSelectedTrees( TArray<FArianeObject*>& SelectedTrees )
+UArianeDrawing::AppendSelectedTrees( TArray<FArianeObject*>& SelectedTrees )
 {
     SelectedTrees.Reserve( SelectedTrees.Num() + SelectedObjects.Num() );
 
@@ -758,7 +758,7 @@ UArianeImage::AppendSelectedTrees( TArray<FArianeObject*>& SelectedTrees )
 }
 
 void
-UArianeImage::GetSelectedTrees( TArray<FArianeObject*>& SelectedTrees )
+UArianeDrawing::GetSelectedTrees( TArray<FArianeObject*>& SelectedTrees )
 {
     SelectedTrees.Empty();
 

@@ -4,11 +4,11 @@
 // Ariane headers
 #include "ArianeLayer.h"
 #include "ArianeLayerFolder.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianePainting3DActor.h"
-#include "ArianeImage.h"
+#include "ArianeDrawing.h"
 #include "ArianeCycle.h"
 #include "ArianeVertex.h"
 #include "ArianePath.h"

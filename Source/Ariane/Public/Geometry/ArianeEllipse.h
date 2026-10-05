@@ -32,7 +32,7 @@ public:
     /**
      * @brief constructor.
      */
-    FArianeEllipse( UArianeImage* InImage
+    FArianeEllipse( UArianeDrawing* InDrawing
                   , const FName& InName
                   , double InRadiusX
                   , double InRadiusY

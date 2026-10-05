@@ -6,14 +6,14 @@
 
 #include "CoreMinimal.h"
 #include "ISequencerTrackEditor.h"
-#include "ArianeImageMovieSceneTrack.h"
+#include "ArianeDrawingMovieSceneTrack.h"
 #include "MovieSceneTrackEditor.h"
 #include "ISequencer.h"
 
-class FArianeEditorImageMovieSceneTrack : public FMovieSceneTrackEditor
+class FArianeEditorDrawingMovieSceneTrack : public FMovieSceneTrackEditor
 {
 public:
-    FArianeEditorImageMovieSceneTrack(TSharedRef<ISequencer> InSequencer);
+    FArianeEditorDrawingMovieSceneTrack(TSharedRef<ISequencer> InSequencer);
     static TSharedRef<ISequencerTrackEditor> CreateTrackEditor(TSharedRef<ISequencer> InSequencer);
     virtual bool SupportsType(TSubclassOf<UMovieSceneTrack> TrackClass) const override;
     virtual void BuildObjectBindingTrackMenu(FMenuBuilder& MenuBuilder, const TArray<FGuid>& ObjectBindings, const UClass* ObjectClass) override;

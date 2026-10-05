@@ -15,7 +15,7 @@
 class UArianeLayerStack;
 class UArianeLayer;
 class UArianeLayerFolder;
-class UArianeLayerDrawing;
+class UArianeLayerVector;
 
 UCLASS(Abstract)
 class ARIANE_API UArianeLayer : public UMeshComponent

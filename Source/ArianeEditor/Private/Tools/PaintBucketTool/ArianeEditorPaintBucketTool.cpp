@@ -12,8 +12,8 @@
 #include "ArianeGroup.h"
 #include "ArianeGraph.h"
 #include "ArianeLayerStack.h"
-#include "ArianeImage.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeSegmentCubic.h"
 
 // Unreal headers
@@ -150,19 +150,19 @@ UArianeEditorPaintBucketTool::Reset()
     if( Painting3DComponent )
     {
         UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>( LayerStack->GetCurrentLayer() );
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>( LayerStack->GetCurrentLayer() );
         FViewCameraState CameraState;
 
         QueriesAPI->GetCurrentViewState( CameraState );
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            FVector4 DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
+            FVector4 DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
             TArray<FArianeObject*> GraphedPaths;
             FVector CameraLocation = CameraState.Position;
-            FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
+            FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
 
-            GraphedPaths.Reserve( DrawingLayer->GetImage()->GetInstancedObjects().Num() );
+            GraphedPaths.Reserve( VectorLayer->GetDrawing()->GetInstancedObjects().Num() );
 
             FArianeObject::Traverse( RootGroup
                                    , [ &GraphedPaths ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
@@ -258,19 +258,19 @@ UArianeEditorPaintBucketTool::OnMouseUp( FEditorViewportClient* ViewportClient
         {
             //painting3DComponent->PrintPointers();
             UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
+            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(LayerStack->GetCurrentLayer());
 
-            if( DrawingLayer )
+            if( VectorLayer )
             {
                 // choose between the root group and the selected group if any
-                FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
-                int PathNumber = DrawingLayer->GetImage()->GetInstancedObjects().Num();
+                FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
+                int PathNumber = VectorLayer->GetDrawing()->GetInstancedObjects().Num();
 
                 GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-paint-bucket-tool.add-cycle","Add Cycle"));
 
-                DrawingLayer->GetImage()->Modify();
+                VectorLayer->GetDrawing()->Modify();
 
-                FArianeCycle* PaintedCycle = DrawingLayer->GetImage()->AllocCycle( MaterialInterface ? MaterialInterface
+                FArianeCycle* PaintedCycle = VectorLayer->GetDrawing()->AllocCycle( MaterialInterface ? MaterialInterface
                                                                                                      : Settings->GetDefaultPathDrawingMaterial()
                                                                                  , *(FString( "Cycle_" ) + FString::FromInt( PathNumber ))
                                                                                  , EArianeAllocationModel::InstancedStruct );
@@ -318,11 +318,11 @@ UArianeEditorPaintBucketTool::Render(IToolsContextRenderAPI* RenderAPI)
         if( Painting3DComponent )
         {
             UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>( LayerStack->GetCurrentLayer() );
+            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>( LayerStack->GetCurrentLayer() );
 
-            if( DrawingLayer )
+            if( VectorLayer )
             {
-                DrawLayerOrientationGrid( RenderAPI, DrawingLayer );
+                DrawLayerOrientationGrid( RenderAPI, VectorLayer );
             }
         }
     }

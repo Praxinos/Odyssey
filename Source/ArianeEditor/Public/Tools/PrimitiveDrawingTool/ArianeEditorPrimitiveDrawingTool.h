@@ -74,7 +74,7 @@ public:
 
 protected:
     //double GetLineRotationAngle( FArianeLine* iLine, const FOdysseyPoint& iPointInTexture );
-    FArianeGroup* GetParentGroup( UArianeLayerDrawing* DrawingLayer );
+    FArianeGroup* GetParentGroup( UArianeLayerVector* VectorLayer );
     //void BindDelegates();
     //void UnbindDelegates();
 

@@ -4,7 +4,7 @@
 #include "ArianeEllipse.h"
 #include "ArianeVertex.h"
 #include "ArianeSegmentCubic.h"
-#include "ArianeImage.h"
+#include "ArianeDrawing.h"
 
 // https://stackoverflow.com/a/27863181
 // https://stackoverflow.com/questions/1734745/how-to-create-circle-with-b%c3%a9zier-curves
@@ -26,13 +26,13 @@ FArianeEllipse::FArianeEllipse()
 {
 }
 
-FArianeEllipse::FArianeEllipse( UArianeImage* InImage
+FArianeEllipse::FArianeEllipse( UArianeDrawing* InDrawing
                               , const FName& InName
                               , double InRadiusX
                               , double InRadiusY
                               , double InStrokeWidth
                               , EArianeAllocationModel InAllocationModel )
-    : FArianePrimitive( InImage
+    : FArianePrimitive( InDrawing
                       , InName
                       , InStrokeWidth
                       , InAllocationModel )
@@ -141,7 +141,7 @@ FArianeEllipse::CopyShape( const FCopyArgs& CopyArgs )
     }
     else
     {
-         EllipseCopy = CopyArgs.Image->AllocEllipse( Material
+         EllipseCopy = CopyArgs.Drawing->AllocEllipse( Material
                                                    , Name
                                                    , RadiusX
                                                    , RadiusY

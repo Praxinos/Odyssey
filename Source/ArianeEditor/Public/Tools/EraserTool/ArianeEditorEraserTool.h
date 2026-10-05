@@ -19,7 +19,7 @@ class UArianePainting3DComponent;
 class UCanvasRenderTarget2D;
 struct FArianeVertex;
 class FEditorViewportClient;
-class UArianeLayerDrawing;
+class UArianeLayerVector;
 
 UENUM(BlueprintType)
 enum class EArianeEditorEraserToolPrimitiveBehaviour : uint8
@@ -202,7 +202,7 @@ protected:
                    , UArianePainting3DComponent* Painting3DComponent );
     bool EraseChainSegments( FEditorViewportClient* ViewportClient
                            , FSceneView* View
-                           , UArianeLayerDrawing* DrawingLayer
+                           , UArianeLayerVector* VectorLayer
                            , FArianePath* Path
                            , const FArianePath::Chain& Chain
                            , const TArray<FColor>& Pixels
@@ -242,7 +242,7 @@ protected:
     static FStartingPoint GetStartingPoint( FWayPoint* WayPoint, FWayFragment* Fragment );
     static ESegmentAdditionFlags SegmentAdditionPolicy( FWayPoint* WayPoint, FWayFragment* Fragment, bool bSplit );
     static EVertexAdditionFlags VertexAdditionPolicy( FWayPoint* WayPoint, bool bSplit );
-    void ParseChainWayPoints( UArianeLayerDrawing* DrawingLayer
+    void ParseChainWayPoints( UArianeLayerVector* VectorLayer
                             , FArianePath* ChainPath
                             , TArray<FWayPoint>& WayPoints
                             , TArray<FWayFragment>& WayFragments
@@ -258,7 +258,7 @@ protected:
                                       , bool bSplit );
     FBox2D GetPathBoundingArea( FEditorViewportClient* ViewportClient, FSceneView* View, FArianePath* Path );
     FBox2D GetErasureBoundingArea( FEditorViewportClient* ViewportClient, FSceneView* View );
-    void ParseChainProcessors( UArianeLayerDrawing* DrawingLayer
+    void ParseChainProcessors( UArianeLayerVector* VectorLayer
                              , FArianePath* ChainPath
                              , TArray<ChainProcessor>& ChainProcessors
                              , TArray<FArianePath*>& AddedPaths

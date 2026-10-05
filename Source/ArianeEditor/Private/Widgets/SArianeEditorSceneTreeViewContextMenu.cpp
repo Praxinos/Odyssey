@@ -11,8 +11,8 @@
 #include "ArianeObject.h"
 #include "ArianePrimitive.h"
 #include "ArianeGroup.h"
-#include "ArianeImage.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeDrawing.h"
+#include "ArianeLayerVector.h"
 // Unreal headers
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Dialogs/Dialogs.h"
@@ -133,9 +133,9 @@ SArianeEditorSceneTreeViewContextMenu::DeleteSelectedObjects( FArianeEditor* Edi
 bool
 SArianeEditorSceneTreeViewContextMenu::HasOnlySelectedPrimitives( FArianeGroup* RootGroup )
 {
-    UArianeLayerDrawing* DrawingLayer = RootGroup->GetImage()->GetDrawingLayer().Get();
+    UArianeLayerVector* VectorLayer = RootGroup->GetDrawing()->GetVectorLayer().Get();
 
-    for( FArianeObject* SelectedObject : DrawingLayer->GetImage()->GetSelectedObjects() )
+    for( FArianeObject* SelectedObject : VectorLayer->GetDrawing()->GetSelectedObjects() )
     {
         if( SelectedObject->HasBaseClass( FArianePrimitive::StaticClass() ) == false )
         {
@@ -200,7 +200,7 @@ SArianeEditorSceneTreeViewContextMenu::CanUngroup( FArianeGroup* RootGroup )
 {
     bool Ret = false;
 
-    for( FArianeObject* SelectedObject : RootGroup->GetImage()->GetSelectedObjects() )
+    for( FArianeObject* SelectedObject : RootGroup->GetDrawing()->GetSelectedObjects() )
     {
         if( ( SelectedObject->HasBaseClass( FArianeGroup::StaticClass() ) == false )
          || ( SelectedObject == RootGroup ) )

@@ -7,18 +7,18 @@
 #include "CoreMinimal.h"
 #include "Tracks/MovieScenePropertyTrack.h"
 #include "Compilation/IMovieSceneTrackTemplateProducer.h"
-#include "ArianeImageMovieSceneSection.h"
+#include "ArianeDrawingMovieSceneSection.h"
 #include "EntitySystem/TrackInstance/MovieSceneTrackInstance.h"
 
-#include "ArianeImageMovieSceneTrack.generated.h"
+#include "ArianeDrawingMovieSceneTrack.generated.h"
 
 UCLASS()
-class ARIANE_API UArianeImageMovieSceneTrack : public UMovieScenePropertyTrack, public IMovieSceneTrackTemplateProducer
+class ARIANE_API UArianeDrawingMovieSceneTrack : public UMovieScenePropertyTrack, public IMovieSceneTrackTemplateProducer
 {
     GENERATED_BODY()
 
 public:
-    UArianeImageMovieSceneTrack();
+    UArianeDrawingMovieSceneTrack();
 
     // --- Interface UMovieSceneTrack ---
     virtual bool SupportsType(TSubclassOf<UMovieSceneSection> SectionClass) const override;
@@ -27,5 +27,5 @@ public:
     // implements IMovieSceneTrackTemplateProducer::CreateTemplateForSection
     virtual FMovieSceneEvalTemplatePtr CreateTemplateForSection(const UMovieSceneSection& InSection) const override;
 
-    UArianeLayerDrawing* GetDrawingLayer( ISequencer& InSequencer );
+    UArianeLayerVector* GetVectorLayer( ISequencer& InSequencer );
 };

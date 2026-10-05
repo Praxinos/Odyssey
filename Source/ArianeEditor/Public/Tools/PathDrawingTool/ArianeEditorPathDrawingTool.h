@@ -81,7 +81,7 @@ protected:
     void PlotVertex( FEditorViewportClient* ViewportClient
                    , const FArianePointerState& State
                    , bool bInteractive );
-    FArianeGroup* GetParentGroup( UArianeLayerDrawing* DrawingLayer );
+    FArianeGroup* GetParentGroup( UArianeLayerVector* VectorLayer );
 
 public:
     UPROPERTY( EditAnywhere

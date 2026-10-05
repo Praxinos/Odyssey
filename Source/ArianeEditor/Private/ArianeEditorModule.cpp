@@ -10,9 +10,9 @@
 #include "ArianeEditorColorSelectorTab.h"
 #include "ArianeEditorLayerStackTab.h"
 #include "ArianeEditorSceneTreeViewTab.h"
-#include "ArianeLayerDrawingOrientationCustomization.h"
+#include "ArianeLayerVectorDrawingOrientationCustomization.h"
 #include "ArianePainting3DComponentCustomization.h"
-#include "ArianeEditorImageMovieSceneTrack.h"
+#include "ArianeEditorDrawingMovieSceneTrack.h"
 #include "ArianeEditorStyle.h"
 #include "ArianeEditorViewportEdMode.h"
 
@@ -21,10 +21,10 @@
 #include "ArianePainting3DComponent.h"
 #include "ArianePainting3DStaticMeshComponent.h"
 #include "ArianeLayer.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerStack.h"
-#include "ArianeImageMovieSceneSection.h"
+#include "ArianeDrawingMovieSceneSection.h"
 
 // Unreal headers
 #include "AssetToolsModule.h"
@@ -151,9 +151,9 @@ FArianeEditorModule::StartupModule()
 
     // for Ariane Image tracks in the sequencer
     ISequencerModule& SequencerModule = FModuleManager::LoadModuleChecked<ISequencerModule>("Sequencer");
-    ImageTrackHandle = SequencerModule.RegisterTrackEditor(FOnCreateTrackEditor::CreateStatic( &FArianeEditorImageMovieSceneTrack::CreateTrackEditor ) );
+    ImageTrackHandle = SequencerModule.RegisterTrackEditor(FOnCreateTrackEditor::CreateStatic( &FArianeEditorDrawingMovieSceneTrack::CreateTrackEditor ) );
 
-    SequencerModule.RegisterChannelInterface<FArianeImageMovieSceneChannel>();
+    SequencerModule.RegisterChannelInterface<FArianeDrawingMovieSceneChannel>();
 
 /* Gary
     RegisterBrushOverrides(); //First thing to do, as it modifies the Brush CDO
@@ -491,8 +491,8 @@ FArianeEditorModule::RegisterCustomizations()
     );
 
     PropertyModule.RegisterCustomPropertyTypeLayout(
-        "EArianeLayerDrawingOrientation",
-        FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FArianeLayerDrawingOrientationCustomization::MakeInstance)
+        "EArianeLayerVectorDrawingOrientation",
+        FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FArianeLayerVectorDrawingOrientationCustomization::MakeInstance)
     );
 
     PropertyModule.NotifyCustomizationModuleChanged();
@@ -505,7 +505,7 @@ FArianeEditorModule::UnregisterCustomization()
 
     PropertyModule.UnregisterCustomPropertyTypeLayout( UArianePainting3DComponent::StaticClass()->GetFName() );
 
-    PropertyModule.UnregisterCustomPropertyTypeLayout("EArianeLayerDrawingOrientation");
+    PropertyModule.UnregisterCustomPropertyTypeLayout("EArianeLayerVectorDrawingOrientation");
 
     PropertyModule.NotifyCustomizationModuleChanged();
 }

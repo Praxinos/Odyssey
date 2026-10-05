@@ -4,7 +4,7 @@
 #include "ArianeLine.h"
 #include "ArianeVertex.h"
 #include "ArianeSegmentCubic.h"
-#include "ArianeImage.h"
+#include "ArianeDrawing.h"
 
 // https://stackoverflow.com/a/27863181
 // https://stackoverflow.com/questions/1734745/how-to-create-circle-with-b%c3%a9zier-curves
@@ -24,13 +24,13 @@ FArianeLine::FArianeLine()
 {
 }
 
-FArianeLine::FArianeLine( UArianeImage* InImage
+FArianeLine::FArianeLine( UArianeDrawing* InDrawing
                         , const FName& InName
                         , const FVector& InStartPoint
                         , const FVector& InEndPoint
                         , double InStrokeWidth
                         , EArianeAllocationModel InAllocationModel )
-    : FArianePrimitive( InImage
+    : FArianePrimitive( InDrawing
                       , InName
                       , InStrokeWidth
                       , InAllocationModel )
@@ -114,7 +114,7 @@ FArianeLine::CopyShape( const FCopyArgs& CopyArgs )
     }
     else
     {
-         LineCopy = CopyArgs.Image->AllocLine( Material
+         LineCopy = CopyArgs.Drawing->AllocLine( Material
                                              , Name
                                              , StartPoint
                                              , EndPoint

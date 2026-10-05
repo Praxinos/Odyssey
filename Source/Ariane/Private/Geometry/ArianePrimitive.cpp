@@ -2,7 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "ArianePrimitive.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeLayerVector.h"
 
 bool
 FArianePrimitiveInvalidationFlags::HasBaseClass( uint32 BaseClass ) const
@@ -29,11 +29,11 @@ FArianePrimitive::FArianePrimitive()
 {
 }
 
-FArianePrimitive::FArianePrimitive( UArianeImage* InImage
+FArianePrimitive::FArianePrimitive( UArianeDrawing* InDrawing
                                   , const FName& InName
                                   , double InStrokeWidth
                                   , EArianeAllocationModel InAllocationModel )
-    : FArianePath( InImage
+    : FArianePath( InDrawing
                  , InName
                  , InAllocationModel )
     , StrokeWidth ( InStrokeWidth )
@@ -75,7 +75,7 @@ FArianePrimitive::Convert( EConversionFlags ConversionFlags )
                    | ( EnumHasAllFlags( ConversionFlags, EConversionFlags::Bezier ) ? ECopyFlags::AsBezier
                                                                                     : ECopyFlags::AsPolyline );
     CopyArgs.AllocationModel = AllocationModel;
-    CopyArgs.Image = Image;
+    CopyArgs.Drawing = Drawing;
 
     FArianePath* Path = static_cast<FArianePath*>(this->Copy( CopyArgs ) );
 

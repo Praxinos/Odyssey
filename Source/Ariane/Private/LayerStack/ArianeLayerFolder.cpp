@@ -51,8 +51,14 @@ UArianeLayerFolder::IsExpanded()
     return bExpanded;
 }
 
-const TArray<UArianeLayer*>&
+TArray<UArianeLayer*>&
 UArianeLayerFolder::GetChildLayers()
+{
+    return ChildLayers;
+}
+
+const TArray<UArianeLayer*>&
+UArianeLayerFolder::GetChildLayers() const
 {
     return ChildLayers;
 }

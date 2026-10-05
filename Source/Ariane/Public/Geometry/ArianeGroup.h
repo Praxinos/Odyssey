@@ -12,7 +12,7 @@
 
 #include "ArianeGroup.generated.h"
 
-class UArianeImage;
+class UArianeDrawing;
 
 struct ARIANE_API FArianeGroupInvalidationFlags : FArianeObjectInvalidationFlags
 {
@@ -51,7 +51,7 @@ public:
 public:
     virtual ~FArianeGroup();
     FArianeGroup();
-    FArianeGroup( UArianeImage* InImage
+    FArianeGroup( UArianeDrawing* InDrawing
                 , const FName& InName
                 , EArianeAllocationModel InAllocationModel );
     virtual FArianeGroup* CopyShape( const FCopyArgs& CopyArgs ) override;

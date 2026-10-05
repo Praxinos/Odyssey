@@ -9,8 +9,8 @@
 // Ariane Headers
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
-#include "ArianeLayerDrawing.h"
-#include "ArianeImage.h"
+#include "ArianeLayerVector.h"
+#include "ArianeDrawing.h"
 #include "ArianeVertex.h"
 #include "ArianeSegment.h"
 #include "ArianeSegmentCubic.h"
@@ -414,7 +414,7 @@ UArianeEditorTool::PostTransacted( const FTransactionObjectEvent& iTransactionEv
 }
 
 void
-UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, UArianeLayerDrawing* DrawingLayer )
+UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, UArianeLayerVector* VectorLayer )
 {
     const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
     double GridSize = Settings->GetGridSize();
@@ -427,9 +427,9 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
     IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
     FPrimitiveDrawInterface* PDI = RenderAPI->GetPrimitiveDrawInterface();
     ULineBatchComponent* LineBatcher = GetWorld()->GetLineBatcher( UWorld::ELineBatcherType::World );
-    //FTransform LayerTransform = DrawingLayer->GetComponentTransform();
+    //FTransform LayerTransform = VectorLayer->GetComponentTransform();
     //FMatrix LayerMatrix = LayerTransform.ToMatrixWithScale();;
-    FPlane DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
+    FPlane DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
     FQuat WorldToPlaneRotationQuat = FQuat::FindBetweenNormals( FVector::ZAxisVector, DrawingPlane.GetNormal() );
     FMatrix WorldMatrix;
     float AdjustedThickness = 2.0f;
@@ -440,7 +440,7 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
     QueriesAPI->GetCurrentViewState( CameraState );
 
     // Adjust line thickness relative to camera distance
-    float Distance = FVector::Dist( CameraState.Position, DrawingLayer->GetComponentLocation() );
+    float Distance = FVector::Dist( CameraState.Position, VectorLayer->GetComponentLocation() );
 
     double GridRadius = GridSize * 0.5f;
     static uint32 StepCount = 20, StepCountHalf = StepCount / 2;
@@ -448,21 +448,21 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
 
     AdjustedThickness = ( Distance / 1000.0f ) * AdjustedThickness;
 
-    switch( Editor->GetLayerDrawingOrientation( DrawingLayer ) )
+    switch( Editor->GetLayerDrawingOrientation( VectorLayer ) )
     {
-        case EArianeLayerDrawingOrientation::XY:
-        case EArianeLayerDrawingOrientation::YZ:
-        case EArianeLayerDrawingOrientation::ZX:
+        case EArianeLayerVectorDrawingOrientation::XY:
+        case EArianeLayerVectorDrawingOrientation::YZ:
+        case EArianeLayerVectorDrawingOrientation::ZX:
         {
             FTransform LayerTranslationTransform;
 
-            LayerTranslationTransform.SetTranslation( DrawingLayer->GetComponentLocation() );
+            LayerTranslationTransform.SetTranslation( VectorLayer->GetComponentLocation() );
 
             WorldMatrix = FTransform(WorldToPlaneRotationQuat).ToMatrixNoScale() * LayerTranslationTransform.ToMatrixNoScale();
         }
         break;
 
-        case EArianeLayerDrawingOrientation::View :
+        case EArianeLayerVectorDrawingOrientation::View :
         {
 
 /* Commented out: CameraState isn't up to date at first. We need to click at least once in the viewport, which is not
@@ -473,7 +473,7 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
             FMatrix ViewAlignedRot = FMatrix( CamUp, CamRight, -CamForward, FVector::ZeroVector );
             FTransform LayerTranslationTransform;
 
-            LayerTranslationTransform.SetTranslation( DrawingLayer->GetComponentLocation() );
+            LayerTranslationTransform.SetTranslation( VectorLayer->GetComponentLocation() );
 
             WorldMatrix = ViewAlignedRot * LayerTranslationTransform.ToMatrixNoScale();
 */
@@ -489,7 +489,7 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
             FMatrix ViewAlignedRot = FMatrix( CamUp, CamRight, -CamForward, FVector::ZeroVector );
             FTransform LayerTranslationTransform;
 
-            LayerTranslationTransform.SetTranslation( DrawingLayer->GetComponentLocation() );
+            LayerTranslationTransform.SetTranslation( VectorLayer->GetComponentLocation() );
 
             WorldMatrix = FTransform(ViewAlignedRot).ToMatrixNoScale() * LayerTranslationTransform.ToMatrixNoScale();
             // --- End
@@ -891,11 +891,11 @@ UArianeEditorTool::CanBeginClickDragSequence(const FInputDeviceRay& PressPos)
 }
 
 FPlane
-UArianeEditorTool::GetDrawingPlane( FEditorViewportClient* ViewportClient, UArianeLayerDrawing* DrawingLayer )
+UArianeEditorTool::GetDrawingPlane( FEditorViewportClient* ViewportClient, UArianeLayerVector* VectorLayer )
 {
     IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
     FTransform CoordSystemTransform;
-    FVector LayerWorldPosition = DrawingLayer->GetComponentLocation();
+    FVector LayerWorldPosition = VectorLayer->GetComponentLocation();
     FViewCameraState CameraState;
 
     QueriesAPI->GetCurrentViewState( CameraState );
@@ -907,11 +907,11 @@ UArianeEditorTool::GetDrawingPlane( FEditorViewportClient* ViewportClient, UAria
     switch ( Editor->GetDrawingCoordinateSystem() )
     {
         case EArianeEditorDrawingCoordinateSystem::World :
-            CoordSystemTransform = FTransform( FQuat(), DrawingLayer->GetComponentLocation(), FVector::One() );
+            CoordSystemTransform = FTransform( FQuat(), VectorLayer->GetComponentLocation(), FVector::One() );
         break;
 
         case EArianeEditorDrawingCoordinateSystem::Layer :
-            CoordSystemTransform = DrawingLayer->GetComponentTransform();
+            CoordSystemTransform = VectorLayer->GetComponentTransform();
         break;
 
         case EArianeEditorDrawingCoordinateSystem::CommonAncestor :
@@ -920,7 +920,7 @@ UArianeEditorTool::GetDrawingPlane( FEditorViewportClient* ViewportClient, UAria
 
         case EArianeEditorDrawingCoordinateSystem::Local :
         {
-            const TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetImage()->GetSelectedObjects();
+            const TArray<FArianeObject*>& SelectedObjects = VectorLayer->GetDrawing()->GetSelectedObjects();
 
             if( SelectedObjects.Num() == 1 )
             {
@@ -928,7 +928,7 @@ UArianeEditorTool::GetDrawingPlane( FEditorViewportClient* ViewportClient, UAria
                 const FTransform& SelectedObjectTransform = SelectedObject->GetTransform();
 
                 CoordSystemTransform = FTransform( SelectedObjectTransform.GetRotation()
-                                                 , DrawingLayer->GetComponentLocation()
+                                                 , VectorLayer->GetComponentLocation()
                                                  , FVector::One() );
             }
         }
@@ -938,17 +938,17 @@ UArianeEditorTool::GetDrawingPlane( FEditorViewportClient* ViewportClient, UAria
         break;
     }
 
-    switch ( Editor->GetLayerDrawingOrientation( DrawingLayer ) )
+    switch ( Editor->GetLayerDrawingOrientation( VectorLayer ) )
     {
-        case EArianeLayerDrawingOrientation::XY :
+        case EArianeLayerVectorDrawingOrientation::XY :
             PlaneWorldDirection = CoordSystemTransform.TransformVector( FVector( 0.0f, 0.0f, 1.0f ) );
         break;
 
-        case EArianeLayerDrawingOrientation::YZ :
+        case EArianeLayerVectorDrawingOrientation::YZ :
             PlaneWorldDirection = CoordSystemTransform.TransformVector( FVector( 1.0f, 0.0f, 0.0f ) );
         break;
 
-        case EArianeLayerDrawingOrientation::ZX :
+        case EArianeLayerVectorDrawingOrientation::ZX :
             PlaneWorldDirection = CoordSystemTransform.TransformVector( FVector( 0.0f, 1.0f, 0.0f ) );
 
         break;
@@ -1246,7 +1246,7 @@ UArianeEditorTool::MapPath( FEditorViewportClient* ViewportClient
                           , TArray<FPointQuadTreeEntry>& OutPointQuadTreeEntries )
 {
     const FTransform& PathTransform = Path->GetTransform();
-    UArianeImage* Image = Path->GetImage();
+    UArianeDrawing* Image = Path->GetDrawing();
 
     for( FArianeVertex* Vertex : Path->GetVertices() )
     {
@@ -1283,15 +1283,15 @@ UArianeEditorTool::MapPoints( FEditorViewportClient* ViewportClient
 void
 UArianeEditorTool::MakePointQuadTree( FEditorViewportClient* ViewportClient
                                     , FSceneView* View
-                                    , TArray<UArianeLayerDrawing*> DrawingLayers
+                                    , TArray<UArianeLayerVector*> VectorLayers
                                     , bool bFocusedObjectsOnly )
 {
     FIntRect ScreenRect = FIntRect( 0, 0, ViewportClient->Viewport->GetSizeXY().X, ViewportClient->Viewport->GetSizeXY().Y );
     TArray<FPointQuadTreeEntry> PointQuadTreeEntries;
 
-    for( UArianeLayerDrawing* DrawingLayer : DrawingLayers )
+    for( UArianeLayerVector* VectorLayer : VectorLayers )
     {
-        FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
+        FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
 
         PointQuadTreeEntries.Reserve( 200 );
 
@@ -1332,7 +1332,7 @@ UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
     const FTransform& PathTransform = Path->GetTransform();
     bool bAnythingPicked = false;
     FVector2D HUDMousePosition = FVector2D( ViewportX, ViewportY );
-    UArianeImage* Image = Path->GetImage();
+    UArianeDrawing* Image = Path->GetDrawing();
 
     // Pick segment handles
     if( PickingFlags.PathSegmentHandle )
@@ -1823,7 +1823,7 @@ UArianeEditorTool::DrawPathHUD( FCanvas* Canvas
     {
         for( const FArianeSegmentID& SegmentID : Path->GetSegments() )
         {
-            UArianeImage* Image = Path->GetImage();
+            UArianeDrawing* Image = Path->GetDrawing();
             FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment( Image );
 
             if( Segment->GetClass() == FArianeSegmentCubic::StaticClass() )
@@ -1843,7 +1843,7 @@ UArianeEditorTool::DrawPathHUD( FCanvas* Canvas
     // Points and Point size handles
     for( const FArianeVertexID& VertexID : Path->GetVertices() )
     {
-        UArianeImage* Image = Path->GetImage();
+        UArianeDrawing* Image = Path->GetDrawing();
         FArianeVertex* Vertex = const_cast<FArianeVertexID&>(VertexID).GetVertex( Image );
         uint32 Valence = Vertex->GetSegments().Num();
 

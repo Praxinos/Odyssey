@@ -6,8 +6,8 @@
 #include "ArianeGroup.h"
 #include "ArianeTag.h"
 #include "ArianePainting3DComponent.h"
-#include "ArianeImage.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeLayerStack.h"
 #include "ArianeKeyedObject.h"
 // Unreal headers
@@ -162,8 +162,8 @@ FArianeObjectGeometry3D::GetVertexFactory()
 void
 FArianeObjectGeometry3D::InitVertexFactory()
 {
-    // DrawingLayer can be null in orphan Images (animation keys)
-    UWorld* World = Object->GetImage()->GetDrawingLayer().IsValid() ? Object->GetImage()->GetDrawingLayer()->GetWorld()
+    // VectorLayer can be null in orphan Drawings (animation keys)
+    UWorld* World = Object->GetDrawing()->GetVectorLayer().IsValid() ? Object->GetDrawing()->GetVectorLayer()->GetWorld()
                                                                     : nullptr ;
 
     if( World && MeshVertices.Num() && MeshIndices.Num() )
@@ -266,7 +266,7 @@ FArianeObject::~FArianeObject()
     // free mallocated Tags.
     for( FArianeTagID& TagID : Tags )
     {
-        FArianeTag* Tag = TagID.GetTag( Image );
+        FArianeTag* Tag = TagID.GetTag( Drawing );
 
         if( Tag->GetAllocationModel() == EArianeAllocationModel::OperatingSystem )
         {
@@ -282,13 +282,13 @@ FArianeObject::FArianeObject()
 {
 }
 
-FArianeObject::FArianeObject( UArianeImage* InImage
+FArianeObject::FArianeObject( UArianeDrawing* InDrawing
                             , const FName& InName
                             , EArianeAllocationModel InAllocationModel )
     : Name ( InName )
     , Guid ( FGuid::NewGuid() )
     , ParentID ( FArianeObjectID() )
-    , Image( InImage )
+    , Drawing( InDrawing )
     , bVisible ( true )
     , bExpanded ( true )
     , AllocationModel ( InAllocationModel  )
@@ -336,10 +336,10 @@ FArianeObject::GetTransientData()
 */
 
 void
-FArianeObject::ResetImage( UArianeImage* InImage )
+FArianeObject::ResetDrawing( UArianeDrawing* InDrawing )
 {
     InstancedInvalidationFlags.Reset();
-    Image = InImage;
+    Drawing = InDrawing;
     AllocatorGuid = FGuid::NewGuid();
     WorldTransform = FTransform();
     WorldTransformVersion = 0;
@@ -384,12 +384,12 @@ FArianeObject::RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstan
 
     if( ChildToRemove->IsSelected() )
     {
-        Image->UnselectObject( ChildToRemove );
+        Drawing->UnselectObject( ChildToRemove );
     }
 
     if( bRemoveFromInstancedObjects )
     {
-        Image->DeleteInstancedObject( ChildToRemove );
+        Drawing->DeleteInstancedObject( ChildToRemove );
     }
 }
 
@@ -454,18 +454,18 @@ FArianeObject::InvalidateChild( FArianeObject* Child )
 void
 FArianeObject::Invalidate( const FArianeObjectInvalidationFlags& InInvalidationFlags )
 {
-    if ( ParentID.GetObject( Image ) )
+    if ( ParentID.GetObject( Drawing ) )
     {
-        ParentID.GetObject( Image )->InvalidateChild( this );
+        ParentID.GetObject( Drawing )->InvalidateChild( this );
     }
 
     GetInvalidationFlags().OR( InInvalidationFlags );
 
-    GetImage()->MarkPackageDirty();
+    GetDrawing()->MarkPackageDirty();
 
-    if( ParentID.GetObject( Image ) == nullptr )
+    if( ParentID.GetObject( Drawing ) == nullptr )
     {
-        Image->Invalidate();
+        Drawing->Invalidate();
     }
 
     //OnPostInvalidated.Broadcast();
@@ -488,7 +488,7 @@ FArianeObject::GetInvalidatedChildren( TArray<FArianeObject*> OutInvalidatedObje
 FArianeObject::ETraversalReturnValue
 FArianeObject::Traverse_Private( FArianeObject* Object, TFunction<ETraversalReturnValue(FArianeObject*)> Callback )
 {
-    UArianeImage* Image = Object->GetImage();
+    UArianeDrawing* Drawing = Object->GetDrawing();
     ETraversalReturnValue Ret = Callback( Object );
 
     if( Ret == ETraversalReturnValue::Stop )
@@ -770,16 +770,16 @@ FArianeObject::UpdateTransform()
 {
     Traverse( this, []( FArianeObject* Object  ) -> ETraversalReturnValue
         {
-            UArianeImage* Image = Object->GetImage();
+            UArianeDrawing* Drawing = Object->GetDrawing();
             FArianeObject* Parent = Object->GetParent();
-            UArianeLayerDrawing* DrawingLayer = Image->GetDrawingLayer().Get();
+            UArianeLayerVector* VectorLayer = Drawing->GetVectorLayer().Get();
 
-            if( DrawingLayer )
+            if( VectorLayer )
             {
                 const FTransform& ParentWorldTransform = Parent ? Parent->WorldTransform
-                                                                : DrawingLayer->GetComponentTransform();
+                                                                : VectorLayer->GetComponentTransform();
                 uint32 ParentWorldTransformVersion = Parent ? Parent->WorldTransformVersion
-                                                            : DrawingLayer->GetWorldTransformVersion();
+                                                            : VectorLayer->GetWorldTransformVersion();
 
                 if( Object->WorldTransformVersion != ParentWorldTransformVersion )
                 {
@@ -798,7 +798,7 @@ FArianeObject::UpdateTransform()
 UArianePainting3DComponent*
 FArianeObject::GetPainting3DComponent()
 {
-    return Image ? Image->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent() : nullptr;
+    return Drawing ? Drawing->GetVectorLayer()->GetLayerStack()->GetPainting3DComponent() : nullptr;
 }
 
 void
@@ -829,10 +829,10 @@ FArianeObject::GetOnPostInvalidatedDelegate()
 }
 */
 
-UArianeImage*
-FArianeObject::GetImage()
+UArianeDrawing*
+FArianeObject::GetDrawing()
 {
-    return Image;
+    return Drawing;
 }
 
 TArray<FArianeObject*>&
@@ -864,7 +864,7 @@ FArianeObject::GetName()
 FArianeObject*
 FArianeObject::GetAncestorByClass( uint32 iClass, bool bHasBaseObjectClass, bool bSelf )
 {
-    FArianeObject* Ancestor = bSelf ? this : ParentID.GetObject( Image );
+    FArianeObject* Ancestor = bSelf ? this : ParentID.GetObject( Drawing );
 
     while ( Ancestor )
     {
@@ -934,7 +934,7 @@ FArianeObject::GetNextChild( FArianeObject* Child )
     FArianeObject* NextChild = nullptr;
     int IndexOfChild = Children.IndexOfByPredicate( [this, Child] ( const FArianeObjectID& ObjectId )
         {
-            return ( const_cast<FArianeObjectID&>(ObjectId).GetObject( Image ) == Child ) ? true : false;
+            return ( const_cast<FArianeObjectID&>(ObjectId).GetObject( Drawing ) == Child ) ? true : false;
         } );
     int IndexOfNext = IndexOfChild + 1;
 
@@ -987,7 +987,7 @@ FArianeObject::TransferChild( FArianeObject* FosterChild
                 int InsertAfterIndex = Children.IndexOfByPredicate(
                     [this,InsertAfter] ( const FArianeObjectID& ItemID ) -> bool
                     {
-                       if( const_cast<FArianeObjectID&>(ItemID).GetObject( Image ) == InsertAfter )
+                       if( const_cast<FArianeObjectID&>(ItemID).GetObject( Drawing ) == InsertAfter )
                        {
                            return true;
                        }
@@ -1078,7 +1078,7 @@ FArianeObject::CopySettings( FArianeObject* DestinationObject, const FCopyArgs& 
 FArianeObject*
 FArianeObject::CopyShape( const FCopyArgs& CopyArgs )
 {
-    FArianeObject* ObjectCopy = CopyArgs.Image->AllocObject( Name, CopyArgs.AllocationModel );
+    FArianeObject* ObjectCopy = CopyArgs.Drawing->AllocObject( Name, CopyArgs.AllocationModel );
 
     return ObjectCopy;
 }
@@ -1114,7 +1114,7 @@ FArianeObject::Copy( const FCopyArgs& CopyArgs
         {
             for( FArianeTagID& TagID : Tags )
             {
-                FArianeTag* Tag = TagID.GetTag( Image );
+                FArianeTag* Tag = TagID.GetTag( Drawing );
 
                 FArianeTag* TagCopy = Tag->Copy( ObjectCopy );
 
@@ -1150,7 +1150,7 @@ FArianeObject::AddTag( FArianeTag* Tag )
 FArianeGroup*
 FArianeObject::GetRootGroup()
 {
-    return Image ? Image->GetRootGroup() : nullptr;
+    return Drawing ? Drawing->GetRootGroup() : nullptr;
 }
 
 #ifdef WITH_EDITOR
@@ -1162,7 +1162,7 @@ FArianeObject::GetHUDForegroundColor()
                                              , true );
 
     return Group ? Group->GetHUDForegroundColor()
-                 : Image->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->GetHUDForegroundColor();
+                 : Drawing->GetVectorLayer()->GetLayerStack()->GetPainting3DComponent()->GetHUDForegroundColor();
 }
 #endif
 
@@ -1175,9 +1175,9 @@ FArianeObject::SetVisible( bool bInVisible )
 bool
 FArianeObject::IsVisible( bool bInHierarchical )
 {
-    FArianeObject* Parent = ParentID.GetObject( Image );
+    FArianeObject* Parent = ParentID.GetObject( Drawing );
 
-    //return ( ( DrawingLayer == nullptr ) || DrawingLayer->IsVisible() == true ) ? true : false;
+    //return ( ( VectorLayer == nullptr ) || VectorLayer->IsVisible() == true ) ? true : false;
     return ( bInHierarchical && Parent ) ? bVisible && Parent->IsVisible( bInHierarchical )
                                          : bVisible;
 }
@@ -1198,7 +1198,7 @@ FArianeObject::ExportProperties( FArianeObject* DestObject )
 FArianeObject*
 FArianeObject::GetParent()
 {
-    return ParentID.GetObject( Image );
+    return ParentID.GetObject( Drawing );
 }
 
 void

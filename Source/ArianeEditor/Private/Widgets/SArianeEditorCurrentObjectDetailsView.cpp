@@ -15,8 +15,8 @@
 // Ariane Headers
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayer.h"
-#include "ArianeImage.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeLayerStack.h"
 #include "ArianeObject.h"
 #include "ArianeGroup.h"
@@ -85,13 +85,13 @@ SArianeEditorCurrentObjectDetailsView::OnPrePainting3DComponentUpdate( bool bInt
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
         // the bInteractive is voluntarily ignored. During a MouseDown, the flag is set but we still need to mark the widget
         // as needing an update
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            FArianeGroup* RootGroup = DrawingLayer->GetImage()->GetRootGroup();
+            FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
 
             FArianeObject::Traverse ( RootGroup
                                     , [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
@@ -137,7 +137,7 @@ SArianeEditorCurrentObjectDetailsView::OnPost3DPaintingComponentSelectionChanged
 }
 
 void
-SArianeEditorCurrentObjectDetailsView::OnPostImageChanged()
+SArianeEditorCurrentObjectDetailsView::OnPostDrawingChanged()
 {
     Update();
 }
@@ -149,13 +149,13 @@ SArianeEditorCurrentObjectDetailsView::OnPreLayerStackSelectionChanged()
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
             // commented-out: nothing to do on Pre. Left there for consistency
-            //DrawingLayer->OnPreImageChangedDelegate().RemoveAll( this );
-            DrawingLayer->OnPostImageChangedDelegate().RemoveAll( this );
+            //VectorLayer->OnPreImageChangedDelegate().RemoveAll( this );
+            VectorLayer->OnPostDrawingChangedDelegate().RemoveAll( this );
         }
     }
 }
@@ -167,13 +167,13 @@ SArianeEditorCurrentObjectDetailsView::OnPostLayerStackSelectionChanged()
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
             // commented-out: nothing to do on Pre. Left there for consistency
-            //DrawingLayer->OnPreImageChangedDelegate().AddSP( this, &SArianeEditorCurrentObjectDetailsView::OnPreImageChanged );
-            DrawingLayer->OnPostImageChangedDelegate().AddSP( this, &SArianeEditorCurrentObjectDetailsView::OnPostImageChanged );
+            //VectorLayer->OnPreImageChangedDelegate().AddSP( this, &SArianeEditorCurrentObjectDetailsView::OnPreImageChanged );
+            VectorLayer->OnPostDrawingChangedDelegate().AddSP( this, &SArianeEditorCurrentObjectDetailsView::OnPostDrawingChanged );
         }
     }
 
@@ -253,11 +253,11 @@ SArianeEditorCurrentObjectDetailsView::GetRootGroup()
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            return DrawingLayer->GetImage()->GetRootGroup();
+            return VectorLayer->GetDrawing()->GetRootGroup();
         }
     }
 
@@ -274,17 +274,17 @@ SArianeEditorCurrentObjectDetailsView::Update()
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
             // work on a copy because we may add the root group in the array
-            TArray<FArianeObject*> SelectedObjects = DrawingLayer->GetImage()->GetSelectedObjects();
+            TArray<FArianeObject*> SelectedObjects = VectorLayer->GetDrawing()->GetSelectedObjects();
 
             if( SelectedObjects.IsEmpty() )
             {
                 // Use the root group as the default object
-                SelectedObjects.Add( DrawingLayer->GetImage()->GetRootGroup() );
+                SelectedObjects.Add( VectorLayer->GetDrawing()->GetRootGroup() );
             }
 
             uint32 ObjectClass = FArianeObject::GetCommonClass( SelectedObjects );
@@ -350,18 +350,18 @@ SArianeEditorCurrentObjectDetailsView::PropertyValueChanged( const FPropertyChan
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
         // for undos
         GEditor->BeginTransaction(LOCTEXT("ariane-object.transaction.property-changed","Property Changed"));
 
-        if( DrawingLayer && CurrentObjectProxy )
+        if( VectorLayer && CurrentObjectProxy )
         {
-            TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetImage()->GetSelectedObjects();
+            TArray<FArianeObject*>& SelectedObjects = VectorLayer->GetDrawing()->GetSelectedObjects();
             FArianeGroup* RootGroup = GetRootGroup();
 
             // for undos
-            DrawingLayer->GetImage()->Modify();
+            VectorLayer->GetDrawing()->Modify();
 
             // Unregister this widget's updates when the scene is updated. We don't want this widget to be
             // rebuilt while it's processing stuff
@@ -370,7 +370,7 @@ SArianeEditorCurrentObjectDetailsView::PropertyValueChanged( const FPropertyChan
             if( SelectedObjects.IsEmpty() )
             {
                 // Use the root group as the default object
-                SelectedObjects.Add( DrawingLayer->GetImage()->GetRootGroup() );
+                SelectedObjects.Add( VectorLayer->GetDrawing()->GetRootGroup() );
             }
 
             CurrentObjectProxy->ValidateProperties( SelectedObjects, true );

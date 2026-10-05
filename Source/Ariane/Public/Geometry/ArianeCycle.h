@@ -28,7 +28,7 @@ struct FArianeSegment;
 struct FArianeSegmentCubic;
 struct FArianeVertex;
 class UMaterial;
-class UArianeLayerDrawing;
+class UArianeLayerVector;
 struct FArianeCycle;
 class UMaterialInterface;
 
@@ -102,7 +102,7 @@ public:
 public:
     virtual ~FArianeCycle();
     FArianeCycle();
-    FArianeCycle( UArianeImage* InImage
+    FArianeCycle( UArianeDrawing* InDrawing
                 , const FName& InName
                 , EArianeAllocationModel InAllocationModel );
 
@@ -155,7 +155,7 @@ protected:
                             , TArray<FArianePoint>& OutPoints
                             , EArianeCycleFittingRule FittingRule );
     FVector GetNodeFittedPosition( FArianeGraph* Graph, FArianeGraph::FNode* Node, EArianeCycleFittingRule FittingRule );
-    virtual void ResetImage( UArianeImage* InImage ) override;
+    virtual void ResetDrawing( UArianeDrawing* InDrawing ) override;
     virtual void PostReset() override;
 
 protected:

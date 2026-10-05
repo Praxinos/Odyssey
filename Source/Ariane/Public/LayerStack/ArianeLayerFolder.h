@@ -32,7 +32,8 @@ public:
     bool IsExpanded();
 
     /** Get child layers **/
-    const TArray<UArianeLayer*>& GetChildLayers();
+    TArray<UArianeLayer*>& GetChildLayers();
+    const TArray<UArianeLayer*>& GetChildLayers() const;
 
     /**
      * @brief Add a child layer to this folder
@@ -70,7 +71,7 @@ protected:
     bool bExpanded;
 
     // Even though unreal has the list of attached Actors, it does not take the order into consideration.
-    // so we have to have our own list. "Instanced" keyword will allow deep copy
+    // so we have to have our own list.
     UPROPERTY()
     TArray<UArianeLayer*> ChildLayers;
 

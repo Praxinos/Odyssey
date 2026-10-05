@@ -9,7 +9,7 @@
 #include "ArianeEditorStyle.h"
 // Ariane headers
 #include "ArianeLayer.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
@@ -272,7 +272,7 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
             objectIcon = FAppStyle::Get().GetBrush("ContentBrowser.AssetTreeFolderClosed");
         }
         else
-        if ( Cast<UArianeLayerDrawing>(Layer) )
+        if ( Cast<UArianeLayerVector>(Layer) )
         {
             objectIcon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.Layers16" );
         }

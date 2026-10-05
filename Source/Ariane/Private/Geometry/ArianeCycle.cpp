@@ -3,8 +3,8 @@
 
 // Ariane headers
 #include "ArianeCycle.h"
-#include "ArianeImage.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
 // Unreal headers
@@ -96,10 +96,10 @@ FArianeCycle::FArianeCycle()
 {
 }
 
-FArianeCycle::FArianeCycle( UArianeImage* InImage
+FArianeCycle::FArianeCycle( UArianeDrawing* InDrawing
                           , const FName& InName
                           , EArianeAllocationModel InAllocationModel )
-    : FArianeObject ( InImage
+    : FArianeObject ( InDrawing
                     , InName
                     , InAllocationModel )
     , Color ( FColor::Black.WithAlpha(255) )
@@ -124,9 +124,9 @@ FArianeCycle::GetInvalidationFlags()
 }
 
 void
-FArianeCycle::ResetImage( UArianeImage* InImage )
+FArianeCycle::ResetDrawing( UArianeDrawing* InDrawing )
 {
-    Super::ResetImage( InImage );
+    Super::ResetDrawing( InDrawing );
 
     Geometry3D = new FArianeCycleGeometry3D( this );
     ModelVertexCache.Empty();
@@ -141,7 +141,7 @@ FArianeCycle::PostReset()
 
     if ( Material )
     {
-        Image->IncrementMaterial( Material );
+        Drawing->IncrementMaterial( Material );
     }
 }
 
@@ -320,18 +320,18 @@ FArianeCycle::HasBaseClass( uint32 BaseClass )
 void
 FArianeCycle::Added()
 {
-    if( Material && Image )
+    if( Material && Drawing )
     {
-        Image->IncrementMaterial( Material );
+        Drawing->IncrementMaterial( Material );
     }
 }
 
 void
 FArianeCycle::Removed()
 {
-    if( Material && Image )
+    if( Material && Drawing )
     {
-        Image->DecrementMaterial( Material );
+        Drawing->DecrementMaterial( Material );
     }
 }
 
@@ -345,9 +345,9 @@ void
 FArianeCycle::SetMaterial( UMaterialInterface* InMaterialInterface )
 {
     // remove the current material from the used material list
-    if( Material && Image )
+    if( Material && Drawing )
     {
-        Image->DecrementMaterial( Material );
+        Drawing->DecrementMaterial( Material );
     }
 
     Material = InMaterialInterface;
@@ -355,9 +355,9 @@ FArianeCycle::SetMaterial( UMaterialInterface* InMaterialInterface )
     if( Material )
     {
         // add the new material to the used material list
-        if( Material && Image )
+        if( Material && Drawing )
         {
-            Image->IncrementMaterial( Material );
+            Drawing->IncrementMaterial( Material );
         }
 
     }
@@ -545,10 +545,10 @@ FArianeCycleGeometry3D::Build()
 
     InitVertexFactory();
 
-    // DrawingLayer can be null in animation keys
-    if( Cycle->GetImage()->GetDrawingLayer().IsValid() )
+    // VectorLayer can be null in animation keys
+    if( Cycle->GetDrawing()->GetVectorLayer().IsValid() )
     {
         // send the vertex data to the graphic card.
-        Cycle->GetImage()->GetDrawingLayer()->MarkRenderStateDirty();
+        Cycle->GetDrawing()->GetVectorLayer()->MarkRenderStateDirty();
     }
 }

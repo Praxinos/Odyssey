@@ -12,27 +12,27 @@
 #include "ScopedTransaction.h"
 #include "Channels/MovieSceneChannelData.h"
 // Ariane Headers
-#include "ArianeImageKeyData.h"
-#include "ArianeImageMovieSceneChannel.h"
-#include "ArianeImage.h"
+#include "ArianeDrawingKeyData.h"
+#include "ArianeDrawingMovieSceneChannel.h"
+#include "ArianeDrawing.h"
 
-#include "ArianeImageMovieSceneSection.generated.h"
+#include "ArianeDrawingMovieSceneSection.generated.h"
 
-class UArianeImage;
+class UArianeDrawing;
 
 UCLASS()
-class ARIANE_API UArianeImageMovieSceneSection : public UMovieSceneSection
+class ARIANE_API UArianeDrawingMovieSceneSection : public UMovieSceneSection
 {
     GENERATED_BODY()
 
 public:
-    UArianeImageMovieSceneSection();
+    UArianeDrawingMovieSceneSection();
 
     virtual void PostLoad() override;
     virtual void PostEditUndo() override;
 
     UPROPERTY()
-    FArianeImageMovieSceneChannel ImageChannel;
+    FArianeDrawingMovieSceneChannel DrawingChannel;
 };
 
 
@@ -41,7 +41,7 @@ namespace Sequencer
 {
     template<>
     ARIANE_API FKeyHandle AddOrUpdateKey(
-        FArianeImageMovieSceneChannel* InChannel,
+        FArianeDrawingMovieSceneChannel* InChannel,
         UMovieSceneSection* InSectionToKey,
         FFrameNumber InTime,
         ISequencer& InSequencer,

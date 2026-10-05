@@ -24,7 +24,7 @@ struct FArianeSegment;
 struct FArianeSegmentCubic;
 struct FArianeVertex;
 class UMaterial;
-class UArianeImage;
+class UArianeDrawing;
 struct FArianePath;
 class UMaterialInterface;
 
@@ -128,7 +128,7 @@ public:
 public:
     virtual ~FArianePath();
     FArianePath();
-    FArianePath( UArianeImage* InImage
+    FArianePath( UArianeDrawing* InDrawing
                , const FName& InName
                , EArianeAllocationModel InAllocationModel );
 
@@ -291,7 +291,7 @@ public:
     uint32 GetCubicSegmentCount();
     uint32 GetLinearSegmentCount();
     virtual FArianePathInvalidationFlags& GetInvalidationFlags() override;
-    virtual void ResetImage( UArianeImage* InImage ) override;
+    virtual void ResetDrawing( UArianeDrawing* InDrawing ) override;
     virtual void PostReset() override;
 
 protected:

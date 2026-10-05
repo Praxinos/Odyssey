@@ -34,7 +34,7 @@ public:
         DetailBuilder.GetCategoryNames(CategoryNames);
 
         // We only display some sections in that view and not the whole parameters of a UMeshComponent
-        static const TSet<FName> Keep = { "DrawingLayerOptions", "TransformCommon" };
+        static const TSet<FName> Keep = { "VectorLayerOptions", "TransformCommon" };
 
         for (const FName& Category : CategoryNames)
         {
@@ -257,15 +257,15 @@ SArianeEditorLayerStackPanel::NewLayer()
 
     if( CurrentPainting3DComponent )
     {
-        GEditor->BeginTransaction(LOCTEXT("ariane-layer-stack-panel.new-layer","New Layer"));
+        GEditor->BeginTransaction(LOCTEXT("ariane-layer-stack-panel.new-vector-layer","New Vector Layer"));
 
         CurrentPainting3DComponent->GetLayerStack()->Modify();
         CurrentPainting3DComponent->GetLayerStack()->GetRootFolder()->Modify();
 
-        UArianeLayerDrawing* DrawingLayer = CurrentPainting3DComponent->GetLayerStack()->CreateDrawingLayer( nullptr, true );
+        UArianeLayerVector* VectorLayer = CurrentPainting3DComponent->GetLayerStack()->CreateVectorLayer( nullptr, true );
 
         CurrentPainting3DComponent->GetLayerStack()->ClearLayerSelection( false );
-        CurrentPainting3DComponent->GetLayerStack()->SelectLayer( DrawingLayer, true );
+        CurrentPainting3DComponent->GetLayerStack()->SelectLayer( VectorLayer, true );
 
         GEditor->EndTransaction();
     }
@@ -280,7 +280,7 @@ SArianeEditorLayerStackPanel::NewFolderLayer()
 
     if (CurrentPainting3DComponent)
     {
-        GEditor->BeginTransaction(LOCTEXT("ariane-layer-stack-panel.new-layer-folder", "New Layer folder"));
+        GEditor->BeginTransaction(LOCTEXT("ariane-layer-stack-panel.new-folder", "New Folder"));
 
         CurrentPainting3DComponent->GetLayerStack()->Modify();
         CurrentPainting3DComponent->GetLayerStack()->GetRootFolder()->Modify();

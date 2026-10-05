@@ -11,7 +11,7 @@
 #include "ArianePainting3DComponent.h"
 #include "ArianePainting3DActor.h"
 #include "ArianeLayer.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerStack.h"
 
@@ -316,19 +316,19 @@ SArianeEditorLayerStack::ExpandTree( const TSharedPtr<FArianeEditorLayerRowItem>
     }
 }
 
-UArianeLayerDrawing*
-SArianeEditorLayerStack::GetAnyDrawingLayer( UArianeLayerStack* LayerStack )
+UArianeLayerVector*
+SArianeEditorLayerStack::GetAnyVectorLayer( UArianeLayerStack* LayerStack )
 {
-    UArianeLayerDrawing* ChosenDrawingLayer = nullptr;
+    UArianeLayerVector* ChosenVectorLayer = nullptr;
 
     UArianeLayerFolder::Traverse( LayerStack->GetRootFolder()
-                                , [ &ChosenDrawingLayer ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
+                                , [ &ChosenVectorLayer ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
         {
-            UArianeLayerDrawing * DrawingLayer = Cast<UArianeLayerDrawing>(Layer);
+            UArianeLayerVector * VectorLayer = Cast<UArianeLayerVector>(Layer);
 
-            if( DrawingLayer )
+            if( VectorLayer )
             {
-                ChosenDrawingLayer = DrawingLayer;
+                ChosenVectorLayer = VectorLayer;
 
                 return UArianeLayerFolder::ETraversalReturnValue::Stop;
             }
@@ -336,7 +336,7 @@ SArianeEditorLayerStack::GetAnyDrawingLayer( UArianeLayerStack* LayerStack )
             return UArianeLayerFolder::ETraversalReturnValue::Continue;
         } );
 
-    return ChosenDrawingLayer;
+    return ChosenVectorLayer;
 }
 
 void
@@ -359,11 +359,11 @@ SArianeEditorLayerStack::Update()
             // Unbind Delegates or else this function will re-enter itself on layer selection
             UnbindDelegates();
 
-            UArianeLayerDrawing* DrawingLayer = GetAnyDrawingLayer( LayerStack );
+            UArianeLayerVector* VectorLayer = GetAnyVectorLayer( LayerStack );
 
-            if( DrawingLayer )
+            if( VectorLayer )
             {
-                LayerStack->SelectLayer( DrawingLayer, true );
+                LayerStack->SelectLayer( VectorLayer, true );
             }
 
             BindDelegates();

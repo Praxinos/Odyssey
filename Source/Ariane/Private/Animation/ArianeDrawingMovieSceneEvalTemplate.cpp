@@ -1,63 +1,63 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-#include "ArianeImageMovieSceneEvalTemplate.h"
-#include "ArianeImage.h"
+#include "ArianeDrawingMovieSceneEvalTemplate.h"
+#include "ArianeDrawing.h"
 #include "ArianeGroup.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeLayerVector.h"
 #include "Evaluation/MovieSceneAnimTypeID.h"
 
 #include "Evaluation/MovieScenePreAnimatedState.h"
 
 // 1. Le Token : Il stocke l'état d'origine et sait comment le restaurer
-struct FArianeImagePreAnimatedToken : IMovieScenePreAnimatedToken
+struct FArianeDrawingPreAnimatedToken : IMovieScenePreAnimatedToken
 {
-    // TStrongObjectPtr prevents Garbage collection, as the key is the only one to store the former Image
-    TStrongObjectPtr<UArianeImage> OldImage;
+    // TStrongObjectPtr prevents Garbage collection, as the key is the only one to store the former Drawing
+    TStrongObjectPtr<UArianeDrawing> OldDrawing;
 
-    FArianeImagePreAnimatedToken(UArianeImage* InImage) : OldImage(InImage) {}
+    FArianeDrawingPreAnimatedToken(UArianeDrawing* InDrawing) : OldDrawing(InDrawing) {}
 
     virtual void RestoreState(UObject& Object, const UE::MovieScene::FRestoreStateParams& Params) override
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(&Object);
-        if (DrawingLayer)
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(&Object);
+        if (VectorLayer)
         {
             // On restaure l'ancienne image sauvegardée avant l'animation
-            DrawingLayer->SetImage(OldImage.Get());
+            VectorLayer->SetDrawing(OldDrawing.Get());
 
-            DrawingLayer->GetImage()->GetRootGroup()->UpdateTransform();
-            DrawingLayer->Update( false );
+            VectorLayer->GetDrawing()->GetRootGroup()->UpdateTransform();
+            VectorLayer->Update( false );
         }
     }
 };
 
 // 2. Le Producer : Il est appelé par Unreal pour fabriquer le Token ci-dessus
-struct FArianeImagePreAnimatedTokenProducer : IMovieScenePreAnimatedTokenProducer
+struct FArianeDrawingPreAnimatedTokenProducer : IMovieScenePreAnimatedTokenProducer
 {
     virtual IMovieScenePreAnimatedTokenPtr CacheExistingState(UObject& Object) const override
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(&Object);
-        if (DrawingLayer)
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(&Object);
+        if (VectorLayer)
         {
             // On capture l'image actuelle (l'image de base de la map)
-            return FArianeImagePreAnimatedToken(DrawingLayer->GetImage());
+            return FArianeDrawingPreAnimatedToken(VectorLayer->GetDrawing());
         }
         return IMovieScenePreAnimatedTokenPtr();
     }
 };
 
 
-// Déclarer l'identifiant unique pour la restauration de l'ArianeImage
+// Déclarer l'identifiant unique pour la restauration de l'ArianeDrawing
 static
-FMovieSceneAnimTypeID GetArianeImageAnimTypeID()
+FMovieSceneAnimTypeID GetArianeDrawingAnimTypeID()
 {
     static FMovieSceneAnimTypeID TypeID = FMovieSceneAnimTypeID::Unique();
 
     return TypeID;
 }
 
-FArianeImageExecutionToken::FArianeImageExecutionToken( const FArianeImageKeyData* InKeyData
-                                                      , const FArianeImageKeyData* InNextKeyData
+FArianeDrawingExecutionToken::FArianeDrawingExecutionToken( const FArianeDrawingKeyData* InKeyData
+                                                      , const FArianeDrawingKeyData* InNextKeyData
                                                       , float InT
                                                       , const FMovieSceneEvaluationOperand& InOperand )
     : KeyData(InKeyData)
@@ -67,7 +67,7 @@ FArianeImageExecutionToken::FArianeImageExecutionToken( const FArianeImageKeyDat
 {
 }
 
-void FArianeImageExecutionToken::Execute( const FMovieSceneContext& Context
+void FArianeDrawingExecutionToken::Execute( const FMovieSceneContext& Context
                                         , const FMovieSceneEvaluationOperand& Operand
                                         , FPersistentEvaluationData& PersistentData
                                         , IMovieScenePlayer& Player )
@@ -77,54 +77,54 @@ void FArianeImageExecutionToken::Execute( const FMovieSceneContext& Context
 
     if ( BoundObjects.Num() > 0 )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>( BoundObjects[0].Get() );
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>( BoundObjects[0].Get() );
         EMovieScenePlayerStatus::Type PlaybackStatus = Player.GetPlaybackStatus();
 
         // LA CORRECTION : Enregistrer l'état actuel (l'image par défaut) avant de la modifier.
         // On utilise le 'PreAnimatedState' du Player.
-        Player.SavePreAnimatedState( *DrawingLayer
-                                   , GetArianeImageAnimTypeID()
-                                   , FArianeImagePreAnimatedTokenProducer () );
+        Player.SavePreAnimatedState( *VectorLayer
+                                   , GetArianeDrawingAnimTypeID()
+                                   , FArianeDrawingPreAnimatedTokenProducer () );
 
-        if ( KeyData->Image && DrawingLayer )
+        if ( KeyData->Drawing && VectorLayer )
         {
             bool bInteractive =( ( PlaybackStatus == EMovieScenePlayerStatus::Type::Scrubbing )
                               || ( PlaybackStatus == EMovieScenePlayerStatus::Type::Playing   ) ) ? true : false;
 
-            DrawingLayer->SetImage( KeyData->Image, bInteractive ? false : true );
+            VectorLayer->SetDrawing( KeyData->Drawing, bInteractive ? false : true );
 
-            DrawingLayer->GetImage()->Animate( KeyData, NextKeyData, T );
+            VectorLayer->GetDrawing()->Animate( KeyData, NextKeyData, T );
 
-            DrawingLayer->GetImage()->GetRootGroup()->UpdateTransform();
-            DrawingLayer->Update( bInteractive );
+            VectorLayer->GetDrawing()->GetRootGroup()->UpdateTransform();
+            VectorLayer->Update( bInteractive );
         }
     }
 }
 
-FArianeImageMovieSceneEvalTemplate::FArianeImageMovieSceneEvalTemplate()
+FArianeDrawingMovieSceneEvalTemplate::FArianeDrawingMovieSceneEvalTemplate()
     : Section ( nullptr )
 {
 }
 
-FArianeImageMovieSceneEvalTemplate::FArianeImageMovieSceneEvalTemplate( const UArianeImageMovieSceneSection* InSection )
+FArianeDrawingMovieSceneEvalTemplate::FArianeDrawingMovieSceneEvalTemplate( const UArianeDrawingMovieSceneSection* InSection )
     : FMovieSceneEvalTemplate()
     , Section( InSection )
 {
 }
 
-UScriptStruct& FArianeImageMovieSceneEvalTemplate::GetScriptStructImpl() const
+UScriptStruct& FArianeDrawingMovieSceneEvalTemplate::GetScriptStructImpl() const
 {
     return *StaticStruct();
 }
 
 void
-FArianeImageMovieSceneEvalTemplate::Evaluate( const FMovieSceneEvaluationOperand& Operand
+FArianeDrawingMovieSceneEvalTemplate::Evaluate( const FMovieSceneEvaluationOperand& Operand
                                             , const FMovieSceneContext& Context
                                             , const FPersistentEvaluationData& PersistentData
                                             , FMovieSceneExecutionTokens& ExecutionTokens ) const
 {
     // On récupère la section source liée à ce template
-    const UArianeImageMovieSceneSection* ArianeSection = Cast<UArianeImageMovieSceneSection>(GetSourceSection());
+    const UArianeDrawingMovieSceneSection* ArianeSection = Cast<UArianeDrawingMovieSceneSection>(GetSourceSection());
     if (!ArianeSection) return;
 
     // 1. Obtenir le temps actuel du Sequencer
@@ -132,15 +132,15 @@ FArianeImageMovieSceneEvalTemplate::Evaluate( const FMovieSceneEvaluationOperand
 
     // 2. Récupérer l'accès aux données de votre canal
     // Note : On assume ici que vous avez stocké votre canal 'MyChannel' dans le template lors de sa compilation
-    TMovieSceneChannelData<const FArianeImageKeyData> ChannelData = Section->ImageChannel.GetData();
+    TMovieSceneChannelData<const FArianeDrawingKeyData> ChannelData = Section->DrawingChannel.GetData();
 
     // Le tableau des temps géré par votre canal
     TArrayView<const FFrameNumber> Times = ChannelData.GetTimes();
     // Le tableau de vos structures de données
-    TArrayView<const FArianeImageKeyData> Values = ChannelData.GetValues();
+    TArrayView<const FArianeDrawingKeyData> Values = ChannelData.GetValues();
 
-    const FArianeImageKeyData* KeyDataA = nullptr;
-    const FArianeImageKeyData* KeyDataB = nullptr;
+    const FArianeDrawingKeyData* KeyDataA = nullptr;
+    const FArianeDrawingKeyData* KeyDataB = nullptr;
     float Alpha = 0.0f;
 
     if (Times.Num() > 0)
@@ -171,6 +171,6 @@ FArianeImageMovieSceneEvalTemplate::Evaluate( const FMovieSceneEvaluationOperand
     if ( KeyDataA )
     {
         // On encapsule la structure trouvée dans le jeton d'exécution et on l'envoie au moteur
-        ExecutionTokens.Add( FArianeImageExecutionToken( KeyDataA, KeyDataB, Alpha, Operand ) );
+        ExecutionTokens.Add( FArianeDrawingExecutionToken( KeyDataA, KeyDataB, Alpha, Operand ) );
     }
 };

@@ -7,8 +7,8 @@
 #include "ArianeEditorStyle.h"
 //Ariane Headers
 #include "ArianeLayerStack.h"
-#include "ArianeImage.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeGroup.h"
 #include "ArianeLine.h"
 #include "ArianeEllipse.h"
@@ -149,9 +149,9 @@ UArianeEditorPrimitiveDrawingTool::OnKeyUpGlobal( const FKeyEvent& InKeyEvent )
 }
 
 FArianeGroup*
-UArianeEditorPrimitiveDrawingTool::GetParentGroup( UArianeLayerDrawing* DrawingLayer )
+UArianeEditorPrimitiveDrawingTool::GetParentGroup( UArianeLayerVector* VectorLayer )
 {
-    TArray<FArianeObject*>& SelectedObjects = DrawingLayer->GetImage()->GetSelectedObjects();
+    TArray<FArianeObject*>& SelectedObjects = VectorLayer->GetDrawing()->GetSelectedObjects();
 
     if( SelectedObjects.Num() == 1 )
     {
@@ -161,7 +161,7 @@ UArianeEditorPrimitiveDrawingTool::GetParentGroup( UArianeLayerDrawing* DrawingL
        }
     }
 
-    return DrawingLayer->GetImage()->GetRootGroup();
+    return VectorLayer->GetDrawing()->GetRootGroup();
 }
 
 bool
@@ -186,13 +186,13 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
         {
             //painting3DComponent->PrintPointers();
             UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
+            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(LayerStack->GetCurrentLayer());
 
-            if( DrawingLayer )
+            if( VectorLayer )
             {
-                FArianeGroup* ParentGroup = GetParentGroup( DrawingLayer );
+                FArianeGroup* ParentGroup = GetParentGroup( VectorLayer );
                 //const FTransform& ParentGroupTransform = ParentGroup->GetTransform();
-                FPlane DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
+                FPlane DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
                 FVector RayOrigin, RayDirection;
                 FVector2D ViewportPosition = FVector2D( PointerState.ViewportX
                                                       , PointerState.ViewportY );
@@ -208,9 +208,9 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
 
                     PrimitiveCoordsAtDown = ParentGroupTransform.InverseTransformPosition( IntersectAtDown );
 
-                    switch( Editor->GetLayerDrawingOrientation( DrawingLayer ) )
+                    switch( Editor->GetLayerDrawingOrientation( VectorLayer ) )
                     {
-                        case EArianeLayerDrawingOrientation::View :
+                        case EArianeLayerVectorDrawingOrientation::View :
                         {
                             FVector CamForward = View->GetViewDirection();
                             FVector CamUp = View->GetViewUp();
@@ -236,13 +236,13 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
 
                     GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-primitive-tool.create","Create Primitive"));
 
-                    DrawingLayer->GetImage()->Modify();
+                    VectorLayer->GetDrawing()->Modify();
 
                     switch( PrimitiveShapeType/*Shapes.GetActiveShapeType()*/ )
                     {
                         //case EOdysseyShapeType::kEllipse:
                         case EArianePrimitiveToolShapeType::Ellipse:
-                            Primitive = DrawingLayer->GetImage()->AllocEllipse( MaterialInterface
+                            Primitive = VectorLayer->GetDrawing()->AllocEllipse( MaterialInterface
                                                                               , *(FString("Ellipse_" + FString::FromInt( EllipseNumber++ )))
                                                                               , 0.0f
                                                                               , 0.0f
@@ -252,7 +252,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
 
                         //case EOdysseyShapeType::kRectangle :
                         case EArianePrimitiveToolShapeType::Rectangle:
-                            Primitive = DrawingLayer->GetImage()->AllocRectangle( MaterialInterface
+                            Primitive = VectorLayer->GetDrawing()->AllocRectangle( MaterialInterface
                                                                               , *(FString("Rectangle_") + FString::FromInt( RectangleNumber++ ))
                                                                               , 0.0f
                                                                               , 0.0f
@@ -262,7 +262,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
 
                         //case EOdysseyShapeType::kLine:
                         case EArianePrimitiveToolShapeType::Line:
-                            Primitive = DrawingLayer->GetImage()->AllocLine( MaterialInterface
+                            Primitive = VectorLayer->GetDrawing()->AllocLine( MaterialInterface
                                                                               , *(FString("Line_") + FString::FromInt( LineNumber++ ))
                                                                               , FVector::Zero()
                                                                               , FVector::Zero()
@@ -272,7 +272,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
 
                         //case EOdysseyShapeType::kPolygon:
                         case EArianePrimitiveToolShapeType::Polygon:
-                            Primitive = DrawingLayer->GetImage()->AllocPolygon( MaterialInterface
+                            Primitive = VectorLayer->GetDrawing()->AllocPolygon( MaterialInterface
                                                                               , *(FString("Polygon_") + FString::FromInt( PolygonNumber++ ))
                                                                               , DivisionCount
                                                                               , 0.0f
@@ -308,11 +308,11 @@ UArianeEditorPrimitiveDrawingTool::OnMouseHover( FEditorViewportClient* Viewport
 
     if( Painting3DComponent )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
+            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
             FVector RayOrigin, RayDirection;
             FVector IntersectAt;
             FVector2D ViewportPosition = FVector2D( ViewportClient->Viewport->GetMouseX()
@@ -375,12 +375,12 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDrag( FEditorViewportClient* ViewportC
         if( Painting3DComponent && Primitive )
         {
             UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
+            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(LayerStack->GetCurrentLayer());
 
-            if( DrawingLayer )
+            if( VectorLayer )
             {
-                FArianeGroup* ParentGroup = GetParentGroup( DrawingLayer );
-                FPlane DrawingPlane = GetDrawingPlane( ViewportClient, DrawingLayer );
+                FArianeGroup* ParentGroup = GetParentGroup( VectorLayer );
+                FPlane DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
                 FVector RayOrigin, RayDirection;
                 FVector IntersectAtDrag;
                 FVector2D ViewportPosition = FVector2D( PointerState.ViewportX
@@ -500,9 +500,9 @@ UArianeEditorPrimitiveDrawingTool::OnMouseUp( FEditorViewportClient* ViewportCli
         {
             //painting3DComponent->PrintPointers();
             UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
+            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(LayerStack->GetCurrentLayer());
 
-            if( DrawingLayer )
+            if( VectorLayer )
             {
                 GetToolManager()->EndUndoTransaction();
             }
@@ -528,11 +528,11 @@ UArianeEditorPrimitiveDrawingTool::Render(IToolsContextRenderAPI* RenderAPI)
         if( Painting3DComponent )
         {
             UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-            UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>( LayerStack->GetCurrentLayer() );
+            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>( LayerStack->GetCurrentLayer() );
 
-            if( DrawingLayer )
+            if( VectorLayer )
             {
-                DrawLayerOrientationGrid( RenderAPI, DrawingLayer );
+                DrawLayerOrientationGrid( RenderAPI, VectorLayer );
             }
         }
     }

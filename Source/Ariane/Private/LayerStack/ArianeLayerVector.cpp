@@ -2,8 +2,8 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 // Ariane headers
-#include "ArianeLayerDrawing.h"
-#include "ArianeImage.h"
+#include "ArianeLayerVector.h"
+#include "ArianeDrawing.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianePath.h"
@@ -31,14 +31,14 @@ FArianeGeometryProxy::~FArianeGeometryProxy()
 
 // Note: The proxy is created via CreateSceneProxy, and will be recreated everytime MarkRenderStateDirty() is called
 FArianeGeometryProxy::FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLevel
-                                          , UArianeLayerDrawing* InDrawingLayer )
-    : FPrimitiveSceneProxy ( InDrawingLayer )
-    , DrawingLayer ( InDrawingLayer )
+                                          , UArianeLayerVector* InVectorLayer )
+    : FPrimitiveSceneProxy ( InVectorLayer )
+    , VectorLayer ( InVectorLayer )
 {
     EShaderPlatform ShaderPlatform = GetFeatureLevelShaderPlatform_Checked( InFeatureLevel );
     TArray<UMaterialInterface*> MaterialInterfaces;
 
-    DrawingLayer->GetImage()->GetUsedMaterials( MaterialInterfaces );
+    VectorLayer->GetDrawing()->GetUsedMaterials( MaterialInterfaces );
 
     // MaterialRelevance is used by GetViewRelevance and is necessary to render all kinds of materials
     for( UMaterialInterface* MaterialInterface : MaterialInterfaces )
@@ -125,15 +125,15 @@ FArianeGeometryProxy::DrawStaticElements( FStaticPrimitiveDrawInterface * PDI )
 
 // static
 void
-FArianeGeometryProxy::GetImageDynamicMeshElements( FMeshElementCollector& Collector
+FArianeGeometryProxy::GetDrawingDynamicMeshElements( FMeshElementCollector& Collector
                                                  , int32 ViewIndex ) const
 {
     FPrimitiveDrawInterface* PDI = Collector.GetPDI(ViewIndex);
     //UMaterialInterface* MaterialInterface = GEngine->VertexColorMaterial;
-    UArianeImage* Image = DrawingLayer->GetImage();
-    FArianeGroup* RootGroup = Image->GetRootGroup();
+    UArianeDrawing* Drawing = VectorLayer->GetDrawing();
+    FArianeGroup* RootGroup = Drawing->GetRootGroup();
 
-    Image->InstancedObjectsAccessRW.Lock();
+    Drawing->InstancedObjectsAccessRW.Lock();
 
     FArianeObject::Traverse( RootGroup
                            , [ this
@@ -216,7 +216,7 @@ FArianeGeometryProxy::GetImageDynamicMeshElements( FMeshElementCollector& Collec
 
                 DynamicPrimitiveUniformBuffer.Set( Collector.GetRHICommandList()
                                                  , Object->GetTransform().ToMatrixWithScale()
-                                                 //, DrawingLayer->GetComponentToWorld().ToMatrixWithScale() //GetLocalToWorld()
+                                                 //, VectorLayer->GetComponentToWorld().ToMatrixWithScale() //GetLocalToWorld()
                                                  , PreviousLocalToWorld
                                                  , GetBounds()
                                                  , GetLocalBounds()
@@ -272,7 +272,7 @@ FArianeGeometryProxy::GetImageDynamicMeshElements( FMeshElementCollector& Collec
         return FArianeObject::ETraversalReturnValue::Continue;
     } );
 
-    Image->InstancedObjectsAccessRW.Unlock();
+    Drawing->InstancedObjectsAccessRW.Unlock();
 }
 
 void
@@ -285,11 +285,11 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
     {
         const FSceneView* View = Views[ViewIndex];
 
-        if( DrawingLayer )
+        if( VectorLayer )
         {
-            if( DrawingLayer->IsVisible() )
+            if( VectorLayer->IsVisible() )
             {
-                GetImageDynamicMeshElements( Collector
+                GetDrawingDynamicMeshElements( Collector
                                            , ViewIndex );
             }
 
@@ -299,7 +299,7 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
                 RenderBounds(
                     Collector.GetPDI(ViewIndex),
                     ViewFamily.EngineShowFlags,
-                    DrawingLayer->GetBounds(),
+                    VectorLayer->GetBounds(),
                     true
                 );
             }
@@ -346,22 +346,22 @@ FArianeGeometryProxy::GetMemoryFootprint( void ) const
 
 //--------------------------------------------------------------------------------------------------
 
-UArianeLayerDrawing::~UArianeLayerDrawing()
+UArianeLayerVector::~UArianeLayerVector()
 {
 }
 
-UArianeLayerDrawing::UArianeLayerDrawing()
-    : Image( nullptr )
-    , DrawingOrigin ( EArianeLayerDrawingOrigin::Layer )
-    , DrawingOrientation ( EArianeLayerDrawingOrientation::View )
+UArianeLayerVector::UArianeLayerVector()
+    : Drawing( nullptr )
+    , DrawingOrigin ( EArianeLayerVectorDrawingOrigin::Layer )
+    , DrawingOrientation ( EArianeLayerVectorDrawingOrientation::View )
 {
     bWantsOnUpdateTransform = true;
 
-    FCoreUObjectDelegates::OnAssetLoaded.AddUObject( this, &UArianeLayerDrawing::OnAssetLoaded );
+    FCoreUObjectDelegates::OnAssetLoaded.AddUObject( this, &UArianeLayerVector::OnAssetLoaded );
 
-    //Image = CreateDefaultSubobject<UArianeImage>("Subobject Image");
+    //Drawing = CreateDefaultSubobject<UArianeDrawing>("Subobject Drawing");
 
-    //Image->SetDrawingLayer( this );
+    //Drawing->SetVectorLayer( this );
 
     //bWantsInitializeComponent = true;
 
@@ -377,68 +377,68 @@ UArianeLayerDrawing::UArianeLayerDrawing()
 */
 }
 
-void UArianeLayerDrawing::PreSave(FObjectPreSaveContext Context)
+void UArianeLayerVector::PreSave(FObjectPreSaveContext Context)
 {
-UE_LOG(LogTemp, Warning, TEXT("BEFORE PreSave FLAGS Layer=0x%x Image=0x%x Stack=0x%x Owner=0x%x Path=%s"),
+UE_LOG(LogTemp, Warning, TEXT("BEFORE PreSave FLAGS Layer=0x%x Drawing=0x%x Stack=0x%x Owner=0x%x Path=%s"),
     (uint32)GetFlags(),
-    Image ? (uint32)Image->GetFlags() : 0,
+    Drawing ? (uint32)Drawing->GetFlags() : 0,
     GetAttachParent() ? (uint32)GetAttachParent()->GetFlags() : 0,
     GetOwner() ? (uint32)GetOwner()->GetFlags() : 0,
     *GetPathName());
 
     Super::PreSave(Context);
 
-UE_LOG(LogTemp, Warning, TEXT("AFTER PreSave FLAGS Layer=0x%x Image=0x%x Stack=0x%x Owner=0x%x Path=%s"),
+UE_LOG(LogTemp, Warning, TEXT("AFTER PreSave FLAGS Layer=0x%x Drawing=0x%x Stack=0x%x Owner=0x%x Path=%s"),
     (uint32)GetFlags(),
-    Image ? (uint32)Image->GetFlags() : 0,
+    Drawing ? (uint32)Drawing->GetFlags() : 0,
     GetAttachParent() ? (uint32)GetAttachParent()->GetFlags() : 0,
     GetOwner() ? (uint32)GetOwner()->GetFlags() : 0,
     *GetPathName());
 }
 
 void
-UArianeLayerDrawing::Serialize(FArchive& Ar )
+UArianeLayerVector::Serialize(FArchive& Ar )
 {
-    // for some currently UNKOWN reason, the UPROPERTY Image is set to Transient when loading the asset as
+    // for some currently UNKOWN reason, the UPROPERTY Drawing is set to Transient when loading the asset as
     // a spawnable from the level sequence. We have to clear the TRANSIENT flag if we wan't the image to be
     // saved in case there is a modification via ArianeEditor. the question should be asked to Epic Games.
     // That took days to troubleshoot :(
-    if ( Ar.IsSaving() && Image )
+    if ( Ar.IsSaving() && Drawing )
     {
-        Image->ClearFlags(RF_Transient);
+        Drawing->ClearFlags(RF_Transient);
     }
 
     Super::Serialize(Ar);
 }
 
 void
-UArianeLayerDrawing::PostLoad()
+UArianeLayerVector::PostLoad()
 {
     Super::PostLoad();
 }
 
 void
-UArianeLayerDrawing::OnRegister()
+UArianeLayerVector::OnRegister()
 {
-    UArianeImage* DefaultImage = Image;
+    UArianeDrawing* DefaultDrawing = Drawing;
 
     Super::OnRegister();
 
     // Force computation of the world Transform in FArianeObject::UpdateTransform
     WorldTransformVersion++;
 
-    if ( DefaultImage == nullptr )
+    if ( DefaultDrawing == nullptr )
     {
-        DefaultImage = NewObject<UArianeImage>(this, TEXT("DefaultImage"), RF_Transactional | RF_Public);
+        DefaultDrawing = NewObject<UArianeDrawing>(this, TEXT("DefaultDrawing"), RF_Transactional | RF_Public);
     }
 
-    SetImage( DefaultImage );
+    SetDrawing( DefaultDrawing );
 
-    Image->OnRegisterLayer();
+    Drawing->OnRegisterLayer();
 }
 
 void
-UArianeLayerDrawing::BeginDestroy()
+UArianeLayerVector::BeginDestroy()
 {
     FCoreUObjectDelegates::OnAssetLoaded.RemoveAll( this );
 
@@ -446,52 +446,52 @@ UArianeLayerDrawing::BeginDestroy()
 }
 
 void
-UArianeLayerDrawing::OnAssetLoaded(UObject* LoadedObject)
+UArianeLayerVector::OnAssetLoaded(UObject* LoadedObject)
 {
     // Note: . Our FArianeObjects Transforms depend on the
     // Layer (to compute the world Transform). but, when PostLoad is called, the Transforms are not set yet
     // so we update the Transforms for our ArianeObjects after the Asset is loaded
     if ( GetOutermost() == LoadedObject )
     {
-        Image->GetRootGroup()->UpdateTransform();
+        Drawing->GetRootGroup()->UpdateTransform();
     }
 }
 
 void
-UArianeLayerDrawing::GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials, bool bGetDebugMaterials ) const
+UArianeLayerVector::GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials, bool bGetDebugMaterials ) const
 {
-    Image->GetUsedMaterials( OutUsedMaterials, bGetDebugMaterials );
+    Drawing->GetUsedMaterials( OutUsedMaterials, bGetDebugMaterials );
 }
 
 FPrimitiveSceneProxy*
-UArianeLayerDrawing::CreateSceneProxy()
+UArianeLayerVector::CreateSceneProxy()
 {
     return new FArianeGeometryProxy( GetScene()->GetFeatureLevel(), this );
 }
 
 FBoxSphereBounds
-UArianeLayerDrawing::CalcBounds( const FTransform& LocalToWorld ) const
+UArianeLayerVector::CalcBounds( const FTransform& LocalToWorld ) const
 {
     FBoxSphereBounds RetBounds = FBoxSphereBounds(ForceInit);
 
-    if( Image )
+    if( Drawing )
     {
-        RetBounds = Image->GetRootGroup()->GetBoundingBox();
+        RetBounds = Drawing->GetRootGroup()->GetBoundingBox();
     }
 
     return FBoxSphereBounds( RetBounds.TransformBy( LocalToWorld ) );
 }
 
 void
-UArianeLayerDrawing::OnUpdateTransform( EUpdateTransformFlags UpdateTransformFlags, ETeleportType TeleportType )
+UArianeLayerVector::OnUpdateTransform( EUpdateTransformFlags UpdateTransformFlags, ETeleportType TeleportType )
 {
     Super::OnUpdateTransform( UpdateTransformFlags, TeleportType );
 
-    Image->GetRootGroup()->UpdateTransform();
+    Drawing->GetRootGroup()->UpdateTransform();
 }
 
 void
-UArianeLayerDrawing::Update( bool bInteractive )
+UArianeLayerVector::Update( bool bInteractive )
 {
     FArianeObject::EUpdateFlags ObjectUpdateFlags = FArianeObject::EUpdateFlags::None;
 
@@ -500,84 +500,84 @@ UArianeLayerDrawing::Update( bool bInteractive )
         ObjectUpdateFlags = FArianeObject::EUpdateFlags::Interactive;
     }
 
-    Image->Update( bInteractive );
+    Drawing->Update( bInteractive );
 
     Super::Update( bInteractive );
 }
 
 void
-UArianeLayerDrawing::OnRootObjectInvalidated()
+UArianeLayerVector::OnRootObjectInvalidated()
 {
     Invalidate();
 }
 
 /*
 FBoxSphereBounds
-UArianeLayerDrawing::CalcBounds( const FTransform& LocalToWorld ) const
+UArianeLayerVector::CalcBounds( const FTransform& LocalToWorld ) const
 {
-    return FBoxSphereBounds( Image->GetRootGroup()->GetBoundingBox().TransformBy( LocalToWorld ) );
+    return FBoxSphereBounds( Drawing->GetRootGroup()->GetBoundingBox().TransformBy( LocalToWorld ) );
 }
 */
 
-EArianeLayerDrawingOrigin
-UArianeLayerDrawing::GetDrawingOrigin()
+EArianeLayerVectorDrawingOrigin
+UArianeLayerVector::GetDrawingOrigin()
 {
     return DrawingOrigin;
 }
 
 void
-UArianeLayerDrawing::SetDrawingOrigin( EArianeLayerDrawingOrigin InDrawingOrigin )
+UArianeLayerVector::SetDrawingOrigin( EArianeLayerVectorDrawingOrigin InDrawingOrigin )
 {
     DrawingOrigin = InDrawingOrigin;
 }
 
-EArianeLayerDrawingOrientation
-UArianeLayerDrawing::GetDrawingOrientation()
+EArianeLayerVectorDrawingOrientation
+UArianeLayerVector::GetDrawingOrientation()
 {
     return DrawingOrientation;
 }
 
 void
-UArianeLayerDrawing::SetDrawingOrientation( EArianeLayerDrawingOrientation InDrawingOrientation )
+UArianeLayerVector::SetDrawingOrientation( EArianeLayerVectorDrawingOrientation InDrawingOrientation )
 {
     DrawingOrientation = InDrawingOrientation;
 }
 
-UArianeImage*
-UArianeLayerDrawing::GetImage()
+UArianeDrawing*
+UArianeLayerVector::GetDrawing()
 {
-    return Image;
+    return Drawing;
 }
 
 void
-UArianeLayerDrawing::SetImage( UArianeImage* InImage, bool bTriggerEvent )
+UArianeLayerVector::SetDrawing( UArianeDrawing* InDrawing, bool bTriggerEvent )
 {
     if( bTriggerEvent )
-        OnPreImageChanged.Broadcast();
+        OnPreDrawingChanged.Broadcast();
 
-    Image = InImage;
-    Image->SetDrawingLayer( this );
+    Drawing = InDrawing;
+    Drawing->SetVectorLayer( this );
 
     MarkRenderStateDirty();
 
     if( bTriggerEvent )
-        OnPostImageChanged.Broadcast();
+        OnPostDrawingChanged.Broadcast();
 }
 
-UArianeLayerDrawing::FOnImageChanged&
-UArianeLayerDrawing::OnPreImageChangedDelegate()
+UArianeLayerVector::FOnDrawingChanged&
+UArianeLayerVector::OnPreDrawingChangedDelegate()
 {
-    return OnPreImageChanged;
+    return OnPreDrawingChanged;
 }
 
-UArianeLayerDrawing::FOnImageChanged&
-UArianeLayerDrawing::OnPostImageChangedDelegate()
+UArianeLayerVector::FOnDrawingChanged&
+UArianeLayerVector::OnPostDrawingChangedDelegate()
 {
-    return OnPostImageChanged;
+    return OnPostDrawingChanged;
 }
 
 void
-UArianeLayerDrawing::PropertyChanged( const FName& PropertyName
+UArianeLayerVector::PropertyChanged( const FName& PropertyName
                                     , const FName& MemberPropertyName
                                     , const FName& Category )
 {

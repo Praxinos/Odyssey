@@ -4,8 +4,8 @@
 #include "ArianeRectangle.h"
 #include "ArianeVertex.h"
 #include "ArianeSegmentCubic.h"
-#include "ArianeImage.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeDrawing.h"
+#include "ArianeLayerVector.h"
 
 // https://stackoverflow.com/a/27863181
 // https://stackoverflow.com/questions/1734745/how-to-create-circle-with-b%c3%a9zier-curves
@@ -25,13 +25,13 @@ FArianeRectangle::FArianeRectangle()
 {
 }
 
-FArianeRectangle::FArianeRectangle( UArianeImage* InImage
+FArianeRectangle::FArianeRectangle( UArianeDrawing* InDrawing
                                   , const FName& InName
                                   , double InWidth
                                   , double InHeight
                                   , double InStrokeWidth
                                   , EArianeAllocationModel InAllocationModel )
-    : FArianePrimitive( InImage
+    : FArianePrimitive( InDrawing
                       , InName
                       , InStrokeWidth
                       , InAllocationModel )
@@ -138,7 +138,7 @@ FArianeRectangle::CopyShape( const FCopyArgs& CopyArgs )
     }
     else
     {
-         RectangleCopy = CopyArgs.Image->AllocRectangle( Material
+         RectangleCopy = CopyArgs.Drawing->AllocRectangle( Material
                                                        , Name
                                                        , Width
                                                        , Height

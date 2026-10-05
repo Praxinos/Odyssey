@@ -13,8 +13,8 @@
 #include "ArianeEllipse.h"
 #include "ArianeLine.h"
 #include "ArianePolygon.h"
-#include "ArianeImage.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
 // Unreal Headers
@@ -99,7 +99,7 @@ SArianeEditorSceneTreeViewRow::OnCheckBoxStateChanged( ECheckBoxState iState )
         break;
     }
 
-    Item->GetObject()->GetImage()->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->Update( false );
+    Item->GetObject()->GetDrawing()->GetVectorLayer()->GetLayerStack()->GetPainting3DComponent()->Update( false );
 
     TreeView->BindComponentDelegates();
 }
@@ -149,7 +149,7 @@ SArianeEditorSceneTreeViewRow::GenerateWidgetForColumn ( const FName& InColumnNa
                    SNew( SColorBlock )
                   .Color_Lambda( [this]
                                  {
-                                     FLinearColor LinearHUDColor = Item->GetObject()->GetImage()->GetDrawingLayer().Get() ? FLinearColor( Item->GetObject()->GetHUDForegroundColor() )
+                                     FLinearColor LinearHUDColor = Item->GetObject()->GetDrawing()->GetVectorLayer().Get() ? FLinearColor( Item->GetObject()->GetHUDForegroundColor() )
                                                                                                                           : FLinearColor() ;
 
                                      return LinearHUDColor;
@@ -276,7 +276,7 @@ SArianeEditorSceneTreeViewRow::GenerateWidgetForColumn ( const FName& InColumnNa
 
         for( FArianeTagID& TagID : Object->GetTags() )
         {
-            FArianeTag* ObjectTag = TagID.GetTag( Object->GetImage() );
+            FArianeTag* ObjectTag = TagID.GetTag( Object->GetDrawing() );
 /*
             if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
             {
@@ -426,13 +426,13 @@ SArianeEditorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     // rebuilt while it's processing stuff
     //TreeView->UnbindComponentDelegates();
 
-    RootGroup->GetImage()->GetSelectedTrees( SelectedTrees );
+    RootGroup->GetDrawing()->GetSelectedTrees( SelectedTrees );
 
     if( RootGroup->IsSelected() == false )
     {
         GEditor->BeginTransaction(LOCTEXT("ariane-tree-view.transaction.drag-drop-object", "Drop Objects"));
 
-        RootGroup->GetImage()->GetDrawingLayer()->Modify();
+        RootGroup->GetDrawing()->GetVectorLayer()->Modify();
 
         for( FArianeObject* SelectedTree : SelectedTrees )
         {

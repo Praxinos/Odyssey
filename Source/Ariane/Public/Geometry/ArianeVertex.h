@@ -11,7 +11,7 @@
 
 #include "ArianeVertex.generated.h"
 
-class UArianeImage;
+class UArianeDrawing;
 struct FArianeObject;
 struct FArianeSegment;
 class UArianePainting3DComponent;
@@ -134,8 +134,8 @@ public:
                                     , TArray<FArianeSegment*>& OutSegments
                                     , bool bEmptyFirst );
     EArianeAllocationModel GetAllocationModel();
-    void SetImage( UArianeImage* InImage );
-    UArianeImage* GetImage();
+    void SetDrawing( UArianeDrawing* InDrawing );
+    UArianeDrawing* GetDrawing();
 
 protected:
     /**
@@ -165,7 +165,7 @@ public:
 
 protected:
     // Needed to resolve the fake-pointers FArianeXXXXID
-    UArianeImage* Image;
+    UArianeDrawing* Drawing;
     TArray<FArianeSegment*> Segments;
 
     uint32 ID;

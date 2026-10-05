@@ -6,9 +6,9 @@
 #include "ArianeVertex.h"
 #include "ArianeSegment.h"
 #include "ArianeSegmentCubic.h"
-#include "ArianeImage.h"
+#include "ArianeDrawing.h"
 #include "ArianeKeyedPath.h"
-#include "ArianeLayerDrawing.h"
+#include "ArianeLayerVector.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
 // Unreal headers
@@ -233,10 +233,10 @@ FArianePath::FArianePath()
 {
 }
 
-FArianePath::FArianePath( UArianeImage* InImage
+FArianePath::FArianePath( UArianeDrawing* InDrawing
                         , const FName& InName
                         , EArianeAllocationModel InAllocationModel )
-    : FArianeObject ( InImage
+    : FArianeObject ( InDrawing
                     , InName
                     , InAllocationModel )
     , LineType ( EArianePathLineType::Tube )
@@ -249,9 +249,9 @@ FArianePath::FArianePath( UArianeImage* InImage
 }
 
 void
-FArianePath::ResetImage( UArianeImage* InImage )
+FArianePath::ResetDrawing( UArianeDrawing* InDrawing )
 {
-    Super::ResetImage( InImage );
+    Super::ResetDrawing( InDrawing );
 
     Vertices.Empty();
     Segments.Empty();
@@ -266,14 +266,14 @@ FArianePath::ResetImage( UArianeImage* InImage )
     {
         FArianeVertex* Vertex = InstancedVertex.GetMutablePtr<FArianeVertex>();
 
-        Vertex->SetImage( InImage );
+        Vertex->SetDrawing( InDrawing );
     }
 
     for( FInstancedStruct& InstancedSegment : InstancedSegments )
     {
         FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
 
-        Segment->SetImage( InImage );
+        Segment->SetDrawing( InDrawing );
     }
 }
 
@@ -298,7 +298,7 @@ FArianePath::PostReset()
 
     if ( Material )
     {
-        Image->IncrementMaterial( Material );
+        Drawing->IncrementMaterial( Material );
     }
 
     InvalidateAllVertices();
@@ -377,18 +377,18 @@ FArianePath::PostLoad()
 void
 FArianePath::Added()
 {
-    if( Material && Image )
+    if( Material && Drawing )
     {
-        Image->IncrementMaterial( Material );
+        Drawing->IncrementMaterial( Material );
     }
 }
 
 void
 FArianePath::Removed()
 {
-    if( Material && Image )
+    if( Material && Drawing )
     {
-        Image->DecrementMaterial( Material );
+        Drawing->DecrementMaterial( Material );
     }
 }
 
@@ -402,9 +402,9 @@ void
 FArianePath::SetMaterial( UMaterialInterface* InMaterialInterface )
 {
     // remove the current material from the used material list
-    if( Material && Image )
+    if( Material && Drawing )
     {
-        Image->DecrementMaterial( Material );
+        Drawing->DecrementMaterial( Material );
     }
 
     Material = InMaterialInterface;
@@ -412,9 +412,9 @@ FArianePath::SetMaterial( UMaterialInterface* InMaterialInterface )
     if( Material )
     {
         // add the new material to the used material list
-        if( Material && Image )
+        if( Material && Drawing )
         {
-            Image->IncrementMaterial( Material );
+            Drawing->IncrementMaterial( Material );
         }
 
     }
@@ -726,7 +726,7 @@ FArianePath::CopyShape( const FCopyArgs& CopyArgs )
     FArianePath* PathCopy = nullptr;
     uint32 VertexID = 0;
 
-    PathCopy = CopyArgs.Image->AllocPath( nullptr, Name, CopyArgs.AllocationModel );
+    PathCopy = CopyArgs.Drawing->AllocPath( nullptr, Name, CopyArgs.AllocationModel );
 
     LookupTable.Reserve ( Vertices.Num() );
 
@@ -1546,7 +1546,7 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
         }
         else
         {
-            FVector RightVector = Path->GetImage()->GetDrawingLayer()->GetLayerStack()->GetPainting3DComponent()->GetRightVector();
+            FVector RightVector = Path->GetDrawing()->GetVectorLayer()->GetLayerStack()->GetPainting3DComponent()->GetRightVector();
 
             InOutPreviousPerpendicularVector = SegmentVector.Cross( RightVector );
             InOutPreviousPerpendicularVector.Normalize();
@@ -1680,7 +1680,7 @@ void
 FArianePathGeometry3D::Build()
 {
     FArianePath* Path = GetPath();
-    UArianeImage* Image = Path->GetImage();
+    UArianeDrawing* Drawing = Path->GetDrawing();
     uint32 TotalModelVertexCount = 0;
     uint32 TotalIndexCount = 0;
     FVector PreviousPerpendicularVector = FVector::Zero();
@@ -1802,9 +1802,9 @@ FArianePathGeometry3D::Build()
 
     InitVertexFactory();
 
-    // DrawingLayer can be null in animation keys
-    if( Path->GetImage()->GetDrawingLayer().IsValid() )
+    // VectorLayer can be null in animation keys
+    if( Path->GetDrawing()->GetVectorLayer().IsValid() )
     {
-        Path->GetImage()->GetDrawingLayer()->MarkRenderStateDirty();
+        Path->GetDrawing()->GetVectorLayer()->MarkRenderStateDirty();
     }
 }
