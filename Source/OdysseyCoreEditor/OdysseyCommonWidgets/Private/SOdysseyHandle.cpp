@@ -25,6 +25,9 @@ SOdysseyHandle::OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEven
     if (!mIsDraggable.Get())
         return FReply::Unhandled();
 
+    if (mIsDragging)
+        return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
+
     if (iMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
     {
         mIsDragging = true;

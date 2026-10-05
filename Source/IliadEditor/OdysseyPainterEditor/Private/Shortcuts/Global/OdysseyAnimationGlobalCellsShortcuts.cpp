@@ -2,16 +2,18 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Shortcuts/Global/OdysseyAnimationGlobalCellsShortcuts.h"
-#include "OdysseyPainterEditorAnimationCommands.h"
-#include "OdysseyAnimation.h"
-#include "OdysseyAnimationLayerStack.h"
-#include "OdysseyAnimationLayer.h"
-#include "OdysseyAnimationPlayer.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyLayerCellSelection.h"
+
 #include "ScopedTransaction.h"
-#include "OdysseyPainterEditor.h"
+
+#include "OdysseyAnimation.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
+#include "OdysseyAnimationLayer.h"
+#include "OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationPlayer.h"
+#include "OdysseyLayerStackSelection.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -169,7 +171,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
     if (!currentLayer->IsEditable())
         return;
 
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(currentLayer);
     if (selectedCells.IsEmpty())
     {
         UOdysseyLayerCell* cell = currentLayer->GetCellAtFrame(mCurrentFrame.Get());
@@ -187,6 +189,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
         cell->SetMark(INDEX_NONE);
     }
 
+    OdysseyLayerStackSelection::RegisterUndo(selectedCells, selectedCells);
     mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
 }
 
@@ -208,7 +211,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
     if (!currentLayer->IsEditable())
         return;
 
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(currentLayer);
     if (selectedCells.IsEmpty())
     {
         UOdysseyLayerCell* cell = currentLayer->GetCellAtFrame(mCurrentFrame.Get());
@@ -226,6 +229,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
         cell->SetMark(iMarkId);
     }
 
+    OdysseyLayerStackSelection::RegisterUndo(selectedCells, selectedCells);
     mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
 }
 
@@ -323,7 +327,7 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveCellMark()
     if (!layer->IsEditable())
         return false;
 
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
     {
         UOdysseyLayerCell* cell = layer->GetCellAtFrame(mCurrentFrame.Get());
@@ -402,7 +406,7 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_SetCellMarkAtFrame(FCellMark iM
     if (!layer->IsEditable())
         return false;
 
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
     {
         UOdysseyLayerCell* cell = layer->GetCellAtFrame(mCurrentFrame.Get());

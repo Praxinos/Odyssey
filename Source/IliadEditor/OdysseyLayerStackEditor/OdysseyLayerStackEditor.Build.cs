@@ -92,6 +92,7 @@ public class OdysseyLayerStackEditor : ModuleRules
                 "SlateCore",
                 "ToolMenus",
                 "ToolWidgets",
+                "TypedElementRuntime",
                 "UnrealEd",
 
                 "OdysseyAnimation",

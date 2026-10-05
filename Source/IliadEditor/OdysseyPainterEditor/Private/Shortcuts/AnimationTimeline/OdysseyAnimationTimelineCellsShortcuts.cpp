@@ -17,7 +17,7 @@
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyCoreEditorModule.h"
 #include "OdysseyLayerCellImageStagger.h"
-#include "OdysseyLayerCellSelection.h"
+#include "OdysseyLayerStackSelection.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
 #include "OdysseyPainterEditorAnimationUserSettings.h"
@@ -149,7 +149,11 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Copy()
     if (!layerStack)
         return;
 
-    const TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    UOdysseyLayer* CurrentLayer = layerStack->GetCurrentLayer();
+    if (!CurrentLayer)
+        return;
+
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(CurrentLayer);
     if (selectedCells.IsEmpty())
         return;
 
@@ -179,7 +183,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
         return;
     }
 
-    const TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
         return;
 
@@ -191,6 +195,8 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
     TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(selectedCells);
     odysseyCoreEditorModule.GetClipboard()->SetData(clipboardData);
     Action_Delete();
+
+    OdysseyLayerStackSelection::RegisterUndo(selectedCells, {});
 }
 
 void
@@ -240,7 +246,16 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SelectAll()
     if (!layer)
         return;
 
-    layerStack->GetCellSelection()->SetSelectedCells(layer->GetCells());
+    OdysseyLayerStackSelection::Get()->BeginBatchSelectOperation();
+    OdysseyLayerStackSelection::Get()->DeselectAll();
+
+    const TArray<UOdysseyLayerCell*>& Cells = layer->GetCells();
+    for (UOdysseyLayerCell* Cell : Cells)
+    {
+        OdysseyLayerStackSelection::Get()->Select(Cell);
+    }
+
+    OdysseyLayerStackSelection::Get()->EndBatchSelectOperation();
 }
 
 void
@@ -261,7 +276,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
     if (!layer->IsEditable())
         return;
 
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
         return;
 
@@ -357,6 +372,8 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
     layer->RemoveCells(selectedCells);
     if (layer->GetCells().IsEmpty())
         layer->AddCell(layer->GetDefaultCellClass());
+
+    OdysseyLayerStackSelection::RegisterUndo(selectedCells, {});
 }
 
 
@@ -379,7 +396,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_CreateStaggerCell( EOdysseyLayer
     if (!layer->IsEditable())
         return;
 
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
     {
         UOdysseyLayerCell* cell = layer->GetCellAtFrame(mCurrentFrame.Get());
@@ -406,6 +423,8 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_CreateStaggerCell( EOdysseyLayer
 #endif
 
     mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
+
+    TArray<UOdysseyLayerCell*> CreatedCells;
     for( TArray<UOdysseyLayerCell*> selectedCellGroup : selectedCellGroups )
     {
         int exposure = Algo::TransformAccumulate( selectedCellGroup,
@@ -425,7 +444,10 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_CreateStaggerCell( EOdysseyLayer
         staggerCell->SetExposure( exposure );
         staggerCell->SetBehaviour( iBehavior );
         staggerCell->SetReach( reach, false );
+        CreatedCells.Add(staggerCell);
     }
+
+    OdysseyLayerStackSelection::RegisterUndo(selectedCells, {CreatedCells});
 }
 
 void
@@ -459,8 +481,8 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_AddCellsBeforeOrAfter( int32 iNu
     if( !layer->IsEditable() )
         return;
 
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
-    if( selectedCells.IsEmpty() )
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
+    if (selectedCells.IsEmpty())
     {
         UOdysseyLayerCell* cell = layer->GetCellAtFrame( mCurrentFrame.Get() );
         if( !cell )
@@ -504,6 +526,8 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_AddCellsBeforeOrAfter( int32 iNu
             layer->AddCells( layer->GetDefaultCellClass(), index + 1, iNumberOfCellsToAddBeforeOrAfter );
         }
     }
+
+    OdysseyLayerStackSelection::RegisterUndo(selectedCells, selectedCells);
 }
 
 void
@@ -550,7 +574,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseOrDecreaseCellExposure( 
     if (!layer->IsEditable())
         return;
 
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
     {
         UOdysseyLayerCell* cell = layer->GetCellAtFrame(mCurrentFrame.Get());
@@ -572,6 +596,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseOrDecreaseCellExposure( 
         // - only use '+' as iNumberOfExposuresToAddOrRemove is signed when removing exposures
         selectedCell->SetExposure( FMath::Max( 1, selectedCell->GetExposure() + iNumberOfExposuresToAddOrRemove ) );
     }
+    OdysseyLayerStackSelection::RegisterUndo(selectedCells, selectedCells);
 }
 
 void
@@ -592,7 +617,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure()
     if (!layer->IsEditable())
         return;
 
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
     {
         UOdysseyLayerCell* cell = layer->GetCellAtFrame(mCurrentFrame.Get());
@@ -638,6 +663,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure()
                 {
                     selectedCell->SetExposure( FMath::Max( 1, value ) );
                 }
+                OdysseyLayerStackSelection::RegisterUndo(selectedCells, selectedCells);
             }
         ),
 
@@ -663,13 +689,14 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ReverseSelectedCells()
     if (!layer->IsEditable())
         return;
 
-    TSharedRef<FOdysseyLayerCellSelection> cellSelection = layer->GetLayerStack()->GetCellSelection();
-    TArray<UOdysseyLayerCell*> selectedCells = cellSelection.Get().GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
 
 #if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.reverse-selected-cells", "Reverse Selected Cells"));
 #endif
     layer->ReverseCells( selectedCells );
+
+    OdysseyLayerStackSelection::RegisterUndo(selectedCells, selectedCells);
 }
 
 bool
@@ -687,7 +714,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Copy()
     if (!layer)
         return false;
 
-    const TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
         return false;
 
@@ -712,7 +739,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Cut()
     if (!layer->IsEditable())
         return false;
 
-    const TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
         return false;
 
@@ -761,7 +788,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_SelectAll()
         return false;
 
     //Authorize SelectAll only if there is already an active selection
-    const TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
         return false;
 
@@ -786,7 +813,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Delete()
     if (!layer->IsEditable())
         return false;
 
-    const TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
         return false;
 
@@ -811,7 +838,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_CreateStaggerCell()
     if (!layer->IsEditable())
         return false;
 
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
     {
         UOdysseyLayerCell* cell = layer->GetCellAtFrame(mCurrentFrame.Get());
@@ -851,8 +878,8 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_AddCellsBefore()
     if( !layer->IsEditable() )
         return false;
 
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
-    if( selectedCells.IsEmpty() )
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
+    if (selectedCells.IsEmpty())
     {
         UOdysseyLayerCell* cell = layer->GetCellAtFrame( mCurrentFrame.Get() );
         if( !cell )
@@ -879,7 +906,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_AddCellsAfter()
     if( !layer->IsEditable() )
         return false;
 
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if( selectedCells.IsEmpty() )
     {
         UOdysseyLayerCell* cell = layer->GetCellAtFrame( mCurrentFrame.Get() );
@@ -908,7 +935,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_ManageCellExposure()
     if (!layer->IsEditable())
         return false;
 
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
     {
         UOdysseyLayerCell* cell = layer->GetCellAtFrame(mCurrentFrame.Get());
@@ -938,9 +965,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_ReverseSelectedCells()
     if (!layer->IsEditable())
         return false;
 
-    TSharedRef<FOdysseyLayerCellSelection> cellSelection = layer->GetLayerStack()->GetCellSelection();
-    TArray<UOdysseyLayerCell*> selectedCells = cellSelection.Get().GetSelectedCells();
-
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     return UOdysseyAnimationLayer::AreCellsContiguous( selectedCells ) && ( selectedCells.Num() > 1 ) ? true
                                                                                                       : false;
 }

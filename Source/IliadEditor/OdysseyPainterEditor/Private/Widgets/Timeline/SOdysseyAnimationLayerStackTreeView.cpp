@@ -7,20 +7,20 @@
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "ScopedTransaction.h"
 
-#include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineShortcuts.h"
-#include "OdysseyAnimationLayerImageRaster.h"
-#include "OdysseyAnimationLayerStack.h"
-#include "OdysseyCommandList.h"
-#include "SOdysseyAnimationTimelineToolSelector.h"
-#include "Widgets/SOdysseyLayerStackAddLayerButton.h"
 #include "OdysseyAnimationCellImageRaster.h"
 #include "OdysseyAnimationCellImageVector.h"
-#include "LayerFolder/OdysseyAnimationLayerFolder.h"
+#include "OdysseyAnimationLayerFolder.h"
+#include "OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyAnimationLayerImageVector.h"
+#include "OdysseyAnimationLayerStack.h"
+#include "OdysseyCommandList.h"
+#include "OdysseyLayerStackSelection.h"
+#include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineShortcuts.h"
 #include "SOdysseyAnimationLayerFolderRow.h"
 #include "SOdysseyAnimationLayerImageRasterRow.h"
-#include "OdysseyAnimationLayerImageVector.h"
 #include "SOdysseyAnimationLayerImageVectorRow.h"
-#include "OdysseyLayerCellSelection.h"
+#include "SOdysseyAnimationTimelineToolSelector.h"
+#include "Widgets/SOdysseyLayerStackAddLayerButton.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -115,14 +115,14 @@ SOdysseyAnimationLayerStackTreeView::OnKeyDown( const FGeometry& iGeometry, cons
 void
 SOdysseyAnimationLayerStackTreeView::Private_SignalSelectionChanged(ESelectInfo::Type SelectInfo)
 {
-    mLayerStack->GetCellSelection()->SetSelectedCells({});
+    //OdysseyLayerStackSelection::Get()->DeselectAll();
     SOdysseyLayerStackTreeView::Private_SignalSelectionChanged(SelectInfo);
 }
 
 FReply
 SOdysseyAnimationLayerStackTreeView::OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent)
 {
-    mLayerStack->GetCellSelection()->SetSelectedCells({});
+    //OdysseyLayerStackSelection::Get()->DeselectAll();
     return SOdysseyLayerStackTreeView::OnFocusReceived(MyGeometry, InFocusEvent);
 }
 

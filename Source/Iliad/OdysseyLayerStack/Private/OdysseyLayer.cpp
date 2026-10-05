@@ -3,14 +3,15 @@
 
 #include "OdysseyLayer.h"
 
-#include "OdysseyLayerStack.h"
-#include "OdysseyLayerCell.h"
-#include "OdysseyLayerRoot.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
-#include "OdysseyBlendShader.h"
+
 #include "OdysseyBlendColorShader.h"
+#include "OdysseyBlendShader.h"
+#include "OdysseyLayerStack.h"
+#include "OdysseyLayerCell.h"
+#include "OdysseyLayerRoot.h"
 
 #if WITH_EDITOR
 UOdysseyLayer::FOnDisplayChildrenChanged&
@@ -35,10 +36,12 @@ UOdysseyLayer::OnDisplayCellNamesChanged()
 }
 #endif
 
-FSimpleMulticastDelegate&
+//static
+UOdysseyLayer::FOnCellsChanged&
 UOdysseyLayer::OnCellsChanged()
 {
-    return mOnCellsChanged;
+    static FOnCellsChanged OnCellsChangedDelegate;
+    return OnCellsChangedDelegate;
 }
 
 void
@@ -261,7 +264,7 @@ UOdysseyLayer::CellsChanged()
 {
     UpdateCellsIndexInLayer();
     InvalidateCellsFrameRanges();
-    mOnCellsChanged.Broadcast();
+    OnCellsChanged().Broadcast(this, false);
     RenderingCompositionChanged();
 }
 
@@ -271,7 +274,7 @@ UOdysseyLayer::CellsChangedInteractive()
 {
     UpdateCellsIndexInLayer();
     InvalidateCellsFrameRanges();
-    mOnCellsChanged.Broadcast();
+    OnCellsChanged().Broadcast(this, true);
     RenderingCompositionChanged(true);
 }
 
@@ -573,13 +576,13 @@ UOdysseyLayer::RemoveCells(const TArray<UOdysseyLayerCell*>& iCells)
         if (!ensureMsgf(cell->GetLayer() == this, TEXT("Layer does not contain the cell to remove")))
             continue;
 
+        cell->Modify();
         cell->IndexInLayer = INDEX_NONE;
+        cell->MarkAsGarbage();
         cells.Add(cell);
     }
 
     Cells.RemoveAll([&](UOdysseyLayerCell* iCell) { return cells.Contains(iCell); });
-    layerStack->GetCellSelection()->CleanSelectedCells();
-
     CellsChanged();
 }
 
@@ -599,10 +602,13 @@ UOdysseyLayer::RemoveCellAtIndex(int Index)
     Modify();
 
     if (Cells[Index])
+    {
+        Cells[Index]->Modify();
         Cells[Index]->IndexInLayer = INDEX_NONE;
+        Cells[Index]->MarkAsGarbage();
+    }
 
     Cells.RemoveAt(Index);
-    layerStack->GetCellSelection()->CleanSelectedCells();
     CellsChanged();
 }
 
@@ -619,8 +625,6 @@ UOdysseyLayer::RemoveAllCells()
     Modify();
 
     Cells.Empty();
-    layerStack->GetCellSelection()->CleanSelectedCells();
-
     CellsChanged();
 }
 
@@ -632,6 +636,10 @@ UOdysseyLayer::UpdateCellsIndexInLayer()
         if (!Cells[i])
             continue;
 
+        if (Cells[i]->IndexInLayer == i)
+            continue;
+
+        Cells[i]->Modify();
         Cells[i]->IndexInLayer = i;
     }
 }
@@ -1779,13 +1787,9 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 
     const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
 
-    if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Cells)))
-    {
-        CellsChanged();
-        mOnCellsChanged.Broadcast();
-    }
-
-    if ( changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayer, CellsOffset) ) )
+    if ( changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Cells))
+        || changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayer, CellsOffset) )
+    )
     {
         InvalidateCellsFrameRanges();
     }
@@ -1833,7 +1837,7 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 bool
 UOdysseyLayer::IsSelectedInEditor() const
 {
-    return GetLayerStack()->IsLayerSelected( ( UOdysseyLayer* ) this );
+    return IsValidChecked(this) && OdysseyLayerStackSelection::GIsLayerSelectedInEditor && OdysseyLayerStackSelection::GIsLayerSelectedInEditor(this);
 }
 #endif
 
@@ -1921,4 +1925,10 @@ UOdysseyLayer::CreateExportTexture( const FString& iAssetName, const FString& iP
     return GetLayerStack()->CreateExportTexture(iAssetName, iPackagePath, iAssetClass, iFactory);
 }
 
+#endif
+
+#if WITH_EDITOR
+namespace OdysseyLayerStackSelection {
+    TFunction<bool(const UObject*)> GIsLayerSelectedInEditor;
+}
 #endif

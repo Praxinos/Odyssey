@@ -10,12 +10,12 @@
 #include "Widgets/Text/STextBlock.h"
 
 #include "OdysseyAnimationLayer.h"
-#include "OdysseyLayerCell.h"
-#include "OdysseyPainterEditorAnimationProjectSettings.h"
-#include "OdysseyStyle.h"
 #include "OdysseyAnimationLayerStack.h"
-#include "OdysseyLayerCellSelection.h"
+#include "OdysseyLayerCell.h"
+#include "OdysseyLayerStackSelection.h"
+#include "OdysseyPainterEditorAnimationProjectSettings.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
+#include "OdysseyStyle.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -240,13 +240,13 @@ int32 SOdysseyAnimationCell::OnPaint(const FPaintArgs& Args, const FGeometry& Al
 bool
 SOdysseyAnimationCell::IsSelected() const
 {
-    return mCell->GetLayerStack()->GetCellSelection()->GetSelectedCells().Contains(mCell);
+    return mCell->IsSelected();
 }
 
 bool
 SOdysseyAnimationCell::IsSelectionCursor() const
 {
-    return mCell->GetLayerStack()->GetCellSelection()->GetCellSelectionCursor() == mCell;
+    return OdysseyLayerStackSelection::GetCellSelectionCursor() == mCell;
 }
 
 const FSlateBrush*

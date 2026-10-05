@@ -17,6 +17,7 @@
 #include "OdysseyCommandList.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyLayerStackEditorCommands.h"
+#include "OdysseyLayerStackSelection.h"
 #include "OdysseyLayerStackShortcuts.h"
 #include "OdysseyStyle.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -318,33 +319,13 @@ SOdysseyLayerRow::GenerateMainRowInheritsAlphaWidget()
 void
 SOdysseyLayerRow::OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState)
 {
-    TSet<UOdysseyLayer*> selected_layers;
-    UOdysseyLayerStack* layerStack = GetLayer()->GetLayerStack();
-    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    if (iState == ECheckBoxState::Checked)
     {
-        if( layerStack->IsLayerSelected( layer ) )
-            selected_layers.Add( layer );
+        mLayerStackGlobalShortcuts->Action_ActivateLayer();
     }
-    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
-    // But too much interrogations to fix it (as many callbacks can be called.
-    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
-    // So, at least for now, just always add it.
-    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
-    selected_layers.Add( layerStack->GetCurrentLayer() );
-
-    // If the focused layer is outside the selection, just change it
-    UOdysseyLayer* focusedLayer = GetLayer();
-    if( !selected_layers.Contains( focusedLayer ) )
+    else
     {
-        selected_layers.Empty();
-        selected_layers.Add( focusedLayer );
-    }
-
-    FScopedTransaction ScopedTransaction( LOCTEXT( "layer.transaction.set-is-activated", "Change Layer Active" ) );
-
-    for( UOdysseyLayer* layer : selected_layers )
-    {
-        layer->SetIsActivated( iState == ECheckBoxState::Checked );
+        mLayerStackGlobalShortcuts->Action_InactivateLayer();
     }
 }
 
@@ -369,33 +350,13 @@ SOdysseyLayerRow::GetIsActivatedCheckBoxEnabled() const
 void
 SOdysseyLayerRow::OnIsLockedCheckBoxStateChanged(ECheckBoxState iState)
 {
-    TSet<UOdysseyLayer*> selected_layers;
-    UOdysseyLayerStack* layerStack = GetLayer()->GetLayerStack();
-    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    if (iState == ECheckBoxState::Checked)
     {
-        if( layerStack->IsLayerSelected( layer ) )
-            selected_layers.Add( layer );
+        mLayerStackGlobalShortcuts->Action_LockLayer();
     }
-    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
-    // But too much interrogations to fix it (as many callbacks can be called.
-    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
-    // So, at least for now, just always add it.
-    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
-    selected_layers.Add( layerStack->GetCurrentLayer() );
-
-    // If the focused layer is outside the selection, just change it
-    UOdysseyLayer* focusedLayer = GetLayer();
-    if( !selected_layers.Contains( focusedLayer ) )
+    else
     {
-        selected_layers.Empty();
-        selected_layers.Add( focusedLayer );
-    }
-
-    FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-is-locked", "Change Layer Lock"));
-
-    for( UOdysseyLayer* layer : selected_layers )
-    {
-        layer->SetIsLocked( iState == ECheckBoxState::Checked );
+        mLayerStackGlobalShortcuts->Action_UnlockLayer();
     }
 }
 
@@ -422,33 +383,13 @@ SOdysseyLayerRow::GetIsLockedCheckBoxEnabled() const
 void
 SOdysseyLayerRow::OnInheritsAlphaCheckBoxStateChanged(ECheckBoxState iState)
 {
-    TSet<UOdysseyLayer*> selected_layers;
-    UOdysseyLayerStack* layerStack = GetLayer()->GetLayerStack();
-    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    if (iState == ECheckBoxState::Checked)
     {
-        if( layerStack->IsLayerSelected( layer ) )
-            selected_layers.Add( layer );
+        mLayerStackGlobalShortcuts->Action_ActivateLayerInheritsAlpha();
     }
-    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
-    // But too much interrogations to fix it (as many callbacks can be called.
-    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
-    // So, at least for now, just always add it.
-    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
-    selected_layers.Add( layerStack->GetCurrentLayer() );
-
-    // If the focused layer is outside the selection, just change it
-    UOdysseyLayer* focusedLayer = GetLayer();
-    if( !selected_layers.Contains( focusedLayer ) )
+    else
     {
-        selected_layers.Empty();
-        selected_layers.Add( focusedLayer );
-    }
-
-    FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-inherits-alpha", "Change Layer Inherits Alpha"));
-
-    for( UOdysseyLayer* layer : selected_layers )
-    {
-        layer->SetInheritsAlpha( iState == ECheckBoxState::Checked );
+        mLayerStackGlobalShortcuts->Action_InactivateLayerInheritsAlpha();
     }
 }
 
@@ -529,31 +470,13 @@ SOdysseyLayerRow::OnRowDragDetected(const FGeometry& iGeometry, const FPointerEv
 void
 SOdysseyLayerRow::OnDisplayOptionsCheckBoxStateChanged(ECheckBoxState iState)
 {
-    TSet<UOdysseyLayer*> selected_layers;
-    UOdysseyLayerStack* layerStack = GetLayer()->GetLayerStack();
-    for( UOdysseyLayer* layer : layerStack->GetLayers() )
+    if (iState == ECheckBoxState::Checked)
     {
-        if( layerStack->IsLayerSelected( layer ) )
-            selected_layers.Add( layer );
+        mLayerStackGlobalShortcuts->Action_UncollapseLayer();
     }
-    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
-    // But too much interrogations to fix it (as many callbacks can be called.
-    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
-    // So, at least for now, just always add it.
-    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
-    selected_layers.Add( layerStack->GetCurrentLayer() );
-
-    // If the focused layer is outside the selection, just change it
-    UOdysseyLayer* focusedLayer = GetLayer();
-    if( !selected_layers.Contains( focusedLayer ) )
+    else
     {
-        selected_layers.Empty();
-        selected_layers.Add( focusedLayer );
-    }
-
-    for( UOdysseyLayer* layer : selected_layers )
-    {
-        layer->SetDisplayOptions( iState == ECheckBoxState::Checked );
+        mLayerStackGlobalShortcuts->Action_CollapseLayer();
     }
 }
 
@@ -581,25 +504,20 @@ SOdysseyLayerRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
     if( !focusedLayer->IsEditable() )
         return;
 
-    TSet<UOdysseyLayer*> selected_layers;
     UOdysseyLayerStack* layerStack = focusedLayer->GetLayerStack();
-    for( UOdysseyLayer* layer : layerStack->GetLayers() )
-    {
-        if( layerStack->IsLayerSelected( layer ) )
-            selected_layers.Add( layer );
-    }
-    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
-    // But too much interrogations to fix it (as many callbacks can be called.
-    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
-    // So, at least for now, just always add it.
-    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
-    selected_layers.Add( layerStack->GetCurrentLayer() );
+    if (!layerStack)
+        return;
 
-    // If the focused layer is outside the selection, just change it
-    if( !selected_layers.Contains( focusedLayer ) )
+    TArray<UOdysseyLayer*> SelectedLayers = OdysseyLayerStackSelection::GetSelectedLayers(layerStack, true);
+
+    /**
+     * If the FocuseLayer is not selected, we consider shortcuts should only
+     * modify the Focused layer and not the selected layers
+     */
+    if (!SelectedLayers.Contains( focusedLayer ))
     {
-        selected_layers.Empty();
-        selected_layers.Add( focusedLayer );
+        SelectedLayers.Empty();
+        SelectedLayers.Add( focusedLayer );
     }
 
     //---
@@ -610,7 +528,7 @@ SOdysseyLayerRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
     // The reference offset from the focused layer
     int referenceOffsetAsInt = iValue - int( focusedLayer->GetOpacity() * 100.f + .5f );
 
-    for( UOdysseyLayer* layer : selected_layers )
+    for( UOdysseyLayer* layer : SelectedLayers )
     {
         // Always process the focused layer with the given value as-is (to avoid any conversion)
         if( layer == focusedLayer )
@@ -635,6 +553,8 @@ SOdysseyLayerRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
             }
         }
     }
+
+    OdysseyLayerStackSelection::RegisterUndo(SelectedLayers, SelectedLayers);
 }
 
 void
@@ -644,25 +564,20 @@ SOdysseyLayerRow::OnOpacityValueChanged(int iValue)
     if( !focusedLayer->IsEditable() )
         return;
 
-    TSet<UOdysseyLayer*> selected_layers;
     UOdysseyLayerStack* layerStack = focusedLayer->GetLayerStack();
-    for( UOdysseyLayer* layer : layerStack->GetLayers() )
-    {
-        if( layerStack->IsLayerSelected( layer ) )
-            selected_layers.Add( layer );
-    }
-    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
-    // But too much interrogations to fix it (as many callbacks can be called.
-    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
-    // So, at least for now, just always add it.
-    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
-    selected_layers.Add( layerStack->GetCurrentLayer() );
+    if (!layerStack)
+        return;
 
-    // If the focused layer is outside the selection, just change it
-    if( !selected_layers.Contains( focusedLayer ) )
+    TArray<UOdysseyLayer*> SelectedLayers = OdysseyLayerStackSelection::GetSelectedLayers(layerStack, true);
+
+    /**
+     * If the FocuseLayer is not selected, we consider shortcuts should only
+     * modify the Focused layer and not the selected layers
+     */
+    if (!SelectedLayers.Contains( focusedLayer ))
     {
-        selected_layers.Empty();
-        selected_layers.Add( focusedLayer );
+        SelectedLayers.Empty();
+        SelectedLayers.Add( focusedLayer );
     }
 
     //---
@@ -670,7 +585,7 @@ SOdysseyLayerRow::OnOpacityValueChanged(int iValue)
     // The reference offset from the focused layer
     int referenceOffsetAsInt = iValue - int( focusedLayer->GetOpacity() * 100.f + .5f );
 
-    for( UOdysseyLayer* layer : selected_layers )
+    for( UOdysseyLayer* layer : SelectedLayers )
     {
         // Always process the focused layer with the given value as-is (to avoid any conversion)
         if( layer == focusedLayer )

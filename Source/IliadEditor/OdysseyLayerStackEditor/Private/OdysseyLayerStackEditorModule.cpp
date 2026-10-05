@@ -3,12 +3,20 @@
 
 #include "OdysseyLayerStackEditorModule.h"
 
-#include "Commands/OdysseyLayerStackEditorCommands.h"
 #include "Modules/ModuleManager.h"
+
+#include "Commands/OdysseyLayerStackEditorCommands.h"
+#include "OdysseyLayerStackSelection.h"
 
 void FOdysseyLayerStackEditorModule::StartupModule()
 {
     RegisterCommands();
+
+    // Load the dependent TypedElementFramework module (holding TypedElementRegistry)
+    // Otherwise, OdysseyLayerStackSelection::Initialize() tries to access TypedElementRegistry and randomly crashes
+    // This also done in some Unreal Engines Plugins / Modules
+    FModuleManager::Get().LoadModule(TEXT("TypedElementFramework"));
+    OdysseyLayerStackSelection::Initialize();
 }
 
 void FOdysseyLayerStackEditorModule::ShutdownModule()

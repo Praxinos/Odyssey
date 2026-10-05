@@ -579,7 +579,7 @@ SOdysseyAnimationCells::OnMouseButtonDown(const FGeometry& iGeometry, const FPoi
         mAnimationLayer
     };
 
-    mTool = FOdysseyAnimationTimelineTools::Get().CreateTool(mTimelinePosition.ToSharedRef(), mAnimationLayer->GetLayerStack()->GetCellSelection());
+    mTool = FOdysseyAnimationTimelineTools::Get().CreateTool(mTimelinePosition.ToSharedRef());
     if (!mTool)
         return FReply::Unhandled();
 

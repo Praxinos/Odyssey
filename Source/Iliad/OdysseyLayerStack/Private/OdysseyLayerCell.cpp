@@ -288,6 +288,12 @@ UOdysseyLayerCell::PostTransacted(const FTransactionObjectEvent& iTransactionEve
     }
 }
 
+bool
+UOdysseyLayerCell::IsSelectedInEditor() const
+{
+    return IsValidChecked(this) && OdysseyLayerStackSelection::GIsCellSelectedInEditor && OdysseyLayerStackSelection::GIsCellSelectedInEditor(this);
+}
+
 UOdysseyLayerCell*
 UOdysseyLayerCell::Break(int Frame, bool bClear)
 {
@@ -438,4 +444,10 @@ UOdysseyLayerCell::CreateExportTexture( const FString& iAssetName, const FString
     return GetLayer()->CreateExportTexture(iAssetName, iPackagePath, iAssetClass, iFactory);
 }
 
+#endif
+
+#if WITH_EDITOR
+namespace OdysseyLayerStackSelection {
+    TFunction<bool(const UObject*)> GIsCellSelectedInEditor;
+}
 #endif

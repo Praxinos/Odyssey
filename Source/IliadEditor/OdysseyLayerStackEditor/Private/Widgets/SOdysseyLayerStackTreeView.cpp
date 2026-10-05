@@ -19,6 +19,7 @@
 #include "OdysseyCommandList.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyLayerStackFunctionLibrary.h"
+#include "OdysseyLayerStackSelection.h"
 #include "OdysseyStyle.h"
 #include "Shortcuts/OdysseyLayerStackGlobalShortcuts.h"
 #include "Shortcuts/OdysseyLayerStackShortcuts.h"
@@ -59,6 +60,8 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
     mCommandList = MakeShared<FOdysseyCommandList>();
     mCommandList->Append( mLayerStackShortcuts->GetCommandList() );
     mLayerStackGlobalShortcuts->MapActionsToCommandList( mCommandList.ToSharedRef() );
+
+    USelection::SelectionChangedEvent.AddSP(this, &SOdysseyLayerStackTreeView::OnExternalSelectionChanged);
 
     //---
 
@@ -256,7 +259,6 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
         .OnGenerateRow( InArgs._OnGenerateRow )
         .OnGetChildren( this, &SOdysseyLayerStackTreeView::OnGetChildren )
         .OnExpansionChanged( this, &SOdysseyLayerStackTreeView::OnExpansionChanged )
-        .OnSelectionChanged( this, &SOdysseyLayerStackTreeView::OnSelectionChanged )
         .OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
         .OnContextMenuOpening( this, &SOdysseyLayerStackTreeView::OnContextMenuOpening )
         .SelectionMode( ESelectionMode::Multi )
@@ -519,73 +521,126 @@ SOdysseyLayerStackTreeView::OnLayerStackHierarchyChanged(UOdysseyLayerStack* iLa
 }
 
 void
-SOdysseyLayerStackTreeView::SetCurrentLayerFromSelectorItem()
+SOdysseyLayerStackTreeView::SynchronizeCurrentAndSelectorItem()
 {
     if ( !mLayerStack )
         return;
 
-    if ( mLayerStack->GetLayers().Num() == 0)
+    if ( mLayerStack->GetLayers().IsEmpty() )
         return;
 
-    if (!SelectorItem)
+    UOdysseyLayer* currentLayer = mLayerStack->GetCurrentLayer();
+
+    //Manage SelectorItem / CurrentLayer synchronization
+    //CurrentLayer should always be displayed as selected
+    //If CurrentLayer is already selected, just make SelectorItem = CurrentLayer
+    //If CurrentLayer is not selected, ensure SelectorItem is selected make CurrentLayer = SelectorItem
+    if ( currentLayer && Private_IsItemSelected(currentLayer) )
     {
-        mLayerStack->SetCurrentLayer(mLayerStack->GetRootLayers()[0]);
-        return;
+        //Ensures that Selector Item is the Current Layer
+        //when the current layer is already selected
+        Private_SetItemSelection(currentLayer, true, true);
     }
+    else
+    {
+        //Having SelectorItem always selected, ensures a layer cannot be deselected
+        //if it is the current layer
+        if ( !Private_IsItemSelected(SelectorItem) )
+            Private_SetItemSelection(SelectorItem, true, true);
 
-    UOdysseyLayerStack* selectorLayerStack = SelectorItem->GetLayerStack();
-    if (selectorLayerStack != mLayerStack )
-        return;
+        //Then we update current layer to match SelectorItem
+        //When currentlayer is not in the selection
+        if (!Private_IsItemSelected(currentLayer))
+        {
+            if (!SelectorItem)
+            {
+                mLayerStack->SetCurrentLayer(mLayerStack->GetRootLayers()[0]);
+                return;
+            }
 
-    if (SelectorItem == mLayerStack->GetCurrentLayer())
-        return;
+            UOdysseyLayerStack* selectorLayerStack = SelectorItem->GetLayerStack();
+            if (selectorLayerStack != mLayerStack )
+                return;
 
-    mLayerStack->SetCurrentLayer(SelectorItem);
+            if (SelectorItem == mLayerStack->GetCurrentLayer())
+                return;
+
+            mLayerStack->SetCurrentLayer(SelectorItem);
+        }
+    }
 }
 
 void
 SOdysseyLayerStackTreeView::Private_SignalSelectionChanged(ESelectInfo::Type SelectInfo)
 {
+    bIsSelectionChanging = true;
     if ( !mLayerStack )
     {
         STreeView< UOdysseyLayer* >::Private_SignalSelectionChanged(SelectInfo);
+        bIsSelectionChanging = false;
         return;
     }
 
-    //Ensure selectorItem = currentLayer if currentLayer is selected
     UOdysseyLayer* currentLayer = mLayerStack->GetCurrentLayer();
-    if ( currentLayer && Private_IsItemSelected(currentLayer) )
-    {
-        Private_SetItemSelection(currentLayer, true, true);
-    }
-    else
-    {
-        if ( !Private_IsItemSelected(SelectorItem) )
-            Private_SetItemSelection(SelectorItem, true, true);
 
-        SetCurrentLayerFromSelectorItem();
+    // Update the OdysseyLayerStackSelection
+    TArray<UOdysseyLayer*> selectedItems = GetSelectedItems();
+    USelection* objectSelection = GEditor->GetSelectedSet( UObject::StaticClass() );
+    OdysseyLayerStackSelection::Get()->BeginBatchSelectOperation();
+    OdysseyLayerStackSelection::Get()->DeselectAll();
+
+    for( int i = 0; i < selectedItems.Num(); i++ )
+    {
+        UOdysseyLayer* layer = selectedItems[i];
+        OdysseyLayerStackSelection::Get()->Select(layer);
     }
+    OdysseyLayerStackSelection::Get()->EndBatchSelectOperation();
+
+    SynchronizeCurrentAndSelectorItem();
 
     STreeView< UOdysseyLayer* >::Private_SignalSelectionChanged(SelectInfo);
+    bIsSelectionChanging = false;
 }
 
 void
 SOdysseyLayerStackTreeView::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 {
-    if ( !mLayerStack )
-        return;
-
     if ( iLayerStack != mLayerStack )
         return;
 
-    Private_ClearSelection();
+    if(bIsSelectionChanging)
+        return;
 
-    UOdysseyLayer* currentLayer = mLayerStack->GetCurrentLayer();
-    if( currentLayer )
+    UpdateSelectedItems();
+    SynchronizeCurrentAndSelectorItem();
+}
+
+void
+SOdysseyLayerStackTreeView::UpdateSelectedItems()
+{
+    if ( !mLayerStack )
+        return;
+
+    UOdysseyLayer* CurrentLayer = mLayerStack->GetCurrentLayer();
+    if (!CurrentLayer)
+        return;
+
+    TArray<UOdysseyLayer*> SelectedLayers = OdysseyLayerStackSelection::GetSelectedLayers(mLayerStack, false);
+
+    Private_ClearSelection();
+    for (UOdysseyLayer* SelectedLayer : SelectedLayers)
     {
-        Private_SetItemSelection(currentLayer, true, true);
-        Private_SignalSelectionChanged(ESelectInfo::Direct);
+        Private_SetItemSelection(SelectedLayer, true, /*bWasUserDirected*/false);
     }
+
+    /*
+        If the Selector Item is among the Selected Layers
+        We consider it as valid.
+        Otherwise, we set SelectorItem to be the Current Layer
+        by selecting the current layer and setting bWasUserDirected == true
+    */
+    bool bIsSelectorItemSelected = Private_IsItemSelected(SelectorItem);
+    Private_SetItemSelection(CurrentLayer, true, !bIsSelectorItemSelected);
 }
 
 // ContextMenu
@@ -678,48 +733,45 @@ SOdysseyLayerStackTreeView::OnLayerDisplayOptionsChanged(UOdysseyLayer* iLayerNo
 void
 SOdysseyLayerStackTreeView::OnExpansionChanged( UOdysseyLayer* iLayerNode, bool iIsExpanded )
 {
-    TSet<UOdysseyLayer*> selected_layers;
     UOdysseyLayerStack* layerStack = iLayerNode->GetLayerStack();
-    for( UOdysseyLayer* layer : layerStack->GetLayers() )
-    {
-        if( layerStack->IsLayerSelected( layer ) )
-            selected_layers.Add( layer );
-    }
-    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
-    // But too much interrogations to fix it (as many callbacks can be called.
-    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
-    // So, at least for now, just always add it.
-    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
-    selected_layers.Add( layerStack->GetCurrentLayer() );
-
-    // If the focused layer is outside the selection, just change it
     UOdysseyLayer* focusedLayer = iLayerNode;
-    if( !selected_layers.Contains( focusedLayer ) )
+
+    TArray<UOdysseyLayer*> SelectedLayers = OdysseyLayerStackSelection::GetSelectedLayers(layerStack, true);
+
+    /**
+     * If the FocuseLayer is not selected, we consider shortcuts should only
+     * modify the Focused layer and not the selected layers
+     */
+    if (!SelectedLayers.Contains( focusedLayer ))
     {
-        selected_layers.Empty();
-        selected_layers.Add( focusedLayer );
+        SelectedLayers.Empty();
+        SelectedLayers.Add( focusedLayer );
     }
 
-    for( UOdysseyLayer* layer : selected_layers )
+    for( UOdysseyLayer* layer : SelectedLayers )
     {
         layer->SetDisplayChildren( iIsExpanded );
     }
+
+    OdysseyLayerStackSelection::RegisterUndo(SelectedLayers, SelectedLayers);
 }
 
+
 void
-SOdysseyLayerStackTreeView::OnSelectionChanged( UOdysseyLayer* iLayerNode, ESelectInfo::Type SelectInfo )
+SOdysseyLayerStackTreeView::OnExternalSelectionChanged(UObject* InSelection)
 {
-    TArray<UOdysseyLayer*> selectedItems = GetSelectedItems();
-    USelection* objectSelection = GEditor->GetSelectedSet( UObject::StaticClass() );
+    if (InSelection != OdysseyLayerStackSelection::Get())
+        return;
 
-    GetLayerStack()->DeselectAllLayers();
+    if (bIsSelectionChanging)
+        return;
 
-    for( int i = 0; i < selectedItems.Num(); i++ )
-    {
-        UOdysseyLayer* layer = selectedItems[i];
-
-        layer->GetLayerStack()->SelectLayer( layer );
-    }
+    UpdateSelectedItems();
+    SynchronizeCurrentAndSelectorItem();
+    /*TArray<UOdysseyLayer*> SelectedLayers = OdysseyLayerStackSelection::GetSelectedLayers(mLayerStack, false);
+    Private_ClearSelection();
+    for (UOdysseyLayer* Layer : SelectedLayers)
+        Private_SetItemSelection(Layer, true);*/
 }
 
 void

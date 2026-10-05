@@ -28,7 +28,7 @@ private:
     FOdysseyAnimationTimelineTools();
 
 public:
-    TSharedPtr<FOdysseyAnimationTimelineTool> CreateTool(TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyLayerCellSelection> iTimelineCellSelection) const;
+    TSharedPtr<FOdysseyAnimationTimelineTool> CreateTool(TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> iTimelinePosition) const;
     EOdysseyTimelineTool GetCurrentTool() const;
     void SetCurrentTool(EOdysseyTimelineTool iTool);
 

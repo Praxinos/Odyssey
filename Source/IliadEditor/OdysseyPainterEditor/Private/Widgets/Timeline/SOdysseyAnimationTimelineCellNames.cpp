@@ -3,21 +3,33 @@
 
 #include "SOdysseyAnimationTimelineCellNames.h"
 #include "SOdysseyAnimationTimelineCellNamesKey.h"
-#include "OdysseyAnimation.h"
 #include "SOdysseyAnimationTimelineSection.h"
-#include "OdysseyAnimationLayer.h"
-#include "OdysseyAnimationCell.h"
-#include "OdysseyPainterEditor.h"
+#include "OdysseyLayerCell.h"
+
+SLATE_IMPLEMENT_WIDGET(SOdysseyAnimationTimelineCellNames)
+void
+SOdysseyAnimationTimelineCellNames::PrivateRegisterAttributes(FSlateAttributeInitializer& AttributeInitializer)
+{
+    SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, mCells, EInvalidateWidgetReason::None)
+    .OnValueChanged(FSlateAttributeDescriptor::FAttributeValueChangedDelegate::CreateLambda(
+        [](SWidget& Widget)
+        {
+            static_cast<SOdysseyAnimationTimelineCellNames&>(Widget).OnCellsChanged();
+        }
+    ));
+}
+
+SOdysseyAnimationTimelineCellNames::SOdysseyAnimationTimelineCellNames()
+    : mCells(*this, {})
+{
+
+}
 
 void
-SOdysseyAnimationTimelineCellNames::Construct(const FArguments& InArgs, UOdysseyAnimationLayer* iLayer)
+SOdysseyAnimationTimelineCellNames::Construct(const FArguments& InArgs)
 {
-    //mCurrentFrame = InArgs._CurrentFrame;
+    mCells.Assign(*this, InArgs._Cells);
     mTimelinePosition = InArgs._TimelinePosition;
-    mLayer = iLayer;
-
-    mLayer->OnCellsChanged().AddSP( this, &SOdysseyAnimationTimelineCellNames::OnCellsChanged );
-
     mRowWidget = SNew( SHorizontalBox );
     RebuildRow();
 
@@ -40,7 +52,8 @@ SOdysseyAnimationTimelineCellNames::RebuildRow()
                 .WidthInFrames_Lambda(
                     [this]()
                     {
-                        UOdysseyLayerCell* cell = mLayer->GetCells()[0];
+                        TArray<UOdysseyLayerCell*> cells = mCells.Get();
+                        UOdysseyLayerCell* cell = cells[0];
                         if( !cell )
                             return 0;
 
@@ -54,7 +67,8 @@ SOdysseyAnimationTimelineCellNames::RebuildRow()
                 ]
         ];
 
-    for( UOdysseyLayerCell* cell : mLayer->GetCells() )
+    TArray<UOdysseyLayerCell*> cells = mCells.Get();
+    for( UOdysseyLayerCell* cell : cells )
     {
         //UOdysseyAnimationCell* animation_cell = Cast<UOdysseyAnimationCell>( cell );
 
@@ -90,12 +104,6 @@ SOdysseyAnimationTimelineCellNames::RebuildRow()
     }
 
 }
-
-//UOdysseyAnimationCell*
-//SOdysseyAnimationTimelineCellNames::GetCurrentCell() const
-//{
-//    return Cast<UOdysseyAnimationCell>(mLayer->GetCellAtFrame(mCurrentFrame.Get()));
-//}
 
 void
 SOdysseyAnimationTimelineCellNames::OnCellsChanged()

@@ -5,13 +5,13 @@
 
 #include "Widgets/SBoxPanel.h"
 
-#include "OdysseyStyle.h"
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationCell.h"
+#include "OdysseyLayerStackSelection.h"
+#include "OdysseyStyle.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyLayerCellSelection.h"
 
 void
 SOdysseyAnimationPlaybackControls::Construct(const FArguments& InArgs)
@@ -181,15 +181,22 @@ FReply
 SOdysseyAnimationPlaybackControls::OnPlayClicked()
 {
     UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
-    if (selectedCells.IsEmpty())
+    if (!layerStack)
+        return FReply::Unhandled();
+
+    UOdysseyLayer* CurrentLayer = layerStack->GetCurrentLayer();
+    if (!CurrentLayer)
+        return FReply::Unhandled();
+
+    TArray<UOdysseyLayerCell*> SelectedCells = OdysseyLayerStackSelection::GetSelectedCells(CurrentLayer);
+    if (SelectedCells.IsEmpty())
     {
         mPlayer->SetPlayRange(EOdysseyAnimationPlayerPlayRange::AnimationBounds);
     }
     else
     {
         TArray<TRange<FFrameNumber>> ranges;
-        for (UOdysseyLayerCell* cell : selectedCells)
+        for (UOdysseyLayerCell* cell : SelectedCells)
         {
             FInt32Range frameRange = cell->GetFrameRange();
             TRange<FFrameNumber> frameNumberRange(frameRange.GetLowerBoundValue(), frameRange.GetUpperBoundValue() + 1 );
@@ -210,15 +217,22 @@ FReply
 SOdysseyAnimationPlaybackControls::OnPlayBackwardClicked()
 {
     UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
-    if (selectedCells.IsEmpty())
+    if (!layerStack)
+        return FReply::Unhandled();
+
+    UOdysseyLayer* CurrentLayer = layerStack->GetCurrentLayer();
+    if (!CurrentLayer)
+        return FReply::Unhandled();
+
+    TArray<UOdysseyLayerCell*> SelectedCells = OdysseyLayerStackSelection::GetSelectedCells(CurrentLayer);
+    if (SelectedCells.IsEmpty())
     {
         mPlayer->SetPlayRange(EOdysseyAnimationPlayerPlayRange::AnimationBounds);
     }
     else
     {
         TArray<TRange<FFrameNumber>> ranges;
-        for (UOdysseyLayerCell* cell : selectedCells)
+        for (UOdysseyLayerCell* cell : SelectedCells)
         {
             FInt32Range frameRange = cell->GetFrameRange();
             TRange<FFrameNumber> frameNumberRange(frameRange.GetLowerBoundValue(), frameRange.GetLowerBoundValue() + 1);

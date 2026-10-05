@@ -48,6 +48,7 @@ public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayChildrenChanged, UOdysseyLayer*);
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayOptionsChanged, UOdysseyLayer*);
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayCellNamesChanged, UOdysseyLayer*);
+    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCellsChanged, UOdysseyLayer*, bool /*IsInteractive*/);
 
     static FOnDisplayChildrenChanged& OnDisplayChildrenChanged();
     static FOnDisplayOptionsChanged& OnDisplayOptionsChanged();
@@ -55,7 +56,11 @@ public:
     FSimpleMulticastDelegate& OnLighttableChanged();
 #endif
 
-    FSimpleMulticastDelegate& OnCellsChanged();
+    /**
+     * Called when cells are changed
+     * Not called on undo/redo
+     */
+    static FOnCellsChanged& OnCellsChanged();
 
 public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
@@ -431,5 +436,11 @@ protected:
 
 private:
     mutable TArray<FInt32Range> mCellsFrameRanges;
-    FSimpleMulticastDelegate mOnCellsChanged;
 };
+
+#if WITH_EDITOR
+namespace OdysseyLayerStackSelection {
+    /** Callback for editor layer selection. This must be in runtime instead of editor for UOdysseyLayer::IsSelectedInEditor to work */
+    extern ODYSSEYLAYERSTACK_API TFunction<bool(const UObject*)> GIsLayerSelectedInEditor;
+}
+#endif

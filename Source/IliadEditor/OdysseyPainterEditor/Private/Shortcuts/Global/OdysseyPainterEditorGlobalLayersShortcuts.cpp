@@ -6,17 +6,18 @@
 #include "ScopedTransaction.h"
 
 #include "OdysseyAnimation.h"
-#include "OdysseyAnimationPlayer.h"
-#include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyAnimationCellImageRaster.h"
+#include "OdysseyAnimationCurrentFrameMutator.h"
+#include "OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyAnimationPlayer.h"
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
-#include "OdysseyPainterEditorCommands.h"
+#include "OdysseyLayerStackSelection.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorCommands.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerStack.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyAnimationCurrentFrameMutator.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -121,25 +122,14 @@ FOdysseyPainterEditorGlobalLayersShortcuts::Action_ChangeLayerOpacity(float iOpa
     if ( !layerStack->GetCurrentLayer()->IsEditable() )
         return;
 
-    TSet<UOdysseyLayer*> selected_layers;
-    for( UOdysseyLayer* layer : layerStack->GetLayers() )
-    {
-        if( layerStack->IsLayerSelected( layer ) )
-            selected_layers.Add( layer );
-    }
-    // Generally, the current layer is selected except when the layer stack is created (before any click interactions in layer stack header)
-    // But too much interrogations to fix it (as many callbacks can be called.
-    // (add a flag in SetCurrentLayer() to deselect all and select only the new current layer or in FOdysseyLayerSelection or ...)
-    // So, at least for now, just always add it.
-    //check( selected_layers.Contains( layerStack->GetCurrentLayer() ) );
-    selected_layers.Add( layerStack->GetCurrentLayer() );
+    TArray<UOdysseyLayer*> SelectedLayers = OdysseyLayerStackSelection::GetSelectedLayers(layerStack, true);
 
     FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.set-layer-opacity", "Change Layer Opacity" ) );
-
-    for( UOdysseyLayer* layer : selected_layers )
+    for( UOdysseyLayer* layer : SelectedLayers )
     {
         layer->SetOpacity( iOpacity );
     }
+    OdysseyLayerStackSelection::RegisterUndo(SelectedLayers, SelectedLayers);
 }
 
 bool

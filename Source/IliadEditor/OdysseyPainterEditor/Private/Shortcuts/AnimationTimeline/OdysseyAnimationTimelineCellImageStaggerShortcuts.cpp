@@ -6,15 +6,15 @@
 #include "ScopedTransaction.h"
 #include "Misc/ScopedSlowTask.h"
 
-#include "SOdysseyAnimationCellImageStagger.h"
-#include "OdysseyPainterEditor.h"
-#include "OdysseyPainterEditorAnimationCommands.h"
+#include "OdysseyAnimation.h"
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyLayerStack.h"
-#include "OdysseyAnimation.h"
-#include "ULISLoaderModule.h"
+#include "OdysseyLayerStackSelection.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
+#include "SOdysseyAnimationCellImageStagger.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyLayerCellSelection.h"
+#include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -51,7 +51,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
     if (!layer->IsEditable())
         return;
 
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
         return;
 
@@ -125,6 +125,9 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
         resultingCellsByCell.Add(staggerCell, resultingCells);
     }
 
+    OdysseyLayerStackSelection::Get()->BeginBatchSelectOperation();
+    OdysseyLayerStackSelection::Get()->DeselectAll();
+
     for (auto element : resultingCellsByCell)
     {
         UOdysseyLayerCell* originalCell = element.Key;
@@ -140,18 +143,19 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
         }
 
         TArray<UOdysseyLayerCell*> newCells = layer->CopyCells(referenceCells, originalCell->GetIndexInLayer());
+
         layer->RemoveCell(originalCell);
+        OdysseyLayerStackSelection::Get()->Deselect(originalCell);
 
         for (int i = 0; i < resultingCells.Num(); i++)
         {
             newCells[i]->SetExposure(resultingCells[i].mExposure);
+            OdysseyLayerStackSelection::Get()->Select(newCells[i]);
         }
-
-        selectedCells.Remove(originalCell);
-        selectedCells.Append(newCells);
     }
+    OdysseyLayerStackSelection::Get()->EndBatchSelectOperation();
 
-    layerStack->GetCellSelection()->SetSelectedCells(selectedCells);
+    OdysseyLayerStackSelection::RegisterUndo(selectedCells, OdysseyLayerStackSelection::GetSelectedCells(layer));
 }
 
 bool
@@ -172,7 +176,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::CanAction_ConvertToReference
     if (!layer->IsEditable())
         return false;
 
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
         return false;
 

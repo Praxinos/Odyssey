@@ -33,10 +33,25 @@ public:
     TSharedPtr<FUICommandInfo> OpenFolderLayer;
     TSharedPtr<FUICommandInfo> CloseFolderLayer;
 
+    TSharedPtr<FUICommandInfo> ActivateLayer;
+    TSharedPtr<FUICommandInfo> InactivateLayer;
     TSharedPtr<FUICommandInfo> ToggleLayerActivated;
+
+    TSharedPtr<FUICommandInfo> LockLayer;
+    TSharedPtr<FUICommandInfo> UnlockLayer;
     TSharedPtr<FUICommandInfo> ToggleLayerLocked;
+
+    TSharedPtr<FUICommandInfo> ActivateLayerInheritsAlpha;
+    TSharedPtr<FUICommandInfo> InactivateLayerInheritsAlpha;
     TSharedPtr<FUICommandInfo> ToggleLayerInheritsAlpha;
+
+    TSharedPtr<FUICommandInfo> ActivateLayerLighttable;
+    TSharedPtr<FUICommandInfo> InactivateLayerLighttable;
     TSharedPtr<FUICommandInfo> ToggleLayerLighttable;
+
+    TSharedPtr<FUICommandInfo> CollapseLayer;
+    TSharedPtr<FUICommandInfo> UncollapseLayer;
+    TSharedPtr<FUICommandInfo> ToggleLayerCollapsed;
 
     TSharedPtr<FUICommandInfo> LockAllLayers;
     TSharedPtr<FUICommandInfo> UnlockAllLayers;

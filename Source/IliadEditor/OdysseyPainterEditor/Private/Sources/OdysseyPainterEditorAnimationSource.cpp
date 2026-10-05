@@ -3,32 +3,33 @@
 
 #include "OdysseyPainterEditorAnimationSource.h"
 
+#include "Engine/TextureRenderTarget2D.h"
 #include "ScopedTransaction.h"
 
 #include "OdysseyAnimation.h"
 //#include "OdysseyAnimationTexture.h"
+#include "OdysseyAnimationCellImageRaster.h"
+#include "OdysseyAnimationCurrentFrameMutator.h"
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyAnimationLayerImageVector.h"
 #include "OdysseyAnimationLayerStack.h"
-#include "OdysseyAnimationCellImageRaster.h"
-#include "OdysseyRasterBlockMutator.h"
+#include "OdysseyAnimationPlayer.h"
+#include "OdysseyLayerStackSelection.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
-#include "ULISLoaderModule.h"
-#include "Undo/OdysseyVectorUndoSceneClear.h"
+#include "OdysseyPainterEditorAnimationFlipSystem.h"
+#include "OdysseyRasterBlock.h"
+#include "OdysseyRasterBlockMutator.h"
+#include "OdysseySurfaceTexture2DEditable.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorCell.h"
 #include "OdysseyVectorLayer.h"
-#include "OdysseyAnimationPlayer.h"
+#include "ULISLoaderModule.h"
+#include "Undo/OdysseyVectorUndoSceneClear.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "Engine/TextureRenderTarget2D.h"
-#include "OdysseySurfaceTexture2DEditable.h"
-#include "OdysseyAnimationCurrentFrameMutator.h"
-#include "OdysseyRasterBlock.h"
-#include "OdysseyPainterEditorAnimationFlipSystem.h"
 #include <ULIS>
 
 
@@ -254,7 +255,7 @@ FOdysseyPainterEditorAnimationSource::Clear()
     if (!player)
         return;
 
-    TArray<UOdysseyLayerCell*> selectedCells = GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(currentLayer);
     if (selectedCells.IsEmpty())
     {
 
@@ -280,6 +281,8 @@ FOdysseyPainterEditorAnimationSource::Clear()
         FOdysseyAnimationCurrentFrameMutator currentFrameMutator(player);
         currentFrameMutator.Set(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
         currentFrameMutator.Commit();
+
+        OdysseyLayerStackSelection::RegisterUndo(selectedCells, selectedCells);
     }
 }
 

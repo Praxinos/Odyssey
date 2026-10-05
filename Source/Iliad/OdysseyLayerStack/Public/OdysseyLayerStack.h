@@ -6,12 +6,6 @@
 #include "CoreMinimal.h"
 #include "OdysseyTextureRenderingAbility.h"
 #include "Templates/SubclassOf.h"
-//#include "Selection.h"
-
-#if WITH_EDITOR
-#include "OdysseyLayerCellSelection.h"
-#include "OdysseyLayerSelection.h"
-#endif
 
 #include "OdysseyLayerStack.generated.h"
 
@@ -48,10 +42,6 @@ public:
      * @brief Returns the HierarchyChanged delegate
      */
     static FOnHierarchyChanged& OnHierarchyChanged();
-
-public:
-    ~UOdysseyLayerStack();
-    UOdysseyLayerStack();
 
 public:
     //Layers management
@@ -219,11 +209,6 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     void MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* ParentLayer = nullptr, int IndexInParent = 0);
 
-    void SelectLayer( UOdysseyLayer* iLayer );
-    void DeselectAllLayers();
-    void DeselectLayer( UOdysseyLayer* iLayer );
-    bool IsLayerSelected( UOdysseyLayer* iLayer ) const;
-
 public:
     //virtual int GetWidth() const { return -1; };
     //virtual int GetHeight() const { return -1; };
@@ -252,7 +237,6 @@ public:
 #if WITH_EDITOR
     void SetTimelineSplitterPosition(float iValue);
     float GetTimelineSplitterPosition() const;
-    TSharedRef<FOdysseyLayerCellSelection> GetCellSelection() const;
 #endif
     UOdysseyLayer* GetLayerRoot() const;
     TSubclassOf<UOdysseyLayer> GetLayerRootClass() const;
@@ -315,11 +299,6 @@ protected:
     UPROPERTY()
     TObjectPtr<UOdysseyLayer> CurrentLayer;
 
-    // Commented out. We don't use USelection anymore because it requires module UnrealEd
-    // which prevents us to compile this for runtime.
-    //UPROPERTY(Transient, NonTransactional)
-    //USelection* LayerSelection = nullptr;
-
     UPROPERTY()
     bool bDisplayOnlyCurrentLayer = false;
 
@@ -338,11 +317,5 @@ protected:
 #if WITH_EDITORONLY_DATA
     UPROPERTY(config)
     float TimelineSplitterPosition = 0.2f; //TODO: Move To Editor Only class
-#endif
-
-private:
-#if WITH_EDITOR
-    TSharedRef<FOdysseyLayerCellSelection> mCellSelection;
-    TSharedRef<FOdysseyLayerSelection> mLayerSelection;
 #endif
 };

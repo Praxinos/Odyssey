@@ -79,11 +79,14 @@ protected:
     virtual TArray<TSharedPtr<FExtender>> ExtendContextMenu();
 
 private:
+
+    void UpdateSelectedItems();
+
     /**
      * @brief Set the layerstack's Current Layer From the treeview Selector Item
      *
      */
-    void SetCurrentLayerFromSelectorItem();
+    void SynchronizeCurrentAndSelectorItem();
 
     /**
      * @brief Refreshes all rows expansion states from the state stored in the Layer
@@ -117,7 +120,7 @@ protected:
      */
     void OnExpansionChanged(UOdysseyLayer* iLayer, bool iIsExpanded);
 
-    void OnSelectionChanged( UOdysseyLayer* iLayerNode, ESelectInfo::Type SelectInfo );
+    void OnExternalSelectionChanged( UObject* InSelection );
 
     /**
      * @brief The layer's DisplayChildren property changes
@@ -168,6 +171,7 @@ public:
 protected:
     UOdysseyLayerStack* mLayerStack;
 
+    bool bIsSelectionChanging = false;
     bool mNeedsRefresh = false;
     bool mIsRenamePending = false;
     bool mDisplayDropZone = false;

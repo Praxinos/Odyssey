@@ -157,6 +157,7 @@ public:
     // UObject overrides
     virtual void OldSerialize(FArchive& Ar); //DEPRECATED: Keep that for compatibility with early versions of Odyssey
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
+    virtual bool IsSelectedInEditor() const override;
 #endif
 
 public:
@@ -212,3 +213,10 @@ private:
     FOnOutOfPegsChanged mOnOutOfPegsChanged;
 #endif
 };
+
+#if WITH_EDITOR
+namespace OdysseyLayerStackSelection {
+    /** Callback for editor layer selection. This must be in runtime instead of editor for UOdysseyLayer::IsSelectedInEditor to work */
+    extern ODYSSEYLAYERSTACK_API TFunction<bool(const UObject*)> GIsCellSelectedInEditor;
+}
+#endif

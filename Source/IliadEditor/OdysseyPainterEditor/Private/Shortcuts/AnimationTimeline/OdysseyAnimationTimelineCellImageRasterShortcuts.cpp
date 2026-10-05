@@ -3,31 +3,32 @@
 
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageRasterShortcuts.h"
 
+#include "Engine/TextureRenderTarget2D.h"
+#include "ImageUtils.h"
 #include "Misc/ScopedSlowTask.h"
+#include "RenderGraphBuilder.h"
+#include "ScopedTransaction.h"
+#include "ScreenPass.h"
 #include "TextureResource.h"
 
 #include "SOdysseyAnimationCellImageStagger.h"
 #include "SOdysseyAnimationCellImageRaster.h"
-#include "OdysseyAnimationLayerImageRaster.h"
-#include "OdysseyPainterEditorAnimationCommands.h"
-#include "OdysseyAnimationLayer.h"
-#include "OdysseyLayerStack.h"
+
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationCellImageRaster.h"
+#include "OdysseyAnimationLayer.h"
+#include "OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyBlendShader.h"
+#include "OdysseyLayerStack.h"
+#include "OdysseyLayerStackSelection.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
+#include "OdysseyPixelFormat.h"
+#include "OdysseyRasterBlockMutator.h"
+#include "OdysseySurfaceTexture2DEditable.h"
+#include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-#include "OdysseyAnimationCellImageRaster.h"
-#include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyRasterBlockMutator.h"
-#include "OdysseyLayerCellSelection.h"
-#include "ScopedTransaction.h"
-#include "RenderGraphBuilder.h"
-#include "ScreenPass.h"
-#include "OdysseyBlendShader.h"
-#include "OdysseyPixelFormat.h"
-#include "OdysseySurfaceTexture2DEditable.h"
-#include "ImageUtils.h"
-#include "Engine/TextureRenderTarget2D.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -64,7 +65,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     if (!layer->IsEditable())
         return;
 
-    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
         return;
 
@@ -92,6 +93,8 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     progressBar.MakeDialog();
     progressBar.EnterProgressFrame();
 
+    OdysseyLayerStackSelection::Get()->BeginBatchSelectOperation();
+
     //Convert Selected Stagger Cells to ImageRaster Cells
     FOdysseyAnimationTimelineCellImageStaggerShortcuts staggerShortcuts(animation);
     staggerShortcuts.Action_ConvertToReferenceCells();
@@ -99,8 +102,8 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     progressBar.EnterProgressFrame();
 
     //Get the selected cells again to ensure having the converted cells
-    selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
-    TArray<UOdysseyLayerCell*> cellsToSelect = selectedCells;
+    selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
+    OdysseyLayerStackSelection::Get()->DeselectAll();
 
     //Cross Fade all selected cells
     //::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
@@ -198,7 +201,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 
                 FImage OutImage;
                 if (!FImageUtils::GetRenderTargetImage(destinationRenderTarget.Get(), OutImage))
-                    return;
+                    continue;
 
                 ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
 
@@ -211,7 +214,10 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
                 mutator.Commit();
             }
 
-            cellsToSelect.Append(rasterCells);
+            for (UOdysseyLayerCell* cell : rasterCells)
+            {
+                OdysseyLayerStackSelection::Get()->Select(cell);
+            }
         }
         else
         {
@@ -257,7 +263,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 
                 FImage OutImage;
                 if (!FImageUtils::GetRenderTargetImage(destinationRenderTarget.Get(), OutImage))
-                    return;
+                    continue;
 
                 ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
 
@@ -269,10 +275,16 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
                 mutator.Copy(block, {::ULISUtils::ToULISRectI(rect)});
                 mutator.Commit();
             }
-            cellsToSelect.Append(rasterCells);
+
+            for (UOdysseyLayerCell* cell : rasterCells)
+            {
+                OdysseyLayerStackSelection::Get()->Select(cell);
+            }
         }
     }
-    layerStack->GetCellSelection()->SetSelectedCells(cellsToSelect);
+    OdysseyLayerStackSelection::Get()->EndBatchSelectOperation();
+
+    OdysseyLayerStackSelection::RegisterUndo(selectedCells, OdysseyLayerStackSelection::GetSelectedCells(layer));
 }
 
 bool
@@ -293,9 +305,8 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_CrossFade()
     if (!layer->IsEditable())
         return false;
 
-    UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->GetCurrentLayer());
-
-    const TArray<UOdysseyLayerCell*> selectedCells = layerImageRaster->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
         return false;
 

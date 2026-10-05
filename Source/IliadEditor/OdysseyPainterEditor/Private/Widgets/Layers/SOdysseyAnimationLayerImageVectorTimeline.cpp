@@ -13,6 +13,7 @@
 #include "SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
 #include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyLayerCellImageStagger.h"
+#include "OdysseyLayerStackSelection.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorModule.h"
 #include "OdysseyAnimation.h"
@@ -141,7 +142,7 @@ void
 SOdysseyAnimationLayerImageVectorTimeline::MassModifier()
 {
     UOdysseyAnimationLayerImageVector* layerImageVector = Cast<UOdysseyAnimationLayerImageVector>( mLayer->GetLayerStack()->GetCurrentLayer() );
-    TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(mLayer);
     TArray<FOdysseyVectorGroupPaint*> vectorSceneArray;
     FOdysseyVectorGroupPaint* previewScene;
     FOdysseyVectorGroupPaint* previewSceneCopy = nullptr;

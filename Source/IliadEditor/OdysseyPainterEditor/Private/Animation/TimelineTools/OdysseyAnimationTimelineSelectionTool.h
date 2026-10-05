@@ -15,7 +15,7 @@ class FOdysseyAnimationTimelineSelectionTool
 {
 public:
     virtual ~FOdysseyAnimationTimelineSelectionTool();
-    FOdysseyAnimationTimelineSelectionTool(TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyLayerCellSelection> iTimelineCellSelection);
+    FOdysseyAnimationTimelineSelectionTool(TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> iTimelinePosition);
 
 public:
     virtual FReply OnMouseButtonDown(const FMouseEventParams& iParams) override;
@@ -45,8 +45,8 @@ private:
 
 private:
     int GetFrameUnderCursor(const FMouseEventParams& iParams);
-    bool SelectFromCursorToFrame(UOdysseyAnimationLayer* iLayer, int iFrame, bool iDeselect = false);
-    bool SetCellSelectionCursorAtFrame(UOdysseyAnimationLayer* iLayer, int iFrame);
+    void SelectFromCursorToFrame(UOdysseyAnimationLayer* iLayer, int iFrame, bool iDeselect = false);
+    void SetCellSelectionCursorAtFrame(UOdysseyAnimationLayer* iLayer, int iFrame);
     bool IsFrameSelected(UOdysseyAnimationLayer* iLayer, int iFrame) const;
 
 private:
@@ -57,7 +57,6 @@ private:
         NonContiguous
     };
 
-    TSharedRef<FOdysseyLayerCellSelection> mTimelineCellSelection;
     bool mIsSelecting = false;
     bool mIsDragDetected = false;
     bool mIsDragnDrop = false;

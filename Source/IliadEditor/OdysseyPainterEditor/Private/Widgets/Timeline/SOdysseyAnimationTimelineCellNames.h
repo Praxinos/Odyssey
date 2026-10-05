@@ -8,39 +8,31 @@
 
 #include "OdysseyRenderingAbility.h"
 
-class UOdysseyAnimationLayer;
-class UOdysseyAnimation;
-class UOdysseyAnimationCell;
+class UOdysseyLayerCell;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 class SHorizontalBox;
 
 class SOdysseyAnimationTimelineCellNames
     : public SCompoundWidget
 {
+    SLATE_DECLARE_WIDGET(SOdysseyAnimationTimelineCellNames, SCompoundWidget)
+
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineCellNames )
-    : _CurrentFrame(0)
     {}
-        SLATE_ATTRIBUTE(int, CurrentFrame)
+        SLATE_ATTRIBUTE(TArray<UOdysseyLayerCell*>, Cells)
         SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
     SLATE_END_ARGS()
 
-    void Construct(
-        const FArguments& InArgs,
-        UOdysseyAnimationLayer* iLayer
-    );
+    SOdysseyAnimationTimelineCellNames();
+    void Construct(const FArguments& InArgs);
 
 private:
-    //UOdysseyAnimationCell* GetCurrentCell() const;
-
     void RebuildRow();
-
     void OnCellsChanged();
 
 private:
-    //TAttribute<int> mCurrentFrame;
+    TSlateAttribute<TArray<UOdysseyLayerCell*>> mCells;
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
-    UOdysseyAnimationLayer* mLayer = nullptr;
-
     TSharedPtr<SHorizontalBox> mRowWidget;
 };

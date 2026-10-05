@@ -12,18 +12,6 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "CanvasTypes.h"
 
-UOdysseyLayerStack::~UOdysseyLayerStack()
-{
-}
-
-UOdysseyLayerStack::UOdysseyLayerStack()
-#if WITH_EDITOR
-    : mCellSelection(MakeShared<FOdysseyLayerCellSelection>(this))
-    , mLayerSelection(MakeShared<FOdysseyLayerSelection>(this))
-#endif
-{
-}
-
 void
 UOdysseyLayerStack::PostInitProperties()
 {
@@ -33,13 +21,6 @@ UOdysseyLayerStack::PostInitProperties()
         return;
 
     LayerRoot = NewObject<UOdysseyLayerRoot>(this, NAME_None, RF_Public | RF_Transactional);
-
-#if WITH_EDITOR
-    // Commented out. We don't use USelection anymore because it requires module UnrealEd
-    // which prevents us to compile this for runtime.
-    //LayerSelection = USelection::CreateObjectSelection(this, NAME_None, RF_Public | RF_Transient );
-    //LayerSelection->SetElementSelectionSet(NewObject<UTypedElementSelectionSet>(LayerSelection, NAME_None, RF_Public | RF_Transient));
-#endif
 }
 
 void
@@ -91,15 +72,6 @@ UOdysseyLayerStack::GetFrameRange() const
 {
     return LayerRoot->GetFrameRange();
 }
-
-
-#if WITH_EDITOR
-TSharedRef<FOdysseyLayerCellSelection>
-UOdysseyLayerStack::GetCellSelection() const
-{
-    return mCellSelection;
-}
-#endif
 
 //--- Layers management
 
@@ -644,32 +616,6 @@ UOdysseyLayerStack::CopyLayerInternal(UOdysseyLayer* iLayer, UOdysseyLayer* iPar
 
     return duplicatedLayer;
 }
-
-#if WITH_EDITOR
-bool
-UOdysseyLayerStack::IsLayerSelected( UOdysseyLayer* iLayer ) const
-{
-    return mLayerSelection->IsSelected( iLayer );
-}
-
-void
-UOdysseyLayerStack::SelectLayer( UOdysseyLayer* iLayer )
-{
-    mLayerSelection->Select( iLayer );
-}
-
-void
-UOdysseyLayerStack::DeselectAllLayers()
-{
-    mLayerSelection->DeselectAll();
-}
-
-void
-UOdysseyLayerStack::DeselectLayer( UOdysseyLayer* iLayer )
-{
-    mLayerSelection->Deselect( iLayer );
-}
-#endif
 
 //--- UObject overrides
 
