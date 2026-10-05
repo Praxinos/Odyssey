@@ -849,55 +849,59 @@ ShotSequenceTools::UpdateChannel( TSharedPtr<ISequencer> iSequencer, AActor* iAc
     }
 
     FGuid binding = sequencer->FindObjectId( *iActor, sequence_id );
-    FGuid bindingCameraComponent = sequencer->FindObjectId( *iCamera->GetCineCameraComponent(), sequence_id );
+    // Can't find the actor or component
+    if( !binding.IsValid() )
+        return;
 
     //---
 
     // Update the default transform channel to take care of the attach track
+
     UMovieScene3DTransformTrack* transformTrack = Cast<UMovieScene3DTransformTrack>( sequence->GetMovieScene()->FindTrack<UMovieScene3DTransformTrack>( binding ) );
-    if( transformTrack )
+    // Can't find a transform track
+    if( !transformTrack )
+        return;
+
+    if( !transformTrack->GetAllSections().Num() )
+        return;
+
+    UMovieScene3DTransformSection* transformSection = Cast<UMovieScene3DTransformSection>( transformTrack->GetAllSections()[0] );
+
+    // Set to EKeyGroupMode::KeyGroup, otherwise it will be overwritten by EMovieSceneTransformChannel::All
+    // in GetTransformKeys() as (certainly) iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyAll
+    EKeyGroupMode backup_groupmode = sequencer->GetKeyGroupMode();
+    sequencer->SetKeyGroupMode( EKeyGroupMode::KeyGroup );
+
+    FTransformData newTransformData( iActor->GetActorTransform() );
+
+    UMovieScene3DAttachTrack* attachTrack = sequence->GetMovieScene()->FindTrack<UMovieScene3DAttachTrack>( binding );
+    //bool hasParentActor = iActor->GetParentActor();
+    bool hasParentActor = !!iActor->GetAttachParentActor();
+    if( EnumHasAnyFlags( iChannelsToApply, EMovieSceneTransformChannel::Translation )
+        && ( attachTrack || hasParentActor ) )
     {
-        if( transformTrack->GetAllSections().Num() )
-        {
-            UMovieScene3DTransformSection* transformSection = Cast<UMovieScene3DTransformSection>( transformTrack->GetAllSections()[0] );
+        FTransform world_actor_transform = iActor->GetActorTransform();
+        FTransform relative_transform = world_actor_transform.GetRelativeTransform( iCamera->GetActorTransform() );
 
-            // Set to EKeyGroupMode::KeyGroup, otherwise it will be overwritten by EMovieSceneTransformChannel::All
-            // in GetTransformKeys() as (certainly) iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyAll
-            EKeyGroupMode backup_groupmode = sequencer->GetKeyGroupMode();
-            sequencer->SetKeyGroupMode( EKeyGroupMode::KeyGroup );
-
-            FTransformData newTransformData( iActor->GetActorTransform() );
-
-            UMovieScene3DAttachTrack* attachTrack = sequence->GetMovieScene()->FindTrack<UMovieScene3DAttachTrack>( binding );
-            //bool hasParentActor = iActor->GetParentActor();
-            bool hasParentActor = !!iActor->GetAttachParentActor();
-            if( EnumHasAnyFlags( iChannelsToApply, EMovieSceneTransformChannel::Translation )
-                && ( attachTrack || hasParentActor ) )
-            {
-                FTransform world_actor_transform = iActor->GetActorTransform();
-                FTransform relative_transform = world_actor_transform.GetRelativeTransform( iCamera->GetActorTransform() );
-
-                newTransformData = relative_transform;
-            }
-
-            FGeneratedTrackKeys generated_keys;
-            ShotSequenceTools::GetTransformKeys( *sequencer, TOptional<FTransformData>(), newTransformData, iChannelsToApply, iActor, transformSection, generated_keys );
-
-            // For now, just update the default values of channels
-            // The problem with creating new keys is:
-            // - camera has NO keys for its focal length (so a unique default value for all frames)
-            // - on frame X, the focal length changes -> new scale for the animation -> create a new key
-            // - on frame X+n, the focal length changes -> new scale for the animation -> create a new key
-            // BUT the key on frame X won't be relevant anymore as the focal length of the camera is also changed on frame X
-            for( const FMovieSceneChannelValueSetter& generated_key : generated_keys )
-            {
-                generated_key->ApplyDefault( transformSection, transformSection->GetChannelProxy(), EKeyFrameTrackEditorSetDefault::SetDefaultOnAddKeys );
-            }
-            //bool key_created = ShotSequenceTools::AddKeysToSection( *sequencer, transformSection, sequencer->GetLocalTime().Time.GetFrame(), generated_keys, ESequencerKeyMode::AutoKey, EKeyFrameTrackEditorSetDefault::SetDefaultOnAddKeys );
-
-            sequencer->SetKeyGroupMode( backup_groupmode );
-        }
+        newTransformData = relative_transform;
     }
+
+    FGeneratedTrackKeys generated_keys;
+    ShotSequenceTools::GetTransformKeys( *sequencer, TOptional<FTransformData>(), newTransformData, iChannelsToApply, iActor, transformSection, generated_keys );
+
+    // For now, just update the default values of channels
+    // The problem with creating new keys is:
+    // - camera has NO keys for its focal length (so a unique default value for all frames)
+    // - on frame X, the focal length changes -> new scale for the animation -> create a new key
+    // - on frame X+n, the focal length changes -> new scale for the animation -> create a new key
+    // BUT the key on frame X won't be relevant anymore as the focal length of the camera is also changed on frame X
+    for( const FMovieSceneChannelValueSetter& generated_key : generated_keys )
+    {
+        generated_key->ApplyDefault( transformSection, transformSection->GetChannelProxy(), EKeyFrameTrackEditorSetDefault::SetDefaultOnAddKeys );
+    }
+    //bool key_created = ShotSequenceTools::AddKeysToSection( *sequencer, transformSection, sequencer->GetLocalTime().Time.GetFrame(), generated_keys, ESequencerKeyMode::AutoKey, EKeyFrameTrackEditorSetDefault::SetDefaultOnAddKeys );
+
+    sequencer->SetKeyGroupMode( backup_groupmode );
 }
 
 //---
