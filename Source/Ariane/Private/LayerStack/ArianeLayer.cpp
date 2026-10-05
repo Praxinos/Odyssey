@@ -23,9 +23,9 @@ UArianeLayer::UArianeLayer()
       //ParentFolder( nullptr )
       bLocked ( false )
     , bSelected ( false )
-    , bInvalidatedInParentFolder ( false )
-    , bInvalidated ( false )
     , WorldTransformVersion( 0 )
+    , bInvalidated ( false )
+    , bInvalidatedInParentFolder ( false )
 {
     // for Transform operations
     SetMobility(EComponentMobility::Movable);

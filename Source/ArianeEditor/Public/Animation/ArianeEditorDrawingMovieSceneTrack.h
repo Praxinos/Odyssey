@@ -19,5 +19,5 @@ public:
     virtual void BuildObjectBindingTrackMenu(FMenuBuilder& MenuBuilder, const TArray<FGuid>& ObjectBindings, const UClass* ObjectClass) override;
 
 private:
-    void AddTrack(TArray<FGuid> ObjectBindings);
+    void AddArianeTrack(TArray<FGuid> ObjectBindings);
 };

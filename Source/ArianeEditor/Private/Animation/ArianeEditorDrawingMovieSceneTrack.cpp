@@ -35,13 +35,13 @@ FArianeEditorDrawingMovieSceneTrack::BuildObjectBindingTrackMenu( FMenuBuilder& 
             NSLOCTEXT("Ariane", "ariane-editor-add-image-track", "Ariane Drawing track"),
             NSLOCTEXT("Ariane", "ariane-editor-add-image-track.tooltip", "Add Drawing spawn track"),
             FSlateIcon(),
-            FUIAction(FExecuteAction::CreateSP(this, &FArianeEditorDrawingMovieSceneTrack::AddTrack, ObjectBindings))
+            FUIAction(FExecuteAction::CreateSP(this, &FArianeEditorDrawingMovieSceneTrack::AddArianeTrack, ObjectBindings))
         );
     }
 }
 
 void
-FArianeEditorDrawingMovieSceneTrack::AddTrack(TArray<FGuid> ObjectBindings)
+FArianeEditorDrawingMovieSceneTrack::AddArianeTrack(TArray<FGuid> ObjectBindings)
 {
     TSharedPtr<ISequencer> Sequencer = GetSequencer();
     UMovieScene* MovieScene = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene();

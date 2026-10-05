@@ -288,10 +288,10 @@ FArianeObject::FArianeObject( UArianeDrawing* InDrawing
     : Name ( InName )
     , Guid ( FGuid::NewGuid() )
     , ParentID ( FArianeObjectID() )
-    , Drawing( InDrawing )
     , bVisible ( true )
     , bExpanded ( true )
     , AllocationModel ( InAllocationModel  )
+    , Drawing( InDrawing )
     , WorldTransformVersion( 0 )
     , bSelected ( false )
 {

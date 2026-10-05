@@ -20,10 +20,10 @@ FArianeObjectID::FArianeObjectID()
 }
 
 FArianeObjectID::FArianeObjectID( FArianeObject* Object )
-    : CachedDrawingAllocatorGuid( FGuid() )
-    , CachedObject( Object )
+    : Guid ( Object ? Object->GetGuid() : FGuid() )
     , AllocationModel( Object ? Object->GetAllocationModel() : EArianeAllocationModel::InstancedStruct )
-    , Guid ( Object ? Object->GetGuid() : FGuid() )
+    , CachedDrawingAllocatorGuid( FGuid() )
+    , CachedObject( Object )
 {
 }
 
