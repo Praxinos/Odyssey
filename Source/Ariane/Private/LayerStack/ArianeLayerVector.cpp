@@ -125,8 +125,9 @@ FArianeGeometryProxy::DrawStaticElements( FStaticPrimitiveDrawInterface * PDI )
 
 // static
 void
-FArianeGeometryProxy::GetDrawingDynamicMeshElements( FMeshElementCollector& Collector
-                                                 , int32 ViewIndex ) const
+FArianeGeometryProxy::GetDrawingDynamicMeshElements( const FSceneViewFamily& ViewFamily
+                                                   , FMeshElementCollector& Collector
+                                                   , int32 ViewIndex ) const
 {
     FPrimitiveDrawInterface* PDI = Collector.GetPDI(ViewIndex);
     //UMaterialInterface* MaterialInterface = GEngine->VertexColorMaterial;
@@ -138,6 +139,7 @@ FArianeGeometryProxy::GetDrawingDynamicMeshElements( FMeshElementCollector& Coll
     FArianeObject::Traverse( RootGroup
                            , [ this
                              , PDI
+                             , &ViewFamily
                              , ViewIndex
                              , &Collector ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
     {
@@ -145,6 +147,7 @@ FArianeGeometryProxy::GetDrawingDynamicMeshElements( FMeshElementCollector& Coll
         FArianeObjectGeometry3D* Geometry3D = nullptr;
         UMaterialInterface* MaterialInterface = nullptr;
         FColor ObjectColor = FColor::Black;
+        bool bWireframe = AllowDebugViewmodes() && ViewFamily.EngineShowFlags.Wireframe;
 
         if( Object->HasBaseClass( FArianePath::StaticClass() ) )
         {
@@ -162,6 +165,13 @@ FArianeGeometryProxy::GetDrawingDynamicMeshElements( FMeshElementCollector& Coll
             Geometry3D = &Cycle->GetGeometry3D();
             MaterialInterface = Cycle->GetMaterial();
             ObjectColor = Cycle->GetColor();
+        }
+
+        if( bWireframe )
+        {
+            MaterialInterface = GEngine->WireframeMaterial;
+
+            ObjectColor = Object->GetHUDForegroundColor();
         }
 
         if( Geometry3D && MaterialInterface )
@@ -194,7 +204,7 @@ FArianeGeometryProxy::GetDrawingDynamicMeshElements( FMeshElementCollector& Coll
                     MaterialInterface->GetRenderProxy()
                   , FLinearColor(ObjectColor) );
 
-                //Mesh.bWireframe = bWireframe;
+                MeshBatch.bWireframe = bWireframe;
                 MeshBatch.VertexFactory = VertexFactory;
                 MeshBatch.MaterialRenderProxy = &MaterialProxy;
 
@@ -289,8 +299,9 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
         {
             if( VectorLayer->IsVisible() )
             {
-                GetDrawingDynamicMeshElements( Collector
-                                           , ViewIndex );
+                GetDrawingDynamicMeshElements( ViewFamily
+                                             , Collector
+                                             , ViewIndex );
             }
 
             // Render bounds manually because it's a bit complicated to render them when using custom proxies like this one.
@@ -379,21 +390,7 @@ UArianeLayerVector::UArianeLayerVector()
 
 void UArianeLayerVector::PreSave(FObjectPreSaveContext Context)
 {
-UE_LOG(LogTemp, Warning, TEXT("BEFORE PreSave FLAGS Layer=0x%x Drawing=0x%x Stack=0x%x Owner=0x%x Path=%s"),
-    (uint32)GetFlags(),
-    Drawing ? (uint32)Drawing->GetFlags() : 0,
-    GetAttachParent() ? (uint32)GetAttachParent()->GetFlags() : 0,
-    GetOwner() ? (uint32)GetOwner()->GetFlags() : 0,
-    *GetPathName());
-
     Super::PreSave(Context);
-
-UE_LOG(LogTemp, Warning, TEXT("AFTER PreSave FLAGS Layer=0x%x Drawing=0x%x Stack=0x%x Owner=0x%x Path=%s"),
-    (uint32)GetFlags(),
-    Drawing ? (uint32)Drawing->GetFlags() : 0,
-    GetAttachParent() ? (uint32)GetAttachParent()->GetFlags() : 0,
-    GetOwner() ? (uint32)GetOwner()->GetFlags() : 0,
-    *GetPathName());
 }
 
 void

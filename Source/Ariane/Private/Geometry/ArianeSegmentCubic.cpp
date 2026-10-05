@@ -149,62 +149,81 @@ FArianeSegmentCubic::BuildVariableAdaptive( TArray<FSubPoint>& SubPoints
                                                                    , Bezier[2]
                                                                    , Bezier[3]
                                                                    , 0.5f );
-    FVector ChildBezier[2][4];
-    FVector StraightVectors[2] = { MidPoint - Bezier[0], MidPoint - Bezier[3] };
-    double DotLimit = 0.9996f; // cos 1.62 deg
+    FVector MidVectors[2] = { MidPoint - Bezier[0], MidPoint - Bezier[3] };
+    FVector StraightVectors[2] = { Bezier[1] - Bezier[0], Bezier[2] - Bezier[3] };
+    double DotLimit = 0.9994f; // cos 2 deg
     double SegmentLength = 0.0;
 
     if( ( StraightVectors[0].IsNearlyZero() == false ) && ( StraightVectors[1].IsNearlyZero() == false ) )
     {
+        double Dot[2];
+
+        MidVectors[0].Normalize();
+        MidVectors[1].Normalize();
         StraightVectors[0].Normalize();
         StraightVectors[1].Normalize();
 
-        if( ( RecurseDepth < MinRecurse ) // <--- minimum recurse level
-         || ( ( StraightVectors[0].Dot(  StraightVectors[1] ) < DotLimit ) && ( RecurseDepth < MaxRecurse ) ) )
+        Dot[0] = StraightVectors[0].Dot(  MidVectors[0] );
+        Dot[1] = StraightVectors[1].Dot(  MidVectors[1] );
+
+        //if( RecurseDepth < MinRecurse ) // <--- minimum recurse level
         {
             double RadiusAt = ( FromSubPoint.Radius + ToSubPoint.Radius ) * 0.5f;
             double SplitsAt = ( FromSubPoint.T      + ToSubPoint.T      ) * 0.5f;
             int32 SplitSubPointIndex = FromSubPointIndex + ( ( ToSubPointIndex - FromSubPointIndex ) >> 1 );
 
-            memcpy( ChildBezier[0], Bezier, sizeof( ChildBezier[0] ) );
-            memcpy( ChildBezier[1], Bezier, sizeof( ChildBezier[1] ) );
-
-            // First sub-bezier from the divided parent bezier
-            // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
-            ::ULIS::CubicBezierSplitAtParameter<FVector>( &ChildBezier[0][0]
-                                                        , &ChildBezier[0][1]
-                                                        , &ChildBezier[0][2]
-                                                        , &ChildBezier[0][3]
-                                                        , 0.5f );
-
-            SubPoints[SplitSubPointIndex] = FSubPoint( ChildBezier[0][3], SplitsAt, RadiusAt, SplitSubPointIndex );
+            SubPoints[SplitSubPointIndex] = FSubPoint( MidPoint, SplitsAt, RadiusAt, SplitSubPointIndex );
 
             InOutPointCount++;
 
-            BuildVariableAdaptive( SubPoints
-                                 , FromSubPointIndex
-                                 , SplitSubPointIndex
-                                 , ChildBezier[0]
-                                 , RecurseDepth + 1
-                                 , MinRecurse
-                                 , MaxRecurse
-                                 , InOutPointCount );
+            if ( ( RecurseDepth < MinRecurse ) // <--- minimum recurse level
+              || ( ( Dot[0] < DotLimit ) && ( RecurseDepth < MaxRecurse ) ) )
+            {
+                FVector ChildBezier[4];
 
-            // Second sub-bezier from the divided parent bezier
-            // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
-            ::ULIS::CubicBezierInverseSplitAtParameter<FVector>( &ChildBezier[1][0]
-                                                               , &ChildBezier[1][1]
-                                                               , &ChildBezier[1][2]
-                                                               , &ChildBezier[1][3]
-                                                               , 0.5f );
-            BuildVariableAdaptive( SubPoints
-                                 , SplitSubPointIndex
-                                 , ToSubPointIndex
-                                 , ChildBezier[1]
-                                 , RecurseDepth + 1
-                                 , MinRecurse
-                                 , MaxRecurse
-                                 , InOutPointCount );
+                memcpy( ChildBezier, Bezier, sizeof( ChildBezier ) );
+
+                // First sub-bezier from the divided parent bezier
+                // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
+                ::ULIS::CubicBezierSplitAtParameter<FVector>( &ChildBezier[0]
+                                                            , &ChildBezier[1]
+                                                            , &ChildBezier[2]
+                                                            , &ChildBezier[3]
+                                                            , 0.5f );
+
+                BuildVariableAdaptive( SubPoints
+                                     , FromSubPointIndex
+                                     , SplitSubPointIndex
+                                     , ChildBezier
+                                     , RecurseDepth + 1
+                                     , MinRecurse
+                                     , MaxRecurse
+                                     , InOutPointCount );
+            }
+
+            if ( ( RecurseDepth < MinRecurse ) // <--- minimum recurse level
+              || ( ( Dot[1] < DotLimit ) && ( RecurseDepth < MaxRecurse ) ) )
+            {
+                FVector ChildBezier[4];
+
+                memcpy( ChildBezier, Bezier, sizeof( ChildBezier ) );
+
+                // Second sub-bezier from the divided parent bezier
+                // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
+                ::ULIS::CubicBezierInverseSplitAtParameter<FVector>( &ChildBezier[0]
+                                                                   , &ChildBezier[1]
+                                                                   , &ChildBezier[2]
+                                                                   , &ChildBezier[3]
+                                                                   , 0.5f );
+                BuildVariableAdaptive( SubPoints
+                                     , SplitSubPointIndex
+                                     , ToSubPointIndex
+                                     , ChildBezier
+                                     , RecurseDepth + 1
+                                     , MinRecurse
+                                     , MaxRecurse
+                                     , InOutPointCount );
+           }
         }
     }
 }

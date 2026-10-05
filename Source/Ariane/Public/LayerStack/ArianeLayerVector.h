@@ -42,8 +42,9 @@ class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
                                            , const FSceneViewFamily& ViewFamily
                                            , uint32 VisibilityMap
                                            , FMeshElementCollector& Collector) const override;
-        void GetDrawingDynamicMeshElements( FMeshElementCollector& Collector
-                                        , int32 ViewIndex ) const;
+        void GetDrawingDynamicMeshElements( const FSceneViewFamily& ViewFamily
+                                          , FMeshElementCollector& Collector
+                                          , int32 ViewIndex ) const;
         virtual void DrawStaticElements( FStaticPrimitiveDrawInterface * PDI ) override;
 
     protected:
