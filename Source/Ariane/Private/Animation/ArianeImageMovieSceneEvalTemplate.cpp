@@ -12,7 +12,8 @@
 // 1. Le Token : Il stocke l'état d'origine et sait comment le restaurer
 struct FArianeImagePreAnimatedToken : IMovieScenePreAnimatedToken
 {
-    TWeakObjectPtr<UArianeImage> OldImage;
+    // TStrongObjectPtr prevents Garbage collection, as the key is the only one to store the former Image
+    TStrongObjectPtr<UArianeImage> OldImage;
 
     FArianeImagePreAnimatedToken(UArianeImage* InImage) : OldImage(InImage) {}
 
@@ -145,7 +146,7 @@ FArianeImageMovieSceneEvalTemplate::Evaluate( const FMovieSceneEvaluationOperand
     if (Times.Num() > 0)
     {
         // 3. Recherche binaire sur le tableau natif des FFrameNumber
-        int32 Index = Algo::LowerBound(Times, CurrentTime.GetFrame()) - 1;
+        int32 Index = Algo::UpperBound(Times, CurrentTime.GetFrame()) - 1;
         Index = FMath::Clamp(Index, 0, Times.Num() - 1);
 
         // Clé Actuelle (Borne inférieure)

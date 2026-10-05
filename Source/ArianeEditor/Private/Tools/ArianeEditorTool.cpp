@@ -205,12 +205,17 @@ UArianeEditorTool::ProcessKeyDownGlobal(const FKeyEvent& InKeyEvent)
 bool
 UArianeEditorTool::OnKeyDownGlobal(const FKeyEvent& InKeyEvent)
 {
+    //PressedKeys is a TSet. No need to check for duplicates, this is handled by TSet itself
+    GlobalPressedKeys.Add( InKeyEvent.GetKey() );
+
     return false; //false means Unreal will continue as if we did nothing
 }
 
 bool
 UArianeEditorTool::OnKeyUpGlobal(const FKeyEvent& InKeyEvent)
 {
+    GlobalPressedKeys.Remove( InKeyEvent.GetKey() );
+
     return false; //false means Unreal will continue as if we did nothing
 }
 
@@ -220,6 +225,25 @@ bool UArianeEditorTool::OnMouseDown( FEditorViewportClient* iViewportClient
                                    , const FArianePointerState& State
                                    , bool iRepeat )
 {
+    return false;
+}
+
+bool
+UArianeEditorTool::AreAllGlobalPressedKeysModifierKeys()
+{
+    if( GlobalPressedKeys.Num() )
+    {
+        for( const FKey& GlobalPressedKey : GlobalPressedKeys )
+        {
+            if( GlobalPressedKey.IsModifierKey() == false )
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     return false;
 }
 

@@ -159,14 +159,20 @@ protected:
     TSharedRef<SWidget> CreateModifierSegmentControl();
     void RebuildQuadTree( FEditorViewportClient* ViewportClient
                         , FSceneView* View );
-    void OnPostUpdate( bool bInteractive );
+    void OnPostUpdate( bool bInteractive, UArianePainting3DComponent* Painting3DComponent );
     void Reset();
     void ResetQuadTree();
-    void BindDelegates();
-    void UnbindDelegates();
-    void OnPreLayerStackSelectionChanged();
-    void OnPostLayerStackSelectionChanged();
-    void OnPostImageChanged();
+    void BindEditorDelegates();
+    void UnbindEditorDelegates();
+    void OnPreLayerStackSelectionChanged( UArianeLayerStack* LayerStack );
+    void OnPostLayerStackSelectionChanged( UArianeLayerStack* LayerStack );
+    void OnPostImageChanged( UArianeLayerDrawing* DrawingLayer );
+    void BindComponentDelegates( UArianePainting3DComponent* Painting3DComponent );
+    void UnbindComponentDelegates( UArianePainting3DComponent* Painting3DComponent );
+    void BindLayerStackDelegates( UArianeLayerStack* LayerStack );
+    void UnbindLayerStackDelegates( UArianeLayerStack* LayerStack );
+    void BindDrawingLayerDelegates( UArianeLayerDrawing* DrawingLayer );
+    void UnbindDrawingLayerDelegates( UArianeLayerDrawing* DrawingLayer );
 
 public:
     UPROPERTY( EditAnywhere

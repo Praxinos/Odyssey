@@ -106,7 +106,7 @@ UArianeEditorPathEditTool::UArianeEditorPathEditTool()
 }
 
 void
-UArianeEditorPathEditTool::OnPostUpdate( bool bInteractive )
+UArianeEditorPathEditTool::OnPostUpdate( bool bInteractive, UArianePainting3DComponent* Painting3DComponent )
 {
     if( bInteractive == false )
     {
@@ -154,65 +154,108 @@ UArianeEditorPathEditTool::Reset()
 }
 
 void
-UArianeEditorPathEditTool::OnPostImageChanged()
+UArianeEditorPathEditTool::OnPostImageChanged( UArianeLayerDrawing* DrawingLayer )
 {
     Reset();
 }
 
 void
-UArianeEditorPathEditTool::OnPreLayerStackSelectionChanged()
+UArianeEditorPathEditTool::OnPreLayerStackSelectionChanged( UArianeLayerStack* LayerStack )
 {
-    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+    UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
 
-    if( Painting3DComponent )
+    if( DrawingLayer )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
-
-        if( DrawingLayer )
-        {
-            // commented-out: nothing to do on Pre. Left there for consistency
-            //DrawingLayer->OnPreImageChangedDelegate().RemoveAll( this );
-            DrawingLayer->OnPostImageChangedDelegate().RemoveAll( this );
-        }
+        UnbindDrawingLayerDelegates( DrawingLayer );
     }
 }
 
 void
-UArianeEditorPathEditTool::OnPostLayerStackSelectionChanged()
+UArianeEditorPathEditTool::OnPostLayerStackSelectionChanged( UArianeLayerStack* LayerStack )
 {
-    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+    UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
 
-    if( Painting3DComponent )
+    if( DrawingLayer )
     {
-        UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
-
-        if( DrawingLayer )
-        {
-            // commented-out: nothing to do on Pre. Left there for consistency
-            //DrawingLayer->OnPreImageChangedDelegate().AddSP( this, &UArianeEditorPathEditTool::OnPreImageChanged );
-            DrawingLayer->OnPostImageChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPostImageChanged );
-        }
+        BindDrawingLayerDelegates( DrawingLayer );
     }
 }
 
 void
-UArianeEditorPathEditTool::BindDelegates()
+UArianeEditorPathEditTool::BindDrawingLayerDelegates( UArianeLayerDrawing* DrawingLayer )
+{
+    // commented-out: nothing to do on Pre. Left there for consistency
+    //DrawingLayer->OnPreImageChangedDelegate().AddSP( this, &UArianeEditorPathEditTool::OnPreImageChanged );
+    DrawingLayer->OnPostImageChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPostImageChanged, DrawingLayer );
+}
+
+void
+UArianeEditorPathEditTool::UnbindDrawingLayerDelegates( UArianeLayerDrawing* DrawingLayer )
+{
+    // commented-out: nothing to do on Pre. Left there for consistency
+    //DrawingLayer->OnPreImageChangedDelegate().RemoveAll( this );
+    DrawingLayer->OnPostImageChangedDelegate().RemoveAll( this );
+}
+
+void
+UArianeEditorPathEditTool::BindLayerStackDelegates( UArianeLayerStack* LayerStack )
+{
+    UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
+
+    LayerStack->OnPreSelectionChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPreLayerStackSelectionChanged, LayerStack );
+    LayerStack->OnPostSelectionChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPostLayerStackSelectionChanged, LayerStack );
+
+    if( DrawingLayer )
+    {
+        BindDrawingLayerDelegates ( DrawingLayer );
+    }
+}
+
+void
+UArianeEditorPathEditTool::UnbindLayerStackDelegates( UArianeLayerStack* LayerStack )
+{
+    UArianeLayerDrawing* DrawingLayer = Cast<UArianeLayerDrawing>(LayerStack->GetCurrentLayer());
+
+    LayerStack->OnPreSelectionChangedDelegate().RemoveAll( this );
+    LayerStack->OnPostSelectionChangedDelegate().RemoveAll( this );
+
+    if( DrawingLayer )
+    {
+        BindDrawingLayerDelegates ( DrawingLayer );
+    }
+}
+
+void
+UArianeEditorPathEditTool::BindComponentDelegates( UArianePainting3DComponent* Painting3DComponent )
+{
+    Painting3DComponent->OnPostUpdateDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPostUpdate, Painting3DComponent );
+
+    BindLayerStackDelegates ( Painting3DComponent->GetLayerStack() );
+}
+
+void
+UArianeEditorPathEditTool::UnbindComponentDelegates( UArianePainting3DComponent* Painting3DComponent )
+{
+    Painting3DComponent->OnPostUpdateDelegate().RemoveAll( this );
+
+    UnbindLayerStackDelegates ( Painting3DComponent->GetLayerStack() );
+}
+
+void
+UArianeEditorPathEditTool::BindEditorDelegates()
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-
-    if( Painting3DComponent )
-    {
-        Painting3DComponent->OnPostUpdateDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPostUpdate );
-
-        Painting3DComponent->GetLayerStack()->OnPreSelectionChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPreLayerStackSelectionChanged );
-        Painting3DComponent->GetLayerStack()->OnPostSelectionChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPostLayerStackSelectionChanged );
-    }
 
     Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::Reset );
+
+    if( Painting3DComponent )
+    {
+        BindComponentDelegates ( Painting3DComponent );
+    }
 }
 
 void
-UArianeEditorPathEditTool::UnbindDelegates()
+UArianeEditorPathEditTool::UnbindEditorDelegates()
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
@@ -220,7 +263,7 @@ UArianeEditorPathEditTool::UnbindDelegates()
 
     if( Painting3DComponent )
     {
-        Painting3DComponent->OnPostUpdateDelegate().RemoveAll( this );
+        UnbindComponentDelegates( Painting3DComponent );
     }
 }
 
@@ -242,7 +285,7 @@ UArianeEditorPathEditTool::Activate()
 
     Reset();
 
-    BindDelegates();
+    BindEditorDelegates();
 }
 
 void
@@ -250,7 +293,7 @@ UArianeEditorPathEditTool::Inactivate()
 {
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
 
-    UnbindDelegates();
+    UnbindEditorDelegates();
 
     // ViewportClient can be nullptr when closing the editor
     if( ViewportClient )
@@ -267,7 +310,11 @@ UArianeEditorPathEditTool::Inactivate()
 bool
 UArianeEditorPathEditTool::OnKeyDownGlobal( const FKeyEvent& InKeyEvent )
 {
-    if( InKeyEvent.IsRepeat() == false )
+    Super::OnKeyDownGlobal( InKeyEvent );
+
+    EditionMode = EArianePathEditToolEditionMode::Vertex;
+
+    if( AreAllGlobalPressedKeysModifierKeys() )
     {
         if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() && ( FSlateApplication::Get().GetModifierKeys().IsControlDown()
                                                                         || FSlateApplication::Get().GetModifierKeys().IsCommandDown() ) )
@@ -308,6 +355,8 @@ bool
 UArianeEditorPathEditTool::OnKeyUpGlobal( const FKeyEvent& InKeyEvent )
 {
     FKey key = InKeyEvent.GetKey();
+
+    Super::OnKeyUpGlobal( InKeyEvent );
 
     // note, we cannot use FSlateApplication::Get().GetModifierKeys()
     // because the keys are already released. For consistency we do

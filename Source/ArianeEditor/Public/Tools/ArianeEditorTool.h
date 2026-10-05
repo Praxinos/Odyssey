@@ -267,6 +267,8 @@ protected:
                           , FSceneView* View
                           , const FVector& WorldPosition
                           , FVector2D& OutHUDPosition );
+    bool AreAllGlobalPressedKeysModifierKeys();
+
 /* Gary
 
     virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey );
@@ -412,6 +414,7 @@ protected:
     TSharedPtr<FUICommandList> CommandList;
     bool bHasContextMenu;
     bool bInited;
+    TSet<FKey> GlobalPressedKeys;
     FKey PressedKey;
     // Temp
     FPointQuadTree* PointQuadTree;
