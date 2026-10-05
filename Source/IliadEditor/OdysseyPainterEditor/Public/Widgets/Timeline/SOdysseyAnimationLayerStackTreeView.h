@@ -35,10 +35,6 @@ public:
     TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
 
 private:
-    virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
-    virtual FReply OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent) override;
-    virtual void Private_SignalSelectionChanged(ESelectInfo::Type SelectInfo);
-
     virtual TArray<TSharedPtr<FExtender>> ExtendContextMenu();
 
 private:
@@ -47,7 +43,6 @@ private:
     void OnLayerAdded(UOdysseyLayer* iLayer);
 
 private:
-    TSharedPtr<FOdysseyAnimationTimelineShortcuts> mTimelineShortcuts;
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
     TAttribute<int> mCurrentFrame;
 

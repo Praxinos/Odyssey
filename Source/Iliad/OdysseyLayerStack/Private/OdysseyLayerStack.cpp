@@ -622,6 +622,17 @@ UOdysseyLayerStack::CopyLayerInternal(UOdysseyLayer* iLayer, UOdysseyLayer* iPar
 void
 UOdysseyLayerStack::HierarchyChanged()
 {
+    if (!CurrentLayer || !CurrentLayer->IsChildOf(LayerRoot))
+    {
+        if (GetRootLayers().IsEmpty())
+        {
+            SetCurrentLayer(nullptr);
+        }
+        else
+        {
+            SetCurrentLayer(GetRootLayers()[0]);
+        }
+    }
     OnHierarchyChanged().Broadcast(this);
 }
 

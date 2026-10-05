@@ -25,7 +25,6 @@
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
 SOdysseyAnimationLayerStackTreeView::SOdysseyAnimationLayerStackTreeView()
-    : mTimelineShortcuts(nullptr)
 {
 }
 
@@ -37,8 +36,6 @@ SOdysseyAnimationLayerStackTreeView::Construct(const FArguments& InArgs)
     mLayerStack = InArgs._LayerStack;
     if (!mLayerStack)
         return;
-
-    mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(mLayerStack->GetAnimation(), InArgs._CurrentFrame, InArgs._OnTransactCurrentFrame);
 
     SOdysseyLayerStackTreeView::Construct(
         SOdysseyLayerStackTreeView::FArguments()
@@ -94,36 +91,6 @@ SOdysseyAnimationLayerStackTreeView::OnGenerateRow(UOdysseyLayer* iLayer, const 
     }
 
     return SNew(STableRow<UOdysseyLayer*>, iOwnerTable);
-}
-
-FReply
-SOdysseyAnimationLayerStackTreeView::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
-{
-    if (mTimelineShortcuts->GetCommandList()->ProcessCommandBindings(iKeyEvent))
-        return FReply::Handled();
-
-    //If Odyssey encountered a shortcut that could not be executed
-    //then don't let Unreal have a chance to execute a shorcut of its own.
-    if (mTimelineShortcuts->GetCommandList()->HasActionForKeyEvent(iKeyEvent))
-    {
-        return FReply::Handled();
-    }
-
-    return SOdysseyLayerStackTreeView::OnKeyDown(iGeometry, iKeyEvent);
-}
-
-void
-SOdysseyAnimationLayerStackTreeView::Private_SignalSelectionChanged(ESelectInfo::Type SelectInfo)
-{
-    //OdysseyLayerStackSelection::Get()->DeselectAll();
-    SOdysseyLayerStackTreeView::Private_SignalSelectionChanged(SelectInfo);
-}
-
-FReply
-SOdysseyAnimationLayerStackTreeView::OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent)
-{
-    //OdysseyLayerStackSelection::Get()->DeselectAll();
-    return SOdysseyLayerStackTreeView::OnFocusReceived(MyGeometry, InFocusEvent);
 }
 
 TArray<TSharedPtr<FExtender>>

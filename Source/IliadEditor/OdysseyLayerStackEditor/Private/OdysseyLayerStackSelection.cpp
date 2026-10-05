@@ -7,9 +7,11 @@
 
 #include "OdysseyLayerStackSelection.h"
 
+#include "Editor.h"
 #include "Misc/Change.h"
 #include "Misc/ITransaction.h"
 #include "Selection.h"
+#include "UObject/GCObject.h"
 
 #include "OdysseyLayer.h"
 #include "OdysseyLayerCell.h"
@@ -87,7 +89,14 @@ private:
 void
 OnLayerCellsChanged(UOdysseyLayer* InLayer, bool IsInteractive)
 {
-    GOdysseyLayerStackSelection->DeselectAll();
+    TArray<UOdysseyLayerCell*> SelectedCells = GetSelectedCells(nullptr);
+    OdysseyLayerStackSelection::Get()->BeginBatchSelectOperation();
+    for (UOdysseyLayerCell* Cell : SelectedCells)
+    {
+        if (!Cell || Cell->GetIndexInLayer() == INDEX_NONE)
+            OdysseyLayerStackSelection::Get()->Deselect(Cell);
+    }
+    OdysseyLayerStackSelection::Get()->EndBatchSelectOperation();
 }
 
 void
