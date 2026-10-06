@@ -55,6 +55,29 @@ UOdysseyAnimationPlayer::UOdysseyAnimationPlayer()
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
 }
 
+FFrameTime
+UOdysseyAnimationPlayer::ClampFrameToPlayRange(FFrameTime InFrame) const
+{
+    FFrameTime newFrame = InFrame;
+    switch(PlayRange)
+    {
+        case EOdysseyAnimationPlayerPlayRange::AnimationBounds:
+        {
+            if (Animation)
+                newFrame = FMath::Clamp(newFrame, FFrameTime(Animation->GetFrameRange().GetLowerBoundValue()), FFrameTime(Animation->GetFrameRange().GetUpperBoundValue(), FFrameTime::MaxSubframe));
+        }
+        break;
+
+        case EOdysseyAnimationPlayerPlayRange::Custom:
+        {
+            newFrame = FMath::Clamp(newFrame, FFrameTime(CustomPlayRangeStartFrame), FFrameTime(CustomPlayRangeEndFrame, FFrameTime::MaxSubframe));
+        }
+        break;
+    }
+
+    return newFrame;
+}
+
 void
 UOdysseyAnimationPlayer::Play(bool iBackward)
 {
@@ -70,22 +93,8 @@ UOdysseyAnimationPlayer::Play(bool iBackward)
     mIsBackward = iBackward;
     Status = EOdysseyAnimationPlayerStatus::Playing;
 
-    FFrameTime newFrame = mCursorFrame;
-    switch(PlayRange)
-    {
-        case EOdysseyAnimationPlayerPlayRange::AnimationBounds:
-        {
-            newFrame = FMath::Clamp(newFrame, FFrameTime(Animation->GetFrameRange().GetLowerBoundValue()), FFrameTime(Animation->GetFrameRange().GetUpperBoundValue()));
-        }
-        break;
-
-        case EOdysseyAnimationPlayerPlayRange::Custom:
-        {
-            newFrame = FMath::Clamp(newFrame, FFrameTime(CustomPlayRangeStartFrame), FFrameTime(CustomPlayRangeEndFrame));
-        }
-        break;
-    }
-    SeekToFrame(newFrame);
+    FFrameTime newFrame = ClampFrameToPlayRange(mCursorFrame);
+    SeekToFrame(mCursorFrame);
     mOnStatusChanged.Broadcast();
     BP_OnStatusChanged.Broadcast();
 }
@@ -118,15 +127,28 @@ UOdysseyAnimationPlayer::Stop()
 
     Status = EOdysseyAnimationPlayerStatus::Stopped;
 
-    if (bRewindOnStop)
+    switch( StopBehaviour )
     {
-        SeekToFrame(mCurrentFrame);
-    }
-    else if (mCurrentFrame != mDisplayedFrame)
-    {
-        //ensure CurrentFrame is correctly set
-        mCurrentFrame = mDisplayedFrame;
-        mOnCurrentFrameChanged.Broadcast();
+        case EOdysseyAnimationPlayerStopBehaviour::SeekToStart:
+        {
+            FFrameTime newFrame = ClampFrameToPlayRange(0);
+            SeekToFrame(newFrame);
+        }
+        break;
+
+        case EOdysseyAnimationPlayerStopBehaviour::SeekToDisplayedFrame:
+        {
+            mCurrentFrame = mDisplayedFrame;
+            mOnCurrentFrameChanged.Broadcast();
+            BP_OnFrameChanged.Broadcast();
+        }
+        break;
+
+        case EOdysseyAnimationPlayerStopBehaviour::SeekToCurrentFrame:
+        {
+            SeekToFrame(mCurrentFrame);
+        }
+        break;
     }
 
     mOnStatusChanged.Broadcast();
@@ -368,8 +390,8 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
 
     if (Status == EOdysseyAnimationPlayerStatus::Playing)
     {
-        FFrameTime leftBound = FFrameTime(Animation->GetFrameRange().GetLowerBoundValue());;
-        FFrameTime rightBound = FFrameTime(Animation->GetFrameRange().GetUpperBoundValue());;
+        FFrameTime leftBound = FFrameTime(Animation->GetFrameRange().GetLowerBoundValue());
+        FFrameTime rightBound = FFrameTime(Animation->GetFrameRange().GetUpperBoundValue());
         if(PlayRange == EOdysseyAnimationPlayerPlayRange::Custom)
         {
             leftBound = CustomPlayRangeStartFrame;
@@ -511,6 +533,8 @@ void
 UOdysseyAnimationPlayer::AnimationChanged()
 {
     InitializeRenderTarget();
+    FFrameTime newFrame = ClampFrameToPlayRange(0);
+    SeekToFrame(newFrame);
     UpdateTexture();
     mOnAnimationChanged.Broadcast();
 }
@@ -594,13 +618,25 @@ UOdysseyAnimationPlayer::GetCustomPlayRange(FFrameNumber& StartFrame, FFrameNumb
 void
 UOdysseyAnimationPlayer::SetRewindOnStop(bool Rewind)
 {
-    bRewindOnStop = Rewind;
+    StopBehaviour = Rewind ? EOdysseyAnimationPlayerStopBehaviour::SeekToCurrentFrame : EOdysseyAnimationPlayerStopBehaviour::SeekToDisplayedFrame;
 }
 
 bool
 UOdysseyAnimationPlayer::GetRewindOnStop() const
 {
-    return bRewindOnStop;
+    return StopBehaviour == EOdysseyAnimationPlayerStopBehaviour::SeekToCurrentFrame;
+}
+
+void
+UOdysseyAnimationPlayer::SetStopBehaviour(EOdysseyAnimationPlayerStopBehaviour Value)
+{
+    StopBehaviour = Value;
+}
+
+EOdysseyAnimationPlayerStopBehaviour
+UOdysseyAnimationPlayer::GetStopBehaviour() const
+{
+    return StopBehaviour;
 }
 
 void
@@ -822,6 +858,9 @@ struct FOdysseyAnimationPlayerObjectVersion
         // Added the Play Range system
         AddPlayRange,
 
+        // Added Stop Behaviour
+        AddStopBehaviour,
+
         // -----<new versions can be added above this line>-------------------------------------------------
         VersionPlusOne,
         LatestVersion = VersionPlusOne - 1
@@ -847,4 +886,11 @@ UOdysseyAnimationPlayer::Serialize(FArchive& Ar)
     {
         PlayRange = EOdysseyAnimationPlayerPlayRange::Infinite;
     }
+
+    if( Ar.IsLoading() && Ar.CustomVer(FOdysseyAnimationPlayerObjectVersion::GUID) < FOdysseyAnimationPlayerObjectVersion::AddStopBehaviour )
+    {
+        StopBehaviour = bRewindOnStop_DEPRECATED ? EOdysseyAnimationPlayerStopBehaviour::SeekToCurrentFrame : EOdysseyAnimationPlayerStopBehaviour::SeekToDisplayedFrame;
+    }
+
+
 }

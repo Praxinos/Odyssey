@@ -46,6 +46,14 @@ enum class EOdysseyAnimationPlayerPlayRange : uint8
     Custom
 };
 
+UENUM(BlueprintType)
+enum class EOdysseyAnimationPlayerStopBehaviour : uint8
+{
+    SeekToStart,
+    SeekToDisplayedFrame,
+    SeekToCurrentFrame
+};
+
 #if WITH_EDITOR
     /*
     * Allows us to react to Tick events at runtime
@@ -169,11 +177,19 @@ public:
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     void GetCustomPlayRange(FFrameNumber& StartFrame, FFrameNumber& EndFrame);
 
-    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
+    UE_DEPRECATED( 5.8, "Function has been deprecated, Please use SetStopBehaviour" )
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer", meta=(DeprecatedFunction, DeprecationMessage="Function has been deprecated, Please use SetStopBehaviour"))
     void SetRewindOnStop(bool Rewind);
 
-    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
+    UE_DEPRECATED( 5.8, "Function has been deprecated, Please use GetStopBehaviour" )
+    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer", meta=(DeprecatedFunction, DeprecationMessage="Function has been deprecated, Please use GetStopBehaviour"))
     bool GetRewindOnStop() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
+    void SetStopBehaviour(EOdysseyAnimationPlayerStopBehaviour Value);
+
+    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
+    EOdysseyAnimationPlayerStopBehaviour GetStopBehaviour() const;
 
     void SetLODGroup(enum TextureGroup iTextureGroup);
     enum TextureGroup GetLODGroup() const;
@@ -196,6 +212,7 @@ private:
     FFrameTime ApplyPostBehaviour(FFrameTime iFrame) const;
     void UpdateTexture();
     void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
+    FFrameTime ClampFrameToPlayRange(FFrameTime InFrame) const;
 
 private:
     /**
@@ -256,7 +273,7 @@ private:
      * If true, when Play stops or Stop() is called, automatically seeks to the frame on which the Play started
      */
     UPROPERTY( EditAnywhere, Category="Animation" )
-    bool bRewindOnStop = false;
+    EOdysseyAnimationPlayerStopBehaviour StopBehaviour = EOdysseyAnimationPlayerStopBehaviour::SeekToStart;
 
 public:
     /**
@@ -288,6 +305,10 @@ public:
     FSimpleDynamicMulticastDelegate BP_OnStatusChanged;
 
 private:
+    //DEPRECATED
+    UPROPERTY()
+    bool bRewindOnStop_DEPRECATED = false;
+
 #if WITH_EDITOR
     //Allows to have Infinite Animation Scrubbing in Editor
     bool mIgnorePrePostBehaviour = false;
