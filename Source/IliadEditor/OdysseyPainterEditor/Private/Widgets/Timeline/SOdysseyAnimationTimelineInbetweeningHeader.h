@@ -22,16 +22,12 @@ class SOdysseyAnimationTimelineInbetweeningHeader
     : public SListView<TSharedPtr<FInbetweeningListViewItem>>
 {
     public:
-        DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
-
-    public:
         ~SOdysseyAnimationTimelineInbetweeningHeader();
         SOdysseyAnimationTimelineInbetweeningHeader();
 
     public:
         SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineInbetweeningHeader)
             {}
-            SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
         SLATE_END_ARGS()
 
         void Construct( const FArguments& InArgs, UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector );
@@ -59,5 +55,4 @@ class SOdysseyAnimationTimelineInbetweeningHeader
         UOdysseyAnimationLayerImageVector* mAnimationLayerImageVector;
         TArray<TSharedPtr<FInbetweeningListViewItem>> mItemsSource;
         TSharedRef<FOdysseyCommandList> mCommandList;
-        FOnTransactCurrentFrame mOnTransactCurrentFrame;
 };

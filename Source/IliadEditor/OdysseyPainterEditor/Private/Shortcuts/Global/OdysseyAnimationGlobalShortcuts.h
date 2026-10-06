@@ -15,14 +15,10 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationGlobalShortcuts
     : public FOdysseyEditorShortcuts
 {
 public:
-    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int> /*iFrame*/)
-
-public:
     virtual ~FOdysseyAnimationGlobalShortcuts() {};
     FOdysseyAnimationGlobalShortcuts(
         const TAttribute<UOdysseyAnimation*>& iAnimation,
-        const TAttribute<int>& iCurrentFrame,
-        const FOnTransactCurrentFrame& iOnTransactCurrentFrame
+        const TAttribute<int>& iCurrentFrame
     );
 
 public:

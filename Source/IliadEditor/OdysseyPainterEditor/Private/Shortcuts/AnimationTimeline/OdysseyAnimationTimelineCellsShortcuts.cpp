@@ -29,12 +29,10 @@
 
 FOdysseyAnimationTimelineCellsShortcuts::FOdysseyAnimationTimelineCellsShortcuts(
     const TAttribute<UOdysseyAnimation*>& iAnimation,
-    const TAttribute<int>& iCurrentFrame,
-    const FOnTransactCurrentFrame& iOnTransactCurrentFrame
+    const TAttribute<int>& iCurrentFrame
 )
     : mAnimation(iAnimation)
     , mCurrentFrame(iCurrentFrame)
-    , mOnTransactCurrentFrame(iOnTransactCurrentFrame)
 {
 }
 
@@ -229,7 +227,6 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.paste-frame", "Paste Frames"));
 #endif
     clipboardData->Paste(layer, mCurrentFrame.Get());
-    mOnTransactCurrentFrame.ExecuteIfBound(mCurrentFrame.Get());
 }
 
 void
@@ -358,7 +355,6 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
 #if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.remove-frame", "Remove Frames"));
 #endif
-    mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
 
     if (UOdysseyPainterEditorSettings::Get()->CellDeletionBehaviour == EOdysseyCellDeletionBehaviour::PreserveBounds)
     {
@@ -421,8 +417,6 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_CreateStaggerCell( EOdysseyLayer
 #if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.create-stagger-cell", "Stagger Cell"));
 #endif
-
-    mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
 
     TArray<UOdysseyLayerCell*> CreatedCells;
     for( TArray<UOdysseyLayerCell*> selectedCellGroup : selectedCellGroups )
@@ -499,8 +493,6 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_AddCellsBeforeOrAfter( int32 iNu
     // Before
     if( iNumberOfCellsToAddBeforeOrAfter < 0 )
     {
-        mOnTransactCurrentFrame.ExecuteIfBound( selectedCells[0]->GetFrameRange().GetLowerBoundValue() );
-
         for( UOdysseyLayerCell* cell : selectedCells )
         {
             int index = INDEX_NONE;
@@ -514,8 +506,6 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_AddCellsBeforeOrAfter( int32 iNu
     // After
     else
     {
-        mOnTransactCurrentFrame.ExecuteIfBound( selectedCells[0]->GetFrameRange().GetLowerBoundValue() );
-
         for( UOdysseyLayerCell* cell : selectedCells )
         {
             int index = INDEX_NONE;
@@ -588,8 +578,6 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseOrDecreaseCellExposure( 
                                           ? LOCTEXT( "timeline-cells.transaction.decrease-selected-cells-exposure", "Decrease Selected Cells Exposure" )
                                           : LOCTEXT( "timeline-cells.transaction.increase-selected-cells-exposure", "Increase Selected Cells Exposure" ) );
 
-    mOnTransactCurrentFrame.ExecuteIfBound( selectedCells[0]->GetFrameRange().GetLowerBoundValue() );
-
     for( UOdysseyLayerCell* selectedCell : selectedCells )
     {
         // - Max() is to make safe removing exposures
@@ -657,8 +645,6 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure()
 #if WITH_EDITOR
                 FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-selected-cells-exposure", "Set Selected Cells Exposure"));
 #endif
-
-                mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
                 for (UOdysseyLayerCell* selectedCell : selectedCells)
                 {
                     selectedCell->SetExposure( FMath::Max( 1, value ) );

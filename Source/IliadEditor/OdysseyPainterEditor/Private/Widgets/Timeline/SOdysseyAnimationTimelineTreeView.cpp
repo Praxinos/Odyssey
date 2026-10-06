@@ -29,7 +29,7 @@ SOdysseyAnimationTimelineTreeView::Construct(const FArguments& InArgs)
     if (!mLayerStack)
         return;
 
-    mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(mLayerStack->GetAnimation(), InArgs._CurrentFrame, InArgs._OnTransactCurrentFrame);
+    mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(mLayerStack->GetAnimation(), InArgs._CurrentFrame);
 
     TArray<SHeaderRow::FColumn::FArguments> columns = {
         SHeaderRow::Column("Timeline")

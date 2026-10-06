@@ -25,7 +25,6 @@ class SOdysseyAnimationCells
     SLATE_DECLARE_WIDGET(SOdysseyAnimationCells, SCompoundWidget)
 
 public:
-    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
     DECLARE_DELEGATE_RetVal_OneParam(TSharedRef<SWidget>, FOnCreateCellWidget, UOdysseyLayerCell*)
 
 public:
@@ -37,7 +36,6 @@ public:
         SLATE_ATTRIBUTE(TArray<UOdysseyLayerCell*>, Cells)
         SLATE_ATTRIBUTE(int, CurrentFrame)
         SLATE_ATTRIBUTE(bool, ShowHandles)
-        SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
         SLATE_EVENT(FOnCreateCellWidget, OnCreateCellWidget)
     SLATE_END_ARGS()
 
@@ -207,7 +205,6 @@ private:
     } mAddCellsHandleDragData;
 
     TAttribute<int> mCurrentFrame;
-    FOnTransactCurrentFrame mOnTransactCurrentFrame;
 
     TMap<UOdysseyLayerCell*, TSharedPtr<SWidget>> mCellWidgetsCache;
 };

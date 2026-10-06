@@ -70,7 +70,6 @@ SOdysseyAnimationCells::Construct(
     mCells.Assign(*this, InArgs._Cells);
     mTimelinePosition = InArgs._TimelinePosition;
     mCurrentFrame = InArgs._CurrentFrame;
-    mOnTransactCurrentFrame = InArgs._OnTransactCurrentFrame;
 
     mTimingHandleBrush = FOdysseyStyle::GetBrush("Animation.CellTimingHandle");
     mExposureHandleBrush = FOdysseyStyle::GetBrush("Animation.CellExposureHandle");

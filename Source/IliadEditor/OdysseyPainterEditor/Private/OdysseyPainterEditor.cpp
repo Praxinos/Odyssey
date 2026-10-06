@@ -305,24 +305,10 @@ FOdysseyPainterEditor::InitShortcuts()
             return player->GetCurrentFrame().FrameNumber.Value;
         }
     );
-    auto onTransactCurrentFrame = FOdysseyAnimationGlobalShortcuts::FOnTransactCurrentFrame::CreateLambda(
-        [this, currentFrame](TOptional<int> iFrame)
-        {
-            UOdysseyAnimationPlayer* player =  GetAnimationPlayer();
-            if (!player)
-                return;
-
-            int frame = iFrame.Get(currentFrame.Get());
-
-            FOdysseyAnimationCurrentFrameMutator currentFrameMutator(player);
-            currentFrameMutator.Set(frame);
-            currentFrameMutator.Commit();
-        }
-    );
 
     GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalShortcuts>(this));
     GetShortcuts().Add(MakeShared<FOdysseyLayerStackGlobalShortcuts>(layerStack));
-    GetShortcuts().Add(MakeShared<FOdysseyAnimationGlobalShortcuts>(animation, currentFrame, onTransactCurrentFrame));
+    GetShortcuts().Add(MakeShared<FOdysseyAnimationGlobalShortcuts>(animation, currentFrame));
 }
 
 FOdysseyPainterEditor::FOnAddEditedObject&

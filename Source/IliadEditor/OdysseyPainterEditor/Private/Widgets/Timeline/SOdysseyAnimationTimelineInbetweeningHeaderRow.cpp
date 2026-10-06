@@ -73,8 +73,6 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::OnCheckBoxStateChanged( ECheckBo
                                                                                                            , mInbetweenerTag->GetOwner() ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-
-        mOnTransactCurrentFrame.ExecuteIfBound(TOptional<int>());
     }
     GEditor->EndTransaction();
 

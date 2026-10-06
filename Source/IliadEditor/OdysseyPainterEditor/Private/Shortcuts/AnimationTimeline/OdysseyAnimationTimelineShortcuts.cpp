@@ -13,11 +13,10 @@
 
 FOdysseyAnimationTimelineShortcuts::FOdysseyAnimationTimelineShortcuts(
     const TAttribute<UOdysseyAnimation*>& iAnimation,
-    const TAttribute<int>& iCurrentFrame,
-    const FOnTransactCurrentFrame& iOnTransactCurrentFrame
+    const TAttribute<int>& iCurrentFrame
 )
     : mCommandList(MakeShared<FOdysseyCommandList>())
-    , mCellsShortcuts(MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(iAnimation, iCurrentFrame, iOnTransactCurrentFrame))
+    , mCellsShortcuts(MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(iAnimation, iCurrentFrame))
     , mCellImageRasterShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(iAnimation))
     , mCellImageStaggerShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(iAnimation))
 {

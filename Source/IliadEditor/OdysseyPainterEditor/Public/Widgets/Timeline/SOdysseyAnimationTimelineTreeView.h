@@ -18,7 +18,6 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyAnimationTimelineTreeView
 public:
     DECLARE_DELEGATE_OneParam(FOnActivateOutOfPegs, UOdysseyLayerCell*)
     DECLARE_DELEGATE_RetVal_OneParam(ECheckBoxState, FOnIsOutOfPegsChecked, UOdysseyLayerCell*)
-    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
     DECLARE_DELEGATE_OneParam(FOnCurrentFrameChanged, int /*iFrame*/)
 
 public:
@@ -36,7 +35,6 @@ public:
         SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
         SLATE_EVENT(FSimpleDelegate, OnScrubStart)
         SLATE_EVENT(FSimpleDelegate, OnScrubEnd)
-        SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
         SLATE_EVENT(FOnCurrentFrameChanged, OnCurrentFrameChanged)
         SLATE_EVENT(FOnCurrentFrameChanged, OnCurrentFrameCommited)
     SLATE_END_ARGS()

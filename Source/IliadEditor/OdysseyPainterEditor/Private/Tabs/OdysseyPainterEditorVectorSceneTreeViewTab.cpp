@@ -86,20 +86,6 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::CreateWidget()
 
 }
 
-void
-FOdysseyPainterEditorVectorSceneTreeViewTab::OnTransactCurrentFrame(TOptional<int> iFrame) const
-{
-    UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
-    if (!player)
-        return;
-
-    int frame = iFrame.Get(player->GetCurrentFrame().FrameNumber.Value);
-
-    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(player);
-    currentFrameMutator.Set(frame);
-    currentFrameMutator.Commit();
-}
-
 uint64
 FOdysseyPainterEditorVectorSceneTreeViewTab::GetVectorHUDFlags() const
 {

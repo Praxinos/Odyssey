@@ -11,15 +11,12 @@ class FOdysseyPainterEditorAnimationTimelinePosition;
 class SOdysseyAnimationCellImageStagger
     : public SCompoundWidget
 {
-    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
-
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationCellImageStagger)
         : _ShowContent(true)
         {}
         SLATE_ATTRIBUTE(bool, ShowContent)
         SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition )
-        SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
     SLATE_END_ARGS()
 
 public:
@@ -60,6 +57,4 @@ private:
         int mReach;
     } mReachData;
     TSharedPtr<SSpinBox<int>> mReachSpinBox;
-
-    FOnTransactCurrentFrame mOnTransactCurrentFrame;
 };

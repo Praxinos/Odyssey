@@ -28,8 +28,6 @@ class FUICommandList;
 class SOdysseyAnimationLayerImageTimeline
     : public SOdysseyAnimationLayerTimeline
 {
-public:
-    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
 
 public:
     // Construction / Destruction
@@ -41,7 +39,6 @@ public:
         {}
         SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition )
         SLATE_ATTRIBUTE(int, CurrentFrame)
-        SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
         SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
         SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
         SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
@@ -145,7 +142,6 @@ private:
 protected:
     UOdysseyAnimationLayer* mLayer;
     TAttribute<int> mCurrentFrame;
-    FOnTransactCurrentFrame mOnTransactCurrentFrame;
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
     SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
     FSimpleDelegate mOnInactivateOutOfPegs;

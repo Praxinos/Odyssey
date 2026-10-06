@@ -22,12 +22,10 @@
 
 FOdysseyAnimationGlobalCellsShortcuts::FOdysseyAnimationGlobalCellsShortcuts(
     const TAttribute<UOdysseyAnimation*>& iAnimation,
-    const TAttribute<int>& iCurrentFrame,
-    const FOnTransactCurrentFrame& iOnTransactCurrentFrame
+    const TAttribute<int>& iCurrentFrame
 )
     : mAnimation(iAnimation)
     , mCurrentFrame(iCurrentFrame)
-    , mOnTransactCurrentFrame(iOnTransactCurrentFrame)
 {
 }
 
@@ -113,8 +111,6 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell()
     //Remove mark from the new cell, because we consider the new cell will be modified by the user and will not represent the original cell anymore
     //This is an arbitrary choice, you are free to change this behaviour whenever you want without any side effect
     newCell->SetMark(INDEX_NONE);
-
-    mOnTransactCurrentFrame.ExecuteIfBound(mCurrentFrame.Get());
 }
 
 void
@@ -149,8 +145,6 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakAndClearCell()
     UOdysseyLayerCell* newCell = cell->Break(frame, true);
     if (!newCell)
         return;
-
-    mOnTransactCurrentFrame.ExecuteIfBound(mCurrentFrame.Get());
 }
 
 void
@@ -190,7 +184,6 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
     }
 
     OdysseyLayerStackSelection::RegisterUndo(selectedCells, selectedCells);
-    mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
 }
 
 void
@@ -230,7 +223,6 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
     }
 
     OdysseyLayerStackSelection::RegisterUndo(selectedCells, selectedCells);
-    mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
 }
 
 void
@@ -261,8 +253,6 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMarkAtFrame()
     int32 index_in_cell = cell->FrameInLayerToIndexInCell( mCurrentFrame.Get() );
     marks.Remove( index_in_cell );
     cell->SetMarks( marks );
-
-    //mOnTransactCurrentFrame.ExecuteIfBound(cell->GetFrameRange().GetLowerBoundValue());
 }
 
 void
@@ -293,8 +283,6 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMarkAtFrame(FCellMark iMark
     int32 index_in_cell = cell->FrameInLayerToIndexInCell( mCurrentFrame.Get() );
     marks.Add( index_in_cell, iMarkId );
     cell->SetMarks( marks );
-
-    //mOnTransactCurrentFrame.ExecuteIfBound(cell->GetFrameRange().GetLowerBoundValue());
 }
 
 bool

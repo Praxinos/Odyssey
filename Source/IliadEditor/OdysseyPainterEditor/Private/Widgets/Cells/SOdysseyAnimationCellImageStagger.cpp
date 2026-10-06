@@ -23,7 +23,6 @@ SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyLa
     mCell = iCell;
     mShowContent = iArgs._ShowContent;
     mTimelinePosition = iArgs._TimelinePosition;
-    mOnTransactCurrentFrame = iArgs._OnTransactCurrentFrame;
 
     FSlateColor behaviourColor( FOdysseyStyle::GetColor( "Animation.CellImageStagger.BehaviourColor" ) );
 
@@ -192,7 +191,6 @@ SOdysseyAnimationCellImageStagger::OnReachValueCommited(int iReach, ETextCommit:
     FScopedTransaction ScopedTransaction(mSetReachTransactionName);
 #endif
     mCell->SetReach(FMath::Max(0, iReach), false);
-    mOnTransactCurrentFrame.ExecuteIfBound(mCell->GetFrameRange().GetLowerBoundValue());
 }
 
 void
@@ -280,8 +278,6 @@ SOdysseyAnimationCellImageStagger::SetBehaviour(EOdysseyLayerCellImageStaggerBeh
     FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-stagger.transaction.set-behaviour", "Set Stagger Cell Behaviour"));
 #endif
     mCell->SetBehaviour(iBehaviour);
-
-    mOnTransactCurrentFrame.ExecuteIfBound(mCell->GetFrameRange().GetLowerBoundValue());
 }
 
 bool

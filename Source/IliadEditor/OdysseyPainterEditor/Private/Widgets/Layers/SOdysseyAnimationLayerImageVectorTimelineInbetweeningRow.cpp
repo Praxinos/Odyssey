@@ -58,7 +58,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::Construct( const FArgu
 {
     mInbetweenerTag = iITem.Get()->GetInbetweenerTag();
     mCurrentFrame = InArgs._CurrentFrame;
-    mOnTransactCurrentFrame = InArgs._OnTransactCurrentFrame;
 
     STableRow<TSharedPtr<FInbetweeningListViewItem>>::FArguments rowArgs;
     rowArgs.Style(&FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("Inbetweening.TableRow"));
@@ -104,8 +103,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
         if( GUndo )
         {
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
-
-            mOnTransactCurrentFrame.ExecuteIfBound(TOptional<int>());
         }
         GEditor->EndTransaction();
 

@@ -15,13 +15,9 @@ class FOdysseyAnimationTimelineCellImageStaggerShortcuts;
 class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationTimelineShortcuts
 {
 public:
-    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int> /*iFrame*/)
-
-public:
     FOdysseyAnimationTimelineShortcuts(
         const TAttribute<UOdysseyAnimation*>& iAnimation,
-        const TAttribute<int>& iCurrentFrame,
-        const FOnTransactCurrentFrame& iOnTransactCurrentFrame
+        const TAttribute<int>& iCurrentFrame
     );
 
 public:

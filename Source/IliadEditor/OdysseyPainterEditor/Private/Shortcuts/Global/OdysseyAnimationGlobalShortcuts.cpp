@@ -10,12 +10,11 @@
 
 FOdysseyAnimationGlobalShortcuts::FOdysseyAnimationGlobalShortcuts(
     const TAttribute<UOdysseyAnimation*>& iAnimation,
-    const TAttribute<int>& iCurrentFrame,
-    const FOnTransactCurrentFrame& iOnTransactCurrentFrame
+    const TAttribute<int>& iCurrentFrame
 )
     : mAnimation(iAnimation)
 {
-    Add(MakeShared<FOdysseyAnimationGlobalCellsShortcuts>(iAnimation, iCurrentFrame, iOnTransactCurrentFrame));
+    Add(MakeShared<FOdysseyAnimationGlobalCellsShortcuts>(iAnimation, iCurrentFrame));
     Add(MakeShared<FOdysseyAnimationGlobalTimelineToolsShortcuts>());
 }
 

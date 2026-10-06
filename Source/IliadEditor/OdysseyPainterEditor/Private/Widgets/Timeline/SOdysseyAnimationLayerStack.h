@@ -63,7 +63,6 @@ private:
     void OnTimelineScrollBarHScrolled(float iOffset);
     void OnTreeViewScrolled(double iOffset);
     void OnTimelineTreeViewScrolled(double iOffset);
-    void OnTransactCurrentFrame(TOptional<int> iFrame);
     void OnCurrentFrameChanged(int iFrame);
     void OnCurrentFrameCommited(int iFrame);
     void RebuildWidgets();

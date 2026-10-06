@@ -33,7 +33,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
 
     private:
         FOdysseyVectorGroupPaint* GetScene() const;
-        void OnTransactCurrentFrame(TOptional<int> iFrame) const;
         uint64 GetVectorHUDFlags() const;
 
     private:

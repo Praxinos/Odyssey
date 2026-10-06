@@ -17,14 +17,10 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationGlobalCellsShortcuts
     : public IOdysseyEditorShortcuts
 {
 public:
-    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int> /*iFrame*/)
-
-public:
     virtual ~FOdysseyAnimationGlobalCellsShortcuts() {};
     FOdysseyAnimationGlobalCellsShortcuts(
         const TAttribute<UOdysseyAnimation*>& iAnimation,
-        const TAttribute<int>& iCurrentFrame,
-        const FOnTransactCurrentFrame& iOnTransactCurrentFrame
+        const TAttribute<int>& iCurrentFrame
     );
 
 public:
@@ -54,5 +50,4 @@ public:
 private:
     TAttribute<UOdysseyAnimation*> mAnimation;
     TAttribute<int> mCurrentFrame;
-    FOnTransactCurrentFrame mOnTransactCurrentFrame;
 };

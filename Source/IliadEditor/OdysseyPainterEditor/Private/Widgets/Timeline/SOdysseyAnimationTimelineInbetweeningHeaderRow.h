@@ -30,12 +30,8 @@ class SOdysseyAnimationTimelineInbetweeningHeaderRow
     : public STableRow<TSharedPtr<FInbetweeningListViewItem>>
 {
     public:
-        DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
-
-    public:
         SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineInbetweeningHeaderRow)
             {}
-            SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
         SLATE_END_ARGS()
 
     public:
@@ -61,7 +57,6 @@ class SOdysseyAnimationTimelineInbetweeningHeaderRow
                      , bool bParentEnabled ) const override;
 
     protected:
-        FOnTransactCurrentFrame mOnTransactCurrentFrame;
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
         TSharedPtr<STextBlock> mTextBlockWidget;
 };

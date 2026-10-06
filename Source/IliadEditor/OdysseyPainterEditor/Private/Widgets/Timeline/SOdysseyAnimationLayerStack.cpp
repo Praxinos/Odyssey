@@ -125,7 +125,6 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
             .ExternalScrollbar(mTimelineScrollBarV)
             .OnTreeViewScrolled(this, &SOdysseyAnimationLayerStack::OnTreeViewScrolled)
             .CurrentFrame(this, &SOdysseyAnimationLayerStack::GetCurrentFrame)
-            .OnTransactCurrentFrame(this, &SOdysseyAnimationLayerStack::OnTransactCurrentFrame)
         ]
         + SSplitter::Slot()
         [
@@ -141,7 +140,6 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
                     SAssignNew(mTimelineTreeView, SOdysseyAnimationTimelineTreeView)
                     .LayerStack(layerStack)
                     .CurrentFrame(this, &SOdysseyAnimationLayerStack::GetCurrentFrame)
-                    .OnTransactCurrentFrame(this, &SOdysseyAnimationLayerStack::OnTransactCurrentFrame)
                     .TimelinePosition(mTimelinePosition.Get())
                     .OnActivateOutOfPegs(mOnActivateOutOfPegs)
                     .OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
@@ -316,20 +314,6 @@ SOdysseyAnimationLayerStack::OnCurrentFrameCommited(int iFrame)
         return;
 
     player->SeekToFrame(iFrame);
-}
-
-void
-SOdysseyAnimationLayerStack::OnTransactCurrentFrame(TOptional<int> iFrame)
-{
-    UOdysseyAnimationPlayer* player = mPlayer.Get();
-    if (!player)
-        return;
-
-    int frame = iFrame.Get(player->GetCurrentFrame().FrameNumber.Value);
-
-    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(player);
-    currentFrameMutator.Set(frame);
-    currentFrameMutator.Commit();
 }
 
 #undef LOCTEXT_NAMESPACE

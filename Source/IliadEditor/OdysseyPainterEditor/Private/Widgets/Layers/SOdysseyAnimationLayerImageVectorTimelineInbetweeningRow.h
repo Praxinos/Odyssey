@@ -43,14 +43,10 @@ class SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow
     };
 
     public:
-        DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
-
-    public:
         SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow)
             : _CurrentFrame(0)
             {}
             SLATE_ATTRIBUTE(int, CurrentFrame)
-            SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
         SLATE_END_ARGS()
 
     public:
@@ -83,7 +79,6 @@ class SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow
 
     protected:
         TAttribute<int> mCurrentFrame;
-        FOnTransactCurrentFrame mOnTransactCurrentFrame;
 
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
         TArray<CellBox> mCellBoxBuffer;

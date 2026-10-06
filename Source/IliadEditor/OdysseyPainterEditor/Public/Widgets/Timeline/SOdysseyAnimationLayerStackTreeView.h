@@ -12,8 +12,6 @@ class UOdysseyAnimationLayerStack;
 class ODYSSEYPAINTEREDITOR_API SOdysseyAnimationLayerStackTreeView
     : public SOdysseyLayerStackTreeView
 {
-    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
-
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerStackTreeView)
         : _CurrentFrame(0)
@@ -26,7 +24,6 @@ public:
         SLATE_EVENT( FOnGenerateRow, OnGenerateRow )
         SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
         SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
-        SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
     SLATE_END_ARGS()
 
 public:

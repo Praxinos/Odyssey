@@ -14,13 +14,9 @@ class FUICommandList;
 class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationTimelineCellsShortcuts
 {
 public:
-    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int> /*iFrame*/)
-
-public:
     FOdysseyAnimationTimelineCellsShortcuts(
         const TAttribute<UOdysseyAnimation*>& iAnimation,
-        const TAttribute<int>& iCurrentFrame,
-        const FOnTransactCurrentFrame& iOnTransactCurrentFrame
+        const TAttribute<int>& iCurrentFrame
     );
 
 public:
@@ -64,5 +60,4 @@ public:
 private:
     TAttribute<UOdysseyAnimation*> mAnimation;
     TAttribute<int> mCurrentFrame;
-    FOnTransactCurrentFrame mOnTransactCurrentFrame;
 };
