@@ -905,7 +905,7 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
     DecreaseButtonBuilder.SetStyle( &FOdysseyStyle::Get(), "InnerMenuToolBar.LargeIcon" );
     DecreaseButtonBuilder.AddToolBarButton( FOdysseyPainterEditorAnimationCommands::Get().DecreaseNCellExposure, NAME_None );
 
-    MenuBuilder.BeginSection( "AddExposure", LOCTEXT( "timeline-cells.context-menu.add-exposure-section.name", "Add Exposure" ) );
+    MenuBuilder.BeginSection( "AddExposure", LOCTEXT( "timeline-cells.context-menu.add-exposure-section.name", "Add/Remove Exposure" ) );
 
         MenuBuilder.AddWidget(
             SNew( SHorizontalBox )
