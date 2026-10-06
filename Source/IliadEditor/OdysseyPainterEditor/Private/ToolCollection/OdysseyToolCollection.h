@@ -43,7 +43,9 @@ public:
      */
     bool IsCollectionTransient() const;
 
-    UOdysseyPainterEditorToolConfiguration* AddToolConfiguration(UClass* iToolClass, TObjectPtr<UOdysseyPainterEditorTool> iTool, FIconToolConfiguration& iIconToolConfiguration, int32 iIndex = INDEX_NONE);
+    FString GetDefaultToolName( UOdysseyPainterEditorTool* iTool );
+
+    UOdysseyPainterEditorToolConfiguration* AddToolConfiguration(UClass* iToolClass, UOdysseyPainterEditorTool* iTool, const FString& iName, const FIconToolConfiguration& iIconToolConfiguration, int32 iIndex = INDEX_NONE);
     void RemoveToolConfigurationAtIndex(int iIndex);
     void RemoveToolConfiguration(UOdysseyPainterEditorToolConfiguration* iToolConfig);
     void MoveToolConfiguration(int32 iFromIndex, int32 iToIndex);

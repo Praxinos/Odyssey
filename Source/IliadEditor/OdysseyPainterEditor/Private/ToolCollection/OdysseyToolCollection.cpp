@@ -52,7 +52,42 @@ bool UOdysseyToolCollection::IsCollectionTransient() const
     return false;
 }
 
-UOdysseyPainterEditorToolConfiguration* UOdysseyToolCollection::AddToolConfiguration(UClass* iToolClass, TObjectPtr<UOdysseyPainterEditorTool> iTool, FIconToolConfiguration& iIconToolConfiguration, int32 iIndex)
+FString UOdysseyToolCollection::GetDefaultToolName( UOdysseyPainterEditorTool* iTool )
+{
+    FString name;
+
+    //TODO: for the moment, find a "name" from the first tooltip line
+    // It must be improved with a name in tool class ?
+    TArray<FString> lines;
+    iTool->GetTooltip().ToString().ParseIntoArrayLines( lines );
+    if( lines.Num() )
+        name += lines[0];
+
+    if( iTool->HasRadius() )
+    {
+        float size = iTool->GetRadius() * 2;
+        float fractional = FMath::Fractional( size );
+        if( FMath::IsNearlyEqual( fractional, 0.f ) )
+            name += FString::Printf( TEXT( " - %d" ), int32( size ) );
+        else if( FMath::IsNearlyEqual( fractional, .1f )
+                 || FMath::IsNearlyEqual( fractional, .2f )
+                 || FMath::IsNearlyEqual( fractional, .3f )
+                 || FMath::IsNearlyEqual( fractional, .4f )
+                 || FMath::IsNearlyEqual( fractional, .5f )
+                 || FMath::IsNearlyEqual( fractional, .6f )
+                 || FMath::IsNearlyEqual( fractional, .7f )
+                 || FMath::IsNearlyEqual( fractional, .8f )
+                 || FMath::IsNearlyEqual( fractional, .9f )
+                 )
+            name += FString::Printf( TEXT( " - %.1f" ), size );
+        else
+            name += FString::Printf( TEXT( " - %.2f" ), size );
+    }
+
+    return name;
+}
+
+UOdysseyPainterEditorToolConfiguration* UOdysseyToolCollection::AddToolConfiguration(UClass* iToolClass, UOdysseyPainterEditorTool* iTool, const FString& iName, const FIconToolConfiguration& iIconToolConfiguration, int32 iIndex)
 {
     if( !iToolClass || !iTool )
         return nullptr;
@@ -63,6 +98,8 @@ UOdysseyPainterEditorToolConfiguration* UOdysseyToolCollection::AddToolConfigura
     UOdysseyPainterEditorToolConfiguration* toolConfig = NewObject<UOdysseyPainterEditorToolConfiguration>(this);
     toolConfig->mToolClass = iToolClass;
     toolConfig->mTool = DuplicateObject<UOdysseyPainterEditorTool>(iTool,this);
+
+    toolConfig->mName = iName.IsEmpty() ? GetDefaultToolName( iTool ) : iName;
 
     toolConfig->mIconToolConfiguration.mIconSource = iIconToolConfiguration.mIconSource;
     toolConfig->mIconToolConfiguration.mIconStyleSet = iIconToolConfiguration.mIconStyleSet;

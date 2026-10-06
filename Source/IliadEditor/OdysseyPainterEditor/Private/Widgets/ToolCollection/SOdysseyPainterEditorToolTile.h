@@ -76,8 +76,16 @@ private:
     TSharedRef<SWidget> BuildIconPicker(TSharedRef<SWindow> PickerWindow);
     void OnChangeIcon();
 
+    FReply OnColorBlockClicked( TSharedPtr<SButton> iWidget, FLinearColor iInitialColor ) const;
+
     void OnTextureSelected(const FAssetData& AssetData);
     void OnStyleIconSelected(FName iBrushStyleSet);
+
+    FText OnGetName() const;
+    void OnSetNameCommitted( const FText& iNewText, ETextCommit::Type iCommitType );
+
+    EVisibility OnGetSizeNoteVisibility() const;
+    FText OnGetSizeNoteText() const;
 
 private:
     UOdysseyPainterEditorToolConfiguration* mToolConfig = nullptr;

@@ -98,8 +98,6 @@ SOdysseyPainterEditorToolCollection::GetToolConfigIcon(UOdysseyPainterEditorTool
 FReply
 SOdysseyPainterEditorToolCollection::OnAddToolClicked()
 {
-
-
     if ( !mEditor || !mEditor->GetCurrentMainTool() || !mEditor->GetCurrentMainTool()->IsActivated() )
         return FReply::Unhandled();
 
@@ -107,7 +105,9 @@ SOdysseyPainterEditorToolCollection::OnAddToolClicked()
     iconToolConfig.mIconSource = EToolIconSource::Style;
     iconToolConfig.mIconStyleSet = mEditor->GetCurrentTool()->mIconStyleSet;
 
-    mToolCollection->AddToolConfiguration( mEditor->GetCurrentTool()->GetClass(), mEditor->GetCurrentTool(), iconToolConfig );
+    FString name = mToolCollection->GetDefaultToolName( mEditor->GetCurrentTool() );
+
+    mToolCollection->AddToolConfiguration( mEditor->GetCurrentTool()->GetClass(), mEditor->GetCurrentTool(), name, iconToolConfig );
 
     HandleToolsChanged();
 

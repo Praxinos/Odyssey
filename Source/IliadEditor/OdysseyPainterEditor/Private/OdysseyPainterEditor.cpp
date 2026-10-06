@@ -3741,7 +3741,9 @@ void FOdysseyPainterEditor::SaveMainToolToRecentTools()
     iconToolConfig.mIconSource = EToolIconSource::Style;
     iconToolConfig.mIconStyleSet = mCurrentMainTool->mIconStyleSet;
 
-    mRecentTools->AddToolConfiguration(mCurrentMainTool->GetClass(), mCurrentMainTool, iconToolConfig);
+    FString name = mRecentTools->GetDefaultToolName( mCurrentMainTool );
+
+    mRecentTools->AddToolConfiguration(mCurrentMainTool->GetClass(), mCurrentMainTool, name, iconToolConfig);
 
     if( mRecentTools->GetToolConfigurations().Num() > 10 )
         mRecentTools->RemoveToolConfigurationAtIndex( 0 );

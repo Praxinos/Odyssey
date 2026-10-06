@@ -235,9 +235,16 @@ public:
     UPROPERTY(config, EditAnywhere, Category=Defaults, meta=(GetOptions="GetCursorOptions") )
     FString ToolMouseCursor = TEXT( "Cross" );
 
-    UPROPERTY(config, EditAnywhere, Category=Defaults)
+public:
+    FMouseCursor GetToolMouseCursor() const;
+
+public:
+    /** Defines the behavior when deleting cells */
+    UPROPERTY( config, EditAnywhere, Category=Defaults )
     EOdysseyCellDeletionBehaviour CellDeletionBehaviour = EOdysseyCellDeletionBehaviour::PreserveBounds;
 
 public:
-     FMouseCursor GetToolMouseCursor() const;
+    /** Step to rotate the canvas in viewport. */
+    UPROPERTY( config, EditAnywhere, Category=Defaults )
+    bool ShowToolSizeInToolCollectionTile = true;
 };

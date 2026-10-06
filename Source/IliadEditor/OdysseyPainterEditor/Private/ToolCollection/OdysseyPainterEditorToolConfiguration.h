@@ -60,6 +60,9 @@ public:
     UPROPERTY(EditAnywhere, Category = "Tool")
     TObjectPtr<UOdysseyPainterEditorTool> mTool;
 
+    UPROPERTY( EditAnywhere, Category = "Tool" )
+    FString mName;
+
 public:
     UPROPERTY(EditAnywhere, Category = "Tool")
     FIconToolConfiguration mIconToolConfiguration;

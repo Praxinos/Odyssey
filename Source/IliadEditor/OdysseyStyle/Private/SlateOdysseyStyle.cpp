@@ -219,6 +219,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetPressedPadding( FMargin(0,0) )
     );
 
+    Set( "VeryTinyText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
+         .SetFont( DEFAULT_FONT( "Regular", 7 ) ) );
+
     // OdysseyTexture
     Set( "ClassIcon.OdysseyTexture", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDefaultThumbnail_16", mIcon16x16 ) );
     Set( "ClassThumbnail.OdysseyTexture", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDefaultThumbnail_64", mIcon64x64 ) );

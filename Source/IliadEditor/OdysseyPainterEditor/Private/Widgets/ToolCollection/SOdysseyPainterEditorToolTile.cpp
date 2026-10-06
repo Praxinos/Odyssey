@@ -11,6 +11,7 @@
 #include "IAssetTools.h"
 #include "OdysseyToolCollection.h"
 #include "OdysseyToolCollectionDragDropOp.h"
+#include "OdysseyPainterEditorSettings.h"
 #include "OdysseyPainterEditorRasterDrawingTool.h"
 #include "Styling/SlateStyleRegistry.h"
 #include "Widgets/Layout/SWrapBox.h"
@@ -45,26 +46,47 @@ SOdysseyPainterEditorToolTile::Construct(const FArguments& InArgs)
         .VAlign(VAlign_Fill)
         [
             SNew(SOverlay)
-                .IsEnabled( this, &SOdysseyPainterEditorToolTile::IsToolActivable )
-                // Background layer (solid fill)
-                + SOverlay::Slot()
+            .IsEnabled( this, &SOdysseyPainterEditorToolTile::IsToolActivable )
+            .ToolTipText_Lambda( [this]() -> FText
+                                 {
+                                     return mToolConfig ? FText::FromString( mToolConfig->mName ) : FText::GetEmpty();
+                                 } )
+            // Background layer (solid fill)
+            + SOverlay::Slot()
+            [
+                SNew(SColorBlock)
+                .Color(this, &SOdysseyPainterEditorToolTile::GetTileColor)
+            ]
+            // foreground (icon)
+            + SOverlay::Slot()
+            .HAlign(HAlign_Center)
+            .VAlign(VAlign_Center)
+            .Padding(4)
+            [
+                SNew(SImage)
+                .Image(this, &SOdysseyPainterEditorToolTile::GetIconBrush)
+                .ColorAndOpacity_Lambda([this]()
+                    {
+                        return mToolConfig ? mToolConfig->mIconToolConfiguration.mIconTint : FLinearColor::White;
+                    })
+                .DesiredSizeOverride(kTileSize)
+            ]
+            // Size (if available)
+            + SOverlay::Slot()
+            .HAlign( HAlign_Left )
+            .VAlign( VAlign_Top )
+            [
+                SNew( SBorder )
+                .Visibility( this, &SOdysseyPainterEditorToolTile::OnGetSizeNoteVisibility )
+                .BorderImage( FAppStyle::Get().GetBrush("WhiteBrush") )
+                .BorderBackgroundColor( FSlateColor( EStyleColor::Panel ) )
                 [
-                    SNew(SColorBlock)
-                        .Color(this, &SOdysseyPainterEditorToolTile::GetTileColor)
+                    SNew( STextBlock )
+                    .TextStyle( FOdysseyStyle::Get(), "VeryTinyText" )
+                    .ColorAndOpacity( FSlateColor( EStyleColor::Foreground ) )
+                    .Text( this, &SOdysseyPainterEditorToolTile::OnGetSizeNoteText )
                 ]
-                + SOverlay::Slot() // foreground (icon)
-                .HAlign(HAlign_Center)
-                .VAlign(VAlign_Center)
-                .Padding(4)
-                [
-                    SNew(SImage)
-                        .Image(this, &SOdysseyPainterEditorToolTile::GetIconBrush)
-                        .ColorAndOpacity_Lambda([this]()
-                            {
-                                return mToolConfig ? mToolConfig->mIconToolConfiguration.mIconTint : FLinearColor::White;
-                            })
-                        .DesiredSizeOverride(kTileSize)
-                ]
+            ]
         ];
 }
 
@@ -171,7 +193,7 @@ FReply SOdysseyPainterEditorToolTile::OnDrop(const FGeometry& MyGeometry, const 
         if (mDropSide == EDropIndicatorSide::Right)
             targetIndex++;
 
-        UOdysseyPainterEditorToolConfiguration* toolConfig = mCollection->AddToolConfiguration( sourceToolConfig->mToolClass, sourceToolConfig->mTool, sourceToolConfig->mIconToolConfiguration, targetIndex );
+        UOdysseyPainterEditorToolConfiguration* toolConfig = mCollection->AddToolConfiguration( sourceToolConfig->mToolClass, sourceToolConfig->mTool, sourceToolConfig->mName, sourceToolConfig->mIconToolConfiguration, targetIndex );
     }
     else
     {
@@ -270,9 +292,51 @@ const FSlateBrush* SOdysseyPainterEditorToolTile::GetIconBrush() const
         return FStyleDefaults::GetNoBrush();
 }
 
+FReply
+SOdysseyPainterEditorToolTile::OnColorBlockClicked( TSharedPtr<SButton> iWidget, FLinearColor iInitialColor ) const
+{
+    FOnLinearColorValueChanged onColorChanged = FOnLinearColorValueChanged::CreateLambda(
+        [this]( FLinearColor iColor )
+        {
+            mToolConfig->mIconToolConfiguration.mIconTint = iColor;
+        }
+    );
+
+    FSimpleDelegate onColorCommited = FSimpleDelegate::CreateLambda(
+        [this]()
+        {
+        }
+    );
+
+    //AnimationOutlinerTreeNode::InitialTrackColor = GetTrackColorTint().GetSpecifiedColor();
+    //AnimationOutlinerTreeNode::bFolderPickerWasCancelled = false;
+
+    FColorPickerArgs PickerArgs;
+    PickerArgs.ParentWidget = iWidget;
+    PickerArgs.bUseAlpha = false;
+    PickerArgs.bOpenAsMenu = true;
+    PickerArgs.bClampValue = true;
+    //PickerArgs.DisplayGamma = TAttribute<float>::Create( TAttribute<float>::FGetter::CreateUObject( GEngine, &UEngine::GetDisplayGamma ) );
+
+    //PickerArgs.InitialColor = AnimationOutlinerTreeNode::InitialTrackColor;
+    PickerArgs.InitialColor = iInitialColor;
+
+    PickerArgs.OnColorCommitted = onColorChanged;
+    //PickerArgs.OnColorCommitted = FOnLinearColorValueChanged::CreateSP( this, &SOutlinerTrackColorPicker::OnColorPickerPicked );
+    //PickerArgs.OnColorPickerWindowClosed = FOnWindowClosed::CreateSP( this, &SOutlinerTrackColorPicker::OnColorPickerClosed );
+    //PickerArgs.OnColorPickerCancelled = FOnColorPickerCancelled::CreateSP( this, &SOutlinerTrackColorPicker::OnColorPickerCancelled );
+    PickerArgs.OnInteractivePickEnd = onColorCommited;
+
+    OpenColorPicker( PickerArgs );
+
+    return FReply::Handled();
+}
+
 TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
 {
     FMenuBuilder menuBuilder(true, nullptr);
+
+    menuBuilder.BeginSection( NAME_None, LOCTEXT( "tool-collection.tool-tile.context-menu.section-common.name", "Common" ) );
 
     menuBuilder.AddMenuEntry(
         LOCTEXT( "tool-collection.tool-tile.context-menu.replace-with-current-tool.name", "Replace with Current Tool" ),
@@ -285,7 +349,7 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
     );
 
     menuBuilder.AddMenuEntry(
-        LOCTEXT( "tool-collection.tool-tile.context-menu.duplicate-tool.name", "Duplicate Tool" ),
+        LOCTEXT( "tool-collection.tool-tile.context-menu.duplicate-tool.name", "Duplicate" ),
         LOCTEXT( "tool-collection.tool-tile.context-menu.duplicate-tool.tooltip", "Create a duplicate of this tool." ),
         FSlateIcon(),
         FUIAction(
@@ -295,7 +359,7 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
     );
 
     menuBuilder.AddMenuEntry(
-        LOCTEXT( "tool-collection.tool-tile.context-menu.delete-tool.name", "Delete Tool" ),
+        LOCTEXT( "tool-collection.tool-tile.context-menu.delete-tool.name", "Delete" ),
         LOCTEXT( "tool-collection.tool-tile.context-menu.delete-tool.tooltip", "Remove this tool from the collection." ),
         FSlateIcon(),
         FUIAction(
@@ -304,15 +368,96 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
         )
     );
 
+    menuBuilder.EndSection();
+
+    //---
+
+    menuBuilder.BeginSection( NAME_None, LOCTEXT( "tool-collection.tool-tile.context-menu.section-appearance.name", "Appearance" ) );
+
     menuBuilder.AddMenuEntry(
-        LOCTEXT( "tool-collection.tool-tile.context-menu.change-icon.name", "Change Icon" ),
-        LOCTEXT( "tool-collection.tool-tile.context-menu.change-icon.tooltip", "Select a new icon for this tool" ),
+        LOCTEXT( "tool-collection.tool-tile.context-menu.change-icon.name", "Set Icon..." ),
+        LOCTEXT( "tool-collection.tool-tile.context-menu.change-icon.tooltip", "Set a new icon for this tool" ),
         FSlateIcon(),
         FUIAction(
             FExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::OnChangeIcon),
             FCanExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::CanChangeIcon)
         )
     );
+
+    //-
+
+    auto onGetColor = [this]() -> FLinearColor
+        {
+            return mToolConfig->mIconToolConfiguration.mIconTint;
+        };
+
+    TSharedPtr<SButton> buttonWidget = SNew( SButton )
+        .ContentPadding( 0 )
+        .VAlign( VAlign_Fill )
+        .HAlign( HAlign_Right )
+        .ButtonStyle( FAppStyle::Get(), "NoBorder" )
+        [
+            SNew( SColorBlock )
+                .AlphaDisplayMode( EColorBlockAlphaDisplayMode::Ignore )
+                .Size( FVector2D( 80, 20 ) )
+                .CornerRadius( FVector4( 4.0f, 4.0f, 4.0f, 4.0f ) )
+                .Color_Lambda( onGetColor )
+        ];
+
+    buttonWidget->SetOnClicked( FOnClicked::CreateSP( SharedThis( this ), &SOdysseyPainterEditorToolTile::OnColorBlockClicked, buttonWidget, onGetColor() ) );
+
+    menuBuilder.AddWidget(
+        buttonWidget.ToSharedRef(),
+        LOCTEXT( "tool-collection.tool-tile.context-menu.set-tint.name", "Color" ),
+        true /* =bNoIndent */,
+        true /* =bInSearchable */,
+        LOCTEXT( "tool-collection.tool-tile.context-menu.set-tint.tooltip", "Modify the color of the tool icon in tile." )
+    );
+
+    menuBuilder.AddEditableText(
+        // Don't use label:
+        // - more space to display the name
+        // - no miss-indent
+        FText::GetEmpty(),
+        LOCTEXT( "tool-collection.tool-tile.context-menu.change-name.tooltip", "Set the name of this tool" ),
+        FSlateIcon(),
+        MakeAttributeSP<FText>( this, &SOdysseyPainterEditorToolTile::OnGetName ),
+        FOnTextCommitted::CreateSP( this, &SOdysseyPainterEditorToolTile::OnSetNameCommitted )
+    );
+
+    menuBuilder.EndSection();
+
+    menuBuilder.BeginSection( NAME_None, LOCTEXT( "tool-collection.tool-tile.context-menu.section-settings.name", "Settings" ) );
+
+    // A sub-menu is created to not shift all previous entries as the settings entry will have a toggle button
+    menuBuilder.AddSubMenu( LOCTEXT( "tool-collection.tool-tile.context-menu.settings.name", "Settings" ),
+                            LOCTEXT( "tool-collection.tool-tile.context-menu.settings.tooltip", "Modify some settings." ),
+                            FNewMenuDelegate::CreateLambda( [this]( FMenuBuilder& ioMenuBuilder )
+                                                            {
+                                                                FMenuEntryParams settingsParams;
+                                                                settingsParams.DirectActions = FUIAction(
+                                                                    FExecuteAction::CreateLambda( []() -> void
+                                                                                                  {
+                                                                                                      UOdysseyPainterEditorSettings* settings = GetMutableDefault<UOdysseyPainterEditorSettings>();
+
+                                                                                                      settings->ShowToolSizeInToolCollectionTile = !settings->ShowToolSizeInToolCollectionTile;
+                                                                                                  } ),
+                                                                    FCanExecuteAction(),
+                                                                    FIsActionChecked::CreateLambda( []() -> bool
+                                                                                                    {
+                                                                                                        const UOdysseyPainterEditorSettings* settings = GetDefault<UOdysseyPainterEditorSettings>();
+
+                                                                                                        return settings->ShowToolSizeInToolCollectionTile;
+                                                                                                    } )
+                                                                );
+                                                                settingsParams.LabelOverride = LOCTEXT( "tool-collection.tool-tile.context-menu.settings-show-tool-size-note.name", "Show Size" );
+                                                                settingsParams.ToolTipOverride = LOCTEXT( "tool-collection.tool-tile.context-menu.settings-show-tool-size-note.tooltip", "Show tool size in each tool tile." );
+                                                                settingsParams.UserInterfaceActionType = EUserInterfaceActionType::ToggleButton;
+                                                                ioMenuBuilder.AddMenuEntry( settingsParams );
+                                                            } )
+    );
+
+    menuBuilder.EndSection();
 
     return menuBuilder.MakeWidget();
 }
@@ -364,10 +509,11 @@ SOdysseyPainterEditorToolTile::OnReplaceWithCurrentTool()
     iconToolConfig.mIconSource = EToolIconSource::Style;
     iconToolConfig.mIconStyleSet = mEditor->GetCurrentTool()->mIconStyleSet;
 
+    FString name = mCollection->GetDefaultToolName( mEditor->GetCurrentTool() );
 
     int32 index = mCollection->GetIndexOfToolConfiguration(mToolConfig);
     mCollection->RemoveToolConfiguration(mToolConfig);
-    mCollection->AddToolConfiguration( mEditor->GetCurrentTool()->GetClass(), mEditor->GetCurrentTool(), iconToolConfig, index );
+    mCollection->AddToolConfiguration( mEditor->GetCurrentTool()->GetClass(), mEditor->GetCurrentTool(), name, iconToolConfig, index );
 }
 
 bool SOdysseyPainterEditorToolTile::CanDuplicateTool() const
@@ -377,12 +523,51 @@ bool SOdysseyPainterEditorToolTile::CanDuplicateTool() const
 
 void SOdysseyPainterEditorToolTile::OnDuplicateTool()
 {
-    mCollection->AddToolConfiguration( mToolConfig->mToolClass, mToolConfig->mTool, mToolConfig->mIconToolConfiguration );
+    mCollection->AddToolConfiguration( mToolConfig->mToolClass, mToolConfig->mTool, mToolConfig->mName, mToolConfig->mIconToolConfiguration );
 }
 
 bool SOdysseyPainterEditorToolTile::CanChangeIcon() const
 {
     return true;
+}
+
+
+FText SOdysseyPainterEditorToolTile::OnGetName() const
+{
+    return FText::FromString( mToolConfig->mName );
+}
+void SOdysseyPainterEditorToolTile::OnSetNameCommitted( const FText& iNewText, ETextCommit::Type iCommitType )
+{
+    if( iCommitType == ETextCommit::OnCleared )
+        return;
+
+    if( iNewText.IsEmpty() )
+        return;
+
+    mToolConfig->mName = iNewText.ToString();
+}
+
+EVisibility SOdysseyPainterEditorToolTile::OnGetSizeNoteVisibility() const
+{
+    const UOdysseyPainterEditorSettings* settings = GetDefault<UOdysseyPainterEditorSettings>();
+    if( !settings->ShowToolSizeInToolCollectionTile )
+        return EVisibility::Collapsed;
+
+    return mToolConfig && mToolConfig->mTool && mToolConfig->mTool->HasRadius()
+        ? EVisibility::Visible
+        : EVisibility::Collapsed;
+}
+FText SOdysseyPainterEditorToolTile::OnGetSizeNoteText() const
+{
+    if( !mToolConfig
+        || !mToolConfig->mTool
+        || !mToolConfig->mTool->HasRadius() )
+        return FText::GetEmpty();
+
+    static FNumberFormattingOptions options;
+    options.SetMaximumFractionalDigits( 2 );
+
+    return FText::AsNumber( mToolConfig->mTool->GetRadius() * 2, &options );
 }
 
 TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildTexturePicker()
