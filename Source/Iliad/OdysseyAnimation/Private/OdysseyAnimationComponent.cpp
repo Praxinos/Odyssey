@@ -106,7 +106,7 @@ UOdysseyAnimationComponent::SetAnimationMaterial( UMaterialInterface* iMaterial 
     Modify();
 
     Material = iMaterial;
-    MaterialChanged();
+    UpdateMaterialInstance( true );
 }
 
 UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer& ObjectInitializer)
@@ -419,46 +419,54 @@ UOdysseyAnimationComponent::PostTransacted(const FTransactionObjectEvent& iTrans
 #endif
 
 void
-UOdysseyAnimationComponent::UpdateMaterialInstance()
+UOdysseyAnimationComponent::UpdateMaterialInstance( bool iForceRecreate )
 {
-#if WITH_EDITOR
     if (!Material)
     {
         UStaticMeshComponent::SetMaterial(0, nullptr);
         return;
     }
-    UMaterialInstanceConstant* MaterialInstance = Cast<UMaterialInstanceConstant>(UStaticMeshComponent::GetMaterial(0));
-    if (!MaterialInstance || MaterialInstance->GetOuter() != this || MaterialInstance->Parent != Material)
-    {
-        MaterialInstance = NewObject<UMaterialInstanceConstant>(this);
-        MaterialInstance->SetFlags(RF_Transient);
 
-        MaterialInstance->SetParentEditorOnly(Material, false);
-        UStaticMeshComponent::SetMaterial(0, MaterialInstance);
+    UMaterialInstanceDynamic* materialInstance = Cast<UMaterialInstanceDynamic>(UStaticMeshComponent::GetMaterial(0));
+    if (iForceRecreate || !materialInstance || materialInstance->GetOuter() != this)
+    {
+        //A material instance is needed to be either {transient} or {public + standalone} (saved in its own asset)
+        //If not, we get an error when saving the object containing it (here when we save the actor containing the component)
+        //Here the material instance is not saved in its own asset so we set it to be transient
+        //And we also define its Outer to be this, because it is owned by the Component even if it's Transient
+        //By the way UImagePlateComponent in the ImagePlate Plugin does exactly the same
+        materialInstance = UMaterialInstanceDynamic::Create(Material, this);
+        materialInstance->SetFlags(RF_Transient);
+        //materialInstance->SetFlags(RF_Public);
+        UStaticMeshComponent::SetMaterial(0, materialInstance);
     }
 
-    if (!GetPlayer())
+    if (materialInstance->Parent != Material)
     {
-        MaterialInstance->ClearParameterValuesEditorOnly();
-        MaterialInstance->PostEditChange();
-        return;
-    }
-
-    UTextureRenderTarget2D* RenderTarget = GetPlayer()->GetRenderTarget();
-    if (!RenderTarget)
-    {
-        MaterialInstance->ClearParameterValuesEditorOnly();
-        MaterialInstance->PostEditChange();
-        return;
-    }
-
-    MaterialInstance->SetTextureParameterValueEditorOnly(FMaterialParameterInfo(TEXT("AnimationTexture")), RenderTarget);
-
-    MaterialInstance->PostEditChange();
-#else
-    UStaticMeshComponent::SetMaterial(0, nullptr);
+        materialInstance->Parent = Material;
+#if WITH_EDITOR
+        materialInstance->PostEditChange();
 #endif
+    }
+
+    UOdysseyAnimationPlayer* player = GetPlayer();
+    if (!player)
+    {
+        materialInstance->ClearParameterValues();
+        return;
+    }
+
+    UTextureRenderTarget2D* renderTarget = player->GetRenderTarget();
+    if (!renderTarget)
+    {
+        //Needed because SetTextureParameterValue does nothing if texture is nullptr
+        materialInstance->ClearParameterValues();
+        return;
+    }
+
+    materialInstance->SetTextureParameterValue("AnimationTexture", renderTarget);
 }
+
 
 void
 UOdysseyAnimationComponent::OnRegister()

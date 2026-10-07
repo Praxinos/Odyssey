@@ -114,7 +114,7 @@ protected:
 private:
     virtual TStructOnScope<FActorComponentInstanceData> GetComponentInstanceData() const override;
     void ApplyComponentInstanceData(struct FOdysseyAnimationComponentInstanceData* ComponentInstanceData);
-    void UpdateMaterialInstance();
+    void UpdateMaterialInstance( bool iForceRecreate = false );
 
 protected:
     UPROPERTY( EditAnywhere, Category="Animation")
