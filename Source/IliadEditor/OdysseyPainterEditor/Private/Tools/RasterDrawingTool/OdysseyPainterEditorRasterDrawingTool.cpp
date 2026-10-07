@@ -74,11 +74,6 @@ UOdysseyPainterEditorRasterDrawingTool::UOdysseyPainterEditorRasterDrawingTool()
     Shapes.AddShapeType(EOdysseyShapeType::kBezier, CreateShape<UOdysseyBezierShape>("UOdysseyPainterEditorRasterDrawingTool::BezierShape"));
 
     Shapes.SetActiveShapeType(EOdysseyShapeType::kFreehand);
-
-    //Set Default Brush
-    UOdysseyPainterEditorSettings* settings = UOdysseyPainterEditorSettings::Get();
-    if (settings)
-        Brush = settings->BrushDefaults.DefaultBrush.LoadSynchronous();
 }
 
 template<class T>
@@ -103,6 +98,14 @@ UOdysseyPainterEditorRasterDrawingTool::CreateShape(FName iName)
 void
 UOdysseyPainterEditorRasterDrawingTool::Activate()
 {
+    if( !Brush )
+    {
+        //Set Default Brush
+        UOdysseyPainterEditorSettings* settings = UOdysseyPainterEditorSettings::Get();
+        if (settings)
+            Brush = settings->BrushDefaults.DefaultBrush.LoadSynchronous();
+    }
+
     BrushOptions->SetColor(FOdysseyBrushColor(GetEditor()->PaintColor()));
 
     //Create the BrushInstance to use for drawing
