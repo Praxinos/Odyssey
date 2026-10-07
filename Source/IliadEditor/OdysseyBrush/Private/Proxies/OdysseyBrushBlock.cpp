@@ -11,6 +11,7 @@
 #include "OdysseyBrushAssetBase.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
+#include "ULISUtils.h"
 
 class FOdysseyBlockProxy_Internal : public TSharedFromThis<FOdysseyBlockProxy_Internal, ESPMode::ThreadSafe>
 {
@@ -323,12 +324,15 @@ UOdysseyBlockProxyFunctionLibrary::BlendColor(
     }
 
     ::ULIS::FEvent eventBlend;
+    ::ULIS::eBlendMode ULISBlendMode;
+    ::ULIS::eAlphaMode ULISAlphaMode;
+    ULISUtils::GetULISBlendingModeFromBlendMode(BlendMode, AlphaMode, ULISBlendMode, ULISAlphaMode);
     ctx.BlendColor(
             Color.GetValue()
         , *dst
         , Area.IsInitialized() ? Area.GetValue() : dst->Rect()
-        , ::ULIS::eBlendMode( BlendMode )
-        , ::ULIS::eAlphaMode( AlphaMode )
+        , ULISBlendMode
+        , ULISAlphaMode
         , Opacity
         , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
         , 1
@@ -493,13 +497,17 @@ UOdysseyBlockProxyFunctionLibrary::Blend(
         )
     );
 
+
+    ::ULIS::eBlendMode ULISBlendMode;
+    ::ULIS::eAlphaMode ULISAlphaMode;
+    ULISUtils::GetULISBlendingModeFromBlendMode(BlendMode, AlphaMode, ULISBlendMode, ULISAlphaMode);
     ctx.BlendAA(
           *src
         , *dst
         , src->Rect()
         , ::ULIS::FVec2F( OffsetX, OffsetY )
-        , ::ULIS::eBlendMode( BlendMode )
-        , ::ULIS::eAlphaMode( AlphaMode )
+        , ULISBlendMode
+        , ULISAlphaMode
         , Opacity
         , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
         , 1

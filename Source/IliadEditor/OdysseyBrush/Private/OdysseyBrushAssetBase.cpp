@@ -9,6 +9,7 @@
 #include "Proxies/OdysseyBrushColor.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
+#include "ULISUtils.h"
 
 //static
 FOdysseyBrushOverride*
@@ -842,6 +843,9 @@ UOdysseyBrushAssetBase::StampInternal(FStampParams iStampParams)
     for (int i = 0; i < iStampParams.mRects.Num(); i++)
     {
         ULIS::FVec2F position = iStampParams.mPosition + ULIS::FVec2F(iStampParams.mRects[i].x, iStampParams.mRects[i].y);
+        ::ULIS::eBlendMode ULISBlendMode;
+        ::ULIS::eAlphaMode ULISAlphaMode;
+        ULISUtils::GetULISBlendingModeFromBlendMode(iStampParams.mBlendMode, iStampParams.mAlphaMode, ULISBlendMode, ULISAlphaMode);
         if (iStampParams.mAntiAliasing)
         {
             ctx.BlendAA(
@@ -849,8 +853,8 @@ UOdysseyBrushAssetBase::StampInternal(FStampParams iStampParams)
                 , *mEditedBlock
                 , iStampParams.mRects[i]
                 , position
-                , ::ULIS::eBlendMode(iStampParams.mBlendMode)
-                , ::ULIS::eAlphaMode(iStampParams.mAlphaMode)
+                , ULISBlendMode
+                , ULISAlphaMode
                 , FMath::Clamp(iStampParams.mFlow, 0.f, 1.f)
                 , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
                 , 1
@@ -865,8 +869,8 @@ UOdysseyBrushAssetBase::StampInternal(FStampParams iStampParams)
                 , *mEditedBlock
                 , iStampParams.mRects[i]
                 , position
-                , ::ULIS::eBlendMode(iStampParams.mBlendMode)
-                , ::ULIS::eAlphaMode(iStampParams.mAlphaMode)
+                , ULISBlendMode
+                , ULISAlphaMode
                 , FMath::Clamp(iStampParams.mFlow, 0.f, 1.f)
                 , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
                 , 1

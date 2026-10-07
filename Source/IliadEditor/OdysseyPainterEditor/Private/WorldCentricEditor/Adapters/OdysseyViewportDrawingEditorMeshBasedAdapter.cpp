@@ -383,6 +383,10 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
         ::ULIS::eFormat target_formatt = ::ULIS::eFormat::Format_RGBAF;
         ::ULIS::FContext& ctxx = IULISLoaderModule::StaticFindOrAddContext(target_formatt);
 
+        ::ULIS::eBlendMode ULISBlendMode;
+        ::ULIS::eAlphaMode ULISAlphaMode;
+        ULISUtils::GetULISBlendingModeFromBlendMode(iStampParams.mBlendMode, iStampParams.mAlphaMode, ULISBlendMode, ULISAlphaMode);
+
         //To check
         if (iStampParams.mAntiAliasing)
         {
@@ -391,8 +395,8 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
                 , *mStrokeBufferSurfaceTexture2DEditable->Block()
                 , iStampParams.mRects[0]
                 , ::ULIS::FVec2F(0,0)
-                , ::ULIS::eBlendMode(iStampParams.mBlendMode)
-                , ::ULIS::eAlphaMode(iStampParams.mAlphaMode)
+                , ULISBlendMode
+                , ULISAlphaMode
                 , FMath::Clamp(iStampParams.mFlow, 0.f, 1.f)
                 , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
                 , 0
@@ -407,8 +411,8 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
                 , *mStrokeBufferSurfaceTexture2DEditable->Block()
                 , iStampParams.mRects[0]
                 , ::ULIS::FVec2F(0, 0)
-                , ::ULIS::eBlendMode(iStampParams.mBlendMode)
-                , ::ULIS::eAlphaMode(iStampParams.mAlphaMode)
+                , ULISBlendMode
+                , ULISAlphaMode
                 , FMath::Clamp(iStampParams.mFlow, 0.f, 1.f)
                 , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
                 , 0
@@ -608,6 +612,9 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
             {
                 ::ULIS::FEvent eventBlend = FULISEventBuilder().RetainBlock(blockToStamp).Build();
 
+                ::ULIS::eBlendMode ULISBlendMode;
+                ::ULIS::eAlphaMode ULISAlphaMode;
+                ULISUtils::GetULISBlendingModeFromBlendMode(iStampParams.mBlendMode, iStampParams.mAlphaMode, ULISBlendMode, ULISAlphaMode);
                 if (iStampParams.mAntiAliasing)
                 {
                     ctx.BlendAA(
@@ -615,8 +622,8 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
                         , *ioDest
                         , iRect
                         , iPos
-                        , ::ULIS::eBlendMode(iStampParams.mBlendMode)
-                        , ::ULIS::eAlphaMode(iStampParams.mAlphaMode)
+                        , ULISBlendMode
+                        , ULISAlphaMode
                         , FMath::Clamp(iStampParams.mFlow, 0.f, 1.f)
                         , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
                         , iWaitList.Num()
@@ -631,8 +638,8 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
                         *ioDest,
                         iRect,
                         iPos,
-                        ::ULIS::eBlendMode(iStampParams.mBlendMode),
-                        ::ULIS::eAlphaMode(iStampParams.mAlphaMode),
+                        ULISBlendMode,
+                        ULISAlphaMode,
                         FMath::Clamp(iStampParams.mFlow, 0.f, 1.f),
                         ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
                         iWaitList.Num(),
