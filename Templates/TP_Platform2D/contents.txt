@@ -1,0 +1,4 @@
+../../../Templates/TP_Platform2D/manifest.json
+../../../Templates/TP_Platform2D/Config/config.ini
+../../../Templates/TP_Platform2D/Media/TP_Platform2D.png
+../../../Templates/TP_Platform2D/Media/TP_Platform2D_Preview.png

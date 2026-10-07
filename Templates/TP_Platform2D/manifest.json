@@ -1,0 +1,29 @@
+{
+	"Version": 1,
+	"Name":
+	[
+		{
+			"Language": "en",
+			"Text": "Blank"
+		}
+	],
+	"Description":
+	[
+		{
+			"Language": "en",
+			"Text": "A lovely 2D platformer game combining Odyssey and Paper2D capacities."
+		}
+	],
+	"AssetTypes": [],	
+	"SearchTags": [],
+	"ClassTypes": "",
+	"Category": "CodeFeature",
+	"FocusAsset": "",
+	"Thumbnail": "TP_Platform2D.png",
+	"Screenshots":
+	[
+		"TP_Platform2D.png"
+	],
+	"SortKey": "_81",
+	"AdditionalFeaturePacks": []
+}
