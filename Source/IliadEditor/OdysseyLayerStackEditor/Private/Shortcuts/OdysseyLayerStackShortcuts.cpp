@@ -231,7 +231,26 @@ FOdysseyLayerStackShortcuts::CanAction_Copy()
 bool
 FOdysseyLayerStackShortcuts::CanAction_Cut()
 {
-    return true;
+    if (!mLayerStack)
+        return false;
+
+    TSharedPtr<SOdysseyLayerStackTreeView> treeView = mTreeView.Pin();
+    if (!treeView)
+        return false;
+
+    TArray<UOdysseyLayer*> selectedLayers = treeView->GetSelectedItems();
+    if (selectedLayers.Num() <= 0)
+        return false;
+
+    //If one of the root layers is not selected, we can cut selected layers
+    const TArray<UOdysseyLayer*>& rootLayers = mLayerStack->GetRootLayers();
+    for (UOdysseyLayer* rootLayer : rootLayers)
+    {
+        if (!selectedLayers.Contains(rootLayer))
+            return true;
+    }
+
+    return false;
 }
 
 bool
