@@ -91,6 +91,18 @@ UOdysseyBrushAssetBase::PostInitProperties()
         {
             EditorOverrides.Remove(key);
         }
+
+        //Add missing classes (can happen in our case when adding overrides classes, in existing brushes)
+        for (auto overrideClass : FOdysseyBrushOverride::GetClasses())
+        {
+            FString str = overrideClass->GetFName().ToString();
+            FName name(str);
+            bool containsClass = EditorOverrides.Contains(overrideClass);
+            if (!containsClass)
+            {
+                EditorOverrides.Add(overrideClass, NewObject<UObject>(this, overrideClass, name));
+            }
+        }
     }
 }
 
@@ -116,6 +128,31 @@ UOdysseyBrushAssetBase::PostLoad()
 
         Overrides_DEPRECATED.Empty();
     }
+
+    //Add missing classes (can happen in our case when adding overrides classes, in existing brushes)
+    for (auto overrideClass : FOdysseyBrushOverride::GetClasses())
+    {
+        FString str = overrideClass->GetFName().ToString();
+        FName name(str);
+        bool containsClass = EditorOverrides.Contains(overrideClass);
+        if (!containsClass)
+        {
+            EditorOverrides.Add(overrideClass, NewObject<UObject>(this, overrideClass, name));
+        }
+    }
+
+    //PATCH: Sometimes EditorOverrides Keys are nullptr after load
+    //This is certainly because we should not use UClass pointers as TMap Keys (I Guess)
+    //So here is a patch to fix those brushes, but we should definitly find a better way to handle overrides
+    TMap<TObjectPtr<UClass>, TObjectPtr<UObject>> overrides;
+    for (auto& element : EditorOverrides)
+    {
+        if (!element.Value)
+            continue;
+
+        overrides.Add(element.Value->GetClass(), element.Value);
+    }
+    EditorOverrides = overrides;
 }
 
 //--------------------------------------------------------------------------------------
