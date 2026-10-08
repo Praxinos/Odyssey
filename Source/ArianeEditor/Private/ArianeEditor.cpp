@@ -70,6 +70,7 @@ FArianeEditor::FArianeEditor( FArianeEditorViewportToolkit* iToolkit )
     , bShowGrid(true)
 {
     HUDDrawingFlags.Mode = FArianeEditorHUD::EMode::Object;
+    GetToolManager()->ConfigureChangeTrackingMode(EToolChangeTrackingMode::NoChangeTracking);
 }
 
 const FArianeEditorHUD::FDrawingFlags&
