@@ -12,6 +12,7 @@
 
 class UOdysseyAnimationLayer;
 class FExtender;
+class FOdysseyAnimationGlobalCellsShortcuts;
 class FOdysseyAnimationTimelineCellsShortcuts;
 class FOdysseyAnimationTimelineCellImageStaggerShortcuts;
 class SOdysseyLayerStackTreeView;
@@ -126,7 +127,19 @@ private:
     bool IsCellMarkCheckedOnClickedFrame( FFrameNumber iClickedFrame, FCellMark iMarkId ) const;
     TSharedRef<SWidget> CreateCellMarkOnClickedFrameWidget( FFrameNumber iClickedFrame, int iMarkId );
 
+    void SetCellMarkOnCellFirstFrame( int iMarkId );
+    bool CanSetCellMarkOnCellFirstFrame( int iMarkId ) const;
+    bool IsCellMarkCheckedOnCellFirstFrame( int iMarkId ) const;
+    TSharedRef<SWidget> CreateCellMarkOnCellFirstFrameWidget( int iMarkId );
+
     void BuildCellsMarksSubMenu(FMenuBuilder& iMenuBuilder, FFrameNumber iClickedFrame);
+
+    enum class ECellMarkApplyType: uint8
+    {
+        MarkCellOnSingleFrame,
+        MarkCellOnCellFirstFrame,
+    };
+    EVisibility GetSingleCellMarkVisibility( ECellMarkApplyType iCellMarkApplyType ) const;
 
     EVisibility GetRowDisabledColorVisibility(FName iRow) const;
     const FSlateBrush* GetRowDisabledColorValue(FName iRow) const;
@@ -164,5 +177,6 @@ protected:
     TAttribute<bool> mDisplayOptions;
 
     TSharedPtr<FOdysseyAnimationTimelineCellsShortcuts> mAnimationTimelineCellsShortcuts;
+    TSharedPtr<FOdysseyAnimationGlobalCellsShortcuts> mAnimationGlobalCellsShortcuts;
     TSharedPtr<FOdysseyAnimationTimelineCellImageStaggerShortcuts> mAnimationTimelineCellImageStaggerShortcuts;
 };

@@ -243,8 +243,14 @@ public:
     UPROPERTY( config, EditAnywhere, Category=Defaults )
     EOdysseyCellDeletionBehaviour CellDeletionBehaviour = EOdysseyCellDeletionBehaviour::PreserveBounds;
 
+    /** If true, mark cell on single frame (any frame inside the cell)
+      * otherwise mark only the first frame of a cell
+      */
+    UPROPERTY( config, EditAnywhere, Category=Defaults )
+    bool MarkSingleFrame = false;
+
 public:
-    /** Step to rotate the canvas in viewport. */
+    /** Show tool size inside each tool tile. */
     UPROPERTY( config, EditAnywhere, Category=Defaults )
     bool ShowToolSizeInToolCollectionTile = true;
 };

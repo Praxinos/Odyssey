@@ -3,6 +3,7 @@
 
 #include "Shortcuts/Global/OdysseyAnimationGlobalCellsShortcuts.h"
 
+#include "Algo/Accumulate.h"
 #include "ScopedTransaction.h"
 
 #include "OdysseyAnimation.h"
@@ -45,6 +46,12 @@ FOdysseyAnimationGlobalCellsShortcuts::MapActionsToCommandList(TSharedRef<FUICom
     );
 
     iCommandList->MapAction(
+        FOdysseyPainterEditorAnimationCommands::Get().RemoveAllCellMarks,
+        FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveAllCellMarks),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveAllCellMarks)
+    );
+
+    iCommandList->MapAction(
         FOdysseyPainterEditorAnimationCommands::Get().RemoveCellMark,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark),
         FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveCellMark)
@@ -55,7 +62,8 @@ FOdysseyAnimationGlobalCellsShortcuts::MapActionsToCommandList(TSharedRef<FUICom
         iCommandList->MapAction(
             FOdysseyPainterEditorAnimationCommands::Get().SetCellMark[i],
             FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark, i),
-            FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::CanAction_SetCellMark, i)
+            FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::CanAction_SetCellMark, i),
+            FIsActionChecked::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::IsActionChecked_SetCellMark, i )
         );
     }
 
@@ -101,9 +109,8 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell()
     if (frame == 0)
         return;
 
-#if WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.break-cell", "Break Cell"));
-#endif
+    FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.break-cell", "Break Cell"));
+
     UOdysseyLayerCell* newCell = cell->Break(frame, false);
     if (!newCell)
         return;
@@ -139,12 +146,49 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakAndClearCell()
     if (frame == 0)
         return;
 
-#if WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.break-cell", "Break Cell"));
-#endif
+    FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.break-cell", "Break Cell"));
+
     UOdysseyLayerCell* newCell = cell->Break(frame, true);
     if (!newCell)
         return;
+}
+
+void
+FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveAllCellMarks()
+{
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if( !animation )
+        return;
+
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( animation->GetLayerStack() );
+    if( !layerStack )
+        return;
+
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>( layerStack->GetCurrentLayer() );
+    if( !currentLayer )
+        return;
+
+    if( !currentLayer->IsEditable() )
+        return;
+
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells( currentLayer );
+    if( selectedCells.IsEmpty() )
+    {
+        UOdysseyLayerCell* cell = currentLayer->GetCellAtFrame( mCurrentFrame.Get() );
+        if( !cell )
+            return;
+
+        selectedCells.Add( cell );
+    }
+
+    FScopedTransaction ScopedTransaction( LOCTEXT( "global-cells-shortcuts.transaction.remove-all-cell-marks", "Remove All Cell Marks" ) );
+
+    for( UOdysseyLayerCell* cell : selectedCells )
+    {
+        cell->SetMarks( {} );
+    }
+
+    OdysseyLayerStackSelection::RegisterUndo( selectedCells, selectedCells );
 }
 
 void
@@ -175,9 +219,8 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
         selectedCells.Add(cell);
     }
 
-#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.remove-cell-mark", "Remove Cell Mark"));
-#endif
+
     for (UOdysseyLayerCell* cell : selectedCells)
     {
         cell->SetMark(INDEX_NONE);
@@ -214,15 +257,57 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
         selectedCells.Add(cell);
     }
 
-#if WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.remove-cell-mark", "Remove Cell Mark"));
-#endif
+    FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.set-cell-mark", "Set Cell Mark"));
+
     for (UOdysseyLayerCell* cell : selectedCells)
     {
         cell->SetMark(iMarkId);
     }
 
     OdysseyLayerStackSelection::RegisterUndo(selectedCells, selectedCells);
+}
+
+bool
+FOdysseyAnimationGlobalCellsShortcuts::IsActionChecked_SetCellMark( int iMarkId )
+{
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if( !animation )
+        return false;
+
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( animation->GetLayerStack() );
+    if( !layerStack )
+        return false;
+
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>( layerStack->GetCurrentLayer() );
+    if( !currentLayer )
+        return false;
+
+    if( !currentLayer->IsEditable() )
+        return false;
+
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells( currentLayer );
+    if( selectedCells.IsEmpty() )
+    {
+        UOdysseyLayerCell* cell = currentLayer->GetCellAtFrame( mCurrentFrame.Get() );
+        if( !cell )
+            return false;
+
+        selectedCells.Add( cell );
+    }
+
+    for( UOdysseyLayerCell* cell : selectedCells )
+    {
+        TMap<int, FCellMark> map = cell->GetMarks();
+        TArray<FCellMark> cellMarks;
+        map.GenerateValueArray( cellMarks );
+        if( cellMarks.ContainsByPredicate( [iMarkId]( const FCellMark& iCellMark )
+                                           {
+                                               return iCellMark.Index == iMarkId;
+                                           } ) )
+            return true;
+    }
+
+    return false;
 }
 
 void
@@ -277,7 +362,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMarkAtFrame(FCellMark iMark
     if( !cell )
         return;
 
-    FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.remove-cell-mark-at-frame", "Remove Cell Mark at Frame"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.set-cell-mark-at-frame", "Set Cell Mark at Frame"));
 
     TMap<int, FCellMark> marks = cell->GetMarks();
     int32 index_in_cell = cell->FrameInLayerToIndexInCell( mCurrentFrame.Get() );
@@ -295,6 +380,44 @@ bool
 FOdysseyAnimationGlobalCellsShortcuts::CanAction_BreakAndClearCell()
 {
     return true;
+}
+
+bool
+FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveAllCellMarks()
+{
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if( !animation )
+        return false;
+
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( animation->GetLayerStack() );
+    if( !layerStack )
+        return false;
+
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>( layerStack->GetCurrentLayer() );
+    if( !layer )
+        return false;
+
+    if( !layer->IsEditable() )
+        return false;
+
+    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells( layer );
+    if( selectedCells.IsEmpty() )
+    {
+        UOdysseyLayerCell* cell = layer->GetCellAtFrame( mCurrentFrame.Get() );
+        if( !cell )
+            return false;
+
+        selectedCells.Add( cell );
+    }
+
+    int mark_count = Algo::TransformAccumulate( selectedCells,
+                                                []( const UOdysseyLayerCell* iCell )
+                                                {
+                                                    return iCell->GetMarks().Num();
+                                                },
+                                                0 );
+
+    return !!mark_count;
 }
 
 bool

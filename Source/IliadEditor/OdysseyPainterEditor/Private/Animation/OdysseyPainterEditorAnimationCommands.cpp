@@ -74,7 +74,9 @@ FOdysseyPainterEditorAnimationCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( DecreaseNCellExposure, TimelineShortcuts, "Decrease Cell Exposure by N", "Decrease Current or Selected Cells Exposure by N frame\n(N is a settings)", EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( SetCellExposure, TimelineShortcuts, "Set Cell Exposure", "Set Current or Selected Cells Exposure", EUserInterfaceActionType::Button, FInputChord());
 
-    UI_BUNDLE_COMMAND( RemoveCellMark, TimelineShortcuts, "Remove Cell Mark", "Removes any cell mark applied on the selected cells", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( RemoveAllCellMarks, TimelineShortcuts, "Remove All Cell Marks", "Remove all cell marks applied on the current or selected cells", EUserInterfaceActionType::Button, FInputChord());
+
+    UI_BUNDLE_COMMAND( RemoveCellMark, TimelineShortcuts, "Remove Cell Mark", "Remove any cell mark applied on the first frame in the selected cells", EUserInterfaceActionType::Button, FInputChord());
 
     for (int i = 0; i < 12; i++)
     {
@@ -84,16 +86,16 @@ FOdysseyPainterEditorAnimationCommands::RegisterCommands()
               this->AsShared()
             , FName( *FString::Printf( TEXT( "SetCellMark-%d" ), i + 1 ))
             , FText::Format( LOCTEXT( "commands.set-cell-mark.label", "Set Cell Mark #{0}"), FText::AsNumber(i + 1, &options) )
-            , FText::Format( LOCTEXT( "commands.set-cell-mark.tooltip", "Sets the Cell Mark #{0} on selected cells"), FText::AsNumber(i + 1, &options))
+            , FText::Format( LOCTEXT( "commands.set-cell-mark.tooltip", "Set the Cell Mark #{0} on the first frame in selected cells"), FText::AsNumber(i + 1, &options))
             , TimelineShortcuts
         )
-        .UserInterfaceType( EUserInterfaceActionType::Button )
+        .UserInterfaceType( EUserInterfaceActionType::Check )
         .DefaultChord( FInputChord() );
 
         SetCellMark.Add(commandInfo);
     }
 
-    UI_BUNDLE_COMMAND( RemoveCellMarkAtFrame, TimelineShortcuts, "Remove Cell Mark at Frame", "Removes any cell mark applied on the current frame", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( RemoveCellMarkAtFrame, TimelineShortcuts, "Remove Cell Mark at Frame", "Remove any cell mark applied on the current frame", EUserInterfaceActionType::Button, FInputChord());
 
     for (int i = 0; i < 12; i++)
     {
@@ -103,7 +105,7 @@ FOdysseyPainterEditorAnimationCommands::RegisterCommands()
               this->AsShared()
             , FName( *FString::Printf( TEXT( "SetCellMarkAtFrame-%d" ), i + 1 ))
             , FText::Format( LOCTEXT( "commands.set-cell-mark-at-frame.label", "Set Cell Mark at Frame #{0}"), FText::AsNumber(i + 1, &options) )
-            , FText::Format( LOCTEXT( "commands.set-cell-mark-at-frame.tooltip", "Sets the Cell Mark #{0} on the current frame"), FText::AsNumber(i + 1, &options))
+            , FText::Format( LOCTEXT( "commands.set-cell-mark-at-frame.tooltip", "Set the Cell Mark #{0} on the current frame"), FText::AsNumber(i + 1, &options))
             , TimelineShortcuts
         )
         .UserInterfaceType( EUserInterfaceActionType::Button )

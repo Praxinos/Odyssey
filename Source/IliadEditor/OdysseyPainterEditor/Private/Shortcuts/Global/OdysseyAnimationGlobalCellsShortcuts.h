@@ -31,15 +31,24 @@ public:
     void Action_BreakAndClearCell();
     bool CanAction_BreakAndClearCell();
 
+    // Remove all cell marks on current or all selected cells
+    void Action_RemoveAllCellMarks();
+    bool CanAction_RemoveAllCellMarks();
+
+    // Remove marks only on the first frame (head) in the current or selected cells
     void Action_RemoveCellMark();
     bool CanAction_RemoveCellMark();
 
+    // Set marks only on the first frame (head) in the current or selected cells
     void Action_SetCellMark(int iMarkId);
     bool CanAction_SetCellMark(int iMarkId);
+    bool IsActionChecked_SetCellMark(int iMarkId);
 
+    // Remove a mark only on the current frame (can be on any exposure)
     void Action_RemoveCellMarkAtFrame();
     bool CanAction_RemoveCellMarkAtFrame();
 
+    // Set a mark only on the current frame (can be on any exposure)
     void Action_SetCellMarkAtFrame(FCellMark iMarkId);
     bool CanAction_SetCellMarkAtFrame(FCellMark iMarkId);
 

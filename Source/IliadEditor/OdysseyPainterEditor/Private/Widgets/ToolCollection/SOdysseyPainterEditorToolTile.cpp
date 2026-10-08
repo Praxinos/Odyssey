@@ -434,6 +434,8 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
                             LOCTEXT( "tool-collection.tool-tile.context-menu.settings.tooltip", "Modify some settings." ),
                             FNewMenuDelegate::CreateLambda( [this]( FMenuBuilder& ioMenuBuilder )
                                                             {
+                                                                const FProperty* Property = UOdysseyPainterEditorSettings::StaticClass()->FindPropertyByName( GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorSettings, ShowToolSizeInToolCollectionTile ) );
+
                                                                 FMenuEntryParams settingsParams;
                                                                 settingsParams.DirectActions = FUIAction(
                                                                     FExecuteAction::CreateLambda( []() -> void
@@ -441,6 +443,7 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
                                                                                                       UOdysseyPainterEditorSettings* settings = GetMutableDefault<UOdysseyPainterEditorSettings>();
 
                                                                                                       settings->ShowToolSizeInToolCollectionTile = !settings->ShowToolSizeInToolCollectionTile;
+                                                                                                      settings->SaveConfig();
                                                                                                   } ),
                                                                     FCanExecuteAction(),
                                                                     FIsActionChecked::CreateLambda( []() -> bool
@@ -450,8 +453,8 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
                                                                                                         return settings->ShowToolSizeInToolCollectionTile;
                                                                                                     } )
                                                                 );
-                                                                settingsParams.LabelOverride = LOCTEXT( "tool-collection.tool-tile.context-menu.settings-show-tool-size-note.name", "Show Size" );
-                                                                settingsParams.ToolTipOverride = LOCTEXT( "tool-collection.tool-tile.context-menu.settings-show-tool-size-note.tooltip", "Show tool size in each tool tile." );
+                                                                settingsParams.LabelOverride = Property ? Property->GetDisplayNameText() : FText::GetEmpty();
+                                                                settingsParams.ToolTipOverride = Property ? Property->GetToolTipText( false ) : FText::GetEmpty();
                                                                 settingsParams.UserInterfaceActionType = EUserInterfaceActionType::ToggleButton;
                                                                 ioMenuBuilder.AddMenuEntry( settingsParams );
                                                             } )
