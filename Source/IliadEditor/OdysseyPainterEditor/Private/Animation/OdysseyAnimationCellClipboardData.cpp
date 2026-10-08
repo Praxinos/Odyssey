@@ -42,7 +42,6 @@ FOdysseyAnimationCellClipboardData::Paste(UOdysseyAnimationLayer* iLayer, int iF
     checkf(CanPaste(iLayer), TEXT("Can't Paste"));
 
     int cellIndex = INDEX_NONE;
-
     FInt32Range layerRange = iLayer->GetFrameRange();
     if (iFrame < layerRange.GetLowerBoundValue())
     {
@@ -50,6 +49,8 @@ FOdysseyAnimationCellClipboardData::Paste(UOdysseyAnimationLayer* iLayer, int iF
     }
     else if (iFrame > layerRange.GetUpperBoundValue())
     {
+        UOdysseyLayerCell* lastCell = iLayer->GetCells().Last();
+        lastCell->SetExposure(lastCell->GetExposure() + FMath::Max(1, (iFrame - layerRange.GetUpperBoundValue() - 1)));
         cellIndex = iLayer->GetCells().Num();
     }
     else
@@ -64,12 +65,50 @@ FOdysseyAnimationCellClipboardData::Paste(UOdysseyAnimationLayer* iLayer, int iF
         }
     }
 
+    int PreviousLayerOffset = iLayer->GetCellsOffset();
     for (int i = 0; i < mCellCopies.Num(); i++)
     {
         const FCellCopy& cellCopy = mCellCopies[i];
         UOdysseyLayerCell* cell = iLayer->CopyCell(cellCopy.mCell, cellIndex + i);
         cell->SetExposure(cellCopy.mExposure);
+
+        if (i == mCellCopies.Num() - 1 && cellIndex == 0)
+        {
+            int addedExposures = iLayer->GetFrameRange().GetUpperBoundValue() - layerRange.GetUpperBoundValue();
+            int offset = FMath::Max(0, FMath::Min(iFrame, iLayer->GetCellsOffset() - addedExposures));
+            iLayer->SetCellsOffset( offset );
+            cell->SetExposure(cellCopy.mExposure + FMath::Max(0, (PreviousLayerOffset - offset) - addedExposures));
+        }
+        else
+        {
+            cell->SetExposure(cellCopy.mExposure);
+        }
     }
+}
+
+
+
+void
+FOdysseyAnimationCellClipboardData::Move(UOdysseyAnimationLayer* iLayer, int iFrame) const
+{
+    Paste(iLayer, iFrame);
+
+    for (int i = 0; i < mCellCopies.Num(); i++)
+    {
+        const FCellCopy& cellCopy = mCellCopies[i];
+        UOdysseyLayer* Layer = cellCopy.mCell->GetLayer();
+        if (!Layer)
+            return;
+
+        int IndexInLayer = cellCopy.mCell->GetIndexInLayer();
+        if (IndexInLayer == 0)
+        {
+            Layer->SetCellsOffset(Layer->GetCellsOffset() + cellCopy.mCell->GetExposure());
+        }
+        Layer->RemoveCell(cellCopy.mCell);
+    }
+
+    mCellCopies.Empty();
 }
 
 bool

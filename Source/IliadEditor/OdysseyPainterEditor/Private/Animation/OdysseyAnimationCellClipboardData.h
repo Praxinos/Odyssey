@@ -43,5 +43,5 @@ private:
         TObjectPtr<UOdysseyLayerCell> mCell;
         int mExposure;
     };
-    TArray<FCellCopy> mCellCopies;
+    mutable TArray<FCellCopy> mCellCopies;
 };
