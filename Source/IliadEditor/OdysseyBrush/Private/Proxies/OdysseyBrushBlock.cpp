@@ -303,8 +303,8 @@ UOdysseyBlockProxyFunctionLibrary::BlendColor(
     , float Opacity
     , EOdysseyColorModel ColorModel
     , EOdysseyChannelDepth ChannelDepth
-    , EOdysseyColorBlendMode BlendMode
-    , EOdysseyAlphaBlendMode AlphaMode
+    , EOdysseyColorBlendMode ColorBlendMode
+    , EOdysseyAlphaBlendMode AlphaBlendMode
 )
 {
     if( !Sample.IsValid() )
@@ -326,7 +326,7 @@ UOdysseyBlockProxyFunctionLibrary::BlendColor(
     ::ULIS::FEvent eventBlend;
     ::ULIS::eBlendMode ULISBlendMode;
     ::ULIS::eAlphaMode ULISAlphaMode;
-    ULISUtils::GetULISBlendingModeFromBlendMode(BlendMode, AlphaMode, ULISBlendMode, ULISAlphaMode);
+    ULISUtils::GetULISBlendingModeFromBlendMode(ColorBlendMode, AlphaBlendMode, ULISBlendMode, ULISAlphaMode);
     ctx.BlendColor(
             Color.GetValue()
         , *dst

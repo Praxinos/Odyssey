@@ -127,8 +127,8 @@ public:
             , float Opacity = 1.f
             , EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA
             , EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8
-            , EOdysseyColorBlendMode BlendingMode = EOdysseyColorBlendMode::Normal
-            , EOdysseyAlphaBlendMode AlphaMode = EOdysseyAlphaBlendMode::Normal);
+            , UPARAM(DisplayName="Color Blend Mode") EOdysseyColorBlendMode BlendingMode = EOdysseyColorBlendMode::Normal
+            , UPARAM(DisplayName="Alpha Blend Mode") EOdysseyAlphaBlendMode AlphaMode = EOdysseyAlphaBlendMode::Normal);
 
     //Fills the given Sample with thge given Color. Requires an Odyssey Brush Color input.
     UFUNCTION( BlueprintPure

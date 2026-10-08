@@ -800,7 +800,7 @@ UOdysseyBrushAssetBase::DebugStamp()
 
 //static
 void
-UOdysseyBrushAssetBase::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow, bool iAntiAliasing, EOdysseyColorBlendMode BlendMode, EOdysseyAlphaBlendMode AlphaMode )
+UOdysseyBrushAssetBase::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, float X, float Y, float Flow, bool iAntiAliasing, EOdysseyColorBlendMode ColorBlendMode, EOdysseyAlphaBlendMode AlphaBlendMode )
 {
     if( !mEditedBlock)
         return;
@@ -848,8 +848,8 @@ UOdysseyBrushAssetBase::Stamp( FOdysseyBlockProxy Sample, FOdysseyPivot Pivot, f
     params.mEvent = eventConv;
     params.mFlow = Flow;
     params.mAntiAliasing = iAntiAliasing;
-    params.mBlendMode = BlendMode;
-    params.mAlphaMode = AlphaMode;
+    params.mBlendMode = ColorBlendMode;
+    params.mAlphaMode = AlphaBlendMode;
 
     ctx.Finish();
 

@@ -372,7 +372,7 @@ public:
     //Must be connected to an Event (i.e. "Event on Step").
     //Requires 3 mandatory input to work : Odyssey Block Reference and X|Y coordinates.
     UFUNCTION( BlueprintCallable, Category="Odyssey|Stamps", meta = ( DefaultToSelf="Target", HideSelfPin, HidePin="Target") )
-    void  Stamp( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample, UPARAM(DisplayName="Handle Position") FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, bool AntiAliasing = false, EOdysseyColorBlendMode BlendingMode = EOdysseyColorBlendMode::Normal, EOdysseyAlphaBlendMode AlphaMode = EOdysseyAlphaBlendMode::Normal );
+    void  Stamp( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample, UPARAM(DisplayName="Handle Position") FOdysseyPivot Pivot, float X, float Y, float Flow = 1.f, bool AntiAliasing = false, UPARAM(DisplayName="Color Blend Mode") EOdysseyColorBlendMode BlendingMode = EOdysseyColorBlendMode::Normal, UPARAM(DisplayName="Alpha Blend Mode") EOdysseyAlphaBlendMode AlphaMode = EOdysseyAlphaBlendMode::Normal );
 
     ::ULIS::FEvent StampInternal(FStampParams iStampParams);
 
