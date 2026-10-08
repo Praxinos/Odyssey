@@ -608,33 +608,47 @@ SOdysseyAnimationLayerImageTimeline::OnMainSubRowDragOver(const FGeometry& iGeom
     float frame = MousePositionToFrame(posX);
 
     UOdysseyLayerCell* cell = mLayer->GetCellAtFrame((int)frame);
-    if (!cell)
-        return FReply::Unhandled();
-
-    int cellStartFrame = cell->GetFrameRange().GetLowerBoundValue();
-    float position = (frame - cellStartFrame) / cell->GetExposure();
-    if (position < 0.5f)
+    if (cell)
     {
-        mDragPosition = cellStartFrame;
+        int cellStartFrame = cell->GetFrameRange().GetLowerBoundValue();
+        float position = (frame - cellStartFrame) / cell->GetExposure();
+        if (position < 0.5f)
+        {
+            mDragPosition = cellStartFrame;
+        }
+        else
+        {
+            mDragPosition = cellStartFrame + cell->GetExposure();
+        }
     }
     else
     {
-        mDragPosition = cellStartFrame + cell->GetExposure();
+        //We are outside the cells limits
+        mDragPosition = FMath::Max(0, int(frame + 0.5f));
+
+        /*
+        if (frame < mLayer->GetFrameRange().GetLowerBoundValue())
+        {
+            //We are before the first cell
+            mDragPosition = mLayer->GetFrameRange().GetLowerBoundValue();
+        }
+        else if (frame > mLayer->GetFrameRange().GetUpperBoundValue())
+        {
+            //We are after the last cell
+            mDragPosition = mLayer->GetFrameRange().GetUpperBoundValue() + 1;
+        }
+        */
     }
 
-    /*
-    if (FSlateApplication::Get().GetModifierKeys().IsControlDown())
+    if (FSlateApplication::Get().GetModifierKeys().IsShiftDown())
         mDragState = kDrag_Copy;
     else
         mDragState = kDrag_Move;
-    */
-   mDragState = kDrag_Copy; //For now we can only copy cells, we will be able to move them when layers will have holes
 
     //Check if the copy or move is actually allowed
     UOdysseyAnimationLayer* layer = operation->GetLayer();
     if (layer == mLayer)
     {
-
         const TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
         UOdysseyLayerCell* nextCell = layer->GetCellAtFrame(mDragPosition);
         UOdysseyLayerCell* previousCell = layer->GetCellAtFrame(mDragPosition - 1);
@@ -646,6 +660,12 @@ SOdysseyAnimationLayerImageTimeline::OnMainSubRowDragOver(const FGeometry& iGeom
             mDragState = kDrag_None;
             return FReply::Handled();
         }
+    }
+    else
+    {
+        //We force a copy if source layer and destination layer are different
+        //Because Moving Cells from one layer to another is weird, so we don't allow it
+        mDragState = kDrag_Copy;
     }
 
     return FReply::Handled();
@@ -677,8 +697,12 @@ SOdysseyAnimationLayerImageTimeline::OnMainSubRowDrop(const FGeometry& iGeometry
     if (mDragState == kDrag_Copy)
     {
         FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.dnd-copy", "Copy Cells"));
-
         operation->GetData().Paste(mLayer, mDragPosition);
+    }
+    else if (mDragState == kDrag_Move)
+    {
+        FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.dnd-move", "Move Cells"));
+        operation->GetData().Move(mLayer, mDragPosition);
     }
     mIsDraggingOver = false;
     return FReply::Handled();
