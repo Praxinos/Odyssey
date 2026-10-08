@@ -95,6 +95,11 @@ FArianeEditorViewportEdMode::Tick( FEditorViewportClient* ViewportClient, float 
 
 void FArianeEditorViewportEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI)
 {
+    if (FEditorViewportClient* ViewportClient = static_cast<FEditorViewportClient*>(Viewport->GetClient()))
+    {
+        ViewportClient->EngineShowFlags.SetSelection(false);
+        ViewportClient->EngineShowFlags.SetSelectionOutline(false);
+    }
 }
 
 bool FArianeEditorViewportEdMode::Select(AActor* InActor, bool bInSelected)
