@@ -517,16 +517,81 @@ UOdysseyPainterEditorRasterPaintBucketTool::ExtendToolbar( UToolMenu* iToolMenu 
             .Padding(10.f, 0.f, 10.f, 0.f)
             [
                 SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPaintBucketTool, BlendParameters), FSinglePropertyParams())
+                .Visibility_Lambda([this](){ return BlendParameters.GetIsComposite() ? EVisibility::Collapsed : EVisibility::Visible; })
                 .InnerPadding(10.f)
                 .ValueWidthOverride(100.f)
                 .OnOverridePropertyHandle_Lambda(
                     [](TSharedPtr<IPropertyHandle> iHandle)
                     {
-                        return iHandle->GetChildHandle("BlendingMode");
+                        return iHandle->GetChildHandle("BlendMode");
                     }
                 )
             ],
             FText()
+        )
+    );
+
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPaintBucketTool, BlendParameters), FSinglePropertyParams())
+                .Visibility_Lambda([this](){ return BlendParameters.GetIsComposite() ? EVisibility::Visible : EVisibility::Collapsed; })
+                .InnerPadding(10.f)
+                .ValueWidthOverride(100.f)
+                .OnOverridePropertyHandle_Lambda(
+                    [](TSharedPtr<IPropertyHandle> iHandle)
+                    {
+                        return iHandle->GetChildHandle("CompositeColorBlendMode");
+                    }
+                )
+            ],
+            FText()
+        )
+    );
+
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPaintBucketTool, BlendParameters), FSinglePropertyParams())
+                .Visibility_Lambda([this](){ return BlendParameters.GetIsComposite() ? EVisibility::Visible : EVisibility::Collapsed; })
+                .InnerPadding(10.f)
+                .ValueWidthOverride(100.f)
+                .OnOverridePropertyHandle_Lambda(
+                    [](TSharedPtr<IPropertyHandle> iHandle)
+                    {
+                        return iHandle->GetChildHandle("CompositeAlphaBlendMode");
+                    }
+                )
+            ],
+            FText()
+        )
+    );
+
+    section.AddEntry(
+        FToolMenuEntry::InitToolBarButton(
+            NAME_None,
+            FUIAction(
+                FExecuteAction::CreateLambda(
+                    [this]()
+                    {
+                        FOdysseyBlendParameters value = BlendParameters;
+                        value.SetEraserMode(!value.GetEraserMode());
+                        FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPaintBucketTool, BlendParameters), value);
+                    }
+                ),
+                FCanExecuteAction::CreateLambda([](){ return true;}),
+                FIsActionChecked::CreateLambda([this](){ return BlendParameters.GetEraserMode();})
+            ),
+            FText(),
+            LOCTEXT("raster-drawing-tool.toolbar.eraser-mode.tooltip", "Toggles the tool Eraser Mode"),
+            FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Eraser32"),
+            EUserInterfaceActionType::ToggleButton
         )
     );
 }
