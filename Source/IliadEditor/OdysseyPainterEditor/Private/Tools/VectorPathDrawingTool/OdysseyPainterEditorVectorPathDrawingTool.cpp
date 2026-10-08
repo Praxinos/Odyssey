@@ -53,7 +53,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
 {
     mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.PathDrawing64"));
 
-    mPathTracer.SetTracingWidth( (100.0f - TracingFidelityPercent) * 10.f );
+    mPathTracer.SetTracingWidth( (100.0f - TracingFidelityPercent) * 100.f * 10.f );
 
     mPathDrawingHUD = static_cast<FOdysseyPainterEditorVectorPathDrawingToolHUD*>( mBaseHUD.Get() );
 }
@@ -621,7 +621,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::PropertyChangedVector( FOdysseyVecto
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathDrawingTool, TracingFidelityPercent) )
     {
-        mPathTracer.SetTracingWidth( (100.0f - TracingFidelityPercent) * 10.f );
+        mPathTracer.SetTracingWidth( (100.0f - TracingFidelityPercent) / 100.f * 10.f );
     }
 
     //vectorEngine->ResetHUD(); // rebuilds quadtree if stitch mode changes
