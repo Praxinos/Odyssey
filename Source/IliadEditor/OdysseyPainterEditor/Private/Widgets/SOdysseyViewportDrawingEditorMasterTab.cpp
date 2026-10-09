@@ -37,7 +37,7 @@ SOdysseyViewportDrawingEditorMasterTab::Construct(const FArguments& InArgs, FOdy
 
     mOptions.Empty();
     mOptions.Add(MakeShared< EOdysseyViewportDrawingPaintingAdapterMethod >(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased));
-#if !PLATFORM_MAC
+#if PLATFORM_WINDOWS
     mOptions.Add(MakeShared< EOdysseyViewportDrawingPaintingAdapterMethod >(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyMeshBasedPlanar));
     //mOptions.Add(MakeShared< EOdysseyViewportDrawingPaintingAdapterMethod >(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyMeshBasedSphere));
     mOptions.Add(MakeShared< EOdysseyViewportDrawingPaintingAdapterMethod >(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyScreenBased));
@@ -301,10 +301,13 @@ FText SOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(EOdysseyViewportDr
     switch (iMethod)
     {
         case OdysseyTextureBased:        return LOCTEXT("master-tab.painting-adapter-method.texture-based.name", "Texture UV");
+#if PLATFORM_WINDOWS
         case OdysseyMeshBasedPlanar:     return LOCTEXT("master-tab.painting-adapter-method.mesh-based-planar.name", "Mesh (planar drawing)");
-        case OdysseyMeshBasedSphere:     return LOCTEXT("master-tab.painting-adapter-method.mesh-based-sphere.name", "Mesh (sphere drawing)");
+        //case OdysseyMeshBasedSphere:     return LOCTEXT("master-tab.painting-adapter-method.mesh-based-sphere.name", "Mesh (sphere drawing)");
         case OdysseyScreenBased:         return LOCTEXT("master-tab.painting-adapter-method.screen-based.name", "Screen");
+#endif
     }
+
     return LOCTEXT("master-tab.painting-adapter-method.invalid.name", "Invalid");
 }
 
@@ -313,10 +316,13 @@ FText SOdysseyViewportDrawingEditorMasterTab::GetTooltipAsText(EOdysseyViewportD
     switch (iMethod)
     {
         case OdysseyTextureBased:        return LOCTEXT("master-tab.painting-adapter-method.texture-based.tooltip", "Stamp will be based on texture (2D) UVs size and orientation");
+#if PLATFORM_WINDOWS
         case OdysseyMeshBasedPlanar:     return LOCTEXT("master-tab.painting-adapter-method.mesh-based-planar.tooltip", "Stamp will be based on mesh (3D) size and orientation. The Z axis is normal to hit plane on the mesh and will follow each edge");
-        case OdysseyMeshBasedSphere:     return LOCTEXT("master-tab.painting-adapter-method.mesh-based-sphere.tooltip", "Stamp will be based on mesh (3D) size and orientation. The stamp will be interpreted as a sphere and applied to the mesh");
+        //case OdysseyMeshBasedSphere:     return LOCTEXT("master-tab.painting-adapter-method.mesh-based-sphere.tooltip", "Stamp will be based on mesh (3D) size and orientation. The stamp will be interpreted as a sphere and applied to the mesh");
         case OdysseyScreenBased:         return LOCTEXT("master-tab.painting-adapter-method.screen-based.tooltip", "Stamp will be based on viewport screen view. Its size and orientation depend on the position of the view.");
+#endif
     }
+
     return LOCTEXT("master-tab.painting-adapter-method.invalid.tooltip", "Invalid");
 }
 

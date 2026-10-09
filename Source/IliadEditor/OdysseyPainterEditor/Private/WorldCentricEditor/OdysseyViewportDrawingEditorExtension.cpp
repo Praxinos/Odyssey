@@ -750,13 +750,26 @@ void FOdysseyViewportDrawingEditorExtension::SetPaintingAdapterMethod(EOdysseyVi
         case EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased :
             mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorTextureBasedAdapter>(this);
         break;
+#if PLATFORM_WINDOWS
         case EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyScreenBased:
             mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorScreenBasedAdapter>(this);
         break;
+        //case EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyMeshBasedSphere:
+        //    mPaintingAdapter = MakeShared<...>( this );
+        //    break;
         case EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyMeshBasedPlanar:
             mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorMeshBasedAdapter>(this);
         break;
+#endif
         default: mPaintingAdapter = nullptr; break;
+    }
+
+    // If an invalid method is given, just create a texture based adapter as it is valid every time
+    // (otherwise, access to mPaintingAdapter in all code should (must) be checked to manage a null adapter)
+    if( !mPaintingAdapter )
+    {
+        mPaintingAdapterMethod = EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased;
+        mPaintingAdapter = MakeShared<FOdysseyViewportDrawingEditorTextureBasedAdapter>( this );
     }
 
     mPaintingAdapter->Initialize();

@@ -23,9 +23,11 @@ UENUM(BlueprintType)
 enum EOdysseyViewportDrawingPaintingAdapterMethod
 {
     OdysseyTextureBased           UMETA(DisplayName = "Texture Based"),
+#if PLATFORM_WINDOWS
     OdysseyMeshBasedPlanar        UMETA(DisplayName = "Mesh Based (Planar)"),
-    OdysseyMeshBasedSphere        UMETA(DisplayName = "Mesh Based (Sphere)"),
+    //OdysseyMeshBasedSphere        UMETA(DisplayName = "Mesh Based (Sphere)"),
     OdysseyScreenBased            UMETA(DisplayName = "Screen Based"),
+#endif
 };
 
 class FOdysseyViewportDrawingEditorExtension
