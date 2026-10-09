@@ -168,11 +168,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         bool Debug;
 
     private:
-        //Deprecated UProperties
-        UPROPERTY()
-        eTracingFidelity TracingFidelity_DEPRECATED;
-
-    private:
         uint64 mTimeAtDown;
         uint64 mTimeAtUp;
         std::vector<FOdysseyVectorVertex*> mAddedVertexArray;

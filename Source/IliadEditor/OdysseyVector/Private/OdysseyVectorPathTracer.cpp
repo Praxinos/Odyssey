@@ -349,9 +349,7 @@ FOdysseyVectorPathTracer::MakeBezier( bool iForce )
                                                             : firstEdge->vector * edgeChainLength * 0.33f;
     ::ULIS::FVec2D lastEdgeVector = lastEdge->vector * edgeChainLength * 0.33f;
 
-    //UE_LOG(LogTemp,Warning,TEXT("firstEdge:0x%x lastEdge:0x%x, firstRecord:0x%x lastRecord:0x%x"),firstEdge,lastEdge,firstRecord, lastRecord);
-
-    //UE_LOG(LogTemp,Warning,TEXT("mPointBuffer:%d mRecordBuffer:%d mEdgeBuffer:%d %f"),mPointBuffer.size(), mRecordBuffer.size(),mEdgeBuffer.size(),edgeChainLength);
+    //UE_LOG(LogTemp,Warning,TEXT("mRecordBuffer:%d mEdgeBuffer:%d %f"),mPointBuffer.size(), mRecordBuffer.size(),mEdgeBuffer.size(),edgeChainLength);
 
     mCandidateBezier.inited = true;
     mCandidateBezier.firstRecordRadius = firstRecord->radius;
@@ -528,15 +526,15 @@ FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iPreviousVertex
                     ::ULIS::FVec2D PreviousSegmentHandleCoords = PreviousSegmentHandle->GetCoords();
                     ::ULIS::FVec2D CurrentSegmentHandleCoords = CurrentSegmentHandle->GetCoords();
 
-                    UE_LOG(LogTemp,Warning,TEXT("Direction:%f %f"),Direction.x, Direction.y);
-                    UE_LOG(LogTemp,Warning,TEXT("PreviousSegmentHandleCoords:%f %f"),PreviousSegmentHandleCoords.x, PreviousSegmentHandleCoords.y);
-                    UE_LOG(LogTemp,Warning,TEXT("CurrentSegmentHandleCoords:%f %f"),CurrentSegmentHandleCoords.x, CurrentSegmentHandleCoords.y);
+                    //UE_LOG(LogTemp,Warning,TEXT("Direction:%f %f"),Direction.x, Direction.y);
+                    //UE_LOG(LogTemp,Warning,TEXT("PreviousSegmentHandleCoords:%f %f"),PreviousSegmentHandleCoords.x, PreviousSegmentHandleCoords.y);
+                    //UE_LOG(LogTemp,Warning,TEXT("CurrentSegmentHandleCoords:%f %f"),CurrentSegmentHandleCoords.x, CurrentSegmentHandleCoords.y);
 
                     PreviousSegmentHandleCoords = Direction * -1 *(PreviousSegmentHandleCoords - PreviousVertexCoords).Distance() + PreviousVertexCoords;
                     CurrentSegmentHandleCoords = Direction * (CurrentSegmentHandleCoords - PreviousVertexCoords).Distance() + PreviousVertexCoords;
 
-                    UE_LOG(LogTemp,Warning,TEXT("PreviousSegmentHandleCoords:%f %f"),PreviousSegmentHandleCoords.x, PreviousSegmentHandleCoords.y);
-                    UE_LOG(LogTemp,Warning,TEXT("CurrentSegmentHandleCoords:%f %f"),CurrentSegmentHandleCoords.x, CurrentSegmentHandleCoords.y);
+                    //UE_LOG(LogTemp,Warning,TEXT("PreviousSegmentHandleCoords:%f %f"),PreviousSegmentHandleCoords.x, PreviousSegmentHandleCoords.y);
+                    //UE_LOG(LogTemp,Warning,TEXT("CurrentSegmentHandleCoords:%f %f"),CurrentSegmentHandleCoords.x, CurrentSegmentHandleCoords.y);
 
                     PreviousSegmentHandle->SetCoordsSilent(PreviousSegmentHandleCoords);
                     CurrentSegmentHandle->SetCoordsSilent(CurrentSegmentHandleCoords);
@@ -568,7 +566,6 @@ FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iPreviousVertex
 
         // must be done after segments are added to the path
         // so that the topology exists
-
         if( iPreviousVertex->IsHandleAligned() )
         {
             iPreviousVertex->SetHandleAligned( true );
