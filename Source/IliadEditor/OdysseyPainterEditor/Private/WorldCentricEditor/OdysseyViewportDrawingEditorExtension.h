@@ -19,7 +19,7 @@ class IOdysseyViewportDrawingEditorAdapter;
 class UMeshComponent;
 class FEditorViewportClient;
 
-UENUM()
+UENUM(BlueprintType)
 enum EOdysseyViewportDrawingPaintingAdapterMethod
 {
     OdysseyTextureBased           UMETA(DisplayName = "Texture Based"),
