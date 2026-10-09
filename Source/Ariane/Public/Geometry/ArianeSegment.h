@@ -45,11 +45,15 @@ struct ARIANE_API FArianeSegment
             ~FFraction(){};
             FFraction( FFractionStep* S0, FFractionStep* S1 )
                 : Steps { S0, S1 }
-                , Length( ( S1->Point->GetPosition() - S0->Point->GetPosition() ).Length() )
             {
+                FVector Vector = S1->Point->GetPosition() - S0->Point->GetPosition();
+
+                //Length = Vector.Length();
+                Vector.ToDirectionAndLength( Direction, Length );
             };
 
             FFractionStep* Steps[2];
+            FVector Direction;
             double Length;
         };
 

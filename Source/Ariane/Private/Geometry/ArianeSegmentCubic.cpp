@@ -166,7 +166,12 @@ FArianeSegmentCubic::BuildVariableAdaptive( TArray<FSubPoint>& SubPoints
         Dot[0] = StraightVectors[0].Dot(  MidVectors[0] );
         Dot[1] = StraightVectors[1].Dot(  MidVectors[1] );
 
-        //if( RecurseDepth < MinRecurse ) // <--- minimum recurse level
+        bool SubDiv0 = ( ( RecurseDepth < MinRecurse ) // <--- minimum recurse level
+                    || ( ( Dot[0] < DotLimit ) && ( RecurseDepth < MaxRecurse ) ) );
+        bool SubDiv1 = ( ( RecurseDepth < MinRecurse ) // <--- minimum recurse level
+                    || ( ( Dot[1] < DotLimit ) && ( RecurseDepth < MaxRecurse ) ) );
+
+        if( SubDiv0 ||SubDiv1 )
         {
             double RadiusAt = ( FromSubPoint.Radius + ToSubPoint.Radius ) * 0.5f;
             double SplitsAt = ( FromSubPoint.T      + ToSubPoint.T      ) * 0.5f;
@@ -176,8 +181,7 @@ FArianeSegmentCubic::BuildVariableAdaptive( TArray<FSubPoint>& SubPoints
 
             InOutPointCount++;
 
-            if ( ( RecurseDepth < MinRecurse ) // <--- minimum recurse level
-              || ( ( Dot[0] < DotLimit ) && ( RecurseDepth < MaxRecurse ) ) )
+            if ( SubDiv0 )
             {
                 FVector ChildBezier[4];
 
@@ -201,8 +205,7 @@ FArianeSegmentCubic::BuildVariableAdaptive( TArray<FSubPoint>& SubPoints
                                      , InOutPointCount );
             }
 
-            if ( ( RecurseDepth < MinRecurse ) // <--- minimum recurse level
-              || ( ( Dot[1] < DotLimit ) && ( RecurseDepth < MaxRecurse ) ) )
+            if ( SubDiv1 )
             {
                 FVector ChildBezier[4];
 
@@ -377,6 +380,9 @@ FArianeSegmentCubic::Extract( FArianeObject* NewSegmentOwner
 FVector
 FArianeSegmentCubic::GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormalize )
 {
+    FArianeVertex* Vertex0 = Vertices[0].GetVertex( Drawing );
+    FArianeVertex* Vertex1 = Vertices[1].GetVertex( Drawing );
+
     if( Vertex == Vertices[0].GetVertex( Drawing ) )
     {
         return GetTangentVectorAt( 0.0f, bNormalize );
@@ -393,15 +399,24 @@ FArianeSegmentCubic::GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNo
 FVector
 FArianeSegmentCubic::GetTangentVectorAt( double T, bool bNormalize )
 {
-    FVector Tangent = ::ULIS::CubicBezierTangentAtParameter( Vertices[0].GetVertex( Drawing )->GetPosition()
-                                                           , Handle0.GetPosition()
-                                                           , Handle1.GetPosition()
-                                                           , Vertices[1].GetVertex( Drawing )->GetPosition()
-                                                           , T );
+    FVector Bezier[4] = { Vertices[0].GetVertex( Drawing )->GetPosition()
+                        , Handle0.GetPosition()
+                        , Handle1.GetPosition()
+                        , Vertices[1].GetVertex( Drawing )->GetPosition() };
+    FVector Tangent = ::ULIS::CubicBezierTangentAtParameter( Bezier[0]
+                                                            , Bezier[1]
+                                                            , Bezier[2]
+                                                            , Bezier[3]
+                                                            , T );
 
-    if( Tangent.IsNearlyZero() )
+    if( ( T == 0.0f ) && ( Bezier[0] == Bezier[1] ) )
     {
-        Tangent = ( Vertices[1].GetVertex( Drawing )->GetPosition() - Vertices[0].GetVertex( Drawing )->GetPosition() );
+        Tangent = Bezier[2] - Bezier[0];
+    }
+
+    if( ( T == 1.0f ) && ( Bezier[3] == Bezier[2] ) )
+    {
+        Tangent = Bezier[3] - Bezier[1];
     }
 
     if( bNormalize )

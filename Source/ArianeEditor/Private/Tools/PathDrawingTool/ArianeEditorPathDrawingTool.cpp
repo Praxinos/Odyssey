@@ -35,12 +35,15 @@ UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
     : Size( 25.0f )
     , bPressureSensitivity( false )
     , LineType ( EArianePathLineType::Flat )
+    , TracingFidelity( EArianeEditorPathDrawingToolTracingFidelity::Higher )
     , SegmentType ( EArianeEditorPathDrawingToolSegmentType::CubicBezier )
     , MaterialInterface ( nullptr )
     , EditedPath(nullptr)
     , Cursor( EMouseCursor::Type::Crosshairs )
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PathDrawing64");
+
+    PathTracer.SetTracingWidth( (double) TracingFidelity );
 
     bHasContextMenu = true;
 }
@@ -294,19 +297,21 @@ EditedPath->AddSegment( EditedPath->AllocCubicSegment( TestVertex1
                                                      , TestVertex2 ) );
 */
 ///////////////////////
-                if( Vertex0 == nullptr )
-                {
-                    Vertex0 = EditedPath->AllocVertex( localCoords
-                                                      , localNormal
-                                                      , Radius
-                                                      , EArianeAllocationModel::InstancedStruct );
 
-                    EditedPath->AddVertex( Vertex0 );
-                }
                                             // if both points are at the same location, the segment will have length 0
                                             // which will result in a broken continuity (angled continuity). Quick-fix to prevent this
-                if( localCoords != Vertex0->GetPosition() )
+                if( ( Vertex0 == nullptr ) || ( localCoords != Vertex0->GetPosition() ) )
                 {
+                    if( Vertex0 == nullptr )
+                    {
+                        Vertex0 = EditedPath->AllocVertex( localCoords
+                                                          , localNormal
+                                                          , Radius
+                                                          , EArianeAllocationModel::InstancedStruct );
+
+                        EditedPath->AddVertex( Vertex0 );
+                    }
+
                     switch ( SegmentType )
                     {
                         case EArianeEditorPathDrawingToolSegmentType::Polyline :
@@ -318,36 +323,32 @@ EditedPath->AddSegment( EditedPath->AllocCubicSegment( TestVertex1
 
                             EditedPath->AddVertex( Vertex1 );
 
-                            if( Vertex0 )
-                            {
-                                FArianeSegment *Segment = EditedPath->AllocSegment( Vertex0
-                                                                                  , Vertex1
-                                                                                  , EArianeAllocationModel::InstancedStruct );
+                            FArianeSegment *Segment = EditedPath->AllocSegment( Vertex0
+                                                                              , Vertex1
+                                                                              , EArianeAllocationModel::InstancedStruct );
 
-                                EditedPath->AddSegment( Segment );
-                            }
+                            EditedPath->AddSegment( Segment );
                         }
                         break;
 
                         case EArianeEditorPathDrawingToolSegmentType::CubicBezier :
                         {
-                            if( Vertex0 )
-                            {
-                                FArianeSegment* NewSegment = PathTracer.Trace( View
-                                                                             , PreviousSegment
-                                                                             , CurrentSegment ? CurrentSegment->GetVertex(0)
-                                                                                              : Vertex0
-                                                                             , CurrentSegment
-                                                                             , ViewportPosition
-                                                                             , localCoords
-                                                                             , localNormal
-                                                                             , Radius );
+                            FArianeSegmentCubic* CurrentCubicSegment = static_cast<FArianeSegmentCubic*>(CurrentSegment);
 
-                                if( NewSegment != CurrentSegment )
-                                {
-                                    PreviousSegment = CurrentSegment;
-                                    CurrentSegment = NewSegment;
-                                }
+                            FArianeSegment* NewSegment = PathTracer.Trace( View
+                                                                         , PreviousSegment
+                                                                         , CurrentCubicSegment ? CurrentCubicSegment->GetVertex(0)
+                                                                                               : Vertex0
+                                                                         , CurrentCubicSegment
+                                                                         , ViewportPosition
+                                                                         , localCoords
+                                                                         , localNormal
+                                                                         , Radius );
+
+                            if( NewSegment != CurrentSegment )
+                            {
+                                PreviousSegment = CurrentSegment;
+                                CurrentSegment = NewSegment;
                             }
                         }
                         break;
@@ -463,6 +464,21 @@ bool
 UArianeEditorPathDrawingTool::SupportsColorType( EOdysseyPainterEditorColorType ColorType )
 {
     return true;
+}
+
+void
+UArianeEditorPathDrawingTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
+{
+    Super::PostEditChangeProperty(PropertyChangedEvent);
+    FName PropertyName = PropertyChangedEvent.GetPropertyName();
+    FName MemberPropertyName = PropertyChangedEvent.GetMemberPropertyName();
+
+    if( PropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPathDrawingTool, TracingFidelity) )
+    {
+        PathTracer.SetTracingWidth( (double) TracingFidelity );
+    }
+
+    return Super::PostEditChangeProperty( PropertyChangedEvent );
 }
 
 void

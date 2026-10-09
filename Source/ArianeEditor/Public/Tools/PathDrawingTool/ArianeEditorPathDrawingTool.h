@@ -28,6 +28,17 @@ enum class EArianeEditorPathDrawingToolSegmentType : uint8
     CubicBezier = 1,
 };
 
+UENUM()
+enum class EArianeEditorPathDrawingToolTracingFidelity: uint8
+{
+    Lowest  = 10,
+    Low     =  8,
+    Average =  6,
+    High    =  4,
+    Higher  =  2,
+    Highest =  1
+};
+
 UCLASS()
 class ARIANEEDITOR_API UArianeEditorPathDrawingTool : public UArianeEditorTool
 {
@@ -69,6 +80,7 @@ public:
     void Inactivate();
     virtual void DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
     virtual bool GetCursor( EMouseCursor::Type& OutCursor ) override;
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
 
 protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
@@ -103,6 +115,13 @@ public:
     UPROPERTY( EditAnywhere
              , Category = PathDrawingTool )
     EArianeEditorPathDrawingToolSegmentType SegmentType;
+
+    UPROPERTY( EditAnywhere
+             , Category = PathDrawingTool
+             , meta = ( ToolTip = "Tracing Fidelity"
+                      , EditCondition = "SegmentType == EArianeEditorPathDrawingToolSegmentType::CubicBezier"
+                      , EditConditionHides ) )
+    EArianeEditorPathDrawingToolTracingFidelity TracingFidelity;
 
     UPROPERTY( EditAnywhere
              , Category = PathDrawingTool )

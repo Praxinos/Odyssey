@@ -1343,16 +1343,16 @@ FArianePathGeometry3D::GetLeavingVectorAt( FArianeSegment* Segment
 }
 
 FVector
-FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
-                                         , double T
-                                         , bool bNormalize )
+GetTangentVectorAt( FArianeSegment* Segment
+                  , const FArianeSegment::FFractionStep& FractionStep
+                  , bool bNormalize )
 {
     FVector SegmentVector =  Segment->GetVertex(1)->GetPosition() - Segment->GetVertex(0)->GetPosition();
     FVector TangentVector = FVector::Zero();
 
-    if( ( T == 0.0f ) || ( T == 1.0f ) )
+    if( FractionStep.Point->HasBaseClass( FArianeVertex::StaticClass() ) )
     {
-        FArianeVertex* Vertex = Segment->GetVertex( static_cast<uint32>(T) );
+        FArianeVertex* Vertex = static_cast<FArianeVertex*>(FractionStep.Point);
         FVector AverageVector = FVector::Zero();
 
         if( Vertex->GetSegments().Num() == 2 )
@@ -1362,21 +1362,23 @@ FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
             FVector VectorBA = Segment->GetVectorLeavingFromVertex( Vertex, true );
             FVector VectorBC = OtherSegment->GetVectorLeavingFromVertex( Vertex, true );
 
-            TangentVector = SegmentVector.Dot( VectorBA ) > 0.0f ? (   VectorBA - VectorBC )
-                                                                 : ( - VectorBA + VectorBC );
+            TangentVector = ( FractionStep.T == 0.0f ) ? (   VectorBA - VectorBC )
+                                                       : ( - VectorBA + VectorBC );
         }
+        else
+        {
+            TangentVector = Segment->GetTangentVectorAt( FractionStep.T, true );
+        }
+    }
+    else
+    {
+        TangentVector = Segment->GetTangentVectorAt( FractionStep.T, true );
     }
 
     if( bNormalize )
     {
         TangentVector.Normalize();
     }
-
-    if( TangentVector.IsNearlyZero() )
-    {
-        TangentVector = Segment->GetTangentVectorAt( T, true );
-    }
-
 /*
     if( TangentVector.IsNearlyZero(0.001f) )
     {
@@ -1392,6 +1394,50 @@ FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
     }
 */
     return TangentVector;
+}
+
+// static
+FVector
+GetAverageFractionVector( FArianeSegment* Segment
+                        , const FArianeSegment::FFraction* Fraction0
+                        , const FArianeSegment::FFractionStep& FractionStep
+                        , const FArianeSegment::FFraction* Fraction1
+                        , bool bNormalize  )
+{
+    FVector Average = FVector::Zero();
+
+    if( FractionStep.Point->HasBaseClass( FArianeVertex::StaticClass() ) )
+    {
+        FArianeVertex* Vertex = static_cast<FArianeVertex*>(FractionStep.Point);
+        FArianeSegment* OtherSegment = Vertex->GetOtherSegment( Segment );
+        FVector VectorBA = Segment->GetVectorLeavingFromVertex( Vertex, true );
+        FVector VectorBC = OtherSegment ? OtherSegment->GetVectorLeavingFromVertex( Vertex, true )
+                                        : FVector::Zero();
+
+        Average = ( FractionStep.T == 0.0f ) ? (   VectorBA - VectorBC )
+                                             : ( - VectorBA + VectorBC );
+    }
+    else
+    {
+        if( Fraction0 && Fraction1 )
+        {
+            Average = Fraction0->Direction + Fraction1->Direction;
+        }
+        else
+        {
+            if( Fraction0 )
+            {
+                Average = Fraction0->Direction;
+            }
+
+            if( Fraction1 )
+            {
+                Average = Fraction1->Direction;
+            }
+        }
+    }
+
+    return bNormalize ? Average.GetSafeNormal() : Average;
 }
 
 void
@@ -1419,16 +1465,26 @@ FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
     TArray<uint32>& IndexCache = const_cast<TArray<uint32>&>(Segment->GetIndexCache());
     const TArray<FArianeSegment::FFraction>& Fractions = Segment->GetFractions();
     const TArray<FArianeSegment::FFractionStep>& FractionSteps = Segment->GetFractionSteps();
+    const FArianeSegment::FFraction* PrevFraction = nullptr;
 
     for( int32 FractionStepIndex = 0; FractionStepIndex < FractionSteps.Num(); FractionStepIndex++ )
     {
+        int32 FractionNextStepIndex = FractionStepIndex + 1;
         const FArianeSegment::FFractionStep& Step = FractionSteps[FractionStepIndex];
+        const FArianeSegment::FFraction* CurrFraction = ( FractionStepIndex == Fractions.Num() ) ? nullptr
+                                                                                                 : &Fractions[FractionStepIndex];
         uint32 ModelVertexOffset = FractionStepIndex * 2;
         double PointRadius = Radius0 + ( DeltaRadius * Step.T );
         FVector PerpendicularVector = Normal0 + ( DeltaNormal * Step.T );
-        FVector TangentVector = GetTangentVectorAt( Segment
-                                                  , Step.T
-                                                  , true );
+        FVector TangentVector = Segment->IsAutoFractioned() ? GetTangentVectorAt( Segment
+                                                                                , Step
+                                                                                , true )
+                                                            : GetAverageFractionVector( Segment
+                                                                                      , PrevFraction
+                                                                                      , Step
+                                                                                      , CurrFraction
+                                                                                      , true );
+        //FVector TangentVector = GetTangentVectorAt( Segment, Step.T, true );
         double VertexU = (double) FractionStepIndex / ( FractionSteps.Num() - 1 );
 
         if( PerpendicularVector.Normalize() )
@@ -1465,6 +1521,8 @@ FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
             ModelVertex1->TangentX = TangentVector;
             ModelVertex1->TangentZ = PerpendicularVector;
         }
+
+        PrevFraction = CurrFraction;
     }
 
     for( int32 FractionIndex = 0; FractionIndex < Fractions.Num(); FractionIndex++ )
@@ -1526,6 +1584,7 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
     double SegmentDeltaT = SegmentT1 - SegmentT0;
     uint32 QuadDivisions = 12;
     uint32 VertexDivisions = QuadDivisions + 1;
+    const FArianeSegment::FFraction* PrevFraction = nullptr;
 
     // Nb: The tube is not a closed one we duplicate the vertex at seam, this is required for proper UV coords
     // That's why we create "Divisions + 1" vertices for each ring
@@ -1557,12 +1616,20 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
 
     for( int32 FractionStepIndex = 0; FractionStepIndex < FractionSteps.Num(); FractionStepIndex++ )
     {
+        int32 FractionNextStepIndex = FractionStepIndex + 1;
         const FArianeSegment::FFractionStep& Step = FractionSteps[FractionStepIndex];
+        const FArianeSegment::FFraction* CurrFraction = ( FractionStepIndex == Fractions.Num() ) ? nullptr
+                                                                                                 : &Fractions[FractionStepIndex];
         uint32 ModelVertexOffset = FractionStepIndex * VertexDivisions;
         double PointRadius = SegmentRadius0 + ( SegmentDeltaRadius * Step.T );
-        FVector TangentVector = GetTangentVectorAt( Segment
-                                                  , Step.T
-                                                  , true );
+        FVector TangentVector = Segment->IsAutoFractioned() ? GetTangentVectorAt( Segment
+                                                                                , Step
+                                                                                , true )
+                                                            : GetAverageFractionVector( Segment
+                                                                                      , PrevFraction
+                                                                                      , Step
+                                                                                      , CurrFraction
+                                                                                      , true );
         double VertexU = (double) FractionStepIndex / ( FractionSteps.Num() - 1 );
         //FVector LeadingVector = GetLeavingVectorAt( Segment
         //                                          , Step.T );
@@ -1577,21 +1644,11 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
         {
             PerpendicularVector = InOutPreviousPerpendicularVector;
         }
-/*
-        UE_LOG( LogTemp, Warning, TEXT("PerpendicularVector: %X %f %f %f - TangentVector: %f %f %f ")
-                                                                          , Segment
-                                                                          , PerpendicularVector.X
-                                                                          , PerpendicularVector.Y
-                                                                          , PerpendicularVector.Z
-                                                                          , TangentVector.X
-                                                                          , TangentVector.Y
-                                                                          , TangentVector.Z );
-*/
+
         if( PerpendicularVector.IsZero() == false )
         {
             float AngleInDegrees = 0.0f;
             float StepAngle = ( float ) 360 / QuadDivisions;
-            //FVector PerpendicularAverage = ( InOutPreviousPerpendicularVector + PerpendicularVector ) * 0.5f;
 
             for( uint32 j = 0; j < VertexDivisions; j++ )
             {
@@ -1618,6 +1675,8 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
         }
 
         InOutPreviousPerpendicularVector = PerpendicularVector;
+
+        PrevFraction = CurrFraction;
     }
 
     SegmentVertices[1]->SetNormal( InOutPreviousPerpendicularVector );

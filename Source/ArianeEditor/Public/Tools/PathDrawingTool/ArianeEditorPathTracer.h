@@ -92,7 +92,7 @@ public:
     FArianeSegment* Trace( FSceneView *View
                          , FArianeSegment* PreviousSegment
                          , FArianeVertex* StartingVertex
-                         , FArianeSegment* CurrentSegment
+                         , FArianeSegmentCubic* CurrentCubicSegment
                          , const FVector2D& ViewportPosition
                          , const FVector& LocalPosition
                          , const FVector& LocalNormal

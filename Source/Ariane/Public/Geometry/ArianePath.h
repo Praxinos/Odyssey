@@ -62,9 +62,6 @@ class ARIANE_API FArianePathGeometry3D : public FArianeObjectGeometry3D
                                , double SegmentT0
                                , double SegmentT1
                                , FVector& InOutPreviousPerpendicularVector );
-        FVector GetTangentVectorAt( FArianeSegment* Segment
-                                  , double T
-                                  , bool bNormalize );
         FVector GetLeavingVectorAt( FArianeSegment* Segment
                                   , double T );
 };
