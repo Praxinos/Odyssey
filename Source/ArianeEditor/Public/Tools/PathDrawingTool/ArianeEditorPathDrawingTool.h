@@ -106,6 +106,11 @@ public:
 
     UPROPERTY( EditAnywhere
              , Category = PathDrawingTool )
+    bool UseMaterial;
+
+    UPROPERTY( EditAnywhere
+             , Category = PathDrawingTool
+             , meta = (EditCondition = "UseMaterial", EditConditionHides, DisplayName = "Material") )
     UMaterialInterface* MaterialInterface;
 
 
