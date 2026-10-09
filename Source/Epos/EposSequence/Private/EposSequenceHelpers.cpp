@@ -93,9 +93,6 @@ BoardSequenceHelpers::GetInnerSequence( IMovieScenePlayer& iPlayer, const UMovie
     if( !IsValid( &iSubSection ) )
         return result;
 
-    result.mInnerSequence = iSubSection.GetSequence();
-    result.mInnerMovieScene = result.mInnerSequence ? result.mInnerSequence->GetMovieScene() : nullptr;
-
     //---
 
     const FMovieSceneSequenceID             thisSequenceID = iSequenceId;
@@ -104,6 +101,11 @@ BoardSequenceHelpers::GetInnerSequence( IMovieScenePlayer& iPlayer, const UMovie
 
     if( !hierarchy )
         return result;
+
+    result.mInnerSequence = iSubSection.GetSequence();
+    result.mInnerMovieScene = result.mInnerSequence ? result.mInnerSequence->GetMovieScene() : nullptr;
+
+    //-
 
     const FMovieSceneSequenceHierarchyNode* thisSequenceNode = hierarchy->FindNode( thisSequenceID );
 
