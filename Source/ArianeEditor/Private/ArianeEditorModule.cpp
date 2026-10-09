@@ -263,15 +263,50 @@ FArianeEditorModule::RegisterToolbarButton(TSharedPtr<ILevelEditor> InLevelEdito
     UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu( "LevelEditor.LevelEditorToolBar.AssetsToolBar");
     FToolMenuSection& ToolbarSection = ToolbarMenu->FindOrAddSection("Content");
 
-    FToolMenuEntry ArianeLauncherEntry = FToolMenuEntry::InitToolBarButton( TEXT("Launch Ariane")
-                                                                            , FExecuteAction::CreateLambda( [this]()
-                                                                            {
-                                                                                ActivateEdMode( nullptr );
-                                                                                //GetModeManager()->ActivateMode( EM_ArianeEditorViewportEdModeId );
-                                                                            } )
-                                                                            , LOCTEXT( "arianeeditor-launch.label", "Launch Ariane" )
-                                                                            , LOCTEXT( "arianeeditor-launch.tooltip", "Launch Ariane" )
-                                                                            , FSlateIcon( FArianeEditorStyle::Get().GetStyleSetName(), "ArianeEditor.EdMode24" ) );
+    FToolMenuEntry ArianeLauncherEntry = FToolMenuEntry::InitToolBarButton( TEXT("Launch Ariane"),
+        FUIAction(
+            FExecuteAction::CreateLambda([this]()
+                {
+                    FEditorModeID ModeID = FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId;
+                    FEditorModeTools& ModeTools = GLevelEditorModeTools();
+
+                    if (ModeTools.IsModeActive(FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId))
+                    {
+                        ModeTools.DeactivateMode(FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId);
+                    }
+                    else
+                    {
+                        AArianePainting3DActor* PaintingActor = nullptr;
+
+                        if (GEditor)
+                        {
+                            USelection* SelectedActors = GEditor->GetSelectedActors();
+
+                            for (FSelectionIterator It(*SelectedActors); It; ++It)
+                            {
+                                if (AArianePainting3DActor* Actor =
+                                    Cast<AArianePainting3DActor>(*It))
+                                {
+                                    PaintingActor = Actor;
+                                    break;
+                                }
+                            }
+                        }
+
+                        ActivateEdMode(PaintingActor);
+                    }
+                }),
+
+            FCanExecuteAction(),
+
+            FIsActionChecked::CreateLambda([this]()
+                {
+                    return GLevelEditorModeTools().IsModeActive( FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId );
+                })
+        ),
+        LOCTEXT("arianeeditor-launch.label", "Launch Ariane"),
+        LOCTEXT("arianeeditor-launch.tooltip", "Launch Ariane"),
+        FSlateIcon( FArianeEditorStyle::Get().GetStyleSetName(), "ArianeEditor.EdMode24" ), EUserInterfaceActionType::ToggleButton, NAME_None );
 
     ToolbarSection.AddEntry( ArianeLauncherEntry );
 }
