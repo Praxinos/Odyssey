@@ -38,7 +38,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     , Opacity( 1.0f )
     , Brush( nullptr )
     , TracingType( eTracingType::Organic )
-    , TracingFidelityPercent( 100.0f )
+    , TracingFidelity( eTracingFidelity::Highest )
     , Radius( 5.0f )
     , PressureSensitive( true )
     //, Absolute( true )
@@ -53,7 +53,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
 {
     mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.PathDrawing64"));
 
-    mPathTracer.SetTracingWidth( (100.0f - TracingFidelityPercent) * 10.f );
+    mPathTracer.SetTracingWidth( (double) TracingFidelity );
 
     mPathDrawingHUD = static_cast<FOdysseyPainterEditorVectorPathDrawingToolHUD*>( mBaseHUD.Get() );
 }
@@ -619,9 +619,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::PropertyChangedVector( FOdysseyVecto
         }
     }
 
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathDrawingTool, TracingFidelityPercent) )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathDrawingTool, TracingFidelity) )
     {
-        mPathTracer.SetTracingWidth( (100.0f - TracingFidelityPercent) * 10.f );
+        mPathTracer.SetTracingWidth( (double) TracingFidelity );
     }
 
     //vectorEngine->ResetHUD(); // rebuilds quadtree if stitch mode changes
@@ -658,7 +658,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::ExtendToolbar( UToolMenu* iToolMenu 
             SNew(SBox)
             .Padding(10.f, 0.f, 10.f, 0.f)
             [
-                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPathDrawingTool, TracingFidelityPercent ), FSinglePropertyParams())
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPathDrawingTool, TracingFidelity ), FSinglePropertyParams())
                 .InnerPadding(10.f)
                 .ValueWidthOverride(100.f)
             ],
