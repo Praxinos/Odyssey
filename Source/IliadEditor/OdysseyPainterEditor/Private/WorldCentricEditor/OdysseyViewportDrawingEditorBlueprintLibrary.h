@@ -89,7 +89,7 @@ public:
 
     /** Set the painting adapter method */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor|ViewportDrawing")
-    static void SetOdysseyViewportDrawingPaintingAdapterMethod( EOdysseyViewportDrawingPaintingAdapterMethod NewMethod );
+    static void SetOdysseyViewportDrawingPaintingAdapterMethod( EOdysseyViewportDrawingPaintingAdapterMethod Method );
 
     //--- Actor
 
@@ -99,7 +99,7 @@ public:
 
     /** Set the selected actor */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor|ViewportDrawing")
-    static void SetOdysseyViewportDrawingActor( AActor* NewActor );
+    static void SetOdysseyViewportDrawingActor( AActor* Actor );
 
     //--- Component
 
@@ -109,7 +109,7 @@ public:
 
     /** Set the selected component in the actor */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor|ViewportDrawing")
-    static void SetOdysseyViewportDrawingComponent( UMeshComponent* NewComponent );
+    static void SetOdysseyViewportDrawingComponent( UMeshComponent* Component );
 
     /** Get the selectable components in the actor */
     UFUNCTION(BlueprintPure, Category="Odyssey|Editor|ViewportDrawing")
@@ -123,7 +123,7 @@ public:
 
     /** Set the selected material in the component */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor|ViewportDrawing")
-    static void SetOdysseyViewportDrawingMaterial( UMaterialInterface* NewMaterial );
+    static void SetOdysseyViewportDrawingMaterial( UMaterialInterface* Material );
 
     /** Get the selectable material in the component */
     UFUNCTION( BlueprintPure, Category = "Odyssey|Editor|ViewportDrawing" )
@@ -137,7 +137,7 @@ public:
 
     /** Set the selected material in the component */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor|ViewportDrawing")
-    static void SetOdysseyViewportDrawingTexture( UTexture* NewTexture );
+    static void SetOdysseyViewportDrawingTexture( UTexture* Texture );
 
     /** Get the selectable textures in the material */
     UFUNCTION( BlueprintPure, Category = "Odyssey|Editor|ViewportDrawing" )
