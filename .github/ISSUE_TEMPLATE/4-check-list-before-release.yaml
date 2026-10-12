@@ -340,8 +340,29 @@ body:
         - label: "Déplacer le pivot pour tourner un objet"
         - label: "Tester le clic droit"
         - label: "Faire un group paint et en modifier les traits"
-        - label: "Sélectionner plusieurs paths dans Vector Scene Tree View"
 
+  - type: checkboxes
+    id: Vector-Scene-Tree-View
+    attributes:
+      label: "Vector Scene Tree View"
+      options:
+        - label: "UNFINISHED"
+        - label: "Sélectionner plusieurs paths dans Vector Scene Tree View"
+        - label: "RMB : Rename"
+        - label: "RMB : Make Paint Group" 
+        - label: "RMB : Group" 
+        - label: "RMB : Ungroup" 
+        - label: "RMB : Copy" 
+        - label: "RMB : Paste" 
+        - label: "RMB : Copy Transform"
+        - label: "RMB : Paste Transform" 
+        - label: "RMB : Delete Selection" 
+        - label: "RMB : Group and Add Inbetweener Tag"
+        - label: "RMB : Add Inbetweener Tag" 
+        - label: "RMB : Remove Inbetweener Tag" 
+        - label: "RMB : Commit Inbetweener Tag"
+        - label: "RMB : Apply Transform" 
+         
   - type: checkboxes
     id: tools-vector-vertex-mode
     attributes:
