@@ -12,18 +12,17 @@ body:
   - type: markdown
     attributes:
       value: |
-        ![Version](https://img.shields.io/badge/Version-yellow)
         # Version 3.0 du 12/10/2026
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00AAFF}\textnormal{Texture Editor}}$
+        ## Texture Editor
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: texture-editor
