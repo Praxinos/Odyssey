@@ -13,14 +13,14 @@ body:
     attributes:
       value: |
         # Version 3.0 du 12/10/2026
-        #  
-        # 
+        # ___
+        #  _
 
   - type: markdown
     attributes:
       value: |
         ## Texture Editor
-        ## 
+        ## __
 
   - type: markdown
     attributes:
