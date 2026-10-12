@@ -12,7 +12,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        ![Version](https://img.shields.io/badge/Version-3.0-du-12/10/2026-yellow)
+        ![Version](https://img.shields.io/badge/Version-yellow)
         # Version 3.0 du 12/10/2026
 
   - type: markdown
