@@ -858,7 +858,7 @@ body:
         ## ---------------------------------------------------------------------
 
   - type: checkboxes
-    id: tools-vector-object-mode
+    id: ariane-tools-vector-object-mode
     attributes:
       label: "Vector tools - Object Mode"
       options:
@@ -905,7 +905,7 @@ body:
         - label: "Sélectionner plusieurs paths dans Vector Scene Tree View"
 
   - type: checkboxes
-    id: tools-vector-vertex-mode
+    id: ariane-tools-vector-vertex-mode
     attributes:
       label: "Vector tools - Vertex Mode"
       options:
