@@ -48,7 +48,6 @@ public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayChildrenChanged, UOdysseyLayer*);
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayOptionsChanged, UOdysseyLayer*);
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayCellNamesChanged, UOdysseyLayer*);
-    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCellsChanged, UOdysseyLayer*, bool /*IsInteractive*/);
 
     static FOnDisplayChildrenChanged& OnDisplayChildrenChanged();
     static FOnDisplayOptionsChanged& OnDisplayOptionsChanged();
@@ -56,6 +55,7 @@ public:
     FSimpleMulticastDelegate& OnLighttableChanged();
 #endif
 
+    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCellsChanged, UOdysseyLayer*, bool /*IsInteractive*/);
     /**
      * Called when cells are changed
      * Not called on undo/redo
