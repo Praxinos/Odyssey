@@ -886,6 +886,22 @@ body:
         ## ---------------------------------------------------------------------
 
   - type: checkboxes
+    id: ariane-ED-mode
+    attributes:
+      label: "Ariane EDmode"
+      options:
+        - label: "check if Ariane icon works"
+        - label: "inteface greyed out if no Ariane Actor si selected"
+        - label: "vérifier s'il n'y a pas concurrence avec les raccourcis d'UE"
+        - label: "Check Add Layer"
+        - label: "Check Add Folder"
+        - label: "transform Widget working in the same way as other widgets of UE"
+        - label: "Check grids"
+        - label: "Check the quality of the linetube when you are very far"
+        - label: "Check materials selection"
+        - label: "Check Ink / Wintab" 
+        
+  - type: checkboxes
     id: ariane-tools-vector-object-mode
     attributes:
       label: "Vector tools - Object Mode"
