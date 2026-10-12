@@ -846,3 +846,67 @@ body:
         - label: "Vérifier les liens avec les ToolCollection sont conservés lors de la migration du projet avec l'ours"
         - label: "Vérifier les liens entre les brushes, les fonctions et macros et les textures lors d'une migration"
         - label: "Vérifier que les BoardSequences et ShotSequence sont toujours correctement liés les uns aux autres lors d'une migration"
+
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ---------------------------------------------------------------------
+        
+        ## Ariane
+        
+        ## ---------------------------------------------------------------------
+
+  - type: checkboxes
+    id: tools-vector-object-mode
+    attributes:
+      label: "Vector tools - Object Mode"
+      options:
+        - label: "UNFINISHED"
+        - label: "Outil de dessin"
+        - label: "Outil d'édition de tracés"
+        - label: "Outil Primitives"
+        - label: "Outil de Sélection"
+        - label: "Outil de découpe"
+        - label: "Outil de transformation"
+        - label: "Outil de déplacement de la scène"
+        - label: "Outil de poussée (push)"
+        - label: "Outil de lissage des tracés (smooth)"
+        - label: "Outil gomme"
+        - label: "Outil pot de peinture"
+        - label: "Outil pipette"
+        - label: "Outil grille"
+        - label: "UNFINISHED2"
+        - label: "Dessiner un path"
+        - label: "Dessiner au stylet puis à la souris"
+        - label: "cocher/décocher stitch et desinner des path connectés"
+        - label: "Changer le stitiching radius ( y compris valeurs farfelues)"
+        - label: "Dessiner des primitives"
+        - label: "Déplacer un vertex"
+        - label: "Déplacer un path"
+        - label: "Déplacer un objet"
+        - label: "Modifier l'épaisseur d'un path"
+        - label: "Modifier l'épaisseur d'un objet"
+        - label: "Déformer un path"
+        - label: "Déformer un objet"
+        - label: "Cut"
+        - label: "Cut plusieurs paths en même temps"
+        - label: "Cut dans le vide"
+        - label: "Modifier la courbure d'un vertex"
+        - label: "Angles et arrondis"
+        - label: "Supprimer un vertex (Alt)"
+        - label: "Gomme vectorielle"
+        - label: "Renouer des paths"
+        - label: "Redimensionenr un objet"
+        - label: "Tourner un objet"
+        - label: "Déplacer le pivot pour tourner un objet"
+        - label: "Tester le clic droit"
+        - label: "Faire un group paint et en modifier les traits"
+        - label: "Sélectionner plusieurs paths dans Vector Scene Tree View"
+
+  - type: checkboxes
+    id: tools-vector-vertex-mode
+    attributes:
+      label: "Vector tools - Vertex Mode"
+      options:
+        - label: "TODO"
