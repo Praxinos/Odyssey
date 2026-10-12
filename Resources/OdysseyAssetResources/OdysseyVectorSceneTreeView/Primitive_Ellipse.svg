@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        isolation: isolate;
+        stroke: #d0d0d0;
+        stroke-miterlimit: 10;
+        stroke-width: 8px;
+      }
+
+      .cls-2 {
+        fill: #d0d0d0;
+      }
+    </style>
+  </defs>
+  <ellipse class="cls-1" cx="54.01" cy="54" rx="55.12" ry="41.59" transform="translate(-22.15 59.7) rotate(-49.28)"/>
+  <circle class="cls-2" cx="54" cy="53.99" r="12"/>
+</svg>
