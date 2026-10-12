@@ -13,18 +13,14 @@ body:
     attributes:
       value: |
         # Version 3.0 du 12/10/2026
-        # _________________________
+        # ______________________________
 
 
   - type: markdown
     attributes:
       value: |
         ## Texture Editor
-        ## ______________
-
-  - type: markdown
-    attributes:
-      value: |
+        ## 
         ## ---------------------------------------------------------------------
 
   - type: checkboxes
