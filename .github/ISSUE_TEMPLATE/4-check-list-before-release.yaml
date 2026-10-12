@@ -14,14 +14,11 @@ body:
       value: |
         # Version 3.0 du 12/10/2026
 
-
-        
-        ## ---------------------------------------------------------------------
-
-
   - type: markdown
     attributes:
       value: |
+        ## ---------------------------------------------------------------------
+        
         ## Texture Editor
         
         ## ---------------------------------------------------------------------
@@ -100,12 +97,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00AAFF}\textnormal{Animation Editor}}$
-
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Animation Editor
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: animation
@@ -204,15 +200,15 @@ body:
         - label: "Modifier le mode de fusion d'un calque dans un dossier"
         - label: "Tester la multi sélection"
 
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00AAFF}\textnormal{Flipbook Editor}}$
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## FlipBook Editor
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: flipbook-basic
@@ -240,15 +236,15 @@ body:
         - label: "Export Current Layer as Textures"
         - label: "Export Textures As Operating System"
 
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00AAFF}\textnormal{Bitmap Tools}}$
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Bitmap Tools
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: tools-bitmap
@@ -289,15 +285,15 @@ body:
         - label : "Paint Bucket > Blending Mode"
         - label : "Color Picker"
 
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00AAFF}\textnormal{Vector Tools}}$
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Vector Tools
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: tools-vector-object-mode
@@ -390,15 +386,15 @@ body:
       options:
         - label: "TODO"
 
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00AAFF}\textnormal{Odyssey Viewport}}$
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Odyssey Viewport
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: paint-viewport
@@ -420,15 +416,15 @@ body:
         - label: "Se déplacer autour de l'objet avec Alt, Clic droit, clic gauche, clic milieu"
         - label: "Dessiner sur un Mesh puis quitter l'Odyssey Mode, revenir dessus et dessiner, quitter l'Odyssey Mode ... plusieurs fois de suite"
 
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00AAFF}\textnormal{Shortcuts Assignés}}$
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Shortcut Assignés
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: shortcut-level-editor-mode
@@ -574,15 +570,15 @@ body:
         - label: "test raccourci [U] : Step to Next Shot"
         - label: "test raccourci [Y] : Step to Previous Shot"
 
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00AAFF}\textnormal{Storyboard}}$
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Storyboard
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: create-manage-shot-board-in-sequencer
@@ -695,15 +691,15 @@ body:
         - label: "Exporter une séquence en Movie Render Queue"
         - label: "Exporter une séquence d'images"
 
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00AAFF}\textnormal{Autres assets et éléments correlés}}$
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Autres Assets et éléments corrélés
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: odyssey-brush
@@ -762,14 +758,15 @@ body:
         - label: "TO DO"
 
   - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00AAFF}\textnormal{Autres tests à effectuer}}$
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Autres Tests à effectuer
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: templates
