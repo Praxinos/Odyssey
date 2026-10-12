@@ -760,6 +760,7 @@ body:
         - label: "Editer les couleurs"
         - label: "Sauvegarder la palette"
         - label: "Charger une autre palette"
+        - label: "s'assurer que les tools vecto peuvent changer la couleur courante pour utiliser celle de la palette"
 
   - type: checkboxes
     id: asset-note
@@ -776,7 +777,14 @@ body:
     attributes:
       label: "Tool Collection Asset"
       options:
-        - label: "TO DO"
+        - label: "Créer une Tool Collection avec différents types d'outils Bitmap et Vecto"
+        - label: "Dupliquer une Tool Collection et s'assurer que tous les tools fonctionnent encore"
+        - label: "Migrer une Tool Collection et s'assurer que tous les tools fonctionnent encore"
+        - label: "Tool Collection : s'assurer que les overrides des brosses bitmap sont sauvées"
+        - label: "Tool Collection : s'assurer que les outils sont bien sauvés quand la version d'UE change"
+        - label: "Tool Collection : tester toutes les options au clic-droit"
+        - label: "Supprimer une Tool Collection"
+        - label: "voir si les customs icones depuis texture fonctionnent"
 
   - type: markdown
     attributes:
@@ -867,7 +875,6 @@ body:
         - label: "Vérifier les liens avec les ToolCollection sont conservés lors de la migration du projet avec l'ours"
         - label: "Vérifier les liens entre les brushes, les fonctions et macros et les textures lors d'une migration"
         - label: "Vérifier que les BoardSequences et ShotSequence sont toujours correctement liés les uns aux autres lors d'une migration"
-
 
   - type: markdown
     attributes:
