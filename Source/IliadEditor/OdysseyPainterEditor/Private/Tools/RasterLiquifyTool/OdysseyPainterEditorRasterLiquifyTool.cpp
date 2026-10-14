@@ -397,7 +397,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
 
                                 uint32 intAngle = angle * 0.1f; // reduce the number of possible angles by dividing by 10
 
-                                targetPosition = localPosition + ( localPosition * factor * iStrength * 0.1f * ( ( intAngle % 2 ) ? 1.0f : -1.0f )  );
+                                targetPosition = localPosition + ( localPosition * factor * iStrength * 0.01f * ( ( intAngle % 2 ) ? 1.0f : -1.0f )  );
                             }
                             break;
 
