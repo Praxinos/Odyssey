@@ -63,8 +63,8 @@ private:
     // ToolActivable = can load the tool by clicking on it -> Depends on the context (ex: active layer) in the editor
     bool IsToolActivable() const;
 
+    void OnReplaceWithCurrentTool(bool iKeepIcon);
     bool CanReplaceWithCurrentTool() const;
-    void OnReplaceWithCurrentTool();
     bool CanDeleteTool() const;
     void OnDeleteTool();
     bool CanDuplicateTool() const;

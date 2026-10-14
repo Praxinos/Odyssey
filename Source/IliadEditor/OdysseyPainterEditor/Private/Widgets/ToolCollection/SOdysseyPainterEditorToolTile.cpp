@@ -343,7 +343,17 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
         LOCTEXT( "tool-collection.tool-tile.context-menu.replace-with-current-tool.tooltip", "Replaces this Tool with the Current Tool." ),
         FSlateIcon(),
         FUIAction(
-            FExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::OnReplaceWithCurrentTool),
+            FExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::OnReplaceWithCurrentTool, false),
+            FCanExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::CanReplaceWithCurrentTool)
+        )
+    );
+
+    menuBuilder.AddMenuEntry(
+        LOCTEXT( "tool-collection.tool-tile.context-menu.replace-with-current-tool-keep-icon.name", "Replace with Current Tool (Keep Icon)" ),
+        LOCTEXT( "tool-collection.tool-tile.context-menu.replace-with-current-tool-keep-icon.tooltip", "Replaces this Tool with the Current Tool but keep the existing icon." ),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::OnReplaceWithCurrentTool, true),
             FCanExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::CanReplaceWithCurrentTool)
         )
     );
@@ -503,7 +513,7 @@ SOdysseyPainterEditorToolTile::CanReplaceWithCurrentTool() const
 }
 
 void
-SOdysseyPainterEditorToolTile::OnReplaceWithCurrentTool()
+SOdysseyPainterEditorToolTile::OnReplaceWithCurrentTool( bool iKeepIcon )
 {
     if ( !mEditor || !mEditor->GetCurrentMainTool() || !mEditor->GetCurrentMainTool()->IsActivated() )
         return;
@@ -516,7 +526,7 @@ SOdysseyPainterEditorToolTile::OnReplaceWithCurrentTool()
 
     int32 index = mCollection->GetIndexOfToolConfiguration(mToolConfig);
     mCollection->RemoveToolConfiguration(mToolConfig);
-    mCollection->AddToolConfiguration( mEditor->GetCurrentTool()->GetClass(), mEditor->GetCurrentTool(), name, iconToolConfig, index );
+    mCollection->AddToolConfiguration( mEditor->GetCurrentTool()->GetClass(), mEditor->GetCurrentTool(), name, iKeepIcon ? mToolConfig->mIconToolConfiguration : iconToolConfig, index );
 }
 
 bool SOdysseyPainterEditorToolTile::CanDuplicateTool() const
