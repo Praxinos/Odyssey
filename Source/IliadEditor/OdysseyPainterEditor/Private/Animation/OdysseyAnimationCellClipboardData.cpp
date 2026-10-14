@@ -34,12 +34,33 @@ FOdysseyAnimationCellClipboardData::Copy(const TArray<UOdysseyLayerCell*>& iCell
     {
         mCellCopies.Add({cell, cell->GetExposure()});
     }
+
+    mCellCopies.Sort(
+        []( const FCellCopy& iA, const FCellCopy& iB ) -> bool
+        {
+            return iA.mCell->GetIndexInLayer() < iB.mCell->GetIndexInLayer();
+        }
+    );
 }
 
 void
 FOdysseyAnimationCellClipboardData::Paste(UOdysseyAnimationLayer* iLayer, int iFrame) const
 {
     checkf(CanPaste(iLayer), TEXT("Can't Paste"));
+
+    //Layer can be empty when moving all layer frames
+    if (iLayer->GetCells().IsEmpty())
+    {
+        iLayer->SetCellsOffset(iFrame);
+
+        for (int i = 0; i < mCellCopies.Num(); i++)
+        {
+            const FCellCopy& cellCopy = mCellCopies[i];
+            UOdysseyLayerCell* cell = iLayer->CopyCell(cellCopy.mCell, i);
+            cell->SetExposure(cellCopy.mExposure);
+        }
+        return;
+    }
 
     int cellIndex = INDEX_NONE;
     FInt32Range layerRange = iLayer->GetFrameRange();
@@ -78,10 +99,6 @@ FOdysseyAnimationCellClipboardData::Paste(UOdysseyAnimationLayer* iLayer, int iF
             int offset = FMath::Max(0, FMath::Min(iFrame, iLayer->GetCellsOffset() - addedExposures));
             iLayer->SetCellsOffset( offset );
             cell->SetExposure(cellCopy.mExposure + FMath::Max(0, (PreviousLayerOffset - offset) - addedExposures));
-        }
-        else
-        {
-            cell->SetExposure(cellCopy.mExposure);
         }
     }
 }
@@ -159,7 +176,7 @@ FOdysseyAnimationCellClipboardData::Move(UOdysseyAnimationLayer* iLayer, int iFr
 
         if (Cell->GetIndexInLayer() == CellIndex - 1)
         {
-            if (iFrame > Cell->GetFrameRange().GetUpperBoundValue() + 1)
+            if (iFrame > Cell->GetFrameRange().GetUpperBoundValue() + 1 && CellIndex < iLayer->GetCells().Num())
             {
                 iFrame -= Value;
             }
