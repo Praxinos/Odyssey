@@ -11,6 +11,7 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorCommands.h"
+#include "OdysseyPainterEditorSettings.h"
 #include "OdysseyTextureLayerStackUserData.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "Widgets/Views/STileView.h"
@@ -319,6 +320,42 @@ TSharedRef<SWidget> FOdysseyPainterEditorToolCollectionTab::GetCollectionMenuCon
             FExecuteAction::CreateSP(this, &FOdysseyPainterEditorToolCollectionTab::HandleRemoveCollection, iCollection)
         )
     );
+
+
+    menuBuilder.BeginSection(NAME_None, LOCTEXT("tool-collection.tool-tile.context-menu.section-settings.name", "Settings"));
+
+    // A sub-menu is created to not shift all previous entries as the settings entry will have a toggle button
+    menuBuilder.AddSubMenu(LOCTEXT("tool-collection.tool-tile.context-menu.settings.name", "Settings"),
+        LOCTEXT("tool-collection.tool-tile.context-menu.settings.tooltip", "Modify some settings."),
+        FNewMenuDelegate::CreateLambda([this](FMenuBuilder& ioMenuBuilder)
+            {
+                const FProperty* Property = UOdysseyPainterEditorSettings::StaticClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorSettings, ShowToolSizeInToolCollectionTile));
+
+                FMenuEntryParams settingsParams;
+                settingsParams.DirectActions = FUIAction(
+                    FExecuteAction::CreateLambda([]() -> void
+                        {
+                            UOdysseyPainterEditorSettings* settings = GetMutableDefault<UOdysseyPainterEditorSettings>();
+
+                            settings->ShowToolSizeInToolCollectionTile = !settings->ShowToolSizeInToolCollectionTile;
+                            settings->SaveConfig();
+                        }),
+                    FCanExecuteAction(),
+                    FIsActionChecked::CreateLambda([]() -> bool
+                        {
+                            const UOdysseyPainterEditorSettings* settings = GetDefault<UOdysseyPainterEditorSettings>();
+
+                            return settings->ShowToolSizeInToolCollectionTile;
+                        })
+                );
+                settingsParams.LabelOverride = Property ? Property->GetDisplayNameText() : FText::GetEmpty();
+                settingsParams.ToolTipOverride = Property ? Property->GetToolTipText(false) : FText::GetEmpty();
+                settingsParams.UserInterfaceActionType = EUserInterfaceActionType::ToggleButton;
+                ioMenuBuilder.AddMenuEntry(settingsParams);
+            })
+    );
+
+    menuBuilder.EndSection();
 
     return menuBuilder.MakeWidget();
 }
