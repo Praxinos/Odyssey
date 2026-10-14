@@ -8,55 +8,55 @@ GetColorBlendModeFromBlendMode(EOdysseyBlendMode InBlendMode)
 {
     switch(InBlendMode)
     {
-        case EOdysseyBlendMode::Normal: return EOdysseyColorBlendMode::Normal; break;
-        case EOdysseyBlendMode::Behind: return EOdysseyColorBlendMode::Behind; break;
+        case EOdysseyBlendMode::Normal: return EOdysseyColorBlendMode::Normal; //break;
+        case EOdysseyBlendMode::Behind: return EOdysseyColorBlendMode::Behind; //break;
 
-        case EOdysseyBlendMode::Erase: return EOdysseyColorBlendMode::Back; break;
-        case EOdysseyBlendMode::Stencil: return EOdysseyColorBlendMode::Back; break;
+        case EOdysseyBlendMode::Erase: return EOdysseyColorBlendMode::Back; //break;
+        case EOdysseyBlendMode::Stencil: return EOdysseyColorBlendMode::Back; //break;
 
-        case EOdysseyBlendMode::Darken: return EOdysseyColorBlendMode::Darken; break;
-        case EOdysseyBlendMode::Multiply: return EOdysseyColorBlendMode::Multiply; break;
-        case EOdysseyBlendMode::ColorBurn: return EOdysseyColorBlendMode::ColorBurn; break;
-        case EOdysseyBlendMode::LinearBurn: return EOdysseyColorBlendMode::LinearBurn; break;
-        case EOdysseyBlendMode::DarkerColor: return EOdysseyColorBlendMode::DarkerColor; break;
+        case EOdysseyBlendMode::Darken: return EOdysseyColorBlendMode::Darken; //break;
+        case EOdysseyBlendMode::Multiply: return EOdysseyColorBlendMode::Multiply; //break;
+        case EOdysseyBlendMode::ColorBurn: return EOdysseyColorBlendMode::ColorBurn; //break;
+        case EOdysseyBlendMode::LinearBurn: return EOdysseyColorBlendMode::LinearBurn; //break;
+        case EOdysseyBlendMode::DarkerColor: return EOdysseyColorBlendMode::DarkerColor; //break;
 
-        case EOdysseyBlendMode::Lighten: return EOdysseyColorBlendMode::Lighten; break;
-        case EOdysseyBlendMode::Screen: return EOdysseyColorBlendMode::Screen; break;
-        case EOdysseyBlendMode::ColorDodge: return EOdysseyColorBlendMode::ColorDodge; break;
-        case EOdysseyBlendMode::LinearDodge: return EOdysseyColorBlendMode::LinearDodge; break;
-        case EOdysseyBlendMode::LighterColor: return EOdysseyColorBlendMode::LighterColor; break;
+        case EOdysseyBlendMode::Lighten: return EOdysseyColorBlendMode::Lighten; //break;
+        case EOdysseyBlendMode::Screen: return EOdysseyColorBlendMode::Screen; //break;
+        case EOdysseyBlendMode::ColorDodge: return EOdysseyColorBlendMode::ColorDodge; //break;
+        case EOdysseyBlendMode::LinearDodge: return EOdysseyColorBlendMode::LinearDodge; //break;
+        case EOdysseyBlendMode::LighterColor: return EOdysseyColorBlendMode::LighterColor; //break;
 
-        case EOdysseyBlendMode::Overlay: return EOdysseyColorBlendMode::Overlay; break;
-        case EOdysseyBlendMode::SoftLight: return EOdysseyColorBlendMode::SoftLight; break;
-        case EOdysseyBlendMode::HardLight: return EOdysseyColorBlendMode::HardLight; break;
-        case EOdysseyBlendMode::VividLight: return EOdysseyColorBlendMode::VividLight; break;
-        case EOdysseyBlendMode::LinearLight: return EOdysseyColorBlendMode::LinearLight; break;
-        case EOdysseyBlendMode::PinLight: return EOdysseyColorBlendMode::PinLight; break;
-        case EOdysseyBlendMode::HardMix: return EOdysseyColorBlendMode::HardMix; break;
+        case EOdysseyBlendMode::Overlay: return EOdysseyColorBlendMode::Overlay; //break;
+        case EOdysseyBlendMode::SoftLight: return EOdysseyColorBlendMode::SoftLight; //break;
+        case EOdysseyBlendMode::HardLight: return EOdysseyColorBlendMode::HardLight; //break;
+        case EOdysseyBlendMode::VividLight: return EOdysseyColorBlendMode::VividLight; //break;
+        case EOdysseyBlendMode::LinearLight: return EOdysseyColorBlendMode::LinearLight; //break;
+        case EOdysseyBlendMode::PinLight: return EOdysseyColorBlendMode::PinLight; //break;
+        case EOdysseyBlendMode::HardMix: return EOdysseyColorBlendMode::HardMix; //break;
 
-        case EOdysseyBlendMode::Phoenix: return EOdysseyColorBlendMode::Phoenix; break;
-        case EOdysseyBlendMode::Reflect: return EOdysseyColorBlendMode::Reflect; break;
-        case EOdysseyBlendMode::Glow: return EOdysseyColorBlendMode::Glow; break;
+        case EOdysseyBlendMode::Phoenix: return EOdysseyColorBlendMode::Phoenix; //break;
+        case EOdysseyBlendMode::Reflect: return EOdysseyColorBlendMode::Reflect; //break;
+        case EOdysseyBlendMode::Glow: return EOdysseyColorBlendMode::Glow; //break;
 
-        case EOdysseyBlendMode::Difference: return EOdysseyColorBlendMode::Difference; break;
-        case EOdysseyBlendMode::Exclusion: return EOdysseyColorBlendMode::Exclusion; break;
-        case EOdysseyBlendMode::Add: return EOdysseyColorBlendMode::Add; break;
-        case EOdysseyBlendMode::Substract: return EOdysseyColorBlendMode::Substract; break;
-        case EOdysseyBlendMode::Divide: return EOdysseyColorBlendMode::Divide; break;
-        case EOdysseyBlendMode::Average: return EOdysseyColorBlendMode::Average; break;
-        case EOdysseyBlendMode::Negation: return EOdysseyColorBlendMode::Negation; break;
+        case EOdysseyBlendMode::Difference: return EOdysseyColorBlendMode::Difference; //break;
+        case EOdysseyBlendMode::Exclusion: return EOdysseyColorBlendMode::Exclusion; //break;
+        case EOdysseyBlendMode::Add: return EOdysseyColorBlendMode::Add; //break;
+        case EOdysseyBlendMode::Substract: return EOdysseyColorBlendMode::Substract; //break;
+        case EOdysseyBlendMode::Divide: return EOdysseyColorBlendMode::Divide; //break;
+        case EOdysseyBlendMode::Average: return EOdysseyColorBlendMode::Average; //break;
+        case EOdysseyBlendMode::Negation: return EOdysseyColorBlendMode::Negation; //break;
 
-        case EOdysseyBlendMode::Hue: return EOdysseyColorBlendMode::Hue; break;
-        case EOdysseyBlendMode::Saturation: return EOdysseyColorBlendMode::Saturation; break;
-        case EOdysseyBlendMode::Color: return EOdysseyColorBlendMode::Color; break;
-        case EOdysseyBlendMode::Luminosity: return EOdysseyColorBlendMode::Luminosity; break;
+        case EOdysseyBlendMode::Hue: return EOdysseyColorBlendMode::Hue; //break;
+        case EOdysseyBlendMode::Saturation: return EOdysseyColorBlendMode::Saturation; //break;
+        case EOdysseyBlendMode::Color: return EOdysseyColorBlendMode::Color; //break;
+        case EOdysseyBlendMode::Luminosity: return EOdysseyColorBlendMode::Luminosity; //break;
 
-        case EOdysseyBlendMode::PartialDerivative: return EOdysseyColorBlendMode::PartialDerivative; break;
-        case EOdysseyBlendMode::WhiteOut: return EOdysseyColorBlendMode::WhiteOut; break;
-        case EOdysseyBlendMode::AngleCorrected: return EOdysseyColorBlendMode::AngleCorrected; break;
+        case EOdysseyBlendMode::PartialDerivative: return EOdysseyColorBlendMode::PartialDerivative; //break;
+        case EOdysseyBlendMode::WhiteOut: return EOdysseyColorBlendMode::WhiteOut; //break;
+        case EOdysseyBlendMode::AngleCorrected: return EOdysseyColorBlendMode::AngleCorrected; //break;
 
-        case EOdysseyBlendMode::Dissolve: return EOdysseyColorBlendMode::Dissolve; break;
-        case EOdysseyBlendMode::BayerDither8x8: return EOdysseyColorBlendMode::BayerDither8x8; break;
+        case EOdysseyBlendMode::Dissolve: return EOdysseyColorBlendMode::Dissolve; //break;
+        case EOdysseyBlendMode::BayerDither8x8: return EOdysseyColorBlendMode::BayerDither8x8; //break;
     }
 
     check(false);
@@ -115,8 +115,8 @@ GetAlphaBlendModeFromBlendMode(EOdysseyBlendMode InBlendMode)
         case EOdysseyBlendMode::WhiteOut: return EOdysseyAlphaBlendMode::Normal;
         case EOdysseyBlendMode::AngleCorrected: return EOdysseyAlphaBlendMode::Normal;
 
-        case EOdysseyBlendMode::Dissolve: return EOdysseyAlphaBlendMode::Dissolve; break;
-        case EOdysseyBlendMode::BayerDither8x8: return EOdysseyAlphaBlendMode::BayerDither8x8; break;
+        case EOdysseyBlendMode::Dissolve: return EOdysseyAlphaBlendMode::Dissolve; //break;
+        case EOdysseyBlendMode::BayerDither8x8: return EOdysseyAlphaBlendMode::BayerDither8x8; //break;
     }
 
     check(false);

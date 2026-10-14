@@ -6,6 +6,8 @@
 #include "Math/UnitConversion.h"
 #include "SEnumCombo.h"
 #include "Widgets/Images/SImage.h"
+#include "Widgets/Input/NumericTypeInterface.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Widgets/Input/SCheckBox.h"
 #include "Widgets/Input/SSpinBox.h"
 #include "Widgets/Layout/SGridPanel.h"

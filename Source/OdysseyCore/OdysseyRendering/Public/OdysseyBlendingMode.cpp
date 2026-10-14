@@ -34,7 +34,7 @@ GetColorAndAlphaBlendModesFromDeprecatedBlendingMode(EOdysseyBlendingMode InBlen
             OutAlphaBlendMode = EOdysseyAlphaBlendMode::Dissolve;
             return;
         }
-        break;
+        //break;
 
         case EOdysseyBlendingMode::kBayerDither8x8:
         {
@@ -42,7 +42,7 @@ GetColorAndAlphaBlendModesFromDeprecatedBlendingMode(EOdysseyBlendingMode InBlen
             OutAlphaBlendMode = EOdysseyAlphaBlendMode::BayerDither8x8;
             return;
         }
-        break;
+        //break;
 
         case EOdysseyBlendingMode::kDarken:
             OutColorBlendMode = EOdysseyColorBlendMode::Darken;
