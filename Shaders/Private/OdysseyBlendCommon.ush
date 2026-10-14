@@ -98,9 +98,9 @@ float GetBayerDither8x8(uint2 iDstPos)
     return gBayer8x8Matrix[bayerY * 8 + bayerX];
 }
 
-bool IsBlendSeparable(uint iBlendingMode)
+bool IsBlendSeparable(uint iBlendMode)
 {
-    switch (iBlendingMode)
+    switch (iBlendMode)
     {
         case ODYSSEY_COLORBLENDMODE_Normal:
         case ODYSSEY_COLORBLENDMODE_Top:
@@ -257,16 +257,6 @@ float3 SetSat(float3 iC, float iS)
 float BlendNormal(float iCb, float iCs)
 {
     return iCs;
-}
-
-float BlendTop(float iCb, float iCs)
-{
-    return iCs;
-}
-
-float BlendBack(float iCb, float iCs)
-{
-    return iCb;
 }
 
 float BlendBehind(float iCb, float iCs)
@@ -495,25 +485,13 @@ float3 BlendAngleCorrected(float3 iCs, float3 iCb) {
     return res;
 }
 
-float BlendComponent(float iCb, float iCs, float iCbA, float iCsA, uint iBlendingMode, uint2 iDstPos)
+float BlendComponent(float iCb, float iCs, float iCbA, float iCsA, uint iBlendMode, uint2 iDstPos)
 {
-    switch (iBlendingMode)
+    switch (iBlendMode)
     {
         case ODYSSEY_COLORBLENDMODE_Normal:
         {
             return BlendNormal(iCb, iCs);
-        }
-        break;
-
-        case ODYSSEY_COLORBLENDMODE_Top:
-        {
-            return BlendTop(iCb, iCs);
-        }
-        break;
-
-        case ODYSSEY_COLORBLENDMODE_Back:
-        {
-            return BlendBack(iCb, iCs);
         }
         break;
 
@@ -926,6 +904,29 @@ float4 BlendNonSeparable(float4 iCb, float4 iCs, float iOpacity, uint iBlendMode
 
 float4 Blend(float4 iCb, float4 iCs, float iOpacity, uint iBlendMode, uint iAlphaMode, uint2 iDstPos)
 {
+    switch (iBlendMode)
+    {
+        case ODYSSEY_COLORBLENDMODE_Top:
+        {
+            float4 outColor = iCs;
+            float csA = iCs.w * iOpacity;
+            float cbA = iCb.w;
+            outColor.w = AlphaBlend(cbA, csA, iAlphaMode, iDstPos);
+            return outColor;
+        }
+        break;
+
+        case ODYSSEY_COLORBLENDMODE_Back:
+        {
+            float4 outColor = iCb;
+            float csA = iCs.w * iOpacity;
+            float cbA = iCb.w;
+            outColor.w = AlphaBlend(cbA, csA, iAlphaMode, iDstPos);
+            return outColor;
+        }
+        break;
+    }
+
     if (IsBlendSeparable(iBlendMode))
         return BlendSeparable(iCb, iCs, iOpacity, iBlendMode, iAlphaMode, iDstPos);
 
