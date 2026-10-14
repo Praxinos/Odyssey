@@ -55,9 +55,9 @@ public:
 private:
     //Deprecated properties
     UPROPERTY()
-    EOdysseyBlendingMode BlendingMode_DEPRECATED;
+    EOdysseyBlendingMode BlendingMode_DEPRECATED = EOdysseyBlendingMode::kNormal;
     UPROPERTY()
-    EOdysseyAlphaMode AlphaMode_DEPRECATED;
+    EOdysseyAlphaMode AlphaMode_DEPRECATED = EOdysseyAlphaMode::kNormal;
 
 protected:
     UPROPERTY(EditAnywhere, Category="Blending")
