@@ -13,6 +13,15 @@
 struct FArianeObject;
 struct FArianePoint;
 struct FArianeSegment;
+struct FArianeVertex;
+
+UENUM(BlueprintType)
+enum class EArianeGraphSegmentExtensionScheme : uint8
+{
+    None   = 0 UMETA(Hidden),
+    Single = 1,
+    Triple = 3
+};
 
 class ARIANE_API FArianeGraph
 {
@@ -66,11 +75,11 @@ public:
         virtual uint32 GetClass(){ return StaticClass(); };
 
         virtual ~FPoint();
-        FPoint( const FVector2D& InPosition, bool bProjected, const FVector& InOriginalWorlPosition );
+        FPoint( const FVector2D& InPosition, bool bProjected, const FVector& InOriginalWorldPosition );
 
         FVector2D Position;
         bool bProjected;
-        FVector OriginalWorlPosition;
+        FVector OriginalWorldPosition;
     };
 
     // a node represents a vertex or a segment's fraction point
@@ -93,8 +102,9 @@ public:
         void UnlinkPendantSections();
 
         TArray<FSectionLinkInfo> SectionLinkInfos;
-        FEdge* Edges[2];
+        FEdge* Edges[4]; // 2 + 2 for triple segment extension
         uint32 EdgeCount;
+        FArianePoint* SourcePoint;
     };
 
     struct ARIANE_API FIntersection
@@ -120,9 +130,11 @@ public:
             double Edge0T;
             double Edge1T;
             FVector2D Position;
+            FVector   OriginalWorldPosition;
 
             virtual ~XRecord();
             XRecord( const FVector2D& InPosition
+                   //, const FVector& InOriginalWorldPosition
                    , FPath* InPath0
                    , FEdge* InEdge0
                    , double InEdge0T
@@ -169,7 +181,7 @@ public:
              , double InLength );
         FNode* GetOtherNode( FNode* Node );
 
-        virtual FVector GetOriginalWorlPosition( float T ) = 0;
+        virtual FVector GetOriginalWorldPosition( float T ) = 0;
         void CreateSections( TArray<FSection>& SectionBuffer
                            , bool bStitchShortSections
                            , TArray<FSection*>& ShortSections );
@@ -528,12 +540,17 @@ public:
     virtual ~FArianeGraph();
     FArianeGraph();
 
-    void Solve( const FVector& ViewOrigin, const FPlane& ProjectionPlane, const TArray<FArianeObject*>& Objects, double GapTolerance );
+    void Solve( const FVector& ViewOrigin
+              , const FPlane& InProjectionPlane
+              , const TArray<FArianeObject*>& Objects
+              , double InGapTolerance
+              , EArianeGraphSegmentExtensionScheme InSegmentExtensionScheme );
     //Build( TArray<FOdysseyVectorObject*> Objects ); // Later
     FCycle* PickCycle( const FVector& RayOrigin, const FVector& RayDirection );
     void HighlightCycle( FCycle* Cycle );
     const FPlane& GetProjectionPlane();
     FVector GetNodeWorldPositionOnPlane( FNode* Node );
+    TArray<FNode*>& GetExtendedNodes();
 
 protected:
     static FSectionLinkInfo* FindNextSectionLinkInfo( FSectionLinkInfo* LastSectionLinkInfo
@@ -575,6 +592,10 @@ protected:
     void MergeCycles();
     void OrderCycles();
     static void UnlinkPendantSectionsRecursively( FSection* Section, FNode* Node );
+    uint32 MakeExtendedSegments( const FVector& ViewOrigin
+                               , FArianeVertex* Vertex
+                               , FNode& VertexNode
+                               , const FTransform& PathTransform );
 
 protected:
     static const uint32 NOCYCLE  = 0;
@@ -585,6 +606,7 @@ protected:
     FVector ProjectionPlaneOrigin;
     FQuat LocalToWorldRotationQuat;
     FQuat WorldToLocalRotationQuat;
+    EArianeGraphSegmentExtensionScheme SegmentExtensionScheme;
     FCriticalSection Mutex;
     // we store everything in one buffer per type, for performance
     TArray<FPoint> PointBuffer;
@@ -593,6 +615,7 @@ protected:
     TArray<FEdgeLinear> LinearEdgeBuffer;
     TArray<FEdgeCubic> CubicEdgeBuffer;
     TArray<FEdge*> Edges;
+    TArray<FNode*> ExtendedNodes;
     TArray<FSectionLinear> LinearSectionBuffer;
     TArray<FSectionCubic> CubicSectionBuffer;
     TArray<FSection*> Sections;

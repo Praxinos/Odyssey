@@ -91,6 +91,11 @@ protected:
                          , FSceneView* View
                          , const FLinearColor& HcColor
                          , const TArray<FArianeGraph::FSection*>& Sections );
+    void DrawExtensionHUD ( FCanvas* HUDCanvas
+                          , IToolsContextRenderAPI* RenderAPI
+                          , FEditorViewportClient* ViewportClient
+                          , FSceneView* View
+                          , const FLinearColor& HcColor );
     void Reset();
     void OnCameraMoved( const FVector& Location, const FRotator& Rotation, ELevelViewportType ViewportType, int32 ViewIndex );
     virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
@@ -105,8 +110,17 @@ public:
     UMaterialInterface* MaterialInterface;
 
     UPROPERTY( EditAnywhere
-             , Category = PaintBucketTool )
+             , Category = PaintBucketTool
+             , meta = ( ToolTip  = "Increase or decrease the tolerance of a gap between 2 paths."
+                      , ClampMin = "0.0"
+                      , UIMin    = "0.0"
+                      , LinearDeltaSensitivity = "15"
+                      , Delta = "1" ) )
     double GapTolerance;
+
+    UPROPERTY( EditAnywhere
+             , Category = PaintBucketTool )
+    EArianeGraphSegmentExtensionScheme SegmentExtensionScheme;
 
     UPROPERTY( EditAnywhere
              , Category = PaintBucketTool )

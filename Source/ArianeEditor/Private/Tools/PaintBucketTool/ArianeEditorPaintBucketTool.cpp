@@ -36,7 +36,8 @@ UArianeEditorPaintBucketTool::~UArianeEditorPaintBucketTool()
 
 UArianeEditorPaintBucketTool::UArianeEditorPaintBucketTool()
     : MaterialInterface( nullptr )
-    , GapTolerance( 0.0f )
+    , GapTolerance( 50.0f )
+    , SegmentExtensionScheme ( EArianeGraphSegmentExtensionScheme::Single )
     , FittingRule ( EArianeCycleFittingRule::FitToPaths )
     , Graph( new FArianeGraph() )
     , PickedCycle( nullptr )
@@ -158,21 +159,25 @@ UArianeEditorPaintBucketTool::Reset()
         if( VectorLayer )
         {
             FVector4 DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
-            TArray<FArianeObject*> GraphedPaths;
+            TArray<FArianeObject*> GraphedObjects;
             FVector CameraLocation = CameraState.Position;
             FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
 
-            GraphedPaths.Reserve( VectorLayer->GetDrawing()->GetInstancedObjects().Num() );
+            GraphedObjects.Reserve( VectorLayer->GetDrawing()->GetInstancedObjects().Num() );
 
             FArianeObject::Traverse( RootGroup
-                                   , [ &GraphedPaths ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+                                   , [ &GraphedObjects ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
                 {
-                    GraphedPaths.Add( Object );
+                    GraphedObjects.Add( Object );
 
                     return FArianeObject::ETraversalReturnValue::Continue;
                 } );
 
-            Graph->Solve( CameraLocation, DrawingPlane, GraphedPaths, GapTolerance );
+            Graph->Solve( CameraLocation
+                        , DrawingPlane
+                        , GraphedObjects
+                        , GapTolerance
+                        , SegmentExtensionScheme );
 
             bGraphNeedsUpdate = false;
         }
@@ -356,12 +361,12 @@ UArianeEditorPaintBucketTool::DrawSectionsHUD ( FCanvas* HUDCanvas
             WorldToHUD( ViewportClient, View, P1World, P1HUD );
 
             DrawLineHUD( HUDCanvas
-                        , ViewportClient
-                        , View
-                        , P0HUD
-                        , P1HUD
-                        , HcColor
-                        , 2.0f );
+                       , ViewportClient
+                       , View
+                       , P0HUD
+                       , P1HUD
+                       , HcColor
+                       , 2.0f );
         }
 
         //if( ContourSection->GetCycle(0) == this )
@@ -387,6 +392,52 @@ UArianeEditorPaintBucketTool::DrawCycleHUD ( FCanvas* HUDCanvas
 }
 
 void
+UArianeEditorPaintBucketTool::DrawExtensionHUD ( FCanvas* HUDCanvas
+                                               , IToolsContextRenderAPI* RenderAPI
+                                               , FEditorViewportClient* ViewportClient
+                                               , FSceneView* View
+                                               , const FLinearColor& HcColor )
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+    const FPlane& ProjectionPlane =  Graph->GetProjectionPlane();
+    FQuat RotationQuat = FQuat::FindBetweenNormals( FVector::UpVector, ProjectionPlane.GetNormal() );
+    FVector ProjectionPlaneOrigin = ProjectionPlane.GetOrigin();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>( LayerStack->GetCurrentLayer() );
+
+        if( VectorLayer )
+        {
+            for( FArianeGraph::FNode* ExtendedNode : Graph->GetExtendedNodes() )
+            {
+                FArianeGraph::FEdge* ExtendedEdge = ExtendedNode->Edges[0];
+                FArianeGraph::FNode* OtherNode = ( ExtendedEdge->Nodes[0] == ExtendedNode ) ? ExtendedEdge->Nodes[1]
+                                                                                            : ExtendedEdge->Nodes[0];
+                FVector P0Local = FVector( ExtendedNode->Position.X, ExtendedNode->Position.Y, 0.0f );
+                FVector P1Local = FVector( OtherNode->Position.X   , OtherNode->Position.Y   , 0.0f );
+                FVector P0World = ( RotationQuat * P0Local ) + ProjectionPlaneOrigin;
+                FVector P1World = ( RotationQuat * P1Local ) + ProjectionPlaneOrigin;
+                FVector2D P0HUD;
+                FVector2D P1HUD;
+
+                WorldToHUD( ViewportClient, View, P0World, P0HUD );
+                WorldToHUD( ViewportClient, View, P1World, P1HUD );
+
+                DrawLineHUD( HUDCanvas
+                           , ViewportClient
+                           , View
+                           , P0HUD
+                           , P1HUD
+                           , VectorLayer->GetDrawing()->GetRootGroup()->GetHUDForegroundColor() //FgColor
+                           , 2.0f );
+            }
+        }
+    }
+}
+
+void
 UArianeEditorPaintBucketTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderAPI* RenderAPI )
 {
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
@@ -401,6 +452,8 @@ UArianeEditorPaintBucketTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderA
 
     if( CanDraw() && ( bGraphNeedsUpdate == false ) )
     {
+        DrawExtensionHUD( HUDCanvas, RenderAPI, ViewportClient, View, HcColor );
+
         if( PickedCycle )
         {
             DrawCycleHUD( HUDCanvas, RenderAPI, ViewportClient, View, HcColor, PickedCycle );
@@ -420,9 +473,14 @@ UArianeEditorPaintBucketTool::PostEditChangeProperty( FPropertyChangedEvent& Pro
     FName PropertyName = PropertyChangedEvent.GetPropertyName();
     FName MemberPropertyName = PropertyChangedEvent.GetMemberPropertyName();
 
-    //if( PropertyName == GET_MEMBER_NAME_CHECKED( UArianeEditorPaintBucketTool, Size ) )
+    if( PropertyName == GET_MEMBER_NAME_CHECKED( UArianeEditorPaintBucketTool, GapTolerance ) )
     {
+        Reset();
+    }
 
+    if( PropertyName == GET_MEMBER_NAME_CHECKED( UArianeEditorPaintBucketTool, SegmentExtensionScheme ) )
+    {
+        Reset();
     }
 }
 

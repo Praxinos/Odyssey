@@ -580,6 +580,7 @@ FArianeGraph::FNodeIntersection::XRecord::~XRecord()
 }
 
 FArianeGraph::FNodeIntersection::XRecord::XRecord( const FVector2D& InPosition
+                                                 //, const FVector& InOriginalWorldPosition
                                                  , FPath* InPath0
                                                  , FEdge* InEdge0
                                                  , double InEdge0T
@@ -591,6 +592,7 @@ FArianeGraph::FNodeIntersection::XRecord::XRecord( const FVector2D& InPosition
     , Edge0T ( InEdge0T )
     , Edge1T ( InEdge1T )
     , Position ( InPosition )
+    //, OriginalWorldPosition ( InOriginalWorldPosition )
 {
     Edge0->IntersectionSlotCount++;
     Edge1->IntersectionSlotCount++;
@@ -718,12 +720,12 @@ FArianeGraph::FEdgeCubic::FEdgeCubic( FNode* InNode0
 }
 
 FVector
-FArianeGraph::FEdgeCubic::GetOriginalWorlPosition( float T )
+FArianeGraph::FEdgeCubic::GetOriginalWorldPosition( float T )
 {
-    return ::ULIS::CubicBezierPointAtParameter<FVector>( Nodes[0]->OriginalWorlPosition
+    return ::ULIS::CubicBezierPointAtParameter<FVector>( Nodes[0]->OriginalWorldPosition
                                                        , OriginalHandlePosition[0]
                                                        , OriginalHandlePosition[1]
-                                                       , Nodes[1]->OriginalWorlPosition
+                                                       , Nodes[1]->OriginalWorldPosition
                                                        , T );
 }
 
@@ -788,7 +790,8 @@ FArianeGraph::~FArianeGraph()
 }
 
 FArianeGraph::FArianeGraph()
-    : GapTolerance ( 0.0f )
+    : GapTolerance ( 50.0f )
+    , SegmentExtensionScheme ( EArianeGraphSegmentExtensionScheme::None )
 {
 #if PLATFORM_MAC
     bMultithreaded = false;
@@ -999,6 +1002,59 @@ FArianeGraph::GetNodeWorldPositionOnPlane( FNode* Node )
     return ( LocalToWorldRotationQuat * FVector( Node->Position.X, Node->Position.Y, 0.0f ) ) + ProjectionPlaneOrigin;
 }
 
+TArray<FArianeGraph::FNode*>&
+FArianeGraph::GetExtendedNodes()
+{
+    return ExtendedNodes;
+}
+
+uint32
+FArianeGraph::MakeExtendedSegments( const FVector& ViewOrigin
+                                  , FArianeVertex* Vertex
+                                  , FNode& VertexNode
+                                  , const FTransform& PathTransform )
+{
+    FArianeSegment* Segment = Vertex->GetFirstSegment();
+    FVector VectorAtVertex = Segment->GetVectorLeavingFromVertex( Vertex, false );
+    FVector WorldVertexNormal = PathTransform.TransformVector( Vertex->GetNormal() ).GetSafeNormal();
+    FVector WorldVectorAtVertex = PathTransform.TransformVector( VectorAtVertex ).GetSafeNormal();
+    FVector VertexWorldPosition = PathTransform.TransformPosition( Vertex->GetPosition() );
+    FVector IntersectAt;
+    FVector PerpendicularVector = FVector::CrossProduct( WorldVertexNormal, WorldVectorAtVertex ).GetSafeNormal();
+    FVector ExtensionVectors[3] = {   WorldVectorAtVertex
+                                  ,   PerpendicularVector
+                                  , - PerpendicularVector };
+
+    for( uint32 i = 0; i < (uint32) SegmentExtensionScheme; i++ )
+    {
+        FVector GapVertexWorldPosition = VertexWorldPosition - ( ExtensionVectors[i] * GapTolerance );
+        FVector RayDirection = GapVertexWorldPosition - ViewOrigin;
+
+        bool bProjected = ( FArianeCore::IntersectPlane( ProjectionPlane
+                                                       , ViewOrigin
+                                                       , RayDirection.GetSafeNormal()
+                                                       , IntersectAt  ) > 0.0f ) ? true
+                                                                                 : false;
+
+        FNode& ExtendedNode = NodeBuffer.Emplace_GetRef( FVector2D( WorldToLocalRotationQuat * ( IntersectAt - ProjectionPlaneOrigin ) )
+                                                        , bProjected
+                                                        , GapVertexWorldPosition );
+
+        FFraction* ExtendedFraction = &FractionBuffer.Emplace_GetRef( 0.0f
+                                                                    , 1.0f
+                                                                    , &VertexNode
+                                                                    , &ExtendedNode );
+        FEdgeLinear* ExtendedLinearEdge = &LinearEdgeBuffer.Emplace_GetRef( &VertexNode
+                                                                          , &ExtendedNode
+                                                                          , ExtendedFraction );
+
+        ExtendedNodes.Add ( &ExtendedNode );
+        Edges.Add( ExtendedLinearEdge );
+    }
+
+    return (uint32) SegmentExtensionScheme;
+}
+
 void
 FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& Objects )
 {
@@ -1008,11 +1064,16 @@ FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& O
     uint32 CubicEdgeCount = 0; // will stay at 0 because no Bezier will stay a Bezier due to the projection
     uint32 FractionCount = 0;
     uint32 PathCount = 0;
+    // Gaps handling
+    uint32 TotalGapSegmentCount = 0;
+    uint32 ExtendedNodeCount = 0;
+    uint32 ExtendedEdgeCount = 0;
 
     NodeBuffer.Empty();
     FractionBuffer.Empty();
     LinearEdgeBuffer.Empty();
     CubicEdgeBuffer.Empty();
+    ExtendedNodes.Empty();
     Edges.Empty();
     PathBuffer.Empty();
 
@@ -1033,19 +1094,34 @@ FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& O
                 LinearEdgeCount += Segment->GetFractionCount(); // for 3D objects, there are as many edges as fractions
             }
 
+            if( GapTolerance )
+            {
+                for( FArianeVertex* Vertex : Path->GetVertices() )
+                {
+                    if( Vertex->GetSegments().Num() == 1 )
+                    {
+                        ExtendedNodeCount += (int) SegmentExtensionScheme;
+                        ExtendedEdgeCount = ExtendedNodeCount;
+                    }
+                }
+            }
+
             PathCount++;
         }
     }
 
     // Allocate memory in one go, for performance
-    NodeBuffer.Reserve( NodeCount );
-    FractionBuffer.Reserve( LinearEdgeCount );
-    LinearEdgeBuffer.Reserve( LinearEdgeCount ); // for 3D objects, there are as many edges as fractions
-    CubicEdgeBuffer.Reserve( CubicEdgeCount ); // for 3D objects, there are as many edges as fractions
-    Edges.Reserve( LinearEdgeCount + CubicEdgeCount );
+    NodeBuffer.Reserve( NodeCount + ExtendedNodeCount );
+    FractionBuffer.Reserve( LinearEdgeCount + ExtendedEdgeCount );
+    LinearEdgeBuffer.Reserve( LinearEdgeCount + ExtendedEdgeCount ); // for 3D objects, there are as many edges as fractions
+    CubicEdgeBuffer.Reserve( CubicEdgeCount );
+    ExtendedNodes.Reserve( ExtendedNodeCount );
+    Edges.Reserve( LinearEdgeCount + CubicEdgeCount + ExtendedEdgeCount );
     PathBuffer.Reserve( PathCount );
 
-    // first step, evaluate the memory needed
+
+
+    // Second step, project and convert to 2D coords.
     for( FArianeObject* Object : Objects )
     {
         if( Object->HasBaseClass( FArianePath::StaticClass() ) )
@@ -1063,14 +1139,29 @@ FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& O
                 FVector IntersectAt;
                 bool bProjected = ( FArianeCore::IntersectPlane( ProjectionPlane
                                                                , ViewOrigin
-                                                               , RayDirection
+                                                               , RayDirection.GetSafeNormal()
                                                                , IntersectAt  ) > 0.0f ) ? true
                                                                                          : false;
                 Vertex->SetID( NodeBuffer.Num() );
 
-                NodeBuffer.Emplace( FVector2D( WorldToLocalRotationQuat * ( IntersectAt - ProjectionPlaneOrigin ) )
-                                  , bProjected
-                                  , VertexWorldPosition );
+                FNode& Node = NodeBuffer.Emplace_GetRef( FVector2D( WorldToLocalRotationQuat * ( IntersectAt - ProjectionPlaneOrigin ) )
+                                                       , bProjected
+                                                       , VertexWorldPosition );
+
+                if( GapTolerance )
+                {
+                    // Gap handling
+                    if( Vertex->GetSegments().Num() == 1 )
+                    {
+                        uint32 ExtensionCount = MakeExtendedSegments( ViewOrigin
+                                                                    , Vertex
+                                                                    , Node
+                                                                    , PathTransform );
+
+                        PathLinearEdgeCount += ExtensionCount;
+                        PathNodeCount += ExtensionCount;
+                    }
+                }
 
                 PathNodeCount++;
             }
@@ -1080,7 +1171,7 @@ FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& O
                 // In theory we could create the edges and the nodes in a single for loop, but this optimizations will come later
                 for( FArianeSegment::FFractionStep& Step : Segment->GetFractionSteps() )
                 {
-                    if( ( Step.T != 0.0f ) && ( Step.T != 1.0f ) )
+                    if( Step.Point->HasBaseClass( FArianeVertex::StaticClass() ) == false )
                     {
                         FVector PointWorldPosition = PathTransform.TransformPosition( Step.Point->GetPosition() );
                         FVector RayDirection = PointWorldPosition - ViewOrigin;
@@ -1125,11 +1216,14 @@ FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& O
                 }
             }
 
-            PathBuffer.Emplace( PathNodeCount
-                              , &NodeBuffer[ NodeBuffer.Num() - PathNodeCount ]
-                              , PathLinearEdgeCount
-                              , PathCubicEdgeCount
-                              , &Edges[ Edges.Num() - ( PathLinearEdgeCount + PathCubicEdgeCount ) ] );
+            if( PathNodeCount )
+            {
+                PathBuffer.Emplace( PathNodeCount
+                                  , &NodeBuffer[ NodeBuffer.Num() - PathNodeCount ]
+                                  , PathLinearEdgeCount
+                                  , PathCubicEdgeCount
+                                  , &Edges[ Edges.Num() - ( PathLinearEdgeCount + PathCubicEdgeCount ) ] );
+            }
         }
     }
 }
@@ -1589,11 +1683,17 @@ FArianeGraph::OrderCycles()
 
 // Note: For ariane objects, there is no need for cubic segments because a projected cubic segment is not a cubic segment itself
 void
-FArianeGraph::Solve( const FVector& ViewOrigin, const FPlane& InProjectionPlane, const TArray<FArianeObject*>& Objects, double InGapTolerance )
+FArianeGraph::Solve( const FVector& ViewOrigin
+                   , const FPlane& InProjectionPlane
+                   , const TArray<FArianeObject*>& Objects
+                   , double InGapTolerance
+                   , EArianeGraphSegmentExtensionScheme InSegmentExtensionScheme )
 {
     TArray<FExplorationPair> ExplorationPairsBuffer;
 
     GapTolerance = InGapTolerance;
+
+    SegmentExtensionScheme = InSegmentExtensionScheme;
 
     ProjectionPlane = InProjectionPlane;
     ProjectionPlaneOrigin = ProjectionPlane.GetOrigin();
