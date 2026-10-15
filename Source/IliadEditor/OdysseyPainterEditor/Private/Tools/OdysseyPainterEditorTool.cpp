@@ -606,6 +606,7 @@ UOdysseyPainterEditorTool::EndRIM()
 
     EndInteractiveMode();
     SetRadius(GetRadius()); //Force a non interactive call to validate the Radius
+    PostEditChange();
 
     //TODO: It would be nice to set the mouse cursor to the start mouse position
     // But right now mRIMStartMousePosition is the position of the mouse in the texture
