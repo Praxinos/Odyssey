@@ -209,7 +209,7 @@ public:
                    , FNode* InNode1
                    , FFraction* InFractions );
 
-        virtual FVector GetOriginalWorlPosition( float T ) override;
+        virtual FVector GetOriginalWorldPosition( float T ) override;
     };
 
     struct ARIANE_API FEdgeCubic : FEdge
@@ -227,7 +227,7 @@ public:
                   , uint32 InFractionCount
                   , FFraction* InFractions );
 
-        virtual FVector GetOriginalWorlPosition( float T ) override;
+        virtual FVector GetOriginalWorldPosition( float T ) override;
 
         FVector2D Bezier[4];
         FVector OriginalHandlePosition[2];

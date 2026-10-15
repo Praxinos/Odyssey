@@ -382,10 +382,10 @@ FArianeGraph::FPoint::~FPoint()
 {
 }
 
-FArianeGraph::FPoint::FPoint( const FVector2D& InPosition, bool bInProjected, const FVector& InOriginalWorlPosition )
+FArianeGraph::FPoint::FPoint( const FVector2D& InPosition, bool bInProjected, const FVector& InOriginalWorldPosition )
     : Position ( InPosition )
     , bProjected ( bInProjected )
-    , OriginalWorlPosition ( InOriginalWorlPosition )
+    , OriginalWorldPosition ( InOriginalWorldPosition )
 {
 }
 
@@ -559,7 +559,7 @@ FArianeGraph::FNodeIntersection::FNodeIntersection( const FVector2D& InPosition
                                                   , double InEdge0T
                                                   , FEdge* InEdge1
                                                   , double InEdge1T )
-    : FNode ( InPosition, true, InEdge0->GetOriginalWorlPosition( InEdge0T ) )
+    : FNode ( InPosition, true, InEdge0->GetOriginalWorldPosition( InEdge0T ) )
     , Intersections { FIntersection( this, InEdge0T )
                     , FIntersection( this, InEdge1T ) }
     , Edges { InEdge0,  InEdge1 }
@@ -686,10 +686,10 @@ FArianeGraph::FEdgeLinear::FEdgeLinear( FNode* InNode0
 }
 
 FVector
-FArianeGraph::FEdgeLinear::GetOriginalWorlPosition( float T )
+FArianeGraph::FEdgeLinear::GetOriginalWorldPosition( float T )
 {
-    return Nodes[0]->OriginalWorlPosition + ( T * ( Nodes[1]->OriginalWorlPosition
-                                              - Nodes[0]->OriginalWorlPosition ) );
+    return Nodes[0]->OriginalWorldPosition + ( T * ( Nodes[1]->OriginalWorldPosition
+                                                   - Nodes[0]->OriginalWorldPosition ) );
 }
 
 FArianeGraph::FEdgeCubic::~FEdgeCubic()

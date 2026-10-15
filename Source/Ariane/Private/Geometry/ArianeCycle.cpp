@@ -209,7 +209,7 @@ FArianeCycle::GetNodeFittedPosition( FArianeGraph* Graph, FArianeGraph::FNode* N
         break;
 
         case EArianeCycleFittingRule::FitToPaths :
-            FittedPosition = Node->OriginalWorlPosition;
+            FittedPosition = Node->OriginalWorldPosition;
         break;
 
         default :
