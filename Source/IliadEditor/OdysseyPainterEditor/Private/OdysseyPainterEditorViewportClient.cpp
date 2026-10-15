@@ -279,6 +279,10 @@ FOdysseyPainterEditorViewportClient::GetCursor( FViewport* iViewport, int32 iX, 
     {
         return mOdysseyPainterEditor->GetCurrentTool()->GetMouseCursor().GetMouseCursorNative();
     }
+    else
+    {
+        mCurrentMouseCursor = EMouseCursor::SlashedCircle;
+    }
 
     return mCurrentMouseCursor;
 }

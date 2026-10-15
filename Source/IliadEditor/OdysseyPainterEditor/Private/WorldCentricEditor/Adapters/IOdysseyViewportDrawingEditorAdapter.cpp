@@ -305,6 +305,11 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
         mMouseCursor = editor->GetCurrentTool()->GetMouseCursor().GetMouseCursorNative();
         mOverrideMouseCursor = true;
     }
+    else
+    {
+        mMouseCursor = EMouseCursor::SlashedCircle;
+        mOverrideMouseCursor = true;
+    }
 
     return true;
 }
