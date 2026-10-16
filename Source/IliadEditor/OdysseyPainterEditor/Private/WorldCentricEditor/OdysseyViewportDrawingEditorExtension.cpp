@@ -412,11 +412,18 @@ FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture, bool iWar
                 {
                     bool needsOpen = true;
                     AMediaPlate* mediaPlate = Cast<AMediaPlate>(mActor);
-                    UMediaSource* mediaSource = mediaPlate->MediaPlateComponent->GetMediaPlaylist()->Get(0);
-                    if (mediaSource && mediaSource->IsA(UOdysseyAnimation::StaticClass()))
+                    if (mediaPlate && mediaPlate->MediaPlateComponent)
                     {
-                        UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(mediaSource);
-                        canSetTexture = AssetEditorSubsystem->FindEditorForAsset(animation, true) == nullptr;
+                        UMediaPlaylist* playlist = mediaPlate->MediaPlateComponent->GetMediaPlaylist();
+                        if (playlist && playlist->Num() > 0)
+                        {
+                            UMediaSource* mediaSource = playlist->Get(0);
+                            if (mediaSource && mediaSource->IsA(UOdysseyAnimation::StaticClass()))
+                            {
+                                UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(mediaSource);
+                                canSetTexture = AssetEditorSubsystem->FindEditorForAsset(animation, true) == nullptr;
+                            }
+                        }
                     }
                 }
             }
