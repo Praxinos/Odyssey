@@ -555,11 +555,12 @@ FArianeGraph::FNodeIntersection::~FNodeIntersection()
 }
 
 FArianeGraph::FNodeIntersection::FNodeIntersection( const FVector2D& InPosition
+                                                   , const FVector& InOriginalWorldPosition
                                                   , FEdge* InEdge0
                                                   , double InEdge0T
                                                   , FEdge* InEdge1
                                                   , double InEdge1T )
-    : FNode ( InPosition, true, InEdge0->GetOriginalWorldPosition( InEdge0T ) )
+    : FNode ( InPosition, true, InOriginalWorldPosition )
     , Intersections { FIntersection( this, InEdge0T )
                     , FIntersection( this, InEdge1T ) }
     , Edges { InEdge0,  InEdge1 }
@@ -580,7 +581,7 @@ FArianeGraph::FNodeIntersection::XRecord::~XRecord()
 }
 
 FArianeGraph::FNodeIntersection::XRecord::XRecord( const FVector2D& InPosition
-                                                 //, const FVector& InOriginalWorldPosition
+                                                 , const FVector& InAverageWorldPosition
                                                  , FPath* InPath0
                                                  , FEdge* InEdge0
                                                  , double InEdge0T
@@ -592,7 +593,7 @@ FArianeGraph::FNodeIntersection::XRecord::XRecord( const FVector2D& InPosition
     , Edge0T ( InEdge0T )
     , Edge1T ( InEdge1T )
     , Position ( InPosition )
-    //, OriginalWorldPosition ( InOriginalWorldPosition )
+    , AverageWorldPosition ( InAverageWorldPosition )
 {
     Edge0->IntersectionSlotCount++;
     Edge1->IntersectionSlotCount++;
@@ -830,6 +831,7 @@ FArianeGraph::IntersectEdges( FPath* Path0
         FVector2D& Edge0P0Coords = Edge0Fraction->Points[0]->Position;
         FVector2D& Edge0P1Coords = Edge0Fraction->Points[1]->Position;
         FVector2D Edge0FractionVector = ( Edge0P1Coords - Edge0P0Coords );
+
         int p = i - 1;
         int n = i + 1;
 
@@ -845,95 +847,128 @@ FArianeGraph::IntersectEdges( FPath* Path0
                 {
                     FFraction* Edge1Fraction = &Edge1->Fractions[j];
 
-                  if(    ( Edge0 >  Edge1 )
-                    // test only once in case of self-intersecting segment
-                    || ( ( Edge0 == Edge1 ) && ( Edge0Fraction > Edge1Fraction ) ) )
-                  {
-                    FVector2D& Edge1P0Coords = Edge1Fraction->Points[0]->Position;
-                    FVector2D& Edge1P1Coords = Edge1Fraction->Points[1]->Position;
-                    double Edge0FractionSubT, Edge1FractionSubT;
-
-                    // to speed things up a bit (actually I've found out that it speeds things up by 2 or by 3)
-                    if( ( Edge0Fraction->BBox.Max.X >= Edge1Fraction->BBox.Min.X ) && ( Edge0Fraction->BBox.Min.X <= Edge1Fraction->BBox.Max.X )
-                     && ( Edge0Fraction->BBox.Max.Y >= Edge1Fraction->BBox.Min.Y ) && ( Edge0Fraction->BBox.Min.Y <= Edge1Fraction->BBox.Max.Y ) )
+                    if(    ( Edge0 >  Edge1 )
+                      // test only once in case of self-intersecting segment
+                      || ( ( Edge0 == Edge1 ) && ( Edge0Fraction > Edge1Fraction ) ) )
                     {
-                        FVector2D Edge1FractionVector = ( Edge1P1Coords - Edge1P0Coords );
+                        FVector2D& Edge1P0Coords = Edge1Fraction->Points[0]->Position;
+                        FVector2D& Edge1P1Coords = Edge1Fraction->Points[1]->Position;
+                        double Edge0FractionSubT, Edge1FractionSubT;
 
-                        // check this is not the same sub-segment or adjacent sub-segment,
-                        // i.e check they don't share a point in common
-                        // or else they would always intersect
-                        if( ( Edge0Fraction->Points[0] != Edge1Fraction->Points[1] )
-                         && ( Edge0Fraction->Points[0] != Edge1Fraction->Points[0] )
-                         && ( Edge0Fraction->Points[1] != Edge1Fraction->Points[0] )
-                         && ( Edge0Fraction->Points[1] != Edge1Fraction->Points[1] ) )
+                        // to speed things up a bit (actually I've found out that it speeds things up by 2 or by 3)
+                        if( ( Edge0Fraction->BBox.Max.X >= Edge1Fraction->BBox.Min.X ) && ( Edge0Fraction->BBox.Min.X <= Edge1Fraction->BBox.Max.X )
+                         && ( Edge0Fraction->BBox.Max.Y >= Edge1Fraction->BBox.Min.Y ) && ( Edge0Fraction->BBox.Min.Y <= Edge1Fraction->BBox.Max.Y ) )
                         {
-                            // Test intersections in PaintGroup's coordinates system (struct member lineVertexInParent).
-                            if ( FArianeCore::IntersectSegment ( Edge0P0Coords
-                                                               , Edge0P1Coords
-                                                               , Edge1P0Coords
-                                                               , Edge1P1Coords
-                                                               , &Edge0FractionSubT
-                                                               , &Edge1FractionSubT ) )
+                            FVector2D Edge1FractionVector = ( Edge1P1Coords - Edge1P0Coords );
+
+                            // check this is not the same sub-segment or adjacent sub-segment,
+                            // i.e check they don't share a point in common
+                            // or else they would always intersect
+                            if( ( Edge0Fraction->Points[0] != Edge1Fraction->Points[1] )
+                             && ( Edge0Fraction->Points[0] != Edge1Fraction->Points[0] )
+                             && ( Edge0Fraction->Points[1] != Edge1Fraction->Points[0] )
+                             && ( Edge0Fraction->Points[1] != Edge1Fraction->Points[1] ) )
                             {
-                                // Find intersections coordinates in respective coordinates systems (struct member lineVertex).
-                                // Note: we cannot use segment->GetPointAt() to determine the position
-                                // of the intersection because it will not match the intersection that
-                                // we detect via linear means. Cubic segments are not linear.
-                                FVector2D Edge0ISXCoords = { Edge0P0Coords.X + ( Edge0FractionVector.X * Edge0FractionSubT )
-                                                           , Edge0P0Coords.Y + ( Edge0FractionVector.Y * Edge0FractionSubT ) };
-                                FVector2D Edge1ISXCoords = { Edge1P0Coords.X + ( Edge1FractionVector.X * Edge1FractionSubT )
-                                                           , Edge1P0Coords.Y + ( Edge1FractionVector.Y * Edge1FractionSubT ) };
-                                // find value T at intersection. This is coordinates system-independent.
-                                double Edge0T = Edge0Fraction->FromT + ( Edge0FractionSubT * ( Edge0Fraction->ToT - Edge0Fraction->FromT ) );
-                                double Edge1T = Edge1Fraction->FromT + ( Edge1FractionSubT * ( Edge1Fraction->ToT - Edge1Fraction->FromT ) );
-
-                                if( ( Edge0T >= 0.0f && Edge0T <= 1.0f )
-                                 && ( Edge1T >= 0.0f && Edge1T <= 1.0f ) )
+                                // Test intersections in PaintGroup's coordinates system (struct member lineVertexInParent).
+                                if ( FArianeCore::IntersectSegment ( Edge0P0Coords
+                                                                   , Edge0P1Coords
+                                                                   , Edge1P0Coords
+                                                                   , Edge1P1Coords
+                                                                   , &Edge0FractionSubT
+                                                                   , &Edge1FractionSubT ) )
                                 {
-                                    // ignore intersection at end points if there is only
-                                    // one segment. The intersection is handled by the gap
-                                    // management
+                                    // Find intersections coordinates in respective coordinates systems (struct member lineVertex).
+                                    // Note: we cannot use segment->GetPointAt() to determine the position
+                                    // of the intersection because it will not match the intersection that
+                                    // we detect via linear means. Cubic segments are not linear.
+                                    FVector2D Edge0ISXCoords = { Edge0P0Coords.X + ( Edge0FractionVector.X * Edge0FractionSubT )
+                                                               , Edge0P0Coords.Y + ( Edge0FractionVector.Y * Edge0FractionSubT ) };
+                                    FVector2D Edge1ISXCoords = { Edge1P0Coords.X + ( Edge1FractionVector.X * Edge1FractionSubT )
+                                                               , Edge1P0Coords.Y + ( Edge1FractionVector.Y * Edge1FractionSubT ) };
+                                    // find value T at intersection. This is coordinates system-independent.
+                                    double Edge0T = Edge0Fraction->FromT + ( Edge0FractionSubT * ( Edge0Fraction->ToT - Edge0Fraction->FromT ) );
+                                    double Edge1T = Edge1Fraction->FromT + ( Edge1FractionSubT * ( Edge1Fraction->ToT - Edge1Fraction->FromT ) );
+
+                                    if( ( Edge0T >= 0.0f && Edge0T <= 1.0f )
+                                     && ( Edge1T >= 0.0f && Edge1T <= 1.0f ) )
                                     {
-                                        if( ( Edge0T == 0.0f )
-                                         && ( Edge0Node0EdgeCount == 1 ) )
+                                        const FVector& Edge0P0WorldPosition = Edge0Fraction->Points[0]->OriginalWorldPosition;
+                                        const FVector& Edge0P1WorldPosition = Edge0Fraction->Points[1]->OriginalWorldPosition;
+                                        FVector CameraToEdge0Fraction = ( Edge0P0WorldPosition - ViewOrigin );
+                                        FVector Edge0FractionWorldVector = ( Edge0P1WorldPosition - Edge0P0WorldPosition ).GetSafeNormal();
+                                        FPlane Edge0FractionPlane = FPlane( Edge0P0WorldPosition, FVector::CrossProduct( Edge0FractionWorldVector
+                                                                                                                       , CameraToEdge0Fraction ).GetSafeNormal() );
+                                        FVector WorldISXEdge1;
+
+
+
+                                        const FVector& Edge1P0WorldPosition = Edge1Fraction->Points[0]->OriginalWorldPosition;
+                                        const FVector& Edge1P1WorldPosition = Edge1Fraction->Points[1]->OriginalWorldPosition;
+                                        FVector CameraToEdge1Fraction = ( Edge1P0WorldPosition - ViewOrigin );
+                                        FVector Edge1FractionWorldVector = ( Edge1P1WorldPosition - Edge1P0WorldPosition ).GetSafeNormal();
+                                        FPlane Edge1FractionPlane = FPlane( Edge1P0WorldPosition, FVector::CrossProduct( Edge1FractionWorldVector
+                                                                                                                       , CameraToEdge1Fraction ).GetSafeNormal() );
+                                        FVector WorldISXEdge0;
+
+                                        // We also need to compute the intersection in 3D space
+                                        // to be able to create a cycle that will respect the projection because
+                                        // if we deduce it from the linear T value in 2D space, we lose precision
+                                        // due to the perspective.
+                                        FArianeCore::IntersectPlane ( Edge0FractionPlane
+                                                                    , Edge1P0WorldPosition
+                                                                    , Edge1FractionWorldVector
+                                                                    , WorldISXEdge1 );
+
+                                        FArianeCore::IntersectPlane ( Edge1FractionPlane
+                                                                    , Edge0P0WorldPosition
+                                                                    , Edge0FractionWorldVector
+                                                                    , WorldISXEdge0 );
+
+                                        // ignore intersection at end points if there is only
+                                        // one segment. The intersection is handled by the gap
+                                        // management
                                         {
-                                            continue;
+                                            if( ( Edge0T == 0.0f )
+                                             && ( Edge0Node0EdgeCount == 1 ) )
+                                            {
+                                                continue;
+                                            }
+
+                                            if( ( Edge0T == 1.0f )
+                                             && ( Edge0Node1EdgeCount == 1 ) )
+                                            {
+                                                continue;
+                                            }
+
+                                            if( ( Edge1T == 0.0f )
+                                             && ( Edge1Node0EdgeCount == 1 ) )
+                                            {
+                                                continue;
+                                            }
+
+                                            if( ( Edge1T == 1.0f )
+                                             && ( Edge1Node1EdgeCount == 1 ) )
+                                            {
+                                                continue;
+                                            }
                                         }
 
-                                        if( ( Edge0T == 1.0f )
-                                         && ( Edge0Node1EdgeCount == 1 ) )
-                                        {
-                                            continue;
-                                        }
-
-                                        if( ( Edge1T == 0.0f )
-                                         && ( Edge1Node0EdgeCount == 1 ) )
-                                        {
-                                            continue;
-                                        }
-
-                                        if( ( Edge1T == 1.0f )
-                                         && ( Edge1Node1EdgeCount == 1 ) )
-                                        {
-                                            continue;
-                                        }
+                                        // save in temporary struct array will allow to alloc vertices in one go.
+                                        Mutex.Lock();
+                                        OutIntersectionRecordArray.Emplace( Edge0ISXCoords
+                                                                          , ( WorldISXEdge0 + WorldISXEdge1 ) * 0.5f
+                                                                          , Path0
+                                                                          , Edge0
+                                                                          , Edge0T
+                                                                          , Path1
+                                                                          , Edge1
+                                                                          , Edge1T );
+                                        Mutex.Unlock();
                                     }
-
-                                    // save in temporary struct array will allow to alloc vertices in one go.
-                                    Mutex.Lock();
-                                    OutIntersectionRecordArray.Emplace( Edge0ISXCoords
-                                                                      , Path0
-                                                                      , Edge0
-                                                                      , Edge0T
-                                                                      , Path1
-                                                                      , Edge1
-                                                                      , Edge1T );
-                                    Mutex.Unlock();
                                 }
                             }
                         }
                     }
-                  }
                 }
             }
         }
@@ -1009,8 +1044,7 @@ FArianeGraph::GetExtendedNodes()
 }
 
 uint32
-FArianeGraph::MakeExtendedSegments( const FVector& ViewOrigin
-                                  , FArianeVertex* Vertex
+FArianeGraph::MakeExtendedSegments( FArianeVertex* Vertex
                                   , FNode& VertexNode
                                   , const FTransform& PathTransform )
 {
@@ -1056,7 +1090,7 @@ FArianeGraph::MakeExtendedSegments( const FVector& ViewOrigin
 }
 
 void
-FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& Objects )
+FArianeGraph::Import( const TArray<FArianeObject*>& Objects )
 {
     FVector::ZAxisVector;
     uint32 NodeCount = 0;
@@ -1153,8 +1187,7 @@ FArianeGraph::Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& O
                     // Gap handling
                     if( Vertex->GetSegments().Num() == 1 )
                     {
-                        uint32 ExtensionCount = MakeExtendedSegments( ViewOrigin
-                                                                    , Vertex
+                        uint32 ExtensionCount = MakeExtendedSegments( Vertex
                                                                     , Node
                                                                     , PathTransform );
 
@@ -1419,6 +1452,7 @@ FArianeGraph::Build()
     for( FNodeIntersection::XRecord& XintersectionRecord : XIntersectionRecordArray )
     {
         IntersectionNodeBuffer.Emplace( XintersectionRecord.Position
+                                      , XintersectionRecord.AverageWorldPosition
                                       , XintersectionRecord.Edge0
                                       , XintersectionRecord.Edge0T
                                       , XintersectionRecord.Edge1
@@ -1683,7 +1717,7 @@ FArianeGraph::OrderCycles()
 
 // Note: For ariane objects, there is no need for cubic segments because a projected cubic segment is not a cubic segment itself
 void
-FArianeGraph::Solve( const FVector& ViewOrigin
+FArianeGraph::Solve( const FVector& InViewOrigin
                    , const FPlane& InProjectionPlane
                    , const TArray<FArianeObject*>& Objects
                    , double InGapTolerance
@@ -1694,7 +1728,7 @@ FArianeGraph::Solve( const FVector& ViewOrigin
     GapTolerance = InGapTolerance;
 
     SegmentExtensionScheme = InSegmentExtensionScheme;
-
+    ViewOrigin = InViewOrigin;
     ProjectionPlane = InProjectionPlane;
     ProjectionPlaneOrigin = ProjectionPlane.GetOrigin();
     // find the angle between the Z axis and the plane's normal vector in order to find the rotation matrix.
@@ -1712,7 +1746,7 @@ FArianeGraph::Solve( const FVector& ViewOrigin
     Cycles.Empty();
 
     // Step1: Import Paths and convert them into 2D space
-    Import( ViewOrigin, Objects );
+    Import( Objects );
 
     // Step2 Intersect and build the Graph
     Build();

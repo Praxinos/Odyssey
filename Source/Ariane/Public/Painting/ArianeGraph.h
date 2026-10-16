@@ -130,11 +130,11 @@ public:
             double Edge0T;
             double Edge1T;
             FVector2D Position;
-            FVector   OriginalWorldPosition;
+            FVector   AverageWorldPosition;
 
             virtual ~XRecord();
             XRecord( const FVector2D& InPosition
-                   //, const FVector& InOriginalWorldPosition
+                   , const FVector& InAverageWorldPosition
                    , FPath* InPath0
                    , FEdge* InEdge0
                    , double InEdge0T
@@ -145,6 +145,7 @@ public:
 
         virtual ~FNodeIntersection();
         FNodeIntersection( const FVector2D& Position
+                         , const FVector& InOriginalWorldPosition
                          , FEdge* InEdge0
                          , double InEdge0T
                          , FEdge* InEdge1
@@ -540,7 +541,7 @@ public:
     virtual ~FArianeGraph();
     FArianeGraph();
 
-    void Solve( const FVector& ViewOrigin
+    void Solve( const FVector& InViewOrigin
               , const FPlane& InProjectionPlane
               , const TArray<FArianeObject*>& Objects
               , double InGapTolerance
@@ -558,7 +559,7 @@ protected:
                                                     , double Orientation );
     static double GetCycleNormalVector( TArray<uint32>& NodeIndexArray, TArray<FSection*>& SectionArray );
 
-    void Import( const FVector& ViewOrigin, const TArray<FArianeObject*>& Objects );
+    void Import( const TArray<FArianeObject*>& Objects );
     void Build();
     void SimplifyGraph();
     void Explore( FExplorationPair* ExplorationPair );
@@ -592,8 +593,7 @@ protected:
     void MergeCycles();
     void OrderCycles();
     static void UnlinkPendantSectionsRecursively( FSection* Section, FNode* Node );
-    uint32 MakeExtendedSegments( const FVector& ViewOrigin
-                               , FArianeVertex* Vertex
+    uint32 MakeExtendedSegments( FArianeVertex* Vertex
                                , FNode& VertexNode
                                , const FTransform& PathTransform );
 
@@ -606,6 +606,7 @@ protected:
     FVector ProjectionPlaneOrigin;
     FQuat LocalToWorldRotationQuat;
     FQuat WorldToLocalRotationQuat;
+    FVector ViewOrigin;
     EArianeGraphSegmentExtensionScheme SegmentExtensionScheme;
     FCriticalSection Mutex;
     // we store everything in one buffer per type, for performance
