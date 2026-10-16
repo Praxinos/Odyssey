@@ -1272,6 +1272,15 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                     .PreventThrottling( true ) // To refresh the viewport during value change
                                     .Delta( 1.f )
                                     .SliderExponent( 0.8f )
+                                    // see comment in EndMoveAndScaleActorDistanceTransaction()
+                                    // 0 is not a valid value, but it is managed (or to be more accurate, it would be "not managed")
+                                    // via ShotSequenceTools::CanMoveAndScaleActor()
+                                    // so this value can natively not being set via all delegates
+                                    //
+                                    // and if something like 0.0001f is used, once this value is set,
+                                    // then, when dragging to increase, all values would be 120.0001f
+                                    .MinValue( 0.f )
+                                    .MinSliderValue( 0.f )
                                     .Value( this, &SStoryboardLevelViewport::GetMoveAndScaleActorDistance )
                                     .OnBeginSliderMovement( this, &SStoryboardLevelViewport::BeginMoveAndScaleActorDistanceTransaction )
                                     .OnValueChanged( this, &SStoryboardLevelViewport::SetMoveAndScaleActorDistanceInteractive )
@@ -2186,7 +2195,11 @@ SStoryboardLevelViewport::EndMoveAndScaleActorDistanceTransaction( float iNewDis
     if( !mActorToMove.IsValid() )
         return;
 
-    check( GetMoveAndScaleActorDistance() == iNewDistance );
+    // The slider is clamped from 0:
+    // - GetMoveAndScaleActorDistance() is always positive (like 150)
+    // - but never 0.f (as ShotSequenceTools::CanMoveAndScaleActor() return false in this case)
+    // That's why a first check is done with 0 because GetMoveAndScaleActorDistance() can never return 0 but the slider does
+    check( FMath::IsNearlyZero( iNewDistance ) || GetMoveAndScaleActorDistance() == iNewDistance );
 
     SetMoveAndScaleActorDistance( iNewDistance, false );
 
