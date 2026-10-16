@@ -90,14 +90,18 @@ UArianeDrawing::Reset()
         Object->PostReset();
     }
 
-    RootGroupID.GetObject( this )->UpdateTransform();
-    RootGroupID.GetObject( this )->Update( FArianeObject::EUpdateFlags::None, true );
+    //if( bCallUpdate )
+    {
+        RootGroupID.GetObject( this )->UpdateTransform();
+        RootGroupID.GetObject( this )->Update( FArianeObject::EUpdateFlags::None, true );
+    }
 }
 
 void
 UArianeDrawing::OnRegisterLayer()
 {
-    Reset();
+    //Reset();
+    RootGroupID.GetObject( this )->UpdateTransform();
 }
 
 void

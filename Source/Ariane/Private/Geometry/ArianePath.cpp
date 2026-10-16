@@ -1016,12 +1016,15 @@ FArianePath::InvalidateAllSegments()
 void
 FArianePath::InvalidateAllVertices()
 {
-    for( FArianeVertex* Vertex : Vertices )
+    if( Vertices.Num() )
     {
-        InvalidatedVertices.Add( Vertex );
-    }
+        for( FArianeVertex* Vertex : Vertices )
+        {
+            InvalidatedVertices.Add( Vertex );
+        }
 
-    Invalidate( FArianePathInvalidationFlags().SetVertexAltered() );
+        Invalidate( FArianePathInvalidationFlags().SetVertexAltered() );
+    }
 }
 
 void
