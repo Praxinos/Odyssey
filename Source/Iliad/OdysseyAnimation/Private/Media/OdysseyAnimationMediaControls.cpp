@@ -42,6 +42,12 @@ FOdysseyAnimationMediaControls::OnClose()
 }
 
 bool
+FOdysseyAnimationMediaControls::IsValid() const
+{
+    return mAnimation != nullptr && mAnimation->IsValidLowLevel();
+}
+
+bool
 FOdysseyAnimationMediaControls::CanControl(EMediaControl iControl) const
 {
     return true; //All controls available

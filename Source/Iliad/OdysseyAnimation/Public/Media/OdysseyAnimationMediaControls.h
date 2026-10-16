@@ -18,6 +18,7 @@ public:
     void Init(TSharedPtr<class FOdysseyAnimationMediaPlayer> iPlayer);
     void OnOpen(UOdysseyAnimation* iAnimation);
     void OnClose();
+    bool IsValid() const;
 
 public:
 

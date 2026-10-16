@@ -84,7 +84,7 @@ FOdysseyAnimationMediaSamples::FlushSamples()
     //But we don't have a sample queue, so we do nothing
 
     TSharedPtr<FOdysseyAnimationMediaControls> controls = mControls.Pin();
-    if ( !controls )
+    if (!controls || !controls->IsValid() || controls->GetState() == EMediaState::Closed )
         return;
 
     controls->SetSequenceIndex(0);
@@ -135,7 +135,7 @@ FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeR
 
     TRange<FMediaTimeStamp>& timeRange = *oTimeRange;
     TSharedPtr<FOdysseyAnimationMediaControls> controls = mControls.Pin();
-    if ( !controls )
+    if (!controls || !controls->IsValid() || controls->GetState() == EMediaState::Closed )
         return false;
 
     //Even if the media player does some kind of looping, we need to ensure the timerange bounds are looping correctly and are valid
@@ -188,7 +188,7 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
         return EFetchBestSampleResult::NoSample;
 
     TSharedPtr<FOdysseyAnimationMediaControls> controls = mControls.Pin();
-    if (!controls)
+    if (!controls || !controls->IsValid() || controls->GetState() == EMediaState::Closed )
         return EFetchBestSampleResult::NoSample;
 
     if ( controls->GetState() == EMediaState::Stopped )
@@ -292,6 +292,8 @@ FOdysseyAnimationMediaSamples::PeekVideoSampleTime(FMediaTimeStamp & TimeStamp)
     //It does not need to be as precise as FetchBestVideoSampleForTimeRange.
 
     TSharedPtr<FOdysseyAnimationMediaControls> controls = mControls.Pin();
+    if (!controls || !controls->IsValid() || controls->GetState() == EMediaState::Closed )
+        return false;
 
     TimeStamp.Time = controls->GetTime();
     TimeStamp.SetSequenceIndex( controls->GetSequenceIndex() );
@@ -320,7 +322,7 @@ void
 FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex, int64 iLoopIndex)
 {
     TSharedPtr<FOdysseyAnimationMediaControls> controls = mControls.Pin();
-    if (!controls)
+    if (!controls || !controls->IsValid() || controls->GetState() == EMediaState::Closed )
         return;
 
     TRange<FTimespan> timeRange = mAnimation->GetFrameTimeRange(iFrameIndex);
