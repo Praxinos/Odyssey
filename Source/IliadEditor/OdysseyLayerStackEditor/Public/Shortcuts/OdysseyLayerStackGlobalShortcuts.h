@@ -64,6 +64,8 @@ public:
     void Action_SetCurrentLayerBlendModeToPreviousBlendMode();
 
     bool CanAction_AlterLayer();
+    bool CanAction_SetCurrentLayerBlendMode(EOdysseyBlendMode iBlendMode);
+    bool CanAction_SetLayerAlphaInheritance();
 
 public:
     //Shortcuts

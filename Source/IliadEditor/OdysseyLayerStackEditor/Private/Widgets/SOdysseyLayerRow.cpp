@@ -200,7 +200,8 @@ SOdysseyLayerRow::CreateBlendModesMenu()
     menu.BeginSection("Context Menu");
     for ( TPair<TSharedPtr<FUICommandInfo>, EOdysseyBlendMode> Pair : FOdysseyLayerStackEditorCommands::Get().SetCurrentLayerBlendMode )
     {
-        menu.AddMenuEntry( Pair.Key );
+        FMenuEntryParams param;
+        menu.AddMenuEntry( Pair.Key);
     }
     menu.EndSection();
 
@@ -307,9 +308,9 @@ SOdysseyLayerRow::GenerateMainRowInheritsAlphaWidget()
         .VAlign(VAlign_Center)
         [
             SNew(SCheckBox)
-            .ToolTipText( LOCTEXT("layer.inherits-alpha.tooltip.", "Inherit Alpha (Clipping Mask)\nWhen activated the layer inherits Alpha from the layers underneath.") )
+            .ToolTipText( LOCTEXT("layer.inherits-alpha.tooltip.", "Inherit Alpha (Clipping Mask)\nWhen activated the layer inherits Alpha from the layers underneath.\nNot compatible with some Blend Modes (ex: Erase, Stencil).") )
             .IsFocusable(false)
-            .IsEnabled_Lambda([this](){ return GetLayer()->IsEditable();})
+            .IsEnabled_Lambda([this](){ return GetLayer()->CanSetInheritsAlpha();})
             .Style(InheritsAlphaToggleStyle)
             .OnCheckStateChanged(this, &SOdysseyLayerRow::OnInheritsAlphaCheckBoxStateChanged)
             .IsChecked(this, &SOdysseyLayerRow::GetInheritsAlphaCheckBoxState)

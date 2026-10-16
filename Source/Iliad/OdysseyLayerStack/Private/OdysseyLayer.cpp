@@ -1066,7 +1066,7 @@ UOdysseyLayer::SetPostBehaviour(EOdysseyLayerImagePostBehaviour Value)
 void
 UOdysseyLayer::SetInheritsAlpha(bool InheritsAlpha)
 {
-    if( !IsEditable() )
+    if( !CanSetInheritsAlpha() )
         return;
 
     Modify();
@@ -1231,10 +1231,31 @@ UOdysseyLayer::SetDisplayCellNames(bool Value)
 }
 #endif
 
+bool
+UOdysseyLayer::CanSetBlendMode(EOdysseyBlendMode Value) const
+{
+    if (!IsEditable())
+        return false;
+
+    if (!bInheritsAlpha)
+        return true;
+
+    return Value != EOdysseyBlendMode::Erase && Value != EOdysseyBlendMode::Stencil;
+}
+
+bool
+UOdysseyLayer::CanSetInheritsAlpha() const
+{
+    if (!IsEditable())
+        return false;
+
+    return BlendMode != EOdysseyBlendMode::Erase && BlendMode != EOdysseyBlendMode::Stencil;
+}
+
 void
 UOdysseyLayer::SetBlendMode(EOdysseyBlendMode Value)
 {
-    if( !IsEditable() )
+    if( !CanSetBlendMode(Value) )
         return;
 
     Modify();

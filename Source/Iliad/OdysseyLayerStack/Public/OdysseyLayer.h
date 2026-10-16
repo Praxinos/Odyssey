@@ -115,6 +115,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetIsActivated(bool Value);
 
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
+    bool CanSetBlendMode(EOdysseyBlendMode Value) const;
+
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetBlendMode(EOdysseyBlendMode Value);
 
@@ -129,6 +132,9 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetPostBehaviour(EOdysseyLayerImagePostBehaviour Value);
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
+    bool CanSetInheritsAlpha() const;
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetInheritsAlpha(bool InheritsAlpha = true);

@@ -112,17 +112,20 @@ FOdysseyLayerStackGlobalShortcuts::MapActionsToCommandList(TSharedRef<FUICommand
 
     iCommandList->MapAction(
         FOdysseyLayerStackEditorCommands::Get().ActivateLayerInheritsAlpha,
-        FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_ActivateLayerInheritsAlpha)
+        FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_ActivateLayerInheritsAlpha),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::CanAction_SetLayerAlphaInheritance)
     );
 
     iCommandList->MapAction(
         FOdysseyLayerStackEditorCommands::Get().InactivateLayerInheritsAlpha,
-        FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_InactivateLayerInheritsAlpha)
+        FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_InactivateLayerInheritsAlpha),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::CanAction_SetLayerAlphaInheritance)
     );
 
     iCommandList->MapAction(
         FOdysseyLayerStackEditorCommands::Get().ToggleLayerInheritsAlpha,
-        FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_ToggleLayerInheritsAlpha)
+        FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_ToggleLayerInheritsAlpha),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::CanAction_SetLayerAlphaInheritance)
     );
 
     iCommandList->MapAction(
@@ -223,7 +226,7 @@ FOdysseyLayerStackGlobalShortcuts::MapActionsToCommandList(TSharedRef<FUICommand
         iCommandList->MapAction(
             Pair.Key,
             FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_SetCurrentLayerBlendMode, Pair.Value),
-            FCanExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::CanAction_AlterLayer)
+            FCanExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::CanAction_SetCurrentLayerBlendMode, Pair.Value)
         );
     }
 }
@@ -724,8 +727,13 @@ FOdysseyLayerStackGlobalShortcuts::Action_SetCurrentLayerBlendModeToNextBlendMod
             continue;
 
         EOdysseyBlendMode currentBlendMode = layer->GetBlendMode();
-        int8 nextBlendModeInt = ( static_cast<int8>( currentBlendMode ) + 1 ) % static_cast<int8>( EOdysseyBlendMode::BlendMode_Count );
-        EOdysseyBlendMode nextBlendMode = static_cast<EOdysseyBlendMode>( nextBlendModeInt );
+        EOdysseyBlendMode nextBlendMode = currentBlendMode;
+        do
+        {
+            int8 nextBlendModeInt = ( static_cast<int8>( nextBlendMode ) + 1 ) % static_cast<int8>( EOdysseyBlendMode::BlendMode_Count );
+            nextBlendMode = static_cast<EOdysseyBlendMode>( nextBlendModeInt );
+        }
+        while(!layer->CanSetBlendMode(nextBlendMode) && nextBlendMode != currentBlendMode);
 
         layer->SetBlendMode( nextBlendMode );
     }
@@ -754,8 +762,13 @@ FOdysseyLayerStackGlobalShortcuts::Action_SetCurrentLayerBlendModeToPreviousBlen
             continue;
 
         EOdysseyBlendMode currentBlendMode = layer->GetBlendMode();
-        int8 prevBlendModeInt = ( static_cast<int8>( currentBlendMode ) - 1 + static_cast<int8>( EOdysseyBlendMode::BlendMode_Count ) ) % static_cast<int8>( EOdysseyBlendMode::BlendMode_Count );
-        EOdysseyBlendMode prevBlendMode = static_cast<EOdysseyBlendMode>( prevBlendModeInt );
+        EOdysseyBlendMode prevBlendMode = currentBlendMode;
+        do
+        {
+            int8 prevBlendModeInt = ( static_cast<int8>( prevBlendMode ) - 1 + static_cast<int8>( EOdysseyBlendMode::BlendMode_Count ) ) % static_cast<int8>( EOdysseyBlendMode::BlendMode_Count );
+            prevBlendMode = static_cast<EOdysseyBlendMode>( prevBlendModeInt );
+        }
+        while(!layer->CanSetBlendMode(prevBlendMode) && prevBlendMode != currentBlendMode);
 
         layer->SetBlendMode( prevBlendMode );
     }
@@ -801,6 +814,34 @@ FOdysseyLayerStackGlobalShortcuts::CanAction_AlterLayer()
         return false;
 
     return FocusedLayer->IsEditable();
+}
+
+bool
+FOdysseyLayerStackGlobalShortcuts::CanAction_SetCurrentLayerBlendMode(EOdysseyBlendMode iBlendMode)
+{
+    UOdysseyLayerStack* layerStack = mLayerStack.Get();
+    if ( !layerStack )
+        return false;
+
+    UOdysseyLayer* FocusedLayer = mFocusedLayer.IsBound() ? mFocusedLayer.Get() : layerStack->GetCurrentLayer();
+    if ( !FocusedLayer )
+        return false;
+
+    return FocusedLayer->CanSetBlendMode(iBlendMode);
+}
+
+bool
+FOdysseyLayerStackGlobalShortcuts::CanAction_SetLayerAlphaInheritance()
+{
+    UOdysseyLayerStack* layerStack = mLayerStack.Get();
+    if ( !layerStack )
+        return false;
+
+    UOdysseyLayer* FocusedLayer = mFocusedLayer.IsBound() ? mFocusedLayer.Get() : layerStack->GetCurrentLayer();
+    if ( !FocusedLayer )
+        return false;
+
+    return FocusedLayer->CanSetInheritsAlpha();
 }
 
 #undef LOCTEXT_NAMESPACE
