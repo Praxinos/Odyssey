@@ -105,6 +105,18 @@ SOdysseyFlipbookTimelineTrack::RefreshTextureRenderTarget( UTexture2D* iTexture,
     FIntRect iDstRect( 0, 0, iRenderTarget->GetSurfaceWidth(), iRenderTarget->GetSurfaceHeight() );
     FIntRect iSrcRect( 0, 0, iTexture->GetSurfaceWidth(), iTexture->GetSurfaceHeight() );
 
+    //Render through Layerstack if we can, otherwise just copy the texture directly
+    UOdysseyTextureLayerStackUserData* userData = iTexture->GetAssetUserData<UOdysseyTextureLayerStackUserData>();
+    if( userData )
+    {
+        UOdysseyTextureLayerStack* layerStack = userData->LayerStack;
+        if( layerStack )
+        {
+            layerStack->Render_GameThread(iRenderTarget, 0, EOdysseyRenderingType::Render, iSrcRect, iDstRect);
+            return;
+        }
+    }
+
     ENQUEUE_RENDER_COMMAND( IOdysseyTextureRenderingAbility_RenderRectAtRect )(
         [this, iRenderTarget, iTexture, iSrcRect, iDstRect]( FRHICommandListImmediate& RHICmdList )
         {
@@ -129,7 +141,9 @@ SOdysseyFlipbookTimelineTrack::RefreshTextureRenderTarget( UTexture2D* iTexture,
 
             graphBuilder.Execute();
         }
-        );
+    );
+
+
 }
 
 void
@@ -279,7 +293,6 @@ SOdysseyFlipbookTimelineTrack::CreateFrameContent(UTexture2D* iTexture)
         }
 
         TStrongObjectPtr<UTextureRenderTarget2D> renderTarget = mRenderTargets.FindChecked( iTexture );
-
         RefreshTextureRenderTarget( iTexture, renderTarget.Get() );
 
         //-
