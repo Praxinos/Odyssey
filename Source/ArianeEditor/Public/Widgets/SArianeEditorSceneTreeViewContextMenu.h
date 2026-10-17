@@ -27,4 +27,6 @@ class ARIANEEDITOR_API SArianeEditorSceneTreeViewContextMenu
         static void DeleteSelectedObjects( FArianeEditor* Editor );
         static void PasteObjects( FArianeEditor* Editor );
         static void UngroupSelectedGroups( FArianeEditor* Editor );
+        static void ConvertSelectedPrimitives( FArianeEditor* Editor );
+        static bool CanConvert( FArianeGroup* RootGroup );
 };

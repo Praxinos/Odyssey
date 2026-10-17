@@ -77,7 +77,8 @@ SArianeEditorSceneTreeViewContextMenu::CreateWidget( SArianeEditorSceneTreeView*
                 LOCTEXT("ariane-scene-tree-view.context-menu.convert-primitive-to-path.name","Convert primitive to path")
               , LOCTEXT("ariane-scene-tree-view.context-menu.convert-primitive-to-path.tooltip","Convert primitive to path")
               , FSlateIcon()
-              , FUIAction(FExecuteAction::CreateRaw( Editor, &FArianeEditor::ConvertSelectedPrimitives ) ));
+              , FUIAction(FExecuteAction::CreateStatic( &SArianeEditorSceneTreeViewContextMenu::ConvertSelectedPrimitives, Editor )
+                        , FCanExecuteAction::CreateStatic( &SArianeEditorSceneTreeViewContextMenu::CanConvert, RootGroup )));
         }
 
 /*
@@ -105,6 +106,17 @@ SArianeEditorSceneTreeViewContextMenu::CreateWidget( SArianeEditorSceneTreeView*
     Menu.EndSection();
 
     return Menu.MakeWidget();
+}
+
+// static
+void
+SArianeEditorSceneTreeViewContextMenu::ConvertSelectedPrimitives( FArianeEditor* Editor )
+{
+    GEditor->BeginTransaction( LOCTEXT("ariane-scene-tree-view.transaction.convert-selected-primitives", "Delete Selected Primitives") );
+
+    Editor->ConvertSelectedPrimitives();
+
+    GEditor->EndTransaction();
 }
 
 // static
@@ -196,22 +208,43 @@ SArianeEditorSceneTreeViewContextMenu::CanGroup( FArianeGroup* RootGroup )
 
 // static
 bool
-SArianeEditorSceneTreeViewContextMenu::CanUngroup( FArianeGroup* RootGroup )
+SArianeEditorSceneTreeViewContextMenu::CanConvert( FArianeGroup* RootGroup )
 {
-    bool Ret = false;
-
-    for( FArianeObject* SelectedObject : RootGroup->GetDrawing()->GetSelectedObjects() )
+    if( RootGroup->GetDrawing()->GetSelectedObjects().Num() )
     {
-        if( ( SelectedObject->HasBaseClass( FArianeGroup::StaticClass() ) == false )
-         || ( SelectedObject == RootGroup ) )
+        for( FArianeObject* SelectedObject : RootGroup->GetDrawing()->GetSelectedObjects() )
         {
-            return false;
+            if( SelectedObject->HasBaseClass( FArianePrimitive::StaticClass() ) == false )
+            {
+                return false;
+            }
         }
 
-        Ret = true;
+        return true;
     }
 
-    return Ret;
+    return false;
+}
+
+// static
+bool
+SArianeEditorSceneTreeViewContextMenu::CanUngroup( FArianeGroup* RootGroup )
+{
+    if( RootGroup->GetDrawing()->GetSelectedObjects().Num() )
+    {
+        for( FArianeObject* SelectedObject : RootGroup->GetDrawing()->GetSelectedObjects() )
+        {
+            if( ( SelectedObject->HasBaseClass( FArianeGroup::StaticClass() ) == false )
+             || ( SelectedObject == RootGroup ) )
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 // static

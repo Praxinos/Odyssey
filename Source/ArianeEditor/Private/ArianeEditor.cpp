@@ -1048,9 +1048,14 @@ void
 FArianeEditor::ConvertPrimitives( UArianePainting3DComponent* Painting3DComponent
                                 , TArray<FArianePrimitive*>& PrimitivesToConvert )
 {
+    UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+    // for undos in case a transaction is opened by the caller
+    VectorLayer->GetDrawing()->Modify();
+
     for( FArianePrimitive* PrimitiveToConvert : PrimitivesToConvert )
     {
-        UArianeDrawing *Image = PrimitiveToConvert->GetDrawing();
+        UArianeDrawing *Drawing = PrimitiveToConvert->GetDrawing();
         TArray<FArianeObject*> Children;
         FArianePath* Path;
 
