@@ -154,7 +154,7 @@ FArianeSegmentCubic::BuildVariableAdaptive( TArray<FSubPoint>& SubPoints
     double DotLimit = 0.9994f; // cos 2 deg
     double SegmentLength = 0.0;
 
-    if( ( StraightVectors[0].IsNearlyZero() == false ) && ( StraightVectors[1].IsNearlyZero() == false ) )
+    //if( ( StraightVectors[0].IsNearlyZero() == false ) && ( StraightVectors[1].IsNearlyZero() == false ) )
     {
         double Dot[2];
 
