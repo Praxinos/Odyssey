@@ -39,7 +39,9 @@ public class OdysseyCore : ModuleRules
                 "ImageCore",
                 "InputCore",
                 "SlateCore",
-                "Slate"
+                "Slate",
+                "Json",
+                "JsonUtilities",
              }
         );
     }
