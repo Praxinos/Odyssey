@@ -856,9 +856,10 @@ FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimation
 
     FThumbnailData thumbnail;
     thumbnail.QTime = FQualifiedFrameTime( *outer_time, movie_scene->GetTickResolution() );
+    thumbnail.RenderingComposition = rendering_composition;
     //thumbnail.RenderTarget = renderTarget;
-    thumbnail.Texture = texture;
-    thumbnail.Brush = brush;
+    //thumbnail.Texture = texture;
+    //thumbnail.Brush = brush;
     thumbnail.Size = thumbnail_size;
 
     return thumbnail;
@@ -914,8 +915,8 @@ FCinematicBoardSection::ReBuildAnimationsTimelineThumbnails( FGuid iGuid, TOptio
 
             FThumbnailData thumbnail = RebuildAnimationThumbnailDataInternal( animation_timeline_section, iGuid, meta_frame, iFrameId );
             //if( !thumbnail.RenderTarget )
-            if( !thumbnail.Texture )
-                continue;
+            //if( !thumbnail.Texture )
+            //    continue;
 
             thumbnail.MultipleSubkey = pair.Value.mSubKeys.Num() > 1;
 
@@ -923,6 +924,24 @@ FCinematicBoardSection::ReBuildAnimationsTimelineThumbnails( FGuid iGuid, TOptio
 
             break; // only the first subkey (of the metakey) is used
         }
+    }
+
+    // (I don't know how to do it better)
+    // (I would like to avoid using mAnimationsTimelineThumbnailPool outside RebuildAnimationThumbnailDataInternal())
+    //
+    // Update all thumbnails once the thumbnail pool is finished
+    // If texture and brush are set inside RebuildAnimationThumbnailDataInternal(),
+    // with 2 same images, when the second is processed, the first texture in mAnimationsTimelineThumbnailPool of the rendering composition
+    // will be removed and replace by the second texture (which contains the same content, but not the same pointer)
+    // Then the texture (and resource brush) stored inside the first thumbnail will be no more valid
+    //
+    // So, thumbnail will store the rendering composition, and only when the thumbnail pool is finished
+    // setup its texture and create the brush, so every thumbnails with the same rendering composition will use the same unique texture
+    for( FThumbnailData& thumbnail : thumbnails )
+    {
+        FPoolData p = mAnimationsTimelineThumbnailPool.FindChecked( thumbnail.RenderingComposition );
+        thumbnail.Texture = p.Texture;
+        thumbnail.Brush = new FSlateImageBrush( thumbnail.Texture, FVector2f( thumbnail.Texture->GetSizeX(), thumbnail.Texture->GetSizeY() ) );
     }
 
     //---

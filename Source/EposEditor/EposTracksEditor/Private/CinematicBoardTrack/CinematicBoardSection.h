@@ -82,6 +82,8 @@ public:
 
     //---
 
+    typedef TArray<FGuid> FRenderingComposition;
+
     virtual void RebuildChannelProxies();
     virtual void RebuildMetaChannels();
 
@@ -103,6 +105,7 @@ public:
     {
         FQualifiedFrameTime QTime;
         FIntVector2 Size;
+        FRenderingComposition RenderingComposition;
         //TObjectPtr<UTextureRenderTarget2D> RenderTarget;
         TObjectPtr<UTexture2D> Texture;
         FSlateBrush* Brush = nullptr;
@@ -137,7 +140,6 @@ private:
         //UTextureRenderTarget2D* RenderTarget = nullptr;
         TObjectPtr<UTexture2D> Texture;
     };
-    typedef TArray<FGuid> FRenderingComposition;
     // A pool containing textures corresponding to each thumbnail and referenced by the render composition of the cell
     // ALL textures of ALL cells in ALL Animations of the section
     // The identifier is the rendering composition of a cell (in any animations)
