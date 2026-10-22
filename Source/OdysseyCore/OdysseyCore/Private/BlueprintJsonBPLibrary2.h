@@ -35,6 +35,6 @@ class UBlueprintJsonBPLibrary2
      * A more robust improvement would be to manage array and return a generic JsonValue, but JsonValue is not exposed at all to BP,
      * only JsonObject (aka "name": value" pairs) are exposed to BP via JsonObjectWrapper
      */
-    UFUNCTION(BlueprintCallable, Category = "FileUtils")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Json")
     static bool GetFieldAsArrayArrayFloat( const FJsonObjectWrapper& JsonObject, const FString& FieldName, UPARAM( DisplayName = "Value" ) TArray<FJsonFloatArray>& OutValue );
 };
