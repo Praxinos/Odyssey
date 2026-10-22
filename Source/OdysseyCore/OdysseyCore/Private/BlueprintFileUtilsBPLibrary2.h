@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+
 #include "BlueprintFileUtilsBPLibrary2.generated.h"
 
 UCLASS()
@@ -32,4 +33,10 @@ class UBlueprintFileUtilsBPLibrary2
      */
     UFUNCTION(BlueprintCallable, Category = "FileUtils")
     static bool FromTextFile( FString& Content, const FFilePath& PathFile );
+
+    /**
+     * Convert a raw rgba file to png.
+     */
+    UFUNCTION(BlueprintCallable, Category = "FileUtils")
+    static bool ConvertRawRGBAToPNG( const FFilePath& RawPathFile, int32 Width, int32 Height, FFilePath& PNGPathFile );
 };

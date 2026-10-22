@@ -217,4 +217,32 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportAsFlipbook(UOdysseyAni
     );
 }
 
+//---
+
+//static
+FOdysseyPainterEditorAnimationImportResult
+UOdysseyPainterEditorAnimationCellFunctionLibrary::ImportTextureSequence( UOdysseyAnimationCellImageRaster* iCellRaster, UTexture2D* iTexture, FOdysseyImportTexturesParameters iParameters )
+{
+    UOdysseyAnimation* animation = iCellRaster->GetAnimation();
+    if( !animation )
+        return FOdysseyPainterEditorAnimationImportResult();
+
+    FOdysseyImportTexturesParameters params = iParameters;
+    params.Init( { iTexture }, animation->GetWidth(), animation->GetHeight() );
+    return FOdysseyPainterEditorAnimationCellImport::ImportTextureSequence( iCellRaster, params );
+}
+
+//static
+FOdysseyPainterEditorAnimationImportResult
+UOdysseyPainterEditorAnimationCellFunctionLibrary::ImportImageSequence( UOdysseyAnimationCellImageRaster* iCellRaster, FString iPath, FOdysseyImportTexturesParameters iParameters )
+{
+    UOdysseyAnimation* animation = iCellRaster->GetAnimation();
+    if( !animation )
+        return FOdysseyPainterEditorAnimationImportResult();
+
+    FOdysseyImportTexturesParameters params = iParameters;
+    params.Init( { iPath }, animation->GetWidth(), animation->GetHeight() );
+    return FOdysseyPainterEditorAnimationCellImport::ImportTextureSequence( iCellRaster, params );
+}
+
 #undef LOCTEXT_NAMESPACE
