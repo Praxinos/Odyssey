@@ -96,3 +96,16 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Animation")
     static UPaperFlipbook* ExportAsFlipbook(UOdysseyAnimationLayer* Layer, FInt32Range FrameRange, FString AssetName, FString Path);
 };
+
+UCLASS()
+class UOdysseyPainterEditorAnimationCellFunctionLibrary: public UBlueprintFunctionLibrary
+{
+    GENERATED_BODY()
+
+public:
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Animation" )
+    static FOdysseyPainterEditorAnimationImportResult ImportTextureSequence( UOdysseyAnimationCellImageRaster* CellRaster, UTexture2D* Texture, FOdysseyImportTexturesParameters Parameters );
+
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Animation" )
+    static FOdysseyPainterEditorAnimationImportResult ImportImageSequence( UOdysseyAnimationCellImageRaster* CellRaster, FString Path, FOdysseyImportTexturesParameters Parameters );
+};

@@ -134,4 +134,60 @@ FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence(UOdysseyAnimati
     return result;
 }
 
+FOdysseyPainterEditorAnimationImportResult
+FOdysseyPainterEditorAnimationCellImport::ImportTextureSequence( UOdysseyAnimationCellImageRaster* iCell, const FOdysseyImportTexturesParameters& iImportData)
+{
+    FOdysseyPainterEditorAnimationImportResult result;
+
+    if ( iImportData.GetSourceTextures().Num() <= 0 || !iCell )
+        return result;
+
+    UOdysseyAnimation* animation = iCell->GetAnimation();
+    if( !animation )
+        return result;
+
+    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures Sequence"));
+
+    UTextureRenderTarget2D* renderTarget = iImportData.CreateRT();
+
+    iImportData.Render(renderTarget, 0); // For cell, always get only the first texture
+
+    //PATCH: Needed to avoid double sRGB application in GetRenderTargetImage()
+    if (animation->GetFormat() == EOdysseyAnimationFormat::BGRA8)
+    {
+        renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
+        renderTarget->bForceLinearGamma = false;
+    }
+    //PATCH: End
+
+    FImage OutImage;
+    if (!FImageUtils::GetRenderTargetImage(renderTarget, OutImage))
+        return result;
+
+    //PATCH: Needed to avoid double sRGB application in GetRenderTargetImage()
+    if (animation->GetFormat() == EOdysseyAnimationFormat::BGRA8)
+    {
+        renderTarget->RenderTargetFormat = RTF_RGBA8;
+        renderTarget->bForceLinearGamma = true;
+    }
+    //PATCH: End
+
+    ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+    TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( renderTarget->GetSurfaceWidth(), renderTarget->GetSurfaceHeight(), format ));
+    CopyImageToBlock(OutImage, block.Get());
+
+    UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>( iCell );
+
+    result.mImportedCells.Add(cell);
+
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
+    FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
+    ::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
+    rasterBlockMutator.Copy( block, { invalidRect } );
+    rasterBlockMutator.Commit();
+
+    return result;
+}
+
 #undef LOCTEXT_NAMESPACE
