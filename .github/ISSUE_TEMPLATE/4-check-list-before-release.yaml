@@ -12,17 +12,18 @@ body:
   - type: markdown
     attributes:
       value: |
-        # ${\color{FFFF00}\textnormal{Version 1.0 du 07/10/2025}}$
+        # Version 3.0 du 12/10/2026
+        #
+        #### nb : ne pas oublier "gc.ForceCollectGarbageEveryFrame 1" pour forcer la garbage collection.
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00AAFF}\textnormal{Texture Editor}}$
-
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Texture Editor
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: texture-editor
@@ -98,12 +99,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00AAFF}\textnormal{Animation Editor}}$
-
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Animation Editor
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: animation
@@ -202,15 +202,15 @@ body:
         - label: "Modifier le mode de fusion d'un calque dans un dossier"
         - label: "Tester la multi sélection"
 
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00AAFF}\textnormal{Flipbook Editor}}$
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## FlipBook Editor
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: flipbook-basic
@@ -238,38 +238,85 @@ body:
         - label: "Export Current Layer as Textures"
         - label: "Export Textures As Operating System"
 
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00AAFF}\textnormal{Bitmap Tools}}$
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Bitmap Tools
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: tools-bitmap
     attributes:
       label: "Bitmap Tools"
       options:
-        - label: "Dessiner"
+        - label : "Outil de dessin"
+        - label : "Outils de dessin > shapes"
+        - label : "Outils de dessin > Paramètres"
+        - label : "Outils de dessin > Lissage"
+        - label : "Outils de dessin > Subpixel"
+        - label : "Outils de dessin > Interpolation"
+        - label : "Outils de dessin > Blendmodes"
+        - label : "Gomme"
+        - label : "Gomme > Shapes"
+        - label : "Gomme > Smoothing"
+        - label : "Gomme > Parameters"
+        - label : "Gomme > Interpolation"
+        - label : "Lasso de Selection "
+        - label : "Lasso de Selection > Shapes"
+        - label : "Transform Tools"
+        - label : "Transform Tools > perspective, uniform, flip"
+        - label : "Primitives"
+        - label : "Primitives > Shapes"
+        - label : "Primitives > Smoothing"
+        - label : "Primitives > Parameters"
+        - label : "Primitives > Blending Modes"
+        - label : "Liquify"
+        - label : "Liquify > Pousser"
+        - label : "Liquify > Tourbillonner"
+        - label : "Liquify > Pincer"
+        - label : "Liquify > Dilater"
+        - label : "Liquify Cristal"
+        - label : "Liquify Contour"
+        - label : "Liquify Reconstruire"
+        - label : "Liquify Ajuster"
+        - label : "Paint Bucket"
+        - label : "Paint Bucket > Blending Mode"
+        - label : "Color Picker"
+
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00AAFF}\textnormal{Vector Tools}}$
-
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Vector Tools
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
-    id: tools-vector
+    id: tools-vector-object-mode
     attributes:
-      label: "Vector tools"
+      label: "Vector tools - Object Mode"
       options:
+        - label: "UNFINISHED"
+        - label: "Outil de dessin"
+        - label: "Outil d'édition de tracés"
+        - label: "Outil Primitives"
+        - label: "Outil de Sélection"
+        - label: "Outil de découpe"
+        - label: "Outil de transformation"
+        - label: "Outil de déplacement de la scène"
+        - label: "Outil de poussée (push)"
+        - label: "Outil de lissage des tracés (smooth)"
+        - label: "Outil gomme"
+        - label: "Outil pot de peinture"
+        - label: "Outil pipette"
+        - label: "Outil grille"
+        - label: "UNFINISHED2"
         - label: "Dessiner un path"
         - label: "Dessiner au stylet puis à la souris"
         - label: "cocher/décocher stitch et desinner des path connectés"
@@ -295,13 +342,42 @@ body:
         - label: "Déplacer le pivot pour tourner un objet"
         - label: "Tester le clic droit"
         - label: "Faire un group paint et en modifier les traits"
-        - label: "Sélectionner plusieurs paths dans Vector Scene Tree View"
 
   - type: checkboxes
-    id: tools-inbetweener
+    id: Vector-Scene-Tree-View
     attributes:
-      label: "Inbetweener"
+      label: "Vector Scene Tree View"
       options:
+        - label: "UNFINISHED"
+        - label: "Sélectionner plusieurs paths dans Vector Scene Tree View"
+        - label: "RMB : Rename"
+        - label: "RMB : Make Paint Group" 
+        - label: "RMB : Group" 
+        - label: "RMB : Ungroup" 
+        - label: "RMB : Copy" 
+        - label: "RMB : Paste" 
+        - label: "RMB : Copy Transform"
+        - label: "RMB : Paste Transform" 
+        - label: "RMB : Delete Selection" 
+        - label: "RMB : Group and Add Inbetweener Tag"
+        - label: "RMB : Add Inbetweener Tag" 
+        - label: "RMB : Remove Inbetweener Tag" 
+        - label: "RMB : Commit Inbetweener Tag"
+        - label: "RMB : Apply Transform" 
+         
+  - type: checkboxes
+    id: tools-vector-vertex-mode
+    attributes:
+      label: "Vector tools - Vertex Mode"
+      options:
+        - label: "TODO"
+
+  - type: checkboxes
+    id: tools-vector-inbetweener
+    attributes:
+      label: "Vector tools - Inbetweener Mode"
+      options:
+        - label: "UNFINISHED"
         - label: "Créer un Tag Inbetweener sur un path (+ undo/redo)"
         - label: "Créer un Tag Inbetweener sur un groupe (+ undo/redo)"
         - label: "Dupliquer un calque ayant un Inbetweener actif (+ undo/redo)"
@@ -326,15 +402,22 @@ body:
         - label: "Faire une interpolation qui va dans le sens classique, de gauche à droite"
         - label: "Faire une interpolation qui va dans le sens inverse, de droite à gauche"
 
-  - type: markdown
+  - type: checkboxes
+    id: vector-scene-tree-view
     attributes:
-      value: |
-        ## ${\color{00AAFF}\textnormal{Odyssey Viewport}}$
+      label: "Vector Scene Tree View"
+      options:
+        - label: "TODO"
+
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Odyssey Viewport
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: paint-viewport
@@ -354,16 +437,17 @@ body:
         - label: "Basculer d'ILIAD à toute autre manipulation dans le viewport"
         - label: "Animer en 2D dans un contexte 3D"
         - label: "Se déplacer autour de l'objet avec Alt, Clic droit, clic gauche, clic milieu"
+        - label: "Dessiner sur un Mesh puis quitter l'Odyssey Mode, revenir dessus et dessiner, quitter l'Odyssey Mode ... plusieurs fois de suite"
+
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00AAFF}\textnormal{Shortcuts Assignés}}$
-
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Shortcut Assignés
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: shortcut-level-editor-mode
@@ -509,15 +593,15 @@ body:
         - label: "test raccourci [U] : Step to Next Shot"
         - label: "test raccourci [Y] : Step to Previous Shot"
 
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00AAFF}\textnormal{Storyboard}}$
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Storyboard
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: create-manage-shot-board-in-sequencer
@@ -630,15 +714,15 @@ body:
         - label: "Exporter une séquence en Movie Render Queue"
         - label: "Exporter une séquence d'images"
 
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00AAFF}\textnormal{Autres assets et éléments correlés}}$
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Autres Assets et éléments corrélés
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: odyssey-brush
@@ -678,6 +762,7 @@ body:
         - label: "Editer les couleurs"
         - label: "Sauvegarder la palette"
         - label: "Charger une autre palette"
+        - label: "s'assurer que les tools vecto peuvent changer la couleur courante pour utiliser celle de la palette"
 
   - type: checkboxes
     id: asset-note
@@ -694,17 +779,23 @@ body:
     attributes:
       label: "Tool Collection Asset"
       options:
-        - label: "TO DO"
+        - label: "Créer une Tool Collection avec différents types d'outils Bitmap et Vecto"
+        - label: "Dupliquer une Tool Collection et s'assurer que tous les tools fonctionnent encore"
+        - label: "Migrer une Tool Collection et s'assurer que tous les tools fonctionnent encore"
+        - label: "Tool Collection : s'assurer que les overrides des brosses bitmap sont sauvées"
+        - label: "Tool Collection : s'assurer que les outils sont bien sauvés quand la version d'UE change"
+        - label: "Tool Collection : tester toutes les options au clic-droit"
+        - label: "Supprimer une Tool Collection"
+        - label: "voir si les customs icones depuis texture fonctionnent"
 
   - type: markdown
     attributes:
       value: |
-        ## ${\color{00AAFF}\textnormal{Autres tests à effectuer}}$
-
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+        ## ---------------------------------------------------------------------
+        
+        ## Autres Tests à effectuer
+        
+        ## ---------------------------------------------------------------------
 
   - type: checkboxes
     id: templates
@@ -729,9 +820,11 @@ body:
     attributes:
       label: "Widgets"
       options:
+        - label: "Tester le Widget EUWBP_Import_XDTS"
+        - label: "Tester le Widget EUWBP_Export_XDTS"
         - label: "Tester le Widget EUWBP_Import_Json"
         - label: "Tester le Widget QuickStart"
-
+        
   - type: checkboxes
     id: interface-layout
     attributes:
@@ -764,3 +857,142 @@ body:
         - label: "Compiler Odyssey en Shipping"
         - label: "Compiler un jeu"
         - label: "Lancer un projet en mode jeu (map gymnastique)"
+
+  - type: checkboxes
+    id: runtime
+    attributes:
+      label: "Runtime"
+      options:
+        - label: "Vérifier la compilation au Runtime sans warning"
+        - label: "Vérifier la compilation au Runtime sans erreur"
+        - label: "Vérifier le fonctionnement de la MAP gymnastique"
+        - label: "Vérifier le fonctionnement de la MAP avec le jeu de Pierrick"
+
+  - type: checkboxes
+    id: migration
+    attributes:
+      label: "Migration"
+      options:
+        - label: "Vérifier les liens avec les Palettes sont conservés lors de la migration du projet avec l'ours"
+        - label: "Vérifier les liens avec les ToolCollection sont conservés lors de la migration du projet avec l'ours"
+        - label: "Vérifier les liens entre les brushes, les fonctions et macros et les textures lors d'une migration"
+        - label: "Vérifier que les BoardSequences et ShotSequence sont toujours correctement liés les uns aux autres lors d'une migration"
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ---------------------------------------------------------------------
+        
+        ## Ariane
+        
+        ## ---------------------------------------------------------------------
+
+  - type: checkboxes
+    id: ariane-ED-mode
+    attributes:
+      label: "Ariane EDmode"
+      options:
+        - label: "check if Ariane icon works"
+        - label: "inteface greyed out if no Ariane Actor si selected"
+        - label: "vérifier s'il n'y a pas concurrence avec les raccourcis d'UE"
+        - label: "Check Add Layer"
+        - label: "Check Add Folder"
+        - label: "transform Widget working in the same way as other widgets of UE"
+        - label: "Check grids"
+        - label: "Check the quality of the linetube when you are very far"
+        - label: "Check materials selection"
+        - label: "Check Ink / Wintab" 
+        
+  - type: checkboxes
+    id: ariane-tools-vector-object-mode
+    attributes:
+      label: "Vector tools - Object Mode"
+      options:
+        - label: "UNFINISHED"
+        - label: "Outil de dessin"
+        - label: "Outil d'édition de tracés"
+        - label: "Outil Primitives"
+        - label: "Outil de Sélection"
+        - label: "Outil de découpe"
+        - label: "Outil de transformation"
+        - label: "Outil de déplacement de la scène"
+        - label: "Outil de poussée (push)"
+        - label: "Outil de lissage des tracés (smooth)"
+        - label: "Outil gomme"
+        - label: "Outil pot de peinture"
+        - label: "Outil pipette"
+        - label: "Outil grille"
+        - label: "UNFINISHED2"
+        - label: "Dessiner un path"
+        - label: "Dessiner au stylet puis à la souris"
+        - label: "cocher/décocher stitch et desinner des path connectés"
+        - label: "Changer le stitiching radius ( y compris valeurs farfelues)"
+        - label: "Dessiner des primitives"
+        - label: "Déplacer un vertex"
+        - label: "Déplacer un path"
+        - label: "Déplacer un objet"
+        - label: "Modifier l'épaisseur d'un path"
+        - label: "Modifier l'épaisseur d'un objet"
+        - label: "Déformer un path"
+        - label: "Déformer un objet"
+        - label: "Cut"
+        - label: "Cut plusieurs paths en même temps"
+        - label: "Cut dans le vide"
+        - label: "Modifier la courbure d'un vertex"
+        - label: "Angles et arrondis"
+        - label: "Supprimer un vertex (Alt)"
+        - label: "Gomme vectorielle"
+        - label: "Renouer des paths"
+        - label: "Redimensionenr un objet"
+        - label: "Tourner un objet"
+        - label: "Déplacer le pivot pour tourner un objet"
+        - label: "Tester le clic droit"
+        - label: "Faire un group paint et en modifier les traits"
+        - label: "Sélectionner plusieurs paths dans Vector Scene Tree View"
+
+  - type: checkboxes
+    id: ariane-tools-vector-vertex-mode
+    attributes:
+      label: "Vector tools - Vertex Mode"
+      options:
+        - label: "UNFINISHED"
+        - label: "Outil de dessin"
+        - label: "Outil d'édition de tracés"
+        - label: "Outil Primitives"
+        - label: "Outil de Sélection"
+        - label: "Outil de découpe"
+        - label: "Outil de transformation"
+        - label: "Outil de déplacement de la scène"
+        - label: "Outil de poussée (push)"
+        - label: "Outil de lissage des tracés (smooth)"
+        - label: "Outil gomme"
+        - label: "Outil pot de peinture"
+        - label: "Outil pipette"
+        - label: "Outil grille"
+        - label: "UNFINISHED2"
+        - label: "Dessiner un path"
+        - label: "Dessiner au stylet puis à la souris"
+        - label: "cocher/décocher stitch et desinner des path connectés"
+        - label: "Changer le stitiching radius ( y compris valeurs farfelues)"
+        - label: "Dessiner des primitives"
+        - label: "Déplacer un vertex"
+        - label: "Déplacer un path"
+        - label: "Déplacer un objet"
+        - label: "Modifier l'épaisseur d'un path"
+        - label: "Modifier l'épaisseur d'un objet"
+        - label: "Déformer un path"
+        - label: "Déformer un objet"
+        - label: "Cut"
+        - label: "Cut plusieurs paths en même temps"
+        - label: "Cut dans le vide"
+        - label: "Modifier la courbure d'un vertex"
+        - label: "Angles et arrondis"
+        - label: "Supprimer un vertex (Alt)"
+        - label: "Gomme vectorielle"
+        - label: "Renouer des paths"
+        - label: "Redimensionenr un objet"
+        - label: "Tourner un objet"
+        - label: "Déplacer le pivot pour tourner un objet"
+        - label: "Tester le clic droit"
+        - label: "Faire un group paint et en modifier les traits"
+        - label: "Sélectionner plusieurs paths dans Vector Scene Tree View"
