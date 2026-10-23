@@ -13,6 +13,8 @@ body:
     attributes:
       value: |
         # Version 3.0 du 12/10/2026
+        #
+        ### nb : ne pas oublier "gc.ForceCollectGarbageEveryFrame 1" pour forcer la garbage collection.
 
   - type: markdown
     attributes:
