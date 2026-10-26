@@ -5,6 +5,7 @@
 
 #include "Bindings/MovieSceneSpawnableBinding.h"
 #include "CineCameraActor.h"
+#include "Framework/Notifications/NotificationManager.h"
 #include "ILevelEditor.h"
 #include "LevelEditor.h"
 #include "LevelSequenceEditorSubsystem.h"
@@ -16,6 +17,7 @@
 #include "Selection.h"
 #include "SequencerSettings.h"
 #include "SequencerUtilities.h"
+#include "Widgets/Notifications/SNotificationList.h"
 
 #include "EposNamingConventionBlueprintLibrary.h"
 #include "EposSequenceEditorBlueprintLibrary.h"
@@ -1466,6 +1468,27 @@ FShotSequenceCustomization::OnSequencerClassesDrop( const TArray<TWeakObjectPtr<
 ESequencerDropResult
 FShotSequenceCustomization::OnSequencerActorsDrop( const TArray<TWeakObjectPtr<AActor>>& iActors, const FActorDragDropOp& iDragDropOp )
 {
+    bool invalid_actors = false;
+    for( TWeakObjectPtr<AActor> actor : iActors )
+    {
+        TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+        if( sequencer
+            && sequencer->GetFocusedMovieSceneSequence()
+            && actor.IsValid()
+            && !sequencer->GetFocusedMovieSceneSequence()->CanPossessObject( *actor, sequencer->GetPlaybackContext() )
+            )
+        {
+            invalid_actors = true;
+        }
+    }
+
+    if( invalid_actors )
+    {
+        FNotificationInfo Info( LOCTEXT( "invalid-actor-type-to-drop-in-shot-sequence", "Can't drop this type of actor in shot sequence" ) );
+        Info.ExpireDuration = 3.0f;
+        FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
+    }
+
     return ESequencerDropResult::Unhandled; // Process the default behavior for actors
 }
 

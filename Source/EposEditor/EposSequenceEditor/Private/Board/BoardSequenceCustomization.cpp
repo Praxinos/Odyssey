@@ -1915,6 +1915,27 @@ FBoardSequenceCustomization::OnSequencerClassesDrop( const TArray<TWeakObjectPtr
 ESequencerDropResult
 FBoardSequenceCustomization::OnSequencerActorsDrop( const TArray<TWeakObjectPtr<AActor>>& iActors, const FActorDragDropOp& iDragDropOp )
 {
+    bool invalid_actors = false;
+    for( TWeakObjectPtr<AActor> actor : iActors )
+    {
+        TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+        if( sequencer
+            && sequencer->GetFocusedMovieSceneSequence()
+            && actor.IsValid()
+            && !sequencer->GetFocusedMovieSceneSequence()->CanPossessObject( *actor, sequencer->GetPlaybackContext() )
+            )
+        {
+            invalid_actors = true;
+        }
+    }
+
+    if( invalid_actors )
+    {
+        FNotificationInfo Info( LOCTEXT( "invalid-actor-type-to-drop-in-board-sequence", "Can't drop this type of actor in board sequence" ) );
+        Info.ExpireDuration = 3.0f;
+        FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
+    }
+
     return ESequencerDropResult::Unhandled; // Process the default behavior for actors
 }
 

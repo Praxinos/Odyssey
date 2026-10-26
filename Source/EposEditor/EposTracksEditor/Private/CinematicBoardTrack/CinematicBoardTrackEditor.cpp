@@ -726,7 +726,13 @@ FCinematicBoardTrackEditor::OnDrop( const FDragDropEvent& iDragDropEvent, const 
     {
         UMovieSceneSequence* sequence = Cast<UMovieSceneSequence>( assetData.GetAsset() );
         if( !SupportsSequence( sequence ) )
+        {
+            FNotificationInfo Info( LOCTEXT( "InvalidAssetType", "Can't drop this asset type in board track" ) );
+            Info.ExpireDuration = 3.0f;
+            FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
+
             return FReply::Unhandled();
+        }
     }
 
     //---
