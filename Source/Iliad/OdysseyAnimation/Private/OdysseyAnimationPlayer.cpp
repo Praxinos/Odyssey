@@ -239,6 +239,12 @@ UOdysseyAnimationPlayer::InitializeRenderTarget()
 UTextureRenderTarget2D*
 UOdysseyAnimationPlayer::GetRenderTarget()
 {
+    if (!RenderTarget)
+    {
+        InitializeRenderTarget();
+        UpdateTexture();
+    }
+
     return RenderTarget;
 }
 
@@ -385,7 +391,7 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    if (!Animation || !GetRenderTarget())
+    if (!Animation)
         return;
 
     if (Status == EOdysseyAnimationPlayerStatus::Playing)
@@ -463,7 +469,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::UpdateTexture);
 
-    if (!Animation)
+    if (!Animation || !RenderTarget)
         return;
 
     if( !RenderTarget->GameThread_GetRenderTargetResource() )
@@ -532,7 +538,13 @@ UOdysseyAnimationPlayer::OnRenderingChanged(const FOdysseyRenderingChangedEvent&
 void
 UOdysseyAnimationPlayer::AnimationChanged()
 {
-    InitializeRenderTarget();
+    if (RenderTarget)
+    {
+        //Reinitialize the RenderTArget if it already exists
+        //so it can match the animation size/format
+        InitializeRenderTarget();
+    }
+
     FFrameTime newFrame = ClampFrameToPlayRange(0);
     SeekToFrame(newFrame);
     UpdateTexture();
@@ -542,9 +554,12 @@ UOdysseyAnimationPlayer::AnimationChanged()
 void
 UOdysseyAnimationPlayer::LODGroupChanged()
 {
-    GetRenderTarget()->LODGroup = LODGroup;
-    GetRenderTarget()->UpdateResource();
-    GetRenderTarget()->UpdateResourceImmediate(false);
+    if (RenderTarget)
+    {
+        RenderTarget->LODGroup = LODGroup;
+        RenderTarget->UpdateResource();
+        RenderTarget->UpdateResourceImmediate(false);
+    }
 
     mInvalidTileMap.Clear();
     mImageRenderingComposition.Empty();
@@ -766,8 +781,6 @@ UOdysseyAnimationPlayer::PostInitProperties()
         RenderTarget = nullptr;
         return;
     }
-
-    InitializeRenderTarget();
 }
 
 void
@@ -783,11 +796,6 @@ UOdysseyAnimationPlayer::PostReinitProperties()
         RenderTarget = nullptr;
         return;
     }
-
-    InitializeRenderTarget();
-    RenderTarget->UpdateResource();
-    RenderTarget->UpdateResourceImmediate( false );
-    UpdateTexture();
 }
 
 void
@@ -804,10 +812,10 @@ UOdysseyAnimationPlayer::PostLoad()
         return;
     }
 
-    InitializeRenderTarget();
-    RenderTarget->UpdateResource();
-    RenderTarget->UpdateResourceImmediate( false );
-    UpdateTexture();
+    //DO NOT CALL UpdateTexture() HERE
+    //Because RenderTarget::PostLoad() has not been called yet
+    //RenderTarget::PostLoad() calls UpdateResource(), which totally erases the RenderTarget
+    //Causing a Black RenderTarget
 }
 
 void
@@ -824,10 +832,10 @@ UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
         return;
     }
 
-    InitializeRenderTarget();
+    /* InitializeRenderTarget();
     RenderTarget->UpdateResource();
     RenderTarget->UpdateResourceImmediate( false );
-    UpdateTexture();
+    UpdateTexture(); */
 }
 
 #if WITH_EDITOR
@@ -844,11 +852,6 @@ UOdysseyAnimationPlayer::PostEditImport()
         RenderTarget = nullptr;
         return;
     }
-
-    InitializeRenderTarget();
-    RenderTarget->UpdateResource();
-    RenderTarget->UpdateResourceImmediate( false );
-    UpdateTexture();
 }
 #endif
 struct FOdysseyAnimationPlayerObjectVersion
