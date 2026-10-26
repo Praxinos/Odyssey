@@ -422,6 +422,9 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
         if( VectorLayer )
         {
             UArianeDrawing* Image = VectorLayer->GetDrawing();
+            FVector2D MousePosition = FVector2D( ViewportClient->GetCachedMouseX()
+                                               , ViewportClient->GetCachedMouseY() );
+            FVector2D HUDPosition = ScreenToHUD( ViewportClient, MousePosition );
 
             for( FArianeObject* SelectedTree : SelectedTrees )
             {
@@ -429,7 +432,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
                                         , [ this
                                           , ViewportClient
                                           , View
-                                          , &PointerState ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+                                          , HUDPosition ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
                     {
                         if( /*iScene->GetCell()->ObjectHasFocus( object, traversalFlags )*/1 )
                         {
@@ -443,8 +446,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
                                 PickPathPoints( ViewportClient
                                             , View
                                             , Path
-                                            , PointerState.ViewportX
-                                            , PointerState.ViewportY
+                                            , HUDPosition
                                             , PickingRadius
                                             , PickedVertices
                                             , PickedHandles
@@ -587,10 +589,13 @@ UArianeEditorPathEditTool::OnMouseHover( FEditorViewportClient* ViewportClient
 {
     if( PointQuadTree )
     {
+        FVector2D MousePosition = FVector2D( ViewportClient->GetCachedMouseX()
+                                           , ViewportClient->GetCachedMouseY() );
+        FVector2D HUDPosition = ScreenToHUD( ViewportClient, MousePosition );
+
         HoveredPoints.Empty();
 
-        PointQuadTree->PickPoints( FVector2D( ViewportClient->Viewport->GetMouseX()
-                                            , ViewportClient->Viewport->GetMouseY() )
+        PointQuadTree->PickPoints( HUDPosition
                                  , PickingRadius
                                  , HoveredPoints );
     }
@@ -1049,6 +1054,8 @@ UArianeEditorPathEditTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* Re
     FArianeEditorHUD::FDrawingFlags HUDDrawingFlags = EditonModeToHUDDrawingFlags();
     FVector2D MousePosition = FVector2D( ViewportClient->GetCachedMouseX()
                                        , ViewportClient->GetCachedMouseY() );
+    FVector2D HUDPosition = ScreenToHUD( ViewportClient, MousePosition );
+
 
     if( Painting3DComponent )
     {
@@ -1092,10 +1099,10 @@ UArianeEditorPathEditTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* Re
     {
         if(  HoveredPoints.Num() )
         {
-            FVector2D MinusP0 = FVector2D( MousePosition.X + PickingRadius
-                                         , MousePosition.Y - PickingRadius );
-            FVector2D MinusP1 = FVector2D( MousePosition.X + PickingRadius + 8
-                                         , MousePosition.Y - PickingRadius );
+            FVector2D MinusP0 = FVector2D( HUDPosition.X + PickingRadius
+                                         , HUDPosition.Y - PickingRadius );
+            FVector2D MinusP1 = FVector2D( HUDPosition.X + PickingRadius + 8
+                                         , HUDPosition.Y - PickingRadius );
 
             DrawLineHUD( Canvas, ViewportClient, View, MinusP0, MinusP1, HcColor, 1.0f );
         }
@@ -1123,8 +1130,7 @@ UArianeEditorPathEditTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* Re
     DrawCircleHUD( Canvas
                  , ViewportClient
                  , View
-                 , FVector2D( ViewportClient->GetCachedMouseX()
-                            , ViewportClient->GetCachedMouseY() )
+                 , HUDPosition
                  , PickingRadius
                  , HcColor
                  , 1.0f );

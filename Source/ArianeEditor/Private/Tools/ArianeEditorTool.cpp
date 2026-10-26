@@ -1322,8 +1322,7 @@ bool
 UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
                                  , FSceneView* View
                                  , FArianePath* Path
-                                 , double ViewportX
-                                 , double ViewportY
+                                 , const FVector2D& HUDPosition
                                  , double PickingRadius
                                  , TArray<FArianeVertex*>& OutPickedVertices
                                  , TArray<FArianeHandleSegment*>& OutPickedHandles
@@ -1331,7 +1330,6 @@ UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
 {
     const FTransform& PathTransform = Path->GetTransform();
     bool bAnythingPicked = false;
-    FVector2D HUDMousePosition = FVector2D( ViewportX, ViewportY );
     UArianeDrawing* Image = Path->GetDrawing();
 
     // Pick segment handles
@@ -1357,7 +1355,7 @@ UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
 
                     if( WorldToHUD( ViewportClient, View, WorldHandlePosition, HUDHandlePosition ) )
                     {
-                        FVector2D Dif0 = HUDHandlePosition - HUDMousePosition;
+                        FVector2D Dif0 = HUDHandlePosition - HUDPosition;
 
                         if( Dif0.Length() <= PickingRadius )
                         {
@@ -1392,7 +1390,7 @@ UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
 
             if( WorldToHUD( ViewportClient, View, WorldVertexPosition, HUDVertexPosition ) )
             {
-                FVector2D Dif = HUDVertexPosition - HUDMousePosition;
+                FVector2D Dif = HUDVertexPosition - HUDPosition;
 
                 if( Dif.Length() < PickingRadius )
                 {
@@ -1417,7 +1415,7 @@ UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
 
                 if( WorldToHUD( ViewportClient, View, WorldHandlePosition, HUDHandlePosition ) )
                 {
-                    FVector2D Dif = HUDHandlePosition - HUDMousePosition;
+                    FVector2D Dif = HUDHandlePosition - HUDPosition;
 
                     if( Dif.Length() <= PickingRadius )
                     {

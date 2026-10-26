@@ -329,8 +329,7 @@ protected:
     bool PickPathPoints( FEditorViewportClient* ViewportClient
                        , FSceneView* View
                        , FArianePath* Path
-                       , double ViewportX
-                       , double ViewportY
+                       , const FVector2D& HUDPosition
                        , double PickingRadius
                        , TArray<FArianeVertex*>& OutPickedVertices
                        , TArray<FArianeHandleSegment*>& OutPickedHandles
