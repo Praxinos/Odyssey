@@ -80,6 +80,7 @@ public class OdysseyCoreEditor : ModuleRules
 
                 // [DEVELOPER] engine dependencies
                 "DerivedDataCache",
+                "FileUtilities",
             }
         );
 
