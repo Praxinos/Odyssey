@@ -68,7 +68,7 @@ UArianeLayerStack::OnRegister()
                                                   , "Root Folder"
                                                   , RF_Transactional | RF_Public );
 
-        RootFolder->AttachToComponent( this,  FAttachmentTransformRules::KeepWorldTransform );
+        RootFolder->AttachToComponent( this,  FAttachmentTransformRules::KeepRelativeTransform );
 
         Painting3DActor->AddInstanceComponent(RootFolder);
 

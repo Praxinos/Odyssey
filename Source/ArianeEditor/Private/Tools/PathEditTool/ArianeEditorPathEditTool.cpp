@@ -456,69 +456,52 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
                     } );
             }
 
-            // Link or Unlink segment handles
-            if( ( EditionMode == EArianePathEditToolEditionMode::SegmentHandle ) &&  ( PickedVertices.Num() == 1 ) )
+            switch( EditionMode )
             {
-                FArianeVertex* Vertex = PickedVertices[0];
+                case EArianePathEditToolEditionMode::VertexHandle :
+                    GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-vertex-handles","Edit Vertex Handles"));
+                    Image->Modify();
+                break;
 
-                //-------------- undo ---------------//
-                GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.transaction.align-point-selection","Align Point Selection"));
-                Image->Modify();
-
-                Vertex->SetHandleAligned( Vertex->IsHandleAligned() ? false : true );
-
-                GetToolManager()->EndUndoTransaction();
-            }
-            // Else, save point coordinates before changing them
-            else
-            {
-                switch( EditionMode )
+                case EArianePathEditToolEditionMode::Vertex :
                 {
-                    case EArianePathEditToolEditionMode::VertexHandle :
-                        GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-vertex-handles","Edit Vertex Handles"));
-                        Image->Modify();
-                    break;
+                    GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-vertices","Edit Vertices"));
 
-                    case EArianePathEditToolEditionMode::Vertex :
+                    Image->Modify();
+
+                    TArray<FArianeSegment*> AlteredSegments;
+
+                    // static call
+                    FArianeVertex::ArrayToSegmentArray( PickedVertices, AlteredSegments, false );
+                    // static call
+                    BuildSegmentAdjustments( VectorLayer, AlteredSegments, SegmentAdjustments );
+
+                    // Control points must move with the point. Store them in the iPickedHandleArray
+                    for( FArianeVertex* Vertex : PickedVertices )
                     {
-                        GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-vertices","Edit Vertices"));
-
-                        Image->Modify();
-
-                        TArray<FArianeSegment*> AlteredSegments;
-
-                        // static call
-                        FArianeVertex::ArrayToSegmentArray( PickedVertices, AlteredSegments, false );
-                        // static call
-                        BuildSegmentAdjustments( VectorLayer, AlteredSegments, SegmentAdjustments );
-
-                        // Control points must move with the point. Store them in the iPickedHandleArray
-                        for( FArianeVertex* Vertex : PickedVertices )
+                        for( const FArianeSegmentID& SegmentID : Vertex->GetSegments() )
                         {
-                            for( const FArianeSegmentID& SegmentID : Vertex->GetSegments() )
+                            FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment( Image );
+
+                            if( Segment->GetClass() == FArianeSegmentCubic::StaticClass() )
                             {
-                                FArianeSegment* Segment = const_cast<FArianeSegmentID&>(SegmentID).GetSegment( Image );
+                                FArianeSegmentCubic* CubicSegment = static_cast<FArianeSegmentCubic*>(Segment);
+                                FArianeHandleSegment* Handle = CubicSegment->GetHandle( Vertex );
 
-                                if( Segment->GetClass() == FArianeSegmentCubic::StaticClass() )
-                                {
-                                    FArianeSegmentCubic* CubicSegment = static_cast<FArianeSegmentCubic*>(Segment);
-                                    FArianeHandleSegment* Handle = CubicSegment->GetHandle( Vertex );
-
-                                    PickedHandles.Add( Handle );
-                                }
+                                PickedHandles.Add( Handle );
                             }
                         }
                     }
-                    break;
-
-                    case EArianePathEditToolEditionMode::SegmentHandle :
-                        GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-handles","Edit Handles"));
-                        Image->Modify();
-                    break;
-
-                    default:
-                    break;
                 }
+                break;
+
+                case EArianePathEditToolEditionMode::SegmentHandle :
+                    GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.edit-handles","Edit Handles"));
+                    Image->Modify();
+                break;
+
+                default:
+                break;
             }
         }
 
@@ -728,13 +711,31 @@ UArianeEditorPathEditTool::OnMouseDrag( FEditorViewportClient* ViewportClient
                 for( int i = 0; i < PickedHandles.Num(); i++ )
                 {
                     FArianeHandleSegment *Handle = PickedHandles[i];
+                    FArianeSegment* Segment = Handle->GetOwnerSegment();
                     FPointDisplacement& PointDisplacement = PickedHandleDisplacements[i];
+                    TArray<FArianeVertex*> AttachedVertices;
+
+                    Handle->GetAttachedVertices( AttachedVertices );
 
                     DisplacePoint( Handle
                                  , PointDisplacement
                                  , Handle->GetOwnerSegment()->GetOwner()->GetTransform()
                                  , RayOrigin
                                  , RayDirection );
+
+
+                    // we will have to invalidate any segment connected to the segment that is edited
+                    // in case the tangent at T = 0 or T = 1 is FVector::Zero. For example, if in a cubic
+                    // bezier P0 = P1, then the tangent is 0. We than use [P2 - P0] as a tangent. This means
+                    // the average tangent at point P0 between both segments will change.
+                    for( FArianeVertex* AttachedVertex : AttachedVertices )
+                    {
+                        for( FArianeSegment* AttachedSegment : AttachedVertex->GetSegments() )
+                        {
+                            AttachedSegment->GetVertex(0)->Invalidate();
+                            AttachedSegment->GetVertex(1)->Invalidate();
+                        }
+                    }
                 }
             }
 
@@ -879,6 +880,14 @@ UArianeEditorPathEditTool::OnMouseUp( FEditorViewportClient* ViewportClient
                 case EArianePathEditToolEditionMode::Vertex :
                 case EArianePathEditToolEditionMode::VertexHandle :
                 case EArianePathEditToolEditionMode::SegmentHandle :
+                    // Link or Unlink segment handles
+                    if( ( PickedVertices.Num() == 1 ) && ( PickedHandles.Num() == 0 ) )
+                    {
+                        FArianeVertex* Vertex = PickedVertices[0];
+
+                        Vertex->SetHandleAligned( Vertex->IsHandleAligned() ? false : true );
+                    }
+
                     GetToolManager()->EndUndoTransaction();
                 break;
 

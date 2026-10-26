@@ -309,6 +309,8 @@ EditedPath->AddSegment( EditedPath->AllocCubicSegment( TestVertex1
                                                           , Radius
                                                           , EArianeAllocationModel::InstancedStruct );
 
+                        Vertex0->SetHandleAligned( true );
+
                         EditedPath->AddVertex( Vertex0 );
                     }
 
@@ -321,11 +323,15 @@ EditedPath->AddSegment( EditedPath->AllocCubicSegment( TestVertex1
                                                                             , Radius
                                                                             , EArianeAllocationModel::InstancedStruct );
 
+                            Vertex1->SetHandleAligned( true );
+
                             EditedPath->AddVertex( Vertex1 );
 
-                            FArianeSegment *Segment = EditedPath->AllocSegment( Vertex0
-                                                                              , Vertex1
-                                                                              , EArianeAllocationModel::InstancedStruct );
+                            FArianeSegment *Segment = EditedPath->AllocCubicSegment( Vertex0
+                                                                                   , Vertex0->GetPosition()
+                                                                                   , Vertex1->GetPosition()
+                                                                                   , Vertex1
+                                                                                   , EArianeAllocationModel::InstancedStruct );
 
                             EditedPath->AddSegment( Segment );
                         }

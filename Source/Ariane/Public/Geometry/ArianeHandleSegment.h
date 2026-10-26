@@ -31,7 +31,7 @@ struct ARIANE_API FArianeHandleSegment : public FArianePoint
          * @param Z the desired handle's Z position
          */
         FArianeHandleSegment( FArianeSegment* iOwnerSegment
-                            , const TArray<uint32> VertexIDs
+                            , const TArray<uint32>& InAttachedVertexIDs
                             , double X
                             , double Y
                             , double Z );
@@ -42,7 +42,7 @@ struct ARIANE_API FArianeHandleSegment : public FArianePoint
          * @param InPosition the desired handle's position
          */
         FArianeHandleSegment( FArianeSegment* InOwnerSegment
-                            , const TArray<uint32> InAttachedVertexIDs
+                            , const TArray<uint32>& InAttachedVertexIDs
                             , const FVector& InPosition );
 
         /**
@@ -51,6 +51,8 @@ struct ARIANE_API FArianeHandleSegment : public FArianePoint
          */
         void SetOwnerSegment( FArianeSegment* InOwnerSegment );
         FArianeSegment* GetOwnerSegment();
+
+        void GetAttachedVertices( TArray<FArianeVertex*>& OutAttachedVertices );
 
     protected:
         /**

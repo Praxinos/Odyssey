@@ -12,23 +12,34 @@ FArianeHandleSegment::~FArianeHandleSegment()
 
 FArianeHandleSegment::FArianeHandleSegment( FArianeSegment* iOwnerSegment
                                            // A handle can be linked to multiple vertices, Quadratic bezier e.g
-                                          , const TArray<uint32> InAttachedVertexIDs
+                                          , const TArray<uint32>& InAttachedVertices
                                           , double iX
                                           , double iY
                                           , double iZ )
     : FArianePoint( iX, iY, iZ )
     , OwnerSegment ( iOwnerSegment )
-    , AttachedVertexIDs ( InAttachedVertexIDs )
+    , AttachedVertexIDs ( InAttachedVertices )
 {
 }
 
 FArianeHandleSegment::FArianeHandleSegment( FArianeSegment* iOwnerSegment
                                            // A handle can be linked to multiple vertices, Quadratic bezier e.g
-                                          , const TArray<uint32> InAttachedVertexIDs
+                                          , const TArray<uint32>& InAttachedVertexIDs
                                           , const FVector& iPosition )
     // Delegating constructor
     : FArianeHandleSegment ( iOwnerSegment, InAttachedVertexIDs, iPosition.X, iPosition.Y, iPosition.Z )
 {
+}
+
+void
+FArianeHandleSegment::GetAttachedVertices( TArray<FArianeVertex*>& OutAttachedVertices )
+{
+    OutAttachedVertices.Empty();
+
+    for( uint32 AttachedVertexID : AttachedVertexIDs )
+    {
+        OutAttachedVertices.Add( OwnerSegment->GetVertex(AttachedVertexID) );
+    }
 }
 
 void

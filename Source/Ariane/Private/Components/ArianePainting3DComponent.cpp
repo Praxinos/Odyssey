@@ -111,7 +111,7 @@ UArianePainting3DComponent::OnRegister()
                                                  , "LayerStack"
                                                  , RF_Transactional | RF_Public );
 
-        LayerStack->AttachToComponent( this,  FAttachmentTransformRules::KeepWorldTransform );
+        LayerStack->AttachToComponent( this,  FAttachmentTransformRules::KeepRelativeTransform );
     }
 
     LayerStack->RegisterComponent();
