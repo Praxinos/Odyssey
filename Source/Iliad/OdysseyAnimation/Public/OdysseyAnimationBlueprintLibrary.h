@@ -7,6 +7,7 @@
 #include "OdysseyAnimationBlueprintLibrary.generated.h"
 
 class UOdysseyAnimation;
+class UOdysseyAnimationCellImageRaster;
 class UOdysseyLayerStack;
 class UOdysseyLayer;
 class UOdysseyLayerCell;
@@ -24,4 +25,11 @@ class UOdysseyAnimationBlueprintLibrary : public UBlueprintFunctionLibrary
 
     UFUNCTION(BlueprintPure, Category = "Odyssey|Cell", meta=(DisplayName="Get Animation", HidePin="Cell", DefaultToSelf="Cell"))
     static UOdysseyAnimation* GetCellAnimation(UOdysseyLayerCell* Cell);
+
+    /** Fill the cell content by a single color
+      *
+      * Warning: This function is temporary until a better way will be in place
+      */
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Cell")
+    static void Fill( UOdysseyAnimationCellImageRaster* Cell, const FLinearColor& Color);
 };
