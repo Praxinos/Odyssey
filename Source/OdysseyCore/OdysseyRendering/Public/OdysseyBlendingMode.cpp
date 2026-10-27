@@ -220,3 +220,172 @@ GetColorAndAlphaBlendModesFromDeprecatedBlendingMode(EOdysseyBlendingMode InBlen
         break;
     }
 }
+
+void
+GetBlendModeFromDeprecatedBlendingMode(EOdysseyBlendingMode InBlendingMode, EOdysseyBlendMode& OutBlendMode)
+{
+    OutBlendMode = EOdysseyBlendMode::Normal;
+
+    switch(InBlendingMode)
+    {
+        case EOdysseyBlendingMode::kNormal:
+            OutBlendMode = EOdysseyBlendMode::Normal;
+        break;
+
+        case EOdysseyBlendingMode::kTop:
+            OutBlendMode = EOdysseyBlendMode::Normal;
+        break;
+
+        case EOdysseyBlendingMode::kBack:
+            OutBlendMode = EOdysseyBlendMode::Normal;
+        break;
+
+        case EOdysseyBlendingMode::kBehind:
+            OutBlendMode = EOdysseyBlendMode::Behind;
+        break;
+
+        case EOdysseyBlendingMode::kDissolve:
+            OutBlendMode = EOdysseyBlendMode::Dissolve;
+        break;
+
+        case EOdysseyBlendingMode::kBayerDither8x8:
+            OutBlendMode = EOdysseyBlendMode::BayerDither8x8;
+        break;
+
+        case EOdysseyBlendingMode::kDarken:
+            OutBlendMode = EOdysseyBlendMode::Darken;
+        break;
+
+        case EOdysseyBlendingMode::kMultiply:
+            OutBlendMode = EOdysseyBlendMode::Multiply;
+        break;
+
+        case EOdysseyBlendingMode::kColorBurn:
+            OutBlendMode = EOdysseyBlendMode::ColorBurn;
+        break;
+
+        case EOdysseyBlendingMode::kLinearBurn:
+            OutBlendMode = EOdysseyBlendMode::LinearBurn;
+        break;
+
+        case EOdysseyBlendingMode::kDarkerColor:
+            OutBlendMode = EOdysseyBlendMode::DarkerColor;
+        break;
+
+        case EOdysseyBlendingMode::kLighten:
+            OutBlendMode = EOdysseyBlendMode::Lighten;
+        break;
+
+        case EOdysseyBlendingMode::kScreen:
+            OutBlendMode = EOdysseyBlendMode::Screen;
+        break;
+
+        case EOdysseyBlendingMode::kColorDodge:
+            OutBlendMode = EOdysseyBlendMode::ColorDodge;
+        break;
+
+        case EOdysseyBlendingMode::kLinearDodge:
+            OutBlendMode = EOdysseyBlendMode::LinearDodge;
+        break;
+
+        case EOdysseyBlendingMode::kLighterColor:
+            OutBlendMode = EOdysseyBlendMode::LighterColor;
+        break;
+
+        case EOdysseyBlendingMode::kOverlay:
+            OutBlendMode = EOdysseyBlendMode::Overlay;
+        break;
+
+        case EOdysseyBlendingMode::kSoftLight:
+            OutBlendMode = EOdysseyBlendMode::SoftLight;
+        break;
+
+        case EOdysseyBlendingMode::kHardLight:
+            OutBlendMode = EOdysseyBlendMode::HardLight;
+        break;
+
+        case EOdysseyBlendingMode::kVividLight:
+            OutBlendMode = EOdysseyBlendMode::VividLight;
+        break;
+
+        case EOdysseyBlendingMode::kLinearLight:
+            OutBlendMode = EOdysseyBlendMode::LinearLight;
+        break;
+
+        case EOdysseyBlendingMode::kPinLight:
+            OutBlendMode = EOdysseyBlendMode::PinLight;
+        break;
+
+        case EOdysseyBlendingMode::kHardMix:
+            OutBlendMode = EOdysseyBlendMode::HardMix;
+        break;
+
+        case EOdysseyBlendingMode::kPhoenix:
+            OutBlendMode = EOdysseyBlendMode::Phoenix;
+        break;
+
+        case EOdysseyBlendingMode::kReflect:
+            OutBlendMode = EOdysseyBlendMode::Reflect;
+        break;
+
+        case EOdysseyBlendingMode::kGlow:
+            OutBlendMode = EOdysseyBlendMode::Glow;
+        break;
+
+        case EOdysseyBlendingMode::kDifference:
+            OutBlendMode = EOdysseyBlendMode::Difference;
+        break;
+
+        case EOdysseyBlendingMode::kExclusion:
+            OutBlendMode = EOdysseyBlendMode::Exclusion;
+        break;
+
+        case EOdysseyBlendingMode::kAdd:
+            OutBlendMode = EOdysseyBlendMode::Add;
+        break;
+
+        case EOdysseyBlendingMode::kSubstract:
+            OutBlendMode = EOdysseyBlendMode::Substract;
+        break;
+
+        case EOdysseyBlendingMode::kDivide:
+            OutBlendMode = EOdysseyBlendMode::Divide;
+        break;
+
+        case EOdysseyBlendingMode::kAverage:
+            OutBlendMode = EOdysseyBlendMode::Average;
+        break;
+
+        case EOdysseyBlendingMode::kNegation:
+            OutBlendMode = EOdysseyBlendMode::Negation;
+        break;
+
+        case EOdysseyBlendingMode::kHue:
+            OutBlendMode = EOdysseyBlendMode::Hue;
+        break;
+
+        case EOdysseyBlendingMode::kSaturation:
+            OutBlendMode = EOdysseyBlendMode::Saturation;
+        break;
+
+        case EOdysseyBlendingMode::kColor:
+            OutBlendMode = EOdysseyBlendMode::Color;
+        break;
+
+        case EOdysseyBlendingMode::kLuminosity:
+            OutBlendMode = EOdysseyBlendMode::Luminosity;
+        break;
+
+        case EOdysseyBlendingMode::kPartialDerivative:
+            OutBlendMode = EOdysseyBlendMode::PartialDerivative;
+        break;
+
+        case EOdysseyBlendingMode::kWhiteOut:
+            OutBlendMode = EOdysseyBlendMode::WhiteOut;
+        break;
+
+        case EOdysseyBlendingMode::kAngleCorrected:
+            OutBlendMode = EOdysseyBlendMode::AngleCorrected;
+        break;
+    }
+}

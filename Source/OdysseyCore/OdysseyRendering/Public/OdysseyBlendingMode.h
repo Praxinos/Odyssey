@@ -81,3 +81,4 @@ enum class EOdysseyAlphaMode : uint8
 ENUM_RANGE_BY_COUNT(EOdysseyAlphaMode, EOdysseyAlphaMode::kAlphaMode_Count)
 
 ODYSSEYRENDERING_API void GetColorAndAlphaBlendModesFromDeprecatedBlendingMode(EOdysseyBlendingMode InBlendingMode, EOdysseyAlphaMode InAlphaMode, EOdysseyColorBlendMode& OutColorBlendMode, EOdysseyAlphaBlendMode& OutAlphaBlendMode);
+ODYSSEYRENDERING_API void GetBlendModeFromDeprecatedBlendingMode(EOdysseyBlendingMode InBlendingMode, EOdysseyBlendMode& OutBlendMode);

@@ -414,7 +414,10 @@ protected:
     bool bIsLocked = false;
 
     UPROPERTY()
-    EOdysseyBlendMode BlendMode = EOdysseyBlendMode::Normal;
+    EOdysseyBlendingMode BlendMode_DEPRECATED = EOdysseyBlendingMode::kBlendingMode_Count;
+
+    UPROPERTY()
+    EOdysseyBlendMode LayerBlendMode = EOdysseyBlendMode::Normal;
 
     UPROPERTY()
     float Opacity = 1.0f;

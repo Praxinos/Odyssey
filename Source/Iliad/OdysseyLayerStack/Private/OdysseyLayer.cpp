@@ -66,6 +66,12 @@ void
 UOdysseyLayer::PostLoad()
 {
     Super::PostLoad();
+
+    if (BlendMode_DEPRECATED != EOdysseyBlendingMode::kBlendingMode_Count)
+    {
+        GetBlendModeFromDeprecatedBlendingMode(BlendMode_DEPRECATED, LayerBlendMode);
+    }
+
     for (UOdysseyLayer* child : Children)
     {
         child->Parent = this;
@@ -931,7 +937,7 @@ UOdysseyLayer::ShouldDisplayCellNames() const
 EOdysseyBlendMode
 UOdysseyLayer::GetBlendMode() const
 {
-    return BlendMode;
+    return LayerBlendMode;
 }
 
 float
@@ -1249,7 +1255,7 @@ UOdysseyLayer::CanSetInheritsAlpha() const
     if (!IsEditable())
         return false;
 
-    return BlendMode != EOdysseyBlendMode::Erase && BlendMode != EOdysseyBlendMode::Stencil;
+    return LayerBlendMode != EOdysseyBlendMode::Erase && LayerBlendMode != EOdysseyBlendMode::Stencil;
 }
 
 void
@@ -1260,7 +1266,7 @@ UOdysseyLayer::SetBlendMode(EOdysseyBlendMode Value)
 
     Modify();
 
-    BlendMode = Value;
+    LayerBlendMode = Value;
     RenderingChanged();
 }
 
@@ -1839,7 +1845,7 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
         RenderingCompositionChanged();
     }
 
-    if ( changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode))
+    if ( changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayer, LayerBlendMode))
         || changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity))
         || changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayer, bInheritsAlpha)))
     {
