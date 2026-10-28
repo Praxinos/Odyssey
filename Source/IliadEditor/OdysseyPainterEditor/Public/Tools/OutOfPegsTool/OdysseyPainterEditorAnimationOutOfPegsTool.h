@@ -53,21 +53,33 @@ private:
     FVector2D GetCenter() const;
 
     void OnTopLeftHandleDragBegin();
+    void OnTopHandleDragBegin();
     void OnTopRightHandleDragBegin();
+    void OnRightHandleDragBegin();
     void OnBottomRightHandleDragBegin();
+    void OnBottomHandleDragBegin();
     void OnBottomLeftHandleDragBegin();
+    void OnLeftHandleDragBegin();
     void OnRotationHandleDragBegin();
 
     void OnTopLeftHandleDragged();
+    void OnTopHandleDragged();
     void OnTopRightHandleDragged();
+    void OnRightHandleDragged();
     void OnBottomRightHandleDragged();
+    void OnBottomHandleDragged();
     void OnBottomLeftHandleDragged();
+    void OnLeftHandleDragged();
     void OnRotationHandleDragged();
 
     void OnTopLeftHandleDragEnd();
+    void OnTopHandleDragEnd();
     void OnTopRightHandleDragEnd();
+    void OnRightHandleDragEnd();
     void OnBottomRightHandleDragEnd();
+    void OnBottomHandleDragEnd();
     void OnBottomLeftHandleDragEnd();
+    void OnLeftHandleDragEnd();
     void OnRotationHandleDragEnd();
 
 public:
@@ -78,51 +90,30 @@ public:
     void ResetAll();
 
 public:
-    /** The pan. */
-    UPROPERTY(
-        EditAnywhere,
-        Category="Out Of Pegs",
-        meta = (
-            Tooltip = "Translation in pixels",
-            LinearDeltaSensitivity = "5",
-            Delta = "1"
-        ))
+    /** Translation in pixels */
+    UPROPERTY(EditAnywhere, Category="Out Of Pegs", meta=(LinearDeltaSensitivity="5", Delta="1"))
     FVector2D Pan = FVector2D(0, 0);
 
-    /** The rotation. */
-    UPROPERTY(
-        EditAnywhere,
-        Category="Out Of Pegs",
-        meta = (
-            Tooltip = "Rotation in degrees",
-            LinearDeltaSensitivity="15",
-            Delta = "1",
-            Units = "Degrees"
-        ) )
+    /** Rotation in degrees */
+    UPROPERTY(EditAnywhere, Category="Out Of Pegs", meta=(LinearDeltaSensitivity="15", Delta = "1", Units = "Degrees"))
     float Rotation = 0.f;
 
-    /** The zoom. */
-    UPROPERTY(
-        EditAnywhere,
-        Category="Out Of Pegs",
-        meta = (
-            Tooltip = "Scale in percent",
-            ClampMin = "0.1",
-            UIMin = "0.1",
-            LinearDeltaSensitivity = "15",
-            Delta = "1",
-            Units="Percent"
-        ) )
-    float Zoom = 100.f;
+    /** Scale in percent */
+    UPROPERTY(EditAnywhere, Category="Out Of Pegs", meta=(ClampMin = "0.1", UIMin = "0.1", LinearDeltaSensitivity = "15", Delta = "1", Units="Percent"))
+    FVector2D Scale = FVector2D( 100.f, 100.f );
 
 private:
     UOdysseyLayer* mLayer;
     UOdysseyLayerCell* mCell;
     TSharedPtr<FOdysseyHUDPolygon> mTransformHUD = nullptr;
     TSharedPtr<FOdysseyHUDHandle> mTransformTopLeftHandleHUD = nullptr;
+    TSharedPtr<FOdysseyHUDHandle> mTransformTopHandleHUD = nullptr;
     TSharedPtr<FOdysseyHUDHandle> mTransformTopRightHandleHUD = nullptr;
+    TSharedPtr<FOdysseyHUDHandle> mTransformRightHandleHUD = nullptr;
     TSharedPtr<FOdysseyHUDHandle> mTransformBottomRightHandleHUD = nullptr;
+    TSharedPtr<FOdysseyHUDHandle> mTransformBottomHandleHUD = nullptr;
     TSharedPtr<FOdysseyHUDHandle> mTransformBottomLeftHandleHUD = nullptr;
+    TSharedPtr<FOdysseyHUDHandle> mTransformLeftHandleHUD = nullptr;
     TSharedPtr<FOdysseyHUDHandle> mTransformRotationHandleHUD = nullptr;
     TSharedPtr<FOdysseyHUDLine> mTransformRotationLineHUD = nullptr;
 
@@ -136,9 +127,9 @@ private:
     class FOdysseyHUDPolygon* mRightPegHUD = nullptr;
     class FOdysseyHUDCircle* mCenterPegHUD = nullptr; */
 
-    FVector2D mZoomCenter;
-    float mZoomDistanceReference;
-    float mZoomReference;
+    FVector2D mScaleCenter;
+    float mScaleDistanceReference;
+    FVector2D mScaleReference;
 };
 
 class FOdysseyPainterEditorAnimationOutOfPegsToolDetails : public IDetailCustomization

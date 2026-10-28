@@ -31,6 +31,12 @@ UOdysseyLayerCell::PostLoad() //override
         Marks.Add( 0, FCellMark{ Mark_DEPRECATED } );
         Mark_DEPRECATED = -1;
     }
+
+    if( OutOfPegs.Zoom_DEPRECATED != -1 )
+    {
+        OutOfPegs.Scale = FVector2D( OutOfPegs.Zoom_DEPRECATED, OutOfPegs.Zoom_DEPRECATED );
+        OutOfPegs.Zoom_DEPRECATED = -1;
+    }
 #endif
     UpdateTextureSize();
 }
@@ -321,7 +327,7 @@ UOdysseyLayerCell::Break(int Frame, bool bClear)
 bool
 UOdysseyLayerCell::IsOutOfPegs() const
 {
-    return OutOfPegs.Pan != FVector2D(0, 0) || OutOfPegs.Rotation != 0.f || OutOfPegs.Zoom != 100.f;
+    return OutOfPegs.Pan != FVector2D(0, 0) || OutOfPegs.Rotation != 0.f || OutOfPegs.Scale != FVector2D( 100.f, 100.f );
 }
 
 FOdysseyLayerCellOutOfPegs
@@ -359,8 +365,8 @@ UOdysseyLayerCell::OutOfPegsTransform() const
     FMatrix matrix = FMatrix::Identity;
 
     matrix *= FTranslationMatrix::Make(FVector(rect.Width() / -2.f, rect.Height() / -2.f, 0));
+    matrix *= FScaleMatrix::Make( FVector( OutOfPegs.Scale.X / 100.f, OutOfPegs.Scale.Y / 100.f, 1.f ) );
     matrix *= FRotationMatrix::Make(FRotator(0, OutOfPegs.Rotation, 0));
-    matrix *= FScaleMatrix::Make(FVector(OutOfPegs.Zoom / 100.f, OutOfPegs.Zoom / 100.f, 1.f));
     matrix *= FTranslationMatrix::Make(FVector(OutOfPegs.Pan.X, OutOfPegs.Pan.Y, 0));
     matrix *= FTranslationMatrix::Make(FVector(rect.Width() / 2.f, rect.Height() / 2.f, 0));
 
