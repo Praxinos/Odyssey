@@ -50,6 +50,44 @@ public:
         kStylusDown,
     };
 
+    struct FSegmentQuadTreeEntry
+    {
+        FArianeSegment* Segment;
+        FBox2D HUDBBox;
+
+        FSegmentQuadTreeEntry( FArianeSegment* InSegment, const FBox2D& InHUDBBox )
+        {
+            Segment = InSegment;
+            HUDBBox = InHUDBBox;
+        }
+    };
+
+    struct ARIANEEDITOR_API FSegmentQuadTree
+    {
+        public:
+           ~FSegmentQuadTree();
+           FSegmentQuadTree( const FIntRect& InRect
+                           , uint32 MaxSegmentsPerQuad
+                           , TArray<FSegmentQuadTreeEntry>& InSegmentQuadTreeEntries
+                           , uint32 Depth
+                           , uint32 MaxDepth );
+
+            void Build( uint32 MaxSegmentsPerQuad
+                      , TArray<FSegmentQuadTreeEntry>& ParentPointQuadTreeEntries
+                      , uint32 Depth
+                      , uint32 MaxDepth );
+
+            void PickSegments( FEditorViewportClient* ViewportClient
+                             , FSceneView* View
+                             , const FVector2D& HUDMousePosition
+                             , double SelectionRadius
+                             , TArray<FArianeSegment*>& OutPickedSegments );
+        private:
+            TArray<FSegmentQuadTreeEntry> SegmentQuadTreeEntries;
+            FSegmentQuadTree* Children[4];
+            FIntRect Rect;
+    };
+
     struct FPointQuadTreeEntry
     {
         FArianePoint* Point;
@@ -76,9 +114,7 @@ public:
                       , TArray<FPointQuadTreeEntry>& ParentPointQuadTreeEntries
                       , uint32 Depth
                       , uint32 MaxDepth );
-            //void Draw( BLContext* iBLContext
-            //         , FOdysseyVectorGroupPaint* iScene
-            //         , uint64 iFlags );
+
             void PickPoints( const FVector2D& HUDPosition
                            , double SelectionRadius
                            , TArray<FArianePoint*>& OutPickedPoints );
@@ -307,7 +343,33 @@ protected:
     void ListenStylusInput();
     void IgnoreStylusInput();
 
-    // Picking
+    // Segment Picking
+protected:
+    static void MapPathSegments( FEditorViewportClient* ViewportClient
+                               , FSceneView* View
+                               , FArianePath* Path
+                               , const FIntRect& Rect
+                               , TArray<FSegmentQuadTreeEntry>& OutSegmentQuadTreeEntries );
+    static void MapSegments( FEditorViewportClient* ViewportClient
+                           , FSceneView* View
+                           , FArianeObject* Object
+                           , const FIntRect& Rect
+                           , TArray<FSegmentQuadTreeEntry>& OutSegmentQuadTreeEntries );
+
+    void MakeSegmentQuadTree( FEditorViewportClient* ViewportClient
+                            , FSceneView* View
+                            , TArray<UArianeLayerVector*> VectorLayers
+                            , bool bFocusedObjectsOnly );
+
+    bool PickPathSegments( FEditorViewportClient* ViewportClient
+                         , FSceneView* View
+                         , FArianePath* Path
+                         , const FVector2D& HUDPosition
+                         , double PickingRadius
+                         , TArray<FArianeSegment*>& OutPickedVertices
+                         , const FPickingFlags& PickingFlags );
+
+    // Point Picking
 protected:
     static void MapPath( FEditorViewportClient* ViewportClient
                        , FSceneView* View
@@ -325,7 +387,6 @@ protected:
                           , TArray<UArianeLayerVector*> VectorLayers
                           , bool bFocusedObjectsOnly );
 
-    static void GetVertexHandlePositions( FArianeVertex* Vertex, FVector OutVertexHandlePositions[2] );
     bool PickPathPoints( FEditorViewportClient* ViewportClient
                        , FSceneView* View
                        , FArianePath* Path
@@ -334,7 +395,11 @@ protected:
                        , TArray<FArianeVertex*>& OutPickedVertices
                        , TArray<FArianeHandleSegment*>& OutPickedHandles
                        , const FPickingFlags& PickingFlags );
+
+
+protected:
     FVector2D WorldToPlane( const FVector& WorldPosition, const FPlane& ProjectionPlane );
+    static void GetVertexHandlePositions( FArianeVertex* Vertex, FVector OutVertexHandlePositions[2] );
 
     // HUD
 protected:
@@ -417,6 +482,7 @@ protected:
     FKey PressedKey;
     // Temp
     FPointQuadTree* PointQuadTree;
+    FSegmentQuadTree* SegmentQuadTree;
 
 // HUD Tiles
 protected:

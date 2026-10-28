@@ -27,6 +27,7 @@
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
 #include "Widgets/Input/SSegmentedControl.h"
+#include "Math/Plane.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -421,6 +422,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
 
         if( VectorLayer )
         {
+            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
             UArianeDrawing* Image = VectorLayer->GetDrawing();
             FVector2D MousePosition = FVector2D( ViewportClient->GetCachedMouseX()
                                                , ViewportClient->GetCachedMouseY() );
@@ -505,35 +507,35 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
                 default:
                 break;
             }
+
+            // remember vertex position at mouse down
+            PickedVertexDisplacements.Reserve( PickedVertices.Num() );
+            for( FArianeVertex* Vertex : PickedVertices )
+            {
+                const FTransform& OwnerTransform = Vertex->GetOwner()->GetTransform();
+
+                PickedVertexDisplacements.Emplace( Vertex
+                                                 , DrawingPlane.GetNormal()
+                                                 , OwnerTransform
+                                                 , RayOrigin
+                                                 , RayDirection );
+            }
+
+            // remember handle position at mouse down
+            PickedHandleDisplacements.Reserve( PickedHandles.Num() );
+            for( FArianeHandleSegment* Handle : PickedHandles )
+            {
+                const FTransform& OwnerTransform = Handle->GetOwnerSegment()->GetOwner()->GetTransform();
+
+                PickedHandleDisplacements.Emplace( Handle
+                                                 , DrawingPlane.GetNormal()
+                                                 , OwnerTransform
+                                                 , RayOrigin
+                                                 , RayDirection );
+            }
+
+            VectorLayer->Update( true );
         }
-
-        // remember vertex position at mouse down
-        PickedVertexDisplacements.Reserve( PickedVertices.Num() );
-        for( FArianeVertex* Vertex : PickedVertices )
-        {
-            const FTransform& OwnerTransform = Vertex->GetOwner()->GetTransform();
-
-            PickedVertexDisplacements.Emplace( Vertex
-                                             , View->GetViewDirection()
-                                             , OwnerTransform
-                                             , RayOrigin
-                                             , RayDirection );
-        }
-
-        // remember handle position at mouse down
-        PickedHandleDisplacements.Reserve( PickedHandles.Num() );
-        for( FArianeHandleSegment* Handle : PickedHandles )
-        {
-            const FTransform& OwnerTransform = Handle->GetOwnerSegment()->GetOwner()->GetTransform();
-
-            PickedHandleDisplacements.Emplace( Handle
-                                             , View->GetViewDirection()
-                                             , OwnerTransform
-                                             , RayOrigin
-                                             , RayDirection );
-        }
-
-        VectorLayer->Update( true );
     }
 }
 
@@ -594,17 +596,18 @@ UArianeEditorPathEditTool::OnMouseHover( FEditorViewportClient* ViewportClient
         FVector2D HUDPosition = ScreenToHUD( ViewportClient, MousePosition );
 
         HoveredPoints.Empty();
+        HoveredSegments.Empty();
 
         PointQuadTree->PickPoints( HUDPosition
                                  , PickingRadius
                                  , HoveredPoints );
+
+        SegmentQuadTree->PickSegments( ViewportClient
+                                     , View
+                                     , HUDPosition
+                                     , 10 // PickingRadius does not make sense when deleting a vertex, soi we use a fixed-size circle instead
+                                     , HoveredSegments );
     }
-}
-
-void
-UArianeEditorPathEditTool::Render( IToolsContextRenderAPI* RenderAPI )
-{
-
 }
 
 void
@@ -762,6 +765,114 @@ UArianeEditorPathEditTool::OnMouseDrag( FEditorViewportClient* ViewportClient
 }
 
 void
+UArianeEditorPathEditTool::OnMouseUpAddPoint( FEditorViewportClient* ViewportClient
+                                            , FSceneView* View
+                                            , const FVector2D& ScreenMousePosition
+                                            , const TArray<FArianeSegment*>& PickedSegments )
+{
+    FVector CamUp = View->GetViewUp();
+    FVector RayOrigin, RayDirection;
+    FVector2D HUDMousePosition = ScreenToHUD( ViewportClient, ScreenMousePosition );
+
+    View->DeprojectFVector2D( ScreenMousePosition, RayOrigin, RayDirection );
+
+    GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.add-vertex","Add Vertex"));
+
+    for( FArianeSegment* PickedSegment : PickedSegments )
+    {
+        FArianeObject* Owner = PickedSegment->GetOwner();
+        const FTransform& OwnerTransform = Owner->GetTransform();
+        FArianeVertex* Vertex0 = PickedSegment->GetVertex(0);
+        FArianeVertex* Vertex1 = PickedSegment->GetVertex(1);
+        FVector Vertex0Normal = Vertex0->GetNormal();
+        FVector Vertex1Normal = Vertex1->GetNormal();
+        double Vertex0Radius = Vertex0->GetRadius();
+        double Vertex1Radius = Vertex1->GetRadius();
+
+        Owner->GetDrawing()->Modify();
+
+        for( const FArianeSegment::FFraction& Fraction : PickedSegment->GetFractions() )
+        {
+            FVector LocalP0 = Fraction.Steps[0]->Point->GetPosition();
+            FVector LocalP1 = Fraction.Steps[1]->Point->GetPosition();
+            FVector WorldP0 = OwnerTransform.TransformPosition( LocalP0 );
+            FVector WorldP1 = OwnerTransform.TransformPosition( LocalP1 );
+            FVector2D HUDP0, HUDP1;
+            FVector LocalDirection = Fraction.Direction;
+            FVector WorldDirection = OwnerTransform.TransformVector( LocalDirection ).GetSafeNormal();
+            bool bProjected =  WorldToHUD( ViewportClient, View, WorldP0, HUDP0 )
+                            && WorldToHUD( ViewportClient, View, WorldP1, HUDP1 );
+            double HUDDistance;
+
+            FArianeCore::DistanceToSegmentConstrained( HUDMousePosition, HUDP0, HUDP1, HUDDistance );
+
+            if( bProjected && ( HUDDistance < 10.0f ) )
+            {
+                // We create a plane to cut the segment, this is necessary because we are in 3D. doing a 2D interplation would result in a loss
+                // of precision for param T
+                FVector Perpendicular = FVector::CrossProduct( RayDirection, WorldDirection ).GetSafeNormal();
+                FPlane CuttingPlane = FPlane( RayOrigin
+                                            , FVector::CrossProduct( RayDirection, Perpendicular ).GetSafeNormal() );
+
+                // Make sure the fraction crosses the plane (not colinear to the plane, i.e perpendicular to the normal component of the plane)
+                if( fabs( FVector::DotProduct( WorldDirection, CuttingPlane.GetNormal() ) ) > UE_SMALL_NUMBER )
+                {
+                    FVector WorldIntersection = FMath::LinePlaneIntersection ( WorldP0, WorldP1, CuttingPlane );
+                    FVector LocalIntersection = OwnerTransform.InverseTransformPosition( WorldIntersection );
+                    // T must be signed, hence the use of the dot product
+                    const double T = FVector::DotProduct( LocalIntersection - LocalP0, LocalP1 - LocalP0 ) / ( Fraction.Length * Fraction.Length );
+            //FVector2D HUDIntersection;
+//WorldToHUD( ViewportClient, View, WorldIntersection, HUDIntersection );
+
+                    //const double T = ( LocalIntersection - LocalP0 ).Length() / ( LocalP1 - LocalP0 ).Length();
+
+
+                    if( FMath::IsWithin(T, 0.0, 1.0) && ( FVector::DotProduct( ( LocalIntersection - LocalP0 )
+                                                                             , ( LocalP1           - LocalP0 ) ) > 0.0f ) )
+                    {
+                        double SegmentT = Fraction.Steps[0]->T + ( T * ( Fraction.Steps[1]->T - Fraction.Steps[0]->T ) );
+
+                        if( Owner->GetClass() == FArianePath::StaticClass() )
+                        {
+                            FArianePath* Path = static_cast<FArianePath*>(Owner);
+
+                            FArianeVertex* NewVertex = Path->AllocVertex( LocalIntersection
+                                                                        , Vertex0Normal + ( SegmentT * ( Vertex1Normal - Vertex0Normal ) )
+                                                                        , Vertex0Radius + ( SegmentT * ( Vertex1Radius - Vertex0Radius ) )
+                                                                        , EArianeAllocationModel::InstancedStruct );
+
+                            Path->AddVertex( NewVertex );
+
+                            FArianeSegment* Segment0 = PickedSegment->Extract( Owner
+                                                                             , PickedSegment->GetVertex(0)
+                                                                             , 0.0f
+                                                                             , NewVertex
+                                                                             , SegmentT
+                                                                             , EArianeAllocationModel::InstancedStruct );
+
+                            FArianeSegment* Segment1 = PickedSegment->Extract( Owner
+                                                                             , NewVertex
+                                                                             , SegmentT
+                                                                             , PickedSegment->GetVertex(1)
+                                                                             , 1.0f
+                                                                             , EArianeAllocationModel::InstancedStruct );
+
+                            Path->RemoveSegment( PickedSegment, true );
+                            Path->AddSegment( Segment0 );
+                            Path->AddSegment( Segment1 );
+
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    GetToolManager()->EndUndoTransaction();
+}
+
+void
 UArianeEditorPathEditTool::OnMouseUpDeletePoint( const TArray<FArianePoint*>& PickedPoints )
 {
     // temporary structure to store the path that will have their vertices removed.
@@ -864,6 +975,7 @@ UArianeEditorPathEditTool::RebuildQuadTree( FEditorViewportClient* ViewportClien
     if( VectorLayer )
     {
         MakePointQuadTree( ViewportClient, View, {VectorLayer}, true );
+        MakeSegmentQuadTree( ViewportClient, View, {VectorLayer}, true );
     }
 }
 
@@ -909,6 +1021,14 @@ UArianeEditorPathEditTool::OnMouseUp( FEditorViewportClient* ViewportClient
                     }
                     else
                     {
+                        if( HoveredSegments.Num() )
+                        {
+                            FVector2D ScreenMousePosition = FVector2D( PointerState.ViewportX, PointerState.ViewportY );
+                            //FVector2D HUDMousePosition = ScreenToHUD( ViewportClient
+                            //                                        ,  );
+
+                            OnMouseUpAddPoint( ViewportClient, View, ScreenMousePosition, HoveredSegments );
+                        }
 /*
                         TArray<FArianeSegment*> PickedSegmentArray;
 
@@ -1039,6 +1159,26 @@ UArianeEditorPathEditTool::EditonModeToHUDDrawingFlags()
 }
 
 void
+UArianeEditorPathEditTool::Render(IToolsContextRenderAPI* RenderAPI)
+{
+    if  ( Editor->GetShowGrid() )
+    {
+        UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+        if( Painting3DComponent )
+        {
+            UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>( LayerStack->GetCurrentLayer() );
+
+            if( VectorLayer )
+            {
+                DrawLayerOrientationGrid( RenderAPI, VectorLayer );
+            }
+        }
+    }
+}
+
+void
 UArianeEditorPathEditTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI )
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
@@ -1097,7 +1237,8 @@ UArianeEditorPathEditTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* Re
 
     if( EditionMode == EArianePathEditToolEditionMode::Alter )
     {
-        if(  HoveredPoints.Num() )
+        // Draw a minus sign
+        if( HoveredPoints.Num() )
         {
             FVector2D MinusP0 = FVector2D( HUDPosition.X + PickingRadius
                                          , HUDPosition.Y - PickingRadius );
@@ -1106,8 +1247,23 @@ UArianeEditorPathEditTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* Re
 
             DrawLineHUD( Canvas, ViewportClient, View, MinusP0, MinusP1, HcColor, 1.0f );
         }
+        // Draw a plus sign
         else
         {
+            if( HoveredSegments.Num() )
+            {
+                FVector2D PlusLine0P0 = FVector2D( HUDPosition.X + PickingRadius
+                                                 , HUDPosition.Y - PickingRadius );
+                FVector2D PlusLine0P1 = FVector2D( HUDPosition.X + PickingRadius + 8
+                                                 , HUDPosition.Y - PickingRadius );
+                FVector2D PlusLine1P0 = FVector2D( HUDPosition.X + PickingRadius + 4
+                                                 , HUDPosition.Y - PickingRadius - 4 );
+                FVector2D PlusLine1P1 = FVector2D( HUDPosition.X + PickingRadius + 4
+                                                 , HUDPosition.Y - PickingRadius + 4 );
+
+                DrawLineHUD( Canvas, ViewportClient, View, PlusLine0P0, PlusLine0P1, HcColor, 1.0f );
+                DrawLineHUD( Canvas, ViewportClient, View, PlusLine1P0, PlusLine1P1, HcColor, 1.0f );
+            }
 /*
             FVector2D lineP0 = iParams.mTextureToHUD.Execute( FVector2D( mCutLinePoint[0].x, mCutLinePoint[0].y ) );
             FVector2D lineP1 = iParams.mTextureToHUD.Execute( FVector2D( mCutLinePoint[1].x, mCutLinePoint[1].y ) );

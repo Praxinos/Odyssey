@@ -7,6 +7,7 @@
 #include "ArianeEditor.h"
 #include "ArianeEditorSettings.h"
 // Ariane Headers
+#include "ArianeCore.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianeLayerStack.h"
 #include "ArianeLayerVector.h"
@@ -47,6 +48,7 @@ UArianeEditorTool::UArianeEditorTool()
     , bHasContextMenu ( false )
     , bInited ( false )
     , PointQuadTree ( nullptr )
+    , SegmentQuadTree ( nullptr )
     , VertexTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Vertex_Full") ) )
     , VertexContourTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Vertex_Contour") ) )
     , HandleTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Handle_Full") ) )
@@ -1123,7 +1125,276 @@ UArianeEditorTool::OnTerminateDragSequence()
 {
 }
 
-// Picking
+// Segment Picking
+UArianeEditorTool::FSegmentQuadTree::~FSegmentQuadTree()
+{
+    for( int i = 0 ; i < 4; i++ )
+    {
+        if( Children[i] )
+        {
+            delete Children[i];
+        }
+    }
+}
+
+UArianeEditorTool::FSegmentQuadTree::FSegmentQuadTree( const FIntRect& InRect
+                                                     , uint32 MaxSegmentsPerQuad
+                                                     , TArray<FSegmentQuadTreeEntry>& InSegmentQuadTreeEntries
+                                                     , uint32 Depth
+                                                     , uint32 MaxDepth )
+    : Children { nullptr, nullptr, nullptr, nullptr }
+    , Rect( InRect )
+{
+    Build( MaxSegmentsPerQuad, InSegmentQuadTreeEntries, Depth, MaxDepth );
+}
+
+void
+UArianeEditorTool::FSegmentQuadTree::Build( uint32 MaxSegmentsPerQuad
+                                          , TArray<FSegmentQuadTreeEntry>& ParentSegmentQuadTreeEntries
+                                          , uint32 Depth
+                                          , uint32 MaxDepth )
+{
+    SegmentQuadTreeEntries.Reserve( ParentSegmentQuadTreeEntries.Num() );
+
+    for( int i = 0; i < ParentSegmentQuadTreeEntries.Num(); i++ )
+    {
+        FVector2D HUDBBoxMin = ParentSegmentQuadTreeEntries[i].HUDBBox.Min;
+        FVector2D HUDBBoxMax = ParentSegmentQuadTreeEntries[i].HUDBBox.Max;
+
+        FIntRect HUDBBoxRect = FIntRect( FIntPoint ( HUDBBoxMin.X
+                                                   , HUDBBoxMin.Y )
+                                       , FIntPoint ( HUDBBoxMax.X
+                                                   , HUDBBoxMax.Y ) );
+
+        if( Rect.Contains( HUDBBoxRect ) )
+        {
+            SegmentQuadTreeEntries.Add( ParentSegmentQuadTreeEntries[i] );
+        }
+    }
+
+    if( ( SegmentQuadTreeEntries.Num() > (int32) MaxSegmentsPerQuad ) && ( Depth < MaxDepth ) )
+    {
+        double MinX =   Rect.Min.X;
+        double MinY =   Rect.Min.Y;
+        double MaxX =   Rect.Max.X;
+        double MaxY =   Rect.Max.Y;
+        double AvgX = ( Rect.Min.X + Rect.Max.X ) * 0.5f;
+        double AvgY = ( Rect.Min.Y + Rect.Max.Y ) * 0.5f;
+
+        Children[0] = new FSegmentQuadTree( FIntRect( FIntPoint( MinX, MinY )
+                                                    , FIntPoint( AvgX, AvgY ) )
+                                          , MaxSegmentsPerQuad, SegmentQuadTreeEntries
+                                          , Depth + 1
+                                          , MaxDepth );
+
+        Children[1] = new FSegmentQuadTree( FIntRect( FIntPoint( AvgX, MinY )
+                                                    , FIntPoint( MaxX, AvgY ) )
+                                          , MaxSegmentsPerQuad, SegmentQuadTreeEntries
+                                          , Depth + 1
+                                          , MaxDepth );
+
+        Children[2] = new FSegmentQuadTree( FIntRect( FIntPoint( AvgX, AvgY )
+                                                    , FIntPoint( MaxX, MaxY ) )
+                                          , MaxSegmentsPerQuad
+                                          , SegmentQuadTreeEntries
+                                          , Depth + 1
+                                          , MaxDepth );
+
+        Children[3] = new FSegmentQuadTree( FIntRect( FIntPoint( MinX, AvgY )
+                                                    , FIntPoint( AvgX, MaxY ) )
+                                          , MaxSegmentsPerQuad
+                                          , SegmentQuadTreeEntries
+                                          , Depth + 1
+                                          , MaxDepth );
+
+        SegmentQuadTreeEntries.Empty();
+    }
+}
+
+void
+UArianeEditorTool::FSegmentQuadTree::PickSegments( FEditorViewportClient* ViewportClient
+                                                 , FSceneView* View
+                                                 , const FVector2D& HUDMousePosition
+                                                 , double SelectionRadius
+                                                 , TArray<FArianeSegment*>& OutPickedSegments )
+{
+    FBox2D LargeBBox = FBox2D( FVector2D( Rect.Min.X - SelectionRadius
+                                        , Rect.Min.Y - SelectionRadius )
+                             , FVector2D( Rect.Max.X + SelectionRadius
+                                        , Rect.Max.Y + SelectionRadius ) );
+
+    if( LargeBBox.IsInside( HUDMousePosition ) )
+    {
+        if( Children[0] == nullptr )
+        {
+            for( int i = 0; i < SegmentQuadTreeEntries.Num(); i++ )
+            {
+                FSegmentQuadTreeEntry& SegmentQuadTreeEntry = SegmentQuadTreeEntries[i];
+                FBox2D LargeSegmentBBox = FBox2D ( SegmentQuadTreeEntry.HUDBBox.Min - SelectionRadius
+                                                 , SegmentQuadTreeEntry.HUDBBox.Max + SelectionRadius );
+                FArianeObject* Owner = SegmentQuadTreeEntry.Segment->GetOwner();
+                const FTransform& OwnerTransform = Owner->GetTransform();
+
+                if( LargeSegmentBBox.IsInside( HUDMousePosition ) )
+                {
+                    for( const FArianeSegment::FFraction& Fraction : SegmentQuadTreeEntry.Segment->GetFractions() )
+                    {
+                        FVector P0WorldPoition = OwnerTransform.TransformPosition( Fraction.Steps[0]->Point->GetPosition() );
+                        FVector P1WorldPoition = OwnerTransform.TransformPosition( Fraction.Steps[1]->Point->GetPosition() );
+                        FVector2D P0HUDPosition;
+                        FVector2D P1HUDPosition;
+
+                        if( WorldToHUD( ViewportClient, View, P0WorldPoition, P0HUDPosition )
+                         && WorldToHUD( ViewportClient, View, P1WorldPoition, P1HUDPosition ) )
+                        {
+                            double Distance;
+
+                            if( FArianeCore::DistanceToSegmentConstrained( HUDMousePosition
+                                                                         , P0HUDPosition
+                                                                         , P1HUDPosition
+                                                                         , Distance ) )
+                            {
+                                if( Distance <= SelectionRadius )
+                                {
+                                    OutPickedSegments.Add( SegmentQuadTreeEntries[i].Segment );
+
+                                    break; // break the for-loop
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            for( int i = 0; i < 4; i++ )
+            {
+                Children[i]->PickSegments( ViewportClient, View, HUDMousePosition, SelectionRadius, OutPickedSegments );
+            }
+        }
+    }
+}
+
+//static
+void
+UArianeEditorTool::MapPathSegments( FEditorViewportClient* ViewportClient
+                                  , FSceneView* View
+                                  , FArianePath* Path
+                                  , const FIntRect& Rect
+                                  , TArray<FSegmentQuadTreeEntry>& OutSegmentQuadTreeEntries )
+{
+    const FTransform& PathTransform = Path->GetTransform();
+    UArianeDrawing* Image = Path->GetDrawing();
+
+    for( FArianeSegment* Segment : Path->GetSegments() )
+    {
+        const FBox& SegmentBox = Segment->GetBoundingBox();
+        FVector Corners[8] = { FVector( SegmentBox.Min.X, SegmentBox.Min.Y, SegmentBox.Min.Z )
+                             , FVector( SegmentBox.Min.X, SegmentBox.Min.Y, SegmentBox.Max.Z )
+                             , FVector( SegmentBox.Min.X, SegmentBox.Max.Y, SegmentBox.Min.Z )
+                             , FVector( SegmentBox.Min.X, SegmentBox.Max.Y, SegmentBox.Max.Z )
+                             , FVector( SegmentBox.Max.X, SegmentBox.Min.Y, SegmentBox.Min.Z )
+                             , FVector( SegmentBox.Max.X, SegmentBox.Min.Y, SegmentBox.Max.Z )
+                             , FVector( SegmentBox.Max.X, SegmentBox.Max.Y, SegmentBox.Min.Z )
+                             , FVector( SegmentBox.Max.X, SegmentBox.Max.Y, SegmentBox.Max.Z ) };
+        FVector2D HUDCorners[8];
+        bool bImport = true;
+
+        for( int i = 0; i < 8; i++ )
+        {
+            FVector WorldCornerPosition = PathTransform.TransformPosition( Corners[i] );
+
+            if( WorldToHUD( ViewportClient, View, WorldCornerPosition, HUDCorners[i] ) == false )
+            {
+                bImport = false;
+            }
+        }
+
+        if( bImport )
+        {
+            double XMin = HUDCorners[0].X
+                 , YMin = HUDCorners[0].Y
+                 , XMax = HUDCorners[0].X
+                 , YMax = HUDCorners[0].Y;
+
+            for( int i = 1; i < 8; i++ )
+            {
+                XMin = FMath::Min( HUDCorners[i].X, XMin );
+                YMin = FMath::Min( HUDCorners[i].Y, YMin );
+                XMax = FMath::Max( HUDCorners[i].X, XMax );
+                YMax = FMath::Max( HUDCorners[i].Y, YMax );
+            }
+
+            //FVector LocalVertexPosition = Vertex->GetPosition();
+            //FVector WorldVertexPosition = PathTransform.TransformPosition( Vertex->GetPosition() );
+            //FVector2D HUDVertexPosition;
+
+            FIntRect SegmentRect = FIntRect( XMin, YMin, XMax, YMax );
+
+            if( Rect.Contains( SegmentRect ) )
+            {
+                OutSegmentQuadTreeEntries.Emplace( Segment, FBox2D( SegmentRect.Min, SegmentRect.Max ) );
+            }
+        }
+    }
+}
+
+//static
+void
+UArianeEditorTool::MapSegments( FEditorViewportClient* ViewportClient
+                              , FSceneView* View
+                              , FArianeObject* Object
+                              , const FIntRect& Rect
+                              , TArray<FSegmentQuadTreeEntry>& OutSegmentQuadTreeEntries )
+{
+    if( Object->GetClass() == FArianePath::StaticClass() )
+    {
+        FArianePath* Path = static_cast<FArianePath*>( Object );
+
+        MapPathSegments( ViewportClient, View, Path, Rect, OutSegmentQuadTreeEntries );
+    }
+}
+
+void
+UArianeEditorTool::MakeSegmentQuadTree( FEditorViewportClient* ViewportClient
+                                      , FSceneView* View
+                                      , TArray<UArianeLayerVector*> VectorLayers
+                                      , bool bFocusedObjectsOnly )
+{
+    FIntRect ScreenRect = FIntRect( 0, 0, ViewportClient->Viewport->GetSizeXY().X, ViewportClient->Viewport->GetSizeXY().Y );
+    TArray<FSegmentQuadTreeEntry> SegmentQuadTreeEntries;
+
+    for( UArianeLayerVector* VectorLayer : VectorLayers )
+    {
+        FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
+
+        SegmentQuadTreeEntries.Reserve( 200 );
+
+        FArianeObject::Traverse( RootGroup
+                               , [ ViewportClient
+                                 , View
+                                 , &ScreenRect
+                                 , &SegmentQuadTreeEntries ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+        {
+            if( /*( iFocusedObjectsOnly == false ) || scene->GetCell()->ObjectHasFocus( object, traverseFlags )*/1 )
+            {
+                MapSegments( ViewportClient, View, Object, ScreenRect, SegmentQuadTreeEntries );
+
+                return FArianeObject::ETraversalReturnValue::Continue;
+            }
+        } );
+
+        if( SegmentQuadTree )
+        {
+            delete SegmentQuadTree;
+        }
+
+        SegmentQuadTree = new FSegmentQuadTree( ScreenRect, 100, SegmentQuadTreeEntries, 0, 8 );
+    }
+}
+
+// Point Picking
 UArianeEditorTool::FPointQuadTree::~FPointQuadTree()
 {
     for( int i = 0 ; i < 4; i++ )
@@ -1145,27 +1416,6 @@ UArianeEditorTool::FPointQuadTree::FPointQuadTree( const FIntRect& InRect
 {
     Build( MaxPointsPerQuad, PointQuadTreeEntries, Depth, MaxDepth );
 }
-
-/*
-void
-UArianeEditorTool::FPointQuadTree::Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene, uint64 iFlags )
-{
-    iBLContext->save();
-    iBLContext->reset_transform();
-    iBLContext->set_stroke_style( BLRgba32( 0xFF0000FF )  );
-    iBLContext->set_stroke_width( 1.0f );
-    iBLContext->stroke_rect( mRect.x, mRect.y, mRect.w, mRect.h );
-    iBLContext->restore();
-
-    for( int i = 0 ; i < 4; i++ )
-    {
-        if( mChildren[i] )
-        {
-            mChildren[i]->Draw( iBLContext, iScene, iFlags );
-        }
-    }
-}
-*/
 
 void
 UArianeEditorTool::FPointQuadTree::Build( uint32 MaxPointsPerQuad

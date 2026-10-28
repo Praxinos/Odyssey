@@ -105,15 +105,15 @@ public:
                           , const FArianePointerState& State ) override;
     virtual bool SupportsColorType( EOdysseyPainterEditorColorType ColorType ) override;
 
-    virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
-
     void Activate();
     void Inactivate();
     virtual void DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
+    virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
     virtual bool OnKeyUpGlobal( const FKeyEvent& InKeyEvent ) override;
     virtual bool OnKeyDownGlobal( const FKeyEvent& InKeyEvent ) override;
 
     virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
+
 
 protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
@@ -139,6 +139,10 @@ protected:
                              , const FArianePointerState& PointerState
                              , bool iRepeat );
     void OnMouseUpDeletePoint( const TArray<FArianePoint*>& PickedPoints );
+    void OnMouseUpAddPoint( FEditorViewportClient* ViewportClient
+                          , FSceneView* View
+                          , const FVector2D& ScreenMousePosition
+                          , const TArray<FArianeSegment*>& PickedSegments );
 
     static void DisplacePoint( FArianePoint* Point
                              , const FPointDisplacement& PointDisplacment
@@ -198,5 +202,6 @@ protected:
     TArray<FArianePath*> SelectedPaths;
     EArianePathEditToolEditionMode EditionMode;
     TArray<FArianePoint*> HoveredPoints;
+    TArray<FArianeSegment*> HoveredSegments;
     TArray<FArianeObject*> SelectedTrees;
 };

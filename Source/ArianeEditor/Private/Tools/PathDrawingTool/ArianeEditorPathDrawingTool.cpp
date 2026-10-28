@@ -240,6 +240,8 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* ViewportClient
     FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
     double Radius = bPressureSensitivity ? ( Size * 0.5f * PointerState.Pressure )
                                          : ( Size * 0.5f );
+    FVector2D PlotAt = FVector2D( PointerState.ViewportX, PointerState.ViewportY );
+    static FVector2D PreviousPlotAt = FVector2D( -1, -1 );
 
     if( Painting3DComponent )
     {
@@ -300,68 +302,72 @@ EditedPath->AddSegment( EditedPath->AllocCubicSegment( TestVertex1
 
                                             // if both points are at the same location, the segment will have length 0
                                             // which will result in a broken continuity (angled continuity). Quick-fix to prevent this
-                if( ( Vertex0 == nullptr ) || ( localCoords != Vertex0->GetPosition() ) )
+                if( ( Vertex0 == nullptr ) || ( ( PreviousPlotAt - PlotAt ).Length() > 2.0f ) )
                 {
                     if( Vertex0 == nullptr )
                     {
                         Vertex0 = EditedPath->AllocVertex( localCoords
-                                                          , localNormal
-                                                          , Radius
-                                                          , EArianeAllocationModel::InstancedStruct );
+                                                         , localNormal
+                                                         , Radius
+                                                         , EArianeAllocationModel::InstancedStruct );
 
                         Vertex0->SetHandleAligned( true );
 
                         EditedPath->AddVertex( Vertex0 );
                     }
-
-                    switch ( SegmentType )
+                    else
                     {
-                        case EArianeEditorPathDrawingToolSegmentType::Polyline :
+                        switch ( SegmentType )
                         {
-                            FArianeVertex *Vertex1 = EditedPath->AllocVertex( localCoords
-                                                                            , localNormal
-                                                                            , Radius
-                                                                            , EArianeAllocationModel::InstancedStruct );
-
-                            Vertex1->SetHandleAligned( true );
-
-                            EditedPath->AddVertex( Vertex1 );
-
-                            FArianeSegment *Segment = EditedPath->AllocCubicSegment( Vertex0
-                                                                                   , Vertex0->GetPosition()
-                                                                                   , Vertex1->GetPosition()
-                                                                                   , Vertex1
-                                                                                   , EArianeAllocationModel::InstancedStruct );
-
-                            EditedPath->AddSegment( Segment );
-                        }
-                        break;
-
-                        case EArianeEditorPathDrawingToolSegmentType::CubicBezier :
-                        {
-                            FArianeSegmentCubic* CurrentCubicSegment = static_cast<FArianeSegmentCubic*>(CurrentSegment);
-
-                            FArianeSegment* NewSegment = PathTracer.Trace( View
-                                                                         , PreviousSegment
-                                                                         , CurrentCubicSegment ? CurrentCubicSegment->GetVertex(0)
-                                                                                               : Vertex0
-                                                                         , CurrentCubicSegment
-                                                                         , ViewportPosition
-                                                                         , localCoords
-                                                                         , localNormal
-                                                                         , Radius );
-
-                            if( NewSegment != CurrentSegment )
+                            case EArianeEditorPathDrawingToolSegmentType::Polyline :
                             {
-                                PreviousSegment = CurrentSegment;
-                                CurrentSegment = NewSegment;
-                            }
-                        }
-                        break;
+                                FArianeVertex *Vertex1 = EditedPath->AllocVertex( localCoords
+                                                                                , localNormal
+                                                                                , Radius
+                                                                                , EArianeAllocationModel::InstancedStruct );
 
-                        default :
-                        break;
+                                Vertex1->SetHandleAligned( true );
+
+                                EditedPath->AddVertex( Vertex1 );
+
+                                FArianeSegment *Segment = EditedPath->AllocCubicSegment( Vertex0
+                                                                                       , Vertex0->GetPosition()
+                                                                                       , Vertex1->GetPosition()
+                                                                                       , Vertex1
+                                                                                       , EArianeAllocationModel::InstancedStruct );
+
+                                EditedPath->AddSegment( Segment );
+                            }
+                            break;
+
+                            case EArianeEditorPathDrawingToolSegmentType::CubicBezier :
+                            {
+                                FArianeSegmentCubic* CurrentCubicSegment = static_cast<FArianeSegmentCubic*>(CurrentSegment);
+
+                                FArianeSegment* NewSegment = PathTracer.Trace( View
+                                                                             , PreviousSegment
+                                                                             , CurrentCubicSegment ? CurrentCubicSegment->GetVertex(0)
+                                                                                                   : Vertex0
+                                                                             , CurrentCubicSegment
+                                                                             , ViewportPosition
+                                                                             , localCoords
+                                                                             , localNormal
+                                                                             , Radius );
+
+                                if( NewSegment != CurrentSegment )
+                                {
+                                    PreviousSegment = CurrentSegment;
+                                    CurrentSegment = NewSegment;
+                                }
+                            }
+                            break;
+
+                            default :
+                            break;
+                        }
                     }
+
+                    PreviousPlotAt = PlotAt;
                 }
             }
 
