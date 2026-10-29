@@ -1268,7 +1268,7 @@ UArianeEditorTool::FSegmentQuadTree::PickSegmentsInRect( FEditorViewportClient* 
                                                               , nullptr
                                                               , nullptr ) )
                             {
-                                OutPickedSegments.Add( SegmentQuadTreeEntries[i].Segment );
+                                OutPickedSegments.AddUnique( SegmentQuadTreeEntries[i].Segment );
 
                                 break;
                             }
@@ -1332,7 +1332,7 @@ UArianeEditorTool::FSegmentQuadTree::PickSegments( FEditorViewportClient* Viewpo
                             {
                                 if( Distance <= SelectionRadius )
                                 {
-                                    OutPickedSegments.Add( SegmentQuadTreeEntries[i].Segment );
+                                    OutPickedSegments.AddUnique( SegmentQuadTreeEntries[i].Segment );
 
                                     break; // break the for-loop
                                 }
