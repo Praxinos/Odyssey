@@ -68,7 +68,10 @@ void FOdysseyBrushEditorModule::ShutdownModule()
 void
 FOdysseyBrushEditorModule::RegisterTelemetry()
 {
+// For the moment, remove the telemetry for brush creation as there are many (200+ records in less than 1s) records and I don't know why
+#if 0
     FOdysseyTelemetryModule::Get().RegisterAssetClassToTrackForCreation( UOdysseyBrush::StaticClass() );
+#endif
 
     // GEditor and/or Subsystem may not be available directly here (in a StartupModule),
     // so delegate it once the engine is fully loaded
@@ -92,7 +95,10 @@ FOdysseyBrushEditorModule::UnregisterTelemetry()
 
     FCoreDelegates::GetOnPostEngineInit().RemoveAll( this );
 
+// For the moment, remove the telemetry for brush creation as there are many (200+ records in less than 1s) records and I don't know why
+#if 0
     FOdysseyTelemetryModule::Get().UnregisterAssetClassToTrackForCreation( UOdysseyBrush::StaticClass() );
+#endif
 }
 
 void
