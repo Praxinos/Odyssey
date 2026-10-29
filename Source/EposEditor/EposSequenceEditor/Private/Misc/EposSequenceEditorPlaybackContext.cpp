@@ -8,6 +8,7 @@
 #include "IMovieScenePlaybackClient.h"
 #include "LevelInstance/LevelInstanceInterface.h"
 #include "LevelInstance/LevelInstanceSubsystem.h"
+#include "LevelSequenceEditorModule.h"
 #include "Selection.h"
 
 #include "EposMovieSceneSequence.h"
@@ -179,11 +180,20 @@ FEposSequenceEditorPlaybackContext::ComputePlaybackContextAndClient( const UEpos
     //// Some plugins may not want us to automatically attempt to bind to the world where it doesn't make sense,
     //// such as movie rendering.
     bool bAllowPlaybackContextBinding = true;
-    //ILevelSequenceEditorModule* LevelSequenceEditorModule = FModuleManager::GetModulePtr<ILevelSequenceEditorModule>( "LevelSequenceEditor" );
-    //if( LevelSequenceEditorModule )
-    //{
-    //    LevelSequenceEditorModule->OnComputePlaybackContext().Broadcast( bAllowPlaybackContextBinding );
-    //}
+    // Using LevelSequence stuff here is ok
+    // Because when rendering a board/shot sequence, a level sequence wrapper is always created
+    // Because the render movie queue only processes level sequence asset
+    //
+    // But it doesn't change the fact that something should be done for EposSequenceEditorModule (?)
+    // (Even if for the moment nothing would set it)
+    //
+    // This delegate is to notify that during rendering the evaluation of the sequencer itself must not be done
+    // only the evaluation of the PIE must be done (certainly with a temporary level sequence player (?))
+    ILevelSequenceEditorModule* LevelSequenceEditorModule = FModuleManager::GetModulePtr<ILevelSequenceEditorModule>( "LevelSequenceEditor" );
+    if( LevelSequenceEditorModule )
+    {
+        LevelSequenceEditorModule->OnComputePlaybackContext().Broadcast( bAllowPlaybackContextBinding );
+    }
 
     UWorld* RecordingWorld = nullptr; // CaptureDialogModule ? CaptureDialogModule->GetCurrentlyRecordingWorld() : nullptr;
 
