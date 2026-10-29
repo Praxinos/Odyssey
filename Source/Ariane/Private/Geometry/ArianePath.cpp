@@ -1492,7 +1492,7 @@ FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
 
         if( PerpendicularVector.Normalize() )
         {
-            FVector UpVector = PerpendicularVector.Cross( TangentVector );
+            FVector UpVector = PerpendicularVector.Cross( TangentVector ).GetSafeNormal();
             FDynamicMeshVertex* ModelVertex0 = &ModelVertexCache[ModelVertexOffset+0];
             FDynamicMeshVertex* ModelVertex1 = &ModelVertexCache[ModelVertexOffset+1];
 

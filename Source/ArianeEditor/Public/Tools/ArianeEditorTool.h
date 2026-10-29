@@ -53,12 +53,12 @@ public:
     struct FSegmentQuadTreeEntry
     {
         FArianeSegment* Segment;
-        FBox2D HUDBBox;
+        FBox2D HUDRect;
 
-        FSegmentQuadTreeEntry( FArianeSegment* InSegment, const FBox2D& InHUDBBox )
+        FSegmentQuadTreeEntry( FArianeSegment* InSegment, const FBox2D& InHUDRect )
         {
             Segment = InSegment;
-            HUDBBox = InHUDBBox;
+            HUDRect = InHUDRect;
         }
     };
 
@@ -66,7 +66,7 @@ public:
     {
         public:
            ~FSegmentQuadTree();
-           FSegmentQuadTree( const FIntRect& InRect
+           FSegmentQuadTree( const FBox2D& InRect
                            , uint32 MaxSegmentsPerQuad
                            , TArray<FSegmentQuadTreeEntry>& InSegmentQuadTreeEntries
                            , uint32 Depth
@@ -82,10 +82,16 @@ public:
                              , const FVector2D& HUDMousePosition
                              , double SelectionRadius
                              , TArray<FArianeSegment*>& OutPickedSegments );
+
+            void PickSegmentsInRect( FEditorViewportClient* ViewportClient
+                                   , FSceneView* View
+                                   , const FBox2D& HUDPickingRect
+                                   , TArray<FArianeSegment*>& OutPickedSegments );
+
         private:
             TArray<FSegmentQuadTreeEntry> SegmentQuadTreeEntries;
             FSegmentQuadTree* Children[4];
-            FIntRect Rect;
+            FBox2D HUDRect;
     };
 
     struct FPointQuadTreeEntry
@@ -348,12 +354,12 @@ protected:
     static void MapPathSegments( FEditorViewportClient* ViewportClient
                                , FSceneView* View
                                , FArianePath* Path
-                               , const FIntRect& Rect
+                               , const FBox2D& Rect
                                , TArray<FSegmentQuadTreeEntry>& OutSegmentQuadTreeEntries );
     static void MapSegments( FEditorViewportClient* ViewportClient
                            , FSceneView* View
                            , FArianeObject* Object
-                           , const FIntRect& Rect
+                           , const FBox2D& Rect
                            , TArray<FSegmentQuadTreeEntry>& OutSegmentQuadTreeEntries );
 
     void MakeSegmentQuadTree( FEditorViewportClient* ViewportClient

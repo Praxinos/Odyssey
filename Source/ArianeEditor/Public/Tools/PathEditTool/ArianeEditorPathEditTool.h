@@ -12,6 +12,7 @@
 // Ariane Headers
 #include "ArianePainting3DComponent.h" // for EArianePainting3DGeometryMode
 #include "ArianePath.h"
+#include "ArianeSegment.h"
 
 // Odyssey
 #include "OdysseyPainterEditorColorType.h"
@@ -113,7 +114,7 @@ public:
     virtual bool OnKeyDownGlobal( const FKeyEvent& InKeyEvent ) override;
 
     virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
-
+    bool IsMouseButtonDown();
 
 protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
@@ -139,11 +140,22 @@ protected:
                              , const FArianePointerState& PointerState
                              , bool iRepeat );
     void OnMouseUpDeletePoint( const TArray<FArianePoint*>& PickedPoints );
+    void OnMouseUpSliceSegments( FEditorViewportClient* ViewportClient
+                               , FSceneView* View
+                               , const FVector2D& ScreenMousePositionP0
+                               , const FVector2D& ScreenMousePositionP1
+                               , const TArray<FArianeSegment*>& Segments );
     void OnMouseUpAddPoint( FEditorViewportClient* ViewportClient
                           , FSceneView* View
                           , const FVector2D& ScreenMousePosition
                           , const TArray<FArianeSegment*>& PickedSegments );
-
+    void OnMouseUpAddPoint( FEditorViewportClient* ViewportClient
+                          , FSceneView* View
+                          , const TArray<FArianeSegment*>& PickedSegments
+                          , TFunction<bool( FArianeSegment* Segment
+                                          , const FArianeSegment::FFraction& Fraction )> FractionFilterFunction
+                          , TFunction<FPlane( FArianeSegment* Segment
+                                            , const FArianeSegment::FFraction& Fraction )> GetCuttingPlaneFunction );
     static void DisplacePoint( FArianePoint* Point
                              , const FPointDisplacement& PointDisplacment
                              , const FTransform& Transform
@@ -194,6 +206,9 @@ public:
     bool bWidenAllAlong;
 
 protected:
+    bool bMouseButtonDown;
+    FVector2D ScreenMousePositionAtDown;
+    FVector2D ScreenMousePositionAtDrag;
     TArray<FArianeVertex*> PickedVertices;
     TArray<FPointDisplacement> PickedVertexDisplacements;
     TArray<FArianeHandleSegment*> PickedHandles;
