@@ -910,6 +910,16 @@ UArianeEditorPathEditTool::OnMouseUpAddPoint( FEditorViewportClient* ViewportCli
                                             , TFunction<FPlane( FArianeSegment* Segment
                                                               , const FArianeSegment::FFraction& Fraction )> GetCuttingPlaneFunction )
 {
+    struct FSegmentCutRecord
+    {
+        double T;
+        FArianeVertex* Vertex;
+    };
+
+    TMap<FArianeSegment*,TArray<FSegmentCutRecord>> Map;
+
+    Map.Reserve ( 10 );
+
     GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-edit-tool.add-vertex","Add Vertex"));
 
     for( FArianeSegment* Segment : Segments )
@@ -963,28 +973,54 @@ UArianeEditorPathEditTool::OnMouseUpAddPoint( FEditorViewportClient* ViewportCli
 
                             Path->AddVertex( NewVertex );
 
-                            FArianeSegment* Segment0 = Segment->Extract( Owner
-                                                                       , Segment->GetVertex(0)
-                                                                       , 0.0f
-                                                                       , NewVertex
-                                                                       , SegmentT
-                                                                       , EArianeAllocationModel::InstancedStruct );
-
-                            FArianeSegment* Segment1 = Segment->Extract( Owner
-                                                                       , NewVertex
-                                                                       , SegmentT
-                                                                       , Segment->GetVertex(1)
-                                                                       , 1.0f
-                                                                       , EArianeAllocationModel::InstancedStruct );
-
-                            Path->RemoveSegment( Segment, true );
-                            Path->AddSegment( Segment0 );
-                            Path->AddSegment( Segment1 );
-
-                            break;
+                            // we store the Cut records in an array because there can be multiple cuts per segment in case of non-linear segments
+                            TArray<FSegmentCutRecord>& SegmentCutRecord = Map.FindOrAdd(Segment);
+                            // Note: the records will be ordered by design
+                            SegmentCutRecord.Emplace( FSegmentCutRecord{ .T = SegmentT, .Vertex = NewVertex } );
                         }
                     }
                 }
+            }
+        }
+    }
+
+    for( TPair<FArianeSegment*,TArray<FSegmentCutRecord>>& Pair : Map )
+    {
+        FArianeSegment* Segment = Pair.Key;
+        TArray<FSegmentCutRecord>* SegmentCutRecords = &Pair.Value;
+        FArianeObject* SegmentOwner = Segment->GetOwner();
+
+        if( SegmentOwner->GetClass() == FArianePath::StaticClass() )
+        {
+            FArianePath* Path = static_cast<FArianePath*>(SegmentOwner);
+            FArianeVertex* PrevVertex = Segment->GetVertex(0);
+            double PrevVertexT = 0.0f;
+
+            if( SegmentCutRecords->Num() )
+            {
+                // add a final record to "close the gap"
+                SegmentCutRecords->Emplace( FSegmentCutRecord{ .T = 1.0f, .Vertex = Segment->GetVertex(1) } );
+
+                for( FSegmentCutRecord& SegmentCutRecord : *SegmentCutRecords )
+                {
+                    FArianeVertex* NextVertex = SegmentCutRecord.Vertex;
+                    double NextVertexT = SegmentCutRecord.T;
+
+                    FArianeSegment* NewSegment = Segment->Extract( SegmentOwner
+                                                                 , PrevVertex
+                                                                 , PrevVertexT
+                                                                 , NextVertex
+                                                                 , NextVertexT
+                                                                 , EArianeAllocationModel::InstancedStruct );
+
+
+                    Path->AddSegment( NewSegment );
+
+                    PrevVertex = NextVertex;
+                    PrevVertexT = NextVertexT;
+                }
+
+                Path->RemoveSegment( Segment, true );
             }
         }
     }
