@@ -1,12 +1,17 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-// Ariane
+// Ariane Editor
 #include "ArianeEditorViewportEdMode.h"
 #include "ArianeEditorViewportToolkit.h"
 #include "ArianeEditorTool.h"
 #include "ArianeEditor.h"
+// Ariane
 #include "ArianePainting3DActor.h"
+#include "ArianePainting3DComponent.h"
+#include "ArianeLayerVector.h"
+#include "ArianeLayerStack.h"
+#include "ArianeDrawing.h"
 // Odyssey
 #include "IOdysseyStylusInputModule.h"
 // Unreal
@@ -512,6 +517,49 @@ FEditorModeTools*
 FArianeEditorViewportEdMode::GetEditorModeTools()
 {
     return this->Owner;
+}
+
+FBox
+FArianeEditorViewportEdMode::GetBoundingBoxFromSelection( UArianePainting3DComponent* Painting3DComponent ) const
+{
+    UArianeLayerVector* CurrentVectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+    if( CurrentVectorLayer )
+    {
+        TArray<FArianeObject*> SelectedTrees;
+        FBox CombinedBBox = FBox(ForceInit);
+
+        CurrentVectorLayer->GetDrawing()->GetSelectedTrees( SelectedTrees );
+
+        if( SelectedTrees.Num() )
+        {
+            for( FArianeObject* SelectedTree : SelectedTrees )
+            {
+                CombinedBBox += SelectedTree->GetBoundingBox().TransformBy( SelectedTree->GetTransform() );
+            }
+
+            return CombinedBBox;
+        }
+
+        return CurrentVectorLayer->GetBounds().GetBox();
+    }
+
+    return Painting3DComponent->GetBounds().GetBox();
+}
+
+bool
+FArianeEditorViewportEdMode::ComputeBoundingBoxForViewportFocus ( AActor* Actor
+                                                                , UPrimitiveComponent* PrimitiveComponent
+                                                                , FBox& InOutBox ) const
+{
+    UArianePainting3DComponent* Painting3DComponent = Cast<UArianePainting3DComponent>(Actor->GetComponentByClass(UArianePainting3DComponent::StaticClass()));
+
+    if( Painting3DComponent )
+    {
+        InOutBox = GetBoundingBoxFromSelection( Painting3DComponent );
+    }
+
+    return true;
 }
 
 void

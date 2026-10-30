@@ -321,6 +321,7 @@ protected:
     virtual bool OnKeyUpGlobal(const FKeyEvent& InKeyEvent);
     virtual bool OnKeyDownGlobal(const FKeyEvent& InKeyEvent);
 */
+    FVector GetCenterFromSelection();
 
 public:
     virtual void ExtendToolbar( UToolMenu* iToolMenu );

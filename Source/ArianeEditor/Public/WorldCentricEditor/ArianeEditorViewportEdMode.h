@@ -6,12 +6,14 @@
 // Unreal headers
 #include "EdMode.h"
 #include "IStylusState.h"
+#include "EditorModeManager.h"
 // Ariane headers
 #include "ArianePointerState.h"
 
 class FModeToolkit;
 class FArianeEditorViewportToolkit;
 class FEditorModeTools;
+class UArianePainting3DComponent;
 
 /**
  * Odyssey paint on viewport editor mode
@@ -66,6 +68,10 @@ public:
 
     // Overriden from FEdMode
     virtual bool MouseLeave(FEditorViewportClient* iViewportClient, FViewport* iViewport) override;
+
+    virtual bool ComputeBoundingBoxForViewportFocus ( AActor* Actor
+                                                    , UPrimitiveComponent* PrimitiveComponent
+                                                    , FBox& InOutBox ) const override;
 
 #ifdef unused
     // Overriden from FEdMode
@@ -131,6 +137,8 @@ private:
                             , const FViewportClick& Click
                             , const FArianePointerState& State );
 #endif
+
+    FBox GetBoundingBoxFromSelection( UArianePainting3DComponent* Painting3DComponent ) const;
 
 private:
     void OnEditorClose();

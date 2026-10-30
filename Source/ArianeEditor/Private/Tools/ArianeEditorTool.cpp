@@ -203,12 +203,56 @@ UArianeEditorTool::ProcessKeyDownGlobal(const FKeyEvent& InKeyEvent)
 {
     return OnKeyDownGlobal(InKeyEvent);
 }
+/*
+FVector
+UArianeEditorTool::GetCenterFromSelection()
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
+    if( Painting3DComponent )
+    {
+        UArianeLayerVector* CurrentVectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
+
+        if( CurrentVectorLayer )
+        {
+            TArray<FArianeObject*> SelectedTrees;
+            FBox CombinedBBox = FBox(ForceInit);
+
+            CurrentVectorLayer->GetDrawing()->GetSelectedTrees( SelectedTrees );
+
+            if( SelectedTrees.Num() )
+            {
+                for( FArianeObject* SelectedTree : SelectedTrees )
+                {
+                    CombinedBBox += SelectedTree->GetBoundingBox().TransformBy( SelectedTree->GetTransform() );
+                }
+
+                return CombinedBBox.GetCenter();
+            }
+
+            return CurrentVectorLayer->GetComponentLocation();
+        }
+    }
+
+    return FVector::Zero();
+}
+*/
 bool
 UArianeEditorTool::OnKeyDownGlobal(const FKeyEvent& InKeyEvent)
 {
-    //PressedKeys is a TSet. No need to check for duplicates, this is handled by TSet itself
-    GlobalPressedKeys.Add( InKeyEvent.GetKey() );
+    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
+
+    if( InKeyEvent.IsRepeat() == false )
+    {
+        //PressedKeys is a TSet. No need to check for duplicates, this is handled by TSet itself
+        GlobalPressedKeys.Add( InKeyEvent.GetKey() );
+
+        if( GlobalPressedKeys.Find( EKeys::LeftAlt ) || GlobalPressedKeys.Find( EKeys::RightAlt ) )
+        {
+            //ViewportClient->SetLookAtLocation( GetCenterFromSelection(), true );
+            //ViewportClient->GetViewTransform().SetLookAt(GetCenterFromSelection());
+        }
+    }
 
     return false; //false means Unreal will continue as if we did nothing
 }
