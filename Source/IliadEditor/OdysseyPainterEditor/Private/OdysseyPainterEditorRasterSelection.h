@@ -44,7 +44,9 @@ public:
 
     void Init(int iWidth, int iHeight);
     void Add( const TArray<FVector2D>& iPolygon );
+    void Add( const TArray<TArray<FVector2D>>& iPolygons );
     void Substract( const TArray<FVector2D>& iPolygon );
+    void Substract( const TArray<TArray<FVector2D>>& iPolygons );
     void Invert();
     void Clear();
     void Reset();

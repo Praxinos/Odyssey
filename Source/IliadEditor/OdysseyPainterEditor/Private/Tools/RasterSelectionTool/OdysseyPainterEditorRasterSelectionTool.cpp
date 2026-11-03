@@ -14,6 +14,7 @@
 #include "OdysseyPolygonShape.h"
 #include "OdysseyEllipseShape.h"
 #include "OdysseyBezierShape.h"
+#include "OdysseyMagicWandShape.h"
 #include "OdysseyPainterEditorViewportTab.h"
 
 #include "ScopedTransaction.h"
@@ -38,11 +39,14 @@ UOdysseyPainterEditorRasterSelectionTool::UOdysseyPainterEditorRasterSelectionTo
     UOdysseyFreehandShape* freehandShape = CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterSelectionTool::FreehandShape");
     freehandShape->DisplayHUD(true);
 
+    mMagicWandShape = CreateShape<UOdysseyMagicWandShape>("UOdysseyPainterEditorRasterDrawingTool::MagicWand");
+
     Shapes.AddShapeType(EOdysseyShapeType::kFreehand, freehandShape);
     Shapes.AddShapeType(EOdysseyShapeType::kRectangle, CreateShape<UOdysseyRectangleShape>("UOdysseyPainterEditorRasterDrawingTool::RectangleShape"));
     Shapes.AddShapeType(EOdysseyShapeType::kPolygon, CreateShape<UOdysseyPolygonShape>("UOdysseyPainterEditorRasterDrawingTool::PolygonShape"));
     Shapes.AddShapeType(EOdysseyShapeType::kEllipse, CreateShape<UOdysseyEllipseShape>("UOdysseyPainterEditorRasterDrawingTool::EllipseShape"));
     Shapes.AddShapeType(EOdysseyShapeType::kBezier, CreateShape<UOdysseyBezierShape>("UOdysseyPainterEditorRasterDrawingTool::BezierShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kMagicWand, mMagicWandShape);
 
     Shapes.SetActiveShapeType(EOdysseyShapeType::kFreehand);
 }
@@ -55,6 +59,7 @@ UOdysseyPainterEditorRasterSelectionTool::CreateShape(FName iName)
 
     shape->OnBegin().AddUObject(this, &UOdysseyPainterEditorRasterSelectionTool::OnShapeBegin);
     shape->OnCommit().AddUObject(this, &UOdysseyPainterEditorRasterSelectionTool::OnShapeCommit);
+    shape->OnContoursCommit().AddUObject(this, &UOdysseyPainterEditorRasterSelectionTool::OnContoursCommit);
     shape->OnAbort().AddUObject(this, &UOdysseyPainterEditorRasterSelectionTool::OnShapeAbort);
 
     shape->SetHUD(mShapeHUD);
@@ -150,6 +155,7 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnKeyUp(const FKey& iKey)
 void UOdysseyPainterEditorRasterSelectionTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
+    mMagicWandShape->SetEditor(mEditor);
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::Unload()
@@ -206,6 +212,31 @@ UOdysseyPainterEditorRasterSelectionTool::OnShapeCommit(const TArray<FOdysseyPoi
         FScopedTransaction scopedTransaction(LOCTEXT("actions.raster.selection", "Raster Selection"));
         rasterSelection->Clear();
         rasterSelection->Add(points);
+    }
+}
+
+void
+UOdysseyPainterEditorRasterSelectionTool::OnContoursCommit(const TArray<TArray<FOdysseyPoint>>& iContours)
+{
+    TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    if (mSelectionState == EOdysseySelectionState::Add) //Add selection to existing one
+    {
+        FScopedTransaction scopedTransaction(LOCTEXT("actions.raster.selection.add", "Add Raster Selection"));
+        TArray<TArray<FVector2D>> contours(iContours);
+        rasterSelection->Add(contours);
+    }
+    else if (mSelectionState == EOdysseySelectionState::Substract) //Remove selection to existing one
+    {
+        FScopedTransaction scopedTransaction(LOCTEXT("actions.raster.selection.substract", "Substract Raster Selection"));
+        TArray<TArray<FVector2D>> contours(iContours);
+        rasterSelection->Substract(contours);
+    }
+    else //Normal, we replace the selection
+    {
+        FScopedTransaction scopedTransaction(LOCTEXT("actions.raster.selection", "Raster Selection"));
+        rasterSelection->Clear();
+        TArray<TArray<FVector2D>> contours(iContours);
+        rasterSelection->Add(contours);
     }
 }
 
