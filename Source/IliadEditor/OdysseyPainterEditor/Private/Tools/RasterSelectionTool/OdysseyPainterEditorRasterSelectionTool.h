@@ -9,6 +9,7 @@
 #include "OdysseyPainterEditorRasterSelectionTool.generated.h"
 
 class UOdysseyShape;
+class UOdysseyMagicWandShape;
 
 UENUM()
 enum class EOdysseySelectionState : uint8
@@ -65,6 +66,7 @@ private:
     // Internal - Callbacks
     void OnShapeBegin();
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
+    void OnContoursCommit(const TArray<TArray<FOdysseyPoint>>& iContours);
     void OnShapeAbort();
 
 protected:
@@ -74,4 +76,6 @@ protected:
 
     EOdysseySelectionState mSelectionState;
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;
+
+    UOdysseyMagicWandShape* mMagicWandShape;
 };

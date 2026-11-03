@@ -127,6 +127,39 @@ UOdysseyPainterEditorRasterSelection::Add(const TArray<FVector2D>& iPolygon)
     mOnChanged.Broadcast();
 }
 
+void UOdysseyPainterEditorRasterSelection::Add(const TArray<TArray<FVector2D>>& iPolygons)
+{
+    for (TArray<FVector2D> polygon : iPolygons)
+    {
+        ::ULIS::FRectI boundingRect = ComputeBoundingRect(polygon);
+
+        std::vector<::ULIS::FVec2I> points;
+        for (const FVector2D& point : polygon)
+        {
+            points.push_back(::ULIS::FVec2I(point.X, point.Y));
+        }
+
+        mRasterMutator.EditTilesFromRects(
+            { boundingRect },
+            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+            {
+                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
+
+                ctx.DrawPolygon(*mBlock, points, ::ULIS::FColor::FromGrey8(255), true);
+
+                ctx.Finish();
+
+                return { };
+            }
+        );
+    }
+    mRasterMutator.Commit();
+
+    RefreshHUD();
+
+    mOnChanged.Broadcast();
+}
+
 void
 UOdysseyPainterEditorRasterSelection::Substract(const TArray<FVector2D>& iPolygon)
 {
@@ -150,6 +183,39 @@ UOdysseyPainterEditorRasterSelection::Substract(const TArray<FVector2D>& iPolygo
             return { };
         }
     );
+
+    mRasterMutator.Commit();
+
+    RefreshHUD();
+
+    mOnChanged.Broadcast();
+}
+
+void UOdysseyPainterEditorRasterSelection::Substract(const TArray<TArray<FVector2D>>& iPolygons)
+{
+    for( TArray<FVector2D> polygon : iPolygons)
+    {
+        ::ULIS::FRectI boundingRect = ComputeBoundingRect(polygon);
+
+        std::vector<::ULIS::FVec2I> points;
+        for (const FVector2D& point : polygon)
+        {
+            points.push_back(::ULIS::FVec2I(point.X, point.Y));
+        }
+
+        mRasterMutator.EditTilesFromRects(
+            { boundingRect },
+            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+            {
+                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
+
+                ctx.DrawPolygon(*mBlock, points, ::ULIS::FColor::FromGrey8(0), true);
+                ctx.Finish();
+
+                return { };
+            }
+        );
+    }
 
     mRasterMutator.Commit();
 

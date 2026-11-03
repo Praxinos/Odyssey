@@ -106,6 +106,7 @@ FOdysseyShapesDetailCustomization::GetShapeIcon(EOdysseyShapeType iShape) const
         case EOdysseyShapeType::kPolygon: return FOdysseyStyle::GetBrush( "Shapes.Polygon_Filled" );
         case EOdysseyShapeType::kEllipse: return FOdysseyStyle::GetBrush( "Shapes.Ellipse_Filled" );
         case EOdysseyShapeType::kBezier: return FOdysseyStyle::GetBrush( "Shapes.Bezier_3pts_Filled" );
+        case EOdysseyShapeType::kMagicWand: return FOdysseyStyle::GetBrush("Shapes.Magic_Wand_Filled");
     }
 
     return nullptr;

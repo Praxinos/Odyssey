@@ -823,6 +823,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Shapes.Polygon_Filled", new IMAGE_BRUSH_SVG("OdysseyShapes/polygon_filled", mIcon16x16));
     Set("Shapes.Ellipse_Filled", new IMAGE_BRUSH_SVG("OdysseyShapes/ellipse_filled", mIcon16x16));
     Set("Shapes.Bezier_3pts_Filled", new IMAGE_BRUSH_SVG("OdysseyShapes/bezier_3pts_filled", mIcon16x16));
+    Set("Shapes.Magic_Wand_Filled", new IMAGE_BRUSH_SVG("OdysseyShapes/magic_wand_filled", mIcon16x16));
     Set("Shapes.Freehand_Empty", new IMAGE_BRUSH_SVG("OdysseyShapes/freehand_empty", mIcon16x16));
     Set("Shapes.Rectangle_Empty", new IMAGE_BRUSH_SVG("OdysseyShapes/rectangle_empty", mIcon16x16));
     Set("Shapes.Polygon_Empty", new IMAGE_BRUSH_SVG("OdysseyShapes/polygon_empty", mIcon16x16));

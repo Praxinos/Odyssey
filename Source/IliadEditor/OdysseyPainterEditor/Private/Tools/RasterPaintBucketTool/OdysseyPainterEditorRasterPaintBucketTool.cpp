@@ -62,19 +62,6 @@ UOdysseyPainterEditorRasterPaintBucketTool::Load()
     rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterPaintBucketTool::OnRasterSelectionChanged);
     if (!rasterSelection->IsEmpty())
         mPaintEngine.SetMaskBlock(rasterSelection->GetBlock());
-
-    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
-    if( hasRaster )
-    {
-        /* It would be better if this is done in OnMouseDown()
-
-        TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaRaster>();
-        if( mediaRasters.Num() > 0 )
-        {
-            mPaintEngine.RasterBlock(mediaRasters[0].GetRasterBlock());
-        }
-        */
-    }
 }
 
 void

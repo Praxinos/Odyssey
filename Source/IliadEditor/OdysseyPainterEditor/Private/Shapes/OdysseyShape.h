@@ -21,6 +21,7 @@ enum class EOdysseyShapeType : uint8
     kPolygon        UMETA(DisplayName = "Polygon"),
     kEllipse        UMETA(DisplayName = "Ellipse"),
     kBezier         UMETA(DisplayName = "Bezier"),
+    kMagicWand      UMETA(DisplayName = "Magic Wand"),
 };
 
 USTRUCT()
@@ -62,6 +63,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyShape : public UObject
 public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnInteractive, const TArray<FOdysseyPoint>& /*iPoints*/);
     DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCommit, const TArray<FOdysseyPoint>& /*iPoints*/, bool /*iReset*/);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnContoursCommit, const TArray<TArray<FOdysseyPoint>>& /*iContours*/); //For shapes that can return multiple polygons in a single commit
 
 public:
     // Destructor
@@ -92,6 +94,7 @@ public:
     FSimpleMulticastDelegate& OnBegin() { return mOnBegin; }
     FOnInteractive& OnInteractive() { return mOnInteractive; }
     FOnCommit& OnCommit() { return mOnCommit; }
+    FOnContoursCommit& OnContoursCommit() { return mOnContoursCommit; }
     FSimpleMulticastDelegate& OnAbort() { return mOnAbort; }
 
 protected:
@@ -101,6 +104,7 @@ protected:
     FSimpleMulticastDelegate mOnBegin;
     FOnInteractive mOnInteractive;
     FOnCommit mOnCommit;
+    FOnContoursCommit mOnContoursCommit;
     FSimpleMulticastDelegate mOnAbort;
 
 protected:
