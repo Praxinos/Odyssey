@@ -30,6 +30,12 @@ UCLASS()
 class ARIANEEDITOR_API UArianeEditorPathPushTool : public UArianeEditorTool
 {
 GENERATED_BODY()
+    struct FInfluencedPoint
+    {
+        FArianePoint* Point;
+        FArianeObject* Owner;
+    };
+
     // Struct that stores the displacement plane and the vertex' original position, so that we don't have to recompute each time.
     struct FPointDisplacement
     {
@@ -49,6 +55,20 @@ GENERATED_BODY()
         FVector WorldPosition;
         FVector WorldRayPositionAtDown;
         FPlane WorldPlane;
+    };
+
+    struct FVertexDisplacement : public FPointDisplacement
+    {
+        ~FVertexDisplacement();
+        FVertexDisplacement( FArianePoint* InPoint
+                           , double InScreenDistance
+                           , const FVector& InWorldPlaneNormal
+                           , const FTransform& Transform
+                           , const FVector& RayOrigin
+                           , const FVector& RayDirection );
+
+    public:
+        TArray<FPointDisplacement> DisplacedHandles;
     };
 
 public:
@@ -102,14 +122,20 @@ protected:
     static FPointDisplacement* GetPointDisplacement( TArray<FPointDisplacement>& PointDisplacements, FArianePoint* Point );
     static double GetPointMaxDistance( TArray<FArianeSegment*> Segments );
     void ComputeRatios( TArray<FPointDisplacement>& PointDisplacements, double MaxScreenDistance );
-    static FPointDisplacement* AddPointDisplacement( FSceneView* View
-                                                   , const FVector2D& ScreenMousePosition
-                                                   , TArray<FPointDisplacement>& PointDisplacements
-                                                   , FArianePoint* Point
-                                                   , const FPlane& DrawingPlane
-                                                   , const FTransform& OwnerTransform
-                                                   , const FVector& RayOrigin
-                                                   , const FVector& RayDirection );
+    static FPointDisplacement* CreateOrGetPointDisplacement( FSceneView* View
+                                                           , const FVector2D& ScreenMousePosition
+                                                           , TArray<FPointDisplacement>& PointDisplacements
+                                                           , const FPlane& DrawingPlane
+                                                           , const FTransform& OwnerTransform
+                                                           , const FVector& RayOrigin
+                                                           , const FVector& RayDirection
+                                                           , FArianePoint* Point );
+    double ParseInfluencedPoints( FSceneView* View
+                            , const FVector2D& MouseScreenPosition
+                            , const FPlane& DrawingPlane
+                            , const FVector& RayOrigin
+                            , const FVector& RayDirection
+                            , const TArray<FInfluencedPoint>& InfluencedPoints );
 
     TSharedRef<SWidget> CreateModifierSegmentControl();
     void RebuildQuadTree( FEditorViewportClient* ViewportClient
@@ -143,7 +169,7 @@ protected:
     bool bMouseButtonDown;
     FVector2D ScreenMousePositionAtDown;
     FVector2D ScreenMousePositionAtDrag;
-    TArray<FPointDisplacement> PickedPointDisplacements;
+    TArray<FPointDisplacement> InfluencedPointDisplacements;
     TArray<FArianeSegment*> PickedSegments;
     TArray<FArianeObject*> SelectedTrees;
 };

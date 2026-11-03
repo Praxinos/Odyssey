@@ -291,14 +291,14 @@ UArianeEditorPathPushTool::GetPointDisplacement( TArray<FPointDisplacement>& Poi
 
 // static
 UArianeEditorPathPushTool::FPointDisplacement*
-UArianeEditorPathPushTool::AddPointDisplacement( FSceneView* View
-                                               , const FVector2D& MouseScreenPosition
-                                               , TArray<FPointDisplacement>& PointDisplacements
-                                               , FArianePoint* Point
-                                               , const FPlane& DrawingPlane
-                                               , const FTransform& OwnerTransform
-                                               , const FVector& RayOrigin
-                                               , const FVector& RayDirection )
+UArianeEditorPathPushTool::CreateOrGetPointDisplacement( FSceneView* View
+                                                       , const FVector2D& MouseScreenPosition
+                                                       , TArray<FPointDisplacement>& PointDisplacements
+                                                       , const FPlane& DrawingPlane
+                                                       , const FTransform& OwnerTransform
+                                                       , const FVector& RayOrigin
+                                                       , const FVector& RayDirection
+                                                       , FArianePoint* Point )
 {
      FPointDisplacement* PointDisplacement = GetPointDisplacement( PointDisplacements, Point );
 
@@ -306,14 +306,18 @@ UArianeEditorPathPushTool::AddPointDisplacement( FSceneView* View
     {
         FVector2D PointScreenPosition;
         bool bMapped = WorldToScreen( View, OwnerTransform.TransformPosition( Point->GetPosition() ), PointScreenPosition );
-        double ScreenDistanceToMouse = bMapped ? ( PointScreenPosition - MouseScreenPosition ).Length() : -1.0f;
 
-        PointDisplacements.Emplace( Point
-                                  , ScreenDistanceToMouse
-                                  , DrawingPlane.GetNormal()
-                                  , OwnerTransform
-                                  , RayOrigin
-                                  , RayDirection );
+        if( bMapped )
+        {
+            double ScreenDistanceToMouse = bMapped ? ( PointScreenPosition - MouseScreenPosition ).Length() : -1.0f;
+
+            PointDisplacement = &PointDisplacements.Emplace_GetRef( Point
+                                                                  , ScreenDistanceToMouse
+                                                                  , DrawingPlane.GetNormal()
+                                                                  , OwnerTransform
+                                                                  , RayOrigin
+                                                                  , RayDirection );
+        }
     }
 
     return PointDisplacement;
@@ -351,6 +355,31 @@ UArianeEditorPathPushTool::ComputeRatios( TArray<FPointDisplacement>& PointDispl
 */
 }
 
+double
+UArianeEditorPathPushTool::ParseInfluencedPoints( FSceneView* View
+                                            , const FVector2D& MouseScreenPosition
+                                            , const FPlane& DrawingPlane
+                                            , const FVector& RayOrigin
+                                            , const FVector& RayDirection
+                                            , const TArray<FInfluencedPoint>& InfluencedPoints )
+{
+    InfluencedPointDisplacements.Reserve( InfluencedPoints.Num() );
+
+    for( const FInfluencedPoint& InfluencedPoint : InfluencedPoints )
+    {
+        FPointDisplacement* PointDisplacement = CreateOrGetPointDisplacement( View
+                                                                            , MouseScreenPosition
+                                                                            , InfluencedPointDisplacements
+                                                                            , DrawingPlane
+                                                                            , InfluencedPoint.Owner->GetTransform()
+                                                                            , RayOrigin
+                                                                            , RayDirection
+                                                                            , InfluencedPoint.Point );
+    }
+
+    return 0.0f;
+}
+
 bool
 UArianeEditorPathPushTool::OnMouseDown( FEditorViewportClient* ViewportClient
                                       , FSceneView* View
@@ -358,22 +387,16 @@ UArianeEditorPathPushTool::OnMouseDown( FEditorViewportClient* ViewportClient
                                       , const FArianePointerState& PointerState
                                       , bool iRepeat )
 {
-    struct FPickedPoint
-    {
-        FArianePoint* Point;
-        FArianeObject* Owner;
-    };
-
     FVector RayOrigin, RayDirection;
     double ScreenMaxDistance = 0.0f;
-    TArray<FPickedPoint> PickedPoints;
+    TArray<FInfluencedPoint> InfluencedPoints;
 
     ScreenMousePositionAtDown = ScreenMousePositionAtDrag = FVector2D( PointerState.ViewportX, PointerState.ViewportY );
 
     bMouseButtonDown = true;
 
     PickedSegments.Empty();
-    PickedPointDisplacements.Empty();
+    InfluencedPointDisplacements.Empty();
 
     View->DeprojectFVector2D( FVector2D( PointerState.ViewportX, PointerState.ViewportY ), RayOrigin, RayDirection );
 
@@ -394,9 +417,8 @@ UArianeEditorPathPushTool::OnMouseDown( FEditorViewportClient* ViewportClient
 
                 SegmentQuadTree->PickSegments( ViewportClient, View, ScreenMousePositionAtDown, PickingRadius, PickedSegments );
 
-                PickedPoints.Reserve( PickedSegments.Num() * 4 );
+                InfluencedPoints.Reserve( PickedSegments.Num() * 4 );
 
-                // second loop : create the array with displacement data
                 for( FArianeSegment* PickedSegment : PickedSegments )
                 {
                     FArianeObject* Owner = PickedSegment->GetOwner();
@@ -404,8 +426,8 @@ UArianeEditorPathPushTool::OnMouseDown( FEditorViewportClient* ViewportClient
                     FArianeVertex* Vertex0 = PickedSegment->GetVertex(0);
                     FArianeVertex* Vertex1 = PickedSegment->GetVertex(1);
 
-                    PickedPoints.Emplace( FPickedPoint{ .Point = Vertex0, .Owner = Owner } );
-                    PickedPoints.Emplace( FPickedPoint{ .Point = Vertex1, .Owner = Owner } );
+                    InfluencedPoints.Emplace( FInfluencedPoint{ .Point = Vertex0, .Owner = Owner } );
+                    InfluencedPoints.Emplace( FInfluencedPoint{ .Point = Vertex1, .Owner = Owner } );
 
                     if( PickedSegment->GetClass() == FArianeSegmentCubic::StaticClass() )
                     {
@@ -413,85 +435,21 @@ UArianeEditorPathPushTool::OnMouseDown( FEditorViewportClient* ViewportClient
                         FArianeHandleSegment* Handle0 = CubicSegment->GetHandle((uint32)0);
                         FArianeHandleSegment* Handle1 = CubicSegment->GetHandle((uint32)1);
 
-                        PickedPoints.Emplace( FPickedPoint{ .Point = Handle0, .Owner = Owner } );
-                        PickedPoints.Emplace( FPickedPoint{ .Point = Handle1, .Owner = Owner } );
+                        InfluencedPoints.Emplace( FInfluencedPoint{ .Point = Handle0, .Owner = Owner } );
+                        InfluencedPoints.Emplace( FInfluencedPoint{ .Point = Handle1, .Owner = Owner } );
                     }
-                }
-
-                PickedPointDisplacements.Reserve( PickedPoints.Num() );
-
-                for( FPickedPoint& PickedPoint : PickedPoints )
-                {
-
                 }
 /*
-                // second loop : create the array with displacement data
-                for( FArianeSegment* PickedSegment : PickedSegments )
-                {
-                    FArianeObject* Owner = PickedSegment->GetOwner();
-                    const FTransform& OwnerTransform = Owner->GetTransform();
-                    FArianeVertex* Vertex0 = PickedSegment->GetVertex(0);
-                    FArianeVertex* Vertex1 = PickedSegment->GetVertex(1);
-                    TArray<FArianePoint*> Points;
-
-                    Points.Add( Vertex0 );
-                    Points.Add( Vertex1 );
-
-                    if( GetPointDisplacement( PickedPointDisplacements, Vertex0 ) == nullptr )
-                    {
-                        PickedPointDisplacements.Emplace( Vertex0
-                                                        , ScreenDistance
-                                                        , DrawingPlane.GetNormal()
-                                                        , OwnerTransform
-                                                        , RayOrigin
-                                                        , RayDirection );
-                    }
-
-                    if( GetPointDisplacement( PickedPointDisplacements, Vertex1 ) == nullptr )
-                    {
-                        PickedPointDisplacements.Emplace( Vertex1
-                                                        , ScreenDistance
-                                                        , DrawingPlane.GetNormal()
-                                                        , OwnerTransform
-                                                        , RayOrigin
-                                                        , RayDirection );
-                    }
-
-                    if( PickedSegment->GetClass() == FArianeSegmentCubic::StaticClass() )
-                    {
-                        FArianeSegmentCubic* CubicSegment = static_cast<FArianeSegmentCubic*>(PickedSegment);
-                        FArianeHandleSegment* Handle0 = CubicSegment->GetHandle((uint32)0);
-                        FArianeHandleSegment* Handle1 = CubicSegment->GetHandle((uint32)1);
-
-                        Points.Add( Handle0 );
-                        Points.Add( Handle1 );
-
-                        if( GetPointDisplacement( PickedPointDisplacements, Handle0 ) == nullptr )
-                        {
-                            PickedPointDisplacements.Emplace( Handle0
-                                                            , ScreenDistance
-                                                            , DrawingPlane.GetNormal()
-                                                            , OwnerTransform
-                                                            , RayOrigin
-                                                            , RayDirection );
-                        }
-
-                        if( GetPointDisplacement( PickedPointDisplacements, Handle1 ) == nullptr )
-                        {
-                            PickedPointDisplacements.Emplace( Handle1
-                                                            , ScreenDistance
-                                                            , DrawingPlane.GetNormal()
-                                                            , OwnerTransform
-                                                            , RayOrigin
-                                                            , RayDirection );
-                        }
-                    }
-                }
-
-                for( FPointDisplacement& PointDisplacement : PickedPointDisplacements )
-                {
-                }
+                MaxDistance = ParseInfluencedPoints( View
+                                               , ScreenMousePositionAtDown
+                                               , DrawingPlane
+                                               , RayOrigin
+                                               , RayDirection
+                                               , InfluencedPoints );
 */
+                for( FPointDisplacement& PointDisplacement : InfluencedPointDisplacements )
+                {
+                }
             }
         }
 

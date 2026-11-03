@@ -141,8 +141,6 @@ UArianeEditorPathEditTool::Reset()
 {
     UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(GetCurrentLayer());
 
-    ResetQuadTree();
-
     SelectedTrees.Empty();
 
     if( VectorLayer )
@@ -155,6 +153,8 @@ UArianeEditorPathEditTool::Reset()
             SelectedTrees.Add( VectorLayer->GetDrawing()->GetRootGroup() );
         }
     }
+
+    ResetQuadTree();
 }
 
 void
