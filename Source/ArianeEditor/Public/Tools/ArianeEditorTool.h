@@ -53,12 +53,12 @@ public:
     struct FSegmentQuadTreeEntry
     {
         FArianeSegment* Segment;
-        FBox2D HUDRect;
+        FBox2D ScreenRect;
 
-        FSegmentQuadTreeEntry( FArianeSegment* InSegment, const FBox2D& InHUDRect )
+        FSegmentQuadTreeEntry( FArianeSegment* InSegment, const FBox2D& InScreenRect )
         {
             Segment = InSegment;
-            HUDRect = InHUDRect;
+            ScreenRect = InScreenRect;
         }
     };
 
@@ -79,30 +79,30 @@ public:
 
             void PickSegments( FEditorViewportClient* ViewportClient
                              , FSceneView* View
-                             , const FVector2D& HUDMousePosition
+                             , const FVector2D& ScreenMousePosition
                              , double SelectionRadius
                              , TArray<FArianeSegment*>& OutPickedSegments );
 
             void PickSegmentsInRect( FEditorViewportClient* ViewportClient
                                    , FSceneView* View
-                                   , const FBox2D& HUDPickingRect
+                                   , const FBox2D& ScreenPickingRect
                                    , TArray<FArianeSegment*>& OutPickedSegments );
 
         private:
             TArray<FSegmentQuadTreeEntry> SegmentQuadTreeEntries;
             FSegmentQuadTree* Children[4];
-            FBox2D HUDRect;
+            FBox2D ScreenRect;
     };
 
     struct FPointQuadTreeEntry
     {
         FArianePoint* Point;
-        FVector2D HUDPosition;
+        FVector2D ScreenPosition;
 
-        FPointQuadTreeEntry( FArianePoint* InPoint, const FVector2D& InHUDPosition )
+        FPointQuadTreeEntry( FArianePoint* InPoint, const FVector2D& InScreenPosition )
         {
             Point = InPoint;
-            HUDPosition = InHUDPosition;
+            ScreenPosition = InScreenPosition;
         }
     };
 
@@ -305,6 +305,7 @@ protected:
     static FVector2D ScreenToHUD( FEditorViewportClient* ViewportClient, const FVector2D& ScreenPosition );
 
     static bool WorldToPixel( FSceneView* View, const FVector& WorldPosition, FVector2D& OutHUDPosition );
+    static bool WorldToScreen( FSceneView* View, const FVector& WorldPosition, FVector2D& OutHUDPosition );
     static bool WorldToHUD( FEditorViewportClient* ViewportClient
                           , FSceneView* View
                           , const FVector& WorldPosition
@@ -365,7 +366,7 @@ protected:
 
     void MakeSegmentQuadTree( FEditorViewportClient* ViewportClient
                             , FSceneView* View
-                            , TArray<UArianeLayerVector*> VectorLayers
+                            , TArray<FArianeObject*> MappedTrees
                             , bool bFocusedObjectsOnly );
 
     bool PickPathSegments( FEditorViewportClient* ViewportClient
@@ -391,13 +392,13 @@ protected:
 
     void MakePointQuadTree( FEditorViewportClient* ViewportClient
                           , FSceneView* View
-                          , TArray<UArianeLayerVector*> VectorLayers
+                          , TArray<FArianeObject*> MappedTrees
                           , bool bFocusedObjectsOnly );
 
     bool PickPathPoints( FEditorViewportClient* ViewportClient
                        , FSceneView* View
                        , FArianePath* Path
-                       , const FVector2D& HUDPosition
+                       , const FVector2D& ScreenPosition
                        , double PickingRadius
                        , TArray<FArianeVertex*>& OutPickedVertices
                        , TArray<FArianeHandleSegment*>& OutPickedHandles

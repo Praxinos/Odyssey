@@ -1154,6 +1154,13 @@ UArianeEditorTool::WorldToPixel( FSceneView* View, const FVector& WorldPosition,
 }
 
 // static
+bool
+UArianeEditorTool::WorldToScreen( FSceneView* View, const FVector& WorldPosition, FVector2D& OutHUDPosition )
+{
+    return WorldToPixel( View, WorldPosition, OutHUDPosition );
+}
+
+// static
 FVector2D
 UArianeEditorTool::ScreenToHUD( FEditorViewportClient* ViewportClient, const FVector2D& ScreenPosition )
 {
@@ -1187,7 +1194,7 @@ UArianeEditorTool::FSegmentQuadTree::FSegmentQuadTree( const FBox2D& InHUDRect
                                                      , uint32 Depth
                                                      , uint32 MaxDepth )
     : Children { nullptr, nullptr, nullptr, nullptr }
-    , HUDRect( InHUDRect )
+    , ScreenRect( InHUDRect )
 {
     Build( MaxSegmentsPerQuad, InSegmentQuadTreeEntries, Depth, MaxDepth );
 }
@@ -1202,11 +1209,11 @@ UArianeEditorTool::FSegmentQuadTree::Build( uint32 MaxSegmentsPerQuad
 
     for( int i = 0; i < ParentSegmentQuadTreeEntries.Num(); i++ )
     {
-        FVector2D SegmentHUDRectMin = ParentSegmentQuadTreeEntries[i].HUDRect.Min;
-        FVector2D SegmentHUDRectMax = ParentSegmentQuadTreeEntries[i].HUDRect.Max;
-        FBox2D SegmentHUDRect = FBox2D( SegmentHUDRectMin, SegmentHUDRectMax );
+        FVector2D SegmentScreenRectMin = ParentSegmentQuadTreeEntries[i].ScreenRect.Min;
+        FVector2D SegmentScreenRectMax = ParentSegmentQuadTreeEntries[i].ScreenRect.Max;
+        FBox2D SegmentScreenRect = FBox2D( SegmentScreenRectMin, SegmentScreenRectMax );
 
-        if( HUDRect.Intersect( SegmentHUDRect ) )
+        if( ScreenRect.Intersect( SegmentScreenRect ) )
         {
             SegmentQuadTreeEntries.Add( ParentSegmentQuadTreeEntries[i] );
         }
@@ -1214,15 +1221,15 @@ UArianeEditorTool::FSegmentQuadTree::Build( uint32 MaxSegmentsPerQuad
 
     if( ( SegmentQuadTreeEntries.Num() > (int32) MaxSegmentsPerQuad ) && ( Depth < MaxDepth ) )
     {
-        double MinX =   HUDRect.Min.X;
-        double MinY =   HUDRect.Min.Y;
-        double MaxX =   HUDRect.Max.X;
-        double MaxY =   HUDRect.Max.Y;
-        double AvgX = ( HUDRect.Min.X + HUDRect.Max.X ) * 0.5f;
-        double AvgY = ( HUDRect.Min.Y + HUDRect.Max.Y ) * 0.5f;
+        double MinX =   ScreenRect.Min.X;
+        double MinY =   ScreenRect.Min.Y;
+        double MaxX =   ScreenRect.Max.X;
+        double MaxY =   ScreenRect.Max.Y;
+        double AvgX = ( ScreenRect.Min.X + ScreenRect.Max.X ) * 0.5f;
+        double AvgY = ( ScreenRect.Min.Y + ScreenRect.Max.Y ) * 0.5f;
 
         Children[0] = new FSegmentQuadTree( FBox2D( FVector2D( MinX, MinY )
-                                                    , FVector2D( AvgX, AvgY ) )
+                                                  , FVector2D( AvgX, AvgY ) )
                                           , MaxSegmentsPerQuad, SegmentQuadTreeEntries
                                           , Depth + 1
                                           , MaxDepth );
@@ -1254,61 +1261,61 @@ UArianeEditorTool::FSegmentQuadTree::Build( uint32 MaxSegmentsPerQuad
 void
 UArianeEditorTool::FSegmentQuadTree::PickSegmentsInRect( FEditorViewportClient* ViewportClient
                                                        , FSceneView* View
-                                                       , const FBox2D& HUDPickingRect
+                                                       , const FBox2D& ScreenPickingRect
                                                        , TArray<FArianeSegment*>& OutPickedSegments )
 {
-    FVector2D HUDPickingRectCorners[4] = { FVector2D( HUDPickingRect.Min.X, HUDPickingRect.Min.Y )
-                                         , FVector2D( HUDPickingRect.Min.X, HUDPickingRect.Max.Y )
-                                         , FVector2D( HUDPickingRect.Max.X, HUDPickingRect.Max.Y )
-                                         , FVector2D( HUDPickingRect.Max.X, HUDPickingRect.Min.Y ) };
+    FVector2D ScreenPickingRectCorners[4] = { FVector2D( ScreenPickingRect.Min.X, ScreenPickingRect.Min.Y )
+                                            , FVector2D( ScreenPickingRect.Min.X, ScreenPickingRect.Max.Y )
+                                            , FVector2D( ScreenPickingRect.Max.X, ScreenPickingRect.Max.Y )
+                                            , FVector2D( ScreenPickingRect.Max.X, ScreenPickingRect.Min.Y ) };
 
-    if( HUDRect.Intersect( HUDPickingRect ) )
+    if( ScreenRect.Intersect( ScreenPickingRect ) )
     {
         if( Children[0] == nullptr )
         {
             for( int i = 0; i < SegmentQuadTreeEntries.Num(); i++ )
             {
                 FSegmentQuadTreeEntry& SegmentQuadTreeEntry = SegmentQuadTreeEntries[i];
-                const FBox2D& SegmentHUDRect = SegmentQuadTreeEntry.HUDRect;
+                const FBox2D& SegmentScreenRect = SegmentQuadTreeEntry.ScreenRect;
                 FArianeObject* Owner = SegmentQuadTreeEntry.Segment->GetOwner();
                 const FTransform& OwnerTransform = Owner->GetTransform();
 
-                if( SegmentHUDRect.Intersect( HUDPickingRect ) )
+                if( SegmentScreenRect.Intersect( ScreenPickingRect ) )
                 {
                     for( const FArianeSegment::FFraction& Fraction : SegmentQuadTreeEntry.Segment->GetFractions() )
                     {
                         FVector P0WorldPoition = OwnerTransform.TransformPosition( Fraction.Steps[0]->Point->GetPosition() );
                         FVector P1WorldPoition = OwnerTransform.TransformPosition( Fraction.Steps[1]->Point->GetPosition() );
-                        FVector2D P0HUDPosition;
-                        FVector2D P1HUDPosition;
+                        FVector2D P0ScreenPosition;
+                        FVector2D P1ScreenPosition;
 
-                        if( WorldToHUD( ViewportClient, View, P0WorldPoition, P0HUDPosition )
-                         && WorldToHUD( ViewportClient, View, P1WorldPoition, P1HUDPosition ) )
+                        if( WorldToScreen( View, P0WorldPoition, P0ScreenPosition )
+                         && WorldToScreen( View, P1WorldPoition, P1ScreenPosition ) )
                         {
-                            if(  HUDPickingRect.IsInside( P0HUDPosition )
-                              || HUDPickingRect.IsInside( P1HUDPosition )
-                              || FArianeCore::IntersectSegment( HUDPickingRectCorners[0]
-                                                              , HUDPickingRectCorners[1]
-                                                              , P0HUDPosition
-                                                              , P1HUDPosition
+                            if(  ScreenPickingRect.IsInside( P0ScreenPosition )
+                              || ScreenPickingRect.IsInside( P1ScreenPosition )
+                              || FArianeCore::IntersectSegment( ScreenPickingRectCorners[0]
+                                                              , ScreenPickingRectCorners[1]
+                                                              , P0ScreenPosition
+                                                              , P1ScreenPosition
                                                               , nullptr
                                                               , nullptr )
-                              || FArianeCore::IntersectSegment( HUDPickingRectCorners[1]
-                                                              , HUDPickingRectCorners[2]
-                                                              , P0HUDPosition
-                                                              , P1HUDPosition
+                              || FArianeCore::IntersectSegment( ScreenPickingRectCorners[1]
+                                                              , ScreenPickingRectCorners[2]
+                                                              , P0ScreenPosition
+                                                              , P1ScreenPosition
                                                               , nullptr
                                                               , nullptr )
-                              || FArianeCore::IntersectSegment( HUDPickingRectCorners[2]
-                                                              , HUDPickingRectCorners[3]
-                                                              , P0HUDPosition
-                                                              , P1HUDPosition
+                              || FArianeCore::IntersectSegment( ScreenPickingRectCorners[2]
+                                                              , ScreenPickingRectCorners[3]
+                                                              , P0ScreenPosition
+                                                              , P1ScreenPosition
                                                               , nullptr
                                                               , nullptr )
-                              || FArianeCore::IntersectSegment( HUDPickingRectCorners[3]
-                                                              , HUDPickingRectCorners[0]
-                                                              , P0HUDPosition
-                                                              , P1HUDPosition
+                              || FArianeCore::IntersectSegment( ScreenPickingRectCorners[3]
+                                                              , ScreenPickingRectCorners[0]
+                                                              , P0ScreenPosition
+                                                              , P1ScreenPosition
                                                               , nullptr
                                                               , nullptr ) )
                             {
@@ -1325,7 +1332,7 @@ UArianeEditorTool::FSegmentQuadTree::PickSegmentsInRect( FEditorViewportClient* 
         {
             for( int i = 0; i < 4; i++ )
             {
-                Children[i]->PickSegmentsInRect( ViewportClient, View, HUDPickingRect, OutPickedSegments );
+                Children[i]->PickSegmentsInRect( ViewportClient, View, ScreenPickingRect, OutPickedSegments );
             }
         }
     }
@@ -1334,44 +1341,44 @@ UArianeEditorTool::FSegmentQuadTree::PickSegmentsInRect( FEditorViewportClient* 
 void
 UArianeEditorTool::FSegmentQuadTree::PickSegments( FEditorViewportClient* ViewportClient
                                                  , FSceneView* View
-                                                 , const FVector2D& HUDMousePosition
+                                                 , const FVector2D& ScreenMousePosition
                                                  , double SelectionRadius
                                                  , TArray<FArianeSegment*>& OutPickedSegments )
 {
-    FBox2D LargeBBox = FBox2D( FVector2D( HUDRect.Min.X - SelectionRadius
-                                        , HUDRect.Min.Y - SelectionRadius )
-                             , FVector2D( HUDRect.Max.X + SelectionRadius
-                                        , HUDRect.Max.Y + SelectionRadius ) );
+    FBox2D LargeBBox = FBox2D( FVector2D( ScreenRect.Min.X - SelectionRadius
+                                        , ScreenRect.Min.Y - SelectionRadius )
+                             , FVector2D( ScreenRect.Max.X + SelectionRadius
+                                        , ScreenRect.Max.Y + SelectionRadius ) );
 
-    if( LargeBBox.IsInside( HUDMousePosition ) )
+    if( LargeBBox.IsInside( ScreenMousePosition ) )
     {
         if( Children[0] == nullptr )
         {
             for( int i = 0; i < SegmentQuadTreeEntries.Num(); i++ )
             {
                 FSegmentQuadTreeEntry& SegmentQuadTreeEntry = SegmentQuadTreeEntries[i];
-                FBox2D LargeSegmentBBox = FBox2D ( SegmentQuadTreeEntry.HUDRect.Min - SelectionRadius
-                                                 , SegmentQuadTreeEntry.HUDRect.Max + SelectionRadius );
+                FBox2D LargeSegmentBBox = FBox2D ( SegmentQuadTreeEntry.ScreenRect.Min - SelectionRadius
+                                                 , SegmentQuadTreeEntry.ScreenRect.Max + SelectionRadius );
                 FArianeObject* Owner = SegmentQuadTreeEntry.Segment->GetOwner();
                 const FTransform& OwnerTransform = Owner->GetTransform();
 
-                if( LargeSegmentBBox.IsInside( HUDMousePosition ) )
+                if( LargeSegmentBBox.IsInside( ScreenMousePosition ) )
                 {
                     for( const FArianeSegment::FFraction& Fraction : SegmentQuadTreeEntry.Segment->GetFractions() )
                     {
                         FVector P0WorldPoition = OwnerTransform.TransformPosition( Fraction.Steps[0]->Point->GetPosition() );
                         FVector P1WorldPoition = OwnerTransform.TransformPosition( Fraction.Steps[1]->Point->GetPosition() );
-                        FVector2D P0HUDPosition;
-                        FVector2D P1HUDPosition;
+                        FVector2D P0ScreenPosition;
+                        FVector2D P1ScreenPosition;
 
-                        if( WorldToHUD( ViewportClient, View, P0WorldPoition, P0HUDPosition )
-                         && WorldToHUD( ViewportClient, View, P1WorldPoition, P1HUDPosition ) )
+                        if( WorldToScreen( View, P0WorldPoition, P0ScreenPosition )
+                         && WorldToScreen( View, P1WorldPoition, P1ScreenPosition ) )
                         {
                             double Distance;
 
-                            if( FArianeCore::DistanceToSegmentConstrained( HUDMousePosition
-                                                                         , P0HUDPosition
-                                                                         , P1HUDPosition
+                            if( FArianeCore::DistanceToSegmentConstrained( ScreenMousePosition
+                                                                         , P0ScreenPosition
+                                                                         , P1ScreenPosition
                                                                          , Distance ) )
                             {
                                 if( Distance <= SelectionRadius )
@@ -1390,7 +1397,7 @@ UArianeEditorTool::FSegmentQuadTree::PickSegments( FEditorViewportClient* Viewpo
         {
             for( int i = 0; i < 4; i++ )
             {
-                Children[i]->PickSegments( ViewportClient, View, HUDMousePosition, SelectionRadius, OutPickedSegments );
+                Children[i]->PickSegments( ViewportClient, View, ScreenMousePosition, SelectionRadius, OutPickedSegments );
             }
         }
     }
@@ -1418,14 +1425,14 @@ UArianeEditorTool::MapPathSegments( FEditorViewportClient* ViewportClient
                              , FVector( SegmentBox.Max.X, SegmentBox.Min.Y, SegmentBox.Max.Z )
                              , FVector( SegmentBox.Max.X, SegmentBox.Max.Y, SegmentBox.Min.Z )
                              , FVector( SegmentBox.Max.X, SegmentBox.Max.Y, SegmentBox.Max.Z ) };
-        FVector2D HUDCorners[8];
+        FVector2D ScreenCorners[8];
         bool bImport = true;
 
         for( int i = 0; i < 8; i++ )
         {
             FVector WorldCornerPosition = PathTransform.TransformPosition( Corners[i] );
 
-            if( WorldToHUD( ViewportClient, View, WorldCornerPosition, HUDCorners[i] ) == false )
+            if( WorldToScreen( View, WorldCornerPosition, ScreenCorners[i] ) == false )
             {
                 bImport = false;
             }
@@ -1433,17 +1440,17 @@ UArianeEditorTool::MapPathSegments( FEditorViewportClient* ViewportClient
 
         if( bImport )
         {
-            double XMin = HUDCorners[0].X
-                 , YMin = HUDCorners[0].Y
-                 , XMax = HUDCorners[0].X
-                 , YMax = HUDCorners[0].Y;
+            double XMin = ScreenCorners[0].X
+                 , YMin = ScreenCorners[0].Y
+                 , XMax = ScreenCorners[0].X
+                 , YMax = ScreenCorners[0].Y;
 
             for( int i = 1; i < 8; i++ )
             {
-                XMin = FMath::Min( HUDCorners[i].X, XMin );
-                YMin = FMath::Min( HUDCorners[i].Y, YMin );
-                XMax = FMath::Max( HUDCorners[i].X, XMax );
-                YMax = FMath::Max( HUDCorners[i].Y, YMax );
+                XMin = FMath::Min( ScreenCorners[i].X, XMin );
+                YMin = FMath::Min( ScreenCorners[i].Y, YMin );
+                XMax = FMath::Max( ScreenCorners[i].X, XMax );
+                YMax = FMath::Max( ScreenCorners[i].Y, YMax );
             }
 
             //FVector LocalVertexPosition = Vertex->GetPosition();
@@ -1479,7 +1486,7 @@ UArianeEditorTool::MapSegments( FEditorViewportClient* ViewportClient
 void
 UArianeEditorTool::MakeSegmentQuadTree( FEditorViewportClient* ViewportClient
                                       , FSceneView* View
-                                      , TArray<UArianeLayerVector*> VectorLayers
+                                      , TArray<FArianeObject*> MappedTrees
                                       , bool bFocusedObjectsOnly )
 {
     FBox2D ScreenRect = FBox2D( FVector2D::Zero()
@@ -1487,13 +1494,11 @@ UArianeEditorTool::MakeSegmentQuadTree( FEditorViewportClient* ViewportClient
                                          , ViewportClient->Viewport->GetSizeXY().Y ) );
     TArray<FSegmentQuadTreeEntry> SegmentQuadTreeEntries;
 
-    for( UArianeLayerVector* VectorLayer : VectorLayers )
+    for( FArianeObject* MappedTree : MappedTrees )
     {
-        FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
-
         SegmentQuadTreeEntries.Reserve( 200 );
 
-        FArianeObject::Traverse( RootGroup
+        FArianeObject::Traverse( MappedTree
                                , [ ViewportClient
                                  , View
                                  , &ScreenRect
@@ -1549,8 +1554,8 @@ UArianeEditorTool::FPointQuadTree::Build( uint32 MaxPointsPerQuad
 
     for( int i = 0; i < ParentPointQuadTreeEntries.Num(); i++ )
     {
-        if( Rect.Contains( FIntPoint( ParentPointQuadTreeEntries[i].HUDPosition.X
-                                    , ParentPointQuadTreeEntries[i].HUDPosition.Y ) ) )
+        if( Rect.Contains( FIntPoint( ParentPointQuadTreeEntries[i].ScreenPosition.X
+                                    , ParentPointQuadTreeEntries[i].ScreenPosition.Y ) ) )
         {
             PointQuadTreeEntries.Add( ParentPointQuadTreeEntries[i] );
         }
@@ -1590,8 +1595,8 @@ UArianeEditorTool::FPointQuadTree::PickPoints( const FVector2D& HUDPosition
         {
             for( int i = 0; i < PointQuadTreeEntries.Num(); i++ )
             {
-                FVector2D Dif = FVector2D( PointQuadTreeEntries[i].HUDPosition.X - HUDPosition.X
-                                         , PointQuadTreeEntries[i].HUDPosition.Y - HUDPosition.Y );
+                FVector2D Dif = FVector2D( PointQuadTreeEntries[i].ScreenPosition.X - HUDPosition.X
+                                         , PointQuadTreeEntries[i].ScreenPosition.Y - HUDPosition.Y );
 
                 if( Dif.Length() <= SelectionRadius )
                 {
@@ -1624,13 +1629,13 @@ UArianeEditorTool::MapPath( FEditorViewportClient* ViewportClient
     {
         FVector LocalVertexPosition = Vertex->GetPosition();
         FVector WorldVertexPosition = PathTransform.TransformPosition( Vertex->GetPosition() );
-        FVector2D HUDVertexPosition;
+        FVector2D ScreenVertexPosition;
 
-        if( WorldToHUD( ViewportClient, View, WorldVertexPosition, HUDVertexPosition ) )
+        if( WorldToScreen( View, WorldVertexPosition, ScreenVertexPosition ) )
         {
-            if( Rect.Contains( FIntPoint( HUDVertexPosition.X, HUDVertexPosition.Y ) ) )
+            if( Rect.Contains( FIntPoint( ScreenVertexPosition.X, ScreenVertexPosition.Y ) ) )
             {
-                OutPointQuadTreeEntries.Emplace( Vertex, HUDVertexPosition );
+                OutPointQuadTreeEntries.Emplace( Vertex, ScreenVertexPosition );
             }
         }
     }
@@ -1655,19 +1660,17 @@ UArianeEditorTool::MapPoints( FEditorViewportClient* ViewportClient
 void
 UArianeEditorTool::MakePointQuadTree( FEditorViewportClient* ViewportClient
                                     , FSceneView* View
-                                    , TArray<UArianeLayerVector*> VectorLayers
+                                    , TArray<FArianeObject*> MappedTrees
                                     , bool bFocusedObjectsOnly )
 {
     FIntRect ScreenRect = FIntRect( 0, 0, ViewportClient->Viewport->GetSizeXY().X, ViewportClient->Viewport->GetSizeXY().Y );
     TArray<FPointQuadTreeEntry> PointQuadTreeEntries;
 
-    for( UArianeLayerVector* VectorLayer : VectorLayers )
+    for( FArianeObject* MappedTree : MappedTrees )
     {
-        FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
-
         PointQuadTreeEntries.Reserve( 200 );
 
-        FArianeObject::Traverse( RootGroup
+        FArianeObject::Traverse( MappedTree
                                , [ ViewportClient
                                  , View
                                  , &ScreenRect
@@ -1694,7 +1697,7 @@ bool
 UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
                                  , FSceneView* View
                                  , FArianePath* Path
-                                 , const FVector2D& HUDPosition
+                                 , const FVector2D& ScreenPosition
                                  , double PickingRadius
                                  , TArray<FArianeVertex*>& OutPickedVertices
                                  , TArray<FArianeHandleSegment*>& OutPickedHandles
@@ -1723,11 +1726,11 @@ UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
                     // convert handles coordinates to world coordinates. Easier to detect collision inside
                     // the picking circle.
                     FVector WorldHandlePosition = PathTransform.TransformPosition( LocalHandlePosition );
-                    FVector2D HUDHandlePosition;
+                    FVector2D ScreenHandlePosition;
 
-                    if( WorldToHUD( ViewportClient, View, WorldHandlePosition, HUDHandlePosition ) )
+                    if( WorldToScreen( View, WorldHandlePosition, ScreenHandlePosition ) )
                     {
-                        FVector2D Dif0 = HUDHandlePosition - HUDPosition;
+                        FVector2D Dif0 = ScreenHandlePosition - ScreenPosition;
 
                         if( Dif0.Length() <= PickingRadius )
                         {
@@ -1758,11 +1761,11 @@ UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
         {
             const FVector& LocalVertexPosition = Vertex->GetPosition();
             const FVector& WorldVertexPosition = PathTransform.TransformPosition( LocalVertexPosition );
-            FVector2D HUDVertexPosition;
+            FVector2D ScreenVertexPosition;
 
-            if( WorldToHUD( ViewportClient, View, WorldVertexPosition, HUDVertexPosition ) )
+            if( WorldToScreen( View, WorldVertexPosition, ScreenVertexPosition ) )
             {
-                FVector2D Dif = HUDVertexPosition - HUDPosition;
+                FVector2D Dif = ScreenVertexPosition - ScreenPosition;
 
                 if( Dif.Length() < PickingRadius )
                 {
@@ -1783,11 +1786,11 @@ UArianeEditorTool::PickPathPoints( FEditorViewportClient* ViewportClient
             for( int i = 0; i < 2; i++ )
             {
                 FVector WorldHandlePosition = PathTransform.TransformPosition( LocalHandlePosition[i] );
-                FVector2D HUDHandlePosition;
+                FVector2D ScreenHandlePosition;
 
-                if( WorldToHUD( ViewportClient, View, WorldHandlePosition, HUDHandlePosition ) )
+                if( WorldToScreen( View, WorldHandlePosition, ScreenHandlePosition ) )
                 {
-                    FVector2D Dif = HUDHandlePosition - HUDPosition;
+                    FVector2D Dif = ScreenHandlePosition - ScreenPosition;
 
                     if( Dif.Length() <= PickingRadius )
                     {

@@ -35,13 +35,6 @@ enum class EArianePathEditToolEditionMode : uint8
     Alter = 3 // Add, Remove or cut
 };
 
-UENUM(BlueprintType)
-enum class EArianeEditorPathEditToolSegmentType : uint8
-{
-    Polyline = 0,
-    CubicBezier = 1,
-};
-
 UCLASS()
 class ARIANEEDITOR_API UArianeEditorPathEditTool : public UArianeEditorTool
 {

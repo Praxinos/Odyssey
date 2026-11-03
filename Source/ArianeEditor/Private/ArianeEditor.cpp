@@ -12,6 +12,8 @@
 #include "ArianeEditorSceneTreeViewTab.h"
 #include "PathEditTool/ArianeEditorPathEditTool.h"
 #include "PathEditTool/ArianeEditorPathEditToolBuilder.h"
+#include "PathPushTool/ArianeEditorPathPushTool.h"
+#include "PathPushTool/ArianeEditorPathPushToolBuilder.h"
 #include "PathDrawingTool/ArianeEditorPathDrawingTool.h"
 #include "PathDrawingTool/ArianeEditorPathDrawingToolBuilder.h"
 #include "PrimitiveDrawingTool/ArianeEditorPrimitiveDrawingTool.h"
@@ -536,6 +538,7 @@ FArianeEditor::RegisterTools()
     AddToolBuilder( NewObject<UArianeEditorPathDrawingToolBuilder>() );
     AddToolBuilder( NewObject<UArianeEditorPrimitiveDrawingToolBuilder>() );
     AddToolBuilder( NewObject<UArianeEditorPathEditToolBuilder>() );
+    AddToolBuilder( NewObject<UArianeEditorPathPushToolBuilder>() );
     AddToolBuilder( NewObject<UArianeEditorEraserToolBuilder>() );
     AddToolBuilder( NewObject<UArianeEditorPaintBucketToolBuilder>() );
     AddToolBuilder( NewObject<UArianeEditorLayerTransformToolBuilder>() );

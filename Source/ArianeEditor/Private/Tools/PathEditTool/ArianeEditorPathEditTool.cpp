@@ -429,7 +429,6 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
             UArianeDrawing* Image = VectorLayer->GetDrawing();
             FVector2D MousePosition = FVector2D( ViewportClient->GetCachedMouseX()
                                                , ViewportClient->GetCachedMouseY() );
-            FVector2D HUDPosition = ScreenToHUD( ViewportClient, MousePosition );
 
             for( FArianeObject* SelectedTree : SelectedTrees )
             {
@@ -437,7 +436,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
                                         , [ this
                                           , ViewportClient
                                           , View
-                                          , HUDPosition ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+                                          , MousePosition ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
                     {
                         if( /*iScene->GetCell()->ObjectHasFocus( object, traversalFlags )*/1 )
                         {
@@ -449,13 +448,13 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
                                 SelectedPaths.Add( Path );
 
                                 PickPathPoints( ViewportClient
-                                            , View
-                                            , Path
-                                            , HUDPosition
-                                            , PickingRadius
-                                            , PickedVertices
-                                            , PickedHandles
-                                            , EditonModeToPickingFlags() );
+                                              , View
+                                              , Path
+                                              , MousePosition
+                                              , PickingRadius
+                                              , PickedVertices
+                                              , PickedHandles
+                                              , EditonModeToPickingFlags() );
                             }
                         }
 
@@ -1130,8 +1129,8 @@ UArianeEditorPathEditTool::RebuildQuadTree( FEditorViewportClient* ViewportClien
 
     if( VectorLayer )
     {
-        MakePointQuadTree( ViewportClient, View, {VectorLayer}, true );
-        MakeSegmentQuadTree( ViewportClient, View, {VectorLayer}, true );
+        MakePointQuadTree( ViewportClient, View, SelectedTrees, true );
+        MakeSegmentQuadTree( ViewportClient, View, SelectedTrees, true );
     }
 }
 

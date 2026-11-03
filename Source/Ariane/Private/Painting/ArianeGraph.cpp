@@ -791,8 +791,8 @@ FArianeGraph::~FArianeGraph()
 }
 
 FArianeGraph::FArianeGraph()
-    : GapTolerance ( 50.0f )
-    , SegmentExtensionScheme ( EArianeGraphSegmentExtensionScheme::None )
+    : SegmentExtensionScheme ( EArianeGraphSegmentExtensionScheme::None )
+    , GapTolerance ( 50.0f )
 {
 #if PLATFORM_MAC
     bMultithreaded = false;
