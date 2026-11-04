@@ -477,6 +477,7 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
             VectorLayer->GetDrawing()->Modify();
 
             FArianeObject::Traverse( RootGroup
+                                   , FArianeObject::ETraversalPolicy::AllChildren
                                    , [ this
                                      , ViewportClient
                                      , View

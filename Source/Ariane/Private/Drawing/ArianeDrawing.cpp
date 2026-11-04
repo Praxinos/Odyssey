@@ -32,6 +32,7 @@ UArianeDrawing::BeginDestroy()
 }
 
 UArianeDrawing::UArianeDrawing()
+    : bUpdateUsedMaterials ( true )
 {
     ResetHierarchy();
 
@@ -230,6 +231,7 @@ void
 UArianeDrawing::Animate( const FArianeDrawingKeyData* KeyData, const FArianeDrawingKeyData* NextKeyData, float T )
 {
     FArianeObject::Traverse( GetRootGroup()
+                           , FArianeObject::ETraversalPolicy::AllChildren
                            , [ KeyData
                              , NextKeyData
                              , T ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
@@ -542,9 +544,9 @@ UArianeDrawing::AppendUsedMaterials( TArray<UMaterialInterface*>& OutUsedMateria
 {
     OutUsedMaterials.Reserve( OutUsedMaterials.Num() + UsedMaterials.Num() );
 
-    for( auto Pair : UsedMaterials )
+    for( UMaterialInterface* UsedMaterial : UsedMaterials )
     {
-        OutUsedMaterials.Add( Pair.Key );
+        OutUsedMaterials.Add( UsedMaterial );
     }
 }
 
@@ -554,47 +556,6 @@ UArianeDrawing::GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials,
     OutUsedMaterials.Empty();
 
     AppendUsedMaterials( OutUsedMaterials );
-}
-
-void
-UArianeDrawing::IncrementMaterial( UMaterialInterface* MaterialInterface )
-{
-    uint32* value = UsedMaterials.Find( MaterialInterface );
-
-    // not: do not use findOrAdd, it will not initialize value to zero.
-    if( value == nullptr )
-    {
-        UsedMaterials.Add( MaterialInterface, 1 );
-    }
-
-    // VectorLayer can be null for orphan Drawings (stored in animation keys)
-    if( VectorLayer.IsValid() )
-    {
-        // we need to rebuild the proxy
-        VectorLayer->MarkRenderStateDirty();
-    }
-}
-
-void
-UArianeDrawing::DecrementMaterial( UMaterialInterface* MaterialInterface )
-{
-    uint32* value = UsedMaterials.Find( MaterialInterface );
-
-    // Note: We don't check the ptr because what is decremented must have been incremented first.
-    // Or else there is a bug somewhere else.
-    *value--;
-
-    if( *value == 0 )
-    {
-        UsedMaterials.Remove( MaterialInterface );
-    }
-
-    // VectorLayer can be null for orphan Drawings (stored in animation keys)
-    if( VectorLayer.IsValid() )
-    {
-        // we need to rebuild the proxy
-        VectorLayer->MarkRenderStateDirty();
-    }
 }
 
 const
@@ -624,12 +585,74 @@ UArianeDrawing::Update( bool bInteractive )
 }
 
 void
+UArianeDrawing::UpdateUsedMaterials()
+{
+    UsedMaterials.Empty();
+
+    FArianeObject::Traverse( RootGroupID.GetObject( this )
+                            , FArianeObject::ETraversalPolicy::AllChildren
+                            , [ this ] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+        {
+            if( Object->HasBaseClass( FArianePath::StaticClass() ) )
+            {
+                FArianePath* Path = static_cast<FArianePath*>(Object);
+
+                if( Path->GetMaterial() )
+                {
+                    UsedMaterials.AddUnique( Path->GetMaterial() );
+                }
+            }
+
+            if( Object->HasBaseClass( FArianeCycle::StaticClass() ) )
+            {
+                FArianeCycle* Cycle = static_cast<FArianeCycle*>(Object);
+
+                if( Cycle->GetMaterial() )
+                {
+                    UsedMaterials.AddUnique( Cycle->GetMaterial() );
+                }
+            }
+
+            return FArianeObject::ETraversalReturnValue::Continue;
+        } );
+}
+
+void
 UArianeDrawing::Invalidate()
 {
     // VectorLayer can be null for orphan images (stored in animation keys)
     if( VectorLayer.IsValid() )
     {
         VectorLayer->Invalidate();
+    }
+
+    // check for materials
+    if( bUpdateUsedMaterials == false )
+    {
+        FArianeObject::Traverse( RootGroupID.GetObject( this )
+                               , FArianeObject::ETraversalPolicy::InvalidatedChildren
+                               , [ this ] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+            {
+                if( Object->GetInvalidationFlags().Color || Object->GetInvalidationFlags().Hierarchy )
+                {
+                    bUpdateUsedMaterials = true;
+                }
+
+                return FArianeObject::ETraversalReturnValue::Continue;
+            } );
+    }
+
+    if( bUpdateUsedMaterials )
+    {
+        UpdateUsedMaterials();
+
+        if( VectorLayer.IsValid() )
+        {
+            // we need to rebuild the proxy
+            VectorLayer->MarkRenderStateDirty();
+        }
+
+        bUpdateUsedMaterials = false;
     }
 
     MarkPackageDirty();

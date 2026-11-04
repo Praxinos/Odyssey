@@ -296,11 +296,6 @@ FArianePath::PostReset()
         AddSegment( Segment );
     }
 
-    if ( Material )
-    {
-        Drawing->IncrementMaterial( Material );
-    }
-
     InvalidateAllVertices();
     InvalidateAllSegments();
 }
@@ -377,19 +372,11 @@ FArianePath::PostLoad()
 void
 FArianePath::Added()
 {
-    if( Material && Drawing )
-    {
-        Drawing->IncrementMaterial( Material );
-    }
 }
 
 void
 FArianePath::Removed()
 {
-    if( Material && Drawing )
-    {
-        Drawing->DecrementMaterial( Material );
-    }
 }
 
 UMaterialInterface*
@@ -401,23 +388,9 @@ FArianePath::GetMaterial()
 void
 FArianePath::SetMaterial( UMaterialInterface* InMaterialInterface )
 {
-    // remove the current material from the used material list
-    if( Material && Drawing )
-    {
-        Drawing->DecrementMaterial( Material );
-    }
-
     Material = InMaterialInterface;
 
-    if( Material )
-    {
-        // add the new material to the used material list
-        if( Material && Drawing )
-        {
-            Drawing->IncrementMaterial( Material );
-        }
-
-    }
+    Invalidate( FArianePathInvalidationFlags().SetColor() );
 }
 
 const TArray<FArianePath::Chain>&

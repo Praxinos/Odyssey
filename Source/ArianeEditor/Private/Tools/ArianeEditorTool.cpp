@@ -1499,6 +1499,7 @@ UArianeEditorTool::MakeSegmentQuadTree( FEditorViewportClient* ViewportClient
         SegmentQuadTreeEntries.Reserve( 200 );
 
         FArianeObject::Traverse( MappedTree
+                               , FArianeObject::ETraversalPolicy::AllChildren
                                , [ ViewportClient
                                  , View
                                  , &ScreenRect
@@ -1671,10 +1672,11 @@ UArianeEditorTool::MakePointQuadTree( FEditorViewportClient* ViewportClient
         PointQuadTreeEntries.Reserve( 200 );
 
         FArianeObject::Traverse( MappedTree
-                               , [ ViewportClient
-                                 , View
-                                 , &ScreenRect
-                                 , &PointQuadTreeEntries ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+                               , FArianeObject::ETraversalPolicy::AllChildren
+                                , [ ViewportClient
+                                  , View
+                                  , &ScreenRect
+                                  , &PointQuadTreeEntries ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
         {
             if( /*( iFocusedObjectsOnly == false ) || scene->GetCell()->ObjectHasFocus( object, traverseFlags )*/1 )
             {

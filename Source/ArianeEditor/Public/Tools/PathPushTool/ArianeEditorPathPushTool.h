@@ -176,4 +176,5 @@ protected:
     TArray<FVertexDisplacement> InfluencedVertexDisplacements;
     TArray<FArianeSegment*> PickedSegments;
     TArray<FArianeObject*> SelectedTrees;
+    double MaxScreenDistanceToMouse;
 };

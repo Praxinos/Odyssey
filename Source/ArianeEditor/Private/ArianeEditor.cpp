@@ -989,6 +989,7 @@ FArianeEditor::SelectAllObjects()
             VectorLayer->GetDrawing()->Modify();
 
             FArianeObject::Traverse( RootGroup
+                                   , FArianeObject::ETraversalPolicy::AllChildren
                                    , [ VectorLayer ] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
                 {
                     if( Object->IsSelected() == false )

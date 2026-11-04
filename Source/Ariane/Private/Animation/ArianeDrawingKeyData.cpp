@@ -14,6 +14,7 @@ FArianeDrawingKeyData::RecordGeometry( UArianeDrawing* RecordedDrawing )
     InstancedKeyedObjects.Empty();
 
     FArianeObject::Traverse( RecordedDrawing->GetRootGroup()
+                           , FArianeObject::ETraversalPolicy::AllChildren
                            , [this]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
         {
             if( Object->GetClass() == FArianePath::StaticClass() )

@@ -433,6 +433,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
             for( FArianeObject* SelectedTree : SelectedTrees )
             {
                 FArianeObject::Traverse ( SelectedTree
+                                        , FArianeObject::ETraversalPolicy::AllChildren
                                         , [ this
                                           , ViewportClient
                                           , View
@@ -1349,14 +1350,15 @@ UArianeEditorPathEditTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* Re
             for( FArianeObject* SelectedTree : SelectedTrees )
             {
                 FArianeObject::Traverse( SelectedTree
-                                      , [ this
-                                        , Canvas
-                                        , ViewportClient
-                                        , View
-                                        , FgColor
-                                        , BgColor
-                                        , HcColor
-                                        , HUDDrawingFlags ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+                                       , FArianeObject::ETraversalPolicy::AllChildren
+                                       , [ this
+                                         , Canvas
+                                         , ViewportClient
+                                         , View
+                                         , FgColor
+                                         , BgColor
+                                         , HcColor
+                                         , HUDDrawingFlags ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
                 {
                     if( Object->GetClass() == FArianePath::StaticClass() )
                     {

@@ -412,6 +412,7 @@ SArianeEditorSceneTreeView::OnPrePainting3DComponentUpdate( bool bInteractive )
             FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
 
             FArianeObject::Traverse ( RootGroup
+                                    , FArianeObject::ETraversalPolicy::InvalidatedChildren
                                     , [this] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
                 {
                     if( Object->GetInvalidationFlags().Hierarchy
@@ -422,7 +423,7 @@ SArianeEditorSceneTreeView::OnPrePainting3DComponentUpdate( bool bInteractive )
                     }
 
                     return bDoUpdate ? FArianeObject::ETraversalReturnValue::Stop
-                                        : FArianeObject::ETraversalReturnValue::Continue;
+                                     : FArianeObject::ETraversalReturnValue::Continue;
                 } );
         }
     }

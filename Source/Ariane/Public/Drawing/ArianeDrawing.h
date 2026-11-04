@@ -96,9 +96,6 @@ public:
     // debug
     void PrintPointers();
 
-    void IncrementMaterial( UMaterialInterface* MaterialInterface );
-    void DecrementMaterial( UMaterialInterface* MaterialInterface );
-
     /**
      * @brief Get used materials
      * @OutUsedMaterials output array
@@ -158,7 +155,7 @@ protected:
     void BindDelegates();
     void UnbindDelegates();
     void OnRootObjectInvalidated();
-
+    void UpdateUsedMaterials();
 
 public:
     UPROPERTY( EditAnywhere )
@@ -176,7 +173,7 @@ protected:
 
     // counter to determine how many times the material is used (i.e by how many objects)
     UPROPERTY( Transient )
-    TMap<UMaterialInterface*, uint32> UsedMaterials;
+    TArray<UMaterialInterface*> UsedMaterials;
 
 protected:
     // Random Guid used for safe pointer resolution. See ArianeID.h
@@ -185,4 +182,5 @@ protected:
 
     // Temp
     TArray<FArianeObject*> SelectedObjects;
+    bool bUpdateUsedMaterials;
 };

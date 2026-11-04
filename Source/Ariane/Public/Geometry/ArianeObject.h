@@ -110,6 +110,7 @@ public:
     };
 
     enum class ETraversalReturnValue{ Continue, IgnoreChildren, Stop };
+    enum class ETraversalPolicy{ AllChildren, InvalidatedChildren };
 
     enum class EUpdateFlags : uint8
     {
@@ -172,6 +173,8 @@ public:
         */
     void GetInvalidatedChildren( TArray<FArianeObject*> OutInvalidatedObjects, bool bRecurse );
 
+    TArray<FArianeObject*>& GetInvalidatedChildren();
+
     /**
         * @brief Update the object
         * @param bRecurse Update recursively
@@ -215,7 +218,7 @@ public:
         * @brief Run a function to each object of the object tree
         * @param Callback the function to run
         */
-    static void Traverse( FArianeObject* Object, TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
+    static void Traverse( FArianeObject* Object, ETraversalPolicy TraversalPolicy, TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
 
     /** Get object's parent object */
     FArianeObject* GetParent();
@@ -325,7 +328,9 @@ protected:
     virtual FArianeObject* CopyShape( const FCopyArgs& CopyArgs );
     virtual void CopySettings( FArianeObject* DestinationObject, const FCopyArgs& CopyArgs, bool bInvalidate );
 
-    static ETraversalReturnValue Traverse_Private( FArianeObject* Object, TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
+    static ETraversalReturnValue Traverse_Private( FArianeObject* Object
+                                                 , ETraversalPolicy TraversalPolicy
+                                                 , TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
     static ETraversalReturnValue TraverseBackwards_Private( FArianeObject* Object, TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
 
     static uint32 CheckCommonClass( const TArray<FArianeObject*>& Objects, uint32 CommonClass );

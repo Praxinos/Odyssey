@@ -166,6 +166,7 @@ UArianeEditorPaintBucketTool::Reset()
             GraphedObjects.Reserve( VectorLayer->GetDrawing()->GetInstancedObjects().Num() );
 
             FArianeObject::Traverse( RootGroup
+                                   , FArianeObject::ETraversalPolicy::AllChildren
                                    , [ &GraphedObjects ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
                 {
                     GraphedObjects.Add( Object );

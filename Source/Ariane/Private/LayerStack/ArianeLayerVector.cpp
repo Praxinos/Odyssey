@@ -137,6 +137,7 @@ FArianeGeometryProxy::GetDrawingDynamicMeshElements( const FSceneViewFamily& Vie
     Drawing->InstancedObjectsAccessRW.Lock();
 
     FArianeObject::Traverse( RootGroup
+                           , FArianeObject::ETraversalPolicy::AllChildren
                            , [ this
                              , PDI
                              , &ViewFamily

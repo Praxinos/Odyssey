@@ -138,11 +138,6 @@ FArianeCycle::PostReset()
     Super::PostReset();
 
     Invalidate( FArianeCycleInvalidationFlags().SetColor() );
-
-    if ( Material )
-    {
-        Drawing->IncrementMaterial( Material );
-    }
 }
 
 // static
@@ -320,19 +315,11 @@ FArianeCycle::HasBaseClass( uint32 BaseClass )
 void
 FArianeCycle::Added()
 {
-    if( Material && Drawing )
-    {
-        Drawing->IncrementMaterial( Material );
-    }
 }
 
 void
 FArianeCycle::Removed()
 {
-    if( Material && Drawing )
-    {
-        Drawing->DecrementMaterial( Material );
-    }
 }
 
 UMaterialInterface*
@@ -344,23 +331,9 @@ FArianeCycle::GetMaterial()
 void
 FArianeCycle::SetMaterial( UMaterialInterface* InMaterialInterface )
 {
-    // remove the current material from the used material list
-    if( Material && Drawing )
-    {
-        Drawing->DecrementMaterial( Material );
-    }
-
     Material = InMaterialInterface;
 
-    if( Material )
-    {
-        // add the new material to the used material list
-        if( Material && Drawing )
-        {
-            Drawing->IncrementMaterial( Material );
-        }
-
-    }
+    Invalidate( FArianeCycleInvalidationFlags().SetColor() );
 }
 
 void

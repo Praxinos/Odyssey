@@ -95,6 +95,7 @@ UArianePainting3DStaticMeshComponent::ConvertDrawingToStaticMesh( FMeshDescripti
     FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
 
     FArianeObject::Traverse( RootGroup
+                           , FArianeObject::ETraversalPolicy::AllChildren
                            , [ &MeshDescriptionBuilder ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
         {
             // convert path and path-like primitives
