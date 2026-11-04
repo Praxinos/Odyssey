@@ -293,6 +293,7 @@ FArianeObject::FArianeObject( UArianeDrawing* InDrawing
     , AllocationModel ( InAllocationModel  )
     , Drawing( InDrawing )
     , WorldTransformVersion( 0 )
+    , BoundingBox( FBox(ForceInit) )
     , bSelected ( false )
 {
 }

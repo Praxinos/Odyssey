@@ -721,12 +721,6 @@ FArianeEditor::AddPainting3DActor()
                                                                                                   , &Location ) );
     UArianePainting3DComponent* Painting3DComponent = Painting3DActor->GetPainting3DComponent();
 
-    // Add a default layer
-    UArianeLayerVector* VectorLayer = Painting3DComponent->GetLayerStack()->CreateVectorLayer( nullptr, true );
-    // And select it
-    Painting3DComponent->GetLayerStack()->ClearLayerSelection( false );
-    Painting3DComponent->GetLayerStack()->SelectLayer( VectorLayer, true );
-
     GEditor->EndTransaction();
 
     GetWorld()->MarkPackageDirty();

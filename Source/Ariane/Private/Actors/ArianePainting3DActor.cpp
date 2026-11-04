@@ -4,6 +4,8 @@
 // Ariane headers
 #include "ArianePainting3DActor.h"
 #include "ArianePainting3DComponent.h"
+#include "ArianeLayerStack.h"
+#include "ArianeLayerVector.h"
 // Unreal headers
 #include "Components/SceneComponent.h"
 
@@ -36,6 +38,17 @@ void
 AArianePainting3DActor::PostActorCreated()
 {
     Painting3DComponent->Init();
+
+    // Add a default layer
+    if( Painting3DComponent->GetLayerStack()->GetVectorLayerCount() == 0 )
+    {
+        UArianeLayerVector* VectorLayer = Painting3DComponent->GetLayerStack()->CreateVectorLayer( nullptr, true );
+        // And select it
+        Painting3DComponent->GetLayerStack()->ClearLayerSelection( false );
+        Painting3DComponent->GetLayerStack()->SelectLayer( VectorLayer, true );
+    }
+
+    Painting3DComponent->Update( false );
 }
 
 void

@@ -41,6 +41,7 @@ GENERATED_BODY()
     {
         ~FPointDisplacement();
         FPointDisplacement( FArianePoint* InPoint
+                          , bool bInMapped
                           , double InScreenDistance
                           , const FVector& InWorldPlaneNormal
                           , const FTransform& Transform
@@ -50,6 +51,7 @@ GENERATED_BODY()
 
     public:
         FArianePoint* Point;
+        bool bMapped;
         double ScreenDistance; // use -1.0f if the point is behind the screen
         FVector LocalPosition;
         FVector WorldPosition;
@@ -60,7 +62,8 @@ GENERATED_BODY()
     struct FVertexDisplacement : public FPointDisplacement
     {
         ~FVertexDisplacement();
-        FVertexDisplacement( FArianePoint* InPoint
+        FVertexDisplacement( FArianeVertex* InVertex
+                           , bool bInMapped
                            , double InScreenDistance
                            , const FVector& InWorldPlaneNormal
                            , const FTransform& Transform
@@ -68,7 +71,8 @@ GENERATED_BODY()
                            , const FVector& RayDirection );
 
     public:
-        TArray<FPointDisplacement> DisplacedHandles;
+        bool bHandleAligned;
+        bool bMapped;
     };
 
 public:
@@ -114,8 +118,7 @@ public:
 protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
 
-    static void DisplacePoint( FArianePoint* Point
-                             , const FPointDisplacement& PointDisplacment
+    static void DisplacePoint( const FPointDisplacement& PointDisplacment
                              , const FTransform& Transform
                              , const FVector& RayOrigin
                              , const FVector& RayDirection );
@@ -123,7 +126,7 @@ protected:
     static double GetPointMaxDistance( TArray<FArianeSegment*> Segments );
     void ComputeRatios( TArray<FPointDisplacement>& PointDisplacements, double MaxScreenDistance );
     static FPointDisplacement* CreateOrGetPointDisplacement( FSceneView* View
-                                                           , const FVector2D& ScreenMousePosition
+                                                           , const FVector2D& MouseScreenPosition
                                                            , TArray<FPointDisplacement>& PointDisplacements
                                                            , const FPlane& DrawingPlane
                                                            , const FTransform& OwnerTransform
@@ -167,9 +170,10 @@ public:
 
 protected:
     bool bMouseButtonDown;
-    FVector2D ScreenMousePositionAtDown;
-    FVector2D ScreenMousePositionAtDrag;
-    TArray<FPointDisplacement> InfluencedPointDisplacements;
+    FVector2D MouseScreenPositionAtDown;
+    FVector2D MouseScreenPositionAtDrag;
+    TArray<FPointDisplacement> InfluencedHandleDisplacements;
+    TArray<FVertexDisplacement> InfluencedVertexDisplacements;
     TArray<FArianeSegment*> PickedSegments;
     TArray<FArianeObject*> SelectedTrees;
 };
