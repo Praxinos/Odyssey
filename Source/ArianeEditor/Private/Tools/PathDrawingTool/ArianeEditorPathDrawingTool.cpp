@@ -33,7 +33,7 @@ UArianeEditorPathDrawingTool::~UArianeEditorPathDrawingTool()
 
 UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
     : Size( 25.0f )
-    , bPressureSensitivity( false )
+    , bPressureSensitivity( true )
     , LineType ( EArianePathLineType::Flat )
     , SegmentType ( EArianeEditorPathDrawingToolSegmentType::CubicBezier )
     , TracingFidelity( EArianeEditorPathDrawingToolTracingFidelity::Higher )
