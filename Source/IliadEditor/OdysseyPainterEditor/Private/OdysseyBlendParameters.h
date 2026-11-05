@@ -63,7 +63,7 @@ protected:
     UPROPERTY(EditAnywhere, Category="Blending")
     bool bEraserMode = false;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending", meta=(DisplayName="Advanced Blend Modes"))
     bool bIsComposite = false;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending",

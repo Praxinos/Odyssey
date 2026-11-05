@@ -61,7 +61,7 @@ public:
     UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_EraserMode" ) )
     bool       bEraserMode;
 
-    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_IsComposite" ) )
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_IsComposite", DisplayName="Advanced Blend Modes" ) )
     bool       bIsComposite;
 
     UPROPERTY( EditAnywhere, Category="Modifiers",
