@@ -833,6 +833,7 @@ UArianeEditorTool::StylusPacketToArianePointerState(const UE::StylusInput::FStyl
     const UE::StylusInput::IStylusInputTabletContext* tabletContext = GetTabletContext(mStylusInputInstance, iPacket.TabletContextID);
     FArianePointerState arianePointerState;
 
+#if PLATFORM_WINDOWS
     if (tabletContext)
     {
         UE::StylusInput::ETabletSupportedProperties capabilities = tabletContext->GetSupportedProperties();
@@ -848,6 +849,16 @@ UArianeEditorTool::StylusPacketToArianePointerState(const UE::StylusInput::FStyl
         //arianePointerState.mPoint.roll = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::RollRotation) ? iPacket.RollRotation : 1.f;
         //arianePointerState.mPoint.yaw = EnumHasAnyFlags(capabilities, UE::StylusInput::ETabletSupportedProperties::YawRotation) ? iPacket.YawRotation : 1.f;
     }
+#elif PLATFORM_MAC
+    arianePointerState.ViewportX = positionInViewport.X;
+    arianePointerState.ViewportY = positionInViewport.Y;
+    arianePointerState.Z = iPacket.Z;
+    arianePointerState.Pressure = iPacket.NormalPressure;
+    arianePointerState.Timer = iPacket.TimerTick;
+    arianePointerState.Altitude = iPacket.AltitudeOrientation;
+    arianePointerState.Azimuth = iPacket.AzimuthOrientation;
+    arianePointerState.Twist = iPacket.TwistOrientation;
+#endif
 
     return arianePointerState;
 }
