@@ -399,11 +399,11 @@ UArianeEditorPathPushTool::OnMouseDown( FEditorViewportClient* ViewportClient
                 for( FArianeHandleSegment* InfluencedHandle : InfluencedHandles )
                 {
                     const FTransform& OwnerTransform = InfluencedHandle->GetOwnerSegment()->GetOwner()->GetTransform();
-                    FVector2D VertexScreenPosition;
+                    FVector2D HandleScreenPosition;
                     bool bMapped = WorldToScreen( View
                                                 , OwnerTransform.TransformPosition( InfluencedHandle->GetPosition() )
-                                                , VertexScreenPosition );
-                    double ScreenDistanceToMouse = bMapped ? ( VertexScreenPosition - MouseScreenPositionAtDown ).Length() : -1.0f;
+                                                , HandleScreenPosition );
+                    double ScreenDistanceToMouse = bMapped ? ( HandleScreenPosition - MouseScreenPositionAtDown ).Length() : -1.0f;
 
                     InfluencedHandleDisplacements.Emplace( InfluencedHandle
                                                          , bMapped
@@ -415,14 +415,6 @@ UArianeEditorPathPushTool::OnMouseDown( FEditorViewportClient* ViewportClient
 
                     MaxScreenDistanceToMouse = FMath::Max( MaxScreenDistanceToMouse, ScreenDistanceToMouse );
                 }
-/*
-                MaxDistance = ParseInfluencedPoints( View
-                                               , MouseScreenPositionAtDown
-                                               , DrawingPlane
-                                               , RayOrigin
-                                               , RayDirection
-                                               , InfluencedPoints );
-*/
             }
         }
 
@@ -475,6 +467,8 @@ UArianeEditorPathPushTool::OnMouseDrag( FEditorViewportClient* ViewportClient
 
         if( Painting3DComponent )
         {
+            FVector2D MouseScreenVector = ( MouseScreenPositionAtDrag - MouseScreenPositionAtDown );
+
             for( FVertexDisplacement& InfluencedVertexDisplacement : InfluencedVertexDisplacements )
             {
                 FArianeVertex* InfluencedVertex = static_cast<FArianeVertex*>(InfluencedVertexDisplacement.Point);
@@ -483,7 +477,6 @@ UArianeEditorPathPushTool::OnMouseDrag( FEditorViewportClient* ViewportClient
                 {
                     double Weight = 1.0f - ( InfluencedVertexDisplacement.ScreenDistance / MaxScreenDistanceToMouse );
                     const FTransform& OwnerTransform = InfluencedVertex->GetOwner()->GetTransform();
-                    FVector2D MouseScreenVector = ( MouseScreenPositionAtDrag - MouseScreenPositionAtDown );
                     FVector RayOrigin;
                     FVector RayDirection;
 
@@ -492,12 +485,12 @@ UArianeEditorPathPushTool::OnMouseDrag( FEditorViewportClient* ViewportClient
                                             , RayDirection );
 
                     DisplacePoint( InfluencedVertexDisplacement
-                                 , InfluencedVertex->GetOwner()->GetTransform()
+                                 , OwnerTransform
                                  , RayOrigin
                                  , RayDirection );
                 }
             }
-/*
+
             for( FPointDisplacement& InfluencedHandleDisplacement : InfluencedHandleDisplacements )
             {
                 FArianeHandleSegment* InfluencedHandle = static_cast<FArianeHandleSegment*>(InfluencedHandleDisplacement.Point);
@@ -505,14 +498,20 @@ UArianeEditorPathPushTool::OnMouseDrag( FEditorViewportClient* ViewportClient
                 if( InfluencedHandleDisplacement.bMapped )
                 {
                     double Weight = 1.0f - ( InfluencedHandleDisplacement.ScreenDistance / MaxScreenDistanceToMouse );
+                    const FTransform& OwnerTransform = InfluencedHandle->GetOwnerSegment()->GetOwner()->GetTransform();
+                    FVector RayOrigin;
+                    FVector RayDirection;
+
+                    View->DeprojectFVector2D( MouseScreenPositionAtDown + ( MouseScreenVector  * Weight )
+                                            , RayOrigin
+                                            , RayDirection );
 
                     DisplacePoint( InfluencedHandleDisplacement
-                                 , InfluencedHandle->GetOwnerSegment()->GetOwner()->GetTransform()
-                                 , RayOriginAtDown + ( ( RayOriginAtDrag - RayOriginAtDown ) * Weight )
-                                 , RayDirectionAtDrag );
+                                 , OwnerTransform
+                                 , RayOrigin
+                                 , RayDirection );
                 }
             }
-*/
 
             // Update. Note: as the seen is invalidated, it will request a redraw
             Painting3DComponent->Update( true );
@@ -575,60 +574,29 @@ UArianeEditorPathPushTool::Render(IToolsContextRenderAPI* RenderAPI)
 void
 UArianeEditorPathPushTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI )
 {
-    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+    //UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
     FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
                                                                             , ViewportClient->GetScene()
                                                                             , ViewportClient->EngineShowFlags ) );
     // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
     FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
-    FLinearColor FgColor = GetForegroundColor();
-    FLinearColor BgColor = GetBackgroundColor();
+    //FLinearColor FgColor = GetForegroundColor();
+    //FLinearColor BgColor = GetBackgroundColor();
     FLinearColor HcColor = GetHighlightColor();
-    FArianeEditorHUD::FDrawingFlags HUDDrawingFlags = Editor->GetHUDDrawingFlags();
+    //FArianeEditorHUD::FDrawingFlags HUDDrawingFlags = Editor->GetHUDDrawingFlags();
     FVector2D MousePosition = FVector2D( ViewportClient->GetCachedMouseX()
                                        , ViewportClient->GetCachedMouseY() );
     FVector2D HUDPosition = ScreenToHUD( ViewportClient, MousePosition );
 
-
-    if( Painting3DComponent )
-    {
-        UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
-
-        if( VectorLayer )
-        {
-            for( FArianeObject* SelectedTree : SelectedTrees )
-            {
-                FArianeObject::Traverse( SelectedTree
-                                       , FArianeObject::ETraversalPolicy::AllChildren
-                                       , [ this
-                                         , Canvas
-                                         , ViewportClient
-                                         , View
-                                         , FgColor
-                                         , BgColor
-                                         , HcColor
-                                         , HUDDrawingFlags ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
-                {
-                    if( Object->GetClass() == FArianePath::StaticClass() )
-                    {
-                        FArianePath* Path = static_cast<FArianePath*>( Object );
-
-                        DrawPathHUD( Canvas
-                                   , ViewportClient
-                                   , View
-                                   , Path
-                                   , Path->GetHUDForegroundColor() //FgColor
-                                   , BgColor
-                                   , HcColor
-                                   , HUDDrawingFlags );
-                    }
-
-                    return FArianeObject::ETraversalReturnValue::Continue;
-                } );
-            }
-        }
-    }
+        // picking circle
+    DrawCircleHUD( Canvas
+                 , ViewportClient
+                 , View
+                 , HUDPosition
+                 , PickingRadius
+                 , HcColor
+                 , 1.0f );
 }
 
 bool

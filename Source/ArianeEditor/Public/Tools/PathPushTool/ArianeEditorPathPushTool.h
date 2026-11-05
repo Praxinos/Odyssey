@@ -72,7 +72,6 @@ GENERATED_BODY()
 
     public:
         bool bHandleAligned;
-        bool bMapped;
     };
 
 public:

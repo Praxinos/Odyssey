@@ -133,10 +133,10 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
 
                 VectorLayer->GetDrawing()->Modify();
 
-                EditedPath = VectorLayer->GetDrawing()->AllocPath( MaterialInterface ? MaterialInterface
-                                                                                    : Settings->GetDefaultPathDrawingMaterial()
-                                                                                    , *(FString( "Path_" ) + FString::FromInt( PathNumber ))
-                                                                                    , EArianeAllocationModel::InstancedStruct );
+                EditedPath = VectorLayer->GetDrawing()->AllocPath( ( MaterialInterface && UseMaterial ) ? MaterialInterface
+                                                                                                        : Settings->GetDefaultPathDrawingMaterial()
+                                                                   , *(FString( "Path_" ) + FString::FromInt( PathNumber ))
+                                                                   , EArianeAllocationModel::InstancedStruct );
 
                 ParentGroup->AppendChild( EditedPath );
                 EditedPath->UpdateTransform();

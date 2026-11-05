@@ -1148,16 +1148,16 @@ UArianeEditorTool::WorldToHUD( FEditorViewportClient* ViewportClient
 
 // static
 bool
-UArianeEditorTool::WorldToPixel( FSceneView* View, const FVector& WorldPosition, FVector2D& OutHUDPosition )
+UArianeEditorTool::WorldToPixel( FSceneView* View, const FVector& WorldPosition, FVector2D& OutScreenPosition )
 {
-    return View->WorldToPixel( WorldPosition, OutHUDPosition );
+    return View->WorldToPixel( WorldPosition, OutScreenPosition );
 }
 
 // static
 bool
-UArianeEditorTool::WorldToScreen( FSceneView* View, const FVector& WorldPosition, FVector2D& OutHUDPosition )
+UArianeEditorTool::WorldToScreen( FSceneView* View, const FVector& WorldPosition, FVector2D& OutScreenPosition )
 {
-    return WorldToPixel( View, WorldPosition, OutHUDPosition );
+    return WorldToPixel( View, WorldPosition, OutScreenPosition );
 }
 
 // static
