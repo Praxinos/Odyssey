@@ -62,17 +62,27 @@ UBlueprintFileUtilitiesBPLibrary::Unzip( const FFilePath& iCompressedPathFile, F
         if( !OutputPath.StartsWith( oUncompressedPath.Path + TEXT( "/" ), ESearchCase::IgnoreCase ) )
             return false;
 
-        // Create parent directories and write the entry.
-        TArray<uint8> Data;
+        // Use EntryName to have the original name and not the normalized one (which remove the last '/' if any)
+        bool isDirectory = EntryName.EndsWith( TEXT( "/" ) );
+        if( isDirectory )
+        {
+            if( !IFileManager::Get().MakeDirectory( *OutputPath, true ) )
+                return false;
+        }
+        else
+        {
+            // Create parent directories and write the entry.
+            TArray<uint8> Data;
 
-        if( !Reader.TryReadFile( EntryName, Data ) )
-            return false;
+            if( !Reader.TryReadFile( EntryName, Data ) )
+                return false;
 
-        if( !IFileManager::Get().MakeDirectory( *FPaths::GetPath( OutputPath ), true ) )
-            return false;
+            if( !IFileManager::Get().MakeDirectory( *FPaths::GetPath( OutputPath ), true ) )
+                return false;
 
-        if( !FFileHelper::SaveArrayToFile( Data, *OutputPath ) )
-            return false;
+            if( !FFileHelper::SaveArrayToFile( Data, *OutputPath ) )
+                return false;
+        }
     }
 
     return true;
