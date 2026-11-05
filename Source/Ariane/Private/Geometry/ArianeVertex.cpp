@@ -70,6 +70,26 @@ FArianeVertex::HasBaseClass( uint32 BaseClassID )
 }
 
 void
+FArianeVertex::EnableHandleAlignment( EHandleAlignmentPolicy HandleAlignmentPolicy )
+{
+    AlignHandles ( HandleAlignmentPolicy );
+
+    bHandleAligned = true;
+}
+
+void
+FArianeVertex::DisableHandleAlignment()
+{
+    bHandleAligned = false;
+};
+
+void
+FArianeVertex::AlignHandles( EHandleAlignmentPolicy HandleAlignmentPolicy )
+{
+
+}
+
+void
 FArianeVertex::SetNormal( const FVector& InNormal )
 {
     Normal = InNormal;

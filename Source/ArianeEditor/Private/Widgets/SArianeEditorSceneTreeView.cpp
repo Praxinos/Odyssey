@@ -24,6 +24,7 @@
 
 SArianeEditorSceneTreeView::~SArianeEditorSceneTreeView()
 {
+    UnbindDelegates();
 }
 
 SArianeEditorSceneTreeView::SArianeEditorSceneTreeView()
@@ -84,11 +85,28 @@ SArianeEditorSceneTreeView::Construct( const FArguments& InArgs, FArianeEditor* 
         .HeaderRow(headerRow)
     );
 
-    Editor->OnPre3DPaintingComponentSelectionChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPre3DPaintingComponentSelectionChanged );
-    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPost3DPaintingComponentSelectionChanged );
+    BindDelegates();
 
     // First update. Following updates will be triggered by delegates
     Update();
+}
+
+void
+SArianeEditorSceneTreeView::BindDelegates()
+{
+    Editor->OnPre3DPaintingComponentSelectionChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPre3DPaintingComponentSelectionChanged );
+    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPost3DPaintingComponentSelectionChanged );
+
+    BindComponentDelegates();
+}
+
+void
+SArianeEditorSceneTreeView::UnbindDelegates()
+{
+    UnbindComponentDelegates();
+
+    Editor->OnPre3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
+    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
 }
 
 void

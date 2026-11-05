@@ -715,7 +715,14 @@ FArianePath::CopyShape( const FCopyArgs& CopyArgs )
                                                         , CopyArgs.AllocationModel );
 
         // Don't check if NewVertex is null, it must not be.
-        NewVertex->SetHandleAligned( OriginalVertex->IsHandleAligned() );
+        if( OriginalVertex->IsHandleAligned() )
+        {
+            NewVertex->EnableHandleAlignment( FArianeVertex::EHandleAlignmentPolicy::None );
+        }
+        else
+        {
+            NewVertex->DisableHandleAlignment();
+        }
 
         LookupTable.Add( NewVertex );
 

@@ -96,7 +96,7 @@ FArianeRectangle::ResetGeometry()
 
         AddSegment ( GeneratedSegments[i] );
 
-        GeneratedVertices[i]->SetHandleAligned( false );
+        GeneratedVertices[i]->DisableHandleAlignment();
     }
 }
 

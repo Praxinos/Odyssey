@@ -85,8 +85,8 @@ FArianeLine::ResetGeometry()
                                             , EArianeAllocationModel::OperatingSystem ) );
     AddSegment ( GeneratedSegments[0] );
 
-    GeneratedVertices[0]->SetHandleAligned( false );
-    GeneratedVertices[1]->SetHandleAligned( false );
+    GeneratedVertices[0]->DisableHandleAlignment();
+    GeneratedVertices[1]->DisableHandleAlignment();
 }
 
 

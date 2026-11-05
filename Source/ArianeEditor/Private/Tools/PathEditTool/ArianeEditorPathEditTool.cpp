@@ -1159,7 +1159,14 @@ UArianeEditorPathEditTool::OnMouseUp( FEditorViewportClient* ViewportClient
                     {
                         FArianeVertex* Vertex = PickedVertices[0];
 
-                        Vertex->SetHandleAligned( Vertex->IsHandleAligned() ? false : true );
+                        if( Vertex->IsHandleAligned() )
+                        {
+                            Vertex->DisableHandleAlignment();
+                        }
+                        else
+                        {
+                            Vertex->EnableHandleAlignment( FArianeVertex::EHandleAlignmentPolicy::TangentVector );
+                        }
                     }
 
                     GetToolManager()->EndUndoTransaction();

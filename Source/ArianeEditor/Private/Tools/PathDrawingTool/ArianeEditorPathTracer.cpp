@@ -449,8 +449,14 @@ FArianeEditorPathTracer::Trace( FSceneView *View
                 }
 
                 // detect if smooth or not
-                EndingVertex->SetHandleAligned( ( PreviousEdge->ViewportVector.Dot( NewEdgeViewportVector ) > DotLimit ) ? true
-                                                                                                                         : false );
+                if( ( PreviousEdge->ViewportVector.Dot( NewEdgeViewportVector ) > DotLimit ) )
+                {
+                    EndingVertex->EnableHandleAlignment( FArianeVertex::EHandleAlignmentPolicy::None );
+                }
+                else
+                {
+                    EndingVertex->DisableHandleAlignment();
+                }
 
                 bool PreviousRecordSmooth = EndingVertex->IsHandleAligned();
                 FTracerRecord PreviousRecordCopy = *PreviousRecord;

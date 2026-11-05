@@ -380,7 +380,7 @@ UArianeEditorPathPushTool::OnMouseDown( FEditorViewportClient* ViewportClient
                                                 , VertexScreenPosition );
                     double ScreenDistanceToMouse = bMapped ? ( VertexScreenPosition - MouseScreenPositionAtDown ).Length() : -1.0f;
 
-                    InfluencedVertex->SetHandleAligned( false );
+                    InfluencedVertex->DisableHandleAlignment();
 
                     InfluencedVertexDisplacements.Emplace( InfluencedVertex
                                                          , bMapped
@@ -513,6 +513,17 @@ UArianeEditorPathPushTool::OnMouseDrag( FEditorViewportClient* ViewportClient
                 }
             }
 
+            // re-align tangents if needed
+            for( FVertexDisplacement& InfluencedVertexDisplacement : InfluencedVertexDisplacements )
+            {
+                FArianeVertex* InfluencedVertex = static_cast<FArianeVertex*>(InfluencedVertexDisplacement.Point);
+
+                if( InfluencedVertexDisplacement.bHandleAligned )
+                {
+                    InfluencedVertex->EnableHandleAlignment( FArianeVertex::EHandleAlignmentPolicy::TangentVector );
+                }
+            }
+
             // Update. Note: as the seen is invalidated, it will request a redraw
             Painting3DComponent->Update( true );
         }
@@ -545,7 +556,20 @@ UArianeEditorPathPushTool::OnMouseUp( FEditorViewportClient* ViewportClient
 
     if ( Painting3DComponent )
     {
+        for( FVertexDisplacement& InfluencedVertexDisplacement : InfluencedVertexDisplacements )
+        {
+            FArianeVertex* InfluencedVertex = static_cast<FArianeVertex*>(InfluencedVertexDisplacement.Point);
+
+            if( InfluencedVertexDisplacement.bHandleAligned )
+            {
+                InfluencedVertex->EnableHandleAlignment( FArianeVertex::EHandleAlignmentPolicy::TangentVector );
+            }
+        }
+
         Painting3DComponent->Update( false );
+
+        InfluencedVertexDisplacements.Empty();
+        InfluencedHandleDisplacements.Empty();
     }
 
     return false;

@@ -95,7 +95,7 @@ FArianeEllipse::ResetGeometry()
                                                 , GeneratedVertices[n]
                                                 , EArianeAllocationModel::OperatingSystem ) );
 
-        GeneratedVertices[i]->SetHandleAligned( true );
+        GeneratedVertices[i]->EnableHandleAlignment( FArianeVertex::EHandleAlignmentPolicy::None );
 
         AddSegment ( GeneratedSegments[i] );
     }

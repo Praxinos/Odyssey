@@ -87,6 +87,9 @@ class ARIANEEDITOR_API SArianeEditorSceneTreeView
         void OnCurrentLayerChanged();
         void OnSourceChanged();
 
+        void BindDelegates();
+        void UnbindDelegates();
+
         void OnPrePainting3DComponentUpdate( bool bInteractive );
         void OnPostPainting3DComponentUpdate( bool bInteractive );
         FArianeGroup* GetRootGroup();

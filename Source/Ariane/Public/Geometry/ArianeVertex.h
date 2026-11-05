@@ -22,6 +22,9 @@ struct ARIANE_API FArianeVertex : public FArianePoint
     GENERATED_BODY()
 
 public:
+    enum class EHandleAlignmentPolicy{ None, TangentVector, StraightVector };
+
+public:
     /**
         * @brief Get the class type
         * @return the class type
@@ -106,8 +109,10 @@ public:
     /** Check the vertex belongs to a chain */
     bool IsHandleAligned() { return bHandleAligned; };
 
-    /** Check if the vertex belongs to a chain */
-    void SetHandleAligned( bool bInHandleAligned ) { bHandleAligned = bInHandleAligned; };
+    void DisableHandleAlignment();
+    void EnableHandleAlignment( EHandleAlignmentPolicy HandleAlignmentPolicy );
+
+    void AlignHandles( EHandleAlignmentPolicy HandleAlignmentPolicy );
 
     /** Get the first segment attached to this vertex **/
     FArianeSegment* GetFirstSegment();
