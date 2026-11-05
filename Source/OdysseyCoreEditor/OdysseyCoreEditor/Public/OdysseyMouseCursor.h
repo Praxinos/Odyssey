@@ -25,7 +25,7 @@ enum class EMouseCursorCustom: uint8
     ArrowEW,
     ArrowSE_NW,
     ArrowSW_NE,
-
+    MagicWand,
     // When adding new entry, don't forget to add the corresponding cursor file in FMouseCursor::InitializeCustomCursorMap()
 };
 

@@ -178,6 +178,9 @@ UOdysseyPainterEditorRasterSelectionTool::GetMouseCursorOverride() const
     if (mediaProvider.IsLocked())
         return FMouseCursor(EMouseCursor::SlashedCircle);
 
+    if (Shapes.GetActiveShape() == mMagicWandShape)
+        return FMouseCursor(EMouseCursorCustom::MagicWand);
+
     return Super::GetMouseCursorOverride();
 }
 
