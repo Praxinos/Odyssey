@@ -65,6 +65,7 @@ UArianeEditorPathPushTool::FVertexDisplacement::FVertexDisplacement( FArianeVert
                                                                    , const FVector& RayOrigin
                                                                    , const FVector& RayDirection )
     : FPointDisplacement( InVertex, bInMapped, InScreenDistance, InWorldPlaneNormal, Transform, RayOrigin, RayDirection )
+    , bHandleAligned ( InVertex->IsHandleAligned() )
 {
 }
 
@@ -380,8 +381,6 @@ UArianeEditorPathPushTool::OnMouseDown( FEditorViewportClient* ViewportClient
                                                 , VertexScreenPosition );
                     double ScreenDistanceToMouse = bMapped ? ( VertexScreenPosition - MouseScreenPositionAtDown ).Length() : -1.0f;
 
-                    InfluencedVertex->DisableHandleAlignment();
-
                     InfluencedVertexDisplacements.Emplace( InfluencedVertex
                                                          , bMapped
                                                          , ScreenDistanceToMouse
@@ -390,6 +389,8 @@ UArianeEditorPathPushTool::OnMouseDown( FEditorViewportClient* ViewportClient
                                                          , RayOrigin
                                                          , RayDirection
                                                          /*, InfluencedVertex->IsHandleAligned()*/ );
+
+                    InfluencedVertex->DisableHandleAlignment();
 
                     MaxScreenDistanceToMouse = FMath::Max( MaxScreenDistanceToMouse, ScreenDistanceToMouse );
                 }
@@ -520,7 +521,7 @@ UArianeEditorPathPushTool::OnMouseDrag( FEditorViewportClient* ViewportClient
 
                 if( InfluencedVertexDisplacement.bHandleAligned )
                 {
-                    InfluencedVertex->EnableHandleAlignment( FArianeVertex::EHandleAlignmentPolicy::TangentVector );
+                    InfluencedVertex->AlignHandles( FArianeVertex::EHandleAlignmentPolicy::TangentVector );
                 }
             }
 

@@ -6,6 +6,8 @@
 #include "ArianeDrawing.h"
 #include "ArianePath.h"
 #include "ArianeSegment.h"
+#include "ArianeSegmentCubic.h"
+#include "ArianeHandleSegment.h"
 #include "ArianePainting3DComponent.h"
 
 FArianeVertex::~FArianeVertex()
@@ -88,25 +90,61 @@ FArianeVertex::AlignHandles( EHandleAlignmentPolicy HandleAlignmentPolicy )
 {
     bool bIsAligned = bHandleAligned;
 
-    // temporarily disable alignment
     bHandleAligned = false;
-/*
-    if( iHandleAligned == true )
+
+    if( ( Segments.Num() == 2 ) && ( HandleAlignmentPolicy != EHandleAlignmentPolicy::None ) )
     {
-        FOdysseyVectorSegment* firstSegment = GetFirstSegment();
+        FArianeSegment* Segment0 = Segments[0];
+        FArianeSegment* Segment1 = Segments[1];
+        FVector Segment0Vector = FVector::Zero();
+        FVector Segment1Vector = FVector::Zero();
+        FArianeHandleSegment* Segment0Handle = nullptr;
+        FArianeHandleSegment* Segment1Handle = nullptr;
 
-        mFlags |= HANDLE_ALIGNED;
-
-        if( iAlignNow && firstSegment )
+        switch ( HandleAlignmentPolicy )
         {
-            FOdysseyVectorHandleSegment* handle = firstSegment->GetHandle( this );
+            case EHandleAlignmentPolicy::StraightVector :
+            break;
 
-            // force alignment of handles
-            handle->Set( handle->GetCoords() );
+            case EHandleAlignmentPolicy::TangentVector :
+                if( Segment0->GetClass() == FArianeSegmentCubic::StaticClass() )
+                {
+                    FArianeSegmentCubic* CubicSegment0 = static_cast<FArianeSegmentCubic*>(Segment0);
+
+                    Segment0Handle = CubicSegment0->GetHandle( this );
+                    Segment0Vector = Segment0Handle->GetPosition() - GetPosition();
+                }
+
+                if( Segment1->GetClass() == FArianeSegmentCubic::StaticClass() )
+                {
+                    FArianeSegmentCubic* CubicSegment1 = static_cast<FArianeSegmentCubic*>(Segment1);
+
+                    Segment1Handle = CubicSegment1->GetHandle( this );
+                    Segment1Vector = Segment1Handle->GetPosition() - GetPosition();
+                }
+            break;
+
+            default :
+            break;
+        }
+
+        FVector AverageVector = ( Segment0Vector.GetSafeNormal() - Segment1Vector.GetSafeNormal() ).GetSafeNormal();
+
+        if( Segment0Handle )
+        {
+            double Length0 = Segment0Vector.Length();
+
+            Segment0Handle->SetPosition( this->GetPosition() + ( AverageVector * Length0 ) );
+        }
+
+        if( Segment1Handle )
+        {
+            double Length1 = Segment1Vector.Length();
+
+            Segment1Handle->SetPosition( this->GetPosition() - ( AverageVector * Length1 ) );
         }
     }
-*/
-    // re-enable alignement if needed
+
     bHandleAligned = bIsAligned;
 }
 
