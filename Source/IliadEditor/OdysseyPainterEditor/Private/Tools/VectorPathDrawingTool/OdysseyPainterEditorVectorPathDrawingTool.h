@@ -112,8 +112,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
         UPROPERTY( EditAnywhere
                  , Category=PathDrawingTool
-                 , meta = ( ToolTip = "Tracing Fidelity" ) )
-        eTracingFidelity TracingFidelity;
+                 , meta=(DisplayName = "Tracing Fidelity", ToolTip = "Tracing Fidelity", UIMin="0", ClampMin="0", UIMax="100", ClampMax="100", Units=Percent))
+        float TracingFidelityPercent;
 
         UPROPERTY( EditAnywhere
                  , Category=PathDrawingTool
