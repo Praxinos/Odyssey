@@ -31,23 +31,17 @@ UArianeDrawing::BeginDestroy()
     Super::BeginDestroy();
 }
 
+UArianeDrawing::UArianeDrawing(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer)
+    , bUpdateUsedMaterials ( true )
+{
+    ResetHierarchy();
+}
+
 UArianeDrawing::UArianeDrawing()
     : bUpdateUsedMaterials ( true )
 {
     ResetHierarchy();
-
-    //bWantsInitializeComponent = true;
-
-/*
-    PrimaryComponentTick.bCanEverTick = true;
-    PrimaryComponentTick.bStartWithTickEnabled = true;
-    PrimaryComponentTick.SetTickFunctionEnable(true);
-
-    bAutoRegister = true;
-    bWantsInitializeComponent = true;
-    bAutoActivate = true;
-    bTickInEditor = true;
-*/
 }
 
 FGuid
@@ -131,6 +125,47 @@ UArianeDrawing::PrintPointers()
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
 
         UE_LOG( LogTemp, Warning, TEXT("UArianeDrawing::PrintPointers - Object.Drawing:%p"), Object->GetDrawing() );
+    }
+}
+
+void
+UArianeDrawing::PostEditImport()
+{
+    UArianeLayerVector* VectorLayerPtr = GetVectorLayer().Get();
+
+    Super::PostEditImport();
+
+    Reset();
+
+    //BindDelegates();
+
+    // Empty the map before reloading. Each path will populate or increment the attached value.
+    UsedMaterials.Empty();
+    // Empty the selection
+    SelectedObjects.Empty();
+
+    for( FInstancedStruct& InstancedStruct : InstancedObjects )
+    {
+        FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
+
+        Object->PostLoad();
+    }
+
+    GetRootGroup()->UpdateTransform();
+
+    Update( false );
+
+    // Not all Drawings have drawing layers, especially those stored in a Level Sequence
+    if( VectorLayerPtr )
+    {
+        UArianeLayerStack* LayerStack = VectorLayerPtr->GetLayerStack();
+
+        // layer stack can be null in case the layer is copied in the clipboard (orphan layer)
+        if( LayerStack )
+        {
+            // recompute the bounding volumes or else nothing will draw
+            LayerStack->GetPainting3DComponent()->UpdateComponentToWorld();
+        }
     }
 }
 
@@ -581,6 +616,19 @@ UArianeDrawing::Update( bool bInteractive )
         ObjectUpdateFlags = FArianeObject::EUpdateFlags::Interactive;
     }
 
+    if( bUpdateUsedMaterials )
+    {
+        UpdateUsedMaterials();
+
+        if( VectorLayer.IsValid() )
+        {
+            // we need to rebuild the proxy
+            VectorLayer->MarkRenderStateDirty();
+        }
+
+        bUpdateUsedMaterials = false;
+    }
+
     RootGroupID.GetObject( this )->Update( ObjectUpdateFlags, true );
 }
 
@@ -642,19 +690,6 @@ UArianeDrawing::Invalidate()
             } );
     }
 
-    if( bUpdateUsedMaterials )
-    {
-        UpdateUsedMaterials();
-
-        if( VectorLayer.IsValid() )
-        {
-            // we need to rebuild the proxy
-            VectorLayer->MarkRenderStateDirty();
-        }
-
-        bUpdateUsedMaterials = false;
-    }
-
     MarkPackageDirty();
 }
 
@@ -689,9 +724,11 @@ UArianeDrawing::ResetHierarchy()
 
     RootGroupID = FArianeObjectID( AllocGroup( "Root Group", EArianeAllocationModel::InstancedStruct ) );
 
+    RootGroupID.GetObject( this )->ResetDrawing( this );
     RootGroupID.GetObject( this )->Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
-
     RootGroupID.GetObject( this )->UpdateTransform();
+
+
 
     //BindDelegates();
 }

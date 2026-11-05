@@ -39,6 +39,13 @@ UArianeLayerFolder::OnRegister()
     }
 }
 
+bool
+UArianeLayerFolder::IsNavigationRelevant() const
+{
+    // DO NOT DRAW
+    return false;
+}
+
 void
 UArianeLayerFolder::SetExpanded( bool bInExpanded )
 {

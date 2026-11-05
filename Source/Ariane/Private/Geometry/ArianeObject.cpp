@@ -1240,6 +1240,13 @@ FArianeObject::PostLoad()
 {
 }
 
+/*
+void
+FArianeObject::PostDuplicate(EDuplicateMode::Type)
+{
+}
+*/
+
 void
 FArianeObject::PostReset()
 {

@@ -62,6 +62,8 @@ public:
     //virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
     virtual void OnRegister() override;
 
+    virtual bool IsNavigationRelevant() const override;
+
 protected:
     static ETraversalReturnValue Traverse_Private( UArianeLayerFolder* FolderLayer, TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
 

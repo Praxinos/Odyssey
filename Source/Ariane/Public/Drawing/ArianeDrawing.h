@@ -33,6 +33,7 @@ class ARIANE_API UArianeDrawing : public UObject
 
 public:
     ~UArianeDrawing();
+    UArianeDrawing(const FObjectInitializer& ObjectInitializer);
     UArianeDrawing();
 
     virtual void Update( bool bInteractive );
@@ -150,6 +151,8 @@ public:
     FGuid GetAllocatorGuid();
     void Invalidate();
     void Reset();
+    virtual void PostEditImport();
+
 
 protected:
     void BindDelegates();

@@ -86,7 +86,28 @@ FArianeVertex::DisableHandleAlignment()
 void
 FArianeVertex::AlignHandles( EHandleAlignmentPolicy HandleAlignmentPolicy )
 {
+    bool bIsAligned = bHandleAligned;
 
+    // temporarily disable alignment
+    bHandleAligned = false;
+/*
+    if( iHandleAligned == true )
+    {
+        FOdysseyVectorSegment* firstSegment = GetFirstSegment();
+
+        mFlags |= HANDLE_ALIGNED;
+
+        if( iAlignNow && firstSegment )
+        {
+            FOdysseyVectorHandleSegment* handle = firstSegment->GetHandle( this );
+
+            // force alignment of handles
+            handle->Set( handle->GetCoords() );
+        }
+    }
+*/
+    // re-enable alignement if needed
+    bHandleAligned = bIsAligned;
 }
 
 void
