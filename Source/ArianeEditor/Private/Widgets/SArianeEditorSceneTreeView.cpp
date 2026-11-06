@@ -94,6 +94,8 @@ SArianeEditorSceneTreeView::Construct( const FArguments& InArgs, FArianeEditor* 
 void
 SArianeEditorSceneTreeView::BindDelegates()
 {
+    FEditorDelegates::PostUndoRedo.AddSP( this, &SArianeEditorSceneTreeView::Update );
+
     Editor->OnPre3DPaintingComponentSelectionChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPre3DPaintingComponentSelectionChanged );
     Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddSP( this, &SArianeEditorSceneTreeView::OnPost3DPaintingComponentSelectionChanged );
 
@@ -104,6 +106,8 @@ void
 SArianeEditorSceneTreeView::UnbindDelegates()
 {
     UnbindComponentDelegates();
+
+    FEditorDelegates::PostUndoRedo.RemoveAll( this );
 
     Editor->OnPre3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
     Editor->OnPost3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );

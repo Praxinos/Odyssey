@@ -84,11 +84,6 @@ void
 UArianeLayer::PostEditUndo()
 {
     Super::PostEditUndo();
-
-    if( IsRegistered() == false )
-    {
-        RegisterComponent();
-    }
 }
 #endif
 

@@ -93,38 +93,13 @@ UArianeLayerStack::GetRootFolder()
 void
 UArianeLayerStack::PreEditUndo()
 {
-    // trigger an event
-    OnPreHierarchyChanged.Broadcast();
-
     Super::PreEditUndo();
 }
 
 void
 UArianeLayerStack::PostEditUndo()
 {
-    UArianeLayerFolder* RootFolder = GetRootFolder();
-
     Super::PostEditUndo();
-
-    OnPreSelectionChanged.Broadcast();
-    OnPreHierarchyChanged.Broadcast();
-
-    SelectedLayers.Empty();
-
-    // At that step layers are only marked "selected" but not in the list of selected layers
-    UArianeLayerFolder::Traverse( RootFolder
-                                , [this]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
-        {
-            if( Layer->IsSelected() )
-            {
-                SelectedLayers.Add( Layer );
-            }
-
-            return UArianeLayerFolder::ETraversalReturnValue::Continue;
-        } );
-
-    OnPostSelectionChanged.Broadcast();
-    OnPostHierarchyChanged.Broadcast();
 }
 #endif
 

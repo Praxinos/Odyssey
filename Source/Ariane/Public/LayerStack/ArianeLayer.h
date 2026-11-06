@@ -133,7 +133,7 @@ protected:
     bool bLocked;
 
 #if WITH_EDITORONLY_DATA
-    UPROPERTY()
+    UPROPERTY(Transient)
     bool bSelected;
 #endif
 
