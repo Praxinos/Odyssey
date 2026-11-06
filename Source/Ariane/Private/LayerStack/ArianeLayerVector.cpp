@@ -430,7 +430,7 @@ UArianeLayerVector::OnRegister()
         DefaultDrawing = NewObject<UArianeDrawing>(this, TEXT("DefaultDrawing"), RF_Transactional | RF_Public);
     }
 
-    SetDrawing( DefaultDrawing );
+    SetDrawing( DefaultDrawing, false );
 
     Drawing->OnRegisterLayer();
 }

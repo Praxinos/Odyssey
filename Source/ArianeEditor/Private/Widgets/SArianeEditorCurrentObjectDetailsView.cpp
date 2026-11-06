@@ -40,6 +40,7 @@
 
 SArianeEditorCurrentObjectDetailsView::~SArianeEditorCurrentObjectDetailsView()
 {
+    UnbindDelegates();
 }
 
 SArianeEditorCurrentObjectDetailsView::SArianeEditorCurrentObjectDetailsView()
@@ -71,11 +72,32 @@ SArianeEditorCurrentObjectDetailsView::Construct( const FArguments& InArgs, FAri
 
     DetailsView->OnFinishedChangingProperties().AddSP( this, &SArianeEditorCurrentObjectDetailsView::PropertyValueChanged );
 
-    Editor->OnPre3DPaintingComponentSelectionChangedDelegate().AddSP( this, &SArianeEditorCurrentObjectDetailsView::OnPre3DPaintingComponentSelectionChanged );
-    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddSP( this, &SArianeEditorCurrentObjectDetailsView::OnPost3DPaintingComponentSelectionChanged );
+    BindDelegates();
 
     // First update. Following updates will be triggered by delegates
     Update();
+}
+
+void
+SArianeEditorCurrentObjectDetailsView::BindDelegates()
+{
+    FEditorDelegates::PostUndoRedo.AddSP( this, &SArianeEditorCurrentObjectDetailsView::Update );
+
+    Editor->OnPre3DPaintingComponentSelectionChangedDelegate().AddSP( this, &SArianeEditorCurrentObjectDetailsView::OnPre3DPaintingComponentSelectionChanged );
+    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddSP( this, &SArianeEditorCurrentObjectDetailsView::OnPost3DPaintingComponentSelectionChanged );
+
+    BindComponentDelegates();
+}
+
+void
+SArianeEditorCurrentObjectDetailsView::UnbindDelegates()
+{
+    UnbindComponentDelegates();
+
+    FEditorDelegates::PostUndoRedo.RemoveAll( this );
+
+    Editor->OnPre3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
+    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
 }
 
 void

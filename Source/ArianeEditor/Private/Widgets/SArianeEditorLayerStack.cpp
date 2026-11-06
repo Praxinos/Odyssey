@@ -25,6 +25,8 @@
 SArianeEditorLayerStack::~SArianeEditorLayerStack()
 {
     USelection::SelectionChangedEvent.RemoveAll( this );
+
+    UnbindDelegates();
 }
 
 SArianeEditorLayerStack::SArianeEditorLayerStack()
@@ -109,12 +111,36 @@ SArianeEditorLayerStack::Construct( const FArguments& InArgs, FArianeEditor* InE
         .HeaderRow(headerRow)
     );
 
+    BindDelegates();
+
+    // First update. Following updates will be triggered by delegates
+    Update();
+}
+
+void
+SArianeEditorLayerStack::BindDelegates()
+{
+    FEditorDelegates::PostUndoRedo.AddSP( this, &SArianeEditorLayerStack::Update );
+
     Editor->OnPre3DPaintingComponentSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStack::OnPre3DPaintingComponentSelectionChanged );
     Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddSP( this, &SArianeEditorLayerStack::OnPost3DPaintingComponentSelectionChanged );
+
+    BindComponentDelegates();
 }
 
 void
 SArianeEditorLayerStack::UnbindDelegates()
+{
+    UnbindComponentDelegates();
+
+    FEditorDelegates::PostUndoRedo.RemoveAll( this );
+
+    Editor->OnPre3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
+    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
+}
+
+void
+SArianeEditorLayerStack::UnbindComponentDelegates()
 {
     UArianePainting3DComponent* CurrentPainting3DComponent = Editor->GetCurrentPainting3DComponent();
 
@@ -131,7 +157,7 @@ SArianeEditorLayerStack::UnbindDelegates()
 }
 
 void
-SArianeEditorLayerStack::BindDelegates()
+SArianeEditorLayerStack::BindComponentDelegates()
 {
     UArianePainting3DComponent* CurrentPainting3DComponent = Editor->GetCurrentPainting3DComponent();
 
@@ -150,13 +176,13 @@ SArianeEditorLayerStack::BindDelegates()
 void
 SArianeEditorLayerStack::OnPre3DPaintingComponentSelectionChanged()
 {
-    UnbindDelegates();
+    UnbindComponentDelegates();
 }
 
 void
 SArianeEditorLayerStack::OnPost3DPaintingComponentSelectionChanged()
 {
-    BindDelegates();
+    BindComponentDelegates();
 
     Update();
 }
@@ -357,7 +383,7 @@ SArianeEditorLayerStack::Update()
         {
 
             // Unbind Delegates or else this function will re-enter itself on layer selection
-            UnbindDelegates();
+            UnbindComponentDelegates();
 
             UArianeLayerVector* VectorLayer = GetAnyVectorLayer( LayerStack );
 
@@ -366,7 +392,7 @@ SArianeEditorLayerStack::Update()
                 LayerStack->SelectLayer( VectorLayer, true );
             }
 
-            BindDelegates();
+            BindComponentDelegates();
         }
 
         RootItem = MakeShareable(new FArianeEditorLayerRowItem( LayerStack->GetRootFolder(), true ) );
@@ -453,7 +479,7 @@ SArianeEditorLayerStack::OnSelectionChanged( TSharedPtr<FArianeEditorLayerRowIte
             {
                 TArray<TSharedPtr<FArianeEditorLayerRowItem>> SelectedLayerItems = GetSelectedItems();
                 UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-                //TArray<UArianeLayer*> OldSelectedLayers = LayerStack->GetSelectedLayers();
+                TArray<UArianeLayer*> OldSelectedLayers = LayerStack->GetSelectedLayers();
                 TArray<UArianeLayer*> NewSelectedLayers;
 
                 for( TSharedPtr<FArianeEditorLayerRowItem> SelectedLayerItem : SelectedLayerItems )
@@ -464,15 +490,16 @@ SArianeEditorLayerStack::OnSelectionChanged( TSharedPtr<FArianeEditorLayerRowIte
                 }
 
                 // Prepare transatction snapshots for all impacted UObjects
-                //ModifyLayerStackAndSelectedLayers( Painting3DComponent->GetLayerStack()
-                //                                 , OldSelectedLayers
-                //                                 , NewSelectedLayers );
+                // to save the bSelected flag in UArianeLayer
+                ModifyLayerStackAndSelectedLayers( Painting3DComponent->GetLayerStack()
+                                                 , OldSelectedLayers
+                                                 , NewSelectedLayers );
 
-                LayerStack->Modify();
+                //LayerStack->Modify();
 
-                UnbindDelegates();
+                UnbindComponentDelegates();
                 Painting3DComponent->GetLayerStack()->SelectLayers( NewSelectedLayers, true, true );
-                BindDelegates();
+                BindComponentDelegates();
             }
         }
     }

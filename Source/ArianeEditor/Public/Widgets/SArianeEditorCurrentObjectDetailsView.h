@@ -37,6 +37,8 @@ class ARIANEEDITOR_API SArianeEditorCurrentObjectDetailsView
         void Construct(const FArguments& InArgs, FArianeEditor* Editor );
         void Update();
 
+        void UnbindDelegates();
+        void BindDelegates();
         void BindComponentDelegates();
         void UnbindComponentDelegates();
 
