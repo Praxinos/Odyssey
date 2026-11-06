@@ -748,47 +748,51 @@ FArianeEditor::OnEditorSelectionChanged( UObject* NewSelection )
 {
     USelection* SelectionSet = Cast<USelection>(NewSelection);
 
-    OnPre3DPaintingComponentSelectionChanged.Broadcast();
-
-    CurrentPainting3DComponent = nullptr;
-
-    if( SelectionSet )
+    // we are only interested in selected actors
+    if ( SelectionSet == GEditor->GetSelectedActors() )
     {
-        TArray<UObject*> SelectedObjects;
+        OnPre3DPaintingComponentSelectionChanged.Broadcast();
 
-        SelectionSet->GetSelectedObjects( SelectedObjects );
+        CurrentPainting3DComponent = nullptr;
 
-        if( SelectedObjects.Num() )
+        if( SelectionSet )
         {
-            for( UObject* SelectedObject : SelectedObjects )
+            TArray<UObject*> SelectedObjects;
+
+            SelectionSet->GetSelectedObjects( SelectedObjects );
+
+            if( SelectedObjects.Num() )
             {
-                // Filter calls to the world we are interested in, because USelection::SelectionChangedEvent is a static
-                // delegate and could be called by other Editor Tabs.
-                if( SelectedObject->GetWorld() == GetWorld() )
+                for( UObject* SelectedObject : SelectedObjects )
                 {
-                    if( SelectedObject->GetClass() == AArianePainting3DActor::StaticClass() )
+                    // Filter calls to the world we are interested in, because USelection::SelectionChangedEvent is a static
+                    // delegate and could be called by other Editor Tabs.
+                    if( SelectedObject->GetWorld() == GetWorld() )
                     {
-                        AArianePainting3DActor* Painting3DActor = Cast<AArianePainting3DActor>(SelectedObject);
+                        if( SelectedObject->GetClass() == AArianePainting3DActor::StaticClass() )
+                        {
+                            AArianePainting3DActor* Painting3DActor = Cast<AArianePainting3DActor>(SelectedObject);
 
-                        CurrentPainting3DComponent = Cast<UArianePainting3DComponent>( Painting3DActor->GetComponentByClass( UArianePainting3DComponent::StaticClass() ) );
-                    }
+                            CurrentPainting3DComponent = Cast<UArianePainting3DComponent>( Painting3DActor->GetComponentByClass( UArianePainting3DComponent::StaticClass() ) );
+                        }
 
-                    if( SelectedObject->GetClass() == UArianePainting3DComponent::StaticClass() )
-                    {
-                        CurrentPainting3DComponent = Cast<UArianePainting3DComponent>( SelectedObject );
+                        if( SelectedObject->GetClass() == UArianePainting3DComponent::StaticClass() )
+                        {
+                            CurrentPainting3DComponent = Cast<UArianePainting3DComponent>( SelectedObject );
+                        }
                     }
                 }
             }
         }
-    }
 
-    // allow the component to communicate with the Editor to retrieve Environnement Settings
-    if( CurrentPainting3DComponent.Get() )
-    {
-        CurrentPainting3DComponent->SetEditorInterface( this );
-    }
+        // allow the component to communicate with the Editor to retrieve Environnement Settings
+        if( CurrentPainting3DComponent.Get() )
+        {
+            CurrentPainting3DComponent->SetEditorInterface( this );
+        }
 
-    OnPost3DPaintingComponentSelectionChanged.Broadcast();
+        OnPost3DPaintingComponentSelectionChanged.Broadcast();
+    }
 }
 
 void
