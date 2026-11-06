@@ -288,7 +288,9 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
                     Primitive->SetLineType( LineType );
                     Primitive->SetTransform( PrimitiveCoordsAtDown, LocalOrientation, FVector::One(), FVector::Zero() );
                     // will also update the transform
-                    ParentGroup->AppendChild( Primitive );
+                    ParentGroup->AppendChild( Primitive, FArianeObject::ETransformPolicy::KeepRelative );
+
+                    Primitive->UpdateTransform();
                 }
             }
 

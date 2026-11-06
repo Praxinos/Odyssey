@@ -395,47 +395,39 @@ FArianeObject::RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstan
 }
 
 void
-FArianeObject::AppendChild( FArianeObject* Child )
+FArianeObject::AppendChild( FArianeObject* Child, FArianeObject::ETransformPolicy TransformPolicy )
 {
-    Children.Add( Child );
-
-    Child->SetParent( this );
-    Child->Added();
-
-    Child->UpdateTransform();
-
-    InvalidateChild( Child );
-
-    Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
+    InsertChild( Child, Children.Num() ? Children.Last() : nullptr, TransformPolicy );
 }
 
 void
-FArianeObject::PrependChild( FArianeObject* Child )
+FArianeObject::PrependChild( FArianeObject* Child, FArianeObject::ETransformPolicy TransformPolicy )
 {
-    Children.Insert( Child, 0 );
-
-    Child->SetParent( this );
-    Child->Added();
-
-    Child->UpdateTransform();
-
-    InvalidateChild( Child );
-
-    Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
+    InsertChild( Child, nullptr, TransformPolicy );
 }
 
 void
-FArianeObject::InsertChild( FArianeObject* Child, FArianeObject* InsertAfter )
+FArianeObject::InsertChild( FArianeObject* Child, FArianeObject* InsertAfter, FArianeObject::ETransformPolicy TransformPolicy )
 {
-    int FoundObjectIndex = Children.IndexOfByPredicate( [Child]( const FArianeObject* Object ) -> bool
+    FTransform RelativeTransform = Child->GetTransform().GetRelativeTransform(WorldTransform);
+
+    int FoundObjectIndex = Children.IndexOfByPredicate( [InsertAfter]( const FArianeObject* Object ) -> bool
                                                         {
-                                                            return ( Object == Child ) ? true : false;
+                                                            return ( Object == InsertAfter );
                                                         } );
 
     Children.Insert( Child, FoundObjectIndex + 1 );
 
     Child->SetParent( this );
     Child->Added();
+
+    if( TransformPolicy == ETransformPolicy::KeepAbsolute )
+    {
+        FQuat Q = RelativeTransform.GetRotation();
+        FRotator R = Q.Rotator();
+
+        Child->SetTransform( RelativeTransform.GetTranslation(), R.Euler(), RelativeTransform.GetScale3D(), FVector::Zero() );
+    }
 
     Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 }
@@ -1129,7 +1121,7 @@ FArianeObject::Copy( const FCopyArgs& CopyArgs
 
             FArianeObject* ChildCopy = Child->Copy( ChildCopyArgs, PreCallback, PostCallback );
 
-            ObjectCopy->AppendChild( ChildCopy );
+            ObjectCopy->AppendChild( ChildCopy, FArianeObject::ETransformPolicy::KeepRelative );
         }
 
         // copy tags
@@ -1252,6 +1244,6 @@ FArianeObject::PostReset()
 {
     if( GetParent() )
     {
-        GetParent()->AppendChild( this );
+        GetParent()->AppendChild( this, FArianeObject::ETransformPolicy::KeepRelative );
     }
 }

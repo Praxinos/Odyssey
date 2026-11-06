@@ -111,6 +111,7 @@ public:
 
     enum class ETraversalReturnValue{ Continue, IgnoreChildren, Stop };
     enum class ETraversalPolicy{ AllChildren, InvalidatedChildren };
+    enum class ETransformPolicy{ KeepRelative, KeepAbsolute };
 
     enum class EUpdateFlags : uint8
     {
@@ -144,21 +145,22 @@ public:
     /**
         * @brief Add a child to this object at the end of the list of children.
         * @param Child the child to add
+        * @param TransformPolicy
         */
-    void AppendChild( FArianeObject* Child );
+    void AppendChild( FArianeObject* Child, FArianeObject::ETransformPolicy TransformPolicy );
 
     /**
         * @brief Add a child to this object at the beginning of the list of children.
         * @param Child the child to add
         */
-    void PrependChild( FArianeObject* Child );
+    void PrependChild( FArianeObject* Child, FArianeObject::ETransformPolicy TransformPolicy );
 
     /**
         * @brief Insert a child to this object's list of children.
         * @param Child the child to add
         * @param InsertAfter insert the added child after this one.
         */
-    void InsertChild( FArianeObject* Child, FArianeObject* InsertAfter );
+    void InsertChild( FArianeObject* Child, FArianeObject* InsertAfter, FArianeObject::ETransformPolicy TransformPolicy );
 
     /**
         * @brief Mark the object as invalidated. It will also invalidate the whole chain of parents.

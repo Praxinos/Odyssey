@@ -138,7 +138,7 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
                                                                    , *(FString( "Path_" ) + FString::FromInt( PathNumber ))
                                                                    , EArianeAllocationModel::InstancedStruct );
 
-                ParentGroup->AppendChild( EditedPath );
+                ParentGroup->AppendChild( EditedPath, FArianeObject::ETransformPolicy::KeepRelative );
                 EditedPath->UpdateTransform();
                 EditedPath->SetColor( ueColor );
                 EditedPath->SetLineType( LineType );

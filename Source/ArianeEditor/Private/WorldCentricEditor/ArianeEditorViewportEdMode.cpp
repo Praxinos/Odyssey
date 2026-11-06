@@ -26,7 +26,7 @@
 #include "GameFramework/InputDeviceSubsystem.h"
 #include "GenericPlatform/GenericPlatformInputDeviceMapper.h"
 #include "Tools/EdModeInteractiveToolsContext.h"
-
+#include "Toolkits/ToolkitManager.h"
 
 /* Gary
 
@@ -637,6 +637,15 @@ void FArianeEditorViewportEdMode::Exit()
     //IgnoreStylusInput();
 
     GetArianeEditorViewportToolkit()->Exit();
+
+    // close all widgets (and destroy them) when leaving the EdMode.
+    // This ensures all delegates used by the widgets in their destructors are released as well.
+    if (Toolkit.IsValid())
+    {
+        UToolMenus::Get()->UnregisterOwner( Toolkit.Get() );
+        FToolkitManager::Get().CloseToolkit(Toolkit.ToSharedRef());
+        Toolkit.Reset();
+    }
 
 /* Gary
     // Restore selection color

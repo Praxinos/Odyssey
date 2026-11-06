@@ -281,7 +281,7 @@ UArianeEditorPaintBucketTool::OnMouseUp( FEditorViewportClient* ViewportClient
                                                                                  , *(FString( "Cycle_" ) + FString::FromInt( PathNumber ))
                                                                                  , EArianeAllocationModel::InstancedStruct );
 
-                RootGroup->AppendChild( PaintedCycle );
+                RootGroup->AppendChild( PaintedCycle, FArianeObject::ETransformPolicy::KeepRelative );
 
                 PaintedCycle->SetColor( ueColor );
                 PaintedCycle->UpdateTransform();

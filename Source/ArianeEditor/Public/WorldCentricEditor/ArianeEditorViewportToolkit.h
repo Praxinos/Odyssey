@@ -100,6 +100,6 @@ private:
 */
     TSharedPtr<FExtender> LevelEditorMenuExtender;
 
-TSharedPtr<FTabManager> LocalTabManager;
-TSharedPtr<SWidget> TabStackWidget;
+    TSharedPtr<FTabManager> LocalTabManager;
+    TSharedPtr<SWidget> TabStackWidget;
 };

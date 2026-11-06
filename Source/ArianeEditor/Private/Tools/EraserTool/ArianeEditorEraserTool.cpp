@@ -576,7 +576,7 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
 
             for( FArianePath* AddedPath : AddedPaths )
             {
-                AddedPath->GetParent()->AppendChild( AddedPath );
+                AddedPath->GetParent()->AppendChild( AddedPath, FArianeObject::ETransformPolicy::KeepRelative );
             }
         }
     }

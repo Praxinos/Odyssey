@@ -958,7 +958,7 @@ FArianeEditor::GroupSelectedObjects( const FName& NewGroupName )
                     }
 
                     // Final step
-                    FosterParent->AppendChild( NewGroup );
+                    FosterParent->AppendChild( NewGroup, FArianeObject::ETransformPolicy::KeepRelative );
 
                     for( FArianeObject* ObjectToRegroup : ObjectsToRegroup )
                     {
@@ -1072,11 +1072,11 @@ FArianeEditor::ConvertPrimitives( UArianePainting3DComponent* Painting3DComponen
         // third step: append children
         for( FArianeObject* Child : Children )
         {
-            Path->AppendChild( Child );
+            Path->AppendChild( Child, FArianeObject::ETransformPolicy::KeepRelative );
         }
 
         // final step: append the converted path and remove the primitive
-        PrimitiveToConvert->GetParent()->AppendChild( Path );
+        PrimitiveToConvert->GetParent()->AppendChild( Path, FArianeObject::ETransformPolicy::KeepRelative );
 
         Path->UpdateTransform();
 
@@ -1201,8 +1201,9 @@ FArianeEditor::PasteObjects()
                     FArianeObject* PasteObject = CopiedObject->Copy( CopyArgs );
 
                     PasteObject->ResetDrawing(  VectorLayer->GetDrawing() );
+                    PasteObject->PostReset();
 
-                    Destination->AppendChild( PasteObject );
+                    Destination->AppendChild( PasteObject, FArianeObject::ETransformPolicy::KeepAbsolute );
 
                     VectorLayer->GetDrawing()->SelectObject( PasteObject );
                 }
