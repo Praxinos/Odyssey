@@ -144,7 +144,7 @@ FArianeGeometryProxy::GetDrawingDynamicMeshElements( const FSceneViewFamily& Vie
                              , ViewIndex
                              , &Collector ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
     {
-
+        const FSceneView* View = ViewFamily.Views[ViewIndex];
         FArianeObjectGeometry3D* Geometry3D = nullptr;
         UMaterialInterface* MaterialInterface = nullptr;
         FColor ObjectColor = FColor::Black;
@@ -216,6 +216,31 @@ FArianeGeometryProxy::GetDrawingDynamicMeshElements( const FSceneViewFamily& Vie
                 int32 SingleCaptureIndex;
                 bool bOutputVelocity;
 
+                FMatrix LocalToWorld = Object->GetTransform().ToMatrixWithScale();
+
+                // against Z-fighting. at each frame we move the cylce away from the screen
+                // always in the direction of the camera.
+                if( Object->GetClass() == FArianeCycle::StaticClass() )
+                {
+                    if( View->IsPerspectiveProjection() )
+                    {
+                        const FVector C = View->ViewMatrices.GetViewOrigin();
+                        const float DepthEpsilon = 1e-4;
+                        const float s = 1.f + DepthEpsilon;
+                        // note: the scaling is centered on the camera.
+                        LocalToWorld.SetAxis( 0, LocalToWorld.GetScaledAxis( EAxis::X ) * s );
+                        LocalToWorld.SetAxis( 1, LocalToWorld.GetScaledAxis( EAxis::Y ) * s );
+                        LocalToWorld.SetAxis( 2, LocalToWorld.GetScaledAxis( EAxis::Z ) * s );
+                        LocalToWorld.SetOrigin( LocalToWorld.GetOrigin() * s + C * ( 1.f - s ) );
+                    }
+                    else // orthographic
+                    {
+                        double OrthoOffset = 5.0f;
+                        // Note: no scaling required in orthographic projection
+                        LocalToWorld.SetOrigin( LocalToWorld.GetOrigin() + View->GetViewDirection() * OrthoOffset );
+                    }
+                }
+
                 GetScene().GetPrimitiveUniformShaderParameters_RenderThread( GetPrimitiveSceneInfo()
                                                                            , bHasPrecomputedVolumetricLightmap
                                                                            , PreviousLocalToWorld
@@ -226,7 +251,7 @@ FArianeGeometryProxy::GetDrawingDynamicMeshElements( const FSceneViewFamily& Vie
                 FDynamicPrimitiveUniformBuffer& DynamicPrimitiveUniformBuffer = Collector.AllocateOneFrameResource<FDynamicPrimitiveUniformBuffer>();
 
                 DynamicPrimitiveUniformBuffer.Set( Collector.GetRHICommandList()
-                                                 , Object->GetTransform().ToMatrixWithScale()
+                                                 , LocalToWorld
                                                  //, VectorLayer->GetComponentToWorld().ToMatrixWithScale() //GetLocalToWorld()
                                                  , PreviousLocalToWorld
                                                  , GetBounds()
