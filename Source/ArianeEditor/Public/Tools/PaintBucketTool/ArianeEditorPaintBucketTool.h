@@ -124,11 +124,6 @@ public:
 
     UPROPERTY( EditAnywhere
              , Category = PaintBucketTool )
-    bool UseMaterial;
-
-    UPROPERTY( EditAnywhere
-             , Category = PaintBucketTool
-             , meta = (EditCondition = "UseMaterial", EditConditionHides, DisplayName = "Material") )
     UMaterialInterface* MaterialInterface;
 
 protected:

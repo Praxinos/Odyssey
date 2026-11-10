@@ -64,6 +64,7 @@ public:
                           , const FArianePointerState& State ) override;
     //virtual bool SupportsColorType( EOdysseyPainterEditorColorType ColorType ) override;
 
+    virtual void Init( FArianeEditor* InEditor ) override;
     void Activate();
     void Inactivate();
     virtual bool GetCursor( EMouseCursor::Type& OutCursor ) override;
@@ -71,6 +72,7 @@ public:
     virtual bool OnKeyUpGlobal( const FKeyEvent& InKeyEvent ) override;
     virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
     virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
 
 protected:
     //double GetLineRotationAngle( FArianeLine* iLine, const FOdysseyPoint& iPointInTexture );
@@ -117,11 +119,6 @@ public:
 
     UPROPERTY( EditAnywhere
              , Category = PrimitiveDrawingTool )
-    bool UseMaterial;
-
-    UPROPERTY( EditAnywhere
-             , Category = PrimitiveDrawingTool
-             , meta = (EditCondition = "UseMaterial", EditConditionHides, DisplayName = "Material") )
     UMaterialInterface* MaterialInterface;
 
     //UPROPERTY( EditAnywhere

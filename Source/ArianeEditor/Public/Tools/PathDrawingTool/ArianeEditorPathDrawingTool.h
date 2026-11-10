@@ -75,7 +75,7 @@ public:
     virtual bool SupportsColorType( EOdysseyPainterEditorColorType ColorType ) override;
 
     virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
-
+    virtual void Init( FArianeEditor* InEditor ) override;
     void Activate();
     void Inactivate();
     virtual void DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
@@ -126,11 +126,6 @@ public:
 
     UPROPERTY( EditAnywhere
              , Category = PathDrawingTool )
-    bool UseMaterial;
-
-    UPROPERTY( EditAnywhere
-             , Category = PathDrawingTool
-             , meta = (EditCondition = "UseMaterial", EditConditionHides, DisplayName = "Material") )
     UMaterialInterface* MaterialInterface;
 
 

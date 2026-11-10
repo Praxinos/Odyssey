@@ -44,7 +44,6 @@ UArianeEditorPrimitiveDrawingTool::UArianeEditorPrimitiveDrawingTool()
     , StrokeWidth( 30.0f )
     , Uniform( false )
     , LineType ( EArianePathLineType::Flat )
-    , UseMaterial ( false )
     , MaterialInterface ( nullptr )
     , Primitive( nullptr )
     , RectangleNumber ( 0 )
@@ -62,29 +61,15 @@ UArianeEditorPrimitiveDrawingTool::UArianeEditorPrimitiveDrawingTool()
     //Shapes.SetActiveShapeType( EOdysseyShapeType::kEllipse );
 }
 
-/*
 void
-UArianeEditorPrimitiveDrawingTool::BindDelegates()
+UArianeEditorPrimitiveDrawingTool::Init( FArianeEditor* InEditor )
 {
-    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+    const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
 
-    if( Painting3DComponent )
-    {
-        Painting3DComponent->OnPostUpdateDelegate().AddUObject( this, &UArianeEditorPrimitiveDrawingTool::OnPostUpdate );
-    }
+    Super::Init( InEditor );
+
+    MaterialInterface = Settings->GetDefaultPathDrawingMaterial();
 }
-
-void
-UArianeEditorPrimitiveDrawingTool::UnbindDelegates()
-{
-    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-
-    if( Painting3DComponent )
-    {
-        Painting3DComponent->OnPostUpdateDelegate().RemoveAll( this );
-    }
-}
-*/
 
 void
 UArianeEditorPrimitiveDrawingTool::Activate()
@@ -246,8 +231,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
                     {
                         //case EOdysseyShapeType::kEllipse:
                         case EArianePrimitiveToolShapeType::Ellipse:
-                            Primitive = VectorLayer->GetDrawing()->AllocEllipse( ( MaterialInterface && UseMaterial ) ? MaterialInterface
-                                                                                                                      : Settings->GetDefaultPathDrawingMaterial()
+                            Primitive = VectorLayer->GetDrawing()->AllocEllipse( MaterialInterface
                                                                                , *(FString("Ellipse_" + FString::FromInt( EllipseNumber++ )))
                                                                                , 0.0f
                                                                                , 0.0f
@@ -257,8 +241,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
 
                         //case EOdysseyShapeType::kRectangle :
                         case EArianePrimitiveToolShapeType::Rectangle:
-                            Primitive = VectorLayer->GetDrawing()->AllocRectangle( ( MaterialInterface && UseMaterial ) ? MaterialInterface
-                                                                                                                        : Settings->GetDefaultPathDrawingMaterial()
+                            Primitive = VectorLayer->GetDrawing()->AllocRectangle( MaterialInterface
                                                                                  , *(FString("Rectangle_") + FString::FromInt( RectangleNumber++ ))
                                                                                  , 0.0f
                                                                                  , 0.0f
@@ -268,8 +251,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
 
                         //case EOdysseyShapeType::kLine:
                         case EArianePrimitiveToolShapeType::Line:
-                            Primitive = VectorLayer->GetDrawing()->AllocLine( ( MaterialInterface && UseMaterial ) ? MaterialInterface
-                                                                                                                   : Settings->GetDefaultPathDrawingMaterial()
+                            Primitive = VectorLayer->GetDrawing()->AllocLine( MaterialInterface
                                                                             , *(FString("Line_") + FString::FromInt( LineNumber++ ))
                                                                             , FVector::Zero()
                                                                             , FVector::Zero()
@@ -279,8 +261,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
 
                         //case EOdysseyShapeType::kPolygon:
                         case EArianePrimitiveToolShapeType::Polygon:
-                            Primitive = VectorLayer->GetDrawing()->AllocPolygon( ( MaterialInterface && UseMaterial ) ? MaterialInterface
-                                                                                                                      : Settings->GetDefaultPathDrawingMaterial()
+                            Primitive = VectorLayer->GetDrawing()->AllocPolygon( MaterialInterface
                                                                                , *(FString("Polygon_") + FString::FromInt( PolygonNumber++ ))
                                                                                , DivisionCount
                                                                                , 0.0f
@@ -546,6 +527,26 @@ UArianeEditorPrimitiveDrawingTool::Render(IToolsContextRenderAPI* RenderAPI)
             }
         }
     }
+}
+
+void
+UArianeEditorPrimitiveDrawingTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
+{
+    const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
+
+    Super::PostEditChangeProperty(PropertyChangedEvent);
+    FName PropertyName = PropertyChangedEvent.GetPropertyName();
+    FName MemberPropertyName = PropertyChangedEvent.GetMemberPropertyName();
+
+    if( PropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPrimitiveDrawingTool, MaterialInterface) )
+    {
+        if( MaterialInterface == nullptr )
+        {
+            MaterialInterface = Settings->GetDefaultPathDrawingMaterial();
+        }
+    }
+
+    return Super::PostEditChangeProperty( PropertyChangedEvent );
 }
 
 void

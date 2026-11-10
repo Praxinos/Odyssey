@@ -38,7 +38,6 @@ UArianeEditorPaintBucketTool::UArianeEditorPaintBucketTool()
     : GapTolerance( 50.0f )
     , SegmentExtensionScheme ( EArianeGraphSegmentExtensionScheme::Single )
     , FittingRule ( EArianeCycleFittingRule::FitToPaths )
-    , UseMaterial ( false )
     , MaterialInterface( nullptr )
     , Graph( new FArianeGraph() )
     , PickedCycle( nullptr )
@@ -52,9 +51,12 @@ UArianeEditorPaintBucketTool::UArianeEditorPaintBucketTool()
 void
 UArianeEditorPaintBucketTool::Init( FArianeEditor* InEditor )
 {
-    Super::Init( InEditor );
-}
+    const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
 
+    Super::Init( InEditor );
+
+    MaterialInterface = Settings->GetDefaultPathDrawingMaterial();
+}
 
 void
 UArianeEditorPaintBucketTool::OnCameraMoved( const FVector& Location, const FRotator& Rotation, ELevelViewportType ViewportType, int32 ViewIndex )
@@ -129,7 +131,14 @@ UArianeEditorPaintBucketTool::UnbindDelegates()
 void
 UArianeEditorPaintBucketTool::Activate()
 {
+    const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
+
     Reset();
+
+    if( MaterialInterface == nullptr )
+    {
+        MaterialInterface = Settings->GetDefaultPathDrawingMaterial();
+    }
 
     BindDelegates();
 }
@@ -277,8 +286,7 @@ UArianeEditorPaintBucketTool::OnMouseUp( FEditorViewportClient* ViewportClient
 
                 VectorLayer->GetDrawing()->Modify();
 
-                FArianeCycle* PaintedCycle = VectorLayer->GetDrawing()->AllocCycle( UseMaterial && MaterialInterface ? MaterialInterface
-                                                                                                                     : Settings->GetDefaultPathDrawingMaterial()
+                FArianeCycle* PaintedCycle = VectorLayer->GetDrawing()->AllocCycle( MaterialInterface
                                                                                  , *(FString( "Cycle_" ) + FString::FromInt( PathNumber ))
                                                                                  , EArianeAllocationModel::InstancedStruct );
 
@@ -471,6 +479,8 @@ UArianeEditorPaintBucketTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderA
 void
 UArianeEditorPaintBucketTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
+    const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
+
     Super::PostEditChangeProperty(PropertyChangedEvent);
     FName PropertyName = PropertyChangedEvent.GetPropertyName();
     FName MemberPropertyName = PropertyChangedEvent.GetMemberPropertyName();
@@ -483,6 +493,14 @@ UArianeEditorPaintBucketTool::PostEditChangeProperty( FPropertyChangedEvent& Pro
     if( PropertyName == GET_MEMBER_NAME_CHECKED( UArianeEditorPaintBucketTool, SegmentExtensionScheme ) )
     {
         Reset();
+    }
+
+    if( PropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPaintBucketTool, MaterialInterface) )
+    {
+        if( MaterialInterface == nullptr )
+        {
+            MaterialInterface = Settings->GetDefaultPathDrawingMaterial();
+        }
     }
 }
 

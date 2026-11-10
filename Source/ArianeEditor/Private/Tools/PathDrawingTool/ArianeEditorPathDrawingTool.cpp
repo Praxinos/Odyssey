@@ -49,6 +49,16 @@ UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
 }
 
 void
+UArianeEditorPathDrawingTool::Init( FArianeEditor* InEditor )
+{
+    const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
+
+    Super::Init( InEditor );
+
+    MaterialInterface = Settings->GetDefaultPathDrawingMaterial();
+}
+
+void
 UArianeEditorPathDrawingTool::Activate()
 {
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
@@ -133,8 +143,7 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* ViewportClient
 
                 VectorLayer->GetDrawing()->Modify();
 
-                EditedPath = VectorLayer->GetDrawing()->AllocPath( ( MaterialInterface && UseMaterial ) ? MaterialInterface
-                                                                                                        : Settings->GetDefaultPathDrawingMaterial()
+                EditedPath = VectorLayer->GetDrawing()->AllocPath( MaterialInterface
                                                                    , *(FString( "Path_" ) + FString::FromInt( PathNumber ))
                                                                    , EArianeAllocationModel::InstancedStruct );
 
@@ -481,6 +490,8 @@ UArianeEditorPathDrawingTool::SupportsColorType( EOdysseyPainterEditorColorType 
 void
 UArianeEditorPathDrawingTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
+    const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
+
     Super::PostEditChangeProperty(PropertyChangedEvent);
     FName PropertyName = PropertyChangedEvent.GetPropertyName();
     FName MemberPropertyName = PropertyChangedEvent.GetMemberPropertyName();
@@ -488,6 +499,14 @@ UArianeEditorPathDrawingTool::PostEditChangeProperty( FPropertyChangedEvent& Pro
     if( PropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPathDrawingTool, TracingFidelity) )
     {
         PathTracer.SetTracingWidth( (double) TracingFidelity );
+    }
+
+    if( PropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPathDrawingTool, MaterialInterface) )
+    {
+        if( MaterialInterface == nullptr )
+        {
+            MaterialInterface = Settings->GetDefaultPathDrawingMaterial();
+        }
     }
 
     return Super::PostEditChangeProperty( PropertyChangedEvent );
