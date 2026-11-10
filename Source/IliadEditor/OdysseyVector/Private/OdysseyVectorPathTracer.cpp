@@ -484,6 +484,25 @@ FOdysseyVectorPathTracer::CommitVertex( bool iIsHandleAligned )
     return newVertex;
 }
 
+bool
+FOdysseyVectorPathTracer::SetupAlignment( FOdysseyVectorSegment* Segment0
+                                        , FOdysseyVectorVertex* Vertex
+                                        , FOdysseyVectorSegment* Segment1 )
+{
+    ::ULIS::FVec2D Segment0Vector = Segment0->GetVectorFromVertex( Vertex, true );
+    ::ULIS::FVec2D Segment1Vector = Segment1->GetVectorFromVertex( Vertex, true );
+    double DotProduct = Segment1Vector.DotProduct( - Segment0Vector );
+
+    if ( DotProduct > mDotLimit )
+    {
+        Vertex->SetHandleAligned( true, false );
+
+        return true;
+    }
+
+    return false;
+}
+
 FOdysseyVectorSegment*
 FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iPreviousVertex
                                        , FOdysseyVectorVertex* iEndVertex )
@@ -508,15 +527,15 @@ FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iPreviousVertex
         if (mEdgeBuffer.size() < 2)
         {
             FOdysseyVectorSegment* PreviousSegment = iPreviousVertex->GetFirstSegment();
-            if (PreviousSegment)
-            {
 
+            if ( (PreviousSegment) && ( SetupAlignment( PreviousSegment, iPreviousVertex, newCubicSegment ) == true ) )
+            {
                 FOdysseyVectorVertex* FirstVertex = PreviousSegment->GetVertex(0); //Get FIrst Vertex
                 ::ULIS::FVec2D FirstVertexCoords = FirstVertex->GetWorldCoords();
                 ::ULIS::FVec2D PreviousVertexCoords = iPreviousVertex->GetWorldCoords();
                 ::ULIS::FVec2D EndVertexCoords = iEndVertex->GetWorldCoords();
-
                 ::ULIS::FVec2D Direction = EndVertexCoords - FirstVertexCoords;
+
                 if (Direction.Distance())
                 {
                     Direction.Normalize();

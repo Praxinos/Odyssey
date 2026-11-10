@@ -131,6 +131,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         void SetDotLimit( double iDotLimit );
         void SetTracingWidth( double iTracingWidth );
         ::ULIS::FRectD GetRedrawRect();
+        bool SetupAlignment( FOdysseyVectorSegment* Segment0
+                           , FOdysseyVectorVertex* Vertex
+                           , FOdysseyVectorSegment* Segment1 );
 
     private:
         double mDotLimit;
