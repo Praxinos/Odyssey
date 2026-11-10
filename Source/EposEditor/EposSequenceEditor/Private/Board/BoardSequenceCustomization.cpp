@@ -1762,10 +1762,16 @@ FBoardSequenceCustomization::OnGlobalTimeChanged()
     }
     else
     {
-        TSharedPtr<FEposSequenceEditorSpawnRegister> spawnRegister = StaticCastSharedPtr<FEposSequenceEditorSpawnRegister>( sequencer->GetSpawnRegister().AsShared().ToSharedPtr() );
-        check( spawnRegister );
+        //PATCH: if a level sequence is opened, it's the levelsequence toolkit which is created
+        // and it registers a FLevelSequenceEditorSpawnRegister
+        // and as there is no hierarchy id (rtti), it's not possible to know how to cast and check sequencer->GetSpawnRegister()
+        // For the moment, check the root sequence (it is UObject) to know if the spawnregister in the toolkit is the correct one
+        if( sequencer->GetRootMovieSceneSequence()->IsA<UEposMovieSceneSequence>() )
+        {
+            TSharedRef<FEposSequenceEditorSpawnRegister> spawnRegister = StaticCastSharedRef<FEposSequenceEditorSpawnRegister>( sequencer->GetSpawnRegister().AsShared() );
 
-        spawnRegister->ResetCameraLock();
+            spawnRegister->ResetCameraLock();
+        }
     }
 }
 
