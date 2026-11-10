@@ -14,6 +14,7 @@
 #include "ArianeLayerStack.h"
 #include "ArianeDrawing.h"
 #include "ArianeLayerVector.h"
+#include "ArianeLayerFolder.h"
 #include "ArianeSegmentCubic.h"
 
 // Unreal headers
@@ -38,6 +39,7 @@ UArianeEditorPaintBucketTool::UArianeEditorPaintBucketTool()
     : GapTolerance( 50.0f )
     , SegmentExtensionScheme ( EArianeGraphSegmentExtensionScheme::Single )
     , FittingRule ( EArianeCycleFittingRule::FitToPaths )
+    , LayerPolicy ( EArianeEditorPaintBucketToolLayerPolicy::Selected )
     , MaterialInterface( nullptr )
     , Graph( new FArianeGraph() )
     , PickedCycle( nullptr )
@@ -172,26 +174,122 @@ UArianeEditorPaintBucketTool::Reset()
             TArray<FArianeObject*> GraphedObjects;
             FVector CameraLocation = CameraState.Position;
             FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
+            TArray<UArianeLayer*> PaintedLayers;
+            uint32 MaxObjectCount = 0;
 
-            GraphedObjects.Reserve( VectorLayer->GetDrawing()->GetInstancedObjects().Num() );
+            GetPaintedLayers( PaintedLayers );
 
-            FArianeObject::Traverse( RootGroup
-                                   , FArianeObject::ETraversalPolicy::AllChildren
-                                   , [ &GraphedObjects ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+            for( UArianeLayer* PaintedLayer : PaintedLayers )
+            {
+                UArianeLayerVector* PaintedVectorLayer = Cast<UArianeLayerVector>(PaintedLayer);
+
+                if( PaintedVectorLayer )
                 {
-                    GraphedObjects.Add( Object );
+                    MaxObjectCount += VectorLayer->GetDrawing()->GetInstancedObjects().Num();
+                }
+            }
 
-                    return FArianeObject::ETraversalReturnValue::Continue;
-                } );
+            if( MaxObjectCount )
+            {
+                GraphedObjects.Reserve( MaxObjectCount );
 
-            Graph->Solve( CameraLocation
-                        , DrawingPlane
-                        , GraphedObjects
-                        , GapTolerance
-                        , SegmentExtensionScheme );
+                for( UArianeLayer* PaintedLayer : PaintedLayers )
+                {
+                    UArianeLayerVector* PaintedVectorLayer = Cast<UArianeLayerVector>(PaintedLayer);
 
-            bGraphNeedsUpdate = false;
+                    if( PaintedVectorLayer )
+                    {
+                        FArianeObject::Traverse( PaintedVectorLayer->GetDrawing()->GetRootGroup()
+                                               , FArianeObject::ETraversalPolicy::AllChildren
+                                               , [ &GraphedObjects ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+                            {
+                                GraphedObjects.Add( Object );
+
+                                return FArianeObject::ETraversalReturnValue::Continue;
+                            } );
+                    }
+                }
+
+                Graph->Solve( CameraLocation
+                            , DrawingPlane
+                            , GraphedObjects
+                            , GapTolerance
+                            , SegmentExtensionScheme );
+
+                bGraphNeedsUpdate = false;
+            }
         }
+    }
+}
+
+void
+UArianeEditorPaintBucketTool::GetPaintedLayers( TArray<UArianeLayer*>& OutPaintedLayers )
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
+    {
+        UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+        bool bDoSelect = false;
+
+        if( LayerPolicy == EArianeEditorPaintBucketToolLayerPolicy::SelectedAndAbove )
+        {
+            bDoSelect = true;
+        }
+
+        if( LayerPolicy == EArianeEditorPaintBucketToolLayerPolicy::SelectedAndBelow )
+        {
+            bDoSelect = false;
+        }
+
+        UArianeLayerFolder::Traverse( LayerStack->GetRootFolder()
+                                    , [ this
+                                      , &bDoSelect
+                                      , &OutPaintedLayers ]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
+            {
+                UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Layer);
+
+                if( VectorLayer )
+                {
+                    switch( LayerPolicy )
+                    {
+                        case EArianeEditorPaintBucketToolLayerPolicy::SelectedAndBelow :
+                            if( VectorLayer->IsSelected() || bDoSelect )
+                            {
+                                OutPaintedLayers.Add( VectorLayer );
+
+                                bDoSelect = false;
+                            }
+                        break;
+
+                        case EArianeEditorPaintBucketToolLayerPolicy::SelectedAndAbove :
+                            if( VectorLayer->IsSelected()  || bDoSelect )
+                            {
+                                OutPaintedLayers.Add( VectorLayer );
+
+                                bDoSelect = true;
+                            }
+                        break;
+
+                        case EArianeEditorPaintBucketToolLayerPolicy::Selected :
+                            if( VectorLayer->IsSelected() )
+                            {
+                                OutPaintedLayers.Add( VectorLayer );
+                            }
+                        break;
+
+                        case EArianeEditorPaintBucketToolLayerPolicy::All :
+                            OutPaintedLayers.Add( VectorLayer );
+                        break;
+
+
+                        default :
+                        break;
+                    }
+                }
+
+                return UArianeLayerFolder::ETraversalReturnValue::Continue;
+            } );
     }
 }
 
@@ -491,6 +589,11 @@ UArianeEditorPaintBucketTool::PostEditChangeProperty( FPropertyChangedEvent& Pro
     }
 
     if( PropertyName == GET_MEMBER_NAME_CHECKED( UArianeEditorPaintBucketTool, SegmentExtensionScheme ) )
+    {
+        Reset();
+    }
+
+    if( PropertyName == GET_MEMBER_NAME_CHECKED( UArianeEditorPaintBucketTool, LayerPolicy ) )
     {
         Reset();
     }

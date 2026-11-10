@@ -23,6 +23,15 @@ struct FArianeVertex;
 class FEditorViewportClient;
 class UArianeLayerVector;
 
+UENUM(BlueprintType)
+enum class EArianeEditorPaintBucketToolLayerPolicy : uint8
+{
+    SelectedAndAbove,
+    Selected,
+    SelectedAndBelow,
+    All
+};
+
 UCLASS()
 class ARIANEEDITOR_API UArianeEditorPaintBucketTool : public UArianeEditorTool
 {
@@ -104,6 +113,8 @@ protected:
     void OnPreUpdate( bool bInteractive );
     void OnPostUpdate( bool bInteractive );
 
+    void GetPaintedLayers( TArray<UArianeLayer*>& OutPaintedLayers );
+
 public:
     UPROPERTY( EditAnywhere
              , Category = PaintBucketTool
@@ -121,6 +132,10 @@ public:
     UPROPERTY( EditAnywhere
              , Category = PaintBucketTool )
     EArianeCycleFittingRule FittingRule;
+
+    UPROPERTY( EditAnywhere
+             , Category = PaintBucketTool )
+    EArianeEditorPaintBucketToolLayerPolicy LayerPolicy;
 
     UPROPERTY( EditAnywhere
              , Category = PaintBucketTool )
