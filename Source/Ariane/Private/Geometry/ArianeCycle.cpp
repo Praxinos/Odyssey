@@ -589,11 +589,12 @@ FArianeCycleGeometry3D::Build()
     for( int32 i = 0; i < CyclePoints.Num(); i++  )
     {
         FArianePoint& Point = CyclePoints[i];
+        FVector2f& UV = CycleUVs[i];
 
         MeshVertices.Emplace( FVector3f( Point.GetPosition() )
                             , FVector3f( NormalAccus[i].TangentX ) // TangentX
                             , FVector3f( NormalAccus[i].TangentZ )// TangentZ
-                            , FVector2f::Zero()
+                            , UV
                             , Cycle->GetColor() );
     }
 
