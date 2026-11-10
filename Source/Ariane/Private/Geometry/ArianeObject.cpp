@@ -429,7 +429,7 @@ FArianeObject::InsertChild( FArianeObject* Child, FArianeObject* InsertAfter, FA
         Child->SetTransform( RelativeTransform.GetTranslation(), R.Euler(), RelativeTransform.GetScale3D(), FVector::Zero() );
     }
 
-    Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
+    Child->Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 }
 
 void
