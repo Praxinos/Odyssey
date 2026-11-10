@@ -86,6 +86,19 @@ public:
 
     UPROPERTY( EditAnywhere
              , Category = PrimitiveDrawingTool
+             , meta = ( ToolTip = "Division count"
+                      , EditCondition = "PrimitiveShapeType == EArianePrimitiveToolShapeType::Polygon"
+                      , EditConditionHides
+                      , ClampMin = "3"
+                      , UIMin = "3"
+                      , Delta = "1"
+                      , LinearDeltaSensitivity = "5"
+                      , ClampMax = "20"
+                      , UIMax = "20" ) )
+    int DivisionCount;
+
+    UPROPERTY( EditAnywhere
+             , Category = PrimitiveDrawingTool
              , meta = ( ToolTip = "StrokeWidth"
                       , ClampMin = "0.01"
                       , Delta = "0.1"
@@ -104,24 +117,16 @@ public:
 
     UPROPERTY( EditAnywhere
              , Category = PrimitiveDrawingTool )
+    bool UseMaterial;
+
+    UPROPERTY( EditAnywhere
+             , Category = PrimitiveDrawingTool
+             , meta = (EditCondition = "UseMaterial", EditConditionHides, DisplayName = "Material") )
     UMaterialInterface* MaterialInterface;
 
     //UPROPERTY( EditAnywhere
     //         , Category = "Shape" )
     //FOdysseyShapes Shapes;
-
-    UPROPERTY( EditAnywhere
-             , Category = PrimitiveDrawingTool
-             , meta = ( ToolTip = "Division count"
-                      , EditCondition = "PrimitiveShapeType == EArianePrimitiveToolShapeType::Polygon"
-                      , EditConditionHides
-                      , ClampMin = "3"
-                      , UIMin = "3"
-                      , Delta = "1"
-                      , LinearDeltaSensitivity = "5"
-                      , ClampMax = "20"
-                      , UIMax = "20" ) )
-    int DivisionCount;
 
 protected:
     FArianePrimitive* Primitive;

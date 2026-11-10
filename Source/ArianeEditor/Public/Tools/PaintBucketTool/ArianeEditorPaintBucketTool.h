@@ -106,10 +106,6 @@ protected:
 
 public:
     UPROPERTY( EditAnywhere
-             , Category = PaintBucketTool )
-    UMaterialInterface* MaterialInterface;
-
-    UPROPERTY( EditAnywhere
              , Category = PaintBucketTool
              , meta = ( ToolTip  = "Increase or decrease the tolerance of a gap between 2 paths."
                       , ClampMin = "0.0"
@@ -125,6 +121,15 @@ public:
     UPROPERTY( EditAnywhere
              , Category = PaintBucketTool )
     EArianeCycleFittingRule FittingRule;
+
+    UPROPERTY( EditAnywhere
+             , Category = PaintBucketTool )
+    bool UseMaterial;
+
+    UPROPERTY( EditAnywhere
+             , Category = PaintBucketTool
+             , meta = (EditCondition = "UseMaterial", EditConditionHides, DisplayName = "Material") )
+    UMaterialInterface* MaterialInterface;
 
 protected:
     FArianeGraph* Graph;

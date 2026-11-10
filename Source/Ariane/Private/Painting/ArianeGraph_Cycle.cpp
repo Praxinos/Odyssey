@@ -276,6 +276,12 @@ FArianeGraph::FCycle::HitTest( double iX, double iY )
     return ( Ret == BL_HIT_TEST_IN ) ? true : false;
 }
 
+const FBox2D&
+FArianeGraph::FCycle::GetBBox()
+{
+    return BBox;
+}
+
 /*
 // for debugging purposes
 static void

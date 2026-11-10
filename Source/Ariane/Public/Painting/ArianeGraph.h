@@ -450,10 +450,10 @@ public:
         bool FitsIn( FCycle* ParentCandidate );
 
         /**
-         * @brief Gets this cycle's bounding box
-         * @return the bounding box as a rectangle
+         * @brief Gets this cycle's bounding box. Allows one to compute UV coords.
+         * @return the bounding box as a 2D rectangle.
          */
-        //::ULIS::FRectD GetBBox( bool iWorld );
+        const FBox2D& GetBBox();
 
         /**
          * @brief Get the attached bucket, if any.

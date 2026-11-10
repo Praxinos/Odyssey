@@ -134,6 +134,7 @@ public:
     TArray<int32>& GetEarcutIndices();
     void ImportGraphCycle( FArianeGraph* Graph, FArianeGraph::FCycle* GraphCycle, EArianeCycleFittingRule FittingRule );
     TArray<FArianePoint>& GetPoints();
+    TArray<FVector2f>& GetUVs();
     virtual FArianeCycleInvalidationFlags& GetInvalidationFlags() override;
 
 protected:
@@ -141,18 +142,19 @@ protected:
     virtual void CopySettings( FArianeObject* DestinationObject, const FCopyArgs& CopyArgs, bool bInvalidate ) override;
     static inline uint32 EvaluateSectionPointCount( FArianeGraph::FSection* Section );
     static uint32 EvaluateContourPointCount( FArianeGraph::FCycle* Cycle );
-    static void EvaluateGraphCyclePointCount( FArianeGraph::FCycle* Cycle
-                                            , std::vector<std::vector<FVector2D>>& EarcutContours
-                                            , TArray<FArianePoint>& Points );
+    static uint32 EvaluateGraphCyclePointCount( FArianeGraph::FCycle* Cycle
+                                              , std::vector<std::vector<FVector2D>>& EarcutContours );
     void ContourToCoords( FArianeGraph* Graph
                         , FArianeGraph::FCycle* GraphCycle
                         , std::vector<FVector2D>& EarcutContour
                         , TArray<FArianePoint>& OutPoints
+                        , TArray<FVector2f>& OutUVs
                         , EArianeCycleFittingRule FittingRule );
     void GraphCycleToCoords(  FArianeGraph* Graph
                             , FArianeGraph::FCycle* GraphCycle
                             , std::vector<std::vector<FVector2D>>& EarcutContours
                             , TArray<FArianePoint>& OutPoints
+                            , TArray<FVector2f>& OutUVs
                             , EArianeCycleFittingRule FittingRule );
     FVector GetNodeFittedPosition( FArianeGraph* Graph, FArianeGraph::FNode* Node, EArianeCycleFittingRule FittingRule );
     virtual void ResetDrawing( UArianeDrawing* InDrawing ) override;
@@ -173,6 +175,9 @@ protected:
 
     UPROPERTY( EditAnywhere )
     TArray<FArianePoint> Points;
+
+    UPROPERTY( EditAnywhere )
+    TArray<FVector2f> UVs;
 
 protected:
     FArianeCycleGeometry3D* Geometry3D;

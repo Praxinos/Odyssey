@@ -168,10 +168,9 @@ FArianeCycle::EvaluateContourPointCount( FArianeGraph::FCycle* Cycle )
     return PointCount;
 }
 
-void
+uint32
 FArianeCycle::EvaluateGraphCyclePointCount( FArianeGraph::FCycle* Cycle
-                                          , std::vector<std::vector<FVector2D>>& EarcutContours
-                                          , TArray<FArianePoint>& Points )
+                                          , std::vector<std::vector<FVector2D>>& EarcutContours )
 {
     uint32 PointCount = 0;
     uint32 CycleCount = 1;
@@ -189,7 +188,7 @@ FArianeCycle::EvaluateGraphCyclePointCount( FArianeGraph::FCycle* Cycle
     }
 
     // Add the result to this cycle's contour (the outer one)
-    Points.Reserve( EvaluateContourPointCount( Cycle ) + PointCount );
+    return EvaluateContourPointCount( Cycle ) + PointCount;
 }
 
 FVector
@@ -220,6 +219,7 @@ FArianeCycle::ContourToCoords( FArianeGraph* Graph
                              , FArianeGraph::FCycle* GraphCycle
                              , std::vector<FVector2D>& EarcutContour
                              , TArray<FArianePoint>& OutPoints
+                             , TArray<FVector2f>& OutUVs
                              , EArianeCycleFittingRule FittingRule )
 {
     FArianeGraph::FSection* FirstSection = GraphCycle->ContourSections[0];
@@ -227,11 +227,13 @@ FArianeCycle::ContourToCoords( FArianeGraph* Graph
     FArianeGraph::FNode* FirstNode = FirstSection->Nodes[FirstNodeIndex];
     int32 ArraySize = GraphCycle->ContourSections.Num();
     FVector FirstNodeFittedPosition = GetNodeFittedPosition( Graph, FirstNode, FittingRule );
+    const FBox2D& GraphCycleBBox = GraphCycle->GetBBox();
 
     // Earcut will create indices on a Graph in a 2D coordinates system.
     EarcutContour.push_back( FirstNode->Position );
     // We will then use the indices to form triangles in the 3D corrdinates system, whether on the plane or fitted to the paths
     OutPoints.Emplace( WorldTransform.InverseTransformPosition( FirstNodeFittedPosition ) );
+    OutUVs.Emplace( ( FirstNode->Position - GraphCycleBBox.Min ) / GraphCycleBBox.GetSize() );
 
     for( int i = 0; i < ArraySize; i++ )
     {
@@ -250,6 +252,7 @@ FArianeCycle::ContourToCoords( FArianeGraph* Graph
             EarcutContour.push_back( NextNode->Position );
             // We will then use the indices to form triangles in the 3D corrdinates system, whether on the plane or fitted to the paths
             OutPoints.Emplace( WorldTransform.InverseTransformPosition( NextNodeFittedPosition ) );
+            OutUVs.Emplace( ( NextNode->Position - GraphCycleBBox.Min ) / GraphCycleBBox.GetSize() );
         }
     }
 }
@@ -259,18 +262,22 @@ FArianeCycle::GraphCycleToCoords(  FArianeGraph* Graph
                                  , FArianeGraph::FCycle* GraphCycle
                                  , std::vector<std::vector<FVector2D>>& EarcutContours
                                  , TArray<FArianePoint>& OutPoints
+                                 , TArray<FVector2f>& OutUVs
                                  , EArianeCycleFittingRule FittingRule )
 {
     uint32 CycleCount = 1;
 
-    EvaluateGraphCyclePointCount( GraphCycle, EarcutContours, OutPoints );
+    uint32 PointCount = EvaluateGraphCyclePointCount( GraphCycle, EarcutContours );
 
-    ContourToCoords( Graph, GraphCycle, EarcutContours[0], OutPoints, FittingRule );
+    OutPoints.Reserve( PointCount );
+    OutUVs.Reserve( PointCount );
+
+    ContourToCoords( Graph, GraphCycle, EarcutContours[0], OutPoints, OutUVs, FittingRule );
 
     // for each inner cycle, we evaluate the number of points it will need for triangulation
     for( FArianeGraph::FCycle* Child : GraphCycle->Children )
     {
-        ContourToCoords( Graph, Child, EarcutContours[CycleCount++], OutPoints, FittingRule );
+        ContourToCoords( Graph, Child, EarcutContours[CycleCount++], OutPoints, OutUVs, FittingRule );
     }
 }
 
@@ -284,7 +291,7 @@ FArianeCycle::ImportGraphCycle( FArianeGraph* Graph, FArianeGraph::FCycle* Graph
     {
         std::vector<std::vector<FVector2D>> Polygon;
 
-        GraphCycleToCoords( Graph, GraphCycle, Polygon, Points, FittingRule );
+        GraphCycleToCoords( Graph, GraphCycle, Polygon, Points, UVs, FittingRule );
 
         // Triangulate. The result is a flat list of indices into the input vertices (numbered ring after
         // ring, so index 6 is {25, 75} here), three per triangle. Output triangles have a consistent
@@ -478,6 +485,12 @@ FArianeCycle::GetPoints()
     return Points;
 }
 
+TArray<FVector2f>&
+FArianeCycle::GetUVs()
+{
+    return UVs;
+}
+
 FArianeCycleGeometry3D::~FArianeCycleGeometry3D()
 {
 }
@@ -495,8 +508,21 @@ FArianeCycleGeometry3D::GetCycle()
 void
 FArianeCycleGeometry3D::Build()
 {
+    struct FNormalAccu
+    {
+        FVector TangentX;
+        FVector TangentZ;
+        uint32 Count;
+    };
+
     FArianeCycle* Cycle = GetCycle();
     TArray<int32>& SignedIndices = Cycle->GetEarcutIndices();
+    TArray<FArianePoint>& CyclePoints = Cycle->GetPoints();
+    TArray<FVector2f>& CycleUVs = Cycle->GetUVs();
+    // helper to compute the normal vector for each vertex.
+    TArray<FNormalAccu> NormalAccus;
+
+    NormalAccus.SetNumZeroed( CyclePoints.Num() );
 
     MeshVertices.Empty();
     MeshIndices.Empty();
@@ -507,11 +533,66 @@ FArianeCycleGeometry3D::Build()
     // signed to unsigned. All values are >= 0 anyways.
     FMemory::Memcpy( MeshIndices.GetData(), SignedIndices.GetData(), SignedIndices.Num() * sizeof( uint32 ) );
 
-    for( FArianePoint& Point : Cycle->GetPoints() )
+    // for each triangle, compute it's normal vector and UV Tangent Calculation
+    for( int32 i = 0; i < MeshIndices.Num(); i += 3 )
     {
+        uint32 Point0Index = MeshIndices[i];
+        uint32 Point1Index = MeshIndices[i+1];
+        uint32 Point2Index = MeshIndices[i+2];
+        FArianePoint& Point0 = CyclePoints[Point0Index];
+        FArianePoint& Point1 = CyclePoints[Point1Index];
+        FArianePoint& Point2 = CyclePoints[Point2Index];
+        FVector P0P1 = ( Point1.GetPosition() - Point0.GetPosition() );
+        FVector P0P2 = ( Point2.GetPosition() - Point0.GetPosition() );
+        FVector Cross = FVector::CrossProduct( P0P1, P0P2 ).GetSafeNormal();
+        FVector2f& UV0 = CycleUVs[Point0Index];
+        FVector2f& UV1 = CycleUVs[Point1Index];
+        FVector2f& UV2 = CycleUVs[Point2Index];
+        FVector2f UV0UV1 = UV1 - UV0;
+        FVector2f UV0UV2 = UV2 - UV0;
+        float UVDeterminant = (UV0UV1.X * UV0UV2.Y - UV0UV2.X * UV0UV1.Y);
+        FVector TangentX = FVector::Zero();
+
+        if( UVDeterminant )
+        {
+            float InvUVDeterminant = 1.0f / UVDeterminant;
+
+            TangentX = (P0P1 * UV0UV2.Y - P0P2 * UV0UV1.Y) * InvUVDeterminant;
+        }
+
+        NormalAccus[Point0Index].TangentX += TangentX;
+        NormalAccus[Point0Index].TangentZ += Cross;
+        NormalAccus[Point0Index].Count++;
+
+        NormalAccus[Point1Index].TangentX += TangentX;
+        NormalAccus[Point1Index].TangentZ += Cross;
+        NormalAccus[Point1Index].Count++;
+
+        NormalAccus[Point2Index].TangentX += TangentX;
+        NormalAccus[Point2Index].TangentZ += Cross;
+        NormalAccus[Point2Index].Count++;
+    }
+
+    // average the result
+    for( FNormalAccu& NormalAccu : NormalAccus )
+    {
+        if( NormalAccu.Count )
+        {
+            NormalAccu.TangentZ = ( NormalAccu.TangentZ / NormalAccu.Count ).GetSafeNormal();
+
+            // Gram-Schmidt to force TangentX to be perpendicular to TangentZ
+            NormalAccu.TangentX = ( NormalAccu.TangentX - NormalAccu.TangentZ * FVector::DotProduct( NormalAccu.TangentZ
+                                                                                                   , NormalAccu.TangentX ) ).GetSafeNormal();
+        }
+    }
+
+    for( int32 i = 0; i < CyclePoints.Num(); i++  )
+    {
+        FArianePoint& Point = CyclePoints[i];
+
         MeshVertices.Emplace( FVector3f( Point.GetPosition() )
-                            , FVector3f::Zero() // TangentX
-                            , FVector3f::Zero() // TangentZ
+                            , FVector3f( NormalAccus[i].TangentX ) // TangentX
+                            , FVector3f( NormalAccus[i].TangentZ )// TangentZ
                             , FVector2f::Zero()
                             , Cycle->GetColor() );
     }

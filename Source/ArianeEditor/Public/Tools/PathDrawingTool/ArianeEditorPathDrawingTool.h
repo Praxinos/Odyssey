@@ -100,6 +100,7 @@ public:
              , Category = PathDrawingTool
              , meta = ( ToolTip = "Size"
                       , ClampMin = "0.01"
+                      , LinearDeltaSensitivity = "15"
                       , Delta = "0.1"
                       , UIMin = "0.01" ) )
     double Size;

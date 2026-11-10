@@ -35,10 +35,11 @@ UArianeEditorPaintBucketTool::~UArianeEditorPaintBucketTool()
 }
 
 UArianeEditorPaintBucketTool::UArianeEditorPaintBucketTool()
-    : MaterialInterface( nullptr )
-    , GapTolerance( 50.0f )
+    : GapTolerance( 50.0f )
     , SegmentExtensionScheme ( EArianeGraphSegmentExtensionScheme::Single )
     , FittingRule ( EArianeCycleFittingRule::FitToPaths )
+    , UseMaterial ( false )
+    , MaterialInterface( nullptr )
     , Graph( new FArianeGraph() )
     , PickedCycle( nullptr )
     , bGraphNeedsUpdate ( true )
@@ -276,8 +277,8 @@ UArianeEditorPaintBucketTool::OnMouseUp( FEditorViewportClient* ViewportClient
 
                 VectorLayer->GetDrawing()->Modify();
 
-                FArianeCycle* PaintedCycle = VectorLayer->GetDrawing()->AllocCycle( MaterialInterface ? MaterialInterface
-                                                                                                     : Settings->GetDefaultPathDrawingMaterial()
+                FArianeCycle* PaintedCycle = VectorLayer->GetDrawing()->AllocCycle( UseMaterial && MaterialInterface ? MaterialInterface
+                                                                                                                     : Settings->GetDefaultPathDrawingMaterial()
                                                                                  , *(FString( "Cycle_" ) + FString::FromInt( PathNumber ))
                                                                                  , EArianeAllocationModel::InstancedStruct );
 
