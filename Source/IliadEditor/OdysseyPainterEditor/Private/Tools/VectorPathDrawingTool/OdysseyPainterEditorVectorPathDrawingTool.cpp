@@ -38,7 +38,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     , Opacity( 1.0f )
     , Brush( nullptr )
     , TracingType( eTracingType::Organic )
-    , TracingFidelityPercent( 100.0f )
+    , TracingFidelityPercent( 90.0f )
     , Radius( 5.0f )
     , PressureSensitive( true )
     //, Absolute( true )
@@ -53,7 +53,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
 {
     mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.PathDrawing64"));
 
-    mPathTracer.SetTracingWidth( (100.0f - TracingFidelityPercent) * 100.f * 10.f );
+    mPathTracer.SetTracingWidth( (100.0f - TracingFidelityPercent) / 100.f * 10.f );
 
     mPathDrawingHUD = static_cast<FOdysseyPainterEditorVectorPathDrawingToolHUD*>( mBaseHUD.Get() );
 }
