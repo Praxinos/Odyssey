@@ -57,6 +57,7 @@ UOdysseyPainterEditorRasterSelection::Reset()
         mRasterBlock->OnBlockCommited().RemoveAll(this);
 
     mBlock = nullptr;
+    mFeatheredBlock = nullptr;
     mRasterBlock = nullptr;
     RefreshHUD();
 
@@ -127,7 +128,8 @@ UOdysseyPainterEditorRasterSelection::Add(const TArray<FVector2D>& iPolygon)
     mOnChanged.Broadcast();
 }
 
-void UOdysseyPainterEditorRasterSelection::Add(const TArray<TArray<FVector2D>>& iPolygons)
+void
+UOdysseyPainterEditorRasterSelection::Add(const TArray<TArray<FVector2D>>& iPolygons)
 {
     for (TArray<FVector2D> polygon : iPolygons)
     {
@@ -191,7 +193,8 @@ UOdysseyPainterEditorRasterSelection::Substract(const TArray<FVector2D>& iPolygo
     mOnChanged.Broadcast();
 }
 
-void UOdysseyPainterEditorRasterSelection::Substract(const TArray<TArray<FVector2D>>& iPolygons)
+void
+UOdysseyPainterEditorRasterSelection::Substract(const TArray<TArray<FVector2D>>& iPolygons)
 {
     for( TArray<FVector2D> polygon : iPolygons)
     {
@@ -224,7 +227,8 @@ void UOdysseyPainterEditorRasterSelection::Substract(const TArray<TArray<FVector
     mOnChanged.Broadcast();
 }
 
-void UOdysseyPainterEditorRasterSelection::Invert()
+void
+UOdysseyPainterEditorRasterSelection::Invert()
 {
     if( !mBlock )
         return;
@@ -279,6 +283,28 @@ TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 UOdysseyPainterEditorRasterSelection::GetBlock()
 {
     return mBlock;
+}
+
+TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
+UOdysseyPainterEditorRasterSelection::GetFeatheredBlock()
+{
+    if( GenerateFeatheredBlock() )
+        return mFeatheredBlock;
+    else
+        return mBlock;
+}
+
+int
+UOdysseyPainterEditorRasterSelection::GetFeatherRadius() const
+{
+    return mFeatherRadius;
+}
+
+void
+UOdysseyPainterEditorRasterSelection::SetFeatherRadius(int iRadius)
+{
+    if( iRadius >= 0 )
+        mFeatherRadius = iRadius;
 }
 
 TSharedPtr<FOdysseyHUDElement>
@@ -352,19 +378,22 @@ UOdysseyPainterEditorRasterSelection::RefreshHUD()
 
 }
 
-void UOdysseyPainterEditorRasterSelection::HideSelectionHUD()
+void
+UOdysseyPainterEditorRasterSelection::HideSelectionHUD()
 {
     mShowHUD = false;
     RefreshHUD();
 }
 
-void UOdysseyPainterEditorRasterSelection::ShowSelectionHUD()
+void
+UOdysseyPainterEditorRasterSelection::ShowSelectionHUD()
 {
     mShowHUD = true;
     RefreshHUD();
 }
 
-TArray<TArray<FVector2D>> UOdysseyPainterEditorRasterSelection::BuildContours(const TArray<FIntEdge>& edges)
+TArray<TArray<FVector2D>>
+UOdysseyPainterEditorRasterSelection::BuildContours(const TArray<FIntEdge>& edges)
 {
     TMultiMap<FIntPoint, FIntPoint> adjacency;
     for( const FIntEdge& edge : edges )
@@ -424,12 +453,6 @@ TArray<TArray<FVector2D>> UOdysseyPainterEditorRasterSelection::BuildContours(co
     return contours;
 }
 
-void UOdysseyPainterEditorRasterSelection::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
-{
-    RefreshHUD();
-    mOnChanged.Broadcast();
-}
-
 ::ULIS::FRectI
 UOdysseyPainterEditorRasterSelection::ComputeBoundingRect(const TArray<FVector2D>& iPoints) const
 {
@@ -450,4 +473,94 @@ UOdysseyPainterEditorRasterSelection::ComputeBoundingRect(const TArray<FVector2D
     }
 
     return ::ULIS::FRectI::FromMinMax(minX, minY, maxX, maxY);
+}
+
+bool
+UOdysseyPainterEditorRasterSelection::GenerateFeatheredBlock()
+{
+    if (!mBlock || mFeatherRadius <= 0)
+        return false;
+
+    if (!mFeatheredBlock)
+        mFeatheredBlock = MakeShared<::ULIS::FBlock>(mBlock->Width(), mBlock->Height(), ::ULIS::Format_GF);
+
+    ::ULIS::FBlock tempBlock(mBlock->Width(),mBlock->Height(),::ULIS::Format_GF);
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
+
+    ::ULIS::FKernel horizontalKernel =
+        MakeGaussianKernel(mFeatherRadius, true);
+
+    ::ULIS::FKernel verticalKernel =
+        MakeGaussianKernel(mFeatherRadius, false);
+
+    //Horizontal blur
+    ctx.Convolve( *mBlock, tempBlock, horizontalKernel );
+    ctx.Flush();
+
+    //Vertical blur
+    ctx.Convolve( tempBlock, *mFeatheredBlock, verticalKernel );
+    ctx.Flush();
+
+    //Set all blurred pixels inside the selection (without it half are out and half are in)
+    ctx.FilterInto(
+        [this](const ::ULIS::FPixel& iSrcPixel,
+               ::ULIS::FPixel& iDstPixel,
+               uint64 iNumPixels)
+        {
+            for (uint64 i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+            {
+                float original = iSrcPixel.GreyF();
+                float inward = std::clamp( 2.f * original - 1.f, 0.f, 1.f );
+
+                iDstPixel.SetGreyF(original * inward);
+            }
+        },
+        *mFeatheredBlock,
+        *mFeatheredBlock
+    );
+
+    ctx.Finish();
+
+    return true;
+}
+
+::ULIS::FKernel
+UOdysseyPainterEditorRasterSelection::MakeGaussianKernel( int iRadius, bool iHorizontal )
+{
+    if (iRadius <= 0)
+        return ::ULIS::FKernel( ::ULIS::FVec2I(1, 1), 1.f );
+
+    float sigma = float(iRadius) / 3.f;
+    int size = iRadius * 2 + 1;
+
+    ::ULIS::FVec2I kernelSize = iHorizontal ? ::ULIS::FVec2I(size, 1) : ::ULIS::FVec2I(1, size);
+
+    ::ULIS::FKernel kernel(kernelSize, 0.f);
+
+    float sum = 0.f;
+
+    for (int i = -iRadius; i <= iRadius; i++)
+    {
+        float value = std::exp( -(float(i * i)) / (2.f * sigma * sigma) );
+
+        int x = iHorizontal ? i + iRadius : 0;
+        int y = iHorizontal ? 0 : i + iRadius;
+
+        kernel.SetAt(x, y, value);
+        sum += value;
+    }
+
+    kernel.Mul(1.f / sum);
+
+    kernel.SetPivot( iHorizontal ? ::ULIS::FVec2I(iRadius + 2, 0) : ::ULIS::FVec2I(0, iRadius + 2) ); //Strange + 2 to set here to compensate for ULIS kernel error, TODO: check why do we have to do this
+
+    return kernel;
+}
+
+void
+UOdysseyPainterEditorRasterSelection::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
+{
+    RefreshHUD();
+    mOnChanged.Broadcast();
 }

@@ -53,6 +53,7 @@ public:
 
     virtual void Tick(float iDeltaTime) override;
 
+    void SetFeatherRadius(int iRadius);
     virtual FText GetTooltip() const override;
 
 public:
@@ -61,6 +62,7 @@ public:
 
 protected:
     TOptional<FMouseCursor> GetMouseCursorOverride() const override;
+    void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive) override;
 
 private:
     // Internal - Callbacks
@@ -73,6 +75,10 @@ protected:
     /** The list of available shapes. */
     UPROPERTY(EditAnywhere, Category="Shape", meta = (IgnoreToolConfiguration))
     FOdysseyShapes Shapes;
+
+    /** The feather radius. */
+    UPROPERTY(EditAnywhere, Category = "Feather", meta = (ClampMin = "0", UIMin = "0", UIMax = "1000", Delta = "1"))
+    float FeatherRadius = 0;
 
     EOdysseySelectionState mSelectionState;
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;

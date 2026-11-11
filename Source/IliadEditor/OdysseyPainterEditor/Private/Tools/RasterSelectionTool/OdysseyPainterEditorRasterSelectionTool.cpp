@@ -184,10 +184,23 @@ UOdysseyPainterEditorRasterSelectionTool::GetMouseCursorOverride() const
     return Super::GetMouseCursorOverride();
 }
 
+void UOdysseyPainterEditorRasterSelectionTool::PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive)
+{
+    Super::PostPropertyChanged(iPropertyName, iIsInteractive);
+
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterSelectionTool, FeatherRadius))
+        mEditor->RasterSelection()->SetFeatherRadius( FeatherRadius );
+}
+
 void UOdysseyPainterEditorRasterSelectionTool::Tick(float iDeltaTime)
 {
     //Tick the shape
     Shapes.GetActiveShape()->Tick(iDeltaTime);
+}
+
+void UOdysseyPainterEditorRasterSelectionTool::SetFeatherRadius( int iRadius)
+{
+    GetEditor()->RasterSelection()->SetFeatherRadius(iRadius);
 }
 
 void
