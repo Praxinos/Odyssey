@@ -452,7 +452,7 @@ void UOdysseyPainterEditorRasterBaseTool::CopyCurrentSelection()
     ctx.Clear(*copyBlock);
     ctx.Finish();
 
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = mEditor->RasterSelection()->GetBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = mEditor->RasterSelection()->GetFeatheredBlock();
 
     if (maskBlock)
     {
@@ -516,7 +516,7 @@ void UOdysseyPainterEditorRasterBaseTool::CutCurrentSelection()
     ctx.Clear(*copyBlock);
     ctx.Finish();
 
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = mEditor->RasterSelection()->GetBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = mEditor->RasterSelection()->GetFeatheredBlock();
 
     if (maskBlock)
     {

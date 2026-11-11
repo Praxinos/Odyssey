@@ -577,7 +577,7 @@ FOdysseyPainterEditor::ClearCurrentLayerOrSelection()
         ctx.Clear(*copyBlock);
         ctx.Finish();
 
-        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = mRasterSelection->GetBlock();
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = mRasterSelection->GetFeatheredBlock();
 
         if (maskBlock)
         {

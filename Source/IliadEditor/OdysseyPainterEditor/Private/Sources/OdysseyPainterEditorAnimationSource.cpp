@@ -424,7 +424,7 @@ void FOdysseyPainterEditorAnimationSource::PasteBlockToCurrentLayer(TSharedPtr<:
                         copyBlock->Rect(),
                         ::ULIS::FVec2I(0, 0),
                         ::ULIS::Blend_Normal,
-                        ::ULIS::Alpha_Normal,
+                        ::ULIS::Alpha_Add,
                         1.f,
                         ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
                         0,
