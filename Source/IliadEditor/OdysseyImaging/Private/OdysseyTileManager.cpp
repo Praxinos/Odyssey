@@ -235,6 +235,9 @@ FOdysseyTileManager::LoadTileFromReadBack(FTileId InTileId)
             Tile.GPUReadBack->Unlock();
             Tile.GPUReadBack.Reset();
 
+            StatNumTilesUncompressed++;
+            StatSizeUncompressed += Buffer.GetSize();
+
             Promise.SetValue(MoveTemp(Buffer));
 
             //Go to next pipeline step
@@ -263,6 +266,9 @@ FOdysseyTileManager::LoadTile(FTileId InTileId)
         TPromise<FSharedBuffer> Promise;
         Tile.UncompressedBuffer = Promise.GetFuture();
         FSharedBuffer Buffer = Tile.CompressedBuffer.Decompress();
+        StatNumTilesUncompressed++;
+        StatSizeUncompressed += Buffer.GetSize();
+
         Promise.SetValue(Buffer);
         return;
     }
@@ -293,22 +299,29 @@ FOdysseyTileManager::CompressTile(FTileId InTileId)
     if (!Tile.UncompressedBuffer.IsValid())
         return;
 
-    if (Tile.CompressedBuffer.IsNull())
+    if (!Tile.CompressedBuffer.IsNull())
         return;
 
     Tile.CompressedBuffer = FCompressedBuffer::Compress(Tile.UncompressedBuffer.Get());
+    StatNumTilesCompressed++;
+    StatSizeCompressed += Tile.CompressedBuffer.GetCompressedSize();
 }
 
 void
 FOdysseyTileManager::CacheTileOnDisk(FTileId InTileId)
 {
-    //TODO:
+    //TODO: Cache On Disk
+    //TODO: Update Stat
 }
 
 void
 FOdysseyTileManager::EvictUncompressedBufferFromTile(FTileId InTileId)
 {
     FTile& Tile = Tiles[InTileId.Index];
+
+    StatNumTilesUncompressed--;
+    StatSizeUncompressed -= Tile.UncompressedBuffer.Get().GetSize();
+
     Tile.UncompressedBuffer = TFuture<FSharedBuffer>();
 }
 
@@ -316,6 +329,10 @@ void
 FOdysseyTileManager::EvictCompressedBufferFromTile(FTileId InTileId)
 {
     FTile& Tile = Tiles[InTileId.Index];
+
+    StatNumTilesCompressed--;
+    StatSizeCompressed -= Tile.CompressedBuffer.GetCompressedSize();
+
     Tile.CompressedBuffer = FCompressedBuffer();
 }
 
@@ -408,4 +425,39 @@ FOdysseyTileManager::Tick(float DeltaTime)
     {
         EvictCompressedBufferFromTile(TileId);
     }
+}
+
+int64
+FOdysseyTileManager::GetNumTilesUncompressed() const
+{
+    return StatNumTilesUncompressed;
+}
+
+int64
+FOdysseyTileManager::GetSizeUncompressed() const
+{
+    return StatSizeUncompressed;
+}
+
+int64
+FOdysseyTileManager::GetNumTilesCompressed() const
+{
+    return StatNumTilesCompressed;
+}
+
+int64
+FOdysseyTileManager::GetSizeCompressed() const
+{
+    return StatSizeCompressed;
+}
+int64
+FOdysseyTileManager::GetNumTilesOnDisk() const
+{
+    return StatNumTilesOnDisk;
+}
+
+int64
+FOdysseyTileManager::GetSizeOnDisk() const
+{
+    return StatSizeOnDisk;
 }
