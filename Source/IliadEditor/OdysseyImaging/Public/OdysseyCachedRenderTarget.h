@@ -167,6 +167,9 @@ public:
     virtual void Serialize(FArchive& Ar) override;
 
 private:
+    void GetComponentIndexes(uint32& oRedIndex, uint32& oGreenIndex, uint32& oBlueIndex, uint32& oAlphaIndex) const;
+
+private:
     /**
      *
     */

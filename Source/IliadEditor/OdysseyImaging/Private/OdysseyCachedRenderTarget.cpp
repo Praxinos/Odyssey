@@ -71,7 +71,7 @@ UOdysseyCachedRenderTarget::GetPixelFormat() const
     {
         case EOdysseyCachedRenderTargetFormat::RGBA8: return PF_R8G8B8A8;
         case EOdysseyCachedRenderTargetFormat::RGBA16F: return PF_FloatRGBA;
-        case EOdysseyCachedRenderTargetFormat::RGBA32F: return PF_A32B32G32R32F;
+        case EOdysseyCachedRenderTargetFormat::RGBA32F: return PF_A32B32G32R32F; //Is actually RGBA32F not ABGR32F (not sure why)
     }
     return PF_B8G8R8A8;
 }
@@ -98,6 +98,42 @@ UOdysseyCachedRenderTarget::GetBytesPerComponent() const
         case EOdysseyCachedRenderTargetFormat::RGBA32F: return 4;
     }
     return 8;
+}
+
+void
+UOdysseyCachedRenderTarget::GetComponentIndexes(uint32& oRedIndex, uint32& oGreenIndex, uint32& oBlueIndex, uint32& oAlphaIndex) const
+{
+    switch(Format)
+    {
+        case EOdysseyCachedRenderTargetFormat::RGBA8:
+        {
+            oRedIndex = 0;
+            oGreenIndex = 1;
+            oBlueIndex = 2;
+            oAlphaIndex = 3;
+        }
+        break;
+
+        case EOdysseyCachedRenderTargetFormat::RGBA16F:
+        {
+            oRedIndex = 0;
+            oGreenIndex = 1;
+            oBlueIndex = 2;
+            oAlphaIndex = 3;
+        }
+        break;
+
+        case EOdysseyCachedRenderTargetFormat::RGBA32F:
+        {
+            //Should be ABGR order because we use PF_A32B32G32R32F
+            //But for some reason we get RGBA instead ABGR
+            oRedIndex = 0;
+            oGreenIndex = 1;
+            oBlueIndex = 2;
+            oAlphaIndex = 3;
+        }
+        break;
+    }
 }
 
 int
@@ -449,6 +485,13 @@ UOdysseyCachedRenderTarget::UnloadRenderTarget() const
         compressionParams.TileHeight = 64;
         compressionParams.BytesPerComponent = GetBytesPerComponent();
         compressionParams.ComponentsPerPixel = 4;
+
+        GetComponentIndexes(
+            compressionParams.RedIndex,
+            compressionParams.GreenIndex,
+            compressionParams.BlueIndex,
+            compressionParams.AlphaIndex
+        );
 
         TSharedRef<TPromise<FOdysseyTiledRLE::FRLECompressedBuffer>> promise = FOdysseyTiledRLE::Compress(mRenderTarget.Get(), compressionParams);
         mRLECompressedBufferFuture = promise->GetFuture().Share();

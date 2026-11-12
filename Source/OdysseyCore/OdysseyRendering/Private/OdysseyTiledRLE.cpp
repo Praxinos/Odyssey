@@ -27,6 +27,10 @@ public:
         SHADER_PARAMETER(uint32, TextureWidth) //Height of the final Texture
         SHADER_PARAMETER(uint32, ComponentsPerPixel)
         SHADER_PARAMETER(uint32, BytesPerComponent)
+        SHADER_PARAMETER(uint32, RedIndex)
+        SHADER_PARAMETER(uint32, GreenIndex)
+        SHADER_PARAMETER(uint32, BlueIndex)
+        SHADER_PARAMETER(uint32, AlphaIndex)
         SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<FTileDescriptor>, TileDescriptors) //Contains informations about tiles (which tile contains data and where to find taht data in the RLEBuffer
         SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int32>, RLEPositions) //Contains each valid tile data compressed in RLE
         SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<uint8>, RLEData) //Contains each valid tile data compressed in RLE
@@ -98,6 +102,10 @@ FOdysseyTiledRLE::DecompressRenderThread(FRDGBuilder& iGraphBuilder, const FRLEC
     PassParameters->TextureHeight = iBuffer.TextureHeight;
     PassParameters->ComponentsPerPixel = iBuffer.ComponentsPerPixel;
     PassParameters->BytesPerComponent = iBuffer.BytesPerComponent;
+    PassParameters->RedIndex = iBuffer.RedIndex;
+    PassParameters->GreenIndex = iBuffer.GreenIndex;
+    PassParameters->BlueIndex = iBuffer.BlueIndex;
+    PassParameters->AlphaIndex = iBuffer.AlphaIndex;
     PassParameters->TileDescriptors = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(tileDescriptorsBuffer, PF_R32_SINT));
     PassParameters->RLEPositions = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(rlePositionsBuffer, PF_R32_SINT));
     PassParameters->RLEData = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(rleDataBuffer, PF_R32_UINT));
@@ -346,6 +354,10 @@ FOdysseyTiledRLE::Compress(UTexture* iTexture, const FCompressionParams& Params)
             RLEBuffer.TileHeight = params.TileHeight;
             RLEBuffer.ComponentsPerPixel = params.ComponentsPerPixel;
             RLEBuffer.BytesPerComponent = params.BytesPerComponent;
+            RLEBuffer.RedIndex = params.RedIndex;
+            RLEBuffer.GreenIndex = params.GreenIndex;
+            RLEBuffer.BlueIndex = params.BlueIndex;
+            RLEBuffer.AlphaIndex = params.AlphaIndex;
 
             CompressTiles(rawBuffer, RLEBuffer);
 
