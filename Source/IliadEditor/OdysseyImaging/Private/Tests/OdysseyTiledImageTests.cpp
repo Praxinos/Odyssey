@@ -8,6 +8,8 @@
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "HAL/FileManager.h"
+#include "HAL/Event.h"
+#include "HAL/PlatformTime.h"
 #include "HAL/PlatformProcess.h"
 #include "HAL/PlatformFileManager.h"
 #include "Misc/AutomationTest.h"
@@ -25,6 +27,14 @@
 
 #include "OdysseyTileManager.h"
 #include "OdysseyTileUtils.h"
+
+struct FOdysseyTileManagerTestAccess
+{
+    static void Poll(FOdysseyTileManager& Manager, FOdysseyTileId Id)
+    {
+        Manager.TryLoadTileFromReadBack(Manager.Tiles[Id.Index]);
+    }
+};
 
 namespace Odyssey::TiledImageTests
 {
@@ -297,6 +307,51 @@ bool FOdysseyTileCacheSessionTest::RunTest(const FString& Parameters)
         TestTrue(TEXT("Other session survived initialization"), IFileManager::Get().FileExists(*SentinelPath));
     }
     AddInfo(FString::Printf(TEXT("Session cache: %s"), *CachePath));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTiledImagePendingTest, "Odyssey.Imaging.TiledImage.PendingReadbackDoesNotBlock", TestFlags)
+bool FOdysseyTiledImagePendingTest::RunTest(const FString& Parameters)
+{
+    TStrongObjectPtr<UTexture2D> Source = MakeSource(32, 32, 211);
+    FOdysseyTileManager& Manager = FOdysseyTileManager::Get();
+    FEvent* Gate = FPlatformProcess::GetSynchEventFromPool(true);
+    ON_SCOPE_EXIT
+    {
+        Gate->Trigger();
+        FlushRenderingCommands();
+        Manager.WaitUntilAllTilesAreCached();
+        FPlatformProcess::ReturnSynchEventToPool(Gate);
+    };
+    ENQUEUE_RENDER_COMMAND(OdysseyTileTest_HoldProducer)([Gate](FRHICommandListImmediate&)
+    {
+        Gate->Wait(2000); // Bound a regression's stall rather than hanging the automation process.
+    });
+
+    const TArray<FOdysseyTileManager::FCreatedTile> Tiles = Manager.CreateOrUpdateTiles(
+        Source.Get(), FIntRect(0, 0, 32, 32), FIntPoint::ZeroValue, 32, PF_R8G8B8A8);
+    if (!TestEqual(TEXT("One tile created"), Tiles.Num(), 1))
+    {
+        return false;
+    }
+    const double Start = FPlatformTime::Seconds();
+    TArray<TFuture<TSharedPtr<FOdysseyTileManager::FTileTextureHandle>>> First = Manager.GetTileTextures({Tiles[0].Id}, 32, PF_R8G8B8A8);
+    TArray<TFuture<TSharedPtr<FOdysseyTileManager::FTileTextureHandle>>> Second = Manager.GetTileTextures({Tiles[0].Id}, 32, PF_R8G8B8A8);
+    FOdysseyTileManagerTestAccess::Poll(Manager, Tiles[0].Id);
+    TestTrue(TEXT("Texture requests and readback polling return before the producer"), FPlatformTime::Seconds() - Start < 1.0);
+    TestFalse(TEXT("First request is pending"), First[0].IsReady());
+    TestFalse(TEXT("Second request is independently pending"), Second[0].IsReady());
+    Gate->Trigger();
+    FlushRenderingCommands();
+    TestTrue(TEXT("First texture becomes available"), First[0].IsReady() && First[0].Get().IsValid());
+    TestTrue(TEXT("Second texture becomes available"), Second[0].IsReady() && Second[0].Get().IsValid());
+    TStrongObjectPtr<UOdysseyTiledImage> Image(NewObject<UOdysseyTiledImage>());
+    Image->Initialize(32, EOdysseyTiledImageFormat::RGBA8);
+    Image->CopyFromTexture(Source.Get(), FIntRect(0, 0, 32, 32), FIntPoint::ZeroValue);
+    Image->CopyFromTexture(Source.Get(), FIntRect(0, 0, 16, 16), FIntPoint::ZeroValue);
+    TStrongObjectPtr<UTextureRenderTarget2D> Target = MakeTarget(32, 32);
+    Image->Render(Target.Get(), FIntRect(0, 0, 32, 32), FIntPoint::ZeroValue);
+    CheckPixels(*this, Target.Get(), 0, 0, 211);
     return true;
 }
 

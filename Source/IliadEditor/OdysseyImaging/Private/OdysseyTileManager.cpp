@@ -525,10 +525,11 @@ FOdysseyTileManager::TryLoadTileFromReadBack(TSharedPtr<FTile> InTile)
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::TryLoadTileFromReadBack);
 
+    FScopeLock TileLock(&InTile->Mutex);
     if (InTile->GPUReadBackState != FTile::EGPUReadBackState::Idle)
         return;
 
-    if (!InTile->GPUIsEmptyReadBack.IsValid() || !InTile->GPUReadBack.IsValid())
+    if (!InTile->GPUIsEmptyReadBack.IsReady() || !InTile->GPUReadBack.IsReady())
         return;
 
     const FTile::FPartialBufferReadBack& IsEmptyReadBack = InTile->GPUIsEmptyReadBack.Get();
@@ -539,6 +540,7 @@ FOdysseyTileManager::TryLoadTileFromReadBack(TSharedPtr<FTile> InTile)
     if (!PixelsReadBack.ReadBack.IsValid() || !PixelsReadBack.ReadBack->IsReady())
         return;
 
+    TileLock.Unlock();
     LoadTileFromReadBack(InTile);
 }
 
@@ -583,7 +585,7 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
                     FScopeLock Lock(&FreeTilesMutex);
                     FScopeLock TileLock(&InTile->Mutex);
 
-                    InTile->TempTexture.Reset();
+                    InTile->TempTexture = {};
                     InTile->TempTexturePromise.Reset();
                     InTile->TileDataPromise.SetValue(nullptr);
                     InTile->GPUIsEmptyReadBack.Reset();
@@ -647,7 +649,7 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
                         if (TileDataBuffer.GetView().EqualBytes(TileBuffer.GetView()))
                         {
                             FScopeLock TileLock(&InTile->Mutex);
-                            InTile->TempTexture.Reset();
+                            InTile->TempTexture = {};
                             InTile->TempTexturePromise.Reset();
                             InTile->TileDataPromise.SetValue(TileData);
                             InTile->GPUIsEmptyReadBack.Reset();
@@ -665,7 +667,7 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
 
                     {
                         FScopeLock TileLock(&InTile->Mutex);
-                        InTile->TempTexture.Reset();
+                        InTile->TempTexture = {};
                         InTile->TempTexturePromise.Reset();
                         InTile->TileDataPromise.SetValue(TileData);
                         InTile->GPUIsEmptyReadBack.Reset();
@@ -730,6 +732,19 @@ FOdysseyTileManager::GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, ui
         //Rely on TempTexture if it exists
         if (Tile->TempTexture.IsValid())
         {
+            if (!Tile->TempTexture.IsReady())
+            {
+                // The producer is already queued. Keep its shared state alive independently of FTile,
+                // and resolve this request on the render thread without blocking or holding Tile->Mutex.
+                TSharedFuture<TSharedPtr<FTileTextureHandle>> PendingTexture = Tile->TempTexture;
+                TileLock.Unlock();
+                ENQUEUE_RENDER_COMMAND(FOdysseyTileManager_ResolvePendingTexture)(
+                    [PendingTexture, Promise = MoveTemp(Promise)](FRHICommandListImmediate&) mutable
+                    {
+                        Promise.SetValue(PendingTexture.Get());
+                    });
+                continue;
+            }
             TSharedPtr<FTileTextureHandle> TileTextureHandle = Tile->TempTexture.Get();
             if (TileTextureHandle.IsValid())
             {
@@ -982,7 +997,7 @@ FOdysseyTileManager::FTile::Initialize()
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTile::Initialize);
     TempTexturePromise = MakeUnique<TPromise<TSharedPtr<FTileTextureHandle>>>();
-    TempTexture = TempTexturePromise->GetFuture();
+    TempTexture = TempTexturePromise->GetFuture().Share();
     TileData = TileDataPromise.GetFuture();
 
     GPUReadBackPromise = MakeUnique<TPromise<FPartialTextureReadBack>>();

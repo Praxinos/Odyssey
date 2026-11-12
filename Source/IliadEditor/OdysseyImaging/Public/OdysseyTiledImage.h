@@ -8,7 +8,7 @@
 #include "Serialization/EditorBulkData.h"
 #include "Factories/Factory.h"
 
-#include "OdysseyTileManager.h"
+#include "OdysseyTileId.h"
 
 #include "OdysseyTiledImage.generated.h"
 

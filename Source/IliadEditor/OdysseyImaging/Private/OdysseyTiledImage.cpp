@@ -10,6 +10,7 @@
 #include "TextureResource.h"
 
 #include "OdysseyTileUtils.h"
+#include "OdysseyTileManager.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogOdysseyTiledImage, Log, All);
 

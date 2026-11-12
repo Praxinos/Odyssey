@@ -12,34 +12,9 @@
 #include "RHIGPUReadback.h"
 #include "TickableEditorObject.h"
 #include "OdysseyTileCacheSession.h"
-#include "OdysseyTileManager.generated.h"
+#include "OdysseyTileId.h"
 
 class UTexture;
-
-/**
- * FTileId is an opaque handle to a Tile (FTile)
- */
-
-USTRUCT()
-struct FOdysseyTileId
-{
-    GENERATED_BODY()
-
-    bool IsValid() const { return Index != INDEX_NONE && Generation != INDEX_NONE; };
-
-    /** Several FTiles can share a similaire Index in the Tiles Array
-     * This can happen when a tile is detected as empty and leaves its place to be reused by another tile
-     * Generation allows us to track how many times the FTile has been reused
-     * Which also allows us to differentiate Tiles indentified by the same Index but different Generation
-    */
-    UPROPERTY()
-    uint64 Index = INDEX_NONE;
-
-    UPROPERTY()
-    uint64 Generation = INDEX_NONE;
-
-    bool operator==(const FOdysseyTileId&) const = default;
-};
 
 class FOdysseyTileManagerStats
 {
@@ -238,7 +213,7 @@ private:
 
         FOdysseyTileId Id;
         TUniquePtr<TPromise<TSharedPtr<FTileTextureHandle>>> TempTexturePromise;
-        TFuture<TSharedPtr<FTileTextureHandle>> TempTexture;
+        TSharedFuture<TSharedPtr<FTileTextureHandle>> TempTexture;
 
         EGPUReadBackState GPUReadBackState;
 
@@ -310,19 +285,25 @@ public:
      * Returns, for each TileId, a FTextureRHIRef containing the Tile's Texture
      * The returned FTextureRHIRef can be invalid, indicating an empty texture
      * Please check FTextureRHIRef::IsValid() before using it
+     * Does not wait for queued render commands on the game thread. Consume the returned futures
+     * in a render command queued after this call, or after IsReady(). Resident CPU data may be
+     * loaded synchronously from the disk/compression cache.
      */
     TArray<TFuture<TSharedPtr<FTileTextureHandle>>> GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, uint32 InTileSize, EPixelFormat InTileFormat) const;
 
-    /** Returns true with a null buffer for an empty tile, and false on a data retrieval error. */
+    /** Blocking game-thread access for serialization; may wait for GPU readback, compression and disk I/O.
+     * Returns true with a null buffer for an empty tile, and false on a data retrieval error. */
     bool GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer);
     bool GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer) const;
 
+    /** Blocking game-thread access; may wait for GPU readback. */
     bool GetTileHash(FOdysseyTileId InTileId, FIoHash& OutHash);
 
     FOdysseyTileManagerStats& GetStats();
 
     /**
      * Waits until all tiles are properly cached on disk and evicted if needed
+     * Blocks the game thread. Intended for explicit synchronization and shutdown, not polling.
      */
     void WaitUntilAllTilesAreCached(bool InEvictTiles = true);
 
@@ -345,6 +326,9 @@ private:
 
 private:
     friend class FTileTextureHandle;
+#if WITH_DEV_AUTOMATION_TESTS
+    friend struct FOdysseyTileManagerTestAccess;
+#endif
 
     FCriticalSection FreeTilesMutex;
     FCriticalSection HashToTileDataMutex;
