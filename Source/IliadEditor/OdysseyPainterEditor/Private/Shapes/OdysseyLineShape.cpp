@@ -72,7 +72,7 @@ UOdysseyLineShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& i
 
     mIsDrawing = false;
     RemoveHUD();
-    mOnCommit.Broadcast( { mStartPoint, mEndPoint }, true);
+    mOnContourCommit.Broadcast( { mStartPoint, mEndPoint }, true);
     return true;
 }
 

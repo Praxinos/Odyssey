@@ -105,7 +105,7 @@ UOdysseyBezierShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey&
 
     if ( mEventState == eEventState::ControlPoint)
     {
-        mOnCommit.Broadcast(GeneratePoints(), true);
+        mOnContourCommit.Broadcast(GeneratePoints(), true);
         RemoveHUD();
         mEventState = eEventState::Idle;
         return true;

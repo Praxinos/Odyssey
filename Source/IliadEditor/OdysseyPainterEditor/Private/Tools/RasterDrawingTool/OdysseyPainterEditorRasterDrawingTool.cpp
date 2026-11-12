@@ -84,7 +84,7 @@ UOdysseyPainterEditorRasterDrawingTool::CreateShape(FName iName)
 
     shape->OnBegin().AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnShapeBegin);
     shape->OnInteractive().AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnShapeInteractive);
-    shape->OnCommit().AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnShapeCommit);
+    shape->OnContourCommit().AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnShapeCommit);
     shape->OnAbort().AddUObject(this, &UOdysseyPainterEditorRasterDrawingTool::OnShapeAbort);
 
     shape->SetHUD( mShapeHUD );

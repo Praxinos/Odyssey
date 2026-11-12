@@ -414,26 +414,44 @@ UOdysseyMagicWandShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FK
     ctx.Clear(*maskBlock);
     ctx.Finish();
 
-    if (GapTolerance > 0)
+    if (Contiguous)
     {
-        ctx.Dilate(
-            *sourceMaskBlock
-            , GapTolerance
-            , ::ULIS::FColor::FromGrey8(255)
-            , ::ULIS::FColor::FromGrey8(255)
+        // Gap tolerance is only relevant for contiguous selections
+        if (GapTolerance > 0)
+        {
+            ctx.Dilate(
+                *sourceMaskBlock,
+                GapTolerance,
+                ::ULIS::FColor::FromGrey8(255),
+                ::ULIS::FColor::FromGrey8(255)
+            );
+            ctx.Finish();
+        }
+
+        // Select only matching pixels connected to the clicked position
+        ctx.FloodFill(
+            *sourceMaskBlock,
+            *maskBlock,
+            iPointInTexture.x,
+            iPointInTexture.y,
+            ::ULIS::FColor::FromGrey8(0),
+            ::ULIS::FColor::FromGrey8(255)
         );
         ctx.Finish();
     }
+    else // Check all image
+    {
+        for (int y = 0; y < sourceMaskBlock->Height(); y++)
+        {
+            uint8* src = (uint8*)sourceMaskBlock->ScanlineBits(y);
+            uint8* dst = (uint8*)maskBlock->ScanlineBits(y);
 
-    //FloodFill
-    ctx.FloodFill(
-        *sourceMaskBlock
-        , *maskBlock
-        , iPointInTexture.x
-        , iPointInTexture.y
-        , ::ULIS::FColor::FromGrey8(0)
-        , ::ULIS::FColor::FromGrey8(255));
-    ctx.Finish();
+            for (int x = 0; x < sourceMaskBlock->Width(); x++)
+            {
+                dst[x] = 255 - src[x];
+            }
+        }
+    }
 
     //Expansion and final step of gap tolerance is managed in a single dilate operation
     if (Expansion != 0 || GapTolerance > 0)
@@ -473,154 +491,10 @@ UOdysseyMagicWandShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FK
         maskBlock = tmpMaskBlock;
     }
 
-    TArray<TArray<FOdysseyPoint>> contours = BuildContoursFromBlock(maskBlock);
-
-    UE_LOG(LogTemp, Display, TEXT("Num contours: %d"), contours.Num());
-
-    if (contours.Num() >= 1 && Contiguous)
-        mOnCommit.Broadcast(contours[0], true);
-    else
-        mOnContoursCommit.Broadcast(contours);
+    mOnSelectionBlockCommit.Broadcast(maskBlock);
 
     return true;
 }
-
-TArray<TArray<FOdysseyPoint>>
-UOdysseyMagicWandShape::BuildContours(const TArray<FIntEdge>& edges)
-{
-    TMultiMap<FIntPoint, FIntPoint> adjacency;
-    for (const FIntEdge& edge : edges)
-    {
-        adjacency.Add(edge.Start, edge.End);
-        adjacency.Add(edge.End, edge.Start); // Start -> End == End -> Start for our search
-    }
-
-    TSet<FIntEdge> used;
-    TArray<TArray<FOdysseyPoint>> contours;
-
-    for (const FIntEdge& edge : edges)
-    {
-        if (used.Contains(edge))
-            continue;
-
-        // Start a new contour
-        TArray<FOdysseyPoint> contour;
-        FIntPoint current = edge.Start;
-        FIntPoint next = edge.End;
-
-        contour.Add(FOdysseyPoint(current.X, current.Y));
-        used.Add(edge);
-
-        while (true)
-        {
-            contour.Add(FOdysseyPoint(next.X, next.Y));
-
-            // Find next unused edge from next
-            bool bFound = false;
-            TArray<FIntPoint> connected;
-            adjacency.MultiFind(next, connected);
-
-            for (const FIntPoint& connectPoint : connected)
-            {
-                FIntEdge connectedEged{ next, connectPoint };
-                FIntEdge connectedEdgeReverse{ connectPoint, next };
-
-                if (!used.Contains(connectedEged) && !used.Contains(connectedEdgeReverse))
-                {
-                    used.Add(connectedEged);
-                    current = next;
-                    next = connectPoint;
-                    bFound = true;
-                    break;
-                }
-            }
-
-            if (!bFound || next == edge.Start) // Closed contour
-                break;
-        }
-
-        if (contour.Num() > 2) // We ignore single lines that can sometimes "float" in the selection if it crosses over itself a lot
-            contours.Add(contour);
-
-        if (Contiguous && contours.Num() >= 1)
-            return contours;
-    }
-
-    return contours;
-}
-
-TArray<TArray<FOdysseyPoint>>
-UOdysseyMagicWandShape::BuildContoursFromBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
-{
-    mHUD->EmptyElements();
-    mHUD->InactivateCustomization();
-
-    ::ULIS::FRectI boundingRect = ::ULIS::FRectI::FromXYWH(0, 0, 0, 0);
-
-    if (!iBlock)
-        return TArray<TArray<FOdysseyPoint>>();
-
-    ::ULIS::eFormat format = iBlock->Format();
-
-    TArray<FVector2D> points;
-    TArray<FIntEdge> edges;
-
-    for (int y = 0; y <= iBlock->Height(); y++)
-    {
-        int8* topLine = y > 0 ? (int8*)iBlock->ScanlineBits(y - 1) : nullptr;
-        int8* line = y < iBlock->Height() ? (int8*)iBlock->ScanlineBits(y) : nullptr;
-        for (int x = 0; x <= iBlock->Width(); x++)
-        {
-            int8 leftValue = line && x > 0 ? line[x - 1] : 0.f;
-            int8 topValue = topLine && x < iBlock->Width() ? topLine[x] : 0.f;
-            int8 value = line && x < iBlock->Width() ? line[x] : 0.f;
-
-            if (leftValue == 0.f && value != 0.f || leftValue != 0.f && value == 0.f)
-            {
-                //left vertical Line
-                points.Add(FVector2D(x, y));
-                points.Add(FVector2D(x, y + 1));
-                edges.Add({ FIntPoint(x, y), FIntPoint(x, y + 1) });
-            }
-
-            if (topValue == 0.f && value != 0.f || topValue != 0.f && value == 0.f)
-            {
-                //top horizontal Line
-                points.Add(FVector2D(x, y));
-                points.Add(FVector2D(x + 1, y));
-                edges.Add({ FIntPoint(x, y), FIntPoint(x + 1, y) });
-            }
-        }
-    }
-
-    boundingRect = ComputeBoundingRect(points);
-
-    return BuildContours(edges);
-}
-
-
-::ULIS::FRectI
-UOdysseyMagicWandShape::ComputeBoundingRect(const TArray<FVector2D>& iPoints) const
-{
-    if (iPoints.IsEmpty())
-        return ::ULIS::FRectI::FromXYWH(0, 0, 0, 0);
-
-    int minX = FMath::FloorToFloat(iPoints[0].X) + 0.5f;
-    int maxX = FMath::CeilToFloat(iPoints[0].X) + 0.5f;
-    int minY = FMath::FloorToFloat(iPoints[0].Y) + 0.5f;
-    int maxY = FMath::CeilToFloat(iPoints[0].Y) + 0.5f;
-
-    for (int j = 1; j < iPoints.Num(); j++)
-    {
-        minX = FMath::Min(minX, FMath::FloorToFloat(iPoints[j].X) + 0.5f);
-        maxX = FMath::Max(maxX, FMath::CeilToFloat(iPoints[j].X) + 0.5f);
-        minY = FMath::Min(minY, FMath::FloorToFloat(iPoints[j].Y) + 0.5f);
-        maxY = FMath::Max(maxY, FMath::CeilToFloat(iPoints[j].Y) + 0.5f);
-    }
-
-    return ::ULIS::FRectI::FromMinMax(minX, minY, maxX, maxY);
-}
-
 
 TArray<IOdysseyRenderingAbility*>
 UOdysseyMagicWandShape::GetBackgroundLayersToExclude(UOdysseyLayer* iLayer) const

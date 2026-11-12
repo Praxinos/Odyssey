@@ -73,7 +73,7 @@ UOdysseyEllipseShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey
 
     mIsDrawing = false;
     RemoveHUD();
-    mOnCommit.Broadcast( GeneratePoints(), true);
+    mOnContourCommit.Broadcast( GeneratePoints(), true);
     return true;
 }
 

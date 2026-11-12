@@ -58,8 +58,10 @@ UOdysseyPainterEditorRasterSelectionTool::CreateShape(FName iName)
     T* shape = CreateDefaultSubobject<T>(iName, true);
 
     shape->OnBegin().AddUObject(this, &UOdysseyPainterEditorRasterSelectionTool::OnShapeBegin);
-    shape->OnCommit().AddUObject(this, &UOdysseyPainterEditorRasterSelectionTool::OnShapeCommit);
+    shape->OnContourCommit().AddUObject(this, &UOdysseyPainterEditorRasterSelectionTool::OnShapeCommit);
     shape->OnContoursCommit().AddUObject(this, &UOdysseyPainterEditorRasterSelectionTool::OnContoursCommit);
+    shape->OnSelectionBlockCommit().AddUObject(this, &UOdysseyPainterEditorRasterSelectionTool::OnSelectionBlockCommit);
+
     shape->OnAbort().AddUObject(this, &UOdysseyPainterEditorRasterSelectionTool::OnShapeAbort);
 
     shape->SetHUD(mShapeHUD);
@@ -253,6 +255,28 @@ UOdysseyPainterEditorRasterSelectionTool::OnContoursCommit(const TArray<TArray<F
         rasterSelection->Clear();
         TArray<TArray<FVector2D>> contours(iContours);
         rasterSelection->Add(contours);
+    }
+}
+
+void
+UOdysseyPainterEditorRasterSelectionTool::OnSelectionBlockCommit(TSharedPtr<::ULIS::FBlock> iMaskBlock)
+{
+    TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    if (mSelectionState == EOdysseySelectionState::Add) //Add selection to existing one
+    {
+        FScopedTransaction scopedTransaction(LOCTEXT("actions.raster.selection.add", "Add Raster Selection"));
+        rasterSelection->Add(iMaskBlock);
+    }
+    else if (mSelectionState == EOdysseySelectionState::Substract) //Remove selection to existing one
+    {
+        FScopedTransaction scopedTransaction(LOCTEXT("actions.raster.selection.substract", "Substract Raster Selection"));
+        rasterSelection->Substract(iMaskBlock);
+    }
+    else //Normal, we replace the selection
+    {
+        FScopedTransaction scopedTransaction(LOCTEXT("actions.raster.selection", "Raster Selection"));
+        rasterSelection->Clear();
+        rasterSelection->Add(iMaskBlock);
     }
 }
 

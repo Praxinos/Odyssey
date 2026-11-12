@@ -45,8 +45,10 @@ public:
     void Init(int iWidth, int iHeight);
     void Add( const TArray<FVector2D>& iPolygon );
     void Add( const TArray<TArray<FVector2D>>& iPolygons );
+    void Add( TSharedPtr<::ULIS::FBlock> iMaskBlock );
     void Substract( const TArray<FVector2D>& iPolygon );
     void Substract( const TArray<TArray<FVector2D>>& iPolygons );
+    void Substract( TSharedPtr<::ULIS::FBlock> iMaskBlock );
     void Invert();
     void Clear();
     void Reset();
