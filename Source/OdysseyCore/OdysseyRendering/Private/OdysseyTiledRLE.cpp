@@ -27,7 +27,7 @@ public:
     //Weights 32Ko for an empty 4096x4096 image with 64x64 tiles
     struct FTileDescriptor
     {
-        uint32 Position;
+        int32 Position;
         uint32 Count;
     };
 
@@ -66,6 +66,123 @@ private:
 //                            ShaderType                            ShaderPath                     Shader function name    Type
 IMPLEMENT_GLOBAL_SHADER(FOdysseyDecompressTiledRLEShader, "/OdysseyShaders/Private/OdysseyDecompressTiledRLEShader.usf", "Main", SF_Compute);
 
+
+
+void TestDecompressTiledRLEShader(FRDGBuilder& iGraphBuilder, FIntPoint iNumTiles, FOdysseyDecompressTiledRLEShader::FParameters* oPassParameters)
+{
+    TArray<FOdysseyDecompressTiledRLEShader::FTileDescriptor> tileDescriptors;
+    TArray<int32> rlePositions;
+    TArray<uint8> rleData;
+    TArray<uint8> sequenceData;
+
+    //RGBA8 so ValueSize is 1 (1 byte per component)
+    oPassParameters->ValueSize = 1;
+    //oPassParameters->ValueSize = 2;
+
+    //1st Tile
+    tileDescriptors.AddZeroed(iNumTiles.X * iNumTiles.Y);
+    for (int i = 0; i < iNumTiles.X * iNumTiles.Y; i++)
+    {
+        //Tile is empty by default, we use negative values to identify empty tiles
+        tileDescriptors[i] = { /*position*/-1, /*count*/0 };
+    }
+    tileDescriptors[0] = { /*position*/0, /*count*/4 };
+    tileDescriptors[1] = { /*position*/5, /*count*/1 };
+
+    uint8 one = 255;
+    uint8 zero = 0;
+    //FFloat16 one(1.0f);
+    //FFloat16 zero(0.0f);
+
+    rlePositions.Add(0); //start from first section
+    rlePositions.Add(oPassParameters->TileWidth * oPassParameters->TileHeight * 1 / 4); //start from second section
+    rlePositions.Add(oPassParameters->TileWidth * oPassParameters->TileHeight * 2 / 4); //start from third section
+    rlePositions.Add(oPassParameters->TileWidth * oPassParameters->TileHeight * 3 / 4); //start from fourth section
+    rlePositions.Add(oPassParameters->TileWidth * oPassParameters->TileHeight); //end at last section of the tile
+
+    rleData.AddUninitialized(4 * oPassParameters->ValueSize);
+    FMemory::Memcpy(rleData.GetData() + (0 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
+    FMemory::Memcpy(rleData.GetData() + (1 * oPassParameters->ValueSize), &zero, oPassParameters->ValueSize);
+    FMemory::Memcpy(rleData.GetData() + (2 * oPassParameters->ValueSize), &zero, oPassParameters->ValueSize);
+    FMemory::Memcpy(rleData.GetData() + (3 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
+
+    rleData.AddUninitialized(4 * oPassParameters->ValueSize);
+    FMemory::Memcpy(rleData.GetData() + (4 * oPassParameters->ValueSize), &zero, oPassParameters->ValueSize);
+    FMemory::Memcpy(rleData.GetData() + (5 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
+    FMemory::Memcpy(rleData.GetData() + (6 * oPassParameters->ValueSize), &zero, oPassParameters->ValueSize);
+    FMemory::Memcpy(rleData.GetData() + (7 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
+
+    rleData.AddUninitialized(4 * oPassParameters->ValueSize);
+    FMemory::Memcpy(rleData.GetData() + (8 * oPassParameters->ValueSize), &zero, oPassParameters->ValueSize);
+    FMemory::Memcpy(rleData.GetData() + (9 * oPassParameters->ValueSize), &zero, oPassParameters->ValueSize);
+    FMemory::Memcpy(rleData.GetData() + (10 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
+    FMemory::Memcpy(rleData.GetData() + (11 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
+
+    rleData.AddUninitialized(4 * oPassParameters->ValueSize);
+    FMemory::Memcpy(rleData.GetData() + (12 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
+    FMemory::Memcpy(rleData.GetData() + (13 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
+    FMemory::Memcpy(rleData.GetData() + (14 * oPassParameters->ValueSize), &zero, oPassParameters->ValueSize);
+    FMemory::Memcpy(rleData.GetData() + (15 * oPassParameters->ValueSize), &one, oPassParameters->ValueSize);
+
+    //Sequence Tile
+    rlePositions.Add(0); //start of sequence tile
+    rlePositions.Add(oPassParameters->TileWidth * oPassParameters->TileHeight * -1); //end at last section of the tile
+
+    rleData.AddUninitialized(4 * oPassParameters->ValueSize);
+    uint32 pointerToSequence = 0;
+    FMemory::Memcpy(rleData.GetData() + (16 * oPassParameters->ValueSize), &pointerToSequence, sizeof(pointerToSequence));
+
+    sequenceData.AddUninitialized(oPassParameters->TileWidth * oPassParameters->TileHeight * 4 * oPassParameters->ValueSize);
+    for (uint32 i = 0; i < oPassParameters->TileWidth * oPassParameters->TileHeight; i++)
+    {
+        if (i&1)
+        {
+            FMemory::Memcpy(sequenceData.GetData() + (i * 4 + 0) * oPassParameters->ValueSize, &one, oPassParameters->ValueSize);
+            FMemory::Memcpy(sequenceData.GetData() + (i * 4 + 1) * oPassParameters->ValueSize, &zero, oPassParameters->ValueSize);
+            FMemory::Memcpy(sequenceData.GetData() + (i * 4 + 2) * oPassParameters->ValueSize, &zero, oPassParameters->ValueSize);
+            FMemory::Memcpy(sequenceData.GetData() + (i * 4 + 3) * oPassParameters->ValueSize, &one, oPassParameters->ValueSize);
+        }
+        else
+        {
+            FMemory::Memcpy(sequenceData.GetData() + (i * 4 + 0) * oPassParameters->ValueSize, &zero, oPassParameters->ValueSize);
+            FMemory::Memcpy(sequenceData.GetData() + (i * 4 + 1) * oPassParameters->ValueSize, &one, oPassParameters->ValueSize);
+            FMemory::Memcpy(sequenceData.GetData() + (i * 4 + 2) * oPassParameters->ValueSize, &zero, oPassParameters->ValueSize);
+            FMemory::Memcpy(sequenceData.GetData() + (i * 4 + 3) * oPassParameters->ValueSize, &one, oPassParameters->ValueSize);
+        }
+    }
+
+    if (tileDescriptors.IsEmpty()) //a buffer must contain something otherwise we get an error.
+        rleData.AddUninitialized();
+
+    if (rlePositions.IsEmpty()) //a buffer must contain something otherwise we get an error.
+        rleData.AddUninitialized();
+
+    if (rleData.IsEmpty()) //a buffer must contain something otherwise we get an error.
+        rleData.AddUninitialized();
+
+    if (sequenceData.IsEmpty()) //a buffer must contain something otherwise we get an error.
+        sequenceData.AddUninitialized();
+
+    FRDGBufferRef tileDescriptorsBuffer = CreateUploadBuffer(iGraphBuilder, TEXT("TileDescriptors"), sizeof(FOdysseyDecompressTiledRLEShader::FTileDescriptor), tileDescriptors.Num(), tileDescriptors.GetData(), tileDescriptors.Num() * sizeof(FOdysseyDecompressTiledRLEShader::FTileDescriptor));
+    FRDGBufferRef rlePositionsBuffer = CreateUploadBuffer(iGraphBuilder, TEXT("RLEPositions"), sizeof(int32), rlePositions.Num(), rlePositions.GetData(), rlePositions.Num() * sizeof(int32));
+    FRDGBufferRef rleDataBuffer = CreateUploadBuffer(iGraphBuilder, TEXT("RLEData"), sizeof(uint32), rleData.Num(), rleData.GetData(), rleData.Num() * sizeof(uint32));
+    FRDGBufferRef sequenceDataBuffer = CreateUploadBuffer(iGraphBuilder, TEXT("SequenceData"), sizeof(uint32), sequenceData.Num(), sequenceData.GetData(), sequenceData.Num() * sizeof(uint32));
+
+    oPassParameters->TileDescriptors = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(tileDescriptorsBuffer, PF_R32_SINT));
+    oPassParameters->RLEPositions = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(rlePositionsBuffer, PF_R32_SINT));
+    oPassParameters->RLEData = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(rleDataBuffer, PF_R32_UINT));
+    oPassParameters->SequenceData = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(sequenceDataBuffer, PF_R32_UINT));
+}
+
+FIntPoint
+GetNumTiles(const FOdysseyTiledRLE::FCompressionParams& Params)
+{
+    return FIntPoint(
+        FMath::Max(uint32(1), ((Params.TextureWidth - 1) / Params.TileWidth) + 1),
+        FMath::Max(uint32(1), ((Params.TextureHeight - 1) / Params.TileHeight) + 1)
+    );
+}
+
 FRDGTextureRef
 FOdysseyTiledRLE::DecompressRenderThread(FRDGBuilder& iGraphBuilder, const FRLEBuffer& iBuffer, const FCompressionParams& Params)
 {
@@ -97,71 +214,11 @@ FOdysseyTiledRLE::DecompressRenderThread(FRDGBuilder& iGraphBuilder, const FRLEB
     PassParameters->TileHeight = Params.TileHeight;
     PassParameters->TextureWidth = Params.TextureWidth;
     PassParameters->TextureHeight = Params.TextureHeight;
-    PassParameters->ValueSize = 1;
 
-    TArray<int32> rlePositions;
-    TArray<uint8> rleData;
-
-    uint8 one = 255;
-    uint8 zero = 0;
-    PassParameters->ValueSize = 1;
-
-    //uint16 one = FFloat16(1.0f).Encoded;
-    //uint16 zero = FFloat16(0.0f).Encoded;
-    //PassParameters->ValueSize = 2;
-
-    //FFloat16 one(1.0f);
-    //FFloat16 zero(0.0f);
-    //PassParameters->ValueSize = 2;
-
-    rlePositions.Add(0);
-    rleData.AddUninitialized(4 * PassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (0 * PassParameters->ValueSize), &one, PassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (1 * PassParameters->ValueSize), &zero, PassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (2 * PassParameters->ValueSize), &zero, PassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (3 * PassParameters->ValueSize), &one, PassParameters->ValueSize);
-
-    rlePositions.Add(64 * 16);
-    rleData.AddUninitialized(4 * PassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (4 * PassParameters->ValueSize), &zero, PassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (5 * PassParameters->ValueSize), &one, PassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (6 * PassParameters->ValueSize), &zero, PassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (7 * PassParameters->ValueSize), &one, PassParameters->ValueSize);
-
-    rlePositions.Add(64 * 32);
-    rleData.AddUninitialized(4 * PassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (8 * PassParameters->ValueSize), &zero, PassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (9 * PassParameters->ValueSize), &zero, PassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (10 * PassParameters->ValueSize), &one, PassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (11 * PassParameters->ValueSize), &one, PassParameters->ValueSize);
-
-    rlePositions.Add(64 * 48);
-    rleData.AddUninitialized(4 * PassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (12 * PassParameters->ValueSize), &one, PassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (13 * PassParameters->ValueSize), &one, PassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (14 * PassParameters->ValueSize), &zero, PassParameters->ValueSize);
-    FMemory::Memcpy(rleData.GetData() + (15 * PassParameters->ValueSize), &one, PassParameters->ValueSize);
-
-    FRDGBufferRef rlePositionsBuffer = CreateUploadBuffer(iGraphBuilder, TEXT("RLEPositions"), sizeof(uint32), rlePositions.Num(), rlePositions.GetData(), rlePositions.Num() * sizeof(uint32));
-    FRDGBufferRef rleDataBuffer = CreateUploadBuffer(iGraphBuilder, TEXT("RLEData"), sizeof(uint32), rleData.Num(), rleData.GetData(), rleData.Num() * sizeof(uint32));
+    FIntPoint numTiles = GetNumTiles(Params);
+    TestDecompressTiledRLEShader(iGraphBuilder, numTiles, PassParameters);
 
     PassParameters->OutputTexture = iGraphBuilder.CreateUAV(FRDGTextureUAVDesc(outputTexture), ERDGUnorderedAccessViewFlags::None);
-    PassParameters->RLEPositions = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(rlePositionsBuffer, PF_R32_SINT));
-    PassParameters->RLEData = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(rleDataBuffer, PF_R32_UINT));
-
-
-    /* const void* RawData = (void*)Params.Input;
-    int NumInputs = 2;
-    int InputSize = sizeof(int);
-    FRDGBufferRef InputBuffer = CreateUploadBuffer(iGraphBuilder, TEXT("InputBuffer"), InputSize, NumInputs, RawData, InputSize * NumInputs);
-
-    PassParameters->Input = iGraphBuilder.CreateSRV(FRDGBufferSRVDesc(InputBuffer, PF_R32_SINT));
-
-    FRDGBufferRef OutputBuffer = iGraphBuilder.CreateBuffer(
-        FRDGBufferDesc::CreateBufferDesc(sizeof(int32), 1),
-        TEXT("OutputBuffer"));
-
-    PassParameters->Output = iGraphBuilder.CreateUAV(FRDGBufferUAVDesc(OutputBuffer, PF_R32_SINT) ); */
 
     int TileMapWidth = ((Params.TextureWidth - 1) / Params.TileWidth) + 1;
     int TileMapHeight = ((Params.TextureHeight - 1) / Params.TileHeight) + 1;
