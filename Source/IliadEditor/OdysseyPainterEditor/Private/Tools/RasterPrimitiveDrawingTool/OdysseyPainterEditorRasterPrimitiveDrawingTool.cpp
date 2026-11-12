@@ -53,7 +53,7 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::CreateShape(FName iName)
     T* shape = CreateDefaultSubobject<T>(iName, true);
 
     shape->OnBegin().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeBegin);
-    shape->OnCommit().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit);
+    shape->OnContourCommit().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit);
     shape->OnAbort().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeAbort);
 
     shape->SetHUD(mShapeHUD);

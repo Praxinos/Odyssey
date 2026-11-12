@@ -88,11 +88,11 @@ UOdysseyFreehandShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKe
     if (SmoothingEnabled && !SmoothingOptions.SmoothingRealTime && mRawStroke.Num() > 0 )
     {
         ReapplySmoothing();
-        mOnCommit.Broadcast( mSmoothedStroke, true);
+        mOnContourCommit.Broadcast( mSmoothedStroke, true);
     }
     else
     {
-        mOnCommit.Broadcast( mRawStroke, false);
+        mOnContourCommit.Broadcast( mRawStroke, false);
     }
 
     mRawStroke.Empty();

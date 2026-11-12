@@ -162,6 +162,44 @@ UOdysseyPainterEditorRasterSelection::Add(const TArray<TArray<FVector2D>>& iPoly
     mOnChanged.Broadcast();
 }
 
+void UOdysseyPainterEditorRasterSelection::Add(TSharedPtr<::ULIS::FBlock> iMaskBlock)
+{
+    ::ULIS::FRectI boundingRect = ::ULIS::FRectI::FromXYWH(0, 0, iMaskBlock->Width(), iMaskBlock->Height());
+
+    TSharedPtr<::ULIS::FBlock> tempMaskBlock = MakeShared<::ULIS::FBlock>(iMaskBlock->Width(), iMaskBlock->Height(), ::ULIS::Format_GF);
+
+    mRasterMutator.EditTilesFromRects(
+        { boundingRect },
+        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+        {
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
+
+            ctx.ConvertFormat( *iMaskBlock,
+                               *tempMaskBlock );
+
+            ctx.Flush();
+
+            ctx.Blend(
+                  *tempMaskBlock
+                , *mBlock
+                , ::ULIS::FRectI::Auto
+                , ::ULIS::FVec2F(0, 0)
+                , ::ULIS::Blend_Add
+                , ::ULIS::Alpha_Normal
+            );
+            ctx.Finish();
+
+            return { };
+        }
+    );
+
+    mRasterMutator.Commit();
+
+    RefreshHUD();
+
+    mOnChanged.Broadcast();
+}
+
 void
 UOdysseyPainterEditorRasterSelection::Substract(const TArray<FVector2D>& iPolygon)
 {
@@ -219,6 +257,44 @@ UOdysseyPainterEditorRasterSelection::Substract(const TArray<TArray<FVector2D>>&
             }
         );
     }
+
+    mRasterMutator.Commit();
+
+    RefreshHUD();
+
+    mOnChanged.Broadcast();
+}
+
+void UOdysseyPainterEditorRasterSelection::Substract(TSharedPtr<::ULIS::FBlock> iMaskBlock)
+{
+    ::ULIS::FRectI boundingRect = ::ULIS::FRectI::FromXYWH(0, 0, iMaskBlock->Width(), iMaskBlock->Height());
+
+    TSharedPtr<::ULIS::FBlock> tempMaskBlock = MakeShared<::ULIS::FBlock>(iMaskBlock->Width(), iMaskBlock->Height(), ::ULIS::Format_GF);
+
+    mRasterMutator.EditTilesFromRects(
+        { boundingRect },
+        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+        {
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
+
+            ctx.ConvertFormat(*iMaskBlock,
+                *tempMaskBlock);
+
+            ctx.Flush();
+
+            ctx.Blend(
+                *tempMaskBlock
+                , *mBlock
+                , ::ULIS::FRectI::Auto
+                , ::ULIS::FVec2F(0, 0)
+                , ::ULIS::Blend_Substract
+                , ::ULIS::Alpha_Normal
+            );
+            ctx.Finish();
+
+            return { };
+        }
+    );
 
     mRasterMutator.Commit();
 

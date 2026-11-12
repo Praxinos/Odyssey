@@ -167,7 +167,7 @@ UOdysseyPolygonShape::CommitPolygon()
     //We close the polygon by adding the first point again
     mPoints.Emplace(mPoints[0]);
 
-    mOnCommit.Broadcast( mPoints, true);
+    mOnContourCommit.Broadcast( mPoints, true);
 
     mPoints.Empty();
 

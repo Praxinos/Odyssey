@@ -67,10 +67,6 @@ public:
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
 
 private:
-    TArray<TArray<FOdysseyPoint>> BuildContours(const TArray<FIntEdge>& edges);
-    TArray<TArray<FOdysseyPoint>> BuildContoursFromBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
-    ::ULIS::FRectI ComputeBoundingRect(const TArray<FVector2D>& iPoints) const;
-
     TArray<IOdysseyRenderingAbility*> GetBackgroundLayersToExclude(UOdysseyLayer* iLayer) const;
     TArray<IOdysseyRenderingAbility*> GetForegroundLayersToExclude(UOdysseyLayer* iLayer) const;
 

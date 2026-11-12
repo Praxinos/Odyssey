@@ -88,7 +88,7 @@ UOdysseyRectangleShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FK
 
     FOdysseyPoint topRightPoint(mBottomRightPoint.x, mTopLeftPoint.y);
     FOdysseyPoint bottomLeftPoint(mTopLeftPoint.x, mBottomRightPoint.y);
-    mOnCommit.Broadcast( { mTopLeftPoint, topRightPoint, mBottomRightPoint, bottomLeftPoint, mTopLeftPoint }, true);
+    mOnContourCommit.Broadcast( { mTopLeftPoint, topRightPoint, mBottomRightPoint, bottomLeftPoint, mTopLeftPoint }, true);
 
     return true;
 }

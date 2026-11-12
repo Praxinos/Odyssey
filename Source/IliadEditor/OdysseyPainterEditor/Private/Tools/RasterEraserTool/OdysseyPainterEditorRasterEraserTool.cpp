@@ -66,7 +66,7 @@ UOdysseyPainterEditorRasterEraserTool::CreateShape(FName iName)
 
     shape->OnBegin().AddUObject(this, &UOdysseyPainterEditorRasterEraserTool::OnShapeBegin);
     shape->OnInteractive().AddUObject(this, &UOdysseyPainterEditorRasterEraserTool::OnShapeInteractive);
-    shape->OnCommit().AddUObject(this, &UOdysseyPainterEditorRasterEraserTool::OnShapeCommit);
+    shape->OnContourCommit().AddUObject(this, &UOdysseyPainterEditorRasterEraserTool::OnShapeCommit);
     shape->OnAbort().AddUObject(this, &UOdysseyPainterEditorRasterEraserTool::OnShapeAbort);
 
     shape->SetHUD( mShapeHUD );

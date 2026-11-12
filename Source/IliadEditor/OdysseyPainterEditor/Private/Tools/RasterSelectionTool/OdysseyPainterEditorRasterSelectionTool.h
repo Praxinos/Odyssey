@@ -69,6 +69,7 @@ private:
     void OnShapeBegin();
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
     void OnContoursCommit(const TArray<TArray<FOdysseyPoint>>& iContours);
+    void OnSelectionBlockCommit(TSharedPtr<::ULIS::FBlock> iMaskBlock);
     void OnShapeAbort();
 
 protected:
