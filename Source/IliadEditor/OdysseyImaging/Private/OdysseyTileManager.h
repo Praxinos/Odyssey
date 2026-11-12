@@ -26,6 +26,11 @@ struct FOdysseyTileId
 
     bool IsValid() const { return Index != INDEX_NONE && Generation != INDEX_NONE; };
 
+    /** Several FTiles can share a similaire Index in the Tiles Array
+     * This can happen when a tile is detected as empty and leaves its place to be reused by another tile
+     * Generation allows us to track how many times the FTile has been reused
+     * Which also allows us to differentiate Tiles indentified by the same Index but different Generation
+    */
     UPROPERTY()
     uint64 Index = INDEX_NONE;
 
@@ -126,9 +131,6 @@ public:
      */
     TFuture<FTextureRHIRef> GetTileTexture(FOdysseyTileId InTileId, uint32 InTileSize, EPixelFormat InTileFormat) const;
 
-    bool GetTileBuffer(FOdysseyTileId InTileId, FSharedBuffer& OutBuffer);
-    bool GetTileBuffer(FOdysseyTileId InTileId, FSharedBuffer& OutBuffer) const;
-
     bool GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer);
     bool GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer) const;
 
@@ -217,24 +219,34 @@ private:
      * Several FTile can, in fine, point to the same FTileData.
      * An FTile can also be empty, in which case it will be marked as "Free" after ReadBack
      */
-    struct FTile
+    class FTile
     {
-        /** An FTile can be reused if it was previously empty
-         * Generation allows us to track how many times the FTile has been reused
-         * Which also allows us to differentiate Tiles indentified by the same Index but different Generation
-        */
-        uint64 Generation;
+    public:
+        FTile(const FOdysseyTileId& InId);
+
+    public:
+        void Initialize();
+        void Initialize(TSharedPtr<FTileData> InTileData);
+
+    public:
+        //When reading a Tile, its data must stay consistent
+        FCriticalSection Mutex;
+
+        FOdysseyTileId Id;
         TPromise<FTextureRHIRef> TempTexturePromise;
         TFuture<FTextureRHIRef> TempTexture;
         TSharedPtr<FRHIGPUTextureReadback> GPUReadBack;
         TSharedPtr<FRHIGPUBufferReadback> GPUIsEmptyReadBack;
+        TPromise<TSharedPtr<FTileData>> TileDataPromise;
         TFuture<TSharedPtr<FTileData>> TileData;
     };
 
-    void TryLoadTileFromReadBack(FOdysseyTileId InTileId);
-    void LoadTileFromReadBack(FOdysseyTileId InTileId);
+    template<typename... ArgsType>
+    TSharedPtr<FTile> CreateNewTile(ArgsType&&... Args);
 
-    FOdysseyTileId RegisterTile(FTile&& InTile);
+    void TryLoadTileFromReadBack(TSharedPtr<FTile> InTile);
+    void LoadTileFromReadBack(TSharedPtr<FTile> InTile);
+
     void CompressTile(TSharedPtr<FTileData> InTileData);
     void CacheTileOnDisk(TSharedPtr<FTileData> InTileData);
 
@@ -246,14 +258,14 @@ private:
     virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(FOdysseyTileManager, STATGROUP_Tickables); }
 
 private:
-    FCriticalSection TilesMutex;
+    FCriticalSection FreeTilesMutex;
     FCriticalSection HashToTileDataMutex;
 
-    TArray64<FTile> Tiles;
-    TArray64<uint64> FreeTiles;
+    TArray64<TSharedPtr<FTile>> Tiles;
+    TArray64<FOdysseyTileId> FreeTiles;
 
     TMultiMap<FIoHash, TSharedPtr<FTileData>> HashToTileData;
-    TArray<FOdysseyTileId> PendingTilesToReadBack;
+    TArray<TSharedPtr<FTile>> PendingTilesToReadBack;
 
     FOdysseyTileManagerStats Stats;
 };
