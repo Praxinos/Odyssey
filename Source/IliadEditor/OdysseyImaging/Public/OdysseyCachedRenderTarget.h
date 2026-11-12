@@ -109,17 +109,20 @@ public:
     /**
      * Initializes RenderTarget with the content of mImage
      */
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Rendering|CachedRenderTarget")
     void LoadRenderTarget() const;
 
     /**
      * Copy the content of the RenderTarget into the mImage
      * Release RenderTarget after the copy is done
      */
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Rendering|CachedRenderTarget")
     void UnloadRenderTarget() const;
 
     /**
      * Initializes mImage with what is saved on the DDC
      */
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Rendering|CachedRenderTarget")
     void LoadImage() const;
 
     /**
@@ -127,6 +130,7 @@ public:
      * Release mImage after the copy is done
      * Calls CacheRenderTargetToImage() if mImage is not up to date yet
      */
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Rendering|CachedRenderTarget")
     void UnloadImage() const;
 
     void CopyRenderTargetToResetRT();
