@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Async/Future.h"
+#include "RenderGraphBuilder.h"
 
 class UTexture;
 
@@ -58,7 +60,7 @@ public:
     static FRDGTextureRef DecompressRenderThread(FRDGBuilder& GraphBuilder, const FRLECompressedBuffer& iBuffer, EPixelFormat iPixelFormat);
 
     // Executes this shader on the render thread from the game thread via EnqueueRenderThreadCommand
-    static void DecompressGameThread(const FRLECompressedBuffer& iBuffer, UTextureRenderTarget2D* oTexture);
+    static void DecompressGameThread(const FRLECompressedBuffer& iBuffer, class UTextureRenderTarget2D* oTexture);
 
     static void TestDecompressTiledRLEShader(uint32 iTextureWidth, uint32 iTextureHeight, FRLECompressedBuffer& oRLEBuffer);
 };
