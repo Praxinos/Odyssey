@@ -11,6 +11,7 @@
 #include "RenderGraphBuilder.h"
 #include "RHIGPUReadback.h"
 #include "TickableEditorObject.h"
+#include "OdysseyTileCacheSession.h"
 #include "OdysseyTileManager.generated.h"
 
 class UTexture;
@@ -179,7 +180,8 @@ private:
             enum class ECacheState
             {
                 InProgress,
-                Cached
+                Cached,
+                Failed
             };
 
             //Static members
@@ -252,7 +254,6 @@ private:
             TSharedPtr<FRHIGPUTextureReadback> ReadBack;
             FIntPoint PositionInPixels;
             uint32 BytesPerPixel;
-            uint32 BytesPerTextureRow;
             uint32 TileSize;
         };
 
@@ -312,6 +313,7 @@ public:
      */
     TArray<TFuture<TSharedPtr<FTileTextureHandle>>> GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, uint32 InTileSize, EPixelFormat InTileFormat) const;
 
+    /** Returns true with a null buffer for an empty tile, and false on a data retrieval error. */
     bool GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer);
     bool GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer) const;
 
@@ -356,4 +358,5 @@ private:
     TArray<TSharedPtr<FTile>> PendingTilesToReadBack;
 
     FOdysseyTileManagerStats Stats;
+    TUniquePtr<FOdysseyTileCacheSession> CacheSession;
 };

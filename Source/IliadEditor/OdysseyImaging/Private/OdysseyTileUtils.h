@@ -7,6 +7,11 @@
 
 namespace Odyssey::TileUtils {
 
+    inline constexpr uint32 MaxAtlasDimensionInTiles = 64;
+
+    /** Every supported tile size must fit a full atlas within the RHI texture dimension limit. */
+    bool IsValidTileSize(int64 InTileSize);
+
     TArray<FIntPoint> GetTilePositionsFromRect(int32 InTileSize, const FIntRect& InRect);
 
 }

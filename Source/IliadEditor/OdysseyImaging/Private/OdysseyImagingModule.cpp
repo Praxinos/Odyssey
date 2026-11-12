@@ -10,8 +10,21 @@
 
 #define LOCTEXT_NAMESPACE "Imaging"
 
+#if WITH_DEV_AUTOMATION_TESTS
+namespace Odyssey::TileCacheTests
+{
+    bool RunWorkerIfRequested();
+}
+#endif
+
 void FOdysseyImagingModule::StartupModule()
 {
+#if WITH_DEV_AUTOMATION_TESTS
+    if (Odyssey::TileCacheTests::RunWorkerIfRequested())
+    {
+        return;
+    }
+#endif
     RegisterSettings();
     FOdysseyTileManager::Get().Initialize();
 }

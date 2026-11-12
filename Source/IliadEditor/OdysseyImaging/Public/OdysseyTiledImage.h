@@ -78,11 +78,13 @@ public:
     virtual void Serialize(FArchive& Ar) override;
 
 private:
+    UPROPERTY()
     uint32 TileSize = 64;
 
     /**
      *
      */
+    UPROPERTY()
     EOdysseyTiledImageFormat Format = EOdysseyTiledImageFormat::RGBA8;
 
     /** TODO:

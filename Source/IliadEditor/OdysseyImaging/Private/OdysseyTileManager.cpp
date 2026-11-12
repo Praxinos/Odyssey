@@ -7,6 +7,7 @@
 #include "Engine/Texture.h"
 #include "GlobalShader.h"
 #include "HAL/FileManager.h"
+#include "HAL/PlatformProcess.h"
 #include "RenderingThread.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
@@ -22,9 +23,11 @@
  * A 64x64 Tiles Atlas of 64x64 RGBA8 pixels tiles
  * Is ~64MB on GPU
  */
-#define TILE_ATLAS_MAX_WIDTH_IN_TILES 64
-#define TILE_ATLAS_MAX_HEIGHT_IN_TILES 64
+#define TILE_ATLAS_MAX_WIDTH_IN_TILES Odyssey::TileUtils::MaxAtlasDimensionInTiles
+#define TILE_ATLAS_MAX_HEIGHT_IN_TILES Odyssey::TileUtils::MaxAtlasDimensionInTiles
 #define TILE_ATLAS_MAX_TILES (TILE_ATLAS_MAX_WIDTH_IN_TILES * TILE_ATLAS_MAX_HEIGHT_IN_TILES)
+
+DEFINE_LOG_CATEGORY_STATIC(LogOdysseyTileManager, Log, All);
 
 /*static*/ FCriticalSection FOdysseyTileManager::FTileData::Mutex;
 /*static*/ FCriticalSection FOdysseyTileManager::FTileData::CacheOnDiskMutex;
@@ -133,32 +136,37 @@ FOdysseyTileManager::Get()
 FString
 FOdysseyTileManager::GetCacheOnDiskPath()
 {
-    return FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("Temp"), TEXT("OdysseyTileManager"), TEXT("TempCache.dat"));
+    FOdysseyTileManager& Manager = Get();
+    if (!Manager.CacheSession)
+    {
+        Manager.Initialize();
+    }
+    return Manager.CacheSession->GetCacheFilePath();
 }
 
 void
 FOdysseyTileManager::Initialize()
 {
-    static bool IsInitialized = false;
-    if (IsInitialized)
+    if (CacheSession)
         return;
 
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::Initialize);
 
-    IsInitialized = true;
-    FString CacheDirectory = FPaths::GetPath(GetCacheOnDiskPath());
-    IFileManager::Get().DeleteDirectory(*CacheDirectory, false, true);
+    CacheSession = MakeUnique<FOdysseyTileCacheSession>(
+        FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("Temp"), TEXT("OdysseyTileManager")));
+    CacheSession->Initialize();
 }
 
 void
 FOdysseyTileManager::Finalize()
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::Finalize);
-    FString CacheDirectory = FPaths::GetPath(GetCacheOnDiskPath());
-
+    if (!CacheSession)
+    {
+        return;
+    }
     WaitUntilAllTilesAreCached(false);
-
-    IFileManager::Get().DeleteDirectory(*CacheDirectory, false, true);
+    CacheSession->Finalize();
 }
 
 BEGIN_SHADER_PARAMETER_STRUCT(FWriteTileParameters, )
@@ -202,6 +210,11 @@ FOdysseyTileManager::CreateOrUpdateTiles(
 )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::CreateOrUpdateTiles);
+
+    if (!InTexture || !Odyssey::TileUtils::IsValidTileSize(InTileSize))
+    {
+        return {};
+    }
 
     FIntRect SourceRect(0, 0, InTexture->GetSurfaceWidth(), InTexture->GetSurfaceHeight());
     SourceRect.Clip(InRect);
@@ -401,7 +414,6 @@ FOdysseyTileManager::CreateOrUpdateTiles(
                     PixelsReadBack.ReadBack = GPUReadBack;
                     PixelsReadBack.PositionInPixels = Atlas->GetTilePosition(TileIndex);
                     PixelsReadBack.BytesPerPixel = BytesPerPixel;
-                    PixelsReadBack.BytesPerTextureRow = Atlas->GetWidthInTiles() * TileSize * BytesPerPixel;
                     PixelsReadBack.TileSize = TileSize;
 
                     TileToCreate.Tile->GPUReadBackPromise->SetValue(PixelsReadBack);
@@ -599,6 +611,7 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
                 int32 Height = 0;
 
                 void* Data = PixelsReadBack.ReadBack->Lock(Width, &Height);
+                const uint64 BytesPerTextureRow = uint64(Width) * PixelsReadBack.BytesPerPixel;
 
                 uint64 BufferSize = PixelsReadBack.TileSize * PixelsReadBack.TileSize * PixelsReadBack.BytesPerPixel;
                 FSharedBuffer TileBuffer = FUniqueBuffer::Alloc(BufferSize).MoveToShared();
@@ -607,7 +620,7 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
                 {
                     const uint8* Src =
                         (const uint8*)Data
-                        + (PixelsReadBack.PositionInPixels.Y + Y) * PixelsReadBack.BytesPerTextureRow
+                        + (PixelsReadBack.PositionInPixels.Y + Y) * BytesPerTextureRow
                         + PixelsReadBack.PositionInPixels.X * PixelsReadBack.BytesPerPixel;
 
                     uint8* Dst = (uint8*)TileBuffer.GetData() + Y * PixelsReadBack.TileSize * PixelsReadBack.BytesPerPixel;
@@ -815,6 +828,7 @@ FOdysseyTileManager::GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompresse
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::GetTileCompressedBuffer);
 
+    OutBuffer = FCompressedBuffer();
     if (InTileId.Index >= (uint64)Tiles.Num())
         return false;
 
@@ -828,7 +842,10 @@ FOdysseyTileManager::GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompresse
     //it indicates the tile corresponding to the TileId was empty
     //and freed.
     if (Tile->Id != InTileId)
-        return false;
+    {
+        // Slots are only reused after the previous generation was found to be empty.
+        return true;
+    }
 
     //If readback is still valid, we need to start reading back
     if (Tile->GPUReadBackState == FTile::EGPUReadBackState::Idle)
@@ -841,7 +858,9 @@ FOdysseyTileManager::GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompresse
     //Tile->TileData is a future, so it will block current thread until GPU Readback is done
     TSharedPtr<FTileData> TileData = Tile->TileData.Get();
     if (!TileData)
-        return false;
+    {
+        return true;
+    }
 
     return TileData->GetCompressedBuffer(OutBuffer);
 }
@@ -893,6 +912,14 @@ void
 FOdysseyTileManager::WaitUntilAllTilesAreCached(bool InEvictTiles)
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::WaitUntilAllTilesAreCached);
+
+    check(IsInGameThread());
+    // Tick cannot advance the pipeline while this thread waits. Queue every remaining readback first.
+    const TArray<TSharedPtr<FTile>> PendingTiles = PendingTilesToReadBack;
+    for (const TSharedPtr<FTile>& Tile : PendingTiles)
+    {
+        LoadTileFromReadBack(Tile);
+    }
 
     for (TSharedPtr<FTile>& Tile : Tiles)
     {
@@ -1138,7 +1165,7 @@ FOdysseyTileManager::FTileData::LoadUncompressedBuffer() const
         }
     }
 
-    return true;
+    return !UncompressedBuffer.IsNull();
 }
 
 bool
@@ -1153,26 +1180,44 @@ FOdysseyTileManager::FTileData::LoadCompressedBuffer() const
     {
         FScopeLock Lock(&CacheOnDiskMutex);
 
-        FString FilePath = GetCacheOnDiskPath();
-        const TUniquePtr<FArchive> Ar(IFileManager::Get().CreateFileReader(*FilePath, FILEWRITE_Append));
-        if (!Ar)
+        if (DiskCacheOffset == INDEX_NONE)
+        {
             return false;
+        }
+
+        FString FilePath = GetCacheOnDiskPath();
+        const TUniquePtr<FArchive> Ar(IFileManager::Get().CreateFileReader(*FilePath));
+        if (!Ar)
+        {
+            return false;
+        }
+
+        if (DiskCacheOffset < 0 || DiskCacheOffset >= Ar->TotalSize())
+        {
+            return false;
+        }
 
         Ar->Seek(DiskCacheOffset);
         *Ar << Buffer;
+
+        const bool bReadSucceeded = !Ar->IsError() && !Buffer.IsNull();
+        const bool bClosed = Ar->Close();
+        if (!bReadSucceeded || !bClosed)
+        {
+            return false;
+        }
 
         if (!Buffer.IsNull())
         {
             FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
             TileStats.AddCompressed(Buffer);
         }
-        Ar->Close();
 
         TPromise<FCompressedBuffer> Promise;
         CompressedBuffer = Promise.GetFuture();
         Promise.SetValue(Buffer);
     }
-    return true;
+    return !Buffer.IsNull();
 }
 
 FCompressedBuffer
@@ -1199,30 +1244,41 @@ FOdysseyTileManager::FTileData::CacheOnDisk()
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::CacheOnDisk);
 
     FString FilePath = FOdysseyTileManager::GetCacheOnDiskPath();
+    bool bCached = false;
 
     //We lock to prevent several threads to write in the file at the same time
     {
         FScopeLock Lock(&CacheOnDiskMutex);
 
         const TUniquePtr<FArchive> Ar(IFileManager::Get().CreateFileWriter(*FilePath, FILEWRITE_Append));
-        if (!Ar)
-            return;
-
-        DiskCacheOffset = Ar->Tell();
-
-        FCompressedBuffer Buffer = CompressedBuffer.Get();
-        *Ar << Buffer;
-        Ar->Flush();
-
-        FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
-        TileStats.AddCachedOnDisk(Ar->TotalSize() - DiskCacheOffset);
-
-        Ar->Close();
+        if (Ar)
+        {
+            const int64 Offset = Ar->Tell();
+            FCompressedBuffer Buffer = CompressedBuffer.Get();
+            if (!Buffer.IsNull())
+            {
+                *Ar << Buffer;
+                Ar->Flush();
+                const int64 SizeOnDisk = Ar->Tell() - Offset;
+                const bool bWriteSucceeded = !Ar->IsError() && SizeOnDisk > 0;
+                const bool bClosed = Ar->Close();
+                bCached = bWriteSucceeded && bClosed;
+                if (bCached)
+                {
+                    DiskCacheOffset = Offset;
+                    FOdysseyTileManager::Get().GetStats().AddCachedOnDisk(SizeOnDisk);
+                }
+            }
+        }
     }
 
     {
         FScopeLock Lock(&CacheStateMutex);
-        CacheState = ECacheState::Cached;
+        CacheState = bCached ? ECacheState::Cached : ECacheState::Failed;
+    }
+    if (!bCached)
+    {
+        UE_LOG(LogOdysseyTileManager, Warning, TEXT("Failed to cache tile %s on disk; its buffers will remain in memory."), *LexToString(Hash));
     }
 }
 
@@ -1289,11 +1345,20 @@ FOdysseyTileManager::FTileData::Touch(TSharedRef<FOdysseyTileManager::FTileData>
         CompressedLRU.RemoveNode(InTileData->CompressedLRUNode);
     }
 
-    UncompressedLRU.AddHead(InTileData);
-    CompressedLRU.AddHead(InTileData);
-
-    InTileData->UncompressedLRUNode = UncompressedLRU.GetHead();
-    InTileData->CompressedLRUNode = CompressedLRU.GetHead();
+    InTileData->UncompressedLRUNode = nullptr;
+    InTileData->CompressedLRUNode = nullptr;
+    if (!InTileData->UncompressedBuffer.IsNull())
+    {
+        UncompressedLRU.AddHead(InTileData);
+        InTileData->UncompressedLRUNode = UncompressedLRU.GetHead();
+    }
+    // A pending compression will produce a resident buffer. Do not wait for it while touching the LRU.
+    if (InTileData->CompressedBuffer.IsValid()
+        && (!InTileData->CompressedBuffer.IsReady() || !InTileData->CompressedBuffer.Get().IsNull()))
+    {
+        CompressedLRU.AddHead(InTileData);
+        InTileData->CompressedLRUNode = CompressedLRU.GetHead();
+    }
 }
 
 void

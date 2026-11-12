@@ -11,6 +11,8 @@
 
 #include "OdysseyTileUtils.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogOdysseyTiledImage, Log, All);
+
 UOdysseyTiledImageFactoryNew::UOdysseyTiledImageFactoryNew()
 {
     bCreateNew = true;
@@ -41,6 +43,13 @@ UOdysseyTiledImage::UOdysseyTiledImage()
 void
 UOdysseyTiledImage::Initialize(int InTileSize, EOdysseyTiledImageFormat InFormat)
 {
+    if (!Odyssey::TileUtils::IsValidTileSize(InTileSize)
+        || InFormat > EOdysseyTiledImageFormat::RGBA32F)
+    {
+        UE_LOG(LogOdysseyTiledImage, Warning, TEXT("Invalid tiled image size or format: %d, %d."), InTileSize, int32(InFormat));
+        return;
+    }
+
     TileSize = InTileSize;
     Format = InFormat;
 
@@ -78,6 +87,10 @@ void
 UOdysseyTiledImage::CopyFromTexture(UTexture* InTexture, FIntRect InRect, FIntPoint InPosition)
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyTiledImage::CopyFromTexture);
+    if (!InTexture || !Odyssey::TileUtils::IsValidTileSize(TileSize))
+    {
+        return;
+    }
     Modify();
 
     FOdysseyTileManager::FGetExistingTileId GetExistingTileId = FOdysseyTileManager::FGetExistingTileId::CreateLambda(
@@ -114,15 +127,27 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyTiledImage::Render);
 
+    if (!OutRenderTarget || !Odyssey::TileUtils::IsValidTileSize(TileSize)
+        || InRect.Width() <= 0 || InRect.Height() <= 0)
+    {
+        return;
+    }
+
     FIntRect RenderTargetRect(0, 0, OutRenderTarget->GetSurfaceWidth(), OutRenderTarget->GetSurfaceHeight());
     FIntRect DestinationRect(
         InPosition,
         InPosition + InRect.Size()
     );
     DestinationRect.Clip(RenderTargetRect);
+    if (DestinationRect.Width() <= 0 || DestinationRect.Height() <= 0)
+    {
+        return;
+    }
+
+    const FIntRect VisibleSourceRect = DestinationRect + (InRect.Min - InPosition);
 
     //Load needed Tiles
-    TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTilePositionsFromRect(TileSize, InRect);
+    TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTilePositionsFromRect(TileSize, VisibleSourceRect);
     TArray<FOdysseyTileId> TileIds;
     TileIds.Reserve(TilePositions.Num());
     for (const FIntPoint& TilePosition : TilePositions)
@@ -141,6 +166,7 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
             TileSize = TileSize,
             TilePixelFormat = GetPixelFormat(),
             DestinationRect,
+            DestinationPosition = InPosition,
             SourceRect = InRect
         ](FRHICommandListImmediate& RHICmdList)
         {
@@ -155,9 +181,13 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
             for (int i = 0; i < TilePositions.Num(); i++)
             {
                 const FIntPoint& TilePosition = TilePositions[i];
-                FIntPoint TileDstPos(TilePosition * TileRect.Size() - SourceRect.Min + DestinationRect.Min);
+                FIntPoint TileDstPos(TilePosition * TileRect.Size() - SourceRect.Min + DestinationPosition);
                 FIntRect TileDstRect(TileDstPos, TileDstPos + TileRect.Size());
                 TileDstRect.Clip(DestinationRect);
+                if (TileDstRect.Width() <= 0 || TileDstRect.Height() <= 0)
+                {
+                    continue;
+                }
 
                 FIntPoint TileSrcPos(
                     TileDstRect.Min.X - TileDstPos.X,
@@ -251,6 +281,13 @@ UOdysseyTiledImage::Serialize(FArchive& Ar)
     //if this custom serialization is changed
     Ar.UsingCustomVersion(FOdysseyTiledImageObjectVersion::GUID);
 
+    if (!Odyssey::TileUtils::IsValidTileSize(TileSize) || Format > EOdysseyTiledImageFormat::RGBA32F)
+    {
+        UE_LOG(LogOdysseyTiledImage, Error, TEXT("Cannot serialize tiled image with invalid size or format."));
+        Ar.SetError();
+        return;
+    }
+
     TArray<FIntPoint> TilePositions;
     TArray<FCompressedBuffer> TileCompressedBuffers;
     TArray<FIoHash> TileHashes;
@@ -264,11 +301,23 @@ UOdysseyTiledImage::Serialize(FArchive& Ar)
 
             FCompressedBuffer CompressedBuffer;
             if (!FOdysseyTileManager::Get().GetTileCompressedBuffer(TileId, CompressedBuffer))
+            {
+                UE_LOG(LogOdysseyTiledImage, Error, TEXT("Cannot save tiled image: tile (%d, %d) could not be read."), TilePosition.X, TilePosition.Y);
+                Ar.SetError();
+                return;
+            }
+            // Empty tiles have no payload. An unavailable non-empty tile is an error above.
+            if (CompressedBuffer.IsNull())
+            {
                 continue;
+            }
 
             FIoHash Hash;
             if (!FOdysseyTileManager::Get().GetTileHash(TileId, Hash))
-                continue;
+            {
+                Ar.SetError();
+                return;
+            }
 
             TilePositions.Add(TilePosition);
             TileCompressedBuffers.Add(CompressedBuffer);
@@ -282,6 +331,22 @@ UOdysseyTiledImage::Serialize(FArchive& Ar)
 
     if( Ar.IsLoading() )
     {
+        if (Ar.IsError() || TilePositions.Num() != TileCompressedBuffers.Num() || TilePositions.Num() != TileHashes.Num())
+        {
+            Ar.SetError();
+            return;
+        }
+
+        const uint64 ExpectedTileBytes = uint64(TileSize) * TileSize * GPixelFormats[GetPixelFormat()].BlockBytes;
+        for (const FCompressedBuffer& Buffer : TileCompressedBuffers)
+        {
+            if (Buffer.IsNull() || Buffer.GetRawSize() != ExpectedTileBytes)
+            {
+                Ar.SetError();
+                return;
+            }
+        }
+
         Tiles.Empty(TilePositions.Num());
 
         for (int i = 0; i < TilePositions.Num(); i++)

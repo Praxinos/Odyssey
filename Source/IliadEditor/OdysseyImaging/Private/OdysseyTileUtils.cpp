@@ -3,7 +3,17 @@
 
 #include "OdysseyTileUtils.h"
 
+#include "RHI.h"
+
 namespace Odyssey::TileUtils {
+
+bool IsValidTileSize(int64 InTileSize)
+{
+    // Before RHI initialization, use the conservative SM5 texture dimension limit.
+    const int32 RHIMaxTextureDimension = GMaxTextureDimensions;
+    const uint32 MaxTextureDimension = RHIMaxTextureDimension > 0 ? uint32(RHIMaxTextureDimension) : 16384;
+    return InTileSize > 0 && InTileSize <= MaxTextureDimension / MaxAtlasDimensionInTiles;
+}
 
 static int32 FloorDiv(int32 Value, int32 Divisor)
 {
@@ -15,7 +25,7 @@ static int32 FloorDiv(int32 Value, int32 Divisor)
 TArray<FIntPoint>
 GetTilePositionsFromRect(int32 InTileSize, const FIntRect& InRect)
 {
-    if (InRect.Min.X >= InRect.Max.X || InRect.Min.Y >= InRect.Max.Y)
+    if (InTileSize <= 0 || InRect.Min.X >= InRect.Max.X || InRect.Min.Y >= InRect.Max.Y)
         return {};
 
     const int32 X1 = FloorDiv(InRect.Min.X, InTileSize);
