@@ -1,0 +1,166 @@
+#include "/Engine/Public/Platform.ush"
+
+Texture2D InputTexture;
+
+StructuredBuffer<int2> TilePositions;
+uint TileSize;
+uint NumTiles;
+RWBuffer<uint> IsTileEmpty;
+
+// One thread group processes exactly one tile.
+// 8x8 = 64 threads per tile.
+//
+// Each thread scans a strided subset of the tile and keeps the result in a
+// thread-local boolean. A groupshared reduction combines the 64 results.
+// Only thread 0 writes the final result to the output buffer.
+//
+// Result convention:
+//   1 = tile is empty (all sampled alpha values are 0)
+//   0 = tile contains content (at least one alpha value is != 0)
+
+// One thread group processes one tile.
+// Only one thread actually does the work.
+[numthreads(1, 1, 1)]
+void MainCS(
+    uint3 GroupId : SV_GroupID)
+{
+    const uint TileIndex = GroupId.x;
+
+    if (TileIndex >= NumTiles)
+    {
+        return;
+    }
+
+    const int2 TilePosition = TilePositions[TileIndex];
+
+    uint TextureWidth;
+    uint TextureHeight;
+
+    InputTexture.GetDimensions(
+        TextureWidth,
+        TextureHeight
+    );
+
+    bool bIsEmpty = true;
+
+    for (uint LocalY = 0; LocalY < TileSize; ++LocalY)
+    {
+        const int PixelY =
+            TilePosition.y + int(LocalY);
+
+        if (PixelY < 0 || PixelY >= int(TextureHeight))
+        {
+            continue;
+        }
+
+        for (uint LocalX = 0; LocalX < TileSize; ++LocalX)
+        {
+            const int PixelX =
+                TilePosition.x + int(LocalX);
+
+            if (PixelX < 0 || PixelX >= int(TextureWidth))
+            {
+                continue;
+            }
+
+            const float Alpha =
+                InputTexture.Load(int3(
+                    PixelX,
+                    PixelY,
+                    0
+                )).a;
+
+            if (Alpha != 0.0f)
+            {
+                bIsEmpty = false;
+                break;
+            }
+        }
+
+        if (!bIsEmpty)
+        {
+            break;
+        }
+    }
+
+    IsTileEmpty[TileIndex] = bIsEmpty ? 1u : 0u;
+}
+
+/* groupshared uint TileHasContent[64];
+
+[numthreads(8, 8, 1)]
+void MainCS(
+    uint3 GroupId        : SV_GroupID,
+    uint3 GroupThreadId  : SV_GroupThreadID,
+    uint  GroupIndex     : SV_GroupIndex)
+{
+    const uint TileIndex = GroupId.x;
+
+    if (TileIndex >= NumTiles)
+    {
+        return;
+    }
+
+    const int2 TilePosition = TilePositions[TileIndex];
+
+    uint TextureWidth;
+    uint TextureHeight;
+    InputTexture.GetDimensions(TextureWidth, TextureHeight);
+
+    const uint ThreadX = GroupThreadId.x;
+    const uint ThreadY = GroupThreadId.y;
+
+    bool bHasContent = false;
+
+    // Each thread scans every 8th pixel in X and Y.
+    for (uint LocalY = ThreadY; LocalY < TileSize; LocalY += 8)
+    {
+        const int PixelY = TilePosition.y + int(LocalY);
+
+        if (PixelY < 0 || PixelY >= int(TextureHeight))
+        {
+            continue;
+        }
+
+        for (uint LocalX = ThreadX; LocalX < TileSize; LocalX += 8)
+        {
+            const int PixelX = TilePosition.x + int(LocalX);
+
+            if (PixelX < 0 || PixelX >= int(TextureWidth))
+            {
+                continue;
+            }
+
+            const float Alpha = InputTexture.Load(
+                int3(PixelX, PixelY, 0)
+            ).a;
+
+            if (Alpha != 0.0f)
+            {
+                bHasContent = true;
+            }
+        }
+    }
+
+    TileHasContent[GroupIndex] = bHasContent ? 1u : 0u;
+
+    GroupMemoryBarrierWithGroupSync();
+
+    // Parallel reduction:
+    // 64 -> 32 -> 16 -> 8 -> 4 -> 2 -> 1
+    for (uint Offset = 32; Offset > 0; Offset >>= 1)
+    {
+        if (GroupIndex < Offset)
+        {
+            TileHasContent[GroupIndex] |= TileHasContent[GroupIndex + Offset];
+        }
+
+        GroupMemoryBarrierWithGroupSync();
+    }
+
+    if (GroupIndex == 0)
+    {
+        // 1 = empty, 0 = non-empty.
+        IsTileEmpty[TileIndex] = (TileHasContent[0] == 0u) ? 1u : 0u;
+    }
+}*/

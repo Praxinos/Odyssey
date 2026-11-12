@@ -77,73 +77,56 @@ public:
     static FOdysseyTileManager& Get();
     static FString GetCacheOnDiskPath();
 
-public:
-    void Initialize();
-    void Finalize();
-
-    /**
-     * Forces Tile Eviction
-     * Will respect TileManager Settings
-     */
-    void EvictTiles();
-
-    /** Used for debug purposes
-     * Evicts ALL Tiles from memory
-     * Does not respect TileManager Settings
-     */
-    void EvictAllTiles();
+private:
+    struct FTileAtlas;
 
 public:
+    //Public structs/classes
     struct FCreatedTile
     {
         FOdysseyTileId Id;
         FIntPoint Pos;
-
-        bool IsEmpty() const { return !Id.IsValid(); }
     };
 
-    DECLARE_DELEGATE_RetVal_OneParam(FOdysseyTileId, FGetExistingTileId, const FIntPoint&)
+    class FTileTextureHandle
+    {
+    public:
+        /** Destructor will release the tile from the tile atlas*/
+        ~FTileTextureHandle();
+        FTileTextureHandle();
+        FTileTextureHandle(TSharedPtr<FTileAtlas> InAtlas, uint32 InTileIndexInAtlas);
 
-    /**
-     * Creates tiles from the given rect in the given texture
-     * @param InTexture Texture to copy from
-     * @param InRect The Texture rect to copy from
-     * @param InPosition Position where to copy the texture in the tile space in pixels
-     * @param InTileSize Width and height of the tile to create in pixels, tiles are always squares
-     * @param InTileFormat The tile pixel format
-     * @param InTilesInfos Defines infos the created tiles should respect
-     */
-    TArray<FCreatedTile> CreateOrUpdateTiles(
-        UTexture* InTexture,
-        FIntRect InRect,
-        FIntPoint InPosition,
-        uint32 InTileSize,
-        EPixelFormat InTileFormat,
-        const FGetExistingTileId& InGetExistingTileId = FGetExistingTileId()
-    );
+    public:
+        bool IsValid() const;
 
-    FOdysseyTileId CreateTile(const FIoHash& InHash, const FCompressedBuffer& InCompressedBuffer);
+    public:
+        FTextureRHIRef GetTextureRHI() const;
+        FIntRect GetRectInTexture() const;
+        FIntPoint GetPositionInTexture() const;
 
-    /**
-     * Returns a FTextureRHIRef containing the Tile's Texture
-     * The returned FTextureRHIRef can be invalid, indicating an empty texture
-     * Please check FTextureRHIRef::IsValid() before using it
-     */
-    TFuture<FTextureRHIRef> GetTileTexture(FOdysseyTileId InTileId, uint32 InTileSize, EPixelFormat InTileFormat) const;
+    private:
+        /** Defines the Atlas containing the Tile */
+        TSharedPtr<FTileAtlas> Atlas;
 
-    bool GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer);
-    bool GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer) const;
-
-    bool GetTileHash(FOdysseyTileId InTileId, FIoHash& OutHash);
-
-    FOdysseyTileManagerStats& GetStats();
-
-    /**
-     * Waits until all tiles are properly cached on disk and evicted if needed
-     */
-    void WaitUntilAllTilesAreCached(bool InEvictTiles = true);
+        /** The slice of the Atlas containing the Tile */
+        uint32 TileIndexInAtlas;
+    };
 
 private:
+    //Private structs/classes
+
+    struct FTileAtlas
+    {
+        FTileAtlas() = default;
+        FTileAtlas(FRHICommandList& InRHICmdList, uint32 InTileSize, EPixelFormat InTileFormat);
+
+        FTextureRHIRef Texture;
+        TArray<uint32> FreeTileIndexes;
+
+        uint32 TileSize;
+        EPixelFormat TileFormat;
+    };
+
     /**
      * FTileData contains the real Tile Data after GPU ReadBack
      * A FTileData is created asyncronously once GPU ReadBack is done
@@ -229,18 +212,97 @@ private:
         void Initialize(TSharedPtr<FTileData> InTileData);
 
     public:
+        enum class EGPUReadBackState
+        {
+            Idle, //GPU Readback has not started yet
+            InProgress, //GPU Readback is in progress
+            Done //GPU Readback is finished
+        };
+
+
         //When reading a Tile, its data must stay consistent
         FCriticalSection Mutex;
 
         FOdysseyTileId Id;
-        TPromise<FTextureRHIRef> TempTexturePromise;
-        TFuture<FTextureRHIRef> TempTexture;
+        TUniquePtr<TPromise<TSharedPtr<FTileTextureHandle>>> TempTexturePromise;
+        TFuture<TSharedPtr<FTileTextureHandle>> TempTexture;
+
+        EGPUReadBackState GPUReadBackState;
         TSharedPtr<FRHIGPUTextureReadback> GPUReadBack;
-        TSharedPtr<FRHIGPUBufferReadback> GPUIsEmptyReadBack;
+
+        struct FIsEmptyReadBack
+        {
+            TSharedPtr<FRHIGPUBufferReadback> ReadBack;
+            uint32 ResultSize;
+            uint32 ResultIndex;
+        };
+
+        TUniquePtr<TPromise<FIsEmptyReadBack>> GPUIsEmptyReadBackPromise;
+        TFuture<FIsEmptyReadBack> GPUIsEmptyReadBack;
         TPromise<TSharedPtr<FTileData>> TileDataPromise;
         TFuture<TSharedPtr<FTileData>> TileData;
     };
 
+public:
+    void Initialize();
+    void Finalize();
+
+    /**
+     * Forces Tile Eviction
+     * Will respect TileManager Settings
+     */
+    void EvictTiles();
+
+    /** Used for debug purposes
+     * Evicts ALL Tiles from memory
+     * Does not respect TileManager Settings
+     */
+    void EvictAllTiles();
+
+public:
+
+    DECLARE_DELEGATE_RetVal_OneParam(FOdysseyTileId, FGetExistingTileId, const FIntPoint&)
+
+    /**
+     * Creates tiles from the given rect in the given texture
+     * @param InTexture Texture to copy from
+     * @param InRect The Texture rect to copy from
+     * @param InPosition Position where to copy the texture in the tile space in pixels
+     * @param InTileSize Width and height of the tile to create in pixels, tiles are always squares
+     * @param InTileFormat The tile pixel format
+     * @param InTilesInfos Defines infos the created tiles should respect
+     */
+    TArray<FCreatedTile> CreateOrUpdateTiles(
+        UTexture* InTexture,
+        FIntRect InRect,
+        FIntPoint InPosition,
+        uint32 InTileSize,
+        EPixelFormat InTileFormat,
+        const FGetExistingTileId& InGetExistingTileId = FGetExistingTileId()
+    );
+
+    FOdysseyTileId CreateTile(const FIoHash& InHash, const FCompressedBuffer& InCompressedBuffer);
+
+    /**
+     * Returns a FTextureRHIRef containing the Tile's Texture
+     * The returned FTextureRHIRef can be invalid, indicating an empty texture
+     * Please check FTextureRHIRef::IsValid() before using it
+     */
+    TFuture<TSharedPtr<FTileTextureHandle>> GetTileTexture(FOdysseyTileId InTileId, uint32 InTileSize, EPixelFormat InTileFormat) const;
+
+    bool GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer);
+    bool GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer) const;
+
+    bool GetTileHash(FOdysseyTileId InTileId, FIoHash& OutHash);
+
+    FOdysseyTileManagerStats& GetStats();
+
+    /**
+     * Waits until all tiles are properly cached on disk and evicted if needed
+     */
+    void WaitUntilAllTilesAreCached(bool InEvictTiles = true);
+
+private:
     template<typename... ArgsType>
     TSharedPtr<FTile> CreateNewTile(ArgsType&&... Args);
 
@@ -250,7 +312,10 @@ private:
     void CompressTile(TSharedPtr<FTileData> InTileData);
     void CacheTileOnDisk(TSharedPtr<FTileData> InTileData);
 
-    static void AddWriteTilePass(FRDGBuilder& GraphBuilder, FRDGTextureRef OutTexture, FSharedBuffer InBuffer);
+    static void AddWriteTilePass(FRDGBuilder& GraphBuilder, FRDGTextureRef OutAtlasTexture, FIntPoint TilePositionInAtlas, uint32 InTileSize, FSharedBuffer InBuffer);
+
+    TSharedPtr<FTileTextureHandle> ReserveTileTexture(FRHICommandList& InRHICmdList, uint32 InTileSize, EPixelFormat InTileFormat);
+    void ReleaseTileTexture(TSharedRef<FTileAtlas> InAtlas, uint32 TileIndexInAtlas);
 
 private:
     // FTickableGameObject implementation
@@ -258,8 +323,12 @@ private:
     virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(FOdysseyTileManager, STATGROUP_Tickables); }
 
 private:
+    friend class FTileTextureHandle;
+
     FCriticalSection FreeTilesMutex;
     FCriticalSection HashToTileDataMutex;
+    FCriticalSection TileAtlasesMutex;
+    TArray<TSharedRef<FTileAtlas>> TileAtlases;
 
     TArray64<TSharedPtr<FTile>> Tiles;
     TArray64<FOdysseyTileId> FreeTiles;
