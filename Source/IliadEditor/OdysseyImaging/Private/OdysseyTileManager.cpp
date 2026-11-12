@@ -19,6 +19,8 @@
 
 DECLARE_STATS_GROUP(TEXT("FOdysseyTileManager"), STATGROUP_OdysseyTileManager, STATCAT_Advanced);
 DECLARE_CYCLE_STAT(TEXT("FOdysseyTileManager::CreateTiles"), STAT_CreateTiles, STATGROUP_OdysseyTileManager);
+DECLARE_CYCLE_STAT(TEXT("FOdysseyTileManager::LoadTileFromReadBack"), STAT_LoadTileFromReadBack, STATGROUP_OdysseyTileManager);
+DECLARE_CYCLE_STAT(TEXT("FOdysseyTileManager::GetTileTexture"), STAT_GetTileTexture, STATGROUP_OdysseyTileManager);
 
 /*static*/ FCriticalSection FOdysseyTileManager::FTileData::Mutex;
 /*static*/ FCriticalSection FOdysseyTileManager::FTileData::CacheOnDiskMutex;
@@ -137,6 +139,8 @@ FOdysseyTileManager::Initialize()
     if (IsInitialized)
         return;
 
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::Initialize);
+
     IsInitialized = true;
     FString CacheDirectory = FPaths::GetPath(GetCacheOnDiskPath());
     IFileManager::Get().DeleteDirectory(*CacheDirectory, false, true);
@@ -145,6 +149,7 @@ FOdysseyTileManager::Initialize()
 void
 FOdysseyTileManager::Finalize()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::Finalize);
     FString CacheDirectory = FPaths::GetPath(GetCacheOnDiskPath());
 
     WaitUntilAllTilesAreCached(false);
@@ -190,6 +195,8 @@ FOdysseyTileManager::CreateOrUpdateTiles(
     const FGetExistingTileId& InGetExistingTileId
 )
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::CreateOrUpdateTiles);
+
     FIntRect SourceRect(0, 0, InTexture->GetSurfaceWidth(), InTexture->GetSurfaceHeight());
     SourceRect.Clip(InRect);
     FIntRect DestinationRect(
@@ -357,6 +364,8 @@ FOdysseyTileManager::CreateOrUpdateTiles(
 FOdysseyTileId
 FOdysseyTileManager::CreateTile(const FIoHash& InHash, const FCompressedBuffer& InCompressedBuffer)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::CreateTile);
+
     check(IsInGameThread());
     //Compare Buffer to other buffers
     TArray<TSharedPtr<FTileData>> TilesData;
@@ -405,6 +414,8 @@ template<typename... ArgsType>
 TSharedPtr<FOdysseyTileManager::FTile>
 FOdysseyTileManager::CreateNewTile(ArgsType&&... Args)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::CreateNewTile);
+
     TSharedPtr<FTile> Tile;
     {
         FScopeLock Lock(&FreeTilesMutex);
@@ -433,6 +444,8 @@ FOdysseyTileManager::CreateNewTile(ArgsType&&... Args)
 void
 FOdysseyTileManager::TryLoadTileFromReadBack(TSharedPtr<FTile> InTile)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::TryLoadTileFromReadBack);
+
     if (!InTile->GPUReadBack.IsValid() ||
         !InTile->GPUIsEmptyReadBack.IsValid())
         return;
@@ -448,14 +461,19 @@ FOdysseyTileManager::TryLoadTileFromReadBack(TSharedPtr<FTile> InTile)
 void
 FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::LoadTileFromReadBack);
+
     PendingTilesToReadBack.RemoveSwap(InTile);
 
-    ENQUEUE_RENDER_COMMAND(FOdysseyTileManager_CreateTiles)(
+    ENQUEUE_RENDER_COMMAND(FOdysseyTileManager_LoadTileFromReadBack)(
         [
             this, //To access HashToTileData and Mutexes
             InTile
         ](FRHICommandListImmediate& RHICmdList) mutable
         {
+            SCOPE_CYCLE_COUNTER(STAT_LoadTileFromReadBack);
+            DECLARE_GPU_STAT(FOdysseyTileManager_LoadTileFromReadBack);
+
             const FRHIGPUMask GPUMask = RHICmdList.GetGPUMask();
 
             //Is Empty ReadBack
@@ -546,6 +564,8 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
 TFuture<FTextureRHIRef>
 FOdysseyTileManager::GetTileTexture(FOdysseyTileId InTileId, uint32 InTileSize, EPixelFormat InTileFormat) const
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::GetTileTexture);
+
     check(IsInGameThread());
 
     TPromise<FTextureRHIRef> Promise;
@@ -621,6 +641,9 @@ FOdysseyTileManager::GetTileTexture(FOdysseyTileId InTileId, uint32 InTileSize, 
             Promise = MoveTemp(Promise)
         ](FRHICommandListImmediate& RHICmdList) mutable
         {
+            SCOPE_CYCLE_COUNTER(STAT_GetTileTexture);
+            DECLARE_GPU_STAT(FOdysseyTileManager_GetTileTexture);
+
             FIntPoint TileWH(TileSize, TileSize);
 
             const FRHITextureCreateDesc CreateDesc = FRHITextureCreateDesc::Create2D(TEXT("FOdysseyTileManager::TileTexture"))
@@ -659,6 +682,8 @@ FOdysseyTileManager::GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompresse
 bool
 FOdysseyTileManager::GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::GetTileCompressedBuffer);
+
     if (InTileId.Index >= (uint64)Tiles.Num())
         return false;
 
@@ -693,6 +718,8 @@ FOdysseyTileManager::GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompresse
 bool
 FOdysseyTileManager::GetTileHash(FOdysseyTileId InTileId, FIoHash& OutHash)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::GetTileHash);
+
     if (InTileId.Index >= (uint64)Tiles.Num())
         return false;
 
@@ -734,6 +761,8 @@ FOdysseyTileManager::GetStats()
 void
 FOdysseyTileManager::WaitUntilAllTilesAreCached(bool InEvictTiles)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::WaitUntilAllTilesAreCached);
+
     for (TSharedPtr<FTile>& Tile : Tiles)
     {
         //Calling Tile.TileData.Get() waits until GPU Readback is finished
@@ -752,6 +781,8 @@ FOdysseyTileManager::WaitUntilAllTilesAreCached(bool InEvictTiles)
 void
 FOdysseyTileManager::Tick(float DeltaTime)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::Tick);
+
     //PendingTilesToReadBack is modified by LoadTileFromReadBack()
     //So we copy into a local variable to avoid iterating over a changing Array
     TArray<TSharedPtr<FTile>> LocalPendingTilesToReadBack = PendingTilesToReadBack;
@@ -766,6 +797,8 @@ FOdysseyTileManager::Tick(float DeltaTime)
 void
 FOdysseyTileManager::EvictTiles()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::EvictTiles);
+
     uint64 MaxUncompressedSize = UOdysseyTileManagerSettings::Get()->MaxUncompressedSize * 1000 * 1000;
     uint64 MaxCompressedSize = UOdysseyTileManagerSettings::Get()->MaxCompressedSize * 1000 * 1000;
     FTileData::EvictTiles(MaxUncompressedSize, MaxCompressedSize);
@@ -789,6 +822,7 @@ FOdysseyTileManager::FTile::FTile(const FOdysseyTileId& InId)
 void
 FOdysseyTileManager::FTile::Initialize()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTile::Initialize);
     TempTexture = TempTexturePromise.GetFuture();
     TileData = TileDataPromise.GetFuture();
 
@@ -799,6 +833,7 @@ FOdysseyTileManager::FTile::Initialize()
 void
 FOdysseyTileManager::FTile::Initialize(TSharedPtr<FTileData> InTileData)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTile::InitializeWithTileData);
     TileData = TileDataPromise.GetFuture();
     TileDataPromise.SetValue(InTileData);
 }
@@ -806,6 +841,8 @@ FOdysseyTileManager::FTile::Initialize(TSharedPtr<FTileData> InTileData)
 TSharedRef<FOdysseyTileManager::FTileData>
 FOdysseyTileManager::FTileData::FromUncompressedBuffer(const FIoHash& InHash, const FSharedBuffer& InUncompressedBuffer)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::FromUncompressedBuffer);
+
     TSharedRef<FTileData> TileData = MakeShared<FTileData>();
     TileData->Hash = InHash;
     TileData->UncompressedBuffer = InUncompressedBuffer;
@@ -840,6 +877,8 @@ FOdysseyTileManager::FTileData::FromUncompressedBuffer(const FIoHash& InHash, co
 TSharedRef<FOdysseyTileManager::FTileData>
 FOdysseyTileManager::FTileData::FromCompressedBuffer(const FIoHash& InHash, const FCompressedBuffer& InCompressedBuffer)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::FromCompressedBuffer);
+
     TSharedRef<FTileData> TileData = MakeShared<FTileData>();
     TileData->Hash = InHash;
 
@@ -873,6 +912,8 @@ FOdysseyTileManager::FTileData::FromCompressedBuffer(const FIoHash& InHash, cons
 TSharedRef<FOdysseyTileManager::FTileData>
 FOdysseyTileManager::FTileData::FromBuffers(const FIoHash& InHash, const FSharedBuffer& InUncompressedBuffer, const FCompressedBuffer& InCompressedBuffer)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::FromBuffers);
+
     TSharedRef<FTileData> TileData = MakeShared<FTileData>();
     TileData->Hash = InHash;
     TileData->UncompressedBuffer = InUncompressedBuffer;
@@ -908,6 +949,8 @@ FOdysseyTileManager::FTileData::FromBuffers(const FIoHash& InHash, const FShared
 bool
 FOdysseyTileManager::FTileData::GetUncompressedBuffer(FSharedBuffer& OutBuffer) const
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::GetUncompressedBuffer);
+
     FScopeLock Lock(&Mutex);
     if (!LoadUncompressedBuffer())
         return false;
@@ -921,6 +964,8 @@ FOdysseyTileManager::FTileData::GetUncompressedBuffer(FSharedBuffer& OutBuffer) 
 bool
 FOdysseyTileManager::FTileData::GetCompressedBuffer(FCompressedBuffer& OutBuffer) const
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::GetCompressedBuffer);
+
     FScopeLock Lock(&Mutex);
     if (!LoadCompressedBuffer())
         return false;
@@ -939,6 +984,8 @@ FOdysseyTileManager::FTileData::GetHash() const
 bool
 FOdysseyTileManager::FTileData::LoadUncompressedBuffer() const
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::LoadUncompressedBuffer);
+
     //If UncompressedBuffer Is Null, it means UncompressedBuffer has been evicted and needs to be loaded from CompressedBuffer
     if (UncompressedBuffer.IsNull())
     {
@@ -960,6 +1007,8 @@ FOdysseyTileManager::FTileData::LoadUncompressedBuffer() const
 bool
 FOdysseyTileManager::FTileData::LoadCompressedBuffer() const
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::LoadCompressedBuffer);
+
     FCompressedBuffer Buffer = CompressedBuffer.Get();
 
     //If Buffer Is Null, it means CompressedBuffer has been evicted and needs to be loaded from disk cache
@@ -992,6 +1041,8 @@ FOdysseyTileManager::FTileData::LoadCompressedBuffer() const
 FCompressedBuffer
 FOdysseyTileManager::FTileData::Compress()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::Compress);
+
     FCompressedBuffer Buffer = FCompressedBuffer::Compress(UncompressedBuffer);
 
     CacheOnDiskCompletionEvent = Async(
@@ -1008,6 +1059,8 @@ FOdysseyTileManager::FTileData::Compress()
 void
 FOdysseyTileManager::FTileData::CacheOnDisk()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::CacheOnDisk);
+
     FString FilePath = FOdysseyTileManager::GetCacheOnDiskPath();
 
     //We lock to prevent several threads to write in the file at the same time
@@ -1039,6 +1092,7 @@ FOdysseyTileManager::FTileData::CacheOnDisk()
 void
 FOdysseyTileManager::FTileData::EvictUncompressed()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::EvictUncompressed);
     //Eviction is not permitted if Caching is not yet finished
     {
         FScopeLock Lock(&CacheStateMutex);
@@ -1061,6 +1115,7 @@ FOdysseyTileManager::FTileData::EvictUncompressed()
 void
 FOdysseyTileManager::FTileData::EvictCompressed()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::EvictCompressed);
     //Eviction is not permitted if Caching is not yet finished
     {
         FScopeLock Lock(&CacheStateMutex);
@@ -1086,6 +1141,7 @@ FOdysseyTileManager::FTileData::EvictCompressed()
 void
 FOdysseyTileManager::FTileData::Touch(TSharedRef<FOdysseyTileManager::FTileData> InTileData)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::Touch);
     if (InTileData->UncompressedLRUNode)
     {
         UncompressedLRU.RemoveNode(InTileData->UncompressedLRUNode);
@@ -1106,6 +1162,8 @@ FOdysseyTileManager::FTileData::Touch(TSharedRef<FOdysseyTileManager::FTileData>
 void
 FOdysseyTileManager::FTileData::EvictTiles(uint64 InMaxUncompressedSize, uint64 InMaxCompressedSize)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::EvictTiles);
+
     FScopeLock Lock(&Mutex);
 
     FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
@@ -1140,12 +1198,14 @@ FOdysseyTileManager::FTileData::EvictTiles(uint64 InMaxUncompressedSize, uint64 
 void
 FOdysseyTileManager::FTileData::WaitUntilCachedCompressed()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::WaitUntilCachedCompressed);
     CacheCompressedCompletionEvent.Wait();
 }
 
 void
 FOdysseyTileManager::FTileData::WaitUntilCachedOnDisk()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::WaitUntilCachedOnDisk);
     //We wait on CacheCompressedCompletionEvent first because
     //CacheOnDiskCompletionEvent's Future is only valid once
     //CacheCompressedCompletionEvent's Value has been set
