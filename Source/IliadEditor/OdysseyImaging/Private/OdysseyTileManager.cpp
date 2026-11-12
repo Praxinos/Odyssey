@@ -199,7 +199,6 @@ FOdysseyTileManager::CreateOrUpdateTiles(
 
     TArray<FOdysseyTileManager::FCreatedTile> CreatedTiles;
 
-    FScopeLock Lock(&FreeTilesMutex);
     for (const FIntPoint& TilePosition : TilePositions)
     {
         FTile Tile;
@@ -220,24 +219,7 @@ FOdysseyTileManager::CreateOrUpdateTiles(
         Tile.GPUIsEmptyReadBack = MakeShared<FRHIGPUBufferReadback>(TEXT("FOdysseyTileManager::IsEmptyReadBack"));
         TileIsEmptyReadBacks.Add(Tile.GPUIsEmptyReadBack);
 
-        FOdysseyTileId TileId;
-        if (FreeTiles.Num() > 0)
-        {
-            TileId.Index = FreeTiles[0];
-            TileId.Generation = Tiles[TileId.Index].Generation + 1;
-            Tile.Generation = TileId.Generation;
-            Tiles[TileId.Index] = MoveTemp(Tile);
-
-            FreeTiles.RemoveAtSwap(0);
-        }
-        else
-        {
-            TileId.Index = Tiles.Num();
-            TileId.Generation = 0;
-            Tile.Generation = TileId.Generation;
-            Tiles.Add(MoveTemp(Tile));
-        }
-
+        FOdysseyTileId TileId = RegisterTile(MoveTemp(Tile));
         PendingTilesToReadBack.Add(TileId);
 
         FCreatedTile CreatedTile;
@@ -336,13 +318,95 @@ FOdysseyTileManager::CreateOrUpdateTiles(
             GraphBuilder.Execute();
 
             //Needed for the readback buffers to be read properly
-            //Otherwise, ReadBack->Wait() will hang indefinitely
-            //RHICmdList.SubmitAndBlockUntilGPUIdle();
+            //Otherwise, ReadBack->Wait() can hang indefinitely
             RHICmdList.ImmediateFlush(EImmediateFlushType::FlushRHIThread);
         }
     );
 
     return CreatedTiles;
+}
+
+FOdysseyTileId
+FOdysseyTileManager::CreateTile(const FIoHash& InHash, const FCompressedBuffer& InCompressedBuffer)
+{
+    //Compare Buffer to other buffers
+    TArray<TSharedPtr<FTileData>> TilesData;
+
+    {
+        FScopeLock Lock(&HashToTileDataMutex);
+        HashToTileData.MultiFind(InHash, TilesData, false);
+    }
+
+    TSharedPtr<FTileData> TileData;
+    if (TilesData.IsEmpty())
+    {
+        TileData = FTileData::FromCompressedBuffer(InHash, InCompressedBuffer);
+        {
+            FScopeLock Lock(&HashToTileDataMutex);
+            HashToTileData.Add(InHash, TileData);
+        }
+    }
+    else
+    {
+        bool bFound = false;
+        FSharedBuffer Buffer = InCompressedBuffer.Decompress();
+        for (TSharedPtr<FTileData> ExistingTileData : TilesData)
+        {
+            FSharedBuffer TileDataBuffer;
+            if(!ExistingTileData->GetUncompressedBuffer(TileDataBuffer))
+                continue;
+
+            if (TileDataBuffer.GetView().EqualBytes(Buffer.GetView()))
+            {
+                bFound = true;
+                TileData = ExistingTileData;
+                break;
+            }
+        }
+
+        //Create a new TileData
+        if (!bFound)
+        {
+            TileData = FTileData::FromBuffers(InHash, Buffer, InCompressedBuffer);
+            {
+                FScopeLock Lock(&HashToTileDataMutex);
+                HashToTileData.Add(InHash, TileData);
+            }
+        }
+    }
+
+    FTile Tile;
+    TPromise<TSharedPtr<FTileData>> Promise;
+    Tile.TileData = Promise.GetFuture();
+    Promise.SetValue(TileData);
+
+    FOdysseyTileId TileId = RegisterTile(MoveTemp(Tile));
+    return TileId;
+}
+
+FOdysseyTileId
+FOdysseyTileManager::RegisterTile(FTile&& InTile)
+{
+    FOdysseyTileId TileId;
+    FScopeLock Lock(&FreeTilesMutex);
+    if (FreeTiles.Num() > 0)
+    {
+        TileId.Index = FreeTiles[0];
+        TileId.Generation = Tiles[TileId.Index].Generation + 1;
+        Tiles[TileId.Index] = MoveTemp(InTile);
+        Tiles[TileId.Index].Generation = TileId.Generation;
+
+        FreeTiles.RemoveAtSwap(0);
+    }
+    else
+    {
+        TileId.Index = Tiles.Num();
+        TileId.Generation = 0;
+        Tiles.Add(MoveTemp(InTile));
+        Tiles[TileId.Index].Generation = 0;
+    }
+
+    return TileId;
 }
 
 void
@@ -428,7 +492,12 @@ FOdysseyTileManager::LoadTileFromReadBack(FOdysseyTileId InTileId)
                 //Compare Buffer to other buffers
                 FIoHash Hash = FIoHashBuilder::HashBuffer(Buffer.GetView());
                 TArray<TSharedPtr<FTileData>> TilesData;
-                HashToTileData.MultiFind(Hash, TilesData, false);
+
+                {
+                    FScopeLock Lock(&HashToTileDataMutex);
+                    HashToTileData.MultiFind(Hash, TilesData, false);
+                }
+
                 for (TSharedPtr<FTileData> TileData : TilesData)
                 {
                     FSharedBuffer TileDataBuffer;
@@ -443,8 +512,13 @@ FOdysseyTileManager::LoadTileFromReadBack(FOdysseyTileId InTileId)
                 }
 
                 //Create a new TileData
-                TSharedPtr<FTileData> TileData = FTileData::FromUncompressedBuffer(Buffer);
-                HashToTileData.Add(Hash, TileData);
+                TSharedPtr<FTileData> TileData = FTileData::FromUncompressedBuffer(Hash, Buffer);
+
+                //TODO: Mutex
+                {
+                    FScopeLock Lock(&HashToTileDataMutex);
+                    HashToTileData.Add(Hash, TileData);
+                }
                 Promise.SetValue(TileData);
             }
         }
@@ -481,6 +555,61 @@ FOdysseyTileManager::GetTileBuffer(FOdysseyTileId InTileId, FSharedBuffer& OutBu
     return TileData->GetUncompressedBuffer(OutBuffer);
 }
 
+bool
+FOdysseyTileManager::GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer) const
+{
+    return const_cast<FOdysseyTileManager*>(this)->GetTileCompressedBuffer(InTileId, OutBuffer);
+}
+
+bool
+FOdysseyTileManager::GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer)
+{
+    if (InTileId.Index >= (uint64)Tiles.Num())
+        return false;
+
+    const FTile& Tile = Tiles[InTileId.Index];
+
+    if (Tile.Generation != InTileId.Generation)
+        return false;
+
+    //If readback is still valid, we need to start reading back
+    if (Tile.GPUReadBack.IsValid())
+        LoadTileFromReadBack(InTileId);
+
+    //Here we get the tile data index
+    //Tile.TileData is a future, so it will block current thread until GPU Readback is done
+    TSharedPtr<FTileData> TileData = Tile.TileData.Get();
+    if (!TileData)
+        return false;
+
+    return TileData->GetCompressedBuffer(OutBuffer);
+}
+
+bool
+FOdysseyTileManager::GetTileHash(FOdysseyTileId InTileId, FIoHash& OutHash)
+{
+    if (InTileId.Index >= (uint64)Tiles.Num())
+        return false;
+
+    const FTile& Tile = Tiles[InTileId.Index];
+
+    if (Tile.Generation != InTileId.Generation)
+        return false;
+
+    //If readback is still valid, we need to start reading back
+    if (Tile.GPUReadBack.IsValid())
+        LoadTileFromReadBack(InTileId);
+
+    //Here we get the tile data index
+    //Tile.TileData is a future, so it will block current thread until GPU Readback is done
+    TSharedPtr<FTileData> TileData = Tile.TileData.Get();
+    if (!TileData)
+        return false;
+
+    OutHash = TileData->GetHash();
+    return true;
+}
+
 FOdysseyTileManagerStats&
 FOdysseyTileManager::GetStats()
 {
@@ -515,9 +644,10 @@ FOdysseyTileManager::EvictAllTiles()
 }
 
 TSharedRef<FOdysseyTileManager::FTileData>
-FOdysseyTileManager::FTileData::FromUncompressedBuffer(const FSharedBuffer& InUncompressedBuffer)
+FOdysseyTileManager::FTileData::FromUncompressedBuffer(const FIoHash& InHash, const FSharedBuffer& InUncompressedBuffer)
 {
     TSharedRef<FTileData> TileData = MakeShared<FTileData>();
+    TileData->Hash = InHash;
     TileData->UncompressedBuffer = InUncompressedBuffer;
 
     FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
@@ -525,12 +655,19 @@ FOdysseyTileManager::FTileData::FromUncompressedBuffer(const FSharedBuffer& InUn
 
     Touch(TileData);
 
+    TPromise<FCompressedBuffer> Promise;
+    TileData->CompressedBuffer = Promise.GetFuture();
     //Go to next pipeline step
     Async(
         EAsyncExecution::ThreadPool,
-        [TileData]()
+        [TileData, Promise = MoveTemp(Promise)]() mutable
         {
-            TileData->Compress();
+            FCompressedBuffer Buffer = TileData->Compress();
+
+            FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
+            TileStats.AddCompressed(Buffer);
+
+            Promise.SetValue(Buffer);
         }
     );
 
@@ -538,13 +675,45 @@ FOdysseyTileManager::FTileData::FromUncompressedBuffer(const FSharedBuffer& InUn
 }
 
 TSharedRef<FOdysseyTileManager::FTileData>
-FOdysseyTileManager::FTileData::FromCompressedBuffer(const FCompressedBuffer& InCompressedBuffer)
+FOdysseyTileManager::FTileData::FromCompressedBuffer(const FIoHash& InHash, const FCompressedBuffer& InCompressedBuffer)
 {
     TSharedRef<FTileData> TileData = MakeShared<FTileData>();
-    TileData->CompressedBuffer = InCompressedBuffer;
+    TileData->Hash = InHash;
+
+    TPromise<FCompressedBuffer> Promise;
+    TileData->CompressedBuffer = Promise.GetFuture();
+    Promise.SetValue(InCompressedBuffer);
 
     FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
-    TileStats.AddCompressed(TileData->CompressedBuffer);
+    TileStats.AddCompressed(TileData->CompressedBuffer.Get());
+
+    Touch(TileData);
+
+    Async(
+        EAsyncExecution::ThreadPool,
+        [TileData]()
+        {
+            TileData->CacheOnDisk();
+        }
+    );
+
+    return TileData;
+}
+
+TSharedRef<FOdysseyTileManager::FTileData>
+FOdysseyTileManager::FTileData::FromBuffers(const FIoHash& InHash, const FSharedBuffer& InUncompressedBuffer, const FCompressedBuffer& InCompressedBuffer)
+{
+    TSharedRef<FTileData> TileData = MakeShared<FTileData>();
+    TileData->Hash = InHash;
+    TileData->UncompressedBuffer = InUncompressedBuffer;
+
+    TPromise<FCompressedBuffer> Promise;
+    TileData->CompressedBuffer = Promise.GetFuture();
+    Promise.SetValue(InCompressedBuffer);
+
+    FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
+    TileStats.AddUncompressed(TileData->UncompressedBuffer);
+    TileStats.AddCompressed(TileData->CompressedBuffer.Get());
 
     Touch(TileData);
 
@@ -580,19 +749,26 @@ FOdysseyTileManager::FTileData::GetCompressedBuffer(FCompressedBuffer& OutBuffer
         return false;
 
     Touch(ConstCastSharedRef<FOdysseyTileManager::FTileData>(AsShared()));
-    OutBuffer = CompressedBuffer;
+    OutBuffer = CompressedBuffer.Get();
     return true;
+}
+
+const FIoHash&
+FOdysseyTileManager::FTileData::GetHash() const
+{
+    return Hash;
 }
 
 bool
 FOdysseyTileManager::FTileData::LoadUncompressedBuffer() const
 {
+    //If UncompressedBuffer Is Null, it means UncompressedBuffer has been evicted and needs to be loaded from CompressedBuffer
     if (UncompressedBuffer.IsNull())
     {
         if (!LoadCompressedBuffer())
             return false;
 
-        UncompressedBuffer = CompressedBuffer.Decompress();
+        UncompressedBuffer = CompressedBuffer.Get().Decompress();
 
         if (!UncompressedBuffer.IsNull())
         {
@@ -607,7 +783,10 @@ FOdysseyTileManager::FTileData::LoadUncompressedBuffer() const
 bool
 FOdysseyTileManager::FTileData::LoadCompressedBuffer() const
 {
-    if (CompressedBuffer.IsNull())
+    FCompressedBuffer Buffer = CompressedBuffer.Get();
+
+    //If Buffer Is Null, it means CompressedBuffer has been evicted and needs to be loaded from disk cache
+    if (Buffer.IsNull())
     {
         FScopeLock Lock(&CacheOnDiskMutex);
 
@@ -617,25 +796,26 @@ FOdysseyTileManager::FTileData::LoadCompressedBuffer() const
             return false;
 
         Ar->Seek(DiskCacheOffset);
-        *Ar << CompressedBuffer;
+        *Ar << Buffer;
 
-        if (!CompressedBuffer.IsNull())
+        if (!Buffer.IsNull())
         {
             FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
-            TileStats.AddCompressed(CompressedBuffer);
+            TileStats.AddCompressed(Buffer);
         }
         Ar->Close();
+
+        TPromise<FCompressedBuffer> Promise;
+        CompressedBuffer = Promise.GetFuture();
+        Promise.SetValue(Buffer);
     }
     return true;
 }
 
-void
+FCompressedBuffer
 FOdysseyTileManager::FTileData::Compress()
 {
-    CompressedBuffer = FCompressedBuffer::Compress(UncompressedBuffer);
-
-    FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
-    TileStats.AddCompressed(CompressedBuffer);
+    FCompressedBuffer Buffer = FCompressedBuffer::Compress(UncompressedBuffer);
 
     Async(
         EAsyncExecution::ThreadPool,
@@ -644,6 +824,8 @@ FOdysseyTileManager::FTileData::Compress()
             self->CacheOnDisk();
         }
     );
+
+    return Buffer;
 }
 
 void
@@ -658,7 +840,8 @@ FOdysseyTileManager::FTileData::CacheOnDisk()
         return;
 
     DiskCacheOffset = Ar->Tell();
-    *Ar << CompressedBuffer;
+    FCompressedBuffer Buffer = CompressedBuffer.Get();
+    *Ar << Buffer;
 
     FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
     TileStats.AddCachedOnDisk(Ar->TotalSize() - DiskCacheOffset);
@@ -697,9 +880,12 @@ FOdysseyTileManager::FTileData::EvictCompressed()
         return;
 
     FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
-    TileStats.RemoveCompressed(CompressedBuffer);
+    TileStats.RemoveCompressed(CompressedBuffer.Get());
 
-    CompressedBuffer = FCompressedBuffer();
+    TPromise<FCompressedBuffer> Promise;
+    CompressedBuffer = Promise.GetFuture();
+    Promise.SetValue(FCompressedBuffer());
+
     CompressedLRUNode = nullptr;
     CompressedLRU.RemoveNode(Node);
 }

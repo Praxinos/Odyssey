@@ -117,8 +117,15 @@ public:
         const FGetExistingTileId& InGetExistingTileId = FGetExistingTileId()
     );
 
+    FOdysseyTileId CreateTile(const FIoHash& InHash, const FCompressedBuffer& InCompressedBuffer);
+
     bool GetTileBuffer(FOdysseyTileId InTileId, FSharedBuffer& OutBuffer);
     bool GetTileBuffer(FOdysseyTileId InTileId, FSharedBuffer& OutBuffer) const;
+
+    bool GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer);
+    bool GetTileCompressedBuffer(FOdysseyTileId InTileId, FCompressedBuffer& OutBuffer) const;
+
+    bool GetTileHash(FOdysseyTileId InTileId, FIoHash& OutHash);
 
     FOdysseyTileManagerStats& GetStats();
 
@@ -136,17 +143,19 @@ private:
 
         public:
             //Used when creating a tile while drawing
-            static TSharedRef<FTileData> FromUncompressedBuffer(const FSharedBuffer& UncompressedBuffer);
-            static TSharedRef<FTileData> FromCompressedBuffer(const FCompressedBuffer& UncompressedBuffer);
+            static TSharedRef<FTileData> FromUncompressedBuffer(const FIoHash& InHash, const FSharedBuffer& InUncompressedBuffer);
+            static TSharedRef<FTileData> FromCompressedBuffer(const FIoHash& InHash, const FCompressedBuffer& InCompressedBuffer);
+            static TSharedRef<FTileData> FromBuffers(const FIoHash& InHash, const FSharedBuffer& InUncompressedBuffer, const FCompressedBuffer& InCompressedBuffer);
 
         public:
             bool GetUncompressedBuffer(FSharedBuffer& OutBuffer) const;
             bool GetCompressedBuffer(FCompressedBuffer& OutBuffer) const;
+            const FIoHash& GetHash() const;
 
         private:
             static void Touch(TSharedRef<FTileData>);
 
-            void Compress();
+            FCompressedBuffer Compress();
             void CacheOnDisk();
 
             bool LoadUncompressedBuffer() const;
@@ -162,8 +171,9 @@ private:
             static TDoubleLinkedList<TSharedPtr<FTileData>> UncompressedLRU;
             static TDoubleLinkedList<TSharedPtr<FTileData>> CompressedLRU;
 
+            FIoHash Hash;
             mutable FSharedBuffer UncompressedBuffer;
-            mutable FCompressedBuffer CompressedBuffer;
+            mutable TFuture<FCompressedBuffer> CompressedBuffer;
             int64 DiskCacheOffset = INDEX_NONE;
 
             mutable TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* UncompressedLRUNode;
@@ -188,13 +198,14 @@ private:
         */
         uint64 Generation;
         TSharedPtr<FRHIGPUTextureReadback> GPUReadBack;
-        TSharedPtr<FRHIGPUBufferReadback> GPUIsEmptyReadBack; //TODO: Replace by a Hash ReadBack
+        TSharedPtr<FRHIGPUBufferReadback> GPUIsEmptyReadBack;
         TFuture<TSharedPtr<FTileData>> TileData;
     };
 
     void TryLoadTileFromReadBack(FOdysseyTileId InTileId);
     void LoadTileFromReadBack(FOdysseyTileId InTileId);
 
+    FOdysseyTileId RegisterTile(FTile&& InTile);
     void CompressTile(TSharedPtr<FTileData> InTileData);
     void CacheTileOnDisk(TSharedPtr<FTileData> InTileData);
 
@@ -210,7 +221,7 @@ private:
      * Tiles and FreeTiles are always accessed / modified in GameThread
      */
     FCriticalSection FreeTilesMutex;
-    FCriticalSection TilesDataMutex;
+    FCriticalSection HashToTileDataMutex;
 
     TArray64<FTile> Tiles;
     TArray64<uint64> FreeTiles;

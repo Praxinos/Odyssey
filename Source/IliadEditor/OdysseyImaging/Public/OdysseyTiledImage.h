@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "PixelFormat.h"
 #include "Serialization/EditorBulkData.h"
+#include "Factories/Factory.h"
 
 #include "OdysseyTileManager.h"
 
@@ -17,6 +18,23 @@ enum class EOdysseyTiledImageFormat : uint8
     RGBA8,
     RGBA16F,
     RGBA32F,
+};
+
+/**
+ * Implements a factory for UBoardSequence objects.
+ */
+UCLASS( BlueprintType )
+class ODYSSEYIMAGING_API UOdysseyTiledImageFactoryNew : public UFactory
+{
+    GENERATED_BODY()
+
+public:
+    UOdysseyTiledImageFactoryNew();
+
+public:
+    // UFactory Interface
+    virtual UObject*    FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn ) override;
+    virtual bool        ShouldShowInNewMenu() const override;
 };
 
 /**
