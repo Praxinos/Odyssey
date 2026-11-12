@@ -94,12 +94,16 @@ protected:
     */
     virtual void PreSave(FObjectPreSaveContext SaveContext) override;
 private:
+    /** Load the Render Target from mImage or DDC*/
+    void LoadRenderTarget();
+
     /**
      * Commits what has been drawn into mImage
      */
     void CommitRenderTargetToImage();
     void CopyRenderTargetToUndoRT();
     void CopyUndoRTToRenderTarget();
+    void ExtractTile(const FImage& InImage, FImage& OutImage, const FIntRect& Rect) const;
 
 private:
     /**
@@ -136,25 +140,22 @@ private:
     TStrongObjectPtr<UTextureRenderTarget2D> mUndoRenderTarget;
 
     /**
-     * Contains invalid tiles state before calling CommitDraw()
-     * When CommitDraw() is called, copies mEditedTiles
-    */
-    FOdysseyInvalidTileMap mResetTiles;
-
-    /**
      * Contains invalid tiles in RenderTarget compared to UndoRenderTarget
     */
-    FOdysseyInvalidTileMap mUndoTiles;
+    FOdysseyInvalidTileMap mUndoTileMap;
 
-    /**
-     * Contains invalid tiles in RenderTarget since BeginDraw() has been called
-     */
-    FOdysseyInvalidTileMap mEditedTiles;
+    struct FTileData
+    {
+        TSharedPtr<FImage> mImage;
+    }
+    struct FTile
+    {
+        FIntRect mRect;
 
-    /**
-     * The current image, but stored on RAM
-     * Contains valid data only when RenderTarget does not exist
-     * Contains the data that will be saved by Serialize()
-     */
-    FOdysseyTiledImage mImage;
+        //mData can be nullptr, which means the tile is fully transparent
+        TSharedPtr<FTileData> mData;
+    };
+
+    /** Stores tiles outside of the GPU (on RAM) */
+    TArray<TArray<FTile>> mTiles;
 };

@@ -9,6 +9,19 @@
 #include "ImageCoreUtils.h"
 #include "ScreenPass.h"
 
+#define TileSize 64
+
+FIntRect
+GetTileRect(int tileX, int tileY)
+{
+    int rectX = tileX * TileSize;
+    int rectY = tileY * TileSize;
+    int rectW = FMath::Min(TileSize, Width - tileX * TileSize);
+    int rectH = FMath::Min(TileSize, Height - tileY * TileSize);
+
+    return FIntRect(rectX, rectY, rectx + rectW, recty + rectH);
+}
+
 void
 UOdysseyPaintableTexture2D::Initialize(int InWidth, int InHeight, ETextureRenderTargetFormat InFormat)
 {
@@ -16,10 +29,20 @@ UOdysseyPaintableTexture2D::Initialize(int InWidth, int InHeight, ETextureRender
     Height = (uint32)InHeight;
     Format = InFormat;
 
-    mEditedTiles = FOdysseyInvalidTileMap(64, Width, Height);
-    mResetTiles = FOdysseyInvalidTileMap(64, Width, Height);
-    mUndoTiles = FOdysseyInvalidTileMap(64, Width, Height);
-    mImage = FOdysseyTiledImage(64, Width, Height, Format);
+    mUndoTileMap = FOdysseyInvalidTileMap(64, Width, Height);
+
+    int numTilesX = (Width - 1) / TileSize,
+    int numTilesY = (Height - 1) / TileSize;
+
+    mTiles.AddDefaulted(numTilesY);
+    for (int y = 0; y < numTilesY; y++)
+    {
+        mTiles[y].AddDefaulted(numTilesX);
+        for (int y = 0; y < numTilesY; y++)
+        {
+            mTiles[y][x].mRect = GetTileRect(x, y);
+        }
+    }
 }
 
 int
@@ -50,21 +73,21 @@ UOdysseyPaintableTexture2D::BeginDraw()
 
     mRenderTarget = TStrongObjectPtr(NewObject<UTextureRenderTarget2D>());
     mRenderTarget->RenderTargetFormat = Format;
-    mRenderTarget->bForceLinearGamma = false;
+    mRenderTarget->bForceLinearGamma = Format != RTF_RGBA8_SRGB;
     mRenderTarget->ClearColor = FLinearColor::Transparent;
     mRenderTarget->InitAutoFormat(Width, Height);
     mRenderTarget->UpdateResource();
 
     mUndoRenderTarget = TStrongObjectPtr(NewObject<UTextureRenderTarget2D>());
     mUndoRenderTarget->RenderTargetFormat = Format;
-    mUndoRenderTarget->bForceLinearGamma = false;
+    mUndoRenderTarget->bForceLinearGamma = Format != RTF_RGBA8_SRGB;
     mUndoRenderTarget->ClearColor = FLinearColor::Transparent;
     mUndoRenderTarget->InitAutoFormat(Width, Height);
     mUndoRenderTarget->UpdateResource();
 
     //Initialize RenderTargets contents
-    mImage.Render(mUndoRenderTarget.Get(), FIntRect(0, 0, Width, Height) );
-    mImage.Render(mRenderTarget.Get(), FIntRect(0, 0, Width, Height) );
+    RenderTiles(mUndoRenderTarget.Get(), FIntRect(0, 0, Width, Height));
+    RenderTiles(mRenderTarget.Get(), FIntRect(0, 0, Width, Height));
 
     IsDrawing = true;
 }
@@ -84,8 +107,7 @@ UOdysseyPaintableTexture2D::Draw(UTexture* SourceTexture, FIntRect Rect, FIntPoi
     sourceRect.Clip(fullRect - Position);
     destinationRect.Clip(Rect + Position);
 
-    mEditedTiles.Invalidate(destinationRect);
-    mUndoTiles.Invalidate(destinationRect);
+    mUndoTileMap.Invalidate(destinationRect);
 
     ENQUEUE_RENDER_COMMAND(UOdysseyPaintableTexture2D_Draw)(
         [source = SourceTexture, destination = mRenderTarget, sourceRect, destinationRect](FRHICommandListImmediate& RHICmdList)
@@ -118,9 +140,7 @@ UOdysseyPaintableTexture2D::ResetDraw()
         return;
 
     CopyUndoRTToRenderTarget();
-    mUndoTiles.Clear();
-
-    mEditedTiles = mResetTiles;
+    mUndoTileMap.Clear();
 }
 
 void
@@ -135,8 +155,7 @@ UOdysseyPaintableTexture2D::CommitDraw(bool IsUndoable)
     {
         //TODO: Register Undo
     }
-    mUndoTiles.Clear();
-    mResetTiles = mEditedTiles;
+    mUndoTileMap.Clear();
 
     CopyRenderTargetToUndoRT();
 }
@@ -154,11 +173,7 @@ UOdysseyPaintableTexture2D::EndDraw(bool IsUndoable)
         //TODO: Register Undo
     }
 
-    CommitRenderTargetToImage();
-
-    mUndoTiles.Clear();
-    mResetTiles.Clear();
-    mEditedTiles.Clear();
+    mUndoTileMap.Clear();
     IsDrawing = false;
     mRenderTarget = nullptr;
     mUndoRenderTarget = nullptr;
@@ -173,55 +188,138 @@ UOdysseyPaintableTexture2D::GetIsDrawing() const
 void
 UOdysseyPaintableTexture2D::PreSave(FObjectPreSaveContext SaveContext)
 {
-    if (IsDrawing)
+    SyncRenderTargetAndImage();
+    /* if (IsDrawing)
     {
         CommitRenderTargetToImage();
-    }
+    } */
 }
 
 void
 UOdysseyPaintableTexture2D::CommitRenderTargetToImage()
 {
-    mImage.Draw(mRenderTarget.Get(), mEditedTiles.InvalidRects());
+    FImage OutImage;
+    if (!FImageUtils::GetRenderTargetImage(mRenderTarget.Get(), OutImage))
+        return;
+
+    for (int y = 0; y < mTiles.Num(); y++)
+    {
+        for (int x = 0; x < mTiles[y].Num(); x++)
+        {
+            FTile& tile = mTiles[y][x];
+            ExtractTile(OutImage, tile, x, y);
+        }
+    }
 }
 
 void
 UOdysseyPaintableTexture2D::Render(UTextureRenderTarget2D* Destination, FIntRect Rect, FIntPoint Position) const
 {
-    if (mRenderTarget)
+    LoadRenderTarget();
+
+    FIntRect sourceRect = Rect;
+    FIntRect fullRect(0, 0, Destination->SizeX, Destination->SizeY);
+    FIntRect destinationRect(0, 0, Destination->SizeX, Destination->SizeY);
+
+    sourceRect.Clip(fullRect - Position);
+    destinationRect.Clip(Rect + Position);
+
+    ENQUEUE_RENDER_COMMAND(UOdysseyPaintableTexture2D_Draw)(
+        [source = mRenderTarget, destination = Destination, sourceRect, destinationRect](FRHICommandListImmediate& RHICmdList)
+        {
+            FRDGBuilder graphBuilder(RHICmdList);
+            FRDGTextureRef sourceTexture = source->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+            FRDGTextureRef destinationTexture = destination->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+
+            AddDrawTexturePass(
+                graphBuilder,
+                FScreenPassViewInfo(),
+                sourceTexture,
+                destinationTexture,
+                sourceRect.Min,
+                sourceRect.Size(),
+                destinationRect.Min,
+                destinationRect.Size()
+            );
+            graphBuilder.Execute();
+        }
+    );
+}
+
+void
+UOdysseyPaintableTexture2D::RenderTiles(UTextureRenderTarget2D* Destination, FIntRect Rect, FIntPoint Position) const
+{
+    FIntRect sourceRect = Rect;
+    FIntRect fullRect(0, 0, Destination->SizeX, Destination->SizeY);
+    sourceRect.Clip(fullRect - Position);
+
+    if (sourceRect.Min.X >= mWidth || sourceRect.Max.X < 0 || sourceRect.Min.Y >= mHeight || sourceRect.Max.Y < 0)
+        return {};
+
+    int tileCountX = (iWidth - 1) / mTileSize;
+    int tileCountY = (iHeight - 1) / mTileSize;
+
+    int x1 = FMath::Clamp(sourceRect.Min.X / TileSize, 0, tileCountX - 1);
+    int y1 = FMath::Clamp(sourceRect.Min.Y / TileSize, 0, tileCountY - 1);
+    int x2 = FMath::Clamp(sourceRect.Max.X / TileSize, 0, tileCountX - 1);
+    int y2 = FMath::Clamp(sourceRect.Max.Y / TileSize, 0, tileCountY - 1);
+
+    int w = x2 - x1 + 1;
+    int h = y2 - y1 + 1;
+
+    if (w <= 0 || h <= 0)
+        return {};
+
+    struct FRenderTile
     {
-
-        FIntRect sourceRect = Rect;
-        FIntRect fullRect(0, 0, mRenderTarget->SizeX, mRenderTarget->SizeY);
-        FIntRect destinationRect(0, 0, mRenderTarget->SizeX, mRenderTarget->SizeY);
-
-        sourceRect.Clip(fullRect - Position);
-        destinationRect.Clip(Rect + Position);
-
-        ENQUEUE_RENDER_COMMAND(UOdysseyPaintableTexture2D_Draw)(
-            [source = mRenderTarget, destination = Destination, sourceRect, destinationRect](FRHICommandListImmediate& RHICmdList)
-            {
-                FRDGBuilder graphBuilder(RHICmdList);
-                FRDGTextureRef sourceTexture = source->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
-                FRDGTextureRef destinationTexture = destination->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
-
-                AddDrawTexturePass(
-                    graphBuilder,
-                    FScreenPassViewInfo(),
-                    sourceTexture,
-                    destinationTexture,
-                    sourceRect.Min,
-                    sourceRect.Size(),
-                    destinationRect.Min,
-                    destinationRect.Size()
-                );
-                graphBuilder.Execute();
-            }
-        );
-        return;
+        FIntRect mRect;
+        TSharedPtr<FImage> mImage;
     }
+    TArray<TArray<FRenderTile>> tilesToRender;
 
-    mImage.Render(Destination, Rect, Position);
+
+    ENQUEUE_RENDER_COMMAND(UOdysseyPaintableTexture2D_RenderTiles)(
+        [tiles = mTiles, x1, y1, x2, y2, sourceRect = Rect, position = Position, destination = Destination](FRHICommandListImmediate& RHICmdList)
+        {
+            FRDGBuilder graphBuilder(RHICmdList);
+            FRDGTextureRef destinationTexture = destination->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+
+            for(int y = y1; y <= y2; y++)
+            {
+                for(int x = x1; x <= x2; x++)
+                {
+                    FTile& tile = tiles[y][x];
+                    if (tile.mIsEmpty)
+                    {
+                        //TODO: Clear destination for this tile
+                        continue;
+                    }
+
+                    FRDGTextureRef sourceTexture = source->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+
+                    FIntRect tileRect = tile->mRect;
+                    FIntRect fullRect(0, 0, destination->SizeX, destination->SizeY);
+                    FIntRect destinationRect(0, 0, destination->SizeX, destination->SizeY);
+
+                    sourceRect.Clip(fullRect - Position);
+                    destinationRect.Clip(Rect + Position);
+
+                    AddDrawTexturePass(
+                        graphBuilder,
+                        FScreenPassViewInfo(),
+                        sourceTexture,
+                        destinationTexture,
+                        sourceRect.Min,
+                        sourceRect.Size(),
+                        destinationRect.Min,
+                        destinationRect.Size()
+                    );
+                }
+            }
+
+            graphBuilder.Execute();
+        }
+    );
 }
 
 void
@@ -280,32 +378,34 @@ UOdysseyPaintableTexture2D::CopyUndoRTToRenderTarget()
     );
 }
 
-/* TArray<FRHITexture*>
-GetTilesRHITextures(const TArray<UTexture*> Textures )
+void
+UOdysseyPaintableTexture2D::ExtractTile(const FImage& InImage, FTile& OutTile) const
 {
-    TArray<FRHITexture*> rhiTextures;
-    for (const UTexture* texture : Textures)
+    //Clear the tile data
+    OutTile->mData = nullptr;
+    FIntRect tileRect = OutTile->mRect;
+
+    bool isEmpty = true;
+    for (int y = 0; isEmpty && y < tileRect.Height(); y++)
     {
-        rhiTextures.Add(texture->GetResource()->TextureRHI);
+        for (int x = 0; isEmpty && x < tileRect.Width(); x++)
+        {
+            if (InImage.GetOnePixelLinear(tileRect.Min.X + x, tileRect.Min.Y + y) != FLinearColor::Transparent)
+                isEmpty = false;
+        }
     }
 
-    return rhiTextures;
+    if (isEmpty)
+        return;
+
+    OutTile->mData = MakeShared<FTileData>();
+    OutTile->mData->mImage.Init(tileRect.Width(), tileRect.Height(), InImage.Format, InImage.GammaSpace);
+
+    for (int y = 0; y < tileRect.Height(); y++)
+    {
+        void* srcLine = InImage.GetPixelPointer(tileRect.Min.X, tileRect.Min.Y + y);
+        void* dstLine = OutTile->mData->mImage.GetPixelPointer(0, y);
+
+        FMemory::Memcpy(dstLine, srcLine, tileRect.Width() * InImage.GetBytesPerPixel());
+    }
 }
-
-void RenderTilesToTexture_RenderThread(FRDGBuilder& GraphBuilder, TArray<FRHITexture*> Tiles, TArray<FIntRect> Rects, FRDGTextureRef DestinationTexture)
-{
-    for (int i = 0; i < Tiles.Num(); i++ )
-    {
-        FIntRect rect = Rects[i];
-        FRHITexture* rhiTexture = Tiles[i];
-        FRDGTextureRef tileTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(rhiTexture, TEXT("UOdysseyPaintableTexture2D::TileTexture")));
-        AddCopyTexturePass(
-            GraphBuilder,
-            tileTexture,
-            DestinationTexture,
-            FIntPoint(0, 0),
-            rect.Min,
-            rect.Size()
-        );
-    }
-} */
