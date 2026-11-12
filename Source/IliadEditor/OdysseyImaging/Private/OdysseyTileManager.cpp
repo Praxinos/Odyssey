@@ -10,6 +10,7 @@
 #include "RenderingThread.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
+#include "ScreenPass.h"
 #include "Stats/Stats.h"
 #include "TextureResource.h"
 
@@ -21,9 +22,9 @@
  * A 64x64 Tiles Atlas of 64x64 RGBA8 pixels tiles
  * Is ~64MB on GPU
  */
-#define TILE_ATLAS_WIDTH_IN_TILES 64
-#define TILE_ATLAS_HEIGHT_IN_TILES 64
-#define TILE_ATLAS_NUM_TILES (TILE_ATLAS_WIDTH_IN_TILES * TILE_ATLAS_HEIGHT_IN_TILES)
+#define TILE_ATLAS_MAX_WIDTH_IN_TILES 64
+#define TILE_ATLAS_MAX_HEIGHT_IN_TILES 64
+#define TILE_ATLAS_MAX_TILES (TILE_ATLAS_MAX_WIDTH_IN_TILES * TILE_ATLAS_MAX_HEIGHT_IN_TILES)
 
 /*static*/ FCriticalSection FOdysseyTileManager::FTileData::Mutex;
 /*static*/ FCriticalSection FOdysseyTileManager::FTileData::CacheOnDiskMutex;
@@ -206,7 +207,7 @@ FOdysseyTileManager::CreateOrUpdateTiles(
     SourceRect.Clip(InRect);
     FIntRect DestinationRect(
         InPosition + (SourceRect.Min - InRect.Min),
-        InPosition + SourceRect.Size()
+        InPosition + (SourceRect.Min - InRect.Min) + SourceRect.Size()
     );
 
     struct FTileToCreate
@@ -221,28 +222,25 @@ FOdysseyTileManager::CreateOrUpdateTiles(
     TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTilePositionsFromRect(InTileSize, DestinationRect);
     TArray<FTileToCreate> TilesToCreate;
 
-    TilesToCreate.Reserve(TilesToCreate.Num());
+    TilesToCreate.Reserve(TilePositions.Num());
 
     TArray<FOdysseyTileManager::FCreatedTile> CreatedTiles;
 
+    TArray<FOdysseyTileId> OldTileIds;
+    OldTileIds.Reserve(TilePositions.Num());
     for (const FIntPoint& TilePosition : TilePositions)
     {
-        //Try to retrieve the previous content of the tile we are updating
         FOdysseyTileId OldTileId;
         if (InGetExistingTileId.IsBound())
             OldTileId = InGetExistingTileId.Execute(TilePosition);
+        OldTileIds.Add(OldTileId);
+    }
 
-        TFuture<TSharedPtr<FTileTextureHandle>> OldTileTextureHandle;
-        if (OldTileId.IsValid())
-        {
-            OldTileTextureHandle = GetTileTexture(OldTileId, InTileSize, InTileFormat);
-        }
-        else
-        {
-            TPromise<TSharedPtr<FTileTextureHandle>> Promise;
-            OldTileTextureHandle = Promise.GetFuture();
-            Promise.SetValue(TSharedPtr<FTileTextureHandle>());
-        }
+    TArray<TFuture<TSharedPtr<FTileTextureHandle>>> OldTileTextureHandles = GetTileTextures(OldTileIds, InTileSize, InTileFormat);
+
+    for (int i = 0; i < TilePositions.Num(); i++)
+    {
+        const FIntPoint& TilePosition = TilePositions[i];
 
         //Create a new tile representing the new version of the updated tile
         TSharedPtr<FTile> Tile = CreateNewTile();
@@ -250,7 +248,7 @@ FOdysseyTileManager::CreateOrUpdateTiles(
         FTileToCreate TileToCreate;
         TileToCreate.Position = TilePosition;
         TileToCreate.Tile = Tile;
-        TileToCreate.OldTextureHandle = MoveTemp(OldTileTextureHandle);
+        TileToCreate.OldTextureHandle = MoveTemp(OldTileTextureHandles[i]);
         TilesToCreate.Add(MoveTemp(TileToCreate));
 
         PendingTilesToReadBack.Add(Tile);
@@ -273,136 +271,140 @@ FOdysseyTileManager::CreateOrUpdateTiles(
         ](FRHICommandListImmediate& RHICmdList) mutable
         {
             TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::CreateOrUpdateTiles_0);
-
             //Step1 :
             // - Create the Tile Textures
             // - Draw in the Tile Textures
             FRDGBuilder GraphBuilder(RHICmdList);
 
-            /**
-             * We need an intermediate Texture to draw our tile in
-             * before drawing it into the Tile's Atlas.
-             * Because an OldTileTexture can share the same Atlas Texture as the new TileTexture
-             * And calling AddDrawTexturePass() with InputTexture == OutputTexture
-             * returns silently.
-             */
-            FIntPoint TileWH(TileSize, TileSize);
-            FRDGTextureDesc TileIntermediateTextureDesc = FRDGTextureDesc::Create2D(
-                TileWH,
-                PixelFormat,
-                FClearValueBinding::Transparent,
-                ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
-            );
-
-            FRDGTextureRef TileIntermediateTexture = GraphBuilder.CreateTexture(TileIntermediateTextureDesc, TEXT("FOdysseyTileManager::TileIntermediateTextureDesc"));
+            FRDGTextureRef SourceTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(Source->GetResource()->TextureRHI, TEXT("FOdysseyTileManager::CreateTiles")));
 
             const FGlobalShaderMap* ShaderMap = GetGlobalShaderMap(GMaxRHIFeatureLevel);
             TMap<FRDGTextureRef, TArray<int>> ReadBackParams;
-            for (int i = 0; i < TilesToCreate.Num(); i++)
+
+            uint32 NumAtlases = (TilesToCreate.Num() + TILE_ATLAS_MAX_TILES - 1) / TILE_ATLAS_MAX_TILES;
+            for (uint32 AtlasIndex = 0; AtlasIndex < NumAtlases; AtlasIndex++)
             {
-                FTileToCreate& TileToCreate = TilesToCreate[i];
-                //Make sure we get the OldTileTexture now
-                TSharedPtr<FTileTextureHandle> OldTileTextureHandle;
-                if (TileToCreate.OldTextureHandle.IsValid())
-                    OldTileTextureHandle = TileToCreate.OldTextureHandle.Get();
+                //Create an Atlas Texture containing the new tiles
+                uint32 NumTilesInAtlas = FMath::Min(uint32(TILE_ATLAS_MAX_TILES), TilesToCreate.Num() - AtlasIndex * TILE_ATLAS_MAX_TILES);
+                TSharedRef<FTileAtlas> Atlas = MakeShared<FTileAtlas>(RHICmdList, TileSize, PixelFormat, NumTilesInAtlas);
+                FRDGTextureRef AtlasTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(Atlas->GetTexture(), TEXT("FOdysseyTileManager::TileAtlasTexture")));
 
-                //Create the TileTexture
-                TileToCreate.TextureHandle = ReserveTileTexture(RHICmdList, TileSize, PixelFormat);
-
-                //Ensure the Rects are precisely the one we need
-                //to prevent bleeding on neighbour Tiles in the Tile's Texture Atlas
-                FIntPoint TileDstPos = TileToCreate.Position * TileSize;
-                FIntRect TileDstRect(TileDstPos, TileDstPos + TileWH);
-                TileDstRect.Clip(DestinationRect);
-
-                FIntPoint TileSrcPos(
-                    SourceRect.Min.X + (TileDstRect.Min.X - DestinationRect.Min.X),
-                    SourceRect.Min.Y + (TileDstRect.Min.Y - DestinationRect.Min.Y)
-                );
-                FIntRect TileSrcRect(
-                    TileSrcPos,
-                    TileSrcPos + TileDstRect.Size()
-                );
-                TileDstRect -= TileDstPos;
-
-
-                FRDGTextureRef SourceTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(Source->GetResource()->TextureRHI, TEXT("FOdysseyTileManager::CreateTiles")));
-                TileToCreate.RDGTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(TileToCreate.TextureHandle->GetTextureRHI(), TEXT("FOdysseyTileManager::TileTexture")));
-
-                //Prepare ReadBack params
-                ReadBackParams.FindOrAdd(TileToCreate.RDGTexture).Add(i);
-
-                //Draw in the Tile Texture
-                if (OldTileTextureHandle.IsValid())
+                TArray<FIntPoint> TilePositionsInAtlas;
+                TilePositionsInAtlas.Reserve(NumTilesInAtlas);
+                for (uint32 TileIndex = 0; TileIndex < NumTilesInAtlas; TileIndex++)
                 {
-                    //First we draw the Old pixels in the tile
-                    //This is needed, as the new pixels can occupy a partial amount of the tile
-                    FRDGTextureRef TileOldTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(OldTileTextureHandle->GetTextureRHI(), TEXT("FOdysseyTileManager::TileOldTexture")));
+                    int TileToCreateIndex = AtlasIndex * TILE_ATLAS_MAX_TILES + TileIndex;
+                    FTileToCreate& TileToCreate = TilesToCreate[TileToCreateIndex];
 
-                    FRDGDrawTextureInfo DrawInfo;
-                    DrawInfo.Size = TileWH;
-                    DrawInfo.SourcePosition = OldTileTextureHandle->GetPositionInTexture();
-                    AddDrawTexturePass(GraphBuilder, ShaderMap, TileOldTexture, TileIntermediateTexture, DrawInfo);
+                    //Reserve the tile in the tile atlas
+                    TileToCreate.TextureHandle = MakeShared<FTileTextureHandle>(Atlas, TileIndex);
+                    TilePositionsInAtlas.Add(TileToCreate.TextureHandle->GetPositionInTexture());
+
+                    TSharedPtr<FTileTextureHandle> OldTileTextureHandle;
+                    if (TileToCreate.OldTextureHandle.IsValid())
+                        OldTileTextureHandle = TileToCreate.OldTextureHandle.Get();
+
+                    //Ensure the Rects are precisely the one we need
+                    //to prevent bleeding on neighbour Tiles in the Tile's Texture Atlas
+                    FIntPoint TileDstPos = TileToCreate.Position * TileSize;
+                    FIntRect TileDstRect(TileDstPos, TileDstPos + FIntPoint(TileSize, TileSize));
+                    TileDstRect.Clip(DestinationRect);
+
+                    FIntPoint TileSrcPos(
+                        SourceRect.Min.X + (TileDstRect.Min.X - DestinationRect.Min.X),
+                        SourceRect.Min.Y + (TileDstRect.Min.Y - DestinationRect.Min.Y)
+                    );
+                    FIntRect TileSrcRect(
+                        TileSrcPos,
+                        TileSrcPos + TileDstRect.Size()
+                    );
+                    TileDstRect -= TileDstPos;
+
+                    //Draw in the Tile Texture
+                    if (OldTileTextureHandle.IsValid())
+                    {
+                        //First we draw the Old pixels in the tile
+                        //This is needed, as the new pixels can occupy a partial amount of the tile
+                        FRDGTextureRef TileOldTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(OldTileTextureHandle->GetTextureRHI(), TEXT("FOdysseyTileManager::TileOldTexture")));
+
+                        AddDrawTexturePass(
+                            GraphBuilder,
+                            FScreenPassViewInfo(),
+                            TileOldTexture,
+                            AtlasTexture,
+                            OldTileTextureHandle->GetPositionInTexture(),
+                            FIntPoint(TileSize, TileSize),
+                            TileToCreate.TextureHandle->GetPositionInTexture(),
+                            FIntPoint(TileSize, TileSize)
+                        );
+                    }
+                    else
+                    {
+                        //First we clear the Tile
+                        FRDGTextureClearInfo ClearInfo;
+
+                        ClearInfo.Viewport = TileToCreate.TextureHandle->GetRectInTexture();
+                        ClearInfo.ClearColor = FLinearColor::Transparent;
+
+                        AddClearRenderTargetPass(GraphBuilder, AtlasTexture, ClearInfo);
+                    }
+
+                    AddDrawTexturePass(
+                        GraphBuilder,
+                        FScreenPassViewInfo(),
+                        SourceTexture,
+                        AtlasTexture,
+                        TileSrcRect.Min,
+                        TileSrcRect.Size(),
+                        TileDstRect.Min + TileToCreate.TextureHandle->GetPositionInTexture(),
+                        TileSrcRect.Size()
+                    );
                 }
-                else
-                {
-                    //First we clear the Tile
-                    AddClearRenderTargetPass(GraphBuilder, TileIntermediateTexture);
-                }
 
-                //Then we draw the new pixels in the Tile
-                FRDGDrawTextureInfo DrawSourceInTileInfo;
-                DrawSourceInTileInfo.Size = TileSrcRect.Size();
-                DrawSourceInTileInfo.SourcePosition = TileSrcRect.Min;
-                DrawSourceInTileInfo.DestPosition = TileDstRect.Min;// + TileToCreate.TextureHandle->GetPositionInTexture();
-                AddDrawTexturePass(GraphBuilder, ShaderMap, SourceTexture, TileIntermediateTexture, DrawSourceInTileInfo);
-
-                //Finally, we draw the tile into the Tile Atlas
-                FRDGDrawTextureInfo DrawTileInTextureAtlasInfo;
-                DrawTileInTextureAtlasInfo.Size = TileWH;
-                DrawTileInTextureAtlasInfo.DestPosition = TileToCreate.TextureHandle->GetPositionInTexture();
-                AddDrawTexturePass(GraphBuilder, ShaderMap, TileIntermediateTexture, TileToCreate.RDGTexture, DrawTileInTextureAtlasInfo);
-            }
-
-            //Step2 : Initiate ReadBacks
-            for (auto& Element : ReadBackParams)
-            {
-                FRDGTextureRef Texture = Element.Key;
-                TArray<int> Indexes = Element.Value;
-
-                TArray<FIntPoint> TilePositions;
-                for(int Index : Indexes)
-                {
-                    TilePositions.Add(TilesToCreate[Index].TextureHandle->GetPositionInTexture());
-                }
-
+                //Initiate Is Altas Texture Empty Readback
                 TSharedRef<FRHIGPUBufferReadback> GPUIsEmptyReadBack = MakeShared<FRHIGPUBufferReadback>(TEXT("FOdysseyTileManager::FTile::GPUIsEmptyReadBack"));
                 Odyssey::Shaders::AddAreTextureTilesEmptyPass(
                     GraphBuilder,
                     GMaxRHIFeatureLevel,
-                    Texture,
-                    TilePositions,
+                    AtlasTexture,
+                    TilePositionsInAtlas,
                     TileSize,
                     GPUIsEmptyReadBack
                 );
 
-                for(int i = 0; i < Indexes.Num(); i++)
+                //Initiate Altas Texture Readback
+                TSharedPtr<FRHIGPUTextureReadback> GPUReadBack = MakeShared<FRHIGPUTextureReadback>(TEXT("FOdysseyTileManager::FTile::GPUReadBack"));
+                AddEnqueueCopyPass(
+                    GraphBuilder,
+                    GPUReadBack.Get(),
+                    AtlasTexture
+                );
+
+                const FPixelFormatInfo& PixelFormatInfo = GPixelFormats[PixelFormat];
+                uint32 BytesPerPixel = PixelFormatInfo.BlockBytes;
+
+                for (uint32 TileIndex = 0; TileIndex < NumTilesInAtlas; TileIndex++)
                 {
-                    int Index = Indexes[i];
+                    int TileToCreateIndex = AtlasIndex * TILE_ATLAS_MAX_TILES + TileIndex;
+                    FTileToCreate& TileToCreate = TilesToCreate[TileToCreateIndex];
 
-                    FTile::FIsEmptyReadBack IsEmptyReadBack;
+                    //IsEmpty ReadBack
+                    FTile::FPartialBufferReadBack IsEmptyReadBack;
                     IsEmptyReadBack.ReadBack = GPUIsEmptyReadBack;
-                    IsEmptyReadBack.ResultSize = Indexes.Num() * sizeof(uint32);
-                    IsEmptyReadBack.ResultIndex = i;
+                    IsEmptyReadBack.ResultSize = NumTilesInAtlas * sizeof(uint32);
+                    IsEmptyReadBack.ResultIndex = TileIndex;
 
-                    TilesToCreate[Index].Tile->GPUIsEmptyReadBackPromise->SetValue(IsEmptyReadBack);
+                    TileToCreate.Tile->GPUIsEmptyReadBackPromise->SetValue(IsEmptyReadBack);
 
-                    AddEnqueueCopyPass(
-                        GraphBuilder,
-                        TilesToCreate[Index].Tile->GPUReadBack.Get(),
-                        Texture,
-                        FResolveRect(TilesToCreate[Index].TextureHandle->GetRectInTexture())
-                    );
+                    //Pixels ReadBack
+                    FTile::FPartialTextureReadBack PixelsReadBack;
+                    PixelsReadBack.ReadBack = GPUReadBack;
+                    PixelsReadBack.PositionInPixels = Atlas->GetTilePosition(TileIndex);
+                    PixelsReadBack.BytesPerPixel = BytesPerPixel;
+                    PixelsReadBack.BytesPerTextureRow = Atlas->GetWidthInTiles() * TileSize * BytesPerPixel;
+                    PixelsReadBack.TileSize = TileSize;
+
+                    TileToCreate.Tile->GPUReadBackPromise->SetValue(PixelsReadBack);
                 }
             }
 
@@ -514,14 +516,15 @@ FOdysseyTileManager::TryLoadTileFromReadBack(TSharedPtr<FTile> InTile)
     if (InTile->GPUReadBackState != FTile::EGPUReadBackState::Idle)
         return;
 
-    if (!InTile->GPUReadBack.IsValid() || !InTile->GPUReadBack->IsReady())
+    if (!InTile->GPUIsEmptyReadBack.IsValid() || !InTile->GPUReadBack.IsValid())
         return;
 
-    if (!InTile->GPUIsEmptyReadBack.IsValid())
-        return;
-
-    const FTile::FIsEmptyReadBack& IsEmptyReadBack = InTile->GPUIsEmptyReadBack.Get();
+    const FTile::FPartialBufferReadBack& IsEmptyReadBack = InTile->GPUIsEmptyReadBack.Get();
     if (!IsEmptyReadBack.ReadBack.IsValid() || !IsEmptyReadBack.ReadBack->IsReady())
+        return;
+
+    const FTile::FPartialTextureReadBack& PixelsReadBack = InTile->GPUReadBack.Get();
+    if (!PixelsReadBack.ReadBack.IsValid() || !PixelsReadBack.ReadBack->IsReady())
         return;
 
     LoadTileFromReadBack(InTile);
@@ -553,7 +556,7 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
             {
                 // This blocks the render thread until the GPU has completed
                 // the readback copy.
-                const FTile::FIsEmptyReadBack& IsEmptyReadBack = InTile->GPUIsEmptyReadBack.Get();
+                const FTile::FPartialBufferReadBack& IsEmptyReadBack = InTile->GPUIsEmptyReadBack.Get();
                 IsEmptyReadBack.ReadBack->Wait(RHICmdList, GPUMask);
                 uint32* Data = static_cast<uint32*>(IsEmptyReadBack.ReadBack->Lock(IsEmptyReadBack.ResultSize));
                 bool IsEmpty = Data[IsEmptyReadBack.ResultIndex] != 0;
@@ -573,7 +576,8 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
                     InTile->TileDataPromise.SetValue(nullptr);
                     InTile->GPUIsEmptyReadBack.Reset();
                     InTile->GPUIsEmptyReadBackPromise.Reset();
-                    InTile->GPUReadBack = nullptr;
+                    InTile->GPUReadBack.Reset();
+                    InTile->GPUReadBackPromise.Reset();
                     InTile->GPUReadBackState = FTile::EGPUReadBackState::Done;
 
                     FOdysseyTileId TileId = InTile->Id;
@@ -585,26 +589,36 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
 
             //Tile Data ReadBack
             {
-
+                const FTile::FPartialTextureReadBack& PixelsReadBack = InTile->GPUReadBack.Get();
                 // This blocks the render thread until the GPU has completed
                 // the readback copy.
-                InTile->GPUReadBack->Wait(RHICmdList, GPUMask);
+                PixelsReadBack.ReadBack->Wait(RHICmdList, GPUMask);
 
                 // At this point Lock() is safe.
                 int32 Width = 0;
                 int32 Height = 0;
 
-                void* Data = InTile->GPUReadBack->Lock(Width, &Height);
+                void* Data = PixelsReadBack.ReadBack->Lock(Width, &Height);
 
-                FSharedBuffer Buffer = FSharedBuffer::Clone(
-                    Data,
-                    InTile->GPUReadBack->GetGPUSizeBytes()
-                );
+                uint64 BufferSize = PixelsReadBack.TileSize * PixelsReadBack.TileSize * PixelsReadBack.BytesPerPixel;
+                FSharedBuffer TileBuffer = FUniqueBuffer::Alloc(BufferSize).MoveToShared();
 
-                InTile->GPUReadBack->Unlock();
+                for (uint32 Y = 0; Y < PixelsReadBack.TileSize; ++Y)
+                {
+                    const uint8* Src =
+                        (const uint8*)Data
+                        + (PixelsReadBack.PositionInPixels.Y + Y) * PixelsReadBack.BytesPerTextureRow
+                        + PixelsReadBack.PositionInPixels.X * PixelsReadBack.BytesPerPixel;
+
+                    uint8* Dst = (uint8*)TileBuffer.GetData() + Y * PixelsReadBack.TileSize * PixelsReadBack.BytesPerPixel;
+
+                    FMemory::Memcpy(Dst, Src, PixelsReadBack.TileSize * PixelsReadBack.BytesPerPixel);
+                }
+
+                PixelsReadBack.ReadBack->Unlock();
 
                 //Compare Buffer to other buffers
-                FIoHash Hash = FIoHashBuilder::HashBuffer(Buffer.GetView());
+                FIoHash Hash = FIoHashBuilder::HashBuffer(TileBuffer.GetView());
                 TArray<TSharedPtr<FTileData>> TilesData;
 
                 {
@@ -617,7 +631,7 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
                         if(!TileData->GetUncompressedBuffer(TileDataBuffer))
                             continue;
 
-                        if (TileDataBuffer.GetView().EqualBytes(Buffer.GetView()))
+                        if (TileDataBuffer.GetView().EqualBytes(TileBuffer.GetView()))
                         {
                             FScopeLock TileLock(&InTile->Mutex);
                             InTile->TempTexture.Reset();
@@ -625,14 +639,15 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
                             InTile->TileDataPromise.SetValue(TileData);
                             InTile->GPUIsEmptyReadBack.Reset();
                             InTile->GPUIsEmptyReadBackPromise.Reset();
-                            InTile->GPUReadBack = nullptr;
+                            InTile->GPUReadBack.Reset();
+                            InTile->GPUReadBackPromise.Reset();
                             InTile->GPUReadBackState = FTile::EGPUReadBackState::Done;
                             return;
                         }
                     }
 
                     //Create a new TileData
-                    TSharedPtr<FTileData> TileData = FTileData::FromUncompressedBuffer(Hash, Buffer);
+                    TSharedPtr<FTileData> TileData = FTileData::FromUncompressedBuffer(Hash, TileBuffer);
                     HashToTileData.Add(Hash, TileData);
 
                     {
@@ -642,7 +657,8 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
                         InTile->TileDataPromise.SetValue(TileData);
                         InTile->GPUIsEmptyReadBack.Reset();
                         InTile->GPUIsEmptyReadBackPromise.Reset();
-                        InTile->GPUReadBack = nullptr;
+                        InTile->GPUReadBack.Reset();
+                        InTile->GPUReadBackPromise.Reset();
                         InTile->GPUReadBackState = FTile::EGPUReadBackState::Done;
                     }
                 }
@@ -651,120 +667,141 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
     );
 }
 
-TFuture<TSharedPtr<FOdysseyTileManager::FTileTextureHandle>>
-FOdysseyTileManager::GetTileTexture(FOdysseyTileId InTileId, uint32 InTileSize, EPixelFormat InTileFormat) const
+TArray<TFuture<TSharedPtr<FOdysseyTileManager::FTileTextureHandle>>>
+FOdysseyTileManager::GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, uint32 InTileSize, EPixelFormat InTileFormat) const
 {
-    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::GetTileTexture);
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::GetTileTextures);
 
     check(IsInGameThread());
+    TArray<TPromise<TSharedPtr<FTileTextureHandle>>> RenderThreadPromises;
+    RenderThreadPromises.Reserve(InTileIds.Num());
 
-    TPromise<TSharedPtr<FTileTextureHandle>> Promise;
-    TFuture<TSharedPtr<FTileTextureHandle>> Future = Promise.GetFuture();
+    TArray<TFuture<TSharedPtr<FTileTextureHandle>>> Futures;
+    Futures.Reserve(InTileIds.Num());
 
-    //Check if TileIndex is out of bounds
-    if (InTileId.Index >= (uint64)Tiles.Num())
+    TArray<FSharedBuffer> Buffers;
+    Buffers.Reserve(InTileIds.Num());
+    for (int i = 0; i < InTileIds.Num(); i++)
     {
-        Promise.SetValue(TSharedPtr<FTileTextureHandle>());
-        return Future;
-    }
+        const FOdysseyTileId& TileId = InTileIds[i];
 
-    //Retrieve Tile
-    TSharedPtr<FTile> Tile = Tiles[InTileId.Index];
+        TPromise<TSharedPtr<FTileTextureHandle>> Promise;
+        TFuture<TSharedPtr<FTileTextureHandle>> Future = Promise.GetFuture();
+        Futures.Add(MoveTemp(Future));
 
-    //We read the tile here
-    //We lock its mutex to ensure it is not modified by another thread
-    FScopeLock TileLock(&Tile->Mutex);
-
-    //If Tile.Id does not correspond to TileId
-    //it indicates the tile corresponding to the TileId was empty
-    //and freed.
-    if (Tile->Id != InTileId)
-    {
-        Promise.SetValue(TSharedPtr<FTileTextureHandle>());
-        return Future;
-    }
-
-    //Check if the Tile has a TempTexture
-    //Indicating the Tile's ReadBack has not yet finished
-    //Rely on TempTexture if it exists
-    if (Tile->TempTexture.IsValid())
-    {
-        TSharedPtr<FTileTextureHandle> TileTextureHandle = Tile->TempTexture.Get();
-        if (TileTextureHandle.IsValid())
+        //Check if TileIndex is out of bounds
+        if (!TileId.IsValid() || TileId.Index >= (uint64)Tiles.Num())
         {
-            Promise.SetValue(TileTextureHandle);
-            return Future;
+            Promise.SetValue(TSharedPtr<FTileTextureHandle>());
+            continue;
         }
-    }
 
-    //We rely directly on FTileData which is guaranteed to be valid here
-    //Because TempTexture is Null or Invalid, indicating ReadBack has finished
-    //
-    //We don't rely on FTile anymore
-    //So we can release the lock here
-    TileLock.Unlock();
+        //Retrieve Tile
+        TSharedPtr<FTile> Tile = Tiles[TileId.Index];
 
-    //TempTexture is Null indicating ReadBack has finished
-    //The Tile's Buffer should be available
-    //Rely on the Tile's Buffer to create a TextureRHIRef
-    TSharedPtr<FTileData> TileData = Tile->TileData.Get();
-    if (!TileData)
-    {
-        Promise.SetValue(TSharedPtr<FTileTextureHandle>());
-        return Future;
-    }
+        //We read the tile here
+        //We lock its mutex to ensure it is not modified by another thread
+        FScopeLock TileLock(&Tile->Mutex);
 
-    FSharedBuffer Buffer;
-    if (!TileData->GetUncompressedBuffer(Buffer))
-    {
-        //Tile's Buffer could not be retrieved
-        //indicating an empty Tile
-        Promise.SetValue(TSharedPtr<FTileTextureHandle>());
-        return Future;
-    }
-
-    ENQUEUE_RENDER_COMMAND(FOdysseyTileManager_GetTileTexture)(
-        [
-            self = const_cast<FOdysseyTileManager*>(this),
-            Buffer,
-            PixelFormat = InTileFormat,
-            TileSize = InTileSize,
-            Promise = MoveTemp(Promise)
-        ](FRHICommandListImmediate& RHICmdList) mutable
+        //If Tile.Id does not correspond to TileId
+        //it indicates the tile corresponding to the TileId was empty
+        //and freed.
+        if (Tile->Id != TileId)
         {
-            TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::GetTileTexture_0);
-
-            /* FIntPoint TileWH(TileSize, TileSize);
-
-            const FRHITextureCreateDesc CreateDesc = FRHITextureCreateDesc::Create2D(TEXT("FOdysseyTileManager::TileTexture"))
-                .SetExtent(TileWH)
-                .SetFormat(PixelFormat)
-                .SetClearValue(FClearValueBinding::Transparent)
-                .SetFlags(ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable);
-
-            FTextureRHIRef TextureRHI = RHICmdList.CreateTexture(CreateDesc); */
-
-            TSharedPtr<FTileTextureHandle> TileTextureHandle = self->ReserveTileTexture(RHICmdList, TileSize, PixelFormat);
-
-            FRDGBuilder GraphBuilder(RHICmdList);
-
-            FRDGTextureRef TileTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(TileTextureHandle->GetTextureRHI(), TEXT("FOdysseyTileManager::TileTexture")));
-
-            AddWriteTilePass(
-                GraphBuilder,
-                TileTexture,
-                TileTextureHandle->GetPositionInTexture(),
-                TileSize,
-                Buffer
-            );
-
-            GraphBuilder.Execute();
-
-            Promise.SetValue(TileTextureHandle);
+            Promise.SetValue(TSharedPtr<FTileTextureHandle>());
+            continue;
         }
-    );
 
-    return Future;
+        //Check if the Tile has a TempTexture
+        //Indicating the Tile's ReadBack has not yet finished
+        //Rely on TempTexture if it exists
+        if (Tile->TempTexture.IsValid())
+        {
+            TSharedPtr<FTileTextureHandle> TileTextureHandle = Tile->TempTexture.Get();
+            if (TileTextureHandle.IsValid())
+            {
+                Promise.SetValue(TileTextureHandle);
+                continue;
+            }
+        }
+
+        //We rely directly on FTileData which is guaranteed to be valid here
+        //Because TempTexture is Null or Invalid, indicating ReadBack has finished
+        //
+        //We don't rely on FTile anymore
+        //So we can release the lock here
+        TileLock.Unlock();
+
+        //TempTexture is Null indicating ReadBack has finished
+        //The Tile's Buffer should be available
+        //Rely on the Tile's Buffer to create a TextureRHIRef
+        TSharedPtr<FTileData> TileData = Tile->TileData.Get();
+        if (!TileData)
+        {
+            Promise.SetValue(TSharedPtr<FTileTextureHandle>());
+            continue;
+        }
+
+        FSharedBuffer Buffer;
+        if (!TileData->GetUncompressedBuffer(Buffer))
+        {
+            //Tile's Buffer could not be retrieved
+            //indicating an empty Tile
+            Promise.SetValue(TSharedPtr<FTileTextureHandle>());
+            continue;
+        }
+
+        RenderThreadPromises.Add(MoveTemp(Promise));
+        Buffers.Add(Buffer);
+    }
+
+    if (Buffers.Num() > 0)
+    {
+        ENQUEUE_RENDER_COMMAND(FOdysseyTileManager_GetTileTextures)(
+            [
+                self = const_cast<FOdysseyTileManager*>(this),
+                Buffers,
+                PixelFormat = InTileFormat,
+                TileSize = InTileSize,
+                Promises = MoveTemp(RenderThreadPromises)
+            ](FRHICommandListImmediate& RHICmdList) mutable
+            {
+                TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::GetTileTextures_0);
+
+                uint32 NumAtlases = (Buffers.Num() + TILE_ATLAS_MAX_TILES - 1) / TILE_ATLAS_MAX_TILES;
+                FRDGBuilder GraphBuilder(RHICmdList);
+                for (uint32 AtlasIndex = 0; AtlasIndex < NumAtlases; AtlasIndex++)
+                {
+                    //Create an Atlas Texture containing the new tiles
+                    uint32 NumTilesInAtlas = FMath::Min(uint32(TILE_ATLAS_MAX_TILES), Buffers.Num() - AtlasIndex * TILE_ATLAS_MAX_TILES);
+                    TSharedRef<FTileAtlas> Atlas = MakeShared<FTileAtlas>(RHICmdList, TileSize, PixelFormat, NumTilesInAtlas);
+                    FRDGTextureRef AtlasTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(Atlas->GetTexture(), TEXT("FOdysseyTileManager::TileAtlasTexture")));
+
+                    for (uint32 TileIndex = 0; TileIndex < NumTilesInAtlas; TileIndex++)
+                    {
+                        int BufferIndex = AtlasIndex * TILE_ATLAS_MAX_TILES + TileIndex;
+                        FSharedBuffer Buffer = Buffers[BufferIndex];
+                        TPromise<TSharedPtr<FTileTextureHandle>>& Promise = Promises[BufferIndex];
+
+                        TSharedPtr<FTileTextureHandle> TileTextureHandle = MakeShared<FTileTextureHandle>(Atlas, TileIndex);
+                        Promise.SetValue(TileTextureHandle);
+
+                        AddWriteTilePass(
+                            GraphBuilder,
+                            AtlasTexture,
+                            TileTextureHandle->GetPositionInTexture(),
+                            TileSize,
+                            Buffer
+                        );
+                    }
+                }
+
+                GraphBuilder.Execute();
+            }
+        );
+    }
+
+    return Futures;
 }
 
 bool
@@ -904,47 +941,6 @@ FOdysseyTileManager::EvictAllTiles()
     FTileData::EvictTiles(0, 0);
 }
 
-TSharedPtr<FOdysseyTileManager::FTileTextureHandle>
-FOdysseyTileManager::ReserveTileTexture(FRHICommandList& InRHICmdList, uint32 InTileSize, EPixelFormat InTileFormat)
-{
-    check(IsInRenderingThread());
-
-    FScopeLock Lock(&TileAtlasesMutex);
-
-    TSharedPtr<FTileAtlas> Atlas;
-    for(TSharedRef<FTileAtlas> TileAtlas : TileAtlases)
-    {
-        if (TileAtlas->TileSize != InTileSize || TileAtlas->TileFormat != InTileFormat)
-            continue;
-
-        if (TileAtlas->FreeTileIndexes.IsEmpty())
-            continue;
-
-        Atlas = TileAtlas;
-        break;
-    }
-
-    if (!Atlas)
-    {
-        Atlas = MakeShared<FTileAtlas>(InRHICmdList, InTileSize, InTileFormat);
-        TileAtlases.Add(Atlas.ToSharedRef());
-    }
-
-    TSharedPtr<FTileTextureHandle> TileTexture = MakeShared<FTileTextureHandle>(Atlas, Atlas->FreeTileIndexes[0]);
-    Atlas->FreeTileIndexes.RemoveAtSwap(0);
-
-    return TileTexture;
-}
-
-void
-FOdysseyTileManager::ReleaseTileTexture(TSharedRef<FOdysseyTileManager::FTileAtlas> InAtlas, uint32 TileIndexInAtlas)
-{
-    FScopeLock Lock(&TileAtlasesMutex);
-    InAtlas->FreeTileIndexes.Add(TileIndexInAtlas);
-    if (InAtlas->FreeTileIndexes.Num() == TILE_ATLAS_NUM_TILES)
-        TileAtlases.Remove(InAtlas);
-}
-
 /*************************************
  * FTile
  *************************************/
@@ -962,8 +958,9 @@ FOdysseyTileManager::FTile::Initialize()
     TempTexture = TempTexturePromise->GetFuture();
     TileData = TileDataPromise.GetFuture();
 
-    GPUReadBack = MakeShared<FRHIGPUTextureReadback>(TEXT("FOdysseyTileManager::FTile::GPUReadBack"));
-    GPUIsEmptyReadBackPromise = MakeUnique<TPromise<FIsEmptyReadBack>>();
+    GPUReadBackPromise = MakeUnique<TPromise<FPartialTextureReadBack>>();
+    GPUReadBack = GPUReadBackPromise->GetFuture();
+    GPUIsEmptyReadBackPromise = MakeUnique<TPromise<FPartialBufferReadBack>>();
     GPUIsEmptyReadBack = GPUIsEmptyReadBackPromise->GetFuture();
     GPUReadBackState = EGPUReadBackState::Idle;
 }
@@ -1353,14 +1350,13 @@ FOdysseyTileManager::FTileData::WaitUntilCachedOnDisk()
     CacheOnDiskCompletionEvent.Wait();
 }
 
-FOdysseyTileManager::FTileAtlas::FTileAtlas(FRHICommandList& InRHICmdList, uint32 InTileSize, EPixelFormat InTileFormat)
+FOdysseyTileManager::FTileAtlas::FTileAtlas(FRHICommandList& InRHICmdList, uint32 InTileSize, EPixelFormat InTileFormat, uint32 InNumTiles)
     : TileSize(InTileSize)
-    , TileFormat(InTileFormat)
+    //, TileFormat(InTileFormat)
 {
-    FIntPoint AtlasSize(
-        InTileSize * TILE_ATLAS_WIDTH_IN_TILES,
-        InTileSize * TILE_ATLAS_HEIGHT_IN_TILES
-    );
+    HeightInTiles = FMath::RoundUpToPowerOfTwo((InNumTiles - 1) / TILE_ATLAS_MAX_WIDTH_IN_TILES + 1);
+    WidthInTiles = (InNumTiles - 1) / HeightInTiles + 1;
+    FIntPoint AtlasSize(WidthInTiles * InTileSize, HeightInTiles * InTileSize);
 
     const FRHITextureCreateDesc CreateDesc = FRHITextureCreateDesc::Create2D(TEXT("FOdysseyTileManager::FTileAtlas::Texture"))
         .SetExtent(AtlasSize)
@@ -1369,19 +1365,29 @@ FOdysseyTileManager::FTileAtlas::FTileAtlas(FRHICommandList& InRHICmdList, uint3
         .SetFlags(ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable);
 
     Texture = InRHICmdList.CreateTexture(CreateDesc);
+}
 
-    FreeTileIndexes.Reserve(TILE_ATLAS_NUM_TILES);
+FIntRect
+FOdysseyTileManager::FTileAtlas::GetTileRect(uint32 InTileIndexInAtlas) const
+{
+    FIntPoint Position = GetTilePosition(InTileIndexInAtlas);
+    return FIntRect(
+        Position,
+        Position + FIntPoint(TileSize, TileSize)
+    );
+}
 
-    for (uint32 i = 0; i < TILE_ATLAS_NUM_TILES; i++)
-    {
-        FreeTileIndexes.Add(i);
-    }
+FIntPoint
+FOdysseyTileManager::FTileAtlas::GetTilePosition(uint32 InTileIndexInAtlas) const
+{
+    return FIntPoint(
+        TileSize * (InTileIndexInAtlas % WidthInTiles),
+        TileSize * (InTileIndexInAtlas / WidthInTiles)
+    );
 }
 
 FOdysseyTileManager::FTileTextureHandle::~FTileTextureHandle()
 {
-    if (Atlas)
-        FOdysseyTileManager::Get().ReleaseTileTexture(Atlas.ToSharedRef(), TileIndexInAtlas);
 }
 
 FOdysseyTileManager::FTileTextureHandle::FTileTextureHandle()
@@ -1402,7 +1408,7 @@ FOdysseyTileManager::FTileTextureHandle::GetTextureRHI() const
     if (!Atlas)
         return FTextureRHIRef();
 
-    return Atlas->Texture;
+    return Atlas->GetTexture();
 }
 
 FIntRect
@@ -1411,11 +1417,7 @@ FOdysseyTileManager::FTileTextureHandle::GetRectInTexture() const
     if (!Atlas)
         return FIntRect();
 
-    FIntPoint Position = GetPositionInTexture();
-    return FIntRect(
-        Position,
-        Position + FIntPoint(Atlas->TileSize, Atlas->TileSize)
-    );
+    return Atlas->GetTileRect(TileIndexInAtlas);
 }
 
 FIntPoint
@@ -1424,10 +1426,7 @@ FOdysseyTileManager::FTileTextureHandle::GetPositionInTexture() const
     if (!Atlas)
         return FIntPoint();
 
-    return FIntPoint(
-        Atlas->TileSize * (TileIndexInAtlas % TILE_ATLAS_WIDTH_IN_TILES),
-        Atlas->TileSize * (TileIndexInAtlas / TILE_ATLAS_WIDTH_IN_TILES)
-    );
+    return Atlas->GetTilePosition(TileIndexInAtlas);
 }
 
 bool
