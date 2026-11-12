@@ -52,6 +52,8 @@ class ARIANEEDITOR_API SArianeEditorLayerRow
         FReply OnMouseButtonDown( const FGeometry & MyGeometry
                                 , const FPointerEvent & MouseEvent ) override;
 
+        //virtual const FSlateBrush* GetBorder() const override;
+
     protected:
         virtual FReply OnDragDetected ( const FGeometry& MyGeometry,
                                         const FPointerEvent& MouseEvent ) override;

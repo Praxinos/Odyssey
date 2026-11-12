@@ -356,6 +356,24 @@ SArianeEditorLayerRow::OnMouseButtonDown( const FGeometry & MyGeometry
     return SMultiColumnTableRow::OnMouseButtonDown( MyGeometry, MouseEvent );
 }
 
+/*
+const FSlateBrush*
+SArianeEditorLayerRow::GetBorder() const
+{
+    const FSlateBrush* borderBrush = SMultiColumnTableRow<UOdysseyLayer*>::GetBorder();
+
+    if (!mLayer)
+        return borderBrush;
+
+    UOdysseyLayerStack* layerStack = mLayer->GetLayerStack();
+    if ( !layerStack || layerStack->GetCurrentLayer() != mLayer)
+        return borderBrush;
+
+    const bool bIsActive = OwnerTablePtr.Pin()->AsWidget()->HasKeyboardFocus();
+    return bIsActive ? FOdysseyStyle::GetBrush("OdysseyLayerStack.CurrentLayerBackgroundBrush") : FOdysseyStyle::GetBrush("OdysseyLayerStack.CurrentLayerInactiveBackgroundBrush");
+}
+*/
+
 ESelectionMode::Type
 SArianeEditorLayerRow::GetSelectionMode () const
 {

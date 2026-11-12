@@ -545,19 +545,25 @@ FArianeCycleGeometry3D::Build()
         FVector P0P1 = ( Point1.GetPosition() - Point0.GetPosition() );
         FVector P0P2 = ( Point2.GetPosition() - Point0.GetPosition() );
         FVector Cross = FVector::CrossProduct( P0P1, P0P2 ).GetSafeNormal();
-        FVector2f& UV0 = CycleUVs[Point0Index];
-        FVector2f& UV1 = CycleUVs[Point1Index];
-        FVector2f& UV2 = CycleUVs[Point2Index];
-        FVector2f UV0UV1 = UV1 - UV0;
-        FVector2f UV0UV2 = UV2 - UV0;
-        float UVDeterminant = (UV0UV1.X * UV0UV2.Y - UV0UV2.X * UV0UV1.Y);
         FVector TangentX = FVector::Zero();
 
-        if( UVDeterminant )
+        // UVs could be empty for cycles that were generated before UVs were implemented.
+        if( CycleUVs.Num() )
         {
-            float InvUVDeterminant = 1.0f / UVDeterminant;
+            FVector2f& UV0 = CycleUVs[Point0Index];
+            FVector2f& UV1 = CycleUVs[Point1Index];
+            FVector2f& UV2 = CycleUVs[Point2Index];
+            FVector2f UV0UV1 = UV1 - UV0;
+            FVector2f UV0UV2 = UV2 - UV0;
+            float UVDeterminant = (UV0UV1.X * UV0UV2.Y - UV0UV2.X * UV0UV1.Y);
 
-            TangentX = (P0P1 * UV0UV2.Y - P0P2 * UV0UV1.Y) * InvUVDeterminant;
+
+            if( UVDeterminant )
+            {
+                float InvUVDeterminant = 1.0f / UVDeterminant;
+
+                TangentX = (P0P1 * UV0UV2.Y - P0P2 * UV0UV1.Y) * InvUVDeterminant;
+            }
         }
 
         NormalAccus[Point0Index].TangentX += TangentX;
@@ -589,7 +595,12 @@ FArianeCycleGeometry3D::Build()
     for( int32 i = 0; i < CyclePoints.Num(); i++  )
     {
         FArianePoint& Point = CyclePoints[i];
-        FVector2f& UV = CycleUVs[i];
+        FVector2f UV = FVector2f::Zero();
+
+        if ( CycleUVs.Num() )
+        {
+            UV = CycleUVs[i];
+        }
 
         MeshVertices.Emplace( FVector3f( Point.GetPosition() )
                             , FVector3f( NormalAccus[i].TangentX ) // TangentX
