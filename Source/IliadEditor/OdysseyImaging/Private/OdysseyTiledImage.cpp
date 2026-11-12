@@ -278,7 +278,7 @@ UOdysseyTiledImage::Serialize(FArchive& Ar)
 
     //We don't need to save Tiles data for undo or when cooking
     //(even if UOdysseyTiledImage will probably never be cooked)
-    if (Ar.IsTransacting() || Ar.IsCooking())
+    if (Ar.IsTransacting() || !Ar.IsPersistent())
         return;
 
     //As we are doing a custom serialization
@@ -286,10 +286,9 @@ UOdysseyTiledImage::Serialize(FArchive& Ar)
     //if this custom serialization is changed
     Ar.UsingCustomVersion(FOdysseyTiledImageObjectVersion::GUID);
 
-
-        TArray<FIntPoint> TilePositions;
-        TArray<FCompressedBuffer> TileCompressedBuffers;
-        TArray<FIoHash> TileHashes;
+    TArray<FIntPoint> TilePositions;
+    TArray<FCompressedBuffer> TileCompressedBuffers;
+    TArray<FIoHash> TileHashes;
 
     if( Ar.IsSaving() )
     {

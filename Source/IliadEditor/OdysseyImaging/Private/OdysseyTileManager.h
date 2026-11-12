@@ -129,6 +129,11 @@ public:
 
     FOdysseyTileManagerStats& GetStats();
 
+    /**
+     * Waits until all tiles are properly cached on disk and evicted if needed
+     */
+    void WaitUntilAllTilesAreCached(bool InEvictTiles = true);
+
 private:
     /**
      * FTileData contains the real Tile Data after GPU ReadBack
@@ -152,6 +157,9 @@ private:
             bool GetCompressedBuffer(FCompressedBuffer& OutBuffer) const;
             const FIoHash& GetHash() const;
 
+            void WaitUntilCachedCompressed();
+            void WaitUntilCachedOnDisk();
+
         private:
             static void Touch(TSharedRef<FTileData>);
 
@@ -165,19 +173,31 @@ private:
             void EvictCompressed();
 
         private:
+            enum class ECacheState
+            {
+                InProgress,
+                Cached
+            };
+
+            //Static members
             static FCriticalSection Mutex;
             static FCriticalSection CacheOnDiskMutex;
 
             static TDoubleLinkedList<TSharedPtr<FTileData>> UncompressedLRU;
             static TDoubleLinkedList<TSharedPtr<FTileData>> CompressedLRU;
 
+            //Non-Static members
+            FCriticalSection CacheStateMutex;
             FIoHash Hash;
+            ECacheState CacheState = ECacheState::InProgress;
             mutable FSharedBuffer UncompressedBuffer;
             mutable TFuture<FCompressedBuffer> CompressedBuffer;
             int64 DiskCacheOffset = INDEX_NONE;
+            TFuture<void> CacheCompressedCompletionEvent;
+            TFuture<void> CacheOnDiskCompletionEvent;
 
-            mutable TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* UncompressedLRUNode;
-            mutable TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* CompressedLRUNode;
+            mutable TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* UncompressedLRUNode = nullptr;
+            mutable TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* CompressedLRUNode = nullptr;
     };
 
     /**
@@ -217,9 +237,6 @@ private:
     virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(FOdysseyTileManager, STATGROUP_Tickables); }
 
 private:
-    /**
-     * Tiles and FreeTiles are always accessed / modified in GameThread
-     */
     FCriticalSection FreeTilesMutex;
     FCriticalSection HashToTileDataMutex;
 
@@ -227,8 +244,6 @@ private:
     TArray64<uint64> FreeTiles;
 
     TMultiMap<FIoHash, TSharedPtr<FTileData>> HashToTileData;
-
-    //Caching pipeline
     TArray<FOdysseyTileId> PendingTilesToReadBack;
 
     FOdysseyTileManagerStats Stats;
