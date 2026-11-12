@@ -31,6 +31,13 @@ class UOdysseyTileManagerBlueprintLibrary : public UBlueprintFunctionLibrary
     UFUNCTION(BlueprintPure, Category = "Odyssey | Stats")
     static int64 GetTileManagerSizeOnDisk();
 
+    UFUNCTION(BlueprintPure, Category = "Odyssey | Stats")
+    static int64 GetTileManagerNumTilesOnGPU();
+
+    /** Retained cache atlas allocations, including padding. In-flight renders and readbacks can hold additional textures. */
+    UFUNCTION(BlueprintPure, Category = "Odyssey | Stats")
+    static int64 GetTileManagerSizeOnGPU();
+
     UFUNCTION(BlueprintCallable, Category = "Odyssey | Stats")
     static void EvictAllTiles();
 };

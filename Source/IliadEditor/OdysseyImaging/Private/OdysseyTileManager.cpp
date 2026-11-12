@@ -4,6 +4,7 @@
 #include "OdysseyTileManager.h"
 
 #include "Async/Async.h"
+#include "DynamicRHI.h"
 #include "Engine/Texture.h"
 #include "GlobalShader.h"
 #include "HAL/FileManager.h"
@@ -11,6 +12,7 @@
 #include "RenderingThread.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
+#include "RHI.h"
 #include "ScreenPass.h"
 #include "Stats/Stats.h"
 #include "TextureResource.h"
@@ -155,6 +157,7 @@ FOdysseyTileManager::Initialize()
     CacheSession = MakeUnique<FOdysseyTileCacheSession>(
         FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("Temp"), TEXT("OdysseyTileManager")));
     CacheSession->Initialize();
+    SetGPUCacheBudget(FMath::Min<uint64>(UOdysseyTileManagerSettings::Get()->MaxGPUSize, MAX_int64 / 1000000) * 1000000);
 }
 
 void
@@ -166,7 +169,310 @@ FOdysseyTileManager::Finalize()
         return;
     }
     WaitUntilAllTilesAreCached(false);
+    FlushRenderingCommands();
+    SetGPUCacheBudget(0);
     CacheSession->Finalize();
+}
+
+TSharedPtr<FOdysseyTileManager::FTileTextureHandle> FOdysseyTileManager::FindGPUTexture(const FGPUCacheKey& Key)
+{
+    FScopeLock Lock(&GPUCacheMutex);
+    if (FGPUCachedTile* Tile = GPUTextures.Find(Key))
+    {
+        Tile->LastUsed = ++GPUUseCounter;
+        return Tile->Handle;
+    }
+    return nullptr;
+}
+
+void FOdysseyTileManager::UpdateGPUCacheStats()
+{
+    GPUAtlases.Reset();
+    GPUCacheBytes = 0;
+    for (const auto& Pair : GPUTextures)
+    {
+        const TSharedPtr<FTileAtlas>& Atlas = Pair.Value.Handle->Atlas;
+        if (!GPUAtlases.Contains(Atlas.Get()))
+        {
+            GPUCacheBytes += Atlas->GetSizeInBytes();
+            GPUAtlases.Add(Atlas.Get(), Atlas);
+        }
+    }
+    Stats.SetGPUCacheStats(GPUTextures.Num(), GPUCacheBytes);
+}
+
+void FOdysseyTileManager::CacheGPUTexture(const FGPUCacheKey& Key, TSharedPtr<FTileTextureHandle> Handle)
+{
+    FScopeLock Lock(&GPUCacheMutex);
+    PendingGPUTextures.Remove(Key);
+    if (!Handle || GPUCacheBudget == 0)
+    {
+        return;
+    }
+    if (FGPUCachedTile* Existing = GPUTextures.Find(Key))
+    {
+        Existing->LastUsed = ++GPUUseCounter;
+        return;
+    }
+    const TSharedPtr<FTileAtlas> Atlas = Handle->Atlas;
+    GPUTextures.Add(Key, {MoveTemp(Handle), ++GPUUseCounter});
+    if (!GPUAtlases.Contains(Atlas.Get()))
+    {
+        GPUAtlases.Add(Atlas.Get(), Atlas);
+        GPUCacheBytes += Atlas->GetSizeInBytes();
+    }
+    bGPUCacheDirty = true;
+    Stats.SetGPUCacheStats(GPUTextures.Num(), GPUCacheBytes);
+}
+
+void FOdysseyTileManager::ClearGPUCache()
+{
+    FScopeLock Lock(&GPUCacheMutex);
+    GPUTextures.Reset();
+    GPUAtlases.Reset();
+    GPUCacheBytes = 0;
+    bGPUCacheDirty = false;
+    ++GPUCacheRevision;
+    Stats.SetGPUCacheStats(0, 0);
+}
+
+void FOdysseyTileManager::SetGPUCacheBudget(uint64 Bytes)
+{
+    {
+        FScopeLock Lock(&GPUCacheMutex);
+        if (GPUCacheBudget != Bytes)
+        {
+            GPUCacheBudget = Bytes;
+            bGPUCacheDirty = true;
+            ++GPUCacheRevision;
+        }
+    }
+    if (Bytes == 0)
+    {
+        ClearGPUCache();
+    }
+    else
+    {
+        RequestGPUCacheMaintenance();
+    }
+}
+
+void FOdysseyTileManager::RequestGPUCacheMaintenance()
+{
+    if (bGPUCacheMaintenanceQueued.Exchange(true))
+    {
+        return;
+    }
+    ENQUEUE_RENDER_COMMAND(OdysseyMaintainGPUCache)([this](FRHICommandListImmediate& RHICmdList)
+    {
+        bGPUCacheMaintenanceQueued = false;
+        MaintainGPUCache(RHICmdList);
+    });
+}
+
+void FOdysseyTileManager::MaintainGPUCache(FRHICommandListImmediate& RHICmdList)
+{
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::MaintainGPUCache);
+    struct FItem
+    {
+        FGPUCacheKey Key;
+        FGPUCachedTile Tile;
+    };
+    struct FGroup
+    {
+        uint32 TileSize;
+        EPixelFormat Format;
+        uint32 MaxTiles;
+        TMap<uint32, uint64> PageSizes;
+        TArray<FItem> Items;
+    };
+    TArray<FItem> Items;
+    uint64 Budget;
+    uint64 Revision;
+    {
+        FScopeLock Lock(&GPUCacheMutex);
+        if (!bGPUCacheDirty)
+        {
+            return;
+        }
+        bGPUCacheDirty = false;
+        Budget = GPUCacheBudget;
+        Revision = GPUCacheRevision;
+        Items.Reserve(GPUTextures.Num());
+        for (const auto& Pair : GPUTextures)
+        {
+            Items.Add({Pair.Key, Pair.Value});
+        }
+    }
+    // All relocation and RHI work is outside GPUCacheMutex. Game-thread cache hits stay short.
+    Items.Sort([](const FItem& A, const FItem& B) { return A.Tile.LastUsed > B.Tile.LastUsed; });
+    auto GroupId = [](const FGPUCacheKey& Key) { return (uint64(Key.TileSize) << 32) | uint32(Key.Format); };
+    TMap<uint64, FGroup> Groups;
+    for (const FItem& Item : Items)
+    {
+        const uint64 Id = GroupId(Item.Key);
+        if (!Groups.Contains(Id))
+        {
+            const uint64 TileBytes = uint64(Item.Key.TileSize) * Item.Key.TileSize * GPixelFormats[Item.Key.Format].BlockBytes;
+            const uint32 MaxTiles = uint32(FMath::RoundDownToPowerOfTwo64(
+                FMath::Clamp<uint64>((4 * 1024 * 1024) / TileBytes, 1, TILE_ATLAS_MAX_TILES)));
+            Groups.Add(Id, {Item.Key.TileSize, Item.Key.Format, MaxTiles, {}, {}});
+        }
+    }
+    auto PageBytes = [](FGroup& Group, uint32 Count)
+    {
+        if (const uint64* Found = Group.PageSizes.Find(Count))
+        {
+            return *Found;
+        }
+        const FRHITextureCreateDesc Desc = FTileAtlas::GetTextureDesc(Group.TileSize, Group.Format, Count, true);
+        const uint64 TexelBytes = uint64(Desc.Extent.X) * Desc.Extent.Y * GPixelFormats[Group.Format].BlockBytes;
+        const uint64 Bytes = FMath::Max<uint64>(TexelBytes, RHICalcTexturePlatformSize(Desc).Size);
+        Group.PageSizes.Add(Count, Bytes);
+        return Bytes;
+    };
+    auto PackedBytes = [&](int32 Count)
+    {
+        TMap<uint64, uint32> Counts;
+        for (int32 Index = 0; Index < Count; ++Index)
+        {
+            ++Counts.FindOrAdd(GroupId(Items[Index].Key));
+        }
+        uint64 Bytes = 0;
+        for (const auto& Pair : Counts)
+        {
+            FGroup& Group = Groups.FindChecked(Pair.Key);
+            const uint32 FullPages = Pair.Value / Group.MaxTiles;
+            const uint32 Tail = Pair.Value % Group.MaxTiles;
+            if (FullPages)
+            {
+                Bytes += uint64(FullPages) * PageBytes(Group, Group.MaxTiles);
+            }
+            if (Tail)
+            {
+                Bytes += PageBytes(Group, Tail);
+            }
+        }
+        return Bytes;
+    };
+    // Keep the most recently used prefix that fits, including the RHI's actual allocation alignment.
+    int32 Low = 0;
+    int32 High = Items.Num();
+    while (Low < High)
+    {
+        const int32 Mid = Low + (High - Low + 1) / 2;
+        if (PackedBytes(Mid) <= Budget)
+        {
+            Low = Mid;
+        }
+        else
+        {
+            High = Mid - 1;
+        }
+    }
+    for (int32 Index = 0; Index < Low; ++Index)
+    {
+        Groups.FindChecked(GroupId(Items[Index].Key)).Items.Add(Items[Index]);
+    }
+
+    TMap<FGPUCacheKey, FGPUCachedTile> Packed;
+    Packed.Reserve(Low);
+    FRDGBuilder GraphBuilder(RHICmdList);
+    for (auto& Pair : Groups)
+    {
+        FGroup& Group = Pair.Value;
+        TMap<FTileAtlas*, uint32> Counts;
+        for (const FItem& Item : Group.Items)
+        {
+            ++Counts.FindOrAdd(Item.Tile.Handle->Atlas.Get());
+        }
+        TArray<FItem> ToPack;
+        for (const FItem& Item : Group.Items)
+        {
+            const TSharedPtr<FTileAtlas>& Atlas = Item.Tile.Handle->Atlas;
+            if (Atlas->IsCacheAtlas() && Atlas->GetCapacity() == Group.MaxTiles
+                && Counts.FindChecked(Atlas.Get()) == Group.MaxTiles)
+            {
+                // A full page already has no holes. Leave its handles and texture untouched.
+                Packed.Add(Item.Key, Item.Tile);
+            }
+            else
+            {
+                ToPack.Add(Item);
+            }
+        }
+        for (int32 Start = 0; Start < ToPack.Num(); Start += Group.MaxTiles)
+        {
+            const uint32 Count = FMath::Min<uint32>(Group.MaxTiles, ToPack.Num() - Start);
+            const FRHITextureCreateDesc Desc = FTileAtlas::GetTextureDesc(Group.TileSize, Group.Format, Count, true);
+            TSharedPtr<FTileAtlas> SourceAtlas = ToPack[Start].Tile.Handle->Atlas;
+            bool bAlreadyPacked = SourceAtlas->IsCacheAtlas()
+                && SourceAtlas->GetTexture()->GetDesc().Extent == Desc.Extent;
+            for (uint32 Index = 0; Index < Count && bAlreadyPacked; ++Index)
+            {
+                bAlreadyPacked = ToPack[Start + Index].Tile.Handle->Atlas == SourceAtlas;
+            }
+            if (bAlreadyPacked)
+            {
+                for (uint32 Index = 0; Index < Count; ++Index)
+                {
+                    const FItem& Item = ToPack[Start + Index];
+                    Packed.Add(Item.Key, Item.Tile);
+                }
+                continue;
+            }
+            // The last page is sized to its remaining contents, never to a large fixed capacity.
+            TSharedPtr<FTileAtlas> Atlas = MakeShared<FTileAtlas>(RHICmdList, Group.TileSize, Group.Format, Count, true);
+            FRDGTextureRef Destination = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(Atlas->GetTexture(), TEXT("OdysseyPackedTileCache")));
+            for (uint32 Index = 0; Index < Count; ++Index)
+            {
+                const FItem& Item = ToPack[Start + Index];
+                const TSharedPtr<FTileTextureHandle>& OldHandle = Item.Tile.Handle;
+                TSharedPtr<FTileTextureHandle> NewHandle = MakeShared<FTileTextureHandle>(Atlas, Index);
+                FRDGTextureRef Source = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(OldHandle->GetTextureRHI(), TEXT("OdysseyTileCacheCopySource")));
+                AddCopyTexturePass(GraphBuilder, Source, Destination, OldHandle->GetPositionInTexture(),
+                    NewHandle->GetPositionInTexture(), FIntPoint(Group.TileSize, Group.TileSize));
+                Packed.Add(Item.Key, {MoveTemp(NewHandle), Item.Tile.LastUsed});
+            }
+        }
+    }
+    GraphBuilder.Execute();
+    bool bRetry = false;
+    {
+        FScopeLock Lock(&GPUCacheMutex);
+        if (Revision != GPUCacheRevision)
+        {
+            // A clear or budget change made while copying must never resurrect old cache entries.
+            bGPUCacheDirty = true;
+            bRetry = true;
+        }
+        else
+        {
+            for (auto& Pair : Packed)
+            {
+                if (const FGPUCachedTile* Current = GPUTextures.Find(Pair.Key))
+                {
+                    Pair.Value.LastUsed = Current->LastUsed;
+                }
+            }
+            GPUTextures = MoveTemp(Packed);
+            UpdateGPUCacheStats();
+        }
+    }
+    if (bRetry)
+    {
+        RequestGPUCacheMaintenance();
+    }
+}
+
+uint32 FOdysseyTileManager::GetMaxTilesPerGPUAtlas(uint32 TileSize, EPixelFormat Format)
+{
+    FScopeLock Lock(&GPUCacheMutex);
+    const uint64 BytesPerTile = uint64(TileSize) * TileSize * GPixelFormats[Format].BlockBytes;
+    const uint32 MaxTiles = GPUCacheBudget == 0 ? uint32(TILE_ATLAS_MAX_TILES)
+        : uint32(FMath::Clamp<uint64>(GPUCacheBudget / BytesPerTile, 1, TILE_ATLAS_MAX_TILES));
+    // Power-of-two batches avoid padding beyond the configured budget.
+    return static_cast<uint32>(FMath::RoundDownToPowerOfTwo64(MaxTiles));
 }
 
 BEGIN_SHADER_PARAMETER_STRUCT(FWriteTileParameters, )
@@ -229,7 +535,7 @@ FOdysseyTileManager::CreateOrUpdateTiles(
         TSharedPtr<FTile> Tile;
         FRDGTextureRef RDGTexture;
         TSharedPtr<FTileTextureHandle> TextureHandle;
-        TFuture<TSharedPtr<FTileTextureHandle>> OldTextureHandle;
+        TSharedFuture<TSharedPtr<FTileTextureHandle>> OldTextureHandle;
     };
 
     TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTilePositionsFromRect(InTileSize, DestinationRect);
@@ -249,7 +555,7 @@ FOdysseyTileManager::CreateOrUpdateTiles(
         OldTileIds.Add(OldTileId);
     }
 
-    TArray<TFuture<TSharedPtr<FTileTextureHandle>>> OldTileTextureHandles = GetTileTextures(OldTileIds, InTileSize, InTileFormat);
+    TArray<TSharedFuture<TSharedPtr<FTileTextureHandle>>> OldTileTextureHandles = GetTileTextures(OldTileIds, InTileSize, InTileFormat);
 
     for (int i = 0; i < TilePositions.Num(); i++)
     {
@@ -294,11 +600,12 @@ FOdysseyTileManager::CreateOrUpdateTiles(
             const FGlobalShaderMap* ShaderMap = GetGlobalShaderMap(GMaxRHIFeatureLevel);
             TMap<FRDGTextureRef, TArray<int>> ReadBackParams;
 
-            uint32 NumAtlases = (TilesToCreate.Num() + TILE_ATLAS_MAX_TILES - 1) / TILE_ATLAS_MAX_TILES;
+            const uint32 MaxTilesPerAtlas = GetMaxTilesPerGPUAtlas(TileSize, PixelFormat);
+            uint32 NumAtlases = (TilesToCreate.Num() + MaxTilesPerAtlas - 1) / MaxTilesPerAtlas;
             for (uint32 AtlasIndex = 0; AtlasIndex < NumAtlases; AtlasIndex++)
             {
                 //Create an Atlas Texture containing the new tiles
-                uint32 NumTilesInAtlas = FMath::Min(uint32(TILE_ATLAS_MAX_TILES), TilesToCreate.Num() - AtlasIndex * TILE_ATLAS_MAX_TILES);
+                uint32 NumTilesInAtlas = FMath::Min(MaxTilesPerAtlas, TilesToCreate.Num() - AtlasIndex * MaxTilesPerAtlas);
                 TSharedRef<FTileAtlas> Atlas = MakeShared<FTileAtlas>(RHICmdList, TileSize, PixelFormat, NumTilesInAtlas);
                 FRDGTextureRef AtlasTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(Atlas->GetTexture(), TEXT("FOdysseyTileManager::TileAtlasTexture")));
 
@@ -306,7 +613,7 @@ FOdysseyTileManager::CreateOrUpdateTiles(
                 TilePositionsInAtlas.Reserve(NumTilesInAtlas);
                 for (uint32 TileIndex = 0; TileIndex < NumTilesInAtlas; TileIndex++)
                 {
-                    int TileToCreateIndex = AtlasIndex * TILE_ATLAS_MAX_TILES + TileIndex;
+                    int TileToCreateIndex = AtlasIndex * MaxTilesPerAtlas + TileIndex;
                     FTileToCreate& TileToCreate = TilesToCreate[TileToCreateIndex];
 
                     //Reserve the tile in the tile atlas
@@ -398,7 +705,7 @@ FOdysseyTileManager::CreateOrUpdateTiles(
 
                 for (uint32 TileIndex = 0; TileIndex < NumTilesInAtlas; TileIndex++)
                 {
-                    int TileToCreateIndex = AtlasIndex * TILE_ATLAS_MAX_TILES + TileIndex;
+                    int TileToCreateIndex = AtlasIndex * MaxTilesPerAtlas + TileIndex;
                     FTileToCreate& TileToCreate = TilesToCreate[TileToCreateIndex];
 
                     //IsEmpty ReadBack
@@ -649,6 +956,8 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
                         if (TileDataBuffer.GetView().EqualBytes(TileBuffer.GetView()))
                         {
                             FScopeLock TileLock(&InTile->Mutex);
+                            CacheGPUTexture({TileData.Get(), PixelsReadBack.TileSize,
+                                InTile->TempTexture.Get()->GetTextureRHI()->GetFormat()}, InTile->TempTexture.Get());
                             InTile->TempTexture = {};
                             InTile->TempTexturePromise.Reset();
                             InTile->TileDataPromise.SetValue(TileData);
@@ -667,6 +976,8 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
 
                     {
                         FScopeLock TileLock(&InTile->Mutex);
+                        CacheGPUTexture({TileData.Get(), PixelsReadBack.TileSize,
+                            InTile->TempTexture.Get()->GetTextureRHI()->GetFormat()}, InTile->TempTexture.Get());
                         InTile->TempTexture = {};
                         InTile->TempTexturePromise.Reset();
                         InTile->TileDataPromise.SetValue(TileData);
@@ -682,26 +993,28 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
     );
 }
 
-TArray<TFuture<TSharedPtr<FOdysseyTileManager::FTileTextureHandle>>>
+TArray<TSharedFuture<TSharedPtr<FOdysseyTileManager::FTileTextureHandle>>>
 FOdysseyTileManager::GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, uint32 InTileSize, EPixelFormat InTileFormat) const
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::GetTileTextures);
 
     check(IsInGameThread());
+    FOdysseyTileManager* Self = const_cast<FOdysseyTileManager*>(this);
     TArray<TPromise<TSharedPtr<FTileTextureHandle>>> RenderThreadPromises;
     RenderThreadPromises.Reserve(InTileIds.Num());
 
-    TArray<TFuture<TSharedPtr<FTileTextureHandle>>> Futures;
+    TArray<TSharedFuture<TSharedPtr<FTileTextureHandle>>> Futures;
     Futures.Reserve(InTileIds.Num());
 
     TArray<FSharedBuffer> Buffers;
     Buffers.Reserve(InTileIds.Num());
+    TArray<FGPUCacheKey> UploadKeys;
     for (int i = 0; i < InTileIds.Num(); i++)
     {
         const FOdysseyTileId& TileId = InTileIds[i];
 
         TPromise<TSharedPtr<FTileTextureHandle>> Promise;
-        TFuture<TSharedPtr<FTileTextureHandle>> Future = Promise.GetFuture();
+        TSharedFuture<TSharedPtr<FTileTextureHandle>> Future = Promise.GetFuture().Share();
         Futures.Add(MoveTemp(Future));
 
         //Check if TileIndex is out of bounds
@@ -758,16 +1071,32 @@ FOdysseyTileManager::GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, ui
         //
         //We don't rely on FTile anymore
         //So we can release the lock here
+        TSharedPtr<FTileData> TileData = Tile->TileData.Get();
         TileLock.Unlock();
 
         //TempTexture is Null indicating ReadBack has finished
         //The Tile's Buffer should be available
         //Rely on the Tile's Buffer to create a TextureRHIRef
-        TSharedPtr<FTileData> TileData = Tile->TileData.Get();
         if (!TileData)
         {
             Promise.SetValue(TSharedPtr<FTileTextureHandle>());
             continue;
+        }
+
+        const FGPUCacheKey Key{TileData.Get(), InTileSize, InTileFormat};
+        if (TSharedPtr<FTileTextureHandle> Cached = Self->FindGPUTexture(Key))
+        {
+            Promise.SetValue(MoveTemp(Cached));
+            continue;
+        }
+        {
+            FScopeLock CacheLock(&Self->GPUCacheMutex);
+            if (const TSharedFuture<TSharedPtr<FTileTextureHandle>>* Pending = Self->PendingGPUTextures.Find(Key))
+            {
+                Futures.Last() = *Pending;
+                Promise.SetValue(nullptr);
+                continue;
+            }
         }
 
         FSharedBuffer Buffer;
@@ -781,6 +1110,11 @@ FOdysseyTileManager::GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, ui
 
         RenderThreadPromises.Add(MoveTemp(Promise));
         Buffers.Add(Buffer);
+        UploadKeys.Add(Key);
+        {
+            FScopeLock CacheLock(&Self->GPUCacheMutex);
+            Self->PendingGPUTextures.Add(Key, Futures.Last());
+        }
     }
 
     if (Buffers.Num() > 0)
@@ -789,6 +1123,7 @@ FOdysseyTileManager::GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, ui
             [
                 self = const_cast<FOdysseyTileManager*>(this),
                 Buffers,
+                UploadKeys,
                 PixelFormat = InTileFormat,
                 TileSize = InTileSize,
                 Promises = MoveTemp(RenderThreadPromises)
@@ -796,23 +1131,28 @@ FOdysseyTileManager::GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, ui
             {
                 TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::GetTileTextures_0);
 
-                uint32 NumAtlases = (Buffers.Num() + TILE_ATLAS_MAX_TILES - 1) / TILE_ATLAS_MAX_TILES;
+                const uint32 MaxTilesPerAtlas = self->GetMaxTilesPerGPUAtlas(TileSize, PixelFormat);
+                uint32 NumAtlases = (Buffers.Num() + MaxTilesPerAtlas - 1) / MaxTilesPerAtlas;
+                TArray<TSharedPtr<FTileTextureHandle>> Handles;
+                Handles.Reserve(Buffers.Num());
                 FRDGBuilder GraphBuilder(RHICmdList);
                 for (uint32 AtlasIndex = 0; AtlasIndex < NumAtlases; AtlasIndex++)
                 {
                     //Create an Atlas Texture containing the new tiles
-                    uint32 NumTilesInAtlas = FMath::Min(uint32(TILE_ATLAS_MAX_TILES), Buffers.Num() - AtlasIndex * TILE_ATLAS_MAX_TILES);
+                    uint32 NumTilesInAtlas = FMath::Min(MaxTilesPerAtlas, Buffers.Num() - AtlasIndex * MaxTilesPerAtlas);
                     TSharedRef<FTileAtlas> Atlas = MakeShared<FTileAtlas>(RHICmdList, TileSize, PixelFormat, NumTilesInAtlas);
                     FRDGTextureRef AtlasTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(Atlas->GetTexture(), TEXT("FOdysseyTileManager::TileAtlasTexture")));
 
                     for (uint32 TileIndex = 0; TileIndex < NumTilesInAtlas; TileIndex++)
                     {
-                        int BufferIndex = AtlasIndex * TILE_ATLAS_MAX_TILES + TileIndex;
+                        int BufferIndex = AtlasIndex * MaxTilesPerAtlas + TileIndex;
                         FSharedBuffer Buffer = Buffers[BufferIndex];
-                        TPromise<TSharedPtr<FTileTextureHandle>>& Promise = Promises[BufferIndex];
 
                         TSharedPtr<FTileTextureHandle> TileTextureHandle = MakeShared<FTileTextureHandle>(Atlas, TileIndex);
-                        Promise.SetValue(TileTextureHandle);
+                        Handles.Add(TileTextureHandle);
+#if WITH_DEV_AUTOMATION_TESTS
+                        ++self->GPUUploadCount;
+#endif
 
                         AddWriteTilePass(
                             GraphBuilder,
@@ -825,6 +1165,16 @@ FOdysseyTileManager::GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, ui
                 }
 
                 GraphBuilder.Execute();
+                for (int32 Index = 0; Index < Handles.Num(); ++Index)
+                {
+                    self->CacheGPUTexture(UploadKeys[Index], Handles[Index]);
+                }
+                self->MaintainGPUCache(RHICmdList);
+                for (int32 Index = 0; Index < Handles.Num(); ++Index)
+                {
+                    TSharedPtr<FTileTextureHandle> Cached = self->FindGPUTexture(UploadKeys[Index]);
+                    Promises[Index].SetValue(Cached ? MoveTemp(Cached) : Handles[Index]);
+                }
             }
         );
     }
@@ -949,6 +1299,8 @@ FOdysseyTileManager::WaitUntilAllTilesAreCached(bool InEvictTiles)
 
     if (InEvictTiles)
         EvictTiles();
+    RequestGPUCacheMaintenance();
+    FlushRenderingCommands();
 }
 
 void
@@ -975,12 +1327,14 @@ FOdysseyTileManager::EvictTiles()
     uint64 MaxUncompressedSize = UOdysseyTileManagerSettings::Get()->MaxUncompressedSize * 1000 * 1000;
     uint64 MaxCompressedSize = UOdysseyTileManagerSettings::Get()->MaxCompressedSize * 1000 * 1000;
     FTileData::EvictTiles(MaxUncompressedSize, MaxCompressedSize);
+    SetGPUCacheBudget(FMath::Min<uint64>(UOdysseyTileManagerSettings::Get()->MaxGPUSize, MAX_int64 / 1000000) * 1000000);
 }
 
 void
 FOdysseyTileManager::EvictAllTiles()
 {
     FTileData::EvictTiles(0, 0);
+    ClearGPUCache();
 }
 
 /*************************************
@@ -1430,21 +1784,38 @@ FOdysseyTileManager::FTileData::WaitUntilCachedOnDisk()
     CacheOnDiskCompletionEvent.Wait();
 }
 
-FOdysseyTileManager::FTileAtlas::FTileAtlas(FRHICommandList& InRHICmdList, uint32 InTileSize, EPixelFormat InTileFormat, uint32 InNumTiles)
+FRHITextureCreateDesc FOdysseyTileManager::FTileAtlas::GetTextureDesc(uint32 InTileSize, EPixelFormat InTileFormat, uint32 InNumTiles, bool bInCacheAtlas)
+{
+    const uint32 Height = FMath::RoundUpToPowerOfTwo((InNumTiles - 1) / TILE_ATLAS_MAX_WIDTH_IN_TILES + 1);
+    const uint32 Width = (InNumTiles - 1) / Height + 1;
+    return FRHITextureCreateDesc::Create2D(TEXT("FOdysseyTileManager::FTileAtlas::Texture"))
+        .SetExtent(Width * InTileSize, Height * InTileSize)
+        .SetFormat(InTileFormat)
+        .SetClearValue(FClearValueBinding::Transparent)
+        .SetFlags(ETextureCreateFlags::ShaderResource | (bInCacheAtlas ? ETextureCreateFlags::None : ETextureCreateFlags::RenderTargetable));
+}
+
+FOdysseyTileManager::FTileAtlas::FTileAtlas(FRHICommandList& InRHICmdList, uint32 InTileSize, EPixelFormat InTileFormat, uint32 InNumTiles, bool bInCacheAtlas)
     : TileSize(InTileSize)
+    , bCacheAtlas(bInCacheAtlas)
     //, TileFormat(InTileFormat)
 {
     HeightInTiles = FMath::RoundUpToPowerOfTwo((InNumTiles - 1) / TILE_ATLAS_MAX_WIDTH_IN_TILES + 1);
     WidthInTiles = (InNumTiles - 1) / HeightInTiles + 1;
     FIntPoint AtlasSize(WidthInTiles * InTileSize, HeightInTiles * InTileSize);
 
-    const FRHITextureCreateDesc CreateDesc = FRHITextureCreateDesc::Create2D(TEXT("FOdysseyTileManager::FTileAtlas::Texture"))
-        .SetExtent(AtlasSize)
-        .SetFormat(InTileFormat)
-        .SetClearValue(FClearValueBinding::Transparent)
-        .SetFlags(ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable);
+    const FRHITextureCreateDesc CreateDesc = GetTextureDesc(InTileSize, InTileFormat, InNumTiles, bInCacheAtlas);
 
     Texture = InRHICmdList.CreateTexture(CreateDesc);
+    SizeInBytes = FMath::Max<uint64>(uint64(AtlasSize.X) * AtlasSize.Y * GPixelFormats[InTileFormat].BlockBytes,
+        RHICalcTexturePlatformSize(CreateDesc).Size);
+#if RHI_ENABLE_RESOURCE_INFO
+    FRHIResourceInfo Info;
+    if (Texture->GetResourceInfo(Info))
+    {
+        SizeInBytes = FMath::Max<uint64>(SizeInBytes, Info.VRamAllocation.AllocationSize);
+    }
+#endif
 }
 
 FIntRect

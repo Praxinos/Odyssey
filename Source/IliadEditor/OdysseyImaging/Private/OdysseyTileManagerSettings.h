@@ -31,4 +31,8 @@ public:
     */
     UPROPERTY(config, EditAnywhere, Category="Tile Manager", meta=(ClampMin = "1", UIMin = "1"))
     uint64 MaxCompressedSize = 512;
+
+    /** Maximum size of retained GPU atlases in MB. Zero disables caching; active renders and readbacks are additional. */
+    UPROPERTY(config, EditAnywhere, Category="Tile Manager", meta=(ClampMin = "0", UIMin = "0"))
+    uint64 MaxGPUSize = 256;
 };

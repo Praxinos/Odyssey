@@ -157,7 +157,7 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
         TileIds.Add(TileId ? *TileId : FOdysseyTileId());
     }
 
-    TArray<TFuture<TSharedPtr<FOdysseyTileManager::FTileTextureHandle>>> TileTextureHandles = FOdysseyTileManager::Get().GetTileTextures(TileIds, TileSize, GetPixelFormat());
+    TArray<TSharedFuture<TSharedPtr<FOdysseyTileManager::FTileTextureHandle>>> TileTextureHandles = FOdysseyTileManager::Get().GetTileTextures(TileIds, TileSize, GetPixelFormat());
 
     ENQUEUE_RENDER_COMMAND(UOdysseyTiledImage_Render)(
         [

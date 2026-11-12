@@ -46,3 +46,13 @@ UOdysseyTileManagerBlueprintLibrary::EvictAllTiles()
 {
     FOdysseyTileManager::Get().EvictAllTiles();
 }
+
+int64 UOdysseyTileManagerBlueprintLibrary::GetTileManagerNumTilesOnGPU()
+{
+    return FOdysseyTileManager::Get().GetStats().GetNumTilesOnGPU();
+}
+
+int64 UOdysseyTileManagerBlueprintLibrary::GetTileManagerSizeOnGPU()
+{
+    return FOdysseyTileManager::Get().GetStats().GetSizeOnGPU();
+}

@@ -36,6 +36,9 @@ public:
     int64 GetSizeCompressed() const;
     int64 GetNumTilesOnDisk() const;
     int64 GetSizeOnDisk() const;
+    int64 GetNumTilesOnGPU() const { return NumTilesOnGPU; }
+    int64 GetSizeOnGPU() const { return SizeOnGPU; }
+    void SetGPUCacheStats(int64 NumTiles, int64 Size) { NumTilesOnGPU = NumTiles; SizeOnGPU = Size; }
 
 private:
     //Stats
@@ -45,6 +48,8 @@ private:
     TAtomic<int64> SizeCompressed;
     TAtomic<int64> NumTilesOnDisk;
     TAtomic<int64> SizeOnDisk;
+    TAtomic<int64> NumTilesOnGPU{0};
+    TAtomic<int64> SizeOnGPU{0};
 };
 class FOdysseyTileManager
     : public FTickableEditorObject
@@ -66,8 +71,9 @@ public:
 
     class FTileTextureHandle
     {
+        friend class FOdysseyTileManager;
     public:
-        /** Destructor will release the tile from the tile atlas*/
+        /** Holds an immutable location, keeping already submitted renders valid during compaction. */
         ~FTileTextureHandle();
         FTileTextureHandle();
         FTileTextureHandle(TSharedPtr<FTileAtlas> InAtlas, uint32 InTileIndexInAtlas);
@@ -95,7 +101,8 @@ private:
     {
     public:
         FTileAtlas() = default;
-        FTileAtlas(FRHICommandList& InRHICmdList, uint32 InTileSize, EPixelFormat InTileFormat, uint32 InNumTiles);
+        FTileAtlas(FRHICommandList& InRHICmdList, uint32 InTileSize, EPixelFormat InTileFormat, uint32 InNumTiles, bool bInCacheAtlas = false);
+        static FRHITextureCreateDesc GetTextureDesc(uint32 InTileSize, EPixelFormat InTileFormat, uint32 InNumTiles, bool bInCacheAtlas);
 
     public:
         FTextureRHIRef GetTexture() const { return Texture; };
@@ -104,6 +111,9 @@ private:
 
         FIntRect GetTileRect(uint32 InTileIndexInAtlas) const;
         FIntPoint GetTilePosition(uint32 InTileIndexInAtlas) const;
+        uint64 GetSizeInBytes() const { return SizeInBytes; }
+        uint32 GetCapacity() const { return WidthInTiles * HeightInTiles; }
+        bool IsCacheAtlas() const { return bCacheAtlas; }
 
     private:
         FTextureRHIRef Texture;
@@ -111,6 +121,8 @@ private:
         uint32 WidthInTiles;
         uint32 HeightInTiles;
         uint32 TileSize;
+        uint64 SizeInBytes = 0;
+        bool bCacheAtlas = false;
         //EPixelFormat TileFormat;
     };
 
@@ -289,7 +301,7 @@ public:
      * in a render command queued after this call, or after IsReady(). Resident CPU data may be
      * loaded synchronously from the disk/compression cache.
      */
-    TArray<TFuture<TSharedPtr<FTileTextureHandle>>> GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, uint32 InTileSize, EPixelFormat InTileFormat) const;
+    TArray<TSharedFuture<TSharedPtr<FTileTextureHandle>>> GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, uint32 InTileSize, EPixelFormat InTileFormat) const;
 
     /** Blocking game-thread access for serialization; may wait for GPU readback, compression and disk I/O.
      * Returns true with a null buffer for an empty tile, and false on a data retrieval error. */
@@ -302,7 +314,7 @@ public:
     FOdysseyTileManagerStats& GetStats();
 
     /**
-     * Waits until all tiles are properly cached on disk and evicted if needed
+     * Waits until all tiles are cached on disk and GPU cache compaction is published, then evicted if needed.
      * Blocks the game thread. Intended for explicit synchronization and shutdown, not polling.
      */
     void WaitUntilAllTilesAreCached(bool InEvictTiles = true);
@@ -319,6 +331,40 @@ private:
 
     static void AddWriteTilePass(FRDGBuilder& GraphBuilder, FRDGTextureRef OutAtlasTexture, FIntPoint TilePositionInAtlas, uint32 InTileSize, FSharedBuffer InBuffer);
 
+    struct FGPUCacheKey
+    {
+        FGPUCacheKey(const FTileData* InTileData, uint32 InTileSize, EPixelFormat InFormat)
+            : TileData(InTileData), TileSize(InTileSize), Format(InFormat)
+        {
+        }
+
+        // HashToTileData retains the immutable content identity throughout the session.
+        const FTileData* TileData;
+        uint32 TileSize;
+        EPixelFormat Format;
+        bool operator==(const FGPUCacheKey&) const = default;
+        friend uint32 GetTypeHash(const FGPUCacheKey& Key)
+        {
+            return HashCombine(PointerHash(Key.TileData),
+                HashCombine(::GetTypeHash(Key.TileSize), ::GetTypeHash(uint32(Key.Format))));
+        }
+    };
+
+    struct FGPUCachedTile
+    {
+        TSharedPtr<FTileTextureHandle> Handle;
+        uint64 LastUsed = 0;
+    };
+
+    TSharedPtr<FTileTextureHandle> FindGPUTexture(const FGPUCacheKey& Key);
+    void CacheGPUTexture(const FGPUCacheKey& Key, TSharedPtr<FTileTextureHandle> Handle);
+    void RequestGPUCacheMaintenance();
+    void MaintainGPUCache(FRHICommandListImmediate& RHICmdList);
+    void UpdateGPUCacheStats(); // GPUCacheMutex must be held.
+    void ClearGPUCache();
+    void SetGPUCacheBudget(uint64 Bytes);
+    uint32 GetMaxTilesPerGPUAtlas(uint32 TileSize, EPixelFormat Format);
+
 private:
     // FTickableGameObject implementation
     virtual void Tick(float DeltaTime) override;
@@ -332,8 +378,19 @@ private:
 
     FCriticalSection FreeTilesMutex;
     FCriticalSection HashToTileDataMutex;
-    FCriticalSection TileAtlasesMutex;
-    TArray<TSharedRef<FTileAtlas>> TileAtlases;
+    FCriticalSection GPUCacheMutex;
+    TMap<FGPUCacheKey, FGPUCachedTile> GPUTextures;
+    TMap<FGPUCacheKey, TSharedFuture<TSharedPtr<FTileTextureHandle>>> PendingGPUTextures;
+    TMap<FTileAtlas*, TSharedPtr<FTileAtlas>> GPUAtlases;
+    uint64 GPUCacheBytes = 0;
+    uint64 GPUCacheBudget = 0;
+    uint64 GPUUseCounter = 0;
+    uint64 GPUCacheRevision = 0;
+    bool bGPUCacheDirty = false;
+    TAtomic<bool> bGPUCacheMaintenanceQueued{false};
+#if WITH_DEV_AUTOMATION_TESTS
+    TAtomic<uint64> GPUUploadCount{0};
+#endif
 
     TArray64<TSharedPtr<FTile>> Tiles;
     TArray64<FOdysseyTileId> FreeTiles;

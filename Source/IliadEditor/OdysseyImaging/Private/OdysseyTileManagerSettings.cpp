@@ -23,6 +23,10 @@ UOdysseyTileManagerSettings::PostEditChangeProperty( FPropertyChangedEvent& Prop
     {
         FOdysseyTileManager::Get().EvictTiles();
     }
+    else if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(UOdysseyTileManagerSettings, MaxGPUSize))
+    {
+        FOdysseyTileManager::Get().EvictTiles();
+    }
 
     Super::PostEditChangeProperty( PropertyChangedEvent );
 }
