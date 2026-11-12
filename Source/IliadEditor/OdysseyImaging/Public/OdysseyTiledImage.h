@@ -35,6 +35,8 @@ public:
     virtual ~UOdysseyTiledImage();
     UOdysseyTiledImage();
 
+    virtual void PostEditUndo() override;
+
 public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|TiledImage")
     void Initialize(int TileSize, EOdysseyTiledImageFormat Format);
@@ -85,4 +87,9 @@ private:
 
     UPROPERTY(Transient)
     TMap<FIntPoint, FOdysseyTileId> Tiles;
+
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDynamicOnChanged);
+
+    UPROPERTY(BlueprintAssignable, Category = Events)
+    FDynamicOnChanged OnChanged;
 };
