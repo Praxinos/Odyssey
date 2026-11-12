@@ -40,3 +40,9 @@ UOdysseyTileManagerBlueprintLibrary::GetTileManagerSizeOnDisk()
 {
     return FOdysseyTileManager::Get().GetSizeOnDisk();
 }
+
+void
+UOdysseyTileManagerBlueprintLibrary::EvictAllTiles()
+{
+    FOdysseyTileManager::Get().EvictAllTiles();
+}

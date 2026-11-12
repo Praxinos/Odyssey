@@ -16,11 +16,6 @@ class UTexture;
 
 /**
  * FTileId is an opaque handle to a Tile (FTile)
- * Several FTile can, in fine, point to the same FTileData.
- * An FTile can also be empty.
- *
- * Keeping an FTileId in memory will keep the tiles data available (at least on disk)
- * So releasing the FTileId when you don't need it anymore is recommended.
  */
 
 USTRUCT()
@@ -28,10 +23,15 @@ struct FOdysseyTileId
 {
     GENERATED_BODY()
 
-    bool IsValid() const { return Index != INDEX_NONE; };
+    bool IsValid() const { return Index != INDEX_NONE && Generation != INDEX_NONE; };
 
     UPROPERTY()
     uint64 Index = INDEX_NONE;
+
+    UPROPERTY()
+    uint64 Generation = INDEX_NONE;
+
+    bool operator==(const FOdysseyTileId&) const = default;
 };
 
 class FOdysseyTileManager
@@ -53,6 +53,22 @@ private:
         , StatSizeOnDisk(0)
     {
     }
+
+public:
+    void Initialize();
+    void Finalize();
+
+    /**
+     * Forces Tile Eviction
+     * Will respect TileManager Settings
+     */
+    void EvictTiles();
+
+    /** Used for debug purposes
+     * Evicts ALL Tiles from memory
+     * Does not respect TileManager Settings
+     */
+    void EvictAllTiles();
 
 public:
     struct FCreatedTile
@@ -88,7 +104,6 @@ public:
 
 public:
     //Stats
-
     int64 GetNumTilesUncompressed() const;
     int64 GetSizeUncompressed() const;
     int64 GetNumTilesCompressed() const;
@@ -98,58 +113,54 @@ public:
 
 private:
     /**
-     * FTile contains the real Tile Data after GPU ReadBack
-     * A FTile is created asyncronously once GPU ReadBack is done
-     * Allowing us to create a FTile only if it contains non empty data
+     * FTileData contains the real Tile Data after GPU ReadBack
+     * A FTileData is created asyncronously once GPU ReadBack is done
+     * Allowing us to create a FTileData only if it contains non empty data
      */
     struct FTileData
     {
         FSharedBuffer UncompressedBuffer;
         FCompressedBuffer CompressedBuffer;
+        int64 DiskCacheOffset = INDEX_NONE;
+
+        TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* UncompressedLRUNode;
+        TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* CompressedLRUNode;
     };
 
     /**
      * FTile is a reliable structure identifying a Tile
      * It contains the GPU ReadBack Buffers.
-     * And the index of the FTileData created after GPU ReadBack
+     * And the FTileData created after GPU ReadBack
      * FTile is created Synchronously and is directly linked to a FTileId
+     *
+     *
+     * Several FTile can, in fine, point to the same FTileData.
+     * An FTile can also be empty, in which case it will be marked as "Free" after ReadBack
      */
     struct FTile
     {
+        /** An FTile can be reused if it was previously empty
+         * Generation allows us to track how many times the FTile has been reused
+         * Which also allows us to differentiate Tiles indentified by the same Index but different Generation
+        */
+        uint64 Generation;
         TSharedPtr<FRHIGPUTextureReadback> GPUReadBack;
-        TSharedPtr<FRHIGPUBufferReadback> GPUIsEmptyReadBack;
-
-        /**
-         * If !TileDataIndex.IsValid()
-         * GPUReadBack has not started yet
-         *
-         * If TileDataIndex.Get() == INDEX_NONE
-         * We consider the tile as empty
-         */
-        TFuture<uint64> TileDataIndex;
-
-        bool IsPendingReadBack() const
-        {
-            return !TileDataIndex.IsValid();
-        };
-
-        bool IsEmpty() const
-        {
-            check(TileDataIndex.IsValid());
-            return TileDataIndex.Get() == INDEX_NONE;
-        };
-        //bool IsValid() const { return Index != INDEX_NONE && Generation != INDEX_NONE; };
-        //bool operator==(const FTileId&) const = default;
+        TSharedPtr<FRHIGPUBufferReadback> GPUIsEmptyReadBack; //TODO: Replace by a Hash ReadBack
+        TFuture<TSharedPtr<FTileData>> TileData;
     };
 
-    void LoadTileFromReadBack(uint64 InTileIndex);
+    void TryLoadTileFromReadBack(FOdysseyTileId InTileId);
+    void LoadTileFromReadBack(FOdysseyTileId InTileId);
 
-    void CompressTile(uint64 InTileDataIndex);
-    void CacheTileOnDisk(uint64 InTileDataIndex);
-    /*
-    void EvictUncompressedBufferFromTile(const FTile& InTileId);
-    void EvictCompressedBufferFromTile(const FTile& InTileId);
-    */
+    void CompressTile(TSharedPtr<FTileData> InTileData);
+    void CacheTileOnDisk(TSharedPtr<FTileData> InTileData);
+
+    FString GetCacheOnDiskPath() const;
+
+    void TouchTileData(TSharedPtr<FTileData> InTileData);
+    void EvictUncompressed(TSharedPtr<FTileData> InTileData);
+    void EvictCompressed(TSharedPtr<FTileData> InTileData);
+    void EvictTiles(uint64 InMaxUncompressedSize, uint64 InMaxCompressedSize);
 
     static void AddWriteTilePass(FRDGBuilder& GraphBuilder, FRDGTextureRef OutTexture, FSharedBuffer InBuffer);
 
@@ -162,24 +173,21 @@ private:
     /**
      * Tiles and FreeTiles are always accessed / modified in GameThread
      */
+    FCriticalSection CacheOnDiskMutex;
+    FCriticalSection FreeTilesMutex;
+    FCriticalSection TilesDataMutex;
+
     TArray64<FTile> Tiles;
     TArray64<uint64> FreeTiles;
+    TArray64<TSharedPtr<FTileData>> TilesData;
 
-    /**
-     * TilesData and FreeTilesData can be accessed / modified by any thread
-     * So we need a mutex
-     */
-    FCriticalSection TilesDataMutex;
-    TArray64<FTileData> TilesData;
-    TArray64<uint64> FreeTilesData;
+    TDoubleLinkedList<TSharedPtr<FTileData>> UncompressedLRU;
+    TDoubleLinkedList<TSharedPtr<FTileData>> CompressedLRU;
+
+    FCriticalSection LRUMutex;
 
     //Caching pipeline
-    FCriticalSection PipelineMutex;
-    TArray<uint64> PendingTilesToReadBack;
-
-    //Tiles eviction pipeline
-    //TArray<FOdysseyTileId> TilesToEvictUncompressed;
-    //TArray<FTileIdFOdysseyTileId> TilesToEvictCompressed;
+    TArray<FOdysseyTileId> PendingTilesToReadBack;
 
     //Stats
     TAtomic<int64> StatNumTilesUncompressed;
