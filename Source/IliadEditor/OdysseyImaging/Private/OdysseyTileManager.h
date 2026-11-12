@@ -31,27 +31,46 @@ public:
     //Yet, for convenience, we create a struct FTileId allowing future optimizations
     struct FTileId
     {
+        FTileId()
+            : Index(0xFFFFFFFF) //Invalid Index by default
+        {
+        }
+
+        FTileId(uint32 InIndex)
+            : Index(InIndex)
+        {
+        }
+
         uint32 Index;
+        bool IsValid() const { return Index != 0xFFFFFFFF; };
     };
 
-    struct FCreateOrUpdateTile
+    struct FCreatedTile
     {
-        /**
-         * If true, creates a transparent Tile before copying into it
-         * If false, copies the tile identified by OldTileId before copying into it
-         */
-        bool IsNewTile;
-        FTileId OldTileId;
+        FTileId Id;
         FIntPoint Pos;
+
+        bool IsEmpty() const { return !Id.IsValid(); }
     };
 
-    TArray<FTileId> CreateOrUpdateTiles(
+    DECLARE_DELEGATE_RetVal_OneParam(FTileId, FGetExistingTileId, const FIntPoint&)
+
+    /**
+     * Creates tiles from the given rect in the given texture
+     * @param InTexture Texture to copy from
+     * @param InRect The Texture rect to copy from
+     * @param InPosition Position where to copy the texture in the tile space in pixels
+     * @param InTileSize Width and height of the tile to create in pixels, tiles are always squares
+     * @param InTileFormat The tile pixel format
+     * @param InTilesInfos Defines infos the created tiles should respect
+     */
+    TArray<FCreatedTile> CreateOrUpdateTiles(
         UTexture* InTexture,
         FIntRect InRect,
         FIntPoint InPosition,
         uint32 InTileSize,
         EPixelFormat InTileFormat,
-        const TArray<FCreateOrUpdateTile>& InTilesInfos
+        const FGetExistingTileId& InGetExistingTileId = FGetExistingTileId()
     );
 
     bool GetTileBuffer(FTileId InTileId, FSharedBuffer& OutBuffer) const;
@@ -59,8 +78,6 @@ public:
 private:
     struct FTile
     {
-        bool IsCacheInProgress;
-
         TSharedPtr<FRHIGPUTextureReadback> GPUReadBack;
         FCompressedBuffer CompressedBuffer;
 

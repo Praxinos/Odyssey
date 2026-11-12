@@ -48,9 +48,6 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|TiledImage")
     void CopyFromTexture(UTexture* Texture, FIntRect Rect, FIntPoint Position);
 
-    UFUNCTION(BlueprintCallable, Category="Odyssey|TiledImage")
-    void CopyFromTiledImage(UOdysseyTiledImage* TiledImage, FIntRect Rect, FIntPoint Position);
-
     /**
      *  Renders the texture into a render target
      */
