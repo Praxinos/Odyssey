@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "OdysseyInvalidTileMap.h"
+#include "OdysseyTiledRLE.h"
 
 #include "OdysseyCachedRenderTarget.generated.h"
 
@@ -61,10 +62,10 @@ public:
     EPixelFormat GetPixelFormat() const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|CachedRenderTarget")
-    int GetChannelsPerPixel() const;
+    int GetComponentsPerPixel() const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|CachedRenderTarget")
-    int GetBytesPerChannel() const;
+    int GetBytesPerComponent() const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Rendering|CachedRenderTarget")
     int GetBytesPerPixel() const;
@@ -213,7 +214,7 @@ private:
     mutable TStrongObjectPtr<UTextureRenderTarget2D> mRenderTarget;
     //mutable TSharedPtr<FImage> mImage;
 
-    mutable TSharedFuture<FUniqueBuffer> mImageFuture;
+    mutable TSharedFuture<FOdysseyTiledRLE::FRLECompressedBuffer> mRLECompressedBufferFuture;
     mutable eCacheState mCacheState = eCacheState::DDC;
     mutable bool mIsImageCacheInvalid = false;
     mutable bool mIsDDCCacheInvalid = false;
