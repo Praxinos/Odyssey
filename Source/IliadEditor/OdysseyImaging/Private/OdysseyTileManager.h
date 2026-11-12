@@ -10,8 +10,29 @@
 #include "RenderGraphBuilder.h"
 #include "RHIGPUReadback.h"
 #include "TickableEditorObject.h"
+#include "OdysseyTileManager.generated.h"
 
 class UTexture;
+
+/**
+ * FTileId is an opaque handle to a Tile (FTile)
+ * Several FTile can, in fine, point to the same FTileData.
+ * An FTile can also be empty.
+ *
+ * Keeping an FTileId in memory will keep the tiles data available (at least on disk)
+ * So releasing the FTileId when you don't need it anymore is recommended.
+ */
+
+USTRUCT()
+struct FOdysseyTileId
+{
+    GENERATED_BODY()
+
+    bool IsValid() const { return Index != INDEX_NONE; };
+
+    UPROPERTY()
+    uint64 Index = INDEX_NONE;
+};
 
 class FOdysseyTileManager
     : public FTickableEditorObject
@@ -34,32 +55,15 @@ private:
     }
 
 public:
-    //All created tiles are permanently added to the Tiles array
-    //which means a tile can be identified by its index in the Tiles array
-    //Yet, for convenience, we create a struct FTileId allowing future optimizations
-    struct FTileId
-    {
-        FTileId()
-            : Index(INDEX_NONE) //Invalid Index by default
-            , Generation(INDEX_NONE)
-        {
-        }
-
-        uint32 Index;
-        uint32 Generation;
-        bool IsValid() const { return Index != INDEX_NONE && Generation != INDEX_NONE; };
-        bool operator==(const FTileId&) const = default;
-    };
-
     struct FCreatedTile
     {
-        FTileId Id;
+        FOdysseyTileId Id;
         FIntPoint Pos;
 
         bool IsEmpty() const { return !Id.IsValid(); }
     };
 
-    DECLARE_DELEGATE_RetVal_OneParam(FTileId, FGetExistingTileId, const FIntPoint&)
+    DECLARE_DELEGATE_RetVal_OneParam(FOdysseyTileId, FGetExistingTileId, const FIntPoint&)
 
     /**
      * Creates tiles from the given rect in the given texture
@@ -79,7 +83,8 @@ public:
         const FGetExistingTileId& InGetExistingTileId = FGetExistingTileId()
     );
 
-    bool GetTileBuffer(FTileId InTileId, FSharedBuffer& OutBuffer) const;
+    bool GetTileBuffer(FOdysseyTileId InTileId, FSharedBuffer& OutBuffer);
+    bool GetTileBuffer(FOdysseyTileId InTileId, FSharedBuffer& OutBuffer) const;
 
 public:
     //Stats
@@ -92,25 +97,59 @@ public:
     int64 GetSizeOnDisk() const;
 
 private:
+    /**
+     * FTile contains the real Tile Data after GPU ReadBack
+     * A FTile is created asyncronously once GPU ReadBack is done
+     * Allowing us to create a FTile only if it contains non empty data
+     */
+    struct FTileData
+    {
+        FSharedBuffer UncompressedBuffer;
+        FCompressedBuffer CompressedBuffer;
+    };
+
+    /**
+     * FTile is a reliable structure identifying a Tile
+     * It contains the GPU ReadBack Buffers.
+     * And the index of the FTileData created after GPU ReadBack
+     * FTile is created Synchronously and is directly linked to a FTileId
+     */
     struct FTile
     {
         TSharedPtr<FRHIGPUTextureReadback> GPUReadBack;
         TSharedPtr<FRHIGPUBufferReadback> GPUIsEmptyReadBack;
-        FCompressedBuffer CompressedBuffer;
 
-        //mutable because it can be loaded while we read the tile
-        //TFuture because GPU Readback is asynchronous
-        //Also could help to prefetch tiles from disk (if we ever need to)
-        TFuture<FSharedBuffer> UncompressedBuffer;
+        /**
+         * If !TileDataIndex.IsValid()
+         * GPUReadBack has not started yet
+         *
+         * If TileDataIndex.Get() == INDEX_NONE
+         * We consider the tile as empty
+         */
+        TFuture<uint64> TileDataIndex;
+
+        bool IsPendingReadBack() const
+        {
+            return !TileDataIndex.IsValid();
+        };
+
+        bool IsEmpty() const
+        {
+            check(TileDataIndex.IsValid());
+            return TileDataIndex.Get() == INDEX_NONE;
+        };
+        //bool IsValid() const { return Index != INDEX_NONE && Generation != INDEX_NONE; };
+        //bool operator==(const FTileId&) const = default;
     };
 
-    void LoadTile(FTileId InTileId);
-    void LoadTileFromReadBack(FTileId InTileId);
+    void LoadTileFromReadBack(uint64 InTileIndex);
 
-    void CompressTile(FTileId InTileId);
-    void CacheTileOnDisk(FTileId InTileId);
-    void EvictUncompressedBufferFromTile(FTileId InTileId);
-    void EvictCompressedBufferFromTile(FTileId InTileId);
+    void CompressTile(uint64 InTileDataIndex);
+    void CacheTileOnDisk(uint64 InTileDataIndex);
+    /*
+    void EvictUncompressedBufferFromTile(const FTile& InTileId);
+    void EvictCompressedBufferFromTile(const FTile& InTileId);
+    */
 
     static void AddWriteTilePass(FRDGBuilder& GraphBuilder, FRDGTextureRef OutTexture, FSharedBuffer InBuffer);
 
@@ -120,18 +159,27 @@ private:
     virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(FOdysseyTileManager, STATGROUP_Tickables); }
 
 private:
-    TArray<FTile> Tiles;
+    /**
+     * Tiles and FreeTiles are always accessed / modified in GameThread
+     */
+    TArray64<FTile> Tiles;
+    TArray64<uint64> FreeTiles;
 
-    FCriticalSection FreeTilesMutex;
-    TArray<FTileId> FreeTiles;
+    /**
+     * TilesData and FreeTilesData can be accessed / modified by any thread
+     * So we need a mutex
+     */
+    FCriticalSection TilesDataMutex;
+    TArray64<FTileData> TilesData;
+    TArray64<uint64> FreeTilesData;
 
     //Caching pipeline
     FCriticalSection PipelineMutex;
-    TArray<FTileId> PendingTilesToReadBack;
+    TArray<uint64> PendingTilesToReadBack;
 
     //Tiles eviction pipeline
-    TArray<FTileId> TilesToEvictUncompressed;
-    TArray<FTileId> TilesToEvictCompressed;
+    //TArray<FOdysseyTileId> TilesToEvictUncompressed;
+    //TArray<FTileIdFOdysseyTileId> TilesToEvictCompressed;
 
     //Stats
     TAtomic<int64> StatNumTilesUncompressed;
