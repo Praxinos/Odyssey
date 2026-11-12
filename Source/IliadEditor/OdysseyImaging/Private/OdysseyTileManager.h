@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Compression/CompressedBuffer.h"
+#include "IO/IoHash.h"
 #include "Memory/SharedBuffer.h"
 #include "PixelFormat.h"
 #include "RenderGraphBuilder.h"
@@ -34,25 +35,42 @@ struct FOdysseyTileId
     bool operator==(const FOdysseyTileId&) const = default;
 };
 
+class FOdysseyTileManagerStats
+{
+public:
+    FOdysseyTileManagerStats();
+
+public:
+    void AddUncompressed(const FSharedBuffer& InBuffer);
+    void AddCompressed(const FCompressedBuffer& InBuffer);
+    void AddCachedOnDisk(int64 InSizeOnDisk);
+
+    void RemoveUncompressed(const FSharedBuffer& InBuffer);
+    void RemoveCompressed(const FCompressedBuffer& InBuffer);
+    void RemoveCachedOnDisk(int64 InSizeOnDisk);
+
+    int64 GetNumTilesUncompressed() const;
+    int64 GetSizeUncompressed() const;
+    int64 GetNumTilesCompressed() const;
+    int64 GetSizeCompressed() const;
+    int64 GetNumTilesOnDisk() const;
+    int64 GetSizeOnDisk() const;
+
+private:
+    //Stats
+    TAtomic<int64> NumTilesUncompressed;
+    TAtomic<int64> SizeUncompressed;
+    TAtomic<int64> NumTilesCompressed;
+    TAtomic<int64> SizeCompressed;
+    TAtomic<int64> NumTilesOnDisk;
+    TAtomic<int64> SizeOnDisk;
+};
 class FOdysseyTileManager
     : public FTickableEditorObject
 {
 public:
     static FOdysseyTileManager& Get();
-
-public:
-    ~FOdysseyTileManager() = default;
-
-private:
-    FOdysseyTileManager()
-        : StatNumTilesUncompressed(0)
-        , StatSizeUncompressed(0)
-        , StatNumTilesCompressed(0)
-        , StatSizeCompressed(0)
-        , StatNumTilesOnDisk(0)
-        , StatSizeOnDisk(0)
-    {
-    }
+    static FString GetCacheOnDiskPath();
 
 public:
     void Initialize();
@@ -102,14 +120,7 @@ public:
     bool GetTileBuffer(FOdysseyTileId InTileId, FSharedBuffer& OutBuffer);
     bool GetTileBuffer(FOdysseyTileId InTileId, FSharedBuffer& OutBuffer) const;
 
-public:
-    //Stats
-    int64 GetNumTilesUncompressed() const;
-    int64 GetSizeUncompressed() const;
-    int64 GetNumTilesCompressed() const;
-    int64 GetSizeCompressed() const;
-    int64 GetNumTilesOnDisk() const;
-    int64 GetSizeOnDisk() const;
+    FOdysseyTileManagerStats& GetStats();
 
 private:
     /**
@@ -117,14 +128,46 @@ private:
      * A FTileData is created asyncronously once GPU ReadBack is done
      * Allowing us to create a FTileData only if it contains non empty data
      */
-    struct FTileData
+    class FTileData
+        : public TSharedFromThis<FTileData>
     {
-        FSharedBuffer UncompressedBuffer;
-        FCompressedBuffer CompressedBuffer;
-        int64 DiskCacheOffset = INDEX_NONE;
+        public:
+            static void EvictTiles(uint64 InMaxUncompressedSize, uint64 InMaxCompressedSize);
 
-        TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* UncompressedLRUNode;
-        TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* CompressedLRUNode;
+        public:
+            //Used when creating a tile while drawing
+            static TSharedRef<FTileData> FromUncompressedBuffer(const FSharedBuffer& UncompressedBuffer);
+            static TSharedRef<FTileData> FromCompressedBuffer(const FCompressedBuffer& UncompressedBuffer);
+
+        public:
+            bool GetUncompressedBuffer(FSharedBuffer& OutBuffer) const;
+            bool GetCompressedBuffer(FCompressedBuffer& OutBuffer) const;
+
+        private:
+            static void Touch(TSharedRef<FTileData>);
+
+            void Compress();
+            void CacheOnDisk();
+
+            bool LoadUncompressedBuffer() const;
+            bool LoadCompressedBuffer() const;
+
+            void EvictUncompressed();
+            void EvictCompressed();
+
+        private:
+            static FCriticalSection Mutex;
+            static FCriticalSection CacheOnDiskMutex;
+
+            static TDoubleLinkedList<TSharedPtr<FTileData>> UncompressedLRU;
+            static TDoubleLinkedList<TSharedPtr<FTileData>> CompressedLRU;
+
+            mutable FSharedBuffer UncompressedBuffer;
+            mutable FCompressedBuffer CompressedBuffer;
+            int64 DiskCacheOffset = INDEX_NONE;
+
+            mutable TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* UncompressedLRUNode;
+            mutable TDoubleLinkedList<TSharedPtr<FTileData>>::TDoubleLinkedListNode* CompressedLRUNode;
     };
 
     /**
@@ -155,13 +198,6 @@ private:
     void CompressTile(TSharedPtr<FTileData> InTileData);
     void CacheTileOnDisk(TSharedPtr<FTileData> InTileData);
 
-    FString GetCacheOnDiskPath() const;
-
-    void TouchTileData(TSharedPtr<FTileData> InTileData);
-    void EvictUncompressed(TSharedPtr<FTileData> InTileData);
-    void EvictCompressed(TSharedPtr<FTileData> InTileData);
-    void EvictTiles(uint64 InMaxUncompressedSize, uint64 InMaxCompressedSize);
-
     static void AddWriteTilePass(FRDGBuilder& GraphBuilder, FRDGTextureRef OutTexture, FSharedBuffer InBuffer);
 
 private:
@@ -173,27 +209,16 @@ private:
     /**
      * Tiles and FreeTiles are always accessed / modified in GameThread
      */
-    FCriticalSection CacheOnDiskMutex;
     FCriticalSection FreeTilesMutex;
     FCriticalSection TilesDataMutex;
 
     TArray64<FTile> Tiles;
     TArray64<uint64> FreeTiles;
-    TArray64<TSharedPtr<FTileData>> TilesData;
 
-    TDoubleLinkedList<TSharedPtr<FTileData>> UncompressedLRU;
-    TDoubleLinkedList<TSharedPtr<FTileData>> CompressedLRU;
-
-    FCriticalSection LRUMutex;
+    TMultiMap<FIoHash, TSharedPtr<FTileData>> HashToTileData;
 
     //Caching pipeline
     TArray<FOdysseyTileId> PendingTilesToReadBack;
 
-    //Stats
-    TAtomic<int64> StatNumTilesUncompressed;
-    TAtomic<int64> StatSizeUncompressed;
-    TAtomic<int64> StatNumTilesCompressed;
-    TAtomic<int64> StatSizeCompressed;
-    TAtomic<int64> StatNumTilesOnDisk;
-    TAtomic<int64> StatSizeOnDisk;
+    FOdysseyTileManagerStats Stats;
 };
