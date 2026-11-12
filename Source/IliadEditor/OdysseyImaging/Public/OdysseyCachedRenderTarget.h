@@ -213,7 +213,7 @@ private:
     mutable TStrongObjectPtr<UTextureRenderTarget2D> mRenderTarget;
     //mutable TSharedPtr<FImage> mImage;
 
-    mutable TSharedFuture<TArray<uint8>> mImageFuture;
+    mutable TSharedFuture<FUniqueBuffer> mImageFuture;
     mutable eCacheState mCacheState = eCacheState::DDC;
     mutable bool mIsImageCacheInvalid = false;
     mutable bool mIsDDCCacheInvalid = false;
