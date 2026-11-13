@@ -4,6 +4,7 @@
 // Ariane headers
 #include "ArianePath.h"
 #include "ArianeVertex.h"
+#include "ArianeGroup.h"
 #include "ArianeSegment.h"
 #include "ArianeSegmentCubic.h"
 #include "ArianeDrawing.h"
@@ -805,8 +806,14 @@ FArianePath::InvalidateVertex( FArianeVertex* Vertex )
 void
 FArianePath::InvalidateSegment( FArianeSegment* Segment )
 {
-    InvalidatedSegments.Add( Segment );
+    if( Segment->IsInvalidated() == false )
+    {
+        InvalidatedSegments.Add( Segment );
 
+        Segment->SetInvalidated( true );
+    }
+
+    // this must always be called to guarantee child-to-parent propagation
     Invalidate( FArianePathInvalidationFlags().SetSegmentAltered() );
 }
 
@@ -978,6 +985,7 @@ FArianePath::UpdateShape( EUpdateFlags UpdateFlags )
     {
         Geometry3D->Build();
     }
+
 
     //PathInvalidationFlags->Clear();
 

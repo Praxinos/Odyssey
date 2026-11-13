@@ -186,6 +186,28 @@ UArianeEditorPathEditTool::OnPostLayerStackSelectionChanged( UArianeLayerStack* 
 }
 
 void
+UArianeEditorPathEditTool::OnPreLayerStackHierarchyChanged( UArianeLayerStack* LayerStack )
+{
+    UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(LayerStack->GetCurrentLayer());
+
+    if( VectorLayer )
+    {
+        UnbindVectorLayerDelegates( VectorLayer );
+    }
+}
+
+void
+UArianeEditorPathEditTool::OnPostLayerStackHierarchyChanged( UArianeLayerStack* LayerStack )
+{
+    UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(LayerStack->GetCurrentLayer());
+
+    if( VectorLayer )
+    {
+        BindVectorLayerDelegates( VectorLayer );
+    }
+}
+
+void
 UArianeEditorPathEditTool::BindVectorLayerDelegates( UArianeLayerVector* VectorLayer )
 {
     // commented-out: nothing to do on Pre. Left there for consistency
@@ -208,6 +230,8 @@ UArianeEditorPathEditTool::BindLayerStackDelegates( UArianeLayerStack* LayerStac
 
     LayerStack->OnPreSelectionChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPreLayerStackSelectionChanged, LayerStack );
     LayerStack->OnPostSelectionChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPostLayerStackSelectionChanged, LayerStack );
+    LayerStack->OnPreHierarchyChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPreLayerStackHierarchyChanged, LayerStack );
+    LayerStack->OnPostHierarchyChangedDelegate().AddUObject( this, &UArianeEditorPathEditTool::OnPostLayerStackHierarchyChanged, LayerStack );
 
     if( VectorLayer )
     {
@@ -222,6 +246,8 @@ UArianeEditorPathEditTool::UnbindLayerStackDelegates( UArianeLayerStack* LayerSt
 
     LayerStack->OnPreSelectionChangedDelegate().RemoveAll( this );
     LayerStack->OnPostSelectionChangedDelegate().RemoveAll( this );
+    LayerStack->OnPreHierarchyChangedDelegate().RemoveAll( this );
+    LayerStack->OnPostHierarchyChangedDelegate().RemoveAll( this );
 
     if( VectorLayer )
     {

@@ -91,6 +91,22 @@ void
 UArianeLayer::PostLoad()
 {
     Super::PostLoad();
+
+    // retrocompatibility - Set The display name from the UObject's Name
+    if ( DisplayName.IsEmpty() )
+    {
+        DisplayName = GetName();
+    }
+}
+
+void UArianeLayer::SetDisplayName( const FString & InDisplayName )
+{
+    DisplayName = InDisplayName;
+}
+
+const FString& UArianeLayer::GetDisplayName()
+{
+    return DisplayName;
 }
 
 /*

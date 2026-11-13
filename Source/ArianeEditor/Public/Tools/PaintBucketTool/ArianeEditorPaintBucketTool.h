@@ -26,9 +26,9 @@ class UArianeLayerVector;
 UENUM(BlueprintType)
 enum class EArianeEditorPaintBucketToolLayerPolicy : uint8
 {
-    SelectedAndAbove,
+    CurrentAndAbove,
     Selected,
-    SelectedAndBelow,
+    CurrentAndBelow,
     All
 };
 

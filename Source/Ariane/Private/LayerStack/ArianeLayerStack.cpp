@@ -14,15 +14,17 @@ UArianeLayerStack::~UArianeLayerStack()
 {
 }
 
-// Legacy compatibility
 UArianeLayerStack::UArianeLayerStack()
 {
-    // Do not load the default drawing layer. this was a bad legacy design
-    //ObjectInitializer.DoNotCreateDefaultSubobject(TEXT("Drawing Layer"));
+    FString RootFolderName = FString("Root Folder");
 
     // init the root folder
-    //RootFolder = CreateDefaultSubobject<UArianeLayerFolder>(TEXT("Root Folder"));
-    //RootFolder->SetupAttachment(this);
+    UArianeLayerFolder* RootFolder = CreateDefaultSubobject<UArianeLayerFolder>(*RootFolderName);
+
+    RootFolder->SetDisplayName( RootFolderName );
+    RootFolder->SetupAttachment(this);
+
+    Layers.Add( RootFolder );
 }
 
 void
@@ -62,17 +64,21 @@ UArianeLayerStack::OnRegister()
 
     UArianeLayerFolder* RootFolder = GetRootFolder();
 
+/*
     if( RootFolder == nullptr )
     {
         RootFolder = NewObject<UArianeLayerFolder>( this
                                                   , "Root Folder"
                                                   , RF_Transactional | RF_Public );
 
-        RootFolder->AttachToComponent( this,  FAttachmentTransformRules::KeepRelativeTransform );
-
-        Painting3DActor->AddInstanceComponent(RootFolder);
+        //Painting3DActor->AddInstanceComponent(RootFolder);
 
         Layers.Add( RootFolder );
+    }
+*/
+    if( RootFolder->GetAttachParent() != this )
+    {
+        RootFolder->AttachToComponent( this, FAttachmentTransformRules::KeepRelativeTransform );
     }
 
     RootFolder->RegisterComponent();
@@ -109,6 +115,13 @@ UArianeLayerStack::PostLoad()
     UArianeLayerFolder* RootFolder = GetRootFolder();
 
     Super::PostLoad();
+
+    // Patch to clean NULLPTR layers
+    Layers.RemoveAll( [] ( const UArianeLayer* Layer )
+    {
+        return ( Layer == nullptr );
+    });
+    // End-Patch
 
     Init();
 
@@ -149,10 +162,69 @@ UArianeLayerStack::RemoveSelectedLayers()
         Layer->GetParentFolder()->Modify();
         Layer->Modify();
 
-        Layer->GetParentFolder()->RemoveChildLayer( Layer );
+        Layer->GetParentFolder()->RemoveChildLayer( Layer, true );
     }
 
     ClearLayerSelection( true );
+}
+
+void
+UArianeLayerStack::UnselectLayers( TArray<UArianeLayer*> LayersToUnselect, bool bTriggerEvent )
+{
+    Modify();
+
+    if( bTriggerEvent )
+        OnPreSelectionChanged.Broadcast();
+
+    for( UArianeLayer* Layer : LayersToUnselect )
+    {
+        SelectedLayers.Remove( Layer );
+    }
+
+    if( bTriggerEvent )
+        OnPostSelectionChanged.Broadcast();
+}
+
+void
+UArianeLayerStack::RemoveLayers( TArray<UArianeLayer*> LayersToRemove, bool bDestroy, bool bTriggerEvent )
+{
+    Modify();
+
+    if( bTriggerEvent )
+        OnPreHierarchyChanged.Broadcast();
+
+    UnselectLayers( LayersToRemove, true );
+
+    for( UArianeLayer* Layer : LayersToRemove )
+    {
+        Layer->GetParentFolder()->Modify();
+        Layer->Modify();
+
+        Layer->GetParentFolder()->RemoveChildLayer( Layer, bDestroy );
+    }
+
+    if( bTriggerEvent )
+        OnPostHierarchyChanged.Broadcast();
+}
+
+uint32
+UArianeLayerStack::GetFolderLayerCount()
+{
+    UArianeLayerFolder* RootFolder = GetRootFolder();
+    uint32 FolderLayerCount = 0;
+
+    UArianeLayerFolder::Traverse( RootFolder
+                                 , [ &FolderLayerCount ] ( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
+    {
+        if( Cast<UArianeLayerFolder>(Layer) )
+        {
+            FolderLayerCount++;
+        }
+
+        return UArianeLayerFolder::ETraversalReturnValue::Continue;
+    } );
+
+    return FolderLayerCount;
 }
 
 uint32
@@ -271,6 +343,34 @@ UArianeLayerStack::SelectLayer_Private( UArianeLayer* Layer )
 
             Layer->SetSelected( true );
         }
+        else // add it at the end of the list, it will become the current layer
+        {
+            SelectedLayers.Remove( Layer );
+            SelectedLayers.Add( Layer );
+        }
+    }
+}
+
+void
+UArianeLayerStack::UnselectLayer( UArianeLayer* Layer, bool bTriggerevent )
+{
+    if( bTriggerevent )
+        OnPreSelectionChanged.Broadcast();
+
+    UnselectLayer_Private( Layer );
+
+    if( bTriggerevent )
+        OnPostSelectionChanged.Broadcast();
+}
+
+void
+UArianeLayerStack::UnselectLayer_Private( UArianeLayer* Layer )
+{
+    if( SelectedLayers.Find( Layer ) != INDEX_NONE )
+    {
+        SelectedLayers.Remove( Layer );
+
+        Layer->SetSelected( false );
     }
 }
 
@@ -310,14 +410,16 @@ UArianeLayerStack::CreateVectorLayer( UArianeLayerFolder* InParentLayerFolder, b
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
                                                                            // The outer must be the AActor or else the TEDS system could crash
-    FName LayerName = FName( *FString::Printf(TEXT("Drawing Layer %d"), GetVectorLayerCount() + 1 ) );
+    FString LayerName = FString::Printf(TEXT("Drawing Layer %d"), GetVectorLayerCount() + 1 );
     UArianeLayerVector* NewVectorLayer = NewObject<UArianeLayerVector>( this
-                                                                         , LayerName
-                                                                         , RF_Transactional | RF_Public ); // for undos
+                                                                      , NAME_None
+                                                                      , RF_Transactional | RF_Public ); // for undos
 
     // Below 2 lines are mandatory to register the component, otherwise undos won't work (RF_TRANSACTIONAL will be erased)
     //NewVectorLayer->SetupAttachment( ParentLayerFolder );
     //NewVectorLayer->RegisterComponent();
+
+    NewVectorLayer->SetDisplayName( LayerName );
 
     AddLayer( ParentLayerFolder, NewVectorLayer, bTriggerEvent );
 
@@ -331,6 +433,7 @@ UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder, b
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
                                                                         // The outer must be the AActor or else the TEDS system could crash
+    FString LayerName = FString::Printf(TEXT("Folder Layer %d"), GetFolderLayerCount() + 1 );
     UArianeLayerFolder* NewLayerFolder = NewObject<UArianeLayerFolder>( this
                                                                       , NAME_None
                                                                       , RF_Transactional | RF_Public  ); // for undos
@@ -338,6 +441,8 @@ UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder, b
     // Below 2 lines are mandatory to register the component, otherwise undos won't work (RF_TRANSACTIONAL will be erased)
     //NewLayerFolder->SetupAttachment( ParentLayerFolder );
     //NewLayerFolder->RegisterComponent();
+
+    NewLayerFolder->SetDisplayName( LayerName );
 
     AddLayer( ParentLayerFolder, NewLayerFolder, bTriggerEvent );
 

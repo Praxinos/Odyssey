@@ -118,6 +118,8 @@ public:
     uint32 GetWorldTransformVersion() const;
     virtual void PostEditChangeProperty (FPropertyChangedEvent & PropertyChangedEvent) override;
 
+    void SetDisplayName( const FString& DisplayName );
+    const FString& GetDisplayName();
 
 protected:
     ETraversalReturnValue TraverseBackwards_Private( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
@@ -128,6 +130,9 @@ protected:
 protected:
     //UPROPERTY()
     //UArianeLayerFolder* ParentFolder;
+
+    UPROPERTY()
+    FString DisplayName;
 
     UPROPERTY()
     bool bLocked;

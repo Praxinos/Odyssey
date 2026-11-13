@@ -15,10 +15,11 @@
 #include "ArianeLayerFolder.h"
 #include "ArianeLayerStack.h"
 
-
 // Unreal headers
 #include "Framework/Commands/GenericCommands.h"
 #include "Selection.h"
+#include "PropertyEditorModule.h"
+#include "Modules/ModuleManager.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -96,8 +97,8 @@ SArianeEditorLayerStack::Construct( const FArguments& InArgs, FArianeEditor* InE
     Editor = InEditor;
     //Painting3DComponent.Assign(*this, InArgs._Painting3DComponent);
 
-    STreeView<TSharedPtr<FArianeEditorLayerRowItem>>::Construct(
-        STreeView<TSharedPtr<FArianeEditorLayerRowItem>>::FArguments()
+    STreeView<UArianeLayer*>::Construct(
+        STreeView<UArianeLayer*>::FArguments()
         // for some reason, SetTreeItemsSource does not work, so we have to use an array that we
         // call mItemsSource and that we will updates with the desired items
         .TreeItemsSource(&ItemsSource)
@@ -107,7 +108,7 @@ SArianeEditorLayerStack::Construct( const FArguments& InArgs, FArianeEditor* InE
         .OnSelectionChanged( this, &SArianeEditorLayerStack::OnSelectionChanged )
         //.OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
         .OnContextMenuOpening( this, &SArianeEditorLayerStack::OnContextMenuOpening )
-        //.SelectionMode( ESelectionMode::Multi )
+        .SelectionMode( ESelectionMode::Multi )
         .HeaderRow(headerRow)
     );
 
@@ -202,7 +203,7 @@ SArianeEditorLayerStack::OnPostLayerStackSelectionChanged()
 void
 SArianeEditorLayerStack::RenameSelectedItem()
 {
-    TArray<TSharedPtr<FArianeEditorLayerRowItem>> selectedItems = GetSelectedItems();
+    TArray<UArianeLayer*> selectedItems = GetSelectedItems();
 
     // no need to create an undo record or do anything if the selection is empty
     if( selectedItems.Num() )
@@ -247,7 +248,7 @@ SArianeEditorLayerStack::DeleteSelectedItem()
 
         for( UArianeLayer* Layer : SelectedTrees )
         {
-            Layer->GetParentFolder()->RemoveChildLayer( Layer );
+            Layer->GetParentFolder()->RemoveChildLayer( Layer,true );
         }
 
         LayerStack->Modify();
@@ -272,13 +273,13 @@ SArianeEditorLayerStack::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent&
     if (CommandList->ProcessCommandBindings(iKeyEvent))
         return FReply::Handled();
 
-    return STreeView<TSharedPtr<FArianeEditorLayerRowItem>>::OnKeyDown( iGeometry, iKeyEvent );
+    return STreeView<UArianeLayer*>::OnKeyDown( iGeometry, iKeyEvent );
 }
 
-TSharedPtr<FArianeEditorLayerRowItem>
-SArianeEditorLayerStack::GetRootItem()
+UArianeLayerFolder*
+SArianeEditorLayerStack::GetRootFolder()
 {
-    return RootItem;
+    return RootFolder;
 }
 
 FArianeEditor*
@@ -288,57 +289,30 @@ SArianeEditorLayerStack::GetEditor() const
 }
 
 void
-SArianeEditorLayerStack::BuildTree( const TSharedPtr<FArianeEditorLayerRowItem> Item )
+SArianeEditorLayerStack::ExpandTree( UArianeLayer* Layer )
 {
-    UArianeLayer* ItemLayer = Item.Get()->GetLayer();
-
-    Item.Get()->Children.Empty();
-
-    if( Cast<UArianeLayerFolder>(ItemLayer) )
+    if( Layer->GetClass() == UArianeLayerFolder::StaticClass() )
     {
-        UArianeLayerFolder* ItemLayerFolder = Cast<UArianeLayerFolder>(ItemLayer);
-        const TArray<UArianeLayer*>& ChildLayers = ItemLayerFolder->GetChildLayers();
+        UArianeLayerFolder* LayerFolder = Cast<UArianeLayerFolder>(Layer);
 
-        for( UArianeLayer* ChildLayer : ChildLayers )
+        if( LayerFolder->IsExpanded() )
         {
-            TSharedPtr<FArianeEditorLayerRowItem> ChildItem = MakeShareable( new FArianeEditorLayerRowItem( ChildLayer, true ) );
+            SetItemExpansion( LayerFolder, true );
 
-            //iItem.Get()->mChildren.Add( childItem );
-            // reverse order in order to get the most forward objet on top of the hierarchy
-            Item.Get()->Children.Insert( ChildItem, 0 );
-
-            BuildTree( ChildItem );
-        }
-    }
-}
-
-void
-SArianeEditorLayerStack::ExpandTree( const TSharedPtr<FArianeEditorLayerRowItem> Item )
-{
-    UArianeLayer* ItemLayer = Item.Get()->GetLayer();
-
-    if( ItemLayer->GetClass() == UArianeLayerFolder::StaticClass() )
-    {
-        UArianeLayerFolder* ItemLayerFolder = Cast<UArianeLayerFolder>(ItemLayer);
-
-        if( ItemLayerFolder->IsExpanded() )
-        {
-            SetItemExpansion( Item, true );
-
-            for( int i = 0; i < Item.Get()->Children.Num(); i++ )
+            for( int i = 0; i < LayerFolder->GetChildLayers().Num(); i++ )
             {
-                ExpandTree( Item.Get()->Children[i] );
+                ExpandTree( LayerFolder->GetChildLayers()[i] );
             }
         }
     }
     else
     {
-        SetItemExpansion( Item, false );
+        SetItemExpansion( Layer, false );
     }
 
-    if( ItemLayer->IsSelected() )
+    if( Layer->IsSelected() )
     {
-        SelectedItems.Add( Item );
+        SelectedItems.Add( Layer );
     }
 }
 
@@ -395,12 +369,10 @@ SArianeEditorLayerStack::Update()
             BindComponentDelegates();
         }
 
-        RootItem = MakeShareable(new FArianeEditorLayerRowItem( LayerStack->GetRootFolder(), true ) );
-
-        BuildTree( RootItem );
+        RootFolder = LayerStack->GetRootFolder();
 
         // We hide the root item by showing only its child items
-        for( TSharedPtr<FArianeEditorLayerRowItem> ChildItem : RootItem->GetChildren() )
+        for( UArianeLayer* ChildItem : RootFolder->GetChildLayers() )
         {
             ItemsSource.Add( ChildItem );
 
@@ -411,34 +383,37 @@ SArianeEditorLayerStack::Update()
 }
 
 void
-SArianeEditorLayerStack::OnGetChildren( TSharedPtr<FArianeEditorLayerRowItem> Parent
-                                      , TArray<TSharedPtr<FArianeEditorLayerRowItem>>& OutChildren) const
+SArianeEditorLayerStack::OnGetChildren( UArianeLayer* Parent
+                                      , TArray<UArianeLayer*>& OutChildren) const
 {
-    OutChildren = Parent.Get()->Children;
+    UArianeLayerFolder* ParentFolder = Cast<UArianeLayerFolder>(Parent);
+
+    if( ParentFolder )
+    {
+        for( UArianeLayer* Child : ParentFolder->GetChildLayers() )
+        {
+            // Note: display in reverse order
+            OutChildren.Insert( Child, 0 );
+        }
+    }
 }
 
 TSharedRef<ITableRow>
-SArianeEditorLayerStack::OnGenerateRow( TSharedPtr<FArianeEditorLayerRowItem> iItem, const TSharedRef<STableViewBase>& iOwnerTable )
+SArianeEditorLayerStack::OnGenerateRow( UArianeLayer* Layer, const TSharedRef<STableViewBase>& iOwnerTable )
 {
-    UArianeLayer* Layer = iItem->GetLayer();
-
-    return SNew( SArianeEditorLayerRow, iOwnerTable, iItem )
+    return SNew( SArianeEditorLayerRow, iOwnerTable, Layer )
            .Padding( FMargin(0.f, 6.f, 0.f, 6.f));
 }
 
 void
-SArianeEditorLayerStack::OnExpansionChanged( TSharedPtr<FArianeEditorLayerRowItem> Item, bool bExpanded )
+SArianeEditorLayerStack::OnExpansionChanged( UArianeLayer* Layer, bool bExpanded )
 {
-    UArianeLayerFolder* ExpandedLayerFolder = Cast<UArianeLayerFolder>(Item.Get()->GetLayer());
+    UArianeLayerFolder* ExpandedLayerFolder = Cast<UArianeLayerFolder>(Layer);
 
     if( ExpandedLayerFolder )
     {
         ExpandedLayerFolder->SetExpanded( bExpanded );
     }
-
-    // Reselect
-    //SelectedItems.Empty();
-    //SelectTree( mRootItem );
 }
 
 void
@@ -460,7 +435,7 @@ SArianeEditorLayerStack::ModifyLayerStackAndSelectedLayers( UArianeLayerStack* L
 }
 
 void
-SArianeEditorLayerStack::OnSelectionChanged( TSharedPtr<FArianeEditorLayerRowItem> iItem
+SArianeEditorLayerStack::OnSelectionChanged( UArianeLayer* Layer
                                            , ESelectInfo::Type SelectInfo )
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
@@ -470,22 +445,18 @@ SArianeEditorLayerStack::OnSelectionChanged( TSharedPtr<FArianeEditorLayerRowIte
     if( Painting3DComponent )
     {
         // mRootItem can be null if the tree is empty
-        if( RootItem )
+        if( RootFolder )
         {
-            UArianeLayerFolder* RootLayerFolder = Cast<UArianeLayerFolder>(RootItem.Get()->GetLayer());
-
             // only if the action is interactive (user action via GUI)
             //if ( SelectInfo != ESelectInfo::Type::Direct )
             {
-                TArray<TSharedPtr<FArianeEditorLayerRowItem>> SelectedLayerItems = GetSelectedItems();
+                TArray<UArianeLayer*> SelectedLayers = GetSelectedItems();
                 UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
                 TArray<UArianeLayer*> OldSelectedLayers = LayerStack->GetSelectedLayers();
                 TArray<UArianeLayer*> NewSelectedLayers;
 
-                for( TSharedPtr<FArianeEditorLayerRowItem> SelectedLayerItem : SelectedLayerItems )
+                for( UArianeLayer* SelectedLayer : SelectedLayers )
                 {
-                    UArianeLayer* SelectedLayer = SelectedLayerItem.Get()->GetLayer();
-
                     NewSelectedLayers.Add( SelectedLayer );
                 }
 

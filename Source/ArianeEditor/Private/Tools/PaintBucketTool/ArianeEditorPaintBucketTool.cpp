@@ -109,6 +109,8 @@ UArianeEditorPaintBucketTool::BindDelegates()
     {
         //Painting3DComponent->OnPreUpdateDelegate().AddUObject( this, &UArianeEditorPaintBucketTool::OnPreUpdate );
         Painting3DComponent->OnPostUpdateDelegate().AddUObject( this, &UArianeEditorPaintBucketTool::OnPostUpdate );
+        Painting3DComponent->GetLayerStack()->OnPostSelectionChangedDelegate().AddUObject( this, &UArianeEditorPaintBucketTool::Reset );
+        Painting3DComponent->GetLayerStack()->OnPostHierarchyChangedDelegate().AddUObject( this, &UArianeEditorPaintBucketTool::Reset );
     }
 
     FEditorDelegates::OnEditorCameraMoved.AddUObject( this, &UArianeEditorPaintBucketTool::OnCameraMoved );
@@ -123,8 +125,10 @@ UArianeEditorPaintBucketTool::UnbindDelegates()
 
     if( Painting3DComponent )
     {
-        Painting3DComponent->OnPreUpdateDelegate().RemoveAll( this );
+        //Painting3DComponent->OnPreUpdateDelegate().RemoveAll( this );
         Painting3DComponent->OnPostUpdateDelegate().RemoveAll( this );
+        Painting3DComponent->GetLayerStack()->OnPostSelectionChangedDelegate().RemoveAll( this );
+        Painting3DComponent->GetLayerStack()->OnPostHierarchyChangedDelegate().RemoveAll( this );
     }
 
     FEditorDelegates::OnEditorCameraMoved.RemoveAll( this );
@@ -232,12 +236,12 @@ UArianeEditorPaintBucketTool::GetPaintedLayers( TArray<UArianeLayer*>& OutPainte
         UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
         bool bDoSelect = false;
 
-        if( LayerPolicy == EArianeEditorPaintBucketToolLayerPolicy::SelectedAndAbove )
+        if( LayerPolicy == EArianeEditorPaintBucketToolLayerPolicy::CurrentAndAbove )
         {
             bDoSelect = true;
         }
 
-        if( LayerPolicy == EArianeEditorPaintBucketToolLayerPolicy::SelectedAndBelow )
+        if( LayerPolicy == EArianeEditorPaintBucketToolLayerPolicy::CurrentAndBelow )
         {
             bDoSelect = false;
         }
@@ -253,21 +257,21 @@ UArianeEditorPaintBucketTool::GetPaintedLayers( TArray<UArianeLayer*>& OutPainte
                 {
                     switch( LayerPolicy )
                     {
-                        case EArianeEditorPaintBucketToolLayerPolicy::SelectedAndBelow :
+                        case EArianeEditorPaintBucketToolLayerPolicy::CurrentAndBelow :
                             if( VectorLayer->IsSelected() || bDoSelect )
                             {
                                 OutPaintedLayers.Add( VectorLayer );
 
-                                bDoSelect = false;
+                                bDoSelect = true;
                             }
                         break;
 
-                        case EArianeEditorPaintBucketToolLayerPolicy::SelectedAndAbove :
+                        case EArianeEditorPaintBucketToolLayerPolicy::CurrentAndAbove :
                             if( VectorLayer->IsSelected()  || bDoSelect )
                             {
                                 OutPaintedLayers.Add( VectorLayer );
 
-                                bDoSelect = true;
+                                bDoSelect = false;
                             }
                         break;
 

@@ -45,7 +45,9 @@ public:
      * @brief Remove a child layer from this folder
      * @param Child the child layer
      */
-    void RemoveChildLayer( UArianeLayer* Child );
+    void RemoveChildLayer( UArianeLayer* Child, bool bDestroy );
+
+    virtual void OnChildDetached( USceneComponent* ChildComponent ) override;
 
     /**
      * @brief Invalidate a child layer

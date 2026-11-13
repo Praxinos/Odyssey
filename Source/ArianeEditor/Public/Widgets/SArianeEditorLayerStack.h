@@ -14,7 +14,7 @@ class UArianeLayerStack;
 class UArianeLayerVector;
 
 class ARIANEEDITOR_API SArianeEditorLayerStack
-    : public STreeView<TSharedPtr<FArianeEditorLayerRowItem>>
+    : public STreeView<UArianeLayer*>
 {
     public:
         static constexpr const char* LAYER_VISIBLE   = "Visible";
@@ -42,7 +42,7 @@ class ARIANEEDITOR_API SArianeEditorLayerStack
         void RenameSelectedItem();
         void DeleteSelectedItem();
 
-        TSharedPtr<FArianeEditorLayerRowItem> GetRootItem();
+        UArianeLayerFolder* GetRootFolder();
         FArianeEditor* GetEditor() const;
 
         bool CanDeleteSelectedLayers();
@@ -54,14 +54,13 @@ class ARIANEEDITOR_API SArianeEditorLayerStack
          * @param iParent
          * @param oChildren
          */
-        void OnGetChildren(TSharedPtr<FArianeEditorLayerRowItem> iParent, TArray<TSharedPtr<FArianeEditorLayerRowItem>>& oChildren) const;
+        void OnGetChildren(UArianeLayer* iParent, TArray<UArianeLayer*>& oChildren) const;
         TSharedPtr<SWidget> OnContextMenuOpening();
-        TSharedRef<ITableRow> OnGenerateRow( TSharedPtr<FArianeEditorLayerRowItem> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
-        void OnSelectionChanged( TSharedPtr<FArianeEditorLayerRowItem> iItem, ESelectInfo::Type SelectInfo );
-        void OnExpansionChanged( TSharedPtr<FArianeEditorLayerRowItem> iItem, bool mExpanded );
-        void ExpandTree( const TSharedPtr<FArianeEditorLayerRowItem> iItem );
-        void BuildTree( const TSharedPtr<FArianeEditorLayerRowItem> iItem );
-        //void SelectTree( const TSharedPtr<FArianeEditorLayerRowItem> iItem );
+        TSharedRef<ITableRow> OnGenerateRow( UArianeLayer* iItem, const TSharedRef<STableViewBase>& iOwnerTable );
+        void OnSelectionChanged( UArianeLayer* iItem, ESelectInfo::Type SelectInfo );
+        void OnExpansionChanged( UArianeLayer* iItem, bool mExpanded );
+        void ExpandTree( UArianeLayer* Layer );
+        //void SelectTree( const UArianeLayer* iItem );
 
         void MapActionsToCommandList();
 
@@ -102,7 +101,7 @@ class ARIANEEDITOR_API SArianeEditorLayerStack
         //TSlateAttribute<UArianePainting3DComponent*> Painting3DComponent;
         //TSharedPtr<FOdysseyVectorLayer> mVectorLayer;
 
-        TSharedPtr<FArianeEditorLayerRowItem> RootItem;
-        TArray<TSharedPtr<FArianeEditorLayerRowItem>> ItemsSource;
+        UArianeLayerFolder* RootFolder;
+        TArray<UArianeLayer*> ItemsSource;
         TSharedRef<FUICommandList> CommandList;
 };

@@ -21,6 +21,7 @@ class UArianeLayerVector;
 class UArianeDrawing;
 struct FArianeKeyedObject;
 
+// we create our own flag structure to allow any number of flags
 USTRUCT(BlueprintType)
 struct ARIANE_API FArianeObjectInvalidationFlags
 {
@@ -43,7 +44,6 @@ public:
     FArianeObjectInvalidationFlags& SetSelected()  { Selected  = 1; return *this; };
     FArianeObjectInvalidationFlags& SetHierarchy() { Hierarchy = 1; return *this; };
     FArianeObjectInvalidationFlags& SetColor()     { Color     = 1; return *this; };
-    FArianeObjectInvalidationFlags& SetChildren()  { Children  = 1; return *this; };
     FArianeObjectInvalidationFlags& SetTags()      { Tags      = 1; return *this; };
     FArianeObjectInvalidationFlags& SetName()      { Name      = 1; return *this; };
     FArianeObjectInvalidationFlags& SetTransform() { Transform = 1; return *this; };
@@ -53,7 +53,6 @@ public:
     uint32 Altered   : 1 = 0;
     uint32 Hierarchy : 1 = 0;
     uint32 Color     : 1 = 0;
-    uint32 Children  : 1 = 0;
     uint32 Tags      : 1 = 0;
     uint32 Name      : 1 = 0;
     uint32 Transform : 1 = 0;
@@ -319,6 +318,8 @@ public:
     virtual void Animate( const FArianeKeyedObject* KeyedObject, const FArianeKeyedObject* NextKeyedObject, float T );
     const FGuid& GetAllocatorGuid();
     virtual void PostReset();
+    bool IsInvalidatedInParent();
+    void SetInvalidatedInParent( bool bInInvalidateInParent );
 
 protected:
     /**
@@ -383,6 +384,7 @@ protected:
     TArray<FArianeObject*> Children;
     FBox BoundingBox;
     bool bSelected;
+    bool bInvalidatedInParent;
     //FSimpleMulticastDelegate  OnPostInvalidated;
 };
 

@@ -51,6 +51,8 @@ public:
     */
     void SelectLayer( UArianeLayer* Layer, bool bTriggerevent );
 
+    void UnselectLayer( UArianeLayer* Layer, bool bTriggerevent );
+
     /**
     * @brief Select a layer
     * @param bClearSelectionFirst true to clear the selection first, flase otherwise
@@ -112,10 +114,13 @@ public:
     virtual void Serialize( FArchive& Ar ) override;
     void AddLayers( UArianeLayerFolder* FosterFolder, TArray<UArianeLayer*> OrphanLayers, bool bTriggerEvent );
     uint32 GetVectorLayerCount();
+    uint32 GetFolderLayerCount();
     void Init();
     void Update( bool bInteractive );
     virtual void OnRegister() override;
     virtual void PostDuplicate( EDuplicateMode::Type DuplicateMode ) override;
+    void RemoveLayers( TArray<UArianeLayer*> LayersToRemove, bool bDestroy, bool bTriggerEvent );
+    void UnselectLayers( TArray<UArianeLayer*> LayersToUnselect, bool bTriggerEvent );
 
 #if WITH_EDITOR
     void PreEditUndo();
@@ -124,6 +129,7 @@ public:
 
 protected:
     void SelectLayer_Private( UArianeLayer* Layer );
+    void UnselectLayer_Private( UArianeLayer* Layer );
 
 protected:
     UPROPERTY(Instanced)

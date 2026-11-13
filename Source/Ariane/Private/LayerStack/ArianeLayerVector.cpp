@@ -144,6 +144,7 @@ FArianeGeometryProxy::GetDrawingDynamicMeshElements( const FSceneViewFamily& Vie
                              , ViewIndex
                              , &Collector ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
     {
+        UArianePainting3DComponent* Painting3DComponent = VectorLayer->GetLayerStack()->GetPainting3DComponent();
         const FSceneView* View = ViewFamily.Views[ViewIndex];
         FArianeObjectGeometry3D* Geometry3D = nullptr;
         UMaterialInterface* MaterialInterface = nullptr;
@@ -254,8 +255,8 @@ FArianeGeometryProxy::GetDrawingDynamicMeshElements( const FSceneViewFamily& Vie
                                                  , LocalToWorld
                                                  //, VectorLayer->GetComponentToWorld().ToMatrixWithScale() //GetLocalToWorld()
                                                  , PreviousLocalToWorld
-                                                 , GetBounds()
-                                                 , GetLocalBounds()
+                                                 , FBoxSphereBounds ( Object->GetBoundingBox().TransformBy( LocalToWorld ) )
+                                                 , FBoxSphereBounds ( Object->GetBoundingBox() )
                                                  , true
                                                  , bHasPrecomputedVolumetricLightmap
                                                 // , DrawsVelocity()
@@ -275,7 +276,7 @@ FArianeGeometryProxy::GetDrawingDynamicMeshElements( const FSceneViewFamily& Vie
                 MeshBatch.DepthPriorityGroup = SDPG_World;
                 MeshBatch.bCanApplyViewModeOverrides = false;
                 MeshBatch.bDisableBackfaceCulling = true; // draw both sides
-                MeshBatch.CastShadow = false;
+                MeshBatch.CastShadow = Painting3DComponent->GetCastShadows();
 
                 //Add the batch to the collector
                 Collector.AddMesh( ViewIndex, MeshBatch );

@@ -159,21 +159,17 @@ FArianeGroup::UpdateBoundingBox( EUpdateFlags UpdateFlags )
 {
     FArianeGroupInvalidationFlags* GroupInvalidationFlags = &GetInvalidationFlags();
 
-    if( ( GroupInvalidationFlags->Hierarchy )
-     || ( GroupInvalidationFlags->Children  ) )
+    // FBox(ForceInit) creates an invalid box
+    FBox CombinedBox(ForceInit);
+
+    for (FArianeObject* Child : Children)
     {
-        // FBox(ForceInit) creates an invalid box
-        FBox CombinedBox(ForceInit);
-
-        for (FArianeObject* Child : Children)
-        {
-            // Note: use "+=" and not "bound = bound + blah". Only += checks for the validity of the box.
-            CombinedBox += Child->GetBoundingBox().TransformBy( Child->GetLocalTransform() );
-        }
-
-        BoundingBox = CombinedBox.IsValid ? FBox(CombinedBox)
-                                          : FBox(ForceInit);
+        // Note: use "+=" and not "bound = bound + blah". Only += checks for the validity of the box.
+        CombinedBox += Child->GetBoundingBox().TransformBy( Child->GetLocalTransform() );
     }
+
+    BoundingBox = CombinedBox.IsValid ? FBox(CombinedBox)
+                                        : FBox(ForceInit);
 }
 
 void

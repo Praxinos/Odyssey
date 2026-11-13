@@ -3,6 +3,7 @@
 
 // Ariane headers
 #include "ArianePainting3DComponent.h"
+#include "ArianePainting3DActor.h"
 #include "ArianePainting3DStaticMeshComponent.h"
 #include "ArianeDrawing.h"
 #include "ArianePath.h"
@@ -37,11 +38,12 @@ UArianePainting3DComponent::UArianePainting3DComponent(const FObjectInitializer&
     : Super(ObjectInitializer)
     , LayerStack ( nullptr )
     , DefaultMaterial ( nullptr )
+    , bCastShadows ( true )
     , CurrentPaletteColorEntry ( nullptr )
     , EditorInterface ( nullptr )
 {
-    //LayerStack = ObjectInitializer.CreateDefaultSubobject<UArianeLayerStack>(this, TEXT("LayerStack"));
-    //LayerStack->SetupAttachment( this );
+    LayerStack = ObjectInitializer.CreateDefaultSubobject<UArianeLayerStack>(this, TEXT("LayerStack"));
+    LayerStack->SetupAttachment( this );
 
     PrimaryComponentTick.bCanEverTick = true;
     PrimaryComponentTick.bStartWithTickEnabled = true;
@@ -99,19 +101,30 @@ UArianePainting3DComponent::PostInitProperties()
 void
 UArianePainting3DComponent::OnRegister()
 {
+    AArianePainting3DActor* Painting3DActor = Cast<AArianePainting3DActor>(GetOwner());
     UMaterial* BaseMaterial = Cast<UMaterial>( StaticLoadObject( UMaterial::StaticClass()
                                                                , nullptr
                                                                , TEXT("/Odyssey/Materials/ArianeDefaultMaterial.ArianeDefaultMaterial") ) );
 
     Super::OnRegister();
 
+/*
     if( LayerStack == nullptr )
     {
         LayerStack = NewObject<UArianeLayerStack>( this
                                                  , "LayerStack"
                                                  , RF_Transactional | RF_Public );
+    }
+*/
 
-        LayerStack->AttachToComponent( this,  FAttachmentTransformRules::KeepRelativeTransform );
+    //if( Painting3DActor->GetInstanceComponents().Contains(LayerStack) == false )
+    //{
+    //    Painting3DActor->AddInstanceComponent( LayerStack );
+    //}
+
+    if( LayerStack->GetAttachParent() != this )
+    {
+        LayerStack->AttachToComponent( this, FAttachmentTransformRules::KeepRelativeTransform );
     }
 
     LayerStack->RegisterComponent();
@@ -298,6 +311,17 @@ UArianePainting3DComponent::PostEditChangeProperty( FPropertyChangedEvent& event
 
     Super::PostEditChangeProperty( event );
 }
+
+bool UArianePainting3DComponent::GetCastShadows() const
+{
+    return bCastShadows;
+}
+
+void UArianePainting3DComponent::SetCastShadows(bool bInCastShadows)
+{
+    bCastShadows = bInCastShadows;
+}
+
 
 const TArray<UOdysseyPaletteSet*>&
 UArianePainting3DComponent::GetPaletteSets() const

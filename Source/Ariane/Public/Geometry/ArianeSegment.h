@@ -161,6 +161,8 @@ struct ARIANE_API FArianeSegment
         /** Get the segment's invalidation status */
         bool IsInvalidated();
 
+        void SetInvalidated( bool bInInvalidated );
+
         /** Get the segment's Guid */
         const FGuid& GetGuid();
 

@@ -175,6 +175,8 @@ protected:
     void UnbindEditorDelegates();
     void OnPreLayerStackSelectionChanged( UArianeLayerStack* LayerStack );
     void OnPostLayerStackSelectionChanged( UArianeLayerStack* LayerStack );
+    void OnPreLayerStackHierarchyChanged( UArianeLayerStack* LayerStack );
+    void OnPostLayerStackHierarchyChanged( UArianeLayerStack* LayerStack );
     void OnPostDrawingChanged( UArianeLayerVector* VectorLayer );
     void BindComponentDelegates( UArianePainting3DComponent* Painting3DComponent );
     void UnbindComponentDelegates( UArianePainting3DComponent* Painting3DComponent );

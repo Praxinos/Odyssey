@@ -16,7 +16,6 @@
 TSharedPtr<SWidget>
 SArianeEditorLayerStackContextMenu::CreateWidget( SArianeEditorLayerStack* TreeView )
 {
-    TSharedPtr<FArianeEditorLayerRowItem> RootItem = TreeView->GetRootItem();
     FArianeEditor* Editor = TreeView->GetEditor();
     FMenuBuilder Menu( true, nullptr );
 

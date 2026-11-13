@@ -96,12 +96,14 @@ public:
     UArianePainting3DStaticMeshComponent* GetStaticMeshComponent();
     UMaterialInstanceDynamic* GetDefaultMaterial();
     virtual void PostInitProperties() override;
+    bool GetCastShadows() const;
+    void SetCastShadows(bool bValue);
 
 private:
     virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
 
 protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Instanced, meta = (AllowPrivateAccess = "true"))
+    UPROPERTY(BlueprintReadOnly, Instanced, meta = (AllowPrivateAccess = "true"))
     UArianeLayerStack* LayerStack;
 
     UPROPERTY()
@@ -113,6 +115,9 @@ protected:
     // for conversions to static mesh
     UPROPERTY(Transient)
     UArianePainting3DStaticMeshComponent* StaticMeshComponent;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    bool bCastShadows;
 
     UPROPERTY()
     int FileVersion = 1;

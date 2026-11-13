@@ -294,6 +294,12 @@ FArianeSegment::IsInvalidated()
 }
 
 void
+FArianeSegment::SetInvalidated( bool bInInvalidated )
+{
+    bInvalidated = bInInvalidated;
+}
+
+void
 FArianeSegment::Invalidate()
 {
     FArianeObject* Owner = OwnerID.GetObject( Drawing );
@@ -304,14 +310,7 @@ FArianeSegment::Invalidate()
         {
             FArianePath* Path = static_cast<FArianePath*>( Owner );
 
-            if ( bInvalidated == false )
-            {
-                Path->InvalidateSegment( this );
-
-                bInvalidated = true;
-            }
-
-            Path->Invalidate( FArianePathInvalidationFlags().SetSegmentAltered() );
+            Path->InvalidateSegment( this );
         }
     }
 }

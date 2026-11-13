@@ -84,7 +84,6 @@ FArianeEditorStyle::Init()
     Set( "ArianeEditor.LayerStack.NotVisible16", new IMAGE_BRUSH_SVG("OdysseyLayerStack/not_visible", Icon16x16));
     Set( "ArianeEditor.LayerStack.Locked16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/locked", Icon16x16 ) );
     Set( "ArianeEditor.LayerStack.Unlocked16", new IMAGE_BRUSH_SVG("OdysseyLayerStack/unlocked", Icon16x16));
-
     {
         FSlateColor selectedRow(FStyleColors::Select.GetSpecifiedColor().CopyWithNewOpacity(0.3f));
         FSlateColor selectedInactiveRow(FStyleColors::SelectInactive.GetSpecifiedColor().CopyWithNewOpacity(0.3f));

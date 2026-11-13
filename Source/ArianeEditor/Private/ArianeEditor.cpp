@@ -294,16 +294,19 @@ FArianeEditor::ClearPainting3DComponents()
 
         if( Painting3DComponent )
         {
-            UArianeLayerVector* CurrentVectorLayer = Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
-
-            if( CurrentVectorLayer )
+            for( UArianeLayer* SelectedLayer : Painting3DComponent->GetLayerStack()->GetSelectedLayers() )
             {
-                if( GEditor->IsTransactionActive() )
-                {
-                    CurrentVectorLayer->GetDrawing()->Modify();
-                }
+                 UArianeLayerVector* SelectedVectorLayer = Cast<UArianeLayerVector>(SelectedLayer);
 
-                CurrentVectorLayer->GetDrawing()->ResetHierarchy();
+                if( SelectedVectorLayer )
+                {
+                    if( GEditor->IsTransactionActive() )
+                    {
+                        SelectedVectorLayer->GetDrawing()->Modify();
+                    }
+
+                    SelectedVectorLayer->GetDrawing()->ResetHierarchy();
+                }
             }
 
             Painting3DComponent->Update( false );
@@ -1242,6 +1245,8 @@ FArianeEditor::CopySelectedLayers()
 
         //Painting3DComponent.Get()->CopySelectedLayers();
     }
+
+    GEditor->NoteSelectionChange();
 }
 
 void
@@ -1284,6 +1289,8 @@ FArianeEditor::PasteLayers()
 
         Painting3DComponent->Update( false );
     }
+
+    GEditor->NoteSelectionChange();
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -33,7 +33,6 @@ FArianeObjectInvalidationFlags::AND( const FArianeObjectInvalidationFlags& RHS )
         Altered   &= ((FArianeObjectInvalidationFlags&)RHS).Altered;
         Hierarchy &= ((FArianeObjectInvalidationFlags&)RHS).Hierarchy;
         Color     &= ((FArianeObjectInvalidationFlags&)RHS).Color;
-        Children  &= ((FArianeObjectInvalidationFlags&)RHS).Children;
         Tags      &= ((FArianeObjectInvalidationFlags&)RHS).Tags;
         Name      &= ((FArianeObjectInvalidationFlags&)RHS).Name;
         Transform &= ((FArianeObjectInvalidationFlags&)RHS).Transform;
@@ -51,7 +50,6 @@ FArianeObjectInvalidationFlags::OR( const FArianeObjectInvalidationFlags& RHS )
         Altered   |= ((FArianeObjectInvalidationFlags&)RHS).Altered;
         Hierarchy |= ((FArianeObjectInvalidationFlags&)RHS).Hierarchy;
         Color     |= ((FArianeObjectInvalidationFlags&)RHS).Color;
-        Children  |= ((FArianeObjectInvalidationFlags&)RHS).Children;
         Tags      |= ((FArianeObjectInvalidationFlags&)RHS).Tags;
         Name      |= ((FArianeObjectInvalidationFlags&)RHS).Name;
         Transform |= ((FArianeObjectInvalidationFlags&)RHS).Transform;
@@ -67,7 +65,6 @@ FArianeObjectInvalidationFlags::SetAll()
     Altered   = 1;
     Hierarchy = 1;
     Color     = 1;
-    Children  = 1;
     Tags      = 1;
     Name      = 1;
     Transform = 1;
@@ -82,7 +79,6 @@ FArianeObjectInvalidationFlags::Clear()
     Altered   = 0;
     Hierarchy = 0;
     Color     = 0;
-    Children  = 0;
     Tags      = 0;
     Name      = 0;
     Transform = 0;
@@ -97,7 +93,6 @@ FArianeObjectInvalidationFlags::HasAny()
           || Altered
           || Hierarchy
           || Color
-          || Children
           || Tags
           || Name
           || Transform );
@@ -295,6 +290,7 @@ FArianeObject::FArianeObject( UArianeDrawing* InDrawing
     , WorldTransformVersion( 0 )
     , BoundingBox( FBox(ForceInit) )
     , bSelected ( false )
+    , bInvalidatedInParent ( false )
 {
 }
 
@@ -433,33 +429,53 @@ FArianeObject::InsertChild( FArianeObject* Child, FArianeObject* InsertAfter, FA
 }
 
 void
+FArianeObject::SetInvalidatedInParent( bool bInInvalidatedInParent )
+{
+    bInvalidatedInParent = bInInvalidatedInParent;
+}
+
+bool
+FArianeObject::IsInvalidatedInParent()
+{
+    return bInvalidatedInParent;
+}
+
+void
 FArianeObject::InvalidateChild( FArianeObject* Child )
 {
+    FArianeObject* Parent = ParentID.GetObject( Drawing );
 
-    if( InvalidatedChildren.Find( Child ) == INDEX_NONE )
+    if( Child->IsInvalidatedInParent() == false )
     {
         InvalidatedChildren.Add( Child );
+
+        Child->SetInvalidatedInParent( true );
     }
 
-    Invalidate( FArianeObjectInvalidationFlags().SetChildren() );
+     // This must always be called to guarantee child-to-parent propagation
+    if( Parent )
+    {
+        Parent->InvalidateChild( this );
+    }
+    else
+    {
+        Drawing->Invalidate();
+    }
 }
 
 void
 FArianeObject::Invalidate( const FArianeObjectInvalidationFlags& InInvalidationFlags )
 {
-    if ( ParentID.GetObject( Drawing ) )
+    FArianeObject* Parent = ParentID.GetObject( Drawing );
+
+    if ( Parent )
     {
-        ParentID.GetObject( Drawing )->InvalidateChild( this );
+        Parent->InvalidateChild( this );
     }
 
     GetInvalidationFlags().OR( InInvalidationFlags );
 
     GetDrawing()->MarkPackageDirty();
-
-    if( ParentID.GetObject( Drawing ) == nullptr )
-    {
-        Drawing->Invalidate();
-    }
 
     //OnPostInvalidated.Broadcast();
 }
@@ -633,7 +649,14 @@ FArianeObject::Update( EUpdateFlags UpdateFlags, bool Recurse )
                                        , &UpdateFlags
                                        , &Recurse](  FArianeObject* InvalidatedChild )
             {
-                return InvalidatedChild->Update( UpdateFlags, Recurse );
+                bool bUpdated = InvalidatedChild->Update( UpdateFlags, Recurse );
+
+                if( bUpdated == true )
+                {
+                    InvalidatedChild->SetInvalidatedInParent( false );
+                }
+
+                return bUpdated;
             } );
     }
 

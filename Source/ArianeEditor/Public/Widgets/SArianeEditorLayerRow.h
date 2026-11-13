@@ -9,28 +9,13 @@
 #include "Widgets/Views/STableRow.h"
 #include "Widgets/Views/STreeView.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
+// Ariane headers
+#include "ArianeLayer.h"
 
-class UArianeLayer;
 class UArianeEditorTool;
 
-class FArianeEditorLayerRowItem
-{
-    public:
-        ~FArianeEditorLayerRowItem();
-        FArianeEditorLayerRowItem( UArianeLayer* InLayer, bool bInSensitive);
-
-        UArianeLayer* GetLayer();
-        bool IsSensitive();
-        const TArray<TSharedPtr<FArianeEditorLayerRowItem>>& GetChildren();
-
-    public:
-        UArianeLayer* Layer;
-        bool bSensitive;
-        TArray<TSharedPtr<FArianeEditorLayerRowItem>> Children;
-};
-
 class ARIANEEDITOR_API SArianeEditorLayerRow
-    : public SMultiColumnTableRow<TSharedPtr<FArianeEditorLayerRowItem>>
+    : public SMultiColumnTableRow<UArianeLayer*>
 {
     public:
         ~SArianeEditorLayerRow();
@@ -41,18 +26,19 @@ class ARIANEEDITOR_API SArianeEditorLayerRow
         static const uint32 DROPZONE_ABOVE = 2;
         static const uint32 DROPZONE_BELOW = 3;
 
-        void Construct( const typename STableRow<TSharedPtr<FArianeEditorLayerRowItem>>::FArguments& InArgs
+        void Construct( const typename STableRow<UArianeLayer*>::FArguments& InArgs
                       , const TSharedRef< STableViewBase >& InOwnerTableView
-                      , const TSharedPtr<FArianeEditorLayerRowItem> iItem );
+                      , UArianeLayer* Layer );
         virtual TSharedRef< SWidget > GenerateWidgetForColumn ( const FName& InColumnName ) override;
 
         void Rename();
+/*
         FReply OnMouseButtonUp( const FGeometry & MyGeometry
                               , const FPointerEvent & MouseEvent ) override;
         FReply OnMouseButtonDown( const FGeometry & MyGeometry
                                 , const FPointerEvent & MouseEvent ) override;
-
-        //virtual const FSlateBrush* GetBorder() const override;
+*/
+        virtual const FSlateBrush* GetBorder() const override;
 
     protected:
         virtual FReply OnDragDetected ( const FGeometry& MyGeometry,
@@ -73,7 +59,7 @@ class ARIANEEDITOR_API SArianeEditorLayerRow
                              , bool bParentEnabled ) const override;
         void OnTextChanged( const FText& InText, ETextCommit::Type CommitInfo );
         bool OnVerifyTextChanged( const FText& NewText, FText& OutErrorMessage );
-        virtual ESelectionMode::Type GetSelectionMode () const;
+        //virtual ESelectionMode::Type GetSelectionMode () const;
         void OnVisibleStateChanged( ECheckBoxState iState );
         void OnLockedStateChanged( ECheckBoxState iState );
         ECheckBoxState IsHierarchicallyVisible() const;
@@ -83,10 +69,11 @@ class ARIANEEDITOR_API SArianeEditorLayerRow
         bool IsLayerSelected() const;
         void OnTransformStateChanged( ECheckBoxState iState );
         ECheckBoxState IsTransforming() const;
+        bool IsSensitive() const;
 
     protected:
         uint32 DropZone;
-        TSharedPtr<FArianeEditorLayerRowItem> Item;
+        UArianeLayer* Layer;
         TSharedPtr<SInlineEditableTextBlock> TextBlockWidget;
         UArianeEditorTool* PreviousTool;
 };

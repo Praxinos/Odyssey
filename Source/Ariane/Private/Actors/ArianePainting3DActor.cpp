@@ -24,8 +24,8 @@ AArianePainting3DActor::AArianePainting3DActor(const FObjectInitializer& ObjectI
 
     Painting3DComponent->SetupAttachment( RootComponent );
 
-    // Add this so that the Component shows in the Outliner
-    AddInstanceComponent( Painting3DComponent );
+    // DO NOT CALL AddInstanceComponent( Painting3DComponent ) or else it will be deletable from the details view
+    //AddInstanceComponent( Painting3DComponent );
 }
 
 UArianePainting3DComponent*

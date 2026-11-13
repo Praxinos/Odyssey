@@ -20,34 +20,6 @@
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
-FArianeEditorLayerRowItem::~FArianeEditorLayerRowItem()
-{
-}
-
-FArianeEditorLayerRowItem::FArianeEditorLayerRowItem( UArianeLayer* InLayer, bool bInSensitive )
-    : Layer( InLayer )
-    , bSensitive( bInSensitive )
-{
-}
-
-UArianeLayer*
-FArianeEditorLayerRowItem::GetLayer()
-{
-    return Layer;
-}
-
-const TArray<TSharedPtr<FArianeEditorLayerRowItem>>&
-FArianeEditorLayerRowItem::GetChildren()
-{
-    return Children;
-}
-
-bool
-FArianeEditorLayerRowItem::IsSensitive()
-{
-    return bSensitive;
-}
-
 SArianeEditorLayerRow::~SArianeEditorLayerRow()
 {
 }
@@ -61,21 +33,27 @@ SArianeEditorLayerRow::SArianeEditorLayerRow()
 ECheckBoxState
 SArianeEditorLayerRow::IsHierarchicallyVisible() const
 {
-    bool visibility = Item->GetLayer()->IsVisible();
+    bool visibility = Layer->IsVisible();
 
     return ( visibility ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
-
+/*
+bool
+SArianeEditorLayerRow::IsSensitive() const
+{
+    return Layer->IsSensitive();
+}
+*/
 bool
 SArianeEditorLayerRow::IsVisibleCheckBoxEnabled() const
 {
-    return Item->GetLayer()->GetParentFolder() ? Item->GetLayer()->GetParentFolder()->IsVisible() : true;
+    return Layer->GetParentFolder() ? Layer->GetParentFolder()->IsVisible() : true;
 }
 
 ECheckBoxState
 SArianeEditorLayerRow::IsHierarchicallyLocked() const
 {
-    bool locked = Item->GetLayer()->IsLocked( true );
+    bool locked = Layer->IsLocked( true );
 
     return ( locked ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
@@ -83,19 +61,19 @@ SArianeEditorLayerRow::IsHierarchicallyLocked() const
 bool
 SArianeEditorLayerRow::IsLockedCheckBoxEnabled() const
 {
-    return Item->GetLayer()->GetParentFolder() ? Item->GetLayer()->GetParentFolder()->IsLocked( true ) == false : true;
+    return Layer->GetParentFolder() ? Layer->GetParentFolder()->IsLocked( true ) == false : true;
 }
 
 ECheckBoxState
 SArianeEditorLayerRow::IsTransforming() const
 {
     const TSharedPtr< SArianeEditorLayerStack > treeView = StaticCastSharedPtr<SArianeEditorLayerStack>(OwnerTablePtr.Pin());
-    const TArray<UArianeLayer*> SelectedLayers = Item->GetLayer()->GetLayerStack()->GetSelectedLayers();
+    const TArray<UArianeLayer*> SelectedLayers = Layer->GetLayerStack()->GetSelectedLayers();
 
     if( SelectedLayers.Num() )
     {
         FArianeEditor* Editor = treeView->GetEditor();
-        bool Transforming = ( Item->GetLayer() == SelectedLayers[0] )
+        bool Transforming = ( Layer == SelectedLayers[0] )
                          && ( Editor->IsCurrentTool( UArianeEditorLayerTransformTool::GetStaticType() ) );
 
         return Transforming ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
@@ -109,7 +87,7 @@ SArianeEditorLayerRow::OnTransformStateChanged( ECheckBoxState iState )
 {
     const TSharedPtr< SArianeEditorLayerStack > treeView = StaticCastSharedPtr<SArianeEditorLayerStack>(OwnerTablePtr.Pin());
 
-    treeView->SetSelection( Item );
+    treeView->SetSelection( Layer );
 
     switch( iState )
     {
@@ -144,16 +122,16 @@ SArianeEditorLayerRow::OnVisibleStateChanged( ECheckBoxState iState )
 
     GEditor->BeginTransaction(LOCTEXT("ariane-layer-stack.layer-visibility","Layer Visibility Changed"));
 
-    Item->GetLayer()->Modify();
+    Layer->Modify();
 
     switch( iState )
     {
         case ECheckBoxState::Checked :
-            Item->GetLayer()->SetVisibility( true );
+            Layer->SetVisibility( true );
         break;
 
         case ECheckBoxState::Unchecked :
-            Item->GetLayer()->SetVisibility( false );
+            Layer->SetVisibility( false );
         break;
 
         default :
@@ -170,16 +148,16 @@ SArianeEditorLayerRow::OnLockedStateChanged( ECheckBoxState iState )
 
     GEditor->BeginTransaction(LOCTEXT("ariane-layer-stack.layer-locking","Layer Locking Changed"));
 
-    Item->GetLayer()->Modify();
+    Layer->Modify();
 
     switch( iState )
     {
         case ECheckBoxState::Checked :
-            Item->GetLayer()->SetLocked( true );
+            Layer->SetLocked( true );
         break;
 
         case ECheckBoxState::Unchecked :
-            Item->GetLayer()->SetLocked( false );
+            Layer->SetLocked( false );
         break;
 
         default :
@@ -190,13 +168,25 @@ SArianeEditorLayerRow::OnLockedStateChanged( ECheckBoxState iState )
 }
 
 void
-SArianeEditorLayerRow::Construct( const typename STableRow<TSharedPtr<FArianeEditorLayerRowItem>>::FArguments& InArgs
+SArianeEditorLayerRow::Construct( const typename STableRow<UArianeLayer*>::FArguments& InArgs
                                 , const TSharedRef< STableViewBase >& InOwnerTableView
-                                , const TSharedPtr<FArianeEditorLayerRowItem> iItem )
+                                , UArianeLayer* InLayer )
 {
-    Item = iItem;
+    SMultiColumnTableRow<UArianeLayer*>::FArguments args = InArgs;
 
-    SMultiColumnTableRow <TSharedPtr<FArianeEditorLayerRowItem>>::Construct( InArgs, InOwnerTableView );
+    Layer = InLayer;
+
+    args.Style( &FArianeEditorStyle::Get().GetWidgetStyle<FTableRowStyle>("ArianeEditor.LayerStack.AlternatedRows") )
+        .Padding( FMargin(0.0f, 2.0f) )
+        //.OnCanAcceptDrop(this, &SArianeEditorLayerRow::OnRowCanAcceptDrop)
+        //.OnAcceptDrop(this, &SArianeEditorLayerRow::OnRowAcceptDrop)
+        //.OnDragDetected(this, &SArianeEditorLayerRow::OnRowDragDetected, TWeakPtr<SOdysseyLayerStackTreeView>(iOwnerTableView)
+        ;
+
+
+    SMultiColumnTableRow <UArianeLayer*>::Construct( args, InOwnerTableView );
+
+    SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
 }
 
 TSharedRef<SWidget>
@@ -204,7 +194,6 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
 {
     const TSharedPtr< SArianeEditorLayerStack > treeView = StaticCastSharedPtr<SArianeEditorLayerStack>(OwnerTablePtr.Pin());
     UArianeEditorLayerTransformTool* TransformTool = Cast<UArianeEditorLayerTransformTool>(treeView->GetEditor()->GetTool( UArianeEditorLayerTransformTool::GetStaticType() ));
-    UArianeLayer* Layer = Item->GetLayer();
     TSharedPtr<SWidget> ColumnWidget = SNullWidget::NullWidget;
 
     if( InColumnName == SArianeEditorLayerStack::LAYER_TRANSFORM )
@@ -216,7 +205,6 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
                        .VAlign(VAlign_Center)
                        [
                            SNew( SCheckBox )
-                          .IsEnabled( Item.Get()->IsSensitive() )
                           .Style( isTransformedToggleStyle )
                           .OnCheckStateChanged( this, &SArianeEditorLayerRow::OnTransformStateChanged)
                           .IsChecked( this, &SArianeEditorLayerRow::IsTransforming)
@@ -238,7 +226,6 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
                        .VAlign(VAlign_Center)
                        [
                            SNew( SCheckBox )
-                          .IsEnabled( Item.Get()->IsSensitive() )
                           .Style( isVisibleToggleStyle )
                           .OnCheckStateChanged( this, &SArianeEditorLayerRow::OnVisibleStateChanged)
                           .IsChecked( this, &SArianeEditorLayerRow::IsHierarchicallyVisible)
@@ -255,7 +242,6 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
                        .VAlign(VAlign_Center)
                        [
                            SNew( SCheckBox )
-                          .IsEnabled( Item.Get()->IsSensitive() )
                           .Style( isLockedToggleStyle )
                           .OnCheckStateChanged( this, &SArianeEditorLayerRow::OnLockedStateChanged)
                           .IsChecked( this, &SArianeEditorLayerRow::IsHierarchicallyLocked)
@@ -279,10 +265,10 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
 
         TextBlockWidget = SNew(SInlineEditableTextBlock)
                            // display cell name only for insensitive objects, i.e objects from another cell
-                           .Text( FText::FromString( Layer->GetName() ) )
-                           .ToolTipText_Lambda( [ Layer ]
+                           .Text( FText::FromString(Layer->GetDisplayName() ) )
+                           .ToolTipText_Lambda( [ this ]
                                                 {
-                                                    return FText::FromString( *Layer->GetName() );
+                                                    return FText::FromString( Layer->GetDisplayName() );
                                                 } )
                            .OnVerifyTextChanged( this, &SArianeEditorLayerRow::OnVerifyTextChanged )
                            .OnTextCommitted( this, &SArianeEditorLayerRow::OnTextChanged )
@@ -291,7 +277,7 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
         TextBlockWidget.Get()->SetOverflowPolicy( TOptional<ETextOverflowPolicy>(ETextOverflowPolicy::Ellipsis) );
 
         ColumnWidget = SNew(SHorizontalBox)
-                       .IsEnabled( Item.Get()->IsSensitive() )
+                       //.IsEnabled( Layer->IsSensitive() )
                        +SHorizontalBox::Slot()
                        .AutoWidth()
                        .Padding(6.f, 0.f, 0.f, 0.f)
@@ -317,7 +303,7 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
     // Grey-out all columns but the locking one
     if( InColumnName != SArianeEditorLayerStack::LAYER_LOCKED )
     {
-           ColumnWidget->SetEnabled( TAttribute<bool>::Create( TAttribute<bool>::FGetter::CreateLambda( [ Layer ] () -> bool
+           ColumnWidget->SetEnabled( TAttribute<bool>::Create( TAttribute<bool>::FGetter::CreateLambda( [ this ] () -> bool
                {
                    return ( Layer->IsLocked( true ) == false ) ? true : false;
                } ) ) );
@@ -326,6 +312,7 @@ SArianeEditorLayerRow::GenerateWidgetForColumn ( const FName& InColumnName )
     return ColumnWidget.ToSharedRef();
 }
 
+/*
 FReply
 SArianeEditorLayerRow::OnMouseButtonUp( const FGeometry & MyGeometry
                                       , const FPointerEvent & MouseEvent )
@@ -336,7 +323,6 @@ SArianeEditorLayerRow::OnMouseButtonUp( const FGeometry & MyGeometry
 
     return reply;
 }
-
 
 FReply
 SArianeEditorLayerRow::OnMouseButtonDown( const FGeometry & MyGeometry
@@ -349,36 +335,38 @@ SArianeEditorLayerRow::OnMouseButtonDown( const FGeometry & MyGeometry
     {
         if (treeView.IsValid())
         {
-            treeView->SetSelection(Item);
+            treeView->SetSelection(Layer);
         }
     }
 
     return SMultiColumnTableRow::OnMouseButtonDown( MyGeometry, MouseEvent );
 }
+*/
 
-/*
 const FSlateBrush*
 SArianeEditorLayerRow::GetBorder() const
 {
-    const FSlateBrush* borderBrush = SMultiColumnTableRow<UOdysseyLayer*>::GetBorder();
+    const FSlateBrush* borderBrush = SMultiColumnTableRow<UArianeLayer*>::GetBorder();
+    UArianeLayerStack* LayerStack = Layer->GetLayerStack();
 
-    if (!mLayer)
+    if( Layer != LayerStack->GetCurrentLayer() )
+    {
         return borderBrush;
-
-    UOdysseyLayerStack* layerStack = mLayer->GetLayerStack();
-    if ( !layerStack || layerStack->GetCurrentLayer() != mLayer)
-        return borderBrush;
+    }
 
     const bool bIsActive = OwnerTablePtr.Pin()->AsWidget()->HasKeyboardFocus();
-    return bIsActive ? FOdysseyStyle::GetBrush("OdysseyLayerStack.CurrentLayerBackgroundBrush") : FOdysseyStyle::GetBrush("OdysseyLayerStack.CurrentLayerInactiveBackgroundBrush");
-}
-*/
 
+    return bIsActive ? FArianeEditorStyle::Get().GetBrush("ArianeEditor.LayerStack.CurrentLayerBackgroundBrush")
+                     : FArianeEditorStyle::Get().GetBrush("ArianeEditor.LayerStack.CurrentLayerInactiveBackgroundBrush");
+}
+
+/*
 ESelectionMode::Type
 SArianeEditorLayerRow::GetSelectionMode () const
 {
-    return Item.Get()->IsSensitive() ? ESelectionMode::Type::Multi :  ESelectionMode::Type::None;
+    return Layer->IsSensitive() ? ESelectionMode::Type::Multi :  ESelectionMode::Type::None;
 }
+*/
 
 bool
 SArianeEditorLayerRow::OnVerifyTextChanged( const FText& NewText
@@ -399,11 +387,9 @@ SArianeEditorLayerRow::OnTextChanged( const FText& InText
 {
     const TSharedPtr< SArianeEditorLayerStack > treeView = StaticCastSharedPtr<SArianeEditorLayerStack>(OwnerTablePtr.Pin());
 
-    UArianeLayer* ItemLayer = Item.Get()->GetLayer();
+    Layer->SetDisplayName( *InText.ToString() );
 
-    ItemLayer->Rename( *InText.ToString() );
-
-    TextBlockWidget.Get()->SetText( ItemLayer->GetName() );
+    TextBlockWidget.Get()->SetText( FText::FromString( Layer->GetDisplayName() ) );
 }
 
 FReply
@@ -412,7 +398,6 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
 {
     const TSharedPtr< SArianeEditorLayerStack > TreeView = StaticCastSharedPtr<SArianeEditorLayerStack>(OwnerTablePtr.Pin());
     TSharedPtr<FDragDropOperation> Operation = iDragDropEvent.GetOperation();
-    UArianeLayer* ItemLayer = Item.Get()->GetLayer();
 
     const TArray<UArianeLayer*>& SelectedLayers = TreeView->GetEditor()->GetCurrentPainting3DComponent()->GetLayerStack()->GetSelectedLayers();
 
@@ -424,27 +409,27 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
             // reverse order in order to get the most forward objet on top of the hierarchy
             case DROPZONE_BELOW:
             {
-                UArianeLayerFolder* ParentFolder = ItemLayer->GetParentFolder();
+                UArianeLayerFolder* ParentFolder = Layer->GetParentFolder();
 
                 // don't drop onto the same object or else expect some infinite loop
                 if( ParentFolder != SelectedLayer )
                 {
-                    SelectedLayer->GetParentFolder()->RemoveChildLayer(SelectedLayer);
+                    SelectedLayer->GetParentFolder()->RemoveChildLayer(SelectedLayer, true );
                     ParentFolder->AddChildLayer( SelectedLayer );
                 }
             }
             break;
 
             case DROPZONE_ONTO:
-                if( ItemLayer->GetClass() == UArianeLayerFolder::StaticClass() )
+                if( Layer->GetClass() == UArianeLayerFolder::StaticClass() )
                 {
-                    UArianeLayerFolder* ItemLayerFolder = Cast<UArianeLayerFolder>(ItemLayer);
+                    UArianeLayerFolder* LayerFolder = Cast<UArianeLayerFolder>(Layer);
 
                     // don't drop onto the same object or else expect some infinite loop
-                    if( ItemLayerFolder != SelectedLayer )
+                    if( LayerFolder != SelectedLayer )
                     {
-                        SelectedLayer->GetParentFolder()->RemoveChildLayer(SelectedLayer);
-                        ItemLayerFolder->AddChildLayer(SelectedLayer);
+                        SelectedLayer->GetParentFolder()->RemoveChildLayer(SelectedLayer, true);
+                        LayerFolder->AddChildLayer(SelectedLayer);
                     }
                 }
             break;
@@ -453,11 +438,11 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
             // reverse order in order to get the most forward objet on top of the hierarchy
             case DROPZONE_ABOVE:
             {
-                UArianeLayerFolder* ParentFolder = ItemLayer->GetParentFolder();
+                UArianeLayerFolder* ParentFolder = Layer->GetParentFolder();
 
                 if( ParentFolder != SelectedLayer )
                 {
-                    SelectedLayer->GetParentFolder()->RemoveChildLayer(SelectedLayer);
+                    SelectedLayer->GetParentFolder()->RemoveChildLayer(SelectedLayer,true);
                     ParentFolder->AddChildLayer(SelectedLayer);
                 }
             }
@@ -477,9 +462,7 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
 bool
 SArianeEditorLayerRow::IsLayerSelected() const
 {
-    UArianeLayer* ItemLayer = Item.Get()->GetLayer();
-
-    return ItemLayer->IsSelected();
+    return Layer->IsSelected();
 }
 
 int32
@@ -494,7 +477,7 @@ SArianeEditorLayerRow::OnPaint( const FPaintArgs& Args
     const FTableRowStyle& style = FArianeEditorStyle::Get().GetWidgetStyle<FTableRowStyle>("ArianeEditor.LayerStack.AlternatedRows");
     const FSlateBrush* DropIndicatorBrush = nullptr;
 
-    int32 rowLayerId = SMultiColumnTableRow<TSharedPtr<FArianeEditorLayerRowItem>>::OnPaint( Args
+    int32 rowLayerId = SMultiColumnTableRow<UArianeLayer*>::OnPaint( Args
                                                                                            , AllottedGeometry
                                                                                            , MyCullingRect
                                                                                            , OutDrawElements

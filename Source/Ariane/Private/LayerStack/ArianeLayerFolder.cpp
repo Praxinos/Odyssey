@@ -92,32 +92,60 @@ UArianeLayerFolder::AddChildLayer( UArianeLayer* Orphan )
         Orphan->RegisterComponent();
     }
 
-    Painting3DActor->AddInstanceComponent(Orphan);
+    // commented-out: this would make the layer appear in the outliner details view. We don't want that
+    // because it would display the FName and not the displayName among other inconvient things.
+    //Painting3DActor->AddInstanceComponent(Orphan);
 
     // Force Update transforms (will update the transform of the rootGroup of drawing layers)
     Orphan->OnUpdateTransform( EUpdateTransformFlags::None, ETeleportType::None );
 }
 
 void
-UArianeLayerFolder::RemoveChildLayer( UArianeLayer* Child )
+UArianeLayerFolder::RemoveChildLayer( UArianeLayer* Child, bool bDestroy )
 {
-    AArianePainting3DActor* Painting3DActor = Cast<AArianePainting3DActor>(GetOwner());
+    if( bDestroy )
+    {
+         // will call void UArianeLayer::OnComponentDestroyed() which will in turn call RemoveChildLayer( Child, false )
+        Child->DestroyComponent();
+    }
+    else
+    {
+        ChildLayers.Remove( Child );
 
-    //Child->SetParentFolder( nullptr );
+        InvalidatedChildLayers.Remove( Child );
 
-    ChildLayers.Remove( Child );
+/*
+        if( Child->IsSelected() )
+        {
+            GetLayerStack()->UnselectLayer( Child, true );
+        }
+*/
 
-    InvalidatedChildLayers.Remove( Child );
+        Child->DetachFromComponent( FDetachmentTransformRules::KeepRelativeTransform );
+    }
 
     Invalidate();
+}
 
-    Child->DetachFromComponent( FDetachmentTransformRules::KeepRelativeTransform );
-    Child->UnregisterComponent();
+void UArianeLayerFolder::OnChildDetached( USceneComponent* ChildComponent )
+{
+    UArianeLayer* ChildLayer = Cast<UArianeLayer>(ChildComponent);
 
-    // Rename() is used to define the parent object
-    Child->Rename( *Child->GetFName().ToString(), nullptr );
+    Super::OnChildDetached(ChildComponent);
 
-    Painting3DActor->RemoveInstanceComponent(Child);
+    if ( ChildLayer )
+    {
+        UArianeLayerStack* LayerStack = GetLayerStack();
+
+        if( ChildLayer->IsSelected() && LayerStack )
+        {
+            LayerStack->UnselectLayer( ChildLayer, false );
+        }
+
+        ChildLayers.Remove(ChildLayer);
+        InvalidatedChildLayers.Remove(ChildLayer);
+        Invalidate();
+    }
 }
 
 // static
