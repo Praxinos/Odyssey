@@ -196,7 +196,7 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
 
         //sequencerInitParams.EventContexts.Bind( PlaybackContext.ToSharedRef(), &FLevelSequencePlaybackContext::GetEventContexts );
         sequencerInitParams.PlaybackContext.Bind( mPlaybackContext.ToSharedRef(), &FEposSequenceEditorPlaybackContext::GetPlaybackContextAsObject );
-        //sequencerInitParams.PlaybackClient.Bind( mPlaybackContext.ToSharedRef(), &FEposSequenceEditorPlaybackContext::GetPlaybackClientAsInterface );
+        sequencerInitParams.PlaybackClient.Bind( mPlaybackContext.ToSharedRef(), &FEposSequenceEditorPlaybackContext::GetPlaybackClientAsInterface );
 
         sequencerInitParams.ViewParams.UniqueName = "EposSequencerEditor";
         sequencerInitParams.ViewParams.ScrubberStyle = ESequencerScrubberStyle::FrameBlock;

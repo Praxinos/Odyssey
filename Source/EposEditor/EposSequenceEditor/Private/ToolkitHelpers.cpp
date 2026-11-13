@@ -10,10 +10,12 @@
 #include "CineCameraActor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Containers/ArrayBuilder.h"
+#include "Engine/StaticMeshActor.h"
 #include "GameFramework/Actor.h"
 #include "IMovieScenePlaybackClient.h"
 #include "ISequencer.h"
 #include "LevelEditor.h"
+//#include "LevelSequenceEditorSubsystem.h"
 #include "Materials/MaterialInterface.h"
 #include "MovieScene.h"
 #include "MovieSceneSequence.h"
@@ -398,6 +400,14 @@ ToolkitHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iAc
         //CreatePropertyTrack( iSequencer, iActor, "CameraComponent", "CurrentAperture" );
 
         return;
+    }
+    else if( iActor->IsA<AStaticMeshActor>() )
+    {
+        //if( ULevelSequenceEditorSubsystem* Subsystem = GEditor->GetEditorSubsystem<ULevelSequenceEditorSubsystem>() )
+        //{
+        //    Subsystem->AddDefaultTracksForActor( iSequencer->AsShared(), *iActor, iBinding );
+        //}
+        CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
     }
     else if( iActor->IsA<AOdysseyAnimationActor>() )
     {
