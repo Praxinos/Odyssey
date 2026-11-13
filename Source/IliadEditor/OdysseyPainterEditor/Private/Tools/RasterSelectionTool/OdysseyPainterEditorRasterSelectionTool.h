@@ -78,7 +78,7 @@ protected:
     FOdysseyShapes Shapes;
 
     /** The feather radius. */
-    UPROPERTY(EditAnywhere, Category = "Feather", meta = (ClampMin = "0", UIMin = "0", UIMax = "1000", Delta = "1"))
+    UPROPERTY(EditAnywhere, Category = "Feather", meta = (ClampMin = "0", ClampMax = "1000", UIMin = "0", UIMax = "1000", Delta = "1"))
     float FeatherRadius = 0;
 
     EOdysseySelectionState mSelectionState;
