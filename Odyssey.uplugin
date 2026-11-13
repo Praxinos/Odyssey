@@ -26,6 +26,10 @@
     "Plugins": [
         {
             "Enabled": true,
+            "Name": "DataValidation"
+        },
+        {
+            "Enabled": true,
             "Name": "StylusInput"
         },
         {

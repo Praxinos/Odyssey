@@ -9,6 +9,12 @@
 #include "OdysseyAnimation.h"
 
 #if WITH_EDITOR
+#include "Engine/Texture2D.h"
+#include "HAL/IConsoleManager.h"
+#include "Misc/App.h"
+#include "OdysseyBlendShader.h"
+#include "OdysseyTiledImage.h"
+#include "UObject/UObjectIterator.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyAnimationCellImageRasterExport.h"
@@ -21,6 +27,7 @@
 #include "CanvasItem.h"
 #include "OdysseyPixelFormat.h"
 #include "TextureCompiler.h"
+#include "TextureResource.h"
 #include "UObject/ObjectSaveContext.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "ScopedTransaction.h"
@@ -28,6 +35,25 @@
 #endif
 
 #define LOCTEXT_NAMESPACE "Animation"
+
+#if WITH_EDITOR
+namespace
+{
+TAutoConsoleVariable<int32> CVarUseTiledAnimationRendering(
+    TEXT("Odyssey.Animation.UseTiledRendering"), 0,
+    TEXT("Experimental raster animation cell rendering in the editor: 0 = texture, 1 = tiled image."),
+    FConsoleVariableDelegate::CreateLambda([](IConsoleVariable*)
+    {
+        for (TObjectIterator<UOdysseyAnimationCellImageRaster> It; It; ++It)
+        {
+            if (!It->HasAnyFlags(RF_ClassDefaultObject) && It->GetAnimation())
+            {
+                It->RenderingChanged();
+            }
+        }
+    }));
+}
+#endif
 
 UOdysseyAnimationCellImageRaster::UOdysseyAnimationCellImageRaster()
 {
@@ -54,10 +80,149 @@ UOdysseyAnimationCellImageRaster::BuildRenderPipelineInternal(
     const TArray<const IOdysseyTextureRenderingAbility*>& iParents
 ) const
 {
+#if WITH_EDITOR
+    if (CVarUseTiledAnimationRendering.GetValueOnGameThread()
+        && const_cast<UOdysseyAnimationCellImageRaster*>(this)->UpdateTiledImage())
+    {
+        const UOdysseyTiledImage* Image = GetTiledImage();
+        const FMatrix CellTransform = (iType & EOdysseyRenderingType::OutOfPegs) ? OutOfPegsTransform() : FMatrix::Identity;
+        const FIntPoint Size = TiledImageSize;
+        // Reassemble using the legacy texture's sampling representation. In particular an
+        // sRGB render target encodes the stored linear tiles before hardware interpolation.
+        const UTexture2D* SourceTexture = GetRenderTexture();
+        const EPixelFormat Format = SourceTexture->GetPixelFormat();
+        const ETextureCreateFlags EncodingFlags = SourceTexture->GetResource()->TextureRHI->GetDesc().Flags & TexCreate_SRGB;
+        auto DrawTiles = Image->BuildRenderFunction(FIntRect(FIntPoint::ZeroValue, Size));
+        oRenderFunction = [DrawTiles = MoveTemp(DrawTiles), Size, Format, EncodingFlags, CellTransform](FRDGBuilder& GraphBuilder,
+            ERHIFeatureLevel::Type FeatureLevel, FRDGTextureRef Destination,
+            const FIntRect& SourceRect, const FIntRect& DestinationRect, const FMatrix& Transform)
+        {
+            RDG_EVENT_SCOPE(GraphBuilder, "Odyssey.Animation.TiledCell");
+            // Assemble a continuous source before filtering: atlas borders must not create seams
+            // under zoom, rotation or anisotropic sampling. No persistent full-size texture is added.
+            FRDGTextureRef Source = GraphBuilder.CreateTexture(FRDGTextureDesc::Create2D(Size, Format,
+                FClearValueBinding::Transparent, TexCreate_ShaderResource | TexCreate_RenderTargetable | EncodingFlags),
+                TEXT("Odyssey.Animation.TiledCell.Source"));
+            DrawTiles(GraphBuilder, Source, FIntPoint::ZeroValue);
+            AddClearRenderTargetPass(GraphBuilder, Destination, FLinearColor::Transparent, DestinationRect);
+            FOdysseyBlendShader::BlendRect(GraphBuilder, FeatureLevel, Destination, Source, Destination,
+                SourceRect, DestinationRect, CellTransform * Transform, EOdysseyColorBlendMode::Normal,
+                EOdysseyAlphaBlendMode::Normal, 1.0f, EOdysseyAntiAliasing::Anisotropic);
+        };
+        return true;
+    }
+#endif
     return Super::BuildRenderPipelineInternal(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents);
 }
 
 #if WITH_EDITOR
+const UOdysseyTiledImage* UOdysseyAnimationCellImageRaster::GetTiledImage() const
+{
+    return Cast<UOdysseyTiledImage>(TiledImage);
+}
+
+bool UOdysseyAnimationCellImageRaster::UpdateTiledImage()
+{
+    check(IsInGameThread());
+    // Detached layers and class defaults have no source image.
+    if (HasAnyFlags(RF_ClassDefaultObject) || !GetAnimation() || !FApp::CanEverRender())
+    {
+        return false;
+    }
+
+    TRACE_CPUPROFILER_EVENT_SCOPE(OdysseyAnimationCell_SyncTiledImage);
+    UTexture2D* SourceTexture = GetRenderTexture();
+    if (!SourceTexture || !SourceTexture->Source.IsValid())
+    {
+        return false;
+    }
+    const FIntPoint SourceSize(SourceTexture->Source.GetSizeX(), SourceTexture->Source.GetSizeY());
+    const FGuid SourceId = SourceTexture->Source.GetId();
+    // Source-only edits have no raster notifications. Preserve partial updates for normal commits.
+    bTiledImageDirty |= !TiledImage || TiledImageSize != SourceSize
+        || (PendingTiledImageTiles.IsEmpty() && TiledImageSourceId != SourceId);
+    if (!bTiledImageDirty && PendingTiledImageTiles.IsEmpty())
+    {
+        return true;
+    }
+    SourceTexture->BlockOnAnyAsyncBuild();
+    SourceTexture->WaitForPendingInitOrStreaming();
+
+    // CopyFromTexture samples linear values. Decoded sRGB values need float storage, and
+    // float sources keep their GPU precision so filtering matches the existing render path.
+    const EPixelFormat SourcePixelFormat = SourceTexture->GetPixelFormat();
+    const EOdysseyTiledImageFormat TileFormat = SourcePixelFormat == PF_FloatRGBA
+        ? EOdysseyTiledImageFormat::RGBA16F
+        : SourceTexture->Source.GetFormat() == TSF_BGRA8 && !SourceTexture->SRGB
+            ? EOdysseyTiledImageFormat::RGBA8 : EOdysseyTiledImageFormat::RGBA32F;
+
+    UOdysseyTiledImage* Image = Cast<UOdysseyTiledImage>(TiledImage);
+    if (!Image)
+    {
+        Image = NewObject<UOdysseyTiledImage>(this);
+        TiledImage = Image;
+    }
+    const FIntRect SourceRect(FIntPoint::ZeroValue, SourceSize);
+    if (bTiledImageDirty || Image->GetFormat() != TileFormat)
+    {
+        // Structural changes discard old tiles, including those outside a resized canvas.
+        Image->Initialize(64, TileFormat);
+        Image->ClearFlags(RF_Transactional);
+        Image->CopyFromTexture(SourceTexture, SourceRect, FIntPoint::ZeroValue);
+    }
+    else
+    {
+        // Upload each touched tile once, preserving identities and cache entries of all other tiles.
+        for (const FIntPoint& Tile : PendingTiledImageTiles)
+        {
+            FIntRect Rect(Tile * 64, (Tile + FIntPoint(1, 1)) * 64);
+            Rect.Clip(SourceRect);
+            if (!Rect.IsEmpty())
+            {
+                Image->CopyFromTexture(SourceTexture, Rect, Rect.Min);
+            }
+        }
+    }
+    PendingTiledImageTiles.Reset();
+    TiledImageSize = SourceSize;
+    TiledImageSourceId = SourceId;
+    bTiledImageDirty = false;
+    return true;
+}
+
+void UOdysseyAnimationCellImageRaster::InvalidateTiledImage(const TArray<::ULIS::FRectI>& Rects)
+{
+    if (bTiledImageDirty)
+    {
+        return;
+    }
+    const FIntRect Bounds = GetDefaultRenderRect();
+    for (FIntRect Rect : ULISUtils::ToIntRects(Rects))
+    {
+        Rect.Clip(Bounds);
+        if (Rect.IsEmpty())
+        {
+            continue;
+        }
+        // FIntRect::Max is exclusive. A rectangle ending at 64 must not touch tile 1.
+        const FIntPoint First = Rect.Min / 64;
+        const FIntPoint Last = (Rect.Max - FIntPoint(1, 1)) / 64;
+        for (int32 Y = First.Y; Y <= Last.Y; ++Y)
+        {
+            for (int32 X = First.X; X <= Last.X; ++X)
+            {
+                PendingTiledImageTiles.Add(FIntPoint(X, Y));
+            }
+        }
+    }
+}
+
+void UOdysseyAnimationCellImageRaster::PostTransacted(const FTransactionObjectEvent& TransactionEvent)
+{
+    Super::PostTransacted(TransactionEvent);
+    bTiledImageDirty = true;
+}
+
 void
 UOdysseyAnimationCellImageRaster::InitRasterBlock() const
 {
@@ -123,6 +288,7 @@ void
 UOdysseyAnimationCellImageRaster::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
 {
     Super::PostDuplicate(iDuplicateMode);
+    bTiledImageDirty = true;
 
     //The cell could be duplicated in a different animation with different parameters
     //Ensure the block uses those parameters
@@ -149,6 +315,7 @@ void
 UOdysseyAnimationCellImageRaster::PostLoad()
 {
     Super::PostLoad();
+    bTiledImageDirty = true;
 
     if (mRasterBlock)
     {
@@ -198,6 +365,7 @@ UOdysseyAnimationCellImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, T
 void
 UOdysseyAnimationCellImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects)
 {
+    InvalidateTiledImage(iRects);
     FOdysseySurfaceTexture2DEditable surface(GetRenderTexture(), GetRasterBlock()->GetBlock());
     surface.Invalidate(iRects);
     RenderingChanged(::ULISUtils::ToIntRects(iRects), true);
@@ -206,6 +374,7 @@ UOdysseyAnimationCellImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& i
 void
 UOdysseyAnimationCellImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
 {
+    InvalidateTiledImage(iRects);
     TSharedPtr<::ULIS::FBlock> block =  GetRasterBlock()->GetBlock();
     FOdysseySurfaceTexture2DEditable surface(GetRenderTexture(), block);
     surface.Invalidate(iRects);
@@ -275,7 +444,10 @@ UOdysseyAnimationCellImageRaster::PreSave(FObjectPreSaveContext SaveContext)
 {
     Super::PreSave(SaveContext);
 
-    //InitTexture();
+    if (!SaveContext.IsCooking())
+    {
+        UpdateTiledImage();
+    }
 }
 
 void

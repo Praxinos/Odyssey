@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "PixelFormat.h"
+#include "RenderGraphFwd.h"
 #include "Serialization/EditorBulkData.h"
 #include "Factories/Factory.h"
 
@@ -73,6 +74,13 @@ public:
      */
     UFUNCTION(BlueprintCallable, Category="Odyssey|TiledImage")
     void Render(UTextureRenderTarget2D* Destination, FIntRect Rect, FIntPoint Position) const;
+
+    /** Prepare on the game thread, invoke on the render thread in an existing graph.
+     * Captures tile handles rather than the UObject, so subsequent edits cannot change this render.
+     * The destination position is in pixels; this operation does not scale or blend the image.
+     */
+    using FRenderFunction = TFunction<void(FRDGBuilder&, FRDGTextureRef, FIntPoint)>;
+    FRenderFunction BuildRenderFunction(FIntRect SourceRect) const;
 
 public:
     virtual void Serialize(FArchive& Ar) override;

@@ -66,6 +66,7 @@ namespace UnrealBuildTool.Rules
                 {
                     "Core",
                     "CoreUObject",
+                    "DataValidation", // Scoped isolation of package persistence automation tests.
                     "Engine",
                     "Kismet",
                     "ImageCore",

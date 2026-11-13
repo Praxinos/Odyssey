@@ -15,6 +15,7 @@
 #if WITH_EDITOR
 class FOdysseyRasterBlock;
 class FOdysseyMediaRaster;
+class UOdysseyTiledImage;
 #endif
 
 UCLASS(BlueprintType)
@@ -50,6 +51,10 @@ public:
 #if WITH_EDITOR
 public:
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
+    /** Returns the existing editor snapshot without creating or synchronizing it. */
+    const UOdysseyTiledImage* GetTiledImage() const;
+    /** Synchronizes the editor snapshot from the authoritative raster render texture. */
+    bool UpdateTiledImage();
     virtual FOdysseyMediaProvider GetMediaProvider() const override;
     virtual void Clear() override;
 
@@ -57,6 +62,7 @@ public:
     virtual void PostLoad() override;
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual void PreSave(FObjectPreSaveContext SaveContext) override;
+    virtual void PostTransacted(const FTransactionObjectEvent& TransactionEvent) override;
     FCriticalSection* GetImageRenderingMutex() const;
 
 private:
@@ -65,6 +71,7 @@ private:
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
     void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects);
     void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);
+    void InvalidateTiledImage(const TArray<::ULIS::FRectI>& Rects);
 
 private:
     //Import/Export
@@ -75,5 +82,17 @@ private:
     mutable TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
     mutable FCriticalSection mImageRenderingMutex;
     mutable TWeakPtr<FOdysseyMediaRaster> mMediaRaster;
+    bool bTiledImageDirty = true;
+    TSet<FIntPoint> PendingTiledImageTiles;
+    FIntPoint TiledImageSize = FIntPoint::ZeroValue;
+    FGuid TiledImageSourceId;
+#endif
+
+#if WITH_EDITORONLY_DATA
+private:
+    // UObject avoids an UHT dependency on the Editor-only OdysseyImaging module in Game targets.
+    // Access through the typed editor API above. This reference and its image are never cooked.
+    UPROPERTY(Instanced, NonTransactional)
+    TObjectPtr<UObject> TiledImage;
 #endif
 };

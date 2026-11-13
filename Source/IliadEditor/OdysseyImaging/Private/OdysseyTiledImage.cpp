@@ -123,32 +123,15 @@ UOdysseyTiledImage::CopyFromTexture(UTexture* InTexture, FIntRect InRect, FIntPo
     OnChanged.Broadcast();
 }
 
-void
-UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InRect, FIntPoint InPosition) const
+UOdysseyTiledImage::FRenderFunction UOdysseyTiledImage::BuildRenderFunction(FIntRect SourceRect) const
 {
-    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyTiledImage::Render);
-
-    if (!OutRenderTarget || !Odyssey::TileUtils::IsValidTileSize(TileSize)
-        || InRect.Width() <= 0 || InRect.Height() <= 0)
+    check(IsInGameThread());
+    if (!Odyssey::TileUtils::IsValidTileSize(TileSize) || SourceRect.IsEmpty())
     {
-        return;
+        return {};
     }
 
-    FIntRect RenderTargetRect(0, 0, OutRenderTarget->GetSurfaceWidth(), OutRenderTarget->GetSurfaceHeight());
-    FIntRect DestinationRect(
-        InPosition,
-        InPosition + InRect.Size()
-    );
-    DestinationRect.Clip(RenderTargetRect);
-    if (DestinationRect.Width() <= 0 || DestinationRect.Height() <= 0)
-    {
-        return;
-    }
-
-    const FIntRect VisibleSourceRect = DestinationRect + (InRect.Min - InPosition);
-
-    //Load needed Tiles
-    TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTilePositionsFromRect(TileSize, VisibleSourceRect);
+    TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTilePositionsFromRect(TileSize, SourceRect);
     TArray<FOdysseyTileId> TileIds;
     TileIds.Reserve(TilePositions.Num());
     for (const FIntPoint& TilePosition : TilePositions)
@@ -156,91 +139,69 @@ UOdysseyTiledImage::Render(UTextureRenderTarget2D* OutRenderTarget, FIntRect InR
         const FOdysseyTileId* TileId = Tiles.Find(TilePosition);
         TileIds.Add(TileId ? *TileId : FOdysseyTileId());
     }
-
-    TArray<TSharedFuture<TSharedPtr<FOdysseyTileManager::FTileTextureHandle>>> TileTextureHandles = FOdysseyTileManager::Get().GetTileTextures(TileIds, TileSize, GetPixelFormat());
-
-    ENQUEUE_RENDER_COMMAND(UOdysseyTiledImage_Render)(
-        [
-            OutRenderTarget,
-            TilePositions,
-            TileTextureHandles = MoveTemp(TileTextureHandles),
-            TileSize = TileSize,
-            TilePixelFormat = GetPixelFormat(),
-            DestinationRect,
-            DestinationPosition = InPosition,
-            SourceRect = InRect
-        ](FRHICommandListImmediate& RHICmdList)
+    auto TileHandles = FOdysseyTileManager::Get().GetTileTextures(TileIds, TileSize, GetPixelFormat());
+    return [TilePositions = MoveTemp(TilePositions), TileHandles = MoveTemp(TileHandles),
+        TileSize = TileSize, SourceRect](FRDGBuilder& GraphBuilder, FRDGTextureRef Destination, FIntPoint Position)
+    {
+        RDG_EVENT_SCOPE(GraphBuilder, "Odyssey.TiledImage.Render");
+        FIntRect DestinationRect(Position, Position + SourceRect.Size());
+        DestinationRect.Clip(FIntRect(FIntPoint::ZeroValue, Destination->Desc.Extent));
+        if (DestinationRect.IsEmpty())
         {
-            TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::TiledImage::Render);
-
-            FRDGBuilder GraphBuilder(RHICmdList);
-            FRDGTextureRef DestinationTexture = OutRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( GraphBuilder );
-
-            const FGlobalShaderMap* ShaderMap = GetGlobalShaderMap(GMaxRHIFeatureLevel);
-            FIntRect TileRect(0, 0, TileSize, TileSize);
-
-            for (int i = 0; i < TilePositions.Num(); i++)
-            {
-                const FIntPoint& TilePosition = TilePositions[i];
-                FIntPoint TileDstPos(TilePosition * TileRect.Size() - SourceRect.Min + DestinationPosition);
-                FIntRect TileDstRect(TileDstPos, TileDstPos + TileRect.Size());
-                TileDstRect.Clip(DestinationRect);
-                if (TileDstRect.Width() <= 0 || TileDstRect.Height() <= 0)
-                {
-                    continue;
-                }
-
-                FIntPoint TileSrcPos(
-                    TileDstRect.Min.X - TileDstPos.X,
-                    TileDstRect.Min.Y - TileDstPos.Y
-                );
-                FIntRect TileSrcRect(
-                    TileSrcPos,
-                    TileSrcPos + TileDstRect.Size()
-                );
-
-                //If the buffer is null, the tile is empty
-                TSharedPtr<FOdysseyTileManager::FTileTextureHandle> TileTextureHandle;
-                if (TileTextureHandles[i].IsValid())
-                    TileTextureHandle = TileTextureHandles[i].Get();
-
-                FTextureRHIRef TileTextureRHI;
-                FIntPoint TileTexturePosition;
-                if (TileTextureHandle.IsValid())
-                {
-                    TileTextureRHI = TileTextureHandle->GetTextureRHI();
-                    TileTexturePosition = TileTextureHandle->GetPositionInTexture();
-                }
-
-                if (TileTextureRHI.IsValid())
-                {
-                    FRDGTextureRef TileTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(TileTextureRHI, TEXT("UOdysseyTiledImage::TileTexture")));
-
-                    AddDrawTexturePass(
-                        GraphBuilder,
-                        FScreenPassViewInfo(),
-                        TileTexture,
-                        DestinationTexture,
-                        TileSrcRect.Min + TileTexturePosition,
-                        TileSrcRect.Size(),
-                        TileDstRect.Min,
-                        TileSrcRect.Size()
-                    );
-                }
-                else
-                {
-/*#ifdef UE_BUILD_DEBUG
-                    FLinearColor ClearColor = FLinearColor::Red;
-#else*/
-                    FLinearColor ClearColor = FLinearColor::Transparent;
-//#endif
-                    AddClearRenderTargetPass(GraphBuilder, DestinationTexture, ClearColor, TileDstRect);
-                }
-            }
-
-            GraphBuilder.Execute();
+            return;
         }
-    );
+        for (int32 Index = 0; Index < TilePositions.Num(); ++Index)
+        {
+            const FIntPoint TileOrigin = TilePositions[Index] * TileSize - SourceRect.Min + Position;
+            FIntRect TileDestination(TileOrigin, TileOrigin + FIntPoint(TileSize, TileSize));
+            TileDestination.Clip(DestinationRect);
+            if (TileDestination.IsEmpty())
+            {
+                continue;
+            }
+            const auto Handle = TileHandles[Index].IsValid() ? TileHandles[Index].Get() : nullptr;
+            if (Handle && Handle->GetTextureRHI().IsValid())
+            {
+                FRDGTextureRef TileTexture = GraphBuilder.RegisterExternalTexture(
+                    CreateRenderTarget(Handle->GetTextureRHI(), TEXT("Odyssey.TiledImage.Tile")));
+                AddDrawTexturePass(GraphBuilder, FScreenPassViewInfo(), TileTexture, Destination,
+                    TileDestination.Min - TileOrigin + Handle->GetPositionInTexture(), TileDestination.Size(),
+                    TileDestination.Min, TileDestination.Size());
+            }
+            else
+            {
+                AddClearRenderTargetPass(GraphBuilder, Destination, FLinearColor::Transparent, TileDestination);
+            }
+        }
+    };
+}
+
+void UOdysseyTiledImage::Render(UTextureRenderTarget2D* Destination, FIntRect Rect, FIntPoint Position) const
+{
+    if (!Destination)
+    {
+        return;
+    }
+    // Clip before preparing handles, so offscreen tiles are not loaded.
+    FIntRect DestinationRect(Position, Position + Rect.Size());
+    DestinationRect.Clip(FIntRect(0, 0, Destination->GetSurfaceWidth(), Destination->GetSurfaceHeight()));
+    if (DestinationRect.IsEmpty())
+    {
+        return;
+    }
+    FRenderFunction RenderFunction = BuildRenderFunction(DestinationRect + (Rect.Min - Position));
+    if (!RenderFunction)
+    {
+        return;
+    }
+    ENQUEUE_RENDER_COMMAND(OdysseyTiledImageRender)(
+        [Destination, Position = DestinationRect.Min, RenderFunction = MoveTemp(RenderFunction)]
+        (FRHICommandListImmediate& RHICmdList)
+        {
+            FRDGBuilder GraphBuilder(RHICmdList);
+            RenderFunction(GraphBuilder, Destination->GetRenderTargetResource()->GetRenderTargetTexture(GraphBuilder), Position);
+            GraphBuilder.Execute();
+        });
 }
 
 struct FOdysseyTiledImageObjectVersion

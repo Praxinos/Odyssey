@@ -5,6 +5,9 @@
 
 #include "Engine/TextureRenderTarget2D.h"
 #include "ImageUtils.h"
+#include "HAL/IConsoleManager.h"
+#include "RenderGraphUtils.h"
+#include "UObject/UObjectIterator.h"
 #include "ScreenPass.h"
 #include "TextureCompiler.h"
 #include "TextureResource.h"
@@ -22,6 +25,7 @@
 #include "OdysseyTextureLayerImageRasterImport.h"
 #include "OdysseyTextureLayerImageRasterExport.h"
 #include "OdysseyTextureLayerStack.h"
+#include "OdysseyTiledImage.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 #include "ULISEventBuilder.h"
@@ -29,6 +33,24 @@
 #include "ULISUtils.h"
 
 #define LOCTEXT_NAMESPACE "Texture"
+
+namespace
+{
+TAutoConsoleVariable<int32> CVarUseTiledRendering(
+    TEXT("Odyssey.Texture.UseTiledRendering"), 0,
+    TEXT("Experimental raster texture layer rendering: 0 = texture, 1 = tiled image."),
+    FConsoleVariableDelegate::CreateLambda([](IConsoleVariable*)
+    {
+        // Refresh previews and thumbnails when switching the comparison path.
+        for (TObjectIterator<UOdysseyTextureLayerImageRaster> It; It; ++It)
+        {
+            if (!It->HasAnyFlags(RF_ClassDefaultObject) && It->GetTexture())
+            {
+                It->RenderingChanged();
+            }
+        }
+    }));
+}
 
 UOdysseyTextureLayerImageRaster::~UOdysseyTextureLayerImageRaster()
 {
@@ -44,6 +66,7 @@ void
 UOdysseyTextureLayerImageRaster::PostLoad()
 {
     Super::PostLoad();
+    bTiledImageDirty = true;
 
     if (RasterBlock)
     {
@@ -58,6 +81,97 @@ UOdysseyTextureLayerImageRaster::PostLoad()
         renderTexture->UpdateResource();
         FTextureCompilingManager::Get().FinishCompilation({ renderTexture });
     }
+}
+
+const UOdysseyTiledImage* UOdysseyTextureLayerImageRaster::GetTiledImage() const
+{
+    return TiledImage;
+}
+
+bool UOdysseyTextureLayerImageRaster::UpdateTiledImage()
+{
+    check(IsInGameThread());
+    // Detached layers and class defaults have no source image.
+    if (HasAnyFlags(RF_ClassDefaultObject) || !GetTexture())
+    {
+        return false;
+    }
+
+    TRACE_CPUPROFILER_EVENT_SCOPE(OdysseyTextureLayer_SyncTiledImage);
+    UTexture2D* SourceTexture = GetRenderTexture();
+    if (!SourceTexture || !SourceTexture->Source.IsValid())
+    {
+        return false;
+    }
+    const FIntPoint SourceSize(SourceTexture->Source.GetSizeX(), SourceTexture->Source.GetSizeY());
+    const FGuid SourceId = SourceTexture->Source.GetId();
+    // Source-only edits have no raster notifications. Preserve partial updates for normal commits.
+    bTiledImageDirty |= !TiledImage || TiledImageSize != SourceSize
+        || (PendingTiledImageTiles.IsEmpty() && TiledImageSourceId != SourceId);
+    if (!bTiledImageDirty && PendingTiledImageTiles.IsEmpty())
+    {
+        return true;
+    }
+    SourceTexture->BlockOnAnyAsyncBuild();
+    SourceTexture->WaitForPendingInitOrStreaming();
+
+    // Integer 16-bit sources require 32-bit float tiles to preserve their precision.
+    const ETextureSourceFormat SourceFormat = SourceTexture->Source.GetFormat();
+    const EOdysseyTiledImageFormat TileFormat = SourceFormat == TSF_BGRA8
+        ? EOdysseyTiledImageFormat::RGBA8
+        : SourceFormat == TSF_RGBA16F ? EOdysseyTiledImageFormat::RGBA16F : EOdysseyTiledImageFormat::RGBA32F;
+
+    if (!TiledImage)
+    {
+        TiledImage = NewObject<UOdysseyTiledImage>(this);
+    }
+    const FIntRect SourceRect(FIntPoint::ZeroValue, SourceSize);
+    if (bTiledImageDirty || TiledImage->GetFormat() != TileFormat)
+    {
+        // Structural changes discard old tiles, including those outside a resized canvas.
+        TiledImage->Initialize(64, TileFormat);
+        TiledImage->ClearFlags(RF_Transactional);
+        TiledImage->CopyFromTexture(SourceTexture, SourceRect, FIntPoint::ZeroValue);
+    }
+    else
+    {
+        // Upload each touched tile once, preserving identities and cache entries of all other tiles.
+        for (const FIntPoint& Tile : PendingTiledImageTiles)
+        {
+            FIntRect Rect(Tile * 64, (Tile + FIntPoint(1, 1)) * 64);
+            Rect.Clip(SourceRect);
+            if (!Rect.IsEmpty())
+            {
+                TiledImage->CopyFromTexture(SourceTexture, Rect, Rect.Min);
+            }
+        }
+    }
+    PendingTiledImageTiles.Reset();
+    TiledImageSize = SourceSize;
+    TiledImageSourceId = SourceId;
+    bTiledImageDirty = false;
+    return true;
+}
+
+void UOdysseyTextureLayerImageRaster::PreSave(FObjectPreSaveContext SaveContext)
+{
+    Super::PreSave(SaveContext);
+    if (!SaveContext.IsCooking())
+    {
+        UpdateTiledImage();
+    }
+}
+
+void UOdysseyTextureLayerImageRaster::PostDuplicate(EDuplicateMode::Type DuplicateMode)
+{
+    Super::PostDuplicate(DuplicateMode);
+    bTiledImageDirty = true;
+}
+
+void UOdysseyTextureLayerImageRaster::PostTransacted(const FTransactionObjectEvent& TransactionEvent)
+{
+    Super::PostTransacted(TransactionEvent);
+    bTiledImageDirty = true;
 }
 
 void
@@ -177,9 +291,72 @@ UOdysseyTextureLayerImageRaster::SanitizeRasterBlock(const TArray<::ULIS::FRectI
     }
 }
 
+void UOdysseyTextureLayerImageRaster::InvalidateTiledImage(const TArray<::ULIS::FRectI>& Rects)
+{
+    if (bTiledImageDirty)
+    {
+        return;
+    }
+    const FIntRect Bounds = GetDefaultRenderRect();
+    for (FIntRect Rect : ULISUtils::ToIntRects(Rects))
+    {
+        Rect.Clip(Bounds);
+        if (Rect.IsEmpty())
+        {
+            continue;
+        }
+        // FIntRect::Max is exclusive. A rectangle ending at 64 must not touch tile 1.
+        const FIntPoint First = Rect.Min / 64;
+        const FIntPoint Last = (Rect.Max - FIntPoint(1, 1)) / 64;
+        for (int32 Y = First.Y; Y <= Last.Y; ++Y)
+        {
+            for (int32 X = First.X; X <= Last.X; ++X)
+            {
+                PendingTiledImageTiles.Add(FIntPoint(X, Y));
+            }
+        }
+    }
+}
+
+bool UOdysseyTextureLayerImageRaster::BuildRenderPipelineInternal(FFrameNumber Frame, uint64 Type,
+    FRenderFunction& OutRenderFunction, const FCanRenderFunction& CanRenderFunction,
+    const TArray<const IOdysseyTextureRenderingAbility*>& Parents) const
+{
+    if (!CVarUseTiledRendering.GetValueOnGameThread())
+    {
+        return Super::BuildRenderPipelineInternal(Frame, Type, OutRenderFunction, CanRenderFunction, Parents);
+    }
+    if (!const_cast<UOdysseyTextureLayerImageRaster*>(this)->UpdateTiledImage())
+    {
+        return Super::BuildRenderPipelineInternal(Frame, Type, OutRenderFunction, CanRenderFunction, Parents);
+    }
+    const UOdysseyTiledImage* Image = GetTiledImage();
+    const FIntPoint Size = TiledImageSize;
+    const EPixelFormat Format = Image->GetPixelFormat();
+    auto DrawTiles = Image->BuildRenderFunction(FIntRect(FIntPoint::ZeroValue, Size));
+    OutRenderFunction = [DrawTiles = MoveTemp(DrawTiles), Size, Format](FRDGBuilder& GraphBuilder,
+        ERHIFeatureLevel::Type FeatureLevel, FRDGTextureRef Destination,
+        const FIntRect& SourceRect, const FIntRect& DestinationRect, const FMatrix& Transform)
+    {
+        RDG_EVENT_SCOPE(GraphBuilder, "Odyssey.Texture.TiledLayer");
+        // Assemble a continuous source before filtering: atlas borders must not create seams
+        // under zoom, rotation or anisotropic sampling. No persistent full-size texture is added.
+        FRDGTextureRef Source = GraphBuilder.CreateTexture(FRDGTextureDesc::Create2D(Size, Format,
+            FClearValueBinding::Transparent, TexCreate_ShaderResource | TexCreate_RenderTargetable),
+            TEXT("Odyssey.Texture.TiledLayer.Source"));
+        DrawTiles(GraphBuilder, Source, FIntPoint::ZeroValue);
+        AddClearRenderTargetPass(GraphBuilder, Destination, FLinearColor::Transparent, DestinationRect);
+        FOdysseyBlendShader::BlendRect(GraphBuilder, FeatureLevel, Destination, Source, Destination,
+            SourceRect, DestinationRect, Transform, EOdysseyColorBlendMode::Normal,
+            EOdysseyAlphaBlendMode::Normal, 1.0f, EOdysseyAntiAliasing::Anisotropic);
+    };
+    return true;
+}
+
 void
 UOdysseyTextureLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects)
 {
+    InvalidateTiledImage(iRects);
     SanitizeRasterBlock(iRects);
     FOdysseySurfaceTexture2DEditable surface(GetRenderTexture(), GetRasterBlock()->GetBlock());
     surface.Invalidate(iRects);
@@ -189,6 +366,7 @@ UOdysseyTextureLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iR
 void
 UOdysseyTextureLayerImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
 {
+    InvalidateTiledImage(iRects);
     TSharedPtr<::ULIS::FBlock> block =  GetRasterBlock()->GetBlock();
     FOdysseySurfaceTexture2DEditable surface(GetRenderTexture(), block);
     surface.Invalidate(iRects);
