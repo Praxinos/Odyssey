@@ -177,7 +177,7 @@ void UOdysseyPainterEditorRasterSelection::Add(TSharedPtr<::ULIS::FBlock> iMaskB
             ctx.ConvertFormat( *iMaskBlock,
                                *tempMaskBlock );
 
-            ctx.Flush();
+            ctx.Finish();
 
             ctx.Blend(
                   *tempMaskBlock
@@ -280,7 +280,7 @@ void UOdysseyPainterEditorRasterSelection::Substract(TSharedPtr<::ULIS::FBlock> 
             ctx.ConvertFormat(*iMaskBlock,
                 *tempMaskBlock);
 
-            ctx.Flush();
+            ctx.Finish();
 
             ctx.Blend(
                 *tempMaskBlock
@@ -572,11 +572,11 @@ UOdysseyPainterEditorRasterSelection::GenerateFeatheredBlock()
 
     //Horizontal blur
     ctx.Convolve( *mBlock, tempBlock, horizontalKernel );
-    ctx.Flush();
+    ctx.Finish();
 
     //Vertical blur
     ctx.Convolve( tempBlock, *mFeatheredBlock, verticalKernel );
-    ctx.Flush();
+    ctx.Finish();
 
     //Set all blurred pixels inside the selection (without it half are out and half are in)
     ctx.FilterInto(

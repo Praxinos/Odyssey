@@ -1185,7 +1185,7 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection( bool iCreateNew
     }
     else
     {
-        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = mEditor->RasterSelection()->GetBlock();
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = mEditor->RasterSelection()->GetFeatheredBlock();
 
         if (maskBlock)
         {
