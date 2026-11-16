@@ -126,7 +126,7 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iP
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnKeyDown(const FKey& iKey)
 {
-    if ( iKey == EKeys::LeftControl || iKey == EKeys::RightControl )
+    if ( iKey == EKeys::LeftControl || iKey == EKeys::RightControl || iKey == EKeys::LeftCommand || iKey == EKeys::RightCommand )
     {
         mSelectionState = EOdysseySelectionState::Add;
         return true;
@@ -141,7 +141,7 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnKeyDown(const FKey& iKey)
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnKeyUp(const FKey& iKey)
 {
-    if (iKey == EKeys::LeftControl || iKey == EKeys::RightControl)
+    if ( iKey == EKeys::LeftControl || iKey == EKeys::RightControl || iKey == EKeys::LeftCommand || iKey == EKeys::RightCommand )
     {
         mSelectionState = EOdysseySelectionState::Normal;
         return true;
