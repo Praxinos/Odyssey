@@ -95,7 +95,6 @@ UArianeDrawing::Reset()
 void
 UArianeDrawing::OnRegisterLayer()
 {
-    Reset();
     RootGroupID.GetObject( this )->UpdateTransform();
 }
 

@@ -127,7 +127,8 @@ UArianePainting3DComponent::OnRegister()
         LayerStack->AttachToComponent( this, FAttachmentTransformRules::KeepRelativeTransform );
     }
 
-    LayerStack->RegisterComponent();
+    // commented-out : not needed for objects created with CreateDefaultSubObject
+    //LayerStack->RegisterComponent();
 
     if( DefaultMaterial == nullptr )
     {

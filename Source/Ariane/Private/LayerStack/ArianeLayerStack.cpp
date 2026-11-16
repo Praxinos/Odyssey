@@ -81,7 +81,8 @@ UArianeLayerStack::OnRegister()
         RootFolder->AttachToComponent( this, FAttachmentTransformRules::KeepRelativeTransform );
     }
 
-    RootFolder->RegisterComponent();
+    // commented-out : not needed for objects created with CreateDefaultSubObject
+    //RootFolder->RegisterComponent();
 }
 
 void
