@@ -497,7 +497,7 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
 
                                          {
                                              FMenuEntryParams params;
-                                             params.LabelOverride = LOCTEXT( "viewport.settings.entry.preserve-canvas-when-flipping.label", "Preserve canvas position when flipping" );
+                                             params.LabelOverride = LOCTEXT( "viewport.settings.entry.preserve-canvas-when-flipping.label", "Flip on viewport center" );
                                              params.ToolTipOverride = LOCTEXT( "viewport.settings.entry.preserve-canvas-when-flipping.tooltip", "Keep the center of the viewport at the same position when flipping it when on" );
                                              params.DirectActions = FUIAction(
                                                  FExecuteAction::CreateSP( this, &SOdysseyViewport::HandleAlignWithViewportClicked ),
