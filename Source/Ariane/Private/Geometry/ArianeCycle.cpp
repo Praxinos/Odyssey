@@ -129,7 +129,6 @@ FArianeCycle::ResetDrawing( UArianeDrawing* InDrawing )
     Super::ResetDrawing( InDrawing );
 
     Geometry3D = new FArianeCycleGeometry3D( this );
-    ModelVertexCache.Empty();
 }
 
 void
@@ -505,6 +504,7 @@ FArianeCycleGeometry3D::GetCycle()
 {
     return static_cast<FArianeCycle*>(Object);
 }
+
 void
 FArianeCycleGeometry3D::Build()
 {

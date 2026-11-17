@@ -375,9 +375,9 @@ UArianePainting3DComponent::GetHUDForegroundColor()
 }
 
 void
-UArianePainting3DComponent::ConvertToStaticMesh()
+UArianePainting3DComponent::ConvertToStaticMesh( TArray<UMaterialInstanceConstant*>& OutMaterialInstanceConstants )
 {
-    StaticMeshComponent->ConvertToStaticMesh();
+    StaticMeshComponent->ConvertToStaticMesh( OutMaterialInstanceConstants );
 }
 
 #undef LOCTEXT_NAMESPACE

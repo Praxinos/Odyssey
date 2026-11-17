@@ -44,6 +44,10 @@
 #include "MeshUtilities.h" // for conversion to static mesh
 #include "ISequencerModule.h"
 #include "SequencerChannelInterface.h"
+#include "Materials/MaterialInstanceConstant.h"
+#include "AssetRegistry/AssetRegistryModule.h"
+#include "UObject/SavePackage.h"
+#include "FileHelpers.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -348,6 +352,7 @@ FArianeEditorModule::ConvertToStaticMesh()
         if( ActorsToConvert.Num() )
         {
             TArray<UMeshComponent*> MeshComponentsToConvert;
+            TArray<UMaterialInstanceConstant*> MaterialInstanceConstants;
 
             // first step retrieve all mesh components
             //FMeshUtilities::GetSkinnedAndStaticMeshComponentsFromActors( ActorsToConvert, MeshComponentsToConvert );
@@ -377,13 +382,52 @@ FArianeEditorModule::ConvertToStaticMesh()
                     Painting3DStaticMeshComponent->SetVisibility(true);
                     Painting3DStaticMeshComponent->SetHiddenInGame(false);
 
-                    Painting3DStaticMeshComponent->ConvertToStaticMesh();
+                    Painting3DStaticMeshComponent->ConvertToStaticMesh( MaterialInstanceConstants );
                 }
             }
 
-            MeshUtilities.ConvertMeshesToStaticMesh( MeshComponentsToConvert
-                                                   , ActorsToConvert.Num() == 1 ? ActorsToConvert[0]->GetTransform()
-                                                                                : FTransform::Identity );
+            // rename created materials according to the name that was chosen for the Static Mesh
+            TArray<FAssetRenameData> Renames;
+            UStaticMesh* StaticMesh = MeshUtilities.ConvertMeshesToStaticMesh( MeshComponentsToConvert
+                                                                             , ActorsToConvert.Num() == 1 ? ActorsToConvert[0]->GetTransform()
+                                                                                                          : FTransform::Identity );
+
+            if ( StaticMesh )
+            {
+                const FString MeshPackageName = StaticMesh->GetOutermost()->GetName();
+                const FString MatFolder = MeshPackageName + TEXT("_Materials");
+                TArray<UPackage*> MICPackages;
+
+                for ( UMaterialInstanceConstant* MIC : MaterialInstanceConstants )
+                {
+                    FLinearColor LinearColor;
+                    float PixelDepthOffset;
+
+                    MIC->GetVectorParameterValue( FMaterialParameterInfo( TEXT("Color") ), LinearColor );
+                    MIC->GetScalarParameterValue( FMaterialParameterInfo( TEXT("PixelDepthOffset") ), PixelDepthOffset );
+
+                    const FString AssetName = FString::Printf( TEXT("%s_Material_%s_%08X_%s")
+                                                             , *StaticMesh->GetName()
+                                                             , *MIC->Parent->GetName()
+                                                             , LinearColor.ToFColor( true ).DWColor()
+                                                             , PixelDepthOffset ? *FString("PDO") : *FString("NOPDO") );
+                    const FString PackageName = MatFolder / AssetName;
+                    UPackage* MICPackage = CreatePackage( *PackageName );
+
+                    MIC->ClearFlags( RF_Transient );
+                    MIC->SetFlags( RF_Public | RF_Standalone );
+                    MIC->Rename( *AssetName, MICPackage, REN_DontCreateRedirectors );
+
+                    // Inform of the creation of a new asset
+                    FAssetRegistryModule::AssetCreated( MIC );
+                    MICPackage->MarkPackageDirty();
+
+                    MICPackages.Add( MICPackage );
+                }
+
+                StaticMesh->MarkPackageDirty();
+                UEditorLoadingAndSavingUtils::SavePackages( MICPackages, /*bPromptUser*/ false );
+            }
 
             for (UMeshComponent* MeshComponent : MeshComponentsToConvert )
             {

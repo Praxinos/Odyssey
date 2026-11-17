@@ -71,6 +71,8 @@ class ARIANE_API FArianeObjectGeometry3D
         FArianeObject* GetObject();
         FLocalVertexFactory* GetVertexFactory();
         void InitVertexFactory();
+        const TArray<FDynamicMeshVertex>& GetMeshVertices();
+        const TArray<uint32>& GetMeshIndices();
 
     protected:
         FArianeObject* Object;

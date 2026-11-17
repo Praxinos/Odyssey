@@ -154,6 +154,16 @@ FArianeObjectGeometry3D::GetVertexFactory()
     return VertexFactory;
 }
 
+const TArray<FDynamicMeshVertex>& FArianeObjectGeometry3D::GetMeshVertices()
+{
+    return MeshVertices;
+}
+
+const TArray<uint32>& FArianeObjectGeometry3D::GetMeshIndices()
+{
+    return MeshIndices;
+}
+
 void
 FArianeObjectGeometry3D::InitVertexFactory()
 {

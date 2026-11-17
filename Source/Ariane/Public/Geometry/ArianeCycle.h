@@ -181,5 +181,4 @@ protected:
 
 protected:
     FArianeCycleGeometry3D* Geometry3D;
-    TArray<FDynamicMeshVertex> ModelVertexCache;
 };
