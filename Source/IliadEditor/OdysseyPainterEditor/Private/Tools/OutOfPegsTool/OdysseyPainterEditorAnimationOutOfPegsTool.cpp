@@ -13,7 +13,7 @@
 #include "DetailLayoutBuilder.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationLayer.h"
-#include "OdysseyLayerCell.h"
+#include "OdysseyAnimationCell.h"
 
 #include <ULIS>
 
@@ -157,7 +157,7 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::PostEditChangeProperty( FPropertyCh
     bool isInteractive = iEvent.ChangeType & EPropertyChangeType::Interactive;
     if ( memberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Pan) )
     {
-        FOdysseyLayerCellOutOfPegs outOfPegs = mCell->GetOutOfPegs();
+        FOdysseyAnimationCellOutOfPegs outOfPegs = mCell->GetOutOfPegs();
         outOfPegs.Pan = Pan;
         if (isInteractive)
         {
@@ -170,7 +170,7 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::PostEditChangeProperty( FPropertyCh
     }
     if ( propertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Rotation) )
     {
-        FOdysseyLayerCellOutOfPegs outOfPegs = mCell->GetOutOfPegs();
+        FOdysseyAnimationCellOutOfPegs outOfPegs = mCell->GetOutOfPegs();
         outOfPegs.Rotation = FMath::UnwindDegrees(Rotation);
         if (isInteractive)
         {
@@ -183,7 +183,7 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::PostEditChangeProperty( FPropertyCh
     }
     if ( propertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Zoom) )
     {
-        FOdysseyLayerCellOutOfPegs outOfPegs = mCell->GetOutOfPegs();
+        FOdysseyAnimationCellOutOfPegs outOfPegs = mCell->GetOutOfPegs();
         outOfPegs.Zoom = Zoom;
         if (isInteractive)
         {
@@ -196,14 +196,14 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::PostEditChangeProperty( FPropertyCh
     }
 }
 
-UOdysseyLayerCell*
+UOdysseyAnimationCell*
 UOdysseyPainterEditorAnimationOutOfPegsTool::GetCell() const
 {
     return mCell;
 }
 
 void
-UOdysseyPainterEditorAnimationOutOfPegsTool::SetCell(UOdysseyLayerCell* iCell)
+UOdysseyPainterEditorAnimationOutOfPegsTool::SetCell(UOdysseyAnimationCell* iCell)
 {
     if (iCell == mCell)
         return;
@@ -483,15 +483,15 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::OnRotationHandleDragEnd()
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::Reset()
 {
-    mCell->SetOutOfPegs(FOdysseyLayerCellOutOfPegs());
+    mCell->SetOutOfPegs(FOdysseyAnimationCellOutOfPegs());
 }
 
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::ResetAll()
 {
-    const TArray<UOdysseyLayerCell*> cells = mLayer->GetCells();
-    for (UOdysseyLayerCell* cell : cells)
+    const TArray<UOdysseyAnimationCell*> cells = mLayer->GetCells();
+    for (UOdysseyAnimationCell* cell : cells)
     {
-        cell->SetOutOfPegs(FOdysseyLayerCellOutOfPegs());
+        cell->SetOutOfPegs(FOdysseyAnimationCellOutOfPegs());
     }
 }

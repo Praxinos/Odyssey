@@ -95,7 +95,6 @@ public class OdysseyLayerStackEditor : ModuleRules
                 "TypedElementRuntime",
                 "UnrealEd",
 
-                "OdysseyAnimation",
                 "OdysseyCore",
                 "OdysseyCoreEditor",
                 "OdysseyFile",

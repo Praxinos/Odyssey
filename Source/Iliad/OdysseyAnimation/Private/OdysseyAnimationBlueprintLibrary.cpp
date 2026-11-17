@@ -21,7 +21,7 @@ UOdysseyAnimationBlueprintLibrary::GetLayerAnimation(UOdysseyLayer* Layer)
 
 //static
 UOdysseyAnimation*
-UOdysseyAnimationBlueprintLibrary::GetCellAnimation(UOdysseyLayerCell* Cell)
+UOdysseyAnimationBlueprintLibrary::GetCellAnimation(UOdysseyAnimationCell* Cell)
 {
     return Odyssey::AnimationUtils::GetCellAnimation(Cell);
 }

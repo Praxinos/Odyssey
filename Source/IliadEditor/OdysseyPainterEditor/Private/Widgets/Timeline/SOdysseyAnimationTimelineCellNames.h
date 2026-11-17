@@ -8,7 +8,7 @@
 
 #include "OdysseyRenderingAbility.h"
 
-class UOdysseyLayerCell;
+class UOdysseyAnimationCell;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 class SHorizontalBox;
 
@@ -20,7 +20,7 @@ class SOdysseyAnimationTimelineCellNames
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineCellNames )
     {}
-        SLATE_ATTRIBUTE(TArray<UOdysseyLayerCell*>, Cells)
+        SLATE_ATTRIBUTE(TArray<UOdysseyAnimationCell*>, Cells)
         SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
     SLATE_END_ARGS()
 
@@ -32,7 +32,7 @@ private:
     void OnCellsChanged();
 
 private:
-    TSlateAttribute<TArray<UOdysseyLayerCell*>> mCells;
+    TSlateAttribute<TArray<UOdysseyAnimationCell*>> mCells;
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
     TSharedPtr<SHorizontalBox> mRowWidget;
 };

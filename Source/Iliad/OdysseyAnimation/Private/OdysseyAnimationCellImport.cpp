@@ -1,21 +1,20 @@
 // IDDN.FR.001.060015.015.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-#include "OdysseyLayerCellImageStaggerImport.h"
+#include "OdysseyAnimationCellImport.h"
 
 #if WITH_EDITOR
+
 #include "Serialization/Archive.h"
-
-#include "OdysseyLayerCellImageStagger.h"
-
+#include "OdysseyAnimationCell.h"
 #include <functional>
 
-static const uint32 CHUNK_CELLIMAGESTAGGER = 0x559ff069; // container
-static const uint32 CHUNK_CELLIMAGESTAGGER_BEHAVIOUR = 0xdd0542e9; // uint32 (Behaviour)
-static const uint32 CHUNK_CELLIMAGESTAGGER_REACH = 0x98930ed0; // uint32 (Reach)
+static const uint32 CHUNK_CELL =  0xf93591b3; // container
+static const uint32 CHUNK_CELL_LENGTH = 0x5dbe40b7; // uint32 (Length)
+static const uint32 CHUNK_CELL_MARKID = 0x866d04a6; // FString (MarkId)
 
 void
-ReadLayerCellImageStaggerChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback )
+ReadLayerCellChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback )
 {
     //UE_LOG( LogTemp, Warning, TEXT("ReadChunks") );
 
@@ -37,7 +36,7 @@ ReadLayerCellImageStaggerChunks( uint64 iChunkEnd, FArchive &Ar, std::function<v
 }
 
 bool
-FOdysseyLayerCellImageStaggerImport::Read( UOdysseyLayerCellImageStagger* iLayerCellImageStagger
+FOdysseyAnimationCellImport::Read( UOdysseyAnimationCell* iCell
                                             , FArchive &Ar )
 {
     if (Ar.AtEnd() || Ar.IsCriticalError())
@@ -49,7 +48,7 @@ FOdysseyLayerCellImageStaggerImport::Read( UOdysseyLayerCellImageStagger* iLayer
     uint64 chunkLen;
     uint64 chunkEnd;
 
-    // Reads the first chunk (CHUNK_CELLIMAGESTAGGER)
+    // Reads the first chunk (CHUNK_CELL)
     Ar << chunkID;
     Ar << chunkLen;
 
@@ -70,10 +69,10 @@ FOdysseyLayerCellImageStaggerImport::Read( UOdysseyLayerCellImageStagger* iLayer
 
     switch( chunkID )
     {
-        case CHUNK_CELLIMAGESTAGGER :
-            //UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELLIMAGESTAGGER") );
+        case CHUNK_CELL :
+            //UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELL") );
 
-            FOdysseyLayerCellImageStaggerImport::Read( iLayerCellImageStagger, Ar, chunkEnd );
+            FOdysseyAnimationCellImport::Read( iCell, Ar, chunkEnd );
         break;
 
         default:
@@ -85,29 +84,30 @@ FOdysseyLayerCellImageStaggerImport::Read( UOdysseyLayerCellImageStagger* iLayer
 }
 
 void
-FOdysseyLayerCellImageStaggerImport::Read( UOdysseyLayerCellImageStagger* iLayerCellImageStagger
+FOdysseyAnimationCellImport::Read( UOdysseyAnimationCell* iCell
                                             , FArchive &Ar
                                             , uint64 iChunkEnd )
 {
-    ReadLayerCellImageStaggerChunks( iChunkEnd
+    ReadLayerCellChunks( iChunkEnd
                               , Ar
-                              , [iLayerCellImageStagger](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+                              , [iCell](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch ( iChunkID )
             {
-                case CHUNK_CELLIMAGESTAGGER_BEHAVIOUR :
+                case CHUNK_CELL_LENGTH :
                 {
-                    uint32 behaviour;
-                    Ar << behaviour;
-
-                    behaviour = FMath::Max(uint32(0), behaviour - 1); //first value was "Invalid" which does not exist anymore
-                    iLayerCellImageStagger->Behaviour = (EOdysseyLayerCellImageStaggerBehaviour)behaviour;
+                    Ar << iCell->Exposure;
                 }
                 break;
 
-                case CHUNK_CELLIMAGESTAGGER_REACH :
+                case CHUNK_CELL_MARKID :
                 {
-                    Ar << iLayerCellImageStagger->Reach;
+#if WITH_EDITOR
+                    int32 mark;
+                    Ar << mark;
+                    if( mark >= 0 )
+                        iCell->Marks.Add( 0, FCellMark{ mark } );
+#endif
                 }
                 break;
 

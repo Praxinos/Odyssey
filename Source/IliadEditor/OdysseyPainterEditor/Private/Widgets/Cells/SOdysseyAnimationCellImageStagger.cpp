@@ -17,7 +17,7 @@
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
 void
-SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyLayerCellImageStagger* iCell)
+SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAnimationCellImageStagger* iCell)
 {
     mSetReachTransactionName = (LOCTEXT("cell-image-stagger.set-reach", "Set Stagger Cell Reach"));
     mCell = iCell;
@@ -91,8 +91,8 @@ SOdysseyAnimationCellImageStagger::OnPaint(const FPaintArgs& Args, const FGeomet
     {
         switch(mCell->GetBehaviour())
         {
-            case EOdysseyLayerCellImageStaggerBehaviour::Loop:
-            case EOdysseyLayerCellImageStaggerBehaviour::PingPong:
+            case EOdysseyAnimationCellImageStaggerBehaviour::Loop:
+            case EOdysseyAnimationCellImageStaggerBehaviour::PingPong:
             {
                 FLinearColor staggerLengthColor = FOdysseyStyle::GetColor( "Animation.CellImageStagger.StaggerLengthColor" );
                 for (int x = staggerLength * frameSize; x < width; x += staggerLength * frameSize)
@@ -160,13 +160,13 @@ SOdysseyAnimationCellImageStagger::GetBehaviourBrush() const
 {
     switch(mCell->GetBehaviour())
     {
-        case EOdysseyLayerCellImageStaggerBehaviour::Loop:
+        case EOdysseyAnimationCellImageStaggerBehaviour::Loop:
             return FOdysseyStyle::GetBrush("Animation.CellImageStagger.Behaviour.Loop");
 
-        case EOdysseyLayerCellImageStaggerBehaviour::PingPong:
+        case EOdysseyAnimationCellImageStaggerBehaviour::PingPong:
             return FOdysseyStyle::GetBrush("Animation.CellImageStagger.Behaviour.PingPong");
 
-        case EOdysseyLayerCellImageStaggerBehaviour::Random:
+        case EOdysseyAnimationCellImageStaggerBehaviour::Random:
             return FOdysseyStyle::GetBrush("Animation.CellImageStagger.Behaviour.Random");
     }
     return nullptr;
@@ -237,9 +237,9 @@ SOdysseyAnimationCellImageStagger::BuildContextMenu(FMenuBuilder& iMenuBuilder)
             TAttribute<FText>(),
             FSlateIcon("OdysseyStyle", "Animation.CellImageStagger.Behaviour.Loop"),
             FUIAction(
-                FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, EOdysseyLayerCellImageStaggerBehaviour::Loop),
-                FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, EOdysseyLayerCellImageStaggerBehaviour::Loop),
-                FIsActionChecked::CreateRaw(this, &SOdysseyAnimationCellImageStagger::IsBehaviour, EOdysseyLayerCellImageStaggerBehaviour::Loop)
+                FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, EOdysseyAnimationCellImageStaggerBehaviour::Loop),
+                FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, EOdysseyAnimationCellImageStaggerBehaviour::Loop),
+                FIsActionChecked::CreateRaw(this, &SOdysseyAnimationCellImageStagger::IsBehaviour, EOdysseyAnimationCellImageStaggerBehaviour::Loop)
             ),
             NAME_None,
             EUserInterfaceActionType::RadioButton
@@ -249,9 +249,9 @@ SOdysseyAnimationCellImageStagger::BuildContextMenu(FMenuBuilder& iMenuBuilder)
             TAttribute<FText>(),
             FSlateIcon("OdysseyStyle", "Animation.CellImageStagger.Behaviour.PingPong"),
             FUIAction(
-                FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, EOdysseyLayerCellImageStaggerBehaviour::PingPong),
-                FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, EOdysseyLayerCellImageStaggerBehaviour::PingPong),
-                FIsActionChecked::CreateRaw(this, &SOdysseyAnimationCellImageStagger::IsBehaviour, EOdysseyLayerCellImageStaggerBehaviour::PingPong)
+                FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, EOdysseyAnimationCellImageStaggerBehaviour::PingPong),
+                FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, EOdysseyAnimationCellImageStaggerBehaviour::PingPong),
+                FIsActionChecked::CreateRaw(this, &SOdysseyAnimationCellImageStagger::IsBehaviour, EOdysseyAnimationCellImageStaggerBehaviour::PingPong)
             ),
             NAME_None,
             EUserInterfaceActionType::RadioButton
@@ -261,9 +261,9 @@ SOdysseyAnimationCellImageStagger::BuildContextMenu(FMenuBuilder& iMenuBuilder)
             TAttribute<FText>(),
             FSlateIcon("OdysseyStyle", "Animation.CellImageStagger.Behaviour.Random"),
             FUIAction(
-                FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, EOdysseyLayerCellImageStaggerBehaviour::Random),
-                FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, EOdysseyLayerCellImageStaggerBehaviour::Random),
-                FIsActionChecked::CreateRaw(this, &SOdysseyAnimationCellImageStagger::IsBehaviour, EOdysseyLayerCellImageStaggerBehaviour::Random)
+                FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, EOdysseyAnimationCellImageStaggerBehaviour::Random),
+                FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, EOdysseyAnimationCellImageStaggerBehaviour::Random),
+                FIsActionChecked::CreateRaw(this, &SOdysseyAnimationCellImageStagger::IsBehaviour, EOdysseyAnimationCellImageStaggerBehaviour::Random)
             ),
             NAME_None,
             EUserInterfaceActionType::RadioButton
@@ -272,7 +272,7 @@ SOdysseyAnimationCellImageStagger::BuildContextMenu(FMenuBuilder& iMenuBuilder)
 }
 
 void
-SOdysseyAnimationCellImageStagger::SetBehaviour(EOdysseyLayerCellImageStaggerBehaviour iBehaviour)
+SOdysseyAnimationCellImageStagger::SetBehaviour(EOdysseyAnimationCellImageStaggerBehaviour iBehaviour)
 {
 #if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-stagger.transaction.set-behaviour", "Set Stagger Cell Behaviour"));
@@ -281,13 +281,13 @@ SOdysseyAnimationCellImageStagger::SetBehaviour(EOdysseyLayerCellImageStaggerBeh
 }
 
 bool
-SOdysseyAnimationCellImageStagger::CanSetBehaviour(EOdysseyLayerCellImageStaggerBehaviour iBehaviour) const
+SOdysseyAnimationCellImageStagger::CanSetBehaviour(EOdysseyAnimationCellImageStaggerBehaviour iBehaviour) const
 {
     return mCell->GetLayer()->IsEditable();
 }
 
 bool
-SOdysseyAnimationCellImageStagger::IsBehaviour(EOdysseyLayerCellImageStaggerBehaviour iBehaviour) const
+SOdysseyAnimationCellImageStagger::IsBehaviour(EOdysseyAnimationCellImageStaggerBehaviour iBehaviour) const
 {
     return mCell->GetBehaviour() == iBehaviour;
 }
@@ -308,11 +308,11 @@ SOdysseyAnimationCellImageStagger::GetStaggerLength() const
 {
     switch(mCell->GetBehaviour())
     {
-        case EOdysseyLayerCellImageStaggerBehaviour::Loop:
-        case EOdysseyLayerCellImageStaggerBehaviour::Random:
+        case EOdysseyAnimationCellImageStaggerBehaviour::Loop:
+        case EOdysseyAnimationCellImageStaggerBehaviour::Random:
             return GetClampedReach();
 
-        case EOdysseyLayerCellImageStaggerBehaviour::PingPong:
+        case EOdysseyAnimationCellImageStaggerBehaviour::PingPong:
             return GetClampedReach() - 1;
     }
     return INDEX_NONE;

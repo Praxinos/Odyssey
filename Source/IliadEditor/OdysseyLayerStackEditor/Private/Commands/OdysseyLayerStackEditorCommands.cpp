@@ -43,9 +43,6 @@ FOdysseyLayerStackEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( InactivateLayerInheritsAlpha, LayerStackShortcuts, "Inactivate Layer's Alpha Inheritance", "Inactivates selected Layers' Alpha Inheritance (Clipping Mask)", EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( ToggleLayerInheritsAlpha, LayerStackShortcuts, "Toggle Layer's Alpha Inheritance", "Toggles selected Layers' Alpha Inheritance (Clipping Mask)", EUserInterfaceActionType::Button, FInputChord() );
 
-    UI_BUNDLE_COMMAND( ActivateLayerLighttable, LayerStackShortcuts, "Activate Layer's Lighttable", "Activates selected Layers' Lighttable", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( InactivateLayerLighttable, LayerStackShortcuts, "Inactivate Layer's Lighttable", "Inactivates selected Layers' Lighttable", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( ToggleLayerLighttable, LayerStackShortcuts, "Toggle Layer's Lighttable", "Activates/Inactivates selected Layers' Lighttable", EUserInterfaceActionType::Button, FInputChord() );
 
     UI_BUNDLE_COMMAND( CollapseLayer, LayerStackShortcuts, "Collapse Layer", "Collapse selected Layers", EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( UncollapseLayer, LayerStackShortcuts, "Uncollapse Layer", "Uncollapse selected Layers", EUserInterfaceActionType::Button, FInputChord() );

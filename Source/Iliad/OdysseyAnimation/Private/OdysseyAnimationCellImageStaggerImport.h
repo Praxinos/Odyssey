@@ -8,28 +8,26 @@
 #if WITH_EDITOR
 
 class FArchive;
-class UOdysseyLayerCell;
+class UOdysseyAnimationCellImageStagger;
 
-class FOdysseyLayerCellImport
+class FOdysseyAnimationCellImageStaggerImport
 {
 public:
     /**
      * @brief Imports Data from the given archive into the given object
      *
-     * @param iCell
+     * @param iLayerCellImageStagger
      * @param Ar
      */
-    static bool ODYSSEYLAYERSTACK_API Read( UOdysseyLayerCell* iCell
-                                  , FArchive &Ar );
+    static bool ODYSSEYANIMATION_API Read( UOdysseyAnimationCellImageStagger* iLayerCellImageStagger, FArchive& Ar );
 
 private:
     /**
      * Private import functions
      */
 
-    static void Read( UOdysseyLayerCell* iCell
+    static void Read( UOdysseyAnimationCellImageStagger* iLayerCellImageStagger
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };
-
 #endif

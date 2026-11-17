@@ -3,30 +3,29 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-
 #if WITH_EDITOR
+#include "Serialization/Archive.h"
 
-class FArchive;
-class UOdysseyLayerCellImageStagger;
+struct FOdysseyLighttableKey;
 
-class FOdysseyLayerCellImageStaggerImport
+class FOdysseyLighttableKeyImport
 {
 public:
     /**
      * @brief Imports Data from the given archive into the given object
      *
-     * @param iLayerCellImageStagger
+     * @param iAnimationCell
      * @param Ar
      */
-    static bool ODYSSEYANIMATION_API Read( UOdysseyLayerCellImageStagger* iLayerCellImageStagger, FArchive& Ar );
+    static bool ODYSSEYANIMATION_API Read( FOdysseyLighttableKey* iKey
+                                  , FArchive &Ar );
 
 private:
     /**
      * Private import functions
      */
 
-    static void Read( UOdysseyLayerCellImageStagger* iLayerCellImageStagger
+    static void Read( FOdysseyLighttableKey* iKey
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };

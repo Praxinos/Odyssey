@@ -6,7 +6,7 @@
 #if WITH_EDITOR
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyAnimationCellImageRaster.h"
-#include "OdysseyLayerCellImageStagger.h"
+#include "OdysseyAnimationCellImageStagger.h"
 #include "OdysseyLighttable.h"
 #include "OdysseyLighttableImport.h"
 #include "OdysseyAnimationCellsContainerImport.h"
@@ -95,12 +95,12 @@ FOdysseyAnimationLayerImageRasterImport::Read( UOdysseyAnimationLayerImageRaster
 
                             if (cellType == TEXT("FOdysseyAnimationCellImageRaster"))
                             {
-                                UOdysseyLayerCell* cell = iAnimationLayerImageRaster->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
+                                UOdysseyAnimationCell* cell = iAnimationLayerImageRaster->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
                                 cell->OldSerialize(Ar);
                             }
                             else if (cellType == TEXT("FOdysseyAnimationCellImageStagger"))
                             {
-                                UOdysseyLayerCell* cell = iAnimationLayerImageRaster->AddCell(UOdysseyLayerCellImageStagger::StaticClass());
+                                UOdysseyAnimationCell* cell = iAnimationLayerImageRaster->AddCell(UOdysseyAnimationCellImageStagger::StaticClass());
                                 cell->OldSerialize(Ar);
                             }
                         }

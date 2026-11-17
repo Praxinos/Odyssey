@@ -34,7 +34,7 @@ public:
     );
 
 private:
-    UOdysseyLayerCell* GetCurrentCell() const;
+    UOdysseyAnimationCell* GetCurrentCell() const;
 
 private:
     TAttribute<int> mCurrentFrame;

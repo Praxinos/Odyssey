@@ -8,7 +8,7 @@
 
 #include "OdysseyClipboard.h"
 
-class UOdysseyLayerCell;
+class UOdysseyAnimationCell;
 class UOdysseyAnimationLayer;
 
 class FOdysseyAnimationCellClipboardData
@@ -18,7 +18,7 @@ class FOdysseyAnimationCellClipboardData
 public:
     virtual ~FOdysseyAnimationCellClipboardData() {};
     FOdysseyAnimationCellClipboardData();
-    FOdysseyAnimationCellClipboardData(const TArray<UOdysseyLayerCell*>& iCells);
+    FOdysseyAnimationCellClipboardData(const TArray<UOdysseyAnimationCell*>& iCells);
 
 public:
     static const FGuid& StaticId();
@@ -35,12 +35,12 @@ public:
     virtual FString GetReferencerName() const override;
 
 private:
-    void Copy(const TArray<UOdysseyLayerCell*>& iCells);
+    void Copy(const TArray<UOdysseyAnimationCell*>& iCells);
 
 private:
     struct FCellCopy
     {
-        TObjectPtr<UOdysseyLayerCell> mCell;
+        TObjectPtr<UOdysseyAnimationCell> mCell;
         int mExposure;
     };
     mutable TArray<FCellCopy> mCellCopies;

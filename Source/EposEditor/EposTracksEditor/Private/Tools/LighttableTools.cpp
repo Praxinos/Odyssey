@@ -21,6 +21,7 @@
 #include "EposSequenceHelpers.h"
 #include "NamingConvention.h"
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationTimelineSection.h"
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
@@ -144,9 +145,12 @@ LighttableTools::Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
         TArray<UOdysseyLayer*> layers = layer_stack->GetLayers();
         for( UOdysseyLayer* layer : layers )
         {
-            FOdysseyLighttable lighttable = layer->GetLighttable();
+            UOdysseyAnimationLayer* AnimationLayer = Cast<UOdysseyAnimationLayer>(layer);
+            if (!AnimationLayer)
+                continue;
+            FOdysseyLighttable lighttable = AnimationLayer->GetLighttable();
             lighttable.bIsActivated = true;
-            layer->SetLighttable( lighttable );
+            AnimationLayer->SetLighttable( lighttable );
         }
     }
 }
@@ -174,9 +178,12 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
         TArray<UOdysseyLayer*> layers = layer_stack->GetLayers();
         for( UOdysseyLayer* layer : layers )
         {
-            FOdysseyLighttable lighttable = layer->GetLighttable();
+            UOdysseyAnimationLayer* AnimationLayer = Cast<UOdysseyAnimationLayer>(layer);
+            if (!AnimationLayer)
+                continue;
+            FOdysseyLighttable lighttable = AnimationLayer->GetLighttable();
             lighttable.bIsActivated = false;
-            layer->SetLighttable( lighttable );
+            AnimationLayer->SetLighttable( lighttable );
         }
     }
 }
@@ -203,7 +210,10 @@ LighttableTools::GetState( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
         TArray<UOdysseyLayer*> layers = layer_stack->GetLayers();
         for( UOdysseyLayer* layer : layers )
         {
-            FOdysseyLighttable lighttable = layer->GetLighttable();
+            UOdysseyAnimationLayer* AnimationLayer = Cast<UOdysseyAnimationLayer>(layer);
+            if (!AnimationLayer)
+                continue;
+            FOdysseyLighttable lighttable = AnimationLayer->GetLighttable();
 
             total_drawing++;
 
@@ -243,7 +253,10 @@ LighttableTools::IsOn( ISequencer& iSequencer, UMovieSceneSequence* iSequence, F
         TArray<UOdysseyLayer*> layers = layer_stack->GetLayers();
         for( UOdysseyLayer* layer : layers )
         {
-            FOdysseyLighttable lighttable = layer->GetLighttable();
+            UOdysseyAnimationLayer* AnimationLayer = Cast<UOdysseyAnimationLayer>(layer);
+            if (!AnimationLayer)
+                continue;
+            FOdysseyLighttable lighttable = AnimationLayer->GetLighttable();
 
             if( lighttable.bIsActivated )
                 return true;

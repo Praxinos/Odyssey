@@ -45,9 +45,6 @@ public:
     TSharedPtr<FUICommandInfo> InactivateLayerInheritsAlpha;
     TSharedPtr<FUICommandInfo> ToggleLayerInheritsAlpha;
 
-    TSharedPtr<FUICommandInfo> ActivateLayerLighttable;
-    TSharedPtr<FUICommandInfo> InactivateLayerLighttable;
-    TSharedPtr<FUICommandInfo> ToggleLayerLighttable;
 
     TSharedPtr<FUICommandInfo> CollapseLayer;
     TSharedPtr<FUICommandInfo> UncollapseLayer;

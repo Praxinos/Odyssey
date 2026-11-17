@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 
 #include "OdysseyAnimationLayer.h"
-#include "OdysseyLayerCell.h"
+#include "OdysseyAnimationCell.h"
 #include "SOdysseyAnimationTimelineOutOfPegsKey.h"
 #include "SOdysseyAnimationLayerTimeline.h"
 
@@ -98,7 +98,7 @@ public:
     UOdysseyAnimationLayer* GetLayer() const;
 
 protected:
-    virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyLayerCell* iCell) = 0;
+    virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyAnimationCell* iCell) = 0;
     virtual void BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder, FFrameNumber iClickedFrame, TSharedRef<FExtender> MenuExtender);
 
 protected:

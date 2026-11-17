@@ -16,14 +16,14 @@
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
 TSharedRef<FOdysseyAnimationCellsDragDropOperation>
-FOdysseyAnimationCellsDragDropOperation::Create(UOdysseyAnimationLayer* iLayer, const TArray<UOdysseyLayerCell*>& iCells)
+FOdysseyAnimationCellsDragDropOperation::Create(UOdysseyAnimationLayer* iLayer, const TArray<UOdysseyAnimationCell*>& iCells)
 {
     TSharedRef<FOdysseyAnimationCellsDragDropOperation> operation =  MakeShared<FOdysseyAnimationCellsDragDropOperation>(iLayer, iCells);
     operation->Construct();
     return operation;
 }
 
-FOdysseyAnimationCellsDragDropOperation::FOdysseyAnimationCellsDragDropOperation(UOdysseyAnimationLayer* iLayer, const TArray<UOdysseyLayerCell*>& iCells)
+FOdysseyAnimationCellsDragDropOperation::FOdysseyAnimationCellsDragDropOperation(UOdysseyAnimationLayer* iLayer, const TArray<UOdysseyAnimationCell*>& iCells)
     : mData(iCells)
     , mLayer(iLayer)
 {

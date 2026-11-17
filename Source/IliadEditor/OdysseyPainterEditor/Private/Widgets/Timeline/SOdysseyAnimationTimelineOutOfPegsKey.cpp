@@ -6,7 +6,7 @@
 #include "OdysseyStyle.h"
 #include "OdysseyAnimationLayer.h"
 #include "SOdysseyAnimationTimelineSection.h"
-#include "OdysseyLayerCell.h"
+#include "OdysseyAnimationCell.h"
 #include "Widgets/Input/SCheckBox.h"
 
 void
@@ -52,7 +52,7 @@ SOdysseyAnimationTimelineOutOfPegsKey::IsOutOfPegsEnabled() const
 const FSlateBrush*
 SOdysseyAnimationTimelineOutOfPegsKey::GetOutOfPegsButtonImage() const
 {
-    UOdysseyLayerCell* cell = mCell.Get();
+    UOdysseyAnimationCell* cell = mCell.Get();
     if (!cell)
         return nullptr;
 

@@ -25,8 +25,9 @@
 #include "OdysseyAnimationCellsDragDropOperation.h"
 #include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyAnimationLayerImageVector.h"
-#include "OdysseyLayerCellImageStagger.h"
+#include "OdysseyAnimationCellImageStagger.h"
 #include "OdysseyLayerStackSelection.h"
+#include "OdysseyAnimationCellsSelection.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
 #include "OdysseyPainterEditorAnimationProjectSettings.h"
 #include "OdysseyPainterEditorSettings.h"
@@ -235,7 +236,7 @@ SOdysseyAnimationLayerImageTimeline::GenerateMainRowTimelineWidget()
 {
     return SNew(SOdysseyAnimationCells, mLayer)
         .Cells_Lambda(
-            [this]() -> TArray<UOdysseyLayerCell*>
+            [this]() -> TArray<UOdysseyAnimationCell*>
             {
                 return mLayer->GetCells();
             }
@@ -271,7 +272,7 @@ SOdysseyAnimationLayerImageTimeline::GenerateCellNamesRowTimelineWidget()
 {
     return SNew(SOdysseyAnimationTimelineCellNames)
         .Cells_Lambda(
-            [this]() -> TArray<UOdysseyLayerCell*>
+            [this]() -> TArray<UOdysseyAnimationCell*>
             {
                 return mLayer->GetCells();
             }
@@ -316,11 +317,11 @@ SOdysseyAnimationLayerImageTimeline::OnMainSubRowMouseButtonDown( const FGeometr
             return FReply::Unhandled();
 
         //On Right click, select cell if none are selected yet
-        UOdysseyLayerCell* cell = mLayer->GetCellAtFrame(frame);
+        UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame(frame);
         if (!cell)
             return FReply::Unhandled();
 
-        const TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(mLayer);
+        const TArray<UOdysseyAnimationCell*> selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(mLayer);
         if (selectedCells.IsEmpty() || !selectedCells.Contains(cell))
         {
             OdysseyLayerStackSelection::Get()->DeselectAll();
@@ -607,7 +608,7 @@ SOdysseyAnimationLayerImageTimeline::OnMainSubRowDragOver(const FGeometry& iGeom
     float posX = iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X;
     float frame = MousePositionToFrame(posX);
 
-    UOdysseyLayerCell* cell = mLayer->GetCellAtFrame((int)frame);
+    UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame((int)frame);
     if (cell)
     {
         int cellStartFrame = cell->GetFrameRange().GetLowerBoundValue();
@@ -649,9 +650,9 @@ SOdysseyAnimationLayerImageTimeline::OnMainSubRowDragOver(const FGeometry& iGeom
     UOdysseyAnimationLayer* layer = operation->GetLayer();
     if (layer == mLayer)
     {
-        const TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
-        UOdysseyLayerCell* nextCell = layer->GetCellAtFrame(mDragPosition);
-        UOdysseyLayerCell* previousCell = layer->GetCellAtFrame(mDragPosition - 1);
+        const TArray<UOdysseyAnimationCell*> selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(layer);
+        UOdysseyAnimationCell* nextCell = layer->GetCellAtFrame(mDragPosition);
+        UOdysseyAnimationCell* previousCell = layer->GetCellAtFrame(mDragPosition - 1);
 
         if (selectedCells.Contains(nextCell) && selectedCells.Contains(previousCell))
         {
@@ -765,10 +766,10 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
             if( !layer->IsEditable() )
                 return true;
 
-            const TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
+            const TArray<UOdysseyAnimationCell*> selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(layer);
             if( selectedCells.IsEmpty() )
             {
-                UOdysseyLayerCell* cell = layer->GetCellAtFrame( mCurrentFrame.Get() );
+                UOdysseyAnimationCell* cell = layer->GetCellAtFrame( mCurrentFrame.Get() );
                 if( !cell )
                     return true;
             }
@@ -790,13 +791,13 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
             TAttribute<FText>::CreateLambda( [this]() -> FText
                                              {
                                                  TArray<FString> selected_names;
-                                                 const TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(mLayer);
+                                                 const TArray<UOdysseyAnimationCell*> selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(mLayer);
                                                  if( selectedCells.IsEmpty() )
                                                  {
-                                                     UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
+                                                     UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
                                                      return cell ? FText::FromString( cell->GetName( ECellNameIfEmpty::None ) ) : FText::GetEmpty();
                                                  }
-                                                 for( const UOdysseyLayerCell* selectedcell : selectedCells )
+                                                 for( const UOdysseyAnimationCell* selectedcell : selectedCells )
                                                      selected_names.AddUnique( selectedcell->GetName( ECellNameIfEmpty::None ) );
 
                                                  if( selected_names.IsEmpty() )
@@ -815,14 +816,14 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
                                                 if( iNewText.ToString() == TEXT( "*" ) )
                                                     return;
 
-                                                const TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(mLayer);
+                                                const TArray<UOdysseyAnimationCell*> selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(mLayer);
                                                 if( selectedCells.IsEmpty() )
                                                 {
-                                                    UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
+                                                    UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
                                                     cell->SetName( iNewText.ToString() );
                                                     return;
                                                 }
-                                                for( UOdysseyLayerCell* selectedcell : selectedCells )
+                                                for( UOdysseyAnimationCell* selectedcell : selectedCells )
                                                     selectedcell->SetName( iNewText.ToString() );
                                             } ),
             FOnTextChanged(),
@@ -999,10 +1000,10 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
 bool
 SOdysseyAnimationLayerImageTimeline::IsCurrentExposureEnabled() const
 {
-    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(mLayer);
+    TArray<UOdysseyAnimationCell*> selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(mLayer);
     if( selectedCells.IsEmpty() )
     {
-        UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
+        UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
         if( !cell )
             return false;
 
@@ -1014,9 +1015,9 @@ SOdysseyAnimationLayerImageTimeline::IsCurrentExposureEnabled() const
 uint32
 SOdysseyAnimationLayerImageTimeline::GetCurrentExposure() const
 {
-    UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
+    UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
 
-    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(mLayer);
+    TArray<UOdysseyAnimationCell*> selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(mLayer);
     if( selectedCells.IsEmpty() )
     {
         if( !cell )
@@ -1051,8 +1052,8 @@ SOdysseyAnimationLayerImageTimeline::EndSetCurrentExposureTransaction( uint32 iN
         return;
 
     SetCurrentExposure( iNewExposure );
-    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(mLayer);
-    OdysseyLayerStackSelection::RegisterUndo(selectedCells, selectedCells);
+    TArray<UOdysseyAnimationCell*> selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(mLayer);
+    OdysseyAnimationCellsSelection::RegisterUndo(selectedCells, selectedCells);
     GEditor->EndTransaction();
 }
 void
@@ -1067,25 +1068,25 @@ SOdysseyAnimationLayerImageTimeline::SetCurrentExposureCommitted( uint32 iNewExp
     FScopedTransaction ScopedTransaction( LOCTEXT( "timeline-cells.transaction.set-selected-cells-exposure", "Set Selected Cells Exposure" ) );
 
     SetCurrentExposure( iNewExposure );
-    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(mLayer);
-    OdysseyLayerStackSelection::RegisterUndo(selectedCells, selectedCells);
+    TArray<UOdysseyAnimationCell*> selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(mLayer);
+    OdysseyAnimationCellsSelection::RegisterUndo(selectedCells, selectedCells);
 }
 void
 SOdysseyAnimationLayerImageTimeline::SetCurrentExposure( uint32 iNewExposure )
 {
     check( mLayer->IsEditable() );
 
-    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(mLayer);
+    TArray<UOdysseyAnimationCell*> selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(mLayer);
     if( selectedCells.IsEmpty() )
     {
-        UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
+        UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
         if( !cell )
             return;
 
         selectedCells.Add( cell );
     }
 
-    for( UOdysseyLayerCell* selectedCell : selectedCells )
+    for( UOdysseyAnimationCell* selectedCell : selectedCells )
     {
         selectedCell->SetExposure( FMath::Max( 1u, iNewExposure ) );
     }
@@ -1264,7 +1265,7 @@ SOdysseyAnimationLayerImageTimeline::CreateRemoveCellMarkOnClickedFrameWidget( F
             .Text( LOCTEXT( "timeline-cells.context-menu.cell-mark.reset-clicked-nothing.label", "No Mark" ) );
             //.Text( FText::Format( LOCTEXT( "timeline-cells.context-menu.cell-mark.reset-clicked-nothing.label", "No Mark at {0}" ), iClickedFrame.Value + 1 ) ); // To display again the frame
 
-    UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
+    UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
     if( !cell )
         return SNew( STextBlock )
             .Text( LOCTEXT( "timeline-cells.context-menu.cell-mark.reset-clicked-nothing.label", "No Mark" ) );
@@ -1316,7 +1317,7 @@ SOdysseyAnimationLayerImageTimeline::CreateRemoveCellMarkOnClickedFrameWidget( F
 FText
 SOdysseyAnimationLayerImageTimeline::GetRemoveCellMarkOnClickedFrameTooltip( FFrameNumber iClickedFrame ) const
 {
-    UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
+    UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
     if( !cell )
         return FText::Format( LOCTEXT( "timeline-cells.context-menu.cell-mark.reset-clicked-nothing.tooltip", "No mark to remove at frame {0}" ), iClickedFrame.Value + 1 );
 
@@ -1335,7 +1336,7 @@ SOdysseyAnimationLayerImageTimeline::RemoveCellMarkOnClickedFrame( FFrameNumber 
     if( !mLayer->IsEditable() )
         return;
 
-    UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
+    UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
     if( !cell )
         return;
 
@@ -1355,7 +1356,7 @@ SOdysseyAnimationLayerImageTimeline::CanRemoveCellMarkOnClickedFrame( FFrameNumb
     if( !mLayer->IsEditable() )
         return false;
 
-    UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
+    UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
     if( !cell )
         return false;
 
@@ -1376,7 +1377,7 @@ SOdysseyAnimationLayerImageTimeline::SetCellMarkOnClickedFrame( FFrameNumber iCl
     if( !mLayer->IsEditable() )
         return;
 
-    UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
+    UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
     if( !cell )
         return;
 
@@ -1395,7 +1396,7 @@ SOdysseyAnimationLayerImageTimeline::CanSetCellMarkOnClickedFrame( FFrameNumber 
     if( !mLayer->IsEditable() )
         return false;
 
-    UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
+    UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
     if( !cell )
         return false;
 
@@ -1414,7 +1415,7 @@ SOdysseyAnimationLayerImageTimeline::IsCellMarkCheckedOnClickedFrame( FFrameNumb
     if( !mLayer->IsEditable() )
         return false;
 
-    UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
+    UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
     if( !cell )
         return false;
 

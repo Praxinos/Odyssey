@@ -12,13 +12,8 @@
 #include "OdysseyMediaProvider.h"
 #include "OdysseyTextureRenderingAbility.h"
 
-#if WITH_EDITOR
-#include "OdysseyLighttable.h"
-#endif
-
 #include "OdysseyLayer.generated.h"
 
-class UOdysseyLayerCell;
 class UOdysseyLayerStack;
 
 UENUM(BlueprintType)
@@ -26,15 +21,6 @@ enum  class  EGetLayerChildrenMethod : uint8
 {
     DepthFirst,
     BreadthFirst
-};
-
-UENUM(BlueprintType)
-enum class EOdysseyLayerImagePostBehaviour : uint8
-{
-    None,
-    Hold,
-    Loop,
-    PingPong
 };
 
 UCLASS(Abstract, HideDropdown, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
@@ -48,20 +34,11 @@ public:
 #if WITH_EDITOR
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayChildrenChanged, UOdysseyLayer*);
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayOptionsChanged, UOdysseyLayer*);
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayCellNamesChanged, UOdysseyLayer*);
 
     static FOnDisplayChildrenChanged& OnDisplayChildrenChanged();
     static FOnDisplayOptionsChanged& OnDisplayOptionsChanged();
-    static FOnDisplayCellNamesChanged& OnDisplayCellNamesChanged();
-    FSimpleMulticastDelegate& OnLighttableChanged();
 #endif
 
-    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCellsChanged, UOdysseyLayer*, bool /*IsInteractive*/);
-    /**
-     * Called when cells are changed
-     * Not called on undo/redo
-     */
-    static FOnCellsChanged& OnCellsChanged();
 
 public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
@@ -83,17 +60,6 @@ public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool ShouldDisplayOptions() const;
 
-    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
-    bool ShouldDisplayCellNames() const;
-
-    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
-    FOdysseyLighttable GetLighttable() const;
-
-    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
-    bool HasLighttable() const;
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    void SetLighttable(FOdysseyLighttable Value);
 #endif
 
 public:
@@ -125,15 +91,6 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetOpacity(float Value);
 
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    void SetCellsOffset(int Value);
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    void SetPreBehaviour(EOdysseyLayerImagePostBehaviour Value);
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    void SetPostBehaviour(EOdysseyLayerImagePostBehaviour Value);
-
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool CanSetInheritsAlpha() const;
 
@@ -144,9 +101,6 @@ public:
     //Getters
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     virtual UOdysseyLayerStack* GetLayerStack() const;
-
-    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
-    TSubclassOf<UOdysseyLayerCell> GetDefaultCellClass() const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     FText GetLayerTypeName() const;
@@ -197,70 +151,7 @@ public:
     float GetOpacity() const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
-    int GetCellsOffset() const;
-
-    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
-    EOdysseyLayerImagePostBehaviour GetPreBehaviour() const;
-
-    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
-    EOdysseyLayerImagePostBehaviour GetPostBehaviour() const;
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    const TArray<TSubclassOf<UOdysseyLayerCell>>& GetSupportedCellTypes() const;
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    const TArray<UOdysseyLayerCell*>& GetCells() const;
-
-    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool GetInheritsAlpha() const;
-
-public:
-    // Advanced Getters
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    int GetPreBehaviourFrame(EOdysseyLayerImagePostBehaviour Behaviour, int Frame) const;
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    int GetPostBehaviourFrame(EOdysseyLayerImagePostBehaviour Behaviour, int Frame) const;
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    UOdysseyLayerCell* GetCellAtFrame(int Frame) const;
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    int GetCellIndexAtFrame(int Frame) const;
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    bool HasCellAtFrame(int Frame) const;
-
-public:
-    //Advanced Setters
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer", meta=(DeterminesOutputType = "CellType"))
-    UOdysseyLayerCell* AddCell(TSubclassOf<UOdysseyLayerCell> CellType, int Index = -1 );
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer", meta=(DeterminesOutputType = "CellType"))
-    TArray<UOdysseyLayerCell*> AddCells(TSubclassOf<UOdysseyLayerCell> CellType, int Index = -1, int Count = 1 );
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    void RemoveCell(UOdysseyLayerCell* Cell); //Prevent Empty Layer ?
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    void RemoveCells(const TArray<UOdysseyLayerCell*>& Cells); //Prevent Empty Layer ?
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    void RemoveCellAtIndex(int Index);
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    void RemoveAllCells();
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    UOdysseyLayerCell* CopyCell(UOdysseyLayerCell* Cell, int Index = -1);
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    UOdysseyLayerCell* CopyCellToLayer(UOdysseyLayerCell* Cell, UOdysseyLayer* ToLayer, int Index = -1) const;
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    TArray<UOdysseyLayerCell*> CopyCells(TArray<UOdysseyLayerCell*> Cells, int Index = -1);
 
 public:
     //Merge
@@ -291,38 +182,14 @@ public:
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers);
 
 public:
-    //Invalidate the frame ranges of all cells
-    //Used for performance optimisation to avoid iterating over all cells each time we need a cell's frame range
 #if WITH_EDITOR
-    void SetLighttableInteractive(FOdysseyLighttable Value);
     const FSlateIcon& GetIcon() const;
     const FSlateIcon& GetIconExpanded() const;
     void SetDisplayChildren(bool Value);
     void SetDisplayOptions(bool Value);
-    void SetDisplayCellNames(bool Value);
-    void AddCellInteractive(int Index = -1 );
-    void AddCellsInteractive(int Index = -1, int Count = 1 );
     void SetOpacityInteractive(float Value);
-    void SetCellsOffsetInteractive(float Value);
-    void CellsChangedInteractive();
 #endif
 
-    void InvalidateCellsFrameRanges();
-    const TArray<FInt32Range>& GetCellsFrameRanges() const;
-    void UpdateCellsIndexInLayer();
-    bool ReverseCells( const TArray<UOdysseyLayerCell*>& iCellsToReverse );
-    static bool AreCellsContiguous( const TArray<UOdysseyLayerCell*>& iCellsToReverse );
-    static bool AreCellsContiguous( const TArray<UOdysseyLayerCell*>& iCellsToReverse
-                                  , TArray<UOdysseyLayerCell*>& oSortedCells  );
-    /** Put contiguous cells together inside the same group
-    *   ...[   C1   ][ C2 ]...[C10][     C11     ]...[    C22   ]...
-    *   groups[0] = [C1, C2]
-    *   groups[1] = [C10, C11]
-    *   groups[2] = [C22]
-    *
-    *   If it returns a single group, it also means that all cells are contiguous
-    */
-    static TArray<TArray<UOdysseyLayerCell*>> GetCellsContiguousGroups( const TArray<UOdysseyLayerCell*>& iCells );
 
 public:
 #if WITH_EDITOR
@@ -333,7 +200,6 @@ public:
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
 #endif
 
-    virtual void PostInitProperties() override;
     virtual void PostLoad() override;
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame) const override;
@@ -348,8 +214,6 @@ public:
 protected:
     virtual bool BuildsCompositeContent() const override { return true; }
     bool BuildRenderChildrenPipeline( IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext) const;
-    //Property changed methods
-    virtual void CellsChanged();
 
 #if WITH_EDITOR
     // UObject overrides
@@ -361,7 +225,6 @@ protected:
 protected:
     //Default properties
 #if WITH_EDITORONLY_DATA
-    FSimpleMulticastDelegate mOnLighttableChanged;
     FSlateIcon Icon;
     FSlateIcon IconExpanded;
 #endif
@@ -394,14 +257,6 @@ protected:
     UPROPERTY(NonTransactional)
     bool bDisplayOptions = true;
 
-    UPROPERTY(NonTransactional)
-    bool bDisplayCellNames = false;
-
-    UPROPERTY(NonTransactional)
-    FOdysseyLighttable Lighttable;
-
-    UPROPERTY(NonTransactional)
-    bool bHasLighttable = true;
 #endif
 
     UPROPERTY()
@@ -423,28 +278,8 @@ protected:
     float Opacity = 1.0f;
 
     UPROPERTY()
-    TSubclassOf<UOdysseyLayerCell> DefaultCellClass = nullptr;
-
-    UPROPERTY()
-    int CellsOffset = 0;
-
-    UPROPERTY()
-    EOdysseyLayerImagePostBehaviour PreBehaviour = EOdysseyLayerImagePostBehaviour::None;
-
-    UPROPERTY()
-    EOdysseyLayerImagePostBehaviour PostBehaviour = EOdysseyLayerImagePostBehaviour::None;
-
-    UPROPERTY()
-    TArray<TSubclassOf<UOdysseyLayerCell>> SupportedCellTypes;
-
-    UPROPERTY()
-    TArray<TObjectPtr<UOdysseyLayerCell>> Cells;
-
-    UPROPERTY()
     bool bInheritsAlpha = false;
 
-private:
-    mutable TArray<FInt32Range> mCellsFrameRanges;
 };
 
 #if WITH_EDITOR

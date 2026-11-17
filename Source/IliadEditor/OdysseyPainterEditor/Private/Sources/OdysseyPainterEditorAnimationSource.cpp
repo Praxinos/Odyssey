@@ -16,6 +16,7 @@
 #include "OdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyLayerStackSelection.h"
+#include "OdysseyAnimationCellsSelection.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
@@ -255,11 +256,11 @@ FOdysseyPainterEditorAnimationSource::Clear()
     if (!player)
         return;
 
-    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(currentLayer);
+    TArray<UOdysseyAnimationCell*> selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(currentLayer);
     if (selectedCells.IsEmpty())
     {
 
-        UOdysseyLayerCell* cell = currentLayer->GetCellAtFrame(player->GetCurrentFrame().FrameNumber.Value);
+        UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(player->GetCurrentFrame().FrameNumber.Value);
         if (!cell)
             return;
 
@@ -273,7 +274,7 @@ FOdysseyPainterEditorAnimationSource::Clear()
     else
     {
         FScopedTransaction ScopedTransaction(transactionName);
-        for(UOdysseyLayerCell* cell : selectedCells)
+        for(UOdysseyAnimationCell* cell : selectedCells)
         {
             cell->Clear();
         }
@@ -282,7 +283,7 @@ FOdysseyPainterEditorAnimationSource::Clear()
         currentFrameMutator.Set(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
         currentFrameMutator.Commit();
 
-        OdysseyLayerStackSelection::RegisterUndo(selectedCells, selectedCells);
+        OdysseyAnimationCellsSelection::RegisterUndo(selectedCells, selectedCells);
     }
 }
 

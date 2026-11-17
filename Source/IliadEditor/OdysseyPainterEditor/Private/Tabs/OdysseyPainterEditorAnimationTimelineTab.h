@@ -12,7 +12,7 @@ class FOdysseyPainterEditor;
 class UOdysseyAnimationLayerStack;
 class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
-class UOdysseyLayerCell;
+class UOdysseyAnimationCell;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 class FExtender;
 
@@ -63,9 +63,9 @@ private:
 
     TSharedPtr<SWidget> CreateDefaultEmptyTimelineTabWidget() const;
 
-    void OnActivateOutOfPegs(UOdysseyLayerCell* iCell);
+    void OnActivateOutOfPegs(UOdysseyAnimationCell* iCell);
     void OnInactivateOutOfPegs();
-    ECheckBoxState OnIsOutOfPegsChecked(UOdysseyLayerCell* iCell);
+    ECheckBoxState OnIsOutOfPegsChecked(UOdysseyAnimationCell* iCell);
     void OnScrubStart();
     void OnScrubEnd();
 

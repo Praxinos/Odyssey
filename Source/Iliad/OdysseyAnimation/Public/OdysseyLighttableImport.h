@@ -17,7 +17,7 @@ public:
      * @param iLighttable
      * @param Ar
      */
-    static bool ODYSSEYLAYERSTACK_API Read( FOdysseyLighttable* iLighttable
+    static bool ODYSSEYANIMATION_API Read( FOdysseyLighttable* iLighttable
                                   , FArchive &Ar );
 
 private:

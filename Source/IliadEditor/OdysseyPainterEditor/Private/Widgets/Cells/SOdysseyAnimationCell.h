@@ -9,7 +9,7 @@
 
 class FOdysseyPainterEditorAnimationTimelinePosition;
 class UOdysseyAnimationLayer;
-class UOdysseyLayerCell;
+class UOdysseyAnimationCell;
 struct FSlateBrush;
 
 class SOdysseyAnimationCell
@@ -27,7 +27,7 @@ public:
     void Construct(
         const FArguments& iArgs,
         UOdysseyAnimationLayer* iAnimationLayer,
-        UOdysseyLayerCell* iCell
+        UOdysseyAnimationCell* iCell
     );
 
 public:
@@ -52,7 +52,7 @@ private:
 
 private:
     UOdysseyAnimationLayer* mAnimationLayer;
-    UOdysseyLayerCell* mCell;
+    UOdysseyAnimationCell* mCell;
 
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
 

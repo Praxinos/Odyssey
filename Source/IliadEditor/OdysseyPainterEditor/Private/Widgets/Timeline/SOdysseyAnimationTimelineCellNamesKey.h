@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 
-class UOdysseyLayerCell;
+class UOdysseyAnimationCell;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 
 class SOdysseyAnimationTimelineCellNamesKey
@@ -16,7 +16,7 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineCellNamesKey)
     {}
         SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
-        SLATE_ATTRIBUTE( UOdysseyLayerCell*, Cell)
+        SLATE_ATTRIBUTE( UOdysseyAnimationCell*, Cell)
     SLATE_END_ARGS()
 
     void Construct(const FArguments& InArgs);
@@ -29,5 +29,5 @@ private:
     void OnNameCommited( const FText& iText, ETextCommit::Type iType );
 
 private:
-    TAttribute<UOdysseyLayerCell*> mCell;
+    TAttribute<UOdysseyAnimationCell*> mCell;
 };

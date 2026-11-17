@@ -1869,8 +1869,8 @@ SCinematicBoardSectionAnimationTimelineKeys::GetKeyTooltipText( TSharedPtr<FMeta
             FAnimationCut animationcut = value.Value;
             animation = animationcut.GetAnimation();
 
-            TArray<UOdysseyLayerCell*> cells = animationcut.GetCellsReference();
-            for( UOdysseyLayerCell* cell : cells )
+            TArray<UOdysseyAnimationCell*> cells = animationcut.GetCellsReference();
+            for( UOdysseyAnimationCell* cell : cells )
             {
                 map.Add( frame_in_sequence, cell->GetLayer()->GetLayerName() );
             }

@@ -18,6 +18,7 @@
 #include "OdysseyBlendShader.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyLayerStackSelection.h"
+#include "OdysseyAnimationCellsSelection.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
 #include "OdysseyPixelFormat.h"
 #include "OdysseyRasterBlockMutator.h"
@@ -58,19 +59,19 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     if (!layerStack)
         return;
 
-    UOdysseyLayer* layer = layerStack->GetCurrentLayer();
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!layer)
         return;
 
     if (!layer->IsEditable())
         return;
 
-    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
+    TArray<UOdysseyAnimationCell*> selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
         return;
 
     bool hasCellsToCrossFade = selectedCells.ContainsByPredicate(
-        [](UOdysseyLayerCell* iCell)
+        [](UOdysseyAnimationCell* iCell)
         {
             return iCell->GetExposure() > 1;
         }
@@ -102,7 +103,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     progressBar.EnterProgressFrame();
 
     //Get the selected cells again to ensure having the converted cells
-    selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
+    selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(layer);
     OdysseyLayerStackSelection::Get()->DeselectAll();
 
     //Cross Fade all selected cells
@@ -117,7 +118,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     destinationRenderTarget->InitAutoFormat(rect.Width(), rect.Height());
 
     FScopedSlowTask selectedCellsProgress(selectedCells.Num());
-    for (UOdysseyLayerCell* selectedCell : selectedCells)
+    for (UOdysseyAnimationCell* selectedCell : selectedCells)
     {
         selectedCellsProgress.EnterProgressFrame();
         selectedCell->Render_GameThread(startRenderTarget.Get(), EOdysseyRenderingType::Render);
@@ -131,11 +132,11 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 
         if (layer->GetCells().IsValidIndex( nextCellIndex ) && layer->GetCells()[nextCellIndex])
         {
-            UOdysseyLayerCell* nextCell = layer->GetCells()[nextCellIndex];
+            UOdysseyAnimationCell* nextCell = layer->GetCells()[nextCellIndex];
 
             nextCell->Render_GameThread(endRenderTarget.Get(), EOdysseyRenderingType::Render);
 
-            TArray<UOdysseyLayerCell*> rasterCells = layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), selectedCell->GetIndexInLayer() + 1, crossFadelength - 1);
+            TArray<UOdysseyAnimationCell*> rasterCells = layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), selectedCell->GetIndexInLayer() + 1, crossFadelength - 1);
 
             FScopedSlowTask framesProgress(crossFadelength);
             for (int j = 1; j < crossFadelength; j++)
@@ -206,14 +207,14 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
                 mutator.Commit();
             }
 
-            for (UOdysseyLayerCell* cell : rasterCells)
+            for (UOdysseyAnimationCell* cell : rasterCells)
             {
                 OdysseyLayerStackSelection::Get()->Select(cell);
             }
         }
         else
         {
-            TArray<UOdysseyLayerCell*> rasterCells = layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), selectedCell->GetIndexInLayer() + 1, crossFadelength - 1);
+            TArray<UOdysseyAnimationCell*> rasterCells = layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), selectedCell->GetIndexInLayer() + 1, crossFadelength - 1);
 
             FScopedSlowTask framesProgress(crossFadelength);
             for (int j = 1; j < crossFadelength; j++)
@@ -268,7 +269,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
                 mutator.Commit();
             }
 
-            for (UOdysseyLayerCell* cell : rasterCells)
+            for (UOdysseyAnimationCell* cell : rasterCells)
             {
                 OdysseyLayerStackSelection::Get()->Select(cell);
             }
@@ -276,7 +277,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     }
     OdysseyLayerStackSelection::Get()->EndBatchSelectOperation();
 
-    OdysseyLayerStackSelection::RegisterUndo(selectedCells, OdysseyLayerStackSelection::GetSelectedCells(layer));
+    OdysseyAnimationCellsSelection::RegisterUndo(selectedCells, OdysseyAnimationCellsSelection::GetSelectedCells(layer));
 }
 
 bool
@@ -298,12 +299,12 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_CrossFade()
         return false;
 
     UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
-    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
+    TArray<UOdysseyAnimationCell*> selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
         return false;
 
     bool hasCellsToCrossFade = selectedCells.ContainsByPredicate(
-        [](UOdysseyLayerCell* iCell)
+        [](UOdysseyAnimationCell* iCell)
         {
             return iCell->GetExposure() > 1;
         }

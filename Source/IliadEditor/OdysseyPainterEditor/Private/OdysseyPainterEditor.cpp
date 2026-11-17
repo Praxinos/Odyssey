@@ -25,9 +25,10 @@
 #include "OdysseyEditorLayoutBuilder.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyLayer.h"
-#include "OdysseyLayerCell.h"
+#include "OdysseyAnimationCell.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyLayerStackGlobalShortcuts.h"
+#include "OdysseyAnimationLayerStackGlobalShortcuts.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditorAnimationFlipSystem.h"
@@ -307,7 +308,7 @@ FOdysseyPainterEditor::InitShortcuts()
     );
 
     GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalShortcuts>(this));
-    GetShortcuts().Add(MakeShared<FOdysseyLayerStackGlobalShortcuts>(layerStack));
+    GetShortcuts().Add(MakeShared<FOdysseyAnimationLayerStackGlobalShortcuts>(layerStack));
     GetShortcuts().Add(MakeShared<FOdysseyAnimationGlobalShortcuts>(animation, currentFrame));
 }
 
@@ -3551,7 +3552,10 @@ void FOdysseyPainterEditor::SetPaletteSet(FGuid iIndex, UOdysseyPaletteSet* iPal
         TArray<UOdysseyLayer*> layers = LayerStack()->GetLayers();
         for (UOdysseyLayer* layer : layers)
         {
-            for (UOdysseyLayerCell* cell : layer->GetCells())
+            UOdysseyAnimationLayer* AnimationLayer = Cast<UOdysseyAnimationLayer>(layer);
+            if (!AnimationLayer)
+                continue;
+            for (UOdysseyAnimationCell* cell : AnimationLayer->GetCells())
             {
                 UOdysseyAnimationCellImageVector* animationVectorCell;
                 if (cell->IsA(UOdysseyAnimationCellImageVector::StaticClass()))
@@ -3684,7 +3688,10 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
         TArray<UOdysseyLayer*> layers = LayerStack()->GetLayers();
         for (UOdysseyLayer* layer : layers)
         {
-            for (UOdysseyLayerCell* cell : layer->GetCells())
+            UOdysseyAnimationLayer* AnimationLayer = Cast<UOdysseyAnimationLayer>(layer);
+            if (!AnimationLayer)
+                continue;
+            for (UOdysseyAnimationCell* cell : AnimationLayer->GetCells())
             {
                 UOdysseyAnimationCellImageVector* animationVectorCell;
                 if (cell->IsA(UOdysseyAnimationCellImageVector::StaticClass()))

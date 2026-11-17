@@ -41,7 +41,7 @@ namespace UnrealBuildTool.Rules
             PublicDependencyModuleNames.AddRange(
                 new string[]
                 {
-                    // ... add other public dependencies that you statically link with here ...
+                    "OdysseyLayerStackEditor",
                 }
                 );
 
@@ -75,6 +75,7 @@ namespace UnrealBuildTool.Rules
                     "Sequencer",
                     "SequencerCore",
                     "ToolWidgets",
+                    "TypedElementRuntime",
                     "UnrealEd",
                     "EditorFramework",
 
@@ -86,8 +87,6 @@ namespace UnrealBuildTool.Rules
                     "OdysseyHUD",
                     "OdysseyImaging",
                     "OdysseyLayerStack",
-                    "OdysseyLayerStackEditor",
-                    "OdysseyPainterEditor",
                     "OdysseyRendering",
                     "OdysseyStyle",
                     "OdysseyVector",
@@ -97,10 +96,13 @@ namespace UnrealBuildTool.Rules
                 }
                 );
 
+            /** Painter is opened through its virtual module interface and links back to animation editing APIs. */
+            PrivateIncludePathModuleNames.Add("OdysseyPainterEditor");
+
             DynamicallyLoadedModuleNames.AddRange(
                 new string[]
                 {
-                    // ... add any modules that your module loads dynamically here ...
+                    "OdysseyPainterEditor",
                 }
                 );
         }

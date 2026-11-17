@@ -167,7 +167,7 @@ FOdysseyPainterEditorGlobalTimelineShortcuts::Action_NavigateToNextCell()
     if (cellIndex >= currentLayer->GetCells().Num())
         return;
 
-    UOdysseyLayerCell* nextCell = currentLayer->GetCells()[cellIndex];
+    UOdysseyAnimationCell* nextCell = currentLayer->GetCells()[cellIndex];
     FFrameTime frame(nextCell->GetFrameRange().GetLowerBoundValue());
     player->SeekToFrame(frame);
 }
@@ -219,7 +219,7 @@ FOdysseyPainterEditorGlobalTimelineShortcuts::Action_NavigateToPreviousCell()
     if (cellIndex < 0)
         return;
 
-    UOdysseyLayerCell* prevCell = currentLayer->GetCells()[cellIndex];
+    UOdysseyAnimationCell* prevCell = currentLayer->GetCells()[cellIndex];
     FFrameTime frame(prevCell->GetFrameRange().GetLowerBoundValue());
     player->SeekToFrame(frame);
 }

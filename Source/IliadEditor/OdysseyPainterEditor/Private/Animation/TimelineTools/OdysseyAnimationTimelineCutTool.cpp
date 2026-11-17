@@ -51,14 +51,14 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
     float posX = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition()).X;
     int frame = (int)(MousePositionToFrame(posX) + 0.5f);
 
-    UOdysseyLayerCell* cell = iParams.mLayer->GetCellAtFrame(frame);
+    UOdysseyAnimationCell* cell = iParams.mLayer->GetCellAtFrame(frame);
     if (!cell || cell->GetFrameRange().GetLowerBoundValue() == frame)
         return FReply::Unhandled();
 
 #if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.cut-tool.transaction.break-cell", "Break Cell"));
 #endif
-    UOdysseyLayerCell* newCell = cell->Break(frame - cell->GetFrameRange().GetLowerBoundValue(), !iParams.mMouseEvent.IsControlDown());
+    UOdysseyAnimationCell* newCell = cell->Break(frame - cell->GetFrameRange().GetLowerBoundValue(), !iParams.mMouseEvent.IsControlDown());
     if (!newCell)
         return FReply::Unhandled();
 

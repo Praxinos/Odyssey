@@ -8,7 +8,7 @@
 #include "OdysseyAnimationCut.generated.h"
 
 class UOdysseyAnimation;
-class UOdysseyLayerCell;
+class UOdysseyAnimationCell;
 
 USTRUCT()
 struct ODYSSEYANIMATION_API FAnimationCutEntry
@@ -17,11 +17,11 @@ struct ODYSSEYANIMATION_API FAnimationCutEntry
 
 public:
     FAnimationCutEntry();
-    FAnimationCutEntry( UOdysseyLayerCell* iCellBefore, UOdysseyLayerCell* iCellAfter );
+    FAnimationCutEntry( UOdysseyAnimationCell* iCellBefore, UOdysseyAnimationCell* iCellAfter );
 
     FFrameNumber GetFrameReference() const;
 
-    UOdysseyLayerCell* GetCellReference();
+    UOdysseyAnimationCell* GetCellReference();
 
     TRange<FFrameNumber> GetRangeLimit() const;
 
@@ -29,9 +29,9 @@ public:
 
 private:
     UPROPERTY()
-    TObjectPtr<UOdysseyLayerCell> mCellBefore;
+    TObjectPtr<UOdysseyAnimationCell> mCellBefore;
     UPROPERTY()
-    TObjectPtr<UOdysseyLayerCell> mCellAfter;
+    TObjectPtr<UOdysseyAnimationCell> mCellAfter;
 };
 
 USTRUCT()
@@ -45,7 +45,7 @@ public:
     UOdysseyAnimation* GetAnimation();
 
     FFrameNumber GetFrameReference() const;
-    TArray<UOdysseyLayerCell*> GetCellsReference() const;
+    TArray<UOdysseyAnimationCell*> GetCellsReference() const;
     TRange<FFrameNumber> GetRangeLimit() const;
 
     void Offset( int32 iOffset, EPropertyChangeType::Type iChangeType );

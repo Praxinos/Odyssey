@@ -12,8 +12,9 @@
 #include "OdysseyAnimationLayerImageVector.h"
 #include "SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
 #include "OdysseyAnimationCellImageVector.h"
-#include "OdysseyLayerCellImageStagger.h"
+#include "OdysseyAnimationCellImageStagger.h"
 #include "OdysseyLayerStackSelection.h"
+#include "OdysseyAnimationCellsSelection.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorModule.h"
 #include "OdysseyAnimation.h"
@@ -65,7 +66,7 @@ SOdysseyAnimationLayerImageVectorTimeline::GetInbetweeningListView()
 }
 
 TSharedRef<SWidget>
-SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(UOdysseyLayerCell* iCell)
+SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(UOdysseyAnimationCell* iCell)
 {
     if (!iCell)
     {
@@ -77,9 +78,9 @@ SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(UOdysseyLayerCel
         return SNew(SOdysseyAnimationCellImageVector, Cast<UOdysseyAnimationCellImageVector>(iCell))
             .Clipping(EWidgetClipping::ClipToBoundsAlways);
     }
-    else if (iCell->IsA<UOdysseyLayerCellImageStagger>())
+    else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
     {
-        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyLayerCellImageStagger>(iCell))
+        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell))
             .TimelinePosition(mTimelinePosition);
     }
 
@@ -142,7 +143,7 @@ void
 SOdysseyAnimationLayerImageVectorTimeline::MassModifier()
 {
     UOdysseyAnimationLayerImageVector* layerImageVector = Cast<UOdysseyAnimationLayerImageVector>( mLayer->GetLayerStack()->GetCurrentLayer() );
-    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(mLayer);
+    TArray<UOdysseyAnimationCell*> selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(mLayer);
     TArray<FOdysseyVectorGroupPaint*> vectorSceneArray;
     FOdysseyVectorGroupPaint* previewScene;
     FOdysseyVectorGroupPaint* previewSceneCopy = nullptr;
@@ -155,7 +156,7 @@ SOdysseyAnimationLayerImageVectorTimeline::MassModifier()
     // prevent multiple instances of the mass modifier
     //if( bMassModifierWindowRunning == false )
     {
-        for( UOdysseyLayerCell* cell : selectedCells )
+        for( UOdysseyAnimationCell* cell : selectedCells )
         {
             UOdysseyAnimationCellImageVector* animationCell = Cast<UOdysseyAnimationCellImageVector>( cell );
 
@@ -165,7 +166,7 @@ SOdysseyAnimationLayerImageVectorTimeline::MassModifier()
             }
         }
 
-        UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
+        UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
         UOdysseyAnimationCellImageVector* imageVectorCell = Cast<UOdysseyAnimationCellImageVector>( cell );
 
         previewScene = imageVectorCell ? imageVectorCell->GetVectorCell()->GetScene() : nullptr;

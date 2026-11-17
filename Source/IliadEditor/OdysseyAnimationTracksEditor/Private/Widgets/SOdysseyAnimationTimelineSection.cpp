@@ -18,7 +18,7 @@
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimationLayerStack.h"
-#include "OdysseyLayerCell.h"
+#include "OdysseyAnimationCell.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationOutOfPegsTool.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
@@ -96,7 +96,7 @@ SOdysseyAnimationTimelineSection::OnPreviewMouseButtonDown(const FGeometry& MyGe
 }
 
 void
-SOdysseyAnimationTimelineSection::OnActivateOutOfPegs(UOdysseyLayerCell* iCell)
+SOdysseyAnimationTimelineSection::OnActivateOutOfPegs(UOdysseyAnimationCell* iCell)
 {
     if (!GLevelEditorModeTools().IsModeActive( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId ))
         return;
@@ -148,7 +148,7 @@ SOdysseyAnimationTimelineSection::OnInactivateOutOfPegs()
 }
 
 ECheckBoxState
-SOdysseyAnimationTimelineSection::OnIsOutOfPegsChecked(UOdysseyLayerCell* iCell)
+SOdysseyAnimationTimelineSection::OnIsOutOfPegsChecked(UOdysseyAnimationCell* iCell)
 {
     if (!GLevelEditorModeTools().IsModeActive( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId))
         return ECheckBoxState::Unchecked;

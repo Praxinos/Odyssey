@@ -80,6 +80,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "NamingTokens",
 
                 "OdysseyAnimation",
+                "OdysseyAnimationEditor",
                 "OdysseyAnimationTracks",
                 "OdysseyCore",
                 "OdysseyCommonWidgets",

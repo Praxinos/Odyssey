@@ -193,7 +193,7 @@ SOdysseyAnimationCells::Construct(
 }
 
 TSharedRef<SWidget>
-SOdysseyAnimationCells::CreateCellWidget(UOdysseyLayerCell* iCell)
+SOdysseyAnimationCells::CreateCellWidget(UOdysseyAnimationCell* iCell)
 {
     if (!iCell)
     {
@@ -238,9 +238,9 @@ SOdysseyAnimationCells::RefreshCellsHBox()
 {
     mCellsHBox->ClearChildren();
 
-    TArray<UOdysseyLayerCell*> cells = mCells.Get();
-    TMap<UOdysseyLayerCell*, TSharedPtr<SWidget>> cellWidgetsCache;
-    for (UOdysseyLayerCell* cell : cells)
+    TArray<UOdysseyAnimationCell*> cells = mCells.Get();
+    TMap<UOdysseyAnimationCell*, TSharedPtr<SWidget>> cellWidgetsCache;
+    for (UOdysseyAnimationCell* cell : cells)
     {
         TSharedPtr<SWidget> cellWidget;
         if (mCellWidgetsCache.Contains(cell))
@@ -270,10 +270,10 @@ SOdysseyAnimationCells::RefreshItemsSource()
 {
     mItemsSource->Reset();
 
-    TArray<UOdysseyLayerCell*> cells = mCells.Get();
+    TArray<UOdysseyAnimationCell*> cells = mCells.Get();
     TArray<TSharedPtr<FCellItem>> cellItems;
     cellItems.Reserve(cells.Num());
-    for (UOdysseyLayerCell* cell : cells)
+    for (UOdysseyAnimationCell* cell : cells)
     {
         TSharedPtr<FCellItem> cellItem = MakeShared<FCellItem>();
         cellItem->mCell = cell;
@@ -297,7 +297,7 @@ SOdysseyAnimationCells::GetCellsWidth() const
 }
 
 float
-SOdysseyAnimationCells::GetCellExposure(UOdysseyLayerCell* iCell) const
+SOdysseyAnimationCells::GetCellExposure(UOdysseyAnimationCell* iCell) const
 {
     return iCell->GetExposure();
 }
@@ -481,7 +481,7 @@ SOdysseyAnimationCells::CreateTimingHandleWidget()
 TSharedRef<SWidget>
 SOdysseyAnimationCells::CreateCellBreakIndicatorWidget()
 {
-    UOdysseyLayerCell* cell = mHoveredCell;
+    UOdysseyAnimationCell* cell = mHoveredCell;
     return SNew(SHorizontalBox)
         +SHorizontalBox::Slot()
         .AutoWidth()
@@ -685,7 +685,7 @@ SOdysseyAnimationCells::GetCellBreakIndicatorWidth() const
 
     //Find frame
     float frame = MousePositionToFrame(mMousePosition.X) + 0.5f;
-    UOdysseyLayerCell* cell = mAnimationLayer->GetCellAtFrame(frame);
+    UOdysseyAnimationCell* cell = mAnimationLayer->GetCellAtFrame(frame);
     if (!cell)
         return 0.f;
 
@@ -707,7 +707,7 @@ SOdysseyAnimationCells::GetCellBreakIndicatorVisibility() const
     //Find frame
     float frame = MousePositionToFrame(mMousePosition.X) + 0.5f;
 
-    UOdysseyLayerCell* cell = mAnimationLayer->GetCellAtFrame(frame);
+    UOdysseyAnimationCell* cell = mAnimationLayer->GetCellAtFrame(frame);
     if (!cell)
         return EVisibility::Hidden;
 
@@ -756,7 +756,7 @@ SOdysseyAnimationCells::OnExposureHandleDragged(const FGeometry& iGeometry, cons
     else
         mouseOffsetInt = (int)(mouseOffset / mTimelinePosition->GetFrameSize() - 0.5f);
 
-    UOdysseyLayerCell* cell = mExposureHandleDragData.mCell;
+    UOdysseyAnimationCell* cell = mExposureHandleDragData.mCell;
     int exposure = FMath::Max(1, mExposureHandleDragData.mInitialExposure + mouseOffsetInt);
     cell->SetExposureInteractive(exposure);
 }
@@ -767,7 +767,7 @@ SOdysseyAnimationCells::OnExposureHandleDragStopped(const FGeometry& iGeometry, 
     if (!mExposureHandleDragData.mCell)
         return;
 
-    UOdysseyLayerCell* cell = mExposureHandleDragData.mCell;
+    UOdysseyAnimationCell* cell = mExposureHandleDragData.mCell;
     cell->SetExposure(cell->GetExposure());
 #if WITH_EDITOR
     GEditor->EndTransaction();
@@ -808,7 +808,7 @@ SOdysseyAnimationCells::OnTimingHandleDragged(const FGeometry& iGeometry, const 
 
     for (auto element : mTimingHandleDragData.mAffectedCells)
     {
-        UOdysseyLayerCell* affectedCell = element.Key;
+        UOdysseyAnimationCell* affectedCell = element.Key;
         int exposure = element.Value;
         affectedCell->SetExposureInteractive(exposure);
     }
@@ -828,7 +828,7 @@ SOdysseyAnimationCells::OnTimingHandleDragged(const FGeometry& iGeometry, const 
     if ( mTimingHandleDragData.mHasMaxOffset )
         mouseOffsetInt = FMath::Min(mouseOffsetInt, mTimingHandleDragData.mMaxOffset);
 
-    UOdysseyLayerCell* cell = mTimingHandleDragData.mCell;
+    UOdysseyAnimationCell* cell = mTimingHandleDragData.mCell;
 
     //Compute what needs to change
     if ( mouseOffsetInt > 0 )
@@ -838,7 +838,7 @@ SOdysseyAnimationCells::OnTimingHandleDragged(const FGeometry& iGeometry, const 
         int previousCellIndex = cell->GetIndexInLayer() - 1;
         if ( previousCellIndex >= 0 )
         {
-            UOdysseyLayerCell* previousCell = mAnimationLayer->GetCells()[previousCellIndex];
+            UOdysseyAnimationCell* previousCell = mAnimationLayer->GetCells()[previousCellIndex];
 
             if (!mTimingHandleDragData.mAffectedCells.Contains(previousCell))
                 mTimingHandleDragData.mAffectedCells.Add(previousCell, previousCell->GetExposure());
@@ -854,7 +854,7 @@ SOdysseyAnimationCells::OnTimingHandleDragged(const FGeometry& iGeometry, const 
         //for each cell, adjust cell exposure or hide it
         for ( int i = cell->GetIndexInLayer(); i < mAnimationLayer->GetCells().Num() && mouseOffsetInt > 0; i++ )
         {
-            UOdysseyLayerCell* cellToAdjust = mAnimationLayer->GetCells()[i];
+            UOdysseyAnimationCell* cellToAdjust = mAnimationLayer->GetCells()[i];
 
             if (!mTimingHandleDragData.mAffectedCells.Contains(cellToAdjust))
                 mTimingHandleDragData.mAffectedCells.Add(cellToAdjust, cellToAdjust->GetExposure());
@@ -884,7 +884,7 @@ SOdysseyAnimationCells::OnTimingHandleDragged(const FGeometry& iGeometry, const 
         for ( int i = cell->GetIndexInLayer() - 1; i >= 0 && mouseOffsetInt < 0; i-- )
         {
             TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCells::OnTimingHandleDragged::SetCellExposure);
-            UOdysseyLayerCell* cellToAdjust = mAnimationLayer->GetCells()[i];
+            UOdysseyAnimationCell* cellToAdjust = mAnimationLayer->GetCells()[i];
 
             if (!mTimingHandleDragData.mAffectedCells.Contains(cellToAdjust))
                 mTimingHandleDragData.mAffectedCells.Add(cellToAdjust, cellToAdjust->GetExposure());
@@ -913,10 +913,10 @@ SOdysseyAnimationCells::OnTimingHandleDragStopped(const FGeometry& iGeometry, co
     if (!mTimingHandleDragData.mCell)
         return;
 
-    TArray<UOdysseyLayerCell*> cellsToRemove;
+    TArray<UOdysseyAnimationCell*> cellsToRemove;
     for (auto element : mTimingHandleDragData.mAffectedCells)
     {
-        UOdysseyLayerCell* affectedCell = element.Key;
+        UOdysseyAnimationCell* affectedCell = element.Key;
         int exposure = element.Value;
         if (affectedCell->GetExposure() <= 0)
         {
@@ -997,14 +997,14 @@ SOdysseyAnimationCells::OnAddCellsHandleDragged(const FGeometry& iGeometry, cons
 {
     for (auto element : mAddCellsHandleDragData.mAffectedCells)
     {
-        UOdysseyLayerCell* affectedCell = element.Key;
+        UOdysseyAnimationCell* affectedCell = element.Key;
         int exposure = element.Value;
         affectedCell->SetExposureInteractive(exposure);
     }
 
     mAnimationLayer->SetCellsOffsetInteractive(mAddCellsHandleDragData.mInitialOffset);
 
-    TArray<UOdysseyLayerCell*> cells = mAnimationLayer->GetCells();
+    TArray<UOdysseyAnimationCell*> cells = mAnimationLayer->GetCells();
     for (int i = cells.Num() - 1; i >= 0; i--)
     {
         if (!cells[i])
@@ -1040,7 +1040,7 @@ SOdysseyAnimationCells::OnAddCellsHandleDragged(const FGeometry& iGeometry, cons
             //for each cell adjust its exposure or hide it
             for ( int i = mAnimationLayer->GetCells().Num() - 1; i >= 0 && mouseOffsetInt < 0; i-- )
             {
-                UOdysseyLayerCell* cellToAdjust = mAnimationLayer->GetCells()[i];
+                UOdysseyAnimationCell* cellToAdjust = mAnimationLayer->GetCells()[i];
 
                 if (!mAddCellsHandleDragData.mAffectedCells.Contains(cellToAdjust))
                     mAddCellsHandleDragData.mAffectedCells.Add(cellToAdjust, cellToAdjust->GetExposure());
@@ -1067,7 +1067,7 @@ SOdysseyAnimationCells::OnAddCellsHandleDragged(const FGeometry& iGeometry, cons
             //for each cell adjust its exposure or hide it
             for ( int i = 0; i < mAnimationLayer->GetCells().Num() && mouseOffsetInt > 0; i++ )
             {
-                UOdysseyLayerCell* cellToAdjust = mAnimationLayer->GetCells()[i];
+                UOdysseyAnimationCell* cellToAdjust = mAnimationLayer->GetCells()[i];
 
                 if (!mAddCellsHandleDragData.mAffectedCells.Contains(cellToAdjust))
                     mAddCellsHandleDragData.mAffectedCells.Add(cellToAdjust, cellToAdjust->GetExposure());
@@ -1092,10 +1092,10 @@ SOdysseyAnimationCells::OnAddCellsHandleDragged(const FGeometry& iGeometry, cons
 void
 SOdysseyAnimationCells::OnAddCellsHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
-    TArray<UOdysseyLayerCell*> cellsToRemove;
+    TArray<UOdysseyAnimationCell*> cellsToRemove;
     for (auto element : mAddCellsHandleDragData.mAffectedCells)
     {
-        UOdysseyLayerCell* affectedCell = element.Key;
+        UOdysseyAnimationCell* affectedCell = element.Key;
         int exposure = element.Value;
         if (affectedCell->GetExposure() <= 0)
         {
@@ -1114,7 +1114,7 @@ SOdysseyAnimationCells::OnAddCellsHandleDragStopped(const FGeometry& iGeometry, 
 
     mAddCellsHandleDragData.mAffectedCells.Empty();
 
-    TArray<UOdysseyLayerCell*> cells = mAnimationLayer->GetCells();
+    TArray<UOdysseyAnimationCell*> cells = mAnimationLayer->GetCells();
     for (int i = cells.Num() - 1; i >= 0; i--)
     {
         if (!cells[i])

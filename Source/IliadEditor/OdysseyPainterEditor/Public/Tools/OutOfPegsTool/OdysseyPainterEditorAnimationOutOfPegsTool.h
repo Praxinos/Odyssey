@@ -10,11 +10,11 @@
 #include "OdysseyPainterEditorAnimationOutOfPegsTool.generated.h"
 
 class FOdysseyPaintEngine;
-class UOdysseyLayer;
+class UOdysseyAnimationLayer;
 class FOdysseyHUDPolygon;
 class FOdysseyHUDHandle;
 class FOdysseyHUDLine;
-class UOdysseyLayerCell;
+class UOdysseyAnimationCell;
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorAnimationOutOfPegsTool :
@@ -42,8 +42,8 @@ public:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& iEvent) override;
 
 public:
-    UOdysseyLayerCell* GetCell() const;
-    void SetCell(UOdysseyLayerCell* iCell);
+    UOdysseyAnimationCell* GetCell() const;
+    void SetCell(UOdysseyAnimationCell* iCell);
 
 private:
     void OnCellOutOfPegsChanged(bool iIsInteractive);
@@ -116,8 +116,8 @@ public:
     float Zoom = 100.f;
 
 private:
-    UOdysseyLayer* mLayer;
-    UOdysseyLayerCell* mCell;
+    UOdysseyAnimationLayer* mLayer;
+    UOdysseyAnimationCell* mCell;
     TSharedPtr<FOdysseyHUDPolygon> mTransformHUD = nullptr;
     TSharedPtr<FOdysseyHUDHandle> mTransformTopLeftHandleHUD = nullptr;
     TSharedPtr<FOdysseyHUDHandle> mTransformTopRightHandleHUD = nullptr;

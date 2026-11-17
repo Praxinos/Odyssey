@@ -54,16 +54,16 @@ void FOdysseyAnimationAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& 
 {
     EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
     UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-    for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
+    for (UObject* Object : InObjects)
     {
-        auto animation = Cast<UOdysseyAnimation>(*ObjIt);
+        UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(Object);
         if (!animation)
             continue;
 
         if (AssetEditorSubsystem->FindEditorForAsset(animation, true))
             continue;
 
-        FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+        FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::LoadModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
         painterEditorModule->OpenStandaloneEditorForAsset(animation);
     }
 }

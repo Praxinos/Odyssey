@@ -4,7 +4,7 @@
 #include "SOdysseyAnimationTimelineCellNames.h"
 #include "SOdysseyAnimationTimelineCellNamesKey.h"
 #include "SOdysseyAnimationTimelineSection.h"
-#include "OdysseyLayerCell.h"
+#include "OdysseyAnimationCell.h"
 
 SLATE_IMPLEMENT_WIDGET(SOdysseyAnimationTimelineCellNames)
 void
@@ -52,8 +52,8 @@ SOdysseyAnimationTimelineCellNames::RebuildRow()
                 .WidthInFrames_Lambda(
                     [this]()
                     {
-                        TArray<UOdysseyLayerCell*> cells = mCells.Get();
-                        UOdysseyLayerCell* cell = cells[0];
+                        TArray<UOdysseyAnimationCell*> cells = mCells.Get();
+                        UOdysseyAnimationCell* cell = cells[0];
                         if( !cell )
                             return 0;
 
@@ -67,8 +67,8 @@ SOdysseyAnimationTimelineCellNames::RebuildRow()
                 ]
         ];
 
-    TArray<UOdysseyLayerCell*> cells = mCells.Get();
-    for( UOdysseyLayerCell* cell : cells )
+    TArray<UOdysseyAnimationCell*> cells = mCells.Get();
+    for( UOdysseyAnimationCell* cell : cells )
     {
         //UOdysseyAnimationCell* animation_cell = Cast<UOdysseyAnimationCell>( cell );
 
@@ -93,7 +93,7 @@ SOdysseyAnimationTimelineCellNames::RebuildRow()
                     [
                         SNew( SOdysseyAnimationTimelineCellNamesKey )
                             .Cell_Lambda(
-                                [cell]() -> UOdysseyLayerCell*
+                                [cell]() -> UOdysseyAnimationCell*
                                 {
                                     return cell;
                                 }

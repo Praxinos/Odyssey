@@ -6,7 +6,7 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyLayer.h"
-#include "OdysseyLayerCell.h"
+#include "OdysseyAnimationCell.h"
 
 namespace Odyssey
 {
@@ -33,7 +33,7 @@ UOdysseyAnimation* GetLayerAnimation(UOdysseyLayer* Layer)
     return GetLayerStackAnimation(Layer->GetLayerStack());
 }
 
-UOdysseyAnimation* GetCellAnimation(UOdysseyLayerCell* Cell)
+UOdysseyAnimation* GetCellAnimation(UOdysseyAnimationCell* Cell)
 {
     return GetLayerAnimation(Cell->GetLayer());
 }

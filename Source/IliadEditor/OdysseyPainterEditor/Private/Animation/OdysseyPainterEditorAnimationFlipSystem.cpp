@@ -725,7 +725,7 @@ FOdysseyPainterEditorAnimationFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
         {
             UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
             UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
-            const TArray<UOdysseyLayerCell*>& cells = layer->GetCells();
+            const TArray<UOdysseyAnimationCell*>& cells = layer->GetCells();
             FInt32Range frameRange = layer->GetFrameRange();
 
             int layerLeftLimit;
@@ -740,7 +740,7 @@ FOdysseyPainterEditorAnimationFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
                 return;
 
             int startCellIndex = INDEX_NONE;
-            UOdysseyLayerCell* cell = layer->GetCellAtFrame(mStartFrame);
+            UOdysseyAnimationCell* cell = layer->GetCellAtFrame(mStartFrame);
             if (cell)
                 startCellIndex = cell->GetIndexInLayer();
 
@@ -886,7 +886,7 @@ FOdysseyPainterEditorAnimationFlipSystem::GetLimits(EOdysseyAnimationFlipLimits 
 
             // Get all marks of the desired type
             TArray<int> frames;
-            for( const UOdysseyLayerCell* cell : layer->GetCells() )
+            for( const UOdysseyAnimationCell* cell : layer->GetCells() )
             {
                 for( TPair<int, FCellMark> pair : cell->GetMarks() )
                 {

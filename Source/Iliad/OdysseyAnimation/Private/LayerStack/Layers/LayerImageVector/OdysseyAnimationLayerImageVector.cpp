@@ -4,7 +4,7 @@
 #include "OdysseyAnimationLayerImageVector.h"
 
 #include "OdysseyAnimationCellImageVector.h"
-#include "OdysseyLayerCellImageStagger.h"
+#include "OdysseyAnimationCellImageStagger.h"
 
 #if WITH_EDITOR
 #include "OdysseyPixelFormat.h"
@@ -53,7 +53,7 @@ UOdysseyAnimationLayerImageVector::PostInitProperties()
     DefaultCellClass = UOdysseyAnimationCellImageVector::StaticClass();
 
     SupportedCellTypes.Add(UOdysseyAnimationCellImageVector::StaticClass());
-    SupportedCellTypes.Add(UOdysseyLayerCellImageStagger::StaticClass());
+    SupportedCellTypes.Add(UOdysseyAnimationCellImageStagger::StaticClass());
 }
 
 #if WITH_EDITOR
@@ -81,7 +81,7 @@ UOdysseyAnimationLayerImageVector::UpdateSharedEnv()
 {
     mVectorLayer->RemoveAllChildren();
 
-    for (UOdysseyLayerCell* cell : Cells)
+    for (UOdysseyAnimationCell* cell : Cells)
     {
         // note: a cell can be nullptr
         if ( cell && !cell->IsA<UOdysseyAnimationCellImageVector>())
@@ -164,7 +164,7 @@ UOdysseyAnimationLayerImageVector::Serialize(FArchive& Ar)
                     }
                     else if (cellType == TEXT("FOdysseyAnimationCellImageStagger"))
                     {
-                        UOdysseyLayerCellImageStagger* cell = NewObject<UOdysseyLayerCellImageStagger>(this, UOdysseyLayerCellImageStagger::StaticClass(), NAME_None, RF_Public | RF_Transactional);
+                        UOdysseyAnimationCellImageStagger* cell = NewObject<UOdysseyAnimationCellImageStagger>(this, UOdysseyAnimationCellImageStagger::StaticClass(), NAME_None, RF_Public | RF_Transactional);
                         Cells.Add(cell);
                         cell->OldSerialize(Ar);
                     }
@@ -178,7 +178,7 @@ UOdysseyAnimationLayerImageVector::Serialize(FArchive& Ar)
 void
 UOdysseyAnimationLayerImageVector::RequestRedrawAllVectorCells()
 {
-    for (UOdysseyLayerCell* cell : Cells)
+    for (UOdysseyAnimationCell* cell : Cells)
     {
         // note: a cell can be nullptr
         if ( cell && cell->IsA<UOdysseyAnimationCellImageVector>() )
@@ -261,7 +261,7 @@ UOdysseyAnimationLayerImageVector::PostTransacted(const FTransactionObjectEvent&
 TSharedPtr<IOdysseyMedia>
 UOdysseyAnimationLayerImageVector::GetCellMediaVector(uint32 iFrameIndex) const
 {
-    UOdysseyLayerCell* cell = GetCellAtFrame(iFrameIndex);
+    UOdysseyAnimationCell* cell = GetCellAtFrame(iFrameIndex);
     if (!cell)
         return nullptr;
 
@@ -322,7 +322,7 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
         Modify();
 
         //Add a frame at current frame and extend it
-        UOdysseyLayerCell* cell = AddCell(UOdysseyAnimationCellImageVector::StaticClass(), 0);
+        UOdysseyAnimationCell* cell = AddCell(UOdysseyAnimationCellImageVector::StaticClass(), 0);
         cell->SetExposure(range.GetLowerBoundValue() - iFrameIndex);
         SetCellsOffset(GetCellsOffset() - cell->GetExposure());
         return;
@@ -336,7 +336,7 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
 
         int cellExposure = Cells.Last()->GetExposure() + iFrameIndex - range.GetUpperBoundValue() - 1;
         Cells.Last()->SetExposure(cellExposure);
-        UOdysseyLayerCell* cell = AddCell(UOdysseyAnimationCellImageVector::StaticClass());
+        UOdysseyAnimationCell* cell = AddCell(UOdysseyAnimationCellImageVector::StaticClass());
         return;
     }
 }
@@ -399,7 +399,7 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
     }
 
     RemoveCells(Cells);
-    TArray<UOdysseyLayerCell*> cells = AddCells(UOdysseyAnimationCellImageVector::StaticClass(), 0, cellRanges.Num());
+    TArray<UOdysseyAnimationCell*> cells = AddCells(UOdysseyAnimationCellImageVector::StaticClass(), 0, cellRanges.Num());
 
     for (int i = 0; i < cellRanges.Num(); i++)
     {
@@ -416,16 +416,16 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
             if ( !vectorLayer )
                 continue;
 
-            UOdysseyLayerCell* srcCell = vectorLayer->GetCellAtFrame(frame);
+            UOdysseyAnimationCell* srcCell = vectorLayer->GetCellAtFrame(frame);
             if (!srcCell)
                 continue;
 
-            if (srcCell && srcCell->IsA<UOdysseyLayerCellImageStagger>())
+            if (srcCell && srcCell->IsA<UOdysseyAnimationCellImageStagger>())
             {
                 int staggerFrame = frame;
-                while(srcCell && srcCell->IsA<UOdysseyLayerCellImageStagger>())
+                while(srcCell && srcCell->IsA<UOdysseyAnimationCellImageStagger>())
                 {
-                    UOdysseyLayerCellImageStagger* cellStagger = Cast<UOdysseyLayerCellImageStagger>(srcCell);
+                    UOdysseyAnimationCellImageStagger* cellStagger = Cast<UOdysseyAnimationCellImageStagger>(srcCell);
                     int srcCellFrame = staggerFrame - srcCell->GetFrameRange().GetLowerBoundValue();
 
                     staggerFrame = cellStagger->GetReferenceFrameAtFrame(srcCellFrame);
@@ -448,7 +448,7 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
         }
     }
 
-    for ( UOdysseyLayerCell* cell : Cells)
+    for ( UOdysseyAnimationCell* cell : Cells)
     {
         UOdysseyAnimationCellImageVector* cellVector = Cast<UOdysseyAnimationCellImageVector>(cell);
         FOdysseyVectorGroupPaint* scene = cellVector->GetVectorCell()->GetScene();
@@ -496,7 +496,7 @@ UOdysseyAnimationLayerImageVector::GetCellByIndex( uint32 iIndex )
 
     if( ( iIndex >= 0 ) && ( iIndex < cellCount ) )
     {
-        UOdysseyLayerCell* cell = Cells[iIndex];
+        UOdysseyAnimationCell* cell = Cells[iIndex];
 
         if( cell )
         {
@@ -514,7 +514,7 @@ UOdysseyAnimationLayerImageVector::GetCellByIndex( uint32 iIndex )
 bool
 UOdysseyAnimationLayerImageVector::Contains( FOdysseyVectorCell* iCandidateCell )
 {
-    return GetCells().ContainsByPredicate( [ iCandidateCell ] ( UOdysseyLayerCell* cell )
+    return GetCells().ContainsByPredicate( [ iCandidateCell ] ( UOdysseyAnimationCell* cell )
                                            {
                                                UOdysseyAnimationCellImageVector* vectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
 
@@ -530,7 +530,7 @@ UOdysseyAnimationLayerImageVector::GetLastCell()
     if (Cells.IsEmpty())
         return nullptr;
 
-    UOdysseyLayerCell* lastCell = Cells.Last();
+    UOdysseyAnimationCell* lastCell = Cells.Last();
     if (!lastCell->IsA<UOdysseyAnimationCellImageVector>())
         return nullptr;
 
@@ -544,7 +544,7 @@ UOdysseyAnimationLayerImageVector::GetFirstCell()
     if (Cells.IsEmpty())
         return nullptr;
 
-    UOdysseyLayerCell* firstCell = Cells[0];
+    UOdysseyAnimationCell* firstCell = Cells[0];
     if (!firstCell->IsA<UOdysseyAnimationCellImageVector>())
         return nullptr;
 
@@ -559,7 +559,7 @@ UOdysseyAnimationLayerImageVector::GetMaxCellFrom( uint32 iIndex )
 
     for( int32 i = iIndex; i < GetCells().Num(); i++ )
     {
-        UOdysseyLayerCell* candidateCell = GetCells()[i];
+        UOdysseyAnimationCell* candidateCell = GetCells()[i];
 
         if( candidateCell->GetClass() == UOdysseyAnimationCellImageVector::StaticClass() )
         {
@@ -578,7 +578,7 @@ UOdysseyAnimationLayerImageVector::GetMinCellFrom( uint32 iIndex )
 
     for ( int32 i = iIndex; i >= 0; i-- )
     {
-        UOdysseyLayerCell* candidateCell = GetCells()[i];
+        UOdysseyAnimationCell* candidateCell = GetCells()[i];
 
         if( candidateCell->GetClass() == UOdysseyAnimationCellImageVector::StaticClass() )
         {

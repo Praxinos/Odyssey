@@ -40,7 +40,7 @@ constexpr EAutomationTestFlags Flags = EAutomationTestFlags::EditorContext | EAu
 
 UOdysseyAnimationCellImageRaster* Cell(UOdysseyAnimation* Animation, int32 Index)
 {
-    return CastChecked<UOdysseyAnimationCellImageRaster>(Animation->GetLayerStack()->GetRootLayers()[0]->GetCells()[Index]);
+    return CastChecked<UOdysseyAnimationCellImageRaster>(CastChecked<UOdysseyAnimationLayer>(Animation->GetLayerStack()->GetRootLayers()[0])->GetCells()[Index]);
 }
 
 void Fill(UOdysseyAnimationCellImageRaster* Target, uint8 Seed)
@@ -65,12 +65,12 @@ void Fill(UOdysseyAnimationCellImageRaster* Target, uint8 Seed)
 
 UOdysseyAnimation* MakeAnimation(UObject* Outer, EOdysseyAnimationFormat Format)
 {
-    auto Animation = NewObject<UOdysseyAnimation>(Outer, NAME_None, RF_Public | RF_Transactional);
+    UOdysseyAnimation* Animation = NewObject<UOdysseyAnimation>(Outer, NAME_None, RF_Public | RF_Transactional);
     Animation->Init(Width, Height, Format, 24.0f);
-    UOdysseyLayer* Layer = Animation->GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass());
+    UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(Animation->GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
     Animation->GetLayerStack()->SetCurrentLayer(Layer);
-    auto First = CastChecked<UOdysseyAnimationCellImageRaster>(Layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
-    auto Second = CastChecked<UOdysseyAnimationCellImageRaster>(Layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
+    UOdysseyAnimationCellImageRaster* First = CastChecked<UOdysseyAnimationCellImageRaster>(Layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
+    UOdysseyAnimationCellImageRaster* Second = CastChecked<UOdysseyAnimationCellImageRaster>(Layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
     First->SetExposure(2);
     Second->SetExposure(3);
     Fill(First, 47);
@@ -148,7 +148,7 @@ bool FOdysseyAnimationTiledIntegrationTest::RunTest(const FString& Parameters)
         TestNull(TEXT("Getter does not create the snapshot"), First->GetTiledImage());
         for (int32 Frame = 0; Frame < 5; ++Frame) { Compare(*this, Animation.Get(), Frame); }
         TestEqual(TEXT("Cell exposures form five frames"), Animation->GetFrameCount(), 5);
-        auto Layer = Animation->GetLayerStack()->GetRootLayers()[0];
+        UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(Animation->GetLayerStack()->GetRootLayers()[0]);
         FOdysseyLighttable Lighttable;
         Lighttable.bIsActivated = true;
         Lighttable.PreviousKeys[0].bIsActivated = true;
@@ -156,7 +156,7 @@ bool FOdysseyAnimationTiledIntegrationTest::RunTest(const FString& Parameters)
         Lighttable.NextKeys[0].bIsActivated = true;
         Lighttable.NextKeys[0].Opacity = 30.0f;
         Layer->SetLighttable(Lighttable);
-        FOdysseyLayerCellOutOfPegs Pegs;
+        FOdysseyAnimationCellOutOfPegs Pegs;
         Pegs.Pan = FVector2D(3, -2);
         Pegs.Rotation = 17;
         Pegs.Zoom = 125;

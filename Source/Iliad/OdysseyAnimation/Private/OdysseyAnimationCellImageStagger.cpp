@@ -1,22 +1,22 @@
 // IDDN.FR.001.060015.015.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-#include "OdysseyLayerCellImageStagger.h"
+#include "OdysseyAnimationCellImageStagger.h"
 
 #include "OdysseyAnimationRenderContext.h"
 #include "OdysseyLayer.h"
-#include "OdysseyLayerCellImageStaggerImport.h"
+#include "OdysseyAnimationCellImageStaggerImport.h"
 #include "OdysseyRenderContext.h"
 
 #if WITH_EDITOR
 
 void
-UOdysseyLayerCellImageStagger::OldSerialize(FArchive& Ar)
+UOdysseyAnimationCellImageStagger::OldSerialize(FArchive& Ar)
 {
     Super::OldSerialize(Ar);
     if( Ar.IsLoading() )
     {
-        if (!FOdysseyLayerCellImageStaggerImport::Read( this, Ar ))
+        if (!FOdysseyAnimationCellImageStaggerImport::Read( this, Ar ))
         {
             checkf(false, TEXT("Error while loading Stagger Cell"));
         }
@@ -24,21 +24,21 @@ UOdysseyLayerCellImageStagger::OldSerialize(FArchive& Ar)
 }
 #endif
 
-UOdysseyLayerCell*
-UOdysseyLayerCellImageStagger::GetReferenceCellAtFrame(int Frame, bool Recursive) const
+UOdysseyAnimationCell*
+UOdysseyAnimationCellImageStagger::GetReferenceCellAtFrame(int Frame, bool Recursive) const
 {
     int staggerFrame = GetReferenceFrameAtFrame(Frame);
-    UOdysseyLayerCell* referenceCell = Cast<UOdysseyLayerCell>(GetLayer()->GetCellAtFrame(staggerFrame));
+    UOdysseyAnimationCell* referenceCell = Cast<UOdysseyAnimationCell>(GetLayer()->GetCellAtFrame(staggerFrame));
     if (!referenceCell)
         return nullptr;
 
     int frame = staggerFrame - referenceCell->GetFrameRange().GetLowerBoundValue();
 
-    while(referenceCell->IsA<UOdysseyLayerCellImageStagger>())
+    while(referenceCell->IsA<UOdysseyAnimationCellImageStagger>())
     {
-        UOdysseyLayerCellImageStagger* referenceStaggerCell = Cast<UOdysseyLayerCellImageStagger>(referenceCell);
+        UOdysseyAnimationCellImageStagger* referenceStaggerCell = Cast<UOdysseyAnimationCellImageStagger>(referenceCell);
         staggerFrame = referenceStaggerCell->GetReferenceFrameAtFrame(frame);
-        referenceCell = Cast<UOdysseyLayerCell>(GetLayer()->GetCellAtFrame(staggerFrame));
+        referenceCell = Cast<UOdysseyAnimationCell>(GetLayer()->GetCellAtFrame(staggerFrame));
         if (!referenceCell)
             return nullptr;
 
@@ -48,7 +48,7 @@ UOdysseyLayerCellImageStagger::GetReferenceCellAtFrame(int Frame, bool Recursive
 }
 
 int
-UOdysseyLayerCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) const
+UOdysseyAnimationCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) const
 {
     FInt32Range frameRange = GetFrameRange();
     if (frameRange.IsEmpty())
@@ -58,7 +58,7 @@ UOdysseyLayerCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) const
     int frame = INDEX_NONE;
     switch(Behaviour)
     {
-        case EOdysseyLayerCellImageStaggerBehaviour::Loop:
+        case EOdysseyAnimationCellImageStaggerBehaviour::Loop:
         {
             int layerStartFrame = GetLayer()->GetFrameRange().GetLowerBoundValue();
             int startFrame = Reach <= 0 ? layerStartFrame : FMath::Max(layerStartFrame, int(cellStartFrame - Reach));
@@ -70,7 +70,7 @@ UOdysseyLayerCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) const
         }
         break;
 
-        case EOdysseyLayerCellImageStaggerBehaviour::PingPong:
+        case EOdysseyAnimationCellImageStaggerBehaviour::PingPong:
         {
             int layerStartFrame = GetLayer()->GetFrameRange().GetLowerBoundValue();
             int startFrame = Reach <= 0 ? layerStartFrame : FMath::Max(layerStartFrame, int(cellStartFrame - Reach));
@@ -92,7 +92,7 @@ UOdysseyLayerCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) const
         }
         break;
 
-        case EOdysseyLayerCellImageStaggerBehaviour::Random:
+        case EOdysseyAnimationCellImageStaggerBehaviour::Random:
         {
             if( iFrameIndex >= 0 ) // for some reasons sometimes iFrameIndex is < 0
             {
@@ -132,20 +132,20 @@ UOdysseyLayerCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) const
     return frame;
 }
 
-EOdysseyLayerCellImageStaggerBehaviour
-UOdysseyLayerCellImageStagger::GetBehaviour() const
+EOdysseyAnimationCellImageStaggerBehaviour
+UOdysseyAnimationCellImageStagger::GetBehaviour() const
 {
     return Behaviour;
 }
 
 int
-UOdysseyLayerCellImageStagger::GetReach() const
+UOdysseyAnimationCellImageStagger::GetReach() const
 {
     return Reach;
 }
 
 void
-UOdysseyLayerCellImageStagger::SetBehaviour(EOdysseyLayerCellImageStaggerBehaviour Value)
+UOdysseyAnimationCellImageStagger::SetBehaviour(EOdysseyAnimationCellImageStaggerBehaviour Value)
 {
     Modify();
     Behaviour = Value;
@@ -153,7 +153,7 @@ UOdysseyLayerCellImageStagger::SetBehaviour(EOdysseyLayerCellImageStaggerBehavio
 }
 
 void
-UOdysseyLayerCellImageStagger::SetReach(int Value, bool IsInteractive)
+UOdysseyAnimationCellImageStagger::SetReach(int Value, bool IsInteractive)
 {
     Modify();
     Reach = Value;
@@ -161,7 +161,7 @@ UOdysseyLayerCellImageStagger::SetReach(int Value, bool IsInteractive)
 }
 
 TArray<FGuid>
-UOdysseyLayerCellImageStagger::GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const
+UOdysseyAnimationCellImageStagger::GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const
 {
     TArray<FGuid> idComposition = { GetRenderingId() };
 
@@ -169,7 +169,7 @@ UOdysseyLayerCellImageStagger::GetRenderingComposition(uint64 iRenderType, int i
     if (staggerFrame == INDEX_NONE)
         return idComposition;
 
-    UOdysseyLayerCell* cell = Cast<UOdysseyLayerCell>(GetLayer()->GetCellAtFrame(staggerFrame));
+    UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>(GetLayer()->GetCellAtFrame(staggerFrame));
     if (!cell)
         return idComposition;
 
@@ -180,13 +180,13 @@ UOdysseyLayerCellImageStagger::GetRenderingComposition(uint64 iRenderType, int i
 }
 
 FIntRect
-UOdysseyLayerCellImageStagger::GetDefaultRenderRect() const
+UOdysseyAnimationCellImageStagger::GetDefaultRenderRect() const
 {
     return GetLayer()->GetDefaultRenderRect();
 }
 
 void
-UOdysseyLayerCellImageStagger::UpdateRandomIntegers( int iLimitValue ) const
+UOdysseyAnimationCellImageStagger::UpdateRandomIntegers( int iLimitValue ) const
 {
     if( ( RandomIntegers.Num() != Exposure ) || ( RandomLimitValue != iLimitValue ) )
     {
@@ -217,18 +217,18 @@ UOdysseyLayerCellImageStagger::UpdateRandomIntegers( int iLimitValue ) const
 }
 
 #if WITH_EDITOR
-UOdysseyLayerCell*
-UOdysseyLayerCellImageStagger::Break(int Frame, bool bClear)
+UOdysseyAnimationCell*
+UOdysseyAnimationCellImageStagger::Break(int Frame, bool bClear)
 {
     if (Frame <= 0 || Frame >= Exposure)
         return nullptr;
 
-    UOdysseyLayerCell* cell = GetReferenceCellAtFrame(Frame);
+    UOdysseyAnimationCell* cell = GetReferenceCellAtFrame(Frame);
     if (!cell)
         return nullptr;
 
     Modify();
-    UOdysseyLayerCell* newCell = nullptr;
+    UOdysseyAnimationCell* newCell = nullptr;
     if (bClear)
     {
         newCell = GetLayer()->AddCell(cell->GetClass(), IndexInLayer + 1);
@@ -245,7 +245,7 @@ UOdysseyLayerCellImageStagger::Break(int Frame, bool bClear)
 #endif
 
 bool
-UOdysseyLayerCellImageStagger::BuildRenderPipelineInternal(
+UOdysseyAnimationCellImageStagger::BuildRenderPipelineInternal(
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
     const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
@@ -257,7 +257,7 @@ UOdysseyLayerCellImageStagger::BuildRenderPipelineInternal(
     if ( staggerFrame == INDEX_NONE )
         return false;
 
-    UOdysseyLayerCell* cell = Cast<UOdysseyLayerCell>(GetLayer()->GetCellAtFrame(staggerFrame));
+    UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>(GetLayer()->GetCellAtFrame(staggerFrame));
     if ( !cell )
         return false;
 

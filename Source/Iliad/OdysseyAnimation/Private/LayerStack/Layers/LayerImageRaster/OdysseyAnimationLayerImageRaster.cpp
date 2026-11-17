@@ -14,7 +14,7 @@
 
 #include "OdysseyAnimationCellImageRaster.h"
 #include "OdysseyAnimationRenderContext.h"
-#include "OdysseyLayerCellImageStagger.h"
+#include "OdysseyAnimationCellImageStagger.h"
 
 #if WITH_EDITOR
 #include "OdysseyAnimation.h"
@@ -49,7 +49,7 @@ UOdysseyAnimationLayerImageRaster::PostInitProperties()
     DefaultCellClass = UOdysseyAnimationCellImageRaster::StaticClass();
 
     SupportedCellTypes.Add(UOdysseyAnimationCellImageRaster::StaticClass());
-    SupportedCellTypes.Add(UOdysseyLayerCellImageStagger::StaticClass());
+    SupportedCellTypes.Add(UOdysseyAnimationCellImageStagger::StaticClass());
 }
 
 #if WITH_EDITOR
@@ -118,7 +118,7 @@ UOdysseyAnimationLayerImageRaster::Serialize(FArchive& Ar)
                     }
                     else if (cellType == TEXT("FOdysseyAnimationCellImageStagger"))
                     {
-                        UOdysseyLayerCellImageStagger* cell = NewObject<UOdysseyLayerCellImageStagger>(this, UOdysseyLayerCellImageStagger::StaticClass(), NAME_None, RF_Public | RF_Transactional);
+                        UOdysseyAnimationCellImageStagger* cell = NewObject<UOdysseyAnimationCellImageStagger>(this, UOdysseyAnimationCellImageStagger::StaticClass(), NAME_None, RF_Public | RF_Transactional);
                         Cells.Add(cell);
                         cell->OldSerialize(Ar);
                     }
@@ -187,7 +187,7 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     }
 
     RemoveCells(Cells);
-    TArray<UOdysseyLayerCell*> cells = AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), 0, cellRanges.Num());
+    TArray<UOdysseyAnimationCell*> cells = AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), 0, cellRanges.Num());
 
     FIntRect rect = GetDefaultRenderRect();
     TStrongObjectPtr<UTextureRenderTarget2D> layerRenderTarget(CreateRenderingRenderTarget());
@@ -274,7 +274,7 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 TSharedPtr<IOdysseyMedia>
 UOdysseyAnimationLayerImageRaster::GetCellMediaRaster(uint32 iFrameIndex) const
 {
-    UOdysseyLayerCell* cell = GetCellAtFrame(iFrameIndex);
+    UOdysseyAnimationCell* cell = GetCellAtFrame(iFrameIndex);
     if (!cell)
         return nullptr;
 
@@ -337,7 +337,7 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
         //Add a frame at current frame and extend it
         FScopedTransaction transaction(LOCTEXT("layer-image-raster.create-cell-transaction", "Create Cell"));
         Modify();
-        UOdysseyLayerCell* cell = AddCell(UOdysseyAnimationCellImageRaster::StaticClass(), 0);
+        UOdysseyAnimationCell* cell = AddCell(UOdysseyAnimationCellImageRaster::StaticClass(), 0);
         return;
     }
 
@@ -346,7 +346,7 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
         //Add a frame at current frame and extend it
         FScopedTransaction transaction( LOCTEXT( "layer-image-raster.create-cell-transaction", "Create Cell" ) );
         Modify();
-        UOdysseyLayerCell* cell = AddCell(UOdysseyAnimationCellImageRaster::StaticClass(), 0);
+        UOdysseyAnimationCell* cell = AddCell(UOdysseyAnimationCellImageRaster::StaticClass(), 0);
         cell->SetExposure(range.GetLowerBoundValue() - iFrameIndex);
         SetCellsOffset(GetCellsOffset() - cell->GetExposure());
         return;
@@ -356,7 +356,7 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
     {
         FScopedTransaction transaction( LOCTEXT( "layer-image-raster.create-cell-transaction", "Create Cell" ) );
         Modify();
-        UOdysseyLayerCell* lastCell = Cells.IsEmpty() ? nullptr : Cells.Last();
+        UOdysseyAnimationCell* lastCell = Cells.IsEmpty() ? nullptr : Cells.Last();
         int cellExposure = iFrameIndex - CellsOffset + 1;
         if(lastCell)
         {
@@ -364,7 +364,7 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
             int lastCellExposure = lastCell->GetExposure() + iFrameIndex - range.GetUpperBoundValue() - 1;
             lastCell->SetExposure(lastCellExposure);
         }
-        UOdysseyLayerCell* cell = AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
+        UOdysseyAnimationCell* cell = AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
         cell->SetExposure(cellExposure);
         return;
     }

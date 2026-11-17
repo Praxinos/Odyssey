@@ -150,7 +150,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
             FOdysseyVectorCell* tagCell = mInbetweenerTag->GetOwner()->GetCell();
             float frameWidth = timelinePosition->GetFrameSize();
 
-            UOdysseyLayerCell* cell = listView.Get()->GetAnimationLayerImageVector()->GetCellAtFrame(frameIndex);
+            UOdysseyAnimationCell* cell = listView.Get()->GetAnimationLayerImageVector()->GetCellAtFrame(frameIndex);
             if (!cell || !cell->IsA<UOdysseyAnimationCellImageVector>())
                 return FReply::Unhandled();
 
@@ -212,7 +212,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
     TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
     UOdysseyAnimationLayerImageVector* vectorLayer = treeView.Get()->GetAnimationLayerImageVector();
     int currentFrame = mCurrentFrame.Get();
-    UOdysseyLayerCell* cell = vectorLayer->GetCellAtFrame( currentFrame );
+    UOdysseyAnimationCell* cell = vectorLayer->GetCellAtFrame( currentFrame );
 
     treeView->UnbindLayerDelegates();
 

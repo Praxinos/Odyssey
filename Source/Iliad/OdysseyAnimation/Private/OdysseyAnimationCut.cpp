@@ -8,7 +8,7 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationUtils.h"
 #include "OdysseyLayer.h"
-#include "OdysseyLayerCell.h"
+#include "OdysseyAnimationCell.h"
 
 #define LOCTEXT_NAMESPACE "AnimationCut"
 
@@ -18,7 +18,7 @@ FAnimationCutEntry::FAnimationCutEntry()
 {
 }
 
-FAnimationCutEntry::FAnimationCutEntry( UOdysseyLayerCell* iCellBefore, UOdysseyLayerCell* iCellAfter )
+FAnimationCutEntry::FAnimationCutEntry( UOdysseyAnimationCell* iCellBefore, UOdysseyAnimationCell* iCellAfter )
     : mCellBefore( iCellBefore )
     , mCellAfter( iCellAfter )
 {
@@ -40,7 +40,7 @@ FAnimationCutEntry::GetFrameReference() const
     return FFrameNumber();
 }
 
-UOdysseyLayerCell*
+UOdysseyAnimationCell*
 FAnimationCutEntry::GetCellReference()
 {
     if( !mCellBefore && mCellAfter )
@@ -235,10 +235,10 @@ FAnimationCut::GetFrameReference() const
     return frames.Array()[0];
 }
 
-TArray<UOdysseyLayerCell*>
+TArray<UOdysseyAnimationCell*>
 FAnimationCut::GetCellsReference() const
 {
-    TArray<UOdysseyLayerCell*> cells;
+    TArray<UOdysseyAnimationCell*> cells;
     for( FAnimationCutEntry entry : mAnimationCutEntries )
         cells.Add( entry.GetCellReference() );
 

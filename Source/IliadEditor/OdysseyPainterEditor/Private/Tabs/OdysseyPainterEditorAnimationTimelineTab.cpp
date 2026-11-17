@@ -247,7 +247,7 @@ FOdysseyPainterEditorAnimationTimelineTab::BuildExportMenu(FMenuBuilder& iMenuBu
 }
 
 void
-FOdysseyPainterEditorAnimationTimelineTab::OnActivateOutOfPegs(UOdysseyLayerCell* iCell)
+FOdysseyPainterEditorAnimationTimelineTab::OnActivateOutOfPegs(UOdysseyAnimationCell* iCell)
 {
     if (!iCell)
         return;
@@ -263,7 +263,7 @@ FOdysseyPainterEditorAnimationTimelineTab::OnInactivateOutOfPegs()
 }
 
 ECheckBoxState
-FOdysseyPainterEditorAnimationTimelineTab::OnIsOutOfPegsChecked(UOdysseyLayerCell* iCell)
+FOdysseyPainterEditorAnimationTimelineTab::OnIsOutOfPegsChecked(UOdysseyAnimationCell* iCell)
 {
     if (!iCell)
         return ECheckBoxState::Unchecked;

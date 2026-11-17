@@ -8,13 +8,9 @@
 #include "CoreMinimal.h"
 #include "Selection.h"
 
-/**
- * The layerstack selection stores selected cells and selected layers.
- * Cell selection and Layer selection are mutually exclusive, meaning you cannot select some cells and select some layers at the same time.
- */
+/** Shares layer and editor object selection, with selection changes supported by undo/redo. */
 
  class UOdysseyLayer;
- class UOdysseyLayerCell;
  class UOdysseyLayerStack;
 
 namespace OdysseyLayerStackSelection {
@@ -27,35 +23,21 @@ namespace OdysseyLayerStackSelection {
     /**
      * Returns the Layer Stack Selection Object
      * Use this to modify the selection
-     * Make sure to deselect every cells
      */
     ODYSSEYLAYERSTACKEDITOR_API USelection* Get();
 
-    /**
-     * Returns the selected cells in the given layer
-     * If InOdysseyLayer == nullptr, then it returns the selected cells without checking if they belong to a specific layer
-     */
-    ODYSSEYLAYERSTACKEDITOR_API TArray<UOdysseyLayerCell*> GetSelectedCells(UOdysseyLayer* InOdysseyLayer);
 
     /**
      * Returns the selected layers in the given layerstack
-     * If InOdysseyLayerStack == nullptr, then it returns the selected cells without checking if they belong to a specific LayerStack
+     * If InOdysseyLayerStack == nullptr, then it returns the selected layers without checking their layerstack
      * If InIncludeCurrentLayer == true, ensures the given layerstack current layer is included in the returned layers, even if it is not selected
      */
     ODYSSEYLAYERSTACKEDITOR_API TArray<UOdysseyLayer*> GetSelectedLayers(UOdysseyLayerStack* InOdysseyLayerStack, bool InIncludeCurrentLayer);
 
-    ODYSSEYLAYERSTACKEDITOR_API void RegisterUndo(const TArray<UOdysseyLayerCell*>& InOldCells, const TArray<UOdysseyLayerCell*>& InNewCells);
     ODYSSEYLAYERSTACKEDITOR_API void RegisterUndo(const TArray<UOdysseyLayer*>& InOldLayers, const TArray<UOdysseyLayer*>& InNewLayers);
 
-    /**
-     * Returns the Cell to use as base for Contiguous Cell Selection
-    */
-    ODYSSEYLAYERSTACKEDITOR_API UOdysseyLayerCell* GetCellSelectionCursor();
-
-    /**
-     * Sets the Cell to use as base for Contiguous Cell Selection
-    */
-    ODYSSEYLAYERSTACKEDITOR_API void SetCellSelectionCursor(UOdysseyLayerCell* InCell);
+    /** Records undo/redo for selected editor objects in the shared selection. */
+    ODYSSEYLAYERSTACKEDITOR_API void RegisterObjectsUndo(const TArray<UObject*>& InOldObjects, const TArray<UObject*>& InNewObjects);
 }
 
 #endif

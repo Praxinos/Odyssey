@@ -39,9 +39,6 @@ public:
     void Action_InactivateLayerInheritsAlpha();
     void Action_ToggleLayerInheritsAlpha();
 
-    void Action_ActivateLayerLighttable();
-    void Action_InactivateLayerLighttable();
-    void Action_ToggleLayerLighttable();
 
     void Action_CollapseLayer();
     void Action_UncollapseLayer();
@@ -71,16 +68,17 @@ public:
     //Shortcuts
     virtual void MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList) override;
 
-private:
+protected:
+    /** Resolves the selection, using only the focused layer when it is outside that selection. */
     void GetSelectedLayers(TArray<UOdysseyLayer*>& OutSelectedLayers) const;
+    UOdysseyLayer* GetFocusedLayer() const;
+
+private:
 
     void SetLayerIsActivated(bool InValue);
     void SetLayerIsLocked(bool InValue);
     void SetLayerAlphaInheritance(bool InValue);
-    void SetLayerLighttable(bool InValue);
     void SetLayerCollapsed(bool InValue);
-
-    UOdysseyLayer* GetFocusedLayer() const;
 
 private:
     TAttribute<UOdysseyLayerStack*> mLayerStack;

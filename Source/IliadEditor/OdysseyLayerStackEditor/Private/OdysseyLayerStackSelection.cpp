@@ -12,11 +12,9 @@
 #include "UObject/GCObject.h"
 
 #include "OdysseyLayer.h"
-#include "OdysseyLayerCell.h"
 #include "OdysseyLayerStack.h"
 
 TObjectPtr<USelection> GOdysseyLayerStackSelection;
-TObjectPtr<UOdysseyLayerCell> GCellSelectionCursor;
 
 namespace OdysseyLayerStackSelection {
 
@@ -66,7 +64,6 @@ public:
         return TEXT("OdysseyLayerStackSelection::FSelectedObjectsUndo");
     }
 
-
     /** FGCObject interface */
     virtual void AddReferencedObjects( FReferenceCollector& Collector ) override
     {
@@ -85,43 +82,9 @@ private:
 };
 
 void
-OnLayerCellsChanged(UOdysseyLayer* InLayer, bool IsInteractive)
-{
-    TArray<UOdysseyLayerCell*> SelectedCells = GetSelectedCells(nullptr);
-    OdysseyLayerStackSelection::Get()->BeginBatchSelectOperation();
-    for (UOdysseyLayerCell* Cell : SelectedCells)
-    {
-        if (!Cell || Cell->GetIndexInLayer() == INDEX_NONE)
-            OdysseyLayerStackSelection::Get()->Deselect(Cell);
-    }
-    OdysseyLayerStackSelection::Get()->EndBatchSelectOperation();
-}
-
-void
 OnCurrentLayerChanged(UOdysseyLayerStack* InLayerStack)
 {
     GOdysseyLayerStackSelection->DeselectAll();
-}
-
-void
-OnSelectionChanged(UObject* InSelectionObject)
-{
-    USelection* Selection = Cast<USelection>(InSelectionObject);
-    if (!Selection || Selection != GOdysseyLayerStackSelection)
-        return;
-
-    if (!GCellSelectionCursor || !GCellSelectionCursor->IsSelected())
-    {
-        TArray<UOdysseyLayerCell*> SelectedCells = GetSelectedCells(nullptr);
-        if (SelectedCells.IsEmpty())
-        {
-            GCellSelectionCursor = nullptr;
-        }
-        else
-        {
-            GCellSelectionCursor = SelectedCells[0];
-        }
-    }
 }
 
 void
@@ -130,39 +93,14 @@ Initialize()
     GOdysseyLayerStackSelection = USelection::CreateObjectSelection(GetTransientPackage(), TEXT("GOdysseyLayerStackSelection")/*, RF_Transactional */);
     GOdysseyLayerStackSelection->AddToRoot();
     GOdysseyLayerStackSelection->SetElementSelectionSet(NewObject<UTypedElementSelectionSet>(GOdysseyLayerStackSelection, NAME_None/*, RF_Transactional*/));
-    USelection::SelectionChangedEvent.AddStatic(&OnSelectionChanged);
 
     UOdysseyLayerStack::OnCurrentLayerChanged().AddStatic(&OnCurrentLayerChanged);
-    UOdysseyLayer::OnCellsChanged().AddStatic(&OnLayerCellsChanged);
 
     GIsLayerSelectedInEditor = [](const UObject* InObject)
     {
         return GOdysseyLayerStackSelection->IsSelected(InObject);
     };
 
-    GIsCellSelectedInEditor = [](const UObject* InObject)
-    {
-        return GOdysseyLayerStackSelection->IsSelected(InObject);
-    };
-}
-
-TArray<UOdysseyLayerCell*>
-GetSelectedCells(UOdysseyLayer* InOdysseyLayer)
-{
-    TArray<UOdysseyLayerCell*> SelectedCells;
-    GOdysseyLayerStackSelection->GetSelectedObjects(SelectedCells);
-
-    if (InOdysseyLayer)
-    {
-        SelectedCells = SelectedCells.FilterByPredicate(
-            [InOdysseyLayer](UOdysseyLayerCell* InCell)
-            {
-                return InCell->GetLayer() == InOdysseyLayer;
-            }
-        );
-    }
-
-    return SelectedCells;
 }
 
 TArray<UOdysseyLayer*>
@@ -195,28 +133,6 @@ Get()
     return GOdysseyLayerStackSelection;
 }
 
-UOdysseyLayerCell*
-GetCellSelectionCursor()
-{
-    return GCellSelectionCursor;
-}
-
-void
-SetCellSelectionCursor(UOdysseyLayerCell* InCell)
-{
-    GCellSelectionCursor = InCell;
-}
-
-void
-RegisterUndo(const TArray<UOdysseyLayerCell*>& InOldCells, const TArray<UOdysseyLayerCell*>& InNewCells)
-{
-    if( GEditor && GUndo && GEditor->IsTransactionActive())
-    {
-        TUniquePtr<FSelectedObjectsUndo<UOdysseyLayerCell>> Undo = MakeUnique<FSelectedObjectsUndo<UOdysseyLayerCell>>(InOldCells, InNewCells);
-        GUndo->StoreUndo( GOdysseyLayerStackSelection, MoveTemp(Undo) );
-    }
-}
-
 void
 RegisterUndo(const TArray<UOdysseyLayer*>& InOldLayers, const TArray<UOdysseyLayer*>& InNewLayers)
 {
@@ -224,6 +140,16 @@ RegisterUndo(const TArray<UOdysseyLayer*>& InOldLayers, const TArray<UOdysseyLay
     {
         TUniquePtr<FSelectedObjectsUndo<UOdysseyLayer>> Undo = MakeUnique<FSelectedObjectsUndo<UOdysseyLayer>>(InOldLayers, InNewLayers);
         GUndo->StoreUndo( GOdysseyLayerStackSelection, MoveTemp(Undo) );
+    }
+}
+
+void
+RegisterObjectsUndo(const TArray<UObject*>& InOldObjects, const TArray<UObject*>& InNewObjects)
+{
+    if (GEditor && GUndo && GEditor->IsTransactionActive())
+    {
+        TUniquePtr<FSelectedObjectsUndo<UObject>> Undo = MakeUnique<FSelectedObjectsUndo<UObject>>(InOldObjects, InNewObjects);
+        GUndo->StoreUndo(Get(), MoveTemp(Undo));
     }
 }
 

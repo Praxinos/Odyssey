@@ -18,7 +18,7 @@
 #include "OdysseyStyle.h"
 #include "OdysseyTextureLayerImageVector.h"
 #include "OdysseyTextureLayerStackUserData.h"
-#include "OdysseyLayerCell.h"
+#include "OdysseyAnimationCell.h"
 #include "OdysseyLayer.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyVectorGroupPaint.h"

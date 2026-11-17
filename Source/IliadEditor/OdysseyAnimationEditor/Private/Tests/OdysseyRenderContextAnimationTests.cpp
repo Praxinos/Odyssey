@@ -20,7 +20,7 @@
 #include "OdysseyAnimationRenderContext.h"
 #include "OdysseyExportImage.h"
 #include "OdysseyLayer.h"
-#include "OdysseyLayerCellImageStagger.h"
+#include "OdysseyAnimationCellImageStagger.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyLayerStackRenderContext.h"
 #include "OdysseyLighttable.h"
@@ -155,7 +155,7 @@ bool FOdysseyAnimationLayerRenderContextTest::RunTest(const FString& Parameters)
     const TArray<FGuid> Composition = Layer->GetRenderingComposition(EOdysseyRenderingType::Render, 7);
     TestTrue(TEXT("Rendering composition follows the resolved animation cell"), Composition.Contains(Cell(Animation.Get(), 0)->GetRenderingId()));
     TestFalse(TEXT("Rendering composition excludes the other animation cell"), Composition.Contains(Cell(Animation.Get(), 1)->GetRenderingId()));
-    UOdysseyLayerCellImageStagger* Stagger = CastChecked<UOdysseyLayerCellImageStagger>(Layer->AddCell(UOdysseyLayerCellImageStagger::StaticClass()));
+    UOdysseyAnimationCellImageStagger* Stagger = CastChecked<UOdysseyAnimationCellImageStagger>(Layer->AddCell(UOdysseyAnimationCellImageStagger::StaticClass()));
     Stagger->SetExposure(4);
     Context.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(5);
     TestTrue(TEXT("Stagger renders the first referenced cell"), ReadPreview().Equals(FLinearColor::Red));
@@ -164,7 +164,7 @@ bool FOdysseyAnimationLayerRenderContextTest::RunTest(const FString& Parameters)
     FSoftClassPath LegacyStaggerPath(TEXT("/Script/OdysseyLayerStack.OdysseyLayerCellImageStagger"));
     LegacyStaggerPath.FixupCoreRedirects();
     TestTrue(TEXT("Serialized Stagger class path loads the moved class"),
-        LegacyStaggerPath.TryLoadClass<UOdysseyLayerCell>() == UOdysseyLayerCellImageStagger::StaticClass());
+        LegacyStaggerPath.TryLoadClass<UOdysseyAnimationCell>() == UOdysseyAnimationCellImageStagger::StaticClass());
     const FString ExportDirectory = FPaths::Combine(FPaths::ProjectIntermediateDir(), TEXT("OdysseyAnimationExportTests"));
     const TArray<FString> ExportedPaths = Odyssey::ExportAsImageSequence(Animation.Get(), FInt32Range(5, 7),
         FGuid::NewGuid().ToString(EGuidFormats::Digits), ExportDirectory, EOdysseyExportImageFormat::PNG);

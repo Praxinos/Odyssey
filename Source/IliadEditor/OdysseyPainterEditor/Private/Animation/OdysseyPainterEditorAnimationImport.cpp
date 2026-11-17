@@ -86,7 +86,7 @@ FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence(UOdysseyAnimati
     FScopedSlowTask progressBar(iImportData.GetSourceTextures().Num(), LOCTEXT("animation-editor.import-texture-dialog.progress-bar.title", "Importing Texture Sequence"));
     progressBar.MakeDialog();
 
-    TArray<UOdysseyLayerCell*> cells = Layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), iCellIndex, iImportData.GetSourceTextures().Num());
+    TArray<UOdysseyAnimationCell*> cells = Layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), iCellIndex, iImportData.GetSourceTextures().Num());
     TArray<UOdysseyAnimationCellImageRaster*> rasterCells;
 
     UTextureRenderTarget2D* renderTarget = iImportData.CreateRT();

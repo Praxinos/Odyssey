@@ -123,7 +123,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::GetScene() const
             return nullptr;
 
         int frame = player->GetCurrentFrame().FrameNumber.Value;
-        UOdysseyLayerCell* cell = currentAnimationVectorLayer->GetCellAtFrame(frame);
+        UOdysseyAnimationCell* cell = currentAnimationVectorLayer->GetCellAtFrame(frame);
         if (!cell || !cell->IsA<UOdysseyAnimationCellImageVector>())
             return nullptr;
 

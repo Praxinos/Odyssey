@@ -129,21 +129,6 @@ FOdysseyLayerStackGlobalShortcuts::MapActionsToCommandList(TSharedRef<FUICommand
     );
 
     iCommandList->MapAction(
-        FOdysseyLayerStackEditorCommands::Get().ActivateLayerLighttable,
-        FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_ActivateLayerLighttable)
-    );
-
-    iCommandList->MapAction(
-        FOdysseyLayerStackEditorCommands::Get().InactivateLayerLighttable,
-        FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_InactivateLayerLighttable)
-    );
-
-    iCommandList->MapAction(
-        FOdysseyLayerStackEditorCommands::Get().ToggleLayerLighttable,
-        FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_ToggleLayerLighttable)
-    );
-
-    iCommandList->MapAction(
         FOdysseyLayerStackEditorCommands::Get().CollapseLayer,
         FExecuteAction::CreateRaw(this, &FOdysseyLayerStackGlobalShortcuts::Action_CollapseLayer)
     );
@@ -408,22 +393,7 @@ FOdysseyLayerStackGlobalShortcuts::SetLayerAlphaInheritance(bool InValue)
     OdysseyLayerStackSelection::RegisterUndo(selectedLayers, selectedLayers);
 }
 
-void
-FOdysseyLayerStackGlobalShortcuts::SetLayerLighttable(bool InValue)
-{
-    TArray<UOdysseyLayer*> selectedLayers;
-    GetSelectedLayers(selectedLayers);
 
-    if (selectedLayers.IsEmpty())
-        return;
-
-    for( UOdysseyLayer* layer : selectedLayers )
-    {
-        FOdysseyLighttable LT = layer->GetLighttable();
-        LT.bIsActivated = InValue;
-        layer->SetLighttable(LT);
-    }
-}
 
 void
 FOdysseyLayerStackGlobalShortcuts::SetLayerCollapsed(bool InValue)
@@ -518,28 +488,11 @@ FOdysseyLayerStackGlobalShortcuts::Action_ToggleLayerInheritsAlpha()
     SetLayerAlphaInheritance(Value);
 }
 
-void
-FOdysseyLayerStackGlobalShortcuts::Action_ActivateLayerLighttable()
-{
-    SetLayerLighttable(true);
-}
 
-void
-FOdysseyLayerStackGlobalShortcuts::Action_InactivateLayerLighttable()
-{
-    SetLayerLighttable(false);
-}
 
-void
-FOdysseyLayerStackGlobalShortcuts::Action_ToggleLayerLighttable()
-{
-    UOdysseyLayer* FocusedLayer = GetFocusedLayer();
-    if (!FocusedLayer)
-        return;
 
-    bool Value = !FocusedLayer->GetLighttable().bIsActivated;
-    SetLayerLighttable(Value);
-}
+
+
 
 void
 FOdysseyLayerStackGlobalShortcuts::Action_CollapseLayer()

@@ -143,9 +143,12 @@ SOdysseyAnimationLayerRow::OnLighttableCheckStateChanged(ECheckBoxState iState)
 
     for( UOdysseyLayer* layer : SelectedLayers )
     {
-        FOdysseyLighttable lighttable = layer->GetLighttable();
+        UOdysseyAnimationLayer* AnimationLayer = Cast<UOdysseyAnimationLayer>(layer);
+        if (!AnimationLayer)
+            continue;
+        FOdysseyLighttable lighttable = AnimationLayer->GetLighttable();
         lighttable.bIsActivated = iState == ECheckBoxState::Checked;
-        layer->SetLighttable( lighttable );
+        AnimationLayer->SetLighttable( lighttable );
     }
 
     GetTreeView()->RequestTreeRefresh(); //needed to display layers previously hidden
@@ -173,7 +176,9 @@ SOdysseyAnimationLayerRow::OnCellNamesCheckStateChanged(ECheckBoxState iState)
 
     for( UOdysseyLayer* layer : SelectedLayers )
     {
-        layer->SetDisplayCellNames( iState == ECheckBoxState::Checked );
+        UOdysseyAnimationLayer* AnimationLayer = Cast<UOdysseyAnimationLayer>(layer);
+        if (AnimationLayer)
+            AnimationLayer->SetDisplayCellNames( iState == ECheckBoxState::Checked );
     }
 
     GetTreeView()->RequestTreeRefresh(); //needed to display layers previously hidden

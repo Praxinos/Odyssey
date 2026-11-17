@@ -8,7 +8,7 @@
 class UOdysseyAnimation;
 class UOdysseyLayerStack;
 class UOdysseyLayer;
-class UOdysseyLayerCell;
+class UOdysseyAnimationCell;
 
 namespace Odyssey
 {
@@ -16,6 +16,6 @@ namespace Odyssey
     {
         ODYSSEYANIMATION_API UOdysseyAnimation* GetLayerStackAnimation(UOdysseyLayerStack* Layerstack);
         ODYSSEYANIMATION_API UOdysseyAnimation* GetLayerAnimation(UOdysseyLayer* Layer);
-        ODYSSEYANIMATION_API UOdysseyAnimation* GetCellAnimation(UOdysseyLayerCell* Cell);
+        ODYSSEYANIMATION_API UOdysseyAnimation* GetCellAnimation(UOdysseyAnimationCell* Cell);
     }
 }

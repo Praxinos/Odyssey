@@ -14,7 +14,7 @@
 
 class UOdysseyAnimationTimelineSection;
 class FOdysseyPainterEditorAnimationTimelinePosition;
-class UOdysseyLayerCell;
+class UOdysseyAnimationCell;
 class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
 
@@ -53,9 +53,9 @@ private:
 
     void OnAnimationChanged();
 
-    void OnActivateOutOfPegs(UOdysseyLayerCell* iCell);
+    void OnActivateOutOfPegs(UOdysseyAnimationCell* iCell);
     void OnInactivateOutOfPegs();
-    ECheckBoxState OnIsOutOfPegsChecked(UOdysseyLayerCell* iCell);
+    ECheckBoxState OnIsOutOfPegsChecked(UOdysseyAnimationCell* iCell);
 
     FOptionalSize GetPreBehaviourWidth() const;
     FOptionalSize GetPostBehaviourWidth() const;

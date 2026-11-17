@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include "OdysseyLayerCell.h"
+#include "OdysseyAnimationCell.h"
 
-#include "OdysseyLayerCellImageStagger.generated.h"
+#include "OdysseyAnimationCellImageStagger.generated.h"
 
 UENUM(BlueprintType)
-enum class EOdysseyLayerCellImageStaggerBehaviour : uint8
+enum class EOdysseyAnimationCellImageStaggerBehaviour : uint8
 {
     Loop,
     PingPong,
@@ -16,8 +16,8 @@ enum class EOdysseyLayerCellImageStaggerBehaviour : uint8
 };
 
 UCLASS(BlueprintType)
-class ODYSSEYANIMATION_API UOdysseyLayerCellImageStagger
-    : public UOdysseyLayerCell
+class ODYSSEYANIMATION_API UOdysseyAnimationCellImageStagger
+    : public UOdysseyAnimationCell
 {
     GENERATED_BODY()
 
@@ -38,16 +38,16 @@ public:
     int GetReferenceFrameAtFrame(int Frame) const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
-    UOdysseyLayerCell* GetReferenceCellAtFrame(int Frame, bool Recursive = true) const;
+    UOdysseyAnimationCell* GetReferenceCellAtFrame(int Frame, bool Recursive = true) const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
-    EOdysseyLayerCellImageStaggerBehaviour GetBehaviour() const;
+    EOdysseyAnimationCellImageStaggerBehaviour GetBehaviour() const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     int GetReach() const;
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
-    void SetBehaviour(EOdysseyLayerCellImageStaggerBehaviour Value);
+    void SetBehaviour(EOdysseyAnimationCellImageStaggerBehaviour Value);
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     void SetReach(int Value, bool IsInteractive);
@@ -57,14 +57,14 @@ protected:
 
 public:
 #if WITH_EDITOR
-    virtual UOdysseyLayerCell* Break(int Frame, bool bClear) override;
+    virtual UOdysseyAnimationCell* Break(int Frame, bool bClear) override;
 #endif
 
 protected:
-    friend class FOdysseyLayerCellImageStaggerImport;
+    friend class FOdysseyAnimationCellImageStaggerImport;
 
     UPROPERTY()
-    EOdysseyLayerCellImageStaggerBehaviour Behaviour = EOdysseyLayerCellImageStaggerBehaviour::Loop;
+    EOdysseyAnimationCellImageStaggerBehaviour Behaviour = EOdysseyAnimationCellImageStaggerBehaviour::Loop;
 
     UPROPERTY()
     int Reach = 0;

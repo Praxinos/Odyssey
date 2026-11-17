@@ -293,7 +293,7 @@ void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 {
     int breakdownFrameIndex = MousePositionToFrame( mCursorPos.X );
-    UOdysseyLayerCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
+    UOdysseyAnimationCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
     if (!cell)
         return;
 
@@ -352,7 +352,7 @@ void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
 {
     int breakdownFrameIndex = MousePositionToFrame( mCursorPos.X );
-    UOdysseyLayerCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
+    UOdysseyAnimationCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
     if (!cell)
         return;
 
@@ -413,7 +413,7 @@ void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
 {
     int breakdownFrameIndex = MousePositionToFrame( mCursorPos.X );
-    UOdysseyLayerCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
+    UOdysseyAnimationCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
 
     if (!cell)
         return;

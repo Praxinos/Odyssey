@@ -25,7 +25,7 @@ class SOdysseyAnimationCells
     SLATE_DECLARE_WIDGET(SOdysseyAnimationCells, SCompoundWidget)
 
 public:
-    DECLARE_DELEGATE_RetVal_OneParam(TSharedRef<SWidget>, FOnCreateCellWidget, UOdysseyLayerCell*)
+    DECLARE_DELEGATE_RetVal_OneParam(TSharedRef<SWidget>, FOnCreateCellWidget, UOdysseyAnimationCell*)
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationCells)
@@ -33,7 +33,7 @@ public:
         , _ShowHandles(false)
         {}
         SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
-        SLATE_ATTRIBUTE(TArray<UOdysseyLayerCell*>, Cells)
+        SLATE_ATTRIBUTE(TArray<UOdysseyAnimationCell*>, Cells)
         SLATE_ATTRIBUTE(int, CurrentFrame)
         SLATE_ATTRIBUTE(bool, ShowHandles)
         SLATE_EVENT(FOnCreateCellWidget, OnCreateCellWidget)
@@ -60,11 +60,11 @@ public:
 private:
     struct FCellItem
     {
-        UOdysseyLayerCell* mCell = nullptr;
+        UOdysseyAnimationCell* mCell = nullptr;
     };
 
 private:
-    TSharedRef<SWidget> CreateCellWidget(UOdysseyLayerCell* iCell);
+    TSharedRef<SWidget> CreateCellWidget(UOdysseyAnimationCell* iCell);
     TSharedRef<SWidget> CreateTimingHandleWidget();
     //TSharedRef<SWidget> CreateExposureHandleWidget(int iCellIndex);
     TSharedRef<SWidget> CreateAddCellsHandleWidget();
@@ -90,14 +90,14 @@ private:
     //EVisibility GetFrameSelectorVisibility() const;
 
     float GetCellHeight() const;
-    float GetCellExposure(UOdysseyLayerCell* iCell) const;
+    float GetCellExposure(UOdysseyAnimationCell* iCell) const;
 
-    EVisibility GetExposureHandleVisibility(UOdysseyLayerCell* iCell) const;
+    EVisibility GetExposureHandleVisibility(UOdysseyAnimationCell* iCell) const;
     void OnExposureHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnExposureHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnExposureHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
 
-    EVisibility GetTimingHandleVisibility(UOdysseyLayerCell* iCell) const;
+    EVisibility GetTimingHandleVisibility(UOdysseyAnimationCell* iCell) const;
     void OnTimingHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnTimingHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnTimingHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
@@ -133,7 +133,7 @@ private:
     void RefreshCellsHBox();
 
 private:
-    TSlateAttribute<TArray<UOdysseyLayerCell*>> mCells;
+    TSlateAttribute<TArray<UOdysseyAnimationCell*>> mCells;
     //TSharedPtr<UE::Slate::Containers::TObservableArray<TSharedPtr<FCellItem>>> mItemsSource;
 
     TSharedPtr<SHorizontalBox> mCellsHBox;
@@ -146,7 +146,7 @@ private:
 
     //Handles visibility management
     TAttribute<bool> mShowHandles;
-    UOdysseyLayerCell* mHoveredCell; //cell that can display its exposure handle
+    UOdysseyAnimationCell* mHoveredCell; //cell that can display its exposure handle
 
     //Box containing the cells widgets
     bool mNeedsCellsRefresh = false;
@@ -173,7 +173,7 @@ private:
     struct
     {
         bool mIsDragging = false;
-        UOdysseyLayerCell* mCell = nullptr;
+        UOdysseyAnimationCell* mCell = nullptr;
         FVector2D mMousePosition;
         int mInitialExposure = 0;
     } mExposureHandleDragData;
@@ -181,14 +181,14 @@ private:
     struct
     {
         bool mIsDragging = false;
-        UOdysseyLayerCell* mCell = nullptr;
+        UOdysseyAnimationCell* mCell = nullptr;
         int mMinOffset = 0;
         bool mHasMaxOffset = false;
         int mMaxOffset = 0;
         FVector2D mMousePosition;
 
         int mInitialOffset = 0;
-        TMap<UOdysseyLayerCell*, int> mAffectedCells;
+        TMap<UOdysseyAnimationCell*, int> mAffectedCells;
     } mTimingHandleDragData;
 
     struct
@@ -201,10 +201,10 @@ private:
         bool mIsRightHandle;
 
         int mInitialOffset;
-        TMap<UOdysseyLayerCell*, int> mAffectedCells;
+        TMap<UOdysseyAnimationCell*, int> mAffectedCells;
     } mAddCellsHandleDragData;
 
     TAttribute<int> mCurrentFrame;
 
-    TMap<UOdysseyLayerCell*, TSharedPtr<SWidget>> mCellWidgetsCache;
+    TMap<UOdysseyAnimationCell*, TSharedPtr<SWidget>> mCellWidgetsCache;
 };

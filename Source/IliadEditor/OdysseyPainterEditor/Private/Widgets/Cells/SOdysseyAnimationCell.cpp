@@ -11,8 +11,9 @@
 
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationLayerStack.h"
-#include "OdysseyLayerCell.h"
+#include "OdysseyAnimationCell.h"
 #include "OdysseyLayerStackSelection.h"
+#include "OdysseyAnimationCellsSelection.h"
 #include "OdysseyPainterEditorAnimationProjectSettings.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "OdysseyStyle.h"
@@ -23,7 +24,7 @@ void
 SOdysseyAnimationCell::Construct(
     const FArguments& InArgs,
     UOdysseyAnimationLayer* iAnimationLayer,
-    UOdysseyLayerCell* iCell
+    UOdysseyAnimationCell* iCell
 )
 {
     ensure(iAnimationLayer);
@@ -246,7 +247,7 @@ SOdysseyAnimationCell::IsSelected() const
 bool
 SOdysseyAnimationCell::IsSelectionCursor() const
 {
-    return OdysseyLayerStackSelection::GetCellSelectionCursor() == mCell;
+    return OdysseyAnimationCellsSelection::GetCellSelectionCursor() == mCell;
 }
 
 const FSlateBrush*

@@ -7,7 +7,7 @@
 
 #include "SOdysseyAnimationCellImageStagger.h"
 #include "SOdysseyAnimationCellImageRaster.h"
-#include "OdysseyLayerCellImageStagger.h"
+#include "OdysseyAnimationCellImageStagger.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageRasterShortcuts.h"
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyAnimationCellImageRaster.h"
@@ -26,7 +26,7 @@ SOdysseyAnimationLayerImageRasterTimeline::SOdysseyAnimationLayerImageRasterTime
 }
 
 TSharedRef<SWidget>
-SOdysseyAnimationLayerImageRasterTimeline::OnGenerateCellWidget(UOdysseyLayerCell* iCell)
+SOdysseyAnimationLayerImageRasterTimeline::OnGenerateCellWidget(UOdysseyAnimationCell* iCell)
 {
     if (!iCell)
     {
@@ -38,9 +38,9 @@ SOdysseyAnimationLayerImageRasterTimeline::OnGenerateCellWidget(UOdysseyLayerCel
         return SNew(SOdysseyAnimationCellImageRaster, Cast<UOdysseyAnimationCellImageRaster>(iCell))
             .Clipping(EWidgetClipping::ClipToBoundsAlways);
     }
-    else if (iCell->IsA<UOdysseyLayerCellImageStagger>())
+    else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
     {
-        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyLayerCellImageStagger>(iCell))
+        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell))
             .TimelinePosition(mTimelinePosition);
     }
 

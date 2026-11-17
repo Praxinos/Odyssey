@@ -22,7 +22,7 @@
 #include "Board/BoardSequence.h"
 #include "EposSequenceHelpers.h"
 #include "OdysseyAnimationTimelineSection.h"
-#include "OdysseyLayerCell.h"
+#include "OdysseyAnimationCell.h"
 #include "ScalingComponent.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Tools/ResourceAssetTools.h"
@@ -181,7 +181,7 @@ ShotSequenceTools::CreateAnimationCut( ISequencer& iSequencer, UMovieSceneSequen
 
             for( UOdysseyAnimationLayer* animation_layer : animation_layers )
             {
-                UOdysseyLayerCell* cell = animation_layer->GetCellAtFrame( frame_in_timeline.Value );
+                UOdysseyAnimationCell* cell = animation_layer->GetCellAtFrame( frame_in_timeline.Value );
                 if( cell )
                 {
                     int32 frame_in_cell = frame_in_timeline.Value - cell->GetFrameRange().GetLowerBoundValue();
@@ -192,19 +192,19 @@ ShotSequenceTools::CreateAnimationCut( ISequencer& iSequencer, UMovieSceneSequen
                     // Create a cell before all other cells
                     if( frame_in_timeline < animation_layer->GetFrameRange().GetLowerBoundValue() )
                     {
-                        UOdysseyLayerCell* previous_first_cell = animation_layer->GetCells()[0];
+                        UOdysseyAnimationCell* previous_first_cell = animation_layer->GetCells()[0];
                         int32 new_offset = previous_first_cell->GetFrameRange().GetLowerBoundValue() - frame_in_timeline.Value;
                         animation_layer->SetCellsOffset( animation_layer->GetCellsOffset() - new_offset );
-                        UOdysseyLayerCell* new_cell = animation_layer->AddCell( animation_layer->GetDefaultCellClass(), 0 );
+                        UOdysseyAnimationCell* new_cell = animation_layer->AddCell( animation_layer->GetDefaultCellClass(), 0 );
                         new_cell->SetExposure( new_offset );
                     }
                     // Create a cell after all other cells
                     else
                     {
-                        UOdysseyLayerCell* previous_last_cell = animation_layer->GetCells().Last();
+                        UOdysseyAnimationCell* previous_last_cell = animation_layer->GetCells().Last();
                         int32 new_offset = frame_in_timeline.Value - previous_last_cell->GetFrameRange().GetUpperBoundValue();
                         previous_last_cell->SetExposure( previous_last_cell->GetExposure() + new_offset - 1 ); // The last exposure will be the new cell (that's why -1)
-                        UOdysseyLayerCell* new_cell = animation_layer->AddCell( animation_layer->GetDefaultCellClass() );
+                        UOdysseyAnimationCell* new_cell = animation_layer->AddCell( animation_layer->GetDefaultCellClass() );
                     }
                 }
             }

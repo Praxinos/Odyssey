@@ -4,10 +4,15 @@
 #include "OdysseyAnimationEditorModule.h"
 
 #include "AssetToolsModule.h"
+#include "Editor.h"
+#include "Materials/Material.h"
+#include "Misc/CoreDelegates.h"
 #include "PropertyEditorModule.h"
 #include "Subsystems/PlacementSubsystem.h"
 
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationCellsSelection.h"
+#include "OdysseyAnimationLayerStackEditorCommands.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationActorFactory.h"
 #include "OdysseyAnimationAssetTypeActions.h"
@@ -15,9 +20,6 @@
 #include "OdysseyAnimationMaterialSelectionDialog.h"
 #include "OdysseyAnimationSettings.h"
 #include "OdysseyAnimationSettingsCustomization.h"
-#include "Materials/Material.h"
-#include "Misc/CoreDelegates.h"
-#include "Editor.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -28,6 +30,9 @@
 void
 FOdysseyAnimationEditorModule::StartupModule()
 {
+    FModuleManager::LoadModuleChecked<IModuleInterface>("OdysseyLayerStackEditor");
+    OdysseyAnimationCellsSelection::Initialize();
+    FOdysseyAnimationLayerStackEditorCommands::Register();
     RegisterAssetTypeActions();
 
     RegisterPlacementFactories();
@@ -43,6 +48,8 @@ FOdysseyAnimationEditorModule::StartupModule()
 void
 FOdysseyAnimationEditorModule::ShutdownModule()
 {
+    OdysseyAnimationCellsSelection::Shutdown();
+    FOdysseyAnimationLayerStackEditorCommands::Unregister();
     // Unregister Assets Type Actions
     UnregisterPropertyCustomizations();
 

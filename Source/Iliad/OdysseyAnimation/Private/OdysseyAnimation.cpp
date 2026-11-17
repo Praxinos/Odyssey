@@ -24,7 +24,7 @@
 #include "OdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationRenderContext.h"
 #include "OdysseyLayer.h"
-#include "OdysseyLayerCell.h"
+#include "OdysseyAnimationCell.h"
 #include "OdysseyRenderContext.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
@@ -685,7 +685,10 @@ UOdysseyAnimation::OnRefreshReferencedPalette(UOdysseyPalette* iPalette)
     TArray<UOdysseyLayer*> layers = GetLayerStack()->GetLayers();
     for (UOdysseyLayer* layer : layers)
     {
-        for (UOdysseyLayerCell* cell : layer->GetCells())
+        UOdysseyAnimationLayer* AnimationLayer = Cast<UOdysseyAnimationLayer>(layer);
+        if (!AnimationLayer)
+            continue;
+        for (UOdysseyAnimationCell* cell : AnimationLayer->GetCells())
         {
             if (!cell->IsA(UOdysseyAnimationCellImageVector::StaticClass()))
                 continue;

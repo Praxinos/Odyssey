@@ -219,7 +219,7 @@ FImportImageSequenceConverter::CreateAnimation( const TArray<FImportImageSequenc
 
                 //---
 
-                TArray<UOdysseyLayerCell*> cells = animation_layer->GetCells();
+                TArray<UOdysseyAnimationCell*> cells = animation_layer->GetCells();
                 // To have at least durations as long as cells
                 if( !ensure( durations.Num() >= cells.Num() ) )
                 {

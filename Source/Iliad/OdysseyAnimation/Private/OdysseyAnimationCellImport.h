@@ -3,21 +3,23 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 #if WITH_EDITOR
-#include "Serialization/Archive.h"
 
-struct FOdysseyLighttableKey;
+class FArchive;
+class UOdysseyAnimationCell;
 
-class FOdysseyLighttableKeyImport
+class FOdysseyAnimationCellImport
 {
 public:
     /**
      * @brief Imports Data from the given archive into the given object
      *
-     * @param iAnimationCell
+     * @param iCell
      * @param Ar
      */
-    static bool ODYSSEYLAYERSTACK_API Read( FOdysseyLighttableKey* iKey
+    static bool ODYSSEYANIMATION_API Read( UOdysseyAnimationCell* iCell
                                   , FArchive &Ar );
 
 private:
@@ -25,8 +27,9 @@ private:
      * Private import functions
      */
 
-    static void Read( FOdysseyLighttableKey* iKey
+    static void Read( UOdysseyAnimationCell* iCell
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };
+
 #endif

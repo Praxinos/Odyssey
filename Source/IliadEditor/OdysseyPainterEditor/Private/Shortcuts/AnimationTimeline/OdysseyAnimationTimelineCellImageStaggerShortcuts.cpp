@@ -10,6 +10,7 @@
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyLayerStackSelection.h"
+#include "OdysseyAnimationCellsSelection.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
 #include "SOdysseyAnimationCellImageStagger.h"
@@ -51,14 +52,14 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
     if (!layer->IsEditable())
         return;
 
-    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
+    TArray<UOdysseyAnimationCell*> selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
         return;
 
-    TArray<UOdysseyLayerCell*> staggerCells = selectedCells.FilterByPredicate(
-        [](UOdysseyLayerCell* iCell)
+    TArray<UOdysseyAnimationCell*> staggerCells = selectedCells.FilterByPredicate(
+        [](UOdysseyAnimationCell* iCell)
         {
-            return iCell->IsA<UOdysseyLayerCellImageStagger>();
+            return iCell->IsA<UOdysseyAnimationCellImageStagger>();
         }
     );
 
@@ -83,18 +84,18 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
 
     struct FResultingCell
     {
-        UOdysseyLayerCell* mReferenceCell;
+        UOdysseyAnimationCell* mReferenceCell;
         int mExposure;
     };
 
-    TMap<UOdysseyLayerCell*, TArray<FResultingCell>> resultingCellsByCell;
-    for (UOdysseyLayerCell* cell : staggerCells)
+    TMap<UOdysseyAnimationCell*, TArray<FResultingCell>> resultingCellsByCell;
+    for (UOdysseyAnimationCell* cell : staggerCells)
     {
         progressBar.EnterProgressFrame();
 
-        UOdysseyLayerCellImageStagger* staggerCell = Cast<UOdysseyLayerCellImageStagger>(cell);
+        UOdysseyAnimationCellImageStagger* staggerCell = Cast<UOdysseyAnimationCellImageStagger>(cell);
 
-        UOdysseyLayerCell* referenceCell = staggerCell->GetReferenceCellAtFrame(0);
+        UOdysseyAnimationCell* referenceCell = staggerCell->GetReferenceCellAtFrame(0);
         if (!referenceCell)
             continue;
 
@@ -130,11 +131,11 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
 
     for (auto element : resultingCellsByCell)
     {
-        UOdysseyLayerCell* originalCell = element.Key;
+        UOdysseyAnimationCell* originalCell = element.Key;
         TArray<FResultingCell> resultingCells = element.Value;
 
         int indexInLayer = originalCell->GetIndexInLayer();
-        TArray<UOdysseyLayerCell*> referenceCells;
+        TArray<UOdysseyAnimationCell*> referenceCells;
 
         for (int i = 0; i < resultingCells.Num(); i++)
         {
@@ -142,7 +143,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
             referenceCells.Add(resultingCell.mReferenceCell);
         }
 
-        TArray<UOdysseyLayerCell*> newCells = layer->CopyCells(referenceCells, originalCell->GetIndexInLayer());
+        TArray<UOdysseyAnimationCell*> newCells = layer->CopyCells(referenceCells, originalCell->GetIndexInLayer());
 
         layer->RemoveCell(originalCell);
         OdysseyLayerStackSelection::Get()->Deselect(originalCell);
@@ -155,7 +156,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
     }
     OdysseyLayerStackSelection::Get()->EndBatchSelectOperation();
 
-    OdysseyLayerStackSelection::RegisterUndo(selectedCells, OdysseyLayerStackSelection::GetSelectedCells(layer));
+    OdysseyAnimationCellsSelection::RegisterUndo(selectedCells, OdysseyAnimationCellsSelection::GetSelectedCells(layer));
 }
 
 bool
@@ -176,14 +177,14 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::CanAction_ConvertToReference
     if (!layer->IsEditable())
         return false;
 
-    TArray<UOdysseyLayerCell*> selectedCells = OdysseyLayerStackSelection::GetSelectedCells(layer);
+    TArray<UOdysseyAnimationCell*> selectedCells = OdysseyAnimationCellsSelection::GetSelectedCells(layer);
     if (selectedCells.IsEmpty())
         return false;
 
-    TArray<UOdysseyLayerCell*> staggerCells = selectedCells.FilterByPredicate(
-        [](UOdysseyLayerCell* iCell)
+    TArray<UOdysseyAnimationCell*> staggerCells = selectedCells.FilterByPredicate(
+        [](UOdysseyAnimationCell* iCell)
         {
-            return iCell->IsA<UOdysseyLayerCellImageStagger>();
+            return iCell->IsA<UOdysseyAnimationCellImageStagger>();
         }
     );
 

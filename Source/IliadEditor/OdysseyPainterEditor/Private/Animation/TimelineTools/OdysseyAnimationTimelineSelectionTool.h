@@ -6,9 +6,9 @@
 #include "TimelineTools/OdysseyAnimationTimelineTool.h"
 #include "Input/Reply.h"
 
-class FOdysseyLayerCellSelection;
+class FOdysseyAnimationCellSelection;
 class FOdysseyPainterEditorAnimationTimelinePosition;
-class UOdysseyLayerCell;
+class UOdysseyAnimationCell;
 
 class FOdysseyAnimationTimelineSelectionTool
     : public FOdysseyAnimationTimelineTool
@@ -62,6 +62,6 @@ private:
     bool mIsDragnDrop = false;
     ESelectionMode mSelectionMode = ESelectionMode::Default;
     bool mShouldDeselect = false;
-    TArray<UOdysseyLayerCell*> mInitialSelection;
-    UOdysseyLayerCell* mCellCursor; //Most of the time same as mTimelineParams->GetCellSelectionCursor() but can be different in some cases
+    TArray<UOdysseyAnimationCell*> mInitialSelection;
+    UOdysseyAnimationCell* mCellCursor; //Most of the time same as mTimelineParams->GetCellSelectionCursor() but can be different in some cases
 };

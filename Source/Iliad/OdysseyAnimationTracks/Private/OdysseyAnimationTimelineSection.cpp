@@ -290,13 +290,13 @@ UOdysseyAnimationTimelineSection::RebuildAnimationCutChannel()
 
     for( UOdysseyAnimationLayer* layer : animation_layers )
     {
-        UOdysseyLayerCell* previous_cell = nullptr;
-        TArray<UOdysseyLayerCell*> cells_unsafe = layer->GetCells();
-        TArray<UOdysseyLayerCell*> cells = cells_unsafe.FilterByPredicate( []( const UOdysseyLayerCell* iCell )
+        UOdysseyAnimationCell* previous_cell = nullptr;
+        TArray<UOdysseyAnimationCell*> cells_unsafe = layer->GetCells();
+        TArray<UOdysseyAnimationCell*> cells = cells_unsafe.FilterByPredicate( []( const UOdysseyAnimationCell* iCell )
                                                                            {
                                                                                return !!iCell;
                                                                            } );
-        for( UOdysseyLayerCell* cell : cells )
+        for( UOdysseyAnimationCell* cell : cells )
         {
             {
                 FAnimationCutEntry animationcutentry( previous_cell, cell );

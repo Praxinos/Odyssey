@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Misc/Attribute.h"
 
-#include "OdysseyLayerCellImageStagger.h"
+#include "OdysseyAnimationCellImageStagger.h"
 
 class UOdysseyAnimation;
 class FUICommandList;
@@ -30,7 +30,7 @@ public:
     void Action_Paste();
     void Action_SelectAll();
     void Action_Delete();
-    void Action_CreateStaggerCell( EOdysseyLayerCellImageStaggerBehaviour iBehavior );
+    void Action_CreateStaggerCell( EOdysseyAnimationCellImageStaggerBehaviour iBehavior );
     void Action_AddCellsBefore();
     void Action_AddCellsAfter();
 private:

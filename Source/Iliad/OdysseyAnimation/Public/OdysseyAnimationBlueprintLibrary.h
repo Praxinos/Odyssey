@@ -9,7 +9,7 @@
 class UOdysseyAnimation;
 class UOdysseyLayerStack;
 class UOdysseyLayer;
-class UOdysseyLayerCell;
+class UOdysseyAnimationCell;
 
 UCLASS(BlueprintType)
 class UOdysseyAnimationBlueprintLibrary : public UBlueprintFunctionLibrary
@@ -23,5 +23,5 @@ class UOdysseyAnimationBlueprintLibrary : public UBlueprintFunctionLibrary
     static UOdysseyAnimation* GetLayerAnimation(UOdysseyLayer* Layer);
 
     UFUNCTION(BlueprintPure, Category = "Odyssey|Cell", meta=(DisplayName="Get Animation", HidePin="Cell", DefaultToSelf="Cell"))
-    static UOdysseyAnimation* GetCellAnimation(UOdysseyLayerCell* Cell);
+    static UOdysseyAnimation* GetCellAnimation(UOdysseyAnimationCell* Cell);
 };

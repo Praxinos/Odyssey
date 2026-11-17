@@ -41,6 +41,7 @@
 #include "EposSequenceHelpers.h"
 #include "NamingConvention.h"
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationTimelineSection.h"
@@ -325,7 +326,9 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
     UOdysseyLayerStack* layer_stack = new_animation->GetLayerStack();
     for( UOdysseyLayer* layer : layer_stack->GetLayers() )
     {
-        layer->SetPostBehaviour( EOdysseyLayerImagePostBehaviour::Hold );
+        UOdysseyAnimationLayer* AnimationLayer = Cast<UOdysseyAnimationLayer>(layer);
+        if (AnimationLayer)
+            AnimationLayer->SetPostBehaviour( EOdysseyLayerImagePostBehaviour::Hold );
     }
 
     // Set the size of the new section to playbackrange by default
