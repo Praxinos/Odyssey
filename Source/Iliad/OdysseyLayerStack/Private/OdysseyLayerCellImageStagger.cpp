@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyLayerCellImageStagger.h"
+#include "OdysseyRenderContext.h"
 #include "OdysseyLayerCellImageStaggerImport.h"
 #include "OdysseyLayer.h"
 
@@ -246,7 +247,7 @@ UOdysseyLayerCellImageStagger::BuildRenderPipelineInternal(
     uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
     const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
-    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
     int staggerFrame = GetReferenceFrameAtFrame(iFrame.Value);
@@ -258,5 +259,5 @@ UOdysseyLayerCellImageStagger::BuildRenderPipelineInternal(
         return false;
 
     int cellFrame = staggerFrame - cell->GetFrameRange().GetLowerBoundValue();
-    return cell->BuildRenderPipeline(cellFrame, iType, oRenderFunction, iCanRenderFunction, iParents);
+    return cell->BuildRenderPipeline(cellFrame, iType, oRenderFunction, iCanRenderFunction, iParents, RenderContext);
 }

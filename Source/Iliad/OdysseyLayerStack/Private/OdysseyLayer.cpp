@@ -2,6 +2,8 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyLayer.h"
+#include "OdysseyRenderContext.h"
+#include "OdysseyLayerStackRenderContext.h"
 
 #include "Misc/TransactionObjectEvent.h"
 #include "RenderGraphBuilder.h"
@@ -1315,13 +1317,18 @@ UOdysseyLayer::BuildRenderPipelineInternal(
     uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
     const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
-    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
+    const FOdysseyRenderOverride* ContentOverride = RenderContext ? RenderContext->Find(*this) : nullptr;
     IOdysseyTextureRenderingAbility::FRenderFunction renderFunction;
-    if ( bCanHaveChildren )
+    if (ContentOverride && ContentOverride->ContentReplacement)
     {
-        if (!BuildRenderChildrenPipeline(iFrame,iType,renderFunction, iCanRenderFunction, iParents))
+        renderFunction = ContentOverride->ContentReplacement;
+    }
+    else if ( bCanHaveChildren )
+    {
+        if (!BuildRenderChildrenPipeline(iFrame,iType,renderFunction, iCanRenderFunction, iParents, RenderContext))
             return false;
     }
     else
@@ -1346,17 +1353,25 @@ UOdysseyLayer::BuildRenderPipelineInternal(
 
         frame -= cell->GetFrameRange().GetLowerBoundValue();
 
-        if(!cell->BuildRenderPipeline( frame, iType, renderFunction, iCanRenderFunction, iParents ))
+        if(!cell->BuildRenderPipeline( frame, iType, renderFunction, iCanRenderFunction, iParents, RenderContext ))
             return false;
     }
 
+    if (ContentOverride && ContentOverride->ContentDecorator)
+    {
+        renderFunction = ContentOverride->ContentDecorator(MoveTemp(renderFunction));
+    }
+    if (!renderFunction) return false;
 #if WITH_EDITOR
-    bool showLighttable = iType & EOdysseyRenderingType::Editor && Lighttable.bIsActivated;
-    EOdysseyLighttableDisplayPosition lighttablePosition = Lighttable.DisplayPosition;
+    const FOdysseyLayerStackRenderContext* LayerContext = RenderContext ? RenderContext->GetExtension<FOdysseyLayerStackRenderContext>() : nullptr;
+    const FOdysseyLayerStackRenderOverride* LayerOverride = LayerContext ? LayerContext->Find(GetRenderingId()) : nullptr;
+    const FOdysseyLighttable EffectiveLighttable = LayerOverride && LayerOverride->Lighttable ? *LayerOverride->Lighttable : Lighttable;
+    bool showLighttable = iType & EOdysseyRenderingType::Editor && EffectiveLighttable.bIsActivated;
+    EOdysseyLighttableDisplayPosition lighttablePosition = EffectiveLighttable.DisplayPosition;
 
     IOdysseyTextureRenderingAbility::FRenderFunction lighttableRenderFunction;
     if (showLighttable)
-        showLighttable = BuildLighttableRenderPipeline(iFrame, iType, lighttableRenderFunction, iCanRenderFunction, iParents);
+        showLighttable = BuildLighttableRenderPipeline(iFrame, iType, lighttableRenderFunction, iCanRenderFunction, iParents, RenderContext);
 
     oRenderFunction = [this, renderFunction, showLighttable, lighttablePosition, lighttableRenderFunction](
             FRDGBuilder& iGraphBuilder,
@@ -1480,9 +1495,22 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
     uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
     const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
-    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
+    const FOdysseyLayerStackRenderContext* LayerContext = RenderContext ? RenderContext->GetExtension<FOdysseyLayerStackRenderContext>() : nullptr;
+    const FOdysseyLayerStackRenderOverride* LayerOverride = LayerContext ? LayerContext->Find(GetRenderingId()) : nullptr;
+    const FOdysseyLighttable EffectiveLighttable = LayerOverride && LayerOverride->Lighttable ? *LayerOverride->Lighttable : Lighttable;
+    FOdysseyRenderContext LighttableContext = RenderContext ? *RenderContext : FOdysseyRenderContext();
+    FOdysseyLayerStackRenderContext& LighttableLayerContext = LighttableContext.FindOrAddExtension<FOdysseyLayerStackRenderContext>();
+    LighttableLayerContext.bLighttablePass = true;
+    for (TMap<FGuid, FOdysseyRenderOverride>::TIterator OverrideIt = LighttableContext.Overrides.CreateIterator(); OverrideIt; ++OverrideIt)
+    {
+        if (!LighttableLayerContext.Find(OverrideIt.Key()))
+        {
+            OverrideIt.RemoveCurrent();
+        }
+    }
     UOdysseyLayerCell* cell = GetCellAtFrame(iFrame.Value);
     if (!cell)
         return false;
@@ -1499,7 +1527,7 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
     TArray<FLighttableKeyRenderParams> keysRenderParams;
     for (int i = 9; i >= 0; i--)
     {
-        if (Lighttable.PreviousKeys[i].bIsActivated)
+        if (EffectiveLighttable.PreviousKeys[i].bIsActivated)
         {
             int keyCellIndex = cell->GetIndexInLayer() - i - 1;
             if (keyCellIndex >= 0 && keyCellIndex < Cells.Num())
@@ -1510,14 +1538,14 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                     int frame = iFrame.Value;
                     frame -= cell->GetFrameRange().GetLowerBoundValue();
                     IOdysseyTextureRenderingAbility::FRenderFunction renderFunction;
-                    if (keyCell->BuildRenderPipeline(frame, EOdysseyRenderingType::Render, renderFunction, iCanRenderFunction, iParents))
+                    if (keyCell->BuildRenderPipeline(frame, EOdysseyRenderingType::Render, renderFunction, iCanRenderFunction, iParents, &LighttableContext))
                     {
                         keysRenderParams.Add(
                             {
                                 renderFunction,
-                                Lighttable.PreviousKeys[i].Opacity / 100.f,
-                                Lighttable.PreviousKeysColor,
-                                Lighttable.PreviousKeysContrast / 100.f,
+                                EffectiveLighttable.PreviousKeys[i].Opacity / 100.f,
+                                EffectiveLighttable.PreviousKeysColor,
+                                EffectiveLighttable.PreviousKeysContrast / 100.f,
                                 keyCell->OutOfPegsTransform()
                             }
                         );
@@ -1526,7 +1554,7 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
             }
         }
 
-        if (Lighttable.NextKeys[i].bIsActivated)
+        if (EffectiveLighttable.NextKeys[i].bIsActivated)
         {
             int keyCellIndex = cell->GetIndexInLayer() + i + 1;
             if (keyCellIndex >= 0 && keyCellIndex < Cells.Num())
@@ -1537,14 +1565,14 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                     int frame = iFrame.Value;
                     frame -= cell->GetFrameRange().GetLowerBoundValue();
                     IOdysseyTextureRenderingAbility::FRenderFunction renderFunction;
-                    if (keyCell->BuildRenderPipeline(frame, EOdysseyRenderingType::Render, renderFunction, iCanRenderFunction, iParents))
+                    if (keyCell->BuildRenderPipeline(frame, EOdysseyRenderingType::Render, renderFunction, iCanRenderFunction, iParents, &LighttableContext))
                     {
                         keysRenderParams.Add(
                             {
                                 renderFunction,
-                                Lighttable.NextKeys[i].Opacity / 100.f,
-                                Lighttable.NextKeysColor,
-                                Lighttable.NextKeysContrast / 100.f,
+                                EffectiveLighttable.NextKeys[i].Opacity / 100.f,
+                                EffectiveLighttable.NextKeysColor,
+                                EffectiveLighttable.NextKeysContrast / 100.f,
                                 keyCell->OutOfPegsTransform()
                             }
                         );
@@ -1645,7 +1673,7 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
     uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
     const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
-    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
     struct FChildRenderParams
@@ -1667,28 +1695,30 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
     for ( int i = Children.Num() - 1; i >= 0; i-- )
     {
         UOdysseyLayer* child = Children[i];
-        if ( !child->IsActivated() )
+        const FOdysseyLayerStackRenderContext* LayerContext = RenderContext ? RenderContext->GetExtension<FOdysseyLayerStackRenderContext>() : nullptr;
+        const FOdysseyLayerStackRenderOverride* LayerOverride = LayerContext ? LayerContext->Find(child->GetRenderingId()) : nullptr;
+        if ( !(LayerOverride && LayerOverride->bVisible.IsSet() ? LayerOverride->bVisible.GetValue() : child->IsActivated()) )
             continue;
 
         IOdysseyTextureRenderingAbility::FRenderFunction childRenderFunction;
-        if (child->BuildRenderPipeline(iFrame, iType, childRenderFunction, iCanRenderFunction, iParents))
+        if (child->BuildRenderPipeline(iFrame, iType, childRenderFunction, iCanRenderFunction, iParents, RenderContext))
         {
-            float opacity = child->GetOpacity();
+            float opacity = LayerOverride && LayerOverride->Opacity.IsSet() ? LayerOverride->Opacity.GetValue() : child->GetOpacity();
 
 #if WITH_EDITOR
             bool bIsChildCurrentLayer = child == layerStack->GetCurrentLayer();
-            if( !bIsChildCurrentLayer && !bIsParentCurrentLayer && layerStack->GetDisplayOnlyCurrentLayer() && !child->CanHaveChildren() )
+            if( (!LayerContext || LayerContext->bUseDisplayOnlyCurrentLayer) && !bIsChildCurrentLayer && !bIsParentCurrentLayer && layerStack->GetDisplayOnlyCurrentLayer() && !child->CanHaveChildren() )
                 opacity = opacity * layerStack->GetOtherLayersOpacityNormalized();
 #endif
 
-            EOdysseyColorBlendMode ColorBlendMode = GetColorBlendModeFromBlendMode(child->GetBlendMode());
-            EOdysseyAlphaBlendMode AlphaBlendMode = GetAlphaBlendModeFromBlendMode(child->GetBlendMode());
+            EOdysseyColorBlendMode ColorBlendMode = GetColorBlendModeFromBlendMode(LayerOverride && LayerOverride->BlendMode.IsSet() ? LayerOverride->BlendMode.GetValue() : child->GetBlendMode());
+            EOdysseyAlphaBlendMode AlphaBlendMode = GetAlphaBlendModeFromBlendMode(LayerOverride && LayerOverride->BlendMode.IsSet() ? LayerOverride->BlendMode.GetValue() : child->GetBlendMode());
 
             childrenRenderParams.Add(
                 {
                     childRenderFunction,
                     ColorBlendMode,
-                    child->GetInheritsAlpha() ? EOdysseyAlphaBlendMode::Back : AlphaBlendMode,
+                    (LayerOverride && LayerOverride->bInheritsAlpha.IsSet() ? LayerOverride->bInheritsAlpha.GetValue() : child->GetInheritsAlpha()) ? EOdysseyAlphaBlendMode::Back : AlphaBlendMode,
                     opacity
                 }
             );

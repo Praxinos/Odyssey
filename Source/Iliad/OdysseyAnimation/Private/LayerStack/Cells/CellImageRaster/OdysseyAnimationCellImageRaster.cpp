@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyAnimationCellImageRaster.h"
+#include "OdysseyRenderContext.h"
 
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
@@ -77,7 +78,7 @@ UOdysseyAnimationCellImageRaster::BuildRenderPipelineInternal(
     uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
     const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
-    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
 #if WITH_EDITOR
@@ -92,7 +93,7 @@ UOdysseyAnimationCellImageRaster::BuildRenderPipelineInternal(
         const UTexture2D* SourceTexture = GetRenderTexture();
         const EPixelFormat Format = SourceTexture->GetPixelFormat();
         const ETextureCreateFlags EncodingFlags = SourceTexture->GetResource()->TextureRHI->GetDesc().Flags & TexCreate_SRGB;
-        auto DrawTiles = Image->BuildRenderFunction(FIntRect(FIntPoint::ZeroValue, Size));
+        UOdysseyTiledImage::FRenderFunction DrawTiles = Image->BuildRenderFunction(FIntRect(FIntPoint::ZeroValue, Size));
         oRenderFunction = [DrawTiles = MoveTemp(DrawTiles), Size, Format, EncodingFlags, CellTransform](FRDGBuilder& GraphBuilder,
             ERHIFeatureLevel::Type FeatureLevel, FRDGTextureRef Destination,
             const FIntRect& SourceRect, const FIntRect& DestinationRect, const FMatrix& Transform)
@@ -112,7 +113,7 @@ UOdysseyAnimationCellImageRaster::BuildRenderPipelineInternal(
         return true;
     }
 #endif
-    return Super::BuildRenderPipelineInternal(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents);
+    return Super::BuildRenderPipelineInternal(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents, RenderContext);
 }
 
 #if WITH_EDITOR

@@ -27,8 +27,9 @@ public:
     virtual void PostDuplicate( EDuplicateMode::Type iDuplicateMode ) override;
 
 public:
+    virtual bool BuildsCompositeContent() const override { return bCanHaveChildren; }
     virtual void InitTexture();
-    virtual bool BuildRenderPipelineInternal( FFrameNumber iFrame, uint64 iType, IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents ) const override;
+    virtual bool BuildRenderPipelineInternal( FFrameNumber iFrame, uint64 iType, IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext ) const override;
 
 public:
 #if WITH_EDITOR

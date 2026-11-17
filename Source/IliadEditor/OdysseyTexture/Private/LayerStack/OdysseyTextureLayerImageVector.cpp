@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyTextureLayerImageVector.h"
+#include "OdysseyRenderContext.h"
 
 #include "OdysseyTextureLayerStack.h"
 #include "OdysseyPixelFormat.h"
@@ -142,7 +143,7 @@ UOdysseyTextureLayerImageVector::BuildRenderPipelineInternal(
     uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
     const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
-    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
 #if WITH_EDITOR
@@ -160,7 +161,7 @@ UOdysseyTextureLayerImageVector::BuildRenderPipelineInternal(
     }
 #endif
 
-    return Super::BuildRenderPipelineInternal(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents);
+    return Super::BuildRenderPipelineInternal(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents, RenderContext);
 }
 
 void

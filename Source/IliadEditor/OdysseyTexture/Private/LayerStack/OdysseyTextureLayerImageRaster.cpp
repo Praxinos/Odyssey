@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyTextureLayerImageRaster.h"
+#include "OdysseyRenderContext.h"
 
 #include "Engine/TextureRenderTarget2D.h"
 #include "ImageUtils.h"
@@ -320,20 +321,20 @@ void UOdysseyTextureLayerImageRaster::InvalidateTiledImage(const TArray<::ULIS::
 
 bool UOdysseyTextureLayerImageRaster::BuildRenderPipelineInternal(FFrameNumber Frame, uint64 Type,
     FRenderFunction& OutRenderFunction, const FCanRenderFunction& CanRenderFunction,
-    const TArray<const IOdysseyTextureRenderingAbility*>& Parents) const
+    const TArray<const IOdysseyTextureRenderingAbility*>& Parents, const FOdysseyRenderContext* RenderContext) const
 {
     if (!CVarUseTiledRendering.GetValueOnGameThread())
     {
-        return Super::BuildRenderPipelineInternal(Frame, Type, OutRenderFunction, CanRenderFunction, Parents);
+        return Super::BuildRenderPipelineInternal(Frame, Type, OutRenderFunction, CanRenderFunction, Parents, RenderContext);
     }
     if (!const_cast<UOdysseyTextureLayerImageRaster*>(this)->UpdateTiledImage())
     {
-        return Super::BuildRenderPipelineInternal(Frame, Type, OutRenderFunction, CanRenderFunction, Parents);
+        return Super::BuildRenderPipelineInternal(Frame, Type, OutRenderFunction, CanRenderFunction, Parents, RenderContext);
     }
     const UOdysseyTiledImage* Image = GetTiledImage();
     const FIntPoint Size = TiledImageSize;
     const EPixelFormat Format = Image->GetPixelFormat();
-    auto DrawTiles = Image->BuildRenderFunction(FIntRect(FIntPoint::ZeroValue, Size));
+    UOdysseyTiledImage::FRenderFunction DrawTiles = Image->BuildRenderFunction(FIntRect(FIntPoint::ZeroValue, Size));
     OutRenderFunction = [DrawTiles = MoveTemp(DrawTiles), Size, Format](FRDGBuilder& GraphBuilder,
         ERHIFeatureLevel::Type FeatureLevel, FRDGTextureRef Destination,
         const FIntRect& SourceRect, const FIntRect& DestinationRect, const FMatrix& Transform)

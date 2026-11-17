@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyLayerCell.h"
+#include "OdysseyRenderContext.h"
 
 #include "Engine/Texture2D.h"
 #include "Misc/TransactionObjectEvent.h"
@@ -381,7 +382,7 @@ UOdysseyLayerCell::BuildRenderPipelineInternal(
     uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
     const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
-    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
 #if WITH_EDITOR
@@ -392,7 +393,15 @@ UOdysseyLayerCell::BuildRenderPipelineInternal(
     Texture->WaitForPendingInitOrStreaming();
 #endif
 
-    oRenderFunction = [this, iType](
+    FMatrix CellTransform = FMatrix::Identity;
+#if WITH_EDITOR
+    if (iType & EOdysseyRenderingType::OutOfPegs)
+    {
+        CellTransform = OutOfPegsTransform();
+    }
+#endif
+    const FTextureRHIRef SourceRHI = Texture->GetResource()->TextureRHI;
+    oRenderFunction = [SourceRHI, CellTransform](
         FRDGBuilder& iGraphBuilder,
         ERHIFeatureLevel::Type iFeatureLevel,
         FRDGTextureRef iDestinationTexture,
@@ -403,13 +412,9 @@ UOdysseyLayerCell::BuildRenderPipelineInternal(
     {
         AddClearRenderTargetPass(iGraphBuilder, iDestinationTexture, FLinearColor::Transparent, iDstRect);
 
-        FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(Texture->GetResource()->TextureRHI, TEXT("UOdysseyLayerCell::sourceTexture")));
+        FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(SourceRHI, TEXT("UOdysseyLayerCell::sourceTexture")));
 
-        FMatrix transform = iSrcTransform;
-#if WITH_EDITOR
-        if ( iType & EOdysseyRenderingType::OutOfPegs )
-            transform = OutOfPegsTransform() * iSrcTransform;
-#endif
+        const FMatrix transform = CellTransform * iSrcTransform;
 
         FOdysseyBlendShader::BlendRect(
             iGraphBuilder,

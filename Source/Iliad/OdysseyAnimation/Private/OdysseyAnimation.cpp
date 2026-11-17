@@ -2,6 +2,8 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyAnimation.h"
+#include "OdysseyRenderContext.h"
+#include "OdysseyAnimationRenderContext.h"
 
 #include "CanvasTypes.h"
 #include "Cooker/CookEvents.h"
@@ -186,25 +188,27 @@ UOdysseyAnimation::BuildRenderPipelineInternal(
     uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
     const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
-    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
+    const FOdysseyAnimationRenderContext* AnimationContext = RenderContext ? RenderContext->GetExtension<FOdysseyAnimationRenderContext>() : nullptr;
+    const FFrameNumber RenderFrame = AnimationContext && AnimationContext->Frame.IsSet() ? AnimationContext->Frame.GetValue() : iFrame;
 #if WITH_EDITOR
     if ( !mLayerStack )
         return false;
 
-    return mLayerStack->BuildRenderPipeline(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents);
+    return mLayerStack->BuildRenderPipeline(RenderFrame, iType, oRenderFunction, iCanRenderFunction, iParents, RenderContext);
 #else
     if ( PreserveLayerStackAtRuntime )
     {
         if ( !mLayerStack )
             return false;
 
-        return mLayerStack->BuildRenderPipeline(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents);
+        return mLayerStack->BuildRenderPipeline(RenderFrame, iType, oRenderFunction, iCanRenderFunction, iParents, RenderContext);
     }
 
     UTexture2D* srcTexture2D = nullptr;
-    int frameIndex = GetFrameIndexAtFrame(iFrame.Value);
+    int frameIndex = GetFrameIndexAtFrame(RenderFrame.Value);
     if (frameIndex != INDEX_NONE)
     {
         if (Frames[frameIndex].Texture)

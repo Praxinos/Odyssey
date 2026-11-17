@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyTextureLayer.h"
+#include "OdysseyRenderContext.h"
 
 #include "AssetToolsModule.h"
 #include "ScreenPass.h"
@@ -142,11 +143,11 @@ UOdysseyTextureLayer::BuildRenderPipelineInternal(
     uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
     const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
-    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
     if (bCanHaveChildren)
-        return Super::BuildRenderPipelineInternal(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents);
+        return Super::BuildRenderPipelineInternal(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents, RenderContext);
 
 #if WITH_EDITOR
     if ( !Texture )
@@ -158,7 +159,8 @@ UOdysseyTextureLayer::BuildRenderPipelineInternal(
 
     FTextureCompilingManager::Get().FinishCompilation({ Texture });
 
-    oRenderFunction = [this, iType](
+    const FTextureRHIRef SourceRHI = Texture->GetResource()->TextureRHI;
+    oRenderFunction = [SourceRHI](
         FRDGBuilder& iGraphBuilder,
         ERHIFeatureLevel::Type iFeatureLevel,
         FRDGTextureRef iDestinationTexture,
@@ -169,7 +171,7 @@ UOdysseyTextureLayer::BuildRenderPipelineInternal(
     {
         AddClearRenderTargetPass(iGraphBuilder, iDestinationTexture, FLinearColor::Transparent, iDstRect);
 
-        FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(Texture->GetResource()->TextureRHI, TEXT("UOdysseyTextureLayer::sourceTexture")));
+        FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(SourceRHI, TEXT("UOdysseyTextureLayer::sourceTexture")));
 
         FOdysseyBlendShader::BlendRect(
             iGraphBuilder,

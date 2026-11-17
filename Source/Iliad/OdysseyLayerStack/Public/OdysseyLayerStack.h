@@ -252,7 +252,7 @@ public:
         uint64 iType,
         IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
         const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
-        const TArray<const IOdysseyTextureRenderingAbility*>& iParents
+        const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
     ) const override;
 
 protected:
