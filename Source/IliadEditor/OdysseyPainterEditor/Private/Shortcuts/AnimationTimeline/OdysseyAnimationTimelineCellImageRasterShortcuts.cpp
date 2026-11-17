@@ -11,9 +11,6 @@
 #include "ScreenPass.h"
 #include "TextureResource.h"
 
-#include "SOdysseyAnimationCellImageStagger.h"
-#include "SOdysseyAnimationCellImageRaster.h"
-
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCellImageRaster.h"
 #include "OdysseyAnimationLayer.h"
@@ -26,9 +23,12 @@
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
+#include "SOdysseyAnimationCellImageRaster.h"
+#include "SOdysseyAnimationCellImageStagger.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
+
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -120,11 +120,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     for (UOdysseyLayerCell* selectedCell : selectedCells)
     {
         selectedCellsProgress.EnterProgressFrame();
-        selectedCell->Render_GameThread(
-            startRenderTarget.Get(),
-            FFrameNumber(0),
-            EOdysseyRenderingType::Render
-        );
+        selectedCell->Render_GameThread(startRenderTarget.Get(), EOdysseyRenderingType::Render);
 
         int cellIndex = selectedCell->GetIndexInLayer();
         int nextCellIndex = cellIndex + 1;
@@ -137,11 +133,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
         {
             UOdysseyLayerCell* nextCell = layer->GetCells()[nextCellIndex];
 
-            nextCell->Render_GameThread(
-                endRenderTarget.Get(),
-                FFrameNumber(0),
-                EOdysseyRenderingType::Render
-            );
+            nextCell->Render_GameThread(endRenderTarget.Get(), EOdysseyRenderingType::Render);
 
             TArray<UOdysseyLayerCell*> rasterCells = layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), selectedCell->GetIndexInLayer() + 1, crossFadelength - 1);
 

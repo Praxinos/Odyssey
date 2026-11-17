@@ -6,15 +6,15 @@
 #include "ContentBrowserModule.h"
 #include "Dialog/SCustomDialog.h"
 #include "IContentBrowserSingleton.h"
-#include "OdysseyTextureLayer.h"
-#include "OdysseyTextureLayerStack.h"
-#include "OdysseyTextureLayerStackUserData.h"
-#include "OdysseyExportImage.h"
+#include "Misc/ScopedSlowTask.h"
 #include "SEnumCombo.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Layout/SGridPanel.h"
 
-#include "Misc/ScopedSlowTask.h"
+#include "OdysseyExportImage.h"
+#include "OdysseyTextureLayer.h"
+#include "OdysseyTextureLayerStack.h"
+#include "OdysseyTextureLayerStackUserData.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
@@ -211,7 +211,7 @@ FOdysseyTextureAsTextureExporter::ExportSource(const FSource& iSource, const FSt
     if (!iSource.mFilename.IsEmpty())
         filename += TEXT("_") + iSource.mFilename;
 
-    Odyssey::ExportAsTexture(iSource.mTextureRenderingAbility, 0, filename, folder);
+    Odyssey::ExportAsTexture(iSource.mTextureRenderingAbility, nullptr, filename, folder);
 }
 
 #undef LOCTEXT_NAMESPACE

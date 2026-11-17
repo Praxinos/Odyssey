@@ -2,21 +2,24 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyTextureLayerStack.h"
-#include "OdysseyTextureLayerFolder.h"
-#include "OdysseyRasterBlock.h"
-#include "TextureCompiler.h"
-#include "UObject/ObjectSaveContext.h"
-#include "OdysseyTextureLayerImageRaster.h"
-#include "OdysseyRasterBlockMutator.h"
-#include "OdysseyTextureLayer.h"
-#include "OdysseyTextureLayerImageVector.h"
-#include "ULISLoaderModule.h"
-#include "OdysseyPixelFormat.h"
-#include "UObject/Package.h"
+
 #include "Engine/TextureRenderTarget2D.h"
 #include "ImageUtils.h"
-#include "ULISUtils.h"
+#include "TextureCompiler.h"
+#include "UObject/ObjectSaveContext.h"
+#include "UObject/Package.h"
+
+#include "OdysseyPixelFormat.h"
+#include "OdysseyRasterBlock.h"
+#include "OdysseyRasterBlockMutator.h"
+#include "OdysseyTextureLayer.h"
+#include "OdysseyTextureLayerFolder.h"
+#include "OdysseyTextureLayerImageRaster.h"
+#include "OdysseyTextureLayerImageVector.h"
 #include "OdysseyTextureLayerStackUserData.h"
+
+#include "ULISLoaderModule.h"
+#include "ULISUtils.h"
 
 UOdysseyTextureLayerStack*
 UOdysseyTextureLayerStack::CreateEmptyFromTexture(UTexture2D* iTexture, UObject* iOuter)
@@ -280,7 +283,7 @@ UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<FIntRect>& iRects)
 
     for (const FIntRect& rect : iRects)
     {
-        Render_GameThread(RenderTarget, FFrameNumber(0), EOdysseyRenderingType::Editor, rect);
+        Render_GameThread(RenderTarget, EOdysseyRenderingType::Editor, rect);
     }
 
     //Fence ?
@@ -402,7 +405,7 @@ UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
 
         for (const FIntRect& rect : invalidRects)
         {
-            Render_GameThread(RenderTarget, FFrameNumber(0), EOdysseyRenderingType::Render, rect);
+            Render_GameThread(RenderTarget, EOdysseyRenderingType::Render, rect);
         }
 
         ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());

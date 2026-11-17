@@ -3,31 +3,36 @@
 
 #include "OdysseyAnimationLayerImageRaster.h"
 
-#include "OdysseyLayerCellImageStagger.h"
-#include "OdysseyAnimationCellImageRaster.h"
-
 #if WITH_EDITOR
-#include "OdysseyPixelFormat.h"
-#include "ULISEventBuilder.h"
-#include "ULISLoaderModule.h"
-#include "OdysseyStyle.h"
-#include "OdysseyAnimationCellsContainerImport.h"
-#include "OdysseyAnimationLayerImageRasterImport.h"
-#include "OdysseyLighttable.h"
-#include "OdysseyRasterBlockMutator.h"
-#include "OdysseyAnimation.h"
-#include "OdysseyRasterBlock.h"
-#include "OdysseyMediaRaster.h"
-#include "ScopedTransaction.h"
-#include "UObject/DevObjectVersion.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
-#include "ULISUtils.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "ImageUtils.h"
-#include "OdysseyBlendShader.h"
+#include "ScopedTransaction.h"
 #include "ScreenPass.h"
-#include "OdysseySurfaceTexture2DEditable.h"
 #include "TextureResource.h"
+#include "UObject/DevObjectVersion.h"
+#endif
+
+#include "OdysseyAnimationCellImageRaster.h"
+#include "OdysseyAnimationRenderContext.h"
+#include "OdysseyLayerCellImageStagger.h"
+
+#if WITH_EDITOR
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationCellsContainerImport.h"
+#include "OdysseyAnimationLayerImageRasterImport.h"
+#include "OdysseyBlendShader.h"
+#include "OdysseyLighttable.h"
+#include "OdysseyMediaRaster.h"
+#include "OdysseyPixelFormat.h"
+#include "OdysseyRasterBlock.h"
+#include "OdysseyRasterBlockMutator.h"
+#include "OdysseyStyle.h"
+#include "OdysseySurfaceTexture2DEditable.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
+
+#include "ULISEventBuilder.h"
+#include "ULISLoaderModule.h"
+#include "ULISUtils.h"
 #endif
 
 #define LOCTEXT_NAMESPACE "Animation"
@@ -213,11 +218,9 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
             if ( !layer )
                 continue;
 
-            layer->Render_GameThread(
-                layerRenderTarget.Get(),
-                FFrameNumber(frame),
-                EOdysseyRenderingType::Render
-            );
+            FOdysseyRenderContext RenderContext;
+            RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(frame);
+            layer->Render_GameThread(layerRenderTarget.Get(), EOdysseyRenderingType::Render, &RenderContext);
 
             const ERHIFeatureLevel::Type featureLevel = GMaxRHIFeatureLevel;
 

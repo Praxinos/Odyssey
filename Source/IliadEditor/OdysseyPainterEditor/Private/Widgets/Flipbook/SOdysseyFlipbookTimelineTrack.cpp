@@ -18,14 +18,14 @@
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Layout/SScaleBox.h"
 
-#include "SOdysseyFlipbookTimelineFrameList.h"
-#include "SOdysseyFlipbookTimelineFrame.h"
 #include "OdysseyPainterEditorFlipbookCommands.h"
 #include "OdysseyPainterEditorFlipbookListener.h"
 #include "OdysseyPainterEditorFlipbookUtils.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "OdysseyStyle.h"
 #include "OdysseyTextureLayerStackUserData.h"
+#include "SOdysseyFlipbookTimelineFrame.h"
+#include "SOdysseyFlipbookTimelineFrameList.h"
 
 #define LOCTEXT_NAMESPACE "FlipbookEditor"
 
@@ -112,7 +112,7 @@ SOdysseyFlipbookTimelineTrack::RefreshTextureRenderTarget( UTexture2D* iTexture,
         UOdysseyTextureLayerStack* layerStack = userData->LayerStack;
         if( layerStack )
         {
-            layerStack->Render_GameThread(iRenderTarget, 0, EOdysseyRenderingType::Render, iSrcRect, iDstRect);
+            layerStack->Render_GameThread(iRenderTarget, EOdysseyRenderingType::Render, iSrcRect, iDstRect);
             return;
         }
     }

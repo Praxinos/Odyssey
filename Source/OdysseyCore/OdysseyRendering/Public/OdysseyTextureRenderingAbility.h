@@ -42,29 +42,29 @@ public:
     UTextureRenderTarget2D* CreateRenderTarget_Blueprint_Implementation();
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Odyssey|Rendering")
-    void Render(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame) const;
-    void Render_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame) const;
+    void Render(UTextureRenderTarget2D* iRenderTarget) const;
+    void Render_Implementation(UTextureRenderTarget2D* iRenderTarget) const;
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Odyssey|Rendering")
-    void RenderRect(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iSrcRect) const;
-    void RenderRect_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iRect) const;
+    void RenderRect(UTextureRenderTarget2D* iRenderTarget, const FIntRect& iSrcRect) const;
+    void RenderRect_Implementation(UTextureRenderTarget2D* iRenderTarget, const FIntRect& iRect) const;
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Odyssey|Rendering")
-    void RenderRectAtPosition(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iRect, const FIntPoint& iPos) const;
-    void RenderRectAtPosition_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntPoint& iPos) const;
+    void RenderRectAtPosition(UTextureRenderTarget2D* iRenderTarget, const FIntRect& iRect, const FIntPoint& iPos) const;
+    void RenderRectAtPosition_Implementation(UTextureRenderTarget2D* iRenderTarget, const FIntRect& iSrcRect, const FIntPoint& iPos) const;
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Odyssey|Rendering")
-    void RenderRectAtRect(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iRect, const FIntRect& iDstRect) const;
-    void RenderRectAtRect_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const;
+    void RenderRectAtRect(UTextureRenderTarget2D* iRenderTarget, const FIntRect& iRect, const FIntRect& iDstRect) const;
+    void RenderRectAtRect_Implementation(UTextureRenderTarget2D* iRenderTarget, const FIntRect& iSrcRect, const FIntRect& iDstRect) const;
 
 public:
-    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FOdysseyRenderContext* RenderContext = nullptr) const;
-    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FOdysseyRenderContext* RenderContext = nullptr) const;
-    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntPoint& iPos, const FOdysseyRenderContext* RenderContext = nullptr) const;
-    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntRect& iDstRect, const FOdysseyRenderContext* RenderContext = nullptr) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, uint64 iType, const FOdysseyRenderContext* RenderContext = nullptr) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, uint64 iType, const FIntRect& iSrcRect, const FOdysseyRenderContext* RenderContext = nullptr) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, uint64 iType, const FIntRect& iSrcRect, const FIntPoint& iPos, const FOdysseyRenderContext* RenderContext = nullptr) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, uint64 iType, const FIntRect& iSrcRect, const FIntRect& iDstRect, const FOdysseyRenderContext* RenderContext = nullptr) const;
 
-    void RenderAndResize_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FOdysseyRenderContext* RenderContext = nullptr) const;
-    void RenderAndResize_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntRect& iDstRect, const FOdysseyRenderContext* RenderContext = nullptr) const;
+    void RenderAndResize_GameThread(UTextureRenderTarget2D* iRenderTarget, uint64 iType, const FOdysseyRenderContext* RenderContext = nullptr) const;
+    void RenderAndResize_GameThread(UTextureRenderTarget2D* iRenderTarget, uint64 iType, const FIntRect& iSrcRect, const FIntRect& iDstRect, const FOdysseyRenderContext* RenderContext = nullptr) const;
 
     bool BuildRenderPipeline(FRenderFunction& OutRenderFunction,
         TArray<const IOdysseyTextureRenderingAbility*> Parents = {},

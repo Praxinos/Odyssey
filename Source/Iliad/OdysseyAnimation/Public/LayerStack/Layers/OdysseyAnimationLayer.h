@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "OdysseyLayer.h"
 #include "OdysseyAnimationLayerStack.h"
+#include "OdysseyLayer.h"
 
 #include "OdysseyAnimationLayer.generated.h"
 
@@ -17,12 +17,22 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayer
 public:
 
     virtual UOdysseyAnimationLayerStack* GetLayerStack() const;
+    virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame) const override;
+    /** Resolves animated cells, pre/post behaviours and editor lighttable content. */
+    virtual bool BuildRenderPipelineInternal(FRenderFunction& oRenderFunction,
+        const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext) const override;
 
 public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     UOdysseyAnimation* GetAnimation() const;
 
 #if WITH_EDITOR
+private:
+    /** Builds the surrounding animation keys using the request's frame. */
+    bool BuildLighttableRenderPipeline(FRenderFunction& oRenderFunction,
+        const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext) const;
+    TArray<FGuid> GetLighttableImageRenderingComposition(int iFrameIndex) const;
+
 protected:
     friend class FOdysseyAnimationCellsContainerImport;
 #endif

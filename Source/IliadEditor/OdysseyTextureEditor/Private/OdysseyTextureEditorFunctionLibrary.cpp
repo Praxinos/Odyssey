@@ -2,19 +2,21 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyTextureEditorFunctionLibrary.h"
-#include "OdysseyLayerStack.h"
-#include "OdysseyTextureLayerStack.h"
-#include "OdysseyTextureLayer.h"
+
 #include "AssetToolsModule.h"
 #include "IAssetTools.h"
+
+#include "OdysseyExportImage.h"
+#include "OdysseyLayerStack.h"
 #include "OdysseyPixelFormat.h"
+#include "OdysseyRasterBlockMutator.h"
 #include "OdysseyTextureFactory.h"
 #include "OdysseyTextureFunctionLibrary.h"
+#include "OdysseyTextureLayer.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerStack.h"
-#include "OdysseyRasterBlockMutator.h"
+
 #include "ULISLoaderModule.h"
-#include "OdysseyExportImage.h"
 
 UOdysseyTextureFactory*
 UOdysseyTextureEditorTextureFunctionLibrary::GetTextureFactory()
@@ -181,7 +183,7 @@ UOdysseyTextureEditorTextureFunctionLibrary::ExportAsImage(
     if ( !layerStack )
         return TEXT("");
 
-    return Odyssey::ExportAsImage(layerStack, 0, Format, Filename, Path );
+    return Odyssey::ExportAsImage(layerStack, nullptr, Format, Filename, Path );
 }
 
 FString
@@ -196,7 +198,7 @@ UOdysseyTextureEditorLayerFunctionLibrary::ExportAsImage(
         return TEXT("");
 
     UTexture2D* texture = Layer->GetTexture();
-    return Odyssey::ExportAsImage(Layer, 0, Format, Filename, Path );
+    return Odyssey::ExportAsImage(Layer, nullptr, Format, Filename, Path );
 }
 
 UTexture2D*
@@ -210,5 +212,5 @@ UOdysseyTextureEditorLayerFunctionLibrary::ExportAsTexture(
         return nullptr;
 
     UTexture2D* texture = Layer->GetTexture();
-    return Odyssey::ExportAsTexture(Layer, 0, Filename, Path );
+    return Odyssey::ExportAsTexture(Layer, nullptr, Filename, Path );
 }

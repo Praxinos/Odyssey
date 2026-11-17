@@ -3,25 +3,27 @@
 
 #include "OdysseyLayerStackBrushEditorFunctionLibrary.h"
 
-#include "OdysseyBrushAssetBase.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "ImageUtils.h"
+
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationLayer.h"
+#include "OdysseyAnimationPlayer.h"
+#include "OdysseyAnimationRenderContext.h"
+#include "OdysseyBrushAssetBase.h"
+#include "OdysseyLayerStack.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorAnimationSource.h"
+#include "OdysseyPainterEditorBrushContext.h"
+#include "OdysseyPixelFormat.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "OdysseyTextureLayer.h"
+#include "OdysseyTextureLayerStack.h"
+
 #include <ULIS>
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-#include "OdysseyLayerStack.h"
-#include "OdysseyAnimationLayer.h"
-#include "OdysseyAnimationPlayer.h"
-#include "OdysseyTextureLayer.h"
-#include "OdysseyTextureLayerStack.h"
-#include "OdysseyPixelFormat.h"
-#include "OdysseyAnimation.h"
-#include "OdysseyPainterEditor.h"
-#include "OdysseyPainterEditorBrushContext.h"
-#include "OdysseyPainterEditorAnimationSource.h"
 
-//---
 namespace
 {
     static
@@ -102,7 +104,9 @@ namespace
 
         TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(iLayer->CreateRenderingRenderTarget());
         renderTarget->InitAutoFormat(rect.w, rect.h);
-        iLayer->Render_GameThread(renderTarget.Get(), frame, EOdysseyRenderingType::Render, ::ULISUtils::ToIntRect(rect), FIntPoint(0, 0));
+        FOdysseyRenderContext RenderContext;
+        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(frame);
+        iLayer->Render_GameThread(renderTarget.Get(), EOdysseyRenderingType::Render, ::ULISUtils::ToIntRect(rect), FIntPoint(0, 0), &RenderContext);
 
         FImage OutImage;
         if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))

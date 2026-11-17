@@ -4,9 +4,10 @@
 #include "OdysseyLayerCellImageStaggerImport.h"
 
 #if WITH_EDITOR
-
 #include "Serialization/Archive.h"
+
 #include "OdysseyLayerCellImageStagger.h"
+
 #include <functional>
 
 static const uint32 CHUNK_CELLIMAGESTAGGER = 0x559ff069; // container

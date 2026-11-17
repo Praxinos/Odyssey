@@ -12,8 +12,10 @@
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Layout/SGridPanel.h"
 
-#include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationExport.h"
+#include "OdysseyAnimationLayer.h"
+#include "OdysseyAnimationRenderContext.h"
 #include "OdysseyExportImage.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -340,7 +342,9 @@ FOdysseyAnimationTextureSequenceExporter::ExportSource(const FSource& iSource, c
             imageName += TEXT("0");
         }
         imageName += FString::Printf(TEXT("%d"), i);
-        Odyssey::ExportAsTexture(iSource.mTextureRenderingAbility, i, imageName, folder);
+        FOdysseyRenderContext RenderContext;
+        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(i);
+        Odyssey::ExportAsTexture(iSource.mTextureRenderingAbility, &RenderContext, imageName, folder);
     }
 }
 

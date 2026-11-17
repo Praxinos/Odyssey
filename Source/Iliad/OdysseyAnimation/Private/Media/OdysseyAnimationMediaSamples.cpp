@@ -3,10 +3,12 @@
 
 #include "Media/OdysseyAnimationMediaSamples.h"
 
-#include "Media/OdysseyAnimationMediaPlayer.h"
-#include "Media/OdysseyAnimationMediaTextureSample.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "UObject/StrongObjectPtr.h"
+
+#include "Media/OdysseyAnimationMediaPlayer.h"
+#include "Media/OdysseyAnimationMediaTextureSample.h"
+#include "OdysseyAnimationRenderContext.h"
 
 FOdysseyAnimationMediaSamples::FOdysseyAnimationMediaSamples()
     : mAnimation(nullptr)
@@ -341,7 +343,9 @@ FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex, int
 
     mImageRenderingComposition = imageRenderingComposition;
 
-    mAnimation->Render_GameThread(mRenderTarget.Get(), FFrameNumber(mCurrentFrameIndex), EOdysseyRenderingType::Render);
+    FOdysseyRenderContext RenderContext;
+    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(mCurrentFrameIndex);
+    mAnimation->Render_GameThread(mRenderTarget.Get(), EOdysseyRenderingType::Render, &RenderContext);
 }
 
 void
@@ -386,7 +390,9 @@ FOdysseyAnimationMediaSamples::Render()
 
     for (const FIntRect& rect : mInvalidTileMap.InvalidRects())
     {
-        mAnimation->Render_GameThread(mRenderTarget.Get(), FFrameNumber(mCurrentFrameIndex), EOdysseyRenderingType::Render, rect);
+        FOdysseyRenderContext RenderContext;
+        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(mCurrentFrameIndex);
+        mAnimation->Render_GameThread(mRenderTarget.Get(), EOdysseyRenderingType::Render, rect, &RenderContext);
     }
 
     mInvalidTileMap.Clear();

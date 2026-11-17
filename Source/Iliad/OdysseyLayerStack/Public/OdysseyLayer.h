@@ -4,12 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Layout/Margin.h"
+#include "Templates/SubclassOf.h"
+#include "Textures/SlateIcon.h"
+
 #include "OdysseyBlendingMode.h"
 #include "OdysseyMediaProvider.h"
 #include "OdysseyTextureRenderingAbility.h"
-#include "Textures/SlateIcon.h"
-#include "Layout/Margin.h"
-#include "Templates/SubclassOf.h"
 
 #if WITH_EDITOR
 #include "OdysseyLighttable.h"
@@ -346,13 +347,11 @@ public:
 
 protected:
     virtual bool BuildsCompositeContent() const override { return true; }
-    bool BuildRenderChildrenPipeline(FFrameNumber iFrame, uint64 iType, IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext) const;
+    bool BuildRenderChildrenPipeline( IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext) const;
     //Property changed methods
     virtual void CellsChanged();
 
 #if WITH_EDITOR
-    bool BuildLighttableRenderPipeline(FFrameNumber iFrame, uint64 iType, IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext) const;
-    TArray<FGuid> GetLighttableImageRenderingComposition(int iFrameIndex) const;
     // UObject overrides
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
     // overide for UObject::IsSelected() which calls IsSelectedInEditor()

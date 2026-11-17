@@ -2,29 +2,28 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyTextureLayerImageRaster.h"
-#include "OdysseyRenderContext.h"
 
 #include "Engine/TextureRenderTarget2D.h"
-#include "ImageUtils.h"
 #include "HAL/IConsoleManager.h"
+#include "ImageUtils.h"
 #include "RenderGraphUtils.h"
-#include "UObject/UObjectIterator.h"
 #include "ScreenPass.h"
 #include "TextureCompiler.h"
 #include "TextureResource.h"
 #include "UObject/ObjectSaveContext.h"
+#include "UObject/UObjectIterator.h"
 
 #include "OdysseyBlendShader.h"
-#include "OdysseyPixelFormat.h"
-#include "OdysseyStyle.h"
 #include "OdysseyMediaRaster.h"
+#include "OdysseyPixelFormat.h"
 #include "OdysseyRasterBlock.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyRasterBlockUndo.h"
-#include "OdysseyTextureLayerImageRaster.h"
+#include "OdysseyRenderContext.h"
+#include "OdysseyStyle.h"
 #include "OdysseySurfaceTexture2DEditable.h"
-#include "OdysseyTextureLayerImageRasterImport.h"
 #include "OdysseyTextureLayerImageRasterExport.h"
+#include "OdysseyTextureLayerImageRasterImport.h"
 #include "OdysseyTextureLayerStack.h"
 #include "OdysseyTiledImage.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -401,11 +400,7 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 
     for ( UOdysseyLayer* layer : iLayers )
     {
-        layer->Render_GameThread(
-            layerRenderTarget.Get(),
-            FFrameNumber(0),
-            EOdysseyRenderingType::Render
-        );
+        layer->Render_GameThread(layerRenderTarget.Get(), EOdysseyRenderingType::Render);
 
         const ERHIFeatureLevel::Type featureLevel = GMaxRHIFeatureLevel;
 

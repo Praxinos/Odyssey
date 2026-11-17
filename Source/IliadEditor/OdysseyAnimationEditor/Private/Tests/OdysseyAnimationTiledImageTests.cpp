@@ -1,8 +1,6 @@
 // IDDN.FR.001.060015.015.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2026
 
-#include "OdysseyAnimationCellImageRaster.h"
-
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Editor.h"
 #include "EditorValidatorSubsystem.h"
@@ -23,12 +21,15 @@
 #include "UObject/SavePackage.h"
 #include "UObject/StrongObjectPtr.h"
 #include "UObject/UnrealType.h"
+
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationCellImageRaster.h"
 #include "OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyAnimationRenderContext.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyLighttable.h"
-#include "OdysseyRasterBlockMutator.h"
 #include "OdysseyRasterBlock.h"
+#include "OdysseyRasterBlockMutator.h"
 #include "OdysseyTiledImage.h"
 
 namespace Odyssey::AnimationTiledTests
@@ -83,7 +84,9 @@ TArray<FLinearColor> Render(UOdysseyAnimation* Animation, int32 Frame, uint64 Ty
     TStrongObjectPtr<UTextureRenderTarget2D> Target(NewObject<UTextureRenderTarget2D>());
     Target->InitCustomFormat(Width, Height, PF_A32B32G32R32F, true);
     Target->UpdateResourceImmediate(true);
-    Animation->Render_GameThread(Target.Get(), FFrameNumber(Frame), Type);
+    FOdysseyRenderContext RenderContext;
+    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(Frame);
+    Animation->Render_GameThread(Target.Get(), Type, &RenderContext);
     FlushRenderingCommands();
     TArray<FLinearColor> Pixels;
     FReadSurfaceDataFlags ReadFlags(RCM_MinMax);

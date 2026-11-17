@@ -2,11 +2,14 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyLayerCellImageStagger.h"
-#include "OdysseyRenderContext.h"
-#include "OdysseyLayerCellImageStaggerImport.h"
+
+#include "OdysseyAnimationRenderContext.h"
 #include "OdysseyLayer.h"
+#include "OdysseyLayerCellImageStaggerImport.h"
+#include "OdysseyRenderContext.h"
 
 #if WITH_EDITOR
+
 void
 UOdysseyLayerCellImageStagger::OldSerialize(FArchive& Ar)
 {
@@ -107,7 +110,7 @@ UOdysseyLayerCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) const
                     if (cellStartFrame - startFrame <= 0)
                         return INDEX_NONE;
 
-                    frame = startFrame + mRandomIntegers[iFrameIndex];
+                    frame = startFrame + RandomIntegers[iFrameIndex];
 
                     // I don't know why but in some cases (drag), the frameRange changes with weird values,
                     // giving unwanted results that makes frame >= cellStartFrame, which should not be possible.
@@ -185,12 +188,12 @@ UOdysseyLayerCellImageStagger::GetDefaultRenderRect() const
 void
 UOdysseyLayerCellImageStagger::UpdateRandomIntegers( int iLimitValue ) const
 {
-    if( ( mRandomIntegers.Num() != Exposure ) || ( mRandomLimitValue != iLimitValue ) )
+    if( ( RandomIntegers.Num() != Exposure ) || ( RandomLimitValue != iLimitValue ) )
     {
         int randomRelativeIndex = 0, previousRandomRelativeIndex = randomRelativeIndex;
 
-        mRandomIntegers.Empty();
-        mRandomIntegers.Reserve( Exposure );
+        RandomIntegers.Empty();
+        RandomIntegers.Reserve( Exposure );
 
         for( int i = 0; i < Exposure; i++ )
         {
@@ -204,12 +207,12 @@ UOdysseyLayerCellImageStagger::UpdateRandomIntegers( int iLimitValue ) const
                 randomRelativeIndex = rand() % iLimitValue;
             } while( randomRelativeIndex == previousRandomRelativeIndex && iLimitValue != 1 ); // Also check the iLimitValue, otherwise if it is equal to 1, there is an infinite loop (as "%1" always returns 0)
 
-            mRandomIntegers.Push( randomRelativeIndex );
+            RandomIntegers.Push( randomRelativeIndex );
 
             previousRandomRelativeIndex = randomRelativeIndex;
         }
 
-        mRandomLimitValue = iLimitValue;
+        RandomLimitValue = iLimitValue;
     }
 }
 
@@ -247,7 +250,8 @@ UOdysseyLayerCellImageStagger::BuildRenderPipelineInternal(
     const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
-    const int32 GlobalFrame = RenderContext ? RenderContext->Frame.Value : GetFrameRange().GetLowerBoundValue();
+    const FOdysseyAnimationRenderContext* AnimationContext = RenderContext ? RenderContext->GetExtension<FOdysseyAnimationRenderContext>() : nullptr;
+    const int32 GlobalFrame = AnimationContext ? AnimationContext->Frame.Get(FFrameNumber(0)).Value : GetFrameRange().GetLowerBoundValue();
     const int32 LocalFrame = GlobalFrame - GetFrameRange().GetLowerBoundValue();
     int staggerFrame = GetReferenceFrameAtFrame(LocalFrame);
     if ( staggerFrame == INDEX_NONE )
@@ -258,6 +262,6 @@ UOdysseyLayerCellImageStagger::BuildRenderPipelineInternal(
         return false;
 
     FOdysseyRenderContext ReferencedCellContext = RenderContext ? *RenderContext : FOdysseyRenderContext();
-    ReferencedCellContext.Frame = FFrameNumber(staggerFrame);
+    ReferencedCellContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(staggerFrame);
     return cell->BuildRenderPipeline(oRenderFunction, iParents, &ReferencedCellContext);
 }

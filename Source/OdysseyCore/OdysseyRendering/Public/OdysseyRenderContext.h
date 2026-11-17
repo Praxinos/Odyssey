@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "OdysseyTextureRenderingAbility.h"
 
 struct FOdysseyRenderOverride;
@@ -58,8 +59,6 @@ struct ODYSSEYRENDERING_API FOdysseyRenderContext
     FFilter Filter;
     /** Rendering flags shared by every node in this request. */
     uint64 Type = EOdysseyRenderingType::Render;
-    /** Effective frame in the current layer's timeline. */
-    FFrameNumber Frame = FFrameNumber(0);
 
 private:
     TMap<FName, TUniquePtr<IOdysseyRenderContextExtension>> Extensions;

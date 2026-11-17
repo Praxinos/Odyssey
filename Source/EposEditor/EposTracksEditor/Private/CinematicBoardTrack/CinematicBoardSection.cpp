@@ -4,8 +4,8 @@
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 
 #include "AnimatedRange.h"
-#include "Channels/MovieSceneFloatChannel.h"
 #include "Channels/MovieSceneChannelProxy.h"
+#include "Channels/MovieSceneFloatChannel.h"
 #include "CineCameraActor.h"
 #include "Compilation/MovieSceneCompiledDataManager.h"
 #include "Editor.h"
@@ -16,8 +16,8 @@
 #include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "Framework/Commands/UIAction.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
-#include "ImageUtils.h"
 #include "ImageCoreUtils.h"
+#include "ImageUtils.h"
 #include "ITimeSlider.h"
 #include "MovieScene.h"
 #include "MovieSceneTimeHelpers.h"
@@ -37,7 +37,6 @@
 #include "Widgets/Colors/SColorPicker.h"
 #include "Widgets/Layout/SSpacer.h"
 
-
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
 #include "CinematicBoardTrack/MetaChannelProxy.h"
@@ -50,6 +49,7 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationComponent.h"
+#include "OdysseyAnimationRenderContext.h"
 #include "OdysseyAnimationTimelineSection.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
@@ -800,7 +800,9 @@ FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimation
         }
 
         // Render the animation into the render target
-        animation->RenderAndResize_GameThread( mBuildRenderTargetTmp, frame_in_timeline.Value, EOdysseyRenderingType::Render );
+        FOdysseyRenderContext RenderContext;
+        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = frame_in_timeline;
+        animation->RenderAndResize_GameThread(mBuildRenderTargetTmp, EOdysseyRenderingType::Render, &RenderContext);
 
         // Let's see if a old no more used compatible texture is available
         for( TWeakObjectPtr<UTexture2D> old_texture : mAnimationsTimelineTexturePool )

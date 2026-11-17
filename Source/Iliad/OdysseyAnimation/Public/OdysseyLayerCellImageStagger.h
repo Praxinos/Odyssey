@@ -16,7 +16,7 @@ enum class EOdysseyLayerCellImageStaggerBehaviour : uint8
 };
 
 UCLASS(BlueprintType)
-class ODYSSEYLAYERSTACK_API UOdysseyLayerCellImageStagger
+class ODYSSEYANIMATION_API UOdysseyLayerCellImageStagger
     : public UOdysseyLayerCell
 {
     GENERATED_BODY()
@@ -74,6 +74,6 @@ protected:
 
     private:
         // declared mutable to bypass the functions const-ness
-        mutable TArray<int> mRandomIntegers;
-        mutable int mRandomLimitValue = 0;
+        mutable TArray<int> RandomIntegers;
+        mutable int RandomLimitValue = 0;
 };

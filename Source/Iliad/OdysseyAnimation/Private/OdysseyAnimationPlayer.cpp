@@ -2,14 +2,17 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyAnimationPlayer.h"
-#include "OdysseyAnimation.h"
+
+#include "Engine/Texture2D.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "Misc/TransactionObjectEvent.h"
 #include "RenderCommandFence.h"
 #include "RHITypes.h"
-#include "Engine/Texture2D.h"
 #include "TextureCompiler.h"
-#include "Misc/TransactionObjectEvent.h"
-#include "Engine/TextureRenderTarget2D.h"
 #include "UObject/DevObjectVersion.h"
+
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationRenderContext.h"
 
 FSimpleMulticastDelegate&
 UOdysseyAnimationPlayer::OnAnimationChanged()
@@ -483,7 +486,9 @@ UOdysseyAnimationPlayer::UpdateTexture()
         mImageRenderingComposition = imageRenderingComposition;
 
         RenderTarget->WaitForPendingInitOrStreaming();
-        Animation->Render_GameThread(RenderTarget, frame.GetFrame(), renderType );
+        FOdysseyRenderContext RenderContext;
+        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = frame.GetFrame();
+        Animation->Render_GameThread(RenderTarget, renderType, &RenderContext);
         RenderTarget->UpdateResourceImmediate(false); //Update MipMaps
 
         mInvalidTileMap.Clear();
@@ -497,7 +502,9 @@ UOdysseyAnimationPlayer::UpdateTexture()
         TArray<FIntRect> invalidTiles = mInvalidTileMap.InvalidRects();
         for (const FIntRect& rect : invalidTiles)
         {
-            Animation->Render_GameThread(RenderTarget, frame.GetFrame(), renderType, rect);
+            FOdysseyRenderContext RenderContext;
+            RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = frame.GetFrame();
+            Animation->Render_GameThread(RenderTarget, renderType, rect, &RenderContext);
         }
         RenderTarget->UpdateResourceImmediate(false); //Update MipMaps
 

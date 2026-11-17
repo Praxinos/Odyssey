@@ -3,18 +3,21 @@
 
 #include "Widgets/Animation/SOdysseyAnimationExportImageSequenceDialog.h"
 
+#include "DesktopPlatformModule.h"
 #include "Dialog/SCustomDialog.h"
-#include "OdysseyAnimationLayer.h"
-#include "OdysseyAnimation.h"
-#include "OdysseyExportImage.h"
+#include "Misc/ScopedSlowTask.h"
 #include "SEnumCombo.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Layout/SGridPanel.h"
-#include "DesktopPlatformModule.h"
+
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationExport.h"
+#include "OdysseyAnimationLayer.h"
+#include "OdysseyAnimationRenderContext.h"
+#include "OdysseyExportImage.h"
+
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-
-#include "Misc/ScopedSlowTask.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -371,7 +374,9 @@ FOdysseyAnimationImageSequenceExporter::ExportSource(const FSource& iSource, con
             imageName += TEXT("0");
         }
         imageName += FString::Printf(TEXT("%d."), i) + extension;
-        Odyssey::ExportAsImage(iSource.mTextureRenderingAbility, i, mFormat, imageName, folder);
+        FOdysseyRenderContext RenderContext;
+        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(i);
+        Odyssey::ExportAsImage(iSource.mTextureRenderingAbility, &RenderContext, mFormat, imageName, folder);
     }
 }
 

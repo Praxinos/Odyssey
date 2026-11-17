@@ -11,22 +11,24 @@
 #include "ToolMenu.h"
 #include "Widgets/Layout/SBox.h"
 
-#include "OdysseyRasterBlock.h"
-#include "OdysseyMediaRaster.h"
-#include "OdysseyPainterEditor.h"
-#include "Palette/OdysseyPaletteEntryColor.h"
 #include "OdysseyAnimationPlayer.h"
-#include "OdysseyPainterEditorSource.h"
-#include "OdysseyPainterEditorViewportTab.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyAnimationRenderContext.h"
 #include "OdysseyHUDElement.h"
-#include "OdysseyPainterEditorRasterSelection.h"
-#include "SOdysseySinglePropertyView.h"
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
-#include "OdysseyRenderContext.h"
+#include "OdysseyMediaRaster.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorRasterSelection.h"
+#include "OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPixelFormat.h"
+#include "OdysseyRasterBlock.h"
+#include "OdysseyRenderContext.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "Palette/OdysseyPaletteEntryColor.h"
+#include "SOdysseySinglePropertyView.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
+
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 
@@ -652,7 +654,9 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetCurrentLayerBlock() const
     TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
     FIntRect rect = layer->GetDefaultRenderRect();
     renderTarget->InitAutoFormat(rect.Width(), rect.Height());
-    layer->Render_GameThread(renderTarget.Get(), currentFrame, EOdysseyRenderingType::Render);
+    FOdysseyRenderContext RenderContext;
+    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = currentFrame;
+    layer->Render_GameThread(renderTarget.Get(), EOdysseyRenderingType::Render, &RenderContext);
 
     FImage OutImage;
     if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
@@ -694,7 +698,8 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetForegroundLayersBlock() const
     {
         return !layersToExclude.Contains(&Ability);
     };
-    layerStack->Render_GameThread(renderTarget.Get(), currentFrame, EOdysseyRenderingType::Render, &RenderContext);
+    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = currentFrame;
+    layerStack->Render_GameThread(renderTarget.Get(), EOdysseyRenderingType::Render, &RenderContext);
 
     FImage OutImage;
     if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
@@ -736,7 +741,8 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetBackgroundLayersBlock() const
     {
         return !layersToExclude.Contains(&Ability);
     };
-    layerStack->Render_GameThread(renderTarget.Get(), currentFrame, EOdysseyRenderingType::Render, &RenderContext);
+    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = currentFrame;
+    layerStack->Render_GameThread(renderTarget.Get(), EOdysseyRenderingType::Render, &RenderContext);
 
     FImage OutImage;
     if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
@@ -765,7 +771,9 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetAllLayersBlock() const
     TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
     FIntRect rect = layerStack->GetDefaultRenderRect();
     renderTarget->InitAutoFormat(rect.Width(), rect.Height());
-    layerStack->Render_GameThread(renderTarget.Get(), currentFrame, EOdysseyRenderingType::Render);
+    FOdysseyRenderContext RenderContext;
+    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = currentFrame;
+    layerStack->Render_GameThread(renderTarget.Get(), EOdysseyRenderingType::Render, &RenderContext);
 
     FImage OutImage;
     if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))

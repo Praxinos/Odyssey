@@ -1,10 +1,7 @@
 // IDDN.FR.001.060015.015.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2026
 
-#include "OdysseyTextureLayerImageRaster.h"
-
 #if WITH_DEV_AUTOMATION_TESTS
-
 #include "Editor.h"
 #include "EditorValidatorSubsystem.h"
 #include "Engine/Texture2D.h"
@@ -14,15 +11,15 @@
 #include "HAL/PlatformTime.h"
 #include "ImageCore.h"
 #include "ImageCoreUtils.h"
+#include "Math/RotationMatrix.h"
+#include "Math/ScaleMatrix.h"
+#include "Math/TranslationMatrix.h"
 #include "Misc/AutomationTest.h"
 #include "Misc/PackageName.h"
 #include "Misc/Paths.h"
 #include "Misc/ScopeExit.h"
-#include "RenderingThread.h"
 #include "RenderGraphUtils.h"
-#include "Math/ScaleMatrix.h"
-#include "Math/TranslationMatrix.h"
-#include "Math/RotationMatrix.h"
+#include "RenderingThread.h"
 #include "ScopedTransaction.h"
 #include "TextureCompiler.h"
 #include "TextureResource.h"
@@ -33,6 +30,7 @@
 
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerStack.h"
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyTiledImage.h"
@@ -87,7 +85,7 @@ bool CheckRender(FAutomationTestBase& Test, UOdysseyTextureLayerImageRaster* Lay
         Target->InitCustomFormat(Width, Height, PF_A32B32G32R32F, true);
         Target->UpdateResourceImmediate(true);
     }
-    Layer->Render_GameThread(Expected.Get(), FFrameNumber(0), EOdysseyRenderingType::Render);
+    Layer->Render_GameThread(Expected.Get(), EOdysseyRenderingType::Render);
     Image->Render(Actual.Get(), FIntRect(0, 0, Width, Height), FIntPoint::ZeroValue);
     FlushRenderingCommands();
     TArray<FLinearColor> ExpectedPixels;

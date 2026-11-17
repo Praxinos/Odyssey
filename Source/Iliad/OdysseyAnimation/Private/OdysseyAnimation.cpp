@@ -2,8 +2,6 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyAnimation.h"
-#include "OdysseyRenderContext.h"
-#include "OdysseyAnimationRenderContext.h"
 
 #include "CanvasTypes.h"
 #include "Cooker/CookEvents.h"
@@ -17,15 +15,17 @@
 #include "TextureResource.h"
 #include "UObject/SavePackage.h"
 
+#if WITH_EDITOR
+#include "AssetToolsModule.h"
+#include "IAssetTools.h"
+#endif
+
+#include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationRenderContext.h"
 #include "OdysseyLayer.h"
 #include "OdysseyLayerCell.h"
-#include "OdysseyAnimationCellImageVector.h"
-
-#if WITH_EDITOR
-    #include "IAssetTools.h"
-    #include "AssetToolsModule.h"
-#endif
+#include "OdysseyRenderContext.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 
@@ -189,27 +189,23 @@ UOdysseyAnimation::BuildRenderPipelineInternal(
 ) const
 {
     const FOdysseyAnimationRenderContext* AnimationContext = RenderContext ? RenderContext->GetExtension<FOdysseyAnimationRenderContext>() : nullptr;
-    FOdysseyRenderContext AnimationRequest = RenderContext ? *RenderContext : FOdysseyRenderContext();
-    if (AnimationContext && AnimationContext->Frame.IsSet())
-    {
-        AnimationRequest.Frame = AnimationContext->Frame.GetValue();
-    }
+    const FFrameNumber Frame = AnimationContext ? AnimationContext->Frame.Get(FFrameNumber(0)) : FFrameNumber(0);
 #if WITH_EDITOR
     if ( !mLayerStack )
         return false;
 
-    return mLayerStack->BuildRenderPipeline(oRenderFunction, iParents, &AnimationRequest);
+    return mLayerStack->BuildRenderPipeline(oRenderFunction, iParents, RenderContext);
 #else
     if ( PreserveLayerStackAtRuntime )
     {
         if ( !mLayerStack )
             return false;
 
-        return mLayerStack->BuildRenderPipeline(oRenderFunction, iParents, &AnimationRequest);
+        return mLayerStack->BuildRenderPipeline(oRenderFunction, iParents, RenderContext);
     }
 
     UTexture2D* srcTexture2D = nullptr;
-    int frameIndex = GetFrameIndexAtFrame(AnimationRequest.Frame.Value);
+    int frameIndex = GetFrameIndexAtFrame(Frame.Value);
     if (frameIndex != INDEX_NONE)
     {
         if (Frames[frameIndex].Texture)
@@ -604,7 +600,9 @@ UOdysseyAnimation::PreSave(FObjectPreSaveContext SaveContext)
 
         lastRenderingComposition = renderingComposition;
 
-        Render_GameThread(renderTarget.Get(), FFrameNumber(i), EOdysseyRenderingType::Render);
+        FOdysseyRenderContext RenderContext;
+        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(i);
+        Render_GameThread(renderTarget.Get(), EOdysseyRenderingType::Render, &RenderContext);
 
 
         FString Name = FString::Printf(TEXT("OdysseyAnimationFrameTexture%d"), i);

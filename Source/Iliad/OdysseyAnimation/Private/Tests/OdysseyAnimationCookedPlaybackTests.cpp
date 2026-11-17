@@ -1,8 +1,6 @@
 // IDDN.FR.001.060015.015.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2026
 
-#include "OdysseyAnimation.h"
-
 #if WITH_DEV_AUTOMATION_TESTS && !WITH_EDITOR
 #include "Engine/TextureRenderTarget2D.h"
 #include "Misc/AutomationTest.h"
@@ -12,7 +10,10 @@
 #include "TextureResource.h"
 #include "UObject/StrongObjectPtr.h"
 #include "UObject/UnrealType.h"
+
+#include "OdysseyAnimation.h"
 #include "OdysseyAnimationCellImageRaster.h"
+#include "OdysseyAnimationRenderContext.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationCookedPlaybackTest, "Odyssey.Animation.TiledImage.CookedPlayback",
     EAutomationTestFlags::ClientContext | EAutomationTestFlags::EngineFilter)
@@ -43,7 +44,9 @@ bool FOdysseyAnimationCookedPlaybackTest::RunTest(const FString& Parameters)
         TArray<FLinearColor> SecondPixels;
         for (int32 Frame = 0; Frame < 5; ++Frame)
         {
-            Animation->Render_GameThread(Target.Get(), FFrameNumber(Frame), EOdysseyRenderingType::Render);
+            FOdysseyRenderContext RenderContext;
+            RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(Frame);
+            Animation->Render_GameThread(Target.Get(), EOdysseyRenderingType::Render, &RenderContext);
             FlushRenderingCommands();
             TArray<FLinearColor> Pixels;
             FReadSurfaceDataFlags Flags(RCM_MinMax);

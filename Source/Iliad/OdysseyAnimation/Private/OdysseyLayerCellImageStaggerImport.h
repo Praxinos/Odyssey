@@ -19,7 +19,7 @@ public:
      * @param iLayerCellImageStagger
      * @param Ar
      */
-    static bool ODYSSEYLAYERSTACK_API Read( UOdysseyLayerCellImageStagger* iLayerCellImageStagger, FArchive& Ar );
+    static bool ODYSSEYANIMATION_API Read( UOdysseyLayerCellImageStagger* iLayerCellImageStagger, FArchive& Ar );
 
 private:
     /**

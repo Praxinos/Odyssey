@@ -3,19 +3,20 @@
 
 #include "SOdysseyTextureExportAsImageDialog.h"
 
+#include "DesktopPlatformModule.h"
 #include "Dialog/SCustomDialog.h"
-#include "OdysseyTextureLayer.h"
-#include "OdysseyTextureLayerStack.h"
-#include "OdysseyTextureLayerStackUserData.h"
-#include "OdysseyExportImage.h"
+#include "Misc/ScopedSlowTask.h"
 #include "SEnumCombo.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Layout/SGridPanel.h"
-#include "DesktopPlatformModule.h"
+
+#include "OdysseyExportImage.h"
+#include "OdysseyTextureLayer.h"
+#include "OdysseyTextureLayerStack.h"
+#include "OdysseyTextureLayerStackUserData.h"
+
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-
-#include "Misc/ScopedSlowTask.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
@@ -242,7 +243,7 @@ FOdysseyTextureAsImageExporter::ExportSource(const FSource& iSource, const FStri
 
     FString imageName = filename;
     imageName += TEXT(".") + extension;
-    Odyssey::ExportAsImage(iSource.mTextureRenderingAbility, 0, mFormat, imageName, folder);
+    Odyssey::ExportAsImage(iSource.mTextureRenderingAbility, nullptr, mFormat, imageName, folder);
 }
 
 #undef LOCTEXT_NAMESPACE

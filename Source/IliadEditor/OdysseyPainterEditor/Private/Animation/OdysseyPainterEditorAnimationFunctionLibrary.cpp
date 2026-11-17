@@ -5,24 +5,26 @@
 
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "IAssetTools.h"
+#include "ImageUtils.h"
+#include "PaperFlipbook.h"
+#include "ScopedTransaction.h"
+#include "ScreenPass.h"
+#include "UObject/SavePackage.h"
+
 #include "Animation/OdysseyPainterEditorAnimationImport.h"
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationCellImageRaster.h"
+#include "OdysseyAnimationExport.h"
 #include "OdysseyAnimationLayerImageRaster.h"
-#include "OdysseyAnimationCellImageRaster.h"
-#include "OdysseySurfaceTexture2DEditable.h"
-#include "PaperFlipbook.h"
-#include "OdysseyPixelFormat.h"
-#include "AssetRegistry/AssetRegistryModule.h"
-#include "UObject/SavePackage.h"
-#include "OdysseyAnimationCellImageRaster.h"
-#include "ScopedTransaction.h"
-#include "OdysseyRasterBlockMutator.h"
-#include "ULISLoaderModule.h"
+#include "OdysseyAnimationRenderContext.h"
 #include "OdysseyExportImage.h"
-#include "ScreenPass.h"
-#include "ImageUtils.h"
-#include "Engine/TextureRenderTarget2D.h"
+#include "OdysseyPixelFormat.h"
+#include "OdysseyRasterBlockMutator.h"
+#include "OdysseySurfaceTexture2DEditable.h"
+
+#include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorAnimationFunctionLibrary"
 
@@ -70,7 +72,9 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ExportFrameAsImage(
     if (!Animation)
         return TEXT("");
 
-    return Odyssey::ExportAsImage(Animation, Frame, Format, Filename, Path );
+    FOdysseyRenderContext RenderContext;
+    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(Frame);
+    return Odyssey::ExportAsImage(Animation, &RenderContext, Format, Filename, Path );
 }
 
 UTexture2D*
@@ -84,7 +88,9 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ExportFrameAsTexture(
     if (!Animation)
         return nullptr;
 
-    return Odyssey::ExportAsTexture(Animation, Frame, Filename, Path );
+    FOdysseyRenderContext RenderContext;
+    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(Frame);
+    return Odyssey::ExportAsTexture(Animation, &RenderContext, Filename, Path );
 }
 
 TArray<UTexture2D*>
@@ -167,7 +173,9 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportFrameAsImage(
     if (!Layer)
         return TEXT("");
 
-    return Odyssey::ExportAsImage(Layer, Frame, Format, Filename, Path );
+    FOdysseyRenderContext RenderContext;
+    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(Frame);
+    return Odyssey::ExportAsImage(Layer, &RenderContext, Format, Filename, Path );
 }
 
 UTexture2D*
@@ -181,7 +189,9 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportFrameAsTexture(
     if (!Layer)
         return nullptr;
 
-    return Odyssey::ExportAsTexture(Layer, Frame, Filename, Path );
+    FOdysseyRenderContext RenderContext;
+    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(Frame);
+    return Odyssey::ExportAsTexture(Layer, &RenderContext, Filename, Path );
 }
 
 TArray<UTexture2D*>

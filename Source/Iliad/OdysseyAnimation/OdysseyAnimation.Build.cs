@@ -59,6 +59,7 @@ namespace UnrealBuildTool.Rules
             PublicDependencyModuleNames.AddRange(
                 new string[]
                 {
+                    "OdysseyLayerStack",
                     "MediaAssets",
                     "OdysseyRendering",
                     "OdysseyPalette",
@@ -80,7 +81,6 @@ namespace UnrealBuildTool.Rules
 
                     "OdysseyCore",
                     "OdysseyRendering",
-                    "OdysseyLayerStack",
                     "NamingTokens",
                     "OdysseyTelemetry",
                     // ... add private dependencies that you statically link with here ...
@@ -102,6 +102,9 @@ namespace UnrealBuildTool.Rules
             {
                 PrivateDependencyModuleNames.AddRange(
                     new string[] {
+                        "AssetTools",
+                        "Paper2D",
+                        "Paper2DEditor",
                         "EditorStyle",
                         "Renderer",
                         "SlateCore",

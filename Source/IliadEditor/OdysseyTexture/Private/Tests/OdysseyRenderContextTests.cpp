@@ -1,19 +1,20 @@
 // IDDN.FR.001.060015.015.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
-#include "OdysseyRenderContext.h"
-#include "OdysseyLayerStackRenderContext.h"
 #if WITH_DEV_AUTOMATION_TESTS
-#include "Misc/AutomationTest.h"
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
-#include "OdysseyTextureLayerImageRaster.h"
-#include "OdysseyTextureLayerFolder.h"
-#include "OdysseyTextureLayerStack.h"
-#include "RenderingThread.h"
+#include "Misc/AutomationTest.h"
 #include "RenderGraphUtils.h"
+#include "RenderingThread.h"
 #include "TextureResource.h"
-#include "UObject/StrongObjectPtr.h"
 #include "UObject/Package.h"
+#include "UObject/StrongObjectPtr.h"
+
+#include "OdysseyLayerStackRenderContext.h"
+#include "OdysseyRenderContext.h"
+#include "OdysseyTextureLayerFolder.h"
+#include "OdysseyTextureLayerImageRaster.h"
+#include "OdysseyTextureLayerStack.h"
 
 namespace Odyssey::TextureLayerTiledImageTests
 {
@@ -36,7 +37,7 @@ TArray<FLinearColor> Read(IOdysseyTextureRenderingAbility* Renderer, const FOdys
     TStrongObjectPtr<UTextureRenderTarget2D> Target(NewObject<UTextureRenderTarget2D>());
     Target->InitCustomFormat(73, 67, PF_A32B32G32R32F, true);
     Target->UpdateResourceImmediate(true);
-    Renderer->Render_GameThread(Target.Get(), FFrameNumber(0), EOdysseyRenderingType::Render, Context);
+    Renderer->Render_GameThread(Target.Get(), EOdysseyRenderingType::Render, Context);
     FlushRenderingCommands();
     TArray<FLinearColor> Pixels;
     FReadSurfaceDataFlags Flags(RCM_MinMax);
