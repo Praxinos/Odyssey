@@ -136,10 +136,7 @@ public:
 public:
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const override;
     virtual bool BuildRenderPipelineInternal(
-        FFrameNumber iFrame,
-        uint64 iType,
         IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
-        const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
         const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
     ) const override;
     virtual FIntRect GetDefaultRenderRect() const override;

@@ -29,7 +29,7 @@ public:
 public:
     virtual bool BuildsCompositeContent() const override { return bCanHaveChildren; }
     virtual void InitTexture();
-    virtual bool BuildRenderPipelineInternal( FFrameNumber iFrame, uint64 iType, IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext ) const override;
+    virtual bool BuildRenderPipelineInternal( IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext ) const override;
 
 public:
 #if WITH_EDITOR

@@ -319,17 +319,16 @@ void UOdysseyTextureLayerImageRaster::InvalidateTiledImage(const TArray<::ULIS::
     }
 }
 
-bool UOdysseyTextureLayerImageRaster::BuildRenderPipelineInternal(FFrameNumber Frame, uint64 Type,
-    FRenderFunction& OutRenderFunction, const FCanRenderFunction& CanRenderFunction,
+bool UOdysseyTextureLayerImageRaster::BuildRenderPipelineInternal(FRenderFunction& OutRenderFunction,
     const TArray<const IOdysseyTextureRenderingAbility*>& Parents, const FOdysseyRenderContext* RenderContext) const
 {
     if (!CVarUseTiledRendering.GetValueOnGameThread())
     {
-        return Super::BuildRenderPipelineInternal(Frame, Type, OutRenderFunction, CanRenderFunction, Parents, RenderContext);
+        return Super::BuildRenderPipelineInternal(OutRenderFunction, Parents, RenderContext);
     }
     if (!const_cast<UOdysseyTextureLayerImageRaster*>(this)->UpdateTiledImage())
     {
-        return Super::BuildRenderPipelineInternal(Frame, Type, OutRenderFunction, CanRenderFunction, Parents, RenderContext);
+        return Super::BuildRenderPipelineInternal(OutRenderFunction, Parents, RenderContext);
     }
     const UOdysseyTiledImage* Image = GetTiledImage();
     const FIntPoint Size = TiledImageSize;

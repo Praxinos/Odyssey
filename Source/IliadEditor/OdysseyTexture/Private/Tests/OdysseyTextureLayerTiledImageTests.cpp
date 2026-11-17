@@ -222,7 +222,7 @@ TArray<FLinearColor> ReadPipeline(IOdysseyTextureRenderingAbility* Renderer, boo
 {
     IConsoleManager::Get().FindConsoleVariable(TEXT("Odyssey.Texture.UseTiledRendering"))->Set(bTiled ? 1 : 0);
     IOdysseyTextureRenderingAbility::FRenderFunction Draw;
-    if (!Renderer->BuildRenderPipeline(FFrameNumber(0), EOdysseyRenderingType::Render, Draw))
+    if (!Renderer->BuildRenderPipeline(Draw))
     {
         return {};
     }

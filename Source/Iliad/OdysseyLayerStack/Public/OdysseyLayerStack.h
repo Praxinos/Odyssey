@@ -248,10 +248,7 @@ public:
     virtual UTexture2D* CreateExportTexture( const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory ) override;
 #endif
     virtual bool BuildRenderPipelineInternal(
-        FFrameNumber iFrame,
-        uint64 iType,
         IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
-        const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
         const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
     ) const override;
 

@@ -342,16 +342,16 @@ public:
 #if WITH_EDITOR
     virtual UTexture2D* CreateExportTexture( const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory ) override;
 #endif
-    virtual bool BuildRenderPipelineInternal(FFrameNumber iFrame, uint64 iType, IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext) const override;
+    virtual bool BuildRenderPipelineInternal(IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext) const override;
 
 protected:
     virtual bool BuildsCompositeContent() const override { return true; }
-    bool BuildRenderChildrenPipeline(FFrameNumber iFrame, uint64 iType, IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext) const;
+    bool BuildRenderChildrenPipeline(FFrameNumber iFrame, uint64 iType, IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext) const;
     //Property changed methods
     virtual void CellsChanged();
 
 #if WITH_EDITOR
-    bool BuildLighttableRenderPipeline(FFrameNumber iFrame, uint64 iType, IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext) const;
+    bool BuildLighttableRenderPipeline(FFrameNumber iFrame, uint64 iType, IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext) const;
     TArray<FGuid> GetLighttableImageRenderingComposition(int iFrameIndex) const;
     // UObject overrides
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;

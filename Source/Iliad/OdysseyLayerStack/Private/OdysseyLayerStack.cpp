@@ -748,14 +748,11 @@ UOdysseyLayerStack::GetLayerRootClass() const
 
 bool
 UOdysseyLayerStack::BuildRenderPipelineInternal(
-    FFrameNumber iFrame,
-    uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
-    const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
     const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
-    return GetLayerRoot()->BuildRenderPipeline(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents, RenderContext);
+    return GetLayerRoot()->BuildRenderPipeline(oRenderFunction, iParents, RenderContext);
 }
 
 TArray<FGuid>

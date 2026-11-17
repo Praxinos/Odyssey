@@ -378,10 +378,7 @@ UOdysseyLayerCell::OnOutOfPegsChanged()
 
 bool
 UOdysseyLayerCell::BuildRenderPipelineInternal(
-    FFrameNumber iFrame,
-    uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
-    const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
     const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
@@ -395,7 +392,7 @@ UOdysseyLayerCell::BuildRenderPipelineInternal(
 
     FMatrix CellTransform = FMatrix::Identity;
 #if WITH_EDITOR
-    if (iType & EOdysseyRenderingType::OutOfPegs)
+    if (RenderContext && (RenderContext->Type & EOdysseyRenderingType::OutOfPegs))
     {
         CellTransform = OutOfPegsTransform();
     }

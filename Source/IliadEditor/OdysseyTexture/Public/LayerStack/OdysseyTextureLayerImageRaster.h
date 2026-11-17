@@ -84,8 +84,8 @@ public:
 public:
     //IOdysseyRenderingAbility overrides
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame = 0) const override;
-    virtual bool BuildRenderPipelineInternal(FFrameNumber Frame, uint64 Type, FRenderFunction& OutRenderFunction,
-        const FCanRenderFunction& CanRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& Parents, const FOdysseyRenderContext* RenderContext) const override;
+    virtual bool BuildRenderPipelineInternal(FRenderFunction& OutRenderFunction,
+        const TArray<const IOdysseyTextureRenderingAbility*>& Parents, const FOdysseyRenderContext* RenderContext) const override;
 
 private:
     void InitTexture();

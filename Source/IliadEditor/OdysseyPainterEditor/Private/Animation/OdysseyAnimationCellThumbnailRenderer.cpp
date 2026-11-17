@@ -54,7 +54,7 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
     const ERHIFeatureLevel::Type featureLevel = Canvas->GetFeatureLevel();
 
     IOdysseyTextureRenderingAbility::FRenderFunction childRenderFunction;
-    if (!cell->BuildRenderPipeline(FFrameNumber(0), EOdysseyRenderingType::Render, childRenderFunction))
+    if (!cell->BuildRenderPipeline(childRenderFunction))
         return;
 
     FIntRect srcRect = cell->GetDefaultRenderRect();

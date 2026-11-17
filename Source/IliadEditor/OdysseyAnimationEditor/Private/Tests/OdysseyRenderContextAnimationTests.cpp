@@ -32,6 +32,8 @@ bool FOdysseyRenderContextAnimationTest::RunTest(const FString& Parameters)
     UOdysseyAnimationCellImageRaster* First = Cell(Animation.Get(), 0);
     UOdysseyAnimationCellImageRaster* Second = Cell(Animation.Get(), 1);
     FOdysseyRenderContext Context;
+    Context.Type = EOdysseyRenderingType::Editor;
+    Context.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(2);
     int32 DecoratorCalls = 0;
     Context.Overrides.FindOrAdd(First->GetRenderingId()).RenderDecorator = [&DecoratorCalls](IOdysseyTextureRenderingAbility::FRenderFunction Original)
     {
@@ -50,18 +52,18 @@ bool FOdysseyRenderContextAnimationTest::RunTest(const FString& Parameters)
     Lighttable->PreviousKeys[0].Opacity = 100.f;
     Context.FindOrAddExtension<FOdysseyLayerStackRenderContext>().Overrides.FindOrAdd(Second->GetLayer()->GetRenderingId()).Lighttable = Lighttable;
     IOdysseyTextureRenderingAbility::FRenderFunction Draw;
-    TestTrue(TEXT("Build lighttable with overrides"), Animation->BuildRenderPipeline(FFrameNumber(2), EOdysseyRenderingType::Editor, Draw, {}, {}, &Context));
+    TestTrue(TEXT("Build lighttable with overrides"), Animation->BuildRenderPipeline(Draw, {}, &Context));
     TestEqual(TEXT("Preview excluded from lighttable by default"), DecoratorCalls, 0);
     Context.FindOrAddExtension<FOdysseyLayerStackRenderContext>().Overrides.FindOrAdd(First->GetRenderingId()).bApplyToLighttable = true;
     FOdysseyAnimationRenderContext& AnimationContext = Context.FindOrAddExtension<FOdysseyAnimationRenderContext>();
     AnimationContext.Frame = FFrameNumber(2);
-    TestTrue(TEXT("Build lighttable relative to context frame"), Animation->BuildRenderPipeline(FFrameNumber(0), EOdysseyRenderingType::Editor, Draw, {}, {}, &Context));
+    TestTrue(TEXT("Build lighttable relative to context frame"), Animation->BuildRenderPipeline(Draw, {}, &Context));
     TestEqual(TEXT("Lighttable decorator resolved exactly once"), DecoratorCalls, 1);
     TestFalse(TEXT("Asset lighttable remains disabled"), Second->GetLayer()->GetLighttable().bIsActivated);
     TStrongObjectPtr<UTextureRenderTarget2D> Target(NewObject<UTextureRenderTarget2D>());
     Target->InitCustomFormat(73, 67, PF_A32B32G32R32F, true);
     Target->UpdateResourceImmediate(true);
-    Animation->Render_GameThread(Target.Get(), FFrameNumber(0), EOdysseyRenderingType::Render, {}, &Context);
+    Animation->Render_GameThread(Target.Get(), FFrameNumber(0), EOdysseyRenderingType::Render, &Context);
     Context.Overrides.Empty(); // Submitted commands must own the resolved preview.
     FlushRenderingCommands();
     TArray<FLinearColor> Pixels;

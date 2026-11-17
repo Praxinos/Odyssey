@@ -139,10 +139,7 @@ UOdysseyTextureLayerImageVector::PostInitProperties()
 
 bool
 UOdysseyTextureLayerImageVector::BuildRenderPipelineInternal(
-    FFrameNumber iFrame,
-    uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
-    const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
     const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
@@ -161,7 +158,7 @@ UOdysseyTextureLayerImageVector::BuildRenderPipelineInternal(
     }
 #endif
 
-    return Super::BuildRenderPipelineInternal(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents, RenderContext);
+    return Super::BuildRenderPipelineInternal(oRenderFunction, iParents, RenderContext);
 }
 
 void

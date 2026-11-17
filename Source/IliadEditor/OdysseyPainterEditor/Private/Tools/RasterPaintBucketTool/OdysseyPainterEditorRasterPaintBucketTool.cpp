@@ -24,6 +24,7 @@
 #include "SOdysseySinglePropertyView.h"
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
+#include "OdysseyRenderContext.h"
 #include "OdysseyPixelFormat.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "ULISLoaderModule.h"
@@ -687,17 +688,13 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetForegroundLayersBlock() const
     FIntRect rect = layerStack->GetDefaultRenderRect();
     renderTarget->InitAutoFormat(rect.Width(), rect.Height());
 
-    layerStack->Render_GameThread(
-        renderTarget.Get(),
-        currentFrame,
-        EOdysseyRenderingType::Render,
-        IOdysseyTextureRenderingAbility::FCanRenderFunction::CreateLambda(
-            [layersToExclude](const IOdysseyTextureRenderingAbility* iAbility, TArray<const IOdysseyTextureRenderingAbility*> iParents)
-            {
-                return !layersToExclude.Contains(iAbility);
-            }
-        )
-    );
+    FOdysseyRenderContext RenderContext;
+    RenderContext.Filter = [layersToExclude](const IOdysseyTextureRenderingAbility& Ability,
+        const TArray<const IOdysseyTextureRenderingAbility*>& Parents)
+    {
+        return !layersToExclude.Contains(&Ability);
+    };
+    layerStack->Render_GameThread(renderTarget.Get(), currentFrame, EOdysseyRenderingType::Render, &RenderContext);
 
     FImage OutImage;
     if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
@@ -733,17 +730,13 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetBackgroundLayersBlock() const
     FIntRect rect = layerStack->GetDefaultRenderRect();
     renderTarget->InitAutoFormat(rect.Width(), rect.Height());
 
-    layerStack->Render_GameThread(
-        renderTarget.Get(),
-        currentFrame,
-        EOdysseyRenderingType::Render,
-        IOdysseyTextureRenderingAbility::FCanRenderFunction::CreateLambda(
-            [layersToExclude](const IOdysseyTextureRenderingAbility* iAbility, TArray<const IOdysseyTextureRenderingAbility*> iParents)
-            {
-                return !layersToExclude.Contains(iAbility);
-            }
-        )
-    );
+    FOdysseyRenderContext RenderContext;
+    RenderContext.Filter = [layersToExclude](const IOdysseyTextureRenderingAbility& Ability,
+        const TArray<const IOdysseyTextureRenderingAbility*>& Parents)
+    {
+        return !layersToExclude.Contains(&Ability);
+    };
+    layerStack->Render_GameThread(renderTarget.Get(), currentFrame, EOdysseyRenderingType::Render, &RenderContext);
 
     FImage OutImage;
     if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))

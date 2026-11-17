@@ -1313,13 +1313,12 @@ UOdysseyLayer::SetCellsOffsetInteractive(float Value)
 
 bool
 UOdysseyLayer::BuildRenderPipelineInternal(
-    FFrameNumber iFrame,
-    uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
-    const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
     const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
+    const FFrameNumber iFrame = RenderContext ? RenderContext->Frame : FFrameNumber(0);
+    const uint64 iType = RenderContext ? RenderContext->Type : EOdysseyRenderingType::Render;
     const FOdysseyRenderOverride* ContentOverride = RenderContext ? RenderContext->Find(*this) : nullptr;
     IOdysseyTextureRenderingAbility::FRenderFunction renderFunction;
     if (ContentOverride && ContentOverride->ContentReplacement)
@@ -1328,7 +1327,7 @@ UOdysseyLayer::BuildRenderPipelineInternal(
     }
     else if ( bCanHaveChildren )
     {
-        if (!BuildRenderChildrenPipeline(iFrame,iType,renderFunction, iCanRenderFunction, iParents, RenderContext))
+        if (!BuildRenderChildrenPipeline(iFrame,iType,renderFunction, iParents, RenderContext))
             return false;
     }
     else
@@ -1351,9 +1350,9 @@ UOdysseyLayer::BuildRenderPipelineInternal(
         if ( !cell )
             return false;
 
-        frame -= cell->GetFrameRange().GetLowerBoundValue();
-
-        if(!cell->BuildRenderPipeline( frame, iType, renderFunction, iCanRenderFunction, iParents, RenderContext ))
+        FOdysseyRenderContext CellContext = RenderContext ? *RenderContext : FOdysseyRenderContext();
+        CellContext.Frame = FFrameNumber(frame);
+        if(!cell->BuildRenderPipeline(renderFunction, iParents, &CellContext))
             return false;
     }
 
@@ -1371,7 +1370,7 @@ UOdysseyLayer::BuildRenderPipelineInternal(
 
     IOdysseyTextureRenderingAbility::FRenderFunction lighttableRenderFunction;
     if (showLighttable)
-        showLighttable = BuildLighttableRenderPipeline(iFrame, iType, lighttableRenderFunction, iCanRenderFunction, iParents, RenderContext);
+        showLighttable = BuildLighttableRenderPipeline(iFrame, iType, lighttableRenderFunction, iParents, RenderContext);
 
     oRenderFunction = [this, renderFunction, showLighttable, lighttablePosition, lighttableRenderFunction](
             FRDGBuilder& iGraphBuilder,
@@ -1494,7 +1493,6 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
     FFrameNumber iFrame,
     uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
-    const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
     const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
@@ -1502,6 +1500,7 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
     const FOdysseyLayerStackRenderOverride* LayerOverride = LayerContext ? LayerContext->Find(GetRenderingId()) : nullptr;
     const FOdysseyLighttable EffectiveLighttable = LayerOverride && LayerOverride->Lighttable ? *LayerOverride->Lighttable : Lighttable;
     FOdysseyRenderContext LighttableContext = RenderContext ? *RenderContext : FOdysseyRenderContext();
+    LighttableContext.Type = EOdysseyRenderingType::Render;
     FOdysseyLayerStackRenderContext& LighttableLayerContext = LighttableContext.FindOrAddExtension<FOdysseyLayerStackRenderContext>();
     LighttableLayerContext.bLighttablePass = true;
     for (TMap<FGuid, FOdysseyRenderOverride>::TIterator OverrideIt = LighttableContext.Overrides.CreateIterator(); OverrideIt; ++OverrideIt)
@@ -1535,10 +1534,10 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                 UOdysseyLayerCell* keyCell = GetCells()[keyCellIndex];
                 if (keyCell)
                 {
-                    int frame = iFrame.Value;
-                    frame -= cell->GetFrameRange().GetLowerBoundValue();
+                    const int frame = iFrame.Value - cell->GetFrameRange().GetLowerBoundValue();
+                    LighttableContext.Frame = FFrameNumber(keyCell->GetFrameRange().GetLowerBoundValue() + frame);
                     IOdysseyTextureRenderingAbility::FRenderFunction renderFunction;
-                    if (keyCell->BuildRenderPipeline(frame, EOdysseyRenderingType::Render, renderFunction, iCanRenderFunction, iParents, &LighttableContext))
+                    if (keyCell->BuildRenderPipeline(renderFunction, iParents, &LighttableContext))
                     {
                         keysRenderParams.Add(
                             {
@@ -1562,10 +1561,10 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                 UOdysseyLayerCell* keyCell = GetCells()[keyCellIndex];
                 if (keyCell)
                 {
-                    int frame = iFrame.Value;
-                    frame -= cell->GetFrameRange().GetLowerBoundValue();
+                    const int frame = iFrame.Value - cell->GetFrameRange().GetLowerBoundValue();
+                    LighttableContext.Frame = FFrameNumber(keyCell->GetFrameRange().GetLowerBoundValue() + frame);
                     IOdysseyTextureRenderingAbility::FRenderFunction renderFunction;
-                    if (keyCell->BuildRenderPipeline(frame, EOdysseyRenderingType::Render, renderFunction, iCanRenderFunction, iParents, &LighttableContext))
+                    if (keyCell->BuildRenderPipeline(renderFunction, iParents, &LighttableContext))
                     {
                         keysRenderParams.Add(
                             {
@@ -1672,7 +1671,6 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
     FFrameNumber iFrame,
     uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
-    const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
     const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
@@ -1701,7 +1699,7 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
             continue;
 
         IOdysseyTextureRenderingAbility::FRenderFunction childRenderFunction;
-        if (child->BuildRenderPipeline(iFrame, iType, childRenderFunction, iCanRenderFunction, iParents, RenderContext))
+        if (child->BuildRenderPipeline(childRenderFunction, iParents, RenderContext))
         {
             float opacity = LayerOverride && LayerOverride->Opacity.IsSet() ? LayerOverride->Opacity.GetValue() : child->GetOpacity();
 

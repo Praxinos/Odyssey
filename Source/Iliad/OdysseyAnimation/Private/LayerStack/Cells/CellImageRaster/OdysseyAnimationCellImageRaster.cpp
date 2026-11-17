@@ -74,10 +74,7 @@ UOdysseyAnimationCellImageRaster::GetDefaultRenderRect() const
 
 bool
 UOdysseyAnimationCellImageRaster::BuildRenderPipelineInternal(
-    FFrameNumber iFrame,
-    uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
-    const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
     const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
@@ -86,7 +83,7 @@ UOdysseyAnimationCellImageRaster::BuildRenderPipelineInternal(
         && const_cast<UOdysseyAnimationCellImageRaster*>(this)->UpdateTiledImage())
     {
         const UOdysseyTiledImage* Image = GetTiledImage();
-        const FMatrix CellTransform = (iType & EOdysseyRenderingType::OutOfPegs) ? OutOfPegsTransform() : FMatrix::Identity;
+        const FMatrix CellTransform = (RenderContext && (RenderContext->Type & EOdysseyRenderingType::OutOfPegs)) ? OutOfPegsTransform() : FMatrix::Identity;
         const FIntPoint Size = TiledImageSize;
         // Reassemble using the legacy texture's sampling representation. In particular an
         // sRGB render target encodes the stored linear tiles before hardware interpolation.
@@ -113,7 +110,7 @@ UOdysseyAnimationCellImageRaster::BuildRenderPipelineInternal(
         return true;
     }
 #endif
-    return Super::BuildRenderPipelineInternal(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents, RenderContext);
+    return Super::BuildRenderPipelineInternal(oRenderFunction, iParents, RenderContext);
 }
 
 #if WITH_EDITOR

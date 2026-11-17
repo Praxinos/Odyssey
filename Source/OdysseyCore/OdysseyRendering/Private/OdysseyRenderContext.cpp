@@ -3,7 +3,7 @@
 #include "OdysseyRenderContext.h"
 
 FOdysseyRenderContext::FOdysseyRenderContext(const FOdysseyRenderContext& Other)
-    : Overrides(Other.Overrides), Filter(Other.Filter)
+    : Overrides(Other.Overrides), Filter(Other.Filter), Type(Other.Type), Frame(Other.Frame)
 {
     for (const TPair<FName, TUniquePtr<IOdysseyRenderContextExtension>>& Entry : Other.Extensions)
     {
@@ -17,6 +17,8 @@ FOdysseyRenderContext& FOdysseyRenderContext::operator=(const FOdysseyRenderCont
     {
         Overrides = Other.Overrides;
         Filter = Other.Filter;
+        Type = Other.Type;
+        Frame = Other.Frame;
         Extensions.Empty();
         for (const TPair<FName, TUniquePtr<IOdysseyRenderContextExtension>>& Entry : Other.Extensions)
         {

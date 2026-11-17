@@ -36,7 +36,7 @@ TArray<FLinearColor> Read(IOdysseyTextureRenderingAbility* Renderer, const FOdys
     TStrongObjectPtr<UTextureRenderTarget2D> Target(NewObject<UTextureRenderTarget2D>());
     Target->InitCustomFormat(73, 67, PF_A32B32G32R32F, true);
     Target->UpdateResourceImmediate(true);
-    Renderer->Render_GameThread(Target.Get(), FFrameNumber(0), EOdysseyRenderingType::Render, {}, Context);
+    Renderer->Render_GameThread(Target.Get(), FFrameNumber(0), EOdysseyRenderingType::Render, Context);
     FlushRenderingCommands();
     TArray<FLinearColor> Pixels;
     FReadSurfaceDataFlags Flags(RCM_MinMax);

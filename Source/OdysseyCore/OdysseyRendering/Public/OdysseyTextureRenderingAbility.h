@@ -28,8 +28,6 @@ class ODYSSEYRENDERING_API IOdysseyTextureRenderingAbility : public IOdysseyRend
     GENERATED_BODY()
 
 public:
-    DECLARE_DELEGATE_RetVal_TwoParams(bool, FCanRenderFunction, const IOdysseyTextureRenderingAbility* /*iAbility*/, TArray<const IOdysseyTextureRenderingAbility*> /* iParents (from highest to lowest) */);
-
     typedef TFunction< void(
         FRDGBuilder& /*iGraphBuilder*/,
         ERHIFeatureLevel::Type /*iFeatureLevel*/,
@@ -60,18 +58,16 @@ public:
     void RenderRectAtRect_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const;
 
 public:
-    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, FCanRenderFunction iCanRenderFunction = FCanRenderFunction(), const FOdysseyRenderContext* RenderContext = nullptr) const;
-    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, FCanRenderFunction iCanRenderFunction = FCanRenderFunction(), const FOdysseyRenderContext* RenderContext = nullptr) const;
-    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntPoint& iPos, FCanRenderFunction iCanRenderFunction = FCanRenderFunction(), const FOdysseyRenderContext* RenderContext = nullptr) const;
-    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntRect& iDstRect, FCanRenderFunction iCanRenderFunction = FCanRenderFunction(), const FOdysseyRenderContext* RenderContext = nullptr) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FOdysseyRenderContext* RenderContext = nullptr) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FOdysseyRenderContext* RenderContext = nullptr) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntPoint& iPos, const FOdysseyRenderContext* RenderContext = nullptr) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntRect& iDstRect, const FOdysseyRenderContext* RenderContext = nullptr) const;
 
-    void RenderAndResize_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, FCanRenderFunction iCanRenderFunction = FCanRenderFunction(), const FOdysseyRenderContext* RenderContext = nullptr) const;
-    void RenderAndResize_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntRect& iDstRect, FCanRenderFunction iCanRenderFunction = FCanRenderFunction(), const FOdysseyRenderContext* RenderContext = nullptr) const;
+    void RenderAndResize_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FOdysseyRenderContext* RenderContext = nullptr) const;
+    void RenderAndResize_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntRect& iDstRect, const FOdysseyRenderContext* RenderContext = nullptr) const;
 
-    bool BuildRenderPipeline(
-        FFrameNumber iFrame, uint64 iType, FRenderFunction& oRenderFunction,
-        const FCanRenderFunction& iCanRenderFunction = FCanRenderFunction(),
-        TArray<const IOdysseyTextureRenderingAbility*> iParents = {},
+    bool BuildRenderPipeline(FRenderFunction& OutRenderFunction,
+        TArray<const IOdysseyTextureRenderingAbility*> Parents = {},
         const FOdysseyRenderContext* RenderContext = nullptr) const;
 
 public:
@@ -83,10 +79,7 @@ public:
 protected:
     virtual bool BuildsCompositeContent() const { return false; }
     virtual bool BuildRenderPipelineInternal(
-        FFrameNumber iFrame,
-        uint64 iType,
         FRenderFunction& oRenderFunction,
-        const FCanRenderFunction& iCanRenderFunction,
         const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
     ) const = 0;
 };

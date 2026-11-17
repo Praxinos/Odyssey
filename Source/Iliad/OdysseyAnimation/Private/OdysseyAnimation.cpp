@@ -184,31 +184,32 @@ UOdysseyAnimation::GetDefaultRenderRect() const
 
 bool
 UOdysseyAnimation::BuildRenderPipelineInternal(
-    FFrameNumber iFrame,
-    uint64 iType,
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
-    const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
     const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
     const FOdysseyAnimationRenderContext* AnimationContext = RenderContext ? RenderContext->GetExtension<FOdysseyAnimationRenderContext>() : nullptr;
-    const FFrameNumber RenderFrame = AnimationContext && AnimationContext->Frame.IsSet() ? AnimationContext->Frame.GetValue() : iFrame;
+    FOdysseyRenderContext AnimationRequest = RenderContext ? *RenderContext : FOdysseyRenderContext();
+    if (AnimationContext && AnimationContext->Frame.IsSet())
+    {
+        AnimationRequest.Frame = AnimationContext->Frame.GetValue();
+    }
 #if WITH_EDITOR
     if ( !mLayerStack )
         return false;
 
-    return mLayerStack->BuildRenderPipeline(RenderFrame, iType, oRenderFunction, iCanRenderFunction, iParents, RenderContext);
+    return mLayerStack->BuildRenderPipeline(oRenderFunction, iParents, &AnimationRequest);
 #else
     if ( PreserveLayerStackAtRuntime )
     {
         if ( !mLayerStack )
             return false;
 
-        return mLayerStack->BuildRenderPipeline(RenderFrame, iType, oRenderFunction, iCanRenderFunction, iParents, RenderContext);
+        return mLayerStack->BuildRenderPipeline(oRenderFunction, iParents, &AnimationRequest);
     }
 
     UTexture2D* srcTexture2D = nullptr;
-    int frameIndex = GetFrameIndexAtFrame(RenderFrame.Value);
+    int frameIndex = GetFrameIndexAtFrame(AnimationRequest.Frame.Value);
     if (frameIndex != INDEX_NONE)
     {
         if (Frames[frameIndex].Texture)
