@@ -7,7 +7,8 @@
 
 #include "OdysseyAnimationFactory.h"
 #include "OdysseyAnimationLayerImageRaster.h"
-#include "OdysseyAnimationUtils.h"
+#include "OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationCell.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyAnimationEditorFunctionLibrary"
 
@@ -49,19 +50,30 @@ UOdysseyAnimationEditorFunctionLibrary::CreateAnimationAsset(FString AssetName, 
 UOdysseyAnimation*
 UOdysseyAnimationEditorFunctionLibrary::GetLayerStackAnimation(UOdysseyLayerStack* Layerstack)
 {
-    return Odyssey::AnimationUtils::GetLayerStackAnimation(Layerstack);
+    UOdysseyAnimationLayerStack* AnimationLayerStack = Cast<UOdysseyAnimationLayerStack>(Layerstack);
+    if (!IsValid(AnimationLayerStack))
+        return nullptr;
+
+    return AnimationLayerStack->GetAnimation();
 }
 
 UOdysseyAnimation*
 UOdysseyAnimationEditorFunctionLibrary::GetLayerAnimation(UOdysseyLayer* Layer)
 {
-    return Odyssey::AnimationUtils::GetLayerAnimation(Layer);
+    UOdysseyAnimationLayer* AnimationLayer = Cast<UOdysseyAnimationLayer>(Layer);
+    if (!IsValid(AnimationLayer))
+        return nullptr;
+
+    return AnimationLayer->GetAnimation();
 }
 
 UOdysseyAnimation*
 UOdysseyAnimationEditorFunctionLibrary::GetCellAnimation(UOdysseyAnimationCell* Cell)
 {
-    return Odyssey::AnimationUtils::GetCellAnimation(Cell);
+    if (!IsValid(Cell))
+        return nullptr;
+
+    return Cell->GetAnimation();
 }
 
 #undef LOCTEXT_NAMESPACE

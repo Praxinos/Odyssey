@@ -6,7 +6,6 @@
 #include "MovieSceneTimeHelpers.h"
 
 #include "OdysseyAnimation.h"
-#include "OdysseyAnimationUtils.h"
 #include "OdysseyLayer.h"
 #include "OdysseyAnimationCell.h"
 
@@ -216,7 +215,7 @@ FAnimationCut::GetAnimation()
         if( !entry.GetCellReference() )
             continue;
 
-        UOdysseyAnimation* animation = ::Odyssey::AnimationUtils::GetCellAnimation(entry.GetCellReference());
+        UOdysseyAnimation* animation = entry.GetCellReference()->GetAnimation();
         if (animation)
             return animation;
     }
