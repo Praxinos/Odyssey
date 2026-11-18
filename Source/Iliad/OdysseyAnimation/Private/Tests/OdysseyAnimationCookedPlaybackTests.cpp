@@ -15,6 +15,36 @@
 #include "OdysseyAnimationCellImageRaster.h"
 #include "OdysseyAnimationRenderContext.h"
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationRuntimeBoundsTest, "Odyssey.Animation.Bounds.Runtime",
+    EAutomationTestFlags::ClientContext | EAutomationTestFlags::EngineFilter)
+
+bool FOdysseyAnimationRuntimeBoundsTest::RunTest(const FString& Parameters)
+{
+    TStrongObjectPtr<UOdysseyAnimation> Animation(NewObject<UOdysseyAnimation>());
+    for (const FName PropertyName : {FName(TEXT("LeftBoundMode")), FName(TEXT("RightBoundMode")), FName(TEXT("LeftBound")), FName(TEXT("RightBound"))})
+    {
+        TestNull(TEXT("Runtime has no editor bounds property"), FindFProperty<FProperty>(Animation->GetClass(), PropertyName));
+    }
+    for (const FName FunctionName : {FName(TEXT("GetLeftBoundMode")), FName(TEXT("GetRightBoundMode")),
+        FName(TEXT("GetLeftBoundValue")), FName(TEXT("GetRightBoundValue")), FName(TEXT("SetLeftBoundMode")),
+        FName(TEXT("SetRightBoundMode")), FName(TEXT("SetLeftBoundValue")), FName(TEXT("SetRightBoundValue"))})
+    {
+        TestNull(TEXT("Runtime has no editor bounds function"), Animation->FindFunction(FunctionName));
+    }
+    TestEqual(TEXT("Animation without baked images is empty"), Animation->GetFrameCount(), 0);
+    const FArrayProperty* FramesProperty = FindFProperty<FArrayProperty>(Animation->GetClass(), TEXT("Frames"));
+    if (!TestNotNull(TEXT("Runtime baked frames property"), FramesProperty)) { return false; }
+    TArray<FOdysseyAnimationFrame>& Frames = *FramesProperty->ContainerPtrToValuePtr<TArray<FOdysseyAnimationFrame>>(Animation.Get());
+    Frames.SetNum(2);
+    Frames[0].Exposure = 2;
+    Frames[1].Exposure = 3;
+    TestNull(TEXT("Runtime frame range needs no layer stack"), Animation->GetLayerStack());
+    TestTrue(TEXT("Runtime frame range follows baked exposures"), Animation->GetFrameRange() == FInt32Range::Inclusive(0, 4));
+    TestEqual(TEXT("Runtime frame count follows baked exposures"), Animation->GetFrameCount(), 5);
+    TestEqual(TEXT("Runtime duration follows baked exposures"), Animation->GetDuration(), FTimespan::FromSeconds(5.0 / Animation->GetFramesPerSecond()) - FTimespan(1));
+    return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationCookedPlaybackTest, "Odyssey.Animation.TiledImage.CookedPlayback",
     EAutomationTestFlags::ClientContext | EAutomationTestFlags::EngineFilter)
 

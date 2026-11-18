@@ -209,6 +209,57 @@ bool FOdysseyAnimationTiledPartialTest::RunTest(const FString& Parameters)
     return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationBoundsTest, "Odyssey.Animation.Bounds.Editor", Odyssey::AnimationTiledTests::Flags)
+bool FOdysseyAnimationBoundsTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::AnimationTiledTests;
+    FScopedDisableValidateOnSave DisableValidation;
+    const FString Id = FGuid::NewGuid().ToString(EGuidFormats::Digits);
+    const FString Mount = TEXT("/OdysseyAnimationBoundsTest/");
+    const FString Directory = FPaths::ConvertRelativePathToFull(FPaths::ProjectPluginsDir() / TEXT("Odyssey-Plugin/Intermediate/OdysseyAnimationTests/"));
+    FPackageName::RegisterMountPoint(Mount, Directory + TEXT("/"));
+    ON_SCOPE_EXIT { FPackageName::UnRegisterMountPoint(Mount, Directory + TEXT("/")); };
+    UPackage* Package = CreatePackage(*(Mount + Id));
+    TStrongObjectPtr<UOdysseyAnimation> Animation(MakeAnimation(Package, EOdysseyAnimationFormat::BGRA8));
+    TestTrue(TEXT("Automatic bounds follow cell exposures"), Animation->GetFrameRange() == FInt32Range::Inclusive(0, 4));
+    for (const FName PropertyName : {FName(TEXT("LeftBoundMode")), FName(TEXT("RightBoundMode")), FName(TEXT("LeftBound")), FName(TEXT("RightBound"))})
+    {
+        const FProperty* Property = FindFProperty<FProperty>(Animation->GetClass(), PropertyName);
+        if (TestNotNull(TEXT("Editor bounds property exists"), Property))
+        {
+            TestTrue(TEXT("Bounds property is stripped when cooking"), Property->HasAnyPropertyFlags(CPF_EditorOnly));
+        }
+    }
+    Animation->SetLeftBoundMode(EOdysseyAnimationBoundMode::Manual);
+    Animation->SetRightBoundMode(EOdysseyAnimationBoundMode::Manual);
+    Animation->SetLeftBoundValue(99);
+    TestEqual(TEXT("Left bound is clamped to the right bound"), Animation->GetLeftBoundValue(), 4);
+    Animation->SetLeftBoundValue(-1);
+    TestEqual(TEXT("Left bound is clamped to zero"), Animation->GetLeftBoundValue(), 0);
+    Animation->SetLeftBoundValue(1);
+    Animation->SetRightBoundValue(3);
+    TestTrue(TEXT("Manual bounds trim the animation"), Animation->GetFrameRange() == FInt32Range::Inclusive(1, 3));
+    const FString Filename = Directory / (Id + TEXT(".uasset"));
+    IFileManager::Get().MakeDirectory(*Directory, true);
+    ON_SCOPE_EXIT { IFileManager::Get().Delete(*Filename); };
+    FSavePackageArgs Args;
+    Args.TopLevelFlags = RF_Public;
+    Args.SaveFlags = SAVE_NoError;
+    if (!TestTrue(TEXT("Save animation with editor bounds"), UPackage::SavePackage(Package, Animation.Get(), *Filename, Args))) { return false; }
+    const FArrayProperty* FramesProperty = FindFProperty<FArrayProperty>(Animation->GetClass(), TEXT("Frames"));
+    if (!TestNotNull(TEXT("Baked frames property"), FramesProperty)) { return false; }
+    const TArray<FOdysseyAnimationFrame>& BakedFrames = *FramesProperty->ContainerPtrToValuePtr<TArray<FOdysseyAnimationFrame>>(Animation.Get());
+    if (!TestEqual(TEXT("Trimmed animation bakes both images"), BakedFrames.Num(), 2)) { return false; }
+    TestEqual(TEXT("First exposure is trimmed by the left bound"), BakedFrames[0].Exposure, 1);
+    TestEqual(TEXT("Second exposure is trimmed by the right bound"), BakedFrames[1].Exposure, 2);
+    TestNotNull(TEXT("First trimmed image is baked"), BakedFrames[0].Texture);
+    TestNotNull(TEXT("Second trimmed image is baked"), BakedFrames[1].Texture);
+    Animation->SetLeftBoundMode(EOdysseyAnimationBoundMode::Automatic);
+    Animation->SetRightBoundMode(EOdysseyAnimationBoundMode::Automatic);
+    TestTrue(TEXT("Automatic bounds restore the complete animation"), Animation->GetFrameRange() == FInt32Range::Inclusive(0, 4));
+    return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationTiledPersistenceTest, "Odyssey.Animation.TiledImage.Persistence", Odyssey::AnimationTiledTests::Flags)
 bool FOdysseyAnimationTiledPersistenceTest::RunTest(const FString& Parameters)
 {

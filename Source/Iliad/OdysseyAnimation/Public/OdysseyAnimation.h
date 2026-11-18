@@ -23,12 +23,14 @@ enum class EOdysseyAnimationFormat : uint8
     RGBAF UMETA(DisplayName = "RGBA F")
 };
 
+#if WITH_EDITORONLY_DATA
 UENUM()
 enum class EOdysseyAnimationBoundMode : uint8
 {
     Automatic,
     Manual
 };
+#endif
 
 USTRUCT()
 struct FOdysseyAnimationFrame
@@ -94,6 +96,7 @@ public:
     //Time range of the frame at iFrameIndex
     TRange<FTimespan> GetFrameTimeRange(int iFrameIndex) const; //TODO: find a better way to have this function, only used by Media and ViewportDrawingEditor
 
+#if WITH_EDITOR
     UFUNCTION(BlueprintPure, Category = "Odyssey|Animation")
     EOdysseyAnimationBoundMode GetLeftBoundMode() const;
 
@@ -118,7 +121,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Animation")
     void SetRightBoundValue(int iValue);
 
-#if WITH_EDITOR
 public:
     void OnLeftBoundModeChanged();
     void OnRightBoundModeChanged();
@@ -171,6 +173,7 @@ protected:
     UPROPERTY(BlueprintReadOnly, Category = "Odyssey|Animation", meta = (DisplayName = "Layer Stack", LoadBehavior = "LazyOnDemand"))
     TObjectPtr<UOdysseyLayerStack> mLayerStack;
 
+#if WITH_EDITORONLY_DATA
     UPROPERTY(EditAnywhere, Category="Odyssey|Animation")
     EOdysseyAnimationBoundMode LeftBoundMode = EOdysseyAnimationBoundMode::Automatic;
 
@@ -182,6 +185,7 @@ protected:
 
     UPROPERTY(EditAnywhere, Category="Odyssey|Animation", meta=(EditCondition="RightBoundMode != EOdysseyAnimationBoundMode::Automatic", EditConditionHides))
     int RightBound = 0;
+#endif
 
 public:
     UPROPERTY()

@@ -251,6 +251,7 @@ UOdysseyAnimation::CreateRenderingRenderTarget() const
     return renderTarget;
 }
 
+#if WITH_EDITOR
 EOdysseyAnimationBoundMode
 UOdysseyAnimation::GetLeftBoundMode() const
 {
@@ -313,9 +314,7 @@ UOdysseyAnimation::SetLeftBoundMode(EOdysseyAnimationBoundMode iMode)
     Modify();
     LeftBoundMode = iMode;
 
-#if WITH_EDITOR
     OnLeftBoundModeChanged();
-#endif
 }
 
 void
@@ -324,9 +323,7 @@ UOdysseyAnimation::SetRightBoundMode(EOdysseyAnimationBoundMode iMode)
     Modify();
     RightBoundMode = iMode;
 
-#if WITH_EDITOR
     OnRightBoundModeChanged();
-#endif
 }
 
 void
@@ -335,9 +332,7 @@ UOdysseyAnimation::SetLeftBoundValue(int iValue)
     Modify();
     LeftBound = iValue;
 
-#if WITH_EDITOR
     OnLeftBoundChanged();
-#endif
 }
 
 void
@@ -346,10 +341,9 @@ UOdysseyAnimation::SetRightBoundValue(int iValue)
     Modify();
     RightBound = iValue;
 
-#if WITH_EDITOR
     OnRightBoundChanged();
-#endif
 }
+#endif
 
 UOdysseyLayerStack*
 UOdysseyAnimation::GetLayerStack() const
