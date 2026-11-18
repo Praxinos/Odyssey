@@ -10,6 +10,10 @@
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationEditorFunctionLibrary.generated.h"
 
+class UOdysseyLayerStack;
+class UOdysseyLayer;
+class UOdysseyAnimationCell;
+
 UCLASS()
 class UOdysseyAnimationEditorFunctionLibrary : public UBlueprintFunctionLibrary
 {
@@ -18,4 +22,13 @@ class UOdysseyAnimationEditorFunctionLibrary : public UBlueprintFunctionLibrary
 public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Animation")
     static UOdysseyAnimation* CreateAnimationAsset(FString AssetName="Animation", FString PackagePath="/Game/", int Width=1920, int Height=1080, EOdysseyAnimationFormat Format=EOdysseyAnimationFormat::BGRA8, float FramesPerSecond=24.f, TSubclassOf<UOdysseyAnimationLayer> DefaultLayerClass=nullptr);
+
+    UFUNCTION(BlueprintPure, Category = "Odyssey|LayerStack", meta=(DisplayName="Get Animation", HidePin="Layerstack", DefaultToSelf="Layerstack"))
+    static UOdysseyAnimation* GetLayerStackAnimation(UOdysseyLayerStack* Layerstack);
+
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Layer", meta=(DisplayName="Get Animation", HidePin="Layer", DefaultToSelf="Layer"))
+    static UOdysseyAnimation* GetLayerAnimation(UOdysseyLayer* Layer);
+
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Cell", meta=(DisplayName="Get Animation", HidePin="Cell", DefaultToSelf="Cell"))
+    static UOdysseyAnimation* GetCellAnimation(UOdysseyAnimationCell* Cell);
 };

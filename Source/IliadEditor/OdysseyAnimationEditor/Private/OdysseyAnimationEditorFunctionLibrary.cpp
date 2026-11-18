@@ -2,9 +2,12 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyAnimationEditorFunctionLibrary.h"
+
 #include "AssetToolsModule.h"
+
 #include "OdysseyAnimationFactory.h"
 #include "OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyAnimationUtils.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyAnimationEditorFunctionLibrary"
 
@@ -41,6 +44,24 @@ UOdysseyAnimationEditorFunctionLibrary::CreateAnimationAsset(FString AssetName, 
     );
 
     return animation;
+}
+
+UOdysseyAnimation*
+UOdysseyAnimationEditorFunctionLibrary::GetLayerStackAnimation(UOdysseyLayerStack* Layerstack)
+{
+    return Odyssey::AnimationUtils::GetLayerStackAnimation(Layerstack);
+}
+
+UOdysseyAnimation*
+UOdysseyAnimationEditorFunctionLibrary::GetLayerAnimation(UOdysseyLayer* Layer)
+{
+    return Odyssey::AnimationUtils::GetLayerAnimation(Layer);
+}
+
+UOdysseyAnimation*
+UOdysseyAnimationEditorFunctionLibrary::GetCellAnimation(UOdysseyAnimationCell* Cell)
+{
+    return Odyssey::AnimationUtils::GetCellAnimation(Cell);
 }
 
 #undef LOCTEXT_NAMESPACE
