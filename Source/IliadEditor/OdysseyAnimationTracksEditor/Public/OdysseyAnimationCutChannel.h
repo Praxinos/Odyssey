@@ -104,7 +104,7 @@ struct FOdysseyAnimationCutChannel : public FMovieSceneChannel
      * @param InTime     The time to evaluate at
      * @return A pointer to the string, or nullptr
      */
-    ODYSSEYANIMATIONTRACKS_API const FOdysseyAnimationCutValue* Evaluate(FFrameTime InTime) const;
+    ODYSSEYANIMATIONTRACKSEDITOR_API const FOdysseyAnimationCutValue* Evaluate(FFrameTime InTime) const;
 
     /**
      * Evaluate this channel
@@ -113,15 +113,15 @@ struct FOdysseyAnimationCutChannel : public FMovieSceneChannel
      * @param OutValue   A value to receive the result
      * @return true if the channel was evaluated successfully, false otherwise
      */
-    ODYSSEYANIMATIONTRACKS_API bool Evaluate( FFrameTime InTime, FOdysseyAnimationCutValue& OutValue ) const;
+    ODYSSEYANIMATIONTRACKSEDITOR_API bool Evaluate( FFrameTime InTime, FOdysseyAnimationCutValue& OutValue ) const;
 
-    ODYSSEYANIMATIONTRACKS_API FKeyHandle FindPreviousKey( const TArray<FKeyHandle>& iKeyHandles );
-    ODYSSEYANIMATIONTRACKS_API FKeyHandle FindNextKey( const TArray<FKeyHandle>& iKeyHandles );
+    ODYSSEYANIMATIONTRACKSEDITOR_API FKeyHandle FindPreviousKey( const TArray<FKeyHandle>& iKeyHandles );
+    ODYSSEYANIMATIONTRACKSEDITOR_API FKeyHandle FindNextKey( const TArray<FKeyHandle>& iKeyHandles );
 
 protected:
-    friend class UOdysseyAnimationTimelineSection;
+    friend class UOdysseyAnimationTimelineSectionEditorData;
 
-    ODYSSEYANIMATIONTRACKS_API void Update( const TArray<FKeyHandle>& iKeyHandles, EPropertyChangeType::Type iChangeType );
+    ODYSSEYANIMATIONTRACKSEDITOR_API void Update( const TArray<FKeyHandle>& iKeyHandles, EPropertyChangeType::Type iChangeType );
 
 public:
     // ~ FMovieSceneChannel Interface

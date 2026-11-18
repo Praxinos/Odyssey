@@ -106,6 +106,7 @@ public class EposSequenceEditor : ModuleRules
                 "EposNote",
                 "EposPattern",
                 "OdysseyAnimationTracks",
+                "OdysseyAnimationTracksEditor",
                 "OdysseyAnimation",
                 "OdysseyLayerStack",
 

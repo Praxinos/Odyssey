@@ -65,6 +65,7 @@ namespace UnrealBuildTool.Rules
                     "OdysseyCoreEditor",
                     "OdysseyImaging",
                     "OdysseyLayerStack",
+                    "OdysseyRendering",
                     "OdysseyLayerStackEditor",
                     "OdysseyPainterEditor",
                     "OdysseyStyle",
@@ -72,6 +73,7 @@ namespace UnrealBuildTool.Rules
 
                     "Core",
                     "CoreUObject",
+                    "DataValidation",
                     "EditorWidgets",
                     "Engine",
                     "InputCore",

@@ -11,7 +11,7 @@ class UOdysseyAnimation;
 class UOdysseyAnimationCell;
 
 USTRUCT()
-struct ODYSSEYANIMATION_API FAnimationCutEntry
+struct ODYSSEYANIMATIONTRACKSEDITOR_API FAnimationCutEntry
 {
     GENERATED_BODY()
 
@@ -35,7 +35,7 @@ private:
 };
 
 USTRUCT()
-struct ODYSSEYANIMATION_API FAnimationCut
+struct ODYSSEYANIMATIONTRACKSEDITOR_API FAnimationCut
 {
     GENERATED_BODY()
 

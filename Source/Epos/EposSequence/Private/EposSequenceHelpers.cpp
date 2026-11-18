@@ -1025,59 +1025,9 @@ ShotSequenceHelpers::FindTimelineTrackAndSections( IMovieScenePlayer& iPlayer, U
     return result;
 }
 
-//static
-TArray<FFrameNumber>
-BoardSequenceHelpers::GetAllAnimationCutTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber )
-{
-    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
-    if( !result.mInnerSequence || result.mInnerSequence->IsA<UBoardSequence>() )
-        return TArray<FFrameNumber>();
 
-    return ShotSequenceHelpers::GetAllAnimationCutTimes( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
-}
 
-//static
-TArray<FFrameNumber>
-ShotSequenceHelpers::GetAllAnimationCutTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
-{
-    check( !iSequence || iSequence->IsA<UShotSequence>() );
 
-    TArray<FFrameNumber> times;
-
-    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
-    if( !moviescene )
-        return times;
-
-    TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( iPlayer, iSequence, iSequenceID );
-    if( animation_bindings.IsEmpty() )
-        return times;
-
-    for( FGuid animation_binding : animation_bindings )
-    {
-        FGuid child_binding_with_timeline = FindSingleChildBindingWithTrack<UOdysseyAnimationTimelineTrack>( moviescene, animation_binding );
-        if( !child_binding_with_timeline.IsValid() )
-            continue;
-
-        UOdysseyAnimationTimelineTrack* track = moviescene->FindTrack<UOdysseyAnimationTimelineTrack>( child_binding_with_timeline );
-        if( !ensure(track) )
-            continue;
-
-        for( auto section : track->GetAllSections() )
-        {
-            UOdysseyAnimationTimelineSection* section_timeline = Cast<UOdysseyAnimationTimelineSection>( section );
-            if( !ensure( section_timeline ) )
-                continue;
-
-            const FOdysseyAnimationCutChannel& channel = section_timeline->GetAnimationCutChannel();
-            for( auto time : channel.GetData().GetTimes() )
-                times.Add( time );
-        }
-    }
-
-    times.Sort();
-
-    return times;
-}
 
 
 bool
@@ -1691,63 +1641,9 @@ ShotSequenceHelpers::BuildAnimationsTransformChannelProxy( IMovieScenePlayer& iP
     return maps;
 }
 
-//static
-TMap<FGuid, FChannelProxyBySectionMap>
-BoardSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID )
-{
-    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
 
-    if( !result.mInnerSequence || result.mInnerSequence->IsA<UBoardSequence>() )
-        return TMap<FGuid, FChannelProxyBySectionMap>();
 
-    return ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
-}
 
-//static
-TMap<FGuid, FChannelProxyBySectionMap>
-ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
-{
-    TMap<FGuid, FChannelProxyBySectionMap> maps;
-
-    TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( iPlayer, iSequence, iSequenceID );
-
-    for( FGuid animation_binding : animation_bindings )
-    {
-        FChannelProxyBySectionMap map;
-
-        //---
-
-        FFindOrCreateTimelineResult result = FindTimelineTrackAndSections( iPlayer, iSequence, iSequenceID, animation_binding );
-
-        for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> animation_timeline_section : result.mSections )
-        {
-            FMovieSceneChannelProxyData ChannelIndirection;
-
-            //const FMovieSceneChannelEntry* ObjectPathChannelEntry = animation_timeline_section->GetChannelProxy().FindEntry( FMovieSceneObjectPathChannel::StaticStruct()->GetFName() );
-            //if( ObjectPathChannelEntry )
-            //{
-#if WITH_EDITOR
-                ChannelIndirection.Add( animation_timeline_section->GetAnimationCutChannel(), FMovieSceneChannelMetaData() );
-#else
-                ChannelIndirection.Add( animation_timeline_section->GetAnimationCutChannel() );
-#endif
-            //}
-
-            TSharedPtr<FMovieSceneChannelProxy> ChannelProxy = MakeShared<FMovieSceneChannelProxy>( MoveTemp( ChannelIndirection ) );
-
-            map.Add( animation_timeline_section, ChannelProxy );
-
-            // UDN: Hook into TransformSection::OnSignatureChangedEvent to invalidate this section's channel proxy if the transform is changed.
-            // Set the delegate to the whole subsequence, then every changes (even removing section) will call the it
-            //if( !camera_transform_section->OnSignatureChanged().IsBoundToObject( this ) )
-            //    camera_transform_section->OnSignatureChanged().AddUObject( this, &UMovieSceneCinematicBoardSection::HandleInvalidateChannelProxy );
-        }
-
-        maps.Add( animation_binding, map );
-    }
-
-    return maps;
-}
 
 //static
 TMap<FGuid, FChannelProxyBySectionMap>

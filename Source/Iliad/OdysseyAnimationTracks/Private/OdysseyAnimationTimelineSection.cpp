@@ -8,12 +8,7 @@
 #include "MovieSceneSequence.h"
 
 #include "OdysseyAnimation.h"
-#include "OdysseyAnimationCell.h"
 #include "OdysseyAnimationComponent.h"
-#include "OdysseyAnimationCut.h"
-#include "OdysseyAnimationLayer.h"
-#include "OdysseyLayer.h"
-#include "OdysseyLayerStack.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationTimelineSection)
 
@@ -21,7 +16,6 @@
 
 UOdysseyAnimationTimelineSection::UOdysseyAnimationTimelineSection(const FObjectInitializer& ObjInitializer)
     : Super(ObjInitializer)
-    , AnimationCutChannel( this )
 {
 }
 
@@ -42,126 +36,10 @@ UOdysseyAnimationTimelineSection::SetRange( const TRange<FFrameNumber>& iNewRang
 
 //---
 
-// During a copy/paste of a binding (actor) track:
-//
-// [during ue splash screen]
-//
-// Default object (section)
-// - Ctor
-// - PostInitProperties
-//
-//
-// [loading a board/shot sequence]
-//
-// Original object with its hierarchy (binding track + binding section)
-// - -------------------- sequence = SS_xxxx (GetOuter<MovieSceneSequence>())
-// - Ctor
-// - PostInitProperties
-// - -------------------- Animation = A_xxxx
-// - PostLoad()
-//
-//
-// [CTRL+C]
-//
-// Copy Object - /Engine/Transient
-// - Ctor
-// - PostInitProperties
-// - -------------------- Animation = A_xxxx
-// - PostDuplicate()
-// - PostLoad()
-//
-//
-// [CTRL+V]
-//
-// Paste Object - /Engine/Sequencer/Editor/Transient
-// - Ctor
-// - PostInitProperties
-// - PostEditImport
-// - -------------------- Animation = A_xxxx
-// - PostEditImport
-//
-//
-// [Ask to duplicate the actor if needed]
-//
-//
-// New Object - /Engine/Sequencer/Editor/Transient
-// - Ctor
-// - PostInitProperties
-// - PostEditImport
-// - -------------------- Animation = A_xxxx
-// - PostEditImport
-// - -------------------- sequence = SS_xxxx (GetOuter<MovieSceneSequence>()) (no more transient)
-// - OnBindingIDsUpdated
-//
-
-void UOdysseyAnimationTimelineSection::PostInitProperties() //override
-{
-    Super::PostInitProperties();
-
-    AnimationCutChannel.SetParentSection( this );
-}
-
-void UOdysseyAnimationTimelineSection::PostLoad() //override
-{
-    Super::PostLoad();
-
-    if( Animation )
-    {
-        Animation->OnRenderingChangedDelegate().AddUObject( this, &UOdysseyAnimationTimelineSection::OnAnimationChanged );
-
-        RebuildAnimationCutChannel();
-    }
-}
-
-void UOdysseyAnimationTimelineSection::PostEditImport() //override
-{
-    Super::PostEditImport();
-}
-
-void UOdysseyAnimationTimelineSection::PostDuplicate( bool bDuplicateForPIE ) //override
-{
-    Super::Super::PostDuplicate( bDuplicateForPIE );
-}
-
 void UOdysseyAnimationTimelineSection::OnBindingIDsUpdated( const TMap<UE::MovieScene::FFixedObjectBindingID, UE::MovieScene::FFixedObjectBindingID>& OldFixedToNewFixedMap, FMovieSceneSequenceID LocalSequenceID, TSharedRef<UE::MovieScene::FSharedPlaybackState> SharedPlaybackState ) //override
 {
-    Super::OnBindingIDsUpdated( OldFixedToNewFixedMap, LocalSequenceID, SharedPlaybackState );
-
-    if( ensure(Animation) )
-        Animation->OnRenderingChangedDelegate().AddUObject( this, &UOdysseyAnimationTimelineSection::OnAnimationChanged );
-
-    RebuildAnimationCutChannel();
-}
-
-#if WITH_EDITOR
-
-void UOdysseyAnimationTimelineSection::PreEditChange( FProperty* PropertyAboutToChange )
-{
-    if( PropertyAboutToChange && PropertyAboutToChange->GetFName() == GET_MEMBER_NAME_CHECKED( UOdysseyAnimationTimelineSection, Animation ) )
-    {
-        SetAnimation( nullptr );
-    }
-
-    Super::PreEditChange( PropertyAboutToChange );
-}
-
-void UOdysseyAnimationTimelineSection::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
-{
-    Super::PostEditChangeProperty( PropertyChangedEvent );
-
-    const FName PropertyName = PropertyChangedEvent.GetPropertyName();
-    if( PropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyAnimationTimelineSection, Animation ) )
-    {
-        SetAnimation( Animation );
-    }
-}
-
-#endif
-
-UOdysseyAnimationTimelineSection::FOnAnimationCutChannelChanged&
-UOdysseyAnimationTimelineSection::OnAnimationCutChannelChanged()
-{
-    return mOnAnimationCutChannelChanged;
+    Super::OnBindingIDsUpdated(OldFixedToNewFixedMap, LocalSequenceID, SharedPlaybackState);
+    MarkAsChanged();
 }
 
 //---
@@ -175,31 +53,6 @@ UOdysseyAnimationTimelineSection::CacheChannelProxy()
     FMovieSceneChannelProxyData Channels;
     ChannelProxy = MakeShared<FMovieSceneChannelProxy>(MoveTemp(Channels));
     return EMovieSceneChannelProxyType::Dynamic;
-}
-
-void
-UOdysseyAnimationTimelineSection::OnAnimationChanged( const FOdysseyRenderingChangedEvent& iEvent )
-{
-    if( iEvent.IsInteractive() )
-        return;
-
-    if( iEvent.GetType() != FOdysseyRenderingChangedEvent::kCompositionChange )
-        return;
-
-    if( !LockChannelRebuild )
-        RebuildAnimationCutChannel();
-}
-
-FOdysseyAnimationCutChannel&
-UOdysseyAnimationTimelineSection::GetAnimationCutChannel()
-{
-    return AnimationCutChannel;
-}
-
-const FOdysseyAnimationCutChannel&
-UOdysseyAnimationTimelineSection::GetAnimationCutChannel() const
-{
-    return AnimationCutChannel;
 }
 
 UOdysseyAnimation*
@@ -228,15 +81,8 @@ UOdysseyAnimationTimelineSection::GetStartFrameOffset() const
 void
 UOdysseyAnimationTimelineSection::SetAnimation(UOdysseyAnimation* iAnimation)
 {
-    if( Animation )
-        Animation->OnRenderingChangedDelegate().RemoveAll( this );
-
     Animation = iAnimation;
-
-    if( Animation )
-        Animation->OnRenderingChangedDelegate().AddUObject( this, &UOdysseyAnimationTimelineSection::OnAnimationChanged );
-
-    RebuildAnimationCutChannel();
+    MarkAsChanged();
 }
 
 void
@@ -258,92 +104,6 @@ UOdysseyAnimationTimelineSection::SetStartFrameOffset(FFrameNumber iOffset)
 {
     StartFrameOffset = iOffset;
     MarkAsChanged();
-}
-
-void
-UOdysseyAnimationTimelineSection::UpdateAnimationCutChannel( const TArray<FKeyHandle>& iKeyHandles, EPropertyChangeType::Type iChangeType )
-{
-    // When 'offseting' each animation cut (in Update()), the animation will be modified, which leads to call the delegate
-    // As the section is bind to this delegate, it will rebuild its channel which will modify all key handles
-    // Once done, all of the key handles here (during the second loop inside Update()) will be invalid
-    // So when this function Update() is called, don't rebuild the channel (as it is what this function does)
-    LockChannelRebuild = true;
-    AnimationCutChannel.Update( iKeyHandles, iChangeType );
-    LockChannelRebuild = false;
-}
-
-void
-UOdysseyAnimationTimelineSection::RebuildAnimationCutChannel()
-{
-    AnimationCutChannel.Reset();
-
-    UMovieSceneSequence* sequence = GetTypedOuter<UMovieSceneSequence>();
-    if( !sequence )
-        return;
-
-    UOdysseyLayerStack* layer_stack = GetAnimation() ? GetAnimation()->GetLayerStack() : nullptr;
-    TArray<UOdysseyLayer*> layers = layer_stack ? layer_stack->GetLayers() : TArray<UOdysseyLayer*>();
-    TSet<UOdysseyAnimationLayer*> animation_layers;
-    for( UOdysseyLayer* layer : layers )
-        animation_layers.Add( Cast<UOdysseyAnimationLayer>( layer ) );
-    animation_layers.Remove( nullptr );
-
-    for( UOdysseyAnimationLayer* layer : animation_layers )
-    {
-        UOdysseyAnimationCell* previous_cell = nullptr;
-        TArray<UOdysseyAnimationCell*> cells_unsafe = layer->GetCells();
-        TArray<UOdysseyAnimationCell*> cells = cells_unsafe.FilterByPredicate( []( const UOdysseyAnimationCell* iCell )
-                                                                           {
-                                                                               return !!iCell;
-                                                                           } );
-        for( UOdysseyAnimationCell* cell : cells )
-        {
-            {
-                FAnimationCutEntry animationcutentry( previous_cell, cell );
-                FFrameNumber frame_in_timeline = animationcutentry.GetFrameReference();
-                FFrameNumber frame_in_sequence = ConvertFrameFromTimelineToSequence( frame_in_timeline );
-
-                int32 index = AnimationCutChannel.GetData().FindKey( frame_in_sequence );
-                if( index != INDEX_NONE )
-                {
-                    AnimationCutChannel.GetData().GetValues()[index].Value.AddNewEntry( animationcutentry );
-                }
-                else
-                {
-                    FAnimationCut new_animationcut;
-                    new_animationcut.AddNewEntry( animationcutentry );
-
-                    AnimationCutChannel.GetData().AddKey( frame_in_sequence, FOdysseyAnimationCutValue{ new_animationcut } );
-                }
-            }
-
-            previous_cell = cell;
-
-            if( cell == cells.Last() )
-            {
-                FAnimationCutEntry animationcutentry( previous_cell, nullptr );
-                FFrameNumber frame_in_timeline = animationcutentry.GetFrameReference();
-                FFrameNumber frame_in_sequence = ConvertFrameFromTimelineToSequence( frame_in_timeline );
-
-                int32 index = AnimationCutChannel.GetData().FindKey( frame_in_sequence );
-                if( index != INDEX_NONE )
-                {
-                    AnimationCutChannel.GetData().GetValues()[index].Value.AddNewEntry( animationcutentry );
-                }
-                else
-                {
-                    FAnimationCut new_animationcut;
-                    new_animationcut.AddNewEntry( animationcutentry );
-
-                    AnimationCutChannel.GetData().AddKey( frame_in_sequence, FOdysseyAnimationCutValue{ new_animationcut } );
-                }
-            }
-        }
-    }
-
-    MarkAsChanged();
-    //BroadcastChanged();
-    mOnAnimationCutChannelChanged.Broadcast();
 }
 
 void
@@ -418,3 +178,15 @@ UOdysseyAnimationTimelineSection::ConvertFrameFromSequenceToTimeline( FFrameNumb
 }
 
 #undef LOCTEXT_NAMESPACE
+
+#if WITH_EDITORONLY_DATA
+UObject* UOdysseyAnimationTimelineSection::GetEditorData() const
+{
+    return EditorData;
+}
+
+void UOdysseyAnimationTimelineSection::SetEditorData(UObject* Data)
+{
+    EditorData = Data;
+}
+#endif
