@@ -79,9 +79,6 @@ UOdysseyAnimation::GetFrameRange() const
     #if WITH_EDITOR
     return FInt32Range::Inclusive(GetLeftBoundValue(), GetRightBoundValue());
     #else
-    if ( PreserveLayerStackAtRuntime )
-        return FInt32Range::Inclusive(GetLeftBoundValue(), GetRightBoundValue());
-
     int frameCount = 0;
     for (const FOdysseyAnimationFrame& frame : Frames)
     {
@@ -156,21 +153,11 @@ UOdysseyAnimation::GetRenderingComposition(uint64 iRenderType, int iFrameIndex) 
 
     idComposition.Append(mLayerStack->GetRenderingComposition(iRenderType, iFrameIndex));
 #else
-    if ( PreserveLayerStackAtRuntime )
-    {
-        if ( !mLayerStack )
-            return idComposition;
+    int frameIndex = GetFrameIndexAtFrame(iFrameIndex);
+    if ( frameIndex == INDEX_NONE )
+        return idComposition;
 
-        idComposition.Append(mLayerStack->GetRenderingComposition(iRenderType, iFrameIndex));
-    }
-    else
-    {
-        int frameIndex = GetFrameIndexAtFrame(iFrameIndex);
-        if ( frameIndex == INDEX_NONE )
-            return idComposition;
-
-        idComposition.Append(Frames[frameIndex].RenderingComposition);
-    }
+    idComposition.Append(Frames[frameIndex].RenderingComposition);
 #endif
 
     return idComposition;
@@ -196,14 +183,6 @@ UOdysseyAnimation::BuildRenderPipelineInternal(
 
     return mLayerStack->BuildRenderPipeline(oRenderFunction, iParents, RenderContext);
 #else
-    if ( PreserveLayerStackAtRuntime )
-    {
-        if ( !mLayerStack )
-            return false;
-
-        return mLayerStack->BuildRenderPipeline(oRenderFunction, iParents, RenderContext);
-    }
-
     UTexture2D* srcTexture2D = nullptr;
     int frameIndex = GetFrameIndexAtFrame(Frame.Value);
     if (frameIndex != INDEX_NONE)
@@ -513,8 +492,7 @@ UOdysseyAnimation::CollectSaveOverrides(FObjectCollectSaveOverridesContext SaveC
     Super::CollectSaveOverrides(SaveContext);
 
     if (SaveContext.IsCooking()
-        && !HasAnyFlags(RF_ArchetypeObject | RF_ClassDefaultObject)
-        && !PreserveLayerStackAtRuntime)
+        && !HasAnyFlags(RF_ArchetypeObject | RF_ClassDefaultObject))
     {
         FObjectSaveOverride ObjSaveOverride;
 
@@ -577,9 +555,6 @@ UOdysseyAnimation::PreSave(FObjectPreSaveContext SaveContext)
         return;
 
     Frames.Empty();
-
-    if ( PreserveLayerStackAtRuntime )
-        return;
 
     TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
     renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;

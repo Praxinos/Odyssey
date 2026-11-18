@@ -168,9 +168,6 @@ protected:
     UPROPERTY()
     TArray<FOdysseyAnimationFrame> Frames;
 
-    UPROPERTY(EditAnywhere, Category = "Odyssey|Animation", NonTransactional)
-    bool PreserveLayerStackAtRuntime = false;
-
     UPROPERTY(BlueprintReadOnly, Category = "Odyssey|Animation", meta = (DisplayName = "Layer Stack", LoadBehavior = "LazyOnDemand"))
     TObjectPtr<UOdysseyLayerStack> mLayerStack;
 

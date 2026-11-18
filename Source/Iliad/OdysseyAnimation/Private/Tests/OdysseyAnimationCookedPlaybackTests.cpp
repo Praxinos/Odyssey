@@ -29,38 +29,37 @@ bool FOdysseyAnimationCookedPlaybackTest::RunTest(const FString& Parameters)
     TestNull(TEXT("Runtime cell has no editor tiled image property"), FindFProperty<FProperty>(
         UOdysseyAnimationCellImageRaster::StaticClass(), TEXT("TiledImage")));
     TestNull(TEXT("Editor imaging module is not loaded"), FindObject<UClass>(nullptr, TEXT("/Script/OdysseyImaging.OdysseyTiledImage")));
-    for (bool bPreserve : {false, true})
+    const FString Name = TEXT("Baked");
+    const FString Path = TEXT("/Odyssey/Automation/Generated/") + Id + TEXT("/") + Name + TEXT(".") + Name;
+    TStrongObjectPtr<UOdysseyAnimation> Animation(LoadObject<UOdysseyAnimation>(nullptr, *Path));
+    if (!TestNotNull(TEXT("Load cooked animation"), Animation.Get())) { return false; }
+    TestEqual(TEXT("Cooked animation duration"), Animation->GetFrameCount(), 5);
+    TestNull(TEXT("Cooked animation has no layer stack"), Animation->GetLayerStack());
+    TStrongObjectPtr<UTextureRenderTarget2D> Target(NewObject<UTextureRenderTarget2D>());
+    Target->InitCustomFormat(73, 67, PF_A32B32G32R32F, true);
+    Target->UpdateResourceImmediate(true);
+    TArray<FLinearColor> FirstPixels;
+    TArray<FLinearColor> SecondPixels;
+    for (int32 Frame = 0; Frame < 5; ++Frame)
     {
-        const FString Name = bPreserve ? TEXT("Layers") : TEXT("Baked");
-        const FString Path = TEXT("/Odyssey/Automation/Generated/") + Id + TEXT("/") + Name + TEXT(".") + Name;
-        TStrongObjectPtr<UOdysseyAnimation> Animation(LoadObject<UOdysseyAnimation>(nullptr, *Path));
-        if (!TestNotNull(TEXT("Load cooked animation"), Animation.Get())) { return false; }
-        TestEqual(TEXT("Cooked animation duration"), Animation->GetFrameCount(), 5);
-        TestEqual(TEXT("Cooked layer stack policy"), Animation->GetLayerStack() != nullptr, bPreserve);
-        TStrongObjectPtr<UTextureRenderTarget2D> Target(NewObject<UTextureRenderTarget2D>());
-        Target->InitCustomFormat(73, 67, PF_A32B32G32R32F, true);
-        Target->UpdateResourceImmediate(true);
-        TArray<FLinearColor> FirstPixels;
-        TArray<FLinearColor> SecondPixels;
-        for (int32 Frame = 0; Frame < 5; ++Frame)
-        {
-            FOdysseyRenderContext RenderContext;
-            RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(Frame);
-            Animation->Render_GameThread(Target.Get(), EOdysseyRenderingType::Render, &RenderContext);
-            FlushRenderingCommands();
-            TArray<FLinearColor> Pixels;
-            FReadSurfaceDataFlags Flags(RCM_MinMax);
-            Flags.SetLinearToGamma(false);
-            TestTrue(TEXT("Read cooked frame pixels"), Target->GameThread_GetRenderTargetResource()->ReadLinearColorPixels(Pixels, Flags));
-            if (!TestEqual(TEXT("Cooked frame size"), Pixels.Num(), 73 * 67)) { return false; }
-            TestTrue(TEXT("Frame contains visible pixels"), Pixels[100].A > 0.9f);
-            if (Frame == 0) { FirstPixels = Pixels; }
-            if (Frame == 2) { SecondPixels = Pixels; }
-            if (Frame == 1) { TestTrue(TEXT("First exposure holds two frames"), Pixels[100].Equals(FirstPixels[100], 0.0001f)); }
-            if (Frame >= 3) { TestTrue(TEXT("Second exposure holds three frames"), Pixels[100].Equals(SecondPixels[100], 0.0001f)); }
-        }
-        TestFalse(TEXT("Switching cells changes the image"), FirstPixels[100].Equals(SecondPixels[100], 0.01f));
+        FOdysseyRenderContext RenderContext;
+        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(Frame);
+        Animation->Render_GameThread(Target.Get(), EOdysseyRenderingType::Render, &RenderContext);
+        FlushRenderingCommands();
+        TArray<FLinearColor> Pixels;
+        FReadSurfaceDataFlags Flags(RCM_MinMax);
+        Flags.SetLinearToGamma(false);
+        TestTrue(TEXT("Read cooked frame pixels"), Target->GameThread_GetRenderTargetResource()->ReadLinearColorPixels(Pixels, Flags));
+        if (!TestEqual(TEXT("Cooked frame size"), Pixels.Num(), 73 * 67)) { return false; }
+        TestTrue(TEXT("Frame contains visible pixels"), Pixels[100].A > 0.9f);
+        if (Frame == 0) { FirstPixels = Pixels; }
+        if (Frame == 2) { SecondPixels = Pixels; }
+        if (Frame == 1) { TestTrue(TEXT("First exposure holds two frames"), Pixels[100].Equals(FirstPixels[100], 0.0001f)); }
+        if (Frame >= 3) { TestTrue(TEXT("Second exposure holds three frames"), Pixels[100].Equals(SecondPixels[100], 0.0001f)); }
     }
+    TestFalse(TEXT("Switching cells changes the image"), FirstPixels[100].Equals(SecondPixels[100], 0.01f));
+    TestEqual(TEXT("Negative frame is outside baked animation"), Animation->GetFrameIndexAtFrame(-1), INDEX_NONE);
+    TestEqual(TEXT("Frame after the last exposure is outside baked animation"), Animation->GetFrameIndexAtFrame(5), INDEX_NONE);
     return true;
 }
 #endif

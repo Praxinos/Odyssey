@@ -221,73 +221,77 @@ bool FOdysseyAnimationTiledPersistenceTest::RunTest(const FString& Parameters)
     const FString Directory = FPaths::ConvertRelativePathToFull(FPaths::ProjectPluginsDir() / TEXT("Odyssey-Plugin/Intermediate/OdysseyAnimationTests/"));
     FPackageName::RegisterMountPoint(Mount, Directory + TEXT("/"));
     ON_SCOPE_EXIT { FPackageName::UnRegisterMountPoint(Mount, Directory + TEXT("/")); };
-    auto Switch = IConsoleManager::Get().FindConsoleVariable(TEXT("Odyssey.Animation.UseTiledRendering"));
+    IConsoleVariable* Switch = IConsoleManager::Get().FindConsoleVariable(TEXT("Odyssey.Animation.UseTiledRendering"));
     const int32 Previous = Switch->GetInt();
     ON_SCOPE_EXIT { Switch->Set(Previous); };
-    for (bool bPreserve : {false, true})
+    const FString Suffix = TEXT("Baked");
+    const FString PackageName = Mount + Id + Suffix;
+    UPackage* Package = CreatePackage(*PackageName);
+    TStrongObjectPtr<UOdysseyAnimation> Animation(MakeAnimation(Package, EOdysseyAnimationFormat::BGRA8));
+    const FString AssetName = Animation->GetName();
+    const FString Filename = Directory / (Id + Suffix + TEXT(".uasset"));
+    IFileManager::Get().MakeDirectory(*Directory, true);
+    ON_SCOPE_EXIT { IFileManager::Get().Delete(*Filename); };
+    FSavePackageArgs Args;
+    Args.TopLevelFlags = RF_Public;
+    Args.SaveFlags = SAVE_NoError;
+    Switch->Set(1);
+    if (!TestTrue(TEXT("Save animation package"), UPackage::SavePackage(Package, Animation.Get(), *Filename, Args))) { return false; }
+    Package->Rename(*(PackageName + TEXT("_Original")), nullptr, REN_DontCreateRedirectors | REN_NonTransactional);
+    UPackage* LoadedPackage = LoadPackage(nullptr, *PackageName, LOAD_None);
+    if (!TestNotNull(TEXT("Reload animation package"), LoadedPackage)) { return false; }
+    UOdysseyAnimation* Loaded = FindObject<UOdysseyAnimation>(LoadedPackage, *AssetName);
+    if (!TestNotNull(TEXT("Reload animation"), Loaded)) { return false; }
+    TestNotNull(TEXT("Editor animation retains its layer stack"), Loaded->GetLayerStack());
+    const FArrayProperty* FramesProperty = FindFProperty<FArrayProperty>(Loaded->GetClass(), TEXT("Frames"));
+    if (!TestNotNull(TEXT("Baked animation frames property"), FramesProperty)) { return false; }
+    const TArray<FOdysseyAnimationFrame>& BakedFrames = *FramesProperty->ContainerPtrToValuePtr<TArray<FOdysseyAnimationFrame>>(Loaded);
+    if (!TestEqual(TEXT("Saving bakes both distinct images"), BakedFrames.Num(), 2)) { return false; }
+    TestEqual(TEXT("First baked exposure"), BakedFrames[0].Exposure, 2);
+    TestEqual(TEXT("Second baked exposure"), BakedFrames[1].Exposure, 3);
+    TestNotNull(TEXT("First baked texture persists"), BakedFrames[0].Texture);
+    TestNotNull(TEXT("Second baked texture persists"), BakedFrames[1].Texture);
+    for (int32 Index = 0; Index < 2; ++Index)
     {
-        const FString Suffix = bPreserve ? TEXT("Layers") : TEXT("Baked");
-        const FString PackageName = Mount + Id + Suffix;
-        UPackage* Package = CreatePackage(*PackageName);
-        TStrongObjectPtr<UOdysseyAnimation> Animation(MakeAnimation(Package, EOdysseyAnimationFormat::BGRA8));
-        auto PreserveProperty = FindFProperty<FBoolProperty>(Animation->GetClass(), TEXT("PreserveLayerStackAtRuntime"));
-        PreserveProperty->SetPropertyValue_InContainer(Animation.Get(), bPreserve);
-        const FString AssetName = Animation->GetName();
-        const FString Filename = Directory / (Id + Suffix + TEXT(".uasset"));
-        IFileManager::Get().MakeDirectory(*Directory, true);
-        ON_SCOPE_EXIT { IFileManager::Get().Delete(*Filename); };
-        FSavePackageArgs Args;
-        Args.TopLevelFlags = RF_Public;
-        Args.SaveFlags = SAVE_NoError;
-        Switch->Set(1);
-        if (!TestTrue(TEXT("Save animation package"), UPackage::SavePackage(Package, Animation.Get(), *Filename, Args))) { return false; }
-        Package->Rename(*(PackageName + TEXT("_Original")), nullptr, REN_DontCreateRedirectors | REN_NonTransactional);
-        UPackage* LoadedPackage = LoadPackage(nullptr, *PackageName, LOAD_None);
-        if (!TestNotNull(TEXT("Reload animation package"), LoadedPackage)) { return false; }
-        auto Loaded = FindObject<UOdysseyAnimation>(LoadedPackage, *AssetName);
-        if (!TestNotNull(TEXT("Reload animation"), Loaded)) { return false; }
-        for (int32 Index = 0; Index < 2; ++Index)
+        const UOdysseyTiledImage* Persisted = Cell(Loaded, Index)->GetTiledImage();
+        TestNotNull(TEXT("Snapshot persisted before explicit update"), Persisted);
+        if (Persisted)
         {
-            const auto Persisted = Cell(Loaded, Index)->GetTiledImage();
-            TestNotNull(TEXT("Snapshot persisted before explicit update"), Persisted);
-            if (Persisted)
+            const TArray<FLinearColor> Reference = Render(Loaded, Index == 0 ? 0 : 2, EOdysseyRenderingType::Render, false);
+            TStrongObjectPtr<UTextureRenderTarget2D> Target(NewObject<UTextureRenderTarget2D>());
+            Target->InitCustomFormat(Width, Height, PF_A32B32G32R32F, true);
+            Target->UpdateResourceImmediate(true);
+            Persisted->Render(Target.Get(), FIntRect(0, 0, Width, Height), FIntPoint::ZeroValue);
+            FlushRenderingCommands();
+            TArray<FLinearColor> Pixels;
+            FReadSurfaceDataFlags ReadFlags(RCM_MinMax);
+            ReadFlags.SetLinearToGamma(false);
+            Target->GameThread_GetRenderTargetResource()->ReadLinearColorPixels(Pixels, ReadFlags);
+            TestEqual(TEXT("Persisted image pixel count"), Pixels.Num(), Reference.Num());
+            for (int32 Pixel = 0; Pixel < FMath::Min(Pixels.Num(), Reference.Num()); ++Pixel)
             {
-                const auto Reference = Render(Loaded, Index == 0 ? 0 : 2, EOdysseyRenderingType::Render, false);
-                TStrongObjectPtr<UTextureRenderTarget2D> Target(NewObject<UTextureRenderTarget2D>());
-                Target->InitCustomFormat(Width, Height, PF_A32B32G32R32F, true);
-                Target->UpdateResourceImmediate(true);
-                Persisted->Render(Target.Get(), FIntRect(0, 0, Width, Height), FIntPoint::ZeroValue);
-                FlushRenderingCommands();
-                TArray<FLinearColor> Pixels;
-                FReadSurfaceDataFlags ReadFlags(RCM_MinMax);
-                ReadFlags.SetLinearToGamma(false);
-                Target->GameThread_GetRenderTargetResource()->ReadLinearColorPixels(Pixels, ReadFlags);
-                TestEqual(TEXT("Persisted image pixel count"), Pixels.Num(), Reference.Num());
-                for (int32 Pixel = 0; Pixel < FMath::Min(Pixels.Num(), Reference.Num()); ++Pixel)
+                if (!Pixels[Pixel].Equals(Reference[Pixel], 0.0001f))
                 {
-                    if (!Pixels[Pixel].Equals(Reference[Pixel], 0.0001f))
-                    {
-                        AddError(TEXT("Persisted tile pixels differ before reconstruction"));
-                        break;
-                    }
+                    AddError(TEXT("Persisted tile pixels differ before reconstruction"));
+                    break;
                 }
             }
-            auto Property = FindFProperty<FObjectPropertyBase>(Cell(Loaded, Index)->GetClass(), TEXT("TiledImage"));
-            TestTrue(TEXT("Snapshot property is stripped when cooking"), Property->HasAnyPropertyFlags(CPF_EditorOnly));
         }
-        Compare(*this, Loaded, 0);
-        Compare(*this, Loaded, 2);
-        if (bWriteCookFixtures)
-        {
-            const FString FixturePackage = TEXT("/Odyssey/Automation/Generated/") + FixtureId + TEXT("/") + Suffix;
-            UPackage* CookPackage = CreatePackage(*FixturePackage);
-            auto CookAnimation = DuplicateObject<UOdysseyAnimation>(Loaded, CookPackage, *Suffix);
-            const FString CookFilename = FPackageName::LongPackageNameToFilename(FixturePackage, TEXT(".uasset"));
-            if (IFileManager::Get().FileExists(*CookFilename)) { AddError(TEXT("Cook fixture already exists")); return false; }
-            IFileManager::Get().MakeDirectory(*FPaths::GetPath(CookFilename), true);
-            TestTrue(TEXT("Write cook fixture"), UPackage::SavePackage(CookPackage, CookAnimation, *CookFilename, Args));
-            AddInfo(TEXT("Cook fixture: ") + FixturePackage + TEXT(".") + Suffix);
-        }
+        FObjectPropertyBase* Property = FindFProperty<FObjectPropertyBase>(Cell(Loaded, Index)->GetClass(), TEXT("TiledImage"));
+        TestTrue(TEXT("Snapshot property is stripped when cooking"), Property->HasAnyPropertyFlags(CPF_EditorOnly));
+    }
+    Compare(*this, Loaded, 0);
+    Compare(*this, Loaded, 2);
+    if (bWriteCookFixtures)
+    {
+        const FString FixturePackage = TEXT("/Odyssey/Automation/Generated/") + FixtureId + TEXT("/") + Suffix;
+        UPackage* CookPackage = CreatePackage(*FixturePackage);
+        UOdysseyAnimation* CookAnimation = DuplicateObject<UOdysseyAnimation>(Loaded, CookPackage, *Suffix);
+        const FString CookFilename = FPackageName::LongPackageNameToFilename(FixturePackage, TEXT(".uasset"));
+        if (IFileManager::Get().FileExists(*CookFilename)) { AddError(TEXT("Cook fixture already exists")); return false; }
+        IFileManager::Get().MakeDirectory(*FPaths::GetPath(CookFilename), true);
+        TestTrue(TEXT("Write cook fixture"), UPackage::SavePackage(CookPackage, CookAnimation, *CookFilename, Args));
+        AddInfo(TEXT("Cook fixture: ") + FixturePackage + TEXT(".") + Suffix);
     }
     return true;
 }
