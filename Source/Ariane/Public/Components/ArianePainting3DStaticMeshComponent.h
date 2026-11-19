@@ -23,6 +23,7 @@ class ARIANE_API UArianePainting3DStaticMeshComponent : public UStaticMeshCompon
 {
     GENERATED_BODY()
 
+#if WITH_EDITOR
     struct FUniqueMaterial
     {
     public:
@@ -44,9 +45,25 @@ class ARIANE_API UArianePainting3DStaticMeshComponent : public UStaticMeshCompon
         float PixelDepthOffset;
     };
 
+    struct FPDOMaterial
+    {
+    public:
+        FPDOMaterial( UMaterialInterface* InOriginalMaterialInterface
+                    , UMaterialInterface* InDuplicatedMaterialInterface )
+            : OriginalMaterialInterface ( InOriginalMaterialInterface )
+            , DuplicatedMaterialInterface ( InDuplicatedMaterialInterface )
+        {
+        }
+
+    public:
+        UMaterialInterface* OriginalMaterialInterface;
+        UMaterialInterface* DuplicatedMaterialInterface;
+    };
+
 public:
     //virtual UMeshDescription* GetMeshDescription(int32 LODIndex) const override;
-    void ConvertToStaticMesh( TArray<UMaterialInstanceConstant*>& OutMaterialInstanceConstants );
+    void ConvertToStaticMesh( TArray<UMaterialInterface*>& OutMaterialInstanceConstants
+                            , TArray<UMaterialInterface*>& OutDuplicatedPDOMaterials );
 
 private:
     void ConvertDrawingToStaticMesh( FMeshDescriptionBuilder& MeshDescriptionBuilder
@@ -56,7 +73,8 @@ private:
     void ConvertCycleToStaticMesh( FMeshDescriptionBuilder& MeshDescriptionBuilder
                                         , FArianeCycle* Cycle );
     void ConvertMaterials( UStaticMesh* ConvertedStaticMesh
-                         , TArray<UMaterialInstanceConstant*>& OutMaterialInstanceConstants );
+                         , TArray<UMaterialInterface*>& OutMaterialInstanceConstants
+                         , TArray<UMaterialInterface*>& OutDuplicatedPDOMaterials );
 
     FUniqueMaterial* GetUniqueMaterial( UMaterialInterface* MaterialInterface
                                       , const FColor& RequestedColor
@@ -66,8 +84,14 @@ private:
                                          , UMaterialInterface* MaterialInterface
                                          , const FColor& RequestedColor
                                          , float RequestedPDO
-                                         , TArray<UMaterialInstanceConstant*>& OutMaterialInstanceConstants );
+                                         , TArray<UMaterialInterface*>& OutMaterialInstanceConstants
+                                         , TArray<UMaterialInterface*>& OutDuplicatedPDOMaterials );
+
+    UMaterialInterface* GetOrCreatePDOMaterial( UMaterialInterface* OriginalMaterialInterface
+                                              , TArray<UMaterialInterface*>& OutDuplicatedPDOMaterials );
 
 private:
     TArray<FUniqueMaterial> UniqueMaterials;
+    TArray<FPDOMaterial> DuplicatedPDOMaterials;
+#endif // WITH_EDITOR
 };

@@ -374,10 +374,13 @@ UArianePainting3DComponent::GetHUDForegroundColor()
     return EditorInterface ? EditorInterface->GetHUDForegroundColor() : FColor::Black;
 }
 
+#if WITH_EDITOR
 void
-UArianePainting3DComponent::ConvertToStaticMesh( TArray<UMaterialInstanceConstant*>& OutMaterialInstanceConstants )
+UArianePainting3DComponent::ConvertToStaticMesh( TArray<UMaterialInterface*>& OutMaterialInstanceConstants
+                                               , TArray<UMaterialInterface*>& OutDuplicatedPDOMaterials )
 {
-    StaticMeshComponent->ConvertToStaticMesh( OutMaterialInstanceConstants );
+    StaticMeshComponent->ConvertToStaticMesh( OutMaterialInstanceConstants, OutDuplicatedPDOMaterials );
 }
+#endif
 
 #undef LOCTEXT_NAMESPACE

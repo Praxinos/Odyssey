@@ -92,7 +92,10 @@ public:
     void Update( bool bInteractive );
     FColor GetHUDForegroundColor();
     void SetEditorInterface( IArianePainting3DComponentEditorInterface* InEditorInterface );
-    void ConvertToStaticMesh( TArray<UMaterialInstanceConstant*>& OutMaterialInstanceConstants );
+#if WITH_EDITOR
+    void ConvertToStaticMesh( TArray<UMaterialInterface*>& OutMaterialInstanceConstants
+                            , TArray<UMaterialInterface*>& OutDuplicatedPDOMaterials );
+#endif
     UArianePainting3DStaticMeshComponent* GetStaticMeshComponent();
     UMaterialInstanceDynamic* GetDefaultMaterial();
     virtual void PostInitProperties() override;

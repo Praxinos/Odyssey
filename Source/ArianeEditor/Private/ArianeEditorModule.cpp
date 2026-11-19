@@ -48,6 +48,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "UObject/SavePackage.h"
 #include "FileHelpers.h"
+#include "Dialogs/Dialogs.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -337,6 +338,74 @@ FArianeEditorModule::RegisterActorMenu()
     Section.AddEntry(Entry);
 }
 
+// Move transient materials to their own package in MaterialFolder so they can be saved as assets
+static void
+MoveMaterialsToPackages( const TArray<UMaterialInterface*>& Materials
+                       , const UStaticMesh* StaticMesh
+                       , const FString& MaterialFolder
+                       , TArray<UPackage*>& OutPackages )
+{
+    IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
+
+    for( UMaterialInterface* Material : Materials )
+    {
+        // An asset with the same name may already exist on disk (e.g. from a previous export).
+        // Pick a free name, otherwise SavePackages would load the existing file into our package.
+        FString PackageName;
+        FString AssetName;
+
+        AssetTools.CreateUniqueAssetName( MaterialFolder / ( StaticMesh->GetName() + TEXT("_Material_") + Material->GetName() )
+                                        , TEXT("")
+                                        , PackageName
+                                        , AssetName );
+
+        UPackage* Package = CreatePackage( *PackageName );
+
+        // The package is new: there is nothing to load from disk
+        Package->MarkAsFullyLoaded();
+
+        Material->ClearFlags( RF_Transient );
+        Material->SetFlags( RF_Public | RF_Standalone );
+        Material->Rename( *AssetName, Package, REN_DontCreateRedirectors );
+
+        // Inform of the creation of a new asset
+        FAssetRegistryModule::AssetCreated( Material );
+        Package->MarkPackageDirty();
+
+        OutPackages.Add( Package );
+    }
+}
+
+// Warn the user that some materials had no PixelDepthOffset and were duplicated.
+// The "Don't show this again" choice only lasts for the current editor session.
+static void
+WarnAboutDuplicatedPDOMaterials( const TArray<UMaterialInterface*>& DuplicatedPDOMaterials )
+{
+    if( DuplicatedPDOMaterials.IsEmpty() )
+    {
+        return;
+    }
+
+    FString MaterialNames;
+
+    for( UMaterialInterface* Material : DuplicatedPDOMaterials )
+    {
+        MaterialNames += TEXT("\n  - ") + Material->GetName();
+    }
+
+    FSuppressableWarningDialog::FSetupInfo SetupInfo( FText::Format( LOCTEXT( "DuplicatedPDOMaterials.Message"
+                                                                            , "The following materials have no \"PixelDepthOffset\" scalar parameter and were duplicated to add one:{0}\n\nTo avoid these copies, add a \"PixelDepthOffset\" scalar parameter plugged into the Pixel Depth Offset output of the original materials." )
+                                                                   , FText::FromString( MaterialNames ) )
+                                                    , LOCTEXT( "DuplicatedPDOMaterials.Title", "Materials duplicated" )
+                                                    , TEXT("ArianeDuplicatedPDOMaterialsWarning") );
+
+    SetupInfo.DialogMode  = FSuppressableWarningDialog::EMode::DontPersistSuppressionAcrossSessions;
+    SetupInfo.ConfirmText = LOCTEXT( "DuplicatedPDOMaterials.Ok", "OK" );
+
+    FSuppressableWarningDialog WarningDialog( SetupInfo );
+    WarningDialog.ShowModal();
+}
+
 void
 FArianeEditorModule::ConvertToStaticMesh()
 {
@@ -352,7 +421,8 @@ FArianeEditorModule::ConvertToStaticMesh()
         if( ActorsToConvert.Num() )
         {
             TArray<UMeshComponent*> MeshComponentsToConvert;
-            TArray<UMaterialInstanceConstant*> MaterialInstanceConstants;
+            TArray<UMaterialInterface*> MaterialInstanceConstants;
+            TArray<UMaterialInterface*> DuplicatedPDOMaterials;
 
             // first step retrieve all mesh components
             //FMeshUtilities::GetSkinnedAndStaticMeshComponentsFromActors( ActorsToConvert, MeshComponentsToConvert );
@@ -382,7 +452,7 @@ FArianeEditorModule::ConvertToStaticMesh()
                     Painting3DStaticMeshComponent->SetVisibility(true);
                     Painting3DStaticMeshComponent->SetHiddenInGame(false);
 
-                    Painting3DStaticMeshComponent->ConvertToStaticMesh( MaterialInstanceConstants );
+                    Painting3DStaticMeshComponent->ConvertToStaticMesh( MaterialInstanceConstants, DuplicatedPDOMaterials );
                 }
             }
 
@@ -396,37 +466,15 @@ FArianeEditorModule::ConvertToStaticMesh()
             {
                 const FString MeshPackageName = StaticMesh->GetOutermost()->GetName();
                 const FString MatFolder = MeshPackageName + TEXT("_Materials");
-                TArray<UPackage*> MICPackages;
+                TArray<UPackage*> MaterialPackages;
 
-                for ( UMaterialInstanceConstant* MIC : MaterialInstanceConstants )
-                {
-                    FLinearColor LinearColor;
-                    float PixelDepthOffset;
-
-                    MIC->GetVectorParameterValue( FMaterialParameterInfo( TEXT("Color") ), LinearColor );
-                    MIC->GetScalarParameterValue( FMaterialParameterInfo( TEXT("PixelDepthOffset") ), PixelDepthOffset );
-
-                    const FString AssetName = FString::Printf( TEXT("%s_Material_%s_%08X_%s")
-                                                             , *StaticMesh->GetName()
-                                                             , *MIC->Parent->GetName()
-                                                             , LinearColor.ToFColor( true ).DWColor()
-                                                             , PixelDepthOffset ? *FString("PDO") : *FString("NOPDO") );
-                    const FString PackageName = MatFolder / AssetName;
-                    UPackage* MICPackage = CreatePackage( *PackageName );
-
-                    MIC->ClearFlags( RF_Transient );
-                    MIC->SetFlags( RF_Public | RF_Standalone );
-                    MIC->Rename( *AssetName, MICPackage, REN_DontCreateRedirectors );
-
-                    // Inform of the creation of a new asset
-                    FAssetRegistryModule::AssetCreated( MIC );
-                    MICPackage->MarkPackageDirty();
-
-                    MICPackages.Add( MICPackage );
-                }
+                MoveMaterialsToPackages( MaterialInstanceConstants, StaticMesh, MatFolder, MaterialPackages );
+                MoveMaterialsToPackages( DuplicatedPDOMaterials, StaticMesh, MatFolder, MaterialPackages );
 
                 StaticMesh->MarkPackageDirty();
-                UEditorLoadingAndSavingUtils::SavePackages( MICPackages, /*bPromptUser*/ false );
+                UEditorLoadingAndSavingUtils::SavePackages( MaterialPackages, /*bPromptUser*/ false );
+
+                WarnAboutDuplicatedPDOMaterials( DuplicatedPDOMaterials );
             }
 
             for (UMeshComponent* MeshComponent : MeshComponentsToConvert )

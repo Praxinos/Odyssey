@@ -17,8 +17,15 @@
 #include "MeshDescriptionBuilder.h"
 #include "StaticMeshAttributes.h"
 #include "Materials/MaterialInstanceConstant.h"
+#include "Materials/Material.h"
+#include "Materials/MaterialExpressionScalarParameter.h"
+#include "Materials/MaterialExpressionSetMaterialAttributes.h"
+#include "Materials/MaterialAttributeDefinitionMap.h"
 
 #define CYCLE_PDO 0.1f
+#define PDO_PARAMETER_NAME TEXT("PixelDepthOffset")
+
+#if WITH_EDITOR
 
 void
 UArianePainting3DStaticMeshComponent::ConvertCycleToStaticMesh( FMeshDescriptionBuilder& MeshDescriptionBuilder
@@ -192,12 +199,106 @@ UArianePainting3DStaticMeshComponent::GetUniqueMaterial( UMaterialInterface* Ori
     return UniqueMaterial;
 }
 
+UMaterialInterface*
+UArianePainting3DStaticMeshComponent::GetOrCreatePDOMaterial( UMaterialInterface* OriginalMaterialInterface
+                                                            , TArray<UMaterialInterface*>& OutDuplicatedPDOMaterials )
+{
+    // Look for a copy already created for this material
+    for( const FPDOMaterial& PDOMaterial : DuplicatedPDOMaterials )
+    {
+        if( PDOMaterial.OriginalMaterialInterface == OriginalMaterialInterface )
+        {
+            return PDOMaterial.DuplicatedMaterialInterface;
+        }
+    }
+
+    UMaterial* BaseMaterial = OriginalMaterialInterface->GetMaterial();
+
+    if( !BaseMaterial )
+    {
+        return OriginalMaterialInterface;
+    }
+
+    // Duplicate the base material in the transient package
+    UMaterial* Material = DuplicateObject<UMaterial>( BaseMaterial
+                                                    , GetTransientPackage()
+                                                    , MakeUniqueObjectName( GetTransientPackage()
+                                                                          , UMaterial::StaticClass()
+                                                                          , *( BaseMaterial->GetName() + TEXT("_PDO") ) ) );
+
+    // Add a "PixelDepthOffset" scalar parameter and plug it into the PDO input
+    UMaterialExpressionScalarParameter* PDOParameter = NewObject<UMaterialExpressionScalarParameter>( Material );
+    PDOParameter->Material      = Material;
+    PDOParameter->ParameterName = PDO_PARAMETER_NAME;
+    PDOParameter->DefaultValue  = 0.0f;
+    PDOParameter->MaterialExpressionEditorX = -300;
+    PDOParameter->MaterialExpressionEditorY = 600;
+    PDOParameter->UpdateParameterGuid( true, true );
+
+    Material->GetExpressionCollection().AddExpression( PDOParameter );
+
+    UMaterialEditorOnlyData* EditorOnlyData = Material->GetEditorOnlyData();
+
+    if( Material->bUseMaterialAttributes )
+    {
+        // When "Use Material Attributes" is checked, the material output node only has a single
+        // "Material Attributes" input: the compiler reads every attribute (BaseColor, Roughness,
+        // PixelDepthOffset...) from the expression plugged into EditorOnlyData->MaterialAttributes
+        // and ignores the individual inputs such as EditorOnlyData->PixelDepthOffset.
+        // Plugging the parameter into EditorOnlyData->PixelDepthOffset would therefore have no effect.
+        //
+        // Instead, we inject the PDO into the attributes flow by inserting a SetMaterialAttributes node
+        // right before the output:
+        //
+        //     [current attributes] --> SetMaterialAttributes --> Output (Material Attributes)
+        //                                     ^
+        //     PixelDepthOffset parameter -----+ (PixelDepthOffset pin)
+        //
+        // This works whatever produces the attributes (MakeMaterialAttributes, material function,
+        // layer blend...) without modifying the rest of the graph.
+        UMaterialExpressionSetMaterialAttributes* SetAttributes = NewObject<UMaterialExpressionSetMaterialAttributes>( Material );
+        SetAttributes->Material = Material;
+        SetAttributes->MaterialExpressionEditorX = -200;
+        SetAttributes->MaterialExpressionEditorY = 0;
+
+        // Inputs[0] is created by the constructor and receives the incoming attributes
+        SetAttributes->Inputs[0].Expression  = EditorOnlyData->MaterialAttributes.Expression;
+        SetAttributes->Inputs[0].OutputIndex = EditorOnlyData->MaterialAttributes.OutputIndex;
+
+        // Each additional pin Inputs[i] overrides the attribute AttributeSetTypes[i - 1]
+        const FGuid PDOAttributeID = FMaterialAttributeDefinitionMap::GetID( MP_PixelDepthOffset );
+        SetAttributes->AttributeSetTypes.Add( PDOAttributeID );
+
+        FExpressionInput& PDOInput = SetAttributes->Inputs.AddDefaulted_GetRef();
+        PDOInput.InputName  = FName( *FMaterialAttributeDefinitionMap::GetDisplayNameForMaterial( PDOAttributeID, Material ).ToString() );
+        PDOInput.Expression = PDOParameter;
+
+        Material->GetExpressionCollection().AddExpression( SetAttributes );
+
+        EditorOnlyData->MaterialAttributes.Expression  = SetAttributes;
+        EditorOnlyData->MaterialAttributes.OutputIndex = 0;
+    }
+    else
+    {
+        EditorOnlyData->PixelDepthOffset.Expression = PDOParameter;
+    }
+
+    Material->PreEditChange( nullptr );
+    Material->PostEditChange();
+
+    DuplicatedPDOMaterials.Add( FPDOMaterial( OriginalMaterialInterface, Material ) );
+    OutDuplicatedPDOMaterials.Add( Material );
+
+    return Material;
+}
+
 UArianePainting3DStaticMeshComponent::FUniqueMaterial*
 UArianePainting3DStaticMeshComponent::CreateUniqueMaterial( UArianePainting3DComponent* Painting3DComponent
                                                           , UMaterialInterface* OriginialMaterialInterface
                                                           , const FColor& RequestedColor
                                                           , float RequestedPDO
-                                                          , TArray<UMaterialInstanceConstant*>& OutMaterialInstanceConstants )
+                                                          , TArray<UMaterialInterface*>& OutMaterialInstanceConstants
+                                                          , TArray<UMaterialInterface*>& OutDuplicatedPDOMaterials )
 {
     FLinearColor LinearColor = FLinearColor( 0.0f, 0.0f, 0.0f, 0.0f );
     float PixelDepthOffset = 0.0f;
@@ -207,27 +308,58 @@ UArianePainting3DStaticMeshComponent::CreateUniqueMaterial( UArianePainting3DCom
     // or the material does not need any vector parameter of name "color". Otherwise, just use the original material as is.
     if( UniqueMaterial == nullptr  )
     {
-        UMaterialInterface* MaterialInstance = nullptr;
+        // 1. Make sure the parent material has a PixelDepthOffset parameter, duplicate it otherwise
+        UMaterialInterface* ParentMaterial = OriginialMaterialInterface;
 
-        OriginialMaterialInterface->GetVectorParameterValue( FMaterialParameterInfo( TEXT("color") ), LinearColor );
-        OriginialMaterialInterface->GetScalarParameterValue( FMaterialParameterInfo( TEXT("PixelDepthOffset") ), PixelDepthOffset );
-
-        if ( ( LinearColor == FLinearColor( RequestedColor ) ) && ( PixelDepthOffset == RequestedPDO ) )
+        if( OriginialMaterialInterface->GetScalarParameterValue( FMaterialParameterInfo( PDO_PARAMETER_NAME ), PixelDepthOffset ) == false )
         {
-            MaterialInstance = OriginialMaterialInterface;
+            ParentMaterial = GetOrCreatePDOMaterial( OriginialMaterialInterface, OutDuplicatedPDOMaterials );
+            ParentMaterial->GetScalarParameterValue( FMaterialParameterInfo( PDO_PARAMETER_NAME ), PixelDepthOffset );
         }
-        else
+
+        const bool bHasColorParameter = ParentMaterial->GetVectorParameterValue( FMaterialParameterInfo( TEXT("Color") ), LinearColor );
+
+        // A material without "Color" parameter can't be tinted: ignore the color in that case
+        const bool bColorMatches = ( bHasColorParameter == false ) || ( LinearColor == FLinearColor( RequestedColor ) );
+
+        // 2. Use the parent as is if it already matches, otherwise create an instance with the requested
+        // color/PDO. An instance is also needed to make a one-sided parent two-sided.
+        UMaterialInterface* MaterialInstance = ParentMaterial;
+
+        if ( ( bColorMatches == false )
+          || ( PixelDepthOffset != RequestedPDO )
+          || ( ParentMaterial->IsTwoSided() == false ) )
         {
-            UMaterialInstanceConstant* MIC;
+            // Name the instance after its parent, color and PDO. The static mesh name is added when saving
+            const FString MICBaseName = FString::Printf( TEXT("%s_%08X_%s")
+                                                       , *ParentMaterial->GetName()
+                                                       , RequestedColor.DWColor()
+                                                       , RequestedPDO ? TEXT("PDO") : TEXT("NOPDO") );
+            UMaterialInstanceConstant* MIC = NewObject<UMaterialInstanceConstant>( GetTransientPackage()
+                                                                                 , MakeUniqueObjectName( GetTransientPackage()
+                                                                                                       , UMaterialInstanceConstant::StaticClass()
+                                                                                                       , *MICBaseName ) );
 
-            MaterialInstance = MIC = NewObject<UMaterialInstanceConstant>( GetTransientPackage(), NAME_None );
+            MIC->SetParentEditorOnly( ParentMaterial );
 
-            MIC->SetParentEditorOnly( OriginialMaterialInterface );
-            MIC->SetVectorParameterValueEditorOnly( FMaterialParameterInfo( TEXT("Color")            ), FLinearColor( RequestedColor ) );
-            MIC->SetScalarParameterValueEditorOnly( FMaterialParameterInfo( TEXT("PixelDepthOffset") ), RequestedPDO );
+            if( bHasColorParameter )
+            {
+                MIC->SetVectorParameterValueEditorOnly( FMaterialParameterInfo( TEXT("Color") ), FLinearColor( RequestedColor ) );
+            }
+
+            MIC->SetScalarParameterValueEditorOnly( FMaterialParameterInfo( PDO_PARAMETER_NAME ), RequestedPDO );
+
+            // Ariane objects are flat and can be drawn from any point of view, so they have no meaningful
+            // front side and must be two-sided. This has to be done on the material: it is compiled with a
+            // permutation that flips back face normals for lighting. Doubling the geometry instead would
+            // z-fight with materials that are already two-sided.
+            MIC->BasePropertyOverrides.bOverride_TwoSided = true;
+            MIC->BasePropertyOverrides.TwoSided = true;
+            MIC->UpdateOverridableBaseProperties();
             MIC->PostEditChange();
 
             OutMaterialInstanceConstants.Add( MIC );
+            MaterialInstance = MIC;
         }
 
         UniqueMaterial = &UniqueMaterials.Add_GetRef( FUniqueMaterial( OriginialMaterialInterface
@@ -242,11 +374,13 @@ UArianePainting3DStaticMeshComponent::CreateUniqueMaterial( UArianePainting3DCom
 
 void
 UArianePainting3DStaticMeshComponent::ConvertMaterials( UStaticMesh* ConvertedStaticMesh
-                                                      , TArray<UMaterialInstanceConstant*>& OutMaterialInstanceConstants )
+                                                      , TArray<UMaterialInterface*>& OutMaterialInstanceConstants
+                                                      , TArray<UMaterialInterface*>& OutDuplicatedPDOMaterials )
 {
     UArianePainting3DComponent* Painting3DComponent = Cast<UArianePainting3DComponent>(GetOuter());
 
     UniqueMaterials.Empty();
+    DuplicatedPDOMaterials.Empty();
 
     if( Painting3DComponent )
     {
@@ -256,7 +390,8 @@ UArianePainting3DStaticMeshComponent::ConvertMaterials( UStaticMesh* ConvertedSt
         UArianeLayerFolder::Traverse( LayerStack->GetRootFolder()
                                     , [ this
                                       , Painting3DComponent
-                                      , &OutMaterialInstanceConstants ]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
+                                      , &OutMaterialInstanceConstants
+                                      , &OutDuplicatedPDOMaterials ]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
             {
                 UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(Layer);
 
@@ -270,7 +405,8 @@ UArianePainting3DStaticMeshComponent::ConvertMaterials( UStaticMesh* ConvertedSt
                                            , FArianeObject::ETraversalPolicy::AllChildren
                                            , [ this
                                              , Painting3DComponent
-                                             , &OutMaterialInstanceConstants ] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+                                             , &OutMaterialInstanceConstants
+                                             , &OutDuplicatedPDOMaterials ] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
                         {
                             if ( Object->HasBaseClass( FArianePath::StaticClass() ) )
                             {
@@ -280,7 +416,8 @@ UArianePainting3DStaticMeshComponent::ConvertMaterials( UStaticMesh* ConvertedSt
                                                     , Path->GetMaterial()
                                                     , Path->GetColor()
                                                     , 0.0f
-                                                    , OutMaterialInstanceConstants );
+                                                    , OutMaterialInstanceConstants
+                                                    , OutDuplicatedPDOMaterials );
                             }
 
                             if ( Object->GetClass() == FArianeCycle::StaticClass() )
@@ -293,7 +430,8 @@ UArianePainting3DStaticMeshComponent::ConvertMaterials( UStaticMesh* ConvertedSt
                                                     // Pixel Depth Offset for cycles only, it will prevent ZFighting
                                                     // when using the default Ariane Material
                                                     , CYCLE_PDO
-                                                    , OutMaterialInstanceConstants );
+                                                    , OutMaterialInstanceConstants
+                                                    , OutDuplicatedPDOMaterials );
                             }
 
                             return FArianeObject::ETraversalReturnValue::Continue;
@@ -312,7 +450,8 @@ UArianePainting3DStaticMeshComponent::ConvertMaterials( UStaticMesh* ConvertedSt
 }
 
 void
-UArianePainting3DStaticMeshComponent::ConvertToStaticMesh( TArray<UMaterialInstanceConstant*>& OutMaterialInstanceConstants )
+UArianePainting3DStaticMeshComponent::ConvertToStaticMesh( TArray<UMaterialInterface*>& OutMaterialInstanceConstants
+                                                         , TArray<UMaterialInterface*>& OutDuplicatedPDOMaterials )
 {
     FName UniqueMeshName = MakeUniqueObjectName( GetTransientPackage()
                                                , UStaticMesh::StaticClass()
@@ -339,7 +478,7 @@ UArianePainting3DStaticMeshComponent::ConvertToStaticMesh( TArray<UMaterialInsta
         MeshDescriptionBuilder.SetNumUVLayers(1);
 
         // retrieve all materials and create them related to the vector object's color if needed
-        ConvertMaterials( ConvertedStaticMesh, OutMaterialInstanceConstants );
+        ConvertMaterials( ConvertedStaticMesh, OutMaterialInstanceConstants, OutDuplicatedPDOMaterials );
 
         // convert vector objects
         UArianeLayerFolder::Traverse( LayerStack->GetRootFolder()
@@ -391,13 +530,12 @@ UArianePainting3DStaticMeshComponent::ConvertToStaticMesh( TArray<UMaterialInsta
         ConvertedStaticMesh->InitResources();
         ConvertedStaticMesh->SetLightingGuid();
         ConvertedStaticMesh->Build( false );
-
-#if WITH_EDITOR
         ConvertedStaticMesh->PostEditChange();
-#endif
 
         SetStaticMesh(ConvertedStaticMesh);
 
         MarkRenderStateDirty();
     }
 }
+
+#endif // WITH_EDITOR
