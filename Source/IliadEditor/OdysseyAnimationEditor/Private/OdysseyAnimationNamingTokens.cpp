@@ -11,7 +11,9 @@
 
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationPlayer.h"
-#include "OdysseyAnimationEditorData.h"
+#include "OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationLayerStackUserData.h"
+#include "OdysseyLayer.h"
 
 //---
 
@@ -117,7 +119,6 @@ UOdysseyAnimationNamingTokens::OnCreateDefaultTokens( TArray<FNamingTokenData>& 
                                                     } );
     Tokens.Add( FrameRateToken );
 
-#if WITH_EDITOR
     FNamingTokenData CurrentLayerNameToken;
     CurrentLayerNameToken.TokenKey = TEXT( "currentLayerName" );
     CurrentLayerNameToken.DisplayName = LOCTEXT( "CurrentLayerNameToken", "Current layer name" );
@@ -127,14 +128,14 @@ UOdysseyAnimationNamingTokens::OnCreateDefaultTokens( TArray<FNamingTokenData>& 
                                                                    return FText::GetEmpty();
 
                                                                UOdysseyAnimation* animation = ContextAnimation->Animation.Pin().Get();
-                                                               const IOdysseyAnimationEditorData* editorData = animation ? Cast<IOdysseyAnimationEditorData>(animation->GetEditorData()) : nullptr;
-                                                               if( !editorData )
+                                                               UOdysseyAnimationLayerStackUserData* editorData = animation ? animation->GetAssetUserData<UOdysseyAnimationLayerStackUserData>() : nullptr;
+                                                               UOdysseyLayer* currentLayer = editorData && editorData->LayerStack ? editorData->LayerStack->GetCurrentLayer() : nullptr;
+                                                               if( !currentLayer )
                                                                    return FText::GetEmpty();
 
-                                                               return editorData->GetCurrentLayerName();
+                                                               return currentLayer->GetLayerName();
                                                            } );
     Tokens.Add( CurrentLayerNameToken );
-#endif
 
     //---
 

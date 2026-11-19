@@ -57,7 +57,6 @@ public:
 
     //~ Begin IOdysseyAnimationEditorData Interface
     virtual const IOdysseyTextureRenderingAbility* GetAnimationRenderingSource() const override;
-    virtual FText GetCurrentLayerName() const override;
     //~ End IOdysseyAnimationEditorData Interface
 
 private:

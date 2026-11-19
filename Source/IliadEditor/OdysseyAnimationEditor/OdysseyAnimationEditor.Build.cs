@@ -102,6 +102,7 @@ namespace UnrealBuildTool.Rules
                     "MediaAssets",
                     "MovieScene",
                     "MovieSceneTools",
+                    "NamingTokens",
                     "Paper2D",
                     "Paper2DEditor",
                     "PropertyEditor",

@@ -64,7 +64,6 @@ namespace UnrealBuildTool.Rules
 
                     "OdysseyCore",
                     "OdysseyRendering",
-                    "NamingTokens",
                     "OdysseyTelemetry",
                     // ... add private dependencies that you statically link with here ...
                 }

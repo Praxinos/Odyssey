@@ -100,7 +100,7 @@ bool FOdysseyAnimationLegacyEditorDataMigrationTest::RunTest(const FString& Para
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationEditorDataRenderingSourceTest, "Odyssey.Animation.EditorData.RenderingSource",
     Odyssey::AnimationLayerStackUserDataTests::Flags)
 
-/** Checks the runtime animation renders, bounds and names layers through its editor data only while it has one. */
+/** Checks the runtime animation renders and bounds through its editor data only while it has one. */
 bool FOdysseyAnimationEditorDataRenderingSourceTest::RunTest(const FString& Parameters)
 {
     using namespace Odyssey::AnimationLayerStackUserDataTests;
@@ -132,7 +132,7 @@ bool FOdysseyAnimationEditorDataRenderingSourceTest::RunTest(const FString& Para
     if (!TestNotNull(TEXT("Editor data implements the runtime interface"), EditorData))
         return false;
 
-    TestEqual(TEXT("Current layer name is reachable from the runtime interface"), EditorData->GetCurrentLayerName().ToString(), Layer->GetLayerName().ToString());
+    TestTrue(TEXT("Runtime interface renders through the layer stack"), EditorData->GetAnimationRenderingSource() == LayerStack);
 
     Animation->RemoveUserDataOfClass(UOdysseyAnimationLayerStackUserData::StaticClass());
     TestNull(TEXT("Removing the editor data detaches it"), Animation->GetEditorData());

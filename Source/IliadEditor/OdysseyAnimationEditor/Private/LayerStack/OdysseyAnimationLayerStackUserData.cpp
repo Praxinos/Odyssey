@@ -58,16 +58,6 @@ UOdysseyAnimationLayerStackUserData::GetAnimationRenderingSource() const
     return LayerStack;
 }
 
-FText
-UOdysseyAnimationLayerStackUserData::GetCurrentLayerName() const
-{
-    UOdysseyLayer* currentLayer = LayerStack ? LayerStack->GetCurrentLayer() : nullptr;
-    if (!currentLayer)
-        return FText::GetEmpty();
-
-    return currentLayer->GetLayerName();
-}
-
 void
 UOdysseyAnimationLayerStackUserData::OnRefreshReferencedPalette(UOdysseyPalette* iPalette)
 {

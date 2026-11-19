@@ -55,13 +55,13 @@ public:
 
     UOdysseyAnimationNamingTokens();
 
-    static ODYSSEYANIMATION_API FString TokenNamespace;
+    static ODYSSEYANIMATIONEDITOR_API FString TokenNamespace;
 
     /** Utility function that will evaluate the input string with the naming tokens subsystem and return the result evaluated text using the input animation */
-    //static ODYSSEYANIMATION_API FText GetResolvedText(const FString& InStringToEvaluate, UOdysseyAnimation* InAnimation);
+    //static ODYSSEYANIMATIONEDITOR_API FText GetResolvedText(const FString& InStringToEvaluate, UOdysseyAnimation* InAnimation);
 
     /** Adds a metadata token with the same name as the input key which will return the result of value of that metadata if found in the Animation */
-    //ODYSSEYANIMATION_API void AddMetadataToken(const FString& InTokenKey);
+    //ODYSSEYANIMATIONEDITOR_API void AddMetadataToken(const FString& InTokenKey);
 
 private:
     /** The current animation context to use when evaluating tokens */

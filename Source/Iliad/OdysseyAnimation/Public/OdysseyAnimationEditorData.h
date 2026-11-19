@@ -34,12 +34,5 @@ public:
      * @return The source used to render, compose and bound the animation in editor, or nullptr if there is none
      */
     virtual const IOdysseyTextureRenderingAbility* GetAnimationRenderingSource() const = 0;
-
-    /**
-     * @brief Returns the name of the layer currently edited in the animation
-     *
-     * @return The current layer name, or an empty text if there is no current layer
-     */
-    virtual FText GetCurrentLayerName() const = 0;
 #endif
 };
