@@ -38,12 +38,12 @@ public:
     /**
      * The content the owner expects: its size in pixels and the format of the blocks read and written by ReadBlock() and WriteBlock().
      *
-     * Transitional, removed with the block adapters:
-     * - The size only sizes the blocks, the edit sessions and the full-size source assembled for rendering.
-     *   Tiled images are unbounded: rendering will assemble only the tiles covering the source rect it is given,
-     *   and the canvas bounds will be the owner's concern.
-     * - The format will be given when the image is created, then converted explicitly when the owner changes format
-     *   (e.g. a cell duplicated into an animation of another format), rather than queried on each use.
+     * The size is the canvas: blocks and edit sessions cover it, and rendering assembles the tiles it samples within it.
+     * The tiled image is unbounded: tiles outside the canvas are kept, e.g. when the canvas shrinks, and shown again when it grows.
+     *
+     * The format is queried on each use rather than given once: EnsureImage() converts the image whenever the owner
+     * expects another format, e.g. after the sRGB setting of a texture changed or a cell was duplicated into an animation
+     * of another format, without the owner having to report each of these changes.
      */
     struct FDescription
     {
@@ -103,7 +103,7 @@ public:
     FDescription Describe() const;
 
     /**
-     * Creates the image when missing, and converts it when the owner expects another format.
+     * Creates the image when missing, and converts it when the owner expects another format, tiles outside the canvas included.
      * Between 8-bit linear and 8-bit sRGB encoded content, the conversion follows bKeepBytesOnEncodingChange;
      * otherwise it keeps the colors.
      * @return False when the owner cannot hold content.

@@ -71,6 +71,13 @@ UTexture2D* MakeTexture(UObject* Outer, ETextureSourceFormat Format)
     return Texture;
 }
 
+/** Returns the render texture an asset saved before the tiled image storage holds, read through its legacy property. */
+UObject* LegacyRenderTexture(UObject* Owner)
+{
+    const FObjectProperty* Property = FindFProperty<FObjectProperty>(Owner->GetClass(), TEXT("Texture"));
+    return Property ? Property->GetObjectPropertyValue_InContainer(Owner) : nullptr;
+}
+
 UOdysseyTextureLayerImageRaster* MakeLayer(UTexture2D* Texture)
 {
     UOdysseyTextureLayerStackUserData* UserData = NewObject<UOdysseyTextureLayerStackUserData>(Texture);
@@ -248,7 +255,7 @@ bool FOdysseyTextureLayerTiledImageTest::RunTest(const FString& Parameters)
         }
         TestEqual(TEXT("Image belongs to the layer"), Image->GetOuter(), static_cast<UObject*>(Layer));
         TestTrue(TEXT("Image is transactional"), Image->HasAnyFlags(RF_Transactional));
-        TestNull(TEXT("Raster layer has no render texture"), Layer->GetRenderTexture());
+        TestNull(TEXT("Raster layer has no render texture"), LegacyRenderTexture(Layer));
         TestEqual(TEXT("Raster layer owns no texture"), CountRenderTextures(Layer), 0);
 
         float Tolerance = 0.0f;
@@ -352,7 +359,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureLayerLegacyMigrationTest, "Odyss
 bool FOdysseyTextureLayerLegacyMigrationTest::RunTest(const FString& Parameters)
 {
     using namespace Odyssey::TextureLayerTiledImageTests;
-    FObjectProperty* TextureProperty = FindFProperty<FObjectProperty>(UOdysseyTextureLayer::StaticClass(), TEXT("Texture"));
+    FObjectProperty* TextureProperty = FindFProperty<FObjectProperty>(UOdysseyTextureLayerImageRaster::StaticClass(), TEXT("Texture"));
     if (!TestNotNull(TEXT("Render texture property"), TextureProperty))
     {
         return false;
@@ -368,7 +375,7 @@ bool FOdysseyTextureLayerLegacyMigrationTest::RunTest(const FString& Parameters)
         TextureProperty->SetObjectPropertyValue_InContainer(Layer, LegacyTexture);
         Layer->PostLoad();
 
-        TestNull(TEXT("Migration discards the render texture"), Layer->GetRenderTexture());
+        TestNull(TEXT("Migration discards the render texture"), LegacyRenderTexture(Layer));
         float Tolerance = 0.0f;
         const TArray<FLinearColor> Pattern = ExpectedPattern(Format, Tolerance);
         ComparePixels(*this, TEXT("Migrated image"), Pattern, ReadImage(Layer->GetTiledImage()), Tolerance);

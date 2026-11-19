@@ -23,7 +23,6 @@
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyRasterBlock.h"
 #include "OdysseyRasterBlockEdit.h"
-#include "OdysseyRasterBlockMutator.h"
 
 #include "ULISEventBuilder.h"
 
@@ -730,19 +729,15 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
             // --- Change the raster selection (if it exists) to cover the transformed pixels only ---
             if( !GetEditor()->RasterSelection()->IsEmpty() )
             {
-                FOdysseyRasterBlockMutator mutator(GetEditor()->RasterSelection()->GetRasterBlock());
-
-                ::ULIS::FRectI boundingRect = ::ULIS::FRectI::FromXYWH(0, 0, GetEditor()->RasterSelection()->GetBlock()->Width(), GetEditor()->RasterSelection()->GetBlock()->Height());
-                mutator.EditTilesFromRects(
-                    { boundingRect },
-                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                GetEditor()->RasterSelection()->EditMask(
+                    [&](::ULIS::FBlock& iBlock)
                     {
                         TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
 
-                        ::ULIS::eFormat format = iBlock->Format();
+                        ::ULIS::eFormat format = iBlock.Format();
                         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
-                        TSharedPtr<::ULIS::FBlock> baseSelectionBlock = MakeShareable(new ::ULIS::FBlock(iBlock->Width(), iBlock->Height(), format));
+                        TSharedPtr<::ULIS::FBlock> baseSelectionBlock = MakeShareable(new ::ULIS::FBlock(iBlock.Width(), iBlock.Height(), format));
 
                         ::ULIS::FRectI selectionBoundingBox = rasterSelection->GetMaskBoundingRect();
 
@@ -766,21 +761,21 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
                         );
 
                         ctx.Copy(
-                            *iBlock,
+                            iBlock,
                             *baseSelectionBlock);
 
                         ctx.Finish();
 
                         ctx.Clear(
-                            *iBlock,
-                            iBlock->Rect());
+                            iBlock,
+                            iBlock.Rect());
 
                         ctx.Finish();
 
                         // This is a very slow operation unfortunately
                         ctx.TransformPerspective(
                             *baseSelectionBlock
-                            , *iBlock
+                            , iBlock
                             , ::ULIS::FRectI::Auto
                             , transformation.m);
 
@@ -795,17 +790,13 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
                                         iDstPixel.SetGreyF(1.f);
                                 }
                             }
-                            , *iBlock
-                            , *iBlock
+                            , iBlock
+                            , iBlock
                         );
 
                         ctx.Finish();
-
-                        return { };
                     }
                 );
-                // --- Change the raster selection to cover the transformed pixels only ---
-                mutator.Commit();
             }
             GetEditor()->RasterSelection()->OnChanged().Broadcast();
         }

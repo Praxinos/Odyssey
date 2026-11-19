@@ -17,8 +17,6 @@
 #include "OdysseyPixelFormat.h"
 #include "OdysseyRasterBlock.h"
 #include "OdysseyRasterBlockEdit.h"
-#include "OdysseyRasterBlockMutator.h"
-#include "OdysseyRasterBlockUndo.h"
 #include "OdysseyRenderContext.h"
 #include "OdysseyStyle.h"
 #include "OdysseySurfaceTexture2DEditable.h"
@@ -67,7 +65,7 @@ UOdysseyTextureLayerImageRaster::BeginDestroy()
 void
 UOdysseyTextureLayerImageRaster::MigrateLegacyContent()
 {
-    UTexture2D* LegacyTexture = GetExistingRenderTexture();
+    UTexture2D* LegacyTexture = Texture;
     if (HasAnyFlags(RF_ClassDefaultObject) || (!LegacyRasterBlock && !LegacyTexture) || !FApp::CanEverRender())
     {
         return;
@@ -89,7 +87,7 @@ UOdysseyTextureLayerImageRaster::MigrateLegacyContent()
         return;
     }
     LegacyRasterBlock.Reset();
-    DiscardRenderTexture();
+    Texture = nullptr;
 }
 
 FOdysseyRasterContent&
@@ -158,11 +156,6 @@ TSharedPtr<FOdysseyRasterBlockEdit>
 UOdysseyTextureLayerImageRaster::BeginRasterEdit()
 {
     return GetRasterContent().BeginEdit();
-}
-
-void
-UOdysseyTextureLayerImageRaster::InitTexture()
-{
 }
 
 void
@@ -362,90 +355,5 @@ UOdysseyTextureLayerImageRaster::IsAlphaLocked() const
 {
     return bIsAlphaLocked;
 }
-
-/* #if WITH_EDITOR
-
-void
-UOdysseyTextureLayerImageRaster::ImportTexture(UTexture2D* InTexture)
-{
-    UTexture2D* renderTexture = GetRenderTexture();
-    if ( !renderTexture )
-        return;
-
-    UTexture2D* texture = GetTexture();
-    if ( !texture )
-        return;
-
-    bool expectSRGB = (texture->Source.GetFormat() == TSF_BGRA8 || texture->Source.GetFormat() == TSF_G8) && texture->SRGB;
-
-    FImage srcImage;
-    InTexture->Source.GetMipImage(srcImage, 0);
-
-    if (expectSRGB && srcImage.GetGammaSpace() == EGammaSpace::sRGB)
-    {
-        //We don't need a conversion here
-        //so just set srcImage.GammaSpace to Linear to avoid gamma conversion
-        srcImage.GammaSpace = EGammaSpace::Linear;
-    }
-
-    FTextureSource::FMipLock dstLock(FTextureSource::ELockState::ReadWrite, &renderTexture->Source, 0);
-
-    if (srcImage.SizeX == dstLock.Image.SizeX && srcImage.SizeY == dstLock.Image.SizeY)
-    {
-        FImageCore::CopyImage(srcImage, dstLock.Image);
-    }
-    else
-    {
-        //Copy no crop
-        int64 srcBpp = ERawImageFormat::GetBytesPerPixel(srcImage.Format);
-        int64 dstBpp = ERawImageFormat::GetBytesPerPixel(dstLock.Image.Format);
-
-        int32 sizeX = FMath::Min(dstLock.Image.SizeX, srcImage.SizeX);
-        int32 sizeY = FMath::Min(dstLock.Image.SizeY, srcImage.SizeY);
-
-        FImage srcFullImage(sizeX, sizeY, srcImage.Format, srcImage.GetGammaSpace());
-        int64 srcNumBytes = srcFullImage.GetImageSizeBytes();
-        srcFullImage.RawData.Empty(srcNumBytes);
-        srcFullImage.RawData.AddZeroed(srcNumBytes);
-
-        FImage dstFullImage(sizeX, sizeY, dstLock.Image.Format, dstLock.Image.GetGammaSpace());
-        int64 dstNumBytes = dstFullImage.GetImageSizeBytes();
-        dstFullImage.RawData.Empty(dstNumBytes);
-        dstFullImage.RawData.AddZeroed(dstNumBytes);
-
-        for (int y = 0; y < sizeY; y++)
-        {
-            uint8* srcLine = (uint8*)srcImage.GetPixelPointer(0, y);
-            uint8* dstLine = (uint8*)srcFullImage.GetPixelPointer(0, y);
-            FMemory::Memcpy(dstLine, srcLine, sizeX * srcBpp);
-        }
-
-        for (int y = 0; y < sizeY; y++)
-        {
-            uint8* srcLine = (uint8*)dstLock.Image.GetPixelPointer(0, y);
-            uint8* dstLine = (uint8*)dstFullImage.GetPixelPointer(0, y);
-            FMemory::Memcpy(dstLine, srcLine, sizeX * dstBpp);
-        }
-
-        //CopyImage makes the conversion between formats and Gammaspace
-        FImageCore::CopyImage(srcFullImage, dstFullImage);
-
-        for (int y = 0; y < sizeY; y++)
-        {
-            uint8* srcLine = (uint8*)dstFullImage.GetPixelPointer(0, y);
-            uint8* dstLine = (uint8*)dstLock.Image.GetPixelPointer(0, y);
-            FMemory::Memcpy(dstLine, srcLine, sizeX * dstBpp);
-        }
-    }
-
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(renderTexture->Source.GetFormat());
-    TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(renderTexture, format));
-
-    FOdysseyRasterBlockMutator rasterBlockMutator(GetRasterBlock());
-    rasterBlockMutator.Copy(textureBlock, { textureBlock->Rect() });
-    rasterBlockMutator.Commit();
-}
-
-#endif */
 
 #undef LOCTEXT_NAMESPACE

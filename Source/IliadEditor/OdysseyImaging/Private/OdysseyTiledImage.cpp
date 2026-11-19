@@ -15,25 +15,6 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogOdysseyTiledImage, Log, All);
 
-UOdysseyTiledImageFactoryNew::UOdysseyTiledImageFactoryNew()
-{
-    bCreateNew = true;
-    bEditAfterNew = true;
-    SupportedClass = UOdysseyTiledImage::StaticClass();
-}
-
-UObject*
-UOdysseyTiledImageFactoryNew::FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn )
-{
-    return NewObject<UOdysseyTiledImage>( iParent, iName, iFlags | RF_Transactional );
-}
-
-bool
-UOdysseyTiledImageFactoryNew::ShouldShowInNewMenu() const
-{
-    return false;
-}
-
 UOdysseyTiledImage::~UOdysseyTiledImage()
 {
 }
@@ -54,10 +35,8 @@ UOdysseyTiledImage::Initialize(int InTileSize, EOdysseyTiledImageFormat InFormat
 
     TileSize = InTileSize;
     Format = InFormat;
-
-    //DEBUG only : Allows to undo a TiledImage created in a blueprint
-    SetFlags(GetFlags() | RF_Public | RF_Transactional);
-
+    // The tiles are undoable through Modify().
+    SetFlags(RF_Transactional);
     Tiles.Empty();
 }
 
@@ -84,7 +63,6 @@ UOdysseyTiledImage::PostEditUndo()
 {
     Super::PostEditUndo();
     OnUndoneDelegate.Broadcast();
-    OnChanged.Broadcast();
 }
 
 UOdysseyTiledImage::FOnUndone&
@@ -129,7 +107,27 @@ UOdysseyTiledImage::CopyFromTexture(UTexture* InTexture, FIntRect InRect, FIntPo
         TileId = CreatedTile.Id;
     }
 
-    OnChanged.Broadcast();
+}
+
+FIntRect
+UOdysseyTiledImage::GetTileBounds() const
+{
+    FIntRect Bounds;
+    bool bFirst = true;
+    for (const TPair<FIntPoint, FOdysseyTileId>& Tile : Tiles)
+    {
+        const FIntRect TileRect(Tile.Key * int32(TileSize), (Tile.Key + FIntPoint(1, 1)) * int32(TileSize));
+        if (bFirst)
+        {
+            Bounds = TileRect;
+            bFirst = false;
+        }
+        else
+        {
+            Bounds.Union(TileRect);
+        }
+    }
+    return Bounds;
 }
 
 UOdysseyTiledImage::FRenderFunction UOdysseyTiledImage::BuildRenderFunction(FIntRect SourceRect) const

@@ -23,6 +23,10 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "TextureCompiler.h"
+#include "RenderGraphUtils.h"
+#include "OdysseyTexture2DUtils.h"
+#include "OdysseyBlendShader.h"
+#include "TextureResource.h"
 #include "UObject/ObjectSaveContext.h"
 #include "OdysseyTextureLayerStackUserData.h"
 
@@ -105,8 +109,82 @@ UOdysseyTextureLayerImageVector::UpdateDrawingFlags() const
 void
 UOdysseyTextureLayerImageVector::InitTexture()
 {
-    Super::InitTexture();
+    if ( !Texture )
+    {
+        UTexture2D* OwnerTexture = GetTexture();
+        if (!OwnerTexture)
+            return;
+
+        checkf(OwnerTexture->Source.GetFormat() != TSF_Invalid, TEXT("Invalid Texture Format"));
+        const ETextureSourceFormat layerTextureFormat = GetLayerTextureFormat(OwnerTexture->Source.GetFormat());
+
+        UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+        Texture = NewObject<UTexture2D>(this, TEXT("Texture"));
+        Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+        Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+        Texture->Filter = TextureFilter::TF_Nearest;
+        // The layer texture holds the bytes of the texture: decoded when sampled if they are sRGB encoded colors.
+        Texture->SRGB = layerStack && layerStack->IsSRGB();
+        Texture->Source.Init(
+            OwnerTexture->Source.GetSizeX(),
+            OwnerTexture->Source.GetSizeY(),
+            1,
+            1,
+            layerTextureFormat
+        );
+    }
 }
+
+void
+UOdysseyTextureLayerImageVector::ColorSettingsChanged()
+{
+    // The render texture holds the bytes of the texture: they are decoded when sampled if they are sRGB encoded colors.
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+    const bool bSRGB = layerStack && layerStack->IsSRGB();
+    if (Texture && Texture->SRGB != bSRGB)
+    {
+        Texture->SRGB = bSRGB;
+        Texture->UpdateResource();
+        FTextureCompilingManager::Get().FinishCompilation({ Texture });
+    }
+}
+
+UTexture2D*
+UOdysseyTextureLayerImageVector::GetRenderTexture() const
+{
+    if (!Texture)
+    {
+        const_cast<UOdysseyTextureLayerImageVector*>(this)->InitTexture();
+        // Layers without a render texture do not create one.
+        if (Texture)
+        {
+            Texture->UpdateResource();
+            FTextureCompilingManager::Get().FinishCompilation({ Texture });
+        }
+    }
+
+    return Texture;
+}
+
+void
+UOdysseyTextureLayerImageVector::UpdateTextureSize()
+{
+    if (!Texture)
+        return;
+
+    FIntRect rect = GetDefaultRenderRect();
+
+    uint32 layerWidth = rect.Width();
+    uint32 layerHeight = rect.Height();
+
+    uint32 textureWidth = Texture->Source.GetSizeX();
+    uint32 textureHeight = Texture->Source.GetSizeY();
+    if ( textureWidth != layerWidth || textureHeight != layerHeight)
+    {
+        Odyssey::ResizeTexture2D(Texture, layerWidth, layerHeight);
+    }
+}
+
 #endif
 
 void
@@ -158,13 +236,74 @@ UOdysseyTextureLayerImageVector::BuildRenderPipelineInternal(
     }
 #endif
 
-    return Super::BuildRenderPipelineInternal(oRenderFunction, iParents, RenderContext);
+#if WITH_EDITOR
+    if ( !Texture )
+    {
+        const_cast<UOdysseyTextureLayerImageVector*>(this)->InitTexture();
+        Texture->UpdateResource();
+    }
+#endif
+
+    FTextureCompilingManager::Get().FinishCompilation({ Texture });
+
+    // The RHI texture of the resource is created by the render thread after UpdateResource().
+    // It must be read when the render function runs on the render thread, not here on the game thread,
+    // where it can still be null right after the resource was (re)created.
+    const FTextureResource* SourceResource = Texture->GetResource();
+    if (!SourceResource)
+        return false;
+
+    oRenderFunction = [SourceResource](
+        FRDGBuilder& iGraphBuilder,
+        ERHIFeatureLevel::Type iFeatureLevel,
+        FRDGTextureRef iDestinationTexture,
+        const FIntRect& iSrcRect,
+        const FIntRect& iDstRect,
+        const FMatrix& iSrcTransform
+        )
+    {
+        AddClearRenderTargetPass(iGraphBuilder, iDestinationTexture, FLinearColor::Transparent, iDstRect);
+
+        const FTextureRHIRef SourceRHI = SourceResource->TextureRHI;
+        if (!SourceRHI)
+            return;
+
+        FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(SourceRHI, TEXT("UOdysseyTextureLayerImageVector::sourceTexture")));
+
+        FOdysseyBlendShader::BlendRect(
+            iGraphBuilder,
+            iFeatureLevel,
+            iDestinationTexture,
+            sourceTexture,
+            iDestinationTexture,
+            iSrcRect,
+            iDstRect,
+            iSrcTransform,
+            EOdysseyColorBlendMode::Normal,
+            EOdysseyAlphaBlendMode::Normal,
+            1.f,
+            EOdysseyAntiAliasing::Anisotropic
+        );
+    };
+
+    return true;
 }
 
 void
 UOdysseyTextureLayerImageVector::PostLoad()
 {
     Super::PostLoad();
+
+    if ( Texture )
+    {
+        Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+        Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+        Texture->Filter = TextureFilter::TF_Nearest;
+        Texture->SRGB = false;
+        Texture->PostEditChange();
+    }
+
+    UpdateTextureSize();
 
     if (GetFlags() & RF_ClassDefaultObject)
         return;
@@ -205,6 +344,8 @@ void
 UOdysseyTextureLayerImageVector::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
 {
     Super::PostDuplicate(iDuplicateMode);
+
+    UpdateTextureSize();
 
     UTexture2D* texture = GetTexture();
     if( !texture || texture->Source.GetFormat() == TSF_Invalid )

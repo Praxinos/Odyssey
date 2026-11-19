@@ -18,6 +18,7 @@
 #include "OdysseyTextureLayerStack.h"
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyTiledImage.h"
+#include "OdysseyTiledImageBlock.h"
 
 namespace Odyssey::TextureColorTests
 {
@@ -210,6 +211,49 @@ bool FOdysseyTextureColorSRGBChangeTest::RunTest(const FString& Parameters)
             [](int32 X, int32 Y) { return FLinearColor::FromSRGBColor(PatternColor(X, Y)).ToFColor(false); },
             ReadTextureBytes(Texture.Get(), UserData->LayerStack), 1);
     }
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureColorOffCanvasTest, "Odyssey.Texture.Color.SRGBChangeKeepsOffCanvas", Odyssey::TextureColorTests::Flags)
+
+/** Pixels outside the canvas, e.g. left by a shrunk canvas, are kept and converted with the others when the format of the layer changes. */
+bool FOdysseyTextureColorOffCanvasTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::TextureColorTests;
+    TStrongObjectPtr<UTexture2D> Texture(MakeTexture(true));
+    UOdysseyTextureLayerStackUserData* UserData = MakeUserData(Texture.Get());
+    UserData->SRGBChangePolicy = EOdysseyTextureSRGBChangePolicy::KeepColors;
+    UOdysseyTextureLayerImageRaster* Layer = CastChecked<UOdysseyTextureLayerImageRaster>(UserData->LayerStack->GetCurrentLayer());
+    UOdysseyTiledImage* Image = const_cast<UOdysseyTiledImage*>(Layer->GetTiledImage());
+    if (!TestNotNull(TEXT("The layer holds a tiled image"), Image))
+    {
+        return false;
+    }
+
+    // Gray pixels far outside the canvas.
+    const FIntPoint OffCanvas(130, 140);
+    ULIS::FBlock Gray(16, 16, ULIS::Format_RGBAF);
+    for (int32 Index = 0; Index < 16 * 16; ++Index)
+    {
+        float* Pixel = reinterpret_cast<float*>(Gray.Bits()) + Index * 4;
+        Pixel[0] = Pixel[1] = Pixel[2] = 0.5f;
+        Pixel[3] = 1.0f;
+    }
+    Odyssey::TiledImage::CopyFromBlock(*Image, Gray, FIntRect(0, 0, 16, 16), OffCanvas);
+
+    SetSRGB(Texture.Get(), false);
+    TestEqual(TEXT("The layer was converted"), Image->GetFormat(), EOdysseyTiledImageFormat::RGBA8);
+    TestTrue(TEXT("Tiles outside the canvas are kept"), Image->GetTileBounds().Contains(OffCanvas));
+    TSharedPtr<ULIS::FBlock> Read = Odyssey::TiledImage::CopyToBlock(*Image, FIntRect(OffCanvas, OffCanvas + FIntPoint(1, 1)), ULIS::Format_RGBAF);
+    if (TestTrue(TEXT("Read the pixel outside the canvas"), Read.IsValid()))
+    {
+        const float* Pixel = reinterpret_cast<const float*>(Read->Bits());
+        TestTrue(FString::Printf(TEXT("Pixels outside the canvas keep their colors, got %f"), Pixel[0]), FMath::IsNearlyEqual(Pixel[0], 0.5f, 1.0f / 255.0f));
+        TestEqual(TEXT("Pixels outside the canvas keep their alpha"), Pixel[3], 1.0f);
+    }
+    CompareBytes(*this, TEXT("Colors kept in the canvas"),
+        [](int32 X, int32 Y) { return FLinearColor::FromSRGBColor(PatternColor(X, Y)).ToFColor(false); },
+        ReadTextureBytes(Texture.Get(), UserData->LayerStack), 1);
     return true;
 }
 

@@ -15,7 +15,6 @@
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTextureLayerStackUserData.h"
-#include "OdysseyRasterBlockMutator.h"
 
 #include <ULIS>
 #include "ULISLoaderModule.h"

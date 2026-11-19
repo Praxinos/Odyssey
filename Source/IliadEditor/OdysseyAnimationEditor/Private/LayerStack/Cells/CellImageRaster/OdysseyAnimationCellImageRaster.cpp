@@ -134,7 +134,7 @@ UOdysseyAnimationCellImageRaster::OnContentChanged(const TArray<FIntRect>& Rects
 void
 UOdysseyAnimationCellImageRaster::MigrateLegacyContent()
 {
-    UTexture2D* LegacyTexture = GetExistingRenderTexture();
+    UTexture2D* LegacyTexture = Texture;
     if (HasAnyFlags(RF_ClassDefaultObject) || (!mLegacyRasterBlock && !LegacyTexture) || !FApp::CanEverRender())
     {
         return;
@@ -156,12 +156,7 @@ UOdysseyAnimationCellImageRaster::MigrateLegacyContent()
         return;
     }
     mLegacyRasterBlock.Reset();
-    DiscardRenderTexture();
-}
-
-void
-UOdysseyAnimationCellImageRaster::InitTexture()
-{
+    Texture = nullptr;
 }
 
 TSharedPtr<FOdysseyRasterBlockEdit>

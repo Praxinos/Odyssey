@@ -92,9 +92,6 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     void SetExposure(int Value);
 
-    UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
-    UTexture2D* GetRenderTexture() const;
-
 #if WITH_EDITOR
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     FString GetName( ECellNameIfEmpty iCellNameIfEmpty ) const;
@@ -151,7 +148,6 @@ public:
     ) const override;
 
 #if WITH_EDITOR
-    virtual void InitTexture();
     virtual FOdysseyMediaProvider GetMediaProvider() const;
 #endif
 
@@ -184,18 +180,6 @@ protected:
     /** Encodes the linear colors of the cell when its animation blends sRGB encoded colors. */
     virtual EOdysseyColorConversion GetContentColorConversion(const FOdysseyRenderContext* RenderContext) const override;
 
-#if WITH_EDITOR
-protected:
-    /** Returns the render texture without creating it. */
-    UTexture2D* GetExistingRenderTexture() const;
-
-    /** Drops the render texture, which is then neither rendered nor saved. */
-    void DiscardRenderTexture();
-#endif
-
-private:
-    void UpdateTextureSize();
-
 public: //Public needed for the shortcuts
     UPROPERTY()//TODO: meta (minvalue 1)
     int Exposure = 1;
@@ -222,10 +206,6 @@ protected:
     UPROPERTY(NonTransactional, DuplicateTransient)
     FOdysseyAnimationCellOutOfPegs OutOfPegs;
 #endif
-
-private:
-    UPROPERTY(NonTransactional)
-    mutable TObjectPtr<UTexture2D> Texture; //mutable is temporary, will be removed when layers will be 100% GPU based and there's no more dependency on ULIS
 
 #if WITH_EDITOR
 private:

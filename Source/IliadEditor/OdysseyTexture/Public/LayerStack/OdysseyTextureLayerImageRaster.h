@@ -87,9 +87,6 @@ public:
     //IOdysseyRenderingAbility overrides
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame = 0) const override;
 
-    /** Raster layers have no render texture: their pixels are held by the tiled image. */
-    virtual void InitTexture() override;
-
     /** Converts the tiled image when the sRGB setting of the texture changed. */
     virtual void ColorSettingsChanged() override;
     virtual bool BuildRenderPipelineInternal(FRenderFunction& OutRenderFunction,
@@ -107,6 +104,13 @@ private:
 private:
     /** Pixels read from assets saved before the tiled image storage. Moved into the tiled image after loading. */
     TSharedPtr<FOdysseyRasterBlock> LegacyRasterBlock;
+
+    /**
+     * The render texture of assets saved before the tiled image storage, which held the pixels of the layer.
+     * Only loaded: moved into the tiled image after loading, then dropped. Named as the former property to load it.
+     */
+    UPROPERTY(NonTransactional)
+    TObjectPtr<UTexture2D> Texture;
 
     /** The pixels of the layer. Its identity never changes; its tiles are transactional. */
     UPROPERTY(Instanced, NonTransactional)

@@ -4,6 +4,7 @@
 #include "OdysseyRasterContent.h"
 
 #include "Engine/TextureRenderTarget2D.h"
+#include "Math/TranslationMatrix.h"
 #include "Misc/App.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
@@ -77,7 +78,14 @@ FOdysseyRasterContent::EnsureImage()
     else if (Image->GetFormat() != Format && FApp::CanEverRender())
     {
         // e.g. a cell duplicated into an animation of another format, or the sRGB setting of a texture changed.
-        const FIntRect Bounds(FIntPoint::ZeroValue, Description.Size);
+        // Tiles outside the canvas are converted too: a canvas shrunk then enlarged shows them again.
+        FIntRect Bounds(FIntPoint::ZeroValue, Description.Size);
+        const FIntRect TileBounds = Image->GetTileBounds();
+        if (TileBounds.Area() > 0)
+        {
+            Bounds.Union(TileBounds);
+        }
+        const FIntRect PixelsRect(FIntPoint::ZeroValue, Bounds.Size());
         const EOdysseyTiledImageFormat PreviousFormat = Image->GetFormat();
         // For 8-bit content, linear tiles are RGBA8 and decoded sRGB tiles are RGBA16F.
         const bool bEncodingChanged = !ULIS_R_FLOATING(Description.Format) && ULIS_R_DEPTH(Description.Format) == 1
@@ -91,7 +99,7 @@ FOdysseyRasterContent::EnsureImage()
             Image->Initialize(TileSize, Format);
             if (Pixels)
             {
-                Odyssey::TiledImage::CopyFromBlock(*Image, *Pixels, Bounds, FIntPoint::ZeroValue, Description.bSRGB);
+                Odyssey::TiledImage::CopyFromBlock(*Image, *Pixels, PixelsRect, Bounds.Min, Description.bSRGB);
             }
         }
         else
@@ -101,7 +109,7 @@ FOdysseyRasterContent::EnsureImage()
             Image->Initialize(TileSize, Format);
             if (Pixels)
             {
-                Odyssey::TiledImage::CopyFromBlock(*Image, *Pixels, Bounds, FIntPoint::ZeroValue);
+                Odyssey::TiledImage::CopyFromBlock(*Image, *Pixels, PixelsRect, Bounds.Min);
             }
         }
         EndEdit();
@@ -396,15 +404,41 @@ FOdysseyRasterContent::BuildImageRenderFunction(IOdysseyTextureRenderingAbility:
         const FIntRect& SourceRect, const FIntRect& DestinationRect, const FMatrix& Transform)
     {
         RDG_EVENT_SCOPE(GraphBuilder, "Odyssey.RasterContent.Tiles");
-        // Assemble a continuous source before filtering: atlas borders must not create seams
-        // under zoom, rotation or anisotropic sampling. No persistent full-size texture is added.
-        FRDGTextureRef Source = GraphBuilder.CreateTexture(FRDGTextureDesc::Create2D(Size, Format,
+        AddClearRenderTargetPass(GraphBuilder, Destination, FLinearColor::Transparent, DestinationRect);
+
+        // The area of the content the blend samples: the source rect, brought back into content space, within the canvas.
+        const FMatrix ToSource = ContentTransform * Transform;
+        const FMatrix ToContent = ToSource.Inverse();
+        FBox2D Sampled(ForceInit);
+        for (const FIntPoint& Corner : { SourceRect.Min, FIntPoint(SourceRect.Max.X, SourceRect.Min.Y), SourceRect.Max, FIntPoint(SourceRect.Min.X, SourceRect.Max.Y) })
+        {
+            const FVector Position = ToContent.TransformPosition(FVector(Corner.X, Corner.Y, 0.0));
+            Sampled += FVector2D(Position.X, Position.Y);
+        }
+        // A margin keeps the filtering of the border pixels: anisotropic filtering samples along the footprint
+        // of a destination pixel, up to its maximum anisotropy, so the margin grows with the texels per pixel.
+        constexpr float MaxAnisotropy = 16.0f;
+        const float TexelsPerPixel = FMath::Max(Sampled.GetSize().X / FMath::Max(DestinationRect.Width(), 1),
+            Sampled.GetSize().Y / FMath::Max(DestinationRect.Height(), 1));
+        const int32 FilterMargin = FMath::CeilToInt(TexelsPerPixel * MaxAnisotropy) + 2;
+        FIntRect Area(FMath::FloorToInt(Sampled.Min.X) - FilterMargin, FMath::FloorToInt(Sampled.Min.Y) - FilterMargin,
+            FMath::CeilToInt(Sampled.Max.X) + FilterMargin, FMath::CeilToInt(Sampled.Max.Y) + FilterMargin);
+        Area.Clip(FIntRect(FIntPoint::ZeroValue, Size));
+        if (Area.Width() <= 0 || Area.Height() <= 0)
+        {
+            return;
+        }
+
+        // Assemble a continuous source of the sampled tiles only before filtering: atlas borders must not create seams
+        // under zoom, rotation or anisotropic sampling. No persistent texture is added.
+        FRDGTextureRef Source = GraphBuilder.CreateTexture(FRDGTextureDesc::Create2D(Area.Size(), Format,
             FClearValueBinding::Transparent, TexCreate_ShaderResource | TexCreate_RenderTargetable),
             TEXT("Odyssey.RasterContent.Source"));
-        DrawTiles(GraphBuilder, Source, FIntPoint::ZeroValue);
-        AddClearRenderTargetPass(GraphBuilder, Destination, FLinearColor::Transparent, DestinationRect);
+        DrawTiles(GraphBuilder, Source, FIntPoint::ZeroValue - Area.Min);
+        // The source starts at the area origin in content space.
+        const FMatrix FromArea = FTranslationMatrix(FVector(Area.Min.X, Area.Min.Y, 0.0)) * ToSource;
         FOdysseyBlendShader::BlendRect(GraphBuilder, FeatureLevel, Destination, Source, Destination,
-            SourceRect, DestinationRect, ContentTransform * Transform, EOdysseyColorBlendMode::Normal,
+            SourceRect, DestinationRect, FromArea, EOdysseyColorBlendMode::Normal,
             EOdysseyAlphaBlendMode::Normal, 1.0f, EOdysseyAntiAliasing::Anisotropic);
     };
     return true;

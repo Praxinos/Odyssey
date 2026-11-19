@@ -11,7 +11,6 @@
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerImageVector.h"
-#include "OdysseyRasterBlockMutator.h"
 #include "ULISLoaderModule.h"
 #include "Undo/OdysseyVectorUndoSceneClear.h"
 #include "OdysseyMediaRaster.h"

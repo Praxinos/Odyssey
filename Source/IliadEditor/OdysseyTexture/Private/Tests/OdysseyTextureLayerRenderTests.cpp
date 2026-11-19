@@ -64,7 +64,7 @@ bool FOdysseyTextureLayerRenderPendingResourceTest::RunTest(const FString& Param
     TStrongObjectPtr<UTexture2D> Texture(MakeTexture(GetTransientPackage(), TSF_BGRA8));
     UOdysseyLayerStack* Stack = MakeLayer(Texture.Get())->GetLayerStack();
     // Raster layers hold their pixels in tiles: the render texture path is the one of vector layers.
-    UOdysseyTextureLayer* Layer = CastChecked<UOdysseyTextureLayer>(Stack->AddLayer(UOdysseyTextureLayerImageVector::StaticClass()));
+    UOdysseyTextureLayerImageVector* Layer = CastChecked<UOdysseyTextureLayerImageVector>(Stack->AddLayer(UOdysseyTextureLayerImageVector::StaticClass()));
     TStrongObjectPtr<UTextureRenderTarget2D> Target(MakeTarget());
 
     Stack->Render_GameThread(Target.Get(), EOdysseyRenderingType::Render);

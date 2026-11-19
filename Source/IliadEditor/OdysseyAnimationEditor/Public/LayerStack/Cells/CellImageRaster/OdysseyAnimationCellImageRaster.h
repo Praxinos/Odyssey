@@ -30,10 +30,6 @@ public:
 
 public:
     //IOdysseyRenderingAbility overrides
-#if WITH_EDITOR
-    /** Raster cells have no render texture: their pixels are held by the tiled image. */
-    virtual void InitTexture() override;
-#endif
     virtual bool BuildRenderPipelineInternal(
         IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
         const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
@@ -96,5 +92,12 @@ private:
     /** The pixels of the cell. Its identity never changes; its tiles are transactional. Never cooked. */
     UPROPERTY(Instanced, NonTransactional)
     TObjectPtr<UOdysseyTiledImage> TiledImage;
+
+    /**
+     * The render texture of assets saved before the tiled image storage, which held the pixels of the cell.
+     * Only loaded: moved into the tiled image after loading, then dropped. Named as the former property to load it.
+     */
+    UPROPERTY(NonTransactional)
+    TObjectPtr<UTexture2D> Texture;
 #endif
 };

@@ -43,6 +43,13 @@ constexpr int32 Width = 73;
 constexpr int32 Height = 67;
 constexpr EAutomationTestFlags Flags = EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter;
 
+/** Returns the render texture an asset saved before the tiled image storage holds, read through its legacy property. */
+UObject* LegacyRenderTexture(UObject* Owner)
+{
+    const FObjectProperty* Property = FindFProperty<FObjectProperty>(Owner->GetClass(), TEXT("Texture"));
+    return Property ? Property->GetObjectPropertyValue_InContainer(Owner) : nullptr;
+}
+
 UOdysseyAnimationCellImageRaster* Cell(UOdysseyAnimation* Animation, int32 Index)
 {
     return CastChecked<UOdysseyAnimationCellImageRaster>(CastChecked<UOdysseyAnimationLayer>(OdysseyAnimationEditor::GetLayerStack(Animation)->GetRootLayers()[0])->GetCells()[Index]);
@@ -188,7 +195,7 @@ bool FOdysseyAnimationTiledIntegrationTest::RunTest(const FString& Parameters)
             return false;
         }
         TestEqual(TEXT("Image belongs to the cell"), First->GetTiledImage()->GetOuter(), static_cast<UObject*>(First));
-        TestNull(TEXT("Raster cell has no render texture"), First->GetRenderTexture());
+        TestNull(TEXT("Raster cell has no render texture"), LegacyRenderTexture(First));
         TestEqual(TEXT("Tiles hold linear colors with enough precision"), First->GetTiledImage()->GetFormat(),
             Format == EOdysseyAnimationFormat::BGRA8 ? EOdysseyTiledImageFormat::RGBA16F : EOdysseyTiledImageFormat::RGBA32F);
         for (int32 Frame = 0; Frame < 5; ++Frame) { Compare(*this, Animation.Get(), Frame); }
@@ -271,7 +278,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationLegacyMigrationTest, "Odyssey.
 bool FOdysseyAnimationLegacyMigrationTest::RunTest(const FString& Parameters)
 {
     using namespace Odyssey::AnimationTiledTests;
-    FObjectProperty* TextureProperty = FindFProperty<FObjectProperty>(UOdysseyAnimationCell::StaticClass(), TEXT("Texture"));
+    FObjectProperty* TextureProperty = FindFProperty<FObjectProperty>(UOdysseyAnimationCellImageRaster::StaticClass(), TEXT("Texture"));
     if (!TestNotNull(TEXT("Render texture property"), TextureProperty))
     {
         return false;
@@ -296,7 +303,7 @@ bool FOdysseyAnimationLegacyMigrationTest::RunTest(const FString& Parameters)
         TextureProperty->SetObjectPropertyValue_InContainer(First, LegacyTexture);
         First->PostLoad();
 
-        TestNull(TEXT("Migration discards the render texture"), First->GetRenderTexture());
+        TestNull(TEXT("Migration discards the render texture"), LegacyRenderTexture(First));
         ComparePixels(*this, TEXT("Migrated cell"), Reference, Render(Animation.Get(), 0, EOdysseyRenderingType::Render), 0.0001f);
         Compare(*this, Animation.Get(), 0);
     }
@@ -401,7 +408,7 @@ bool FOdysseyAnimationTiledPersistenceTest::RunTest(const FString& Parameters)
     for (int32 Index = 0; Index < 2; ++Index)
     {
         TestNotNull(TEXT("Image is saved with the cell"), Cell(Loaded, Index)->GetTiledImage());
-        TestNull(TEXT("No render texture is saved with the cell"), Cell(Loaded, Index)->GetRenderTexture());
+        TestNull(TEXT("No render texture is saved with the cell"), LegacyRenderTexture(Cell(Loaded, Index)));
         FObjectPropertyBase* Property = FindFProperty<FObjectPropertyBase>(Cell(Loaded, Index)->GetClass(), TEXT("TiledImage"));
         TestTrue(TEXT("Image property is stripped when cooking"), Property->HasAnyPropertyFlags(CPF_EditorOnly));
     }

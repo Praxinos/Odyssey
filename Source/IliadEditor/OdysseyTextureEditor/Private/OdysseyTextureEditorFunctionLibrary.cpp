@@ -9,7 +9,6 @@
 #include "OdysseyExportImage.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyPixelFormat.h"
-#include "OdysseyRasterBlockMutator.h"
 #include "OdysseyTextureFactory.h"
 #include "OdysseyTextureFunctionLibrary.h"
 #include "OdysseyTextureLayer.h"

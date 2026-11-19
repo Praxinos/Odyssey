@@ -14,7 +14,6 @@
 
 class FOdysseyPainterEditorRasterLiquifyToolHUD;
 class FOdysseyMediaRaster;
-class FOdysseyRasterBlock;
 class FOdysseyRasterBlockEdit;
 class FTransaction;
 class UTransBuffer;

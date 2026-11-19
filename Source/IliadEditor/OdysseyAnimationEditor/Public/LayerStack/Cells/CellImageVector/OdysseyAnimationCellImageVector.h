@@ -46,6 +46,18 @@ public:
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const override;
     virtual FIntRect GetDefaultRenderRect() const override;
 
+    /** Returns the texture holding the render of the vector content, created when needed. */
+    UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
+    UTexture2D* GetRenderTexture() const;
+
+private:
+    /** Resizes the render texture to the size of the animation. */
+    void UpdateTextureSize();
+
+    /** The render of the vector content, blended by the animation. */
+    UPROPERTY(NonTransactional)
+    mutable TObjectPtr<UTexture2D> Texture; //mutable is temporary, will be removed when layers will be 100% GPU based and there's no more dependency on ULIS
+
 public:
 #if WITH_EDITORONLY_DATA
     virtual void Serialize(FArchive& Ar) override;
@@ -86,6 +98,7 @@ public:
 private:
     void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
     bool UpdateDrawingFlags() const;
+    /** Creates the render texture when missing, then fills it with the render of the vector content. */
     void InitTexture();
 
 private:

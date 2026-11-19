@@ -7,13 +7,15 @@
 #include "PixelFormat.h"
 #include "RenderGraphFwd.h"
 #include "Serialization/EditorBulkData.h"
-#include "Factories/Factory.h"
 
 #include "OdysseyTileId.h"
 
 #include "OdysseyTiledImage.generated.h"
 
-UENUM(BlueprintType)
+class UTexture;
+class UTextureRenderTarget2D;
+
+UENUM()
 enum class EOdysseyTiledImageFormat : uint8
 {
     RGBA8,
@@ -22,29 +24,12 @@ enum class EOdysseyTiledImageFormat : uint8
 };
 
 /**
- * Implements a factory for UBoardSequence objects.
+ * Raster data split in tiles, positioned in space to provide a technically unbounded image.
+ *
+ * Meant to store the pixels of raster texture layers and raster animation cells, through FOdysseyRasterContent;
+ * it is not exposed to Blueprints nor created as an asset. Its tiles are transactional: Modify() makes changes undoable.
  */
-UCLASS( BlueprintType )
-class ODYSSEYIMAGING_API UOdysseyTiledImageFactoryNew : public UFactory
-{
-    GENERATED_BODY()
-
-public:
-    UOdysseyTiledImageFactoryNew();
-
-public:
-    // UFactory Interface
-    virtual UObject*    FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn ) override;
-    virtual bool        ShouldShowInNewMenu() const override;
-};
-
-/**
- * A class containing raster data split in tiles.
- * Tiles are the positioned in space to provide
- * a technically infinite amount of Raster data
- */
-
-UCLASS(BlueprintType)
+UCLASS()
 class ODYSSEYIMAGING_API UOdysseyTiledImage
     : public UObject
 {
@@ -57,23 +42,31 @@ public:
     virtual void PostEditUndo() override;
 
 public:
-    UFUNCTION(BlueprintCallable, Category="Odyssey|TiledImage")
+    /** Sets the tile size and format, and removes every tile. */
     void Initialize(int TileSize, EOdysseyTiledImageFormat Format);
 
-    UFUNCTION(BlueprintPure, Category="Odyssey|TiledImage")
     EOdysseyTiledImageFormat GetFormat() const;
 
-    UFUNCTION(BlueprintPure, Category="Odyssey|TiledImage")
     EPixelFormat GetPixelFormat() const;
 
-    UFUNCTION(BlueprintCallable, Category="Odyssey|TiledImage")
+    /**
+     * Copies an area of a texture into the image, replacing the touched tiles. Calls Modify(), so the copy is undoable within a transaction.
+     * @param Texture The source texture.
+     * @param Rect The area of the texture to copy.
+     * @param Position The position, in image pixels, of the top-left corner of Rect.
+     */
     void CopyFromTexture(UTexture* Texture, FIntRect Rect, FIntPoint Position);
 
     /**
-     *  Renders the texture into a render target
+     * Renders an area of the image into a render target. Pixels without a tile are transparent.
+     * @param Destination The render target.
+     * @param Rect The area of the image to render, in image pixels.
+     * @param Position The position of the top-left corner of Rect in the destination.
      */
-    UFUNCTION(BlueprintCallable, Category="Odyssey|TiledImage")
     void Render(UTextureRenderTarget2D* Destination, FIntRect Rect, FIntPoint Position) const;
+
+    /** Returns the bounds of the tiles of the image, in image pixels; empty when the image has no tile. */
+    FIntRect GetTileBounds() const;
 
     /** Prepare on the game thread, invoke on the render thread in an existing graph.
      * Captures tile handles rather than the UObject, so subsequent edits cannot change this render.
@@ -129,11 +122,6 @@ private:
 
     UPROPERTY(Transient)
     TMap<FIntPoint, FOdysseyTileId> Tiles;
-
-    DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDynamicOnChanged);
-
-    UPROPERTY(BlueprintAssignable, Category = Events)
-    FDynamicOnChanged OnChanged;
 
     FOnUndone OnUndoneDelegate;
 };

@@ -16,7 +16,6 @@
 #include "ImageUtils.h"
 #include "OdysseyPixelFormat.h"
 #include "ULISLoaderModule.h"
-#include "OdysseyRasterBlockMutator.h"
 #include "Factories/TextureFactory.h"
 
 #define LOCTEXT_NAMESPACE "FOdysseyPainterEditorTextureImport"

@@ -29,7 +29,6 @@
 #include "AssetToolsModule.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-#include "OdysseyRasterBlockMutator.h"
 #include "OdysseyExportImage.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"

@@ -49,6 +49,10 @@ private:
     UPROPERTY()
     FGuid mVectorBlockId;
 
+    /** The render of the vector content, blended by the layer stack. */
+    UPROPERTY(NonTransactional)
+    mutable TObjectPtr<UTexture2D> Texture; //mutable is temporary, will be removed when layers will be 100% GPU based and there's no more dependency on ULIS
+
 public:
     //UOdysseyLayer overrides
     virtual void PostInitProperties() override;
@@ -66,6 +70,13 @@ public:
 
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
+    /** Updates the sRGB setting of the render texture. */
+    virtual void ColorSettingsChanged() override;
+
+    /** Returns the texture holding the render of the vector content, created when needed. */
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
+    UTexture2D* GetRenderTexture() const;
+
 public:
     //IOdysseyRenderingAbility overrides
     virtual bool BuildRenderPipelineInternal(IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext) const override;
@@ -73,7 +84,10 @@ public:
 
 private:
     bool UpdateDrawingFlags() const;
+    /** Creates the render texture, in the format and size of the texture of the layer stack. */
     void InitTexture();
+    /** Resizes the render texture to the size of the layer. */
+    void UpdateTextureSize();
     void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
 
 public:

@@ -34,35 +34,12 @@ UOdysseyAnimationCell::PostLoad() //override
         Mark_DEPRECATED = -1;
     }
 #endif
-    UpdateTextureSize();
-}
-
-void
-UOdysseyAnimationCell::UpdateTextureSize()
-{
-    if (!Texture)
-        return;
-
-    FIntRect rect = GetDefaultRenderRect();
-
-    uint32 layerWidth = rect.Width();
-    uint32 layerHeight = rect.Height();
-#if WITH_EDITORONLY_DATA
-    uint32 textureWidth = Texture->Source.GetSizeX();
-    uint32 textureHeight = Texture->Source.GetSizeY();
-    if ( textureWidth != layerWidth || textureHeight != layerHeight)
-    {
-        Odyssey::ResizeTexture2D(Texture, layerWidth, layerHeight);
-    }
-#endif
 }
 
 void
 UOdysseyAnimationCell::PostDuplicate( EDuplicateMode::Type iDuplicateMode ) //override
 {
     Super::PostDuplicate( iDuplicateMode );
-
-    UpdateTextureSize();
 }
 
 //---
@@ -211,42 +188,7 @@ UOdysseyAnimationCell::ExposureChanged(bool iIsInteractive)
     RenderingCompositionChanged(iIsInteractive);
 }
 
-UTexture2D*
-UOdysseyAnimationCell::GetRenderTexture() const
-{
 #if WITH_EDITOR
-    if (!Texture)
-        const_cast<UOdysseyAnimationCell*>(this)->InitTexture();
-#endif
-
-    return Texture;
-}
-
-#if WITH_EDITOR
-UTexture2D*
-UOdysseyAnimationCell::GetExistingRenderTexture() const
-{
-    return Texture;
-}
-
-void
-UOdysseyAnimationCell::DiscardRenderTexture()
-{
-    Texture = nullptr;
-}
-
-void
-UOdysseyAnimationCell::InitTexture()
-{
-    if ( !Texture )
-    {
-        Texture = NewObject<UTexture2D>(this, TEXT("Texture"));
-        Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-        Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-        Texture->Filter = TextureFilter::TF_Trilinear;
-    }
-}
-
 void
 UOdysseyAnimationCell::SetExposureInteractive(int Value)
 {
@@ -420,48 +362,8 @@ UOdysseyAnimationCell::BuildRenderPipelineInternal(
     const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
-#if WITH_EDITOR
-    if ( !Texture )
-        const_cast<UOdysseyAnimationCell*>(this)->InitTexture();
-
-    Texture->BlockOnAnyAsyncBuild();
-    Texture->WaitForPendingInitOrStreaming();
-#endif
-
-    const FMatrix CellTransform = GetContentTransform(RenderContext);
-    const FTextureRHIRef SourceRHI = Texture->GetResource()->TextureRHI;
-    oRenderFunction = [SourceRHI, CellTransform](
-        FRDGBuilder& iGraphBuilder,
-        ERHIFeatureLevel::Type iFeatureLevel,
-        FRDGTextureRef iDestinationTexture,
-        const FIntRect& iSrcRect,
-        const FIntRect& iDstRect,
-        const FMatrix& iSrcTransform
-        )
-    {
-        AddClearRenderTargetPass(iGraphBuilder, iDestinationTexture, FLinearColor::Transparent, iDstRect);
-
-        FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(SourceRHI, TEXT("UOdysseyAnimationCell::sourceTexture")));
-
-        const FMatrix transform = CellTransform * iSrcTransform;
-
-        FOdysseyBlendShader::BlendRect(
-            iGraphBuilder,
-            iFeatureLevel,
-            iDestinationTexture,
-            sourceTexture,
-            iDestinationTexture,
-            iSrcRect,
-            iDstRect,
-            transform,
-            EOdysseyColorBlendMode::Normal,
-            EOdysseyAlphaBlendMode::Normal,
-            1.f,
-            EOdysseyAntiAliasing::Anisotropic
-        );
-    };
-
-    return true;
+    // Cells render the content their subclass holds.
+    return false;
 }
 
 UTextureRenderTarget2D*

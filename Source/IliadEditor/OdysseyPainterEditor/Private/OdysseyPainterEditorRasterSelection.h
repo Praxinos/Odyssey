@@ -5,8 +5,6 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyHUDElement.h"
-#include "OdysseyRasterBlock.h"
-#include "OdysseyRasterBlockMutator.h"
 
 #include <ULIS>
 
@@ -31,6 +29,14 @@ FORCEINLINE uint32 GetTypeHash(const FIntEdge& Edge)
     return HashCombine(GetTypeHash(Edge.Start), GetTypeHash(Edge.End));
 }
 
+class UOdysseyTiledImage;
+
+/**
+ * The raster selection of the painter editor: a mask of the pixels the raster tools edit.
+ *
+ * The mask is held by a tiled image, in the alpha of its tiles, so that changes are undoable through Modify()
+ * and unselected areas hold no tile. Tools read a CPU block derived from it, of grey floats where 1 is selected.
+ */
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterSelection
     : public UObject
@@ -52,8 +58,15 @@ public:
     bool IsEmpty() const;
 
     ::ULIS::FRectI GetMaskBoundingRect() const;
-    TSharedPtr<FOdysseyRasterBlock> GetRasterBlock();
+
+    /** Returns the mask, of grey floats where 1 is selected; null before Init(). Must not be changed: use EditMask(). */
     TSharedPtr<::ULIS::FBlock> GetBlock();
+
+    /**
+     * Changes the whole mask, then writes it, undoable within a transaction, and notifies the change.
+     * @param Edit Changes the mask. Pending ULIS operations must be finished when it returns.
+     */
+    void EditMask(TFunctionRef<void(::ULIS::FBlock& Mask)> Edit);
 
     TSharedPtr<FOdysseyHUDElement> GetHUD();
 
@@ -67,12 +80,19 @@ private:
     TArray<TArray<FVector2D>> BuildContours(const TArray<FIntEdge>& Edges);
 
 private:
-    void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);
+    /** Changes an area of the mask, then writes it and notifies the change, see EditMask(). */
+    void EditMaskArea(TFunctionRef<void(::ULIS::FBlock& Mask)> Edit, const ::ULIS::FRectI& Area);
+
+    /** Reads the mask back from the tiles an undo or a redo restored. */
+    void OnMaskUndone();
 
 private:
+    /** The mask, derived from the tiles; tools read it. */
     TSharedPtr<::ULIS::FBlock> mBlock;
-    TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
-    FOdysseyRasterBlockMutator mRasterMutator;
+
+    /** The mask, in the alpha of the tiles: the undoable storage of the selection. */
+    UPROPERTY(Transient)
+    TObjectPtr<UOdysseyTiledImage> Mask;
 
     TSharedPtr<FOdysseyHUDElement> mHUD;
     bool mShowHUD;

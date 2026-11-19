@@ -10,6 +10,11 @@
 #if WITH_EDITOR
 #include "Editor.h"
 #include "TextureCompiler.h"
+#include "Engine/Texture2D.h"
+#include "RenderGraphUtils.h"
+#include "OdysseyTexture2DUtils.h"
+#include "OdysseyBlendShader.h"
+#include "TextureResource.h"
 #include "OdysseyAnimationCellImageVectorExport.h"
 #include "OdysseyAnimationCellImageVectorImport.h"
 #include "OdysseyAnimationLayerImageVector.h"
@@ -67,6 +72,37 @@ UOdysseyAnimationCellImageVector::GetDefaultRenderRect() const
     return FIntRect(0, 0, animation->GetWidth(), animation->GetHeight());
 }
 
+UTexture2D*
+UOdysseyAnimationCellImageVector::GetRenderTexture() const
+{
+#if WITH_EDITOR
+    if (!Texture)
+        const_cast<UOdysseyAnimationCellImageVector*>(this)->InitTexture();
+#endif
+
+    return Texture;
+}
+
+void
+UOdysseyAnimationCellImageVector::UpdateTextureSize()
+{
+    if (!Texture)
+        return;
+
+    FIntRect rect = GetDefaultRenderRect();
+
+    uint32 layerWidth = rect.Width();
+    uint32 layerHeight = rect.Height();
+#if WITH_EDITORONLY_DATA
+    uint32 textureWidth = Texture->Source.GetSizeX();
+    uint32 textureHeight = Texture->Source.GetSizeY();
+    if ( textureWidth != layerWidth || textureHeight != layerHeight)
+    {
+        Odyssey::ResizeTexture2D(Texture, layerWidth, layerHeight);
+    }
+#endif
+}
+
 bool
 UOdysseyAnimationCellImageVector::BuildRenderPipelineInternal(
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
@@ -88,7 +124,48 @@ UOdysseyAnimationCellImageVector::BuildRenderPipelineInternal(
     }
 #endif
 
-    return Super::BuildRenderPipelineInternal(oRenderFunction, iParents, RenderContext);
+#if WITH_EDITOR
+    if ( !Texture )
+        const_cast<UOdysseyAnimationCellImageVector*>(this)->InitTexture();
+
+    Texture->BlockOnAnyAsyncBuild();
+    Texture->WaitForPendingInitOrStreaming();
+#endif
+
+    const FMatrix CellTransform = GetContentTransform(RenderContext);
+    const FTextureRHIRef SourceRHI = Texture->GetResource()->TextureRHI;
+    oRenderFunction = [SourceRHI, CellTransform](
+        FRDGBuilder& iGraphBuilder,
+        ERHIFeatureLevel::Type iFeatureLevel,
+        FRDGTextureRef iDestinationTexture,
+        const FIntRect& iSrcRect,
+        const FIntRect& iDstRect,
+        const FMatrix& iSrcTransform
+        )
+    {
+        AddClearRenderTargetPass(iGraphBuilder, iDestinationTexture, FLinearColor::Transparent, iDstRect);
+
+        FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(SourceRHI, TEXT("UOdysseyAnimationCellImageVector::sourceTexture")));
+
+        const FMatrix transform = CellTransform * iSrcTransform;
+
+        FOdysseyBlendShader::BlendRect(
+            iGraphBuilder,
+            iFeatureLevel,
+            iDestinationTexture,
+            sourceTexture,
+            iDestinationTexture,
+            iSrcRect,
+            iDstRect,
+            transform,
+            EOdysseyColorBlendMode::Normal,
+            EOdysseyAlphaBlendMode::Normal,
+            1.f,
+            EOdysseyAntiAliasing::Anisotropic
+        );
+    };
+
+    return true;
 }
 
 #if WITH_EDITOR
@@ -107,7 +184,13 @@ UOdysseyAnimationCellImageVector::UpdateDrawingFlags() const
 void
 UOdysseyAnimationCellImageVector::InitTexture()
 {
-    Super::InitTexture();
+    if ( !Texture )
+    {
+        Texture = NewObject<UTexture2D>(this, TEXT("Texture"));
+        Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+        Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+        Texture->Filter = TextureFilter::TF_Trilinear;
+    }
 
     UTexture2D* texture = GetRenderTexture();
     InitTextureWithBlockData(mVectorBlock->GetBlock(mDrawingFlags).Get(), texture, TextureSourceFormatForULISFormat(mVectorBlock->GetFormat()));
@@ -157,6 +240,7 @@ void
 UOdysseyAnimationCellImageVector::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
 {
     Super::PostDuplicate(iDuplicateMode);
+    UpdateTextureSize();
     UOdysseyAnimation* animation = GetAnimation();
     mVectorBlockId = FGuid::NewGuid();
 
@@ -271,6 +355,7 @@ void
 UOdysseyAnimationCellImageVector::PostLoad()
 {
     Super::PostLoad();
+    UpdateTextureSize();
 
     if (GetFlags() & RF_ClassDefaultObject)
         return;

@@ -23,34 +23,9 @@ UOdysseyTextureLayer::GetTexture() const
     return layerStack->GetTexture();
 }
 
-UTexture2D*
-UOdysseyTextureLayer::GetRenderTexture() const
-{
-    if (!Texture)
-    {
-        const_cast<UOdysseyTextureLayer*>(this)->InitTexture();
-        // Layers without a render texture do not create one.
-        if (Texture)
-        {
-            Texture->UpdateResource();
-            FTextureCompilingManager::Get().FinishCompilation({ Texture });
-        }
-    }
-
-    return Texture;
-}
-
 void
 UOdysseyTextureLayer::ColorSettingsChanged()
 {
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    const bool bSRGB = layerStack && layerStack->IsSRGB();
-    if (Texture && Texture->SRGB != bSRGB)
-    {
-        Texture->SRGB = bSRGB;
-        Texture->UpdateResource();
-        FTextureCompilingManager::Get().FinishCompilation({ Texture });
-    }
 }
 
 EOdysseyColorConversion
@@ -58,18 +33,6 @@ UOdysseyTextureLayer::GetContentColorConversion(const FOdysseyRenderContext* Ren
 {
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
     return layerStack ? layerStack->GetLayerColorConversion() : EOdysseyColorConversion::None;
-}
-
-UTexture2D*
-UOdysseyTextureLayer::GetExistingRenderTexture() const
-{
-    return Texture;
-}
-
-void
-UOdysseyTextureLayer::DiscardRenderTexture()
-{
-    Texture = nullptr;
 }
 
 ETextureSourceFormat
@@ -91,142 +54,6 @@ UOdysseyTextureLayer::GetLayerTextureFormat(ETextureSourceFormat TextureFormat)
             return TSF_BGRA8;
     }
 }
-
-void
-UOdysseyTextureLayer::PostLoad()
-{
-    Super::PostLoad();
-
-    if ( Texture )
-    {
-        Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-        Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-        Texture->Filter = TextureFilter::TF_Nearest;
-        Texture->SRGB = false;
-        Texture->PostEditChange();
-    }
-
-    UpdateTextureSize();
-}
-
-void
-UOdysseyTextureLayer::UpdateTextureSize()
-{
-    if (!Texture)
-        return;
-
-    FIntRect rect = GetDefaultRenderRect();
-
-    uint32 layerWidth = rect.Width();
-    uint32 layerHeight = rect.Height();
-
-    uint32 textureWidth = Texture->Source.GetSizeX();
-    uint32 textureHeight = Texture->Source.GetSizeY();
-    if ( textureWidth != layerWidth || textureHeight != layerHeight)
-    {
-        Odyssey::ResizeTexture2D(Texture, layerWidth, layerHeight);
-    }
-}
-
-void
-UOdysseyTextureLayer::PostDuplicate( EDuplicateMode::Type iDuplicateMode ) //override
-{
-    Super::PostDuplicate( iDuplicateMode );
-
-    UpdateTextureSize();
-}
-
-void
-UOdysseyTextureLayer::InitTexture()
-{
-    if ( !Texture )
-    {
-        UTexture2D* OwnerTexture = GetTexture();
-        if (!OwnerTexture)
-            return;
-
-        checkf(OwnerTexture->Source.GetFormat() != TSF_Invalid, TEXT("Invalid Texture Format"));
-        const ETextureSourceFormat layerTextureFormat = GetLayerTextureFormat(OwnerTexture->Source.GetFormat());
-
-        UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-        Texture = NewObject<UTexture2D>(this, TEXT("Texture"));
-        Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-        Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-        Texture->Filter = TextureFilter::TF_Nearest;
-        // The layer texture holds the bytes of the texture: decoded when sampled if they are sRGB encoded colors.
-        Texture->SRGB = layerStack && layerStack->IsSRGB();
-        Texture->Source.Init(
-            OwnerTexture->Source.GetSizeX(),
-            OwnerTexture->Source.GetSizeY(),
-            1,
-            1,
-            layerTextureFormat
-        );
-    }
-}
-
-bool
-UOdysseyTextureLayer::BuildRenderPipelineInternal(
-    IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
-    const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
-) const
-{
-    if (bCanHaveChildren)
-        return Super::BuildRenderPipelineInternal(oRenderFunction, iParents, RenderContext);
-
-#if WITH_EDITOR
-    if ( !Texture )
-    {
-        const_cast<UOdysseyTextureLayer*>(this)->InitTexture();
-        Texture->UpdateResource();
-    }
-#endif
-
-    FTextureCompilingManager::Get().FinishCompilation({ Texture });
-
-    // The RHI texture of the resource is created by the render thread after UpdateResource().
-    // It must be read when the render function runs on the render thread, not here on the game thread,
-    // where it can still be null right after the resource was (re)created.
-    const FTextureResource* SourceResource = Texture->GetResource();
-    if (!SourceResource)
-        return false;
-
-    oRenderFunction = [SourceResource](
-        FRDGBuilder& iGraphBuilder,
-        ERHIFeatureLevel::Type iFeatureLevel,
-        FRDGTextureRef iDestinationTexture,
-        const FIntRect& iSrcRect,
-        const FIntRect& iDstRect,
-        const FMatrix& iSrcTransform
-        )
-    {
-        AddClearRenderTargetPass(iGraphBuilder, iDestinationTexture, FLinearColor::Transparent, iDstRect);
-
-        const FTextureRHIRef SourceRHI = SourceResource->TextureRHI;
-        if (!SourceRHI)
-            return;
-
-        FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(SourceRHI, TEXT("UOdysseyTextureLayer::sourceTexture")));
-
-        FOdysseyBlendShader::BlendRect(
-            iGraphBuilder,
-            iFeatureLevel,
-            iDestinationTexture,
-            sourceTexture,
-            iDestinationTexture,
-            iSrcRect,
-            iDstRect,
-            iSrcTransform,
-            EOdysseyColorBlendMode::Normal,
-            EOdysseyAlphaBlendMode::Normal,
-            1.f,
-            EOdysseyAntiAliasing::Anisotropic
-        );
-    };
-
-    return true;
-}
-
 
 #if WITH_EDITOR
 FSimpleMulticastDelegate&

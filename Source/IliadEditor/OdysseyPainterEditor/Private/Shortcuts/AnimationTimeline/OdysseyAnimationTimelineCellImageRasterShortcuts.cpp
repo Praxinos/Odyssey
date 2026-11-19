@@ -21,7 +21,6 @@
 #include "OdysseyAnimationCellsSelection.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
 #include "OdysseyPixelFormat.h"
-#include "OdysseyRasterBlockMutator.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
 #include "SOdysseyAnimationCellImageRaster.h"
