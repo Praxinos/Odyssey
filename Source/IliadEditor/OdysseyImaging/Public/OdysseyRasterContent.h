@@ -5,15 +5,14 @@
 
 #include "CoreMinimal.h"
 #include "UObject/ObjectPtr.h"
-#include "UObject/StrongObjectPtr.h"
 
 #include "OdysseyRasterBlock.h"
 #include "OdysseyTextureRenderingAbility.h"
 
 #include <ULIS>
 
+class FOdysseyRasterEditSession;
 class UOdysseyTiledImage;
-class UTexture2D;
 
 /**
  * Raster content shared by raster texture layers and raster animation cells.
@@ -22,9 +21,10 @@ class UTexture2D;
  * UPROPERTY so that it is saved, duplicated and garbage collected with the owner; this class creates it in that
  * property, keeps it in the format the owner expects, renders it and writes into it.
  *
- * Transitional: while tools still edit an FOdysseyRasterBlock, this class derives that block from the tiled image,
- * writes the committed edits of the block back into the tiled image, and displays the uncommitted edits
- * through a transient preview texture. This part goes away once tools edit render targets.
+ * Transitional: while tools still edit an FOdysseyRasterBlock, this class derives that block from the tiled image.
+ * The uncommitted edits of the block are copied into an FOdysseyRasterEditSession, which the views show, and
+ * the committed ones are written into the tiled image through that session. This part goes away once tools edit
+ * render targets through edit sessions themselves.
  */
 class ODYSSEYIMAGING_API FOdysseyRasterContent
 {
@@ -62,6 +62,7 @@ public:
 
     /**
      * @param InOwner The object owning the image property; the outer of the image and the owner of the raster block.
+     * @param InRenderingId The rendering id of the owner, which the edit sessions replace in the views.
      * @param InImage The owner's instanced property holding the tiled image. It must outlive this object.
      * @param bInSRGB True when the 8-bit raster block holds sRGB encoded colors. The image always holds linear colors:
      *                they are decoded when written into it and encoded when the raster block is read from it.
@@ -69,7 +70,7 @@ public:
      * @param InOnChanged Called when pixels changed.
      * @param InPostProcess Applied by the raster block after each edit, e.g. the alpha lock.
      */
-    FOdysseyRasterContent(UObject& InOwner, TObjectPtr<UOdysseyTiledImage>& InImage, bool bInSRGB,
+    FOdysseyRasterContent(UObject& InOwner, const FGuid& InRenderingId, TObjectPtr<UOdysseyTiledImage>& InImage, bool bInSRGB,
         FGetDescription InGetDescription, FOnChanged InOnChanged, FOdysseyRasterBlock::FPostProcess InPostProcess);
 
     FOdysseyRasterContent(const FOdysseyRasterContent&) = delete;
@@ -99,14 +100,14 @@ public:
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock();
 
     /**
-     * Builds the function rendering the content: the uncommitted edits when there are some, otherwise the image.
+     * Builds the function rendering the image. The uncommitted edits are shown by the views through the edit session.
      * @param OutRenderFunction The render function.
      * @param ContentTransform Applied to the content before the transform given to the render function.
      * @return False when there is nothing to render.
      */
     bool BuildRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform);
 
-    /** Returns true while the raster block has edits not yet written into the image. */
+    /** Returns true while the raster block has edits not yet written into the image, i.e. an edit session is active. */
     bool HasUncommittedEdits() const;
 
 private:
@@ -114,12 +115,12 @@ private:
     void OnBlockChanged(const TArray<::ULIS::FRectI>& Rects);
     void OnBlockCommited(const TArray<::ULIS::FRectI>& Rects);
     void OnImageUndone();
-    void UpdatePreview(const TArray<::ULIS::FRectI>& Rects, bool bCommitted);
-    bool BuildPreviewRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform) const;
+    void EndEditSession();
     bool BuildImageRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform, FIntPoint Size) const;
 
 private:
     UObject& Owner;
+    FGuid RenderingId;
     TObjectPtr<UOdysseyTiledImage>& Image;
     bool bSRGB;
     FGetDescription GetDescription;
@@ -130,6 +131,5 @@ private:
     TWeakObjectPtr<UOdysseyTiledImage> BoundImage;
 
     TSharedPtr<FOdysseyRasterBlock> RasterBlock;
-    TStrongObjectPtr<UTexture2D> PreviewTexture;
-    bool bHasUncommittedEdits = false;
+    TSharedPtr<FOdysseyRasterEditSession> EditSession;
 };

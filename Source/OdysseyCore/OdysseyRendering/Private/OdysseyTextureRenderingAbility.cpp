@@ -231,7 +231,20 @@ bool IOdysseyTextureRenderingAbility::BuildRenderPipeline(FRenderFunction& OutRe
     {
         if (Override->ContentReplacement)
         {
-            OutRenderFunction = Override->ContentReplacement;
+            const FMatrix ContentTransform = GetContentTransform(RenderContext);
+            if (ContentTransform.Equals(FMatrix::Identity))
+            {
+                OutRenderFunction = Override->ContentReplacement;
+            }
+            else
+            {
+                OutRenderFunction = [Replacement = Override->ContentReplacement, ContentTransform](FRDGBuilder& GraphBuilder,
+                    ERHIFeatureLevel::Type FeatureLevel, FRDGTextureRef Destination, const FIntRect& SourceRect,
+                    const FIntRect& DestinationRect, const FMatrix& Transform)
+                {
+                    Replacement(GraphBuilder, FeatureLevel, Destination, SourceRect, DestinationRect, ContentTransform * Transform);
+                };
+            }
         }
         if (Override->ContentDecorator)
         {

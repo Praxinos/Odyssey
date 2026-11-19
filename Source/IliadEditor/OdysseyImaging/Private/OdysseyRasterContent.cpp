@@ -3,17 +3,13 @@
 
 #include "OdysseyRasterContent.h"
 
-#include "Engine/Texture2D.h"
 #include "Misc/App.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
-#include "TextureCompiler.h"
-#include "TextureResource.h"
 
 #include "OdysseyBlendShader.h"
-#include "OdysseyPixelFormat.h"
 #include "OdysseyRasterBlockMutator.h"
-#include "OdysseySurfaceTexture2DEditable.h"
+#include "OdysseyRasterEditSession.h"
 #include "OdysseyTiledImage.h"
 #include "OdysseyTiledImageBlock.h"
 #include "ULISUtils.h"
@@ -32,9 +28,10 @@ FOdysseyRasterContent::~FOdysseyRasterContent()
     }
 }
 
-FOdysseyRasterContent::FOdysseyRasterContent(UObject& InOwner, TObjectPtr<UOdysseyTiledImage>& InImage, bool bInSRGB,
+FOdysseyRasterContent::FOdysseyRasterContent(UObject& InOwner, const FGuid& InRenderingId, TObjectPtr<UOdysseyTiledImage>& InImage, bool bInSRGB,
     FGetDescription InGetDescription, FOnChanged InOnChanged, FOdysseyRasterBlock::FPostProcess InPostProcess)
     : Owner(InOwner)
+    , RenderingId(InRenderingId)
     , Image(InImage)
     , bSRGB(bInSRGB)
     , GetDescription(MoveTemp(InGetDescription))
@@ -152,18 +149,14 @@ FOdysseyRasterContent::BuildRenderFunction(IOdysseyTextureRenderingAbility::FRen
     {
         return false;
     }
-
-    if (bHasUncommittedEdits && PreviewTexture)
-    {
-        return BuildPreviewRenderFunction(OutRenderFunction, ContentTransform);
-    }
+    // Uncommitted edits are shown by the views, through the content replacement of the edit session.
     return BuildImageRenderFunction(OutRenderFunction, ContentTransform, GetDescription().Size);
 }
 
 bool
 FOdysseyRasterContent::HasUncommittedEdits() const
 {
-    return bHasUncommittedEdits;
+    return EditSession.IsValid() && EditSession->IsActive();
 }
 
 void
@@ -177,30 +170,61 @@ FOdysseyRasterContent::ReleaseRasterBlock()
         RasterBlock->PostProcess().Unbind();
         RasterBlock.Reset();
     }
-    PreviewTexture.Reset();
-    bHasUncommittedEdits = false;
+    EndEditSession();
+}
+
+void
+FOdysseyRasterContent::EndEditSession()
+{
+    if (EditSession)
+    {
+        EditSession->End();
+        EditSession.Reset();
+    }
 }
 
 void
 FOdysseyRasterContent::OnBlockChanged(const TArray<::ULIS::FRectI>& Rects)
 {
-    bHasUncommittedEdits = true;
-    UpdatePreview(Rects, false);
-    OnChanged(::ULISUtils::ToIntRects(Rects), true);
+    if (!Image || !FApp::CanEverRender())
+    {
+        return;
+    }
+    if (!HasUncommittedEdits())
+    {
+        EditSession = FOdysseyRasterEditSession::Begin(RenderingId, *Image, GetDescription().Size);
+        if (!EditSession)
+        {
+            return;
+        }
+    }
+    const TArray<FIntRect> IntRects = ::ULISUtils::ToIntRects(Rects);
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> Block = RasterBlock->GetBlock();
+    Odyssey::TiledImage::CopyBlockToRenderTarget(*EditSession->GetTarget(), Image->GetFormat(), *Block, IntRects, bSRGB);
+    EditSession->Invalidate(IntRects);
 }
 
 void
 FOdysseyRasterContent::OnBlockCommited(const TArray<::ULIS::FRectI>& Rects)
 {
-    TArray<FIntRect> IntRects = ::ULISUtils::ToIntRects(Rects);
+    const TArray<FIntRect> IntRects = ::ULISUtils::ToIntRects(Rects);
     // While undoing, the image is restored by the transaction itself.
-    if (!GIsTransacting && Image && FApp::CanEverRender())
+    if (GIsTransacting || !Image || !FApp::CanEverRender())
+    {
+        EndEditSession();
+    }
+    else if (HasUncommittedEdits())
+    {
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> Block = RasterBlock->GetBlock();
+        Odyssey::TiledImage::CopyBlockToRenderTarget(*EditSession->GetTarget(), Image->GetFormat(), *Block, IntRects, bSRGB);
+        EditSession->Commit(IntRects);
+        EditSession.Reset();
+    }
+    else
     {
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> Block = RasterBlock->GetBlock();
         Odyssey::TiledImage::CopyFromBlock(*Image, *Block, IntRects, bSRGB);
     }
-    bHasUncommittedEdits = false;
-    UpdatePreview(Rects, true);
     OnChanged(IntRects, false);
 }
 
@@ -209,7 +233,7 @@ FOdysseyRasterContent::OnImageUndone()
 {
     if (!RasterBlock || !FApp::CanEverRender())
     {
-        bHasUncommittedEdits = false;
+        EndEditSession();
         OnChanged({}, false);
         return;
     }
@@ -229,77 +253,6 @@ FOdysseyRasterContent::OnImageUndone()
         Mutator.Commit();
     }
     RasterBlock->PostProcess() = PostProcess;
-}
-
-void
-FOdysseyRasterContent::UpdatePreview(const TArray<::ULIS::FRectI>& Rects, bool bCommitted)
-{
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> Block = RasterBlock->GetBlock();
-    const ETextureSourceFormat SourceFormat = TextureSourceFormatForULISFormat(Block->Format());
-    UTexture2D* Texture = PreviewTexture.Get();
-    if (Texture && Texture->Source.GetSizeX() == Block->Width() && Texture->Source.GetSizeY() == Block->Height()
-        && Texture->Source.GetFormat() == SourceFormat)
-    {
-        FOdysseySurfaceTexture2DEditable Surface(Texture, Block);
-        Surface.Invalidate(Rects);
-        if (bCommitted)
-        {
-            // Keeps the source valid in case the resource is recreated.
-            CopyBlockDataToTextureSource(Block.Get(), Texture, ::ULISUtils::ToIntRects(Rects));
-        }
-        return;
-    }
-
-    // A preview is only needed to display uncommitted edits.
-    if (bCommitted)
-    {
-        PreviewTexture.Reset();
-        return;
-    }
-    Texture = NewObject<UTexture2D>(GetTransientPackage(), NAME_None, RF_Transient);
-    Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-    // 8-bit blocks keep their encoding; other blocks keep their precision.
-    const bool b8Bit = !ULIS_R_FLOATING(Block->Format()) && ULIS_R_DEPTH(Block->Format()) == 1;
-    Texture->CompressionSettings = b8Bit ? TextureCompressionSettings::TC_VectorDisplacementmap : TextureCompressionSettings::TC_HDR_F32;
-    Texture->Filter = TextureFilter::TF_Nearest;
-    Texture->SRGB = bSRGB;
-    InitTextureWithBlockData(Block.Get(), Texture, SourceFormat);
-    Texture->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({ Texture });
-    PreviewTexture.Reset(Texture);
-}
-
-bool
-FOdysseyRasterContent::BuildPreviewRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform) const
-{
-    UTexture2D* Texture = PreviewTexture.Get();
-    FTextureCompilingManager::Get().FinishCompilation({ Texture });
-    Texture->BlockOnAnyAsyncBuild();
-    Texture->WaitForPendingInitOrStreaming();
-
-    // The RHI texture is read on the render thread, where it is valid once the resource is initialized.
-    const FTextureResource* Resource = Texture->GetResource();
-    if (!Resource)
-    {
-        return false;
-    }
-
-    OutRenderFunction = [Resource, ContentTransform](FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type FeatureLevel,
-        FRDGTextureRef Destination, const FIntRect& SourceRect, const FIntRect& DestinationRect, const FMatrix& Transform)
-    {
-        RDG_EVENT_SCOPE(GraphBuilder, "Odyssey.RasterContent.Preview");
-        AddClearRenderTargetPass(GraphBuilder, Destination, FLinearColor::Transparent, DestinationRect);
-        const FTextureRHIRef SourceRHI = Resource->TextureRHI;
-        if (!SourceRHI)
-        {
-            return;
-        }
-        FRDGTextureRef Source = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(SourceRHI, TEXT("Odyssey.RasterContent.Preview")));
-        FOdysseyBlendShader::BlendRect(GraphBuilder, FeatureLevel, Destination, Source, Destination,
-            SourceRect, DestinationRect, ContentTransform * Transform, EOdysseyColorBlendMode::Normal,
-            EOdysseyAlphaBlendMode::Normal, 1.0f, EOdysseyAntiAliasing::Anisotropic);
-    };
-    return true;
 }
 
 bool

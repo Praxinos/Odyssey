@@ -6,6 +6,8 @@
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Math/Float16.h"
+#include "RenderGraphBuilder.h"
+#include "RenderGraphUtils.h"
 #include "RenderingThread.h"
 #include "TextureResource.h"
 #include "UObject/StrongObjectPtr.h"
@@ -68,7 +70,7 @@ void DecodeSRGB(const ::ULIS::FBlock& Source, ::ULIS::FBlock& Destination)
  * Creates a transient texture holding SourceRect of the block in the tile pixel format, ready to be read by CopyFromTexture().
  * Without bSRGB, values are kept, so only channel order and type change. SourceRect must lie within the block.
  */
-UTexture2D* CreateTileTexture(const UOdysseyTiledImage& Image, const ::ULIS::FBlock& Block, const FIntRect& SourceRect, bool bSRGB)
+UTexture2D* CreateTileTexture(EOdysseyTiledImageFormat TileFormat, EPixelFormat PixelFormat, const ::ULIS::FBlock& Block, const FIntRect& SourceRect, bool bSRGB)
 {
     // FIntRect::IsEmpty() is false when only one dimension is zero.
     if (SourceRect.Width() <= 0 || SourceRect.Height() <= 0)
@@ -77,7 +79,6 @@ UTexture2D* CreateTileTexture(const UOdysseyTiledImage& Image, const ::ULIS::FBl
     }
 
     // Convert to the memory layout of the tiles.
-    const EOdysseyTiledImageFormat TileFormat = Image.GetFormat();
     const bool bDecode = bSRGB && Is8Bit(Block.Format());
     // Linear colors need more than 8 bits to keep every sRGB encoded color.
     if (bDecode && TileFormat == EOdysseyTiledImageFormat::RGBA8)
@@ -99,7 +100,6 @@ UTexture2D* CreateTileTexture(const UOdysseyTiledImage& Image, const ::ULIS::FBl
         ConvertBlock(Block, Staging, Rect);
     }
 
-    const EPixelFormat PixelFormat = Image.GetPixelFormat();
     UTexture2D* Texture = UTexture2D::CreateTransient(Size.X, Size.Y, PixelFormat);
     if (!Texture)
     {
@@ -157,7 +157,7 @@ bool CopyFromBlock(UOdysseyTiledImage& Image, const ::ULIS::FBlock& Block, FIntR
     check(IsInGameThread());
     TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::TiledImage::CopyFromBlock);
     SourceRect.Clip(FIntRect(0, 0, Block.Width(), Block.Height()));
-    TStrongObjectPtr<UTexture2D> Texture(CreateTileTexture(Image, Block, SourceRect, bSRGB));
+    TStrongObjectPtr<UTexture2D> Texture(CreateTileTexture(Image.GetFormat(), Image.GetPixelFormat(), Block, SourceRect, bSRGB));
     if (!Texture)
     {
         return false;
@@ -193,7 +193,7 @@ bool CopyFromBlock(UOdysseyTiledImage& Image, const ::ULIS::FBlock& Block, const
         }
     }
     // Upload the bounds once, then only replace the tiles touched by each rect.
-    TStrongObjectPtr<UTexture2D> Texture(CreateTileTexture(Image, Block, Bounds, bSRGB));
+    TStrongObjectPtr<UTexture2D> Texture(CreateTileTexture(Image.GetFormat(), Image.GetPixelFormat(), Block, Bounds, bSRGB));
     if (!Texture)
     {
         return false;
@@ -203,6 +203,53 @@ bool CopyFromBlock(UOdysseyTiledImage& Image, const ::ULIS::FBlock& Block, const
         Image.CopyFromTexture(Texture.Get(), Rect - Bounds.Min, Rect.Min);
     }
     // The tiles are written on the render thread, which reads the texture.
+    FlushRenderingCommands();
+    return true;
+}
+
+bool CopyBlockToRenderTarget(UTextureRenderTarget2D& Target, EOdysseyTiledImageFormat Format, const ::ULIS::FBlock& Block, const TArray<FIntRect>& Rects, bool bSRGB)
+{
+    check(IsInGameThread());
+    TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::TiledImage::CopyBlockToRenderTarget);
+    const EPixelFormat PixelFormat = Target.GetFormat();
+    const FIntRect BlockRect(0, 0, FMath::Min<int32>(Block.Width(), Target.SizeX), FMath::Min<int32>(Block.Height(), Target.SizeY));
+    TArray<FIntRect> Clipped;
+    Clipped.Reserve(Rects.Num());
+    FIntRect Bounds;
+    for (FIntRect Rect : Rects)
+    {
+        Rect.Clip(BlockRect);
+        if (Rect.Width() > 0 && Rect.Height() > 0)
+        {
+            if (Clipped.IsEmpty())
+            {
+                Bounds = Rect;
+            }
+            else
+            {
+                Bounds.Union(Rect);
+            }
+            Clipped.Add(Rect);
+        }
+    }
+    TStrongObjectPtr<UTexture2D> Texture(CreateTileTexture(Format, PixelFormat, Block, Bounds, bSRGB));
+    if (!Texture)
+    {
+        return false;
+    }
+    ENQUEUE_RENDER_COMMAND(OdysseyCopyBlockToRenderTarget)(
+        [Source = Texture->GetResource(), Destination = Target.GameThread_GetRenderTargetResource(), Clipped = MoveTemp(Clipped), Bounds](FRHICommandListImmediate& RHICmdList)
+        {
+            FRDGBuilder GraphBuilder(RHICmdList);
+            FRDGTextureRef SourceTexture = GraphBuilder.RegisterExternalTexture(::CreateRenderTarget(Source->TextureRHI, TEXT("Odyssey.TiledImage.BlockUpload")));
+            FRDGTextureRef DestinationTexture = Destination->GetRenderTargetTexture(GraphBuilder);
+            for (const FIntRect& Rect : Clipped)
+            {
+                AddCopyTexturePass(GraphBuilder, SourceTexture, DestinationTexture, Rect.Min - Bounds.Min, Rect.Min, Rect.Size());
+            }
+            GraphBuilder.Execute();
+        });
+    // The copy is done on the render thread, which reads the texture.
     FlushRenderingCommands();
     return true;
 }

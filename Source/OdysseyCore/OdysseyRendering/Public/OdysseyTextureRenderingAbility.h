@@ -78,6 +78,13 @@ public:
 
 protected:
     virtual bool BuildsCompositeContent() const { return false; }
+
+    /**
+     * Returns the transform applied to the content of this node before the transform given to its render function,
+     * e.g. the out of pegs transform of an animation cell. A content replacement is rendered with it too,
+     * so that a replacement is given in content space.
+     */
+    virtual FMatrix GetContentTransform(const FOdysseyRenderContext* RenderContext) const { return FMatrix::Identity; }
     virtual bool BuildRenderPipelineInternal(
         FRenderFunction& oRenderFunction,
         const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext

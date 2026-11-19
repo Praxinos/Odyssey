@@ -18,6 +18,7 @@
 
 #include "OdysseyAnimationPlayer.generated.h"
 
+class FOdysseyRenderPreview;
 class UOdysseyAnimation;
 
 UENUM()
@@ -212,6 +213,15 @@ private:
     FFrameTime ApplyPostBehaviour(FFrameTime iFrame) const;
     void UpdateTexture();
     void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
+    void OnRenderPreviewInvalidated(const TArray<FIntRect>& Rects);
+
+public:
+    /**
+     * Sets the view preview rendered by this player, e.g. the uncommitted edits of a tool.
+     *
+     * @param Preview The preview; null to render without preview.
+     */
+    void SetRenderPreview(TSharedPtr<FOdysseyRenderPreview> Preview);
     FFrameTime ClampFrameToPlayRange(FFrameTime InFrame) const;
 
 private:
@@ -321,6 +331,8 @@ private:
     FFrameTime mDisplayedFrame; //Displayed frame when playing / Scrubbing / Paused (always in animation bounds)
     TArray<FGuid>   mImageRenderingComposition;
     FOdysseyInvalidTileMap mInvalidTileMap;
+    TSharedPtr<FOdysseyRenderPreview> mRenderPreview;
+    FDelegateHandle mRenderPreviewInvalidatedHandle;
     EOdysseyAnimationPlayerStatus Status = EOdysseyAnimationPlayerStatus::Stopped;
 
 private:

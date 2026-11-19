@@ -12,6 +12,7 @@
 #include "OdysseyPixelFormat.h"
 #include "OdysseyRasterBlock.h"
 #include "OdysseyRasterBlockMutator.h"
+#include "OdysseyRenderContext.h"
 #include "OdysseyTextureLayer.h"
 #include "OdysseyTextureLayerFolder.h"
 #include "OdysseyTextureLayerImageRaster.h"
@@ -211,6 +212,13 @@ UOdysseyTextureLayerStack::InactivateTextureFastUpdate()
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.RemoveAll(this);
     UPackage::PreSavePackageWithContextEvent.RemoveAll(this);
     UPackage::PackageSavedWithContextEvent.RemoveAll(this);
+    // The texture source, written below, holds the committed pixels only.
+    RenderWithoutPreview();
+    if (mRenderPreview)
+    {
+        mRenderPreview->OnInvalidated().Remove(mRenderPreviewInvalidatedHandle);
+        mRenderPreview.Reset();
+    }
     CompressTexture();
     texture->UpdateResource();
     mTextureFastUpdateSurface = nullptr;
@@ -272,7 +280,75 @@ UOdysseyTextureLayerStack::CompressTexture()
 }
 
 void
-UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<FIntRect>& iRects)
+UOdysseyTextureLayerStack::SetRenderPreview(TSharedPtr<FOdysseyRenderPreview> Preview)
+{
+    if (mRenderPreview == Preview)
+    {
+        return;
+    }
+    const bool bHadOverrides = HasPreviewOverrides();
+    if (mRenderPreview)
+    {
+        mRenderPreview->OnInvalidated().Remove(mRenderPreviewInvalidatedHandle);
+    }
+    mRenderPreview = MoveTemp(Preview);
+    if (mRenderPreview)
+    {
+        mRenderPreviewInvalidatedHandle = mRenderPreview->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerStack::OnRenderPreviewInvalidated);
+    }
+    if (bHadOverrides || HasPreviewOverrides())
+    {
+        OnRenderPreviewInvalidated({});
+    }
+}
+
+void
+UOdysseyTextureLayerStack::RenderWithoutPreview()
+{
+    if (!HasPreviewOverrides() || !mTextureFastUpdateSurface.IsValid())
+        return;
+
+    if (!RenderTarget)
+        CreateRenderTarget();
+
+    UpdateRenderTargetFormat();
+    FastUpdateTexture({ GetDefaultRenderRect() }, false);
+}
+
+bool
+UOdysseyTextureLayerStack::HasPreviewOverrides() const
+{
+    if (!mRenderPreview)
+        return false;
+
+    // The preview may also replace nodes of other assets.
+    const TMap<FGuid, FOdysseyRenderOverride>& overrides = mRenderPreview->GetContext().Overrides;
+    for (const FGuid& id : GetRenderingComposition(EOdysseyRenderingType::Editor, 0))
+    {
+        if (overrides.Contains(id))
+            return true;
+    }
+    return false;
+}
+
+void
+UOdysseyTextureLayerStack::OnRenderPreviewInvalidated(const TArray<FIntRect>& Rects)
+{
+    if (Rects.IsEmpty())
+    {
+        mInvalidTileMap.Invalidate();
+    }
+    else
+    {
+        mInvalidTileMap.Invalidate(Rects);
+    }
+
+    if (mTextureUpdateMode == EOdysseyTextureLayerStackTextureUpdateMode::Instantaneous)
+        UpdateTexture();
+}
+
+void
+UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<FIntRect>& iRects, bool bWithPreview)
 {
     UTexture2D* texture = GetTexture();
     if ( !texture )
@@ -281,9 +357,10 @@ UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<FIntRect>& iRects)
     FTextureCompilingManager::Get().FinishCompilation({ texture });
     ETextureSourceFormat textureSourceFormat = texture->Source.GetFormat();
 
+    const FOdysseyRenderContext* renderContext = bWithPreview && mRenderPreview ? &mRenderPreview->GetContext() : nullptr;
     for (const FIntRect& rect : iRects)
     {
-        Render_GameThread(RenderTarget, EOdysseyRenderingType::Editor, rect);
+        Render_GameThread(RenderTarget, EOdysseyRenderingType::Editor, rect, renderContext);
     }
 
     //Fence ?
@@ -346,6 +423,8 @@ UOdysseyTextureLayerStack::OnPackagePreSave(UPackage* iPackage, FObjectPreSaveCo
     if ( package != iPackage )
         return;
 
+    // The saved source holds the committed pixels only.
+    RenderWithoutPreview();
     CompressTexture();
 }
 
@@ -361,6 +440,10 @@ UOdysseyTextureLayerStack::OnPackageSaved(const FString& iPackageFilename, UPack
         return;
 
     UncompressTexture();
+    if (HasPreviewOverrides())
+    {
+        OnRenderPreviewInvalidated({});
+    }
 }
 
 void

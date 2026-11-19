@@ -28,6 +28,8 @@
 #include "UObject/UnrealType.h"
 
 #include "OdysseyRasterBlockMutator.h"
+#include "OdysseyRasterEditSession.h"
+#include "OdysseyRenderContext.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerStack.h"
 #include "OdysseyTextureLayerStackUserData.h"
@@ -76,13 +78,15 @@ UOdysseyTextureLayerImageRaster* MakeLayer(UTexture2D* Texture)
     return CastChecked<UOdysseyTextureLayerImageRaster>(UserData->LayerStack->GetCurrentLayer());
 }
 
-/** Renders the pipeline of a node into a new float render target and reads it back. */
+/** Renders the pipeline of a node as a view does, showing the active edit sessions, into a new float render target and reads it back. */
 TArray<FLinearColor> ReadPipeline(const IOdysseyTextureRenderingAbility* Renderer,
     FIntRect SourceRect = FIntRect(0, 0, Width, Height), FIntRect DestinationRect = FIntRect(0, 0, Width, Height),
     FMatrix Transform = FMatrix::Identity)
 {
+    FOdysseyRenderContext Context;
+    FOdysseyRasterEditSession::AddOverrides(Context);
     IOdysseyTextureRenderingAbility::FRenderFunction Draw;
-    if (!Renderer->BuildRenderPipeline(Draw))
+    if (!Renderer->BuildRenderPipeline(Draw, {}, &Context))
     {
         return {};
     }
@@ -480,6 +484,63 @@ bool FOdysseyTextureLayerTiledPartialTest::RunTest(const FString& Parameters)
     Aborted.Abort();
     TestTrue(TEXT("Aborted edits leave the tiles unchanged"), ReadTileIds(Image).OrderIndependentCompareEqual(After));
     ComparePixels(*this, TEXT("Aborted edits are not rendered"), Interactive, ReadPipeline(Layer), 0.0001f);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureLayerStackPreviewTest, "Odyssey.Texture.TiledImage.StackPreview",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+/**
+ * While the texture is edited, its displayed pixels show the uncommitted edits through the view preview,
+ * whereas its source, which is saved, holds the committed pixels only.
+ */
+bool FOdysseyTextureLayerStackPreviewTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::TextureLayerTiledImageTests;
+    TStrongObjectPtr<UTexture2D> Texture(MakeTexture(GetTransientPackage(), TSF_BGRA8));
+    UOdysseyTextureLayerImageRaster* Layer = MakeLayer(Texture.Get());
+    UOdysseyTextureLayerStack* Stack = CastChecked<UOdysseyTextureLayerStack>(Layer->GetLayerStack());
+    Stack->SetTextureUpdateMode(EOdysseyTextureLayerStackTextureUpdateMode::Instantaneous);
+    Stack->ActivateTextureFastUpdate();
+    FOdysseyRasterEditPreview Preview(MakeShared<FOdysseyRenderPreview>());
+    Stack->SetRenderPreview(Preview.GetPreview());
+    ON_SCOPE_EXIT { Stack->InactivateTextureFastUpdate(); };
+
+    const FIntPoint Erased(3, 4);
+    auto ReadDisplayedAlpha = [Stack, Erased]()
+    {
+        return Stack->GetSurface()->Block()->PixelBits(static_cast<uint16>(Erased.X), static_cast<uint16>(Erased.Y))[3];
+    };
+    auto ReadSourceAlpha = [&Texture, Erased]()
+    {
+        FImage Image;
+        Texture->Source.GetMipImage(Image, 0);
+        return Image.AsBGRA8()[Erased.Y * Width + Erased.X].A;
+    };
+    TestNotEqual(TEXT("Fixture pixel is not transparent"), int32(ReadDisplayedAlpha()), 0);
+
+    FOdysseyRasterBlockMutator Mutator(Layer->GetRasterBlock(), false);
+    Mutator.EditTilesFromRects({ULIS::FRectI::FromXYWH(2, 3, 4, 5)},
+        [](TSharedPtr<ULIS::FBlock> Block, const FOdysseyInvalidTileMap&) -> TArray<ULIS::FEvent>
+        {
+            for (int32 Y = 3; Y < 8; ++Y)
+            {
+                FMemory::Memzero(Block->Bits() + (Y * Width + 2) * 4, 4 * 4);
+            }
+            return {};
+        });
+    TestTrue(TEXT("An edit session shows the uncommitted edits"), Preview.GetPreview()->GetContext().Overrides.Contains(Layer->GetRenderingId()));
+    TestEqual(TEXT("The displayed texture shows the uncommitted edits"), int32(ReadDisplayedAlpha()), 0);
+
+    // Leaving the edition writes the texture source, which must not hold the uncommitted edits.
+    Stack->InactivateTextureFastUpdate();
+    TestNotEqual(TEXT("The texture source holds the committed pixels"), int32(ReadSourceAlpha()), 0);
+    Stack->ActivateTextureFastUpdate();
+    Stack->SetRenderPreview(Preview.GetPreview());
+
+    Mutator.Commit();
+    TestFalse(TEXT("The commit ends the edit session"), Preview.GetPreview()->GetContext().Overrides.Contains(Layer->GetRenderingId()));
+    TestEqual(TEXT("The displayed texture shows the committed edits"), int32(ReadDisplayedAlpha()), 0);
     return true;
 }
 

@@ -388,6 +388,18 @@ UOdysseyAnimationCell::OnOutOfPegsChanged()
 
 #endif
 
+FMatrix
+UOdysseyAnimationCell::GetContentTransform(const FOdysseyRenderContext* RenderContext) const
+{
+#if WITH_EDITOR
+    if (RenderContext && (RenderContext->Type & EOdysseyRenderingType::OutOfPegs))
+    {
+        return OutOfPegsTransform();
+    }
+#endif
+    return FMatrix::Identity;
+}
+
 bool
 UOdysseyAnimationCell::BuildRenderPipelineInternal(
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
@@ -402,13 +414,7 @@ UOdysseyAnimationCell::BuildRenderPipelineInternal(
     Texture->WaitForPendingInitOrStreaming();
 #endif
 
-    FMatrix CellTransform = FMatrix::Identity;
-#if WITH_EDITOR
-    if (RenderContext && (RenderContext->Type & EOdysseyRenderingType::OutOfPegs))
-    {
-        CellTransform = OutOfPegsTransform();
-    }
-#endif
+    const FMatrix CellTransform = GetContentTransform(RenderContext);
     const FTextureRHIRef SourceRHI = Texture->GetResource()->TextureRHI;
     oRenderFunction = [SourceRHI, CellTransform](
         FRDGBuilder& iGraphBuilder,

@@ -29,6 +29,7 @@
 #include "OdysseyLighttable.h"
 #include "OdysseyRasterBlock.h"
 #include "OdysseyRasterBlockMutator.h"
+#include "OdysseyRasterEditSession.h"
 #include "OdysseyPixelFormat.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTiledImage.h"
@@ -87,7 +88,9 @@ TArray<FLinearColor> Render(UOdysseyAnimation* Animation, int32 Frame, uint64 Ty
     TStrongObjectPtr<UTextureRenderTarget2D> Target(NewObject<UTextureRenderTarget2D>());
     Target->InitCustomFormat(Width, Height, PF_A32B32G32R32F, true);
     Target->UpdateResourceImmediate(true);
+    // Render as a view does, showing the active edit sessions.
     FOdysseyRenderContext RenderContext;
+    FOdysseyRasterEditSession::AddOverrides(RenderContext);
     RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(Frame);
     Animation->Render_GameThread(Target.Get(), Type, &RenderContext);
     FlushRenderingCommands();
@@ -123,37 +126,6 @@ bool ComparePixels(FAutomationTestBase& Test, const FString& What, const TArray<
     return true;
 }
 
-/**
- * Compares colors as displayed by an 8-bit sRGB output, allowing one level of difference.
- * The former render texture was decoded by the GPU, up to 0.002 away from the exact decoding of the tiles:
- * filtered dark tones may differ by a few more levels within this linear difference.
- */
-bool CompareDisplayedPixels(FAutomationTestBase& Test, const FString& What, const TArray<FLinearColor>& Expected, const TArray<FLinearColor>& Actual)
-{
-    if (!Test.TestEqual(What + TEXT(": rendered pixel count"), Actual.Num(), Width * Height)
-        || !Test.TestEqual(What + TEXT(": reference pixel count"), Expected.Num(), Actual.Num()))
-    {
-        return false;
-    }
-    int32 MaxDifference = 0;
-    for (int32 Index = 0; Index < Actual.Num(); ++Index)
-    {
-        const FColor ExpectedColor = Expected[Index].ToFColorSRGB();
-        const FColor ActualColor = Actual[Index].ToFColorSRGB();
-        const int32 Difference = FMath::Max(FMath::Max(FMath::Abs(ExpectedColor.R - ActualColor.R), FMath::Abs(ExpectedColor.G - ActualColor.G)),
-            FMath::Max(FMath::Abs(ExpectedColor.B - ActualColor.B), FMath::Abs(ExpectedColor.A - ActualColor.A)));
-        MaxDifference = FMath::Max(MaxDifference, Difference);
-        if (Difference > 1 && !Actual[Index].Equals(Expected[Index], 0.002f))
-        {
-            Test.AddError(FString::Printf(TEXT("%s: pixel %d differs: %s vs %s"), *What, Index,
-                *ExpectedColor.ToString(), *ActualColor.ToString()));
-            return false;
-        }
-    }
-    Test.AddInfo(FString::Printf(TEXT("%s: maximum 8-bit sRGB difference %d"), *What, MaxDifference));
-    return true;
-}
-
 TArray<UOdysseyAnimationCellImageRaster*> RasterCells(UOdysseyAnimation* Animation)
 {
     TArray<UOdysseyAnimationCellImageRaster*> Cells;
@@ -171,9 +143,8 @@ TArray<UOdysseyAnimationCellImageRaster*> RasterCells(UOdysseyAnimation* Animati
 }
 
 /**
- * Renders a frame while every cell displays uncommitted edits changing no pixel, as the former render texture did,
- * then once these edits are committed into the tiles. Both renders must match:
- * float cells exactly, 8-bit cells as displayed.
+ * Renders a frame while every cell displays uncommitted edits changing no pixel, through its edit session,
+ * then once these edits are committed into the tiles. Both renders must match, including out of pegs.
  */
 bool Compare(FAutomationTestBase& Test, UOdysseyAnimation* Animation, int32 Frame, uint64 Type = EOdysseyRenderingType::Render)
 {
@@ -194,12 +165,7 @@ bool Compare(FAutomationTestBase& Test, UOdysseyAnimation* Animation, int32 Fram
         Mutator->Commit();
     }
     const TArray<FLinearColor> Tiles = Render(Animation, Frame, Type);
-    const FString What = FString::Printf(TEXT("Frame %d render type %llu"), Frame, Type);
-    if (Animation->GetFormat() == EOdysseyAnimationFormat::BGRA8)
-    {
-        return CompareDisplayedPixels(Test, What, Preview, Tiles);
-    }
-    return ComparePixels(Test, What, Preview, Tiles, 0.0001f);
+    return ComparePixels(Test, FString::Printf(TEXT("Frame %d render type %llu"), Frame, Type), Preview, Tiles, 0.0001f);
 }
 
 TMap<FIntPoint, FOdysseyTileId> TileIds(const UOdysseyTiledImage* Image)
@@ -292,18 +258,15 @@ bool FOdysseyAnimationTiledPartialTest::RunTest(const FString& Parameters)
         && TestEqual(TEXT("Reference pixel count"), BeforePixels.Num(), Width * Height))
     {
         TestTrue(TEXT("Uncommitted edits are rendered"), Interactive[4 * Width + 3].Equals(FLinearColor::Transparent));
-        const FColor Kept = Interactive[40 * Width + 40].ToFColorSRGB();
-        const FColor Original = BeforePixels[40 * Width + 40].ToFColorSRGB();
-        TestTrue(TEXT("Pixels outside the edit are kept"), FMath::Abs(Kept.R - Original.R) <= 1 && FMath::Abs(Kept.G - Original.G) <= 1
-            && FMath::Abs(Kept.B - Original.B) <= 1 && Kept.A == Original.A);
+        TestTrue(TEXT("Pixels outside the edit are kept"), Interactive[40 * Width + 40].Equals(BeforePixels[40 * Width + 40], 0.0001f));
     }
     Mutator.Commit();
     const TMap<FIntPoint, FOdysseyTileId> After = TileIds(First->GetTiledImage());
     int32 Changed = 0;
     for (const TPair<FIntPoint, FOdysseyTileId>& Pair : Before) { Changed += !(After.FindChecked(Pair.Key) == Pair.Value); }
     TestEqual(TEXT("Commit replaces only the touched tile"), Changed, 1);
-    // The edit is rendered from the raster block before the commit, and from the tiles after.
-    CompareDisplayedPixels(*this, TEXT("Committed tiles render the edit"), Interactive, Render(Animation.Get(), 0, EOdysseyRenderingType::Render));
+    // The edit is rendered from the edit session before the commit, and from the tiles after.
+    ComparePixels(*this, TEXT("Committed tiles render the edit"), Interactive, Render(Animation.Get(), 0, EOdysseyRenderingType::Render), 0.0001f);
     return true;
 }
 

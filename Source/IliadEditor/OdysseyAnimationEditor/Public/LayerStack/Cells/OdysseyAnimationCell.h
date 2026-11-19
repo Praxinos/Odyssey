@@ -177,6 +177,10 @@ private:
     void OutOfPegsChanged(bool iIsInteractive);
 #endif
 
+protected:
+    /** The out of pegs transform, when the render context asks for it. */
+    virtual FMatrix GetContentTransform(const FOdysseyRenderContext* RenderContext) const override;
+
 #if WITH_EDITOR
 protected:
     /** Returns the render texture without creating it. */

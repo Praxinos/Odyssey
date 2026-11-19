@@ -9,6 +9,8 @@
 
 #include <ULIS>
 
+class UTextureRenderTarget2D;
+
 /**
  * Transitional adapters between ::ULIS::FBlock and UOdysseyTiledImage.
  *
@@ -57,6 +59,19 @@ ODYSSEYIMAGING_API bool CopyFromBlock(UOdysseyTiledImage& Image, const ::ULIS::F
  * @return False when nothing was copied.
  */
 ODYSSEYIMAGING_API bool CopyFromBlock(UOdysseyTiledImage& Image, const ::ULIS::FBlock& Block, const TArray<FIntRect>& Rects, bool bSRGB = false);
+
+/**
+ * Copies parts of a block into a render target holding pixels in the given tile format, e.g. the target of an edit session.
+ * Values are converted as CopyFromBlock() does; each part lands at the same position in the target.
+ *
+ * @param Target The destination render target; its pixel format must be the one of Format.
+ * @param Format The tile format of the target pixels.
+ * @param Block The source block.
+ * @param Rects The parts of the block to copy; clipped to the block and target bounds.
+ * @param bSRGB True when the 8-bit block holds sRGB encoded colors, decoded as in CopyFromBlock().
+ * @return False when nothing was copied.
+ */
+ODYSSEYIMAGING_API bool CopyBlockToRenderTarget(UTextureRenderTarget2D& Target, EOdysseyTiledImageFormat Format, const ::ULIS::FBlock& Block, const TArray<FIntRect>& Rects, bool bSRGB = false);
 
 /**
  * Reads a part of the image into a new block. Pixels without a tile are transparent.

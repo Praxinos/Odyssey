@@ -9,6 +9,7 @@
 #include "OdysseyAnimationLayerStack.h"
 
 //class UOdysseyAnimationTexture;
+class FOdysseyRasterEditPreview;
 class UOdysseyAnimationPlayer;
 class UTexture;
 
@@ -69,4 +70,8 @@ public:
     TObjectPtr<UOdysseyAnimationPlayer> mExternalPlayer;
     TArray<FGuid> mImageRenderingComposition;
     FOdysseyPainterEditor* mEditor;
+
+private:
+    /** Shows the uncommitted raster edits in the players of this source. */
+    TSharedPtr<FOdysseyRasterEditPreview> mRasterEditPreview;
 };

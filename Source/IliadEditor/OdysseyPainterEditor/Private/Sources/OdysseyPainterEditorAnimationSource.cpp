@@ -15,6 +15,8 @@
 #include "OdysseyAnimationLayerImageVector.h"
 #include "OdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationPlayer.h"
+#include "OdysseyRasterEditSession.h"
+#include "OdysseyRenderContext.h"
 #include "OdysseyLayerStackSelection.h"
 #include "OdysseyAnimationCellsSelection.h"
 #include "OdysseyMediaRaster.h"
@@ -110,6 +112,12 @@ FOdysseyPainterEditorAnimationSource::ActivatePlayer(UOdysseyAnimationPlayer* iP
 
     iPlayer->SetRenderType(renderType);
     iPlayer->OnCurrentFrameChanged().AddRaw(this, &FOdysseyPainterEditorAnimationSource::OnCurrentFrameChanged);
+
+    if (!mRasterEditPreview)
+    {
+        mRasterEditPreview = MakeShared<FOdysseyRasterEditPreview>(MakeShared<FOdysseyRenderPreview>());
+    }
+    iPlayer->SetRenderPreview(mRasterEditPreview->GetPreview());
 }
 
 void
@@ -131,6 +139,7 @@ FOdysseyPainterEditorAnimationSource::InactivatePlayer(UOdysseyAnimationPlayer* 
 {
     iPlayer->OnCurrentFrameChanged().RemoveAll(this);
     iPlayer->SetRenderType(EOdysseyRenderingType::Render);
+    iPlayer->SetRenderPreview(nullptr);
     iPlayer->Stop();
 }
 

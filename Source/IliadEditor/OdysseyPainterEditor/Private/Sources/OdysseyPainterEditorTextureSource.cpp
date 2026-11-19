@@ -5,6 +5,8 @@
 
 #include "Editor.h"
 
+#include "OdysseyRasterEditSession.h"
+#include "OdysseyRenderContext.h"
 #include "OdysseyTextureLayerStack.h"
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyTextureLayerImageRaster.h"
@@ -70,7 +72,11 @@ FOdysseyPainterEditorTextureSource::Activate(FOdysseyPainterEditor* iEditor)
 
     UOdysseyTextureLayerStack* layerStack = GetLayerStack();
     if ( layerStack )
+    {
         layerStack->ActivateTextureFastUpdate();
+        mRasterEditPreview = MakeShared<FOdysseyRasterEditPreview>(MakeShared<FOdysseyRenderPreview>());
+        layerStack->SetRenderPreview(mRasterEditPreview->GetPreview());
+    }
 
     FOdysseyPainterEditorSource::Activate(iEditor);
 }
@@ -83,6 +89,7 @@ FOdysseyPainterEditorTextureSource::Inactivate()
     UOdysseyTextureLayerStack* layerStack = GetLayerStack();
     if ( layerStack )
         layerStack->InactivateTextureFastUpdate();
+    mRasterEditPreview.Reset();
 
     FOdysseyPainterEditorSource::Inactivate();
 }

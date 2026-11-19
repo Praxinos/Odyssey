@@ -486,7 +486,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
         mImageRenderingComposition = imageRenderingComposition;
 
         RenderTarget->WaitForPendingInitOrStreaming();
-        FOdysseyRenderContext RenderContext;
+        FOdysseyRenderContext RenderContext = mRenderPreview ? mRenderPreview->GetContext() : FOdysseyRenderContext();
         RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = frame.GetFrame();
         Animation->Render_GameThread(RenderTarget, renderType, &RenderContext);
         RenderTarget->UpdateResourceImmediate(false); //Update MipMaps
@@ -502,13 +502,48 @@ UOdysseyAnimationPlayer::UpdateTexture()
         TArray<FIntRect> invalidTiles = mInvalidTileMap.InvalidRects();
         for (const FIntRect& rect : invalidTiles)
         {
-            FOdysseyRenderContext RenderContext;
+            FOdysseyRenderContext RenderContext = mRenderPreview ? mRenderPreview->GetContext() : FOdysseyRenderContext();
             RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = frame.GetFrame();
             Animation->Render_GameThread(RenderTarget, renderType, rect, &RenderContext);
         }
         RenderTarget->UpdateResourceImmediate(false); //Update MipMaps
 
         mInvalidTileMap.Clear();
+    }
+}
+
+void
+UOdysseyAnimationPlayer::SetRenderPreview(TSharedPtr<FOdysseyRenderPreview> Preview)
+{
+    if (mRenderPreview == Preview)
+    {
+        return;
+    }
+    if (mRenderPreview)
+    {
+        mRenderPreview->OnInvalidated().Remove(mRenderPreviewInvalidatedHandle);
+    }
+    mRenderPreview = MoveTemp(Preview);
+    if (mRenderPreview)
+    {
+        mRenderPreviewInvalidatedHandle = mRenderPreview->OnInvalidated().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderPreviewInvalidated);
+    }
+    OnRenderPreviewInvalidated({});
+}
+
+void
+UOdysseyAnimationPlayer::OnRenderPreviewInvalidated(const TArray<FIntRect>& Rects)
+{
+    if (!Animation)
+        return;
+
+    if (Rects.IsEmpty())
+    {
+        mInvalidTileMap.Invalidate(FIntRect(0, 0, Animation->GetWidth(), Animation->GetHeight()));
+    }
+    else
+    {
+        mInvalidTileMap.Invalidate(Rects);
     }
 }
 

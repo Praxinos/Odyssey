@@ -73,7 +73,12 @@ public:
     const FGuid& GetId() const;
     uint64 GetRevision() const;
     FOnInvalidated& OnInvalidated();
-    void SetContext(FOdysseyRenderContext InContext);
+    /**
+     * @param InContext The context of the next renders.
+     * @param bInvalidate False when the new context renders the same pixels as the previous one, e.g. a replacement
+     *                    showing the current content, so that nothing needs to be rendered again.
+     */
+    void SetContext(FOdysseyRenderContext InContext, bool bInvalidate = true);
     /** Empty rectangles invalidate everything; otherwise use destination-space bounds. */
     void Invalidate(const TArray<FIntRect>& Rects);
     void Reset();

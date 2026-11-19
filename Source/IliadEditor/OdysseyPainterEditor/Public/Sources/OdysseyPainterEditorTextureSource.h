@@ -7,6 +7,7 @@
 
 #include "OdysseyTextureLayerStack.h"
 
+class FOdysseyRasterEditPreview;
 class UOdysseyTextureLayerStackUserData;
 
 /**
@@ -46,4 +47,8 @@ public:
 
 public:
     UTexture2D* mTexture;
+
+private:
+    /** Shows the uncommitted raster edits in the edited texture. */
+    TSharedPtr<FOdysseyRasterEditPreview> mRasterEditPreview;
 };

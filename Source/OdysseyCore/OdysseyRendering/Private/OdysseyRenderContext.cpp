@@ -57,10 +57,13 @@ FOdysseyRenderPreview::FOnInvalidated& FOdysseyRenderPreview::OnInvalidated()
     return Invalidated;
 }
 
-void FOdysseyRenderPreview::SetContext(FOdysseyRenderContext InContext)
+void FOdysseyRenderPreview::SetContext(FOdysseyRenderContext InContext, bool bInvalidate)
 {
     Context = MoveTemp(InContext);
-    Invalidate({});
+    if (bInvalidate)
+    {
+        Invalidate({});
+    }
 }
 
 void FOdysseyRenderPreview::Invalidate(const TArray<FIntRect>& Rects)

@@ -98,7 +98,7 @@ UOdysseyTextureLayerImageRaster::GetRasterContent() const
     if (!RasterContent)
     {
         UOdysseyTextureLayerImageRaster* MutableThis = const_cast<UOdysseyTextureLayerImageRaster*>(this);
-        RasterContent = MakeUnique<FOdysseyRasterContent>(*MutableThis, MutableThis->TiledImage, false,
+        RasterContent = MakeUnique<FOdysseyRasterContent>(*MutableThis, MutableThis->GetRenderingId(), MutableThis->TiledImage, false,
             [MutableThis]()
             {
                 FOdysseyRasterContent::FDescription Description;

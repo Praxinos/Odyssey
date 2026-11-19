@@ -13,6 +13,7 @@
 
 #include "OdysseyTextureLayerStack.generated.h"
 
+class FOdysseyRenderPreview;
 class UOdysseyTextureLayer;
 class IOdysseyImageRenderer;
 class UTextureRenderTarget2D;
@@ -70,6 +71,14 @@ public:
     void InactivateTextureFastUpdate();
 
     /**
+     * Sets the view preview rendered into the texture while it is fast updated, e.g. the uncommitted edits of a tool.
+     * The texture source, which is saved, never holds the preview.
+     *
+     * @param Preview The preview; null to render without preview.
+     */
+    void SetRenderPreview(TSharedPtr<FOdysseyRenderPreview> Preview);
+
+    /**
      * @brief Defines when the texture should be updated, and how frequently
      * Manually = does not update the texture automatically
      * OnTick = refresh the texture at each engine tick if needed
@@ -113,7 +122,11 @@ private:
 
     void CompressTexture();
     void UncompressTexture();
-    void FastUpdateTexture(const TArray<FIntRect>& iRects);
+    void FastUpdateTexture(const TArray<FIntRect>& iRects, bool bWithPreview = true);
+    void OnRenderPreviewInvalidated(const TArray<FIntRect>& Rects);
+    bool HasPreviewOverrides() const;
+    /** Renders the whole texture without the preview, before its source is written. */
+    void RenderWithoutPreview();
     void UpdateTextureSource();
 
     //React to Texture property changes, updating texture source if we are in fast update
@@ -129,6 +142,8 @@ private:
 
     EOdysseyTextureLayerStackTextureUpdateMode mTextureUpdateMode = EOdysseyTextureLayerStackTextureUpdateMode::OnTick;
     FOdysseyInvalidTileMap mInvalidTileMap;
+    TSharedPtr<FOdysseyRenderPreview> mRenderPreview;
+    FDelegateHandle mRenderPreviewInvalidatedHandle;
 
 public:
     UPROPERTY(Transient)
