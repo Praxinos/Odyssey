@@ -12,6 +12,7 @@
 #include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
 #include "Sequencer/EditModeAnimationUtil.h"
+#include "SequencerAsyncEvaluation.h"
 #include "SequencerSettings.h"
 
 #include "Board/BoardSequence.h"
@@ -58,6 +59,8 @@ FEposSequenceEditorModule::StartupModule()
 void
 FEposSequenceEditorModule::ShutdownModule()
 {
+    UE::Sequencer::AbortPendingEvaluations();
+
     UnregisterMovieRenderer();
     UnregisterPropertyCustomizations();
     UnregisterSequenceCustomizations();

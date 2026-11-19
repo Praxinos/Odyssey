@@ -68,6 +68,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     void CopyFolders(const TArray<UMovieSceneFolder*>& Folders, FString& FoldersExportedText, FString& ObjectsExportedText, FString& TracksExportedText);
 
+    ///** Copy folders of the focused sequence to the clipboard and return all three text payloads. Raises when no Sequencer is open or a folder belongs elsewhere. */
+    //UFUNCTION( meta = ( PythonCallable, AICallable, AIAccessMode = "Write" ) )
+    //FMovieSceneFolderClipboardText CopyFoldersToText( const TArray<UMovieSceneFolder*>& Folders );
+
     UE_DEPRECATED(5.5, "CopyFolders now gathers objects and tracks within the folders. Please use CopyFolders that outputs ObjectsExportedText and TracksExportedText")
     void CopyFolders(const TArray<UMovieSceneFolder*>& Folders, FString& FoldersExportedText);
 
@@ -88,6 +92,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     void CopySections(const TArray<UMovieSceneSection*>& Sections, FString& ExportedText);
 
+    ///** Copy sections to the clipboard and return the text accepted by PasteSectionsFromText. */
+    //UFUNCTION( meta = ( PythonCallable, AICallable, AIAccessMode = "Write" ) )
+    //FString CopySectionsToText( const TArray<UMovieSceneSection*>& Sections );
+
     /**
      * Paste sections
      * Paste sections from the given TextToImport string (used in conjunction with CopySections).
@@ -104,6 +112,10 @@ public:
      */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     void CopyTracks(const TArray<UMovieSceneTrack*>& Tracks, const TArray<UMovieSceneFolder*>& Folders, FString& ExportedText);
+
+    ///** Copy tracks to the clipboard and return the text accepted by PasteTracksFromText. */
+    //UFUNCTION( meta = ( PythonCallable, AICallable, AIAccessMode = "Write" ) )
+    //FString CopyTracksToText( const TArray<UMovieSceneTrack*>& Tracks );
 
     /**
      * Paste tracks
@@ -122,6 +134,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     void CopyBindings(const TArray<FMovieSceneBindingProxy>& Bindings, const TArray<UMovieSceneFolder*>& Folders, FString& ExportedText);
 
+    ///** Copy bindings of the focused sequence to the clipboard and return the text accepted by PasteBindingsFromText. Raises when no Sequencer is open or a binding belongs elsewhere. */
+    //UFUNCTION( meta = ( PythonCallable, AICallable, AIAccessMode = "Write" ) )
+    //FString CopyBindingsToText( const TArray<FMovieSceneBindingProxy>& Bindings );
+
     /**
      * Paste bindings
      * Paste bindings from the given TextToImport string (used in conjunction with CopyBindings).
@@ -129,6 +145,22 @@ public:
      */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     bool PasteBindings(const FString& TextToImport, FMovieScenePasteBindingsParams PasteBindingsParams, TArray<FMovieSceneBindingProxy>& OutObjectBindings);
+
+    ///** Paste bindings and return the new objects, raising a script error if nothing was pasted. Empty text uses the clipboard. */
+    //UFUNCTION( meta = ( PythonCallable, AICallable, AIAccessMode = "Write" ) )
+    //TArray<FMovieSceneBindingProxy> PasteBindingsFromText( const FString& TextToImport, FMovieScenePasteBindingsParams PasteBindingsParams );
+
+    ///** Paste tracks and return the new objects, raising a script error if nothing was pasted. Empty text uses the clipboard. */
+    //UFUNCTION( meta = ( PythonCallable, AICallable, AIAccessMode = "Write" ) )
+    //TArray<UMovieSceneTrack*> PasteTracksFromText( const FString& TextToImport, FMovieScenePasteTracksParams PasteTracksParams );
+
+    ///** Paste sections and return the new objects, raising a script error if nothing was pasted. Empty text uses the clipboard. */
+    //UFUNCTION( meta = ( PythonCallable, AICallable, AIAccessMode = "Write" ) )
+    //TArray<UMovieSceneSection*> PasteSectionsFromText( const FString& TextToImport, FMovieScenePasteSectionsParams PasteSectionsParams );
+
+    ///** Paste folders and return the new objects, raising a script error if nothing was pasted. Empty text uses the clipboard. */
+    //UFUNCTION( meta = ( PythonCallable, AICallable, AIAccessMode = "Write" ) )
+    //TArray<UMovieSceneFolder*> PasteFoldersFromText( const FString& TextToImport, FMovieScenePasteFoldersParams PasteFoldersParams );
 
     //...
 
@@ -146,7 +178,7 @@ private:
 
     //...
 
-    TSharedPtr<ISequencer> GetActiveSequencer();
+    TSharedPtr<ISequencer> GetActiveSequencer() const;
 
     //...
 

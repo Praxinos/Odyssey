@@ -111,7 +111,7 @@ EposSequenceRenderHelpers::CreateLevelSequenceTransient( TArray<UEposMovieSceneS
         if( shotSection )
         {
             shotTrack->Modify();
-            shotTrack->AddSection( *shotSection );
+            shotTrack->UMovieSceneTrack::AddSection( *shotSection );
         }
 
         // Add boardSequence to section

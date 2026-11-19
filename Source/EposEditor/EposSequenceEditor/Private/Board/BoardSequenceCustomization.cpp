@@ -1357,10 +1357,7 @@ FBoardSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBu
             }
         }
 
-        //MenuBuilder.AddSubMenu(
-        //    LOCTEXT( "BindingProperties", "Binding Properties" ),
-        //    LOCTEXT( "BindingPropertiesTooltip", "Modify the actor and object bindings for this track" ),
-        //    FNewMenuDelegate::CreateRaw( this, &FBoardSequenceCustomization::AddBindingPropertiesSubMenu ) );
+        //AddBindingPropertiesSubMenus( MenuBuilder, Sequencer, MovieScene, ObjectBindingID );
 
         // Regular possessable
         if( !bCustomBinding )
@@ -1552,7 +1549,7 @@ FBoardSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBu
 
     //if( FMovieScenePossessable* Possessable = MovieScene->FindPossessable( ObjectBindingID ) )
     //{
-    //    AddBindingPropertiesSubMenu( MenuBuilder );
+    //    AddBindingPropertiesSubMenu( MenuBuilder, ObjectBindingID );
     //}
 //}
 

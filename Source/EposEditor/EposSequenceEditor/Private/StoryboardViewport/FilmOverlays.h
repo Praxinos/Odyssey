@@ -4,6 +4,9 @@
 #pragma once
 
 #include "Framework/Commands/UICommandList.h"
+#include "Math/Vector2D.h"
+#include "Misc/Optional.h"
+#include "UObject/NameTypes.h"
 #include "Widgets/SCompoundWidget.h"
 #include "IFilmOverlay.h"
 
@@ -36,10 +39,7 @@ public:
     }
 
     /** Sets the current primary film overlay */
-    void SetPrimaryFilmOverlay( const FName InFilmOverlay )
-    {
-        PrimaryFilmOverlay = InFilmOverlay;
-    }
+    void SetPrimaryFilmOverlay( const FName InFilmOverlay );
 
     /** Get the current primary film overlay */
     FName GetPrimaryFilmOverlay() const
@@ -47,12 +47,21 @@ public:
         return PrimaryFilmOverlay;
     }
 
+    /** The tint this viewport applies to the primary film overlay it picks */
+    const FLinearColor& GetPrimaryTint() const;
+
+    /** Set the tint this viewport applies to its primary film overlay, now and whenever another is picked */
+    void SetPrimaryTint( const FLinearColor& InTint );
+
 private:
     /** Attribute used once per frame to retrieve the film overlays to paint */
     TAttribute<TArray<IFilmOverlay*>> FilmOverlays;
 
     /** Currently selected primary film overlay */
     FName PrimaryFilmOverlay;
+
+    /** Tint this viewport applies to whichever primary film overlay it picks, which other viewports picking the same overlay replace */
+    FLinearColor PrimaryTint = IFilmOverlay::DefaultTint;
 };
 
 /** A custom widget that comprises a combo box displaying all available overlay options */
@@ -103,24 +112,46 @@ private:
     /** Set the current primary overlay to the specified name */
     FReply SetPrimaryFilmOverlay(FName InName);
 
-    /** Get/Set the color tint override for the current primary overlay */
+    /** Get/Set the tint the overlay widget applies to its primary overlay, which the menu's color control edits */
     FLinearColor GetPrimaryColorTint() const;
-    void OnPrimaryColorTintChanged(const FLinearColor& Tint);
+    void SetPrimaryColorTint( const FLinearColor& InTint );
 
     /** Toggle the film overlay enabled or disabled */
     FReply ToggleFilmOverlay( FName InName );
 
 private:
 
-    /** Color tint to apply to primary overlays */
-    FLinearColor PrimaryColorTint;
+    ///** Primary overlays (only one can be active at a time) */
+    //TArray<TSharedPtr<IFilmOverlay>> PrimaryOverlays;
 
-    /** Primary overlays (only one can be active at a time) */
-    TArray<TSharedPtr<IFilmOverlay>> PrimaryOverlays;
-
-    /** Toggleable overlays (any number can be active at a time) */
-    TArray<TSharedPtr<IFilmOverlay>> ToggleableOverlays;
+    ///** Toggleable overlays (any number can be active at a time) */
+    //TArray<TSharedPtr<IFilmOverlay>> ToggleableOverlays;
 
     /** The overlay widget we control - externally owned */
-    TWeakPtr<SFilmOverlay> OverlayWidget;
+    TWeakPtr<SFilmOverlay> WeakOverlayWidget;
 };
+
+/** Script access to the settings of the default frame overlays RegisterDefaultOverlays creates, which their settings widgets otherwise own */
+namespace UE::EposSequenceEditor::FilmOverlays
+{
+
+    /** The name RegisterDefaultOverlays registers the letterbox under */
+    inline const FLazyName LetterBoxName( TEXT( "LetterBox" ) );
+
+    /** The smallest and largest value either term of the letterbox ratio can take, which its settings widget also enforces */
+    inline constexpr float MinLetterboxRatioTerm = 0.1f;
+    inline constexpr float MaxLetterboxRatioTerm = 35.f;
+
+    /** The inset of the default safe frame registered under InName as a percentage of the viewport, or unset when no default safe frame is registered there */
+    TOptional<int32> GetSafeFrameSize( const FName InName );
+
+    /** Sets the inset of the default safe frame registered under InName as a percentage of the viewport, returning false when no default safe frame is registered there */
+    bool SetSafeFrameSize( const FName InName, const int32 InSizePercentage );
+
+    /** The width and height terms of the ratio the default letterbox masks the viewport to, as X and Y, or unset when it is not registered */
+    TOptional<FVector2D> GetLetterboxAspectRatio();
+
+    /** Sets the width and height terms of the ratio the default letterbox masks the viewport to, returning false when it is not registered */
+    bool SetLetterboxAspectRatio( const float InWidth, const float InHeight );
+
+} // namespace UE::EposSequenceEditor::FilmOverlays

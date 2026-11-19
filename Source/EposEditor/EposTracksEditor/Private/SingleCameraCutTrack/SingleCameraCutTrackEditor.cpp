@@ -50,7 +50,7 @@ public:
         : TCommands<FSingleCameraCutTrackCommands>
     (
         "SingleCameraCutTrack",
-        NSLOCTEXT("Contexts", "SingleCameraCutTrack", "SingleCameraCutTrack"),
+        NSLOCTEXT("Contexts", "SingleCameraCutTrack", "Single Camera Cut Track"),
         NAME_None, // "MainFrame" // @todo Fix this crash
         FAppStyle::Get().GetStyleSetName() // Icon Style Set
     )
@@ -162,7 +162,7 @@ void FSingleCameraCutTrackEditor::BuildTrackContextMenu(FMenuBuilder& MenuBuilde
     //    FUIAction(
     //        FExecuteAction::CreateSP( this, &FCameraCutTrackEditor::HandleToggleAutoArrangeSectionsExecute, CameraCutTrack ),
     //        FCanExecuteAction::CreateLambda( [=]() { return CameraCutTrack != nullptr; } ),
-    //        FIsActionChecked::CreateLambda( [=]() { return CameraCutTrack->IsAutoManagingSections(); } )
+    //        FIsActionChecked::CreateLambda( [=]() { return CameraCutTrack->IsAutoArrangeSectionsEnabled(); } )
     //    ),
     //    "Edit",
     //    EUserInterfaceActionType::ToggleButton
@@ -189,7 +189,7 @@ void FSingleCameraCutTrackEditor::BuildTrackContextMenu(FMenuBuilder& MenuBuilde
 //
 //    CameraCutTrack->Modify();
 //
-//    CameraCutTrack->SetIsAutoManagingSections( !CameraCutTrack->IsAutoManagingSections() );
+//    CameraCutTrack->SetIsAutoManagingSections( !CameraCutTrack->IsAutoArrangeSectionsEnabled() );
 //
 //    if( CameraCutTrack->IsAutoManagingSections() )
 //    {

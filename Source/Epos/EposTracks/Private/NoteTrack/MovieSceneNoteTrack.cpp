@@ -47,6 +47,7 @@ UMovieSceneNoteTrack::SupportsType( TSubclassOf<UMovieSceneSection> SectionClass
 void
 UMovieSceneNoteTrack::RemoveAllAnimationData() //override
 {
+    NotifyAllSectionsRemoved();
     NoteSections.Empty();
 }
 
@@ -116,7 +117,7 @@ UMovieSceneNoteTrack::AddNewNoteOnRow( UStoryNote* iNote, FFrameNumber iStartTim
     NewSection->InitialPlacementOnRow( NoteSections, iStartTime, iDuration, RowIndex );
     NewSection->SetNote( iNote );
 
-    NoteSections.Add( NewSection );
+    UMovieSceneTrack::AddSection( *NewSection );
 
     return NewSection;
 }

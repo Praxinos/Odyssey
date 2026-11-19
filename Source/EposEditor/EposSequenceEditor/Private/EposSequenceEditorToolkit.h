@@ -83,6 +83,12 @@ public:
     //~ IEposSequenceEditorToolkit interface
     virtual TSharedPtr<ISequencer> GetSequencer() const override;
 
+    /** The world and playback client this editor's Sequencer evaluates in. */
+    TSharedPtr<FEposSequenceEditorPlaybackContext> GetPlaybackContext() const
+    {
+        return mPlaybackContext;
+    }
+
 private:
 
     void HandleMapChanged( UWorld* iNewWorld, EMapChangeType iMapChangeType );

@@ -3,7 +3,10 @@
 
 #pragma once
 
+#include "Containers/Array.h"
+#include "Internationalization/Text.h"
 #include "Templates/SharedPointer.h"
+#include "Templates/Tuple.h"
 #include "UObject/WeakObjectPtr.h"
 #include "UObject/WeakInterfacePtr.h"
 
@@ -64,9 +67,26 @@ public:
      */
     //UE_API void OverrideWith( UWorld* InNewContext, IMovieScenePlaybackClient* InNewClient );
 
-private:
-
+    /** A world, and the playback client to preview through in it (null for none). */
     using FContextAndClient = TTuple<UWorld*, IMovieScenePlaybackClient*>;
+
+    /**
+     * Gets both the context and client, computing them from the auto-bind settings unless overridden.
+     */
+    UE_API FContextAndClient GetPlaybackContextAndClient() const;
+
+    ///**
+    // * The choices the world picker offers for InLevelSequence: each editor or PIE world, once per playback client in it
+    // * that can preview the sequence, or once with no client if it has none.
+    // */
+    //static UE_API TArray<FContextAndClient> GetAvailableContextsAndClients( const ULevelSequence* InLevelSequence );
+
+    ///**
+    // * Describes a context and client as the world picker does, such as "Map (PIE) (no actor)".
+    // */
+    //static UE_API FText GetContextAndClientDescription( const UWorld* Context, const IMovieScenePlaybackClient* Client );
+
+private:
 
     /**
      * Compute the new playback context based on the user's current auto-bind settings.
@@ -78,12 +98,6 @@ private:
      * Update the cached context and client pointers if needed.
      */
     UE_API void UpdateCachedContextAndClient() const;
-
-    /**
-     * Gets both the context and client.
-     */
-     //TTuple<UWorld*, IMovieScenePlaybackClient*>
-    UE_API FContextAndClient GetPlaybackContextAndClient() const;
 
     UE_API void OnPieEvent( bool );
     UE_API void OnMapChange( uint32 );

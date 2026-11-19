@@ -358,13 +358,18 @@ FGuid UShotSequence::CreateSpawnable( UObject* ObjectToSpawn ) //override
     }
 
     FGuid NewGuid = MovieSceneHelpers::TryCreateCustomSpawnableBinding( this, ObjectToSpawn );
+    if( !NewGuid.IsValid() )
+    {
+        // None of the spawnable binding types the editor allows can spawn this object.
+        return FGuid();
+    }
 
     UMovieSceneSpawnTrack* NewSpawnTrack = MovieScene->AddTrack<UMovieSceneSpawnTrack>( NewGuid );
     if( NewSpawnTrack )
     {
         NewSpawnTrack->Modify();
 
-        NewSpawnTrack->AddSection( *NewSpawnTrack->CreateNewSection() );
+        NewSpawnTrack->UMovieSceneTrack::AddSection( *NewSpawnTrack->CreateNewSection() );
     }
     return NewGuid;
 }
@@ -377,6 +382,12 @@ FGuid UShotSequence::FindOrAddBinding( UObject* InObject )
     UObject* PlaybackContext = InObject ? InObject->GetWorld() : nullptr;
     if( !InObject || !PlaybackContext )
     {
+        return FGuid();
+    }
+
+    if( !MovieScene )
+    {
+        UE_LOGF( LogTemp, Error, "Unable to possess object '%ls' because sequence '%ls' has no movie scene.", *InObject->GetName(), *GetName() );
         return FGuid();
     }
 

@@ -2,7 +2,6 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "StoryboardViewport/SStoryboardTransportRange.h"
-#include "MVVM/SharedList.h"
 #include "SequencerKeyCollection.h"
 #include "SequencerSettings.h"
 #include "Misc/QualifiedFrameTime.h"
@@ -184,19 +183,22 @@ void SStoryboardTransportRange::DrawKeys(const FGeometry& AllottedGeometry, FSla
     const ESlateDrawEffect DrawEffects = bParentEnabled ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect;
 
     static const float TrackOffsetY = 6.f;
-    const float TrackHeight = AllottedGeometry.GetLocalSize().Y - TrackOffsetY;
+    const FVector2f GeometrySize = AllottedGeometry.GetLocalSize();
+    const float TrackHeight = GeometrySize.Y - TrackOffsetY;
 
     FFrameRate           TickResolution  = Sequencer->GetFocusedTickResolution();
     TRange<double>       ViewRange       = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetEditorData().GetViewRange();
     TRange<FFrameNumber> PlaybackRange   = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetPlaybackRange();
 
-    const FFrameTime FramesPerPixel = (ViewRange.Size<double>() / AllottedGeometry.GetLocalSize().X) * TickResolution;
+    const FFrameTime FramesPerPixel = ( ViewRange.Size<double>() / GeometrySize.X ) * TickResolution;
     const float FullRange = ViewRange.Size<float>();
 
-    static const float BrushWidth = 7.f;
-    static const float BrushHeight = 7.f;
+    static constexpr float BrushWidth = 7.f;
+    static constexpr float BrushHeight = 7.f;
+    static constexpr float HalfBrushWidth = BrushWidth * .5f;
+    static constexpr float HalfBrushHeight = BrushHeight * .5f;
 
-    const float BrushOffsetY = TrackOffsetY + TrackHeight * .5f - BrushHeight * .5f;
+    const float BrushOffsetY = TrackOffsetY + TrackHeight * .5f - HalfBrushHeight;
     const FSlateBrush* KeyBrush = FEposSequenceEditorStyle::Get().GetBrush("CinematicViewportTransportRangeKey");
     const FQualifiedFrameTime CurrentTime = Sequencer->GetLocalTime();
 
@@ -217,7 +219,7 @@ void SStoryboardTransportRange::DrawKeys(const FGeometry& AllottedGeometry, FSla
             LayerId+2,
             AllottedGeometry.ToPaintGeometry(
                 FVector2D(BrushWidth, BrushHeight),
-                FSlateLayoutTransform(FVector2D(AllottedGeometry.GetLocalSize().X*Lerp - BrushWidth*.5f, BrushOffsetY))
+                FSlateLayoutTransform( FVector2D( ( GeometrySize.X * Lerp ) - HalfBrushWidth, BrushOffsetY ) )
             ),
             KeyBrush,
             DrawEffects,
@@ -241,7 +243,10 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
     }
 
     static const float TrackOffsetY = 6.f;
-    const float TrackHeight = AllottedGeometry.GetLocalSize().Y - TrackOffsetY;
+
+    const FPaintGeometry PaintGeometry = AllottedGeometry.ToPaintGeometry();
+    const FVector2f GeometrySize = AllottedGeometry.GetLocalSize();
+    const float TrackHeight = GeometrySize.Y - TrackOffsetY;
 
     FFrameRate           TickResolution  = Sequencer->GetFocusedTickResolution();
     TRange<double>       ViewRange       = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetEditorData().GetViewRange();
@@ -251,8 +256,6 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
     FTimeToPixel TimeToPixelConverter(AllottedGeometry, ViewRange, TickResolution);
     const float DuplicateThreshold = (TimeToPixelConverter.PixelToSeconds(3.f) - TimeToPixelConverter.PixelToSeconds(0.f));
 
-    const FFrameTime FramesPerPixel = (ViewRange.Size<double>() / AllottedGeometry.GetLocalSize().X) * TickResolution;
-
     FColor DarkGray(40, 40, 40);
     FColor MidGray(80, 80, 80);
     FColor LightGray(200, 200, 200);
@@ -261,7 +264,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
     FSlateDrawElement::MakeBox(
         OutDrawElements,
         LayerId,
-        AllottedGeometry.ToPaintGeometry(  FVector2D(AllottedGeometry.GetLocalSize().X, TrackHeight), FSlateLayoutTransform(FVector2f(0.f, TrackOffsetY))),
+        AllottedGeometry.ToPaintGeometry( FVector2D( GeometrySize.X, TrackHeight ), FSlateLayoutTransform( FVector2f( 0.f, TrackOffsetY ) ) ),
         FAppStyle::Get().GetBrush("WhiteBrush"),
         DrawEffects,
         FLinearColor(DarkGray)
@@ -276,7 +279,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
     FSlateDrawElement::MakeBox(
         OutDrawElements,
         ++LayerId,
-        AllottedGeometry.ToPaintGeometry(  FVector2f(AllottedGeometry.GetLocalSize().X*(PlaybackEndLerp - PlaybackStartLerp), TrackHeight), FSlateLayoutTransform(FVector2f(AllottedGeometry.GetLocalSize().X*PlaybackStartLerp, TrackOffsetY))),
+        AllottedGeometry.ToPaintGeometry( FVector2f( GeometrySize.X * ( PlaybackEndLerp - PlaybackStartLerp ), TrackHeight ), FSlateLayoutTransform( FVector2f( GeometrySize.X * PlaybackStartLerp, TrackOffsetY ) ) ),
         FAppStyle::Get().GetBrush("WhiteBrush"),
         DrawEffects,
         FLinearColor(MidGray)
@@ -292,7 +295,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
         FSlateDrawElement::MakeBox(
             OutDrawElements,
             ++LayerId,
-            AllottedGeometry.ToPaintGeometry( FVector2f(AllottedGeometry.GetLocalSize().X * (ClampedProgressLerp - PlaybackStartLerp), TrackHeight) , FSlateLayoutTransform(FVector2f(AllottedGeometry.GetLocalSize().X*PlaybackStartLerp, TrackOffsetY))),
+            AllottedGeometry.ToPaintGeometry( FVector2f( GeometrySize.X * ( ClampedProgressLerp - PlaybackStartLerp ), TrackHeight ), FSlateLayoutTransform( FVector2f( GeometrySize.X * PlaybackStartLerp, TrackOffsetY ) ) ),
             FAppStyle::Get().GetBrush("WhiteBrush"),
             DrawEffects,
             FLinearColor(LightGray)
@@ -316,11 +319,92 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
         DrawKeys(AllottedGeometry, OutDrawElements, LayerId, bParentEnabled, Keys, TArrayView<FLinearColor>(), bPlayMarkerOnKey);
     }
 
-    // Draw the marked frames
-    TArray<FMovieSceneMarkedFrame> MarkedFrames = Sequencer->GetMarkedFrames();
-    const FLinearColor DefaultMarkedFrameColor = Sequencer->GetSequencerSettings()->GetMarkedFrameColor();
-    if (MarkedFrames.Num())
+    // Draw the marks and mark ranges
+    const TArray<FMovieSceneMarkedFrame> MarkedFrames = Sequencer->GetMarkedFrames();
+    const int32 MarkedFrameCount = MarkedFrames.Num();
+
+    if( MarkedFrameCount > 0 )
     {
+        const FLinearColor DefaultMarkedFrameColor = Sequencer->GetSequencerSettings()->GetMarkedFrameColor();
+        const double LowerViewRange = ViewRange.GetLowerBoundValue();
+        const FSlateBrush* const WhiteBrush = FAppStyle::GetBrush( TEXT( "WhiteBrush" ) );
+
+        const auto GetMarkColor = [&DefaultMarkedFrameColor]( const FMovieSceneMarkedFrame& InMarkedFrame ) -> FLinearColor
+            {
+#if WITH_EDITORONLY_DATA
+                if( InMarkedFrame.bUseCustomColor )
+                {
+                    return InMarkedFrame.CustomColor;
+                }
+#endif
+                return DefaultMarkedFrameColor;
+            };
+
+        // Single-frame marks are drawn as glyphs below. All range fills share one layer and all edges
+        // the layer above, so stacking against the key tick marks does not depend on array position.
+        const int32 FillLayerId = ++LayerId;
+        const int32 EdgeLayerId = ++LayerId;
+
+        TArray<FVector2D> EdgePoints;
+        EdgePoints.AddUninitialized( 2 );
+
+        for( const FMovieSceneMarkedFrame& MarkedFrame : MarkedFrames )
+        {
+            if( !MarkedFrame.IsRange() )
+            {
+                continue;
+            }
+
+            const double StartSeconds = MarkedFrame.GetStartFrame() / TickResolution;
+            const double EndSeconds = MarkedFrame.GetEndFrame() / TickResolution;
+            const float StartLerpUnclamped = ( StartSeconds - LowerViewRange ) / FullRange;
+            const float EndLerpUnclamped = ( EndSeconds - LowerViewRange ) / FullRange;
+            const float StartLerp = FMath::Clamp<float>( StartLerpUnclamped, 0.f, 1.f );
+            const float EndLerp = FMath::Clamp<float>( EndLerpUnclamped, 0.f, 1.f );
+            const float Width = GeometrySize.X * ( EndLerp - StartLerp );
+
+            if( Width <= 0.f )
+            {
+                continue;
+            }
+
+            const FLinearColor Color = GetMarkColor( MarkedFrame );
+
+            const float StartX = GeometrySize.X * StartLerp;
+            const float EndX = GeometrySize.X * EndLerp;
+
+            FSlateDrawElement::MakeBox(
+                OutDrawElements,
+                FillLayerId,
+                AllottedGeometry.ToPaintGeometry(
+                    FVector2f( Width, TrackHeight ),
+                    FSlateLayoutTransform( FVector2f( StartX, TrackOffsetY ) )
+                ),
+                WhiteBrush,
+                DrawEffects,
+                Color.CopyWithNewOpacity( 0.15f )
+            );
+
+            // Solid start/end edge lines so the boundaries stand out against the faint fill, following the
+            // same faint-fill-plus-edge-lines pattern as the main Sequencer timeline's mark ranges
+            const FLinearColor EdgeColor = Color.CopyWithNewOpacity( 1.f );
+
+            // Only draw an edge line when that edge is actually in view. A clamped position would paint a
+            // false boundary at the widget border while the real edge is scrolled offscreen.
+            auto DrawEdgeLine = [&EdgePoints, TrackHeight, &OutDrawElements, EdgeLayerId, &PaintGeometry, DrawEffects, &EdgeColor]
+            ( const float InLerpUnclamped, const float InX )
+                {
+                    if( InLerpUnclamped >= 0.f && InLerpUnclamped <= 1.f )
+                    {
+                        EdgePoints[0] = FVector2D( InX, TrackOffsetY );
+                        EdgePoints[1] = FVector2D( InX, TrackOffsetY + TrackHeight );
+                        FSlateDrawElement::MakeLines( OutDrawElements, EdgeLayerId, PaintGeometry, EdgePoints, DrawEffects, EdgeColor, /*bAntialias=*/false, /*Thickness=*/2.f );
+                    }
+                };
+            DrawEdgeLine( StartLerpUnclamped, StartX );
+            DrawEdgeLine( EndLerpUnclamped, EndX );
+        }
+
         int64 TotalMaxSeconds = static_cast<int64>(TNumericLimits<int32>::Max() / TickResolution.AsDecimal());
 
         FFrameNumber ThresholdFrames = (FMath::Max(DuplicateThreshold, SMALL_NUMBER) * TickResolution).FloorToFrame();
@@ -335,33 +419,46 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
 
         TArray<FFrameNumber> GroupedTimes;
         TArray<FLinearColor> KeyColors;
+        GroupedTimes.Reset( MarkedFrameCount );
+        KeyColors.Reset( MarkedFrameCount );
 
-        GroupedTimes.Reset(MarkedFrames.Num());
-        KeyColors.Reset(MarkedFrames.Num());
         int32 Index = 0;
-        while ( Index < MarkedFrames.Num() )
+        while( Index < MarkedFrameCount )
         {
-            FFrameNumber PredicateTime = MarkedFrames[Index].GetStartFrame();
-            FLinearColor MarkedFrameColor = MarkedFrames[Index].bUseCustomColor ? MarkedFrames[Index].CustomColor : DefaultMarkedFrameColor;
+            // Mark ranges are drawn as spans above. Only single-frame marks get grouped glyphs here.
+            if( MarkedFrames[Index].IsRange() )
+            {
+                ++Index;
+                continue;
+            }
+
+            const FFrameNumber PredicateTime = MarkedFrames[Index].GetStartFrame();
+
+            const FLinearColor MarkedFrameColor = GetMarkColor( MarkedFrames[Index] );
+
             GroupedTimes.Add( PredicateTime );
             KeyColors.Add( MarkedFrameColor );
             KeyColors[KeyColors.Num() - 1].A = 0.8f; // make the alpha consistent across all markers
 
-            while (Index < MarkedFrames.Num() && FMath::Abs(MarkedFrames[Index].GetStartFrame() - PredicateTime) <= ThresholdFrames)
+            // Skip interleaved mark ranges rather than ending the run, so single marks within the
+            // duplicate threshold still group into one glyph when a range's start sits between them
+            do
             {
                 ++Index;
-            }
+            } while( Index < MarkedFrameCount
+                     && ( MarkedFrames[Index].IsRange() || FMath::Abs( MarkedFrames[Index].GetStartFrame() - PredicateTime ) <= ThresholdFrames ) );
         }
+
         GroupedTimes.Shrink();
         KeyColors.Shrink();
 
-        DrawKeys(AllottedGeometry, OutDrawElements, LayerId, bParentEnabled, GroupedTimes, KeyColors, bPlayMarkerOnKey);
+        DrawKeys( AllottedGeometry, OutDrawElements, LayerId, bParentEnabled, GroupedTimes, KeyColors, bPlayMarkerOnKey );
     }
 
     // Draw the play marker
     {
         static const float BrushWidth = 11.f, BrushHeight = 6.f;
-        const float PositionX = AllottedGeometry.GetLocalSize().X * ProgressLerp;
+        const float PositionX = GeometrySize.X * ProgressLerp;
 
         FSlateDrawElement::MakeBox(
             OutDrawElements,
@@ -376,12 +473,12 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
         {
             TArray<FVector2D> LinePoints;
             LinePoints.Add(FVector2D(PositionX, BrushHeight));
-            LinePoints.Add(FVector2D(PositionX, AllottedGeometry.GetLocalSize().Y));
+            LinePoints.Add( FVector2D( PositionX, GeometrySize.Y ) );
 
             FSlateDrawElement::MakeLines(
                 OutDrawElements,
                 LayerId,
-                AllottedGeometry.ToPaintGeometry(),
+                PaintGeometry,
                 LinePoints,
                 DrawEffects,
                 LightGray,
@@ -397,7 +494,10 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
         FSlateDrawElement::MakeBox(
             OutDrawElements,
             LayerId+1,
-            AllottedGeometry.ToPaintGeometry(FVector2f(BrushWidth, TrackHeight), FSlateLayoutTransform(FVector2f(AllottedGeometry.GetLocalSize().X*PlaybackStartLerp, TrackOffsetY))),
+            AllottedGeometry.ToPaintGeometry(
+                FVector2f( BrushWidth, TrackHeight ),
+                FSlateLayoutTransform( FVector2f( GeometrySize.X* PlaybackStartLerp, TrackOffsetY ) )
+            ),
             FEposSequenceEditorStyle::Get().GetBrush("CinematicViewportRangeStart"),
             DrawEffects,
             Sequencer->GetSequencerSettings()->GetPlaybackRangeStartColor().ToFColor( true )
@@ -406,7 +506,10 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
         FSlateDrawElement::MakeBox(
             OutDrawElements,
             LayerId+1,
-            AllottedGeometry.ToPaintGeometry(FVector2f(BrushWidth, TrackHeight), FSlateLayoutTransform(FVector2f(AllottedGeometry.GetLocalSize().X*PlaybackEndLerp - BrushWidth, TrackOffsetY))),
+            AllottedGeometry.ToPaintGeometry(
+                FVector2f( BrushWidth, TrackHeight ),
+                FSlateLayoutTransform( FVector2f( ( GeometrySize.X* PlaybackEndLerp ) - BrushWidth, TrackOffsetY ) )
+            ),
             FEposSequenceEditorStyle::Get().GetBrush("CinematicViewportRangeEnd"),
             DrawEffects,
             Sequencer->GetSequencerSettings()->GetPlaybackRangeEndColor().ToFColor( true )
