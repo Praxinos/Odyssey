@@ -84,6 +84,7 @@ public:
     virtual void RecordEvent( FString&& EventName, const TArray<FAnalyticsEventAttribute>& Attributes, EAnalyticsRecordEventMode Mode ) override;
 
     virtual void SetDefaultEventAttributes( TArray<FAnalyticsEventAttribute>&& Attributes ) override;
+    virtual void AddOrUpdateDefaultValue( FAnalyticsEventAttribute&& Attribute ) override;
     virtual TArray<FAnalyticsEventAttribute> GetDefaultEventAttributesSafe() const override;
     virtual int32 GetDefaultEventAttributeCount() const override;
     virtual FAnalyticsEventAttribute GetDefaultEventAttribute( int AttributeIndex ) const override;

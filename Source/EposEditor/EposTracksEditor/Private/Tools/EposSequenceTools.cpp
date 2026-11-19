@@ -638,7 +638,8 @@ ShotSequenceTools::AddKeysToSection( ISequencer& iSequencer, UMovieSceneSection*
     {
         for( const FMovieSceneChannelValueSetter& GeneratedKey : Keys )
         {
-            GeneratedKey->ApplyDefault( Section, Proxy, SetDefault );
+            bool SectionModified;
+            GeneratedKey->ApplyDefaultDeferred( Section, SectionModified, Proxy, SetDefault );
         }
     }
 
@@ -659,7 +660,8 @@ ShotSequenceTools::AddKeysToSection( ISequencer& iSequencer, UMovieSceneSection*
 
         for( const FMovieSceneChannelValueSetter& GeneratedKey : Keys )
         {
-            key_created |= GeneratedKey->Apply( Section, Proxy, KeyTime, InterpolationMode, bKeyEvenIfUnchanged, bKeyEvenIfEmpty );
+            bool SectionModified;
+            key_created |= GeneratedKey->ApplyDeferred( Section, SectionModified, Proxy, KeyTime, InterpolationMode, bKeyEvenIfUnchanged, bKeyEvenIfEmpty );
         }
     }
 
@@ -897,7 +899,8 @@ ShotSequenceTools::UpdateChannel( TSharedPtr<ISequencer> iSequencer, AActor* iAc
     // BUT the key on frame X won't be relevant anymore as the focal length of the camera is also changed on frame X
     for( const FMovieSceneChannelValueSetter& generated_key : generated_keys )
     {
-        generated_key->ApplyDefault( transformSection, transformSection->GetChannelProxy(), EKeyFrameTrackEditorSetDefault::SetDefaultOnAddKeys );
+        bool SectionModified;
+        generated_key->ApplyDefaultDeferred( transformSection, SectionModified, transformSection->GetChannelProxy(), EKeyFrameTrackEditorSetDefault::SetDefaultOnAddKeys );
     }
     //bool key_created = ShotSequenceTools::AddKeysToSection( *sequencer, transformSection, sequencer->GetLocalTime().Time.GetFrame(), generated_keys, ESequencerKeyMode::AutoKey, EKeyFrameTrackEditorSetDefault::SetDefaultOnAddKeys );
 

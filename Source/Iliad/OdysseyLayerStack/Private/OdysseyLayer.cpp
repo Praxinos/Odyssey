@@ -1360,7 +1360,7 @@ UOdysseyLayer::BuildRenderPipelineInternal(
 
     oRenderFunction = [this, renderFunction, showLighttable, lighttablePosition, lighttableRenderFunction](
             FRDGBuilder& iGraphBuilder,
-            ERHIFeatureLevel::Type iFeatureLevel,
+            EShaderPlatform iShaderPlatform,
             FRDGTextureRef iDestinationTexture,
             const FIntRect& iSrcRect,
             const FIntRect& iDstRect,
@@ -1380,7 +1380,7 @@ UOdysseyLayer::BuildRenderPipelineInternal(
 
             renderFunction(
                 iGraphBuilder,
-                iFeatureLevel,
+                iShaderPlatform,
                 renderTexture,
                 iSrcRect,
                 iDstRect,
@@ -1401,7 +1401,7 @@ UOdysseyLayer::BuildRenderPipelineInternal(
 
                 lighttableRenderFunction(
                     iGraphBuilder,
-                    iFeatureLevel,
+                    iShaderPlatform,
                     lighttableTexture,
                     iSrcRect,
                     iDstRect,
@@ -1413,7 +1413,7 @@ UOdysseyLayer::BuildRenderPipelineInternal(
             {
                 FOdysseyBlendShader::BlendRect(
                     iGraphBuilder,
-                    iFeatureLevel,
+                    iShaderPlatform,
                     iDestinationTexture,
                     lighttableTexture,
                     iDestinationTexture,
@@ -1429,7 +1429,7 @@ UOdysseyLayer::BuildRenderPipelineInternal(
 
             FOdysseyBlendShader::BlendRect(
                 iGraphBuilder,
-                iFeatureLevel,
+                iShaderPlatform,
                 iDestinationTexture,
                 renderTexture,
                 iDestinationTexture,
@@ -1446,7 +1446,7 @@ UOdysseyLayer::BuildRenderPipelineInternal(
             {
                 FOdysseyBlendShader::BlendRect(
                     iGraphBuilder,
-                    iFeatureLevel,
+                    iShaderPlatform,
                     iDestinationTexture,
                     lighttableTexture,
                     iDestinationTexture,
@@ -1559,7 +1559,7 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
 
     oRenderFunction = [this, keysRenderParams](
             FRDGBuilder& iGraphBuilder,
-            ERHIFeatureLevel::Type iFeatureLevel,
+            EShaderPlatform iShaderPlatform,
             FRDGTextureRef iDestinationTexture,
             const FIntRect& iSrcRect,
             const FIntRect& iDstRect,
@@ -1578,12 +1578,12 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                 );
 
                 FRDGTextureRef keyTexture = iGraphBuilder.CreateTexture(desc, TEXT("UOdysseyLayer::Lighttable::keyTexture"));
-                keyRenderParams.RenderFunction(iGraphBuilder, iFeatureLevel, keyTexture, iSrcRect, iDstRect, iSrcTransform * keyRenderParams.Transform);
+                keyRenderParams.RenderFunction(iGraphBuilder, iShaderPlatform, keyTexture, iSrcRect, iDstRect, iSrcTransform * keyRenderParams.Transform);
 
                 //Turn to black and white
                 FOdysseyBlendColorShader::BlendRect(
                     iGraphBuilder,
-                    iFeatureLevel,
+                    iShaderPlatform,
                     keyTexture,
                     FLinearColor::Black,
                     keyTexture,
@@ -1596,7 +1596,7 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                 //Apply Contrast
                 FOdysseyBlendColorShader::BlendRect(
                     iGraphBuilder,
-                    iFeatureLevel,
+                    iShaderPlatform,
                     keyTexture,
                     FLinearColor::Black,
                     keyTexture,
@@ -1608,7 +1608,7 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
 
                 FOdysseyBlendColorShader::BlendRect(
                     iGraphBuilder,
-                    iFeatureLevel,
+                    iShaderPlatform,
                     keyTexture,
                     keyRenderParams.Color,
                     keyTexture,
@@ -1620,7 +1620,7 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
 
                 FOdysseyBlendShader::BlendRect(
                     iGraphBuilder,
-                    iFeatureLevel,
+                    iShaderPlatform,
                     iDestinationTexture,
                     keyTexture,
                     iDestinationTexture,
@@ -1700,7 +1700,7 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
 
     oRenderFunction = [childrenRenderParams](
             FRDGBuilder& iGraphBuilder,
-            ERHIFeatureLevel::Type iFeatureLevel,
+            EShaderPlatform iShaderPlatform,
             FRDGTextureRef iDestinationTexture,
             const FIntRect& iSrcRect,
             const FIntRect& iDstRect,
@@ -1720,11 +1720,11 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
 
             for ( const FChildRenderParams& childRenderParams : childrenRenderParams )
             {
-                childRenderParams.RenderFunction(iGraphBuilder, iFeatureLevel, childTexture, iSrcRect, iDstRect, iSrcTransform);
+                childRenderParams.RenderFunction(iGraphBuilder, iShaderPlatform, childTexture, iSrcRect, iDstRect, iSrcTransform);
 
                 FOdysseyBlendShader::BlendRect(
                     iGraphBuilder,
-                    iFeatureLevel,
+                    iShaderPlatform,
                     iDestinationTexture,
                     childTexture,
                     iDestinationTexture,

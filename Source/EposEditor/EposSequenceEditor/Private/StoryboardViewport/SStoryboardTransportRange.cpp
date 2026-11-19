@@ -341,13 +341,13 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
         int32 Index = 0;
         while ( Index < MarkedFrames.Num() )
         {
-            FFrameNumber PredicateTime = MarkedFrames[Index].FrameNumber;
+            FFrameNumber PredicateTime = MarkedFrames[Index].GetStartFrame();
             FLinearColor MarkedFrameColor = MarkedFrames[Index].bUseCustomColor ? MarkedFrames[Index].CustomColor : DefaultMarkedFrameColor;
             GroupedTimes.Add( PredicateTime );
             KeyColors.Add( MarkedFrameColor );
             KeyColors[KeyColors.Num() - 1].A = 0.8f; // make the alpha consistent across all markers
 
-            while (Index < MarkedFrames.Num() && FMath::Abs(MarkedFrames[Index].FrameNumber - PredicateTime) <= ThresholdFrames)
+            while (Index < MarkedFrames.Num() && FMath::Abs(MarkedFrames[Index].GetStartFrame() - PredicateTime) <= ThresholdFrames)
             {
                 ++Index;
             }

@@ -152,10 +152,10 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 
                 UOdysseyAnimationCellImageRaster* rasterCell = Cast<UOdysseyAnimationCellImageRaster>(rasterCells[j - 1]);
 
-                const ERHIFeatureLevel::Type featureLevel = GMaxRHIFeatureLevel;
+                const EShaderPlatform shaderPlatform = GMaxRHIShaderPlatform;
 
                 ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(
-                    [startRenderTarget, endRenderTarget, destinationRenderTarget, featureLevel, rect, crossFadelength, j](FRHICommandListImmediate& RHICmdList)
+                    [startRenderTarget, endRenderTarget, destinationRenderTarget, shaderPlatform, rect, crossFadelength, j](FRHICommandListImmediate& RHICmdList)
                     {
                         FRDGBuilder graphBuilder(RHICmdList);
 
@@ -167,7 +167,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 
                         FOdysseyBlendShader::BlendRect(
                             graphBuilder,
-                            featureLevel,
+                            shaderPlatform,
                             destinationTexture,
                             startTexture,
                             destinationTexture,
@@ -182,7 +182,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 
                         FOdysseyBlendShader::BlendRect(
                             graphBuilder,
-                            featureLevel,
+                            shaderPlatform,
                             destinationTexture,
                             endTexture,
                             destinationTexture,
@@ -230,10 +230,10 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 
                 UOdysseyAnimationCellImageRaster* rasterCell = Cast<UOdysseyAnimationCellImageRaster>(rasterCells[j - 1]);
 
-                const ERHIFeatureLevel::Type featureLevel = GMaxRHIFeatureLevel;
+                const EShaderPlatform shaderPlatform = GMaxRHIShaderPlatform;
 
                 ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(
-                    [startRenderTarget, endRenderTarget, destinationRenderTarget, featureLevel, rect, crossFadelength, j](FRHICommandListImmediate& RHICmdList)
+                    [startRenderTarget, endRenderTarget, destinationRenderTarget, shaderPlatform, rect, crossFadelength, j](FRHICommandListImmediate& RHICmdList)
                     {
                         FRDGBuilder graphBuilder(RHICmdList);
 
@@ -244,7 +244,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 
                         FOdysseyBlendShader::BlendRect(
                             graphBuilder,
-                            featureLevel,
+                            shaderPlatform,
                             destinationTexture,
                             startTexture,
                             destinationTexture,

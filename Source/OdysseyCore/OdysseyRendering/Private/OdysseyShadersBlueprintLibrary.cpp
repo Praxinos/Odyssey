@@ -29,7 +29,7 @@ UOdysseyShadersBlueprintLibrary::Blend(
     if (!BackgroundTexture || !ForegroundTexture || !DestinationTexture)
         return;
 
-    const ERHIFeatureLevel::Type featureLevel = WorldContextObject->GetWorld() ? WorldContextObject->GetWorld()->GetFeatureLevel() : GMaxRHIFeatureLevel;
+    const EShaderPlatform shaderPlatform = WorldContextObject->GetWorld() ? GetFeatureLevelShaderPlatform( WorldContextObject->GetWorld()->GetFeatureLevel() ) : GMaxRHIShaderPlatform;
 
     ENQUEUE_RENDER_COMMAND(UpdateOdysseyScreenPaintRTCommandSeams)(
         [=](FRHICommandListImmediate& RHICmdList)
@@ -46,7 +46,7 @@ UOdysseyShadersBlueprintLibrary::Blend(
 
             FOdysseyBlendShader::BlendRect(
                 graphBuilder,
-                featureLevel,
+                shaderPlatform,
                 backgroundTexture,
                 foregroundTexture,
                 destinationTexture,

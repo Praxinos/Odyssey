@@ -394,7 +394,7 @@ UOdysseyLayerCell::BuildRenderPipelineInternal(
 
     oRenderFunction = [this, iType](
         FRDGBuilder& iGraphBuilder,
-        ERHIFeatureLevel::Type iFeatureLevel,
+        EShaderPlatform iShaderPlatform,
         FRDGTextureRef iDestinationTexture,
         const FIntRect& iSrcRect,
         const FIntRect& iDstRect,
@@ -413,7 +413,7 @@ UOdysseyLayerCell::BuildRenderPipelineInternal(
 
         FOdysseyBlendShader::BlendRect(
             iGraphBuilder,
-            iFeatureLevel,
+            iShaderPlatform,
             iDestinationTexture,
             sourceTexture,
             iDestinationTexture,

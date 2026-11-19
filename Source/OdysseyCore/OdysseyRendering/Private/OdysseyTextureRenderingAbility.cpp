@@ -69,7 +69,7 @@ IOdysseyTextureRenderingAbility::Render_GameThread(UTextureRenderTarget2D* iRend
 void
 IOdysseyTextureRenderingAbility::Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntRect& iDstRect, FCanRenderFunction iCanRenderFunction) const
 {
-    const ERHIFeatureLevel::Type featureLevel = iRenderTarget->GetWorld() ? iRenderTarget->GetWorld()->GetFeatureLevel() : GMaxRHIFeatureLevel;
+    const EShaderPlatform shaderPlatform = iRenderTarget->GetWorld() ? GetFeatureLevelShaderPlatform( iRenderTarget->GetWorld()->GetFeatureLevel() ) : GMaxRHIShaderPlatform;
 
     IOdysseyTextureRenderingAbility::FRenderFunction renderFunction;
     if (!BuildRenderPipeline(iFrame, iType, renderFunction, iCanRenderFunction, {}))
@@ -92,7 +92,7 @@ IOdysseyTextureRenderingAbility::Render_GameThread(UTextureRenderTarget2D* iRend
     checkf(iRenderTarget->GameThread_GetRenderTargetResource(), TEXT( "Render_GameThread::GetRenderTargetResource is Null" ))
 
     ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(
-        [this, renderFunction, iRenderTarget, featureLevel, iSrcRect, iDstRect](FRHICommandListImmediate& RHICmdList)
+        [this, renderFunction, iRenderTarget, shaderPlatform, iSrcRect, iDstRect](FRHICommandListImmediate& RHICmdList)
         {
             FRDGBuilder graphBuilder(RHICmdList);
 
@@ -104,7 +104,7 @@ IOdysseyTextureRenderingAbility::Render_GameThread(UTextureRenderTarget2D* iRend
 
             renderFunction(
                 graphBuilder,
-                featureLevel,
+                shaderPlatform,
                 destinationTexture,
                 iSrcRect,
                 iDstRect,
@@ -129,6 +129,7 @@ IOdysseyTextureRenderingAbility::RenderAndResize_GameThread(UTextureRenderTarget
 void
 IOdysseyTextureRenderingAbility::RenderAndResize_GameThread(UTextureRenderTarget2D* iDstRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntRect& iDstRect, FCanRenderFunction iCanRenderFunction) const
 {
+    const EShaderPlatform shaderPlatform = iDstRenderTarget->GetWorld() ? GetFeatureLevelShaderPlatform( iDstRenderTarget->GetWorld()->GetFeatureLevel() ) : GMaxRHIShaderPlatform;
     const ERHIFeatureLevel::Type featureLevel = iDstRenderTarget->GetWorld() ? iDstRenderTarget->GetWorld()->GetFeatureLevel() : GMaxRHIFeatureLevel;
 
     IOdysseyTextureRenderingAbility::FRenderFunction renderFunction;
@@ -149,7 +150,7 @@ IOdysseyTextureRenderingAbility::RenderAndResize_GameThread(UTextureRenderTarget
     }
 
     ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(
-        [this, renderFunction, iDstRenderTarget, featureLevel, iSrcRect, iDstRect](FRHICommandListImmediate& RHICmdList)
+        [this, renderFunction, iDstRenderTarget, shaderPlatform, featureLevel, iSrcRect, iDstRect](FRHICommandListImmediate& RHICmdList)
         {
             FRDGBuilder graphBuilder( RHICmdList );
 
@@ -173,7 +174,7 @@ IOdysseyTextureRenderingAbility::RenderAndResize_GameThread(UTextureRenderTarget
 
             renderFunction(
                 graphBuilder,
-                featureLevel,
+                shaderPlatform,
                 renderTexture,
                 iSrcRect,
                 iSrcRect,
@@ -184,7 +185,7 @@ IOdysseyTextureRenderingAbility::RenderAndResize_GameThread(UTextureRenderTarget
 
             FOdysseyBlendShader::BlendRect(
                 graphBuilder,
-                featureLevel,
+                shaderPlatform,
                 destinationTexture,
                 renderTexture,
                 destinationTexture,

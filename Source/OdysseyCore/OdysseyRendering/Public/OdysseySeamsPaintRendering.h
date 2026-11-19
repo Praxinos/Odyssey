@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "RHI.h"
+#include "RHIShaderPlatform.h"
 
 class FRHICommandList;
 class UTextureRenderTarget2D;
@@ -25,11 +25,11 @@ namespace OdysseySeamsPaintRendering
 
 
     /** Binds the mesh paint vertex and pixel shaders to the graphics device */
-    ODYSSEYRENDERING_API void SetSeamsPaintShaders(  FRHICommandList& iRHICmdList,
-                                            FGraphicsPipelineStateInitializer& iGraphicsPSOInit,
-                                            ERHIFeatureLevel::Type iFeatureLevel,
-                                            const FMatrix& iTransform,
-                                            const float iGamma,
-                                            const FOdysseySeamsPaintShaderParameters& iShaderParams );
+    ODYSSEYRENDERING_API void SetSeamsPaintShaders( FRHICommandList& iRHICmdList,
+                                                    FGraphicsPipelineStateInitializer& iGraphicsPSOInit,
+                                                    EShaderPlatform iShaderPlatform,
+                                                    const FMatrix& iTransform,
+                                                    const float iGamma,
+                                                    const FOdysseySeamsPaintShaderParameters& iShaderParams );
 
 }

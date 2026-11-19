@@ -51,6 +51,7 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
     if (!cell)
         return;
 
+    const EShaderPlatform shaderPlatform = Canvas->GetShaderPlatform();
     const ERHIFeatureLevel::Type featureLevel = Canvas->GetFeatureLevel();
 
     IOdysseyTextureRenderingAbility::FRenderFunction childRenderFunction;
@@ -59,7 +60,7 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
 
     FIntRect srcRect = cell->GetDefaultRenderRect();
     ENQUEUE_RENDER_COMMAND(UOdysseyAnimationCellThumbnailRenderer_Draw)(
-        [this, Viewport, srcRect, X, Y, Width, Height, featureLevel, childRenderFunction](FRHICommandListImmediate& RHICmdList)
+        [this, Viewport, srcRect, X, Y, Width, Height, shaderPlatform, featureLevel, childRenderFunction](FRHICommandListImmediate& RHICmdList)
         {
             FRDGBuilder graphBuilder(RHICmdList);
             FRDGTextureRef destinationTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(Viewport->GetRenderTargetTexture(), TEXT("UOdysseyAnimationCellThumbnailRenderer::destinationTexture")));
@@ -77,7 +78,7 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
 
             childRenderFunction(
                 graphBuilder,
-                featureLevel,
+                shaderPlatform,
                 renderTexture,
                 srcRect,
                 srcRect,
@@ -88,7 +89,7 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
 
             FOdysseyBlendShader::BlendRect(
                 graphBuilder,
-                featureLevel,
+                shaderPlatform,
                 destinationTexture, // Background
                 renderTexture,      // Foreground
                 destinationTexture, // Destination
