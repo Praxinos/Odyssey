@@ -16,6 +16,7 @@
 #include "OdysseyTiledImage.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyMediaRaster.h"
+#include "OdysseyRasterBlockEdit.h"
 #include "OdysseyAnimationCellImageRasterExport.h"
 #include "OdysseyAnimationCellImageRasterImport.h"
 #include "OdysseyAnimationLayerImageRaster.h"
@@ -79,7 +80,7 @@ UOdysseyAnimationCellImageRaster::GetRasterContent() const
     {
         UOdysseyAnimationCellImageRaster* MutableThis = const_cast<UOdysseyAnimationCellImageRaster*>(this);
         // As the former render texture, 8-bit raster blocks of cells hold sRGB encoded colors; the tiles hold them decoded.
-        mRasterContent = MakeUnique<FOdysseyRasterContent>(*MutableThis, MutableThis->GetRenderingId(), MutableThis->TiledImage,
+        mRasterContent = MakeShared<FOdysseyRasterContent>(*MutableThis, MutableThis->GetRenderingId(), MutableThis->TiledImage,
             [MutableThis]()
             {
                 FOdysseyRasterContent::FDescription Description;
@@ -95,7 +96,11 @@ UOdysseyAnimationCellImageRaster::GetRasterContent() const
             {
                 MutableThis->OnContentChanged(Rects, bInteractive);
             },
-            FOdysseyRasterBlock::FPostProcess::CreateUObject(MutableThis, &UOdysseyAnimationCellImageRaster::RasterBlockPostProcess));
+            [MutableThis]()
+            {
+                const UOdysseyAnimationLayerImageRaster* Layer = Cast<UOdysseyAnimationLayerImageRaster>(MutableThis->GetLayer());
+                return Layer && Layer->IsAlphaLocked();
+            });
     }
     return *mRasterContent;
 }
@@ -158,6 +163,13 @@ UOdysseyAnimationCellImageRaster::GetRasterBlock() const
     return GetRasterContent().GetRasterBlock();
 }
 
+TSharedPtr<FOdysseyRasterBlockEdit>
+UOdysseyAnimationCellImageRaster::BeginRasterEdit()
+{
+    MigrateLegacyContent();
+    return GetRasterContent().BeginEdit();
+}
+
 void
 UOdysseyAnimationCellImageRaster::PostLoad()
 {
@@ -172,52 +184,25 @@ UOdysseyAnimationCellImageRaster::BeginDestroy()
     Super::BeginDestroy();
 }
 
-TArray<::ULIS::FEvent>
-UOdysseyAnimationCellImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(GetLayer());
-    if (!layer || !layer->IsAlphaLocked())
-        return iWaitList;
-
-    //Apply AlphaLock
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlock();
-
-    TArray<::ULIS::FEvent> events;
-    TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
-    TArray<FIntPoint> invalidTiles = iInvalidMap.InvalidTiles();
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-    for (const FIntPoint& invalidTile : invalidTiles)
-    {
-        TSharedPtr<::ULIS::FBlock> originalBlock = iOriginalBlocks[invalidTile];
-        ::ULIS::FRectI rect = ::ULISUtils::ToULISRectI(iInvalidMap.GetTileRect(invalidTile));
-        ::ULIS::FEvent eventBlend;
-        ctx.Blend(
-            *originalBlock
-            , *block
-            , ::ULIS::FRectI::Auto
-            , rect.Position()
-            , ::ULIS::Blend_Back
-            , ::ULIS::Alpha_Top
-            , 1.f
-            , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
-            , iWaitList.Num()
-            , iWaitList.GetData()
-            , &eventBlend
-        );
-        events.Add(eventBlend);
-    }
-
-    return events;
-}
-
-
 FOdysseyMediaProvider
 UOdysseyAnimationCellImageRaster::GetMediaProvider() const
 {
     //Don't create a mediaRaster if there is an image render in use
     FScopeLock lock(&mImageRenderingMutex);
 
-    TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(GetRasterBlock());
+    // The pixels are read or edited only when a tool needs them.
+    TWeakObjectPtr<UOdysseyAnimationCellImageRaster> weakThis = const_cast<UOdysseyAnimationCellImageRaster*>(this);
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(GetRenderingId(),
+        [weakThis]() -> TSharedPtr<FOdysseyRasterBlock>
+        {
+            UOdysseyAnimationCellImageRaster* cell = weakThis.Get();
+            return cell ? cell->GetRasterBlock() : nullptr;
+        },
+        [weakThis]() -> TSharedPtr<FOdysseyRasterBlockEdit>
+        {
+            UOdysseyAnimationCellImageRaster* cell = weakThis.Get();
+            return cell ? cell->BeginRasterEdit() : nullptr;
+        });
     mMediaRaster = mediaRaster;
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.Add(mediaRaster);

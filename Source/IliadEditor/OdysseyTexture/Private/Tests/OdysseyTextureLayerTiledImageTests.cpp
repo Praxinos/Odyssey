@@ -27,6 +27,7 @@
 #include "UObject/UObjectHash.h"
 #include "UObject/UnrealType.h"
 
+#include "OdysseyRasterBlockEdit.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyRasterEditSession.h"
 #include "OdysseyRenderContext.h"
@@ -165,7 +166,7 @@ TMap<FIntPoint, FOdysseyTileId> ReadTileIds(const UOdysseyTiledImage* Image)
     return *Property->ContainerPtrToValuePtr<TMap<FIntPoint, FOdysseyTileId>>(Image);
 }
 
-/** Clears the whole layer through its raster block, as a tool does. */
+/** Clears the whole layer through its raster block, as users other than tools do. */
 void ClearLayer(UOdysseyTextureLayerImageRaster* Layer)
 {
     TSharedPtr<FOdysseyRasterBlock> Raster = Layer->GetRasterBlock();
@@ -176,17 +177,15 @@ void ClearLayer(UOdysseyTextureLayerImageRaster* Layer)
     Mutator.Commit();
 }
 
-/** Opens an edit changing no pixel on the layer, so that it renders its uncommitted edits until the mutator commits. */
-TUniquePtr<FOdysseyRasterBlockMutator> BeginUnchangedEdit(UOdysseyTextureLayerImageRaster* Layer)
+/** Begins an edit changing no pixel on the layer, so that it renders its uncommitted edits until the edit is committed. */
+TSharedPtr<FOdysseyRasterBlockEdit> BeginUnchangedEdit(FAutomationTestBase& Test, UOdysseyTextureLayerImageRaster* Layer)
 {
-    TSharedPtr<FOdysseyRasterBlock> Raster = Layer->GetRasterBlock();
-    TUniquePtr<FOdysseyRasterBlockMutator> Mutator = MakeUnique<FOdysseyRasterBlockMutator>(Raster, false);
-    Mutator->EditTilesFromRects({Raster->GetRect()},
-        [](TSharedPtr<ULIS::FBlock>, const FOdysseyInvalidTileMap&) -> TArray<ULIS::FEvent>
-        {
-            return {};
-        });
-    return Mutator;
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Layer->BeginRasterEdit();
+    if (Test.TestTrue(TEXT("Begin an edit"), Edit.IsValid()))
+    {
+        Edit->Update({ FIntRect(0, 0, Width, Height) });
+    }
+    return Edit;
 }
 
 /**
@@ -198,15 +197,18 @@ bool ComparePreviewAndTiles(FAutomationTestBase& Test, const IOdysseyTextureRend
     FIntRect SourceRect = FIntRect(0, 0, Width, Height), FIntRect DestinationRect = FIntRect(0, 0, Width, Height),
     FMatrix Transform = FMatrix::Identity)
 {
-    TArray<TUniquePtr<FOdysseyRasterBlockMutator>> Mutators;
+    TArray<TSharedPtr<FOdysseyRasterBlockEdit>> Edits;
     for (UOdysseyTextureLayerImageRaster* Layer : Layers)
     {
-        Mutators.Add(BeginUnchangedEdit(Layer));
+        Edits.Add(BeginUnchangedEdit(Test, Layer));
     }
     const TArray<FLinearColor> Preview = ReadPipeline(Renderer, SourceRect, DestinationRect, Transform);
-    for (TUniquePtr<FOdysseyRasterBlockMutator>& Mutator : Mutators)
+    for (const TSharedPtr<FOdysseyRasterBlockEdit>& Edit : Edits)
     {
-        Mutator->Commit();
+        if (Edit)
+        {
+            Edit->Commit();
+        }
     }
     const TArray<FLinearColor> Tiles = ReadPipeline(Renderer, SourceRect, DestinationRect, Transform);
     return ComparePixels(Test, TEXT("Tiles render the previewed edits"), Preview, Tiles, Tolerance);
@@ -429,16 +431,16 @@ bool FOdysseyTextureLayerTiledPartialTest::RunTest(const FString& Parameters)
 
     const FIntPoint Erased(3, 4);
     const int32 ErasedIndex = Erased.Y * Width + Erased.X;
-    FOdysseyRasterBlockMutator Mutator(Layer->GetRasterBlock(), false);
-    Mutator.EditTilesFromRects({ULIS::FRectI::FromXYWH(2, 3, 4, 5)},
-        [](TSharedPtr<ULIS::FBlock> Block, const FOdysseyInvalidTileMap&) -> TArray<ULIS::FEvent>
-        {
-            for (int32 Y = 3; Y < 8; ++Y)
-            {
-                FMemory::Memzero(Block->Bits() + (Y * Width + 2) * 4, 4 * 4);
-            }
-            return {};
-        });
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Layer->BeginRasterEdit();
+    if (!TestTrue(TEXT("Begin an edit"), Edit.IsValid()))
+    {
+        return false;
+    }
+    for (int32 Y = 3; Y < 8; ++Y)
+    {
+        FMemory::Memzero(Edit->GetBlock()->Bits() + (Y * Width + 2) * 4, 4 * 4);
+    }
+    Edit->Update({ FIntRect(2, 3, 6, 8) });
     TestTrue(TEXT("Uncommitted edits leave the tiles unchanged"), ReadTileIds(Image).OrderIndependentCompareEqual(Before));
     const TArray<FLinearColor> Interactive = ReadPipeline(Layer);
     if (TestEqual(TEXT("Interactive render pixel count"), Interactive.Num(), Width * Height))
@@ -446,7 +448,8 @@ bool FOdysseyTextureLayerTiledPartialTest::RunTest(const FString& Parameters)
         TestTrue(TEXT("Uncommitted edits are rendered"), Interactive[ErasedIndex].Equals(FLinearColor::Transparent));
     }
 
-    Mutator.Commit();
+    TestTrue(TEXT("Commit the edit"), Edit->Commit());
+    TestFalse(TEXT("A commit ends the edit"), Edit->IsActive());
     const TMap<FIntPoint, FOdysseyTileId> After = ReadTileIds(Image);
     int32 ChangedTiles = 0;
     for (const TPair<FIntPoint, FOdysseyTileId>& Pair : Before)
@@ -473,15 +476,18 @@ bool FOdysseyTextureLayerTiledPartialTest::RunTest(const FString& Parameters)
     SnapshotTarget->GameThread_GetRenderTargetResource()->ReadLinearColorPixels(SnapshotPixels, Flags);
     ComparePixels(*this, TEXT("Prepared RDG snapshot is not changed by a later commit"), BeforePixels, SnapshotPixels, 0.0001f);
 
-    // An aborted edit restores the block and leaves the tiles as they are.
-    FOdysseyRasterBlockMutator Aborted(Layer->GetRasterBlock(), false);
-    Aborted.EditTilesFromRects({ULIS::FRectI::FromXYWH(40, 40, 4, 4)},
-        [](TSharedPtr<ULIS::FBlock> Block, const FOdysseyInvalidTileMap&) -> TArray<ULIS::FEvent>
-        {
-            FMemory::Memzero(Block->Bits() + (40 * Width + 40) * 4, 4 * 4);
-            return {};
-        });
-    Aborted.Abort();
+    // An ended edit leaves the tiles as they are.
+    TSharedPtr<FOdysseyRasterBlockEdit> Aborted = Layer->BeginRasterEdit();
+    if (!TestTrue(TEXT("Begin another edit"), Aborted.IsValid()))
+    {
+        return false;
+    }
+    FMemory::Memzero(Aborted->GetBlock()->Bits() + (40 * Width + 40) * 4, 4 * 4);
+    Aborted->Update({ FIntRect(40, 40, 44, 41) });
+    Aborted->End();
+    FOdysseyRenderContext EndedContext;
+    FOdysseyRasterEditSession::AddOverrides(EndedContext);
+    TestFalse(TEXT("An ended edit is not shown"), EndedContext.Overrides.Contains(Layer->GetRenderingId()));
     TestTrue(TEXT("Aborted edits leave the tiles unchanged"), ReadTileIds(Image).OrderIndependentCompareEqual(After));
     ComparePixels(*this, TEXT("Aborted edits are not rendered"), Interactive, ReadPipeline(Layer), 0.0001f);
     return true;
@@ -519,16 +525,16 @@ bool FOdysseyTextureLayerStackPreviewTest::RunTest(const FString& Parameters)
     };
     TestNotEqual(TEXT("Fixture pixel is not transparent"), int32(ReadDisplayedAlpha()), 0);
 
-    FOdysseyRasterBlockMutator Mutator(Layer->GetRasterBlock(), false);
-    Mutator.EditTilesFromRects({ULIS::FRectI::FromXYWH(2, 3, 4, 5)},
-        [](TSharedPtr<ULIS::FBlock> Block, const FOdysseyInvalidTileMap&) -> TArray<ULIS::FEvent>
-        {
-            for (int32 Y = 3; Y < 8; ++Y)
-            {
-                FMemory::Memzero(Block->Bits() + (Y * Width + 2) * 4, 4 * 4);
-            }
-            return {};
-        });
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Layer->BeginRasterEdit();
+    if (!TestTrue(TEXT("Begin an edit"), Edit.IsValid()))
+    {
+        return false;
+    }
+    for (int32 Y = 3; Y < 8; ++Y)
+    {
+        FMemory::Memzero(Edit->GetBlock()->Bits() + (Y * Width + 2) * 4, 4 * 4);
+    }
+    Edit->Update({ FIntRect(2, 3, 6, 8) });
     TestTrue(TEXT("An edit session shows the uncommitted edits"), Preview.GetPreview()->GetContext().Overrides.Contains(Layer->GetRenderingId()));
     TestEqual(TEXT("The displayed texture shows the uncommitted edits"), int32(ReadDisplayedAlpha()), 0);
 
@@ -538,9 +544,70 @@ bool FOdysseyTextureLayerStackPreviewTest::RunTest(const FString& Parameters)
     Stack->ActivateTextureFastUpdate();
     Stack->SetRenderPreview(Preview.GetPreview());
 
-    Mutator.Commit();
+    Edit->Commit();
     TestFalse(TEXT("The commit ends the edit session"), Preview.GetPreview()->GetContext().Overrides.Contains(Layer->GetRenderingId()));
     TestEqual(TEXT("The displayed texture shows the committed edits"), int32(ReadDisplayedAlpha()), 0);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureLayerEditAlphaLockTest, "Odyssey.Texture.TiledImage.EditAlphaLock",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+/** While the alpha of a layer is locked, its edits change colors only: the views and the tiles keep the alpha of the layer. */
+bool FOdysseyTextureLayerEditAlphaLockTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::TextureLayerTiledImageTests;
+    TStrongObjectPtr<UTexture2D> Texture(MakeTexture(GetTransientPackage(), TSF_BGRA8));
+    UOdysseyTextureLayerImageRaster* Layer = MakeLayer(Texture.Get());
+
+    TSharedPtr<FOdysseyRasterBlockEdit> Unlocked = Layer->BeginRasterEdit();
+    if (!TestTrue(TEXT("Begin an edit"), Unlocked.IsValid()))
+    {
+        return false;
+    }
+    TestFalse(TEXT("An edit of an unlocked layer edits alpha"), Unlocked->GetSession().PreservesAlpha());
+    Unlocked->End();
+
+    Layer->SetIsAlphaLocked(true);
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Layer->BeginRasterEdit();
+    if (!TestTrue(TEXT("Begin an edit of the locked layer"), Edit.IsValid()))
+    {
+        return false;
+    }
+    TestTrue(TEXT("An edit of a locked layer preserves alpha"), Edit->GetSession().PreservesAlpha());
+
+    // The fixture is opaque at (3, 4) and half transparent at (5, 4). The block holds BGRA8 linear colors.
+    const FIntPoint Erased(3, 4);
+    const FIntPoint Painted(5, 4);
+    uint8* Bits = Edit->GetBlock()->Bits();
+    FMemory::Memzero(Bits + (Erased.Y * Width + Erased.X) * 4, 4);
+    uint8* PaintedPixel = Bits + (Painted.Y * Width + Painted.X) * 4;
+    PaintedPixel[0] = 0;
+    PaintedPixel[1] = 0;
+    PaintedPixel[2] = 255;
+    PaintedPixel[3] = 255;
+    Edit->Update({ FIntRect(Erased.X, Erased.Y, Painted.X + 1, Painted.Y + 1) });
+
+    const float Tolerance = 0.5f / 255.0f + 0.0001f;
+    TFunction<void(const TCHAR*, const TArray<FLinearColor>&)> CheckPixels = [this, Erased, Painted, Tolerance](const TCHAR* What, const TArray<FLinearColor>& Pixels)
+    {
+        if (!TestEqual(FString::Printf(TEXT("%s: pixel count"), What), Pixels.Num(), Width * Height))
+        {
+            return;
+        }
+        const FLinearColor ErasedColor = Pixels[Erased.Y * Width + Erased.X];
+        const FLinearColor PaintedColor = Pixels[Painted.Y * Width + Painted.X];
+        TestTrue(FString::Printf(TEXT("%s: the erased pixel keeps its alpha, got %s"), What, *ErasedColor.ToString()),
+            ErasedColor.Equals(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), Tolerance));
+        TestTrue(FString::Printf(TEXT("%s: the painted pixel keeps its alpha, got %s"), What, *PaintedColor.ToString()),
+            PaintedColor.Equals(FLinearColor(1.0f, 0.0f, 0.0f, 0.5f), Tolerance));
+    };
+    CheckPixels(TEXT("Uncommitted edit"), ReadPipeline(Layer));
+    {
+        FScopedTransaction Transaction(NSLOCTEXT("OdysseyTextureLayerTiledImageTests", "EditAlphaLock", "Edit a locked layer"));
+        TestTrue(TEXT("Commit the edit"), Edit->Commit());
+    }
+    CheckPixels(TEXT("Committed tiles"), ReadImage(Layer->GetTiledImage()));
     return true;
 }
 

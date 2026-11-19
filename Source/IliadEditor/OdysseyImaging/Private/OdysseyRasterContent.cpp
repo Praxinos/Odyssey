@@ -8,10 +8,12 @@
 #include "RenderGraphUtils.h"
 
 #include "OdysseyBlendShader.h"
+#include "OdysseyRasterBlockEdit.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyRasterEditSession.h"
 #include "OdysseyTiledImage.h"
 #include "OdysseyTiledImageBlock.h"
+#include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 
 namespace
@@ -22,6 +24,7 @@ constexpr int32 TileSize = 64;
 FOdysseyRasterContent::~FOdysseyRasterContent()
 {
     ReleaseRasterBlock();
+    EndEdit();
     if (UOdysseyTiledImage* Bound = BoundImage.Get())
     {
         Bound->OnUndone().RemoveAll(this);
@@ -29,13 +32,13 @@ FOdysseyRasterContent::~FOdysseyRasterContent()
 }
 
 FOdysseyRasterContent::FOdysseyRasterContent(UObject& InOwner, const FGuid& InRenderingId, TObjectPtr<UOdysseyTiledImage>& InImage,
-    FGetDescription InGetDescription, FOnChanged InOnChanged, FOdysseyRasterBlock::FPostProcess InPostProcess)
+    FGetDescription InGetDescription, FOnChanged InOnChanged, FIsAlphaLocked InIsAlphaLocked)
     : Owner(InOwner)
     , RenderingId(InRenderingId)
     , Image(InImage)
     , GetDescription(MoveTemp(InGetDescription))
     , OnChanged(MoveTemp(InOnChanged))
-    , PostProcess(MoveTemp(InPostProcess))
+    , IsAlphaLocked(MoveTemp(InIsAlphaLocked))
 {
 }
 
@@ -94,6 +97,7 @@ FOdysseyRasterContent::EnsureImage()
             }
         }
         ReleaseRasterBlock();
+        EndEdit();
     }
 
     if (BoundImage.Get() != Image)
@@ -118,10 +122,48 @@ FOdysseyRasterContent::SetContent(const ::ULIS::FBlock& Block)
 
     Image->Initialize(TileSize, Image->GetFormat());
     Odyssey::TiledImage::CopyFromBlock(*Image, Block, FIntRect(0, 0, Block.Width(), Block.Height()), FIntPoint::ZeroValue, GetDescription().bSRGB);
-    // The block and the preview are derived from the previous content.
+    // The block and the edit are derived from the previous content.
     ReleaseRasterBlock();
+    EndEdit();
     OnChanged({}, false);
     return true;
+}
+
+TSharedPtr<FOdysseyRasterBlockEdit>
+FOdysseyRasterContent::BeginEdit()
+{
+    check(IsInGameThread());
+    if (!FApp::CanEverRender() || !EnsureImage())
+    {
+        return nullptr;
+    }
+
+    EndEdit();
+    const FDescription Description = GetDescription();
+    TSharedPtr<::ULIS::FBlock> Pixels = Odyssey::TiledImage::CopyToBlock(*Image, FIntRect(FIntPoint::ZeroValue, Description.Size), Description.Format, Description.bSRGB);
+    if (!Pixels)
+    {
+        return nullptr;
+    }
+    const bool bPreserveAlpha = IsAlphaLocked && IsAlphaLocked();
+    TSharedPtr<FOdysseyRasterEditSession> Session = FOdysseyRasterEditSession::Begin(RenderingId, *Image, Description.Size, bPreserveAlpha);
+    if (!Session)
+    {
+        return nullptr;
+    }
+
+    TWeakPtr<FOdysseyRasterContent> WeakThis = AsShared();
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = MakeShared<FOdysseyRasterBlockEdit>(Session.ToSharedRef(), Pixels.ToSharedRef(),
+        Image->GetFormat(), Description.bSRGB,
+        [WeakThis](const TArray<FIntRect>& Rects)
+        {
+            if (TSharedPtr<FOdysseyRasterContent> Content = WeakThis.Pin())
+            {
+                Content->OnEditCommitted(Rects);
+            }
+        });
+    ActiveEdit = Edit;
+    return Edit;
 }
 
 TSharedPtr<FOdysseyRasterBlock>
@@ -154,9 +196,8 @@ FOdysseyRasterContent::GetRasterBlock()
             Mutator.Commit();
         }
 
-        RasterBlock->OnBlockChanged().AddRaw(this, &FOdysseyRasterContent::OnBlockChanged);
         RasterBlock->OnBlockCommited().AddRaw(this, &FOdysseyRasterContent::OnBlockCommited);
-        RasterBlock->PostProcess() = PostProcess;
+        RasterBlock->PostProcess().BindRaw(this, &FOdysseyRasterContent::PreserveBlockAlpha);
     }
     return RasterBlock;
 }
@@ -175,7 +216,8 @@ FOdysseyRasterContent::BuildRenderFunction(IOdysseyTextureRenderingAbility::FRen
 bool
 FOdysseyRasterContent::HasUncommittedEdits() const
 {
-    return EditSession.IsValid() && EditSession->IsActive();
+    const TSharedPtr<FOdysseyRasterBlockEdit> Edit = ActiveEdit.Pin();
+    return Edit.IsValid() && Edit->IsActive();
 }
 
 void
@@ -183,63 +225,40 @@ FOdysseyRasterContent::ReleaseRasterBlock()
 {
     if (RasterBlock)
     {
-        // Tools may keep the block alive after it is released.
-        RasterBlock->OnBlockChanged().RemoveAll(this);
+        // Users may keep the block alive after it is released.
         RasterBlock->OnBlockCommited().RemoveAll(this);
         RasterBlock->PostProcess().Unbind();
         RasterBlock.Reset();
     }
-    EndEditSession();
 }
 
 void
-FOdysseyRasterContent::EndEditSession()
+FOdysseyRasterContent::EndEdit()
 {
-    if (EditSession)
+    if (TSharedPtr<FOdysseyRasterBlockEdit> Edit = ActiveEdit.Pin())
     {
-        EditSession->End();
-        EditSession.Reset();
+        Edit->End();
     }
+    ActiveEdit.Reset();
 }
 
 void
-FOdysseyRasterContent::OnBlockChanged(const TArray<::ULIS::FRectI>& Rects)
+FOdysseyRasterContent::OnEditCommitted(const TArray<FIntRect>& Rects)
 {
-    if (!Image || !FApp::CanEverRender())
-    {
-        return;
-    }
-    if (!HasUncommittedEdits())
-    {
-        EditSession = FOdysseyRasterEditSession::Begin(RenderingId, *Image, GetDescription().Size);
-        if (!EditSession)
-        {
-            return;
-        }
-    }
-    const TArray<FIntRect> IntRects = ::ULISUtils::ToIntRects(Rects);
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> Block = RasterBlock->GetBlock();
-    Odyssey::TiledImage::CopyBlockToRenderTarget(*EditSession->GetTarget(), Image->GetFormat(), *Block, IntRects, GetDescription().bSRGB);
-    EditSession->Invalidate(IntRects);
+    ActiveEdit.Reset();
+    // The raster block is derived from the previous tiles: it is created again when needed.
+    ReleaseRasterBlock();
+    OnChanged(Rects, false);
 }
 
 void
 FOdysseyRasterContent::OnBlockCommited(const TArray<::ULIS::FRectI>& Rects)
 {
+    // The edit started from the previous pixels: committing it would discard this change.
+    EndEdit();
     const TArray<FIntRect> IntRects = ::ULISUtils::ToIntRects(Rects);
     // While undoing, the image is restored by the transaction itself.
-    if (GIsTransacting || !Image || !FApp::CanEverRender())
-    {
-        EndEditSession();
-    }
-    else if (HasUncommittedEdits())
-    {
-        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> Block = RasterBlock->GetBlock();
-        Odyssey::TiledImage::CopyBlockToRenderTarget(*EditSession->GetTarget(), Image->GetFormat(), *Block, IntRects, GetDescription().bSRGB);
-        EditSession->Commit(IntRects);
-        EditSession.Reset();
-    }
-    else
+    if (!GIsTransacting && Image && FApp::CanEverRender())
     {
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> Block = RasterBlock->GetBlock();
         Odyssey::TiledImage::CopyFromBlock(*Image, *Block, IntRects, GetDescription().bSRGB);
@@ -247,12 +266,38 @@ FOdysseyRasterContent::OnBlockCommited(const TArray<::ULIS::FRectI>& Rects)
     OnChanged(IntRects, false);
 }
 
+TArray<::ULIS::FEvent>
+FOdysseyRasterContent::PreserveBlockAlpha(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& OriginalBlocks,
+    const FOdysseyInvalidTileMap& InvalidMap, const TArray<::ULIS::FEvent>& WaitList)
+{
+    if (!RasterBlock || !IsAlphaLocked || !IsAlphaLocked())
+    {
+        return WaitList;
+    }
+
+    TArray<::ULIS::FEvent> Events;
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> Block = RasterBlock->GetBlock();
+    ::ULIS::FContext& Context = IULISLoaderModule::StaticFindOrAddContext(RasterBlock->GetFormat());
+    for (const FIntPoint& Tile : InvalidMap.InvalidTiles())
+    {
+        // The colors of the edited pixels with the alpha of the original ones.
+        const TSharedPtr<::ULIS::FBlock>& OriginalBlock = OriginalBlocks[Tile];
+        const ::ULIS::FRectI Rect = ::ULISUtils::ToULISRectI(InvalidMap.GetTileRect(Tile));
+        ::ULIS::FEvent Event;
+        Context.Blend(*OriginalBlock, *Block, ::ULIS::FRectI::Auto, Rect.Position(), ::ULIS::Blend_Back, ::ULIS::Alpha_Top, 1.f,
+            ::ULIS::FSchedulePolicy::AsyncCacheEfficient, WaitList.Num(), WaitList.GetData(), &Event);
+        Events.Add(Event);
+    }
+    return Events;
+}
+
 void
 FOdysseyRasterContent::OnImageUndone()
 {
+    // The edit started from pixels the undo replaced.
+    EndEdit();
     if (!RasterBlock || !FApp::CanEverRender())
     {
-        EndEditSession();
         OnChanged({}, false);
         return;
     }
@@ -271,7 +316,7 @@ FOdysseyRasterContent::OnImageUndone()
         Mutator.Copy(Pixels, { Pixels->Rect() });
         Mutator.Commit();
     }
-    RasterBlock->PostProcess() = PostProcess;
+    RasterBlock->PostProcess().BindRaw(this, &FOdysseyRasterContent::PreserveBlockAlpha);
 }
 
 bool

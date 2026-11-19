@@ -80,7 +80,6 @@ public:
     virtual void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive) override;
 
 private:
-    TSharedPtr<FOdysseyRasterBlock> GetRasterBlockFromEditor(bool iCreate) const;
 
     // Internal - Callbacks
     void OnShapeBegin();

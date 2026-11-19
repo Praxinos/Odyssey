@@ -15,6 +15,8 @@
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "OdysseyRasterBlock.h"
+#include "OdysseyRasterBlockEdit.h"
+#include "OdysseyRasterEditSession.h"
 #include "ScopedTransaction.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
 #include "PropertyHandle.h"
@@ -34,6 +36,28 @@ UOdysseyPainterEditorRasterBaseTool::~UOdysseyPainterEditorRasterBaseTool()
 UOdysseyPainterEditorRasterBaseTool::UOdysseyPainterEditorRasterBaseTool()
     : mHasContextMenu( true )
 {
+}
+
+bool
+UOdysseyPainterEditorRasterBaseTool::IsEditing(const TSharedPtr<FOdysseyRasterBlockEdit>& iEdit, const TSharedPtr<FOdysseyMediaRaster>& iMediaRaster)
+{
+    return iEdit && iEdit->IsActive() && iMediaRaster && iEdit->GetSession().GetRenderingId() == iMediaRaster->GetContentId();
+}
+
+TSharedPtr<FOdysseyMediaRaster>
+UOdysseyPainterEditorRasterBaseTool::GetMediaRasterFromEditor(bool iCreate) const
+{
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked() || !mediaProvider.HasMedia<FOdysseyMediaRaster>())
+        return nullptr;
+
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = iCreate
+        ? mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>()
+        : mediaProvider.GetMedias<FOdysseyMediaRaster>();
+    if (mediaRasters.Num() <= 0)
+        return nullptr;
+
+    return mediaRasters[0];
 }
 
 void

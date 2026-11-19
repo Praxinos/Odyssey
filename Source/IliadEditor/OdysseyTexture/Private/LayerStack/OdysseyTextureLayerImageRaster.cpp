@@ -16,6 +16,7 @@
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPixelFormat.h"
 #include "OdysseyRasterBlock.h"
+#include "OdysseyRasterBlockEdit.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyRasterBlockUndo.h"
 #include "OdysseyRenderContext.h"
@@ -98,7 +99,7 @@ UOdysseyTextureLayerImageRaster::GetRasterContent() const
     if (!RasterContent)
     {
         UOdysseyTextureLayerImageRaster* MutableThis = const_cast<UOdysseyTextureLayerImageRaster*>(this);
-        RasterContent = MakeUnique<FOdysseyRasterContent>(*MutableThis, MutableThis->GetRenderingId(), MutableThis->TiledImage,
+        RasterContent = MakeShared<FOdysseyRasterContent>(*MutableThis, MutableThis->GetRenderingId(), MutableThis->TiledImage,
             [MutableThis]()
             {
                 FOdysseyRasterContent::FDescription Description;
@@ -116,7 +117,10 @@ UOdysseyTextureLayerImageRaster::GetRasterContent() const
             {
                 MutableThis->OnContentChanged(Rects, bInteractive);
             },
-            FOdysseyRasterBlock::FPostProcess::CreateUObject(MutableThis, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess));
+            [MutableThis]()
+            {
+                return MutableThis->IsAlphaLocked();
+            });
     }
     return *RasterContent;
 }
@@ -155,6 +159,12 @@ TSharedPtr<FOdysseyRasterBlock>
 UOdysseyTextureLayerImageRaster::GetRasterBlock() const
 {
     return GetRasterContent().GetRasterBlock();
+}
+
+TSharedPtr<FOdysseyRasterBlockEdit>
+UOdysseyTextureLayerImageRaster::BeginRasterEdit()
+{
+    return GetRasterContent().BeginEdit();
 }
 
 void
@@ -270,7 +280,19 @@ UOdysseyTextureLayerImageRaster::GetMediaProvider(uint32 iFrameIndex) const
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.IsLocked(!isActive || isLocked);
 
-    TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(GetRasterBlock());
+    // The pixels are read or edited only when a tool needs them.
+    TWeakObjectPtr<UOdysseyTextureLayerImageRaster> weakThis = const_cast<UOdysseyTextureLayerImageRaster*>(this);
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(GetRenderingId(),
+        [weakThis]() -> TSharedPtr<FOdysseyRasterBlock>
+        {
+            UOdysseyTextureLayerImageRaster* layer = weakThis.Get();
+            return layer ? layer->GetRasterBlock() : nullptr;
+        },
+        [weakThis]() -> TSharedPtr<FOdysseyRasterBlockEdit>
+        {
+            UOdysseyTextureLayerImageRaster* layer = weakThis.Get();
+            return layer ? layer->BeginRasterEdit() : nullptr;
+        });
     mediaProvider.Add(mediaRaster);
     return mediaProvider;
 }
@@ -348,43 +370,6 @@ UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
             }
         }
     }
-}
-
-TArray<::ULIS::FEvent>
-UOdysseyTextureLayerImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    if (!IsAlphaLocked())
-        return iWaitList;
-
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlock();
-
-    //Apply AlphaLock
-    TArray<::ULIS::FEvent> events;
-    TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
-    TArray<FIntPoint> invalidTiles = iInvalidMap.InvalidTiles();
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-    for (const FIntPoint& invalidTile : invalidTiles)
-    {
-        TSharedPtr<::ULIS::FBlock> originalBlock = iOriginalBlocks[invalidTile];
-        ::ULIS::FRectI rect = ::ULISUtils::ToULISRectI(iInvalidMap.GetTileRect(invalidTile));
-        ::ULIS::FEvent eventBlend;
-        ctx.Blend(
-            *originalBlock
-            , *block
-            , ::ULIS::FRectI::Auto
-            , rect.Position()
-            , ::ULIS::Blend_Back
-            , ::ULIS::Alpha_Top
-            , 1.f
-            , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
-            , iWaitList.Num()
-            , iWaitList.GetData()
-            , &eventBlend
-        );
-        events.Add(eventBlend);
-    }
-
-    return events;
 }
 
 TArray<FGuid>

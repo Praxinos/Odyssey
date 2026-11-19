@@ -11,7 +11,7 @@
 
 #include <ULIS>
 
-class FOdysseyRasterEditSession;
+class FOdysseyRasterBlockEdit;
 class UOdysseyTiledImage;
 
 /**
@@ -21,12 +21,14 @@ class UOdysseyTiledImage;
  * UPROPERTY so that it is saved, duplicated and garbage collected with the owner; this class creates it in that
  * property, keeps it in the format the owner expects, renders it and writes into it.
  *
- * Transitional: while tools still edit an FOdysseyRasterBlock, this class derives that block from the tiled image.
- * The uncommitted edits of the block are copied into an FOdysseyRasterEditSession, which the views show, and
- * the committed ones are written into the tiled image through that session. This part goes away once tools edit
- * render targets through edit sessions themselves.
+ * Tools edit the content through BeginEdit(): the edit session shows their pixels in the views until they commit them
+ * into the tiled image or end the edit.
+ *
+ * Transitional: other users still edit an FOdysseyRasterBlock derived from the tiled image; its committed edits are
+ * written into the tiled image. This part goes away once they read and write render targets through this class.
  */
 class ODYSSEYIMAGING_API FOdysseyRasterContent
+    : public TSharedFromThis<FOdysseyRasterContent>
 {
 public:
     /**
@@ -69,6 +71,9 @@ public:
      */
     using FOnChanged = TFunction<void(const TArray<FIntRect>& Rects, bool bInteractive)>;
 
+    /** Returns true when edits must keep the alpha of the content, e.g. the alpha of the layer is locked. */
+    using FIsAlphaLocked = TFunction<bool()>;
+
 public:
     ~FOdysseyRasterContent();
 
@@ -78,10 +83,10 @@ public:
      * @param InImage The owner's instanced property holding the tiled image. It must outlive this object.
      * @param InGetDescription Returns the content the owner expects.
      * @param InOnChanged Called when pixels changed.
-     * @param InPostProcess Applied by the raster block after each edit, e.g. the alpha lock.
+     * @param InIsAlphaLocked Returns true when edits must keep the alpha of the content.
      */
     FOdysseyRasterContent(UObject& InOwner, const FGuid& InRenderingId, TObjectPtr<UOdysseyTiledImage>& InImage,
-        FGetDescription InGetDescription, FOnChanged InOnChanged, FOdysseyRasterBlock::FPostProcess InPostProcess);
+        FGetDescription InGetDescription, FOnChanged InOnChanged, FIsAlphaLocked InIsAlphaLocked);
 
     FOdysseyRasterContent(const FOdysseyRasterContent&) = delete;
     FOdysseyRasterContent& operator=(const FOdysseyRasterContent&) = delete;
@@ -105,8 +110,16 @@ public:
     bool SetContent(const ::ULIS::FBlock& Block);
 
     /**
-     * Transitional: returns the raster block edited by tools, created from the image when needed.
-     * Committed edits of this block are written into the image, uncommitted edits are previewed.
+     * Begins an edit of the content, shown by the views until it is committed or ended.
+     * Ends the active edit of this content, if any. The edit keeps the alpha of the content when it is locked.
+     * Its commit is undoable within a transaction, and notifies the owner that pixels changed.
+     * @return Null when the owner cannot hold content or the rendering is unavailable.
+     */
+    TSharedPtr<FOdysseyRasterBlockEdit> BeginEdit();
+
+    /**
+     * Transitional: returns the raster block edited by other users than tools, created from the image when needed.
+     * Committed edits of this block are written into the image, and end the active edit.
      * @return Null when the owner cannot hold content.
      */
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock();
@@ -119,15 +132,18 @@ public:
      */
     bool BuildRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform);
 
-    /** Returns true while the raster block has edits not yet written into the image, i.e. an edit session is active. */
+    /** Returns true while an edit begun by BeginEdit() is neither committed nor ended. */
     bool HasUncommittedEdits() const;
 
 private:
     void ReleaseRasterBlock();
-    void OnBlockChanged(const TArray<::ULIS::FRectI>& Rects);
+    void EndEdit();
+    void OnEditCommitted(const TArray<FIntRect>& Rects);
     void OnBlockCommited(const TArray<::ULIS::FRectI>& Rects);
+    /** Keeps the alpha of the original pixels in the edited tiles of the raster block, when the alpha is locked. */
+    TArray<::ULIS::FEvent> PreserveBlockAlpha(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& OriginalBlocks,
+        const FOdysseyInvalidTileMap& InvalidMap, const TArray<::ULIS::FEvent>& WaitList);
     void OnImageUndone();
-    void EndEditSession();
     bool BuildImageRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform, FIntPoint Size) const;
 
 private:
@@ -136,11 +152,12 @@ private:
     TObjectPtr<UOdysseyTiledImage>& Image;
     FGetDescription GetDescription;
     FOnChanged OnChanged;
-    FOdysseyRasterBlock::FPostProcess PostProcess;
+    FIsAlphaLocked IsAlphaLocked;
 
     /** The image whose undo notification is bound. */
     TWeakObjectPtr<UOdysseyTiledImage> BoundImage;
 
     TSharedPtr<FOdysseyRasterBlock> RasterBlock;
-    TSharedPtr<FOdysseyRasterEditSession> EditSession;
+    /** The edit begun by BeginEdit(), owned by the tool. */
+    TWeakPtr<FOdysseyRasterBlockEdit> ActiveEdit;
 };

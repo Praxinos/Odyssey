@@ -18,6 +18,7 @@
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyMediaProvider.h"
 #include "OdysseyRasterBlock.h"
+#include "OdysseyRasterBlockEdit.h"
 #include "OdysseyPainterEditorCommands.h"
 #include "ScopedTransaction.h"
 #include "OdysseyPainterEditorRasterSelection.h"
@@ -45,28 +46,27 @@
 
 UOdysseyPainterEditorRasterLiquifyTool::FAlteredImage::~FAlteredImage()
 {
+    // An uncommitted stroke is discarded
+    if( edit )
+        edit->End();
 }
 
-UOdysseyPainterEditorRasterLiquifyTool::FAlteredImage::FAlteredImage( TSharedPtr<FOdysseyRasterBlock> iSourceRasterBlock
+UOdysseyPainterEditorRasterLiquifyTool::FAlteredImage::FAlteredImage( TSharedPtr<FOdysseyMediaRaster> iMediaRaster
+                                                                    , TSharedPtr<::ULIS::FBlock> iSourceBlock
                                                                     , TSharedPtr<::ULIS::FBlock> iMaskBlock )
-    : sourceRasterBlock ( iSourceRasterBlock )
-    , sourceBlock ( iSourceRasterBlock->GetBlock() )
+    : mediaRaster ( iMediaRaster )
     , maskBlock( iMaskBlock )
-    , mutator( iSourceRasterBlock, true )
     , context( IULISLoaderModule::StaticFindOrAddContext( ::ULIS::eFormat::Format_RGBA8 ) )
 {
-    //sourceRasterBlock = iSourceRasterBlock;
-    //maskBlock = iMaskBlock;
-
-    uint32 blockWidth = sourceRasterBlock->GetWidth();
-    uint32 blockHeight = sourceRasterBlock->GetHeight();
+    uint32 blockWidth = iSourceBlock->Width();
+    uint32 blockHeight = iSourceBlock->Height();
 
     // we convert to RGBA8 and will convert back before rendering
     sourceBlockCopy =  MakeShared<::ULIS::FBlock>( blockWidth
                                                  , blockHeight
                                                  , ::ULIS::eFormat::Format_RGBA8 );
 
-    context.ConvertFormat( *sourceRasterBlock->GetBlock(), *sourceBlockCopy.Get() );
+    context.ConvertFormat( *iSourceBlock, *sourceBlockCopy.Get() );
     context.Finish();
 
     destinationBlock =  MakeShared<::ULIS::FBlock>( blockWidth
@@ -128,7 +128,24 @@ UOdysseyPainterEditorRasterLiquifyTool::Unload()
 {
     TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
 
-     // TODO: what to do when the tool is unloaded ? commit changes or not ?
+    // A stroke still in progress is committed, as on mouse up
+    if( bIsMouseLeftButtonDown )
+    {
+        FScopedTransaction transaction( LOCTEXT("raster-liquify-tool.transaction.liquify","Raster Liquify Tool") );
+        for( FAlteredImage& alteredImage : mAlteredImageBuffer )
+        {
+            if( alteredImage.edit )
+                alteredImage.edit->Commit();
+
+            alteredImage.edit = nullptr;
+        }
+
+        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+        if ( source )
+            source->RecordCurrentFrameUndo();
+
+        bIsMouseLeftButtonDown = false;
+    }
 
     mAlteredImageBuffer.Empty();
 
@@ -146,37 +163,16 @@ UOdysseyPainterEditorRasterLiquifyTool::IsActivable() const
 TSharedPtr<FOdysseyRasterBlock>
 UOdysseyPainterEditorRasterLiquifyTool::GetRasterBlockFromEditor(bool iCreate) const
 {
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return nullptr;
-
-    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
-    if (!hasRaster)
-        return nullptr;
-
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters;
-    if (iCreate)
-        mediaRasters = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
-    else
-        mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
-
-    if( mediaRasters.Num() <= 0 )
-        return nullptr;
-
-    return mediaRasters[0]->GetRasterBlock();
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = GetMediaRasterFromEditor(iCreate);
+    return mediaRaster ? mediaRaster->GetRasterBlock() : nullptr;
 }
 
 void
 UOdysseyPainterEditorRasterLiquifyTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
-
     mMousePosition = FVector2D( iPointInTexture.x, iPointInTexture.y );
 
     mLiquifyHUD->SetCursorPositionInTexture( mMousePosition );
-
-    if (!rasterBlock)
-        return;
 }
 
 bool
@@ -243,14 +239,15 @@ void
 UOdysseyPainterEditorRasterLiquifyTool::FetchSourceImages()
 {
     TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
-    TSharedPtr<FOdysseyRasterBlock> srcRasterBlock = GetRasterBlockFromEditor(false);
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = GetMediaRasterFromEditor(false);
+    TSharedPtr<FOdysseyRasterBlock> srcRasterBlock = mediaRaster ? mediaRaster->GetRasterBlock() : nullptr;
     if (!srcRasterBlock)
         return;
 
     TSharedPtr<::ULIS::FBlock> maskBlock = ( rasterSelection->IsEmpty() == false ) ? rasterSelection->GetBlock() : nullptr;
 
     mAlteredImageBuffer.Empty();
-    mAlteredImageBuffer.Emplace( srcRasterBlock, maskBlock );
+    mAlteredImageBuffer.Emplace( mediaRaster, srcRasterBlock->GetBlock(), maskBlock );
 }
 
 void
@@ -766,8 +763,9 @@ UOdysseyPainterEditorRasterLiquifyTool::Reset()
     // restore source images as it was
     for( FAlteredImage& alteredImage : mAlteredImageBuffer )
     {
-        alteredImage.mutator.Copy( alteredImage.sourceBlockCopy, { alteredImage.sourceBlockCopy->Rect() } );
-        alteredImage.mutator.Commit();
+        alteredImage.context.Copy( *alteredImage.sourceBlockCopy, *alteredImage.destinationBlock );
+        alteredImage.context.Finish();
+        UpdateAlteredImage( alteredImage, alteredImage.sourceBlockCopy->Rect(), true );
     }
 
     Init();
@@ -924,8 +922,7 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseUp(const FOdysseyPoint& iPointInT
 bool
 UOdysseyPainterEditorRasterLiquifyTool::OnKeyDown(const FKey& iKey)
 {
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
-    if (!rasterBlock)
+    if (!GetMediaRasterFromEditor(false))
         return false;
 
     return Super::OnKeyDown( iKey );
@@ -934,8 +931,7 @@ UOdysseyPainterEditorRasterLiquifyTool::OnKeyDown(const FKey& iKey)
 bool
 UOdysseyPainterEditorRasterLiquifyTool::OnKeyUp(const FKey& iKey)
 {
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
-    if (!rasterBlock)
+    if (!GetMediaRasterFromEditor(false))
         return false;
 
     return Super::OnKeyUp( iKey );
@@ -1000,11 +996,33 @@ UOdysseyPainterEditorRasterLiquifyTool::UpdateAlteredImage( FAlteredImage& iAlte
                                                           , const ::ULIS::FRectI& iSanitizedRegionOfInterest
                                                           , bool iCommit )
 {
-    iAlteredImage.mutator.Copy( iAlteredImage.destinationBlock, { iSanitizedRegionOfInterest } );
+    // Each stroke edits the content from its first update to its commit
+    if( !IsEditing( iAlteredImage.edit, iAlteredImage.mediaRaster ) )
+    {
+        iAlteredImage.edit = iAlteredImage.mediaRaster->BeginEdit();
+        if( !iAlteredImage.edit )
+            return;
+    }
+
+    ::ULIS::FRectI regionOfInterest = iSanitizedRegionOfInterest & iAlteredImage.destinationBlock->Rect();
+    if( regionOfInterest.Area() > 0 )
+    {
+        const TSharedRef<::ULIS::FBlock>& editedBlock = iAlteredImage.edit->GetBlock();
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( editedBlock->Format() );
+        ctx.ConvertFormat( *iAlteredImage.destinationBlock
+                         , *editedBlock
+                         , regionOfInterest
+                         , regionOfInterest.Position()
+                         , ::ULIS::FSchedulePolicy::AsyncCacheEfficient );
+        ctx.Finish();
+
+        iAlteredImage.edit->Update( { ::ULISUtils::ToIntRect( regionOfInterest ) } );
+    }
 
     if( iCommit )
     {
-        iAlteredImage.mutator.Commit();
+        iAlteredImage.edit->Commit();
+        iAlteredImage.edit = nullptr;
     }
 }
 

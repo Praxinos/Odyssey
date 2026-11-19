@@ -8,16 +8,16 @@
 #include "UObject/UObjectGlobals.h"
 
 #include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
-#include "OdysseyRasterBlockMutator.h"
 #include <ULIS>
 
 #include "OdysseyPainterEditorRasterLiquifyTool.generated.h"
 
 class FOdysseyPainterEditorRasterLiquifyToolHUD;
+class FOdysseyMediaRaster;
 class FOdysseyRasterBlock;
+class FOdysseyRasterBlockEdit;
 class FTransaction;
 class UTransBuffer;
-class FOdysseyRasterBlockMutator;
 
 UENUM()
 enum class EOdysseyLiquifyTwirlDirection : uint8
@@ -99,15 +99,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         struct FAlteredImage
         {
             ~FAlteredImage();
-            FAlteredImage( TSharedPtr<FOdysseyRasterBlock> iSourceRasterBlock
+            FAlteredImage( TSharedPtr<FOdysseyMediaRaster> iMediaRaster
+                         , TSharedPtr<::ULIS::FBlock> iSourceBlock
                          , TSharedPtr<::ULIS::FBlock> iMaskBlock );
 
-            TSharedPtr<FOdysseyRasterBlock> sourceRasterBlock;
-            TSharedPtr<::ULIS::FBlock> sourceBlock; // to prevent garbagde collection of FOdysseyRasterBlock::GetBlock()
+            TSharedPtr<FOdysseyMediaRaster> mediaRaster; // The liquified content
+            TSharedPtr<FOdysseyRasterBlockEdit> edit; // The edit of the current stroke, begun by its first update, ended by its commit
             TSharedPtr<::ULIS::FBlock> sourceBlockCopy;
             TSharedPtr<::ULIS::FBlock> destinationBlock;
             TSharedPtr<::ULIS::FBlock> maskBlock;
-            FOdysseyRasterBlockMutator mutator;
             ::ULIS::FContext& context;
         };
 

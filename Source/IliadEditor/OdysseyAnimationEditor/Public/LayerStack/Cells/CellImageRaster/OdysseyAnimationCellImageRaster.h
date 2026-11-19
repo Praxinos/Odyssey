@@ -50,10 +50,17 @@ public:
 #if WITH_EDITOR
 public:
     /**
-     * Transitional: returns the raster block edited by tools, derived from the tiled image.
+     * Transitional: returns the raster block derived from the tiled image, read by tools and edited by other users.
      * Its committed edits are written into the tiled image. Null when the cell is not in an animation.
      */
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
+
+    /**
+     * Begins an edit of the pixels, shown by the views until it is committed or ended; see FOdysseyRasterContent::BeginEdit().
+     * The edit keeps the alpha of the pixels while the alpha of the layer is locked.
+     * @return Null when the cell is not in an animation or the rendering is unavailable.
+     */
+    TSharedPtr<FOdysseyRasterBlockEdit> BeginRasterEdit();
     /** Returns the tiled image holding the pixels, without creating it. */
     const UOdysseyTiledImage* GetTiledImage() const;
     virtual FOdysseyMediaProvider GetMediaProvider() const override;
@@ -70,7 +77,6 @@ private:
     ::ULIS::eFormat GetRasterFormat() const;
     void OnContentChanged(const TArray<FIntRect>& Rects, bool bInteractive);
     void MigrateLegacyContent();
-    TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
 
 private:
     //Import/Export
@@ -80,7 +86,7 @@ private:
 private:
     /** Pixels read from assets saved before the tiled image storage. Moved into the tiled image after loading. */
     TSharedPtr<FOdysseyRasterBlock> mLegacyRasterBlock;
-    mutable TUniquePtr<FOdysseyRasterContent> mRasterContent;
+    mutable TSharedPtr<FOdysseyRasterContent> mRasterContent;
     mutable FCriticalSection mImageRenderingMutex;
     mutable TWeakPtr<FOdysseyMediaRaster> mMediaRaster;
 #endif

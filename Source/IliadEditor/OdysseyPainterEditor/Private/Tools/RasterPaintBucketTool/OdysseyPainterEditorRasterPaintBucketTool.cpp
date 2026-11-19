@@ -5,6 +5,7 @@
 
 #include "Editor.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Misc/ScopeExit.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "ImageUtils.h"
 #include "PropertyHandle.h"
@@ -17,6 +18,7 @@
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyMediaRaster.h"
+#include "OdysseyRasterBlockEdit.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "OdysseyPainterEditorSource.h"
@@ -74,7 +76,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::Load()
         TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaRaster>();
         if( mediaRasters.Num() > 0 )
         {
-            mPaintEngine.RasterBlock(mediaRasters[0].GetRasterBlock());
+            mPaintEngine.Edit(mediaRasters[0]->BeginEdit());
         }
         */
     }
@@ -83,7 +85,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::Load()
 void
 UOdysseyPainterEditorRasterPaintBucketTool::Unload()
 {
-    mPaintEngine.RasterBlock(nullptr);
+    mPaintEngine.Abort();
     mPaintEngine.SetMaskBlock(nullptr);
 
     TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
@@ -135,11 +137,18 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPoi
     if( mediaRasters.IsEmpty() )
         return false;
 
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
-    mPaintEngine.RasterBlock(rasterBlock);
+    TSharedPtr<FOdysseyRasterBlockEdit> edit = mediaRasters[0]->BeginEdit();
+    if (!edit)
+        return false;
+
+    //The fill is committed at once: the edit ends on any other return
+    mPaintEngine.Edit(edit);
+    ON_SCOPE_EXIT
+    {
+        mPaintEngine.Abort();
+    };
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
-    ::ULIS::eFormat format = paintBlock->Format();
     if (!paintBlock)
         return false;
 
@@ -153,7 +162,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPoi
     if (!sourceBlock)
         return false;
 
-    TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
+    const TSharedRef<::ULIS::FBlock>& block = edit->GetBlock();
     ::ULIS::FPixel sourceColor = sourceBlock->Pixel(iPointInTexture.x, iPointInTexture.y);
     ::ULIS::FColor dstColor = GetEditor()->PaintColor().GetValue();
     dstColor.SetAlphaF(BlendParameters.GetOpacity() / 100.f);

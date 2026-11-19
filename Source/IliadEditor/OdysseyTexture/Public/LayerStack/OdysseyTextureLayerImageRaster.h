@@ -35,10 +35,17 @@ public:
     // Public API
 
     /**
-     * Transitional: returns the raster block edited by tools, derived from the tiled image.
+     * Transitional: returns the raster block derived from the tiled image, read by tools and edited by other users.
      * Its committed edits are written into the tiled image. Null when the layer is not in a layer stack.
      */
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
+
+    /**
+     * Begins an edit of the pixels, shown by the views until it is committed or ended; see FOdysseyRasterContent::BeginEdit().
+     * The edit keeps the alpha of the pixels while the alpha of the layer is locked.
+     * @return Null when the layer is not in a layer stack or the rendering is unavailable.
+     */
+    TSharedPtr<FOdysseyRasterBlockEdit> BeginRasterEdit();
 
     /** Returns the tiled image holding the pixels, without creating it. */
     const UOdysseyTiledImage* GetTiledImage() const;
@@ -94,8 +101,6 @@ private:
     void OnContentChanged(const TArray<FIntRect>& Rects, bool bInteractive);
     void MigrateLegacyContent();
 
-    TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
-
 private:
     //Import/Export
     friend class FOdysseyTextureLayerImageRasterExport;
@@ -109,7 +114,7 @@ private:
     UPROPERTY(Instanced, NonTransactional)
     TObjectPtr<UOdysseyTiledImage> TiledImage;
 
-    mutable TUniquePtr<FOdysseyRasterContent> RasterContent;
+    mutable TSharedPtr<FOdysseyRasterContent> RasterContent;
 
 private:
     UPROPERTY(NonTransactional)

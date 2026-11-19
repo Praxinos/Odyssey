@@ -200,4 +200,81 @@ bool FOdysseyRasterEditSessionCommitTest::RunTest(const FString& Parameters)
     return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyRasterEditSessionPreserveAlphaTest, "Odyssey.Imaging.RasterEditSession.PreserveAlpha", Odyssey::RasterEditSessionTests::TestFlags)
+/** A session preserving alpha shows and commits the edited colors with the alpha the tiles had at its beginning. */
+bool FOdysseyRasterEditSessionPreserveAlphaTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::RasterEditSessionTests;
+    TStrongObjectPtr<UOdysseyTiledImage> Image = MakeImage();
+    // A transparent area, which an edit preserving alpha cannot paint.
+    const FIntRect TransparentRect(50, 50, 60, 60);
+    ::ULIS::FBlock Transparent(TestSize, TestSize, ::ULIS::Format_RGBAF);
+    FMemory::Memzero(Transparent.Bits(), Transparent.BytesTotal());
+    Odyssey::TiledImage::CopyFromBlock(*Image, Transparent, TransparentRect, TransparentRect.Min);
+    const TArray<FLinearColor> Original = ReadImage(*Image);
+
+    const FGuid Id = FGuid::NewGuid();
+    TSharedPtr<FOdysseyRasterEditSession> Session = FOdysseyRasterEditSession::Begin(Id, *Image, FIntPoint(TestSize, TestSize), true);
+    if (!TestTrue(TEXT("Begin a session"), Session.IsValid()))
+    {
+        return false;
+    }
+    TestTrue(TEXT("The session preserves alpha"), Session->PreservesAlpha());
+
+    // Erase an opaque area, and paint an opaque red over the transparent one.
+    const FIntRect Erased(10, 10, 20, 20);
+    ClearTarget(*Session, Erased);
+    ::ULIS::FBlock Red(TestSize, TestSize, ::ULIS::Format_RGBAF);
+    for (int32 Index = 0; Index < TestSize * TestSize; ++Index)
+    {
+        float* Pixel = reinterpret_cast<float*>(Red.Bits()) + Index * 4;
+        Pixel[0] = 1.0f;
+        Pixel[1] = 0.0f;
+        Pixel[2] = 0.0f;
+        Pixel[3] = 1.0f;
+    }
+    Odyssey::TiledImage::CopyBlockToRenderTarget(*Session->GetTarget(), EOdysseyTiledImageFormat::RGBA32F, Red, { TransparentRect });
+    Session->Invalidate({ TransparentRect });
+
+    FOdysseyRenderContext Context;
+    FOdysseyRasterEditSession::AddOverrides(Context);
+    const FOdysseyRenderOverride* Override = Context.Overrides.Find(Id);
+    if (!TestTrue(TEXT("The session replaces the content"), Override && Override->ContentReplacement))
+    {
+        return false;
+    }
+    TArray<FLinearColor> Expected = Original;
+    for (int32 Y = Erased.Min.Y; Y < Erased.Max.Y; ++Y)
+    {
+        for (int32 X = Erased.Min.X; X < Erased.Max.X; ++X)
+        {
+            // The erased colors with the opaque alpha of the tiles.
+            Expected[Y * TestSize + X] = FLinearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        }
+    }
+    for (int32 Y = TransparentRect.Min.Y; Y < TransparentRect.Max.Y; ++Y)
+    {
+        for (int32 X = TransparentRect.Min.X; X < TransparentRect.Max.X; ++X)
+        {
+            // The painted colors with the transparent alpha of the tiles.
+            Expected[Y * TestSize + X] = FLinearColor(1.0f, 0.0f, 0.0f, 0.0f);
+        }
+    }
+    // The views blend the replacement: transparent pixels show no color.
+    const TArray<FLinearColor> Shown = ReadReplacement(Override->ContentReplacement);
+    if (TestEqual(TEXT("Shown pixel count"), Shown.Num(), TestSize * TestSize))
+    {
+        TestTrue(TEXT("The views show the erased colors with the original alpha"), Shown[15 * TestSize + 15].Equals(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), 0.0001f));
+        TestEqual(TEXT("The views show no painted pixel where the tiles were transparent"), Shown[55 * TestSize + 55].A, 0.0f);
+        TestTrue(TEXT("The views show the other pixels unchanged"), Shown[40 * TestSize + 40].Equals(Original[40 * TestSize + 40], 0.0001f));
+    }
+
+    {
+        FScopedTransaction Transaction(NSLOCTEXT("OdysseyRasterEditSessionTests", "CommitPreservingAlpha", "Commit edit session preserving alpha"));
+        TestTrue(TEXT("Commit the session"), Session->Commit({ Erased, TransparentRect }));
+    }
+    ComparePixels(*this, TEXT("The tiles hold the colors with the original alpha"), Expected, ReadImage(*Image));
+    return true;
+}
+
 #endif

@@ -7,6 +7,8 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyPainterEditorRasterBaseTool.generated.h"
 
+class FOdysseyMediaRaster;
+class FOdysseyRasterBlockEdit;
 class ISinglePropertyView;
 
 //Base tool to create options that are common to all raster tools
@@ -41,6 +43,19 @@ public:
     virtual bool UsesRasterSelection() const override;
 
 protected:
+    /**
+     * Returns true when the edit is active and edits the content of the media,
+     * e.g. false once the current layer changed or the edit ended by itself.
+     */
+    static bool IsEditing(const TSharedPtr<FOdysseyRasterBlockEdit>& iEdit, const TSharedPtr<FOdysseyMediaRaster>& iMediaRaster);
+
+    /**
+     * Returns the raster content of the current layer or cell.
+     * @param iCreate True to create the content when missing, e.g. the cell of the current frame.
+     * @return Null when there is no raster content, or it is locked.
+     */
+    TSharedPtr<FOdysseyMediaRaster> GetMediaRasterFromEditor(bool iCreate) const;
+
     void SelectAll();
     void ClearCurrentSelection();
     void InvertSelection();

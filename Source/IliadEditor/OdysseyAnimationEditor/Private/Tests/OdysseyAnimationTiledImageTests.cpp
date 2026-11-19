@@ -28,6 +28,7 @@
 #include "OdysseyLayerStack.h"
 #include "OdysseyLighttable.h"
 #include "OdysseyRasterBlock.h"
+#include "OdysseyRasterBlockEdit.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyRasterEditSession.h"
 #include "OdysseyPixelFormat.h"
@@ -148,21 +149,20 @@ TArray<UOdysseyAnimationCellImageRaster*> RasterCells(UOdysseyAnimation* Animati
  */
 bool Compare(FAutomationTestBase& Test, UOdysseyAnimation* Animation, int32 Frame, uint64 Type = EOdysseyRenderingType::Render)
 {
-    TArray<TUniquePtr<FOdysseyRasterBlockMutator>> Mutators;
+    TArray<TSharedPtr<FOdysseyRasterBlockEdit>> Edits;
     for (UOdysseyAnimationCellImageRaster* RasterCell : RasterCells(Animation))
     {
-        TSharedPtr<FOdysseyRasterBlock> Raster = RasterCell->GetRasterBlock();
-        TUniquePtr<FOdysseyRasterBlockMutator>& Mutator = Mutators.Add_GetRef(MakeUnique<FOdysseyRasterBlockMutator>(Raster, false));
-        Mutator->EditTilesFromRects({Raster->GetRect()},
-            [](TSharedPtr<ULIS::FBlock>, const FOdysseyInvalidTileMap&) -> TArray<ULIS::FEvent>
-            {
-                return {};
-            });
+        TSharedPtr<FOdysseyRasterBlockEdit> Edit = RasterCell->BeginRasterEdit();
+        if (Test.TestTrue(TEXT("Begin an edit"), Edit.IsValid()))
+        {
+            Edit->Update({ FIntRect(0, 0, Width, Height) });
+            Edits.Add(Edit);
+        }
     }
     const TArray<FLinearColor> Preview = Render(Animation, Frame, Type);
-    for (TUniquePtr<FOdysseyRasterBlockMutator>& Mutator : Mutators)
+    for (const TSharedPtr<FOdysseyRasterBlockEdit>& Edit : Edits)
     {
-        Mutator->Commit();
+        Edit->Commit();
     }
     const TArray<FLinearColor> Tiles = Render(Animation, Frame, Type);
     return ComparePixels(Test, FString::Printf(TEXT("Frame %d render type %llu"), Frame, Type), Preview, Tiles, 0.0001f);
@@ -245,13 +245,13 @@ bool FOdysseyAnimationTiledPartialTest::RunTest(const FString& Parameters)
     UOdysseyAnimationCellImageRaster* First = Cell(Animation.Get(), 0);
     const TMap<FIntPoint, FOdysseyTileId> Before = TileIds(First->GetTiledImage());
     const TArray<FLinearColor> BeforePixels = Render(Animation.Get(), 0, EOdysseyRenderingType::Render);
-    FOdysseyRasterBlockMutator Mutator(First->GetRasterBlock(), false);
-    Mutator.EditTilesFromRects({ULIS::FRectI::FromXYWH(2, 3, 4, 5)},
-        [](TSharedPtr<ULIS::FBlock> Block, const FOdysseyInvalidTileMap&) -> TArray<ULIS::FEvent>
-        {
-            for (int32 Y = 3; Y < 8; ++Y) { FMemory::Memzero(Block->Bits() + (Y * Width + 2) * 4, 16); }
-            return {};
-        });
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = First->BeginRasterEdit();
+    if (!TestTrue(TEXT("Begin an edit"), Edit.IsValid()))
+    {
+        return false;
+    }
+    for (int32 Y = 3; Y < 8; ++Y) { FMemory::Memzero(Edit->GetBlock()->Bits() + (Y * Width + 2) * 4, 16); }
+    Edit->Update({ FIntRect(2, 3, 6, 8) });
     TestTrue(TEXT("Uncommitted edits leave the tiles unchanged"), TileIds(First->GetTiledImage()).OrderIndependentCompareEqual(Before));
     const TArray<FLinearColor> Interactive = Render(Animation.Get(), 0, EOdysseyRenderingType::Render);
     if (TestEqual(TEXT("Interactive pixel count"), Interactive.Num(), Width * Height)
@@ -260,7 +260,7 @@ bool FOdysseyAnimationTiledPartialTest::RunTest(const FString& Parameters)
         TestTrue(TEXT("Uncommitted edits are rendered"), Interactive[4 * Width + 3].Equals(FLinearColor::Transparent));
         TestTrue(TEXT("Pixels outside the edit are kept"), Interactive[40 * Width + 40].Equals(BeforePixels[40 * Width + 40], 0.0001f));
     }
-    Mutator.Commit();
+    Edit->Commit();
     const TMap<FIntPoint, FOdysseyTileId> After = TileIds(First->GetTiledImage());
     int32 Changed = 0;
     for (const TPair<FIntPoint, FOdysseyTileId>& Pair : Before) { Changed += !(After.FindChecked(Pair.Key) == Pair.Value); }

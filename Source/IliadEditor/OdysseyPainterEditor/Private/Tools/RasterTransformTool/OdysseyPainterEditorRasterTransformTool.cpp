@@ -21,6 +21,8 @@
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyRasterBlock.h"
+#include "OdysseyRasterBlockEdit.h"
+#include "OdysseyRasterBlockMutator.h"
 
 #include "ULISEventBuilder.h"
 
@@ -48,7 +50,6 @@ UOdysseyPainterEditorRasterTransformTool::~UOdysseyPainterEditorRasterTransformT
 
 UOdysseyPainterEditorRasterTransformTool::UOdysseyPainterEditorRasterTransformTool()
     : mPaintEngine()
-    , mRasterMutator(true)
     , mTransformCaptureMode(EOdysseyTransformCapture::NoCapture)
     , mTransformToolHUD(MakeShared<FOdysseyHUDElement>())
     , mTransformAreaHUD(nullptr)
@@ -382,8 +383,14 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
     if (mediaRasters.Num() <= 0)
         return;
 
+    //The transform is shown through an edit, committed by CommitTransform() or ended by ClearTransform()
+    TSharedPtr<FOdysseyRasterBlockEdit> edit = mediaRasters[0]->BeginEdit();
+    if (!edit)
+        return;
+
+    const TSharedRef<::ULIS::FBlock>& originalBlock = edit->GetOriginalBlock();
     if (mSelectionBoundingBox.Area() <= 0)
-        mSelectionBoundingBox = ::ULIS::FRectI::FromMinMax(0, 0, mediaRasters[0]->GetRasterBlock()->GetWidth(), mediaRasters[0]->GetRasterBlock()->GetHeight());
+        mSelectionBoundingBox = ::ULIS::FRectI::FromMinMax(0, 0, originalBlock->Width(), originalBlock->Height());
 
     mTransformAreaHUD = MakeShared<FOdysseyHUDPolygon>();
     TArray<FVector2D>& areaPoints = mTransformAreaHUD->GetPoints();
@@ -425,40 +432,28 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
     mHandles.Add(pivot);
 
     //Creating the data
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
-    mPaintEngine.RasterBlock(rasterBlock);
+    mPaintEngine.Edit(edit);
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
 
-    ::ULIS::eFormat format = rasterBlock->GetFormat();
+    ::ULIS::eFormat format = originalBlock->Format();
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
-    mRasterMutator.SetRasterBlock(rasterBlock);
-    mRasterMutator.EditTilesFromRects(
-        { mSelectionBoundingBox },
-        [&, referenceBlock = mSelectionBlock](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-        {
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-
-            ctx.Blend(
-                *referenceBlock,
-                *iBlock,
-                referenceBlock->Rect(),
-                ::ULIS::FVec2I(mSelectionBoundingBox.x, mSelectionBoundingBox.y),
-                ::ULIS::Blend_Normal,
-                ::ULIS::Alpha_Sub,
-                1.f,
-                ::ULIS::FSchedulePolicy::MultiScanlines,
-                0,
-                nullptr,
-                nullptr
-            );
-
-            ctx.Finish();
-
-            return { };
-        }
+    //Remove the moved pixels from the original pixels the transformed ones are composed with
+    ctx.Blend(
+        *mSelectionBlock,
+        *originalBlock,
+        mSelectionBlock->Rect(),
+        ::ULIS::FVec2I(mSelectionBoundingBox.x, mSelectionBoundingBox.y),
+        ::ULIS::Blend_Normal,
+        ::ULIS::Alpha_Sub,
+        1.f,
+        ::ULIS::FSchedulePolicy::MultiScanlines,
+        0,
+        nullptr,
+        nullptr
     );
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+    ctx.Finish();
 
     ctx.Blend(
         *mSelectionBlock,
@@ -720,11 +715,10 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
     if( !mTransformAreaHUD )
         return;
 
-    if( mRasterMutator.GetRasterBlock() != nullptr )
+    if( mPaintEngine.GetEdit() )
     {
         FScopedTransaction scopedTransaction(LOCTEXT("actions.raster.transform.apply", "Apply transform"));
         {
-            mRasterMutator.Commit();
             mPaintEngine.Commit(FOdysseyBlendParameters());
 
             FOdysseyPainterEditor* editor = GetEditor();
@@ -820,12 +814,8 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
 
 void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
 {
-    if (mRasterMutator.GetRasterBlock() != nullptr)
-    {
-        mPaintEngine.Abort();
-        mRasterMutator.Abort();
-        mRasterMutator.SetRasterBlock(nullptr);
-    }
+    //Discard the transform: the views show the content again
+    mPaintEngine.Abort();
 
     mIndexTransaction = 0;
     mTransformTransactions.Empty();

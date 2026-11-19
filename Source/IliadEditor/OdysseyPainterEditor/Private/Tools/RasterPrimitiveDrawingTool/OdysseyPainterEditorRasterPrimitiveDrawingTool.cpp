@@ -13,6 +13,7 @@
 #include "OdysseyBezierShape.h"
 
 #include "OdysseyMediaRaster.h"
+#include "OdysseyRasterBlockEdit.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDHandle.h"
 #include "OdysseyPainterEditorSource.h"
@@ -67,29 +68,6 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::IsActivable() const
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
 }
 
-TSharedPtr<FOdysseyRasterBlock>
-UOdysseyPainterEditorRasterPrimitiveDrawingTool::GetRasterBlockFromEditor(bool iCreate) const
-{
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return nullptr;
-
-    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
-    if (!hasRaster)
-        return nullptr;
-
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters;
-    if (iCreate)
-        mediaRasters = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
-    else
-        mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
-
-    if( mediaRasters.Num() <= 0 )
-        return nullptr;
-
-    return mediaRasters[0]->GetRasterBlock();
-}
-
 bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     UOdysseyPainterEditorTool::OnMouseDown(iPointInTexture, iKey);
@@ -97,11 +75,19 @@ bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDown(const FOdyssey
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(true);
-    if (!rasterBlock)
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = GetMediaRasterFromEditor(true);
+    if (!mediaRaster)
         return false;
 
-    mPaintEngine.RasterBlock(rasterBlock);
+    //Keep the edit of a shape drawn with several clicks, begin an edit otherwise
+    if (!IsEditing(mPaintEngine.GetEdit(), mediaRaster))
+    {
+        TSharedPtr<FOdysseyRasterBlockEdit> edit = mediaRaster->BeginEdit();
+        if (!edit)
+            return false;
+
+        mPaintEngine.Edit(edit);
+    }
 
     FOdysseyPoint point = iPointInTexture;
     if (!SubPixel)
@@ -120,8 +106,7 @@ bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDown(const FOdyssey
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
-    if (!rasterBlock)
+    if (!GetMediaRasterFromEditor(false))
         return;
 
     FOdysseyPoint point = iPointInTexture;
@@ -141,8 +126,7 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseHover(const FOdysse
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
-    if (!rasterBlock || rasterBlock != mPaintEngine.GetRasterBlock())
+    if (!IsEditing(mPaintEngine.GetEdit(), GetMediaRasterFromEditor(false)))
     {
         Shapes.GetActiveShape()->Abort();
         return;
@@ -168,8 +152,7 @@ bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseUp(const FOdysseyPo
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
-    if (!rasterBlock || rasterBlock != mPaintEngine.GetRasterBlock())
+    if (!IsEditing(mPaintEngine.GetEdit(), GetMediaRasterFromEditor(false)))
     {
         Shapes.GetActiveShape()->Abort();
         return false;
@@ -213,6 +196,7 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Load()
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Unload()
 {
     Shapes.GetActiveShape()->Abort();
+    mPaintEngine.Abort();
 
     UOdysseyPainterEditorTool::Unload();
     mPaintEngine.SetMaskBlock(nullptr);
@@ -263,6 +247,13 @@ void
 UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset)
 {
     mPath = iPoints;
+
+    //The edit begins on mouse down, it may have failed or ended since
+    if (!mPaintEngine.GetEdit())
+    {
+        OnShapeAbort();
+        return;
+    }
 
     int w = mPaintEngine.PaintBlock()->Width();
     int h = mPaintEngine.PaintBlock()->Height();
@@ -389,6 +380,8 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
 void
 UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeAbort()
 {
+    //End the edit: the views show the content again
+    mPaintEngine.Abort();
     if(mTransaction)
         mTransaction->Cancel();
     mTransaction = nullptr; //Finish the undo transaction

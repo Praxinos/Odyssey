@@ -164,7 +164,6 @@ private:
     void ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance);
 
 private:
-    TSharedPtr<FOdysseyRasterBlock> GetRasterBlockFromEditor(bool iCreate) const;
 
     void BeginStroke();
     void StrokeTo(const TArray<FOdysseyPoint>& iPoints);

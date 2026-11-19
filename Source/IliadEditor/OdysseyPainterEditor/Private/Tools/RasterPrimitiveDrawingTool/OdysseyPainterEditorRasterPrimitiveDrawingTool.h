@@ -55,7 +55,6 @@ protected:
 
 private:
     // Internal - Callbacks
-    TSharedPtr<FOdysseyRasterBlock> GetRasterBlockFromEditor(bool iCreate) const;
 
     void OnShapeBegin();
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);

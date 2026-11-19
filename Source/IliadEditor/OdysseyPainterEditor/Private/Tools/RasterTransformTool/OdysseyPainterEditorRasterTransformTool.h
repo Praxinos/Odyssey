@@ -112,8 +112,8 @@ public:
     bool Uniform = false;
 
 private:
+    /** Paints the transformed pixels into an edit of the content, whose original pixels lack the moved ones. */
     FOdysseyPaintEngine mPaintEngine;
-    FOdysseyRasterBlockMutator mRasterMutator;
 
     EOdysseyTransformCapture mTransformCaptureMode;
     TSharedPtr<FOdysseyHUDElement> mTransformToolHUD; // The whole HUD displayed by the tool, selection + transform

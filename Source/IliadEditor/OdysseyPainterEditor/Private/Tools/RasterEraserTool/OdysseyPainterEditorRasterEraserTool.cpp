@@ -3,6 +3,7 @@
 
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
 #include "OdysseyMediaRaster.h"
+#include "OdysseyRasterBlockEdit.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyHUDElement.h"
@@ -105,7 +106,7 @@ UOdysseyPainterEditorRasterEraserTool::Unload()
 {
     Shapes.GetActiveShape()->Abort();
 
-    mPaintEngine.RasterBlock(nullptr);
+    mPaintEngine.Abort();
     mPaintEngine.SetMaskBlock(nullptr);
 
     TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
@@ -149,30 +150,6 @@ UOdysseyPainterEditorRasterEraserTool::GetRadius() const
     return Size / 2.f;
 }
 
-TSharedPtr<FOdysseyRasterBlock>
-UOdysseyPainterEditorRasterEraserTool::GetRasterBlockFromEditor(bool iCreate) const
-{
-
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return nullptr;
-
-    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
-    if (!hasRaster)
-        return nullptr;
-
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters;
-    if (iCreate)
-        mediaRasters = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
-    else
-        mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
-
-    if( mediaRasters.Num() <= 0 )
-        return nullptr;
-
-    return mediaRasters[0]->GetRasterBlock();
-}
-
 void
 UOdysseyPainterEditorRasterEraserTool::Tick(float iDeltaTime)
 {
@@ -189,11 +166,19 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseDown(const FOdysseyPoint& iPointIn
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(true);
-    if (!rasterBlock)
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = GetMediaRasterFromEditor(true);
+    if (!mediaRaster)
         return false;
 
-    mPaintEngine.RasterBlock(rasterBlock);
+    //Keep the edit of a shape drawn with several clicks, begin an edit otherwise
+    if (!IsEditing(mPaintEngine.GetEdit(), mediaRaster))
+    {
+        TSharedPtr<FOdysseyRasterBlockEdit> edit = mediaRaster->BeginEdit();
+        if (!edit)
+            return false;
+
+        mPaintEngine.Edit(edit);
+    }
 
     mSubPixelPoint = iPointInTexture;
     if (!SubPixel)
@@ -211,8 +196,7 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseUp(const FOdysseyPoint& iPointInTe
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
-    if (!rasterBlock || rasterBlock != mPaintEngine.GetRasterBlock())
+    if (!IsEditing(mPaintEngine.GetEdit(), GetMediaRasterFromEditor(false)))
     {
         Shapes.GetActiveShape()->Abort();
         return false;
@@ -231,8 +215,7 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseUp(const FOdysseyPoint& iPointInTe
 void
 UOdysseyPainterEditorRasterEraserTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
-    if (!rasterBlock)
+    if (!GetMediaRasterFromEditor(false))
         return;
 
     mSubPixelPoint = iPointInTexture;
@@ -248,8 +231,7 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseHover(const FOdysseyPoint& iPointI
 void
 UOdysseyPainterEditorRasterEraserTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
-    if (!rasterBlock || rasterBlock != mPaintEngine.GetRasterBlock())
+    if (!IsEditing(mPaintEngine.GetEdit(), GetMediaRasterFromEditor(false)))
     {
         Shapes.GetActiveShape()->Abort();
         return;
@@ -273,8 +255,7 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseDrag(const FOdysseyPoint& iPointIn
 bool
 UOdysseyPainterEditorRasterEraserTool::OnKeyDown(const FKey& iKey)
 {
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
-    if (!rasterBlock)
+    if (!GetMediaRasterFromEditor(false))
         return false;
 
     return Shapes.GetActiveShape()->OnKeyDown(iKey);
@@ -283,8 +264,7 @@ UOdysseyPainterEditorRasterEraserTool::OnKeyDown(const FKey& iKey)
 bool
 UOdysseyPainterEditorRasterEraserTool::OnKeyUp(const FKey& iKey)
 {
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
-    if (!rasterBlock)
+    if (!GetMediaRasterFromEditor(false))
         return false;
 
     return Shapes.GetActiveShape()->OnKeyUp(iKey);
@@ -606,7 +586,8 @@ UOdysseyPainterEditorRasterEraserTool::OnShapeCommit(const TArray<FOdysseyPoint>
     if ( iReset )
     {
         ResetInterpolation();
-        mPaintEngine.Abort();
+        //Discard the stroke, keep the edit to draw it again
+        mPaintEngine.Reset();
 
         for ( const FOdysseyPoint& point : iPoints )
         {
