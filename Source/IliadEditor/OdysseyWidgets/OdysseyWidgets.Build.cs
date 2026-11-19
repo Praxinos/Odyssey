@@ -60,7 +60,6 @@ public class OdysseyWidgets : ModuleRules
                 "OdysseyCoreEditor",
                 "OdysseyImaging",
                 "OdysseyLayerStack",
-                "OdysseyLayerStackEditor",
                 "OdysseyStyle",
                 "OdysseyStylusInput",
                 "OdysseyTexture",

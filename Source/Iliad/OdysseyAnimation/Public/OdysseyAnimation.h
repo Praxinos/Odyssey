@@ -6,13 +6,15 @@
 #include "CoreMinimal.h"
 #include "UObject/AssetRegistryTagsContext.h"
 #include "BaseMediaSource.h"
-#include "OdysseyTextureRenderingAbility.h"
+#include "Interfaces/Interface_AssetUserData.h"
 #include "UObject/SoftObjectPath.h"
+
 #include "OdysseyPaletteReferencer.h"
+#include "OdysseyTextureRenderingAbility.h"
 
 #include "OdysseyAnimation.generated.h"
 
-class UOdysseyLayerStack;
+class UAssetUserData;
 class UTexture2D;
 class UOdysseyPaletteSet;
 
@@ -52,17 +54,65 @@ class ODYSSEYANIMATION_API UOdysseyAnimation
     : public UBaseMediaSource
     , public IOdysseyTextureRenderingAbility
     , public IOdysseyPaletteReferencer
+    , public IInterface_AssetUserData
 {
     GENERATED_BODY()
 
 public:
+#if WITH_EDITOR
+    /** Broadcast when an animation saved before the editor content moved to an asset user data is loaded */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnLegacyEditorDataLoaded, UOdysseyAnimation*);
+
+    /**
+     * @brief Delegate used by the editor module to migrate the legacy editor content of a loaded animation
+     *
+     * @return The delegate broadcast from PostLoad when HasLegacyEditorData() is true
+     */
+    static FOnLegacyEditorDataLoaded& OnLegacyEditorDataLoaded();
+#endif
+
+public:
+    //~ Begin IInterface_AssetUserData Interface
+    virtual void AddAssetUserData(UAssetUserData* InUserData) override;
+    virtual void RemoveUserDataOfClass(TSubclassOf<UAssetUserData> InUserDataClass) override;
+    virtual UAssetUserData* GetAssetUserDataOfClass(TSubclassOf<UAssetUserData> InUserDataClass) override;
+    virtual const TArray<UAssetUserData*>* GetAssetUserDataArray() const override;
+    //~ End IInterface_AssetUserData Interface
+
+#if WITH_EDITOR
+    /**
+     * @brief Returns the asset user data holding the editable content of this animation
+     *
+     * @return The first asset user data implementing IOdysseyAnimationEditorData, or nullptr
+     */
+    UAssetUserData* GetEditorData() const;
+#endif
+
+#if WITH_EDITORONLY_DATA
+    /**
+     * @brief Tells if this animation still holds editor content saved before it moved to an asset user data
+     */
+    bool HasLegacyEditorData() const;
+
+    /**
+     * @brief Moves the legacy editor content out of this animation, leaving it empty
+     *
+     * @param oLayerStack Receives the legacy layer stack
+     * @param oPalettes Receives the legacy palette sets
+     * @param oToolCollections Receives the legacy tool collection paths
+     */
+    void TakeLegacyEditorData(UObject*& oLayerStack, TArray<UOdysseyPaletteSet*>& oPalettes, TArray<FSoftObjectPath>& oToolCollections);
+#endif
+
+public:
+    virtual void PostLoad() override;
+
 #if WITH_EDITOR
     //Property changed methods
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
     virtual void PropertyChanged(const FName& iPropertyName);
     virtual void PreSave(FObjectPreSaveContext SaveContext) override;
-    virtual void CollectSaveOverrides(FObjectCollectSaveOverridesContext SaveContext) override;
     virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
     virtual void GetAssetRegistryTags( FAssetRegistryTagsContext ioContext ) const override;
 #endif
@@ -128,12 +178,13 @@ public:
     void OnRightBoundChanged();
 
 public:
+    /**
+     * @brief Sets the size, format and frame rate of a new animation
+     *
+     * The editable content is created separately, as an asset user data, by the editor module.
+     */
     void Init(int iWidth, int iHeight, EOdysseyAnimationFormat iFormat, float iFramesPerSecond);
-
-    //Getters
-    void SetLayerStack(UOdysseyLayerStack* iLayerStack);
 #endif
-    UOdysseyLayerStack* GetLayerStack() const;
 
 public:
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const override;
@@ -151,6 +202,9 @@ public:
 private:
 #if WITH_EDITOR
     virtual void OnRefreshReferencedPalette(UOdysseyPalette* iPalette) override;
+
+    /** Returns the rendering source of the editor data, or nullptr if there is none */
+    const IOdysseyTextureRenderingAbility* GetEditorRenderingSource() const;
 #endif
 
 public:
@@ -170,10 +224,23 @@ protected:
     UPROPERTY()
     TArray<FOdysseyAnimationFrame> Frames;
 
-    UPROPERTY(BlueprintReadOnly, Category = "Odyssey|Animation", meta = (DisplayName = "Layer Stack", LoadBehavior = "LazyOnDemand"))
-    TObjectPtr<UOdysseyLayerStack> mLayerStack;
+    /** Asset user data attached to this animation, among which its editor-only editable content */
+    UPROPERTY(EditAnywhere, AdvancedDisplay, Instanced, Category="Odyssey|Animation")
+    TArray<TObjectPtr<UAssetUserData>> AssetUserData;
 
 #if WITH_EDITORONLY_DATA
+    /** Legacy layer stack, moved to the editor data on load */
+    UPROPERTY()
+    TObjectPtr<UObject> mLayerStack_DEPRECATED;
+
+    /** Legacy palette sets, moved to the editor data on load */
+    UPROPERTY()
+    TArray<UOdysseyPaletteSet*> Palettes_DEPRECATED;
+
+    /** Legacy tool collection paths, moved to the editor data on load */
+    UPROPERTY()
+    TArray<FSoftObjectPath> ToolCollections_DEPRECATED;
+
     UPROPERTY(EditAnywhere, Category="Odyssey|Animation")
     EOdysseyAnimationBoundMode LeftBoundMode = EOdysseyAnimationBoundMode::Automatic;
 
@@ -186,13 +253,4 @@ protected:
     UPROPERTY(EditAnywhere, Category="Odyssey|Animation", meta=(EditCondition="RightBoundMode != EOdysseyAnimationBoundMode::Automatic", EditConditionHides))
     int RightBound = 0;
 #endif
-
-public:
-    UPROPERTY()
-    TArray<UOdysseyPaletteSet*> Palettes;
-
-    // We store the path to the Tool Collections Assets, so that we don't have to include the painterEditorModule (where the tools and tool collections are) in the build.cs
-    UPROPERTY()
-    TArray<FSoftObjectPath> ToolCollections;
-
 };

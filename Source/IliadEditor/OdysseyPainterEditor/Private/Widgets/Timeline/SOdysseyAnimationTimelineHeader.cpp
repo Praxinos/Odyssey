@@ -19,6 +19,7 @@
 #include "Shortcuts/Global/OdysseyAnimationGlobalTimelineHeaderShortcuts.h"
 #include "SOdysseyHandle.h"
 #include "Widgets/Input/SNumericEntryBox.h"
+#include "OdysseyAnimationLayerStackUserData.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -149,7 +150,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
     int32 endKey = FMath::Max(0, FGenericPlatformMath::CeilToInt(offset - padding + (width / frameSize)));
 
     UOdysseyAnimation* animation = mAnimation;
-    UOdysseyAnimationLayerStack* layerstack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerstack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     FInt32Range animationRange = animation->GetFrameRange();
 
     for(int32 keyNum = startKey; keyNum <= endKey; keyNum++)

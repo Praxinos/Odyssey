@@ -20,6 +20,7 @@
 #include "OdysseyPainterEditorAnimationUserSettings.h"
 #include "OdysseyStyle.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyAnimationLayerStackUserData.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -609,7 +610,7 @@ FOdysseyPainterEditorAnimationFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
 
         case EOdysseyAnimationFlipKeys::Cells:
         {
-            UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
+            UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(mAnimation));
             UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
             bool useLayerLeftLimit = layer->GetCells().Num() < 2;
             bool useLayerRightLimit = useLayerLeftLimit;
@@ -723,7 +724,7 @@ FOdysseyPainterEditorAnimationFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
 
         case EOdysseyAnimationFlipKeys::CellMarks:
         {
-            UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
+            UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(mAnimation));
             UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
             const TArray<UOdysseyAnimationCell*>& cells = layer->GetCells();
             FInt32Range frameRange = layer->GetFrameRange();
@@ -871,7 +872,7 @@ FOdysseyPainterEditorAnimationFlipSystem::GetLimits(EOdysseyAnimationFlipLimits 
 
         case EOdysseyAnimationFlipLimits::Layer:
         {
-            UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
+            UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(mAnimation));
             UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
             FInt32Range frameRange = layer->GetFrameRange();
             oLeftLimit = frameRange.GetLowerBoundValue();
@@ -881,7 +882,7 @@ FOdysseyPainterEditorAnimationFlipSystem::GetLimits(EOdysseyAnimationFlipLimits 
 
         case EOdysseyAnimationFlipLimits::CellMarks:
         {
-            UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
+            UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(mAnimation));
             UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
 
             // Get all marks of the desired type

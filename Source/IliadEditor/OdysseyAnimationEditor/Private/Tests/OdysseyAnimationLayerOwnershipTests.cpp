@@ -12,8 +12,12 @@
 #include "OdysseyAnimationCellImageRaster.h"
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyAnimationLayerStack.h"
 #include "OdysseyLayer.h"
+#include "OdysseyLayerStack.h"
+#include "OdysseyLighttable.h"
 #include "OdysseyAnimationCellImageStagger.h"
+#include "OdysseyAnimationLayerStackUserData.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationLayerOwnershipTest, "Odyssey.Animation.LayerOwnership",
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -27,7 +31,23 @@ bool FOdysseyAnimationLayerOwnershipTest::RunTest(const FString& Parameters)
     if (!TestNotNull(TEXT("Animation layers own cells"), CellsProperty))
         return false;
     TestEqual(TEXT("Cells are declared by the animation layer"), CellsProperty->GetOwnerClass(), UOdysseyAnimationLayer::StaticClass());
-    TestEqual(TEXT("Cell module"), UOdysseyAnimationCell::StaticClass()->GetOutermost()->GetName(), FString(TEXT("/Script/OdysseyAnimation")));
+    TestEqual(TEXT("Cell module is editor only"), UOdysseyAnimationCell::StaticClass()->GetOutermost()->GetName(), FString(TEXT("/Script/OdysseyAnimationEditor")));
+    TestEqual(TEXT("Layer stack module is editor only"), UOdysseyLayerStack::StaticClass()->GetOutermost()->GetName(), FString(TEXT("/Script/OdysseyLayerStack")));
+    TestTrue(TEXT("Layer stack classes are not cooked"), UOdysseyLayerStack::StaticClass()->GetOutermost()->HasAnyPackageFlags(PKG_EditorOnly));
+    TestTrue(TEXT("Animation cell classes are not cooked"), UOdysseyAnimationCell::StaticClass()->GetOutermost()->HasAnyPackageFlags(PKG_EditorOnly));
+    TestTrue(TEXT("Animation editor data is not cooked"), UOdysseyAnimationLayerStackUserData::StaticClass()->GetOutermost()->HasAnyPackageFlags(PKG_EditorOnly));
+    TestEqual(TEXT("Runtime animation layer stack class is redirected"),
+        FCoreRedirects::GetRedirectedName(ECoreRedirectFlags::Type_Class, FCoreRedirectObjectName(TEXT("/Script/OdysseyAnimation.OdysseyAnimationLayerStack"))).ToString(),
+        UOdysseyAnimationLayerStack::StaticClass()->GetPathName());
+    TestEqual(TEXT("Runtime animation raster cell class is redirected"),
+        FCoreRedirects::GetRedirectedName(ECoreRedirectFlags::Type_Class, FCoreRedirectObjectName(TEXT("/Script/OdysseyAnimation.OdysseyAnimationCellImageRaster"))).ToString(),
+        UOdysseyAnimationCellImageRaster::StaticClass()->GetPathName());
+    TestEqual(TEXT("Runtime lighttable struct is redirected"),
+        FCoreRedirects::GetRedirectedName(ECoreRedirectFlags::Type_Struct, FCoreRedirectObjectName(TEXT("/Script/OdysseyAnimation.OdysseyLighttable"))).ToString(),
+        FOdysseyLighttable::StaticStruct()->GetPathName());
+    TestEqual(TEXT("Runtime post behaviour enum is redirected"),
+        FCoreRedirects::GetRedirectedName(ECoreRedirectFlags::Type_Enum, FCoreRedirectObjectName(TEXT("/Script/OdysseyAnimation.EOdysseyLayerImagePostBehaviour"))).ToString(),
+        StaticEnum<EOdysseyLayerImagePostBehaviour>()->GetPathName());
     const FCoreRedirectObjectName OldCell(TEXT("/Script/OdysseyLayerStack.OdysseyLayerCell"));
     const FCoreRedirectObjectName NewCell = FCoreRedirects::GetRedirectedName(ECoreRedirectFlags::Type_Class, OldCell);
     TestEqual(TEXT("Saved cell class references are redirected"), NewCell.ToString(), UOdysseyAnimationCell::StaticClass()->GetPathName());
@@ -52,8 +72,8 @@ bool FOdysseyAnimationLayerOwnershipTest::RunTest(const FString& Parameters)
 
     TStrongObjectPtr<UOdysseyAnimation> Animation(NewObject<UOdysseyAnimation>(GetTransientPackage()));
     Animation->Init(16, 16, EOdysseyAnimationFormat::BGRA8, 24.f);
-    UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(Animation->GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-    UOdysseyAnimationLayer* Destination = CastChecked<UOdysseyAnimationLayer>(Animation->GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
+    UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(UOdysseyAnimationLayerStackUserData::GetLayerStack(Animation.Get())->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
+    UOdysseyAnimationLayer* Destination = CastChecked<UOdysseyAnimationLayer>(UOdysseyAnimationLayerStackUserData::GetLayerStack(Animation.Get())->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
     UOdysseyAnimationCell* First = Layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
     UOdysseyAnimationCell* Second = Layer->AddCell(UOdysseyAnimationCellImageStagger::StaticClass());
     if (!TestNotNull(TEXT("Raster cell"), First) || !TestNotNull(TEXT("Stagger cell"), Second))

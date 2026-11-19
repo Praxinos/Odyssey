@@ -174,11 +174,6 @@
             "Type": "Runtime",
             "LoadingPhase": "Default"
         },
-        {
-            "Name": "OdysseyLayerStack",
-            "Type": "Runtime",
-            "LoadingPhase": "Default"
-        },
 
         {
             "Name": "OdysseyMedia",
@@ -216,7 +211,7 @@
             "LoadingPhase": "Default"
         },
         {
-            "Name": "OdysseyLayerStackEditor",
+            "Name": "OdysseyLayerStack",
             "Type": "Editor",
             "LoadingPhase": "Default"
         },

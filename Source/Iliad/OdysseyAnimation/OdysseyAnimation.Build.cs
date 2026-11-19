@@ -29,14 +29,6 @@ namespace UnrealBuildTool.Rules
             PublicIncludePaths.AddRange(
                 new string[] {
                     // ... add public include paths required here ...
-                    Path.Combine(ModuleDirectory, "Public", "LayerStack"),
-                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Cells"),
-                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Cells", "CellImageRaster"),
-                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Cells", "CellImageVector"),
-                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers"),
-                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerFolder"),
-                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerImageRaster"),
-                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerImageVector"),
                     Path.Combine(ModuleDirectory, "Public", "Media"),
                 }
                 );
@@ -44,14 +36,6 @@ namespace UnrealBuildTool.Rules
             PrivateIncludePaths.AddRange(
                 new string[] {
                     // ... add other private include paths required here ...
-                    Path.Combine(ModuleDirectory, "Private", "LayerStack"),
-                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Cells"),
-                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Cells", "CellImageRaster"),
-                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Cells", "CellImageVector"),
-                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers"),
-                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerFolder"),
-                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerImageRaster"),
-                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerImageVector"),
                     Path.Combine(ModuleDirectory, "Private", "Media"),
                 }
                 );
@@ -59,7 +43,6 @@ namespace UnrealBuildTool.Rules
             PublicDependencyModuleNames.AddRange(
                 new string[]
                 {
-                    "OdysseyLayerStack",
                     "MediaAssets",
                     "OdysseyRendering",
                     "OdysseyPalette",
@@ -95,8 +78,7 @@ namespace UnrealBuildTool.Rules
                 );
 
             //--- Editor Only Dependencies
-            // This is here because Animation LayerStack depends on ULIS and OdysseyVector
-            // This can be removed once layers don't use ULIS anymore and OdysseyVector is Runtime Ready
+            // Editor-only helpers (export to texture/flipbook) rely on editor modules
 
             if (Target.Type == TargetType.Editor)
             {
@@ -112,13 +94,8 @@ namespace UnrealBuildTool.Rules
 
                         "OdysseyCoreEditor",
                         "OdysseyImaging",
-                        "OdysseyFile",
                         "OdysseyMedia",
-                        "OdysseyStyle",
-                        "OdysseyVector",
 
-                        "ULIS",
-                        "ULISLoader"
                     }
                 );
             }

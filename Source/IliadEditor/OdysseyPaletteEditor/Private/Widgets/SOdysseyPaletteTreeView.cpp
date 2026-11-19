@@ -32,6 +32,7 @@
 #include "SOdysseyPaletteEntryRow.h"
 #include "SOdysseyPaletteFolderRow.h"
 #include "SOdysseyPaletteColorRow.h"
+#include "OdysseyAnimationLayerStackUserData.h"
 
 
 #define LOCTEXT_NAMESPACE "Palette"
@@ -585,7 +586,7 @@ SOdysseyPaletteTreeView::GetVectorCellsUsedByEntries(const TArray<UOdysseyPalett
 
         if( animation )
         {
-            for( UOdysseyLayer* layer : animation->GetLayerStack()->GetLayers() )
+            for( UOdysseyLayer* layer : UOdysseyAnimationLayerStackUserData::GetLayerStack(animation)->GetLayers() )
             {
                 UOdysseyAnimationLayerImageVector* imageVectorLayer = Cast< UOdysseyAnimationLayerImageVector >(layer);
                 if( imageVectorLayer )

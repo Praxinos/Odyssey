@@ -1,0 +1,88 @@
+// IDDN.FR.001.060015.015.S.X.2019.000.00000
+// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Misc/Attribute.h"
+
+#include "OdysseyEditorShortcuts.h"
+#include "OdysseyBlendingMode.h"
+
+class UOdysseyLayer;
+class UOdysseyLayerStack;
+
+class ODYSSEYLAYERSTACK_API FOdysseyLayerStackGlobalShortcuts
+    : public IOdysseyEditorShortcuts
+
+{
+public:
+    virtual ~FOdysseyLayerStackGlobalShortcuts() {}
+    FOdysseyLayerStackGlobalShortcuts(TAttribute<UOdysseyLayerStack*> iLayerStack, TAttribute<UOdysseyLayer*> iLayer=TAttribute<UOdysseyLayer*>());
+
+public:
+    //Common Shortcuts
+    void Action_NavigateToNextLayer();
+    void Action_NavigateToPreviousLayer();
+    void Action_OpenFolderLayer();
+    void Action_CloseFolderLayer();
+
+    void Action_ActivateLayer();
+    void Action_InactivateLayer();
+    void Action_ToggleLayerActivated();
+
+    void Action_LockLayer();
+    void Action_UnlockLayer();
+    void Action_ToggleLayerLocked();
+
+    void Action_ActivateLayerInheritsAlpha();
+    void Action_InactivateLayerInheritsAlpha();
+    void Action_ToggleLayerInheritsAlpha();
+
+
+    void Action_CollapseLayer();
+    void Action_UncollapseLayer();
+    void Action_ToggleLayerCollapsed();
+
+    void Action_LockAllLayers();
+    void Action_UnlockAllLayers();
+    void Action_ActivateAllLayers();
+    void Action_InactivateAllLayers();
+    void Action_DisplayOnlyCurrentLayer();
+    bool CanAction_DisplayOnlyCurrentLayer();
+    bool IsActionChecked_DisplayOnlyCurrentLayer();
+    void Action_CollapseAllLayers();
+    void Action_UncollapseAllLayers();
+    void Action_OpenAllFolderLayers();
+    void Action_CloseAllFolderLayers();
+
+    void Action_SetCurrentLayerBlendMode(EOdysseyBlendMode iBlendMode);
+    void Action_SetCurrentLayerBlendModeToNextBlendMode();
+    void Action_SetCurrentLayerBlendModeToPreviousBlendMode();
+
+    bool CanAction_AlterLayer();
+    bool CanAction_SetCurrentLayerBlendMode(EOdysseyBlendMode iBlendMode);
+    bool CanAction_SetLayerAlphaInheritance();
+
+public:
+    //Shortcuts
+    virtual void MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList) override;
+
+protected:
+    /** Resolves the selection, using only the focused layer when it is outside that selection. */
+    void GetSelectedLayers(TArray<UOdysseyLayer*>& OutSelectedLayers) const;
+    UOdysseyLayer* GetFocusedLayer() const;
+
+private:
+
+    void SetLayerIsActivated(bool InValue);
+    void SetLayerIsLocked(bool InValue);
+    void SetLayerAlphaInheritance(bool InValue);
+    void SetLayerCollapsed(bool InValue);
+
+private:
+    TAttribute<UOdysseyLayerStack*> mLayerStack;
+    // It's not necessary the current layer (when modifying a parameter of a layer which is NOT selected/current)
+    // Only "really" used by Action_SetCurrentLayerBlendMode() as this shortcut is called from the layer popup
+    TAttribute<UOdysseyLayer*> mFocusedLayer;
+};

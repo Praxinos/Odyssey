@@ -11,8 +11,7 @@
 
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationPlayer.h"
-#include "OdysseyLayer.h"
-#include "OdysseyLayerStack.h"
+#include "OdysseyAnimationEditorData.h"
 
 //---
 
@@ -128,12 +127,11 @@ UOdysseyAnimationNamingTokens::OnCreateDefaultTokens( TArray<FNamingTokenData>& 
                                                                    return FText::GetEmpty();
 
                                                                UOdysseyAnimation* animation = ContextAnimation->Animation.Pin().Get();
-                                                               UOdysseyLayerStack* layerStack = animation ? animation->GetLayerStack() : nullptr;
-                                                               UOdysseyLayer* currentLayer = layerStack ? layerStack->GetCurrentLayer() : nullptr;
-                                                               if( !currentLayer )
+                                                               const IOdysseyAnimationEditorData* editorData = animation ? Cast<IOdysseyAnimationEditorData>(animation->GetEditorData()) : nullptr;
+                                                               if( !editorData )
                                                                    return FText::GetEmpty();
 
-                                                               return currentLayer->GetLayerName();
+                                                               return editorData->GetCurrentLayerName();
                                                            } );
     Tokens.Add( CurrentLayerNameToken );
 #endif

@@ -49,6 +49,8 @@ OnLayerCellsChanged(UOdysseyLayer* InLayer, bool IsInteractive)
         if (!Cell || Cell->GetIndexInLayer() == INDEX_NONE)
             OdysseyLayerStackSelection::Get()->Deselect(Cell);
     }
+    /** Removed cells are marked as garbage, which hides them from GetSelectedCells() while they stay selected. */
+    OdysseyLayerStackSelection::DeselectGarbageObjects();
     OdysseyLayerStackSelection::Get()->EndBatchSelectOperation();
     /** Garbage cells can disappear from USelection without sending another selection notification. */
     OnSelectionChanged(OdysseyLayerStackSelection::Get());

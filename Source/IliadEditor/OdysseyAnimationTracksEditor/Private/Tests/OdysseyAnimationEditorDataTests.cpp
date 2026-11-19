@@ -25,6 +25,7 @@
 #include "OdysseyAnimationTimelineSectionEditorData.h"
 #include "OdysseyAnimationTimelineTrack.h"
 #include "OdysseyLayerStack.h"
+#include "OdysseyAnimationLayerStackUserData.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationEditorDataTest, "Odyssey.Animation.EditorData.Cuts",
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -36,7 +37,7 @@ bool FOdysseyAnimationEditorDataTest::RunTest(const FString& Parameters)
     Sequence->GetMovieScene()->SetTickResolutionDirectly(FFrameRate(24, 1));
     TStrongObjectPtr<UOdysseyAnimation> Animation(NewObject<UOdysseyAnimation>());
     Animation->Init(16, 16, EOdysseyAnimationFormat::BGRA8, 24.f);
-    UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(Animation->GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
+    UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(UOdysseyAnimationLayerStackUserData::GetLayerStack(Animation.Get())->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
     UOdysseyAnimationCell* First = Layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
     UOdysseyAnimationCell* Second = Layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
     First->SetExposure(2);

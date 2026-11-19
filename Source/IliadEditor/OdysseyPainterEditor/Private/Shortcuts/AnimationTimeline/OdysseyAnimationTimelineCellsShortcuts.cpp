@@ -25,6 +25,7 @@
 #include "OdysseyPainterEditorModule.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyAnimationLayerStackUserData.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -144,7 +145,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Copy()
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return;
 
@@ -168,7 +169,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return;
 
@@ -205,7 +206,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return;
 
@@ -236,7 +237,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SelectAll()
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return;
 
@@ -263,7 +264,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return;
 
@@ -382,7 +383,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_CreateStaggerCell( EOdysseyAnima
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return;
 
@@ -465,7 +466,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_AddCellsBeforeOrAfter( int32 iNu
     if( !animation )
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( animation->GetLayerStack() );
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( UOdysseyAnimationLayerStackUserData::GetLayerStack(animation) );
     if( !layerStack )
         return;
 
@@ -554,7 +555,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseOrDecreaseCellExposure( 
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return;
 
@@ -595,7 +596,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure()
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return;
 
@@ -665,7 +666,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ReverseSelectedCells()
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return;
 
@@ -693,7 +694,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Copy()
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return false;
 
@@ -715,7 +716,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Cut()
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return false;
 
@@ -740,7 +741,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Paste()
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return false;
 
@@ -766,7 +767,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_SelectAll()
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return false;
 
@@ -789,7 +790,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Delete()
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return false;
 
@@ -814,7 +815,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_CreateStaggerCell()
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return false;
 
@@ -854,7 +855,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_AddCellsBefore()
     if( !animation )
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( animation->GetLayerStack() );
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( UOdysseyAnimationLayerStackUserData::GetLayerStack(animation) );
     if( !layerStack )
         return false;
 
@@ -882,7 +883,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_AddCellsAfter()
     if( !animation )
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( animation->GetLayerStack() );
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( UOdysseyAnimationLayerStackUserData::GetLayerStack(animation) );
     if( !layerStack )
         return false;
 
@@ -911,7 +912,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_ManageCellExposure()
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return false;
 
@@ -941,7 +942,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_ReverseSelectedCells()
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
     if (!layerStack)
         return false;
 

@@ -15,6 +15,7 @@
 
 #include "Editor.h"
 #include "EditorStyleSet.h"
+#include "OdysseyAnimationLayerStackUserData.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 
@@ -72,7 +73,7 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
     UOdysseyAnimation* animation = NewObject<UOdysseyAnimation>( iParent, iName, iFlags | RF_Transactional );
 
     animation->Init( Width, Height, Format, FrameRate.AsDecimal() );
-    UOdysseyLayerStack* layerStack = animation->GetLayerStack();
+    UOdysseyLayerStack* layerStack = UOdysseyAnimationLayerStackUserData::GetLayerStack(animation);
 
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>( layerStack->AddLayer( *DefaultLayerClass ) );
     layerStack->SetCurrentLayer( layer );

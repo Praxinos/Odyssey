@@ -31,6 +31,7 @@
 #include "OdysseyRasterBlock.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyTiledImage.h"
+#include "OdysseyAnimationLayerStackUserData.h"
 
 namespace Odyssey::AnimationTiledTests
 {
@@ -40,7 +41,7 @@ constexpr EAutomationTestFlags Flags = EAutomationTestFlags::EditorContext | EAu
 
 UOdysseyAnimationCellImageRaster* Cell(UOdysseyAnimation* Animation, int32 Index)
 {
-    return CastChecked<UOdysseyAnimationCellImageRaster>(CastChecked<UOdysseyAnimationLayer>(Animation->GetLayerStack()->GetRootLayers()[0])->GetCells()[Index]);
+    return CastChecked<UOdysseyAnimationCellImageRaster>(CastChecked<UOdysseyAnimationLayer>(UOdysseyAnimationLayerStackUserData::GetLayerStack(Animation)->GetRootLayers()[0])->GetCells()[Index]);
 }
 
 void Fill(UOdysseyAnimationCellImageRaster* Target, uint8 Seed)
@@ -67,8 +68,8 @@ UOdysseyAnimation* MakeAnimation(UObject* Outer, EOdysseyAnimationFormat Format)
 {
     UOdysseyAnimation* Animation = NewObject<UOdysseyAnimation>(Outer, NAME_None, RF_Public | RF_Transactional);
     Animation->Init(Width, Height, Format, 24.0f);
-    UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(Animation->GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-    Animation->GetLayerStack()->SetCurrentLayer(Layer);
+    UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(UOdysseyAnimationLayerStackUserData::GetLayerStack(Animation)->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
+    UOdysseyAnimationLayerStackUserData::GetLayerStack(Animation)->SetCurrentLayer(Layer);
     UOdysseyAnimationCellImageRaster* First = CastChecked<UOdysseyAnimationCellImageRaster>(Layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
     UOdysseyAnimationCellImageRaster* Second = CastChecked<UOdysseyAnimationCellImageRaster>(Layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
     First->SetExposure(2);
@@ -148,7 +149,7 @@ bool FOdysseyAnimationTiledIntegrationTest::RunTest(const FString& Parameters)
         TestNull(TEXT("Getter does not create the snapshot"), First->GetTiledImage());
         for (int32 Frame = 0; Frame < 5; ++Frame) { Compare(*this, Animation.Get(), Frame); }
         TestEqual(TEXT("Cell exposures form five frames"), Animation->GetFrameCount(), 5);
-        UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(Animation->GetLayerStack()->GetRootLayers()[0]);
+        UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(UOdysseyAnimationLayerStackUserData::GetLayerStack(Animation.Get())->GetRootLayers()[0]);
         FOdysseyLighttable Lighttable;
         Lighttable.bIsActivated = true;
         Lighttable.PreviousKeys[0].bIsActivated = true;
@@ -293,7 +294,11 @@ bool FOdysseyAnimationTiledPersistenceTest::RunTest(const FString& Parameters)
     if (!TestNotNull(TEXT("Reload animation package"), LoadedPackage)) { return false; }
     UOdysseyAnimation* Loaded = FindObject<UOdysseyAnimation>(LoadedPackage, *AssetName);
     if (!TestNotNull(TEXT("Reload animation"), Loaded)) { return false; }
-    TestNotNull(TEXT("Editor animation retains its layer stack"), Loaded->GetLayerStack());
+    const UOdysseyAnimationLayerStackUserData* LoadedEditorData = Loaded->GetAssetUserData<UOdysseyAnimationLayerStackUserData>();
+    if (!TestNotNull(TEXT("Editor data is saved with the animation"), LoadedEditorData)) { return false; }
+    TestTrue(TEXT("Editor data is the animation editor data"), Loaded->GetEditorData() == LoadedEditorData);
+    if (!TestNotNull(TEXT("Editor animation retains its layer stack"), LoadedEditorData->LayerStack.Get())) { return false; }
+    TestEqual(TEXT("Saved layer stack keeps its layers"), LoadedEditorData->LayerStack->GetRootLayers().Num(), 1);
     const FArrayProperty* FramesProperty = FindFProperty<FArrayProperty>(Loaded->GetClass(), TEXT("Frames"));
     if (!TestNotNull(TEXT("Baked animation frames property"), FramesProperty)) { return false; }
     const TArray<FOdysseyAnimationFrame>& BakedFrames = *FramesProperty->ContainerPtrToValuePtr<TArray<FOdysseyAnimationFrame>>(Loaded);

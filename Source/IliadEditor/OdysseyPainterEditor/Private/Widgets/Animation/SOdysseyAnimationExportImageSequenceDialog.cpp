@@ -18,6 +18,7 @@
 
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
+#include "OdysseyAnimationLayerStackUserData.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -191,7 +192,7 @@ FOdysseyAnimationImageSequenceExporter::GetSourceRange(const FSource& iSource)
 TArray<FOdysseyAnimationImageSequenceExporter::FSource>
 FOdysseyAnimationImageSequenceExporter::GetSources()
 {
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(mAnimation));
     switch(mSource)
     {
         case EOdysseyAnimationExportImageSequenceSource::Animation:
