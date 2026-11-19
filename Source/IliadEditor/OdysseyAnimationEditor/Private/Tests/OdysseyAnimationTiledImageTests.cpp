@@ -69,8 +69,9 @@ UOdysseyAnimation* MakeAnimation(UObject* Outer, EOdysseyAnimationFormat Format)
 {
     UOdysseyAnimation* Animation = NewObject<UOdysseyAnimation>(Outer, NAME_None, RF_Public | RF_Transactional);
     Animation->Init(Width, Height, Format, 24.0f);
-    UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(OdysseyAnimationEditor::GetLayerStack(Animation)->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-    OdysseyAnimationEditor::GetLayerStack(Animation)->SetCurrentLayer(Layer);
+    UOdysseyAnimationLayerStack* LayerStack = OdysseyAnimationEditor::GetLayerStack(Animation);
+    UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(LayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
+    LayerStack->SetCurrentLayer(Layer);
     UOdysseyAnimationCellImageRaster* First = CastChecked<UOdysseyAnimationCellImageRaster>(Layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
     UOdysseyAnimationCellImageRaster* Second = CastChecked<UOdysseyAnimationCellImageRaster>(Layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
     First->SetExposure(2);

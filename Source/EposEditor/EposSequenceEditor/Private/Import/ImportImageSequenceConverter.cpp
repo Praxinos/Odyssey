@@ -216,7 +216,7 @@ FImportImageSequenceConverter::CreateAnimation( const TArray<FImportImageSequenc
             if (!importResult.mImportedLayers.IsEmpty())
             {
                 UOdysseyAnimationLayerImageRaster* animation_layer = importResult.mImportedLayers[0];
-                OdysseyAnimationEditor::GetLayerStack(new_animation)->SetCurrentLayer( animation_layer );
+                layer_stack->SetCurrentLayer( animation_layer );
 
                 //---
 

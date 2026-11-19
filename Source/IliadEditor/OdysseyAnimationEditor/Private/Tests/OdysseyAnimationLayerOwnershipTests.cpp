@@ -77,8 +77,9 @@ bool FOdysseyAnimationLayerOwnershipTest::RunTest(const FString& Parameters)
 
     TStrongObjectPtr<UOdysseyAnimation> Animation(NewObject<UOdysseyAnimation>(GetTransientPackage()));
     Animation->Init(16, 16, EOdysseyAnimationFormat::BGRA8, 24.f);
-    UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(OdysseyAnimationEditor::GetLayerStack(Animation.Get())->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-    UOdysseyAnimationLayer* Destination = CastChecked<UOdysseyAnimationLayer>(OdysseyAnimationEditor::GetLayerStack(Animation.Get())->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
+    UOdysseyAnimationLayerStack* LayerStack = OdysseyAnimationEditor::GetLayerStack(Animation.Get());
+    UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(LayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
+    UOdysseyAnimationLayer* Destination = CastChecked<UOdysseyAnimationLayer>(LayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
     UOdysseyAnimationCell* First = Layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
     UOdysseyAnimationCell* Second = Layer->AddCell(UOdysseyAnimationCellImageStagger::StaticClass());
     if (!TestNotNull(TEXT("Raster cell"), First) || !TestNotNull(TEXT("Stagger cell"), Second))

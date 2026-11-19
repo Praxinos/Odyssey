@@ -3515,8 +3515,9 @@ FOdysseyPainterEditor::RemovePaletteSet(UOdysseyPaletteSet* iPaletteSet)
     TArray<UOdysseyPaletteSet*> paletteSets;
     if (animation)
     {
-        OdysseyAnimationEditor::GetPalettes(*animation).Remove(iPaletteSet);
-        paletteSets = OdysseyAnimationEditor::GetPalettes(*animation);
+        TArray<UOdysseyPaletteSet*>& animationPaletteSets = OdysseyAnimationEditor::GetPalettes(*animation);
+        animationPaletteSets.Remove(iPaletteSet);
+        paletteSets = animationPaletteSets;
     }
     else if (textureUserData)
     {

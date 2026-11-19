@@ -598,11 +598,12 @@ UOdysseyAnimationLayerImageVector::GetPaletteSetID( UOdysseyPalette* iPalette )
 
     if( animation )
     {
-        for( int32 i = 0; i < OdysseyAnimationEditor::GetPalettes(*animation).Num(); i++ )
+        const TArray<UOdysseyPaletteSet*>& paletteSets = OdysseyAnimationEditor::GetPalettes(*animation);
+        for( int32 i = 0; i < paletteSets.Num(); i++ )
         {
-            if( OdysseyAnimationEditor::GetPalettes(*animation)[i]->mPalette == iPalette )
+            if( paletteSets[i]->mPalette == iPalette )
             {
-                return OdysseyAnimationEditor::GetPalettes(*animation)[i]->mSet;
+                return paletteSets[i]->mSet;
             }
         }
     }
