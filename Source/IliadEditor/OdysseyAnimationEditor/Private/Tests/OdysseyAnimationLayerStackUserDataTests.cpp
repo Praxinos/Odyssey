@@ -106,6 +106,12 @@ bool FOdysseyAnimationEditorDataRenderingSourceTest::RunTest(const FString& Para
     using namespace Odyssey::AnimationLayerStackUserDataTests;
 
     TestNull(TEXT("No editor data without animation"), UOdysseyAnimationLayerStackUserData::FindOrCreate(nullptr));
+
+    const FProperty* AssetUserDataProperty = FindFProperty<FProperty>(UOdysseyAnimation::StaticClass(), TEXT("AssetUserData"));
+    if (!TestNotNull(TEXT("Animation asset user data property"), AssetUserDataProperty))
+        return false;
+
+    TestFalse(TEXT("Editor data cannot be removed from the details panel"), AssetUserDataProperty->HasAnyPropertyFlags(CPF_Edit));
     TestNull(TEXT("No layer stack without animation"), UOdysseyAnimationLayerStackUserData::GetLayerStack(nullptr));
 
     TStrongObjectPtr<UOdysseyAnimation> Animation(NewObject<UOdysseyAnimation>(GetTransientPackage()));

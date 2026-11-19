@@ -224,8 +224,11 @@ protected:
     UPROPERTY()
     TArray<FOdysseyAnimationFrame> Frames;
 
-    /** Asset user data attached to this animation, among which its editor-only editable content */
-    UPROPERTY(EditAnywhere, AdvancedDisplay, Instanced, Category="Odyssey|Animation")
+    /**
+     * Asset user data attached to this animation, among which its editor-only editable content.
+     * Not editable from the details panel: removing the editor content there would silently lose the drawing.
+     */
+    UPROPERTY(Instanced)
     TArray<TObjectPtr<UAssetUserData>> AssetUserData;
 
 #if WITH_EDITORONLY_DATA
