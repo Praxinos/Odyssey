@@ -161,7 +161,7 @@ public:
     /** Construct this widget */
     void Construct(const FArguments& InArgs);
 
-    virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime);
+    virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
     virtual FReply OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& iMouseEvent) override;
     virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& iMouseEvent) override;
     virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& iMouseEvent) override;
@@ -177,6 +177,25 @@ public:
     {
         return CommandList;
     }
+
+    /** The storyboard viewports the level editor currently shows, in its viewport order, by tab then slot */
+    static TArray<TSharedRef<SStoryboardLevelViewport>> GetOpenViewports();
+
+    /** The storyboard viewport whose level viewport is the level editor's active viewport, or null when the active viewport is not one */
+    static TSharedPtr<SStoryboardLevelViewport> GetActiveViewport();
+
+    /** The level editor's active viewport, storyboard or not, or null when the level editor is not open */
+    static TSharedPtr<SLevelViewport> GetActiveLevelViewport();
+
+    /** The registered viewport type InLevelViewport has within its layout, or None when it is not in a layout */
+    static FName GetLevelViewportType( const TSharedPtr<SLevelViewport>& InLevelViewport );
+
+    /**
+     * Switch InLevelViewport's slot in its layout to the registered viewport type InType, which rebuilds the layout.
+     * Returns false when the viewport is not in a layout or no registered type of that name has an activation command.
+     */
+    static bool SetLevelViewportType( const TSharedPtr<SLevelViewport>& InLevelViewport, const FName InType );
+
 private:
 
     /** Set up this viewport to operate on its sequencer */

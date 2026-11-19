@@ -11,6 +11,7 @@
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Input/SCheckBox.h"
 #include "Styles/EposSequenceEditorStyle.h"
+#include "Templates/Function.h"
 #include "Widgets/Input/SSpinBox.h"
 #include "Widgets/Colors/SColorPicker.h"
 #include "FilmOverlayToolkit2.h"
@@ -23,39 +24,45 @@ DECLARE_DELEGATE_OneParam(FOnColorPicked, const FLinearColor&);
 
 namespace WidgetHelpers
 {
-    TSharedRef<SWidget> CreateColorWidget(FLinearColor* Color, FOnColorPicked OnColorPicked = FOnColorPicked())
+    TSharedRef<SWidget> CreateColorWidget( TFunction<FLinearColor()> InGetColor, TFunction<void( const FLinearColor& )> InSetColor )
     {
-        auto GetValue = [=]{
-            return *Color;
-        };
+        auto OnGetMenuContent = [InGetColor, InSetColor]() -> TSharedRef<SWidget>
+            {
+                // Open a color picker
+                return SNew( SColorPicker )
+                    .TargetColorAttribute_Lambda( TFunction<FLinearColor()>( InGetColor ) )
+                    .UseAlpha( true )
+                    .DisplayInlineVersion( true )
+                    .OnColorCommitted_Lambda( InSetColor );
+            };
 
-        auto SetValue = [=](FLinearColor NewColor){
-            *Color = NewColor;
-            OnColorPicked.ExecuteIfBound(NewColor);
-        };
-
-        auto OnGetMenuContent = [=]() -> TSharedRef<SWidget> {
-            // Open a color picker
-            return SNew(SColorPicker)
-            .TargetColorAttribute_Lambda(GetValue)
-            .UseAlpha(true)
-            .DisplayInlineVersion(true)
-            .OnColorCommitted_Lambda(SetValue);
-        };
-
-        return SNew(SComboButton)
-            .ContentPadding(0)
-            .HasDownArrow(false)
-            .ButtonStyle(FAppStyle::Get(), "Sequencer.AnimationOutliner.ColorStrip")
-            .OnGetMenuContent_Lambda(OnGetMenuContent)
-            .CollapseMenuOnParentFocus(true)
+        return SNew( SComboButton )
+            .ContentPadding( 0 )
+            .HasDownArrow( false )
+            .ButtonStyle( FAppStyle::Get(), "Sequencer.AnimationOutliner.ColorStrip" )
+            .OnGetMenuContent_Lambda( OnGetMenuContent )
+            .CollapseMenuOnParentFocus( true )
             .ButtonContent()
             [
-                SNew(SColorBlock)
-                .Color_Lambda(GetValue)
-                .ShowBackgroundForAlpha(true)
-                .Size(FVector2D(10.0f, 10.0f))
+                SNew( SColorBlock )
+                .Color_Lambda( TFunction<FLinearColor()>( InGetColor ) )
+                .ShowBackgroundForAlpha( true )
+                .Size( FVector2D( 10.0f, 10.0f ) )
             ];
+    }
+
+    TSharedRef<SWidget> CreateColorWidget( FLinearColor* Color, FOnColorPicked OnColorPicked = FOnColorPicked() )
+    {
+        return CreateColorWidget(
+            [Color]
+            {
+                return *Color;
+            },
+            [Color, OnColorPicked]( const FLinearColor& NewColor )
+            {
+                *Color = NewColor;
+                OnColorPicked.ExecuteIfBound( NewColor );
+            } );
     }
 
     template<typename T>
@@ -367,6 +374,16 @@ struct FFilmOverlay_SafeFrame : IFilmOverlay
             ];
     }
 
+    int32 GetSizePercentage() const
+    {
+        return SizePercentage;
+    }
+
+    void SetSizePercentage( const int32 InSizePercentage )
+    {
+        SizePercentage = InSizePercentage;
+    }
+
 private:
     int32 SizePercentage;
     FText DisplayName;
@@ -377,9 +394,9 @@ struct FFilmOverlay_LetterBox : IFilmOverlay
 {
     FFilmOverlay_LetterBox()
     {
-        Ratio1 = 2.35f;
-        Ratio2 = 1.f;
-        Color = FLinearColor(0.f, 0.f, 0.f, .5f);
+        RatioWidth = 2.35f;
+        RatioHeight = 1.f;
+        Tint = FLinearColor( 0.f, 0.f, 0.f, .5f );
     }
 
     FText GetDisplayName() const { return LOCTEXT("LetterboxMask", "Letterbox Mask"); }
@@ -391,7 +408,7 @@ struct FFilmOverlay_LetterBox : IFilmOverlay
     {
         const FSlateBrush* Brush = FAppStyle::Get().GetBrush("WhiteBrush");
 
-        const float DesiredRatio = Ratio1 / Ratio2;
+        const float DesiredRatio = RatioWidth / RatioHeight;
         const float CurrentRatio = AllottedGeometry.GetLocalSize().X / AllottedGeometry.GetLocalSize().Y;
 
         if (CurrentRatio > DesiredRatio)
@@ -404,7 +421,7 @@ struct FFilmOverlay_LetterBox : IFilmOverlay
                 AllottedGeometry.ToPaintGeometry(LetterBoxSize, FSlateLayoutTransform(FVector2D(0.f, 0.f))),
                 Brush,
                 ESlateDrawEffect::None,
-                Color
+                Tint
                 );
 
             FSlateDrawElement::MakeBox(
@@ -413,7 +430,7 @@ struct FFilmOverlay_LetterBox : IFilmOverlay
                 AllottedGeometry.ToPaintGeometry(LetterBoxSize, FSlateLayoutTransform(FVector2D(AllottedGeometry.GetLocalSize().X - LetterBoxSize.X, 0.f))),
                 Brush,
                 ESlateDrawEffect::None,
-                Color
+                Tint
                 );
 
         }
@@ -428,7 +445,7 @@ struct FFilmOverlay_LetterBox : IFilmOverlay
                 AllottedGeometry.ToPaintGeometry(LetterBoxSize, FSlateLayoutTransform(FVector2D(0.f, 0.f))),
                 Brush,
                 ESlateDrawEffect::None,
-                Color
+                Tint
                 );
 
             FSlateDrawElement::MakeBox(
@@ -437,7 +454,7 @@ struct FFilmOverlay_LetterBox : IFilmOverlay
                 AllottedGeometry.ToPaintGeometry(LetterBoxSize, FSlateLayoutTransform(FVector2D(0.f, AllottedGeometry.GetLocalSize().Y - LetterBoxSize.Y))),
                 Brush,
                 ESlateDrawEffect::None,
-                Color
+                Tint
                 );
         }
     }
@@ -453,7 +470,7 @@ struct FFilmOverlay_LetterBox : IFilmOverlay
 
                 + SHorizontalBox::Slot()
                 [
-                    WidgetHelpers::CreateSpinBox<float>(&Ratio1, 0.1f, 35)
+                    WidgetHelpers::CreateSpinBox<float>( &RatioWidth, UE::EposSequenceEditor::FilmOverlays::MinLetterboxRatioTerm, UE::EposSequenceEditor::FilmOverlays::MaxLetterboxRatioTerm )
                 ]
 
                 + SHorizontalBox::Slot()
@@ -466,7 +483,7 @@ struct FFilmOverlay_LetterBox : IFilmOverlay
 
                 + SHorizontalBox::Slot()
                 [
-                    WidgetHelpers::CreateSpinBox<float>(&Ratio2, 0.1f, 35)
+                    WidgetHelpers::CreateSpinBox<float>( &RatioHeight, UE::EposSequenceEditor::FilmOverlays::MinLetterboxRatioTerm, UE::EposSequenceEditor::FilmOverlays::MaxLetterboxRatioTerm )
                 ]
             ]
 
@@ -474,19 +491,112 @@ struct FFilmOverlay_LetterBox : IFilmOverlay
             .Padding(FMargin(0.f, 1.f, 0.f, 0.f))
             .AutoHeight()
             [
-                WidgetHelpers::CreateColorWidget(&Color)
+                WidgetHelpers::CreateColorWidget(&Tint)
             ];
     }
 
+    FVector2D GetAspectRatio() const
+    {
+        return FVector2D( RatioWidth, RatioHeight );
+    }
+
+    void SetAspectRatio( const float InWidth, const float InHeight )
+    {
+        RatioWidth = InWidth;
+        RatioHeight = InHeight;
+    }
+
 private:
-    float Ratio1;
-    float Ratio2;
-    FLinearColor Color;
+    float RatioWidth;
+    float RatioHeight;
 };
+
+namespace UE::EposSequenceEditor::FilmOverlays
+{
+
+    /** The default safe frames by the name RegisterDefaultOverlays registered them under, dead once the toolkit drops them */
+    static TMap<FName, TWeakPtr<FFilmOverlay_SafeFrame>> DefaultSafeFrames;
+
+    /** The default letterbox, dead once the toolkit drops it */
+    static TWeakPtr<FFilmOverlay_LetterBox> DefaultLetterBox;
+
+    /** The default safe frame registered under InName, or null when another overlay or none is registered there */
+    static TSharedPtr<FFilmOverlay_SafeFrame> FindRegisteredSafeFrame( const FName InName )
+    {
+        const TSharedPtr<FFilmOverlay_SafeFrame> SafeFrame = DefaultSafeFrames.FindRef( InName ).Pin();
+        return SafeFrame.IsValid() && UFilmOverlayToolkit2::GetToggleableFilmOverlays().FindRef( InName ) == SafeFrame ? SafeFrame : nullptr;
+    }
+
+    /** The default letterbox registered under its name, or null when another overlay or none is registered there */
+    static TSharedPtr<FFilmOverlay_LetterBox> FindRegisteredLetterBox()
+    {
+        const TSharedPtr<FFilmOverlay_LetterBox> LetterBox = DefaultLetterBox.Pin();
+        return LetterBox.IsValid() && UFilmOverlayToolkit2::GetToggleableFilmOverlays().FindRef( LetterBoxName ) == LetterBox ? LetterBox : nullptr;
+    }
+
+    TOptional<int32> GetSafeFrameSize( const FName InName )
+    {
+        if( const TSharedPtr<FFilmOverlay_SafeFrame> SafeFrame = FindRegisteredSafeFrame( InName ) )
+        {
+            return SafeFrame->GetSizePercentage();
+        }
+        return {};
+    }
+
+    bool SetSafeFrameSize( const FName InName, const int32 InSizePercentage )
+    {
+        if( const TSharedPtr<FFilmOverlay_SafeFrame> SafeFrame = FindRegisteredSafeFrame( InName ) )
+        {
+            SafeFrame->SetSizePercentage( InSizePercentage );
+            return true;
+        }
+        return false;
+    }
+
+    TOptional<FVector2D> GetLetterboxAspectRatio()
+    {
+        if( const TSharedPtr<FFilmOverlay_LetterBox> LetterBox = FindRegisteredLetterBox() )
+        {
+            return LetterBox->GetAspectRatio();
+        }
+        return {};
+    }
+
+    bool SetLetterboxAspectRatio( const float InWidth, const float InHeight )
+    {
+        if( const TSharedPtr<FFilmOverlay_LetterBox> LetterBox = FindRegisteredLetterBox() )
+        {
+            LetterBox->SetAspectRatio( InWidth, InHeight );
+            return true;
+        }
+        return false;
+    }
+
+} // namespace UE::EposSequenceEditor::FilmOverlays
 
 void SFilmOverlay::Construct(const FArguments& InArgs)
 {
     FilmOverlays = InArgs._FilmOverlays;
+}
+
+void SFilmOverlay::SetPrimaryFilmOverlay( const FName InFilmOverlay )
+{
+    PrimaryFilmOverlay = InFilmOverlay;
+    if( const TSharedPtr<IFilmOverlay> Overlay = UFilmOverlayToolkit2::GetPrimaryFilmOverlays().FindRef( InFilmOverlay ) )
+    {
+        Overlay->SetTint( PrimaryTint );
+    }
+}
+
+void SFilmOverlay::SetPrimaryTint( const FLinearColor& InTint )
+{
+    PrimaryTint = InTint;
+    SetPrimaryFilmOverlay( PrimaryFilmOverlay );
+}
+
+const FLinearColor& SFilmOverlay::GetPrimaryTint() const
+{
+    return PrimaryTint;
 }
 
 int32 SFilmOverlay::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
@@ -518,10 +628,12 @@ int32 SFilmOverlay::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeo
 // static
 void SFilmOverlayOptions::RegisterDefaultOverlays()
 {
+    using namespace UE::EposSequenceEditor::FilmOverlays;
+
     auto& ExistingPrimaryOverlays = UFilmOverlayToolkit2::GetPrimaryFilmOverlays();
 
 #define PREPARE_PRIMARY_OVERLAY(Name, Construct) { TSharedPtr<IFilmOverlay> Overlay = ExistingPrimaryOverlays.FindRef(Name); \
-    if (!Overlay) { UFilmOverlayToolkit2::RegisterPrimaryFilmOverlay(Name, Construct); }}
+    if (!Overlay.IsValid()) { UFilmOverlayToolkit2::RegisterPrimaryFilmOverlay(Name, Construct); }}
 
     PREPARE_PRIMARY_OVERLAY( NAME_None, MakeShared<FFilmOverlay_None>() );
     PREPARE_PRIMARY_OVERLAY( "Grid3x3", MakeShared<FFilmOverlay_Grid>( 3, 3 ) );
@@ -531,23 +643,32 @@ void SFilmOverlayOptions::RegisterDefaultOverlays()
 
 #undef PREPARE_PRIMARY_OVERLAY
 
-    auto& ExistingToggleableOverlays = UFilmOverlayToolkit2::GetToggleableFilmOverlays();
+    // The default frames are also kept by type so scripts can reach the settings their widgets edit
+    const TMap<FName, TSharedPtr<IFilmOverlay>>& ExistingToggleableOverlays = UFilmOverlayToolkit2::GetToggleableFilmOverlays();
 
-#define PREPARE_TOGGLEABLE_OVERLAY(Name, Construct) { TSharedPtr<IFilmOverlay> Overlay = ExistingToggleableOverlays.FindRef(Name); \
-    if (!Overlay) { UFilmOverlayToolkit2::RegisterToggleableFilmOverlay(Name, Construct); }}
+    auto RegisterSafeFrame = [&ExistingToggleableOverlays]( const FName InName, const FText& InDisplayName, const int32 InSizePercentage, const FLinearColor& InColor )
+        {
+            if( !ExistingToggleableOverlays.FindRef( InName ).IsValid() )
+            {
+                const TSharedRef<FFilmOverlay_SafeFrame> SafeFrame = MakeShared<FFilmOverlay_SafeFrame>( InDisplayName, InSizePercentage, InColor );
+                DefaultSafeFrames.Add( InName, SafeFrame );
+                UFilmOverlayToolkit2::RegisterToggleableFilmOverlay( InName, SafeFrame );
+            }
+        };
+    RegisterSafeFrame( "ActionSafe", LOCTEXT( "ActionSafe", "Action Safe" ), 95, FLinearColor::Red );
+    RegisterSafeFrame( "TitleSafe", LOCTEXT( "TitleSafe", "Title Safe" ), 90, FLinearColor::Yellow );
+    RegisterSafeFrame( "CustomSafe", LOCTEXT( "CustomSafe", "Custom Safe" ), 85, FLinearColor::Green );
 
-    PREPARE_TOGGLEABLE_OVERLAY( "ActionSafe", MakeShared<FFilmOverlay_SafeFrame>( LOCTEXT( "ActionSafe", "Action Safe" ), 95.f, FLinearColor::Red ) );
-    PREPARE_TOGGLEABLE_OVERLAY( "TitleSafe", MakeShared<FFilmOverlay_SafeFrame>( LOCTEXT( "TitleSafe", "Title Safe" ), 90.f, FLinearColor::Yellow ) );
-    PREPARE_TOGGLEABLE_OVERLAY( "CustomSafe", MakeShared<FFilmOverlay_SafeFrame>( LOCTEXT( "CustomSafe", "Custom Safe" ), 85.f, FLinearColor::Green ) );
-    PREPARE_TOGGLEABLE_OVERLAY( "LetterBox", MakeShared<FFilmOverlay_LetterBox>() );
-
-#undef PREPARE_TOGGLEABLE_OVERLAY
+    if( !ExistingToggleableOverlays.FindRef( LetterBoxName ).IsValid() )
+    {
+        const TSharedRef<FFilmOverlay_LetterBox> LetterBox = MakeShared<FFilmOverlay_LetterBox>();
+        DefaultLetterBox = LetterBox;
+        UFilmOverlayToolkit2::RegisterToggleableFilmOverlay( LetterBoxName, LetterBox );
+    }
 }
 
 void SFilmOverlayOptions::Construct( const FArguments& InArgs, TSharedPtr<SFilmOverlay> InFilmOverlay )
 {
-    PrimaryColorTint = FLinearColor( 1.f, 1.f, 1.f, .5f );
-
     RegisterDefaultOverlays();
 
     // used to choose between creating the whole button + menu widget, or just the menu widget
@@ -585,13 +706,13 @@ void SFilmOverlayOptions::Construct( const FArguments& InArgs, TSharedPtr<SFilmO
         MainWidget = GetMenuContent();
     }
 
-    OverlayWidget = InFilmOverlay;
-    if( TSharedPtr<SFilmOverlay> OverlayWidgetPinned = OverlayWidget.Pin() )
+    WeakOverlayWidget = InFilmOverlay;
+    if( TSharedPtr<SFilmOverlay> OverlayWidget = WeakOverlayWidget.Pin() )
     {
         // CurrentPrimaryOverlay (and therefore Thumbnail) resets for non button version of this widget every time we create it, so let's keep it up to date
         if( !bIsComboButton )
         {
-            FName WidgetPrimaryOverlay = OverlayWidgetPinned->GetPrimaryFilmOverlay();
+            FName WidgetPrimaryOverlay = OverlayWidget->GetPrimaryFilmOverlay();
 
             if( !WidgetPrimaryOverlay.IsNone() )
             {
@@ -608,15 +729,15 @@ void SFilmOverlayOptions::Construct( const FArguments& InArgs, TSharedPtr<SFilmO
 
 FLinearColor SFilmOverlayOptions::GetPrimaryColorTint() const
 {
-    return PrimaryColorTint;
+    const TSharedPtr<SFilmOverlay> OverlayWidget = WeakOverlayWidget.Pin();
+    return OverlayWidget.IsValid() ? OverlayWidget->GetPrimaryTint() : IFilmOverlay::DefaultTint;
 }
 
-void SFilmOverlayOptions::OnPrimaryColorTintChanged(const FLinearColor& Tint)
+void SFilmOverlayOptions::SetPrimaryColorTint( const FLinearColor& InTint )
 {
-    IFilmOverlay* Overlay = GetPrimaryFilmOverlay();
-    if (Overlay)
+    if( const TSharedPtr<SFilmOverlay> OverlayWidget = WeakOverlayWidget.Pin() )
     {
-        Overlay->SetTint(PrimaryColorTint);
+        OverlayWidget->SetPrimaryTint( InTint );
     }
 }
 
@@ -663,7 +784,15 @@ TSharedRef<SWidget> SFilmOverlayOptions::GetMenuContent()
             + SHorizontalBox::Slot()
             .VAlign(VAlign_Center)
             [
-                WidgetHelpers::CreateColorWidget(&PrimaryColorTint, FOnColorPicked::CreateRaw(this, &SFilmOverlayOptions::OnPrimaryColorTintChanged))
+                WidgetHelpers::CreateColorWidget(
+                    [this]
+                    {
+                        return GetPrimaryColorTint();
+                    },
+                    [this]( const FLinearColor& InTint )
+                    {
+                        SetPrimaryColorTint( InTint );
+                    } )
             ]
         ]
 
@@ -805,15 +934,9 @@ TSharedRef<SWidget> SFilmOverlayOptions::ConstructToggleableOverlaysMenu()
 
 FReply SFilmOverlayOptions::SetPrimaryFilmOverlay(FName InName)
 {
-    if( TSharedPtr<SFilmOverlay> OverlayWidgetPinned = OverlayWidget.Pin() )
+    if( TSharedPtr<SFilmOverlay> OverlayWidget = WeakOverlayWidget.Pin() )
     {
-        OverlayWidgetPinned->SetPrimaryFilmOverlay( InName );
-    }
-
-    IFilmOverlay* Overlay = GetPrimaryFilmOverlay();
-    if (Overlay)
-    {
-        Overlay->SetTint(PrimaryColorTint);
+        OverlayWidget->SetPrimaryFilmOverlay( InName );
     }
     return FReply::Unhandled();
 }
@@ -831,7 +954,7 @@ FReply SFilmOverlayOptions::ToggleFilmOverlay( FName InName )
 
 TSharedPtr<SFilmOverlay> SFilmOverlayOptions::GetFilmOverlayWidget() const
 {
-    return OverlayWidget.Pin();
+    return WeakOverlayWidget.Pin();
 }
 
 TArray<IFilmOverlay*> SFilmOverlayOptions::GetActiveFilmOverlays() const

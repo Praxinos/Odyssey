@@ -53,7 +53,6 @@ public class OdysseyLayerStackEditor : ModuleRules
             new string[] {
                 Path.Combine(ModuleDirectory, "Public", "Widgets"),
                 Path.Combine(ModuleDirectory, "Public", "Commands"),
-                Path.Combine(ModuleDirectory, "Public", "Controllers"),
                 Path.Combine(ModuleDirectory, "Public", "DragDropOperations"),
                 Path.Combine(ModuleDirectory, "Public", "Shortcuts"),
                 Path.Combine(ModuleDirectory, "Public", "Widgets"),
@@ -64,7 +63,6 @@ public class OdysseyLayerStackEditor : ModuleRules
             new string[] {
                 Path.Combine(ModuleDirectory, "Private", "Widgets"),
                 Path.Combine(ModuleDirectory, "Private", "Commands"),
-                Path.Combine(ModuleDirectory, "Private", "Controllers"),
                 Path.Combine(ModuleDirectory, "Private", "DragDropOperations"),
                 Path.Combine(ModuleDirectory, "Private", "Shortcuts"),
                 Path.Combine(ModuleDirectory, "Private", "Widgets"),

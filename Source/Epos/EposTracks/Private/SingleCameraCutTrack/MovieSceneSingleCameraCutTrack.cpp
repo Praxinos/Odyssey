@@ -61,7 +61,7 @@ UMovieSceneSingleCameraCutSection* UMovieSceneSingleCameraCutTrack::AddNewSingle
         NewSection->SetRange(TRange<FFrameNumber>(StartTime, NewSectionEndTime));
         NewSection->SetCameraBindingID(CameraBindingID);
 
-        AddSection(*NewSection);
+        UMovieSceneTrack::AddSection(*NewSection);
     }
 
     // When a new CameraCut is added, sort all CameraCuts to ensure they are in the correct order
@@ -158,6 +158,7 @@ void UMovieSceneSingleCameraCutTrack::RemoveSectionAt(int32 SectionIndex)
 
 void UMovieSceneSingleCameraCutTrack::RemoveAllAnimationData()
 {
+    NotifyAllSectionsRemoved();
     Sections.Empty();
 }
 

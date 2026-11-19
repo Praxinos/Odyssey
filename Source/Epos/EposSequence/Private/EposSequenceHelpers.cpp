@@ -1236,7 +1236,7 @@ ShotSequenceHelpers::FindOrCreateMaterialParameterTrackAndSections( IMovieSceneP
 
         UMovieSceneSection* section = result.mTrack->CreateNewSection();
         check( result.mTrack->IsEmpty() );
-        result.mTrack->AddSection( *section );
+        result.mTrack->UMovieSceneTrack::AddSection( *section );
 
         section->SetRange( TRange<FFrameNumber>::All() );
 

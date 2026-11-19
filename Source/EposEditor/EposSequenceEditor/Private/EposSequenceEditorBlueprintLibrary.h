@@ -355,7 +355,8 @@ public:
     static UEposMovieSceneSequence* GetRootEposSequence();
 
     /**
-     * Get the currently focused/viewed epos sequence asset if there is a hierarchy of sequences.
+     * Get the focused epos sequence, which may be a subsequence of the opened root sequence.
+     * Returns nullptr when no Sequencer is open or the focused sequence is not an epos sequence.
      */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static UEposMovieSceneSequence* GetFocusedEposSequence();
@@ -509,7 +510,8 @@ public:
     static FMovieSceneSequencePlaybackParams GetLocalPosition( EMovieSceneTimeUnit TimeUnit = EMovieSceneTimeUnit::DisplayRate );
 
     /**
-     * Set playback speed of the current epos sequence
+     * Set playback speed of the current epos sequence. Negative speeds play in reverse; zero and non-finite
+     * speeds raise an error and leave the speed unchanged.
      */
     UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static void SetPlaybackSpeed( float NewPlaybackSpeed );
@@ -554,11 +556,11 @@ public:
 
 public:
 
-    /** Gets the currently selected tracks. */
+    /** Gets the currently selected tracks, or an empty array when no Sequencer is open. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static TArray<UMovieSceneTrack*> GetSelectedTracks();
 
-    /** Gets the currently selected sections. */
+    /** Gets the currently selected sections, or an empty array when no Sequencer is open. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static TArray<UMovieSceneSection*> GetSelectedSections();
 
@@ -574,23 +576,31 @@ public:
     UFUNCTION( BlueprintPure, Category = "Odyssey|Storyboard Editor" )
     static TArray<int32> GetSelectedKeys( const FSequencerChannelProxy& ChannelProxy );
 
-    /** Gets the currently selected folders. */
+    /** Gets selected folders, including parent folders of selected tracks or bindings. Returns an empty array when no Sequencer is open. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static TArray<UMovieSceneFolder*> GetSelectedFolders();
 
-    /** Gets the currently selected object bindings */
+    /** Gets only folders explicitly selected in the outliner. Returns an empty array when no Sequencer is open. */
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
+    static TArray<UMovieSceneFolder*> GetDirectlySelectedFolders();
+
+    /** Gets the currently selected object bindings for the focused sequence. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static TArray<FMovieSceneBindingProxy> GetSelectedBindings();
 
-    /** Select tracks */
+    /** Gets the currently selected marked frames, as indices into the focused movie scene's marked frames array. */
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Storyboard Editor" )
+    static TArray<int32> GetSelectedMarkedFrames();
+
+    /** Adds tracks from the focused sequence to the selection without clearing it. Raises an error when no Sequencer is open, or without selecting anything when any track is invalid or foreign. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SelectTracks(const TArray<UMovieSceneTrack*>& Tracks);
 
-    /** Select sections */
+    /** Adds sections from the focused sequence to the selection without clearing it. Raises an error when no Sequencer is open, or without selecting anything when any section is invalid or foreign. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SelectSections(const TArray<UMovieSceneSection*>& Sections);
 
-    /** Select channels */
+    /** Adds channels to the selection without clearing it. A channel name matches a channel of the section or the label of the outliner node that contains it. Raises an error when no Sequencer is open, or without selecting anything when any section is foreign or any name matches nothing. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SelectChannels(const TArray<FSequencerChannelProxy>& Channels);
 
@@ -598,11 +608,11 @@ public:
     UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static void SelectKeys( const FSequencerChannelProxy& Channel, const TArray<int32>& Indices );
 
-    /** Select folders */
+    /** Adds folders from the focused sequence to the selection without clearing it. Raises an error when no Sequencer is open, or without selecting anything when any folder is invalid or foreign. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SelectFolders(const TArray<UMovieSceneFolder*>& Folders);
 
-    /** Select bindings */
+    /** Adds bindings of the focused sequence to the selection without clearing it. Raises an error when no Sequencer is open, or without selecting anything when any binding is invalid or foreign. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SelectBindings(const TArray<FMovieSceneBindingProxy>& ObjectBindings);
 
@@ -610,9 +620,25 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void DeselectBindings(const TArray<FMovieSceneBindingProxy>& ObjectBindings);
 
-    /** Empties the current selection. */
+    /** Select marked frames by index into the focused movie scene's marked frames array. Adds to the current marked frame selection. */
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
+    static void SelectMarkedFrames( const TArray<int32>& MarkedFrameIndices );
+
+    /** Deselect marked frames by index into the focused movie scene's marked frames array. */
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
+    static void DeselectMarkedFrames( const TArray<int32>& MarkedFrameIndices );
+
+    /** Empties the current selection. Does nothing when no Sequencer is open. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void EmptySelection();
+
+    /** Empties the marked frame selection, leaving all other selection intact. */
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
+    static void EmptyMarkedFrameSelection();
+
+    /** Empties the key selection, leaving all other selection intact. */
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
+    static void EmptyKeySelection();
 
     /** Set the selection range start frame. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
@@ -630,6 +656,14 @@ public:
     UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static int32 GetSelectionRangeEnd();
 
+    ///** Whether the focused sequence has a selection range. When it does not, the selection range start and end are both 0. */
+    //UFUNCTION( meta = ( PythonCallable, AICallable, AIAccessMode = "Read" ) )
+    //static bool HasSelectionRange();
+
+    ///** Clear the focused sequence's selection range as an undoable step, as Clear Selection Range in the time slider does, including on a read-only sequence. Raises when no Sequencer is open. */
+    //UFUNCTION( meta = ( PythonCallable, AICallable, AIAccessMode = "Write" ) )
+    //static void ClearSelectionRange();
+
 public:
 
     /** Refresh Sequencer UI on next tick */
@@ -639,6 +673,17 @@ public:
     /** Force sequencer evaluation and UI update immediately */
     UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static void ForceUpdate();
+
+    /**
+     * Restore all pre-animated state captured by the current Sequencer, undoing
+     * transient evaluation side-effects so the affected objects are no longer
+     * referenced by the evaluation. Editor sequences default to KeepState, so
+     * closing them leaves things like AnimMixer AnimNext injections active;
+     * calling this first releases those references (useful before deleting a
+     * sequence, e.g. in automated tests, so ForceDeleteObjects can unload it).
+     */
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
+    static void RestorePreAnimatedState();
 
     /** Get the object bound to the given binding ID with the current Epos Sequence Editor */
     UFUNCTION(BlueprintPure, Category="Odyssey|Storyboard Editor")
@@ -681,7 +726,7 @@ public:
     UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static bool IsTrackFilterEnabled(const FText& TrackFilterName);
 
-    /** Gets whether the specified track filter is on/off */
+    /** Checks active state by the filter's localized display name. Unknown names and a closed Sequencer return false. */
     UFUNCTION( BlueprintPure, Category = "Odyssey|Storyboard Editor" )
     static bool IsTrackFilterActive( const FText& TrackFilterName );
 
@@ -694,13 +739,21 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SetTrackFilterEnabled(const FText& TrackFilterName, bool bEnabled);
 
-    /** Sets the specified track filter to be on or off */
+    /** Sets the specified track filter to be on or off by display name, ignoring case. Raises an error when no Sequencer is open or no filter has that name. */
     UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static void SetTrackFilterActive( const FText& TrackFilterName, bool bActive );
 
-    /** Gets all the available track filter names */
+    /** Gets available localized filter display names, or an empty array when no Sequencer is open. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static TArray<FText> GetTrackFilterNames();
+
+    ///** Gets the filter bar's search text. Raises an error when no Sequencer is open. */
+    //UFUNCTION( meta = ( PythonCallable, AICallable, AIAccessMode = "Read" ) )
+    //static FString GetTrackFilterText();
+
+    ///** Sets the filter bar's search text, as typing in the search box does. An empty string clears it. Raises an error when no Sequencer is open. */
+    //UFUNCTION( meta = ( PythonCallable, AICallable, AIAccessMode = "Write" ) )
+    //static void SetTrackFilterText( const FString& FilterText );
 
 public:
     UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::HasCustomColorForChannel" )
@@ -777,7 +830,7 @@ public:
      */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor",
     meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::DeleteColorForChannels"))
-    static void DeleteColorForChannels(UClass* Class, FString& Identifier);
+    static void DeleteColorForChannels(UClass* Class, const FString& Identifier);
 
 public:
 
@@ -792,4 +845,15 @@ public:
      * NOTE: Only to be called by EposSequenceEditor::Construct.
      */
     static void SetSequencer(TSharedRef<ISequencer> InSequencer);
+
+    /**
+     * Return the editor's currently-tracked sequencer, or nullptr if no
+     * epos sequence is open. Counterpart to SetSequencer. Used by
+     * scripting modules that need to drive the active ISequencer (e.g.
+     * to evaluate the sequence for bone matching, root-motion baking).
+     *
+     * Not a UFUNCTION because ISequencer is not a Blueprint-exposed type;
+     * intended for native C++ scripting callers.
+     */
+    static TSharedPtr<ISequencer> GetCurrentSequencer();
 };

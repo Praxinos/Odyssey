@@ -83,6 +83,7 @@ void FPreAnimatedCameraCutEditorTraits::RestorePreAnimatedValue(
 
     InKey->SetCinematicActorLock(nullptr);
     InKey->bLockedCameraView = false;
+    InKey->RemoveCameraRoll();
     InKey->UpdateViewForLockedActor();
     InKey->Invalidate();
 }
@@ -451,6 +452,7 @@ void FCameraCutEditorHandler::ReleaseCameraCutForViewport(
     // Actually release control.
     ViewportClient.SetCinematicActorLock(nullptr);
     ViewportClient.bLockedCameraView = false;
+    ViewportClient.RemoveCameraRoll();
     ViewportClient.UpdateViewForLockedActor();
     ViewportClient.Invalidate();
 }

@@ -9,8 +9,11 @@
 #include "Filters/ISequencerTrackFilters.h"
 #include "IKeyArea.h"
 #include "ISequencer.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "EposSequenceEditorScriptingAccess.h"
 #include "Modules/ModuleManager.h"
 #include "MovieSceneCommonHelpers.h"
+#include "MovieSceneFolder.h"
 #include "MovieSceneSequencePlayer.h"
 #include "MovieSceneSection.h"
 #include "MovieSceneTimeHelpers.h"
@@ -48,6 +51,8 @@ namespace
 {
     static TWeakPtr<ISequencer> CurrentSequencer;
 }
+
+using UE::EposSequenceEditor::Private::RaiseScriptingError;
 
 //---
 
@@ -973,6 +978,13 @@ FMovieSceneSequencePlaybackParams UEposSequenceEditorBlueprintLibrary::GetLocalP
 
 void UEposSequenceEditorBlueprintLibrary::SetPlaybackSpeed( float NewPlaybackSpeed )
 {
+    // A negative speed plays in reverse; zero would never advance the playhead.
+    if( !FMath::IsFinite( NewPlaybackSpeed ) || NewPlaybackSpeed == 0.f )
+    {
+        RaiseScriptingError( TEXT( "Playback speed must be non-zero and finite" ) );
+        return;
+    }
+
     if( CurrentSequencer.IsValid() )
     {
         CurrentSequencer.Pin()->SetPlaybackSpeed( NewPlaybackSpeed );
@@ -1185,15 +1197,29 @@ TArray<UMovieSceneFolder*> UEposSequenceEditorBlueprintLibrary::GetSelectedFolde
     return OutSelectedFolders;
 }
 
+TArray<UMovieSceneFolder*> UEposSequenceEditorBlueprintLibrary::GetDirectlySelectedFolders()
+{
+    TArray<UMovieSceneFolder*> OutSelectedFolders;
+    if( const TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin() )
+    {
+        Sequencer->GetDirectlySelectedFolders( OutSelectedFolders );
+    }
+    return OutSelectedFolders;
+}
+
 TArray<FMovieSceneBindingProxy> UEposSequenceEditorBlueprintLibrary::GetSelectedBindings()
 {
     TArray<FMovieSceneBindingProxy> OutSelectedBindings;
     if( CurrentSequencer.IsValid() )
     {
+        UMovieSceneSequence* Sequence = CurrentSequencer.Pin()->GetFocusedMovieSceneSequence();
+        if( !Sequence )
+        {
+            return OutSelectedBindings;
+        }
+
         TArray<FGuid> OutSelectedGuids;
         CurrentSequencer.Pin()->GetSelectedObjects( OutSelectedGuids );
-
-        UMovieSceneSequence* Sequence = CurrentSequencer.Pin()->GetFocusedMovieSceneSequence();
 
         for( const FGuid& SelectedGuid : OutSelectedGuids )
         {
@@ -1203,42 +1229,154 @@ TArray<FMovieSceneBindingProxy> UEposSequenceEditorBlueprintLibrary::GetSelected
     return OutSelectedBindings;
 }
 
+static bool IsSelectableInFocusedMovieScene( const UObject* Object, const UMovieScene* FocusedMovieScene )
+{
+    return IsValid( Object ) && Object->GetTypedOuter<UMovieScene>() == FocusedMovieScene;
+}
+
+/** Reports a failure on the executing script frame. Does not unwind: callers must return immediately afterwards. */
+static void RaiseSelectionScriptError( const FString& Message )
+{
+    if( FFrame::GetThreadLocalTopStackFrame() )
+    {
+        UKismetSystemLibrary::RaiseScriptError( Message );
+    }
+    else
+    {
+        FFrame::KismetExecutionMessage( *Message, ELogVerbosity::Error );
+    }
+}
+
+/**
+ * Whether ISequencer::SelectByChannels would find a node for Name on the section: Name is the metadata name of
+ * one of the section's channels or the label of the outliner node that contains a channel group.
+ */
+static bool HasChannelNamed( ISequencer& Sequencer, const UMovieSceneSection* Section, FName Name )
+{
+    using namespace UE::Sequencer;
+
+    FSectionModelStorageExtension* SectionModelStorage = Sequencer.GetViewModel()->GetRootModel()->CastDynamic<FSectionModelStorageExtension>();
+    const TSharedPtr<FSectionModel> SectionModel = SectionModelStorage ? SectionModelStorage->FindModelForSection( Section ) : nullptr;
+    if( !SectionModel )
+    {
+        return false;
+    }
+
+    const TSharedPtr<FViewModel> TrackNode = SectionModel->GetParentSectionOwnerModel().AsModel();
+    for( const TViewModelPtr<FChannelGroupOutlinerModel>& KeyAreaNode : TrackNode->GetDescendantsOfType<FChannelGroupOutlinerModel>() )
+    {
+        const TViewModelPtr<IOutlinerExtension> Parent = KeyAreaNode->FindAncestorOfType<IOutlinerExtension>();
+        if( Parent && FName( *Parent->GetLabel().ToString() ) == Name )
+        {
+            return true;
+        }
+
+        for( const TSharedRef<IKeyArea>& KeyArea : KeyAreaNode->GetAllKeyAreas() )
+        {
+            const FMovieSceneChannelMetaData* MetaData = KeyArea->GetChannel().GetMetaData();
+            if( MetaData && MetaData->Name == Name )
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/** The focused movie scene that selection entries must belong to; raises and returns null when there is none. */
+static UMovieScene* GetSelectionMovieSceneOrRaise( const TSharedPtr<ISequencer>& Sequencer )
+{
+    if( !Sequencer.IsValid() )
+    {
+        RaiseSelectionScriptError( TEXT( "No epos sequence is open in Sequencer" ) );
+        return nullptr;
+    }
+    const UMovieSceneSequence* FocusedSequence = Sequencer->GetFocusedMovieSceneSequence();
+    UMovieScene* FocusedMovieScene = FocusedSequence ? FocusedSequence->GetMovieScene() : nullptr;
+    if( !FocusedMovieScene )
+    {
+        RaiseSelectionScriptError( TEXT( "Sequencer has no focused movie scene" ) );
+    }
+    return FocusedMovieScene;
+}
+
 void UEposSequenceEditorBlueprintLibrary::SelectTracks(const TArray<UMovieSceneTrack*>& Tracks)
 {
-    if (CurrentSequencer.IsValid())
+    const TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin();
+    const UMovieScene* FocusedMovieScene = GetSelectionMovieSceneOrRaise( Sequencer );
+    if( !FocusedMovieScene )
     {
-        for (UMovieSceneTrack* Track : Tracks)
+        return;
+    }
+
+    for( UMovieSceneTrack* Track : Tracks )
+    {
+        if( !IsSelectableInFocusedMovieScene( Track, FocusedMovieScene ) )
         {
-            CurrentSequencer.Pin()->SelectTrack(Track);
+            RaiseSelectionScriptError( TEXT( "All tracks must belong to the focused epos sequence" ) );
+            return;
         }
+    }
+
+    for( UMovieSceneTrack* Track : Tracks )
+    {
+        Sequencer->SelectTrack( Track );
     }
 }
 
 void UEposSequenceEditorBlueprintLibrary::SelectSections(const TArray<UMovieSceneSection*>& Sections)
 {
-    if (CurrentSequencer.IsValid())
+    const TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin();
+    const UMovieScene* FocusedMovieScene = GetSelectionMovieSceneOrRaise( Sequencer );
+    if( !FocusedMovieScene )
     {
-        for (UMovieSceneSection* Section : Sections)
+        return;
+    }
+
+    for( UMovieSceneSection* Section : Sections )
+    {
+        if( !IsSelectableInFocusedMovieScene( Section, FocusedMovieScene ) )
         {
-            CurrentSequencer.Pin()->SelectSection(Section);
+            RaiseSelectionScriptError( TEXT( "All sections must belong to the focused epos sequence" ) );
+            return;
         }
+    }
+
+    for( UMovieSceneSection* Section : Sections )
+    {
+        Sequencer->SelectSection( Section );
     }
 }
 
 void UEposSequenceEditorBlueprintLibrary::SelectChannels( const TArray<FSequencerChannelProxy>& Channels )
 {
-    if( CurrentSequencer.IsValid() )
+    const TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin();
+    const UMovieScene* FocusedMovieScene = GetSelectionMovieSceneOrRaise( Sequencer );
+    if( !FocusedMovieScene )
     {
-        for( FSequencerChannelProxy ChannelProxy : Channels )
+        return;
+    }
+
+    for( const FSequencerChannelProxy& ChannelProxy : Channels )
+    {
+        if( !IsSelectableInFocusedMovieScene( ChannelProxy.Section, FocusedMovieScene ) )
         {
-            UMovieSceneSection* Section = ChannelProxy.Section;
-            if( Section )
-            {
-                TArray<FName> ChannelNames;
-                ChannelNames.Add( ChannelProxy.ChannelName );
-                CurrentSequencer.Pin()->SelectByChannels( Section, ChannelNames, false, true );
-            }
+            RaiseSelectionScriptError( TEXT( "All channels must belong to the focused epos sequence" ) );
+            return;
         }
+
+        if( !HasChannelNamed( *Sequencer, ChannelProxy.Section, ChannelProxy.ChannelName ) )
+        {
+            RaiseSelectionScriptError( FString::Printf( TEXT( "Channel '%s' does not exist on its section" ), *ChannelProxy.ChannelName.ToString() ) );
+            return;
+        }
+    }
+
+    for( const FSequencerChannelProxy& ChannelProxy : Channels )
+    {
+        TArray<FName> ChannelNames;
+        ChannelNames.Add( ChannelProxy.ChannelName );
+        Sequencer->SelectByChannels( ChannelProxy.Section, ChannelNames, false, true );
     }
 }
 
@@ -1283,23 +1421,51 @@ void UEposSequenceEditorBlueprintLibrary::SelectKeys( const FSequencerChannelPro
 
 void UEposSequenceEditorBlueprintLibrary::SelectFolders(const TArray<UMovieSceneFolder*>& Folders)
 {
-    if (CurrentSequencer.IsValid())
+    const TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin();
+    const UMovieScene* FocusedMovieScene = GetSelectionMovieSceneOrRaise( Sequencer );
+    if( !FocusedMovieScene )
     {
-        for (UMovieSceneFolder* Folder : Folders)
+        return;
+    }
+
+    for( UMovieSceneFolder* Folder : Folders )
+    {
+        if( !IsSelectableInFocusedMovieScene( Folder, FocusedMovieScene ) )
         {
-            CurrentSequencer.Pin()->SelectFolder(Folder);
+            RaiseSelectionScriptError( TEXT( "All folders must belong to the focused epos sequence" ) );
+            return;
         }
+    }
+
+    for( UMovieSceneFolder* Folder : Folders )
+    {
+        Sequencer->SelectFolder( Folder );
     }
 }
 
 void UEposSequenceEditorBlueprintLibrary::SelectBindings( const TArray<FMovieSceneBindingProxy>& ObjectBindings )
 {
-    if( CurrentSequencer.IsValid() )
+    const TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin();
+    const UMovieScene* FocusedMovieScene = GetSelectionMovieSceneOrRaise( Sequencer );
+    if( !FocusedMovieScene )
     {
-        for( const FMovieSceneBindingProxy& ObjectBinding : ObjectBindings )
+        return;
+    }
+    const UMovieSceneSequence* FocusedSequence = Sequencer->GetFocusedMovieSceneSequence();
+
+    for( const FMovieSceneBindingProxy& ObjectBinding : ObjectBindings )
+    {
+        if( ObjectBinding.Sequence.Get() != FocusedSequence || !ObjectBinding.BindingID.IsValid()
+            || !FocusedMovieScene->FindBinding( ObjectBinding.BindingID ) )
         {
-            CurrentSequencer.Pin()->SelectObject( ObjectBinding.BindingID );
+            RaiseSelectionScriptError( TEXT( "All bindings must belong to the focused epos sequence" ) );
+            return;
         }
+    }
+
+    for( const FMovieSceneBindingProxy& ObjectBinding : ObjectBindings )
+    {
+        Sequencer->SelectObject( ObjectBinding.BindingID );
     }
 }
 
@@ -1314,12 +1480,118 @@ void UEposSequenceEditorBlueprintLibrary::DeselectBindings(const TArray<FMovieSc
     }
 }
 
+static TSharedPtr<UE::Sequencer::FSequencerSelection> GetViewModelSelection()
+{
+    using namespace UE::Sequencer;
+
+    const TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin();
+    if( !Sequencer.IsValid() )
+    {
+        return nullptr;
+    }
+
+    const TSharedPtr<FSequencerEditorViewModel> ViewModel = Sequencer->GetViewModel();
+    if( !ViewModel.IsValid() )
+    {
+        return nullptr;
+    }
+
+    return ViewModel->GetSelection();
+}
+
+TArray<int32> UEposSequenceEditorBlueprintLibrary::GetSelectedMarkedFrames()
+{
+    const TSharedPtr<UE::Sequencer::FSequencerSelection> Selection = GetViewModelSelection();
+    return Selection.IsValid() ? Selection->MarkedFrames.GetSelected().Array() : TArray<int32>{};
+}
+
+void UEposSequenceEditorBlueprintLibrary::SelectMarkedFrames( const TArray<int32>& MarkedFrameIndices )
+{
+    const TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin();
+    if( !Sequencer.IsValid() )
+    {
+        return;
+    }
+
+    const UMovieSceneSequence* const FocusedSequence = Sequencer->GetFocusedMovieSceneSequence();
+    if( !FocusedSequence )
+    {
+        return;
+    }
+
+    const UMovieScene* const MovieScene = FocusedSequence->GetMovieScene();
+    if( !MovieScene )
+    {
+        return;
+    }
+
+    const TSharedPtr<UE::Sequencer::FSequencerEditorViewModel> ViewModel = Sequencer->GetViewModel();
+    if( !ViewModel.IsValid() )
+    {
+        return;
+    }
+
+    const TSharedPtr<UE::Sequencer::FSequencerSelection> Selection = ViewModel->GetSelection();
+    if( !Selection.IsValid() )
+    {
+        return;
+    }
+
+    // Only indices of marked frames that exist on the focused movie scene may
+    // enter the selection set, mirroring the per-index validation SelectKeys
+    // does above.
+    const int32 NumMarkedFrames = MovieScene->GetMarkedFrames().Num();
+    for( const int32 MarkedFrameIndex : MarkedFrameIndices )
+    {
+        if( MarkedFrameIndex >= 0 && MarkedFrameIndex < NumMarkedFrames )
+        {
+            Selection->MarkedFrames.Select( MarkedFrameIndex );
+        }
+    }
+}
+
+void UEposSequenceEditorBlueprintLibrary::DeselectMarkedFrames( const TArray<int32>& MarkedFrameIndices )
+{
+    const TSharedPtr<UE::Sequencer::FSequencerSelection> Selection = GetViewModelSelection();
+    if( !Selection.IsValid() )
+    {
+        return;
+    }
+
+    for( const int32 MarkedFrameIndex : MarkedFrameIndices )
+    {
+        Selection->MarkedFrames.Deselect( MarkedFrameIndex );
+    }
+}
+
 void UEposSequenceEditorBlueprintLibrary::EmptySelection()
 {
     if (CurrentSequencer.IsValid())
     {
         CurrentSequencer.Pin()->EmptySelection();
     }
+}
+
+void UEposSequenceEditorBlueprintLibrary::EmptyMarkedFrameSelection()
+{
+    const TSharedPtr<UE::Sequencer::FSequencerSelection> Selection = GetViewModelSelection();
+    if( !Selection.IsValid() )
+    {
+        return;
+    }
+
+    Selection->MarkedFrames.Empty();
+}
+
+void UEposSequenceEditorBlueprintLibrary::EmptyKeySelection()
+{
+    const TSharedPtr<UE::Sequencer::FSequencerSelection> Selection = GetViewModelSelection();
+    if( !Selection.IsValid() )
+    {
+        return;
+    }
+
+    Selection->KeySelection.Empty();
 }
 
 void UEposSequenceEditorBlueprintLibrary::SetSelectionRangeStart(int32 NewFrame)
@@ -1370,9 +1642,49 @@ int32 UEposSequenceEditorBlueprintLibrary::GetSelectionRangeEnd()
     return 0;
 }
 
+///** GetSelectionMovieSceneOrRaise that also raises when the focused sequence is not visible to scripting. */
+//static UMovieScene* GetVisibleSelectionMovieSceneOrRaise( const TSharedPtr<ISequencer>& Sequencer )
+//{
+//    UMovieScene* MovieScene = GetSelectionMovieSceneOrRaise( Sequencer );
+//    FString AccessError;
+//    if( MovieScene && !UE::SequencerScripting::IsObjectAccessibleForScripting( MovieScene, /* bRequireWritable */ false, AccessError ) )
+//    {
+//        RaiseSelectionScriptError( AccessError );
+//        return nullptr;
+//    }
+//    return MovieScene;
+//}
+//
+//bool UEposSequenceEditorBlueprintLibrary::HasSelectionRange()
+//{
+//    const UMovieScene* MovieScene = GetVisibleSelectionMovieSceneOrRaise( CurrentSequencer.Pin() );
+//    return MovieScene && !MovieScene->GetSelectionRange().IsEmpty();
+//}
+//
+//void UEposSequenceEditorBlueprintLibrary::ClearSelectionRange()
+//{
+//    // Read access only, as for the selection range setters and Sequencer's Clear Selection Range: the selection range is
+//    // editor view state that Sequencer lets users change on read-only and locked sequences.
+//    UMovieScene* MovieScene = GetVisibleSelectionMovieSceneOrRaise( CurrentSequencer.Pin() );
+//    if( !MovieScene || MovieScene->GetSelectionRange().IsEmpty() )
+//    {
+//        return;
+//    }
+//
+//    // Its own undo step, like the selection range start and end setters, which go through Sequencer's transaction.
+//    const FScopedTransaction Transaction( NSLOCTEXT( "LevelSequenceEditorBlueprintLibrary", "ClearSelectionRange", "Clear Selection Range" ) );
+//    MovieScene->Modify();
+//    MovieScene->SetSelectionRange( TRange<FFrameNumber>::Empty() );
+//}
+
 void UEposSequenceEditorBlueprintLibrary::SetSequencer(TSharedRef<ISequencer> InSequencer)
 {
     CurrentSequencer = TWeakPtr<ISequencer>(InSequencer);
+}
+
+TSharedPtr<ISequencer> UEposSequenceEditorBlueprintLibrary::GetCurrentSequencer()
+{
+    return CurrentSequencer.Pin();
 }
 
 void UEposSequenceEditorBlueprintLibrary::RefreshCurrentEposSequence()
@@ -1388,6 +1700,17 @@ void UEposSequenceEditorBlueprintLibrary::ForceUpdate()
     if( CurrentSequencer.IsValid() )
     {
         CurrentSequencer.Pin()->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
+    }
+}
+
+void UEposSequenceEditorBlueprintLibrary::RestorePreAnimatedState()
+{
+    // RestorePreAnimatedState is inherited from IMovieScenePlayer (ISequencer's
+    // base) and restores all captured state globally, regardless of section
+    // completion mode.
+    if( CurrentSequencer.IsValid() )
+    {
+        CurrentSequencer.Pin()->RestorePreAnimatedState();
     }
 }
 
@@ -1493,10 +1816,26 @@ void UEposSequenceEditorBlueprintLibrary::SetTrackFilterEnabled(const FText& Tra
 
 void UEposSequenceEditorBlueprintLibrary::SetTrackFilterActive( const FText& TrackFilterName, bool bActive )
 {
-    if( const TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin() )
+    const TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin();
+    if( !Sequencer )
     {
-        Sequencer->GetFilterInterface()->SetFilterActiveByDisplayName( TrackFilterName.ToString(), bActive );
+        RaiseSelectionScriptError( TEXT( "No epos sequence is open in Sequencer" ) );
+        return;
     }
+    const TSharedRef<ISequencerTrackFilters> Filters = Sequencer->GetFilterInterface();
+    const FString FilterName = TrackFilterName.ToString();
+    // Filter bars match display names without regard to case.
+    auto MatchesFilterName = [&FilterName]( const FText& DisplayName )
+        {
+            return DisplayName.ToString().Equals( FilterName, ESearchCase::IgnoreCase );
+        };
+    if( !Filters->GetFilterDisplayNames().ContainsByPredicate( MatchesFilterName )
+        && !Filters->GetCustomTextFilterNames().ContainsByPredicate( MatchesFilterName ) )
+    {
+        RaiseSelectionScriptError( FString::Printf( TEXT( "No track filter is named '%s'" ), *FilterName ) );
+        return;
+    }
+    Filters->SetFilterActiveByDisplayName( FilterName, bActive );
 }
 
 TArray<FText> UEposSequenceEditorBlueprintLibrary::GetTrackFilterNames()
@@ -1507,6 +1846,30 @@ TArray<FText> UEposSequenceEditorBlueprintLibrary::GetTrackFilterNames()
     }
     return {};
 }
+
+//FString UEposSequenceEditorBlueprintLibrary::GetTrackFilterText()
+//{
+//    const TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin();
+//    if( !Sequencer.IsValid() )
+//    {
+//        RaiseSelectionScriptError( TEXT( "No epos sequence is open in Sequencer" ) );
+//        return FString();
+//    }
+//
+//    return Sequencer->GetFilterInterface()->GetTextFilterString();
+//}
+//
+//void UEposSequenceEditorBlueprintLibrary::SetTrackFilterText( const FString& FilterText )
+//{
+//    const TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin();
+//    if( !Sequencer.IsValid() )
+//    {
+//        RaiseSelectionScriptError( TEXT( "No epos sequence is open in Sequencer" ) );
+//        return;
+//    }
+//
+//    Sequencer->GetFilterInterface()->SetTextFilterString( FilterText );
+//}
 
 bool UEposSequenceEditorBlueprintLibrary::HasCustomColorForChannel(UClass* Class, const FString& Identifier)
 {
@@ -1561,7 +1924,7 @@ void UEposSequenceEditorBlueprintLibrary::SetCustomColorForChannels(UClass* Clas
     }
 }
 
-void UEposSequenceEditorBlueprintLibrary::DeleteColorForChannels(UClass* Class, FString& Identifier)
+void UEposSequenceEditorBlueprintLibrary::DeleteColorForChannels(UClass* Class, const FString& Identifier)
 {
     UCurveEditorSettings* Settings = GetMutableDefault<UCurveEditorSettings>();
     if (Settings)

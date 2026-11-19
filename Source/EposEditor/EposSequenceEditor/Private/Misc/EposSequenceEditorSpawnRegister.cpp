@@ -7,13 +7,6 @@
 #include "LevelEditorViewport.h"
 #include "MovieSceneToolHelpers.h"
 
-void
-FEposSequenceEditorSpawnRegister::SetSequencer( const TSharedPtr<ISequencer>& Sequencer )
-{
-    FLevelSequenceEditorSpawnRegister::SetSequencer( Sequencer );
-    WeakSequencer2 = Sequencer;
-}
-
 UObject*
 FEposSequenceEditorSpawnRegister::SpawnObject( const FGuid& BindingId, UMovieScene& MovieScene, FMovieSceneSequenceIDRef TemplateID, TSharedRef<const FSharedPlaybackState> SharedPlaybackState, int32 BindingIndex/* = 0*/ )
 {
@@ -24,7 +17,7 @@ FEposSequenceEditorSpawnRegister::SpawnObject( const FGuid& BindingId, UMovieSce
         // If a camera "track" was piloted, then pilot the new spawned camera
         if( ActiveCameraLocked.IsSet() )
         {
-            MovieSceneToolHelpers::LockCameraActorToViewport( WeakSequencer2.Pin(), camera );
+            MovieSceneToolHelpers::LockCameraActorToViewport( GetSequencer(), camera );
 
             FMovieSceneSpawnRegisterKey key( TemplateID, BindingId, BindingIndex );
             ActiveCameraLocked = key;

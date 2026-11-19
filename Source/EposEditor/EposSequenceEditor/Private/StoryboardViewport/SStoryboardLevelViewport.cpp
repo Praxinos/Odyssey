@@ -19,6 +19,7 @@
 #include "EngineUtils.h"
 #include "Fonts/FontMeasure.h"
 #include "Framework/Commands/UICommandList.h"
+#include "ILevelEditor.h"
 #include "ISequencer.h"
 #include "LevelEditor.h"
 #include "LevelEditorSequencerIntegration.h"
@@ -35,9 +36,9 @@
 #include "SequencerSettings.h"
 #include "SlateOptMacros.h"
 #include "SLevelViewport.h"
-#include "Subsystems/PanelExtensionSubsystem.h"
 #include "ToolMenu.h"
 #include "ToolMenus.h"
+#include "ViewportTypeDefinition.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/SSpinBox.h"
 #include "Widgets/Layout/SBorder.h"
@@ -49,7 +50,6 @@
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
-#include "ViewportToolbar/UnrealEdViewportToolbar.h"
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
@@ -80,6 +80,36 @@
 
 namespace UE::StoryboardViewport::Private
 {
+    /** Every constructed storyboard viewport, with destroyed ones pruned when read, whether or not a level editor layout still shows it */
+    static TArray<TWeakPtr<SStoryboardLevelViewport>> WeakLiveViewports;
+
+    /** The level editor whose layouts show storyboard viewports, or null before it exists */
+    static TSharedPtr<ILevelEditor> GetLevelEditor()
+    {
+        return FModuleManager::GetModuleChecked<FLevelEditorModule>( TEXT( "LevelEditor" ) ).GetFirstLevelEditor();
+    }
+
+    /** The live storyboard viewport wrapping InLevelViewport, or null when InLevelViewport is not one of theirs */
+    static TSharedPtr<SStoryboardLevelViewport> FindLiveViewport( const TSharedPtr<SLevelViewport>& InLevelViewport )
+    {
+        WeakLiveViewports.RemoveAll( []( const TWeakPtr<SStoryboardLevelViewport>& InWeakViewport )
+                                     {
+                                         return !InWeakViewport.IsValid();
+                                     } );
+        if( InLevelViewport.IsValid() )
+        {
+            for( const TWeakPtr<SStoryboardLevelViewport>& WeakViewport : WeakLiveViewports )
+            {
+                const TSharedPtr<SStoryboardLevelViewport> Viewport = WeakViewport.Pin();
+                if( Viewport->GetLevelViewport() == InLevelViewport )
+                {
+                    return Viewport;
+                }
+            }
+        }
+        return nullptr;
+    }
+
     void AddOverlayOptionsEntry( UToolMenu* InMenu )
     {
         if( !InMenu )
@@ -895,6 +925,8 @@ SStoryboardLevelViewport::~SStoryboardLevelViewport()
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 {
+    UE::StoryboardViewport::Private::WeakLiveViewports.Add( SharedThis( this ) );
+
     CreateCommandList();
 
     ParentLayout = InArgs._ParentLayout;
@@ -1610,6 +1642,92 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
     OnSequencerChanged();
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
+
+TArray<TSharedRef<SStoryboardLevelViewport>>
+SStoryboardLevelViewport::GetOpenViewports()
+{
+    using namespace UE::StoryboardViewport::Private;
+
+    TArray<TSharedRef<SStoryboardLevelViewport>> Viewports;
+
+    const TSharedPtr<ILevelEditor> LevelEditor = GetLevelEditor();
+    if( !LevelEditor.IsValid() )
+    {
+        return Viewports;
+    }
+
+    for( const TSharedPtr<SLevelViewport>& LevelViewport : LevelEditor->GetViewports() )
+    {
+        if( const TSharedPtr<SStoryboardLevelViewport> Viewport = FindLiveViewport( LevelViewport ) )
+        {
+            Viewports.Add( Viewport.ToSharedRef() );
+        }
+    }
+
+    return Viewports;
+}
+
+TSharedPtr<SLevelViewport>
+SStoryboardLevelViewport::GetActiveLevelViewport()
+{
+    using namespace UE::StoryboardViewport::Private;
+    const TSharedPtr<ILevelEditor> LevelEditor = GetLevelEditor();
+    return LevelEditor.IsValid() ? LevelEditor->GetActiveViewportInterface() : nullptr;
+}
+
+TSharedPtr<SStoryboardLevelViewport>
+SStoryboardLevelViewport::GetActiveViewport()
+{
+    return UE::StoryboardViewport::Private::FindLiveViewport( GetActiveLevelViewport() );
+}
+
+FName
+SStoryboardLevelViewport::GetLevelViewportType( const TSharedPtr<SLevelViewport>& InLevelViewport )
+{
+    FName Type;
+
+    if( !InLevelViewport.IsValid() )
+    {
+        return Type;
+    }
+
+    // The layout binds every registered type's activation command into the viewport's command list, checked for the current type
+    const TSharedPtr<FUICommandList> CommandList = InLevelViewport->GetCommandList();
+    FModuleManager::GetModuleChecked<FLevelEditorModule>( TEXT( "LevelEditor" ) ).IterateViewportTypes( [&Type, &CommandList]( const FName InTypeName, const FViewportTypeDefinition& InDefinition )
+                                                                                                        {
+                                                                                                            const FUIAction* const Action = InDefinition.ActivationCommand.IsValid()
+                                                                                                                ? CommandList->GetActionForCommand( InDefinition.ActivationCommand ) : nullptr;
+                                                                                                            if( Action && Action->GetCheckState() == ECheckBoxState::Checked )
+                                                                                                            {
+                                                                                                                Type = InTypeName;
+                                                                                                            }
+                                                                                                        } );
+
+    return Type;
+}
+
+bool
+SStoryboardLevelViewport::SetLevelViewportType( const TSharedPtr<SLevelViewport>& InLevelViewport, const FName InType )
+{
+    if( !InLevelViewport.IsValid() )
+    {
+        return false;
+    }
+
+    // The command is found first so the layout rebuild it causes runs after the registered types have been iterated
+    TSharedPtr<FUICommandInfo> ActivationCommand;
+    FModuleManager::GetModuleChecked<FLevelEditorModule>( TEXT( "LevelEditor" ) ).IterateViewportTypes(
+        [&ActivationCommand, InType]( const FName InTypeName, const FViewportTypeDefinition& InDefinition )
+        {
+            if( InTypeName == InType )
+            {
+                ActivationCommand = InDefinition.ActivationCommand;
+            }
+        } );
+
+    return ActivationCommand.IsValid()
+        && InLevelViewport->GetCommandList()->TryExecuteAction( ActivationCommand.ToSharedRef() );
+}
 
 void
 SStoryboardLevelViewport::CreateCommandList()
