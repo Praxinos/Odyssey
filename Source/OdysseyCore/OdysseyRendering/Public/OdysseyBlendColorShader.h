@@ -33,12 +33,12 @@ public:
 
 public:
     /** Binds vertex and pixel shaders for this element */
-    virtual void BindShaders(FRHICommandList& RHICmdList, FGraphicsPipelineStateInitializer& GraphicsPSOInit, ERHIFeatureLevel::Type InFeatureLevel, const FMatrix& InTransform, const float InGamma, const FMatrix& ColorWeights, const FTexture* Texture) override;
+    virtual void BindShaders(FRHICommandList& RHICmdList, FGraphicsPipelineStateInitializer& GraphicsPSOInit, EShaderPlatform InShaderPlatform, const FMatrix& InTransform, const float InGamma, const FMatrix& ColorWeights, const FTexture* Texture) override;
 
 public:
     static void BlendRect(
         FRDGBuilder& iGraphBuilder,
-        ERHIFeatureLevel::Type iFeatureLevel,
+        EShaderPlatform iShaderPlatform,
         FRDGTextureRef iBackgroundTexture,
         FLinearColor iForegroundColor,
         FRDGTextureRef iDestinationTexture,

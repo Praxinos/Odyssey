@@ -50,7 +50,7 @@ FExportConverter::ProcessSequencerMarks( UShotSequence& iShotSequence, FMovieSce
     for( auto mark : marks )
     {
         FMovieSceneInverseSequenceTransform localToRootTransform = iRootToSequenceTransform.Inverse();
-        TOptional<FFrameTime> time_in_root = localToRootTransform.TryTransformTime( mark.FrameNumber );
+        TOptional<FFrameTime> time_in_root = localToRootTransform.TryTransformTime( mark.GetStartFrame() );
         if( !time_in_root )
             continue;
 

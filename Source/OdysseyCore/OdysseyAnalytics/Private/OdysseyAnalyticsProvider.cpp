@@ -551,6 +551,11 @@ void FOdysseyAnalyticsProvider::SetDefaultEventAttributes( TArray<FAnalyticsEven
     EventCache.SetDefaultAttributes( MoveTemp( Attributes ) );
 }
 
+void FOdysseyAnalyticsProvider::AddOrUpdateDefaultValue( FAnalyticsEventAttribute&& Attribute )
+{
+    EventCache.AddOrUpdateDefaultValue( MoveTemp( Attribute ) );
+}
+
 TArray<FAnalyticsEventAttribute> FOdysseyAnalyticsProvider::GetDefaultEventAttributesSafe() const
 {
     return EventCache.GetDefaultAttributes();

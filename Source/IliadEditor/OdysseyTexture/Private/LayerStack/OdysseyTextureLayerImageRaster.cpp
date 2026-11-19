@@ -229,10 +229,10 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
             EOdysseyRenderingType::Render
         );
 
-        const ERHIFeatureLevel::Type featureLevel = GMaxRHIFeatureLevel;
+        const EShaderPlatform shaderPlatform = GMaxRHIShaderPlatform;
 
         ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(
-            [layerRenderTarget, destinationRenderTarget, featureLevel, rect, layer](FRHICommandListImmediate& RHICmdList)
+            [layerRenderTarget, destinationRenderTarget, shaderPlatform, rect, layer](FRHICommandListImmediate& RHICmdList)
             {
                 FRDGBuilder graphBuilder(RHICmdList);
 
@@ -244,7 +244,7 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 
                 FOdysseyBlendShader::BlendRect(
                     graphBuilder,
-                    featureLevel,
+                    shaderPlatform,
                     destinationTexture,
                     layerTexture,
                     destinationTexture,

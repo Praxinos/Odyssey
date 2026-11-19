@@ -33,7 +33,7 @@ IMPLEMENT_SHADER_TYPE(, FOdysseyBlendColorShaderPS, TEXT("/OdysseyShaders/Privat
 
 void FOdysseyBlendColorShader::BlendRect(
     FRDGBuilder& iGraphBuilder,
-    ERHIFeatureLevel::Type iFeatureLevel,
+    EShaderPlatform iShaderPlatform,
     FRDGTextureRef iBackgroundTexture,
     FLinearColor iForegroundColor,
     FRDGTextureRef iDestinationTexture,
@@ -89,7 +89,7 @@ void FOdysseyBlendColorShader::BlendRect(
         RDG_EVENT_NAME("OdysseyBlendColorShader"),
         shaderParameters,
         ERDGPassFlags::Raster,
-        [iFeatureLevel, iDstRect, destinationTextureSize, blendColorShader](FRHICommandListImmediate& RHICmdList)
+        [iShaderPlatform, iDstRect, destinationTextureSize, blendColorShader](FRHICommandListImmediate& RHICmdList)
         {
             FBatchedElements blendBatchedElements;
 
@@ -127,12 +127,11 @@ void FOdysseyBlendColorShader::BlendRect(
             )
             );
 
-            FSceneView proxySceneView = FBatchedElements::CreateProxySceneView(transform, FIntRect(0, 0, destinationTextureSize.X, destinationTextureSize.Y));
+            FSceneView proxySceneView = FBatchedElements::CreateProxySceneView(transform, FIntRect(0, 0, destinationTextureSize.X, destinationTextureSize.Y), iShaderPlatform);
 
             blendBatchedElements.Draw(
                 RHICmdList,
                 DrawRenderState,
-                iFeatureLevel,
                 proxySceneView,
                 false
             );
@@ -146,11 +145,11 @@ FOdysseyBlendColorShader::FOdysseyBlendColorShader(FOdysseyBlendColorShaderParam
 }
 
 void
-FOdysseyBlendColorShader::BindShaders(FRHICommandList& RHICmdList, FGraphicsPipelineStateInitializer& GraphicsPSOInit, ERHIFeatureLevel::Type InFeatureLevel, const FMatrix& InTransform, const float InGamma, const FMatrix& ColorWeights, const FTexture* Texture)
+FOdysseyBlendColorShader::BindShaders(FRHICommandList& RHICmdList, FGraphicsPipelineStateInitializer& GraphicsPSOInit, EShaderPlatform InShaderPlatform, const FMatrix& InTransform, const float InGamma, const FMatrix& ColorWeights, const FTexture* Texture)
 {
     static TGlobalResource< FSimpleElementVertexDeclaration > GBlendVertexDeclaration;
-    TShaderMapRef< FSimpleElementVS > VertexShader(GetGlobalShaderMap(InFeatureLevel));
-    TShaderMapRef< FOdysseyBlendColorShaderPS > PixelShader(GetGlobalShaderMap(InFeatureLevel));
+    TShaderMapRef< FSimpleElementVS > VertexShader(GetGlobalShaderMap(InShaderPlatform));
+    TShaderMapRef< FOdysseyBlendColorShaderPS > PixelShader(GetGlobalShaderMap(InShaderPlatform));
     GraphicsPSOInit.BoundShaderState.VertexDeclarationRHI = GBlendVertexDeclaration.VertexDeclarationRHI;
     GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VertexShader.GetVertexShader();
     GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PixelShader.GetPixelShader();

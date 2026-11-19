@@ -31,7 +31,7 @@ public:
 
     typedef TFunction< void(
         FRDGBuilder& /*iGraphBuilder*/,
-        ERHIFeatureLevel::Type /*iFeatureLevel*/,
+        EShaderPlatform /*iShaderPlatform*/,
         FRDGTextureRef /*iDestinationTexture*/,
         const FIntRect& /*iSrcRect*/,
         const FIntRect& /*iDstRect*/,
