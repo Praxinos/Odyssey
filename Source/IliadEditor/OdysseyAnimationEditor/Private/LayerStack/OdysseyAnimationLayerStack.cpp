@@ -91,3 +91,16 @@ UOdysseyAnimationLayerStack::CreateExportTexture( const FString& iAssetName, con
     return GetAnimation()->CreateExportTexture( iAssetName, iPackagePath, iAssetClass, iFactory );
 }
 #endif
+
+EOdysseyColorConversion
+UOdysseyAnimationLayerStack::GetContentColorConversion(const FOdysseyRenderContext* RenderContext) const
+{
+#if WITH_EDITOR
+    const UOdysseyAnimation* Animation = GetAnimation();
+    if (Animation && !Animation->UsesLinearCompositing())
+    {
+        return EOdysseyColorConversion::Decode;
+    }
+#endif
+    return EOdysseyColorConversion::None;
+}

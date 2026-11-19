@@ -40,6 +40,26 @@ UOdysseyTextureLayer::GetRenderTexture() const
     return Texture;
 }
 
+void
+UOdysseyTextureLayer::ColorSettingsChanged()
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+    const bool bSRGB = layerStack && layerStack->IsSRGB();
+    if (Texture && Texture->SRGB != bSRGB)
+    {
+        Texture->SRGB = bSRGB;
+        Texture->UpdateResource();
+        FTextureCompilingManager::Get().FinishCompilation({ Texture });
+    }
+}
+
+EOdysseyColorConversion
+UOdysseyTextureLayer::GetContentColorConversion(const FOdysseyRenderContext* RenderContext) const
+{
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+    return layerStack ? layerStack->GetLayerColorConversion() : EOdysseyColorConversion::None;
+}
+
 UTexture2D*
 UOdysseyTextureLayer::GetExistingRenderTexture() const
 {
@@ -128,11 +148,13 @@ UOdysseyTextureLayer::InitTexture()
         checkf(OwnerTexture->Source.GetFormat() != TSF_Invalid, TEXT("Invalid Texture Format"));
         const ETextureSourceFormat layerTextureFormat = GetLayerTextureFormat(OwnerTexture->Source.GetFormat());
 
+        UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
         Texture = NewObject<UTexture2D>(this, TEXT("Texture"));
         Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
         Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
         Texture->Filter = TextureFilter::TF_Nearest;
-        Texture->SRGB = false;
+        // The layer texture holds the bytes of the texture: decoded when sampled if they are sRGB encoded colors.
+        Texture->SRGB = layerStack && layerStack->IsSRGB();
         Texture->Source.Init(
             OwnerTexture->Source.GetSizeX(),
             OwnerTexture->Source.GetSizeY(),

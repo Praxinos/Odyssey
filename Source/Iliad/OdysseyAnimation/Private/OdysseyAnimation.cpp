@@ -13,6 +13,7 @@
 #include "RenderGraphBuilder.h"
 #include "ScreenPass.h"
 #include "TextureResource.h"
+#include "UObject/DevObjectVersion.h"
 #include "UObject/ObjectSaveContext.h"
 #include "UObject/SavePackage.h"
 
@@ -465,6 +466,11 @@ UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
     {
         OnRightBoundChanged();
     }
+
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, bLinearCompositing) )
+    {
+        RenderingCompositionChanged(false);
+    }
 }
 
 void
@@ -686,10 +692,67 @@ UOdysseyAnimation::TakeLegacyToolCollections()
 }
 #endif
 
+namespace
+{
+/** Custom version of UOdysseyAnimation. */
+struct FOdysseyAnimationObjectVersion
+{
+    enum Type
+    {
+        // Before any version changes were made: layers were blended with linear colors
+        BeforeCustomVersionWasAdded,
+
+        // Layers are blended with sRGB encoded colors unless bLinearCompositing is set
+        EncodedCompositingByDefault,
+
+        // -----<new versions can be added above this line>-------------------------------------------------
+        VersionPlusOne,
+        LatestVersion = VersionPlusOne - 1
+    };
+
+    // The GUID for this custom version number
+    const static FGuid GUID;
+};
+
+const FGuid FOdysseyAnimationObjectVersion::GUID(0x6A2F43C1, 0x8B0E4D27, 0x9C5A1E73, 0x40D8B612);
+FDevVersionRegistration GRegisterOdysseyAnimationObjectVersion(FOdysseyAnimationObjectVersion::GUID, FOdysseyAnimationObjectVersion::LatestVersion, TEXT("OdysseyAnimation"));
+}
+
+#if WITH_EDITOR
+bool
+UOdysseyAnimation::UsesLinearCompositing() const
+{
+    return bLinearCompositing;
+}
+
+void
+UOdysseyAnimation::SetLinearCompositing(bool bValue)
+{
+    Modify();
+    bLinearCompositing = bValue;
+    PropertyChanged(GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, bLinearCompositing));
+}
+#endif
+
+void
+UOdysseyAnimation::Serialize(FArchive& Ar)
+{
+    Super::Serialize(Ar);
+    Ar.UsingCustomVersion(FOdysseyAnimationObjectVersion::GUID);
+}
+
 void
 UOdysseyAnimation::PostLoad()
 {
     Super::PostLoad();
+
+#if WITH_EDITORONLY_DATA
+    // Keep the colors of animations created when layers were blended with linear colors.
+    if (GetLinkerCustomVersion(FOdysseyAnimationObjectVersion::GUID) < FOdysseyAnimationObjectVersion::EncodedCompositingByDefault)
+    {
+        bLinearCompositing = true;
+    }
+#endif
 
 #if WITH_EDITOR
     if (HasLegacyEditorData())

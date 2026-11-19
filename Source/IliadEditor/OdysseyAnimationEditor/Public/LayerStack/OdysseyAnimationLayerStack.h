@@ -31,6 +31,10 @@ public:
 #endif
     virtual FIntRect GetDefaultRenderRect() const override;
 
+protected:
+    /** Decodes the blended colors when the animation blends sRGB encoded colors: an animation outputs linear colors. */
+    virtual EOdysseyColorConversion GetContentColorConversion(const FOdysseyRenderContext* RenderContext) const override;
+
 private:
     void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
 };

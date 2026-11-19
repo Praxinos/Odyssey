@@ -125,12 +125,21 @@ public:
 
 public:
     virtual void PostLoad() override;
+    virtual void Serialize(FArchive& Ar) override;
 
 #if WITH_EDITOR
     //Property changed methods
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
     virtual void PropertyChanged(const FName& iPropertyName);
+
+#if WITH_EDITOR
+    /** Returns true when the layers are blended with linear colors, false when with sRGB encoded colors. */
+    bool UsesLinearCompositing() const;
+
+    /** Sets whether the layers are blended with linear colors, and renders the animation again. */
+    void SetLinearCompositing(bool bValue);
+#endif
     virtual void PreSave(FObjectPreSaveContext SaveContext) override;
     virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
     virtual void GetAssetRegistryTags( FAssetRegistryTagsContext ioContext ) const override;
@@ -271,5 +280,13 @@ protected:
 
     UPROPERTY(EditAnywhere, Category="Odyssey|Animation", meta=(EditCondition="RightBoundMode != EOdysseyAnimationBoundMode::Automatic", EditConditionHides))
     int RightBound = 0;
+
+    /**
+     * Blends the layers with linear colors, as 3D and compositing applications do.
+     * Otherwise they are blended with sRGB encoded colors, as painting applications such as Photoshop do.
+     * Animations created before this option blend linear colors.
+     */
+    UPROPERTY(EditAnywhere, Category="Odyssey|Animation")
+    bool bLinearCompositing = false;
 #endif
 };

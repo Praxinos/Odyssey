@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/TextureRenderTarget2D.h"
+
 #include "OdysseyLayerStack.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "TickableEditorObject.h"
@@ -51,6 +53,21 @@ public:
 public:
     UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
     UTexture2D* GetTexture() const;
+
+    /** Returns true when the texture holds 8-bit sRGB encoded colors, which the layers hold decoded. */
+    bool IsSRGB() const;
+
+    /** Returns true when the layers of an sRGB texture are blended with linear colors rather than encoded colors. */
+    bool UsesLinearCompositing() const;
+
+    /** Returns true when the sRGB setting of the texture changes its colors rather than its bytes. */
+    bool KeepsColorsOnSRGBChange() const;
+
+    /** Returns the conversion of the linear colors of a layer into the colors this stack blends. */
+    EOdysseyColorConversion GetLayerColorConversion() const;
+
+    /** Applies a change of the color settings of the texture or of the layer stack to the layers and the texture. */
+    void ColorSettingsChanged();
 
 public:
     /**
@@ -106,6 +123,10 @@ public:
      */
     void UpdateTexture(bool iForceRefresh = false);
 
+protected:
+    /** Encodes the blended colors when they are linear: the texture holds encoded colors. */
+    virtual EOdysseyColorConversion GetContentColorConversion(const FOdysseyRenderContext* RenderContext) const override;
+
 public:
     //IOdysseyRenderingAbility overrides
     virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() const override;
@@ -134,6 +155,9 @@ private:
     void OnPackagePreSave(UPackage* iPackage, FObjectPreSaveContext ObjectSaveContext);
     void OnPackageSaved(const FString& iPackageFilename, UPackage* iPackage, FObjectPostSaveContext ObjectSaveContext);
     void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
+    void OnObjectPropertyChanged(UObject* Object, FPropertyChangedEvent& PropertyChangedEvent);
+    /** Returns the render target format blending the layers. */
+    ETextureRenderTargetFormat GetCompositingFormat() const;
 
 private:
     TSharedPtr<FOdysseySurfaceTexture2DEditable> mTextureFastUpdateSurface;

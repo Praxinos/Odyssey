@@ -28,12 +28,11 @@ FOdysseyRasterContent::~FOdysseyRasterContent()
     }
 }
 
-FOdysseyRasterContent::FOdysseyRasterContent(UObject& InOwner, const FGuid& InRenderingId, TObjectPtr<UOdysseyTiledImage>& InImage, bool bInSRGB,
+FOdysseyRasterContent::FOdysseyRasterContent(UObject& InOwner, const FGuid& InRenderingId, TObjectPtr<UOdysseyTiledImage>& InImage,
     FGetDescription InGetDescription, FOnChanged InOnChanged, FOdysseyRasterBlock::FPostProcess InPostProcess)
     : Owner(InOwner)
     , RenderingId(InRenderingId)
     , Image(InImage)
-    , bSRGB(bInSRGB)
     , GetDescription(MoveTemp(InGetDescription))
     , OnChanged(MoveTemp(InOnChanged))
     , PostProcess(MoveTemp(InPostProcess))
@@ -56,7 +55,7 @@ FOdysseyRasterContent::EnsureImage()
         return false;
     }
 
-    const EOdysseyTiledImageFormat Format = Odyssey::TiledImage::TiledImageFormatForULISFormat(Description.Format, bSRGB);
+    const EOdysseyTiledImageFormat Format = Odyssey::TiledImage::TiledImageFormatForULISFormat(Description.Format, Description.bSRGB);
     if (!Image)
     {
         // The image identity never changes, so creating it is not part of any transaction.
@@ -66,13 +65,33 @@ FOdysseyRasterContent::EnsureImage()
     }
     else if (Image->GetFormat() != Format && FApp::CanEverRender())
     {
-        // e.g. a cell duplicated into an animation of another format.
+        // e.g. a cell duplicated into an animation of another format, or the sRGB setting of a texture changed.
         const FIntRect Bounds(FIntPoint::ZeroValue, Description.Size);
-        TSharedPtr<::ULIS::FBlock> Pixels = Odyssey::TiledImage::CopyToBlock(*Image, Bounds, Description.Format, bSRGB);
-        Image->Initialize(TileSize, Format);
-        if (Pixels)
+        const EOdysseyTiledImageFormat PreviousFormat = Image->GetFormat();
+        // For 8-bit content, linear tiles are RGBA8 and decoded sRGB tiles are RGBA16F.
+        const bool bEncodingChanged = !ULIS_R_FLOATING(Description.Format) && ULIS_R_DEPTH(Description.Format) == 1
+            && (PreviousFormat == EOdysseyTiledImageFormat::RGBA8) != (Format == EOdysseyTiledImageFormat::RGBA8)
+            && (PreviousFormat == EOdysseyTiledImageFormat::RGBA16F || Format == EOdysseyTiledImageFormat::RGBA16F);
+        TSharedPtr<::ULIS::FBlock> Pixels;
+        if (bEncodingChanged && Description.bKeepBytesOnEncodingChange)
         {
-            Odyssey::TiledImage::CopyFromBlock(*Image, *Pixels, Bounds, FIntPoint::ZeroValue, bSRGB);
+            // Read the bytes as they were interpreted, write them as they are now interpreted.
+            Pixels = Odyssey::TiledImage::CopyToBlock(*Image, Bounds, Description.Format, !Description.bSRGB);
+            Image->Initialize(TileSize, Format);
+            if (Pixels)
+            {
+                Odyssey::TiledImage::CopyFromBlock(*Image, *Pixels, Bounds, FIntPoint::ZeroValue, Description.bSRGB);
+            }
+        }
+        else
+        {
+            // Keep the linear colors, in the precision of the new format.
+            Pixels = Odyssey::TiledImage::CopyToBlock(*Image, Bounds, ::ULIS::Format_RGBAF);
+            Image->Initialize(TileSize, Format);
+            if (Pixels)
+            {
+                Odyssey::TiledImage::CopyFromBlock(*Image, *Pixels, Bounds, FIntPoint::ZeroValue);
+            }
         }
         ReleaseRasterBlock();
     }
@@ -98,7 +117,7 @@ FOdysseyRasterContent::SetContent(const ::ULIS::FBlock& Block)
     }
 
     Image->Initialize(TileSize, Image->GetFormat());
-    Odyssey::TiledImage::CopyFromBlock(*Image, Block, FIntRect(0, 0, Block.Width(), Block.Height()), FIntPoint::ZeroValue, bSRGB);
+    Odyssey::TiledImage::CopyFromBlock(*Image, Block, FIntRect(0, 0, Block.Width(), Block.Height()), FIntPoint::ZeroValue, GetDescription().bSRGB);
     // The block and the preview are derived from the previous content.
     ReleaseRasterBlock();
     OnChanged({}, false);
@@ -126,7 +145,7 @@ FOdysseyRasterContent::GetRasterBlock()
 
         // Fill the block before binding, so the image is not written back and no post process applies.
         TSharedPtr<::ULIS::FBlock> Pixels = FApp::CanEverRender()
-            ? Odyssey::TiledImage::CopyToBlock(*Image, FIntRect(FIntPoint::ZeroValue, Description.Size), Description.Format, bSRGB)
+            ? Odyssey::TiledImage::CopyToBlock(*Image, FIntRect(FIntPoint::ZeroValue, Description.Size), Description.Format, Description.bSRGB)
             : nullptr;
         if (Pixels)
         {
@@ -200,7 +219,7 @@ FOdysseyRasterContent::OnBlockChanged(const TArray<::ULIS::FRectI>& Rects)
     }
     const TArray<FIntRect> IntRects = ::ULISUtils::ToIntRects(Rects);
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> Block = RasterBlock->GetBlock();
-    Odyssey::TiledImage::CopyBlockToRenderTarget(*EditSession->GetTarget(), Image->GetFormat(), *Block, IntRects, bSRGB);
+    Odyssey::TiledImage::CopyBlockToRenderTarget(*EditSession->GetTarget(), Image->GetFormat(), *Block, IntRects, GetDescription().bSRGB);
     EditSession->Invalidate(IntRects);
 }
 
@@ -216,14 +235,14 @@ FOdysseyRasterContent::OnBlockCommited(const TArray<::ULIS::FRectI>& Rects)
     else if (HasUncommittedEdits())
     {
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> Block = RasterBlock->GetBlock();
-        Odyssey::TiledImage::CopyBlockToRenderTarget(*EditSession->GetTarget(), Image->GetFormat(), *Block, IntRects, bSRGB);
+        Odyssey::TiledImage::CopyBlockToRenderTarget(*EditSession->GetTarget(), Image->GetFormat(), *Block, IntRects, GetDescription().bSRGB);
         EditSession->Commit(IntRects);
         EditSession.Reset();
     }
     else
     {
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> Block = RasterBlock->GetBlock();
-        Odyssey::TiledImage::CopyFromBlock(*Image, *Block, IntRects, bSRGB);
+        Odyssey::TiledImage::CopyFromBlock(*Image, *Block, IntRects, GetDescription().bSRGB);
     }
     OnChanged(IntRects, false);
 }
@@ -240,7 +259,7 @@ FOdysseyRasterContent::OnImageUndone()
 
     // Keep the derived block in sync with the restored tiles. GIsTransacting prevents writing them back.
     const FDescription Description = GetDescription();
-    TSharedPtr<::ULIS::FBlock> Pixels = Odyssey::TiledImage::CopyToBlock(*Image, FIntRect(FIntPoint::ZeroValue, Description.Size), RasterBlock->GetFormat(), bSRGB);
+    TSharedPtr<::ULIS::FBlock> Pixels = Odyssey::TiledImage::CopyToBlock(*Image, FIntRect(FIntPoint::ZeroValue, Description.Size), RasterBlock->GetFormat(), Description.bSRGB);
     if (!Pixels)
     {
         return;

@@ -98,14 +98,17 @@ UOdysseyTextureLayerImageRaster::GetRasterContent() const
     if (!RasterContent)
     {
         UOdysseyTextureLayerImageRaster* MutableThis = const_cast<UOdysseyTextureLayerImageRaster*>(this);
-        RasterContent = MakeUnique<FOdysseyRasterContent>(*MutableThis, MutableThis->GetRenderingId(), MutableThis->TiledImage, false,
+        RasterContent = MakeUnique<FOdysseyRasterContent>(*MutableThis, MutableThis->GetRenderingId(), MutableThis->TiledImage,
             [MutableThis]()
             {
                 FOdysseyRasterContent::FDescription Description;
-                if (MutableThis->GetTexture())
+                UOdysseyTextureLayerStack* LayerStack = Cast<UOdysseyTextureLayerStack>(MutableThis->GetLayerStack());
+                if (MutableThis->GetTexture() && LayerStack)
                 {
                     Description.Size = MutableThis->GetDefaultRenderRect().Size();
                     Description.Format = MutableThis->GetRasterFormat();
+                    Description.bSRGB = LayerStack->IsSRGB();
+                    Description.bKeepBytesOnEncodingChange = !LayerStack->KeepsColorsOnSRGBChange();
                 }
                 return Description;
             },
@@ -157,6 +160,14 @@ UOdysseyTextureLayerImageRaster::GetRasterBlock() const
 void
 UOdysseyTextureLayerImageRaster::InitTexture()
 {
+}
+
+void
+UOdysseyTextureLayerImageRaster::ColorSettingsChanged()
+{
+    // Converts the tiles to the interpretation of the texture bytes.
+    GetRasterContent().EnsureImage();
+    RenderingChanged();
 }
 
 bool
@@ -229,6 +240,15 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     FImage OutImage;
     if (!FImageUtils::GetRenderTargetImage(destinationRenderTarget.Get(), OutImage))
         return;
+
+    // Linear blended colors are encoded back into the bytes the layer holds.
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+    if (layerStack && layerStack->IsSRGB() && layerStack->UsesLinearCompositing())
+    {
+        FImage EncodedImage;
+        OutImage.CopyTo(EncodedImage, ERawImageFormat::BGRA8, EGammaSpace::sRGB);
+        OutImage = MoveTemp(EncodedImage);
+    }
 
     ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
 

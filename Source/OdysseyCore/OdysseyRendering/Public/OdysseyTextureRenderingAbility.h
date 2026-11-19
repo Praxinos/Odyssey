@@ -7,6 +7,7 @@
 #include "RenderGraphFwd.h"
 #include "RHI.h"
 
+#include "OdysseyColorConversion.h"
 #include "OdysseyRenderingAbility.h"
 
 #include "OdysseyTextureRenderingAbility.generated.h"
@@ -85,6 +86,13 @@ protected:
      * so that a replacement is given in content space.
      */
     virtual FMatrix GetContentTransform(const FOdysseyRenderContext* RenderContext) const { return FMatrix::Identity; }
+
+    /**
+     * Returns the conversion applied to the content of this node, a content replacement included, e.g. the sRGB encoding
+     * of the linear colors of a layer whose stack blends encoded colors, or the conversion of a stack to its output.
+     * Not applied to composite content, whose children convert their own.
+     */
+    virtual EOdysseyColorConversion GetContentColorConversion(const FOdysseyRenderContext* RenderContext) const { return EOdysseyColorConversion::None; }
     virtual bool BuildRenderPipelineInternal(
         FRenderFunction& oRenderFunction,
         const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext

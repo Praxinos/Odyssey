@@ -422,4 +422,74 @@ bool FOdysseyAnimationTiledPersistenceTest::RunTest(const FString& Parameters)
     }
     return true;
 }
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationColorCompositingTest, "Odyssey.Animation.Color.Compositing", Odyssey::AnimationTiledTests::Flags)
+/**
+ * New animations blend their layers with encoded colors, as painting applications do, and output linear colors.
+ */
+bool FOdysseyAnimationColorCompositingTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::AnimationTiledTests;
+    TStrongObjectPtr<UOdysseyAnimation> Animation(MakeAnimation(GetTransientPackage(), EOdysseyAnimationFormat::BGRA8));
+    TestFalse(TEXT("New animations blend encoded colors"), Animation->UsesLinearCompositing());
+    const TArray<FLinearColor> Single = Render(Animation.Get(), 0, EOdysseyRenderingType::Render);
+    Animation->SetLinearCompositing(true);
+    ComparePixels(*this, TEXT("A single layer renders the same colors in both modes"), Single, Render(Animation.Get(), 0, EOdysseyRenderingType::Render), 0.0001f);
+
+    // A layer of a constant color blended at half opacity over the first cell.
+    const FColor Top(200, 40, 120, 255);
+    UOdysseyAnimationLayerStack* LayerStack = OdysseyAnimationEditor::GetLayerStack(Animation.Get());
+    UOdysseyAnimationLayer* TopLayer = CastChecked<UOdysseyAnimationLayer>(LayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
+    UOdysseyAnimationCellImageRaster* TopCell = CastChecked<UOdysseyAnimationCellImageRaster>(TopLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
+    TopCell->SetExposure(5);
+    {
+        TSharedPtr<FOdysseyRasterBlock> Raster = TopCell->GetRasterBlock();
+        FOdysseyRasterBlockMutator Mutator(Raster, false);
+        Mutator.EditTilesFromRects({Raster->GetRect()}, [Top](TSharedPtr<ULIS::FBlock> Block, const FOdysseyInvalidTileMap&) -> TArray<ULIS::FEvent>
+        {
+            for (int32 Y = 0; Y < Height; ++Y)
+            {
+                for (int32 X = 0; X < Width; ++X)
+                {
+                    Block->SetPixel(X, Y, ULIS::FColor(ULIS::Format_RGBA8, {Top.R, Top.G, Top.B, Top.A}));
+                }
+            }
+            return {};
+        });
+        Mutator.Commit();
+    }
+    TopLayer->SetOpacity(0.5f);
+
+    // The first cell is filled with the seed 47.
+    TFunction<FColor(int32, int32)> Bottom = [](int32 X, int32 Y) { return FColor(47, uint8((X * 3 + Y * 5) % 251), 255 - 47, 255); };
+    TFunction<void(const TCHAR*, const TArray<FLinearColor>&, bool)> CheckBlend = [this, &Bottom, &Top](const TCHAR* What, const TArray<FLinearColor>& Pixels, bool bLinear)
+    {
+        TArray<FLinearColor> Expected;
+        for (int32 Index = 0; Index < Width * Height; ++Index)
+        {
+            const FColor B = Bottom(Index % Width, Index / Width);
+            if (bLinear)
+            {
+                Expected.Add((FLinearColor::FromSRGBColor(B) + FLinearColor::FromSRGBColor(Top)) * 0.5f);
+            }
+            else
+            {
+                const FLinearColor Encoded = (FLinearColor(B.R, B.G, B.B, B.A) + FLinearColor(Top.R, Top.G, Top.B, Top.A)) / 510.0f;
+                // Decode each channel exactly rather than through an 8-bit color.
+                Expected.Add(FLinearColor(
+                    Encoded.R <= 0.04045f ? Encoded.R / 12.92f : FMath::Pow((Encoded.R + 0.055f) / 1.055f, 2.4f),
+                    Encoded.G <= 0.04045f ? Encoded.G / 12.92f : FMath::Pow((Encoded.G + 0.055f) / 1.055f, 2.4f),
+                    Encoded.B <= 0.04045f ? Encoded.B / 12.92f : FMath::Pow((Encoded.B + 0.055f) / 1.055f, 2.4f),
+                    1.0f));
+            }
+        }
+        ComparePixels(*this, What, Expected, Pixels, 0.002f);
+    };
+    CheckBlend(TEXT("Linear compositing blends linear colors"), Render(Animation.Get(), 0, EOdysseyRenderingType::Render), true);
+    Animation->SetLinearCompositing(false);
+    CheckBlend(TEXT("Encoded compositing blends encoded colors and outputs linear colors"), Render(Animation.Get(), 0, EOdysseyRenderingType::Render), false);
+    Compare(*this, Animation.Get(), 0);
+
+    return true;
+}
+
 #endif

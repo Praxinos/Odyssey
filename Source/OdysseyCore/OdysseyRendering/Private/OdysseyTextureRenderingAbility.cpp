@@ -11,6 +11,7 @@
 #include "TextureResource.h"
 
 #include "OdysseyBlendShader.h"
+#include "OdysseyColorSpaceShader.h"
 #include "OdysseyRenderContext.h"
 
 #define LOCTEXT_NAMESPACE "Imaging"
@@ -250,6 +251,10 @@ bool IOdysseyTextureRenderingAbility::BuildRenderPipeline(FRenderFunction& OutRe
         {
             OutRenderFunction = Override->ContentDecorator(MoveTemp(OutRenderFunction));
         }
+    }
+    if (!BuildsCompositeContent() && !(Override && Override->RenderReplacement))
+    {
+        OutRenderFunction = FOdysseyColorSpaceShader::WrapRenderFunction(MoveTemp(OutRenderFunction), GetContentColorConversion(RenderContext));
     }
     if (Override && Override->RenderDecorator)
     {

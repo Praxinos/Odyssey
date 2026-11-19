@@ -17,6 +17,16 @@
 
 #include "OdysseyTextureLayerStackUserData.generated.h"
 
+/** What the layers keep when the sRGB setting of their texture changes. */
+UENUM()
+enum class EOdysseyTextureSRGBChangePolicy : uint8
+{
+    /** The bytes of the layers are kept: the displayed colors change. */
+    KeepBytes,
+    /** The colors of the layers are kept: their bytes change. */
+    KeepColors,
+};
+
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerStackUserData
     : public UAssetUserData
@@ -41,6 +51,10 @@ public:
     UOdysseyTextureLayerStack* GetLayerStack();
     UTexture2D* GetTexture();
 
+#if WITH_EDITOR
+    virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
+
 private:
 #if WITH_EDITOR
     virtual void OnRefreshReferencedPalette(UOdysseyPalette* iPalette) override;
@@ -49,6 +63,17 @@ private:
 public:
     UPROPERTY(BlueprintReadOnly, Category="Odyssey|LayerStack")
     TObjectPtr<UOdysseyTextureLayerStack> LayerStack;
+
+    /**
+     * Blends the layers of an sRGB texture with linear colors, as 3D and compositing applications do.
+     * Otherwise they are blended with sRGB encoded colors, as painting applications such as Photoshop do.
+     */
+    UPROPERTY(EditAnywhere, Category="Odyssey|Color")
+    bool bLinearCompositing = false;
+
+    /** What the layers keep when the sRGB setting of the texture changes. */
+    UPROPERTY(EditAnywhere, Category="Odyssey|Color")
+    EOdysseyTextureSRGBChangePolicy SRGBChangePolicy = EOdysseyTextureSRGBChangePolicy::KeepBytes;
 
     UPROPERTY()
     TArray<UOdysseyPaletteSet*> Palettes;

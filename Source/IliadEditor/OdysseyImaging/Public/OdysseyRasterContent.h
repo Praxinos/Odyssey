@@ -46,6 +46,18 @@ public:
 
         FIntPoint Size = FIntPoint::ZeroValue;
         ::ULIS::eFormat Format = ::ULIS::Format_RGBA8;
+
+        /**
+         * True when the 8-bit raster block holds sRGB encoded colors. The image always holds linear colors:
+         * they are decoded when written into it and encoded when the raster block is read from it.
+         */
+        bool bSRGB = false;
+
+        /**
+         * When bSRGB changes, e.g. with the sRGB setting of a texture: true to keep the encoded bytes, so that the
+         * displayed colors change; false to keep the colors, so that the bytes change.
+         */
+        bool bKeepBytesOnEncodingChange = true;
     };
 
     using FGetDescription = TFunction<FDescription()>;
@@ -64,13 +76,11 @@ public:
      * @param InOwner The object owning the image property; the outer of the image and the owner of the raster block.
      * @param InRenderingId The rendering id of the owner, which the edit sessions replace in the views.
      * @param InImage The owner's instanced property holding the tiled image. It must outlive this object.
-     * @param bInSRGB True when the 8-bit raster block holds sRGB encoded colors. The image always holds linear colors:
-     *                they are decoded when written into it and encoded when the raster block is read from it.
      * @param InGetDescription Returns the content the owner expects.
      * @param InOnChanged Called when pixels changed.
      * @param InPostProcess Applied by the raster block after each edit, e.g. the alpha lock.
      */
-    FOdysseyRasterContent(UObject& InOwner, const FGuid& InRenderingId, TObjectPtr<UOdysseyTiledImage>& InImage, bool bInSRGB,
+    FOdysseyRasterContent(UObject& InOwner, const FGuid& InRenderingId, TObjectPtr<UOdysseyTiledImage>& InImage,
         FGetDescription InGetDescription, FOnChanged InOnChanged, FOdysseyRasterBlock::FPostProcess InPostProcess);
 
     FOdysseyRasterContent(const FOdysseyRasterContent&) = delete;
@@ -82,6 +92,8 @@ public:
 
     /**
      * Creates the image when missing, and converts it when the owner expects another format.
+     * Between 8-bit linear and 8-bit sRGB encoded content, the conversion follows bKeepBytesOnEncodingChange;
+     * otherwise it keeps the colors.
      * @return False when the owner cannot hold content.
      */
     bool EnsureImage();
@@ -122,7 +134,6 @@ private:
     UObject& Owner;
     FGuid RenderingId;
     TObjectPtr<UOdysseyTiledImage>& Image;
-    bool bSRGB;
     FGetDescription GetDescription;
     FOnChanged OnChanged;
     FOdysseyRasterBlock::FPostProcess PostProcess;

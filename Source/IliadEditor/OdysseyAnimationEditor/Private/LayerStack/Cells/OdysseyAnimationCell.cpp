@@ -9,6 +9,7 @@
 #include "TextureCompiler.h"
 #include "TextureResource.h"
 
+#include "OdysseyAnimation.h"
 #include "OdysseyBlendShader.h"
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationCellImport.h"
@@ -398,6 +399,19 @@ UOdysseyAnimationCell::GetContentTransform(const FOdysseyRenderContext* RenderCo
     }
 #endif
     return FMatrix::Identity;
+}
+
+EOdysseyColorConversion
+UOdysseyAnimationCell::GetContentColorConversion(const FOdysseyRenderContext* RenderContext) const
+{
+#if WITH_EDITOR
+    const UOdysseyAnimation* Animation = GetAnimation();
+    if (Animation && !Animation->UsesLinearCompositing())
+    {
+        return EOdysseyColorConversion::Encode;
+    }
+#endif
+    return EOdysseyColorConversion::None;
 }
 
 bool

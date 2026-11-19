@@ -60,6 +60,17 @@ UOdysseyTextureLayerStackUserData::InitWithDuplicateLayerStack(UOdysseyTextureLa
     LayerStack->CopyLayers(iLayerStack->GetRootLayers(), LayerStack->GetLayerRoot());
 }
 
+#if WITH_EDITOR
+void
+UOdysseyTextureLayerStackUserData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+    Super::PostEditChangeProperty(PropertyChangedEvent);
+
+    if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerStackUserData, bLinearCompositing) && LayerStack)
+        LayerStack->ColorSettingsChanged();
+}
+#endif
+
 UOdysseyTextureLayerStack*
 UOdysseyTextureLayerStackUserData::GetLayerStack()
 {

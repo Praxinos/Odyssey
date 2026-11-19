@@ -82,6 +82,9 @@ public:
 
     /** Raster layers have no render texture: their pixels are held by the tiled image. */
     virtual void InitTexture() override;
+
+    /** Converts the tiled image when the sRGB setting of the texture changed. */
+    virtual void ColorSettingsChanged() override;
     virtual bool BuildRenderPipelineInternal(FRenderFunction& OutRenderFunction,
         const TArray<const IOdysseyTextureRenderingAbility*>& Parents, const FOdysseyRenderContext* RenderContext) const override;
 

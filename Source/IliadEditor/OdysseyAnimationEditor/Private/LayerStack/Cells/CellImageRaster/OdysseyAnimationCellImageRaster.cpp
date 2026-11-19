@@ -79,7 +79,7 @@ UOdysseyAnimationCellImageRaster::GetRasterContent() const
     {
         UOdysseyAnimationCellImageRaster* MutableThis = const_cast<UOdysseyAnimationCellImageRaster*>(this);
         // As the former render texture, 8-bit raster blocks of cells hold sRGB encoded colors; the tiles hold them decoded.
-        mRasterContent = MakeUnique<FOdysseyRasterContent>(*MutableThis, MutableThis->GetRenderingId(), MutableThis->TiledImage, true,
+        mRasterContent = MakeUnique<FOdysseyRasterContent>(*MutableThis, MutableThis->GetRenderingId(), MutableThis->TiledImage,
             [MutableThis]()
             {
                 FOdysseyRasterContent::FDescription Description;
@@ -87,6 +87,7 @@ UOdysseyAnimationCellImageRaster::GetRasterContent() const
                 {
                     Description.Size = MutableThis->GetDefaultRenderRect().Size();
                     Description.Format = MutableThis->GetRasterFormat();
+                    Description.bSRGB = true;
                 }
                 return Description;
             },

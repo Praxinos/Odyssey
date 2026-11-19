@@ -31,6 +31,9 @@ public:
 public:
     virtual bool BuildsCompositeContent() const override { return bCanHaveChildren; }
     virtual void InitTexture();
+
+    /** Applies a change of the color settings of the texture or of the layer stack, e.g. its sRGB setting. */
+    virtual void ColorSettingsChanged();
     virtual bool BuildRenderPipelineInternal( IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext ) const override;
 
 public:
@@ -43,6 +46,9 @@ public:
 #endif
 
 protected:
+    /** Encodes the linear colors of the layer when its stack blends sRGB encoded colors. */
+    virtual EOdysseyColorConversion GetContentColorConversion(const FOdysseyRenderContext* RenderContext) const override;
+
     /** Returns the source format of the layer texture for a texture of the given source format. */
     static ETextureSourceFormat GetLayerTextureFormat(ETextureSourceFormat TextureFormat);
 

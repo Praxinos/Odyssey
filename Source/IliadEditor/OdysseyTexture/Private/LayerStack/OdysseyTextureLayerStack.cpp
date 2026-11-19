@@ -13,6 +13,7 @@
 #include "OdysseyRasterBlock.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyRenderContext.h"
+#include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyTextureLayer.h"
 #include "OdysseyTextureLayerFolder.h"
 #include "OdysseyTextureLayerImageRaster.h"
@@ -91,9 +92,26 @@ UOdysseyTextureLayerStack::CreateWithEmptyVectorLayer(UTexture2D* iTexture, UObj
     return layerStack;
 }
 
+namespace
+{
+/** Rounds a float image to 8 bits when it is read into an 8-bit block, which a raw conversion would truncate. */
+void RoundFloatImageForBlock(FImage& Image, ::ULIS::eFormat BlockFormat)
+{
+    const bool bFloatImage = Image.Format == ERawImageFormat::RGBA16F || Image.Format == ERawImageFormat::RGBA32F;
+    if (!bFloatImage || ULIS_R_FLOATING(BlockFormat) || ULIS_R_DEPTH(BlockFormat) != 1)
+        return;
+
+    // The values are the bytes to write, already encoded when needed: no gamma conversion.
+    FImage RoundedImage;
+    Image.CopyTo(RoundedImage, ERawImageFormat::BGRA8, EGammaSpace::Linear);
+    Image = MoveTemp(RoundedImage);
+}
+}
+
 UOdysseyTextureLayerStack::~UOdysseyTextureLayerStack()
 {
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
+    FCoreUObjectDelegates::OnObjectPropertyChanged.RemoveAll(this);
 }
 
 UOdysseyTextureLayerStack::UOdysseyTextureLayerStack()
@@ -103,6 +121,91 @@ UOdysseyTextureLayerStack::UOdysseyTextureLayerStack()
     SupportedLayerClasses.Add(UOdysseyTextureLayerImageVector::StaticClass());
 
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyTextureLayerStack::OnRenderingChanged);
+    FCoreUObjectDelegates::OnObjectPropertyChanged.AddUObject(this, &UOdysseyTextureLayerStack::OnObjectPropertyChanged);
+}
+
+bool
+UOdysseyTextureLayerStack::IsSRGB() const
+{
+    UTexture2D* texture = GetTexture();
+    if (!texture)
+        return false;
+
+    const ETextureSourceFormat format = texture->Source.GetFormat();
+    return (format == TSF_BGRA8 || format == TSF_G8) && texture->SRGB;
+}
+
+bool
+UOdysseyTextureLayerStack::UsesLinearCompositing() const
+{
+    const UOdysseyTextureLayerStackUserData* userData = Cast<UOdysseyTextureLayerStackUserData>(GetOuter());
+    return userData && userData->bLinearCompositing;
+}
+
+bool
+UOdysseyTextureLayerStack::KeepsColorsOnSRGBChange() const
+{
+    const UOdysseyTextureLayerStackUserData* userData = Cast<UOdysseyTextureLayerStackUserData>(GetOuter());
+    return userData && userData->SRGBChangePolicy == EOdysseyTextureSRGBChangePolicy::KeepColors;
+}
+
+EOdysseyColorConversion
+UOdysseyTextureLayerStack::GetLayerColorConversion() const
+{
+    return IsSRGB() && !UsesLinearCompositing() ? EOdysseyColorConversion::Encode : EOdysseyColorConversion::None;
+}
+
+EOdysseyColorConversion
+UOdysseyTextureLayerStack::GetContentColorConversion(const FOdysseyRenderContext* RenderContext) const
+{
+    return IsSRGB() && UsesLinearCompositing() ? EOdysseyColorConversion::Encode : EOdysseyColorConversion::None;
+}
+
+ETextureRenderTargetFormat
+UOdysseyTextureLayerStack::GetCompositingFormat() const
+{
+    UTexture2D* texture = GetTexture();
+    if (!texture)
+        return RTF_RGBA8;
+
+    switch (texture->Source.GetFormat())
+    {
+        // 16-bit and float textures are blended in 32-bit floats, which keep every 16-bit value.
+        case TSF_R16F:
+        case TSF_G16:
+        case TSF_RGBA16:
+        case TSF_RGBA16F:
+        case TSF_R32F:
+        case TSF_RGBA32F:
+            return RTF_RGBA32f;
+
+        default:
+            // Linear colors need more than 8 bits to keep every sRGB encoded color.
+            return IsSRGB() && UsesLinearCompositing() ? RTF_RGBA16f : RTF_RGBA8;
+    }
+}
+
+void
+UOdysseyTextureLayerStack::ColorSettingsChanged()
+{
+    for (UOdysseyLayer* layer : GetLayers())
+    {
+        if (UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(layer))
+            textureLayer->ColorSettingsChanged();
+    }
+    RenderingCompositionChanged(false);
+}
+
+void
+UOdysseyTextureLayerStack::OnObjectPropertyChanged(UObject* Object, FPropertyChangedEvent& PropertyChangedEvent)
+{
+    if (!Object || Object != GetTexture())
+        return;
+
+    // The sRGB setting changes how the layers interpret the bytes of the texture.
+    // Changes without property name are ignored: texture compilations send them, while no texture may be compiled.
+    if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(UTexture, SRGB))
+        ColorSettingsChanged();
 }
 
 void
@@ -375,6 +478,7 @@ UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<FIntRect>& iRects, boo
         if (!FImageUtils::GetRenderTargetImage(RenderTarget, OutImage, rect))
             continue;
 
+        RoundFloatImageForBlock(OutImage, dst->Format());
         ::ULIS::eFormat srcFormat = ULISFormatForRawImageFormat( OutImage.Format );
         ::ULIS::FBlock src(OutImage.GetWidth(), OutImage.GetHeight(), srcFormat);
         CopyImageToBlock(OutImage, &src);
@@ -501,7 +605,8 @@ UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
             if (!FImageUtils::GetRenderTargetImage(RenderTarget, OutImage, rect))
                 continue;
 
-            ::ULIS::eFormat srcFormat = ULISFormatForRawImageFormat( OutImage.Format );
+            RoundFloatImageForBlock(OutImage, dst->Format());
+        ::ULIS::eFormat srcFormat = ULISFormatForRawImageFormat( OutImage.Format );
             ::ULIS::FBlock src(OutImage.GetWidth(), OutImage.GetHeight(), srcFormat);
             CopyImageToBlock(OutImage, &src);
 
@@ -542,42 +647,12 @@ UOdysseyTextureLayerStack::UpdateRenderTargetFormat()
 
     FTextureCompilingManager::Get().FinishCompilation({ texture });
 
-    ETextureSourceFormat textureSourceFormat = texture->Source.GetFormat();
-    //bool expectSRGB = false; //(textureSourceFormat == TSF_BGRA8 || textureSourceFormat == TSF_G8) && texture->SRGB;
-    ETextureRenderTargetFormat format = RTF_RGBA8;
-
-    switch(textureSourceFormat)
-    {
-        case TSF_BGRA8:
-        case TSF_BGRE8:
-        case TSF_G8:
-        case TSF_RGBA8_DEPRECATED:
-        case TSF_RGBE8_DEPRECATED:
-        {
-            format = RTF_RGBA8; //expectSRGB ? RTF_RGBA8_SRGB : RTF_RGBA8;
-        }
-        break;
-
-        case TSF_R16F: //we could use RTF_R16f here
-        case TSF_G16:
-        case TSF_RGBA16:
-        case TSF_RGBA16F:
-        {
-            format = RTF_RGBA16f;
-        }
-
-        case TSF_R32F: //we could use RTF_R32f here
-        case TSF_RGBA32F:
-        {
-            format = RTF_RGBA32f;
-        }
-    }
-
+    const ETextureRenderTargetFormat format = GetCompositingFormat();
 
     if (RenderTarget->RenderTargetFormat != format)
     {
         RenderTarget->RenderTargetFormat = format;
-        RenderTarget->bForceLinearGamma = true; //!expectSRGB;
+        RenderTarget->bForceLinearGamma = true;
         RenderTarget->PostEditChange();
         RenderTarget->UpdateResourceImmediate();
     }
@@ -598,35 +673,7 @@ UOdysseyTextureLayerStack::CreateRenderingRenderTarget() const
 
     FTextureCompilingManager::Get().FinishCompilation({ texture });
 
-    ETextureSourceFormat textureSourceFormat = texture->Source.GetFormat();
-    ETextureRenderTargetFormat format = RTF_RGBA8;
-
-    switch(textureSourceFormat)
-    {
-        case TSF_BGRA8:
-        case TSF_BGRE8:
-        case TSF_G8:
-        case TSF_RGBA8_DEPRECATED:
-        case TSF_RGBE8_DEPRECATED:
-        {
-            format = RTF_RGBA8; //expectSRGB ? RTF_RGBA8_SRGB : RTF_RGBA8;
-        }
-        break;
-
-        case TSF_R16F: //we could use RTF_R16f here
-        case TSF_G16:
-        case TSF_RGBA16:
-        case TSF_RGBA16F:
-        {
-            format = RTF_RGBA16f;
-        }
-
-        case TSF_R32F: //we could use RTF_R32f here
-        case TSF_RGBA32F:
-        {
-            format = RTF_RGBA32f;
-        }
-    }
+    const ETextureRenderTargetFormat format = GetCompositingFormat();
 
     UTextureRenderTarget2D* renderTarget = NewObject<UTextureRenderTarget2D>();
     renderTarget->RenderTargetFormat = format;
