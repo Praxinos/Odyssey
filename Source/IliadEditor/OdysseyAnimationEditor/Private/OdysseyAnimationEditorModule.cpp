@@ -12,6 +12,9 @@
 
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCellsSelection.h"
+#include "OdysseyAnimationLayerStackUserData.h"
+#include "OdysseyAnimationPalettesUserData.h"
+#include "OdysseyAnimationToolCollectionsUserData.h"
 #include "OdysseyAnimationLayerStackEditorCommands.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationActorFactory.h"
@@ -30,7 +33,7 @@
 void
 FOdysseyAnimationEditorModule::StartupModule()
 {
-    FModuleManager::LoadModuleChecked<IModuleInterface>("OdysseyLayerStackEditor");
+    FModuleManager::LoadModuleChecked<IModuleInterface>("OdysseyLayerStack");
     OdysseyAnimationCellsSelection::Initialize();
     FOdysseyAnimationLayerStackEditorCommands::Register();
     RegisterAssetTypeActions();
@@ -43,6 +46,20 @@ FOdysseyAnimationEditorModule::StartupModule()
         this,
         &FOdysseyAnimationEditorModule::OnNewActorsDropped
     );
+
+    mLegacyEditorDataLoadedHandle = UOdysseyAnimation::OnLegacyEditorDataLoaded().AddStatic(&FOdysseyAnimationEditorModule::OnLegacyEditorDataLoaded);
+}
+
+void
+FOdysseyAnimationEditorModule::OnLegacyEditorDataLoaded(UOdysseyAnimation* iAnimation)
+{
+    UOdysseyAnimationLayerStackUserData::FindOrCreate(iAnimation);
+
+    if (iAnimation->HasLegacyPalettes())
+        UOdysseyAnimationPalettesUserData::FindOrCreate(iAnimation);
+
+    if (iAnimation->HasLegacyToolCollections())
+        UOdysseyAnimationToolCollectionsUserData::FindOrCreate(iAnimation);
 }
 
 void
@@ -58,6 +75,8 @@ FOdysseyAnimationEditorModule::ShutdownModule()
     UnregisterAssetTypeActions();
 
     FEditorDelegates::OnNewActorsDropped.RemoveAll(this);
+
+    UOdysseyAnimation::OnLegacyEditorDataLoaded().Remove(mLegacyEditorDataLoadedHandle);
 }
 
 void

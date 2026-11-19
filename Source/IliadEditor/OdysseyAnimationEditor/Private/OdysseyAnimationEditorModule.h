@@ -27,7 +27,13 @@ private:
     void UnregisterPropertyCustomizations();
 
     void OnNewActorsDropped(const TArray<UObject*>& DroppedObjects, const TArray<AActor*>& NewActors);
+
+    /** Moves the legacy editor content of a loaded animation into its layer stack, palettes and tool collections user data */
+    static void OnLegacyEditorDataLoaded(class UOdysseyAnimation* iAnimation);
 private:
     /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
     TSharedPtr<IAssetTypeActions> mOdysseyTypeActions;
+
+    /** Handle of the legacy animation editor data migration */
+    FDelegateHandle mLegacyEditorDataLoadedHandle;
 };

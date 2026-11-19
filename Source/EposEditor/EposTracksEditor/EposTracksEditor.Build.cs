@@ -85,6 +85,7 @@ public class EposTracksEditor : ModuleRules
                 "EposPattern",
                 "OdysseyAnimation",
                 "OdysseyAnimationTracks",
+                "OdysseyAnimationTracksEditor",
                 "OdysseyLayerStack",
                 "OdysseyRendering",
 

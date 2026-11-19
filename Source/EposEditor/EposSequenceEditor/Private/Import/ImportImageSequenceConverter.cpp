@@ -26,6 +26,7 @@
 #include "Settings/EposTracksEditorSettings.h"
 #include "Tools/EposSequenceTools.h"
 #include "Tools/ResourceAssetTools.h"
+#include "OdysseyAnimationEditorData.h"
 
 #define LOCTEXT_NAMESPACE "ImportImageSequenceConverter"
 
@@ -202,7 +203,7 @@ FImportImageSequenceConverter::CreateAnimation( const TArray<FImportImageSequenc
         if( new_animation )
         {
             // Remove all existing layers
-            UOdysseyLayerStack* layer_stack = new_animation->GetLayerStack();
+            UOdysseyLayerStack* layer_stack = OdysseyAnimationEditor::GetLayerStack(new_animation);
             layer_stack->RemoveLayers( layer_stack->GetLayers() );
 
             //---
@@ -215,7 +216,7 @@ FImportImageSequenceConverter::CreateAnimation( const TArray<FImportImageSequenc
             if (!importResult.mImportedLayers.IsEmpty())
             {
                 UOdysseyAnimationLayerImageRaster* animation_layer = importResult.mImportedLayers[0];
-                new_animation->GetLayerStack()->SetCurrentLayer( animation_layer );
+                layer_stack->SetCurrentLayer( animation_layer );
 
                 //---
 

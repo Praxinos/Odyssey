@@ -3,6 +3,8 @@
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
 
+#include "EposTracksEditorHelpers.h"
+
 #include "AnimatedRange.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneFloatChannel.h"
@@ -673,7 +675,7 @@ FCinematicBoardSection::GetAnimationTransformMetaChannel( FMovieScenePossessable
 void
 FCinematicBoardSection::BuildAnimationsTimelineChannelProxy()
 {
-    mAnimationsTimelineChannelProxies = BoardSequenceHelpers::BuildAnimationsTimelineChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
+    mAnimationsTimelineChannelProxies = FEposTracksEditorHelpers::BuildAnimationsTimelineChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
 
     ReBuildAnimationsTimelineMetaChannel();
 }

@@ -2,9 +2,13 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyAnimationEditorFunctionLibrary.h"
+
 #include "AssetToolsModule.h"
+
 #include "OdysseyAnimationFactory.h"
 #include "OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationCell.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyAnimationEditorFunctionLibrary"
 
@@ -41,6 +45,35 @@ UOdysseyAnimationEditorFunctionLibrary::CreateAnimationAsset(FString AssetName, 
     );
 
     return animation;
+}
+
+UOdysseyAnimation*
+UOdysseyAnimationEditorFunctionLibrary::GetLayerStackAnimation(UOdysseyLayerStack* Layerstack)
+{
+    UOdysseyAnimationLayerStack* AnimationLayerStack = Cast<UOdysseyAnimationLayerStack>(Layerstack);
+    if (!IsValid(AnimationLayerStack))
+        return nullptr;
+
+    return AnimationLayerStack->GetAnimation();
+}
+
+UOdysseyAnimation*
+UOdysseyAnimationEditorFunctionLibrary::GetLayerAnimation(UOdysseyLayer* Layer)
+{
+    UOdysseyAnimationLayer* AnimationLayer = Cast<UOdysseyAnimationLayer>(Layer);
+    if (!IsValid(AnimationLayer))
+        return nullptr;
+
+    return AnimationLayer->GetAnimation();
+}
+
+UOdysseyAnimation*
+UOdysseyAnimationEditorFunctionLibrary::GetCellAnimation(UOdysseyAnimationCell* Cell)
+{
+    if (!IsValid(Cell))
+        return nullptr;
+
+    return Cell->GetAnimation();
 }
 
 #undef LOCTEXT_NAMESPACE

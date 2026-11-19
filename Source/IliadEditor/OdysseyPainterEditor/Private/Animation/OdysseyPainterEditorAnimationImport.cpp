@@ -26,6 +26,7 @@
 #include "ULISLoaderModule.h"
 #include "Factories/TextureFactory.h"
 #include "Factories/Factory.h"
+#include "OdysseyAnimationEditorData.h"
 
 #define LOCTEXT_NAMESPACE "FOdysseyPainterEditorAnimationImport"
 
@@ -37,7 +38,7 @@ FOdysseyPainterEditorAnimationImport::ImportTextureSequence(UOdysseyAnimation* A
     if ( iImportData.GetSourceTextures().Num() <= 0 || !Animation )
         return result;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(Animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(Animation));
     if ( !layerStack )
         return result;
 

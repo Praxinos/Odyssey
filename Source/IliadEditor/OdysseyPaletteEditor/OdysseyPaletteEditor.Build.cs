@@ -82,6 +82,7 @@ namespace UnrealBuildTool.Rules
                     "PropertyEditor",
                     "ToolWidgets",
                     "OdysseyAnimation",
+                    "OdysseyAnimationEditor",
                     "OdysseyCore",
                     "OdysseyCoreEditor",
                     "OdysseyLayerStack",

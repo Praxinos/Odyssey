@@ -7,8 +7,6 @@
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationPlayer.h"
 
-#include "OdysseyAnimationCutChannel.h"
-
 #include "OdysseyAnimationTimelineSection.generated.h"
 
 enum class EMovieSceneChannelProxyType : uint8;
@@ -46,31 +44,15 @@ public:
     FFrameNumber ConvertFrameFromTimelineToSequence( FFrameNumber iFrameInTimeline );
     FFrameNumber ConvertFrameFromSequenceToTimeline( FFrameNumber iFrameInSequence );
 
-    FOdysseyAnimationCutChannel& GetAnimationCutChannel();
-    const FOdysseyAnimationCutChannel& GetAnimationCutChannel() const;
-
-    DECLARE_MULTICAST_DELEGATE( FOnAnimationCutChannelChanged );
-    FOnAnimationCutChannelChanged& OnAnimationCutChannelChanged();
-
-    void UpdateAnimationCutChannel( const TArray<FKeyHandle>& iKeyHandles, EPropertyChangeType::Type iChangeType );
-
-protected:
-    virtual void PostInitProperties() override;
-    virtual void PostEditImport() override;
-    virtual void PostLoad() override;
-    virtual void PostDuplicate( bool bDuplicateForPIE ) override;
-#if WITH_EDITOR
-    virtual void PreEditChange( FProperty* PropertyAboutToChange );
-    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent );
+#if WITH_EDITORONLY_DATA
+    UObject* GetEditorData() const;
+    void SetEditorData(UObject* Data);
 #endif
 
+protected:
     virtual EMovieSceneChannelProxyType CacheChannelProxy() override;
     virtual void MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate) override;
     virtual void OnBindingIDsUpdated( const TMap<UE::MovieScene::FFixedObjectBindingID, UE::MovieScene::FFixedObjectBindingID>& OldFixedToNewFixedMap, FMovieSceneSequenceID LocalSequenceID, TSharedRef<UE::MovieScene::FSharedPlaybackState> SharedPlaybackState ) override;
-
-    virtual void RebuildAnimationCutChannel();
-
-    virtual void OnAnimationChanged( const FOdysseyRenderingChangedEvent& iEvent );
 
 protected:
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation")
@@ -85,10 +67,8 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
     FFrameNumber StartFrameOffset = 0;
 
-    UPROPERTY(Transient)
-    FOdysseyAnimationCutChannel AnimationCutChannel;
-
-    FOnAnimationCutChannelChanged mOnAnimationCutChannelChanged;
-
-    bool LockChannelRebuild = false;
+#if WITH_EDITORONLY_DATA
+    UPROPERTY(Transient, DuplicateTransient)
+    TObjectPtr<UObject> EditorData;
+#endif
 };

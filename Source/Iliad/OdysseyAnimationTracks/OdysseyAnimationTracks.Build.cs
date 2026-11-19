@@ -54,7 +54,6 @@ namespace UnrealBuildTool.Rules
                     "MediaAssets",
                     "MovieScene",
                     "OdysseyAnimation",
-                    "OdysseyLayerStack",
                     "OdysseyRendering", //TODO: required with OdysseyAnimation otherwise in OdysseyAnimation: OdysseyAnimation.h(9): fatal error C1083: Cannot open include file: 'OdysseyImageRenderingAbility.h': No such file or directory
                     "OdysseyCore",
                     "RenderCore",

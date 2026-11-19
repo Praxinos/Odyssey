@@ -22,6 +22,7 @@
 #include "OdysseyStyle.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/SOdysseyAnimationTimelineTrack.h"
+#include "OdysseyAnimationEditorData.h"
 
 #define LOCTEXT_NAMESPACE "AnimationTrack"
 
@@ -455,7 +456,7 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
                                 if (!animation)
                                     return nullptr;
 
-                                return Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+                                return Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
                             }
                         )
                 ]

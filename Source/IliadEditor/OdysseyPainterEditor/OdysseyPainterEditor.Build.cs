@@ -87,7 +87,6 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyHUD",
                 "OdysseyImaging",
                 "OdysseyLayerStack",
-                "OdysseyLayerStackEditor",
                 "OdysseyRendering",
                 "OdysseyStyle",
                 "OdysseyStylusInput",

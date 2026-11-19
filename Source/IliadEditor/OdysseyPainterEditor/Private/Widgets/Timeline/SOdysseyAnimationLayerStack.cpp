@@ -12,6 +12,7 @@
 #include "OdysseyStyle.h"
 #include "SOdysseyAnimationTimelineControl.h"
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationEditorData.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -71,7 +72,7 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
     if (!layerStack)
         return;
 

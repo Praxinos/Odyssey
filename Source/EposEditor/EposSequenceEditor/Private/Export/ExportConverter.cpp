@@ -3,6 +3,8 @@
 
 #include "Export/ExportConverter.h"
 
+#include "OdysseyAnimationTimelineSectionEditorData.h"
+
 #include "AssetToolsModule.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "CommonFrameRates.h"
@@ -91,7 +93,7 @@ FExportConverter::ProcessAnimationCuts( UShotSequence& iShotSequence, FMovieScen
 
         for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result.mSections )
         {
-            const FOdysseyAnimationCutChannel& channel = section->GetAnimationCutChannel();
+            const FOdysseyAnimationCutChannel& channel = UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*section)->GetAnimationCutChannel();
             TMovieSceneChannelData<const FOdysseyAnimationCutValue> data = channel.GetData();
             TArrayView<const FFrameNumber> times = data.GetTimes();
             TArrayView<const FOdysseyAnimationCutValue> values = data.GetValues();

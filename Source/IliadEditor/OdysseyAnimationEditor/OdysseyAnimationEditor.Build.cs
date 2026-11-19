@@ -38,10 +38,47 @@ namespace UnrealBuildTool.Rules
                 OptimizeCode = CodeOptimization.Never;
             }
 
+            /** Animation LayerStack data (layers, cells, lighttables) is editor only and lives in this module. */
+            PublicIncludePaths.AddRange(
+                new string[]
+                {
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Cells"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Cells", "CellImageRaster"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Cells", "CellImageStagger"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Cells", "CellImageVector"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerFolder"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerImageRaster"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerImageVector"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Lighttable"),
+                }
+                );
+
+            PrivateIncludePaths.AddRange(
+                new string[]
+                {
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Cells"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Cells", "CellImageRaster"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Cells", "CellImageStagger"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Cells", "CellImageVector"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerFolder"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerImageRaster"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerImageVector"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Lighttable"),
+                }
+                );
+
             PublicDependencyModuleNames.AddRange(
                 new string[]
                 {
-                    "OdysseyLayerStackEditor",
+                    "MediaAssets",
+                    "OdysseyAnimation",
+                    "OdysseyLayerStack",
+                    "OdysseyPalette",
+                    "OdysseyRendering",
                 }
                 );
 
@@ -65,6 +102,7 @@ namespace UnrealBuildTool.Rules
                     "MediaAssets",
                     "MovieScene",
                     "MovieSceneTools",
+                    "NamingTokens",
                     "Paper2D",
                     "Paper2DEditor",
                     "PropertyEditor",
@@ -79,15 +117,14 @@ namespace UnrealBuildTool.Rules
                     "UnrealEd",
                     "EditorFramework",
 
-                    "OdysseyAnimation",
                     "OdysseyBrush",
                     "OdysseyCore",
                     "OdysseyCoreEditor",
                     "OdysseyEditor",
+                    "OdysseyFile",
                     "OdysseyHUD",
                     "OdysseyImaging",
-                    "OdysseyLayerStack",
-                    "OdysseyRendering",
+                    "OdysseyMedia",
                     "OdysseyStyle",
                     "OdysseyVector",
 

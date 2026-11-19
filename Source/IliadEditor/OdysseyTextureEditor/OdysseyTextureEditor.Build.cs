@@ -71,7 +71,6 @@ namespace UnrealBuildTool.Rules
 
                     "OdysseyImaging",
                     "OdysseyLayerStack",
-                    "OdysseyLayerStackEditor",
                     "OdysseyPainterEditor",
                     "OdysseyStyle",
                     "OdysseyTexture",

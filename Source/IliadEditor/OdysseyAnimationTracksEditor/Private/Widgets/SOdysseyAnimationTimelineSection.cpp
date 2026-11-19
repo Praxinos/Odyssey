@@ -27,6 +27,7 @@
 #include "OdysseyViewportDrawingEditorEdMode.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "SOdysseyAnimationTimelineTreeView.h"
+#include "OdysseyAnimationEditorData.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -201,7 +202,7 @@ SOdysseyAnimationTimelineSection::RebuildWidgets()
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
 
     TSharedRef<SEnumComboBox> preBehaviourComboBoxWidget = SNew(SEnumComboBox, StaticEnum<EOdysseyAnimationPlayerPostBehaviour>())
         .Clipping(EWidgetClipping::ClipToBounds)

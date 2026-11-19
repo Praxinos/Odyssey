@@ -30,6 +30,7 @@
 
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
+#include "OdysseyAnimationEditorData.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -55,7 +56,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     if (!animation)
         return;
 
-    UOdysseyLayerStack* layerStack = animation->GetLayerStack();
+    UOdysseyLayerStack* layerStack = OdysseyAnimationEditor::GetLayerStack(animation);
     if (!layerStack)
         return;
 
@@ -287,7 +288,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_CrossFade()
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
     if (!layerStack)
         return false;
 

@@ -3,6 +3,8 @@
 
 #include "CinematicBoardWidgets/SCinematicBoardSectionAnimations.h"
 
+#include "OdysseyAnimationTimelineSectionEditorData.h"
+
 #include "Brushes/SlateColorBrush.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
@@ -1222,7 +1224,7 @@ SCinematicBoardSectionAnimationTimelineKeys::SetDelegates()
     TMultiMap<UOdysseyAnimation*, FFrameNumber> map;
     for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> animation_timeline_section : result.mSections )
     {
-        animation_timeline_section->OnAnimationCutChannelChanged().AddSP( this, &SCinematicBoardSectionAnimationTimelineKeys::OnAnimationCutChannelChanged );
+        UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*animation_timeline_section)->OnAnimationCutChannelChanged().AddSP( this, &SCinematicBoardSectionAnimationTimelineKeys::OnAnimationCutChannelChanged );
         if( animation_timeline_section->GetAnimation() )
             animation_timeline_section->GetAnimation()->OnRenderingChangedDelegate().AddSP( this, &SCinematicBoardSectionAnimationTimelineKeys::OnAnimationChanged );
     }
@@ -1294,7 +1296,7 @@ SCinematicBoardSectionAnimationTimelineKeys::OnAnimationCutChannelChanged()
     //TMultiMap<UOdysseyAnimation*, FFrameNumber> map;
     //for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> animation_timeline_section : result.mSections )
     //{
-    //    const FOdysseyAnimationCutChannel& object_channel = animation_timeline_section->GetAnimationCutChannel();
+    //    const FOdysseyAnimationCutChannel& object_channel = UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*animation_timeline_section)->GetAnimationCutChannel();
 
     //    for( FFrameNumber frame_in_sequence : object_channel.GetTimes() )
     //    {
@@ -1405,7 +1407,7 @@ SCinematicBoardSectionAnimationTimelineKeys::OnAnimationCutChannelChanged()
 //        board_section->BuildAnimationsTimelineChannelProxy();
 //        RebuildMetaChannel();
 //
-//        const FOdysseyAnimationCutChannel& object_channel = animation_timeline_section->GetAnimationCutChannel();
+//        const FOdysseyAnimationCutChannel& object_channel = UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*animation_timeline_section)->GetAnimationCutChannel();
 //
 //        for( FFrameNumber frame_in_sequence : object_channel.GetTimes() )
 //        {
@@ -2004,7 +2006,7 @@ SCinematicBoardSectionAnimationTimelineKeys::OnDragKeys( TSharedPtr<FMetaChannel
         //TArray<FFrameNumber> new_frames_in_timeline;
         //new_frames_in_timeline_map.MultiFind( section, new_frames_in_timeline );
 
-        section->UpdateAnimationCutChannel( key_handles, EPropertyChangeType::Interactive );
+        UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*section)->UpdateAnimationCutChannel( key_handles, EPropertyChangeType::Interactive );
     }
 
     //mNeedRebuildThumbnails = true;
@@ -2029,7 +2031,7 @@ SCinematicBoardSectionAnimationTimelineKeys::OnStopDragKeys( TSharedPtr<FMetaCha
         //TArray<FFrameNumber> new_frames_in_timeline;
         //new_frames_in_timeline_map.MultiFind( section, new_frames_in_timeline );
 
-        section->UpdateAnimationCutChannel( key_handles, EPropertyChangeType::ValueSet );
+        UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*section)->UpdateAnimationCutChannel( key_handles, EPropertyChangeType::ValueSet );
     }
 
     //mNeedRebuildThumbnails = true;
@@ -2085,7 +2087,7 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
 
             TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
             FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
-            check( object_channel == &animation_timeline_section->GetAnimationCutChannel() );
+            check( object_channel == &UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*animation_timeline_section)->GetAnimationCutChannel() );
 
             dragged_keys_map.Add( animation_timeline_section, subkey.mKeyHandle );
         }
@@ -2102,13 +2104,13 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
         TArray<FKeyHandle> handles;
         dragged_keys_map.MultiFind( section, handles );
 
-        FKeyHandle previous_handle_in_section = section->GetAnimationCutChannel().FindPreviousKey( handles );
-        FKeyHandle next_handle_in_section = section->GetAnimationCutChannel().FindNextKey( handles );
+        FKeyHandle previous_handle_in_section = UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*section)->GetAnimationCutChannel().FindPreviousKey( handles );
+        FKeyHandle next_handle_in_section = UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*section)->GetAnimationCutChannel().FindNextKey( handles );
 
         if( previous_handle_in_section.IsValid() )
         {
             FFrameNumber previous_frame_in_section;
-            section->GetAnimationCutChannel().GetKeyTime( previous_handle_in_section, previous_frame_in_section );
+            UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*section)->GetAnimationCutChannel().GetKeyTime( previous_handle_in_section, previous_frame_in_section );
 
             if( !first_limit_handle.Key )
             {
@@ -2118,7 +2120,7 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
             else
             {
                 FFrameNumber previous_frame;
-                first_limit_handle.Key->GetAnimationCutChannel().GetKeyTime( first_limit_handle.Value, previous_frame );
+                UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*first_limit_handle.Key)->GetAnimationCutChannel().GetKeyTime( first_limit_handle.Value, previous_frame );
 
                 if( previous_frame_in_section < previous_frame )
                 {
@@ -2132,7 +2134,7 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
             if( next_handle_in_section.IsValid() )
             {
                 FFrameNumber next_frame_in_section;
-                section->GetAnimationCutChannel().GetKeyTime( next_handle_in_section, next_frame_in_section );
+                UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*section)->GetAnimationCutChannel().GetKeyTime( next_handle_in_section, next_frame_in_section );
 
                 if( !last_limit_handle.Key )
                 {
@@ -2142,7 +2144,7 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
                 else
                 {
                     FFrameNumber next_frame;
-                    last_limit_handle.Key->GetAnimationCutChannel().GetKeyTime( last_limit_handle.Value, next_frame );
+                    UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*last_limit_handle.Key)->GetAnimationCutChannel().GetKeyTime( last_limit_handle.Value, next_frame );
 
                     if( next_frame_in_section > next_frame )
                     {
@@ -2159,7 +2161,7 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
     if( first_limit_handle.Key )
     {
         FFrameNumber frame_in_sequence;
-        first_limit_handle.Key->GetAnimationCutChannel().GetKeyTime( first_limit_handle.Value, frame_in_sequence );
+        UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*first_limit_handle.Key)->GetAnimationCutChannel().GetKeyTime( first_limit_handle.Value, frame_in_sequence );
         FFrameNumber frame_in_timeline = first_limit_handle.Key->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
         frame_in_sequence = first_limit_handle.Key->ConvertFrameFromTimelineToSequence( frame_in_timeline + 1 );
 
@@ -2183,7 +2185,7 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
         if( last_limit_handle.Key )
         {
             FFrameNumber frame_in_sequence;
-            last_limit_handle.Key->GetAnimationCutChannel().GetKeyTime( last_limit_handle.Value, frame_in_sequence );
+            UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*last_limit_handle.Key)->GetAnimationCutChannel().GetKeyTime( last_limit_handle.Value, frame_in_sequence );
             FFrameNumber frame_in_timeline = last_limit_handle.Key->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
             frame_in_sequence = last_limit_handle.Key->ConvertFrameFromTimelineToSequence( frame_in_timeline - 1 );
 
