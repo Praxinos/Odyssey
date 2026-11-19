@@ -26,7 +26,7 @@
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
 #include "Tools/ResourceAssetTools.h"
-#include "OdysseyAnimationLayerStackUserData.h"
+#include "OdysseyAnimationEditorData.h"
 
 #define LOCTEXT_NAMESPACE "LighttableTools"
 
@@ -142,7 +142,7 @@ LighttableTools::Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
         if( !animation )
             continue;
 
-        UOdysseyLayerStack* layer_stack = UOdysseyAnimationLayerStackUserData::GetLayerStack(animation);
+        UOdysseyLayerStack* layer_stack = OdysseyAnimationEditor::GetLayerStack(animation);
         TArray<UOdysseyLayer*> layers = layer_stack->GetLayers();
         for( UOdysseyLayer* layer : layers )
         {
@@ -175,7 +175,7 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
         if( !animation )
             continue;
 
-        UOdysseyLayerStack* layer_stack = UOdysseyAnimationLayerStackUserData::GetLayerStack(animation);
+        UOdysseyLayerStack* layer_stack = OdysseyAnimationEditor::GetLayerStack(animation);
         TArray<UOdysseyLayer*> layers = layer_stack->GetLayers();
         for( UOdysseyLayer* layer : layers )
         {
@@ -207,7 +207,7 @@ LighttableTools::GetState( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
         if( !animation )
             return false;
 
-        UOdysseyLayerStack* layer_stack = UOdysseyAnimationLayerStackUserData::GetLayerStack(animation);
+        UOdysseyLayerStack* layer_stack = OdysseyAnimationEditor::GetLayerStack(animation);
         TArray<UOdysseyLayer*> layers = layer_stack->GetLayers();
         for( UOdysseyLayer* layer : layers )
         {
@@ -250,7 +250,7 @@ LighttableTools::IsOn( ISequencer& iSequencer, UMovieSceneSequence* iSequence, F
         if( !animation )
             return false;
 
-        UOdysseyLayerStack* layer_stack = UOdysseyAnimationLayerStackUserData::GetLayerStack(animation);
+        UOdysseyLayerStack* layer_stack = OdysseyAnimationEditor::GetLayerStack(animation);
         TArray<UOdysseyLayer*> layers = layer_stack->GetLayers();
         for( UOdysseyLayer* layer : layers )
         {

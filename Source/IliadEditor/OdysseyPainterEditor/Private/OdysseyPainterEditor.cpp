@@ -128,7 +128,7 @@
 
 //Tablet Includes
 #include "SOdysseyTabletAPISwitcher.h"
-#include "OdysseyAnimationPalettesUserData.h"
+#include "OdysseyAnimationEditorData.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -3439,7 +3439,7 @@ FOdysseyPainterEditor::GetPaletteSets() const
     UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
     if (animation)
     {
-        paletteSets = UOdysseyAnimationPalettesUserData::FindOrCreate(animation)->Palettes;
+        paletteSets = OdysseyAnimationEditor::GetPalettes(*animation);
     }
     else if (textureUserData)
     {
@@ -3496,7 +3496,7 @@ FOdysseyPainterEditor::AddPaletteSet(UOdysseyPalette* iPalette)
         UOdysseyPaletteSet* paletteSet = NewObject<UOdysseyPaletteSet>(animation);
         paletteSet->mPalette = iPalette;
         paletteSet->mSet = iPalette->GetDefaultSetID();
-        UOdysseyAnimationPalettesUserData::FindOrCreate(animation)->Palettes.Add(paletteSet);
+        OdysseyAnimationEditor::GetPalettes(*animation).Add(paletteSet);
     }
     else if (textureUserData)
     {
@@ -3515,8 +3515,8 @@ FOdysseyPainterEditor::RemovePaletteSet(UOdysseyPaletteSet* iPaletteSet)
     TArray<UOdysseyPaletteSet*> paletteSets;
     if (animation)
     {
-        UOdysseyAnimationPalettesUserData::FindOrCreate(animation)->Palettes.Remove(iPaletteSet);
-        paletteSets = UOdysseyAnimationPalettesUserData::FindOrCreate(animation)->Palettes;
+        OdysseyAnimationEditor::GetPalettes(*animation).Remove(iPaletteSet);
+        paletteSets = OdysseyAnimationEditor::GetPalettes(*animation);
     }
     else if (textureUserData)
     {
@@ -3670,7 +3670,7 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
     TArray<UOdysseyPaletteSet*> paletteSets;
     if (animation)
     {
-        paletteSets = UOdysseyAnimationPalettesUserData::FindOrCreate(animation)->Palettes;
+        paletteSets = OdysseyAnimationEditor::GetPalettes(*animation);
     }
     else if (textureUserData)
     {

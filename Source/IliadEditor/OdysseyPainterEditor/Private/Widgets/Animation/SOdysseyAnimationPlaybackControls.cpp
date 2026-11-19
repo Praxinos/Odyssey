@@ -13,7 +13,7 @@
 #include "OdysseyAnimationCellsSelection.h"
 #include "OdysseyStyle.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyAnimationLayerStackUserData.h"
+#include "OdysseyAnimationEditorData.h"
 
 void
 SOdysseyAnimationPlaybackControls::Construct(const FArguments& InArgs)
@@ -182,7 +182,7 @@ SOdysseyAnimationPlaybackControls::GetNotLoopingButtonVisibility() const
 FReply
 SOdysseyAnimationPlaybackControls::OnPlayClicked()
 {
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(mAnimation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(mAnimation));
     if (!layerStack)
         return FReply::Unhandled();
 
@@ -218,7 +218,7 @@ SOdysseyAnimationPlaybackControls::OnPlayClicked()
 FReply
 SOdysseyAnimationPlaybackControls::OnPlayBackwardClicked()
 {
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(mAnimation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(mAnimation));
     if (!layerStack)
         return FReply::Unhandled();
 
@@ -291,7 +291,7 @@ SOdysseyAnimationPlaybackControls::OnPreviousKeyClicked()
     if (!animation)
         return FReply::Handled();
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
 
     if (layer->GetCells().IsEmpty())
@@ -334,7 +334,7 @@ SOdysseyAnimationPlaybackControls::OnNextKeyClicked()
     if (!animation)
         return FReply::Handled();
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
 
     if (layer->GetCells().IsEmpty())

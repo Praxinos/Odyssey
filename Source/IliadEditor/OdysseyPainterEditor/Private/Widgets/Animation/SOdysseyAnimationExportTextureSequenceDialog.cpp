@@ -17,7 +17,7 @@
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationRenderContext.h"
 #include "OdysseyExportImage.h"
-#include "OdysseyAnimationLayerStackUserData.h"
+#include "OdysseyAnimationEditorData.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -165,7 +165,7 @@ FOdysseyAnimationTextureSequenceExporter::GetSourceRange(const FSource& iSource)
 TArray<FOdysseyAnimationTextureSequenceExporter::FSource>
 FOdysseyAnimationTextureSequenceExporter::GetSources()
 {
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(mAnimation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(mAnimation));
     switch(mSource)
     {
         case EOdysseyAnimationExportTextureSequenceSource::Animation:

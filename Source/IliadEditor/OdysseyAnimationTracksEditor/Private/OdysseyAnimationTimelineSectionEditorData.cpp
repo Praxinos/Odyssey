@@ -13,7 +13,7 @@
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyRenderingAbility.h"
-#include "OdysseyAnimationLayerStackUserData.h"
+#include "OdysseyAnimationEditorData.h"
 
 UOdysseyAnimationTimelineSectionEditorData* UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(UOdysseyAnimationTimelineSection& Section)
 {
@@ -71,7 +71,7 @@ void UOdysseyAnimationTimelineSectionEditorData::OnAnimationChanged(const FOdyss
     UOdysseyAnimation* Animation = Section->GetAnimation();
     if (!Animation) { return; }
     const FGuid Id = Event.GetId();
-    UOdysseyLayerStack* Stack = UOdysseyAnimationLayerStackUserData::GetLayerStack(Animation);
+    UOdysseyLayerStack* Stack = OdysseyAnimationEditor::GetLayerStack(Animation);
     bool bRelevant = Id == Animation->GetRenderingId() || (Stack && Id == Stack->GetRenderingId())
         || (Stack && Stack->GetLayerRoot() && Id == Stack->GetLayerRoot()->GetRenderingId());
     if (Stack && !bRelevant)
@@ -113,7 +113,7 @@ void UOdysseyAnimationTimelineSectionEditorData::RebuildAnimationCutChannel()
         return;
     }
 
-    UOdysseyLayerStack* layer_stack = Section->GetAnimation() ? UOdysseyAnimationLayerStackUserData::GetLayerStack(Section->GetAnimation()) : nullptr;
+    UOdysseyLayerStack* layer_stack = Section->GetAnimation() ? OdysseyAnimationEditor::GetLayerStack(Section->GetAnimation()) : nullptr;
     TArray<UOdysseyLayer*> layers = layer_stack ? layer_stack->GetLayers() : TArray<UOdysseyLayer*>();
     TSet<UOdysseyAnimationLayer*> animation_layers;
     for( UOdysseyLayer* layer : layers )

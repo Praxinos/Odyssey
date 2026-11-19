@@ -50,7 +50,7 @@
 #include "ScalingComponent.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Tools/ResourceAssetTools.h"
-#include "OdysseyAnimationLayerStackUserData.h"
+#include "OdysseyAnimationEditorData.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceTools_Animation"
 
@@ -324,7 +324,7 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
     //iSequencer.OnActorAddedToSequencer().Broadcast( animation, animationGuid ); // Already called when creating the binding for animation
 
     // Set the post behavior to hold
-    UOdysseyLayerStack* layer_stack = UOdysseyAnimationLayerStackUserData::GetLayerStack(new_animation);
+    UOdysseyLayerStack* layer_stack = OdysseyAnimationEditor::GetLayerStack(new_animation);
     for( UOdysseyLayer* layer : layer_stack->GetLayers() )
     {
         UOdysseyAnimationLayer* AnimationLayer = Cast<UOdysseyAnimationLayer>(layer);

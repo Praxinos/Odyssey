@@ -10,6 +10,7 @@
 #include "UObject/UnrealType.h"
 
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationEditorData.h"
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationLayerStackUserData.h"
@@ -102,7 +103,7 @@ bool FOdysseyAnimationLegacyEditorDataMigrationTest::RunTest(const FString& Para
     TestTrue(TEXT("Accessing the palettes user data again returns the same one"), UOdysseyAnimationPalettesUserData::FindOrCreate(Animation.Get()) == PalettesData);
     TestTrue(TEXT("Accessing the tool collections user data again returns the same one"), UOdysseyAnimationToolCollectionsUserData::FindOrCreate(Animation.Get()) == ToolCollectionsData);
     TestEqual(TEXT("Animation has one asset user data per content"), Animation->GetAssetUserDataArray()->Num(), 3);
-    TestTrue(TEXT("Layer stack is unchanged"), UOdysseyAnimationLayerStackUserData::GetLayerStack(Animation.Get()) == LegacyLayerStack);
+    TestTrue(TEXT("Layer stack is unchanged"), OdysseyAnimationEditor::GetLayerStack(Animation.Get()) == LegacyLayerStack);
 
     return true;
 }
@@ -122,7 +123,7 @@ bool FOdysseyAnimationEditorDataRenderingSourceTest::RunTest(const FString& Para
         return false;
 
     TestFalse(TEXT("Editor data cannot be removed from the details panel"), AssetUserDataProperty->HasAnyPropertyFlags(CPF_Edit));
-    TestNull(TEXT("No layer stack without animation"), UOdysseyAnimationLayerStackUserData::GetLayerStack(nullptr));
+    TestNull(TEXT("No layer stack without animation"), OdysseyAnimationEditor::GetLayerStack(nullptr));
 
     TStrongObjectPtr<UOdysseyAnimation> Animation(NewObject<UOdysseyAnimation>(GetTransientPackage()));
     Animation->Init(16, 16, EOdysseyAnimationFormat::BGRA8, 24.f);
@@ -134,7 +135,7 @@ bool FOdysseyAnimationEditorDataRenderingSourceTest::RunTest(const FString& Para
     TestNull(TEXT("Palettes and tool collections do not override the rendering"), Animation->GetRenderingOverride());
     TestFalse(TEXT("A new animation has no legacy content"), Animation->HasLegacyEditorData());
 
-    UOdysseyAnimationLayerStack* LayerStack = UOdysseyAnimationLayerStackUserData::GetLayerStack(Animation.Get());
+    UOdysseyAnimationLayerStack* LayerStack = OdysseyAnimationEditor::GetLayerStack(Animation.Get());
     if (!TestNotNull(TEXT("The editor creates an empty layer stack"), LayerStack))
         return false;
 
@@ -155,6 +156,42 @@ bool FOdysseyAnimationEditorDataRenderingSourceTest::RunTest(const FString& Para
     TestNull(TEXT("Removing the layer stack user data removes the rendering override"), Animation->GetRenderingOverride());
     TestEqual(TEXT("Without rendering override, the animation only renders its own id"),
         Animation->GetRenderingComposition(EOdysseyRenderingType::Render, 0), ExpectedComposition(Animation.Get(), nullptr));
+
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationEditorDataAccessorsTest, "Odyssey.Animation.EditorData.Accessors",
+    Odyssey::AnimationLayerStackUserDataTests::Flags)
+
+/** Edits the palettes and tool collections of an animation through the editor accessors, and checks they land in their own user data. */
+bool FOdysseyAnimationEditorDataAccessorsTest::RunTest(const FString& Parameters)
+{
+    TestNull(TEXT("No layer stack without animation"), OdysseyAnimationEditor::GetLayerStack(nullptr));
+
+    TStrongObjectPtr<UOdysseyAnimation> Animation(NewObject<UOdysseyAnimation>(GetTransientPackage()));
+    Animation->Init(16, 16, EOdysseyAnimationFormat::BGRA8, 24.f);
+    TestNull(TEXT("A new animation has no palettes user data"), Animation->GetAssetUserData<UOdysseyAnimationPalettesUserData>());
+    TestNull(TEXT("A new animation has no tool collections user data"), Animation->GetAssetUserData<UOdysseyAnimationToolCollectionsUserData>());
+
+    UOdysseyPaletteSet* PaletteSet = NewObject<UOdysseyPaletteSet>(Animation.Get());
+    OdysseyAnimationEditor::GetPalettes(*Animation).Add(PaletteSet);
+    const FSoftObjectPath ToolCollection(TEXT("/Odyssey/Tools/AccessorToolCollection.AccessorToolCollection"));
+    OdysseyAnimationEditor::GetToolCollections(*Animation).Add(ToolCollection);
+
+    UOdysseyAnimationPalettesUserData* PalettesData = Animation->GetAssetUserData<UOdysseyAnimationPalettesUserData>();
+    UOdysseyAnimationToolCollectionsUserData* ToolCollectionsData = Animation->GetAssetUserData<UOdysseyAnimationToolCollectionsUserData>();
+    if (!TestNotNull(TEXT("Palettes accessor creates its user data"), PalettesData) || !TestNotNull(TEXT("Tool collections accessor creates its user data"), ToolCollectionsData))
+        return false;
+
+    TestTrue(TEXT("Palettes accessor edits the palettes user data"), PalettesData->Palettes.Num() == 1 && PalettesData->Palettes[0] == PaletteSet);
+    TestTrue(TEXT("Tool collections accessor edits the tool collections user data"), ToolCollectionsData->ToolCollections.Num() == 1 && ToolCollectionsData->ToolCollections[0] == ToolCollection);
+    TestTrue(TEXT("Palettes accessor returns the stored array"), &OdysseyAnimationEditor::GetPalettes(*Animation) == &PalettesData->Palettes);
+    TestTrue(TEXT("Tool collections accessor returns the stored array"), &OdysseyAnimationEditor::GetToolCollections(*Animation) == &ToolCollectionsData->ToolCollections);
+    TestNull(TEXT("Palettes and tool collections do not create a layer stack"), Animation->GetAssetUserData<UOdysseyAnimationLayerStackUserData>());
+
+    UOdysseyAnimationLayerStack* LayerStack = OdysseyAnimationEditor::GetLayerStack(Animation.Get());
+    TestTrue(TEXT("Layer stack accessor returns the layer stack user data content"), LayerStack && LayerStack == Animation->GetAssetUserData<UOdysseyAnimationLayerStackUserData>()->LayerStack);
+    TestEqual(TEXT("Animation has one user data per content"), Animation->GetAssetUserDataArray()->Num(), 3);
 
     return true;
 }

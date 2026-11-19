@@ -16,7 +16,7 @@
 #include "SOdysseyAnimationCellImageStagger.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "ULISLoaderModule.h"
-#include "OdysseyAnimationLayerStackUserData.h"
+#include "OdysseyAnimationEditorData.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -42,7 +42,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
     if (!layerStack)
         return;
 
@@ -167,7 +167,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::CanAction_ConvertToReference
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
     if (!layerStack)
         return false;
 

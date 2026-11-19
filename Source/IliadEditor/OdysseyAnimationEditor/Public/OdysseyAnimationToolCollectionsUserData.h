@@ -15,6 +15,7 @@ class UOdysseyAnimation;
  * @brief Editor-only tool collections of a UOdysseyAnimation, attached to it as an asset user data
  *
  * Its class lives in an editor module, so it is never cooked.
+ * Use OdysseyAnimationEditor::GetToolCollections() to access it from an animation.
  */
 UCLASS()
 class ODYSSEYANIMATIONEDITOR_API UOdysseyAnimationToolCollectionsUserData

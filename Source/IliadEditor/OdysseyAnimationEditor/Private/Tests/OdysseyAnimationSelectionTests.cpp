@@ -19,7 +19,7 @@
 #include "OdysseyAnimationCellsSelection.h"
 #include "OdysseyAnimationCellImageStagger.h"
 #include "OdysseyLayerStackSelection.h"
-#include "OdysseyAnimationLayerStackUserData.h"
+#include "OdysseyAnimationEditorData.h"
 
 namespace
 {
@@ -74,7 +74,7 @@ bool FOdysseyAnimationSelectionTest::RunTest(const FString& Parameters)
     FScopedAnimationSelection RestoreSelection;
     TStrongObjectPtr<UOdysseyAnimation> Animation(NewObject<UOdysseyAnimation>(GetTransientPackage()));
     Animation->Init(16, 16, EOdysseyAnimationFormat::BGRA8, 24.f);
-    UOdysseyAnimationLayerStack* Stack = CastChecked<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(Animation.Get()));
+    UOdysseyAnimationLayerStack* Stack = CastChecked<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(Animation.Get()));
     UOdysseyAnimationLayer* FirstLayer = CastChecked<UOdysseyAnimationLayer>(Stack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
     UOdysseyAnimationLayer* SecondLayer = CastChecked<UOdysseyAnimationLayer>(Stack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
     UOdysseyAnimationCell* First = FirstLayer->AddCell(UOdysseyAnimationCellImageStagger::StaticClass());
@@ -146,7 +146,7 @@ bool FOdysseyAnimationLayerShortcutsTest::RunTest(const FString& Parameters)
     FScopedAnimationSelection RestoreSelection;
     TStrongObjectPtr<UOdysseyAnimation> Animation(NewObject<UOdysseyAnimation>(GetTransientPackage()));
     Animation->Init(16, 16, EOdysseyAnimationFormat::BGRA8, 24.f);
-    UOdysseyAnimationLayerStack* Stack = CastChecked<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(Animation.Get()));
+    UOdysseyAnimationLayerStack* Stack = CastChecked<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(Animation.Get()));
     UOdysseyAnimationLayer* First = CastChecked<UOdysseyAnimationLayer>(Stack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
     UOdysseyAnimationLayer* Second = CastChecked<UOdysseyAnimationLayer>(Stack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
     UOdysseyAnimationLayer* Focused = CastChecked<UOdysseyAnimationLayer>(Stack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));

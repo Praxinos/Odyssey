@@ -20,7 +20,7 @@
 #include "SOdysseyAnimationExportImageSequenceDialog.h"
 #include "SOdysseyAnimationExportTextureSequenceDialog.h"
 #include "SOdysseyImportTexturesDialog.h"
-#include "OdysseyAnimationLayerStackUserData.h"
+#include "OdysseyAnimationEditorData.h"
 
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -161,7 +161,7 @@ FOdysseyPainterEditorAnimationExportShortcuts::Action_ImportImageSequence()
 
     if (!importResult.mImportedLayers.IsEmpty())
     {
-        UOdysseyLayerStack* layerStack = UOdysseyAnimationLayerStackUserData::GetLayerStack(animation);
+        UOdysseyLayerStack* layerStack = OdysseyAnimationEditor::GetLayerStack(animation);
         if (layerStack)
             layerStack->SetCurrentLayer(importResult.mImportedLayers[0]);
     }

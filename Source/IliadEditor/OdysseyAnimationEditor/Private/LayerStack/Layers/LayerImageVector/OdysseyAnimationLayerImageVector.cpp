@@ -31,7 +31,7 @@
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAlter.h"
 #include "Editor.h"
 #include "Misc/TransactionObjectEvent.h"
-#include "OdysseyAnimationPalettesUserData.h"
+#include "OdysseyAnimationEditorData.h"
 #endif
 
 #define LOCTEXT_NAMESPACE "Animation"
@@ -598,11 +598,11 @@ UOdysseyAnimationLayerImageVector::GetPaletteSetID( UOdysseyPalette* iPalette )
 
     if( animation )
     {
-        for( int32 i = 0; i < UOdysseyAnimationPalettesUserData::FindOrCreate(animation)->Palettes.Num(); i++ )
+        for( int32 i = 0; i < OdysseyAnimationEditor::GetPalettes(*animation).Num(); i++ )
         {
-            if( UOdysseyAnimationPalettesUserData::FindOrCreate(animation)->Palettes[i]->mPalette == iPalette )
+            if( OdysseyAnimationEditor::GetPalettes(*animation)[i]->mPalette == iPalette )
             {
-                return UOdysseyAnimationPalettesUserData::FindOrCreate(animation)->Palettes[i]->mSet;
+                return OdysseyAnimationEditor::GetPalettes(*animation)[i]->mSet;
             }
         }
     }
@@ -619,7 +619,7 @@ UOdysseyAnimationLayerImageVector::GetPaletteSets() const
     if( !animation )
         return TArray<UOdysseyPaletteSet*>();
 
-    paletteSets = UOdysseyAnimationPalettesUserData::FindOrCreate(animation)->Palettes;
+    paletteSets = OdysseyAnimationEditor::GetPalettes(*animation);
 
     //Fail safe in case the user force delete a used palette while in the editor
     for( int i = 0; i < paletteSets.Num(); i++ )

@@ -31,13 +31,6 @@ UOdysseyAnimationLayerStackUserData::FindOrCreate(const UOdysseyAnimation* iAnim
     return userData;
 }
 
-UOdysseyAnimationLayerStack*
-UOdysseyAnimationLayerStackUserData::GetLayerStack(const UOdysseyAnimation* iAnimation)
-{
-    UOdysseyAnimationLayerStackUserData* userData = FindOrCreate(iAnimation);
-    return userData ? userData->LayerStack : nullptr;
-}
-
 UOdysseyAnimation*
 UOdysseyAnimationLayerStackUserData::GetAnimation() const
 {

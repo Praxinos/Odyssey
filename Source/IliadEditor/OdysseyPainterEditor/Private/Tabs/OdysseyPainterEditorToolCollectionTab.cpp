@@ -27,7 +27,7 @@
 #include "Misc/PackageName.h"
 #include "UObject/Package.h"
 #include "UObject/SavePackage.h"
-#include "OdysseyAnimationToolCollectionsUserData.h"
+#include "OdysseyAnimationEditorData.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -220,7 +220,7 @@ void FOdysseyPainterEditorToolCollectionTab::AddToolCollection(UOdysseyToolColle
 
     if (animation)
     {
-        UOdysseyAnimationToolCollectionsUserData::FindOrCreate(animation)->ToolCollections.AddUnique( assetPath );
+        OdysseyAnimationEditor::GetToolCollections(*animation).AddUnique( assetPath );
     }
     else if (textureUserData)
     {
@@ -240,7 +240,7 @@ void FOdysseyPainterEditorToolCollectionTab::RemoveToolCollection(UOdysseyToolCo
 
     if (animation)
     {
-        UOdysseyAnimationToolCollectionsUserData::FindOrCreate(animation)->ToolCollections.Remove(assetPath);
+        OdysseyAnimationEditor::GetToolCollections(*animation).Remove(assetPath);
     }
     else if (textureUserData)
     {
@@ -265,7 +265,7 @@ void FOdysseyPainterEditorToolCollectionTab::RefreshCollectionsGUI()
     UOdysseyTextureLayerStackUserData* textureUserData = mEditor->GetTextureUserData();
     if (animation)
     {
-        for (const FSoftObjectPath& Path : UOdysseyAnimationToolCollectionsUserData::FindOrCreate(animation)->ToolCollections)
+        for (const FSoftObjectPath& Path : OdysseyAnimationEditor::GetToolCollections(*animation))
         {
             UObject* Obj = Path.TryLoad();
             if (UOdysseyToolCollection* Col = Cast<UOdysseyToolCollection>(Obj))

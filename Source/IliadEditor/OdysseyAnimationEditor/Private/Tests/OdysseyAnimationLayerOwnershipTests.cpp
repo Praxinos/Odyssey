@@ -20,6 +20,7 @@
 #include "OdysseyAnimationLayerStackUserData.h"
 #include "OdysseyAnimationToolCollectionsUserData.h"
 #include "OdysseyAnimationPalettesUserData.h"
+#include "OdysseyAnimationEditorData.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationLayerOwnershipTest, "Odyssey.Animation.LayerOwnership",
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -76,8 +77,8 @@ bool FOdysseyAnimationLayerOwnershipTest::RunTest(const FString& Parameters)
 
     TStrongObjectPtr<UOdysseyAnimation> Animation(NewObject<UOdysseyAnimation>(GetTransientPackage()));
     Animation->Init(16, 16, EOdysseyAnimationFormat::BGRA8, 24.f);
-    UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(UOdysseyAnimationLayerStackUserData::GetLayerStack(Animation.Get())->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-    UOdysseyAnimationLayer* Destination = CastChecked<UOdysseyAnimationLayer>(UOdysseyAnimationLayerStackUserData::GetLayerStack(Animation.Get())->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
+    UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(OdysseyAnimationEditor::GetLayerStack(Animation.Get())->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
+    UOdysseyAnimationLayer* Destination = CastChecked<UOdysseyAnimationLayer>(OdysseyAnimationEditor::GetLayerStack(Animation.Get())->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
     UOdysseyAnimationCell* First = Layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
     UOdysseyAnimationCell* Second = Layer->AddCell(UOdysseyAnimationCellImageStagger::StaticClass());
     if (!TestNotNull(TEXT("Raster cell"), First) || !TestNotNull(TEXT("Stagger cell"), Second))

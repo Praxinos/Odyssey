@@ -16,7 +16,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyAnimationLayerStackUserData.h"
+#include "OdysseyAnimationEditorData.h"
 
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -92,7 +92,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell()
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
     if (!layerStack)
         return;
 
@@ -129,7 +129,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakAndClearCell()
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
     if (!layerStack)
         return;
 
@@ -162,7 +162,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveAllCellMarks()
     if( !animation )
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( UOdysseyAnimationLayerStackUserData::GetLayerStack(animation) );
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( OdysseyAnimationEditor::GetLayerStack(animation) );
     if( !layerStack )
         return;
 
@@ -200,7 +200,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
     if (!layerStack)
         return;
 
@@ -238,7 +238,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
     if (!layerStack)
         return;
 
@@ -276,7 +276,7 @@ FOdysseyAnimationGlobalCellsShortcuts::IsActionChecked_SetCellMark( int iMarkId 
     if( !animation )
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( UOdysseyAnimationLayerStackUserData::GetLayerStack(animation) );
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( OdysseyAnimationEditor::GetLayerStack(animation) );
     if( !layerStack )
         return false;
 
@@ -319,7 +319,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMarkAtFrame()
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
     if (!layerStack)
         return;
 
@@ -349,7 +349,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMarkAtFrame(FCellMark iMark
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
     if (!layerStack)
         return;
 
@@ -391,7 +391,7 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveAllCellMarks()
     if( !animation )
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( UOdysseyAnimationLayerStackUserData::GetLayerStack(animation) );
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( OdysseyAnimationEditor::GetLayerStack(animation) );
     if( !layerStack )
         return false;
 
@@ -429,7 +429,7 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveCellMark()
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
     if (!layerStack)
         return false;
 
@@ -458,7 +458,7 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_SetCellMark(int iMarkId)
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
     if (!layerStack)
         return false;
 
@@ -483,7 +483,7 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveCellMarkAtFrame()
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
     if (!layerStack)
         return false;
 
@@ -508,7 +508,7 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_SetCellMarkAtFrame(FCellMark iM
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
     if (!layerStack)
         return false;
 

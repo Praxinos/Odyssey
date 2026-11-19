@@ -28,7 +28,7 @@
 #include "ScalingComponent.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Tools/ResourceAssetTools.h"
-#include "OdysseyAnimationLayerStackUserData.h"
+#include "OdysseyAnimationEditorData.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceTools_AnimationCut"
 
@@ -173,7 +173,7 @@ ShotSequenceTools::CreateAnimationCut( ISequencer& iSequencer, UMovieSceneSequen
 
             FFrameNumber frame_in_timeline = section->ConvertFrameFromSequenceToTimeline( iFrameNumber );
 
-            TArray<UOdysseyLayer*> layers = UOdysseyAnimationLayerStackUserData::GetLayerStack(animation)->GetLayers();
+            TArray<UOdysseyLayer*> layers = OdysseyAnimationEditor::GetLayerStack(animation)->GetLayers();
             TArray<UOdysseyAnimationLayer*> animation_layers;
             for( UOdysseyLayer* layer : layers )
             {

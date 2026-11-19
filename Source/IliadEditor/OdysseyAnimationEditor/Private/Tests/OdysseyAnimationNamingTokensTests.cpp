@@ -14,6 +14,7 @@
 #include "OdysseyAnimationLayerStackUserData.h"
 #include "OdysseyAnimationNamingTokens.h"
 #include "OdysseyLayer.h"
+#include "OdysseyAnimationEditorData.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationCurrentLayerNamingTokenTest, "Odyssey.Animation.NamingTokens.CurrentLayerName",
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -38,7 +39,7 @@ bool FOdysseyAnimationCurrentLayerNamingTokenTest::RunTest(const FString& Parame
     TestTrue(TEXT("Animation without editor data has no current layer name"), Result.EvaluatedText.IsEmpty());
     TestNull(TEXT("Evaluating the token does not create the layer stack user data"), Animation->GetAssetUserData<UOdysseyAnimationLayerStackUserData>());
 
-    UOdysseyAnimationLayerStack* LayerStack = UOdysseyAnimationLayerStackUserData::GetLayerStack(Animation.Get());
+    UOdysseyAnimationLayerStack* LayerStack = OdysseyAnimationEditor::GetLayerStack(Animation.Get());
     if (!TestNotNull(TEXT("Animation layer stack"), LayerStack))
         return false;
 

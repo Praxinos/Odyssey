@@ -32,7 +32,7 @@
 #include "Undo/OdysseyVectorUndoSceneClear.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include <ULIS>
-#include "OdysseyAnimationLayerStackUserData.h"
+#include "OdysseyAnimationEditorData.h"
 
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -152,7 +152,7 @@ FOdysseyPainterEditorAnimationSource::GetLayerStack() const
     if (!mAnimation)
         return nullptr;
 
-    return Cast<UOdysseyAnimationLayerStack>(UOdysseyAnimationLayerStackUserData::GetLayerStack(mAnimation));
+    return Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(mAnimation));
 }
 
 UOdysseyAnimationPlayer*

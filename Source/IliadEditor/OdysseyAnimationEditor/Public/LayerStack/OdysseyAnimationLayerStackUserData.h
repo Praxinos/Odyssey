@@ -19,6 +19,7 @@ class UOdysseyPalette;
  * @brief Editor-only layer stack of a UOdysseyAnimation, attached to it as an asset user data
  *
  * Overrides the animation rendering with its layer stack, so that edits are displayed live in editor.
+ * Use OdysseyAnimationEditor::GetLayerStack() to access the layer stack of an animation.
  * Its class lives in an editor module, so it is never cooked: the runtime only plays the baked frames.
  */
 UCLASS(BlueprintType)
@@ -40,14 +41,6 @@ public:
      * @return The layer stack user data of the animation, or nullptr if iAnimation is null
      */
     static UOdysseyAnimationLayerStackUserData* FindOrCreate(const UOdysseyAnimation* iAnimation);
-
-    /**
-     * @brief Returns the layer stack of an animation, creating its user data if needed
-     *
-     * @param iAnimation The animation owning the layer stack
-     * @return The layer stack of the animation, or nullptr if iAnimation is null
-     */
-    static UOdysseyAnimationLayerStack* GetLayerStack(const UOdysseyAnimation* iAnimation);
 
 public:
     /** Returns the animation owning this user data */
