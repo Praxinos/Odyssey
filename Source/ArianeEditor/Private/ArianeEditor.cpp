@@ -45,6 +45,7 @@
 #include "Tools/EdModeInteractiveToolsContext.h"
 #include "Widgets/Input/SSegmentedControl.h"
 #include "SEnumCombo.h"
+#include "Widgets/Input/SNumericEntryBox.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -67,7 +68,9 @@ FArianeEditor::FArianeEditor( FArianeEditorViewportToolkit* iToolkit )
     : Toolkit( iToolkit )
     , Name("ArianeEditor")
     , ColorType ( EOdysseyPainterEditorColorType::Raw )
-    , DrawingOrientation ( EArianeEditorDrawingOrientation::View )
+    , DrawingDistanceToPlane( 0.0f )
+    , DrawingOrigin ( EArianeDrawingOrigin::Layer )
+    , DrawingOrientation ( EArianeDrawingOrientation::View )
     , DrawingCoordinateSystem ( EArianeEditorDrawingCoordinateSystem::Local )
     , bShowGrid(true)
 {
@@ -159,49 +162,111 @@ bool FArianeEditor::GetShowGrid() const
     return bShowGrid;
 }
 
-EArianeLayerVectorDrawingOrientation
-FArianeEditor::GetLayerDrawingOrientation( UArianeLayerVector* VectorLayer )
+UArianeLayerVector*
+FArianeEditor::GetCurrentVectorLayer()
 {
-    if( ( DrawingOrientation == EArianeEditorDrawingOrientation::XY )
-     || ( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerDefined )
-       && ( VectorLayer->GetDrawingOrientation() ==  EArianeLayerVectorDrawingOrientation::XY ) ) )
+    UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
+
+    if( Painting3DComponent )
     {
-        return EArianeLayerVectorDrawingOrientation::XY;
+        return Cast<UArianeLayerVector>(Painting3DComponent->GetLayerStack()->GetCurrentLayer());
     }
 
-    if( ( DrawingOrientation == EArianeEditorDrawingOrientation::YZ )
-     || ( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerDefined )
-       && ( VectorLayer->GetDrawingOrientation() ==  EArianeLayerVectorDrawingOrientation::YZ ) ) )
-    {
-        return EArianeLayerVectorDrawingOrientation::YZ;
-    }
-
-    if( ( DrawingOrientation == EArianeEditorDrawingOrientation::ZX )
-     || ( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerDefined )
-       && ( VectorLayer->GetDrawingOrientation() ==  EArianeLayerVectorDrawingOrientation::ZX ) ) )
-    {
-        return EArianeLayerVectorDrawingOrientation::ZX;
-    }
-
-    if( ( DrawingOrientation == EArianeEditorDrawingOrientation::View )
-     || ( ( DrawingOrientation == EArianeEditorDrawingOrientation::LayerDefined )
-       && ( VectorLayer->GetDrawingOrientation() ==  EArianeLayerVectorDrawingOrientation::View ) ) )
-    {
-        return EArianeLayerVectorDrawingOrientation::View;
-    }
-
-    // should not de reached anyways
-    return EArianeLayerVectorDrawingOrientation::View;
+    return nullptr;
 }
 
 void
-FArianeEditor::SetDrawingOrientation( EArianeEditorDrawingOrientation InDrawingOrientation )
+FArianeEditor::SetDrawingDistanceToPlane( float InDrawingDistanceToPlane )
 {
-    DrawingOrientation = InDrawingOrientation;
+    UArianeLayerVector* VectorLayer = GetCurrentVectorLayer();
+
+    if( VectorLayer && VectorLayer && VectorLayer->GetOverrideDrawingSettings() )
+    {
+        VectorLayer->SetDrawingDistanceToPlane( InDrawingDistanceToPlane );
+    }
+    else
+    {
+        DrawingDistanceToPlane = InDrawingDistanceToPlane;
+    }
+}
+
+float
+FArianeEditor::GetDrawingDistanceToPlane()
+{
+    UArianeLayerVector* VectorLayer = GetCurrentVectorLayer();
+    float CurrentDrawingDistanceToPlane = DrawingDistanceToPlane;
+
+    if( VectorLayer && VectorLayer->GetOverrideDrawingSettings() )
+    {
+        CurrentDrawingDistanceToPlane = VectorLayer->GetDrawingDistanceToPlane();
+    }
+
+    // should not de reached anyways
+    return CurrentDrawingDistanceToPlane;
+}
+
+void
+FArianeEditor::SetDrawingOrigin( EArianeDrawingOrigin InDrawingOrigin )
+{
+    UArianeLayerVector* VectorLayer = GetCurrentVectorLayer();
+
+    if( VectorLayer && VectorLayer->GetOverrideDrawingSettings() )
+    {
+        VectorLayer->SetDrawingOrigin( InDrawingOrigin );
+    }
+    else
+    {
+        DrawingOrigin = InDrawingOrigin;
+    }
+}
+
+EArianeDrawingOrigin
+FArianeEditor::GetDrawingOrigin()
+{
+    UArianeLayerVector* VectorLayer = GetCurrentVectorLayer();
+    EArianeDrawingOrigin CurrentOrigin = DrawingOrigin;
+
+    if( VectorLayer && VectorLayer->GetOverrideDrawingSettings() )
+    {
+        CurrentOrigin = VectorLayer->GetDrawingOrigin();
+    }
+
+    // should not de reached anyways
+    return CurrentOrigin;
+}
+
+void
+FArianeEditor::SetDrawingOrientation( EArianeDrawingOrientation InDrawingOrientation )
+{
+    UArianeLayerVector* VectorLayer = GetCurrentVectorLayer();
+
+    if( VectorLayer && VectorLayer && VectorLayer->GetOverrideDrawingSettings() )
+    {
+        VectorLayer->SetDrawingOrientation( InDrawingOrientation );
+    }
+    else
+    {
+        DrawingOrientation = InDrawingOrientation;
+    }
+}
+
+EArianeDrawingOrientation
+FArianeEditor::GetDrawingOrientation()
+{
+    UArianeLayerVector* VectorLayer = GetCurrentVectorLayer();
+    EArianeDrawingOrientation CurrentDrawingOrientation = DrawingOrientation;
+
+    if( VectorLayer && VectorLayer->GetOverrideDrawingSettings() )
+    {
+        CurrentDrawingOrientation = VectorLayer->GetDrawingOrientation();
+    }
+
+    // should not de reached anyways
+    return CurrentDrawingOrientation;
 }
 
 const FSlateBrush*
-FArianeEditor::GetDrawingOrientationBackgroundBrush( EArianeEditorDrawingOrientation InDrawingOrientation ) const
+FArianeEditor::GetDrawingOrientationBackgroundBrush( EArianeDrawingOrientation InDrawingOrientation ) const
 {
     static FSlateColorBrush Selected = FSlateColorBrush( FStyleColors::Select );
 
@@ -209,11 +274,34 @@ FArianeEditor::GetDrawingOrientationBackgroundBrush( EArianeEditorDrawingOrienta
 }
 
 TSharedRef<SWidget>
-FArianeEditor::CreateDrawingCoordinateSystemComboBox()
+FArianeEditor::CreateDrawingCoordinateSystemComboBox( const FText& InLabel )
 {
-    return SNew(SEnumComboBox, StaticEnum<EArianeEditorDrawingCoordinateSystem>())
-          .OnEnumSelectionChanged(this, &FArianeEditor::OnDrawingCoordinateSystemChanged)
-          .CurrentValue_Lambda([this]() { return (int32)DrawingCoordinateSystem; } );
+    TSharedRef<SHorizontalBox> Box = SNew(SHorizontalBox);
+
+    if( InLabel.IsEmpty() == false )
+    {
+        Box->AddSlot()
+            .AutoWidth()
+            .VAlign( VAlign_Center )
+            .Padding( FMargin( 0, 0, 6, 0 ) )
+            [
+                SNew(STextBlock).Text( InLabel )
+            ];
+    }
+
+    Box->AddSlot()
+        .AutoWidth()
+        .VAlign( VAlign_Center )
+        [
+            SNew(SEnumComboBox, StaticEnum<EArianeEditorDrawingCoordinateSystem>())
+            .OnEnumSelectionChanged(this, &FArianeEditor::OnDrawingCoordinateSystemChanged)
+            .CurrentValue_Lambda( [this]()
+                {
+                    return (int32)DrawingCoordinateSystem;
+                } )
+        ];
+
+    return Box;
 }
 
 void
@@ -223,64 +311,145 @@ FArianeEditor::OnDrawingCoordinateSystemChanged( int32 EnumID, ESelectInfo::Type
 }
 
 TSharedRef<SWidget>
-FArianeEditor::CreateDrawingOrientationSegmentControl()
+FArianeEditor::CreateDrawingOriginComboBox( const FText& InLabel )
 {
-    return SNew(SSegmentedControl<EArianeEditorDrawingOrientation>)
-           .Value_Lambda( [this]{ return DrawingOrientation; } )
-           .SupportsEmptySelection( false )
-           .SupportsMultiSelection( false )
-           .UniformPadding( FMargin( 2, 0, 2, 0 ) )
-           .OnValueChanged( SSegmentedControl<EArianeEditorDrawingOrientation>::FOnValueChanged::CreateSP( this, &FArianeEditor::SetDrawingOrientation ) )
-           + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::View )
-           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.View.name", "Use Camera's view") )
-           [
-               SNew(SBorder)
-               .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::View  )
-               [
-                   SNew(SImage)
-                   .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.View20") )
-               ]
-           ]
-           + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::XY )
-           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerXY.name", "Use XY Plane") )
-           [
-               SNew(SBorder)
-               .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::XY  )
-               [
-                   SNew(SImage)
-                   .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerXY20") )
-               ]
-           ]
-           + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::YZ )
-           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerYZ.name", "Use YZ Plane") )
-           [
-               SNew(SBorder)
-               .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::YZ  )
-               [
-                   SNew(SImage)
-                   .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerYZ20") )
-               ]
-           ]
-           + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::ZX )
-           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerZX.name", "Use ZX Plane") )
-           [
-               SNew(SBorder)
-               .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::ZX  )
-               [
-                   SNew(SImage)
-                   .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerZX20") )
-               ]
-           ]
-           + SSegmentedControl<EArianeEditorDrawingOrientation>::Slot( EArianeEditorDrawingOrientation::LayerDefined )
-           .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerDefined.name", "Use Layer-defined drawing orientation") )
-           [
-               SNew(SBorder)
-               .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeEditorDrawingOrientation::LayerDefined  )
-               [
-                   SNew(SImage)
-                   .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerDefined20") )
-               ]
-           ];
+    TSharedRef<SHorizontalBox> Box = SNew(SHorizontalBox);
+
+    if( InLabel.IsEmpty() == false )
+    {
+        Box->AddSlot()
+            .AutoWidth()
+            .VAlign( VAlign_Center )
+            .Padding( FMargin( 0, 0, 6, 0 ) )
+            [
+                SNew(STextBlock).Text( InLabel )
+            ];
+    }
+
+    Box->AddSlot()
+        .AutoWidth()
+        .VAlign( VAlign_Center )
+        [
+            SNew(SEnumComboBox, StaticEnum<EArianeDrawingOrigin>())
+            .OnEnumSelectionChanged(this, &FArianeEditor::OnDrawingOriginChanged)
+            .CurrentValue_Lambda([this]()
+                {
+                    return (int32)DrawingOrigin;
+                } )
+        ];
+
+    return Box;
+}
+
+void
+FArianeEditor::OnDrawingOriginChanged( int32 EnumID, ESelectInfo::Type )
+{
+    DrawingOrigin = static_cast<EArianeDrawingOrigin>(EnumID);
+}
+
+TSharedRef<SWidget>
+FArianeEditor::CreateDrawingOrientationSegmentControl( const FText& InLabel )
+{
+    TSharedRef<SHorizontalBox> Box = SNew(SHorizontalBox);
+
+    if( InLabel.IsEmpty() == false )
+    {
+        Box->AddSlot()
+            .AutoWidth()
+            .VAlign( VAlign_Center )
+            .Padding( FMargin( 0, 0, 6, 0 ) )
+            [
+                SNew(STextBlock).Text( InLabel )
+            ];
+    }
+
+    Box->AddSlot()
+        .AutoWidth()
+        .VAlign( VAlign_Center )
+        [
+            SNew(SSegmentedControl<EArianeDrawingOrientation>)
+            .Value_Lambda( [this]{ return DrawingOrientation; } )
+            .SupportsEmptySelection( false )
+            .SupportsMultiSelection( false )
+            .UniformPadding( FMargin( 2, 0, 2, 0 ) )
+            .OnValueChanged( SSegmentedControl<EArianeDrawingOrientation>::FOnValueChanged::CreateSP( this, &FArianeEditor::SetDrawingOrientation ) )
+            + SSegmentedControl<EArianeDrawingOrientation>::Slot( EArianeDrawingOrientation::View )
+            .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.View.name", "Use Camera's view") )
+            [
+                SNew(SBorder)
+                .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeDrawingOrientation::View  )
+                [
+                    SNew(SImage)
+                    .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.View20") )
+                ]
+            ]
+            + SSegmentedControl<EArianeDrawingOrientation>::Slot( EArianeDrawingOrientation::XY )
+            .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerXY.name", "Use XY Plane") )
+            [
+                SNew(SBorder)
+                .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeDrawingOrientation::XY  )
+                [
+                    SNew(SImage)
+                    .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerXY20") )
+                ]
+            ]
+            + SSegmentedControl<EArianeDrawingOrientation>::Slot( EArianeDrawingOrientation::YZ )
+            .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerYZ.name", "Use YZ Plane") )
+            [
+                SNew(SBorder)
+                .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeDrawingOrientation::YZ  )
+                [
+                    SNew(SImage)
+                    .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerYZ20") )
+                ]
+            ]
+            + SSegmentedControl<EArianeDrawingOrientation>::Slot( EArianeDrawingOrientation::ZX )
+            .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerZX.name", "Use ZX Plane") )
+            [
+                SNew(SBorder)
+                .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeDrawingOrientation::ZX  )
+                [
+                    SNew(SImage)
+                    .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerZX20") )
+                ]
+            ]
+         ];
+
+    return Box;
+}
+
+TSharedRef<SWidget>
+FArianeEditor::CreateDrawingDistanceToPlaneSpinBox( const FText& InLabel )
+{
+    TSharedRef<SHorizontalBox> Box = SNew(SHorizontalBox);
+
+    if( InLabel.IsEmpty() == false )
+    {
+        Box->AddSlot()
+            .AutoWidth()
+            .VAlign( VAlign_Center )
+            .Padding( FMargin( 0, 0, 6, 0 ) )
+            [
+                SNew(STextBlock).Text( InLabel )
+            ];
+    }
+
+    Box->AddSlot()
+        .AutoWidth()
+        .VAlign( VAlign_Center )
+        [
+            SNew(SSpinBox<float>)
+            .Value_Lambda( [this]
+                {
+                    return GetDrawingDistanceToPlane();
+                } )
+            .OnValueChanged_Lambda( [this]( float NewValue )
+                {
+                    SetDrawingDistanceToPlane( NewValue );
+                } )
+        ];
+
+    return Box;
 }
 
 void
@@ -407,7 +576,17 @@ FArianeEditor::ExtendToolbarToolParameters( UToolMenu* iToolMenu )
     DrawingOrientationSection.AddEntry(
         FToolMenuEntry::InitWidget(
             NAME_None,
-            CreateDrawingOrientationSegmentControl(),
+            CreateDrawingOrientationSegmentControl( FText() ),
+            FText()
+        )
+    );
+
+    FToolMenuSection& DrawingOriginSection = iToolMenu->AddSection("DrawingOrigin");
+
+    DrawingOriginSection.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            CreateDrawingOriginComboBox( LOCTEXT("ariane-editor-drawing-origin.label", "Drawing Origin" ) ),
             FText()
         )
     );
@@ -417,10 +596,23 @@ FArianeEditor::ExtendToolbarToolParameters( UToolMenu* iToolMenu )
     DrawingCoordinateSystemSection.AddEntry(
         FToolMenuEntry::InitWidget(
             NAME_None,
-            CreateDrawingCoordinateSystemComboBox(),
+            CreateDrawingCoordinateSystemComboBox( LOCTEXT("ariane-editor.coordinate-system.label", "Coordinate system" ) ),
             FText()
         )
     );
+
+    FToolMenuSection& DrawingDistanceToPlaneSection = iToolMenu->AddSection("DrawingDistanceToPlane");
+
+    DrawingDistanceToPlaneSection.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            CreateDrawingDistanceToPlaneSpinBox( LOCTEXT("ariane-editor.drawing-distance-to-plane.label", "Distance" ) ),
+            FText()
+        )
+    );
+
+
+
 
     UArianeEditorTool* CurrentTool = GetCurrentTool();
     if (CurrentTool)

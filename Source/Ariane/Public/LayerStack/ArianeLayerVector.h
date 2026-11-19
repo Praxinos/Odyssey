@@ -70,25 +70,25 @@ public:
      * @brief Get the drawing origin
      * @return the drawing origin
      */
-    EArianeLayerVectorDrawingOrigin GetDrawingOrigin();
+    EArianeDrawingOrigin GetDrawingOrigin();
 
     /**
      * @brief Set the drawing origin
      * @param the drawing origin type
      */
-    void SetDrawingOrigin( EArianeLayerVectorDrawingOrigin InDrawingOrigin );
+    void SetDrawingOrigin( EArianeDrawingOrigin InDrawingOrigin );
 
     /**
      * @brief Get the drawing orientation
      * @return the drawing orientation
      */
-    EArianeLayerVectorDrawingOrientation GetDrawingOrientation();
+    EArianeDrawingOrientation GetDrawingOrientation();
 
     /**
      * @brief Set the drawing orientation
      * @param InDrawingOrientation the drawing orientation
      */
-    void SetDrawingOrientation( EArianeLayerVectorDrawingOrientation InDrawingOrientation );
+    void SetDrawingOrientation( EArianeDrawingOrientation InDrawingOrientation );
 
     //virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
     UArianeDrawing* GetDrawing();
@@ -105,6 +105,10 @@ public:
     virtual void Serialize(FArchive& Ar ) override;
     virtual void PreSave(FObjectPreSaveContext Context) override;
     virtual void PostLoad() override;
+    bool GetOverrideDrawingSettings() const;
+    void SetOverrideDrawingSettings(bool bInOverrideDrawingSettings);
+    void SetDrawingDistanceToPlane( float InDrawingDistanceToPlane );
+    float GetDrawingDistanceToPlane();
 
 protected:
     void BindDelegates();
@@ -120,10 +124,25 @@ protected:
     UArianeDrawing* Drawing;
 
     UPROPERTY( EditAnywhere, Category = VectorLayerOptions )
-    EArianeLayerVectorDrawingOrigin DrawingOrigin;
+    bool bOverrideDrawingSettings;
 
-    UPROPERTY( EditAnywhere, Category = VectorLayerOptions )
-    EArianeLayerVectorDrawingOrientation DrawingOrientation;
+    UPROPERTY( EditAnywhere, Category = VectorLayerOptions
+             , meta = ( ToolTip = "Drawing distance to plane"
+                      , EditCondition = "bOverrideDrawingSettings == true"
+                      , EditConditionHides ) )
+    float DrawingDistanceToPlane;
+
+    UPROPERTY( EditAnywhere, Category = VectorLayerOptions
+             , meta = ( ToolTip = "Drawing Origin"
+                      , EditCondition = "bOverrideDrawingSettings == true"
+                      , EditConditionHides ) )
+    EArianeDrawingOrigin DrawingOrigin;
+
+    UPROPERTY( EditAnywhere, Category = VectorLayerOptions
+             , meta = ( ToolTip = "Drawing Orientation"
+                      , EditCondition = "bOverrideDrawingSettings == true"
+                      , EditConditionHides ) )
+    EArianeDrawingOrientation DrawingOrientation;
 
 protected:
     FOnDrawingChanged OnPreDrawingChanged;

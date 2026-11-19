@@ -290,7 +290,9 @@ UArianePainting3DStaticMeshComponent::ConvertMaterials( UStaticMesh* ConvertedSt
                                 CreateUniqueMaterial( Painting3DComponent
                                                     , Cycle->GetMaterial()
                                                     , Cycle->GetColor()
-                                                    , CYCLE_PDO // Pixel Depth Offset
+                                                    // Pixel Depth Offset for cycles only, it will prevent ZFighting
+                                                    // when using the default Ariane Material
+                                                    , CYCLE_PDO
                                                     , OutMaterialInstanceConstants );
                             }
 

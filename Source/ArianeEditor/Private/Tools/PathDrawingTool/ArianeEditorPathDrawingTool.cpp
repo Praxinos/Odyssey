@@ -186,7 +186,7 @@ UArianeEditorPathDrawingTool::OnMouseHover( FEditorViewportClient* ViewportClien
 
         if( VectorLayer )
         {
-            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
+            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, nullptr );
             FVector RayOrigin, RayDirection;
             FVector IntersectAt;
             FVector2D ViewportPosition = FVector2D( ViewportClient->Viewport->GetMouseX()
@@ -219,20 +219,7 @@ UArianeEditorPathDrawingTool::Render(IToolsContextRenderAPI* RenderAPI)
 {
     if  ( Editor->GetShowGrid() )
     {
-        UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-
-        //Super::OnTick( DeltaTime );
-
-        if( Painting3DComponent )
-        {
-            UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>( LayerStack->GetCurrentLayer() );
-
-            if( VectorLayer )
-            {
-                DrawLayerOrientationGrid( RenderAPI, VectorLayer );
-            }
-        }
+        RenderDrawingGrid( RenderAPI );
     }
 }
 
@@ -262,7 +249,7 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* ViewportClient
             UArianeDrawing* Image = VectorLayer->GetDrawing();
             const FTransform& PathTransform = EditedPath->GetTransform();
             // note: we could do that at MouseDown
-            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
+            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, nullptr );
             FVector RayOrigin, RayDirection;
             FVector IntersectAt;
             FVector2D ViewportPosition = FVector2D( PointerState.ViewportX

@@ -174,7 +174,7 @@ UArianeEditorPaintBucketTool::Reset()
 
         if( VectorLayer )
         {
-            FVector4 DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
+            FVector4 DrawingPlane = GetDrawingPlane( ViewportClient, nullptr  );
             TArray<FArianeObject*> GraphedObjects;
             FVector CameraLocation = CameraState.Position;
             FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
@@ -428,20 +428,7 @@ UArianeEditorPaintBucketTool::Render(IToolsContextRenderAPI* RenderAPI)
 {
     if  ( Editor->GetShowGrid() )
     {
-        UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-
-        //Super::OnTick( DeltaTime );
-
-        if( Painting3DComponent )
-        {
-            UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>( LayerStack->GetCurrentLayer() );
-
-            if( VectorLayer )
-            {
-                DrawLayerOrientationGrid( RenderAPI, VectorLayer );
-            }
-        }
+        RenderDrawingGrid( RenderAPI );
     }
 }
 

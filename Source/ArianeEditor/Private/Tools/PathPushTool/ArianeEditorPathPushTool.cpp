@@ -340,7 +340,7 @@ UArianeEditorPathPushTool::OnMouseDown( FEditorViewportClient* ViewportClient
 
             if( VectorLayer )
             {
-                FPlane DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
+                FPlane DrawingPlane = GetDrawingPlane( ViewportClient, nullptr );
 
                 VectorLayer->GetDrawing()->Modify();
 
@@ -581,18 +581,7 @@ UArianeEditorPathPushTool::Render(IToolsContextRenderAPI* RenderAPI)
 {
     if  ( Editor->GetShowGrid() )
     {
-        UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-
-        if( Painting3DComponent )
-        {
-            UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>( LayerStack->GetCurrentLayer() );
-
-            if( VectorLayer )
-            {
-                DrawLayerOrientationGrid( RenderAPI, VectorLayer );
-            }
-        }
+        RenderDrawingGrid( RenderAPI );
     }
 }
 

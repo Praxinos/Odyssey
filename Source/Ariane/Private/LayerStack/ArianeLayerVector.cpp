@@ -390,8 +390,10 @@ UArianeLayerVector::~UArianeLayerVector()
 
 UArianeLayerVector::UArianeLayerVector()
     : Drawing( nullptr )
-    , DrawingOrigin ( EArianeLayerVectorDrawingOrigin::Layer )
-    , DrawingOrientation ( EArianeLayerVectorDrawingOrientation::View )
+    , bOverrideDrawingSettings( false )
+    , DrawingDistanceToPlane ( 0.0f )
+    , DrawingOrigin ( EArianeDrawingOrigin::Layer )
+    , DrawingOrientation ( EArianeDrawingOrientation::View )
 {
     bWantsOnUpdateTransform = true;
 
@@ -543,26 +545,49 @@ UArianeLayerVector::CalcBounds( const FTransform& LocalToWorld ) const
 }
 */
 
-EArianeLayerVectorDrawingOrigin
+bool UArianeLayerVector::GetOverrideDrawingSettings() const
+{
+    return bOverrideDrawingSettings;
+}
+
+void UArianeLayerVector::SetOverrideDrawingSettings(bool bInOverrideDrawingSettings)
+{
+    bOverrideDrawingSettings = bInOverrideDrawingSettings;
+}
+
+void
+UArianeLayerVector::SetDrawingDistanceToPlane( float InDrawingDistanceToPlane )
+{
+    DrawingDistanceToPlane = InDrawingDistanceToPlane;
+}
+
+float
+UArianeLayerVector::GetDrawingDistanceToPlane()
+{
+    // should not de reached anyways
+    return DrawingDistanceToPlane;
+}
+
+EArianeDrawingOrigin
 UArianeLayerVector::GetDrawingOrigin()
 {
     return DrawingOrigin;
 }
 
 void
-UArianeLayerVector::SetDrawingOrigin( EArianeLayerVectorDrawingOrigin InDrawingOrigin )
+UArianeLayerVector::SetDrawingOrigin( EArianeDrawingOrigin InDrawingOrigin )
 {
     DrawingOrigin = InDrawingOrigin;
 }
 
-EArianeLayerVectorDrawingOrientation
+EArianeDrawingOrientation
 UArianeLayerVector::GetDrawingOrientation()
 {
     return DrawingOrientation;
 }
 
 void
-UArianeLayerVector::SetDrawingOrientation( EArianeLayerVectorDrawingOrientation InDrawingOrientation )
+UArianeLayerVector::SetDrawingOrientation( EArianeDrawingOrientation InDrawingOrientation )
 {
     DrawingOrientation = InDrawingOrientation;
 }

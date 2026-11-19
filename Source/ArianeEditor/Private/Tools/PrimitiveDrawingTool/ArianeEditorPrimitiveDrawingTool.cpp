@@ -181,7 +181,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
             {
                 FArianeGroup* ParentGroup = GetParentGroup( VectorLayer );
                 //const FTransform& ParentGroupTransform = ParentGroup->GetTransform();
-                FPlane DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
+                FPlane DrawingPlane = GetDrawingPlane( ViewportClient, nullptr );
                 FVector RayOrigin, RayDirection;
                 FVector2D ViewportPosition = FVector2D( PointerState.ViewportX
                                                       , PointerState.ViewportY );
@@ -197,9 +197,9 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
 
                     PrimitiveCoordsAtDown = ParentGroupTransform.InverseTransformPosition( IntersectAtDown );
 
-                    switch( Editor->GetLayerDrawingOrientation( VectorLayer ) )
+                    switch( Editor->GetDrawingOrientation() )
                     {
-                        case EArianeLayerVectorDrawingOrientation::View :
+                        case EArianeDrawingOrientation::View :
                         {
                             FVector CamForward = View->GetViewDirection();
                             FVector CamUp = View->GetViewUp();
@@ -303,7 +303,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseHover( FEditorViewportClient* Viewport
 
         if( VectorLayer )
         {
-            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
+            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, nullptr );
             FVector RayOrigin, RayDirection;
             FVector IntersectAt;
             FVector2D ViewportPosition = FVector2D( ViewportClient->Viewport->GetMouseX()
@@ -371,7 +371,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDrag( FEditorViewportClient* ViewportC
             if( VectorLayer )
             {
                 FArianeGroup* ParentGroup = GetParentGroup( VectorLayer );
-                FPlane DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
+                FPlane DrawingPlane = GetDrawingPlane( ViewportClient, nullptr );
                 FVector RayOrigin, RayDirection;
                 FVector IntersectAtDrag;
                 FVector2D ViewportPosition = FVector2D( PointerState.ViewportX
@@ -512,20 +512,7 @@ UArianeEditorPrimitiveDrawingTool::Render(IToolsContextRenderAPI* RenderAPI)
 {
     if  ( 1 )
     {
-        UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-
-        //Super::OnTick( DeltaTime );
-
-        if( Painting3DComponent )
-        {
-            UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>( LayerStack->GetCurrentLayer() );
-
-            if( VectorLayer )
-            {
-                DrawLayerOrientationGrid( RenderAPI, VectorLayer );
-            }
-        }
+        RenderDrawingGrid( RenderAPI );
     }
 }
 

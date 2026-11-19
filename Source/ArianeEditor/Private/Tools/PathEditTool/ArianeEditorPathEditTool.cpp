@@ -451,7 +451,7 @@ UArianeEditorPathEditTool::OnMouseDownPickPoint( FEditorViewportClient* Viewport
 
         if( VectorLayer )
         {
-            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
+            FPlane DrawingPlane = GetDrawingPlane( ViewportClient, nullptr );
             UArianeDrawing* Image = VectorLayer->GetDrawing();
             FVector2D MousePosition = FVector2D( ViewportClient->GetCachedMouseX()
                                                , ViewportClient->GetCachedMouseY() );
@@ -1340,18 +1340,7 @@ UArianeEditorPathEditTool::Render(IToolsContextRenderAPI* RenderAPI)
 {
     if  ( Editor->GetShowGrid() )
     {
-        UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
-
-        if( Painting3DComponent )
-        {
-            UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
-            UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>( LayerStack->GetCurrentLayer() );
-
-            if( VectorLayer )
-            {
-                DrawLayerOrientationGrid( RenderAPI, VectorLayer );
-            }
-        }
+        RenderDrawingGrid( RenderAPI );
     }
 }
 

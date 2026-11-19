@@ -10,15 +10,15 @@
 #include "ArianeLayerVectorEnums.generated.h"
 
 UENUM()
-enum class EArianeLayerVectorDrawingOrigin : uint8
+enum class EArianeDrawingOrigin : uint8
 {
     Layer,
-    //View,
+    View,
     Surface,
 };
 
 UENUM()
-enum class EArianeLayerVectorDrawingOrientation : uint8
+enum class EArianeDrawingOrientation : uint8
 {
     XY,
     YZ,

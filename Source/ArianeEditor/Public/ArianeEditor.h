@@ -35,16 +35,6 @@ struct FArianePrimitive;
 struct FArianeObject;
 
 UENUM()
-enum class EArianeEditorDrawingOrientation : uint8
-{
-    XY = static_cast<uint8>(EArianeLayerVectorDrawingOrientation::XY),
-    YZ = static_cast<uint8>(EArianeLayerVectorDrawingOrientation::YZ),
-    ZX = static_cast<uint8>(EArianeLayerVectorDrawingOrientation::ZX),
-    View    = static_cast<uint8>(EArianeLayerVectorDrawingOrientation::View),
-    LayerDefined,
-};
-
-UENUM()
 enum class EArianeEditorDrawingCoordinateSystem : uint8
 {
     World,
@@ -52,7 +42,6 @@ enum class EArianeEditorDrawingCoordinateSystem : uint8
     CommonAncestor,
     Local,
 };
-
 
 /**
  * Base class for a Painting Editor
@@ -243,8 +232,11 @@ public:
     // immplements IArianePainting3DComponentEditorInterface::GetHUDForegroundColor
     virtual FColor GetHUDForegroundColor() override;
     void SetCurrentPainting3DComponent( UArianePainting3DComponent* InPainting3DComponent );
-    EArianeLayerVectorDrawingOrientation GetLayerDrawingOrientation( UArianeLayerVector* VectorLayer );
+    EArianeDrawingOrigin GetDrawingOrigin();
+    EArianeDrawingOrientation GetDrawingOrientation();
     EArianeEditorDrawingCoordinateSystem GetDrawingCoordinateSystem();
+    void SetDrawingDistanceToPlane( float InDrawingDistanceToPlane );
+    float GetDrawingDistanceToPlane();
     bool GetShowGrid() const;
 
     static FClipboard& GetClipboard();
@@ -258,6 +250,7 @@ public:
     void CopySelectedLayers();
     void PasteLayers();
     void SelectAllObjects();
+    UArianeLayerVector* GetCurrentVectorLayer();
 
 protected:
     /**
@@ -277,10 +270,14 @@ protected:
 
     void ExtendToolbarSaveAssetButton( UToolMenu* iToolMenu );
     void ExtendToolbarToolParameters( UToolMenu* iToolMenu );
-    void SetDrawingOrientation( EArianeEditorDrawingOrientation InDrawingOrientation);
-    TSharedRef<SWidget> CreateDrawingOrientationSegmentControl();
-    TSharedRef<SWidget> CreateDrawingCoordinateSystemComboBox();
-    const FSlateBrush* GetDrawingOrientationBackgroundBrush( EArianeEditorDrawingOrientation InDrawingOrientation ) const;
+    void SetDrawingOrigin( EArianeDrawingOrigin InDrawingOrigin);
+    void SetDrawingOrientation( EArianeDrawingOrientation InDrawingOrientation);
+    TSharedRef<SWidget> CreateDrawingOrientationSegmentControl( const FText& InLabel );
+    TSharedRef<SWidget> CreateDrawingCoordinateSystemComboBox( const FText& InLabel );
+    TSharedRef<SWidget> CreateDrawingOriginComboBox( const FText& InLabel );
+    TSharedRef<SWidget> CreateDrawingDistanceToPlaneSpinBox( const FText& InLabel );
+    void OnDrawingOriginChanged( int32 EnumID, ESelectInfo::Type );
+    const FSlateBrush* GetDrawingOrientationBackgroundBrush( EArianeDrawingOrientation InDrawingOrientation ) const;
     void ClearPainting3DComponents();
     void OnEditorSelectionChanged( UObject* NewSelection );
     void AddToolBuilder( UArianeEditorToolBuilder* ToolBuilder );
@@ -309,7 +306,9 @@ protected:
     ::ULIS::FColor PaintColor;
     EOdysseyPainterEditorColorType ColorType;
     FArianeEditorHUD::FDrawingFlags HUDDrawingFlags;
-    EArianeEditorDrawingOrientation DrawingOrientation;
+    float DrawingDistanceToPlane;
+    EArianeDrawingOrigin DrawingOrigin;
+    EArianeDrawingOrientation DrawingOrientation;
     EArianeEditorDrawingCoordinateSystem DrawingCoordinateSystem;
     bool bShowGrid;
     FString LastActiveToolIdentifier;

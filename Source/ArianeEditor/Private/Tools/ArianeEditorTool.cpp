@@ -460,7 +460,7 @@ UArianeEditorTool::PostTransacted( const FTransactionObjectEvent& iTransactionEv
 }
 
 void
-UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, UArianeLayerVector* VectorLayer )
+UArianeEditorTool::RenderDrawingGrid( IToolsContextRenderAPI* RenderAPI )
 {
     const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
     double GridSize = Settings->GetGridSize();
@@ -475,7 +475,8 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
     ULineBatchComponent* LineBatcher = GetWorld()->GetLineBatcher( UWorld::ELineBatcherType::World );
     //FTransform LayerTransform = VectorLayer->GetComponentTransform();
     //FMatrix LayerMatrix = LayerTransform.ToMatrixWithScale();;
-    FPlane DrawingPlane = GetDrawingPlane( ViewportClient, VectorLayer );
+    FVector WorldPlanePosition;
+    FPlane DrawingPlane = GetDrawingPlane( ViewportClient, &WorldPlanePosition );
     FQuat WorldToPlaneRotationQuat = FQuat::FindBetweenNormals( FVector::ZAxisVector, DrawingPlane.GetNormal() );
     FMatrix WorldMatrix;
     float AdjustedThickness = 2.0f;
@@ -486,7 +487,7 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
     QueriesAPI->GetCurrentViewState( CameraState );
 
     // Adjust line thickness relative to camera distance
-    float Distance = FVector::Dist( CameraState.Position, VectorLayer->GetComponentLocation() );
+    float Distance = FVector::Dist( CameraState.Position, WorldPlanePosition );
 
     double GridRadius = GridSize * 0.5f;
     static uint32 StepCount = 20, StepCountHalf = StepCount / 2;
@@ -494,21 +495,21 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
 
     AdjustedThickness = ( Distance / 1000.0f ) * AdjustedThickness;
 
-    switch( Editor->GetLayerDrawingOrientation( VectorLayer ) )
+    switch( Editor->GetDrawingOrientation() )
     {
-        case EArianeLayerVectorDrawingOrientation::XY:
-        case EArianeLayerVectorDrawingOrientation::YZ:
-        case EArianeLayerVectorDrawingOrientation::ZX:
+        case EArianeDrawingOrientation::XY:
+        case EArianeDrawingOrientation::YZ:
+        case EArianeDrawingOrientation::ZX:
         {
             FTransform LayerTranslationTransform;
 
-            LayerTranslationTransform.SetTranslation( VectorLayer->GetComponentLocation() );
+            LayerTranslationTransform.SetTranslation( WorldPlanePosition );
 
             WorldMatrix = FTransform(WorldToPlaneRotationQuat).ToMatrixNoScale() * LayerTranslationTransform.ToMatrixNoScale();
         }
         break;
 
-        case EArianeLayerVectorDrawingOrientation::View :
+        case EArianeDrawingOrientation::View :
         {
 
 /* Commented out: CameraState isn't up to date at first. We need to click at least once in the viewport, which is not
@@ -535,7 +536,7 @@ UArianeEditorTool::DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, 
             FMatrix ViewAlignedRot = FMatrix( CamUp, CamRight, -CamForward, FVector::ZeroVector );
             FTransform LayerTranslationTransform;
 
-            LayerTranslationTransform.SetTranslation( VectorLayer->GetComponentLocation() );
+            LayerTranslationTransform.SetTranslation( WorldPlanePosition );
 
             WorldMatrix = FTransform(ViewAlignedRot).ToMatrixNoScale() * LayerTranslationTransform.ToMatrixNoScale();
             // --- End
@@ -948,74 +949,106 @@ UArianeEditorTool::CanBeginClickDragSequence(const FInputDeviceRay& PressPos)
 }
 
 FPlane
-UArianeEditorTool::GetDrawingPlane( FEditorViewportClient* ViewportClient, UArianeLayerVector* VectorLayer )
+UArianeEditorTool::GetDrawingPlane( FEditorViewportClient* ViewportClient
+                                  , FVector* OutPlaneWorldPosition )
 {
-    IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
-    FTransform CoordSystemTransform;
-    FVector LayerWorldPosition = VectorLayer->GetComponentLocation();
-    FViewCameraState CameraState;
+    UArianeLayerVector* VectorLayer = Editor->GetCurrentVectorLayer();
 
-    QueriesAPI->GetCurrentViewState( CameraState );
-
-    FVector CameraLocation = CameraState.Position;
-    FVector CameraDirection = CameraState.Orientation.GetForwardVector();
-    FVector PlaneWorldDirection = FVector( 0.0f, 0.0f, 0.0f ) ;
-
-    switch ( Editor->GetDrawingCoordinateSystem() )
+    if( VectorLayer )
     {
-        case EArianeEditorDrawingCoordinateSystem::World :
-            CoordSystemTransform = FTransform( FQuat(), VectorLayer->GetComponentLocation(), FVector::One() );
-        break;
+        IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
+        FTransform CoordSystemTransform;
+        FVector LayerWorldPosition = VectorLayer->GetComponentLocation();
+        FViewCameraState CameraState;
+        float DrawingDistanceToPlane = Editor->GetDrawingDistanceToPlane();
 
-        case EArianeEditorDrawingCoordinateSystem::Layer :
-            CoordSystemTransform = VectorLayer->GetComponentTransform();
-        break;
+        QueriesAPI->GetCurrentViewState( CameraState );
 
-        case EArianeEditorDrawingCoordinateSystem::CommonAncestor :
-            CoordSystemTransform = FTransform::Identity;
-        break;
+        FVector CameraLocation = CameraState.Position;
+        FVector CameraDirection = CameraState.Orientation.GetForwardVector();
+        FVector PlaneWorldDirection = FVector( 0.0f, 0.0f, 0.0f );
+        FVector PlaneWorldPosition = FVector( 0.0f, 0.0f, 0.0f );
 
-        case EArianeEditorDrawingCoordinateSystem::Local :
+        switch ( Editor->GetDrawingCoordinateSystem() )
         {
-            const TArray<FArianeObject*>& SelectedObjects = VectorLayer->GetDrawing()->GetSelectedObjects();
+            case EArianeEditorDrawingCoordinateSystem::World :
+                CoordSystemTransform = FTransform( FQuat(), VectorLayer->GetComponentLocation(), FVector::One() );
+            break;
 
-            if( SelectedObjects.Num() == 1 )
+            case EArianeEditorDrawingCoordinateSystem::Layer :
+                CoordSystemTransform = VectorLayer->GetComponentTransform();
+            break;
+
+            case EArianeEditorDrawingCoordinateSystem::CommonAncestor :
+                CoordSystemTransform = FTransform::Identity;
+            break;
+
+            case EArianeEditorDrawingCoordinateSystem::Local :
             {
-                FArianeObject* SelectedObject = SelectedObjects[0];
-                const FTransform& SelectedObjectTransform = SelectedObject->GetTransform();
+                const TArray<FArianeObject*>& SelectedObjects = VectorLayer->GetDrawing()->GetSelectedObjects();
 
-                CoordSystemTransform = FTransform( SelectedObjectTransform.GetRotation()
-                                                 , VectorLayer->GetComponentLocation()
-                                                 , FVector::One() );
+                if( SelectedObjects.Num() == 1 )
+                {
+                    FArianeObject* SelectedObject = SelectedObjects[0];
+                    const FTransform& SelectedObjectTransform = SelectedObject->GetTransform();
+
+                    CoordSystemTransform = FTransform( SelectedObjectTransform.GetRotation()
+                                                     , VectorLayer->GetComponentLocation()
+                                                     , FVector::One() );
+                }
             }
+            break;
+
+            default :
+            break;
         }
-        break;
 
-        default :
-        break;
+        switch ( Editor->GetDrawingOrientation() )
+        {
+            case EArianeDrawingOrientation::XY :
+                PlaneWorldDirection = CoordSystemTransform.TransformVector( FVector( 0.0f, 0.0f, 1.0f ) );
+            break;
+
+            case EArianeDrawingOrientation::YZ :
+                PlaneWorldDirection = CoordSystemTransform.TransformVector( FVector( 1.0f, 0.0f, 0.0f ) );
+            break;
+
+            case EArianeDrawingOrientation::ZX :
+                PlaneWorldDirection = CoordSystemTransform.TransformVector( FVector( 0.0f, 1.0f, 0.0f ) );
+
+            break;
+
+            default : // View
+                PlaneWorldDirection = CameraDirection;
+            break;
+        }
+
+        switch ( Editor->GetDrawingOrigin() )
+        {
+            case EArianeDrawingOrigin::Layer :
+                PlaneWorldPosition = LayerWorldPosition;
+            break;
+
+            case EArianeDrawingOrigin::View :
+                PlaneWorldPosition = CameraLocation;
+            break;
+
+            case EArianeDrawingOrigin::Surface :
+            break;
+
+            default :
+            break;
+        }
+
+        if( OutPlaneWorldPosition )
+        {
+            *OutPlaneWorldPosition = PlaneWorldPosition + ( DrawingDistanceToPlane * PlaneWorldDirection );
+        }
+
+        return FPlane( PlaneWorldPosition  + ( DrawingDistanceToPlane * PlaneWorldDirection ), PlaneWorldDirection );
     }
 
-    switch ( Editor->GetLayerDrawingOrientation( VectorLayer ) )
-    {
-        case EArianeLayerVectorDrawingOrientation::XY :
-            PlaneWorldDirection = CoordSystemTransform.TransformVector( FVector( 0.0f, 0.0f, 1.0f ) );
-        break;
-
-        case EArianeLayerVectorDrawingOrientation::YZ :
-            PlaneWorldDirection = CoordSystemTransform.TransformVector( FVector( 1.0f, 0.0f, 0.0f ) );
-        break;
-
-        case EArianeLayerVectorDrawingOrientation::ZX :
-            PlaneWorldDirection = CoordSystemTransform.TransformVector( FVector( 0.0f, 1.0f, 0.0f ) );
-
-        break;
-
-        default : // View
-            PlaneWorldDirection = -CameraDirection;
-        break;
-    }
-
-    return FPlane( LayerWorldPosition, PlaneWorldDirection );
+    return FPlane();
 }
 
 // Helper function

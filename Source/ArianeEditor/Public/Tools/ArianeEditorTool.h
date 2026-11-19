@@ -273,7 +273,7 @@ protected:
      * @param ViewportClient
      * @param VectorLayer the layer from get the plane from
      */
-    FPlane GetDrawingPlane( FEditorViewportClient* ViewportClient, UArianeLayerVector* VectorLayer );
+    FPlane GetDrawingPlane( FEditorViewportClient* ViewportClient, FVector* OutPlaneWorldPosition );
 
     /**
      * @brief Get the active viewport client
@@ -282,11 +282,11 @@ protected:
     FEditorViewportClient* GetActiveViewportClient();
 
     /**
-     * @brief Draw the layer orientation grid
+     * @brief Draw the drawing grid
      * @param RenderAPI
      * @param VectorLayer
      */
-    void DrawLayerOrientationGrid( IToolsContextRenderAPI* RenderAPI, UArianeLayerVector* VectorLayer );
+    void RenderDrawingGrid( IToolsContextRenderAPI* RenderAPI );
 
     /**
      * @brief Get the current layer
