@@ -193,19 +193,8 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
                     }
                 );
 
-                FImage OutImage;
-                if (!FImageUtils::GetRenderTargetImage(destinationRenderTarget.Get(), OutImage))
-                    continue;
-
-                ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
-
-                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-                TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( rect.Width(), rect.Height(), format ));
-                CopyImageToBlock(OutImage, block.Get());
-
-                FOdysseyRasterBlockMutator mutator(rasterCell->GetRasterBlock(), false);
-                mutator.Copy(block, {::ULISUtils::ToULISRectI(rect)});
-                mutator.Commit();
+                // The cells were rendered in compositing space: their colors are converted back into the linear colors the cell holds.
+                rasterCell->GetRasterContent().Write(*destinationRenderTarget, { rect }, InverseColorConversion(rasterCell->GetRenderedContentColorConversion()));
             }
 
             for (UOdysseyAnimationCell* cell : rasterCells)
@@ -255,19 +244,8 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
                     }
                 );
 
-                FImage OutImage;
-                if (!FImageUtils::GetRenderTargetImage(destinationRenderTarget.Get(), OutImage))
-                    continue;
-
-                ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
-
-                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-                TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( rect.Width(), rect.Height(), format ));
-                CopyImageToBlock(OutImage, block.Get());
-
-                FOdysseyRasterBlockMutator mutator(rasterCell->GetRasterBlock(), false);
-                mutator.Copy(block, {::ULISUtils::ToULISRectI(rect)});
-                mutator.Commit();
+                // The cells were rendered in compositing space: their colors are converted back into the linear colors the cell holds.
+                rasterCell->GetRasterContent().Write(*destinationRenderTarget, { rect }, InverseColorConversion(rasterCell->GetRenderedContentColorConversion()));
             }
 
             for (UOdysseyAnimationCell* cell : rasterCells)

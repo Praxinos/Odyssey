@@ -45,17 +45,12 @@ UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOut
     layerStack->SetCurrentLayer(layer);
 
     //Fill LayerImage with content of Texture
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();
-    FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
-    rasterBlockMutator.EditTilesFromRects(
-        { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
+    layer->GetRasterContent().EditBlock(
+        [&](::ULIS::FBlock& iBlock)
         {
-            FillOdysseyBlockFromUTextureData(iBlock.Get(), iTexture, iBlock->Format());
-            return {};
+            FillOdysseyBlockFromUTextureData(&iBlock, iTexture, iBlock.Format());
         }
     );
-    rasterBlockMutator.Commit();
 
     return layerStack;
 }
@@ -153,6 +148,14 @@ EOdysseyColorConversion
 UOdysseyTextureLayerStack::GetLayerColorConversion() const
 {
     return IsSRGB() && !UsesLinearCompositing() ? EOdysseyColorConversion::Encode : EOdysseyColorConversion::None;
+}
+
+EOdysseyColorConversion
+UOdysseyTextureLayerStack::GetDisplayColorConversion(const UOdysseyLayer* RenderedLayer) const
+{
+    return RenderedLayer && GetLayerColorConversion() == EOdysseyColorConversion::None && IsSRGB()
+        ? EOdysseyColorConversion::Encode
+        : EOdysseyColorConversion::None;
 }
 
 EOdysseyColorConversion

@@ -2,16 +2,18 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2026
 
 #if WITH_DEV_AUTOMATION_TESTS
+#include "Editor.h"
 #include "Engine/Texture2D.h"
 #include "ImageCore.h"
 #include "Misc/AutomationTest.h"
+#include "ScopedTransaction.h"
 #include "TextureCompiler.h"
 #include "UObject/Package.h"
 #include "UObject/StrongObjectPtr.h"
 #include "UObject/UnrealType.h"
 
 #include "OdysseyColorSpaceShader.h"
-#include "OdysseyRasterBlockMutator.h"
+#include "OdysseyRasterContent.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerStack.h"
 #include "OdysseyTextureLayerStackUserData.h"
@@ -69,28 +71,27 @@ TArray<FColor> ReadTextureBytes(UTexture2D* Texture, UOdysseyTextureLayerStack* 
     return Bytes;
 }
 
-/** Adds an opaque layer of TopColor, blended at half opacity. */
-void AddHalfOpaqueTopLayer(UOdysseyTextureLayerStack* Stack)
+/** Adds an opaque layer of TopColor, blended at half opacity, and returns it. */
+UOdysseyTextureLayerImageRaster* AddHalfOpaqueTopLayer(UOdysseyTextureLayerStack* Stack)
 {
     UOdysseyTextureLayerImageRaster* Top = CastChecked<UOdysseyTextureLayerImageRaster>(Stack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
-    TSharedPtr<FOdysseyRasterBlock> Raster = Top->GetRasterBlock();
-    TSharedPtr<ULIS::FBlock> Solid = MakeShared<ULIS::FBlock>(Width, Height, Raster->GetFormat());
+    FOdysseyRasterContent& Content = Top->GetRasterContent();
+    TSharedPtr<ULIS::FBlock> Solid = MakeShared<ULIS::FBlock>(Width, Height, Content.Describe().Format);
     for (int32 Y = 0; Y < Height; ++Y)
     {
         for (int32 X = 0; X < Width; ++X)
         {
             uint8* Pixel = Solid->PixelBits(static_cast<uint16>(X), static_cast<uint16>(Y));
-            // BGRA8, as the raster block of a BGRA8 texture.
+            // BGRA8, as the blocks of a BGRA8 texture.
             Pixel[0] = TopColor.B;
             Pixel[1] = TopColor.G;
             Pixel[2] = TopColor.R;
             Pixel[3] = TopColor.A;
         }
     }
-    FOdysseyRasterBlockMutator Mutator(Raster, false);
-    Mutator.Copy(Solid, { ULIS::FRectI::FromXYWH(0, 0, Width, Height) });
-    Mutator.Commit();
+    Content.WriteBlock(*Solid, { FIntRect(0, 0, Width, Height) });
     Top->SetOpacity(0.5f);
+    return Top;
 }
 
 bool CompareBytes(FAutomationTestBase& Test, const TCHAR* What, TFunctionRef<FColor(int32, int32)> Expected, const TArray<FColor>& Actual, int32 Tolerance)
@@ -208,6 +209,52 @@ bool FOdysseyTextureColorSRGBChangeTest::RunTest(const FString& Parameters)
         CompareBytes(*this, TEXT("Colors kept when sRGB is turned off"),
             [](int32 X, int32 Y) { return FLinearColor::FromSRGBColor(PatternColor(X, Y)).ToFColor(false); },
             ReadTextureBytes(Texture.Get(), UserData->LayerStack), 1);
+    }
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureColorMergeTest, "Odyssey.Texture.Color.Merge", Odyssey::TextureColorTests::Flags)
+
+/**
+ * Merging layers writes the colors they were blended into, as the texture showed them,
+ * whether the layers of the sRGB texture are blended with encoded or linear colors. The merge is undoable.
+ */
+bool FOdysseyTextureColorMergeTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::TextureColorTests;
+    if (!TestTrue(TEXT("OpenColorIO converts between linear and sRGB encoded colors"), FOdysseyColorSpaceShader::IsAvailable()))
+    {
+        return false;
+    }
+    for (bool bLinearCompositing : { false, true })
+    {
+        TStrongObjectPtr<UTexture2D> Texture(MakeTexture(true));
+        UOdysseyTextureLayerStackUserData* UserData = MakeUserData(Texture.Get());
+        UOdysseyTextureLayerStack* Stack = UserData->LayerStack;
+        UserData->bLinearCompositing = bLinearCompositing;
+        Stack->ColorSettingsChanged();
+        UOdysseyLayer* Bottom = Stack->GetCurrentLayer();
+        UOdysseyTextureLayerImageRaster* Top = AddHalfOpaqueTopLayer(Stack);
+        const TArray<FColor> Blended = ReadTextureBytes(Texture.Get(), Stack);
+        const int32 LayerCount = Stack->GetLayers().Num();
+        TFunction<FColor(int32, int32)> Expected = [&Blended](int32 X, int32 Y) { return Blended[Y * Width + X]; };
+
+        UOdysseyLayer* Merged = nullptr;
+        {
+            FScopedTransaction Transaction(NSLOCTEXT("OdysseyTextureColorTests", "Merge", "Merge layers"));
+            Merged = Stack->MergeLayers({ Bottom, Top });
+        }
+        const TCHAR* Mode = bLinearCompositing ? TEXT("linear compositing") : TEXT("encoded compositing");
+        if (!TestNotNull(FString::Printf(TEXT("Merge the layers with %s"), Mode), Merged))
+        {
+            return false;
+        }
+        TestEqual(TEXT("The merged layer replaces both layers"), Stack->GetLayers().Num(), LayerCount - 1);
+        CompareBytes(*this, *FString::Printf(TEXT("The merged layer holds the blended colors with %s"), Mode), Expected, ReadTextureBytes(Texture.Get(), Stack), 1);
+
+        TestTrue(TEXT("Undo the merge"), GEditor->UndoTransaction());
+        TestEqual(TEXT("Undo restores the layers"), Stack->GetLayers().Num(), LayerCount);
+        CompareBytes(*this, *FString::Printf(TEXT("Undone merge with %s"), Mode), Expected, ReadTextureBytes(Texture.Get(), Stack), 1);
     }
     return true;
 }

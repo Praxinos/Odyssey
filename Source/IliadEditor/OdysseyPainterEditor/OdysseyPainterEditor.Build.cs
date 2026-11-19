@@ -57,6 +57,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "EditorFramework",
                 "EditorWidgets",
                 "InputCore",
+                "ImageCore",
                 "Json",
                 "LevelEditor",
                 "MediaAssets",

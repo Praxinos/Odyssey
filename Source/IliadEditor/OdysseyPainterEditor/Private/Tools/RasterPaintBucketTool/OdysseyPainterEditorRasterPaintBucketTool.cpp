@@ -5,6 +5,7 @@
 
 #include "Editor.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "ImageCore.h"
 #include "Misc/ScopeExit.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "ImageUtils.h"
@@ -14,10 +15,12 @@
 
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimationRenderContext.h"
+#include "OdysseyColorConversion.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyMediaRaster.h"
+#include "OdysseyRasterContent.h"
 #include "OdysseyRasterBlockEdit.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorRasterSelection.h"
@@ -33,6 +36,23 @@
 
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
+
+namespace
+{
+/** Converts a color value with the sRGB transfer functions, as the views do. */
+float ConvertDisplayedValue(float iValue, EOdysseyColorConversion iConversion)
+{
+    switch (iConversion)
+    {
+        case EOdysseyColorConversion::Encode:
+            return iValue <= 0.0031308f ? iValue * 12.92f : 1.055f * FMath::Pow(iValue, 1.0f / 2.4f) - 0.055f;
+        case EOdysseyColorConversion::Decode:
+            return iValue <= 0.04045f ? iValue / 12.92f : FMath::Pow((iValue + 0.055f) / 1.055f, 2.4f);
+        default:
+            return iValue;
+    }
+}
+}
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -266,8 +286,12 @@ void UOdysseyPainterEditorRasterPaintBucketTool::ExtendContextMenu(FMenuBuilder&
     if( mediaRasters.IsEmpty() )
         return;
 
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
-    ::ULIS::FColor color = rasterBlock->GetBlock()->Color(iPointInTexture.x, iPointInTexture.y);
+    // The color is read in the source the tool compares, as the views display it.
+    TSharedPtr<::ULIS::FBlock> block = GetSourceBlock();
+    if( !block || iPointInTexture.x < 0 || iPointInTexture.y < 0 || iPointInTexture.x >= block->Width() || iPointInTexture.y >= block->Height() )
+        return;
+
+    ::ULIS::FColor color = block->Color(iPointInTexture.x, iPointInTexture.y);
 
     iBuilder.BeginSection("PaintBucket", LOCTEXT("raster-paint-bucket-tool.context-menu.paint-bucket-section.name", "Paint Bucket"));
 
@@ -645,6 +669,39 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnRasterSelectionChanged()
 }
 
 TSharedPtr<::ULIS::FBlock>
+UOdysseyPainterEditorRasterPaintBucketTool::RenderDisplayedColors(const UOdysseyLayerStack& LayerStack, const UOdysseyLayer* RenderedLayer, const FOdysseyRenderContext& RenderContext)
+{
+    const FIntRect rect = RenderedLayer ? RenderedLayer->GetDefaultRenderRect() : LayerStack.GetDefaultRenderRect();
+    TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
+    renderTarget->InitAutoFormat(rect.Width(), rect.Height());
+    if (RenderedLayer)
+        RenderedLayer->Render_GameThread(renderTarget.Get(), EOdysseyRenderingType::Render, &RenderContext);
+    else
+        LayerStack.Render_GameThread(renderTarget.Get(), EOdysseyRenderingType::Render, &RenderContext);
+
+    FImage renderedImage;
+    if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), renderedImage))
+        return nullptr;
+
+    FImage image;
+    renderedImage.CopyTo(image, ERawImageFormat::RGBA32F, EGammaSpace::Linear);
+    const EOdysseyColorConversion conversion = LayerStack.GetDisplayColorConversion(RenderedLayer);
+    if (conversion != EOdysseyColorConversion::None)
+    {
+        for (FLinearColor& pixel : image.AsRGBA32F())
+        {
+            pixel.R = ConvertDisplayedValue(pixel.R, conversion);
+            pixel.G = ConvertDisplayedValue(pixel.G, conversion);
+            pixel.B = ConvertDisplayedValue(pixel.B, conversion);
+        }
+    }
+
+    TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock(image.SizeX, image.SizeY, ULISFormatForRawImageFormat(image.Format)));
+    CopyImageToBlock(image, block.Get());
+    return block;
+}
+
+TSharedPtr<::ULIS::FBlock>
 UOdysseyPainterEditorRasterPaintBucketTool::GetCurrentLayerBlock() const
 {
     UOdysseyLayerStack* layerStack = GetEditor()->LayerStack();
@@ -660,23 +717,9 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetCurrentLayerBlock() const
     if (player)
         currentFrame = player->GetCurrentFrame().FrameNumber;
 
-    TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
-    FIntRect rect = layer->GetDefaultRenderRect();
-    renderTarget->InitAutoFormat(rect.Width(), rect.Height());
     FOdysseyRenderContext RenderContext;
     RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = currentFrame;
-    layer->Render_GameThread(renderTarget.Get(), EOdysseyRenderingType::Render, &RenderContext);
-
-    FImage OutImage;
-    if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
-        return nullptr;
-
-    ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-    TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( rect.Width(), rect.Height(), format ));
-    CopyImageToBlock(OutImage, block.Get());
-
-    return block;
+    return RenderDisplayedColors(*layerStack, layer, RenderContext);
 }
 
 TSharedPtr<::ULIS::FBlock>
@@ -697,10 +740,6 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetForegroundLayersBlock() const
 
     TArray<IOdysseyRenderingAbility*> layersToExclude = GetForegroundLayersToExclude(layer);
 
-    TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
-    FIntRect rect = layerStack->GetDefaultRenderRect();
-    renderTarget->InitAutoFormat(rect.Width(), rect.Height());
-
     FOdysseyRenderContext RenderContext;
     RenderContext.Filter = [layersToExclude](const IOdysseyTextureRenderingAbility& Ability,
         const TArray<const IOdysseyTextureRenderingAbility*>& Parents)
@@ -708,18 +747,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetForegroundLayersBlock() const
         return !layersToExclude.Contains(&Ability);
     };
     RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = currentFrame;
-    layerStack->Render_GameThread(renderTarget.Get(), EOdysseyRenderingType::Render, &RenderContext);
-
-    FImage OutImage;
-    if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
-        return nullptr;
-
-    ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-    TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( rect.Width(), rect.Height(), format ));
-    CopyImageToBlock(OutImage, block.Get());
-
-    return block;
+    return RenderDisplayedColors(*layerStack, nullptr, RenderContext);
 }
 
 TSharedPtr<::ULIS::FBlock>
@@ -740,10 +768,6 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetBackgroundLayersBlock() const
 
     TArray<IOdysseyRenderingAbility*> layersToExclude = GetBackgroundLayersToExclude(layer);
 
-    TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
-    FIntRect rect = layerStack->GetDefaultRenderRect();
-    renderTarget->InitAutoFormat(rect.Width(), rect.Height());
-
     FOdysseyRenderContext RenderContext;
     RenderContext.Filter = [layersToExclude](const IOdysseyTextureRenderingAbility& Ability,
         const TArray<const IOdysseyTextureRenderingAbility*>& Parents)
@@ -751,18 +775,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetBackgroundLayersBlock() const
         return !layersToExclude.Contains(&Ability);
     };
     RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = currentFrame;
-    layerStack->Render_GameThread(renderTarget.Get(), EOdysseyRenderingType::Render, &RenderContext);
-
-    FImage OutImage;
-    if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
-        return nullptr;
-
-    ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-    TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( rect.Width(), rect.Height(), format ));
-    CopyImageToBlock(OutImage, block.Get());
-
-    return block;
+    return RenderDisplayedColors(*layerStack, nullptr, RenderContext);
 }
 
 TSharedPtr<::ULIS::FBlock>
@@ -777,23 +790,9 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetAllLayersBlock() const
     if (player)
         currentFrame = player->GetCurrentFrame().FrameNumber;
 
-    TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
-    FIntRect rect = layerStack->GetDefaultRenderRect();
-    renderTarget->InitAutoFormat(rect.Width(), rect.Height());
     FOdysseyRenderContext RenderContext;
     RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = currentFrame;
-    layerStack->Render_GameThread(renderTarget.Get(), EOdysseyRenderingType::Render, &RenderContext);
-
-    FImage OutImage;
-    if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
-        return nullptr;
-
-    ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-    TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( rect.Width(), rect.Height(), format ));
-    CopyImageToBlock(OutImage, block.Get());
-
-    return block;
+    return RenderDisplayedColors(*layerStack, nullptr, RenderContext);
 }
 
 TArray<IOdysseyRenderingAbility*>

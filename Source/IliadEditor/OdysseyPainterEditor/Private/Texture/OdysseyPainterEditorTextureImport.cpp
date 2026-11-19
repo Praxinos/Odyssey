@@ -93,11 +93,8 @@ FOdysseyPainterEditorTextureImport::ImportTextures(UTexture2D* DestinationTextur
 
         rasterLayers.Add(layer);
 
-        TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();
-        FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
-        ::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight());
-        rasterBlockMutator.Copy(block, { invalidRect });
-        rasterBlockMutator.Commit();
+        FOdysseyRasterContent& content = layer->GetRasterContent();
+        content.WriteBlock(*block, { FIntRect(FIntPoint::ZeroValue, content.Describe().Size) });
     }
 
     //---

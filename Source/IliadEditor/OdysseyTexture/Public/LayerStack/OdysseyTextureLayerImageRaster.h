@@ -35,10 +35,10 @@ public:
     // Public API
 
     /**
-     * Transitional: returns the raster block derived from the tiled image, read by tools and edited by other users.
-     * Its committed edits are written into the tiled image. Null when the layer is not in a layer stack.
+     * Returns the pixels of the layer, to read or write them; see FOdysseyRasterContent.
+     * Its functions fail while the layer is not in a layer stack.
      */
-    TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
+    FOdysseyRasterContent& GetRasterContent() const;
 
     /**
      * Begins an edit of the pixels, shown by the views until it is committed or ended; see FOdysseyRasterContent::BeginEdit().
@@ -96,14 +96,12 @@ public:
         const TArray<const IOdysseyTextureRenderingAbility*>& Parents, const FOdysseyRenderContext* RenderContext) const override;
 
 private:
-    FOdysseyRasterContent& GetRasterContent() const;
     ::ULIS::eFormat GetRasterFormat() const;
     void OnContentChanged(const TArray<FIntRect>& Rects, bool bInteractive);
     void MigrateLegacyContent();
 
 private:
-    //Import/Export
-    friend class FOdysseyTextureLayerImageRasterExport;
+    //Import
     friend class FOdysseyTextureLayerImageRasterImport;
 
 private:

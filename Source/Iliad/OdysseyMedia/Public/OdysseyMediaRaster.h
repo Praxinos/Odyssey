@@ -6,12 +6,12 @@
 #include "CoreMinimal.h"
 #include "OdysseyMedia.h"
 
-class FOdysseyRasterBlock;
 class FOdysseyRasterBlockEdit;
+class FOdysseyRasterContent;
 
 /**
  * The raster content of a layer or a cell, as tools reach it.
- * Its pixels are reached through functions given by the content owner, called only when needed.
+ * The content is reached through functions given by its owner, called only when needed.
  */
 class ODYSSEYMEDIA_API FOdysseyMediaRaster
     : public IOdysseyMedia
@@ -19,7 +19,7 @@ class ODYSSEYMEDIA_API FOdysseyMediaRaster
 public:
     DECLARE_ODYSSEY_MEDIA()
 
-    using FGetRasterBlock = TFunction<TSharedPtr<FOdysseyRasterBlock>()>;
+    using FGetContent = TFunction<TSharedPtr<FOdysseyRasterContent>()>;
     using FBeginEdit = TFunction<TSharedPtr<FOdysseyRasterBlockEdit>()>;
 
 public:
@@ -29,10 +29,10 @@ public:
 
     /**
      * @param iContentId Identifies the content: the rendering id of its owner, which its edit sessions replace in the views.
-     * @param iGetRasterBlock Returns the raster block of the content, read by tools.
+     * @param iGetContent Returns the content, to read or write it.
      * @param iBeginEdit Begins an edit of the content, see FOdysseyRasterContent::BeginEdit().
      */
-    FOdysseyMediaRaster(const FGuid& iContentId, FGetRasterBlock iGetRasterBlock, FBeginEdit iBeginEdit);
+    FOdysseyMediaRaster(const FGuid& iContentId, FGetContent iGetContent, FBeginEdit iBeginEdit);
 
 public:
     //IOdysseyMedia API
@@ -40,14 +40,14 @@ public:
     /** Returns the id of the content, the same for every media of the same layer or cell. */
     const FGuid& GetContentId() const;
 
-    /** Transitional: returns the raster block of the content, to read its pixels. Edits go through BeginEdit(). */
-    TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
+    /** Returns the content, to read or write it; see FOdysseyRasterContent. Null when the owner was destroyed. */
+    TSharedPtr<FOdysseyRasterContent> GetContent() const;
 
     /** Begins an edit of the content, shown by the views until the tool commits or ends it. Null when the content cannot be edited. */
     TSharedPtr<FOdysseyRasterBlockEdit> BeginEdit() const;
 
 private:
     FGuid mContentId;
-    FGetRasterBlock mGetRasterBlock;
+    FGetContent mGetContent;
     FBeginEdit mBeginEdit;
 };

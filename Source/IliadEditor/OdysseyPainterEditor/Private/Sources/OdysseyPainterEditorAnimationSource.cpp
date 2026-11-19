@@ -20,6 +20,7 @@
 #include "OdysseyLayerStackSelection.h"
 #include "OdysseyAnimationCellsSelection.h"
 #include "OdysseyMediaRaster.h"
+#include "OdysseyRasterContent.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationFlipSystem.h"
@@ -321,21 +322,19 @@ void FOdysseyPainterEditorAnimationSource::ClearFromCopyBlock(TSharedPtr<::ULIS:
         TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
         for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
         {
-            TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
-            if (!rasterBlock)
+            TSharedPtr<FOdysseyRasterContent> content = mediaRaster->GetContent();
+            if (!content)
                 continue;
 
-            FOdysseyRasterBlockMutator mutator(rasterBlock);
-            mutator.EditTilesFromRects(
-                { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+            content->EditBlock(
+                [&](::ULIS::FBlock& iBlock)
                 {
-                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock.Format());
                     ::ULIS::FEvent eventCut;
 
                     ctx.Blend(
                         *iCopyBlock,
-                        *iBlock,
+                        iBlock,
                         iCopyBlock->Rect(),
                         ::ULIS::FVec2I(0, 0),
                         ::ULIS::Blend_Normal,
@@ -347,10 +346,9 @@ void FOdysseyPainterEditorAnimationSource::ClearFromCopyBlock(TSharedPtr<::ULIS:
                         &eventCut
                     );
 
-                    return { eventCut };
+                    ctx.Finish();
                 }
             );
-            mutator.Commit();
 
             FOdysseyAnimationCurrentFrameMutator currentFrameMutator(player);
             currentFrameMutator.Set(player->GetCurrentFrame().FrameNumber.Value);
@@ -418,20 +416,18 @@ void FOdysseyPainterEditorAnimationSource::PasteBlockToCurrentLayer(TSharedPtr<:
         TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
         for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
         {
-            TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
-            if (!rasterBlock)
+            TSharedPtr<FOdysseyRasterContent> content = mediaRaster->GetContent();
+            if (!content)
                 continue;
 
-            FOdysseyRasterBlockMutator mutator(rasterBlock);
-            mutator.EditTilesFromRects(
-                { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+            content->EditBlock(
+                [&](::ULIS::FBlock& iBlock)
                 {
                     ::ULIS::FEvent eventPaste;
 
                     ctx.Blend(
                         *copyBlock,
-                        *iBlock,
+                        iBlock,
                         copyBlock->Rect(),
                         ::ULIS::FVec2I(0, 0),
                         ::ULIS::Blend_Normal,
@@ -442,11 +438,10 @@ void FOdysseyPainterEditorAnimationSource::PasteBlockToCurrentLayer(TSharedPtr<:
                         nullptr,
                         &eventPaste);
 
-                    return { eventPaste };
+                    ctx.Finish();
 
                 }
             );
-            mutator.Commit();
         }
     }
 }
@@ -516,20 +511,18 @@ FOdysseyPainterEditorAnimationSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::F
         TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
         for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
         {
-            TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
-            if (!rasterBlock)
+            TSharedPtr<FOdysseyRasterContent> content = mediaRaster->GetContent();
+            if (!content)
                 continue;
 
-            FOdysseyRasterBlockMutator mutator(rasterBlock);
-            mutator.EditTilesFromRects(
-                { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+            content->EditBlock(
+                [&](::ULIS::FBlock& iBlock)
                 {
                     ::ULIS::FEvent eventPaste;
 
                     ctx.Blend(
                         *copyBlock,
-                        *iBlock,
+                        iBlock,
                         copyBlock->Rect(),
                         ::ULIS::FVec2I(0, 0),
                         ::ULIS::Blend_Normal,
@@ -540,11 +533,10 @@ FOdysseyPainterEditorAnimationSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::F
                         nullptr,
                         &eventPaste);
 
-                    return { eventPaste };
+                    ctx.Finish();
 
                 }
             );
-            mutator.Commit();
         }
     }
 

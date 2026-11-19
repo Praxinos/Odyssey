@@ -31,6 +31,12 @@ public:
 #endif
     virtual FIntRect GetDefaultRenderRect() const override;
 
+    /**
+     * The views display the encoded colors of the linear colors an animation outputs:
+     * the stack renders linear colors, a layer renders linear colors when the animation blends linear colors.
+     */
+    virtual EOdysseyColorConversion GetDisplayColorConversion(const UOdysseyLayer* RenderedLayer) const override;
+
 protected:
     /** Decodes the blended colors when the animation blends sRGB encoded colors: an animation outputs linear colors. */
     virtual EOdysseyColorConversion GetContentColorConversion(const FOdysseyRenderContext* RenderContext) const override;

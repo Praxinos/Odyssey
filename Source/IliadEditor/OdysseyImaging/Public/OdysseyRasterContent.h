@@ -4,15 +4,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Templates/Function.h"
 #include "UObject/ObjectPtr.h"
 
-#include "OdysseyRasterBlock.h"
+#include "OdysseyColorConversion.h"
 #include "OdysseyTextureRenderingAbility.h"
 
 #include <ULIS>
 
 class FOdysseyRasterBlockEdit;
+class FOdysseyRasterEditSession;
 class UOdysseyTiledImage;
+class UTextureRenderTarget2D;
 
 /**
  * Raster content shared by raster texture layers and raster animation cells.
@@ -21,21 +24,22 @@ class UOdysseyTiledImage;
  * UPROPERTY so that it is saved, duplicated and garbage collected with the owner; this class creates it in that
  * property, keeps it in the format the owner expects, renders it and writes into it.
  *
- * Tools edit the content through BeginEdit(): the edit session shows their pixels in the views until they commit them
- * into the tiled image or end the edit.
- *
- * Transitional: other users still edit an FOdysseyRasterBlock derived from the tiled image; its committed edits are
- * written into the tiled image. This part goes away once they read and write render targets through this class.
+ * - Tools edit the content through BeginEdit(): the edit session shows their pixels in the views until they commit them
+ *   into the tiled image or end the edit.
+ * - Other users read and write render targets in the tile format with Read() and Write(). Each write is undoable within
+ *   a transaction, keeps the alpha of the content when it is locked, and ends the active edit.
+ * - Transitional: users still working on CPU blocks go through ReadBlock(), WriteBlock() and EditBlock(), whose blocks
+ *   are in the format the owner expects. They go away once these users work on render targets.
  */
 class ODYSSEYIMAGING_API FOdysseyRasterContent
     : public TSharedFromThis<FOdysseyRasterContent>
 {
 public:
     /**
-     * The content the owner expects: its size in pixels and the format of its raster block.
+     * The content the owner expects: its size in pixels and the format of the blocks read and written by ReadBlock() and WriteBlock().
      *
-     * Transitional, removed with the raster block:
-     * - The size only sizes the raster block, the preview texture and the full-size source assembled for rendering.
+     * Transitional, removed with the block adapters:
+     * - The size only sizes the blocks, the edit sessions and the full-size source assembled for rendering.
      *   Tiled images are unbounded: rendering will assemble only the tiles covering the source rect it is given,
      *   and the canvas bounds will be the owner's concern.
      * - The format will be given when the image is created, then converted explicitly when the owner changes format
@@ -50,8 +54,8 @@ public:
         ::ULIS::eFormat Format = ::ULIS::Format_RGBA8;
 
         /**
-         * True when the 8-bit raster block holds sRGB encoded colors. The image always holds linear colors:
-         * they are decoded when written into it and encoded when the raster block is read from it.
+         * True when 8-bit blocks hold sRGB encoded colors. The image always holds linear colors:
+         * they are decoded when written into it and encoded when blocks are read from it.
          */
         bool bSRGB = false;
 
@@ -78,7 +82,7 @@ public:
     ~FOdysseyRasterContent();
 
     /**
-     * @param InOwner The object owning the image property; the outer of the image and the owner of the raster block.
+     * @param InOwner The object owning the image property; the outer of the image.
      * @param InRenderingId The rendering id of the owner, which the edit sessions replace in the views.
      * @param InImage The owner's instanced property holding the tiled image. It must outlive this object.
      * @param InGetDescription Returns the content the owner expects.
@@ -94,6 +98,9 @@ public:
 public:
     /** Returns the existing image without creating it. */
     UOdysseyTiledImage* GetImage() const;
+
+    /** Returns the content the owner expects. */
+    FDescription Describe() const;
 
     /**
      * Creates the image when missing, and converts it when the owner expects another format.
@@ -118,11 +125,53 @@ public:
     TSharedPtr<FOdysseyRasterBlockEdit> BeginEdit();
 
     /**
-     * Transitional: returns the raster block edited by other users than tools, created from the image when needed.
-     * Committed edits of this block are written into the image, and end the active edit.
-     * @return Null when the owner cannot hold content.
+     * Creates a render target holding pixels in the tile format, as large as the content, to read or write the content.
+     * @return Null when the owner cannot hold content or the rendering is unavailable.
      */
-    TSharedPtr<FOdysseyRasterBlock> GetRasterBlock();
+    UTextureRenderTarget2D* CreateRenderTarget();
+
+    /**
+     * Reads an area of the content, as linear colors, into a render target.
+     * Use a target created by CreateRenderTarget() to keep every value.
+     * @param Destination The render target to read into.
+     * @param Rect The area to read, in content pixels.
+     * @param Position The position of the top-left corner of Rect in the destination.
+     * @return False when the owner cannot hold content or the rendering is unavailable.
+     */
+    bool Read(UTextureRenderTarget2D& Destination, const FIntRect& Rect, FIntPoint Position);
+
+    /**
+     * Writes areas of a render target into the content, undoable within a transaction.
+     * The alpha of the content is kept when it is locked. The active edit ends, and the owner is notified.
+     * @param Source The pixels to write, at the same positions as in the content.
+     * @param Rects The areas to write, in content pixels; clipped to the content bounds.
+     * @param Conversion Converts the source values into the linear colors of the content,
+     *                   e.g. Decode for a render of the owner blended with encoded colors.
+     * @return False when nothing was written.
+     */
+    bool Write(UTextureRenderTarget2D& Source, const TArray<FIntRect>& Rects, EOdysseyColorConversion Conversion = EOdysseyColorConversion::None);
+
+    /**
+     * Transitional: reads the whole content into a new block in the format the owner expects. Waits for the GPU.
+     * @return Null when the owner cannot hold content or the rendering is unavailable.
+     */
+    TSharedPtr<::ULIS::FBlock> ReadBlock();
+
+    /**
+     * Transitional: writes areas of a block into the content, as Write() does.
+     * The block is first converted to the format the owner expects, its 8-bit colors being sRGB encoded when bSRGB is set.
+     * @param Block The pixels to write, at the same positions as in the content.
+     * @param Rects The areas to write, in content pixels; clipped to the content and block bounds.
+     * @return False when nothing was written.
+     */
+    bool WriteBlock(const ::ULIS::FBlock& Block, const TArray<FIntRect>& Rects);
+
+    /**
+     * Transitional: reads the whole content into a block, lets the caller change it, then writes the whole block back as WriteBlock() does.
+     * @param Edit Changes the block, in the format the owner expects. Pending ULIS operations must be finished when it returns.
+     * @return False when nothing was written.
+     */
+    bool EditBlock(TFunctionRef<void(::ULIS::FBlock& Block)> Edit);
 
     /**
      * Builds the function rendering the image. The uncommitted edits are shown by the views through the edit session.
@@ -136,14 +185,17 @@ public:
     bool HasUncommittedEdits() const;
 
 private:
-    void ReleaseRasterBlock();
     void EndEdit();
     void OnEditCommitted(const TArray<FIntRect>& Rects);
-    void OnBlockCommited(const TArray<::ULIS::FRectI>& Rects);
-    /** Keeps the alpha of the original pixels in the edited tiles of the raster block, when the alpha is locked. */
-    TArray<::ULIS::FEvent> PreserveBlockAlpha(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& OriginalBlocks,
-        const FOdysseyInvalidTileMap& InvalidMap, const TArray<::ULIS::FEvent>& WaitList);
     void OnImageUndone();
+
+    /**
+     * Writes areas through an edit session, which keeps the alpha when it is locked, then notifies the owner.
+     * @param Rects The areas to write; clipped to the content bounds.
+     * @param Fill Writes the new pixels of the clipped areas into the session target.
+     */
+    bool WriteThroughSession(const TArray<FIntRect>& Rects, TFunctionRef<void(FOdysseyRasterEditSession& Session, const TArray<FIntRect>& Rects)> Fill);
+
     bool BuildImageRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform, FIntPoint Size) const;
 
 private:
@@ -157,7 +209,6 @@ private:
     /** The image whose undo notification is bound. */
     TWeakObjectPtr<UOdysseyTiledImage> BoundImage;
 
-    TSharedPtr<FOdysseyRasterBlock> RasterBlock;
     /** The edit begun by BeginEdit(), owned by the tool. */
     TWeakPtr<FOdysseyRasterBlockEdit> ActiveEdit;
 };

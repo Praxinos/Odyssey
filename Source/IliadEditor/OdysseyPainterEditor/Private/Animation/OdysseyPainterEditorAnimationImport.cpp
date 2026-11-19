@@ -125,11 +125,7 @@ FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence(UOdysseyAnimati
 
         result.mImportedCells.Add(cell);
 
-        TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
-        FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
-        ::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
-        rasterBlockMutator.Copy(block, { invalidRect });
-        rasterBlockMutator.Commit();
+        cell->GetRasterContent().WriteBlock(*block, { FIntRect(0, 0, animation->GetWidth(), animation->GetHeight()) });
     }
 
     return result;

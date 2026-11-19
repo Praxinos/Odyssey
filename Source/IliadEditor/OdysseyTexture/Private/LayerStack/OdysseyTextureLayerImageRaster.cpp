@@ -22,7 +22,6 @@
 #include "OdysseyRenderContext.h"
 #include "OdysseyStyle.h"
 #include "OdysseySurfaceTexture2DEditable.h"
-#include "OdysseyTextureLayerImageRasterExport.h"
 #include "OdysseyTextureLayerImageRasterImport.h"
 #include "OdysseyTextureLayerStack.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -155,12 +154,6 @@ UOdysseyTextureLayerImageRaster::GetTiledImage() const
     return TiledImage;
 }
 
-TSharedPtr<FOdysseyRasterBlock>
-UOdysseyTextureLayerImageRaster::GetRasterBlock() const
-{
-    return GetRasterContent().GetRasterBlock();
-}
-
 TSharedPtr<FOdysseyRasterBlockEdit>
 UOdysseyTextureLayerImageRaster::BeginRasterEdit()
 {
@@ -247,28 +240,8 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
         );
     }
 
-    FImage OutImage;
-    if (!FImageUtils::GetRenderTargetImage(destinationRenderTarget.Get(), OutImage))
-        return;
-
-    // Linear blended colors are encoded back into the bytes the layer holds.
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    if (layerStack && layerStack->IsSRGB() && layerStack->UsesLinearCompositing())
-    {
-        FImage EncodedImage;
-        OutImage.CopyTo(EncodedImage, ERawImageFormat::BGRA8, EGammaSpace::sRGB);
-        OutImage = MoveTemp(EncodedImage);
-    }
-
-    ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-    TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( rect.Width(), rect.Height(), format ));
-    CopyImageToBlock(OutImage, block.Get());
-
-    FOdysseyRasterBlockMutator mutator( GetRasterBlock() );
-    mutator.Copy(block, {::ULISUtils::ToULISRectI(rect)});
-    mutator.Commit();
+    // The layers were blended in compositing space: their colors are converted back into the linear colors the layer holds.
+    GetRasterContent().Write(*destinationRenderTarget, { rect }, InverseColorConversion(GetRenderedContentColorConversion()));
 }
 
 FOdysseyMediaProvider
@@ -283,10 +256,10 @@ UOdysseyTextureLayerImageRaster::GetMediaProvider(uint32 iFrameIndex) const
     // The pixels are read or edited only when a tool needs them.
     TWeakObjectPtr<UOdysseyTextureLayerImageRaster> weakThis = const_cast<UOdysseyTextureLayerImageRaster*>(this);
     TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(GetRenderingId(),
-        [weakThis]() -> TSharedPtr<FOdysseyRasterBlock>
+        [weakThis]() -> TSharedPtr<FOdysseyRasterContent>
         {
             UOdysseyTextureLayerImageRaster* layer = weakThis.Get();
-            return layer ? layer->GetRasterBlock() : nullptr;
+            return layer ? TSharedPtr<FOdysseyRasterContent>(layer->GetRasterContent().AsShared()) : nullptr;
         },
         [weakThis]() -> TSharedPtr<FOdysseyRasterBlockEdit>
         {
@@ -329,11 +302,6 @@ UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
 
     if (GetFlags() & RF_ClassDefaultObject)
         return;
-
-    if( Ar.IsSaving() )
-    {
-        //FOdysseyTextureLayerImageRasterExport::Write( this, Ar );
-    }
 
     if( Ar.IsLoading() )
     {

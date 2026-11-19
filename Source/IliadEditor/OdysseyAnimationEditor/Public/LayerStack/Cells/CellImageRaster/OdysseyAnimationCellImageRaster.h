@@ -50,10 +50,10 @@ public:
 #if WITH_EDITOR
 public:
     /**
-     * Transitional: returns the raster block derived from the tiled image, read by tools and edited by other users.
-     * Its committed edits are written into the tiled image. Null when the cell is not in an animation.
+     * Returns the pixels of the cell, to read or write them; see FOdysseyRasterContent.
+     * Its functions fail while the cell is not in an animation.
      */
-    TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
+    FOdysseyRasterContent& GetRasterContent() const;
 
     /**
      * Begins an edit of the pixels, shown by the views until it is committed or ended; see FOdysseyRasterContent::BeginEdit().
@@ -73,14 +73,14 @@ public:
     FCriticalSection* GetImageRenderingMutex() const;
 
 private:
-    FOdysseyRasterContent& GetRasterContent() const;
+    /** Returns the content, creating it when needed, without migrating legacy content. */
+    FOdysseyRasterContent& FindOrCreateRasterContent() const;
     ::ULIS::eFormat GetRasterFormat() const;
     void OnContentChanged(const TArray<FIntRect>& Rects, bool bInteractive);
     void MigrateLegacyContent();
 
 private:
-    //Import/Export
-    friend class FOdysseyAnimationCellImageRasterExport;
+    //Import
     friend class FOdysseyAnimationCellImageRasterImport;
 
 private:

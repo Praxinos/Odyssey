@@ -255,19 +255,8 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
             );
         }
 
-        FImage OutImage;
-        if (!FImageUtils::GetRenderTargetImage(destinationRenderTarget.Get(), OutImage))
-            continue;
-
-        ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
-
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-        TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( rect.Width(), rect.Height(), format ));
-        CopyImageToBlock(OutImage, block.Get());
-
-        FOdysseyRasterBlockMutator mutator(cell->GetRasterBlock());
-        mutator.Copy(block, {::ULISUtils::ToULISRectI(rect)});
-        mutator.Commit();
+        // The layers were blended in compositing space: their colors are converted back into the linear colors the cell holds.
+        cell->GetRasterContent().Write(*destinationRenderTarget, { rect }, InverseColorConversion(cell->GetRenderedContentColorConversion()));
     }
 }
 

@@ -14,6 +14,8 @@ class FOdysseyPaintEngine;
 class IOdysseyRenderingAbility;
 class FOdysseyPainterEditorRasterPaintBucketToolSourceProvider;
 class UOdysseyLayer;
+class UOdysseyLayerStack;
+struct FOdysseyRenderContext;
 
 UENUM()
 enum class EOdysseyRasterPaintBucketToolColorToleranceSource : uint8
@@ -76,6 +78,18 @@ protected:
     virtual TOptional<FMouseCursor> GetMouseCursorOverride() const override;
 
 public:
+    /**
+     * Renders the layer stack, or one of its layers, into a new float block of the colors the views display.
+     * The tool compares colors in this block, so that its tolerance and its included colors apply to the colors the user sees,
+     * whether the layers are blended with encoded or linear colors.
+     * @param LayerStack The layer stack.
+     * @param RenderedLayer The layer to render, or null for the whole stack.
+     * @param RenderContext The context of the render, e.g. the frame or the layers to exclude.
+     * @return Null when the render cannot be read back.
+     */
+    static TSharedPtr<::ULIS::FBlock> RenderDisplayedColors(const UOdysseyLayerStack& LayerStack, const UOdysseyLayer* RenderedLayer, const FOdysseyRenderContext& RenderContext);
+
+public:
     void SetSourceProvider(TSharedPtr<FOdysseyPainterEditorRasterPaintBucketToolSourceProvider> iProvider);
     FOdysseyBlendParameters GetBlendParameters() const;
 
@@ -119,7 +133,7 @@ public:
     UPROPERTY( EditAnywhere, Category="RasterPaintBucketTool", meta = ( ClampMin = "0", UIMin = "0", LinearDeltaSensitivity = "15", Delta = "1" ) )
     float GapTolerance = 0; //pixels positive only
 
-    /** The list of color to include. */
+    /** The list of colors to include, as the views display them. */
     UPROPERTY( EditAnywhere, Category="RasterPaintBucketTool" )
     TArray<FLinearColor> IncludeColors;
 

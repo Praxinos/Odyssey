@@ -11,13 +11,14 @@
 
 #if WITH_EDITOR
 #include "Engine/Texture2D.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "UObject/StrongObjectPtr.h"
 #include "Misc/App.h"
 #include "OdysseyBlendShader.h"
 #include "OdysseyTiledImage.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyRasterBlockEdit.h"
-#include "OdysseyAnimationCellImageRasterExport.h"
 #include "OdysseyAnimationCellImageRasterImport.h"
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyRasterBlock.h"
@@ -29,7 +30,6 @@
 #include "TextureCompiler.h"
 #include "TextureResource.h"
 #include "UObject/ObjectSaveContext.h"
-#include "OdysseyRasterBlockMutator.h"
 #include "ScopedTransaction.h"
 
 #endif
@@ -60,7 +60,7 @@ UOdysseyAnimationCellImageRaster::BuildRenderPipelineInternal(
 {
 #if WITH_EDITOR
     const_cast<UOdysseyAnimationCellImageRaster*>(this)->MigrateLegacyContent();
-    return GetRasterContent().BuildRenderFunction(oRenderFunction, GetContentTransform(RenderContext));
+    return FindOrCreateRasterContent().BuildRenderFunction(oRenderFunction, GetContentTransform(RenderContext));
 #else
     return Super::BuildRenderPipelineInternal(oRenderFunction, iParents, RenderContext);
 #endif
@@ -75,6 +75,14 @@ UOdysseyAnimationCellImageRaster::GetTiledImage() const
 
 FOdysseyRasterContent&
 UOdysseyAnimationCellImageRaster::GetRasterContent() const
+{
+    // Content still held by a legacy render texture or raster block reaches the tiled image first.
+    const_cast<UOdysseyAnimationCellImageRaster*>(this)->MigrateLegacyContent();
+    return FindOrCreateRasterContent();
+}
+
+FOdysseyRasterContent&
+UOdysseyAnimationCellImageRaster::FindOrCreateRasterContent() const
 {
     if (!mRasterContent)
     {
@@ -143,7 +151,7 @@ UOdysseyAnimationCellImageRaster::MigrateLegacyContent()
     }
 
     // Keep the legacy data when it cannot be migrated, e.g. while the cell is not yet in an animation.
-    if (Pixels && !GetRasterContent().SetContent(*Pixels))
+    if (Pixels && !FindOrCreateRasterContent().SetContent(*Pixels))
     {
         return;
     }
@@ -156,18 +164,11 @@ UOdysseyAnimationCellImageRaster::InitTexture()
 {
 }
 
-TSharedPtr<FOdysseyRasterBlock>
-UOdysseyAnimationCellImageRaster::GetRasterBlock() const
-{
-    const_cast<UOdysseyAnimationCellImageRaster*>(this)->MigrateLegacyContent();
-    return GetRasterContent().GetRasterBlock();
-}
-
 TSharedPtr<FOdysseyRasterBlockEdit>
 UOdysseyAnimationCellImageRaster::BeginRasterEdit()
 {
     MigrateLegacyContent();
-    return GetRasterContent().BeginEdit();
+    return FindOrCreateRasterContent().BeginEdit();
 }
 
 void
@@ -193,10 +194,10 @@ UOdysseyAnimationCellImageRaster::GetMediaProvider() const
     // The pixels are read or edited only when a tool needs them.
     TWeakObjectPtr<UOdysseyAnimationCellImageRaster> weakThis = const_cast<UOdysseyAnimationCellImageRaster*>(this);
     TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(GetRenderingId(),
-        [weakThis]() -> TSharedPtr<FOdysseyRasterBlock>
+        [weakThis]() -> TSharedPtr<FOdysseyRasterContent>
         {
             UOdysseyAnimationCellImageRaster* cell = weakThis.Get();
-            return cell ? cell->GetRasterBlock() : nullptr;
+            return cell ? TSharedPtr<FOdysseyRasterContent>(cell->GetRasterContent().AsShared()) : nullptr;
         },
         [weakThis]() -> TSharedPtr<FOdysseyRasterBlockEdit>
         {
@@ -219,11 +220,6 @@ void
 UOdysseyAnimationCellImageRaster::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
-
-    if( Ar.IsSaving() && !Ar.IsTransacting() && !Ar.IsCooking())
-    {
-        //FOdysseyAnimationCellImageRasterExport::Write( this, Ar );
-    }
 
     if( Ar.IsLoading() && !Ar.IsTransacting() )
     {
@@ -264,20 +260,13 @@ UOdysseyAnimationCellImageRaster::Clear()
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("animation-cell-raster.clear", "Clear"));
 
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlock();
-
-    FOdysseyRasterBlockMutator mutator(rasterBlock);
-    mutator.EditTilesFromRects(
-        { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-        {
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-            ::ULIS::FEvent eventClear;
-            ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
-            return { eventClear };
-        }
-    );
-    mutator.Commit();
+    // A new render target holds transparent pixels.
+    FOdysseyRasterContent& Content = GetRasterContent();
+    TStrongObjectPtr<UTextureRenderTarget2D> Transparent(Content.CreateRenderTarget());
+    if (Transparent)
+    {
+        Content.Write(*Transparent, { FIntRect(FIntPoint::ZeroValue, GetDefaultRenderRect().Size()) });
+    }
 }
 
 #endif

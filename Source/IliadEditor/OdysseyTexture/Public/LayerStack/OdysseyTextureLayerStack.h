@@ -66,6 +66,9 @@ public:
     /** Returns the conversion of the linear colors of a layer into the colors this stack blends. */
     EOdysseyColorConversion GetLayerColorConversion() const;
 
+    /** The views display the bytes of the texture: the stack renders them, a layer blended with linear colors renders them decoded. */
+    virtual EOdysseyColorConversion GetDisplayColorConversion(const UOdysseyLayer* RenderedLayer) const override;
+
     /** Applies a change of the color settings of the texture or of the layer stack to the layers and the texture. */
     void ColorSettingsChanged();
 

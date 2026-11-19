@@ -79,11 +79,9 @@ UOdysseyTextureEditorTextureFunctionLibrary::ImportTexture(UTexture2D* Texture, 
         return nullptr;
 
     UOdysseyTextureLayerImageRaster* layerImageRaster = Cast<UOdysseyTextureLayerImageRaster>(layer);
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = layerImageRaster->GetRasterBlock();
-    TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(TextureToImport, rasterBlock->GetFormat()));
-    FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
-    rasterBlockMutator.Copy(textureBlock, { textureBlock->Rect() });
-    rasterBlockMutator.Commit();
+    FOdysseyRasterContent& content = layerImageRaster->GetRasterContent();
+    TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(TextureToImport, content.Describe().Format));
+    content.WriteBlock(*textureBlock, { FIntRect(0, 0, textureBlock->Width(), textureBlock->Height()) });
 
     return layerImageRaster;
 }
@@ -102,7 +100,9 @@ UOdysseyTextureEditorTextureFunctionLibrary::ImportImage(UTexture2D* Texture, FS
     if (!layer)
         return nullptr;
 
-    ::ULIS::eFormat format = layer->GetRasterBlock()->GetFormat();
+    FOdysseyRasterContent& content = layer->GetRasterContent();
+    const FOdysseyRasterContent::FDescription description = content.Describe();
+    ::ULIS::eFormat format = description.Format;
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( format );
     FString path( FPaths::ConvertRelativePathToFull( Path ) );
     FString extension = FPaths::GetExtension(path, false);
@@ -136,13 +136,11 @@ UOdysseyTextureEditorTextureFunctionLibrary::ImportImage(UTexture2D* Texture, FS
     if (block->IsHollow())
         return nullptr;
 
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();
-
-    if (block->Width() != rasterBlock->GetWidth() || block->Height() != rasterBlock->GetHeight() || block->Format() != rasterBlock->GetFormat())
+    if (block->Width() != description.Size.X || block->Height() != description.Size.Y || block->Format() != description.Format)
     {
 
         //Need to convert the block before adding it to the layer
-        TSharedPtr<::ULIS::FBlock> blockProxy = MakeShared<::ULIS::FBlock>(rasterBlock->GetWidth(), rasterBlock->GetHeight(), rasterBlock->GetFormat());
+        TSharedPtr<::ULIS::FBlock> blockProxy = MakeShared<::ULIS::FBlock>(description.Size.X, description.Size.Y, description.Format);
 
         ::ULIS::FEvent eventConvert;
         ctx.ConvertFormat(
@@ -161,9 +159,7 @@ UOdysseyTextureEditorTextureFunctionLibrary::ImportImage(UTexture2D* Texture, FS
         block = blockProxy;
     }
 
-    FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
-    rasterBlockMutator.Copy(block, { block->Rect() });
-    rasterBlockMutator.Commit();
+    content.WriteBlock(*block, { FIntRect(0, 0, block->Width(), block->Height()) });
 
     return layer;
 }

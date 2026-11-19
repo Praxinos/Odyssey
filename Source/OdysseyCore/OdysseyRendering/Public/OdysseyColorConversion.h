@@ -14,3 +14,14 @@ enum class EOdysseyColorConversion : uint8
     /** sRGB encoded to linear values. */
     Decode,
 };
+
+/** Returns the conversion undoing the given one, e.g. to write back into a content the render it was converted for. */
+inline EOdysseyColorConversion InverseColorConversion(EOdysseyColorConversion Conversion)
+{
+    switch (Conversion)
+    {
+        case EOdysseyColorConversion::Encode: return EOdysseyColorConversion::Decode;
+        case EOdysseyColorConversion::Decode: return EOdysseyColorConversion::Encode;
+        default: return EOdysseyColorConversion::None;
+    }
+}

@@ -87,20 +87,15 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
         backgroundLayer->SetLayerName(LOCTEXT("animation.default-background-layer.name", "Background"));
 
         UOdysseyAnimationCellImageRaster* backgroundCell = Cast<UOdysseyAnimationCellImageRaster>(backgroundLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
-        TSharedPtr<FOdysseyRasterBlock> backgroundRasterBlock = backgroundCell->GetRasterBlock();
+        FLinearColor backgroundColor = *LayerBackgroundColor;
 
-        FLinearColor backgorundColor = *LayerBackgroundColor;
-
-        FOdysseyRasterBlockMutator rasterBlockMutator(backgroundRasterBlock);
-        rasterBlockMutator.EditTilesFromRects(
-            { backgroundRasterBlock->GetRect() },
-            [backgorundColor](TSharedPtr<::ULIS::FBlock> ioBlock, const FOdysseyInvalidTileMap& iInvalidTileMap) -> TArray<::ULIS::FEvent>
+        backgroundCell->GetRasterContent().EditBlock(
+            [backgroundColor](::ULIS::FBlock& ioBlock)
             {
-                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ioBlock->Format());
-                ::ULIS::FColor color( ::ULIS::FColor::FromRGBAF( backgorundColor.R, backgorundColor.G, backgorundColor.B, backgorundColor.A ) );
-                ctx.Fill(*ioBlock, color);
+                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ioBlock.Format());
+                ::ULIS::FColor color( ::ULIS::FColor::FromRGBAF( backgroundColor.R, backgroundColor.G, backgroundColor.B, backgroundColor.A ) );
+                ctx.Fill(ioBlock, color);
                 ctx.Finish();
-                return {};
             }
         );
 

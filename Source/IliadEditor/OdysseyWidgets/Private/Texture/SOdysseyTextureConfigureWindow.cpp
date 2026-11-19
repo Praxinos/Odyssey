@@ -115,17 +115,12 @@ FOdysseyTextureConfiguration::CreateTexture(UObject* iParent, FName iName, EObje
         layer->SetLayerName(LOCTEXT("texture.default-background-layer.name", "Background"));
 
         //Fill LayerImage with content of Texture
-        TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();
-        FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
-        rasterBlockMutator.EditTilesFromRects(
-            { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
+        layer->GetRasterContent().EditBlock(
+            [&](::ULIS::FBlock& iBlock)
             {
-                FillOdysseyBlockFromUTextureData(iBlock.Get(), texture, iBlock->Format());
-                return {};
+                FillOdysseyBlockFromUTextureData(&iBlock, texture, iBlock.Format());
             }
         );
-        rasterBlockMutator.Commit();
 
         // Must be done after all modifications
         layer->SetIsLocked( true );

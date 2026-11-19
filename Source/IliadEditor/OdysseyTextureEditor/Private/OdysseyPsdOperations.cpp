@@ -895,9 +895,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
 
         UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(mLayerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
 
-        FOdysseyRasterBlockMutator mutator(layer->GetRasterBlock());
-        mutator.Copy(layerBlock, { layerBlock->Rect() });
-        mutator.Commit();
+        layer->GetRasterContent().WriteBlock(*layerBlock, { FIntRect(0, 0, layerBlock->Width(), layerBlock->Height()) });
 
         delete srcblock;
     }
@@ -1074,13 +1072,12 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             UOdysseyTextureLayerImageRaster* imageLayer = Cast<UOdysseyTextureLayerImageRaster>(mLayerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), currentRoot, currentRoot->GetChildren().Num()));
             imageLayer->SetLayerName(FText::FromName(layerName));
             imageLayer->SetOpacity((float)mLayersInfo[i].mOpacity / 255.0);
-            imageLayer->SetIsAlphaLocked(mLayersInfo[i].mFlags & 0x01);
             imageLayer->SetIsActivated(!(mLayersInfo[i].mFlags & 0x02));
             imageLayer->SetBlendMode((EOdysseyBlendMode)GetBlendModeFromPSD(mLayersInfo[i].mBlendModeKey));
 
-            FOdysseyRasterBlockMutator mutator(imageLayer->GetRasterBlock());
-            mutator.Copy(layerBlock, { layerBlock->Rect() });
-            mutator.Commit();
+            // The pixels are written before the alpha is locked, which would keep the transparent pixels of the new layer.
+            imageLayer->GetRasterContent().WriteBlock(*layerBlock, { FIntRect(0, 0, layerBlock->Width(), layerBlock->Height()) });
+            imageLayer->SetIsAlphaLocked(mLayersInfo[i].mFlags & 0x01);
 
             //UE_LOG(LogTemp,Display,TEXT("flags: %d"),mLayersInfo[i].mFlags)
             //Todo: Locked

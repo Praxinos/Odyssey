@@ -252,6 +252,13 @@ public:
         const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
     ) const override;
 
+    /**
+     * Returns the conversion turning a render of this stack, or of one of its layers, into the colors the views display,
+     * e.g. to compare colors as the user sees them.
+     * @param RenderedLayer The rendered layer, or null for the whole stack.
+     */
+    virtual EOdysseyColorConversion GetDisplayColorConversion(const UOdysseyLayer* RenderedLayer) const { return EOdysseyColorConversion::None; }
+
 protected:
     //Internal
     UOdysseyLayer* CreateLayer(UClass* iLayerType);

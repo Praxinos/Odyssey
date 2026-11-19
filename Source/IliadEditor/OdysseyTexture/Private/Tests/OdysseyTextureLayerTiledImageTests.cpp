@@ -27,8 +27,9 @@
 #include "UObject/UObjectHash.h"
 #include "UObject/UnrealType.h"
 
+#include "OdysseyColorSpaceShader.h"
 #include "OdysseyRasterBlockEdit.h"
-#include "OdysseyRasterBlockMutator.h"
+#include "OdysseyRasterContent.h"
 #include "OdysseyRasterEditSession.h"
 #include "OdysseyRenderContext.h"
 #include "OdysseyTextureLayerImageRaster.h"
@@ -166,15 +167,15 @@ TMap<FIntPoint, FOdysseyTileId> ReadTileIds(const UOdysseyTiledImage* Image)
     return *Property->ContainerPtrToValuePtr<TMap<FIntPoint, FOdysseyTileId>>(Image);
 }
 
-/** Clears the whole layer through its raster block, as users other than tools do. */
+/** Clears the whole layer by writing a transparent render target, as users other than tools do. */
 void ClearLayer(UOdysseyTextureLayerImageRaster* Layer)
 {
-    TSharedPtr<FOdysseyRasterBlock> Raster = Layer->GetRasterBlock();
-    FOdysseyRasterBlockMutator Mutator(Raster);
-    TSharedPtr<ULIS::FBlock> Empty = MakeShared<ULIS::FBlock>(Width, Height, Raster->GetFormat());
-    FMemory::Memzero(Empty->Bits(), Empty->BytesTotal());
-    Mutator.Copy(Empty, {ULIS::FRectI::FromXYWH(0, 0, Width, Height)});
-    Mutator.Commit();
+    FOdysseyRasterContent& Content = Layer->GetRasterContent();
+    TStrongObjectPtr<UTextureRenderTarget2D> Transparent(Content.CreateRenderTarget());
+    if (Transparent)
+    {
+        Content.Write(*Transparent, { FIntRect(0, 0, Width, Height) });
+    }
 }
 
 /** Begins an edit changing no pixel on the layer, so that it renders its uncommitted edits until the edit is committed. */
@@ -234,7 +235,7 @@ bool FOdysseyTextureLayerTiledImageTest::RunTest(const FString& Parameters)
     using namespace Odyssey::TextureLayerTiledImageTests;
     TStrongObjectPtr<UOdysseyTextureLayerImageRaster> Detached(NewObject<UOdysseyTextureLayerImageRaster>());
     TestNull(TEXT("Detached layer has no image"), Detached->GetTiledImage());
-    TestFalse(TEXT("Detached layer has no raster block"), Detached->GetRasterBlock().IsValid());
+    TestFalse(TEXT("Detached layer has no pixels"), Detached->GetRasterContent().ReadBlock().IsValid());
 
     for (ETextureSourceFormat Format : Formats)
     {
@@ -273,7 +274,7 @@ bool FOdysseyTextureLayerTiledImageTest::RunTest(const FString& Parameters)
         ComparePixels(*this, TEXT("Redone clear"), Transparent, ReadPipeline(Layer), KINDA_SMALL_NUMBER);
         TestTrue(TEXT("Undo raster edit again"), GEditor->UndoTransaction());
 
-        // The raster block derived from the tiles must match them after an undo.
+        // The pixels shown by an edit must match the tiles after an undo.
         ComparePreviewAndTiles(*this, Layer, {Layer}, Tolerance);
 
         TStrongObjectPtr<UTexture2D> Duplicate(DuplicateObject<UTexture2D>(Texture.Get(), GetTransientPackage()));
@@ -397,9 +398,11 @@ bool FOdysseyTextureLayerTiledPipelineTest::RunTest(const FString& Parameters)
         UOdysseyLayerStack* Stack = Layer->GetLayerStack();
         UOdysseyTextureLayerImageRaster* Top = CastChecked<UOdysseyTextureLayerImageRaster>(Stack->AddLayer(
             UOdysseyTextureLayerImageRaster::StaticClass()));
-        FOdysseyRasterBlockMutator Copy(Top->GetRasterBlock(), false);
-        Copy.Copy(Layer->GetRasterBlock()->GetBlock(), {ULIS::FRectI::FromXYWH(0, 0, Width, Height)});
-        Copy.Commit();
+        TSharedPtr<ULIS::FBlock> Pixels = Layer->GetRasterContent().ReadBlock();
+        if (TestTrue(TEXT("Read the layer pixels"), Pixels.IsValid()))
+        {
+            Top->GetRasterContent().WriteBlock(*Pixels, { FIntRect(0, 0, Width, Height) });
+        }
         Top->SetOpacity(0.63f);
         for (EOdysseyBlendMode Mode : {EOdysseyBlendMode::Normal, EOdysseyBlendMode::Multiply, EOdysseyBlendMode::Screen})
         {
@@ -608,6 +611,100 @@ bool FOdysseyTextureLayerEditAlphaLockTest::RunTest(const FString& Parameters)
         TestTrue(TEXT("Commit the edit"), Edit->Commit());
     }
     CheckPixels(TEXT("Committed tiles"), ReadImage(Layer->GetTiledImage()));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureLayerContentReadWriteTest, "Odyssey.Texture.TiledImage.ContentReadWrite",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+/**
+ * Users other than tools read the content into render targets and write render targets or blocks into it:
+ * writes convert colors when asked, are undoable, keep a locked alpha and end the active edit.
+ */
+bool FOdysseyTextureLayerContentReadWriteTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::TextureLayerTiledImageTests;
+    if (!TestTrue(TEXT("OpenColorIO converts between linear and sRGB encoded colors"), FOdysseyColorSpaceShader::IsAvailable()))
+    {
+        return false;
+    }
+    TStrongObjectPtr<UTexture2D> Texture(MakeTexture(GetTransientPackage(), TSF_BGRA8));
+    UOdysseyTextureLayerImageRaster* Layer = MakeLayer(Texture.Get());
+    FOdysseyRasterContent& Content = Layer->GetRasterContent();
+    const float Tolerance = 0.5f / 255.0f + 0.0001f;
+    const TArray<FLinearColor> Original = ReadImage(Layer->GetTiledImage());
+
+    // Read into a float render target, which keeps every value when read back as linear colors.
+    TStrongObjectPtr<UTextureRenderTarget2D> Target(NewObject<UTextureRenderTarget2D>());
+    Target->InitCustomFormat(Width, Height, PF_A32B32G32R32F, true);
+    Target->UpdateResourceImmediate(true);
+    if (!TestTrue(TEXT("Read the content"), Content.Read(*Target, FIntRect(0, 0, Width, Height), FIntPoint::ZeroValue)))
+    {
+        return false;
+    }
+    FlushRenderingCommands();
+    TArray<FLinearColor> Read;
+    FReadSurfaceDataFlags Flags(RCM_MinMax);
+    Flags.SetLinearToGamma(false);
+    Target->GameThread_GetRenderTargetResource()->ReadLinearColorPixels(Read, Flags);
+    ComparePixels(*this, TEXT("The content is read as it is held"), Original, Read, 0.0001f);
+
+    // Write encoded colors, decoded into the linear colors of the content; the active edit ends.
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Layer->BeginRasterEdit();
+    TStrongObjectPtr<UTextureRenderTarget2D> Encoded(NewObject<UTextureRenderTarget2D>());
+    Encoded->ClearColor = FLinearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    Encoded->InitCustomFormat(Width, Height, PF_A32B32G32R32F, true);
+    Encoded->UpdateResourceImmediate(true);
+    const FIntRect Written(0, 0, 10, 10);
+    {
+        FScopedTransaction Transaction(NSLOCTEXT("OdysseyTextureLayerTiledImageTests", "Write", "Write content"));
+        TestTrue(TEXT("Write a render target"), Content.Write(*Encoded, { Written }, EOdysseyColorConversion::Decode));
+    }
+    TestFalse(TEXT("A write ends the active edit"), Edit.IsValid() && Edit->IsActive());
+    const float Decoded = FLinearColor::FromSRGBColor(FColor(128, 128, 128)).R;
+    TArray<FLinearColor> Tiles = ReadImage(Layer->GetTiledImage());
+    if (TestEqual(TEXT("Pixel count"), Tiles.Num(), Width * Height))
+    {
+        TestTrue(FString::Printf(TEXT("Written colors are decoded, got %s"), *Tiles[5 * Width + 5].ToString()),
+            Tiles[5 * Width + 5].Equals(FLinearColor(Decoded, Decoded, Decoded, 1.0f), Tolerance));
+        TestTrue(TEXT("Pixels outside the written areas are kept"), Tiles[20 * Width + 20].Equals(Original[20 * Width + 20], 0.0001f));
+    }
+    TestTrue(TEXT("Undo the write"), GEditor->UndoTransaction());
+    ComparePixels(*this, TEXT("Undone write"), Original, ReadImage(Layer->GetTiledImage()), 0.0001f);
+
+    // A locked alpha is kept: writing transparent pixels only changes colors.
+    Layer->SetIsAlphaLocked(true);
+    TStrongObjectPtr<UTextureRenderTarget2D> Transparent(Content.CreateRenderTarget());
+    TestTrue(TEXT("Write transparent pixels"), Content.Write(*Transparent, { Written }));
+    Tiles = ReadImage(Layer->GetTiledImage());
+    if (TestEqual(TEXT("Pixel count"), Tiles.Num(), Width * Height))
+    {
+        TestEqual(TEXT("A locked alpha is kept"), Tiles[5 * Width + 5].A, Original[5 * Width + 5].A, Tolerance);
+        TestTrue(TEXT("Colors are written"), Tiles[5 * Width + 5].R < Tolerance && Tiles[5 * Width + 5].G < Tolerance);
+    }
+    Layer->SetIsAlphaLocked(false);
+
+    // Blocks are converted to the format the layer expects.
+    ULIS::FBlock Gray(Width, Height, ULIS::Format_RGBAF);
+    for (int32 Index = 0; Index < Width * Height; ++Index)
+    {
+        float* Pixel = reinterpret_cast<float*>(Gray.Bits()) + Index * 4;
+        Pixel[0] = 0.25f;
+        Pixel[1] = 0.25f;
+        Pixel[2] = 0.25f;
+        Pixel[3] = 1.0f;
+    }
+    TestTrue(TEXT("Write a block of another format"), Content.WriteBlock(Gray, { Written }));
+    // The conversion of the block to 8 bits truncates values, as the raster block did.
+    const float TruncationTolerance = 1.0f / 255.0f + 0.0001f;
+    Tiles = ReadImage(Layer->GetTiledImage());
+    if (TestEqual(TEXT("Pixel count"), Tiles.Num(), Width * Height))
+    {
+        TestTrue(FString::Printf(TEXT("Block colors are written, got %s"), *Tiles[5 * Width + 5].ToString()),
+            Tiles[5 * Width + 5].Equals(FLinearColor(0.25f, 0.25f, 0.25f, 1.0f), TruncationTolerance));
+    }
+    TSharedPtr<ULIS::FBlock> Block = Content.ReadBlock();
+    TestTrue(TEXT("Blocks are read in the format the layer expects"), Block.IsValid() && Block->Format() == Content.Describe().Format);
     return true;
 }
 

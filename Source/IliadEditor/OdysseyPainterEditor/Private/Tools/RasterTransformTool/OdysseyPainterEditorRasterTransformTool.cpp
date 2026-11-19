@@ -15,6 +15,7 @@
 #include "OdysseyHUDHandle.h"
 #include "OdysseyHUDPolygon.h"
 #include "OdysseyMediaRaster.h"
+#include "OdysseyRasterContent.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorCommands.h"
 #include "OdysseyPainterEditorRasterDrawingTool.h"
@@ -1126,10 +1127,12 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection( bool iCreateNew
         }
         else //If we have no selection, by default, transform tool will select the smallest block that contains all pixels in the layer/frame
         {
-            TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
-            TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = rasterBlock->GetBlock();
+            TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
+            TSharedPtr<::ULIS::FBlock> block = content ? content->ReadBlock() : nullptr;
+            if (!block)
+                return;
 
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
 
             ctx.AnalyzeSmallestVisibleRect( *block, &mSelectionBoundingBox);
             ctx.Finish();
@@ -1148,12 +1151,14 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection( bool iCreateNew
         mSelectionBoundingBox = rasterSelection->GetMaskBoundingRect();
     }
 
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = rasterBlock->GetBlock();
+    TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
+    TSharedPtr<::ULIS::FBlock> block = content ? content->ReadBlock() : nullptr;
+    if (!block)
+        return;
 
-    mSelectionBlock = MakeShared<::ULIS::FBlock>(mSelectionBoundingBox.w, mSelectionBoundingBox.h, rasterBlock->GetFormat());
+    mSelectionBlock = MakeShared<::ULIS::FBlock>(mSelectionBoundingBox.w, mSelectionBoundingBox.h, block->Format());
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
     ::ULIS::FEvent clearEvent, copyEvent;
     ctx.Clear(*mSelectionBlock);
     ctx.Finish();

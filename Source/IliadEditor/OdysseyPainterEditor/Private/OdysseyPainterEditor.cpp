@@ -30,6 +30,7 @@
 #include "OdysseyLayerStackGlobalShortcuts.h"
 #include "OdysseyAnimationLayerStackGlobalShortcuts.h"
 #include "OdysseyMediaRaster.h"
+#include "OdysseyRasterContent.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditorAnimationFlipSystem.h"
 #include "OdysseyPainterEditorAnimationSource.h"
@@ -567,14 +568,16 @@ FOdysseyPainterEditor::ClearCurrentLayerOrSelection()
 
         FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
 
-        TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
-        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = rasterBlock->GetBlock();
+        TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
+        TSharedPtr<::ULIS::FBlock> block = content ? content->ReadBlock() : nullptr;
+        if (!block)
+            return;
 
-        ::ULIS::FRectI boundingBox = rasterBlock->GetRect();
+        ::ULIS::FRectI boundingBox = block->Rect();
 
-        TSharedPtr<::ULIS::FBlock> copyBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, rasterBlock->GetFormat());
+        TSharedPtr<::ULIS::FBlock> copyBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, block->Format());
 
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
         ::ULIS::FEvent clearEvent, copyEvent;
         ctx.Clear(*copyBlock);
         ctx.Finish();

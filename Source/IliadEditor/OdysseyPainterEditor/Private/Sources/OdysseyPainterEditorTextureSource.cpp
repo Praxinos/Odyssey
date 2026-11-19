@@ -15,6 +15,7 @@
 #include "ULISLoaderModule.h"
 #include "Undo/OdysseyVectorUndoSceneClear.h"
 #include "OdysseyMediaRaster.h"
+#include "OdysseyRasterContent.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPixelFormat.h"
 #include "ScopedTransaction.h"
@@ -187,22 +188,19 @@ FOdysseyPainterEditorTextureSource::Clear()
         TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
         for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
         {
-            TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
-            if (!rasterBlock)
+            TSharedPtr<FOdysseyRasterContent> content = mediaRaster->GetContent();
+            if (!content)
                 continue;
 
-            FOdysseyRasterBlockMutator mutator(rasterBlock);
-            mutator.EditTilesFromRects(
-                { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+            content->EditBlock(
+                [&](::ULIS::FBlock& iBlock)
                 {
-                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock.Format());
                     ::ULIS::FEvent eventClear;
-                    ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
-                    return { eventClear };
+                    ctx.Clear(iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+                    ctx.Finish();
                 }
             );
-            mutator.Commit();
         }
     }
     else if (mediaProvider.HasMedia<FOdysseyMediaVector>())
@@ -260,21 +258,19 @@ FOdysseyPainterEditorTextureSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock
         TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
         for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
         {
-            TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
-            if (!rasterBlock)
+            TSharedPtr<FOdysseyRasterContent> content = mediaRaster->GetContent();
+            if (!content)
                 continue;
 
-            FOdysseyRasterBlockMutator mutator(rasterBlock);
-            mutator.EditTilesFromRects(
-                { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+            content->EditBlock(
+                [&](::ULIS::FBlock& iBlock)
                 {
-                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock.Format());
                     ::ULIS::FEvent eventCut;
 
                     ctx.Blend(
                         *iCopyBlock,
-                        *iBlock,
+                        iBlock,
                         iCopyBlock->Rect(),
                         ::ULIS::FVec2I(0, 0),
                         ::ULIS::Blend_Normal,
@@ -286,10 +282,9 @@ FOdysseyPainterEditorTextureSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock
                         &eventCut
                     );
 
-                    return { eventCut };
+                    ctx.Finish();
                 }
             );
-            mutator.Commit();
         }
     }
 }
@@ -343,20 +338,18 @@ void FOdysseyPainterEditorTextureSource::PasteBlockToCurrentLayer(TSharedPtr<::U
         TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
         for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
         {
-            TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
-            if (!rasterBlock)
+            TSharedPtr<FOdysseyRasterContent> content = mediaRaster->GetContent();
+            if (!content)
                 continue;
 
-            FOdysseyRasterBlockMutator mutator(rasterBlock);
-            mutator.EditTilesFromRects(
-                { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+            content->EditBlock(
+                [&](::ULIS::FBlock& iBlock)
                 {
                     ::ULIS::FEvent eventPaste;
 
                     ctx.Blend(
                         *copyBlock,
-                        *iBlock,
+                        iBlock,
                         copyBlock->Rect(),
                         ::ULIS::FVec2I(0, 0),
                         ::ULIS::Blend_Normal,
@@ -367,11 +360,10 @@ void FOdysseyPainterEditorTextureSource::PasteBlockToCurrentLayer(TSharedPtr<::U
                         nullptr,
                         &eventPaste);
 
-                    return { eventPaste };
+                    ctx.Finish();
 
                 }
             );
-            mutator.Commit();
         }
     }
 }
@@ -396,9 +388,7 @@ FOdysseyPainterEditorTextureSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBl
     UOdysseyTextureLayerImageRaster* layer = Cast< UOdysseyTextureLayerImageRaster >(GetLayerStack()->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
     GetLayerStack()->SetCurrentLayer(layer);
 
-    FOdysseyRasterBlockMutator mutator(layer->GetRasterBlock());
-    mutator.Copy(iBlock, { iBlock->Rect() });
-    mutator.Commit();
+    layer->GetRasterContent().WriteBlock(*iBlock, { FIntRect(0, 0, iBlock->Width(), iBlock->Height()) });
 }
 
 bool FOdysseyPainterEditorTextureSource::IsValid() const

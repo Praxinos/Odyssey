@@ -71,6 +71,15 @@ public:
         TArray<const IOdysseyTextureRenderingAbility*> Parents = {},
         const FOdysseyRenderContext* RenderContext = nullptr) const;
 
+    /**
+     * Returns the conversion applied to the content of this node when it is rendered, see GetContentColorConversion(),
+     * e.g. to write a render of the node back into its content with the inverse conversion.
+     */
+    EOdysseyColorConversion GetRenderedContentColorConversion(const FOdysseyRenderContext* RenderContext = nullptr) const
+    {
+        return GetContentColorConversion(RenderContext);
+    }
+
 public:
     virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() const = 0;
 #if WITH_EDITOR

@@ -6,6 +6,7 @@
 #include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyToolHUD.h"
 #include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyToolUndo.h"
 #include "OdysseyMediaRaster.h"
+#include "OdysseyRasterContent.h"
 #include "Toolkits/BaseToolkit.h"
 #include "Async/ParallelFor.h"
 #include "Editor.h"
@@ -160,11 +161,12 @@ UOdysseyPainterEditorRasterLiquifyTool::IsActivable() const
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
 }
 
-TSharedPtr<FOdysseyRasterBlock>
-UOdysseyPainterEditorRasterLiquifyTool::GetRasterBlockFromEditor(bool iCreate) const
+TSharedPtr<::ULIS::FBlock>
+UOdysseyPainterEditorRasterLiquifyTool::ReadBlockFromEditor(bool iCreate) const
 {
     TSharedPtr<FOdysseyMediaRaster> mediaRaster = GetMediaRasterFromEditor(iCreate);
-    return mediaRaster ? mediaRaster->GetRasterBlock() : nullptr;
+    TSharedPtr<FOdysseyRasterContent> content = mediaRaster ? mediaRaster->GetContent() : nullptr;
+    return content ? content->ReadBlock() : nullptr;
 }
 
 void
@@ -240,24 +242,23 @@ UOdysseyPainterEditorRasterLiquifyTool::FetchSourceImages()
 {
     TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     TSharedPtr<FOdysseyMediaRaster> mediaRaster = GetMediaRasterFromEditor(false);
-    TSharedPtr<FOdysseyRasterBlock> srcRasterBlock = mediaRaster ? mediaRaster->GetRasterBlock() : nullptr;
-    if (!srcRasterBlock)
+    TSharedPtr<FOdysseyRasterContent> content = mediaRaster ? mediaRaster->GetContent() : nullptr;
+    TSharedPtr<::ULIS::FBlock> srcBlock = content ? content->ReadBlock() : nullptr;
+    if (!srcBlock)
         return;
 
     TSharedPtr<::ULIS::FBlock> maskBlock = ( rasterSelection->IsEmpty() == false ) ? rasterSelection->GetBlock() : nullptr;
 
     mAlteredImageBuffer.Empty();
-    mAlteredImageBuffer.Emplace( mediaRaster, srcRasterBlock->GetBlock(), maskBlock );
+    mAlteredImageBuffer.Emplace( mediaRaster, srcBlock, maskBlock );
 }
 
 void
 UOdysseyPainterEditorRasterLiquifyTool::MakeFlowMap()
 {
-    TSharedPtr<FOdysseyRasterBlock> srcRasterBlock = GetRasterBlockFromEditor(false);
-    if (!srcRasterBlock)
+    TSharedPtr<::ULIS::FBlock> srcBlock = ReadBlockFromEditor(false);
+    if (!srcBlock)
         return;
-
-    TSharedPtr<::ULIS::FBlock> srcBlock = srcRasterBlock->GetBlock();
 
     mFlowMap.Empty();
     mFlowMap.SetSize( srcBlock->Width(), srcBlock->Height() );
@@ -266,11 +267,9 @@ UOdysseyPainterEditorRasterLiquifyTool::MakeFlowMap()
 void
 UOdysseyPainterEditorRasterLiquifyTool::MakeDistortionMap()
 {
-    TSharedPtr<FOdysseyRasterBlock> srcRasterBlock = GetRasterBlockFromEditor(false);
-    if (!srcRasterBlock)
+    TSharedPtr<::ULIS::FBlock> srcBlock = ReadBlockFromEditor(false);
+    if (!srcBlock)
         return;
-
-    TSharedPtr<::ULIS::FBlock> srcBlock = srcRasterBlock->GetBlock();
 
     mDistortionMap.Empty();
     mDistortionMap.SetSize( srcBlock->Width(), srcBlock->Height() );
@@ -757,7 +756,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Init()
 void
 UOdysseyPainterEditorRasterLiquifyTool::Reset()
 {
-    // needed by the FOdysseyRasterBlockMutator for recording an undo
+    // needed for recording an undo
     GEditor->BeginTransaction( LOCTEXT("raster-liquify-tool.transaction.reset","Reset Liquify"));
 
     // restore source images as it was
