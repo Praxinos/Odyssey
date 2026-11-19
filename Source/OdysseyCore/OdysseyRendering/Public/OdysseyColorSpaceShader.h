@@ -4,29 +4,27 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "RenderGraphFwd.h"
-#include "RHIFeatureLevel.h"
 
 #include "OdysseyColorConversion.h"
 #include "OdysseyTextureRenderingAbility.h"
 
 /**
- * Converts straight alpha colors between linear and sRGB encoded values, alpha excepted, with the exact sRGB transfer functions.
+ * Converts colors between linear values and sRGB encoded values with OpenColorIO, alpha excepted.
+ *
+ * The conversions are the transforms between the "Linear Rec.709 (sRGB)" and "sRGB Encoded Rec.709 (sRGB)" color spaces
+ * of the OpenColorIO built-in CG configuration. Their shaders are compiled the first time a conversion is requested.
  */
 class ODYSSEYRENDERING_API FOdysseyColorSpaceShader
 {
 public:
     /**
-     * Converts Rect of Source into the same pixels of Destination. Source and Destination must be different textures.
-     * Nothing is drawn with EOdysseyColorConversion::None.
-     */
-    static void Convert(FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type FeatureLevel, FRDGTextureRef Source,
-        FRDGTextureRef Destination, const FIntRect& Rect, EOdysseyColorConversion Conversion);
-
-    /**
      * Wraps a render function so that its output is converted: the function renders into an intermediate float texture,
-     * whose destination area is then converted into the destination. The function is returned unchanged with None.
+     * whose destination area is then converted into the destination. Call on the game thread.
+     * The function is returned unchanged with None, or when the conversion is unavailable, which is logged.
      */
     static IOdysseyTextureRenderingAbility::FRenderFunction WrapRenderFunction(
         IOdysseyTextureRenderingAbility::FRenderFunction RenderFunction, EOdysseyColorConversion Conversion);
+
+    /** Returns true when the conversions are available, compiling them on first call. Call on the game thread. */
+    static bool IsAvailable();
 };

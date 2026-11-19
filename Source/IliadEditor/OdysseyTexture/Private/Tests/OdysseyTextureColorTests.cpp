@@ -10,6 +10,7 @@
 #include "UObject/StrongObjectPtr.h"
 #include "UObject/UnrealType.h"
 
+#include "OdysseyColorSpaceShader.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerStack.h"
@@ -143,6 +144,11 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureColorCompositingTest, "Odyssey.T
 bool FOdysseyTextureColorCompositingTest::RunTest(const FString& Parameters)
 {
     using namespace Odyssey::TextureColorTests;
+    // The conversions are OpenColorIO transforms, compiled on first use.
+    if (!TestTrue(TEXT("OpenColorIO converts between linear and sRGB encoded colors"), FOdysseyColorSpaceShader::IsAvailable()))
+    {
+        return false;
+    }
     TStrongObjectPtr<UTexture2D> Texture(MakeTexture(true));
     UOdysseyTextureLayerStackUserData* UserData = MakeUserData(Texture.Get());
     UOdysseyTextureLayerStack* Stack = UserData->LayerStack;

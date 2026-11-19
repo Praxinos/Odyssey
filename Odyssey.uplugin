@@ -30,6 +30,10 @@
         },
         {
             "Enabled": true,
+            "Name": "OpenColorIO"
+        },
+        {
+            "Enabled": true,
             "Name": "StylusInput"
         },
         {
