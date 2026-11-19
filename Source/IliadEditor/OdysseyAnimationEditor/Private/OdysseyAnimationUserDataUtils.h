@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/AssetUserData.h"
+#include "Templates/SubclassOf.h"
 
 #include "OdysseyAnimation.h"
 

@@ -13,6 +13,7 @@
 #include "MovieScene.h"
 #include "ScopedTransaction.h"
 #include "UObject/GarbageCollection.h"
+#include "UObject/Linker.h"
 #include "UObject/Package.h"
 #include "UObject/SavePackage.h"
 #include "UObject/StrongObjectPtr.h"

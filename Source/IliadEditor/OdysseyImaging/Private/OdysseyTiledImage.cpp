@@ -8,6 +8,7 @@
 #include "RenderGraphUtils.h"
 #include "ScreenPass.h"
 #include "TextureResource.h"
+#include "UObject/Package.h"
 
 #include "OdysseyTileUtils.h"
 #include "OdysseyTileManager.h"

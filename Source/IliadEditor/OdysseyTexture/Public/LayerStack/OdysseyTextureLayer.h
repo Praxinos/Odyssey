@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/TextureDefines.h"
+
 #include "OdysseyLayer.h"
 
 #include "OdysseyMediaProvider.h"

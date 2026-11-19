@@ -10,6 +10,7 @@
 #include "Misc/AutomationTest.h"
 #include "RenderingThread.h"
 #include "ScopedTransaction.h"
+#include "TextureResource.h"
 #include "UObject/StrongObjectPtr.h"
 
 namespace Odyssey::TiledImageBlockTests
