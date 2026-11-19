@@ -156,8 +156,14 @@ UOdysseyTextureLayer::BuildRenderPipelineInternal(
 
     FTextureCompilingManager::Get().FinishCompilation({ Texture });
 
-    const FTextureRHIRef SourceRHI = Texture->GetResource()->TextureRHI;
-    oRenderFunction = [SourceRHI](
+    // The RHI texture of the resource is created by the render thread after UpdateResource().
+    // It must be read when the render function runs on the render thread, not here on the game thread,
+    // where it can still be null right after the resource was (re)created.
+    const FTextureResource* SourceResource = Texture->GetResource();
+    if (!SourceResource)
+        return false;
+
+    oRenderFunction = [SourceResource](
         FRDGBuilder& iGraphBuilder,
         ERHIFeatureLevel::Type iFeatureLevel,
         FRDGTextureRef iDestinationTexture,
@@ -167,6 +173,10 @@ UOdysseyTextureLayer::BuildRenderPipelineInternal(
         )
     {
         AddClearRenderTargetPass(iGraphBuilder, iDestinationTexture, FLinearColor::Transparent, iDstRect);
+
+        const FTextureRHIRef SourceRHI = SourceResource->TextureRHI;
+        if (!SourceRHI)
+            return;
 
         FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(SourceRHI, TEXT("UOdysseyTextureLayer::sourceTexture")));
 
