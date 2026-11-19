@@ -82,6 +82,16 @@ public:
     using FRenderFunction = TFunction<void(FRDGBuilder&, FRDGTextureRef, FIntPoint)>;
     FRenderFunction BuildRenderFunction(FIntRect SourceRect) const;
 
+    /**
+     * Creates a linear render target whose pixel format is the tile pixel format,
+     * so that Render() into it and CopyFromTexture() from it involve no conversion.
+     *
+     * @param Size The size of the render target, in pixels.
+     * @param Outer The outer of the render target; the transient package when null.
+     * @return The render target, or null when Size is empty.
+     */
+    UTextureRenderTarget2D* CreateRenderTarget(FIntPoint Size, UObject* Outer = nullptr) const;
+
 public:
     virtual void Serialize(FArchive& Ar) override;
 

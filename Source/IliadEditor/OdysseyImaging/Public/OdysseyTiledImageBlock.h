@@ -1,0 +1,55 @@
+// IDDN.FR.001.060015.014.S.X.2019.000.00000
+// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2026
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include "OdysseyTiledImage.h"
+
+#include <ULIS>
+
+/**
+ * Transitional adapters between ::ULIS::FBlock and UOdysseyTiledImage.
+ *
+ * They exist while raster editing still works on CPU blocks. Both go through the GPU path
+ * (CopyFromTexture() and Render()), so they can be removed once every caller uses render targets.
+ */
+namespace Odyssey::TiledImage
+{
+/**
+ * Returns the tile format able to store a block of the given format without precision loss.
+ * 8-bit formats map to RGBA8; 16-bit integer and floating formats map to RGBA32F.
+ */
+ODYSSEYIMAGING_API EOdysseyTiledImageFormat TiledImageFormatForULISFormat(::ULIS::eFormat Format);
+
+/**
+ * Returns the RGBA ULIS format whose channel order and type match the given tile format.
+ * RGBA16F maps to 32-bit float RGBA, as ULIS has no half float type.
+ */
+ODYSSEYIMAGING_API ::ULIS::eFormat ULISFormatForTiledImageFormat(EOdysseyTiledImageFormat Format);
+
+/**
+ * Copies a part of a block into the image, as CopyFromTexture() does for a texture.
+ * The block is converted to the tile format; its color profile (sRGB or linear) is kept, so only channel order and type change.
+ * Calls Modify() on the image, so the copy is undoable within a transaction.
+ *
+ * @param Image The destination image.
+ * @param Block The source block.
+ * @param SourceRect The part of the block to copy; clipped to the block bounds.
+ * @param Position The position, in image pixels, of the top-left corner of SourceRect.
+ * @return False when nothing was copied.
+ */
+ODYSSEYIMAGING_API bool CopyFromBlock(UOdysseyTiledImage& Image, const ::ULIS::FBlock& Block, FIntRect SourceRect, FIntPoint Position);
+
+/**
+ * Reads a part of the image into a new block. Pixels without a tile are transparent.
+ * Waits for the GPU.
+ *
+ * @param Image The source image.
+ * @param Rect The part of the image to read, in image pixels.
+ * @param Format The format of the returned block.
+ * @return The block, or null when Rect is empty, larger than a block can be, or the GPU readback failed.
+ */
+ODYSSEYIMAGING_API TSharedPtr<::ULIS::FBlock> CopyToBlock(const UOdysseyTiledImage& Image, FIntRect Rect, ::ULIS::eFormat Format);
+}

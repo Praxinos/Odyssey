@@ -163,7 +163,7 @@ UOdysseyTiledImage::FRenderFunction UOdysseyTiledImage::BuildRenderFunction(FInt
             if (Handle && Handle->GetTextureRHI().IsValid())
             {
                 FRDGTextureRef TileTexture = GraphBuilder.RegisterExternalTexture(
-                    CreateRenderTarget(Handle->GetTextureRHI(), TEXT("Odyssey.TiledImage.Tile")));
+                    ::CreateRenderTarget(Handle->GetTextureRHI(), TEXT("Odyssey.TiledImage.Tile")));
                 AddDrawTexturePass(GraphBuilder, FScreenPassViewInfo(), TileTexture, Destination,
                     TileDestination.Min - TileOrigin + Handle->GetPositionInTexture(), TileDestination.Size(),
                     TileDestination.Min, TileDestination.Size());
@@ -174,6 +174,19 @@ UOdysseyTiledImage::FRenderFunction UOdysseyTiledImage::BuildRenderFunction(FInt
             }
         }
     };
+}
+
+UTextureRenderTarget2D* UOdysseyTiledImage::CreateRenderTarget(FIntPoint Size, UObject* Outer) const
+{
+    if (Size.X <= 0 || Size.Y <= 0)
+    {
+        return nullptr;
+    }
+    UTextureRenderTarget2D* Target = NewObject<UTextureRenderTarget2D>(Outer ? Outer : GetTransientPackage());
+    Target->ClearColor = FLinearColor::Transparent;
+    Target->InitCustomFormat(Size.X, Size.Y, GetPixelFormat(), true);
+    Target->UpdateResourceImmediate(true);
+    return Target;
 }
 
 void UOdysseyTiledImage::Render(UTextureRenderTarget2D* Destination, FIntRect Rect, FIntPoint Position) const
