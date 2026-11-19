@@ -177,6 +177,15 @@ private:
     void OutOfPegsChanged(bool iIsInteractive);
 #endif
 
+#if WITH_EDITOR
+protected:
+    /** Returns the render texture without creating it. */
+    UTexture2D* GetExistingRenderTexture() const;
+
+    /** Drops the render texture, which is then neither rendered nor saved. */
+    void DiscardRenderTexture();
+#endif
+
 private:
     void UpdateTextureSize();
 

@@ -13,7 +13,7 @@ FOdysseyTextureLayerImageRasterExport::WriteRasterBlock( UOdysseyTextureLayerIma
                             , Ar
                             , [iTextureLayerImageRaster](FArchive &Ar) -> void
     {
-        Ar << *iTextureLayerImageRaster->RasterBlock;
+        Ar << *iTextureLayerImageRaster->GetRasterBlock();
     });
 }
 

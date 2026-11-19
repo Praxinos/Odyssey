@@ -252,4 +252,65 @@ bool FOdysseyTiledImageBlockUndoTest::RunTest(const FString& Parameters)
     return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTiledImageBlockSRGBTest, "Odyssey.Imaging.TiledImage.Block.SRGBRoundTrip", TestFlags)
+/** 8-bit sRGB encoded blocks are stored as linear colors, and every encoded value is read back exactly. */
+bool FOdysseyTiledImageBlockSRGBTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::TiledImage;
+    TestEqual(TEXT("sRGB 8-bit blocks are stored in half floats"), TiledImageFormatForULISFormat(::ULIS::Format_BGRA8, true), EOdysseyTiledImageFormat::RGBA16F);
+    TestEqual(TEXT("Linear 8-bit blocks are stored as they are"), TiledImageFormatForULISFormat(::ULIS::Format_BGRA8, false), EOdysseyTiledImageFormat::RGBA8);
+
+    // Every 8-bit value appears in every color channel; BGRA8 is stored as B, G, R, A.
+    constexpr int32 Size = 16;
+    TSharedPtr<::ULIS::FBlock> Block = MakeShared<::ULIS::FBlock>(Size, Size, ::ULIS::Format_BGRA8);
+    TArray<FColor> Colors;
+    for (int32 Index = 0; Index < Size * Size; ++Index)
+    {
+        const FColor Color(uint8((Index * 7) % 256), uint8(255 - Index), uint8(Index), uint8(1 + Index % 255));
+        uint8* Pixel = Block->PixelBits(static_cast<uint16>(Index % Size), static_cast<uint16>(Index / Size));
+        Pixel[0] = Color.B;
+        Pixel[1] = Color.G;
+        Pixel[2] = Color.R;
+        Pixel[3] = Color.A;
+        Colors.Add(Color);
+    }
+
+    TStrongObjectPtr<UOdysseyTiledImage> Linear8 = MakeImage(EOdysseyTiledImageFormat::RGBA8);
+    TestFalse(TEXT("8-bit tiles cannot hold decoded colors"), CopyFromBlock(*Linear8, *Block, FIntRect(0, 0, Size, Size), FIntPoint::ZeroValue, true));
+
+    TStrongObjectPtr<UOdysseyTiledImage> Image = MakeImage(EOdysseyTiledImageFormat::RGBA16F);
+    if (!TestTrue(TEXT("Copy sRGB block"), CopyFromBlock(*Image, *Block, FIntRect(0, 0, Size, Size), FIntPoint::ZeroValue, true)))
+    {
+        return false;
+    }
+
+    TStrongObjectPtr<UTextureRenderTarget2D> Target(NewObject<UTextureRenderTarget2D>());
+    Target->InitCustomFormat(Size, Size, PF_A32B32G32R32F, true);
+    Target->UpdateResourceImmediate(true);
+    Image->Render(Target.Get(), FIntRect(0, 0, Size, Size), FIntPoint::ZeroValue);
+    FlushRenderingCommands();
+    TArray<FLinearColor> Pixels;
+    FReadSurfaceDataFlags Flags(RCM_MinMax);
+    Flags.SetLinearToGamma(false);
+    if (!TestTrue(TEXT("Read image"), Target->GameThread_GetRenderTargetResource()->ReadLinearColorPixels(Pixels, Flags))
+        || !TestEqual(TEXT("Image pixel count"), Pixels.Num(), Size * Size))
+    {
+        return false;
+    }
+    for (int32 Index = 0; Index < Pixels.Num(); ++Index)
+    {
+        const FLinearColor Expected = FLinearColor::FromSRGBColor(Colors[Index]);
+        // Half floats keep about three decimal digits.
+        if (!Pixels[Index].Equals(Expected, 0.001f))
+        {
+            AddError(FString::Printf(TEXT("Pixel %d is not the decoded color: expected %s, got %s"), Index, *Expected.ToString(), *Pixels[Index].ToString()));
+            break;
+        }
+    }
+
+    TSharedPtr<::ULIS::FBlock> Read = CopyToBlock(*Image, FIntRect(0, 0, Size, Size), ::ULIS::Format_BGRA8, true);
+    CheckBlock(*this, TEXT("Encoded colors are read back exactly"), Read.Get(), FIntPoint::ZeroValue, Block.Get(), FIntPoint::ZeroValue, FIntPoint(Size, Size), 0.0);
+    return true;
+}
+
 #endif

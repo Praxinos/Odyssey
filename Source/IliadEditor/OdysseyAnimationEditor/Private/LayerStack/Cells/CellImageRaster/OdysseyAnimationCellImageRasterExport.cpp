@@ -16,7 +16,7 @@ FOdysseyAnimationCellImageRasterExport::WriteRasterBlock( UOdysseyAnimationCellI
                             , Ar
                             , [iAnimationCellImageRaster](FArchive &Ar) -> void
     {
-        Ar << *iAnimationCellImageRaster->mRasterBlock;
+        Ar << *iAnimationCellImageRaster->GetRasterBlock();
     });
 }
 
@@ -28,7 +28,7 @@ FOdysseyAnimationCellImageRasterExport::Write( UOdysseyAnimationCellImageRaster*
                             , Ar
                             , [iAnimationCellImageRaster](FArchive &Ar) -> void
     {
-        if (iAnimationCellImageRaster->mRasterBlock)
+        if (iAnimationCellImageRaster->GetRasterBlock())
             WriteRasterBlock( iAnimationCellImageRaster, Ar );
     } );
 }

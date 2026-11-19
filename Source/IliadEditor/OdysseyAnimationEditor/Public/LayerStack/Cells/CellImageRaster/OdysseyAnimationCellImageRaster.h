@@ -7,15 +7,16 @@
 
 #if WITH_EDITOR
 #include "OdysseyInvalidTileMap.h"
+#include "OdysseyRasterContent.h"
 #include <ULIS>
 #endif
 
 #include "OdysseyAnimationCellImageRaster.generated.h"
 
+class UOdysseyTiledImage;
 #if WITH_EDITOR
 class FOdysseyRasterBlock;
 class FOdysseyMediaRaster;
-class UOdysseyTiledImage;
 #endif
 
 UCLASS(BlueprintType)
@@ -30,6 +31,7 @@ public:
 public:
     //IOdysseyRenderingAbility overrides
 #if WITH_EDITOR
+    /** Raster cells have no render texture: their pixels are held by the tiled image. */
     virtual void InitTexture() override;
 #endif
     virtual bool BuildRenderPipelineInternal(
@@ -47,28 +49,28 @@ public:
 
 #if WITH_EDITOR
 public:
+    /**
+     * Transitional: returns the raster block edited by tools, derived from the tiled image.
+     * Its committed edits are written into the tiled image. Null when the cell is not in an animation.
+     */
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
-    /** Returns the existing editor snapshot without creating or synchronizing it. */
+    /** Returns the tiled image holding the pixels, without creating it. */
     const UOdysseyTiledImage* GetTiledImage() const;
-    /** Synchronizes the editor snapshot from the authoritative raster render texture. */
-    bool UpdateTiledImage();
     virtual FOdysseyMediaProvider GetMediaProvider() const override;
     virtual void Clear() override;
 
 public:
     virtual void PostLoad() override;
-    virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual void PreSave(FObjectPreSaveContext SaveContext) override;
-    virtual void PostTransacted(const FTransactionObjectEvent& TransactionEvent) override;
+    virtual void BeginDestroy() override;
     FCriticalSection* GetImageRenderingMutex() const;
 
 private:
-    void InitTexture() const;
-    void InitRasterBlock() const;
+    FOdysseyRasterContent& GetRasterContent() const;
+    ::ULIS::eFormat GetRasterFormat() const;
+    void OnContentChanged(const TArray<FIntRect>& Rects, bool bInteractive);
+    void MigrateLegacyContent();
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
-    void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects);
-    void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);
-    void InvalidateTiledImage(const TArray<::ULIS::FRectI>& Rects);
 
 private:
     //Import/Export
@@ -76,20 +78,17 @@ private:
     friend class FOdysseyAnimationCellImageRasterImport;
 
 private:
-    mutable TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
+    /** Pixels read from assets saved before the tiled image storage. Moved into the tiled image after loading. */
+    TSharedPtr<FOdysseyRasterBlock> mLegacyRasterBlock;
+    mutable TUniquePtr<FOdysseyRasterContent> mRasterContent;
     mutable FCriticalSection mImageRenderingMutex;
     mutable TWeakPtr<FOdysseyMediaRaster> mMediaRaster;
-    bool bTiledImageDirty = true;
-    TSet<FIntPoint> PendingTiledImageTiles;
-    FIntPoint TiledImageSize = FIntPoint::ZeroValue;
-    FGuid TiledImageSourceId;
 #endif
 
 #if WITH_EDITORONLY_DATA
 private:
-    // UObject avoids an UHT dependency on the Editor-only OdysseyImaging module in Game targets.
-    // Access through the typed editor API above. This reference and its image are never cooked.
+    /** The pixels of the cell. Its identity never changes; its tiles are transactional. Never cooked. */
     UPROPERTY(Instanced, NonTransactional)
-    TObjectPtr<UObject> TiledImage;
+    TObjectPtr<UOdysseyTiledImage> TiledImage;
 #endif
 };

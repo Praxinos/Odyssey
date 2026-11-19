@@ -40,6 +40,16 @@ public:
     FSimpleMulticastDelegate& OnThumbnailDirtied();
 #endif
 
+protected:
+    /** Returns the source format of the layer texture for a texture of the given source format. */
+    static ETextureSourceFormat GetLayerTextureFormat(ETextureSourceFormat TextureFormat);
+
+    /** Returns the render texture without creating it. */
+    UTexture2D* GetExistingRenderTexture() const;
+
+    /** Drops the render texture, which is then neither rendered nor saved. */
+    void DiscardRenderTexture();
+
 private:
     void UpdateTextureSize();
 

@@ -5,7 +5,6 @@
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "HAL/Event.h"
-#include "HAL/IConsoleManager.h"
 #include "HAL/PlatformProcess.h"
 #include "Misc/AutomationTest.h"
 #include "Misc/ScopeExit.h"
@@ -17,6 +16,7 @@
 
 #include "OdysseyRenderingType.h"
 #include "OdysseyTextureLayerImageRaster.h"
+#include "OdysseyTextureLayerImageVector.h"
 #include "OdysseyTextureLayerStack.h"
 
 namespace Odyssey::TextureLayerTiledImageTests
@@ -61,17 +61,10 @@ bool FOdysseyTextureLayerRenderPendingResourceTest::RunTest(const FString& Param
     using namespace Odyssey::TextureLayerTiledImageTests;
     using namespace Odyssey::TextureLayerRenderTests;
 
-    IConsoleVariable* TiledRendering = IConsoleManager::Get().FindConsoleVariable(TEXT("Odyssey.Texture.UseTiledRendering"));
-    if (!TestNotNull(TEXT("Tiled rendering console variable"), TiledRendering))
-        return false;
-
-    const int32 PreviousTiledRendering = TiledRendering->GetInt();
-    TiledRendering->Set(0, ECVF_SetByCode);
-    ON_SCOPE_EXIT { TiledRendering->Set(PreviousTiledRendering, ECVF_SetByCode); };
-
     TStrongObjectPtr<UTexture2D> Texture(MakeTexture(GetTransientPackage(), TSF_BGRA8));
-    UOdysseyTextureLayerImageRaster* Layer = MakeLayer(Texture.Get());
-    UOdysseyLayerStack* Stack = Layer->GetLayerStack();
+    UOdysseyLayerStack* Stack = MakeLayer(Texture.Get())->GetLayerStack();
+    // Raster layers hold their pixels in tiles: the render texture path is the one of vector layers.
+    UOdysseyTextureLayer* Layer = CastChecked<UOdysseyTextureLayer>(Stack->AddLayer(UOdysseyTextureLayerImageVector::StaticClass()));
     TStrongObjectPtr<UTextureRenderTarget2D> Target(MakeTarget());
 
     Stack->Render_GameThread(Target.Get(), EOdysseyRenderingType::Render);

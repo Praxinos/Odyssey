@@ -7,7 +7,6 @@
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "HAL/FileManager.h"
-#include "HAL/IConsoleManager.h"
 #include "Misc/AutomationTest.h"
 #include "Misc/CommandLine.h"
 #include "Misc/PackageName.h"
@@ -30,6 +29,8 @@
 #include "OdysseyLighttable.h"
 #include "OdysseyRasterBlock.h"
 #include "OdysseyRasterBlockMutator.h"
+#include "OdysseyPixelFormat.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTiledImage.h"
 #include "OdysseyAnimationLayerStackUserData.h"
 #include "OdysseyAnimationEditorData.h"
@@ -81,9 +82,8 @@ UOdysseyAnimation* MakeAnimation(UObject* Outer, EOdysseyAnimationFormat Format)
     return Animation;
 }
 
-TArray<FLinearColor> Render(UOdysseyAnimation* Animation, int32 Frame, uint64 Type, bool bTiled)
+TArray<FLinearColor> Render(UOdysseyAnimation* Animation, int32 Frame, uint64 Type)
 {
-    IConsoleManager::Get().FindConsoleVariable(TEXT("Odyssey.Animation.UseTiledRendering"))->Set(bTiled ? 1 : 0);
     TStrongObjectPtr<UTextureRenderTarget2D> Target(NewObject<UTextureRenderTarget2D>());
     Target->InitCustomFormat(Width, Height, PF_A32B32G32R32F, true);
     Target->UpdateResourceImmediate(true);
@@ -98,16 +98,13 @@ TArray<FLinearColor> Render(UOdysseyAnimation* Animation, int32 Frame, uint64 Ty
     return Pixels;
 }
 
-bool Compare(FAutomationTestBase& Test, UOdysseyAnimation* Animation, int32 Frame, uint64 Type = EOdysseyRenderingType::Render)
+bool ComparePixels(FAutomationTestBase& Test, const FString& What, const TArray<FLinearColor>& Expected, const TArray<FLinearColor>& Actual, float Tolerance)
 {
-    auto Expected = Render(Animation, Frame, Type, false);
-    auto Actual = Render(Animation, Frame, Type, true);
-    if (!Test.TestEqual(TEXT("Rendered pixel count"), Actual.Num(), Width * Height)
-        || !Test.TestEqual(TEXT("Reference pixel count"), Expected.Num(), Actual.Num()))
+    if (!Test.TestEqual(What + TEXT(": rendered pixel count"), Actual.Num(), Width * Height)
+        || !Test.TestEqual(What + TEXT(": reference pixel count"), Expected.Num(), Actual.Num()))
     {
         return false;
     }
-    const float Tolerance = 0.0001f;
     float MaxDifference = 0.0f;
     for (int32 Index = 0; Index < Actual.Num(); ++Index)
     {
@@ -117,13 +114,92 @@ bool Compare(FAutomationTestBase& Test, UOdysseyAnimation* Animation, int32 Fram
             FMath::Max(FMath::Abs(Difference.B), FMath::Abs(Difference.A))));
         if (!Actual[Index].Equals(Expected[Index], Tolerance))
         {
-            Test.AddError(FString::Printf(TEXT("Frame %d pixel %d differs: %s vs %s"), Frame, Index,
+            Test.AddError(FString::Printf(TEXT("%s: pixel %d differs: %s vs %s"), *What, Index,
                 *Expected[Index].ToString(), *Actual[Index].ToString()));
             return false;
         }
     }
-    Test.AddInfo(FString::Printf(TEXT("Frame %d render type %llu: maximum component difference %.7f"), Frame, Type, MaxDifference));
+    Test.AddInfo(FString::Printf(TEXT("%s: maximum component difference %.7f"), *What, MaxDifference));
     return true;
+}
+
+/**
+ * Compares colors as displayed by an 8-bit sRGB output, allowing one level of difference.
+ * The former render texture was decoded by the GPU, up to 0.002 away from the exact decoding of the tiles:
+ * filtered dark tones may differ by a few more levels within this linear difference.
+ */
+bool CompareDisplayedPixels(FAutomationTestBase& Test, const FString& What, const TArray<FLinearColor>& Expected, const TArray<FLinearColor>& Actual)
+{
+    if (!Test.TestEqual(What + TEXT(": rendered pixel count"), Actual.Num(), Width * Height)
+        || !Test.TestEqual(What + TEXT(": reference pixel count"), Expected.Num(), Actual.Num()))
+    {
+        return false;
+    }
+    int32 MaxDifference = 0;
+    for (int32 Index = 0; Index < Actual.Num(); ++Index)
+    {
+        const FColor ExpectedColor = Expected[Index].ToFColorSRGB();
+        const FColor ActualColor = Actual[Index].ToFColorSRGB();
+        const int32 Difference = FMath::Max(FMath::Max(FMath::Abs(ExpectedColor.R - ActualColor.R), FMath::Abs(ExpectedColor.G - ActualColor.G)),
+            FMath::Max(FMath::Abs(ExpectedColor.B - ActualColor.B), FMath::Abs(ExpectedColor.A - ActualColor.A)));
+        MaxDifference = FMath::Max(MaxDifference, Difference);
+        if (Difference > 1 && !Actual[Index].Equals(Expected[Index], 0.002f))
+        {
+            Test.AddError(FString::Printf(TEXT("%s: pixel %d differs: %s vs %s"), *What, Index,
+                *ExpectedColor.ToString(), *ActualColor.ToString()));
+            return false;
+        }
+    }
+    Test.AddInfo(FString::Printf(TEXT("%s: maximum 8-bit sRGB difference %d"), *What, MaxDifference));
+    return true;
+}
+
+TArray<UOdysseyAnimationCellImageRaster*> RasterCells(UOdysseyAnimation* Animation)
+{
+    TArray<UOdysseyAnimationCellImageRaster*> Cells;
+    for (UOdysseyLayer* Layer : OdysseyAnimationEditor::GetLayerStack(Animation)->GetRootLayers())
+    {
+        for (UOdysseyAnimationCell* AnimationCell : CastChecked<UOdysseyAnimationLayer>(Layer)->GetCells())
+        {
+            if (UOdysseyAnimationCellImageRaster* RasterCell = Cast<UOdysseyAnimationCellImageRaster>(AnimationCell))
+            {
+                Cells.Add(RasterCell);
+            }
+        }
+    }
+    return Cells;
+}
+
+/**
+ * Renders a frame while every cell displays uncommitted edits changing no pixel, as the former render texture did,
+ * then once these edits are committed into the tiles. Both renders must match:
+ * float cells exactly, 8-bit cells as displayed.
+ */
+bool Compare(FAutomationTestBase& Test, UOdysseyAnimation* Animation, int32 Frame, uint64 Type = EOdysseyRenderingType::Render)
+{
+    TArray<TUniquePtr<FOdysseyRasterBlockMutator>> Mutators;
+    for (UOdysseyAnimationCellImageRaster* RasterCell : RasterCells(Animation))
+    {
+        TSharedPtr<FOdysseyRasterBlock> Raster = RasterCell->GetRasterBlock();
+        TUniquePtr<FOdysseyRasterBlockMutator>& Mutator = Mutators.Add_GetRef(MakeUnique<FOdysseyRasterBlockMutator>(Raster, false));
+        Mutator->EditTilesFromRects({Raster->GetRect()},
+            [](TSharedPtr<ULIS::FBlock>, const FOdysseyInvalidTileMap&) -> TArray<ULIS::FEvent>
+            {
+                return {};
+            });
+    }
+    const TArray<FLinearColor> Preview = Render(Animation, Frame, Type);
+    for (TUniquePtr<FOdysseyRasterBlockMutator>& Mutator : Mutators)
+    {
+        Mutator->Commit();
+    }
+    const TArray<FLinearColor> Tiles = Render(Animation, Frame, Type);
+    const FString What = FString::Printf(TEXT("Frame %d render type %llu"), Frame, Type);
+    if (Animation->GetFormat() == EOdysseyAnimationFormat::BGRA8)
+    {
+        return CompareDisplayedPixels(Test, What, Preview, Tiles);
+    }
+    return ComparePixels(Test, What, Preview, Tiles, 0.0001f);
 }
 
 TMap<FIntPoint, FOdysseyTileId> TileIds(const UOdysseyTiledImage* Image)
@@ -137,18 +213,22 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationTiledIntegrationTest, "Odyssey
 bool FOdysseyAnimationTiledIntegrationTest::RunTest(const FString& Parameters)
 {
     using namespace Odyssey::AnimationTiledTests;
-    auto Switch = IConsoleManager::Get().FindConsoleVariable(TEXT("Odyssey.Animation.UseTiledRendering"));
-    const int32 Previous = Switch->GetInt();
-    ON_SCOPE_EXIT { Switch->Set(Previous); };
     TStrongObjectPtr<UOdysseyAnimationCellImageRaster> Detached(NewObject<UOdysseyAnimationCellImageRaster>());
-    TestNull(TEXT("Pure getter on a detached cell"), Detached->GetTiledImage());
-    TestFalse(TEXT("Detached update fails safely"), Detached->UpdateTiledImage());
+    TestNull(TEXT("Detached cell has no image"), Detached->GetTiledImage());
+    TestFalse(TEXT("Detached cell has no raster block"), Detached->GetRasterBlock().IsValid());
     for (auto Format : {EOdysseyAnimationFormat::BGRA8, EOdysseyAnimationFormat::RGBAF})
     {
         TStrongObjectPtr<UOdysseyAnimation> Animation(MakeAnimation(GetTransientPackage(), Format));
         auto First = Cell(Animation.Get(), 0);
         auto Second = Cell(Animation.Get(), 1);
-        TestNull(TEXT("Getter does not create the snapshot"), First->GetTiledImage());
+        if (!TestNotNull(TEXT("Cell stores its pixels in a tiled image"), First->GetTiledImage()))
+        {
+            return false;
+        }
+        TestEqual(TEXT("Image belongs to the cell"), First->GetTiledImage()->GetOuter(), static_cast<UObject*>(First));
+        TestNull(TEXT("Raster cell has no render texture"), First->GetRenderTexture());
+        TestEqual(TEXT("Tiles hold linear colors with enough precision"), First->GetTiledImage()->GetFormat(),
+            Format == EOdysseyAnimationFormat::BGRA8 ? EOdysseyTiledImageFormat::RGBA16F : EOdysseyTiledImageFormat::RGBA32F);
         for (int32 Frame = 0; Frame < 5; ++Frame) { Compare(*this, Animation.Get(), Frame); }
         TestEqual(TEXT("Cell exposures form five frames"), Animation->GetFrameCount(), 5);
         UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(OdysseyAnimationEditor::GetLayerStack(Animation.Get())->GetRootLayers()[0]);
@@ -166,33 +246,39 @@ bool FOdysseyAnimationTiledIntegrationTest::RunTest(const FString& Parameters)
         First->SetOutOfPegs(Pegs);
         Compare(*this, Animation.Get(), 0, EOdysseyRenderingType::Editor | EOdysseyRenderingType::OutOfPegs);
         Compare(*this, Animation.Get(), 2, EOdysseyRenderingType::Editor | EOdysseyRenderingType::OutOfPegs);
-        Second->UpdateTiledImage();
-        const auto OtherTiles = TileIds(Second->GetTiledImage());
+        const TMap<FIntPoint, FOdysseyTileId> OtherTiles = TileIds(Second->GetTiledImage());
+        const TMap<FIntPoint, FOdysseyTileId> FirstTiles = TileIds(First->GetTiledImage());
+        const TArray<FLinearColor> BeforeClear = Render(Animation.Get(), 0, EOdysseyRenderingType::Render);
         First->Clear();
+        TestTrue(TEXT("Other cell stays unchanged"), TileIds(Second->GetTiledImage()).OrderIndependentCompareEqual(OtherTiles));
         Compare(*this, Animation.Get(), 0);
         TestTrue(TEXT("Undo clear"), GEditor->UndoTransaction());
+        TestTrue(TEXT("Undo restores the tiles"), TileIds(First->GetTiledImage()).OrderIndependentCompareEqual(FirstTiles));
+        ComparePixels(*this, TEXT("Undone clear"), BeforeClear, Render(Animation.Get(), 0, EOdysseyRenderingType::Render), 0.0001f);
         Compare(*this, Animation.Get(), 0);
         TestTrue(TEXT("Redo clear"), GEditor->RedoTransaction());
         Compare(*this, Animation.Get(), 0);
-        TestTrue(TEXT("Other cell stays unchanged"), TileIds(Second->GetTiledImage()).OrderIndependentCompareEqual(OtherTiles));
         TStrongObjectPtr<UOdysseyAnimation> Duplicate(DuplicateObject<UOdysseyAnimation>(Animation.Get(), GetTransientPackage()));
         Compare(*this, Duplicate.Get(), 2);
-        TestTrue(TEXT("Duplicated cell owns its snapshot"), Cell(Duplicate.Get(), 1)->GetTiledImage() != Second->GetTiledImage());
+        // The duplicate has no raster block yet: it reads it from its tiles.
+        TSharedPtr<ULIS::FBlock> OriginalBlock = Second->GetRasterBlock()->GetBlock();
+        TSharedPtr<ULIS::FBlock> ReadBlock = Cell(Duplicate.Get(), 1)->GetRasterBlock()->GetBlock();
+        TestTrue(TEXT("Raster block read from the tiles keeps every value"), OriginalBlock->BytesTotal() == ReadBlock->BytesTotal()
+            && FMemory::Memcmp(OriginalBlock->Bits(), ReadBlock->Bits(), OriginalBlock->BytesTotal()) == 0);
+        TestTrue(TEXT("Duplicated cell owns its image"), Cell(Duplicate.Get(), 1)->GetTiledImage() != Second->GetTiledImage());
     }
     return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationTiledPartialTest, "Odyssey.Animation.TiledImage.PartialUpdates", Odyssey::AnimationTiledTests::Flags)
+/** Uncommitted edits are rendered without touching the tiles; a commit replaces only the touched tiles. */
 bool FOdysseyAnimationTiledPartialTest::RunTest(const FString& Parameters)
 {
     using namespace Odyssey::AnimationTiledTests;
-    auto Switch = IConsoleManager::Get().FindConsoleVariable(TEXT("Odyssey.Animation.UseTiledRendering"));
-    const int32 Previous = Switch->GetInt();
-    ON_SCOPE_EXIT { Switch->Set(Previous); };
     TStrongObjectPtr<UOdysseyAnimation> Animation(MakeAnimation(GetTransientPackage(), EOdysseyAnimationFormat::BGRA8));
-    auto First = Cell(Animation.Get(), 0);
-    TestTrue(TEXT("Initial explicit update"), First->UpdateTiledImage());
-    const auto Before = TileIds(First->GetTiledImage());
+    UOdysseyAnimationCellImageRaster* First = Cell(Animation.Get(), 0);
+    const TMap<FIntPoint, FOdysseyTileId> Before = TileIds(First->GetTiledImage());
+    const TArray<FLinearColor> BeforePixels = Render(Animation.Get(), 0, EOdysseyRenderingType::Render);
     FOdysseyRasterBlockMutator Mutator(First->GetRasterBlock(), false);
     Mutator.EditTilesFromRects({ULIS::FRectI::FromXYWH(2, 3, 4, 5)},
         [](TSharedPtr<ULIS::FBlock> Block, const FOdysseyInvalidTileMap&) -> TArray<ULIS::FEvent>
@@ -200,15 +286,57 @@ bool FOdysseyAnimationTiledPartialTest::RunTest(const FString& Parameters)
             for (int32 Y = 3; Y < 8; ++Y) { FMemory::Memzero(Block->Bits() + (Y * Width + 2) * 4, 16); }
             return {};
         });
-    TestTrue(TEXT("Getter does not synchronize dirty tiles"), TileIds(First->GetTiledImage()).OrderIndependentCompareEqual(Before));
-    TestTrue(TEXT("Update interactive edits before commit"), First->UpdateTiledImage());
-    const auto After = TileIds(First->GetTiledImage());
+    TestTrue(TEXT("Uncommitted edits leave the tiles unchanged"), TileIds(First->GetTiledImage()).OrderIndependentCompareEqual(Before));
+    const TArray<FLinearColor> Interactive = Render(Animation.Get(), 0, EOdysseyRenderingType::Render);
+    if (TestEqual(TEXT("Interactive pixel count"), Interactive.Num(), Width * Height)
+        && TestEqual(TEXT("Reference pixel count"), BeforePixels.Num(), Width * Height))
+    {
+        TestTrue(TEXT("Uncommitted edits are rendered"), Interactive[4 * Width + 3].Equals(FLinearColor::Transparent));
+        const FColor Kept = Interactive[40 * Width + 40].ToFColorSRGB();
+        const FColor Original = BeforePixels[40 * Width + 40].ToFColorSRGB();
+        TestTrue(TEXT("Pixels outside the edit are kept"), FMath::Abs(Kept.R - Original.R) <= 1 && FMath::Abs(Kept.G - Original.G) <= 1
+            && FMath::Abs(Kept.B - Original.B) <= 1 && Kept.A == Original.A);
+    }
+    Mutator.Commit();
+    const TMap<FIntPoint, FOdysseyTileId> After = TileIds(First->GetTiledImage());
     int32 Changed = 0;
-    for (const auto& Pair : Before) { Changed += !(After.FindChecked(Pair.Key) == Pair.Value); }
-    TestEqual(TEXT("Only one tile changes"), Changed, 1);
-    Compare(*this, Animation.Get(), 0);
-    Mutator.Abort();
-    Compare(*this, Animation.Get(), 0);
+    for (const TPair<FIntPoint, FOdysseyTileId>& Pair : Before) { Changed += !(After.FindChecked(Pair.Key) == Pair.Value); }
+    TestEqual(TEXT("Commit replaces only the touched tile"), Changed, 1);
+    // The edit is rendered from the raster block before the commit, and from the tiles after.
+    CompareDisplayedPixels(*this, TEXT("Committed tiles render the edit"), Interactive, Render(Animation.Get(), 0, EOdysseyRenderingType::Render));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationLegacyMigrationTest, "Odyssey.Animation.TiledImage.LegacyMigration", Odyssey::AnimationTiledTests::Flags)
+/** Cells saved before the tiled image storage hold their pixels in a render texture, moved into the tiled image after loading. */
+bool FOdysseyAnimationLegacyMigrationTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::AnimationTiledTests;
+    FObjectProperty* TextureProperty = FindFProperty<FObjectProperty>(UOdysseyAnimationCell::StaticClass(), TEXT("Texture"));
+    if (!TestNotNull(TEXT("Render texture property"), TextureProperty))
+    {
+        return false;
+    }
+    for (EOdysseyAnimationFormat Format : {EOdysseyAnimationFormat::BGRA8, EOdysseyAnimationFormat::RGBAF})
+    {
+        TStrongObjectPtr<UOdysseyAnimation> Animation(MakeAnimation(GetTransientPackage(), Format));
+        UOdysseyAnimationCellImageRaster* First = Cell(Animation.Get(), 0);
+        const TArray<FLinearColor> Reference = Render(Animation.Get(), 0, EOdysseyRenderingType::Render);
+
+        // Recreate the state of a loaded legacy cell: its pixels are only in its render texture, set up as the former one.
+        TSharedPtr<FOdysseyRasterBlock> Raster = First->GetRasterBlock();
+        UTexture2D* LegacyTexture = NewObject<UTexture2D>(First);
+        LegacyTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+        LegacyTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+        InitTextureWithBlockData(Raster->GetBlock().Get(), LegacyTexture, TextureSourceFormatForULISFormat(Raster->GetFormat()));
+        First->Clear();
+        TextureProperty->SetObjectPropertyValue_InContainer(First, LegacyTexture);
+        First->PostLoad();
+
+        TestNull(TEXT("Migration discards the render texture"), First->GetRenderTexture());
+        ComparePixels(*this, TEXT("Migrated cell"), Reference, Render(Animation.Get(), 0, EOdysseyRenderingType::Render), 0.0001f);
+        Compare(*this, Animation.Get(), 0);
+    }
     return true;
 }
 
@@ -275,9 +403,6 @@ bool FOdysseyAnimationTiledPersistenceTest::RunTest(const FString& Parameters)
     const FString Directory = FPaths::ConvertRelativePathToFull(FPaths::ProjectPluginsDir() / TEXT("Odyssey-Plugin/Intermediate/OdysseyAnimationTests/"));
     FPackageName::RegisterMountPoint(Mount, Directory + TEXT("/"));
     ON_SCOPE_EXIT { FPackageName::UnRegisterMountPoint(Mount, Directory + TEXT("/")); };
-    IConsoleVariable* Switch = IConsoleManager::Get().FindConsoleVariable(TEXT("Odyssey.Animation.UseTiledRendering"));
-    const int32 Previous = Switch->GetInt();
-    ON_SCOPE_EXIT { Switch->Set(Previous); };
     const FString Suffix = TEXT("Baked");
     const FString PackageName = Mount + Id + Suffix;
     UPackage* Package = CreatePackage(*PackageName);
@@ -289,7 +414,8 @@ bool FOdysseyAnimationTiledPersistenceTest::RunTest(const FString& Parameters)
     FSavePackageArgs Args;
     Args.TopLevelFlags = RF_Public;
     Args.SaveFlags = SAVE_NoError;
-    Switch->Set(1);
+    const TArray<FLinearColor> FirstImage = Render(Animation.Get(), 0, EOdysseyRenderingType::Render);
+    const TArray<FLinearColor> SecondImage = Render(Animation.Get(), 2, EOdysseyRenderingType::Render);
     if (!TestTrue(TEXT("Save animation package"), UPackage::SavePackage(Package, Animation.Get(), *Filename, Args))) { return false; }
     Package->Rename(*(PackageName + TEXT("_Original")), nullptr, REN_DontCreateRedirectors | REN_NonTransactional);
     UPackage* LoadedPackage = LoadPackage(nullptr, *PackageName, LOAD_None);
@@ -311,33 +437,13 @@ bool FOdysseyAnimationTiledPersistenceTest::RunTest(const FString& Parameters)
     TestNotNull(TEXT("Second baked texture persists"), BakedFrames[1].Texture);
     for (int32 Index = 0; Index < 2; ++Index)
     {
-        const UOdysseyTiledImage* Persisted = Cell(Loaded, Index)->GetTiledImage();
-        TestNotNull(TEXT("Snapshot persisted before explicit update"), Persisted);
-        if (Persisted)
-        {
-            const TArray<FLinearColor> Reference = Render(Loaded, Index == 0 ? 0 : 2, EOdysseyRenderingType::Render, false);
-            TStrongObjectPtr<UTextureRenderTarget2D> Target(NewObject<UTextureRenderTarget2D>());
-            Target->InitCustomFormat(Width, Height, PF_A32B32G32R32F, true);
-            Target->UpdateResourceImmediate(true);
-            Persisted->Render(Target.Get(), FIntRect(0, 0, Width, Height), FIntPoint::ZeroValue);
-            FlushRenderingCommands();
-            TArray<FLinearColor> Pixels;
-            FReadSurfaceDataFlags ReadFlags(RCM_MinMax);
-            ReadFlags.SetLinearToGamma(false);
-            Target->GameThread_GetRenderTargetResource()->ReadLinearColorPixels(Pixels, ReadFlags);
-            TestEqual(TEXT("Persisted image pixel count"), Pixels.Num(), Reference.Num());
-            for (int32 Pixel = 0; Pixel < FMath::Min(Pixels.Num(), Reference.Num()); ++Pixel)
-            {
-                if (!Pixels[Pixel].Equals(Reference[Pixel], 0.0001f))
-                {
-                    AddError(TEXT("Persisted tile pixels differ before reconstruction"));
-                    break;
-                }
-            }
-        }
+        TestNotNull(TEXT("Image is saved with the cell"), Cell(Loaded, Index)->GetTiledImage());
+        TestNull(TEXT("No render texture is saved with the cell"), Cell(Loaded, Index)->GetRenderTexture());
         FObjectPropertyBase* Property = FindFProperty<FObjectPropertyBase>(Cell(Loaded, Index)->GetClass(), TEXT("TiledImage"));
-        TestTrue(TEXT("Snapshot property is stripped when cooking"), Property->HasAnyPropertyFlags(CPF_EditorOnly));
+        TestTrue(TEXT("Image property is stripped when cooking"), Property->HasAnyPropertyFlags(CPF_EditorOnly));
     }
+    ComparePixels(*this, TEXT("Reloaded first image"), FirstImage, Render(Loaded, 0, EOdysseyRenderingType::Render), 0.0001f);
+    ComparePixels(*this, TEXT("Reloaded second image"), SecondImage, Render(Loaded, 2, EOdysseyRenderingType::Render), 0.0001f);
     Compare(*this, Loaded, 0);
     Compare(*this, Loaded, 2);
     if (bWriteCookFixtures)

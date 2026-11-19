@@ -222,6 +222,18 @@ UOdysseyAnimationCell::GetRenderTexture() const
 }
 
 #if WITH_EDITOR
+UTexture2D*
+UOdysseyAnimationCell::GetExistingRenderTexture() const
+{
+    return Texture;
+}
+
+void
+UOdysseyAnimationCell::DiscardRenderTexture()
+{
+    Texture = nullptr;
+}
+
 void
 UOdysseyAnimationCell::InitTexture()
 {

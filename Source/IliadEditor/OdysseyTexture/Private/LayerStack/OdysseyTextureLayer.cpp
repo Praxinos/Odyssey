@@ -29,11 +29,47 @@ UOdysseyTextureLayer::GetRenderTexture() const
     if (!Texture)
     {
         const_cast<UOdysseyTextureLayer*>(this)->InitTexture();
-        Texture->UpdateResource();
-        FTextureCompilingManager::Get().FinishCompilation({ Texture });
+        // Layers without a render texture do not create one.
+        if (Texture)
+        {
+            Texture->UpdateResource();
+            FTextureCompilingManager::Get().FinishCompilation({ Texture });
+        }
     }
 
     return Texture;
+}
+
+UTexture2D*
+UOdysseyTextureLayer::GetExistingRenderTexture() const
+{
+    return Texture;
+}
+
+void
+UOdysseyTextureLayer::DiscardRenderTexture()
+{
+    Texture = nullptr;
+}
+
+ETextureSourceFormat
+UOdysseyTextureLayer::GetLayerTextureFormat(ETextureSourceFormat TextureFormat)
+{
+    switch (TextureFormat)
+    {
+        case TSF_G16:
+        case TSF_RGBA16:
+            return TSF_RGBA16;
+
+        case TSF_RGBA16F:
+        case TSF_RGBA32F:
+        case TSF_R16F:
+        case TSF_R32F:
+            return TSF_RGBA32F;
+
+        default:
+            return TSF_BGRA8;
+    }
 }
 
 void
@@ -89,38 +125,8 @@ UOdysseyTextureLayer::InitTexture()
         if (!OwnerTexture)
             return;
 
-        ETextureSourceFormat ownerTextureFormat = OwnerTexture->Source.GetFormat();
-        ETextureSourceFormat layerTextureFormat = TSF_BGRA8;
-        switch(ownerTextureFormat)
-        {
-            case TSF_Invalid: checkf(false, TEXT("Invalid Texture Format")); break;
-
-            case TSF_G8:
-            case TSF_BGRA8:
-            case TSF_BGRE8:
-            case TSF_RGBA8_DEPRECATED:
-            case TSF_RGBE8_DEPRECATED:
-            {
-                layerTextureFormat = TSF_BGRA8;
-            }
-            break;
-
-            case TSF_G16:
-            case TSF_RGBA16:
-            {
-                layerTextureFormat = TSF_RGBA16;
-            }
-            break;
-
-            case TSF_RGBA16F:
-            case TSF_RGBA32F:
-            case TSF_R16F:
-            case TSF_R32F:
-            {
-                layerTextureFormat = TSF_RGBA32F;
-            }
-            break;
-        };
+        checkf(OwnerTexture->Source.GetFormat() != TSF_Invalid, TEXT("Invalid Texture Format"));
+        const ETextureSourceFormat layerTextureFormat = GetLayerTextureFormat(OwnerTexture->Source.GetFormat());
 
         Texture = NewObject<UTexture2D>(this, TEXT("Texture"));
         Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;

@@ -4,14 +4,13 @@
 #include "OdysseyTextureLayerImageRaster.h"
 
 #include "Engine/TextureRenderTarget2D.h"
-#include "HAL/IConsoleManager.h"
+#include "Misc/App.h"
 #include "ImageUtils.h"
 #include "RenderGraphUtils.h"
 #include "ScreenPass.h"
 #include "TextureCompiler.h"
 #include "TextureResource.h"
 #include "UObject/ObjectSaveContext.h"
-#include "UObject/UObjectIterator.h"
 
 #include "OdysseyBlendShader.h"
 #include "OdysseyMediaRaster.h"
@@ -25,7 +24,6 @@
 #include "OdysseyTextureLayerImageRasterExport.h"
 #include "OdysseyTextureLayerImageRasterImport.h"
 #include "OdysseyTextureLayerStack.h"
-#include "OdysseyTiledImage.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 #include "ULISEventBuilder.h"
@@ -33,24 +31,6 @@
 #include "ULISUtils.h"
 
 #define LOCTEXT_NAMESPACE "Texture"
-
-namespace
-{
-TAutoConsoleVariable<int32> CVarUseTiledRendering(
-    TEXT("Odyssey.Texture.UseTiledRendering"), 0,
-    TEXT("Experimental raster texture layer rendering: 0 = texture, 1 = tiled image."),
-    FConsoleVariableDelegate::CreateLambda([](IConsoleVariable*)
-    {
-        // Refresh previews and thumbnails when switching the comparison path.
-        for (TObjectIterator<UOdysseyTextureLayerImageRaster> It; It; ++It)
-        {
-            if (!It->HasAnyFlags(RF_ClassDefaultObject) && It->GetTexture())
-            {
-                It->RenderingChanged();
-            }
-        }
-    }));
-}
 
 UOdysseyTextureLayerImageRaster::~UOdysseyTextureLayerImageRaster()
 {
@@ -66,313 +46,124 @@ void
 UOdysseyTextureLayerImageRaster::PostLoad()
 {
     Super::PostLoad();
-    bTiledImageDirty = true;
-
-    if (RasterBlock)
-    {
-        ConvertRasterBlock();
-        SanitizeRasterBlock({RasterBlock->GetRect()}); //ensure the RasterBlock contains the right data
-        UnbindRasterBlockDelegates();
-        BindRasterBlockDelegates();
-
-        //Copy the rasterblock data into the texture
-        UTexture2D* renderTexture = GetRenderTexture();
-        InitTextureWithBlockData(RasterBlock->GetBlock().Get(), renderTexture, renderTexture->Source.GetFormat());
-        renderTexture->UpdateResource();
-        FTextureCompilingManager::Get().FinishCompilation({ renderTexture });
-    }
+    MigrateLegacyContent();
 }
 
-const UOdysseyTiledImage* UOdysseyTextureLayerImageRaster::GetTiledImage() const
-{
-    return TiledImage;
-}
-
-bool UOdysseyTextureLayerImageRaster::UpdateTiledImage()
-{
-    check(IsInGameThread());
-    // Detached layers and class defaults have no source image.
-    if (HasAnyFlags(RF_ClassDefaultObject) || !GetTexture())
-    {
-        return false;
-    }
-
-    TRACE_CPUPROFILER_EVENT_SCOPE(OdysseyTextureLayer_SyncTiledImage);
-    UTexture2D* SourceTexture = GetRenderTexture();
-    if (!SourceTexture || !SourceTexture->Source.IsValid())
-    {
-        return false;
-    }
-    const FIntPoint SourceSize(SourceTexture->Source.GetSizeX(), SourceTexture->Source.GetSizeY());
-    const FGuid SourceId = SourceTexture->Source.GetId();
-    // Source-only edits have no raster notifications. Preserve partial updates for normal commits.
-    bTiledImageDirty |= !TiledImage || TiledImageSize != SourceSize
-        || (PendingTiledImageTiles.IsEmpty() && TiledImageSourceId != SourceId);
-    if (!bTiledImageDirty && PendingTiledImageTiles.IsEmpty())
-    {
-        return true;
-    }
-    SourceTexture->BlockOnAnyAsyncBuild();
-    SourceTexture->WaitForPendingInitOrStreaming();
-
-    // Integer 16-bit sources require 32-bit float tiles to preserve their precision.
-    const ETextureSourceFormat SourceFormat = SourceTexture->Source.GetFormat();
-    const EOdysseyTiledImageFormat TileFormat = SourceFormat == TSF_BGRA8
-        ? EOdysseyTiledImageFormat::RGBA8
-        : SourceFormat == TSF_RGBA16F ? EOdysseyTiledImageFormat::RGBA16F : EOdysseyTiledImageFormat::RGBA32F;
-
-    if (!TiledImage)
-    {
-        TiledImage = NewObject<UOdysseyTiledImage>(this);
-    }
-    const FIntRect SourceRect(FIntPoint::ZeroValue, SourceSize);
-    if (bTiledImageDirty || TiledImage->GetFormat() != TileFormat)
-    {
-        // Structural changes discard old tiles, including those outside a resized canvas.
-        TiledImage->Initialize(64, TileFormat);
-        TiledImage->ClearFlags(RF_Transactional);
-        TiledImage->CopyFromTexture(SourceTexture, SourceRect, FIntPoint::ZeroValue);
-    }
-    else
-    {
-        // Upload each touched tile once, preserving identities and cache entries of all other tiles.
-        for (const FIntPoint& Tile : PendingTiledImageTiles)
-        {
-            FIntRect Rect(Tile * 64, (Tile + FIntPoint(1, 1)) * 64);
-            Rect.Clip(SourceRect);
-            if (!Rect.IsEmpty())
-            {
-                TiledImage->CopyFromTexture(SourceTexture, Rect, Rect.Min);
-            }
-        }
-    }
-    PendingTiledImageTiles.Reset();
-    TiledImageSize = SourceSize;
-    TiledImageSourceId = SourceId;
-    bTiledImageDirty = false;
-    return true;
-}
-
-void UOdysseyTextureLayerImageRaster::PreSave(FObjectPreSaveContext SaveContext)
+void
+UOdysseyTextureLayerImageRaster::PreSave(FObjectPreSaveContext SaveContext)
 {
     Super::PreSave(SaveContext);
-    if (!SaveContext.IsCooking())
+    // Content still held by a legacy render texture must reach the tiled image before saving.
+    MigrateLegacyContent();
+}
+
+void
+UOdysseyTextureLayerImageRaster::BeginDestroy()
+{
+    RasterContent.Reset();
+    Super::BeginDestroy();
+}
+
+void
+UOdysseyTextureLayerImageRaster::MigrateLegacyContent()
+{
+    UTexture2D* LegacyTexture = GetExistingRenderTexture();
+    if (HasAnyFlags(RF_ClassDefaultObject) || (!LegacyRasterBlock && !LegacyTexture) || !FApp::CanEverRender())
     {
-        UpdateTiledImage();
-    }
-}
-
-void UOdysseyTextureLayerImageRaster::PostDuplicate(EDuplicateMode::Type DuplicateMode)
-{
-    Super::PostDuplicate(DuplicateMode);
-    bTiledImageDirty = true;
-}
-
-void UOdysseyTextureLayerImageRaster::PostTransacted(const FTransactionObjectEvent& TransactionEvent)
-{
-    Super::PostTransacted(TransactionEvent);
-    bTiledImageDirty = true;
-}
-
-void
-UOdysseyTextureLayerImageRaster::ConvertRasterBlock()
-{
-    UTexture2D* renderTexture = GetRenderTexture();
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(renderTexture->Source.GetFormat());
-    RasterBlock->ConvertTo(RasterBlock->GetWidth(), RasterBlock->GetHeight(), format);
-}
-
-void
-UOdysseyTextureLayerImageRaster::InitRasterBlock()
-{
-    UTexture2D* texture = GetTexture();
-    if (!texture)
         return;
-
-    UnbindRasterBlockDelegates();
-
-    int width = texture->Source.GetSizeX();
-    int height = texture->Source.GetSizeY();
-
-    UTexture2D* renderTexture = GetRenderTexture();
-    if ( renderTexture && renderTexture->Source.GetFormat() != TSF_Invalid )
-    {
-        ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(renderTexture->Source.GetFormat());
-        RasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyTextureLayerImageRaster*>(this), width, height, format);
-
-        TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(renderTexture, format));
-        FOdysseyRasterBlockMutator rasterBlockMutator(RasterBlock, false);
-        rasterBlockMutator.Copy(textureBlock, { textureBlock->Rect() });
-        rasterBlockMutator.Commit();
-    }
-    else
-    {
-        //The layer a different texture with different parameters
-        //Ensure the block uses those parameters
-        ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-        //let's ensure the format has alpha, so add alpha channel of needed
-        format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
-
-        RasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyTextureLayerImageRaster*>(this), width, height, format);
     }
 
-    BindRasterBlockDelegates();
-}
+    TSharedPtr<::ULIS::FBlock> Pixels;
+    if (LegacyRasterBlock)
+    {
+        Pixels = LegacyRasterBlock->GetBlock();
+    }
+    else if (LegacyTexture->Source.IsValid())
+    {
+        Pixels = MakeShareable(NewBlockFromUTextureData(LegacyTexture, GetRasterFormat()));
+    }
 
-void
-UOdysseyTextureLayerImageRaster::BindRasterBlockDelegates()
-{
-    RasterBlock->OnBlockChanged().AddUObject(const_cast<UOdysseyTextureLayerImageRaster*>(this), &UOdysseyTextureLayerImageRaster::OnBlockChanged);
-    RasterBlock->OnBlockCommited().AddUObject(const_cast<UOdysseyTextureLayerImageRaster*>(this), &UOdysseyTextureLayerImageRaster::OnBlockCommited);
-    RasterBlock->PostProcess().BindUObject(const_cast<UOdysseyTextureLayerImageRaster*>(this), &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);
-}
-
-void
-UOdysseyTextureLayerImageRaster::UnbindRasterBlockDelegates()
-{
-    if (!RasterBlock)
+    // Keep the legacy data when it cannot be migrated, e.g. while the layer is not yet in a layer stack.
+    if (Pixels && !GetRasterContent().SetContent(*Pixels))
+    {
         return;
+    }
+    LegacyRasterBlock.Reset();
+    DiscardRenderTexture();
+}
 
-    RasterBlock->OnBlockChanged().RemoveAll(this);
-    RasterBlock->OnBlockCommited().RemoveAll(this);
+FOdysseyRasterContent&
+UOdysseyTextureLayerImageRaster::GetRasterContent() const
+{
+    if (!RasterContent)
+    {
+        UOdysseyTextureLayerImageRaster* MutableThis = const_cast<UOdysseyTextureLayerImageRaster*>(this);
+        RasterContent = MakeUnique<FOdysseyRasterContent>(*MutableThis, MutableThis->TiledImage, false,
+            [MutableThis]()
+            {
+                FOdysseyRasterContent::FDescription Description;
+                if (MutableThis->GetTexture())
+                {
+                    Description.Size = MutableThis->GetDefaultRenderRect().Size();
+                    Description.Format = MutableThis->GetRasterFormat();
+                }
+                return Description;
+            },
+            [MutableThis](const TArray<FIntRect>& Rects, bool bInteractive)
+            {
+                MutableThis->OnContentChanged(Rects, bInteractive);
+            },
+            FOdysseyRasterBlock::FPostProcess::CreateUObject(MutableThis, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess));
+    }
+    return *RasterContent;
+}
+
+::ULIS::eFormat
+UOdysseyTextureLayerImageRaster::GetRasterFormat() const
+{
+    UTexture2D* OwnerTexture = GetTexture();
+    if (!OwnerTexture)
+    {
+        return ::ULIS::Format_BGRA8;
+    }
+    ::ULIS::eFormat Format = ULISFormatForTextureSourceFormat(GetLayerTextureFormat(OwnerTexture->Source.GetFormat()));
+    // Raster layers always hold an alpha channel.
+    return static_cast<::ULIS::eFormat>(Format | ULIS_W_ALPHA(1));
 }
 
 void
-UOdysseyTextureLayerImageRaster::InitTexture()
+UOdysseyTextureLayerImageRaster::OnContentChanged(const TArray<FIntRect>& Rects, bool bInteractive)
 {
-    Super::InitTexture();
+    if (Rects.IsEmpty())
+    {
+        RenderingChanged({ GetDefaultRenderRect() }, bInteractive);
+        return;
+    }
+    RenderingChanged(Rects, bInteractive);
+}
+
+const UOdysseyTiledImage*
+UOdysseyTextureLayerImageRaster::GetTiledImage() const
+{
+    return TiledImage;
 }
 
 TSharedPtr<FOdysseyRasterBlock>
 UOdysseyTextureLayerImageRaster::GetRasterBlock() const
 {
-    if (!RasterBlock)
-        const_cast<UOdysseyTextureLayerImageRaster*>(this)->InitRasterBlock();
-
-    return RasterBlock;
+    return GetRasterContent().GetRasterBlock();
 }
 
 void
-UOdysseyTextureLayerImageRaster::SanitizeRasterBlock(const TArray<::ULIS::FRectI>& iRects)
+UOdysseyTextureLayerImageRaster::InitTexture()
 {
-    UTexture2D* texture = GetTexture();
-    if (!texture)
-        return;
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-    //let's ensure the format has alpha, so add alpha channel of needed
-    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
-
-    TSharedPtr<::ULIS::FBlock> block = GetRasterBlock()->GetBlock();
-    if (block->Format() != format)
-    {
-        for (const ::ULIS::FRectI& rect : iRects)
-        {
-            TSharedPtr<::ULIS::FBlock> convBlock = MakeShared<::ULIS::FBlock>(rect.w, rect.h, format);
-
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-            ctx.ConvertFormat(
-                *block.Get(),
-                *convBlock.Get(),
-                rect,
-                ::ULIS::FVec2I(0),
-                ::ULIS::FSchedulePolicy::AsyncCacheEfficient
-            );
-            ctx.Finish();
-
-            ctx.ConvertFormat(
-                *convBlock.Get(),
-                *block.Get(),
-                ::ULIS::FRectI::Auto,
-                rect.Position(),
-                ::ULIS::FSchedulePolicy::AsyncCacheEfficient
-            );
-            ctx.Finish();
-        }
-    }
 }
 
-void UOdysseyTextureLayerImageRaster::InvalidateTiledImage(const TArray<::ULIS::FRectI>& Rects)
-{
-    if (bTiledImageDirty)
-    {
-        return;
-    }
-    const FIntRect Bounds = GetDefaultRenderRect();
-    for (FIntRect Rect : ULISUtils::ToIntRects(Rects))
-    {
-        Rect.Clip(Bounds);
-        if (Rect.IsEmpty())
-        {
-            continue;
-        }
-        // FIntRect::Max is exclusive. A rectangle ending at 64 must not touch tile 1.
-        const FIntPoint First = Rect.Min / 64;
-        const FIntPoint Last = (Rect.Max - FIntPoint(1, 1)) / 64;
-        for (int32 Y = First.Y; Y <= Last.Y; ++Y)
-        {
-            for (int32 X = First.X; X <= Last.X; ++X)
-            {
-                PendingTiledImageTiles.Add(FIntPoint(X, Y));
-            }
-        }
-    }
-}
-
-bool UOdysseyTextureLayerImageRaster::BuildRenderPipelineInternal(FRenderFunction& OutRenderFunction,
+bool
+UOdysseyTextureLayerImageRaster::BuildRenderPipelineInternal(FRenderFunction& OutRenderFunction,
     const TArray<const IOdysseyTextureRenderingAbility*>& Parents, const FOdysseyRenderContext* RenderContext) const
 {
-    if (!CVarUseTiledRendering.GetValueOnGameThread())
-    {
-        return Super::BuildRenderPipelineInternal(OutRenderFunction, Parents, RenderContext);
-    }
-    if (!const_cast<UOdysseyTextureLayerImageRaster*>(this)->UpdateTiledImage())
-    {
-        return Super::BuildRenderPipelineInternal(OutRenderFunction, Parents, RenderContext);
-    }
-    const UOdysseyTiledImage* Image = GetTiledImage();
-    const FIntPoint Size = TiledImageSize;
-    const EPixelFormat Format = Image->GetPixelFormat();
-    UOdysseyTiledImage::FRenderFunction DrawTiles = Image->BuildRenderFunction(FIntRect(FIntPoint::ZeroValue, Size));
-    OutRenderFunction = [DrawTiles = MoveTemp(DrawTiles), Size, Format](FRDGBuilder& GraphBuilder,
-        ERHIFeatureLevel::Type FeatureLevel, FRDGTextureRef Destination,
-        const FIntRect& SourceRect, const FIntRect& DestinationRect, const FMatrix& Transform)
-    {
-        RDG_EVENT_SCOPE(GraphBuilder, "Odyssey.Texture.TiledLayer");
-        // Assemble a continuous source before filtering: atlas borders must not create seams
-        // under zoom, rotation or anisotropic sampling. No persistent full-size texture is added.
-        FRDGTextureRef Source = GraphBuilder.CreateTexture(FRDGTextureDesc::Create2D(Size, Format,
-            FClearValueBinding::Transparent, TexCreate_ShaderResource | TexCreate_RenderTargetable),
-            TEXT("Odyssey.Texture.TiledLayer.Source"));
-        DrawTiles(GraphBuilder, Source, FIntPoint::ZeroValue);
-        AddClearRenderTargetPass(GraphBuilder, Destination, FLinearColor::Transparent, DestinationRect);
-        FOdysseyBlendShader::BlendRect(GraphBuilder, FeatureLevel, Destination, Source, Destination,
-            SourceRect, DestinationRect, Transform, EOdysseyColorBlendMode::Normal,
-            EOdysseyAlphaBlendMode::Normal, 1.0f, EOdysseyAntiAliasing::Anisotropic);
-    };
-    return true;
-}
-
-void
-UOdysseyTextureLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects)
-{
-    InvalidateTiledImage(iRects);
-    SanitizeRasterBlock(iRects);
-    FOdysseySurfaceTexture2DEditable surface(GetRenderTexture(), GetRasterBlock()->GetBlock());
-    surface.Invalidate(iRects);
-    RenderingChanged(::ULISUtils::ToIntRects(iRects), true);
-}
-
-void
-UOdysseyTextureLayerImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
-{
-    InvalidateTiledImage(iRects);
-    TSharedPtr<::ULIS::FBlock> block =  GetRasterBlock()->GetBlock();
-    FOdysseySurfaceTexture2DEditable surface(GetRenderTexture(), block);
-    surface.Invalidate(iRects);
-
-    TArray<FIntRect> intRects = ::ULISUtils::ToIntRects(iRects);
-    CopyBlockDataToTextureSource(block.Get(), GetRenderTexture(), intRects);
-    RenderingChanged(::ULISUtils::ToIntRects(iRects), false);
+    return GetRasterContent().BuildRenderFunction(OutRenderFunction, FMatrix::Identity);
 }
 
 void
@@ -531,8 +322,8 @@ UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
                 bool canRead = id.IsValid() && width > 0 && width <= 8192 && height > 0 && height <= 8192;
                 if (canRead)
                 {
-                    RasterBlock = MakeShared<FOdysseyRasterBlock>(this);
-                    Ar << *RasterBlock;
+                    LegacyRasterBlock = MakeShared<FOdysseyRasterBlock>(this);
+                    Ar << *LegacyRasterBlock;
                 }
             }
         }

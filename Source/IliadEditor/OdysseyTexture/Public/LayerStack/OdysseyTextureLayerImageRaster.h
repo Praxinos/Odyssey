@@ -9,6 +9,7 @@
 #include "Misc/ITransaction.h"
 #include "Misc/ITransactionObjectAnnotation.h"
 #include "OdysseyRasterBlock.h"
+#include "OdysseyRasterContent.h"
 
 #include <ULIS>
 
@@ -32,15 +33,15 @@ public:
 
 public:
     // Public API
+
+    /**
+     * Transitional: returns the raster block edited by tools, derived from the tiled image.
+     * Its committed edits are written into the tiled image. Null when the layer is not in a layer stack.
+     */
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
 
-    /** Returns the existing snapshot without creating or updating it. May be null or out of date. */
+    /** Returns the tiled image holding the pixels, without creating it. */
     const UOdysseyTiledImage* GetTiledImage() const;
-
-    /** Creates or synchronizes the snapshot from the authoritative render texture on the game thread.
-     * Returns false when the layer has no valid source image.
-     */
-    bool UpdateTiledImage();
 
 public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
@@ -59,17 +60,11 @@ public:
      */
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
-protected:
-    void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects);
-    void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);
-    void OnBlockPtrChanged();
-
 public:
     // UObject overrides
     virtual void PostLoad() override;
     virtual void PreSave(FObjectPreSaveContext SaveContext) override;
-    virtual void PostDuplicate(EDuplicateMode::Type DuplicateMode) override;
-    virtual void PostTransacted(const FTransactionObjectEvent& TransactionEvent) override;
+    virtual void BeginDestroy() override;
 
 public:
     //UObject overrides
@@ -84,17 +79,17 @@ public:
 public:
     //IOdysseyRenderingAbility overrides
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame = 0) const override;
+
+    /** Raster layers have no render texture: their pixels are held by the tiled image. */
+    virtual void InitTexture() override;
     virtual bool BuildRenderPipelineInternal(FRenderFunction& OutRenderFunction,
         const TArray<const IOdysseyTextureRenderingAbility*>& Parents, const FOdysseyRenderContext* RenderContext) const override;
 
 private:
-    void InitTexture();
-    void InitRasterBlock();
-    void ConvertRasterBlock();
-    void BindRasterBlockDelegates();
-    void UnbindRasterBlockDelegates();
-    void SanitizeRasterBlock(const TArray<::ULIS::FRectI>& iRects);
-    void InvalidateTiledImage(const TArray<::ULIS::FRectI>& Rects);
+    FOdysseyRasterContent& GetRasterContent() const;
+    ::ULIS::eFormat GetRasterFormat() const;
+    void OnContentChanged(const TArray<FIntRect>& Rects, bool bInteractive);
+    void MigrateLegacyContent();
 
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
 
@@ -104,16 +99,14 @@ private:
     friend class FOdysseyTextureLayerImageRasterImport;
 
 private:
-    mutable TSharedPtr<FOdysseyRasterBlock> RasterBlock;
+    /** Pixels read from assets saved before the tiled image storage. Moved into the tiled image after loading. */
+    TSharedPtr<FOdysseyRasterBlock> LegacyRasterBlock;
 
-    // A derived representation, excluded from transactions: the raster undo path invalidates it.
+    /** The pixels of the layer. Its identity never changes; its tiles are transactional. */
     UPROPERTY(Instanced, NonTransactional)
     TObjectPtr<UOdysseyTiledImage> TiledImage;
 
-    bool bTiledImageDirty = true;
-    TSet<FIntPoint> PendingTiledImageTiles;
-    FIntPoint TiledImageSize = FIntPoint::ZeroValue;
-    FGuid TiledImageSourceId;
+    mutable TUniquePtr<FOdysseyRasterContent> RasterContent;
 
 private:
     UPROPERTY(NonTransactional)

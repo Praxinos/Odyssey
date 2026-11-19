@@ -81,7 +81,15 @@ UOdysseyTiledImage::GetPixelFormat() const
 void
 UOdysseyTiledImage::PostEditUndo()
 {
+    Super::PostEditUndo();
+    OnUndoneDelegate.Broadcast();
     OnChanged.Broadcast();
+}
+
+UOdysseyTiledImage::FOnUndone&
+UOdysseyTiledImage::OnUndone()
+{
+    return OnUndoneDelegate;
 }
 
 void
