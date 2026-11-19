@@ -13,6 +13,8 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCellsSelection.h"
 #include "OdysseyAnimationLayerStackUserData.h"
+#include "OdysseyAnimationPalettesUserData.h"
+#include "OdysseyAnimationToolCollectionsUserData.h"
 #include "OdysseyAnimationLayerStackEditorCommands.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationActorFactory.h"
@@ -52,6 +54,12 @@ void
 FOdysseyAnimationEditorModule::OnLegacyEditorDataLoaded(UOdysseyAnimation* iAnimation)
 {
     UOdysseyAnimationLayerStackUserData::FindOrCreate(iAnimation);
+
+    if (iAnimation->HasLegacyPalettes())
+        UOdysseyAnimationPalettesUserData::FindOrCreate(iAnimation);
+
+    if (iAnimation->HasLegacyToolCollections())
+        UOdysseyAnimationToolCollectionsUserData::FindOrCreate(iAnimation);
 }
 
 void

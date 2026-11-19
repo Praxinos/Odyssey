@@ -21,7 +21,7 @@
 #include "IAssetTools.h"
 #endif
 
-#include "OdysseyAnimationEditorData.h"
+#include "OdysseyAnimationRenderingOverride.h"
 #include "OdysseyAnimationRenderContext.h"
 #include "OdysseyRenderContext.h"
 
@@ -146,11 +146,11 @@ UOdysseyAnimation::GetRenderingComposition(uint64 iRenderType, int iFrameIndex) 
     TArray<FGuid> idComposition = { GetRenderingId() };
 
 #if WITH_EDITOR
-    const IOdysseyTextureRenderingAbility* source = GetEditorRenderingSource();
-    if ( !source )
+    const IOdysseyTextureRenderingAbility* renderingOverride = GetRenderingOverride();
+    if ( !renderingOverride )
         return idComposition;
 
-    idComposition.Append(source->GetRenderingComposition(iRenderType, iFrameIndex));
+    idComposition.Append(renderingOverride->GetRenderingComposition(iRenderType, iFrameIndex));
 #else
     int frameIndex = GetFrameIndexAtFrame(iFrameIndex);
     if ( frameIndex == INDEX_NONE )
@@ -177,11 +177,11 @@ UOdysseyAnimation::BuildRenderPipelineInternal(
     const FOdysseyAnimationRenderContext* AnimationContext = RenderContext ? RenderContext->GetExtension<FOdysseyAnimationRenderContext>() : nullptr;
     const FFrameNumber Frame = AnimationContext ? AnimationContext->Frame.Get(FFrameNumber(0)) : FFrameNumber(0);
 #if WITH_EDITOR
-    const IOdysseyTextureRenderingAbility* source = GetEditorRenderingSource();
-    if ( !source )
+    const IOdysseyTextureRenderingAbility* renderingOverride = GetRenderingOverride();
+    if ( !renderingOverride )
         return false;
 
-    return source->BuildRenderPipeline(oRenderFunction, iParents, RenderContext);
+    return renderingOverride->BuildRenderPipeline(oRenderFunction, iParents, RenderContext);
 #else
     UTexture2D* srcTexture2D = nullptr;
     int frameIndex = GetFrameIndexAtFrame(Frame.Value);
@@ -271,7 +271,7 @@ UOdysseyAnimation::GetLeftBoundValue() const
     {
         case EOdysseyAnimationBoundMode::Automatic:
         {
-            const IOdysseyTextureRenderingAbility* source = GetEditorRenderingSource();
+            const IOdysseyTextureRenderingAbility* source = GetRenderingOverride();
             if ( !source )
                 return 0;
 
@@ -294,7 +294,7 @@ UOdysseyAnimation::GetRightBoundValue() const
     {
         case EOdysseyAnimationBoundMode::Automatic:
         {
-            const IOdysseyTextureRenderingAbility* source = GetEditorRenderingSource();
+            const IOdysseyTextureRenderingAbility* source = GetRenderingOverride();
             if ( !source )
                 return 0;
 
@@ -386,7 +386,7 @@ UOdysseyAnimation::PostTransacted(const FTransactionObjectEvent& iTransactionEve
 void
 UOdysseyAnimation::OnLeftBoundModeChanged()
 {
-    const IOdysseyTextureRenderingAbility* source = GetEditorRenderingSource();
+    const IOdysseyTextureRenderingAbility* source = GetRenderingOverride();
     if ( !source )
         return;
 
@@ -398,7 +398,7 @@ UOdysseyAnimation::OnLeftBoundModeChanged()
 void
 UOdysseyAnimation::OnRightBoundModeChanged()
 {
-    const IOdysseyTextureRenderingAbility* source = GetEditorRenderingSource();
+    const IOdysseyTextureRenderingAbility* source = GetRenderingOverride();
     if ( !source )
         return;
 
@@ -412,7 +412,7 @@ UOdysseyAnimation::OnLeftBoundChanged()
 {
     if (LeftBoundMode == EOdysseyAnimationBoundMode::Automatic)
     {
-        const IOdysseyTextureRenderingAbility* source = GetEditorRenderingSource();
+        const IOdysseyTextureRenderingAbility* source = GetRenderingOverride();
         if ( !source )
             return;
 
@@ -430,7 +430,7 @@ UOdysseyAnimation::OnRightBoundChanged()
 {
     if (RightBoundMode == EOdysseyAnimationBoundMode::Automatic)
     {
-        const IOdysseyTextureRenderingAbility* source = GetEditorRenderingSource();
+        const IOdysseyTextureRenderingAbility* source = GetRenderingOverride();
         if ( !source )
             return;
 
@@ -603,11 +603,12 @@ UOdysseyAnimation::OnRefreshReferencedPalette(UOdysseyPalette* iPalette)
     if( !FApp::CanEverRender() )
         return;
 
-    IOdysseyPaletteReferencer* referencer = Cast<IOdysseyPaletteReferencer>(GetEditorData());
-    if (!referencer)
-        return;
-
-    referencer->OnRefreshReferencedPalette(iPalette);
+    for (UAssetUserData* userData : AssetUserData)
+    {
+        IOdysseyPaletteReferencer* referencer = Cast<IOdysseyPaletteReferencer>(userData);
+        if (referencer)
+            referencer->OnRefreshReferencedPalette(iPalette);
+    }
 }
 
 UOdysseyAnimation::FOnLegacyEditorDataLoaded&
@@ -617,47 +618,71 @@ UOdysseyAnimation::OnLegacyEditorDataLoaded()
     return delegate;
 }
 
-UAssetUserData*
-UOdysseyAnimation::GetEditorData() const
+#endif
+
+#if WITH_EDITOR
+const IOdysseyTextureRenderingAbility*
+UOdysseyAnimation::GetRenderingOverride() const
 {
     for (UAssetUserData* userData : AssetUserData)
     {
-        if (userData && userData->Implements<UOdysseyAnimationEditorData>())
-            return userData;
+        const IOdysseyAnimationRenderingOverride* renderingOverride = Cast<IOdysseyAnimationRenderingOverride>(userData);
+        const IOdysseyTextureRenderingAbility* overridingAbility = renderingOverride ? renderingOverride->GetAnimationRenderingOverride() : nullptr;
+        if (overridingAbility)
+            return overridingAbility;
     }
 
     return nullptr;
 }
-
-const IOdysseyTextureRenderingAbility*
-UOdysseyAnimation::GetEditorRenderingSource() const
-{
-    const IOdysseyAnimationEditorData* editorData = Cast<IOdysseyAnimationEditorData>(GetEditorData());
-    if (!editorData)
-        return nullptr;
-
-    return editorData->GetAnimationRenderingSource();
-}
-
 #endif
 
 #if WITH_EDITORONLY_DATA
 bool
 UOdysseyAnimation::HasLegacyEditorData() const
 {
-    return mLayerStack_DEPRECATED || !Palettes_DEPRECATED.IsEmpty() || !ToolCollections_DEPRECATED.IsEmpty();
+    return HasLegacyLayerStack() || HasLegacyPalettes() || HasLegacyToolCollections();
 }
 
-void
-UOdysseyAnimation::TakeLegacyEditorData(UObject*& oLayerStack, TArray<UOdysseyPaletteSet*>& oPalettes, TArray<FSoftObjectPath>& oToolCollections)
+bool
+UOdysseyAnimation::HasLegacyLayerStack() const
 {
-    oLayerStack = mLayerStack_DEPRECATED;
-    oPalettes = MoveTemp(Palettes_DEPRECATED);
-    oToolCollections = MoveTemp(ToolCollections_DEPRECATED);
+    return mLayerStack_DEPRECATED != nullptr;
+}
 
+bool
+UOdysseyAnimation::HasLegacyPalettes() const
+{
+    return !Palettes_DEPRECATED.IsEmpty();
+}
+
+bool
+UOdysseyAnimation::HasLegacyToolCollections() const
+{
+    return !ToolCollections_DEPRECATED.IsEmpty();
+}
+
+UObject*
+UOdysseyAnimation::TakeLegacyLayerStack()
+{
+    UObject* layerStack = mLayerStack_DEPRECATED;
     mLayerStack_DEPRECATED = nullptr;
+    return layerStack;
+}
+
+TArray<UOdysseyPaletteSet*>
+UOdysseyAnimation::TakeLegacyPalettes()
+{
+    TArray<UOdysseyPaletteSet*> palettes = MoveTemp(Palettes_DEPRECATED);
     Palettes_DEPRECATED.Reset();
+    return palettes;
+}
+
+TArray<FSoftObjectPath>
+UOdysseyAnimation::TakeLegacyToolCollections()
+{
+    TArray<FSoftObjectPath> toolCollections = MoveTemp(ToolCollections_DEPRECATED);
     ToolCollections_DEPRECATED.Reset();
+    return toolCollections;
 }
 #endif
 

@@ -36,7 +36,7 @@ bool FOdysseyAnimationCurrentLayerNamingTokenTest::RunTest(const FString& Parame
 
     FNamingTokenResultData Result = NamingTokensSubsystem->EvaluateTokenString(Template, Filter, { Context.Get() });
     TestTrue(TEXT("Animation without editor data has no current layer name"), Result.EvaluatedText.IsEmpty());
-    TestNull(TEXT("Evaluating the token does not create the editor data"), Animation->GetEditorData());
+    TestNull(TEXT("Evaluating the token does not create the layer stack user data"), Animation->GetAssetUserData<UOdysseyAnimationLayerStackUserData>());
 
     UOdysseyAnimationLayerStack* LayerStack = UOdysseyAnimationLayerStackUserData::GetLayerStack(Animation.Get());
     if (!TestNotNull(TEXT("Animation layer stack"), LayerStack))

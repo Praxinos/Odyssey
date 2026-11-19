@@ -5,9 +5,8 @@
 
 #include "CoreMinimal.h"
 #include "Engine/AssetUserData.h"
-#include "UObject/SoftObjectPath.h"
 
-#include "OdysseyAnimationEditorData.h"
+#include "OdysseyAnimationRenderingOverride.h"
 #include "OdysseyPaletteReferencer.h"
 
 #include "OdysseyAnimationLayerStackUserData.generated.h"
@@ -15,36 +14,35 @@
 class UOdysseyAnimation;
 class UOdysseyAnimationLayerStack;
 class UOdysseyPalette;
-class UOdysseyPaletteSet;
 
 /**
- * @brief Editor-only content of a UOdysseyAnimation, attached to it as an asset user data
+ * @brief Editor-only layer stack of a UOdysseyAnimation, attached to it as an asset user data
  *
- * Holds the layer stack, the palettes and the tool collections of the animation.
+ * Overrides the animation rendering with its layer stack, so that edits are displayed live in editor.
  * Its class lives in an editor module, so it is never cooked: the runtime only plays the baked frames.
  */
 UCLASS(BlueprintType)
 class ODYSSEYANIMATIONEDITOR_API UOdysseyAnimationLayerStackUserData
     : public UAssetUserData
-    , public IOdysseyAnimationEditorData
+    , public IOdysseyAnimationRenderingOverride
     , public IOdysseyPaletteReferencer
 {
     GENERATED_BODY()
 
 public:
     /**
-     * @brief Returns the editor data of an animation, creating it if needed
+     * @brief Returns the layer stack user data of an animation, creating it if needed
      *
-     * Moves the legacy editor content still stored on the animation into the editor data,
+     * Moves the legacy layer stack still stored on the animation into the user data,
      * and creates an empty layer stack if the animation has none.
      *
-     * @param iAnimation The animation owning the editor data
-     * @return The editor data of the animation, or nullptr if iAnimation is null
+     * @param iAnimation The animation owning the user data
+     * @return The layer stack user data of the animation, or nullptr if iAnimation is null
      */
     static UOdysseyAnimationLayerStackUserData* FindOrCreate(const UOdysseyAnimation* iAnimation);
 
     /**
-     * @brief Returns the layer stack of an animation, creating its editor data if needed
+     * @brief Returns the layer stack of an animation, creating its user data if needed
      *
      * @param iAnimation The animation owning the layer stack
      * @return The layer stack of the animation, or nullptr if iAnimation is null
@@ -52,34 +50,26 @@ public:
     static UOdysseyAnimationLayerStack* GetLayerStack(const UOdysseyAnimation* iAnimation);
 
 public:
-    /** Returns the animation owning this editor data */
+    /** Returns the animation owning this user data */
     UOdysseyAnimation* GetAnimation() const;
 
-    //~ Begin IOdysseyAnimationEditorData Interface
-    virtual const IOdysseyTextureRenderingAbility* GetAnimationRenderingSource() const override;
-    //~ End IOdysseyAnimationEditorData Interface
+    //~ Begin IOdysseyAnimationRenderingOverride Interface
+    virtual const IOdysseyTextureRenderingAbility* GetAnimationRenderingOverride() const override;
+    //~ End IOdysseyAnimationRenderingOverride Interface
 
 private:
     //~ Begin IOdysseyPaletteReferencer Interface
     virtual void OnRefreshReferencedPalette(UOdysseyPalette* iPalette) override;
     //~ End IOdysseyPaletteReferencer Interface
 
-    /** Moves the legacy editor content stored on the owning animation into this editor data */
+    /** Moves the legacy layer stack stored on the owning animation into this user data */
     void MigrateLegacyData();
 
-    /** Creates an empty layer stack if this editor data has none */
+    /** Creates an empty layer stack if this user data has none */
     void CreateLayerStackIfNeeded();
 
 public:
     /** Layer stack holding the editable layers and cells of the animation */
     UPROPERTY(BlueprintReadOnly, Category="Odyssey|LayerStack")
     TObjectPtr<UOdysseyAnimationLayerStack> LayerStack;
-
-    /** Palette sets used by the vector layers of the animation */
-    UPROPERTY()
-    TArray<UOdysseyPaletteSet*> Palettes;
-
-    /** Paths to the tool collections used with the animation, kept as paths so this module does not depend on the painter module */
-    UPROPERTY()
-    TArray<FSoftObjectPath> ToolCollections;
 };

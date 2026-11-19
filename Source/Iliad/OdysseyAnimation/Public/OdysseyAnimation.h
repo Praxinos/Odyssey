@@ -81,27 +81,46 @@ public:
 
 #if WITH_EDITOR
     /**
-     * @brief Returns the asset user data holding the editable content of this animation
+     * @brief Returns the rendering ability overriding the rendering of this animation in editor
      *
-     * @return The first asset user data implementing IOdysseyAnimationEditorData, or nullptr
+     * @return The override of the first asset user data implementing IOdysseyAnimationRenderingOverride that provides one, or nullptr
      */
-    UAssetUserData* GetEditorData() const;
+    const IOdysseyTextureRenderingAbility* GetRenderingOverride() const;
 #endif
 
 #if WITH_EDITORONLY_DATA
-    /**
-     * @brief Tells if this animation still holds editor content saved before it moved to an asset user data
-     */
+    /** Tells if this animation still holds editor content saved before it moved to asset user data */
     bool HasLegacyEditorData() const;
 
+    /** Tells if this animation still holds a legacy layer stack */
+    bool HasLegacyLayerStack() const;
+
+    /** Tells if this animation still holds legacy palette sets */
+    bool HasLegacyPalettes() const;
+
+    /** Tells if this animation still holds legacy tool collection paths */
+    bool HasLegacyToolCollections() const;
+
     /**
-     * @brief Moves the legacy editor content out of this animation, leaving it empty
+     * @brief Moves the legacy layer stack out of this animation
      *
-     * @param oLayerStack Receives the legacy layer stack
-     * @param oPalettes Receives the legacy palette sets
-     * @param oToolCollections Receives the legacy tool collection paths
+     * @return The legacy layer stack, or nullptr if there is none
      */
-    void TakeLegacyEditorData(UObject*& oLayerStack, TArray<UOdysseyPaletteSet*>& oPalettes, TArray<FSoftObjectPath>& oToolCollections);
+    UObject* TakeLegacyLayerStack();
+
+    /**
+     * @brief Moves the legacy palette sets out of this animation
+     *
+     * @return The legacy palette sets
+     */
+    TArray<UOdysseyPaletteSet*> TakeLegacyPalettes();
+
+    /**
+     * @brief Moves the legacy tool collection paths out of this animation
+     *
+     * @return The legacy tool collection paths
+     */
+    TArray<FSoftObjectPath> TakeLegacyToolCollections();
 #endif
 
 public:
@@ -202,9 +221,6 @@ public:
 private:
 #if WITH_EDITOR
     virtual void OnRefreshReferencedPalette(UOdysseyPalette* iPalette) override;
-
-    /** Returns the rendering source of the editor data, or nullptr if there is none */
-    const IOdysseyTextureRenderingAbility* GetEditorRenderingSource() const;
 #endif
 
 public:
@@ -232,15 +248,15 @@ protected:
     TArray<TObjectPtr<UAssetUserData>> AssetUserData;
 
 #if WITH_EDITORONLY_DATA
-    /** Legacy layer stack, moved to the editor data on load */
+    /** Legacy layer stack, moved to the layer stack user data on load */
     UPROPERTY()
     TObjectPtr<UObject> mLayerStack_DEPRECATED;
 
-    /** Legacy palette sets, moved to the editor data on load */
+    /** Legacy palette sets, moved to the palettes user data on load */
     UPROPERTY()
     TArray<UOdysseyPaletteSet*> Palettes_DEPRECATED;
 
-    /** Legacy tool collection paths, moved to the editor data on load */
+    /** Legacy tool collection paths, moved to the tool collections user data on load */
     UPROPERTY()
     TArray<FSoftObjectPath> ToolCollections_DEPRECATED;
 

@@ -296,7 +296,7 @@ bool FOdysseyAnimationTiledPersistenceTest::RunTest(const FString& Parameters)
     if (!TestNotNull(TEXT("Reload animation"), Loaded)) { return false; }
     const UOdysseyAnimationLayerStackUserData* LoadedEditorData = Loaded->GetAssetUserData<UOdysseyAnimationLayerStackUserData>();
     if (!TestNotNull(TEXT("Editor data is saved with the animation"), LoadedEditorData)) { return false; }
-    TestTrue(TEXT("Editor data is the animation editor data"), Loaded->GetEditorData() == LoadedEditorData);
+    TestTrue(TEXT("Saved layer stack overrides the animation rendering"), Loaded->GetRenderingOverride() == LoadedEditorData->LayerStack.Get());
     if (!TestNotNull(TEXT("Editor animation retains its layer stack"), LoadedEditorData->LayerStack.Get())) { return false; }
     TestEqual(TEXT("Saved layer stack keeps its layers"), LoadedEditorData->LayerStack->GetRootLayers().Num(), 1);
     const FArrayProperty* FramesProperty = FindFProperty<FArrayProperty>(Loaded->GetClass(), TEXT("Frames"));

@@ -13,6 +13,7 @@
 #include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationUserDataUtils.h"
 #include "OdysseyLayer.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogOdysseyAnimationLayerStackUserData, Log, All);
@@ -20,18 +21,9 @@ DEFINE_LOG_CATEGORY_STATIC(LogOdysseyAnimationLayerStackUserData, Log, All);
 UOdysseyAnimationLayerStackUserData*
 UOdysseyAnimationLayerStackUserData::FindOrCreate(const UOdysseyAnimation* iAnimation)
 {
-    if (!iAnimation)
-        return nullptr;
-
-    // Creating the editor data lazily does not change the animation content, so it is allowed from const accessors
-    UOdysseyAnimation* animation = const_cast<UOdysseyAnimation*>(iAnimation);
-
-    UOdysseyAnimationLayerStackUserData* userData = animation->GetAssetUserData<UOdysseyAnimationLayerStackUserData>();
+    UOdysseyAnimationLayerStackUserData* userData = OdysseyAnimationUserData::FindOrAdd<UOdysseyAnimationLayerStackUserData>(iAnimation);
     if (!userData)
-    {
-        userData = NewObject<UOdysseyAnimationLayerStackUserData>(animation, NAME_None, RF_Transactional);
-        animation->AddAssetUserData(userData);
-    }
+        return nullptr;
 
     userData->MigrateLegacyData();
     userData->CreateLayerStackIfNeeded();
@@ -53,7 +45,7 @@ UOdysseyAnimationLayerStackUserData::GetAnimation() const
 }
 
 const IOdysseyTextureRenderingAbility*
-UOdysseyAnimationLayerStackUserData::GetAnimationRenderingSource() const
+UOdysseyAnimationLayerStackUserData::GetAnimationRenderingOverride() const
 {
     return LayerStack;
 }
@@ -98,26 +90,16 @@ void
 UOdysseyAnimationLayerStackUserData::MigrateLegacyData()
 {
     UOdysseyAnimation* animation = GetAnimation();
-    if (!animation || !animation->HasLegacyEditorData())
+    if (!animation || !animation->HasLegacyLayerStack())
         return;
 
-    UObject* legacyLayerStack = nullptr;
-    TArray<UOdysseyPaletteSet*> legacyPalettes;
-    TArray<FSoftObjectPath> legacyToolCollections;
-    animation->TakeLegacyEditorData(legacyLayerStack, legacyPalettes, legacyToolCollections);
+    UObject* legacyLayerStack = animation->TakeLegacyLayerStack();
+    if (LayerStack)
+        return;
 
-    if (!LayerStack && legacyLayerStack)
-    {
-        LayerStack = Cast<UOdysseyAnimationLayerStack>(legacyLayerStack);
-        if (!LayerStack)
-            UE_LOG(LogOdysseyAnimationLayerStackUserData, Warning, TEXT("%s: legacy layer stack %s is not an animation layer stack and is dropped"), *animation->GetPathName(), *legacyLayerStack->GetName());
-    }
-
-    for (UOdysseyPaletteSet* paletteSet : legacyPalettes)
-        Palettes.AddUnique(paletteSet);
-
-    for (const FSoftObjectPath& toolCollection : legacyToolCollections)
-        ToolCollections.AddUnique(toolCollection);
+    LayerStack = Cast<UOdysseyAnimationLayerStack>(legacyLayerStack);
+    if (!LayerStack)
+        UE_LOG(LogOdysseyAnimationLayerStackUserData, Warning, TEXT("%s: legacy layer stack %s is not an animation layer stack and is dropped"), *animation->GetPathName(), *legacyLayerStack->GetName());
 
     animation->RenderingCompositionChanged();
 }
