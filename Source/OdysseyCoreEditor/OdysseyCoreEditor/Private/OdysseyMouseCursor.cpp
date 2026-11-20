@@ -185,6 +185,7 @@ FMouseCursor::InitializeCustomCursorMap()
     AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::ArrowEW, "arrow-E-W.cursor" );
     AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::ArrowSE_NW, "arrow-SE-NW.cursor" );
     AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::ArrowSW_NE, "arrow-SW-NE.cursor" );
+    AddCursor( smMouseCursorCustomMap, EMouseCursorCustom::MagicWand, "Magic_Wand.cursor");
     // Make corresponding the cursor id to the cursor file (like for svg in styling)
     // cursor file DON'T have extension ! (because different files are used for each OS)
 }

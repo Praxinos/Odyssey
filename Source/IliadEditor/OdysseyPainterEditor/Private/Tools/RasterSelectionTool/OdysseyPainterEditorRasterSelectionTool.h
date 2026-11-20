@@ -9,6 +9,7 @@
 #include "OdysseyPainterEditorRasterSelectionTool.generated.h"
 
 class UOdysseyShape;
+class UOdysseyMagicWandShape;
 
 UENUM()
 enum class EOdysseySelectionState : uint8
@@ -52,6 +53,7 @@ public:
 
     virtual void Tick(float iDeltaTime) override;
 
+    void SetFeatherRadius(int iRadius);
     virtual FText GetTooltip() const override;
 
 public:
@@ -60,11 +62,14 @@ public:
 
 protected:
     TOptional<FMouseCursor> GetMouseCursorOverride() const override;
+    void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive) override;
 
 private:
     // Internal - Callbacks
     void OnShapeBegin();
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
+    void OnContoursCommit(const TArray<TArray<FOdysseyPoint>>& iContours);
+    void OnSelectionBlockCommit(TSharedPtr<::ULIS::FBlock> iMaskBlock);
     void OnShapeAbort();
 
 protected:
@@ -72,6 +77,12 @@ protected:
     UPROPERTY(EditAnywhere, Category="Shape", meta = (IgnoreToolConfiguration))
     FOdysseyShapes Shapes;
 
+    /** The feather radius. */
+    UPROPERTY(EditAnywhere, Category = "Feather", meta = (ClampMin = "0", ClampMax = "1000", UIMin = "0", UIMax = "1000", Delta = "1"))
+    float FeatherRadius = 0;
+
     EOdysseySelectionState mSelectionState;
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;
+
+    UOdysseyMagicWandShape* mMagicWandShape;
 };

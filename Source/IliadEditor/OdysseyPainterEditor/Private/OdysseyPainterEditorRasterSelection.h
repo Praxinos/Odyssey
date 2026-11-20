@@ -44,7 +44,11 @@ public:
 
     void Init(int iWidth, int iHeight);
     void Add( const TArray<FVector2D>& iPolygon );
+    void Add( const TArray<TArray<FVector2D>>& iPolygons );
+    void Add( TSharedPtr<::ULIS::FBlock> iMaskBlock );
     void Substract( const TArray<FVector2D>& iPolygon );
+    void Substract( const TArray<TArray<FVector2D>>& iPolygons );
+    void Substract( TSharedPtr<::ULIS::FBlock> iMaskBlock );
     void Invert();
     void Clear();
     void Reset();
@@ -54,6 +58,10 @@ public:
     ::ULIS::FRectI GetMaskBoundingRect() const;
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock();
     TSharedPtr<::ULIS::FBlock> GetBlock();
+    TSharedPtr<::ULIS::FBlock> GetFeatheredBlock();
+
+    int GetFeatherRadius() const;
+    void SetFeatherRadius( int iRadius );
 
     TSharedPtr<FOdysseyHUDElement> GetHUD();
 
@@ -66,11 +74,19 @@ private:
     ::ULIS::FRectI ComputeBoundingRect(const TArray<FVector2D>& iPoints) const;
     TArray<TArray<FVector2D>> BuildContours(const TArray<FIntEdge>& Edges);
 
+    // Utils for feathered block
+    bool GenerateFeatheredBlock();
+    ::ULIS::FKernel MakeGaussianKernel(int iRadius, bool iHorizontal);
+
 private:
     void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);
 
 private:
     TSharedPtr<::ULIS::FBlock> mBlock;
+
+    int mFeatherRadius; // The radius of the gaussian blur to apply to the edges of the selection
+    TSharedPtr<::ULIS::FBlock> mFeatheredBlock; // The resulting block after the application of the gaussian blur to mBlock
+
     TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
     FOdysseyRasterBlockMutator mRasterMutator;
 

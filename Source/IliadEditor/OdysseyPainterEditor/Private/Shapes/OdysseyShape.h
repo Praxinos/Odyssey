@@ -21,6 +21,7 @@ enum class EOdysseyShapeType : uint8
     kPolygon        UMETA(DisplayName = "Polygon"),
     kEllipse        UMETA(DisplayName = "Ellipse"),
     kBezier         UMETA(DisplayName = "Bezier"),
+    kMagicWand      UMETA(DisplayName = "Magic Wand"),
 };
 
 USTRUCT()
@@ -61,7 +62,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyShape : public UObject
 
 public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnInteractive, const TArray<FOdysseyPoint>& /*iPoints*/);
-    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCommit, const TArray<FOdysseyPoint>& /*iPoints*/, bool /*iReset*/);
+    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnContourCommit, const TArray<FOdysseyPoint>& /*iPoints*/, bool /*iReset*/);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnContoursCommit, const TArray<TArray<FOdysseyPoint>>& /*iContours*/); //For shapes that can return multiple polygons in a single commit
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnSelectionBlockCommit, TSharedPtr<::ULIS::FBlock> /*iMaskBlock*/ ); //For shapes that can return a mask block (usually in grey, for selection)
 
 public:
     // Destructor
@@ -91,7 +94,9 @@ public:
     // Getters
     FSimpleMulticastDelegate& OnBegin() { return mOnBegin; }
     FOnInteractive& OnInteractive() { return mOnInteractive; }
-    FOnCommit& OnCommit() { return mOnCommit; }
+    FOnContourCommit& OnContourCommit() { return mOnContourCommit; }
+    FOnContoursCommit& OnContoursCommit() { return mOnContoursCommit; }
+    FOnSelectionBlockCommit& OnSelectionBlockCommit() { return mOnSelectionBlockCommit; }
     FSimpleMulticastDelegate& OnAbort() { return mOnAbort; }
 
 protected:
@@ -100,7 +105,9 @@ protected:
 protected:
     FSimpleMulticastDelegate mOnBegin;
     FOnInteractive mOnInteractive;
-    FOnCommit mOnCommit;
+    FOnContourCommit mOnContourCommit;
+    FOnContoursCommit mOnContoursCommit;
+    FOnSelectionBlockCommit mOnSelectionBlockCommit;
     FSimpleMulticastDelegate mOnAbort;
 
 protected:
