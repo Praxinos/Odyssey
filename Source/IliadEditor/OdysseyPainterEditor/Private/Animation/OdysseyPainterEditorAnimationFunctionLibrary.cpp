@@ -40,7 +40,10 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ImportImageSequence(UOdysseyAnima
 {
     FOdysseyImportTexturesParameters params = Parameters;
     params.Init(Paths, Animation->GetWidth(), Animation->GetHeight());
-    return FOdysseyPainterEditorAnimationImport::ImportTextureSequence( Animation, params );
+    FOdysseyPainterEditorAnimationImportResult result = FOdysseyPainterEditorAnimationImport::ImportTextureSequence( Animation, params );
+    params.ReleaseOwnedSourceTextures();
+
+    return result;
 }
 
 TArray<FString>
@@ -137,7 +140,10 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ImportImageSequence(UOdyssey
 
     FOdysseyImportTexturesParameters params = Parameters;
     params.Init(Paths, animation->GetWidth(), animation->GetHeight());
-    return FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence( Layer, params, CellIndex );
+    FOdysseyPainterEditorAnimationImportResult result = FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence( Layer, params, CellIndex );
+    params.ReleaseOwnedSourceTextures();
+
+    return result;
 }
 
 TArray<FString>
@@ -242,7 +248,10 @@ UOdysseyPainterEditorAnimationCellFunctionLibrary::ImportImageSequence( UOdyssey
 
     FOdysseyImportTexturesParameters params = iParameters;
     params.Init( { iPath }, animation->GetWidth(), animation->GetHeight() );
-    return FOdysseyPainterEditorAnimationCellImport::ImportTextureSequence( iCellRaster, params );
+    FOdysseyPainterEditorAnimationImportResult result = FOdysseyPainterEditorAnimationCellImport::ImportTextureSequence( iCellRaster, params );
+    params.ReleaseOwnedSourceTextures();
+
+    return result;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -35,6 +35,7 @@ FOdysseyImportTexturesParametersGC::AddReferencedObjects( FReferenceCollector& i
 {
     ioCollector.AddReferencedObjects( mParameters->mSourceTextures );
     ioCollector.AddReferencedObject( mParameters->mScanCleanerCurve );
+    ioCollector.AddReferencedObject( mParameters->mScanCleanerCurveTexture );
 }
 
 FString FOdysseyImportTexturesParametersGC::GetReferencerName() const
@@ -65,14 +66,55 @@ FOdysseyImportTexturesParameters::FOdysseyImportTexturesParameters()
     UpdateScanCleanerCurveTextures();
 }
 
+FOdysseyImportTexturesParameters::FOdysseyImportTexturesParameters( const FOdysseyImportTexturesParameters& iOther )
+    : mGC( this ) // toujours pointer sur soi-même
+{
+    *this = iOther;
+}
+
+FOdysseyImportTexturesParameters&
+FOdysseyImportTexturesParameters::operator=( const FOdysseyImportTexturesParameters& iOther )
+{
+    if( this == &iOther )
+        return *this;
+
+    if( mScanCleanerCurve )
+        mScanCleanerCurve->OnUpdateCurve.RemoveAll( this );
+
+    // NE PAS copier mGC
+    mSourceTextures = iOther.mSourceTextures;
+    mSourceTextureNames = iOther.mSourceTextureNames;
+    mOwnsSourceTextures = iOther.mOwnsSourceTextures;
+    mDestinationWidth = iOther.mDestinationWidth;
+    mDestinationHeight = iOther.mDestinationHeight;
+    mAlignment = iOther.mAlignment;
+    mScaling = iOther.mScaling;
+    ScalingFullFit = iOther.ScalingFullFit;
+    ScalingCustomSize = iOther.ScalingCustomSize;
+    mResamplingMethod = iOther.mResamplingMethod;
+    mIsScanCleanerActivated = iOther.mIsScanCleanerActivated;
+    mScanCleanerCurve = iOther.mScanCleanerCurve;
+    mScanCleanerCurveTexture = iOther.mScanCleanerCurveTexture;
+    mScanCleanerColorSaturation = iOther.mScanCleanerColorSaturation;
+    mScanCleanerColorValue = iOther.mScanCleanerColorValue;
+
+    if( mScanCleanerCurve )
+        mScanCleanerCurve->OnUpdateCurve.AddRaw( this, &FOdysseyImportTexturesParameters::OnUpdateCurve );
+
+    return *this;
+}
+
 void
 FOdysseyImportTexturesParameters::Init(const TArray< UTexture2D* >& iTextures, uint32 iDestinationWidth, uint32 iDestinationHeight)
 {
+    ReleaseOwnedSourceTextures();
+
     mSourceTextures = iTextures;
+    mOwnsSourceTextures = false;
     mDestinationWidth = iDestinationWidth;
     mDestinationHeight = iDestinationHeight;
 
-    mSourceTextureNames.Reserve(mSourceTextures.Num());
+    mSourceTextureNames.Empty(mSourceTextures.Num());
     for(UTexture2D* texture : mSourceTextures)
     {
         mSourceTextureNames.Emplace(texture->GetName());
@@ -82,10 +124,14 @@ FOdysseyImportTexturesParameters::Init(const TArray< UTexture2D* >& iTextures, u
 void
 FOdysseyImportTexturesParameters::Init(const TArray<FString>& iFilenames, uint32 iDestinationWidth, uint32 iDestinationHeight)
 {
+    ReleaseOwnedSourceTextures();
+
     mDestinationWidth = iDestinationWidth;
     mDestinationHeight = iDestinationHeight;
 
     mSourceTextures.Empty();
+    mSourceTextureNames.Empty();
+    mOwnsSourceTextures = true; // transient textures created below, only used during the import
 
     //Convert to textures
     FScopedSlowTask progressBar(iFilenames.Num(), LOCTEXT("texture-editor.import-images.progress-bar.title", "Importing Images"));
@@ -128,6 +174,29 @@ FOdysseyImportTexturesParameters::Init(const TArray<FString>& iFilenames, uint32
 }
 
 void
+FOdysseyImportTexturesParameters::ReleaseOwnedSourceTextures()
+{
+    if( !mOwnsSourceTextures )
+        return;
+
+    for( UTexture2D* texture : mSourceTextures )
+    {
+        if( !IsValid( texture ) )
+            continue;
+
+        // Free the GPU memory now (the render thread keeps its own RHI reference if a command is still pending)
+        texture->ReleaseResource();
+        // Let the next GC destroy the UObject (and its source/platform data in CPU memory)
+        texture->ClearFlags( RF_Standalone | RF_Public );
+        texture->MarkAsGarbage();
+    }
+
+    mSourceTextures.Empty();
+    mSourceTextureNames.Empty();
+    mOwnsSourceTextures = false;
+}
+
+void
 FOdysseyImportTexturesParameters::UpdateScanCleanerCurveTextures()
 {
     FOdysseyScanCleanerShader::InitTextureFromCurves(
@@ -150,6 +219,58 @@ FOdysseyImportTexturesParameters::CreateRT() const
     renderTarget->UpdateResourceImmediate();
     return renderTarget;
 }
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------- FOdysseyImportTexturesSharedRT
+
+TUniquePtr<FOdysseyImportTexturesSharedRT> FOdysseyImportTexturesSharedRT::sInstance;
+
+//static
+void
+FOdysseyImportTexturesSharedRT::Startup()
+{
+    sInstance = MakeUnique<FOdysseyImportTexturesSharedRT>();
+}
+
+//static
+void
+FOdysseyImportTexturesSharedRT::Shutdown()
+{
+    sInstance.Reset();
+}
+
+//static
+UTextureRenderTarget2D*
+FOdysseyImportTexturesSharedRT::Get( const FOdysseyImportTexturesParameters& iParameters )
+{
+    if( !ensureMsgf( sInstance.IsValid(), TEXT( "FOdysseyImportTexturesSharedRT used outside of the OdysseyPainterEditor module lifetime" ) ) )
+        return iParameters.CreateRT();
+
+    TObjectPtr<UTextureRenderTarget2D>& renderTarget = sInstance->mRenderTarget;
+    if( !IsValid( renderTarget )
+        || renderTarget->SizeX != int32( iParameters.GetDestinationWidth() )
+        || renderTarget->SizeY != int32( iParameters.GetDestinationHeight() ) )
+    {
+        // The previous render target (if any) is not referenced anymore and will be collected by the GC
+        renderTarget = iParameters.CreateRT();
+    }
+
+    return renderTarget;
+}
+
+void
+FOdysseyImportTexturesSharedRT::AddReferencedObjects( FReferenceCollector& ioCollector )
+{
+    ioCollector.AddReferencedObject( mRenderTarget );
+}
+
+FString
+FOdysseyImportTexturesSharedRT::GetReferencerName() const
+{
+    return TEXT( "FOdysseyImportTexturesSharedRT" );
+}
+
+//--------------------------------------------------------------------------------------
 
 FVector2D
 FOdysseyImportTexturesParameters::GetTextureScaledSize(int iSourceTextureIndex) const

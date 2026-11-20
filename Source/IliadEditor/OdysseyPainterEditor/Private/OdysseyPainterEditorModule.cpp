@@ -43,6 +43,7 @@
 #include "StandaloneEditor/OdysseyPainterEditorStandaloneToolkit.h"
 #include "OdysseyTelemetryModule.h"
 #include "OdysseyViewportCommands.h"
+#include "OdysseyImportTexturesParameters.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -105,11 +106,15 @@ FOdysseyPainterEditorModule::StartupModule()
 
     FOdysseyVectorBrushCustomization::Register();
     FOdysseyVectorObjectViewPaletteCustomization::Register();
+
+    FOdysseyImportTexturesSharedRT::Startup();
 }
 
 void
 FOdysseyPainterEditorModule::ShutdownModule()
 {
+    FOdysseyImportTexturesSharedRT::Shutdown();
+
     UnregisterBrushOverrides();
     UnregisterSettings();
     UnregisterCommands();
