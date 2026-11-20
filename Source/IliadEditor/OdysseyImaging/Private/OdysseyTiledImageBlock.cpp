@@ -6,6 +6,7 @@
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Math/Float16.h"
+#include "Memory/SharedBuffer.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
 #include "RenderingThread.h"
@@ -67,15 +68,16 @@ void DecodeSRGB(const ::ULIS::FBlock& Source, ::ULIS::FBlock& Destination)
 }
 
 /**
- * Creates a transient texture holding SourceRect of the block in the tile pixel format, ready to be read by CopyFromTexture().
+ * Returns SourceRect of the block in the memory layout of the tiles: rows of SourceRect.Width() pixels in the tile pixel format.
  * Without bSRGB, values are kept, so only channel order and type change. SourceRect must lie within the block.
+ * @return A null buffer when SourceRect is empty, or an sRGB encoded 8-bit block cannot be held by RGBA8 tiles.
  */
-UTexture2D* CreateTileTexture(EOdysseyTiledImageFormat TileFormat, EPixelFormat PixelFormat, const ::ULIS::FBlock& Block, const FIntRect& SourceRect, bool bSRGB)
+FSharedBuffer ToTileMemory(EOdysseyTiledImageFormat TileFormat, EPixelFormat PixelFormat, const ::ULIS::FBlock& Block, const FIntRect& SourceRect, bool bSRGB)
 {
     // FIntRect::IsEmpty() is false when only one dimension is zero.
     if (SourceRect.Width() <= 0 || SourceRect.Height() <= 0)
     {
-        return nullptr;
+        return FSharedBuffer();
     }
 
     // Convert to the memory layout of the tiles.
@@ -83,7 +85,7 @@ UTexture2D* CreateTileTexture(EOdysseyTiledImageFormat TileFormat, EPixelFormat 
     // Linear colors need more than 8 bits to keep every sRGB encoded color.
     if (bDecode && TileFormat == EOdysseyTiledImageFormat::RGBA8)
     {
-        return nullptr;
+        return FSharedBuffer();
     }
     const FIntPoint Size = SourceRect.Size();
     const bool bLinear = ULIS_R_LINEAR(Block.Format()) != 0;
@@ -100,15 +102,9 @@ UTexture2D* CreateTileTexture(EOdysseyTiledImageFormat TileFormat, EPixelFormat 
         ConvertBlock(Block, Staging, Rect);
     }
 
-    UTexture2D* Texture = UTexture2D::CreateTransient(Size.X, Size.Y, PixelFormat);
-    if (!Texture)
-    {
-        return nullptr;
-    }
-    Texture->SRGB = false;
-    FByteBulkData& BulkData = Texture->GetPlatformData()->Mips[0].BulkData;
-    uint8* Destination = static_cast<uint8*>(BulkData.Lock(LOCK_READ_WRITE));
     const int64 DestinationPitch = int64(Size.X) * GPixelFormats[PixelFormat].BlockBytes;
+    FUniqueBuffer Memory = FUniqueBuffer::Alloc(uint64(DestinationPitch) * Size.Y);
+    uint8* Destination = static_cast<uint8*>(Memory.GetData());
     const int32 NumValuesPerRow = Size.X * 4;
     for (int32 Y = 0; Y < Size.Y; ++Y)
     {
@@ -128,11 +124,37 @@ UTexture2D* CreateTileTexture(EOdysseyTiledImageFormat TileFormat, EPixelFormat 
             FMemory::Memcpy(DestinationRow, SourceRow, DestinationPitch);
         }
     }
+    return Memory.MoveToShared();
+}
+
+/**
+ * Creates a transient texture holding SourceRect of the block in the tile pixel format, ready to be read by CopyFromTexture().
+ * Converts as ToTileMemory() does. The texture is garbage collected: keep it for single copies, not repeated ones.
+ */
+UTexture2D* CreateTileTexture(EOdysseyTiledImageFormat TileFormat, EPixelFormat PixelFormat, const ::ULIS::FBlock& Block, const FIntRect& SourceRect, bool bSRGB)
+{
+    const FSharedBuffer Memory = ToTileMemory(TileFormat, PixelFormat, Block, SourceRect, bSRGB);
+    if (Memory.IsNull())
+    {
+        return nullptr;
+    }
+    UTexture2D* Texture = UTexture2D::CreateTransient(SourceRect.Width(), SourceRect.Height(), PixelFormat);
+    if (!Texture)
+    {
+        return nullptr;
+    }
+    Texture->SRGB = false;
+    FByteBulkData& BulkData = Texture->GetPlatformData()->Mips[0].BulkData;
+    FMemory::Memcpy(BulkData.Lock(LOCK_READ_WRITE), Memory.GetData(), Memory.GetSize());
     BulkData.Unlock();
     Texture->UpdateResource();
     return Texture;
 }
 }
+
+BEGIN_SHADER_PARAMETER_STRUCT(FOdysseyBlockUploadParameters, )
+    RDG_TEXTURE_ACCESS(Texture, ERHIAccess::CopyDest)
+END_SHADER_PARAMETER_STRUCT()
 
 namespace Odyssey::TiledImage
 {
@@ -234,24 +256,39 @@ bool CopyBlockToRenderTarget(UTextureRenderTarget2D& Target, EOdysseyTiledImageF
             Clipped.Add(Rect);
         }
     }
-    TStrongObjectPtr<UTexture2D> Texture(CreateTileTexture(Format, PixelFormat, Block, Bounds, bSRGB));
-    if (!Texture)
+    // Tools upload their edits on every tick: the pixels are written into the target directly, without creating a texture.
+    const FSharedBuffer Memory = ToTileMemory(Format, PixelFormat, Block, Bounds, bSRGB);
+    if (Memory.IsNull())
     {
         return false;
     }
+    const uint32 BytesPerPixel = GPixelFormats[PixelFormat].BlockBytes;
+    const uint32 Pitch = uint32(Bounds.Width()) * BytesPerPixel;
     ENQUEUE_RENDER_COMMAND(OdysseyCopyBlockToRenderTarget)(
-        [Source = Texture->GetResource(), Destination = Target.GameThread_GetRenderTargetResource(), Clipped = MoveTemp(Clipped), Bounds, Position](FRHICommandListImmediate& RHICmdList)
+        [Destination = Target.GameThread_GetRenderTargetResource(), Clipped = MoveTemp(Clipped), Bounds, Position, Memory, BytesPerPixel, Pitch](FRHICommandListImmediate& RHICmdList)
         {
             FRDGBuilder GraphBuilder(RHICmdList);
-            FRDGTextureRef SourceTexture = GraphBuilder.RegisterExternalTexture(::CreateRenderTarget(Source->TextureRHI, TEXT("Odyssey.TiledImage.BlockUpload")));
             FRDGTextureRef DestinationTexture = Destination->GetRenderTargetTexture(GraphBuilder);
             for (const FIntRect& Rect : Clipped)
             {
-                AddCopyTexturePass(GraphBuilder, SourceTexture, DestinationTexture, Rect.Min - Bounds.Min, Rect.Min + Position, Rect.Size());
+                FOdysseyBlockUploadParameters* Parameters = GraphBuilder.AllocParameters<FOdysseyBlockUploadParameters>();
+                Parameters->Texture = DestinationTexture;
+                GraphBuilder.AddPass(
+                    RDG_EVENT_NAME("Odyssey.TiledImage.BlockUpload"),
+                    Parameters,
+                    ERDGPassFlags::Copy | ERDGPassFlags::NeverCull,
+                    [DestinationTexture, Memory, Rect, Bounds, Position, BytesPerPixel, Pitch](FRHICommandList& PassCmdList)
+                    {
+                        // The data starts at the first pixel of the rect; rows keep the pitch of the bounds.
+                        const FIntPoint Source = Rect.Min - Bounds.Min;
+                        const uint8* Data = static_cast<const uint8*>(Memory.GetData()) + uint64(Source.Y) * Pitch + uint64(Source.X) * BytesPerPixel;
+                        const FUpdateTextureRegion2D Region(Rect.Min.X + Position.X, Rect.Min.Y + Position.Y, 0, 0, Rect.Width(), Rect.Height());
+                        PassCmdList.UpdateTexture2D(DestinationTexture->GetRHI(), 0, Region, Pitch, Data);
+                    });
             }
             GraphBuilder.Execute();
         });
-    // The copy is done on the render thread, which reads the texture.
+    // Callers expect the target to hold the pixels once this returns.
     FlushRenderingCommands();
     return true;
 }

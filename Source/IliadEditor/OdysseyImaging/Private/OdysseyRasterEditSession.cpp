@@ -142,7 +142,22 @@ FOdysseyRasterEditSession::Invalidate(const TArray<FIntRect>& Rects)
     {
         return;
     }
-    InvalidRects.Append(Rects);
+    // Tools invalidate on every tick: keep the bounds only, so that this does not grow with the edit duration.
+    for (const FIntRect& Rect : Rects)
+    {
+        if (Rect.Width() <= 0 || Rect.Height() <= 0)
+        {
+            continue;
+        }
+        if (InvalidBounds.IsSet())
+        {
+            InvalidBounds->Union(Rect);
+        }
+        else
+        {
+            InvalidBounds = Rect;
+        }
+    }
     OnInvalidated().Broadcast(RenderingId, Rects);
 }
 
@@ -199,9 +214,10 @@ FOdysseyRasterEditSession::End()
     });
     OnActiveSessionsChanged().Broadcast();
     // The views showed the target: they show the tiles again.
-    TArray<FIntRect> Rects = MoveTemp(InvalidRects);
-    if (!Rects.IsEmpty())
+    if (InvalidBounds.IsSet())
     {
+        const TArray<FIntRect> Rects = { InvalidBounds.GetValue() };
+        InvalidBounds.Reset();
         OnInvalidated().Broadcast(RenderingId, Rects);
     }
 }

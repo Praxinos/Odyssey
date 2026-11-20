@@ -110,7 +110,8 @@ private:
     TStrongObjectPtr<UTextureRenderTarget2D> Target;
     /** When preserving alpha: the tiles at the beginning of the session. */
     TStrongObjectPtr<UTextureRenderTarget2D> Original;
-    TArray<FIntRect> InvalidRects;
+    /** The bounds of the areas invalidated since the beginning, rendered again when the session ends; unset when none. */
+    TOptional<FIntRect> InvalidBounds;
     FOnCommitted OnCommitted;
 };
 

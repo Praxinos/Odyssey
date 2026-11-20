@@ -6,6 +6,7 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Editor.h"
+#include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Math/TranslationMatrix.h"
 #include "Misc/AutomationTest.h"
@@ -16,6 +17,7 @@
 #include "TextureResource.h"
 #include "UObject/StrongObjectPtr.h"
 #include "UObject/UnrealType.h"
+#include "UObject/UObjectIterator.h"
 
 #include "OdysseyRenderContext.h"
 #include "OdysseyTiledImage.h"
@@ -354,6 +356,81 @@ bool FOdysseyRasterEditSessionPreserveAlphaAreaTest::RunTest(const FString& Para
         }
     }
     Session->End();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyRasterEditSessionRepeatedUpdateTest, "Odyssey.Imaging.RasterEditSession.RepeatedUpdates", Odyssey::RasterEditSessionTests::TestFlags)
+/**
+ * A tool updates the target of its session on every tick: the updates must not accumulate memory.
+ * Uploading parts of a block creates no texture, places each part at its position, and the areas a session
+ * remembers to render again when it ends stay a single area, however many times it is invalidated.
+ */
+bool FOdysseyRasterEditSessionRepeatedUpdateTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::RasterEditSessionTests;
+    TStrongObjectPtr<UOdysseyTiledImage> Image = MakeImage();
+    const FGuid Id = FGuid::NewGuid();
+    TSharedPtr<FOdysseyRasterEditSession> Session = FOdysseyRasterEditSession::Begin(Id, *Image, FIntPoint(TestSize, TestSize));
+    if (!TestTrue(TEXT("The session begins"), Session.IsValid()))
+    {
+        return false;
+    }
+
+    // The block differs from the image by its blue channel.
+    ::ULIS::FBlock Block(TestSize, TestSize, ::ULIS::Format_RGBAF);
+    for (int32 Y = 0; Y < TestSize; ++Y)
+    {
+        for (int32 X = 0; X < TestSize; ++X)
+        {
+            float* Pixel = reinterpret_cast<float*>(Block.PixelBits(static_cast<uint16>(X), static_cast<uint16>(Y)));
+            Pixel[0] = X / float(TestSize);
+            Pixel[1] = Y / float(TestSize);
+            Pixel[2] = 0.25f;
+            Pixel[3] = 1.0f;
+        }
+    }
+
+    const TArray<FIntRect> Parts = { FIntRect(0, 0, 40, 40), FIntRect(50, 50, TestSize, TestSize) };
+    const TFunction<int32()> CountTextures = []()
+    {
+        int32 Count = 0;
+        for (TObjectIterator<UTexture2D> It; It; ++It)
+        {
+            Count += IsValid(*It) && !It->HasAnyFlags(RF_ClassDefaultObject) ? 1 : 0;
+        }
+        return Count;
+    };
+    const int32 TexturesBefore = CountTextures();
+    constexpr int32 NumUpdates = 10;
+    for (int32 Update = 0; Update < NumUpdates; ++Update)
+    {
+        TestTrue(TEXT("The parts are uploaded"), Odyssey::TiledImage::CopyBlockToRenderTarget(*Session->GetTarget(), EOdysseyTiledImageFormat::RGBA32F, Block, Parts));
+    }
+    TestEqual(TEXT("Uploads create no texture"), CountTextures() - TexturesBefore, 0);
+
+    const TArray<FLinearColor> Pixels = ReadTarget(Session->GetTarget());
+    const TFunction<float(int32, int32)> BlueAt = [&Pixels](int32 X, int32 Y) { return Pixels.IsValidIndex(Y * TestSize + X) ? Pixels[Y * TestSize + X].B : -1.0f; };
+    TestEqual(TEXT("The first part is uploaded"), BlueAt(10, 10), 0.25f);
+    TestEqual(TEXT("The second part is uploaded at its position"), BlueAt(60, 60), 0.25f);
+    TestEqual(TEXT("The second part keeps its pixels"), Pixels.IsValidIndex(70 * TestSize + 55) ? Pixels[70 * TestSize + 55].R : -1.0f, 55 / float(TestSize));
+    TestEqual(TEXT("Pixels between the parts are kept"), BlueAt(45, 45), 0.5f);
+
+    TArray<FIntRect> Rendered;
+    FDelegateHandle Handle = FOdysseyRasterEditSession::OnInvalidated().AddLambda([&Rendered, Id](const FGuid& RenderingId, const TArray<FIntRect>& Rects)
+    {
+        if (RenderingId == Id)
+        {
+            Rendered = Rects;
+        }
+    });
+    for (int32 Update = 0; Update < NumUpdates; ++Update)
+    {
+        Session->Invalidate(Parts);
+    }
+    Session->End();
+    FOdysseyRasterEditSession::OnInvalidated().Remove(Handle);
+    TestEqual(TEXT("The session renders one area again when it ends"), Rendered.Num(), 1);
+    TestEqual(TEXT("The area covers every invalidated part"), Rendered.Num() == 1 ? Rendered[0].ToString() : FString(), FIntRect(0, 0, TestSize, TestSize).ToString());
     return true;
 }
 
