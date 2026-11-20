@@ -36,6 +36,7 @@
 #include "OdysseyTextureLayerStack.h"
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyTiledImage.h"
+#include "OdysseyRasterContentBlocks.h"
 
 namespace Odyssey::TextureLayerTiledImageTests
 {
@@ -188,7 +189,7 @@ void ClearLayer(UOdysseyTextureLayerImageRaster* Layer)
 /** Begins an edit changing no pixel on the layer, so that it renders its uncommitted edits until the edit is committed. */
 TSharedPtr<FOdysseyRasterBlockEdit> BeginUnchangedEdit(FAutomationTestBase& Test, UOdysseyTextureLayerImageRaster* Layer)
 {
-    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Layer->GetRasterContent().BeginEdit();
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Odyssey::RasterContentBlocks::BeginBlockEdit(Layer->GetRasterContent());
     if (Test.TestTrue(TEXT("Begin an edit"), Edit.IsValid()))
     {
         Edit->Update({ FIntRect(0, 0, Width, Height) });
@@ -242,7 +243,7 @@ bool FOdysseyTextureLayerTiledImageTest::RunTest(const FString& Parameters)
     using namespace Odyssey::TextureLayerTiledImageTests;
     TStrongObjectPtr<UOdysseyTextureLayerImageRaster> Detached(NewObject<UOdysseyTextureLayerImageRaster>());
     TestNull(TEXT("Detached layer has no image"), Detached->GetTiledImage());
-    TestFalse(TEXT("Detached layer has no pixels"), Detached->GetRasterContent().ReadBlock().IsValid());
+    TestFalse(TEXT("Detached layer has no pixels"), Odyssey::RasterContentBlocks::ReadBlock(Detached->GetRasterContent()).IsValid());
 
     for (ETextureSourceFormat Format : Formats)
     {
@@ -405,10 +406,10 @@ bool FOdysseyTextureLayerTiledPipelineTest::RunTest(const FString& Parameters)
         UOdysseyLayerStack* Stack = Layer->GetLayerStack();
         UOdysseyTextureLayerImageRaster* Top = CastChecked<UOdysseyTextureLayerImageRaster>(Stack->AddLayer(
             UOdysseyTextureLayerImageRaster::StaticClass()));
-        TSharedPtr<ULIS::FBlock> Pixels = Layer->GetRasterContent().ReadBlock();
+        TSharedPtr<ULIS::FBlock> Pixels = Odyssey::RasterContentBlocks::ReadBlock(Layer->GetRasterContent());
         if (TestTrue(TEXT("Read the layer pixels"), Pixels.IsValid()))
         {
-            Top->GetRasterContent().WriteBlock(*Pixels, { FIntRect(0, 0, Width, Height) });
+            Odyssey::RasterContentBlocks::WriteBlock(Top->GetRasterContent(), *Pixels, { FIntRect(0, 0, Width, Height) });
         }
         Top->SetOpacity(0.63f);
         for (EOdysseyBlendMode Mode : {EOdysseyBlendMode::Normal, EOdysseyBlendMode::Multiply, EOdysseyBlendMode::Screen})
@@ -441,7 +442,7 @@ bool FOdysseyTextureLayerTiledPartialTest::RunTest(const FString& Parameters)
 
     const FIntPoint Erased(3, 4);
     const int32 ErasedIndex = Erased.Y * Width + Erased.X;
-    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Layer->GetRasterContent().BeginEdit();
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Odyssey::RasterContentBlocks::BeginBlockEdit(Layer->GetRasterContent());
     if (!TestTrue(TEXT("Begin an edit"), Edit.IsValid()))
     {
         return false;
@@ -487,7 +488,7 @@ bool FOdysseyTextureLayerTiledPartialTest::RunTest(const FString& Parameters)
     ComparePixels(*this, TEXT("Prepared RDG snapshot is not changed by a later commit"), BeforePixels, SnapshotPixels, 0.0001f);
 
     // An ended edit leaves the tiles as they are.
-    TSharedPtr<FOdysseyRasterBlockEdit> Aborted = Layer->GetRasterContent().BeginEdit();
+    TSharedPtr<FOdysseyRasterBlockEdit> Aborted = Odyssey::RasterContentBlocks::BeginBlockEdit(Layer->GetRasterContent());
     if (!TestTrue(TEXT("Begin another edit"), Aborted.IsValid()))
     {
         return false;
@@ -535,7 +536,7 @@ bool FOdysseyTextureLayerStackPreviewTest::RunTest(const FString& Parameters)
     };
     TestNotEqual(TEXT("Fixture pixel is not transparent"), int32(ReadDisplayedAlpha()), 0);
 
-    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Layer->GetRasterContent().BeginEdit();
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Odyssey::RasterContentBlocks::BeginBlockEdit(Layer->GetRasterContent());
     if (!TestTrue(TEXT("Begin an edit"), Edit.IsValid()))
     {
         return false;
@@ -570,7 +571,7 @@ bool FOdysseyTextureLayerEditAlphaLockTest::RunTest(const FString& Parameters)
     TStrongObjectPtr<UTexture2D> Texture(MakeTexture(GetTransientPackage(), TSF_BGRA8));
     UOdysseyTextureLayerImageRaster* Layer = MakeLayer(Texture.Get());
 
-    TSharedPtr<FOdysseyRasterBlockEdit> Unlocked = Layer->GetRasterContent().BeginEdit();
+    TSharedPtr<FOdysseyRasterBlockEdit> Unlocked = Odyssey::RasterContentBlocks::BeginBlockEdit(Layer->GetRasterContent());
     if (!TestTrue(TEXT("Begin an edit"), Unlocked.IsValid()))
     {
         return false;
@@ -579,7 +580,7 @@ bool FOdysseyTextureLayerEditAlphaLockTest::RunTest(const FString& Parameters)
     Unlocked->End();
 
     Layer->SetIsAlphaLocked(true);
-    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Layer->GetRasterContent().BeginEdit();
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Odyssey::RasterContentBlocks::BeginBlockEdit(Layer->GetRasterContent());
     if (!TestTrue(TEXT("Begin an edit of the locked layer"), Edit.IsValid()))
     {
         return false;
@@ -657,7 +658,7 @@ bool FOdysseyTextureLayerContentReadWriteTest::RunTest(const FString& Parameters
     ComparePixels(*this, TEXT("The content is read as it is held"), Original, Read, 0.0001f);
 
     // Write encoded colors, decoded into the linear colors of the content; the active edit ends.
-    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Layer->GetRasterContent().BeginEdit();
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Odyssey::RasterContentBlocks::BeginBlockEdit(Layer->GetRasterContent());
     TStrongObjectPtr<UTextureRenderTarget2D> Encoded(NewObject<UTextureRenderTarget2D>());
     Encoded->ClearColor = FLinearColor(0.5f, 0.5f, 0.5f, 1.0f);
     Encoded->InitCustomFormat(Width, Height, PF_A32B32G32R32F, true);
@@ -701,7 +702,7 @@ bool FOdysseyTextureLayerContentReadWriteTest::RunTest(const FString& Parameters
         Pixel[2] = 0.25f;
         Pixel[3] = 1.0f;
     }
-    TestTrue(TEXT("Write a block of another format"), Content.WriteBlock(Gray, { Written }));
+    TestTrue(TEXT("Write a block of another format"), Odyssey::RasterContentBlocks::WriteBlock(Content, Gray, { Written }));
     // The conversion of the block to 8 bits truncates values, as the raster block did.
     const float TruncationTolerance = 1.0f / 255.0f + 0.0001f;
     Tiles = ReadImage(Layer->GetTiledImage());
@@ -710,7 +711,7 @@ bool FOdysseyTextureLayerContentReadWriteTest::RunTest(const FString& Parameters
         TestTrue(FString::Printf(TEXT("Block colors are written, got %s"), *Tiles[5 * Width + 5].ToString()),
             Tiles[5 * Width + 5].Equals(FLinearColor(0.25f, 0.25f, 0.25f, 1.0f), TruncationTolerance));
     }
-    TSharedPtr<ULIS::FBlock> Block = Content.ReadBlock();
+    TSharedPtr<ULIS::FBlock> Block = Odyssey::RasterContentBlocks::ReadBlock(Content);
     TestTrue(TEXT("Blocks are read in the format the layer expects"), Block.IsValid() && Block->Format() == Content.Describe().Format);
     return true;
 }
@@ -737,7 +738,7 @@ bool FOdysseyTextureLayerContentClearTest::RunTest(const FString& Parameters)
     ON_SCOPE_EXIT { FOdysseyRasterEditSession::OnActiveSessionsChanged().Remove(SessionsHandle); };
 
     // A clear removes the tiles.
-    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Content.BeginEdit();
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Odyssey::RasterContentBlocks::BeginBlockEdit(Content);
     SessionChanges = 0;
     {
         FScopedTransaction Transaction(NSLOCTEXT("OdysseyTextureLayerTiledImageTests", "Clear", "Clear content"));

@@ -28,23 +28,18 @@ class FOdysseyRasterEditSession;
 class ODYSSEYIMAGING_API FOdysseyRasterBlockEdit
 {
 public:
-    /** Called after a commit, with the areas written into the tiled image. */
-    using FOnCommitted = TFunction<void(const TArray<FIntRect>& Rects)>;
-
-public:
     /** Ends the edit, if not committed or ended yet. */
     ~FOdysseyRasterBlockEdit();
 
     /**
-     * Use FOdysseyRasterContent::BeginEdit().
+     * Use Odyssey::RasterContentBlocks::BeginBlockEdit().
      * @param InSession The session showing the edit, holding pixels in the tile format.
      * @param InOriginal The pixels of the content at the beginning of the edit; the working block starts as a copy of it.
      * @param InTileFormat The format of the session pixels.
      * @param bInSRGB True when the 8-bit blocks hold sRGB encoded colors, decoded when uploaded into the session.
-     * @param InOnCommitted Called after a commit.
      */
     FOdysseyRasterBlockEdit(TSharedRef<FOdysseyRasterEditSession> InSession, TSharedRef<::ULIS::FBlock> InOriginal,
-        EOdysseyTiledImageFormat InTileFormat, bool bInSRGB, FOnCommitted InOnCommitted);
+        EOdysseyTiledImageFormat InTileFormat, bool bInSRGB);
 
     FOdysseyRasterBlockEdit(const FOdysseyRasterBlockEdit&) = delete;
     FOdysseyRasterBlockEdit& operator=(const FOdysseyRasterBlockEdit&) = delete;
@@ -94,5 +89,4 @@ private:
     EOdysseyTiledImageFormat TileFormat;
     bool bSRGB;
     FOdysseyInvalidTileMap EditedTiles;
-    FOnCommitted OnCommitted;
 };

@@ -35,6 +35,7 @@
 #include "OdysseyTiledImage.h"
 #include "OdysseyAnimationLayerStackUserData.h"
 #include "OdysseyAnimationEditorData.h"
+#include "OdysseyRasterContentBlocks.h"
 
 namespace Odyssey::AnimationTiledTests
 {
@@ -56,7 +57,7 @@ UOdysseyAnimationCellImageRaster* Cell(UOdysseyAnimation* Animation, int32 Index
 
 void Fill(UOdysseyAnimationCellImageRaster* Target, uint8 Seed)
 {
-    Target->GetRasterContent().EditBlock([Seed](ULIS::FBlock& Block)
+    Odyssey::RasterContentBlocks::EditBlock(Target->GetRasterContent(), [Seed](ULIS::FBlock& Block)
     {
         // Both animation formats have four channels; write through ULIS for the float variant too.
         for (int32 Y = 0; Y < Height; ++Y)
@@ -154,7 +155,7 @@ bool Compare(FAutomationTestBase& Test, UOdysseyAnimation* Animation, int32 Fram
     TArray<TSharedPtr<FOdysseyRasterBlockEdit>> Edits;
     for (UOdysseyAnimationCellImageRaster* RasterCell : RasterCells(Animation))
     {
-        TSharedPtr<FOdysseyRasterBlockEdit> Edit = RasterCell->GetRasterContent().BeginEdit();
+        TSharedPtr<FOdysseyRasterBlockEdit> Edit = Odyssey::RasterContentBlocks::BeginBlockEdit(RasterCell->GetRasterContent());
         if (Test.TestTrue(TEXT("Begin an edit"), Edit.IsValid()))
         {
             Edit->Update({ FIntRect(0, 0, Width, Height) });
@@ -183,7 +184,7 @@ bool FOdysseyAnimationTiledIntegrationTest::RunTest(const FString& Parameters)
     using namespace Odyssey::AnimationTiledTests;
     TStrongObjectPtr<UOdysseyAnimationCellImageRaster> Detached(NewObject<UOdysseyAnimationCellImageRaster>());
     TestNull(TEXT("Detached cell has no image"), Detached->GetTiledImage());
-    TestFalse(TEXT("Detached cell has no pixels"), Detached->GetRasterContent().ReadBlock().IsValid());
+    TestFalse(TEXT("Detached cell has no pixels"), Odyssey::RasterContentBlocks::ReadBlock(Detached->GetRasterContent()).IsValid());
     for (auto Format : {EOdysseyAnimationFormat::BGRA8, EOdysseyAnimationFormat::RGBAF})
     {
         TStrongObjectPtr<UOdysseyAnimation> Animation(MakeAnimation(GetTransientPackage(), Format));
@@ -229,8 +230,8 @@ bool FOdysseyAnimationTiledIntegrationTest::RunTest(const FString& Parameters)
         TStrongObjectPtr<UOdysseyAnimation> Duplicate(DuplicateObject<UOdysseyAnimation>(Animation.Get(), GetTransientPackage()));
         Compare(*this, Duplicate.Get(), 2);
         // The duplicate has no raster block yet: it reads it from its tiles.
-        TSharedPtr<ULIS::FBlock> OriginalBlock = Second->GetRasterContent().ReadBlock();
-        TSharedPtr<ULIS::FBlock> ReadBlock = Cell(Duplicate.Get(), 1)->GetRasterContent().ReadBlock();
+        TSharedPtr<ULIS::FBlock> OriginalBlock = Odyssey::RasterContentBlocks::ReadBlock(Second->GetRasterContent());
+        TSharedPtr<ULIS::FBlock> ReadBlock = Odyssey::RasterContentBlocks::ReadBlock(Cell(Duplicate.Get(), 1)->GetRasterContent());
         TestTrue(TEXT("Blocks read from the tiles keep every value"), OriginalBlock && ReadBlock && OriginalBlock->BytesTotal() == ReadBlock->BytesTotal()
             && FMemory::Memcmp(OriginalBlock->Bits(), ReadBlock->Bits(), OriginalBlock->BytesTotal()) == 0);
         TestTrue(TEXT("Duplicated cell owns its image"), Cell(Duplicate.Get(), 1)->GetTiledImage() != Second->GetTiledImage());
@@ -247,7 +248,7 @@ bool FOdysseyAnimationTiledPartialTest::RunTest(const FString& Parameters)
     UOdysseyAnimationCellImageRaster* First = Cell(Animation.Get(), 0);
     const TMap<FIntPoint, FOdysseyTileId> Before = TileIds(First->GetTiledImage());
     const TArray<FLinearColor> BeforePixels = Render(Animation.Get(), 0, EOdysseyRenderingType::Render);
-    TSharedPtr<FOdysseyRasterBlockEdit> Edit = First->GetRasterContent().BeginEdit();
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Odyssey::RasterContentBlocks::BeginBlockEdit(First->GetRasterContent());
     if (!TestTrue(TEXT("Begin an edit"), Edit.IsValid()))
     {
         return false;
@@ -289,7 +290,7 @@ bool FOdysseyAnimationLegacyMigrationTest::RunTest(const FString& Parameters)
         const TArray<FLinearColor> Reference = Render(Animation.Get(), 0, EOdysseyRenderingType::Render);
 
         // Recreate the state of a loaded legacy cell: its pixels are only in its render texture, set up as the former one.
-        TSharedPtr<ULIS::FBlock> Pixels = First->GetRasterContent().ReadBlock();
+        TSharedPtr<ULIS::FBlock> Pixels = Odyssey::RasterContentBlocks::ReadBlock(First->GetRasterContent());
         if (!TestTrue(TEXT("Read the cell pixels"), Pixels.IsValid()))
         {
             return false;
@@ -448,7 +449,7 @@ bool FOdysseyAnimationColorCompositingTest::RunTest(const FString& Parameters)
     UOdysseyAnimationCellImageRaster* TopCell = CastChecked<UOdysseyAnimationCellImageRaster>(TopLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
     TopCell->SetExposure(5);
     {
-        TopCell->GetRasterContent().EditBlock([Top](ULIS::FBlock& Block)
+        Odyssey::RasterContentBlocks::EditBlock(TopCell->GetRasterContent(), [Top](ULIS::FBlock& Block)
         {
             for (int32 Y = 0; Y < Height; ++Y)
             {

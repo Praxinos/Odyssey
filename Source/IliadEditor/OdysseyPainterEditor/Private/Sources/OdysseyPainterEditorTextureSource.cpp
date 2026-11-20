@@ -23,6 +23,7 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCell.h"
+#include "OdysseyRasterContentBlocks.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Engine/TextureRenderTarget2D.h"
 
@@ -191,7 +192,7 @@ FOdysseyPainterEditorTextureSource::Clear()
             if (!content)
                 continue;
 
-            content->EditBlock(
+            Odyssey::RasterContentBlocks::EditBlock(*content,
                 [&](::ULIS::FBlock& iBlock)
                 {
                     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock.Format());
@@ -260,7 +261,7 @@ FOdysseyPainterEditorTextureSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock
             if (!content)
                 continue;
 
-            content->EditBlock(
+            Odyssey::RasterContentBlocks::EditBlock(*content,
                 [&](::ULIS::FBlock& iBlock)
                 {
                     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock.Format());
@@ -338,7 +339,7 @@ void FOdysseyPainterEditorTextureSource::PasteBlockToCurrentLayer(TSharedPtr<::U
             if (!content)
                 continue;
 
-            content->EditBlock(
+            Odyssey::RasterContentBlocks::EditBlock(*content,
                 [&](::ULIS::FBlock& iBlock)
                 {
                     ctx.Blend(
@@ -382,7 +383,7 @@ FOdysseyPainterEditorTextureSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBl
     UOdysseyTextureLayerImageRaster* layer = Cast< UOdysseyTextureLayerImageRaster >(GetLayerStack()->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
     GetLayerStack()->SetCurrentLayer(layer);
 
-    layer->GetRasterContent().WriteBlock(*iBlock, { FIntRect(0, 0, iBlock->Width(), iBlock->Height()) });
+    Odyssey::RasterContentBlocks::WriteBlock(layer->GetRasterContent(), *iBlock, { FIntRect(0, 0, iBlock->Width(), iBlock->Height()) });
 }
 
 bool FOdysseyPainterEditorTextureSource::IsValid() const

@@ -167,7 +167,17 @@ FOdysseyRasterEditSession::Commit(const TArray<FIntRect>& Rects)
     // The tiles are written on the render thread, which reads the target.
     FlushRenderingCommands();
     End();
+    if (OnCommitted)
+    {
+        OnCommitted(Rects);
+    }
     return true;
+}
+
+void
+FOdysseyRasterEditSession::SetOnCommitted(FOnCommitted InOnCommitted)
+{
+    OnCommitted = MoveTemp(InOnCommitted);
 }
 
 void

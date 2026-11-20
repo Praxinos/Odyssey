@@ -17,6 +17,7 @@
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "OdysseyRasterBlockEdit.h"
 #include "OdysseyRasterEditSession.h"
+#include "OdysseyRasterContentBlocks.h"
 #include "ScopedTransaction.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
 #include "PropertyHandle.h"
@@ -465,7 +466,7 @@ void UOdysseyPainterEditorRasterBaseTool::CopyCurrentSelection()
     FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
 
     TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
-    TSharedPtr<::ULIS::FBlock> block = content ? content->ReadBlock() : nullptr;
+    TSharedPtr<::ULIS::FBlock> block = content ? Odyssey::RasterContentBlocks::ReadBlock(*content) : nullptr;
     if (!block)
         return;
 
@@ -531,7 +532,7 @@ void UOdysseyPainterEditorRasterBaseTool::CutCurrentSelection()
     FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
 
     TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
-    TSharedPtr<::ULIS::FBlock> block = content ? content->ReadBlock() : nullptr;
+    TSharedPtr<::ULIS::FBlock> block = content ? Odyssey::RasterContentBlocks::ReadBlock(*content) : nullptr;
     if (!block)
         return;
 

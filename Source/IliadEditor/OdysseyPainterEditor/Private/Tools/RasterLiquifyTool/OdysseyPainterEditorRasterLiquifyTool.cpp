@@ -31,6 +31,7 @@
 #include <chrono>
 
 #include "OdysseyHUDElement.h"
+#include "OdysseyRasterContentBlocks.h"
 #include "SOdysseySinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -165,7 +166,7 @@ UOdysseyPainterEditorRasterLiquifyTool::ReadBlockFromEditor(bool iCreate) const
 {
     TSharedPtr<FOdysseyMediaRaster> mediaRaster = GetMediaRasterFromEditor(iCreate);
     TSharedPtr<FOdysseyRasterContent> content = mediaRaster ? mediaRaster->GetContent() : nullptr;
-    return content ? content->ReadBlock() : nullptr;
+    return content ? Odyssey::RasterContentBlocks::ReadBlock(*content) : nullptr;
 }
 
 void
@@ -242,7 +243,7 @@ UOdysseyPainterEditorRasterLiquifyTool::FetchSourceImages()
     TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     TSharedPtr<FOdysseyMediaRaster> mediaRaster = GetMediaRasterFromEditor(false);
     TSharedPtr<FOdysseyRasterContent> content = mediaRaster ? mediaRaster->GetContent() : nullptr;
-    TSharedPtr<::ULIS::FBlock> srcBlock = content ? content->ReadBlock() : nullptr;
+    TSharedPtr<::ULIS::FBlock> srcBlock = content ? Odyssey::RasterContentBlocks::ReadBlock(*content) : nullptr;
     if (!srcBlock)
         return;
 
@@ -990,7 +991,7 @@ UOdysseyPainterEditorRasterLiquifyTool::UpdateAlteredImage( FAlteredImage& iAlte
     if( !IsEditing( iAlteredImage.edit, iAlteredImage.mediaRaster ) )
     {
         TSharedPtr<FOdysseyRasterContent> content = iAlteredImage.mediaRaster->GetContent();
-        iAlteredImage.edit = content ? content->BeginEdit() : nullptr;
+        iAlteredImage.edit = content ? Odyssey::RasterContentBlocks::BeginBlockEdit(*content) : nullptr;
         if( !iAlteredImage.edit )
             return;
     }

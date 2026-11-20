@@ -29,6 +29,7 @@
 #include "OdysseyPixelFormat.h"
 #include "OdysseyRenderContext.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "OdysseyRasterContentBlocks.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 #include "SOdysseySinglePropertyView.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -144,7 +145,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPoi
         return false;
 
     TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
-    TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? content->BeginEdit() : nullptr;
+    TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? Odyssey::RasterContentBlocks::BeginBlockEdit(*content) : nullptr;
     if (!edit)
         return false;
 

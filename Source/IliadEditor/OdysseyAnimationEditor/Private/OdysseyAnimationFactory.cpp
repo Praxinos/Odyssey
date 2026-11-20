@@ -14,6 +14,7 @@
 #include "Editor.h"
 #include "EditorStyleSet.h"
 #include "OdysseyAnimationEditorData.h"
+#include "OdysseyRasterContentBlocks.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 
@@ -87,7 +88,7 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
         UOdysseyAnimationCellImageRaster* backgroundCell = Cast<UOdysseyAnimationCellImageRaster>(backgroundLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
         FLinearColor backgroundColor = *LayerBackgroundColor;
 
-        backgroundCell->GetRasterContent().EditBlock(
+        Odyssey::RasterContentBlocks::EditBlock(backgroundCell->GetRasterContent(),
             [backgroundColor](::ULIS::FBlock& ioBlock)
             {
                 ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ioBlock.Format());

@@ -26,6 +26,7 @@
 #include "Factories/TextureFactory.h"
 #include "Factories/Factory.h"
 #include "OdysseyAnimationEditorData.h"
+#include "OdysseyRasterContentBlocks.h"
 
 #define LOCTEXT_NAMESPACE "FOdysseyPainterEditorAnimationImport"
 
@@ -124,7 +125,7 @@ FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence(UOdysseyAnimati
 
         result.mImportedCells.Add(cell);
 
-        cell->GetRasterContent().WriteBlock(*block, { FIntRect(0, 0, animation->GetWidth(), animation->GetHeight()) });
+        Odyssey::RasterContentBlocks::WriteBlock(cell->GetRasterContent(), *block, { FIntRect(0, 0, animation->GetWidth(), animation->GetHeight()) });
     }
 
     return result;

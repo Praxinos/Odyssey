@@ -12,7 +12,6 @@
 
 #include <ULIS>
 
-class FOdysseyRasterBlockEdit;
 class FOdysseyRasterEditSession;
 class UOdysseyTiledImage;
 class UTexture2D;
@@ -25,19 +24,21 @@ class UTextureRenderTarget2D;
  * UPROPERTY so that it is saved, duplicated and garbage collected with the owner; this class creates it in that
  * property, keeps it in the format the owner expects, renders it and writes into it.
  *
- * - Tools edit the content through BeginEdit(): the edit session shows their pixels in the views until they commit them
- *   into the tiled image or end the edit.
- * - Other users read and write render targets in the tile format with Read() and Write(). Each write is undoable within
- *   a transaction, keeps the alpha of the content when it is locked, and ends the active edit.
- * - Transitional: users still working on CPU blocks go through ReadBlock(), WriteBlock() and EditBlock(), whose blocks
- *   are in the format the owner expects. They go away once these users work on render targets.
+ * It is the only access to the pixels of its owner, and sets the rules of every access: the format the owner expects,
+ * the locked alpha, a single active edit, undo through the tiled image, and the notification of the owner.
+ *
+ * - Tools edit the content through BeginEdit(): they write into the render target of the edit session, which the views show
+ *   in place of the content until the tool commits it into the tiled image or ends it.
+ * - Other users read and write render targets in the tile format with Read(), Write() and Clear(). Each write is undoable
+ *   within a transaction, keeps the alpha of the content when it is locked, and ends the active edit.
+ * - Transitional: users still working on CPU blocks go through Odyssey::RasterContentBlocks, built on this API.
  */
 class ODYSSEYIMAGING_API FOdysseyRasterContent
     : public TSharedFromThis<FOdysseyRasterContent>
 {
 public:
     /**
-     * The content the owner expects: its size in pixels and the format of the blocks read and written by ReadBlock() and WriteBlock().
+     * The content the owner expects: its size in pixels and the format of its CPU blocks, see Odyssey::RasterContentBlocks.
      *
      * The size is the canvas: blocks and edit sessions cover it, and rendering assembles the tiles it samples within it.
      * The tiled image is unbounded: tiles outside the canvas are kept, e.g. when the canvas shrinks, and shown again when it grows.
@@ -126,12 +127,13 @@ public:
     void MigrateLegacy(TObjectPtr<UTexture2D>& LegacyTexture, TSharedPtr<::ULIS::FBlock>& LegacyPixels);
 
     /**
-     * Begins an edit of the content, shown by the views until it is committed or ended.
-     * Ends the active edit of this content, if any. The edit keeps the alpha of the content when it is locked.
-     * Its commit is undoable within a transaction, and notifies the owner that pixels changed.
+     * Begins an edit of the content: the tool writes into the render target of the session, initialized with the pixels of the content,
+     * which the views show until it is committed or ended. Ends the active edit of this content, if any.
+     * The edit keeps the alpha of the content when it is locked. Its commit is undoable within a transaction,
+     * and notifies the owner that pixels changed.
      * @return Null when the owner cannot hold content or the rendering is unavailable.
      */
-    TSharedPtr<FOdysseyRasterBlockEdit> BeginEdit();
+    TSharedPtr<FOdysseyRasterEditSession> BeginEdit();
 
     /**
      * Creates a render target holding pixels in the tile format, as large as the content, to read or write the content.
@@ -166,28 +168,6 @@ public:
      * @return False when the owner cannot hold content or the rendering is unavailable.
      */
     bool Clear();
-
-    /**
-     * Transitional: reads the whole content into a new block in the format the owner expects. Waits for the GPU.
-     * @return Null when the owner cannot hold content or the rendering is unavailable.
-     */
-    TSharedPtr<::ULIS::FBlock> ReadBlock();
-
-    /**
-     * Transitional: writes areas of a block into the content, as Write() does.
-     * The block is first converted to the format the owner expects, its 8-bit colors being sRGB encoded when bSRGB is set.
-     * @param Block The pixels to write, at the same positions as in the content.
-     * @param Rects The areas to write, in content pixels; clipped to the content and block bounds.
-     * @return False when nothing was written.
-     */
-    bool WriteBlock(const ::ULIS::FBlock& Block, const TArray<FIntRect>& Rects);
-
-    /**
-     * Transitional: reads the whole content into a block, lets the caller change it, then writes the whole block back as WriteBlock() does.
-     * @param Edit Changes the block, in the format the owner expects. Pending ULIS operations must be finished when it returns.
-     * @return False when nothing was written.
-     */
-    bool EditBlock(TFunctionRef<void(::ULIS::FBlock& Block)> Edit);
 
     /**
      * Builds the function rendering the image. The uncommitted edits are shown by the views through the edit session.
@@ -230,5 +210,5 @@ private:
     TWeakObjectPtr<UOdysseyTiledImage> BoundImage;
 
     /** The edit begun by BeginEdit(), owned by the tool. */
-    TWeakPtr<FOdysseyRasterBlockEdit> ActiveEdit;
+    TWeakPtr<FOdysseyRasterEditSession> ActiveEdit;
 };

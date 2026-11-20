@@ -129,6 +129,7 @@
 //Tablet Includes
 #include "SOdysseyTabletAPISwitcher.h"
 #include "OdysseyAnimationEditorData.h"
+#include "OdysseyRasterContentBlocks.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -568,7 +569,7 @@ FOdysseyPainterEditor::ClearCurrentLayerOrSelection()
         FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
 
         TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
-        TSharedPtr<::ULIS::FBlock> block = content ? content->ReadBlock() : nullptr;
+        TSharedPtr<::ULIS::FBlock> block = content ? Odyssey::RasterContentBlocks::ReadBlock(*content) : nullptr;
         if (!block)
             return;
 

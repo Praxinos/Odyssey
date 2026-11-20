@@ -16,7 +16,6 @@
 
 #include "OdysseyBlendShader.h"
 #include "OdysseyColorSpaceShader.h"
-#include "OdysseyRasterBlockEdit.h"
 #include "OdysseyRasterEditSession.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTiledImage.h"
@@ -176,7 +175,7 @@ FOdysseyRasterContent::MigrateLegacy(TObjectPtr<UTexture2D>& LegacyTexture, TSha
     LegacyTexture = nullptr;
 }
 
-TSharedPtr<FOdysseyRasterBlockEdit>
+TSharedPtr<FOdysseyRasterEditSession>
 FOdysseyRasterContent::BeginEdit()
 {
     check(IsInGameThread());
@@ -186,31 +185,23 @@ FOdysseyRasterContent::BeginEdit()
     }
 
     EndEdit();
-    const FDescription Description = GetDescription();
-    TSharedPtr<::ULIS::FBlock> Pixels = Odyssey::TiledImage::CopyToBlock(*Image, FIntRect(FIntPoint::ZeroValue, Description.Size), Description.Format, Description.bSRGB);
-    if (!Pixels)
-    {
-        return nullptr;
-    }
     const bool bPreserveAlpha = IsAlphaLocked && IsAlphaLocked();
-    TSharedPtr<FOdysseyRasterEditSession> Session = FOdysseyRasterEditSession::Begin(RenderingId, *Image, Description.Size, bPreserveAlpha);
+    TSharedPtr<FOdysseyRasterEditSession> Session = FOdysseyRasterEditSession::Begin(RenderingId, *Image, GetDescription().Size, bPreserveAlpha);
     if (!Session)
     {
         return nullptr;
     }
 
     TWeakPtr<FOdysseyRasterContent> WeakThis = AsShared();
-    TSharedPtr<FOdysseyRasterBlockEdit> Edit = MakeShared<FOdysseyRasterBlockEdit>(Session.ToSharedRef(), Pixels.ToSharedRef(),
-        Image->GetFormat(), Description.bSRGB,
-        [WeakThis](const TArray<FIntRect>& Rects)
+    Session->SetOnCommitted([WeakThis](const TArray<FIntRect>& Rects)
+    {
+        if (TSharedPtr<FOdysseyRasterContent> Content = WeakThis.Pin())
         {
-            if (TSharedPtr<FOdysseyRasterContent> Content = WeakThis.Pin())
-            {
-                Content->OnEditCommitted(Rects);
-            }
-        });
-    ActiveEdit = Edit;
-    return Edit;
+            Content->OnEditCommitted(Rects);
+        }
+    });
+    ActiveEdit = Session;
+    return Session;
 }
 
 UTextureRenderTarget2D*
@@ -287,69 +278,6 @@ FOdysseyRasterContent::Clear()
     return true;
 }
 
-TSharedPtr<::ULIS::FBlock>
-FOdysseyRasterContent::ReadBlock()
-{
-    if (!EnsureImage())
-    {
-        return nullptr;
-    }
-    const FDescription Description = GetDescription();
-    return Odyssey::TiledImage::CopyToBlock(*Image, FIntRect(FIntPoint::ZeroValue, Description.Size), Description.Format, Description.bSRGB);
-}
-
-bool
-FOdysseyRasterContent::WriteBlock(const ::ULIS::FBlock& Block, const TArray<FIntRect>& Rects)
-{
-    if (!EnsureImage())
-    {
-        return false;
-    }
-
-    // As the former raster block, convert the block to the expected format first: its 8-bit colors are then sRGB encoded when bSRGB is set.
-    const FDescription Description = GetDescription();
-    const ::ULIS::FBlock* Pixels = &Block;
-    TSharedPtr<::ULIS::FBlock> Converted;
-    if (Block.Format() != Description.Format)
-    {
-        Converted = MakeShared<::ULIS::FBlock>(Block.Width(), Block.Height(), Description.Format);
-        ::ULIS::FContext& Context = IULISLoaderModule::StaticFindOrAddContext(Description.Format);
-        Context.ConvertFormat(Block, *Converted, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::MultiScanlines);
-        Context.Finish();
-        Pixels = Converted.Get();
-    }
-
-    const FIntRect BlockBounds(0, 0, Pixels->Width(), Pixels->Height());
-    TArray<FIntRect> InBlock;
-    InBlock.Reserve(Rects.Num());
-    for (FIntRect Rect : Rects)
-    {
-        Rect.Clip(BlockBounds);
-        if (Rect.Width() > 0 && Rect.Height() > 0)
-        {
-            InBlock.Add(Rect);
-        }
-    }
-
-    const EOdysseyTiledImageFormat TileFormat = Image->GetFormat();
-    return WriteThroughSession(InBlock, [Pixels, TileFormat, &Description](FOdysseyRasterEditSession& Session, const TArray<FIntRect>& Clipped)
-    {
-        Odyssey::TiledImage::CopyBlockToRenderTarget(*Session.GetTarget(), TileFormat, *Pixels, Clipped, Description.bSRGB);
-    });
-}
-
-bool
-FOdysseyRasterContent::EditBlock(TFunctionRef<void(::ULIS::FBlock& Block)> Edit)
-{
-    TSharedPtr<::ULIS::FBlock> Block = ReadBlock();
-    if (!Block)
-    {
-        return false;
-    }
-    Edit(*Block);
-    return WriteBlock(*Block, { FIntRect(0, 0, Block->Width(), Block->Height()) });
-}
-
 bool
 FOdysseyRasterContent::BuildRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform) const
 {
@@ -365,14 +293,14 @@ FOdysseyRasterContent::BuildRenderFunction(IOdysseyTextureRenderingAbility::FRen
 bool
 FOdysseyRasterContent::HasUncommittedEdits() const
 {
-    const TSharedPtr<FOdysseyRasterBlockEdit> Edit = ActiveEdit.Pin();
+    const TSharedPtr<FOdysseyRasterEditSession> Edit = ActiveEdit.Pin();
     return Edit.IsValid() && Edit->IsActive();
 }
 
 void
 FOdysseyRasterContent::EndEdit()
 {
-    if (TSharedPtr<FOdysseyRasterBlockEdit> Edit = ActiveEdit.Pin())
+    if (TSharedPtr<FOdysseyRasterEditSession> Edit = ActiveEdit.Pin())
     {
         Edit->End();
     }

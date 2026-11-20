@@ -15,6 +15,7 @@
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTextureLayerStackUserData.h"
+#include "OdysseyRasterContentBlocks.h"
 
 #include <ULIS>
 #include "ULISLoaderModule.h"
@@ -114,7 +115,7 @@ FOdysseyTextureConfiguration::CreateTexture(UObject* iParent, FName iName, EObje
         layer->SetLayerName(LOCTEXT("texture.default-background-layer.name", "Background"));
 
         //Fill LayerImage with content of Texture
-        layer->GetRasterContent().EditBlock(
+        Odyssey::RasterContentBlocks::EditBlock(layer->GetRasterContent(),
             [&](::ULIS::FBlock& iBlock)
             {
                 FillOdysseyBlockFromUTextureData(&iBlock, texture, iBlock.Format());

@@ -20,6 +20,7 @@
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyTiledImage.h"
 #include "OdysseyTiledImageBlock.h"
+#include "OdysseyRasterContentBlocks.h"
 
 namespace Odyssey::TextureColorTests
 {
@@ -91,7 +92,7 @@ UOdysseyTextureLayerImageRaster* AddHalfOpaqueTopLayer(UOdysseyTextureLayerStack
             Pixel[3] = TopColor.A;
         }
     }
-    Content.WriteBlock(*Solid, { FIntRect(0, 0, Width, Height) });
+    Odyssey::RasterContentBlocks::WriteBlock(Content, *Solid, { FIntRect(0, 0, Width, Height) });
     Top->SetOpacity(0.5f);
     return Top;
 }

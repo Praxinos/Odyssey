@@ -34,6 +34,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include <ULIS>
 #include "OdysseyAnimationEditorData.h"
+#include "OdysseyRasterContentBlocks.h"
 
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -324,7 +325,7 @@ void FOdysseyPainterEditorAnimationSource::ClearFromCopyBlock(TSharedPtr<::ULIS:
             if (!content)
                 continue;
 
-            content->EditBlock(
+            Odyssey::RasterContentBlocks::EditBlock(*content,
                 [&](::ULIS::FBlock& iBlock)
                 {
                     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock.Format());
@@ -416,7 +417,7 @@ void FOdysseyPainterEditorAnimationSource::PasteBlockToCurrentLayer(TSharedPtr<:
             if (!content)
                 continue;
 
-            content->EditBlock(
+            Odyssey::RasterContentBlocks::EditBlock(*content,
                 [&](::ULIS::FBlock& iBlock)
                 {
                     ctx.Blend(
@@ -509,7 +510,7 @@ FOdysseyPainterEditorAnimationSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::F
             if (!content)
                 continue;
 
-            content->EditBlock(
+            Odyssey::RasterContentBlocks::EditBlock(*content,
                 [&](::ULIS::FBlock& iBlock)
                 {
                     ctx.Blend(

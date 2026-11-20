@@ -17,6 +17,7 @@
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerImageVector.h"
 #include "OdysseyTextureLayerStackUserData.h"
+#include "OdysseyRasterContentBlocks.h"
 
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
@@ -43,7 +44,7 @@ UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOut
     layerStack->SetCurrentLayer(layer);
 
     //Fill LayerImage with content of Texture
-    layer->GetRasterContent().EditBlock(
+    Odyssey::RasterContentBlocks::EditBlock(layer->GetRasterContent(),
         [&](::ULIS::FBlock& iBlock)
         {
             FillOdysseyBlockFromUTextureData(&iBlock, iTexture, iBlock.Format());

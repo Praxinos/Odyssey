@@ -22,6 +22,7 @@
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyRasterBlockEdit.h"
+#include "OdysseyRasterContentBlocks.h"
 
 #include "ULISEventBuilder.h"
 
@@ -384,7 +385,7 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
 
     //The transform is shown through an edit, committed by CommitTransform() or ended by ClearTransform()
     TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
-    TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? content->BeginEdit() : nullptr;
+    TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? Odyssey::RasterContentBlocks::BeginBlockEdit(*content) : nullptr;
     if (!edit)
         return;
 
@@ -1124,7 +1125,7 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection( bool iCreateNew
         else //If we have no selection, by default, transform tool will select the smallest block that contains all pixels in the layer/frame
         {
             TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
-            TSharedPtr<::ULIS::FBlock> block = content ? content->ReadBlock() : nullptr;
+            TSharedPtr<::ULIS::FBlock> block = content ? Odyssey::RasterContentBlocks::ReadBlock(*content) : nullptr;
             if (!block)
                 return;
 
@@ -1148,7 +1149,7 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection( bool iCreateNew
     }
 
     TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
-    TSharedPtr<::ULIS::FBlock> block = content ? content->ReadBlock() : nullptr;
+    TSharedPtr<::ULIS::FBlock> block = content ? Odyssey::RasterContentBlocks::ReadBlock(*content) : nullptr;
     if (!block)
         return;
 

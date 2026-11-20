@@ -14,6 +14,7 @@
 #include "OdysseyTextureLayer.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerStack.h"
+#include "OdysseyRasterContentBlocks.h"
 
 #include "ULISLoaderModule.h"
 
@@ -80,7 +81,7 @@ UOdysseyTextureEditorTextureFunctionLibrary::ImportTexture(UTexture2D* Texture, 
     UOdysseyTextureLayerImageRaster* layerImageRaster = Cast<UOdysseyTextureLayerImageRaster>(layer);
     FOdysseyRasterContent& content = layerImageRaster->GetRasterContent();
     TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(TextureToImport, content.Describe().Format));
-    content.WriteBlock(*textureBlock, { FIntRect(0, 0, textureBlock->Width(), textureBlock->Height()) });
+    Odyssey::RasterContentBlocks::WriteBlock(content, *textureBlock, { FIntRect(0, 0, textureBlock->Width(), textureBlock->Height()) });
 
     return layerImageRaster;
 }
@@ -158,7 +159,7 @@ UOdysseyTextureEditorTextureFunctionLibrary::ImportImage(UTexture2D* Texture, FS
         block = blockProxy;
     }
 
-    content.WriteBlock(*block, { FIntRect(0, 0, block->Width(), block->Height()) });
+    Odyssey::RasterContentBlocks::WriteBlock(content, *block, { FIntRect(0, 0, block->Width(), block->Height()) });
 
     return layer;
 }

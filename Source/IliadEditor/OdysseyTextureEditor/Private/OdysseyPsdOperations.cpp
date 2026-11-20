@@ -10,6 +10,7 @@
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerFolder.h"
 #include "OdysseyTextureLayerStackUserData.h"
+#include "OdysseyRasterContentBlocks.h"
 #include "ULISLoaderModule.h"
 
 #include <ULIS>
@@ -893,7 +894,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
 
         UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(mLayerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
 
-        layer->GetRasterContent().WriteBlock(*layerBlock, { FIntRect(0, 0, layerBlock->Width(), layerBlock->Height()) });
+        Odyssey::RasterContentBlocks::WriteBlock(layer->GetRasterContent(), *layerBlock, { FIntRect(0, 0, layerBlock->Width(), layerBlock->Height()) });
 
         delete srcblock;
     }
@@ -1074,7 +1075,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             imageLayer->SetBlendMode((EOdysseyBlendMode)GetBlendModeFromPSD(mLayersInfo[i].mBlendModeKey));
 
             // The pixels are written before the alpha is locked, which would keep the transparent pixels of the new layer.
-            imageLayer->GetRasterContent().WriteBlock(*layerBlock, { FIntRect(0, 0, layerBlock->Width(), layerBlock->Height()) });
+            Odyssey::RasterContentBlocks::WriteBlock(imageLayer->GetRasterContent(), *layerBlock, { FIntRect(0, 0, layerBlock->Width(), layerBlock->Height()) });
             imageLayer->SetIsAlphaLocked(mLayersInfo[i].mFlags & 0x01);
 
             //UE_LOG(LogTemp,Display,TEXT("flags: %d"),mLayersInfo[i].mFlags)

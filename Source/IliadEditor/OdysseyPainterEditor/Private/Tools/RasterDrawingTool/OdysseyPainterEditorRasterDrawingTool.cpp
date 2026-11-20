@@ -40,6 +40,7 @@
 #include "OdysseyPainterEditorRasterDrawingToolCustomization.h"
 
 #include "OdysseyHUDElement.h"
+#include "OdysseyRasterContentBlocks.h"
 #include "SOdysseySinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -215,7 +216,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointI
     if (!IsEditing(mPaintEngine.GetEdit(), mediaRaster))
     {
         TSharedPtr<FOdysseyRasterContent> content = mediaRaster->GetContent();
-        TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? content->BeginEdit() : nullptr;
+        TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? Odyssey::RasterContentBlocks::BeginBlockEdit(*content) : nullptr;
         if (!edit)
             return false;
 

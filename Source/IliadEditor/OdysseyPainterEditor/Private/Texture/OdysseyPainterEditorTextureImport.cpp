@@ -15,6 +15,7 @@
 #include "ScreenPass.h"
 #include "ImageUtils.h"
 #include "OdysseyPixelFormat.h"
+#include "OdysseyRasterContentBlocks.h"
 #include "ULISLoaderModule.h"
 #include "Factories/TextureFactory.h"
 
@@ -93,7 +94,7 @@ FOdysseyPainterEditorTextureImport::ImportTextures(UTexture2D* DestinationTextur
         rasterLayers.Add(layer);
 
         FOdysseyRasterContent& content = layer->GetRasterContent();
-        content.WriteBlock(*block, { FIntRect(FIntPoint::ZeroValue, content.Describe().Size) });
+        Odyssey::RasterContentBlocks::WriteBlock(content, *block, { FIntRect(FIntPoint::ZeroValue, content.Describe().Size) });
     }
 
     //---

@@ -22,6 +22,7 @@
 #include "Interpolation/OdysseyInterpolationCatmullRom.h"
 #include "Interpolation/OdysseyInterpolationLine.h"
 #include "OdysseyPainterEditorRasterSelection.h"
+#include "OdysseyRasterContentBlocks.h"
 #include "SOdysseySinglePropertyView.h"
 
 #include "ToolMenu.h"
@@ -175,7 +176,7 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseDown(const FOdysseyPoint& iPointIn
     if (!IsEditing(mPaintEngine.GetEdit(), mediaRaster))
     {
         TSharedPtr<FOdysseyRasterContent> content = mediaRaster->GetContent();
-        TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? content->BeginEdit() : nullptr;
+        TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? Odyssey::RasterContentBlocks::BeginBlockEdit(*content) : nullptr;
         if (!edit)
             return false;
 

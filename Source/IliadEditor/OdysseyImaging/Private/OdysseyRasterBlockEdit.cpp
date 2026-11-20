@@ -24,14 +24,13 @@ FOdysseyRasterBlockEdit::~FOdysseyRasterBlockEdit()
 }
 
 FOdysseyRasterBlockEdit::FOdysseyRasterBlockEdit(TSharedRef<FOdysseyRasterEditSession> InSession, TSharedRef<::ULIS::FBlock> InOriginal,
-    EOdysseyTiledImageFormat InTileFormat, bool bInSRGB, FOnCommitted InOnCommitted)
+    EOdysseyTiledImageFormat InTileFormat, bool bInSRGB)
     : Session(MoveTemp(InSession))
     , Original(InOriginal)
     , Block(CopyBlock(*InOriginal))
     , TileFormat(InTileFormat)
     , bSRGB(bInSRGB)
     , EditedTiles(TileSize, InOriginal->Width(), InOriginal->Height())
-    , OnCommitted(MoveTemp(InOnCommitted))
 {
 }
 
@@ -105,15 +104,7 @@ FOdysseyRasterBlockEdit::Commit()
     }
 
     // The session target already holds every updated area: the tiles are written from it.
-    if (!Session->Commit(Rects))
-    {
-        return false;
-    }
-    if (OnCommitted)
-    {
-        OnCommitted(Rects);
-    }
-    return true;
+    return Session->Commit(Rects);
 }
 
 void

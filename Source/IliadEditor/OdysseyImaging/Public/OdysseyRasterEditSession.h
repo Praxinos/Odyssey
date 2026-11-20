@@ -90,6 +90,12 @@ public:
     /** Ends the session: its target is discarded and the views show the tiles again. */
     void End();
 
+    /** Called after a commit, with the committed areas, once the session ended. */
+    using FOnCommitted = TFunction<void(const TArray<FIntRect>& Rects)>;
+
+    /** Sets the function called after a commit, e.g. by the content that began the session to notify its owner. */
+    void SetOnCommitted(FOnCommitted InOnCommitted);
+
 private:
     /** Returns the pixels shown and committed: the target, or the result when preserving alpha. */
     UTextureRenderTarget2D* GetShownTarget() const;
@@ -110,6 +116,7 @@ private:
     /** Keeps the shown texture alive for renders already built, even after the session ended. */
     FTextureRHIRef ShownRHI;
     TArray<FIntRect> InvalidRects;
+    FOnCommitted OnCommitted;
 };
 
 /**
