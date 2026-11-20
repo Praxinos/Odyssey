@@ -299,7 +299,9 @@ UOdysseyTextureLayerImageVector::PostLoad()
         Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
         Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
         Texture->Filter = TextureFilter::TF_Nearest;
-        Texture->SRGB = false;
+        // As in InitTexture(): the layer texture holds the bytes of the texture, decoded when sampled if they are sRGB encoded colors.
+        UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+        Texture->SRGB = layerStack && layerStack->IsSRGB();
         Texture->PostEditChange();
     }
 

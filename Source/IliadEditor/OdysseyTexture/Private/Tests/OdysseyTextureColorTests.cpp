@@ -15,6 +15,7 @@
 #include "OdysseyColorSpaceShader.h"
 #include "OdysseyRasterContent.h"
 #include "OdysseyTextureLayerImageRaster.h"
+#include "OdysseyTextureLayerImageVector.h"
 #include "OdysseyTextureLayerStack.h"
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyTiledImage.h"
@@ -299,6 +300,34 @@ bool FOdysseyTextureColorMergeTest::RunTest(const FString& Parameters)
         TestTrue(TEXT("Undo the merge"), GEditor->UndoTransaction());
         TestEqual(TEXT("Undo restores the layers"), Stack->GetLayers().Num(), LayerCount);
         CompareBytes(*this, *FString::Printf(TEXT("Undone merge with %s"), Mode), Expected, ReadTextureBytes(Texture.Get(), Stack), 1);
+    }
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureColorVectorLayerLoadTest, "Odyssey.Texture.Color.VectorLayerSRGBAfterLoad", Odyssey::TextureColorTests::Flags)
+
+/**
+ * The render texture of a vector layer holds the bytes of the texture: it decodes them when sampled if they are sRGB encoded colors,
+ * after loading as after creation, so that a reloaded vector layer is not shown brighter.
+ */
+bool FOdysseyTextureColorVectorLayerLoadTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::TextureColorTests;
+    for (const bool bSRGB : { true, false })
+    {
+        TStrongObjectPtr<UTexture2D> Texture(MakeTexture(bSRGB));
+        UOdysseyTextureLayerStackUserData* UserData = MakeUserData(Texture.Get());
+        UOdysseyTextureLayerImageVector* Layer = CastChecked<UOdysseyTextureLayerImageVector>(UserData->LayerStack->AddLayer(UOdysseyTextureLayerImageVector::StaticClass()));
+        const TCHAR* Encoding = bSRGB ? TEXT("sRGB texture") : TEXT("linear texture");
+        UTexture2D* LayerTexture = Layer->GetRenderTexture();
+        if (!TestNotNull(FString::Printf(TEXT("Render texture of the vector layer of a %s"), Encoding), LayerTexture))
+        {
+            return false;
+        }
+        TestEqual(FString::Printf(TEXT("A new vector layer of a %s samples its bytes as the texture does"), Encoding), bool(LayerTexture->SRGB), bSRGB);
+
+        Layer->PostLoad();
+        TestEqual(FString::Printf(TEXT("A loaded vector layer of a %s samples its bytes as the texture does"), Encoding), bool(Layer->GetRenderTexture()->SRGB), bSRGB);
     }
     return true;
 }
