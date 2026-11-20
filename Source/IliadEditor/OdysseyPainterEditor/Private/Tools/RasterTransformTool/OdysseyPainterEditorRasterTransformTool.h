@@ -129,6 +129,9 @@ private:
 
     FInputChord mToolChord; //The current state of the keyboard keys that are pressed while using this tool
 
+    /** True while CommitTransform() runs: the selection it changes must not begin a new transform, which the commit clears. */
+    bool mIsCommittingTransform = false;
+
     int mIndexTransaction; //Current index in the transactions array
     TArray<TStaticArray<FVector2D, 5>> mTransformTransactions; //Undos/Redos for the current transform, contains 4 handles and 1 pivot for each transaction
 };

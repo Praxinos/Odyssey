@@ -717,6 +717,7 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
 
     if( mPaintEngine.GetEdit() )
     {
+        TGuardValue<bool> committingGuard(mIsCommittingTransform, true);
         FScopedTransaction scopedTransaction(LOCTEXT("actions.raster.transform.apply", "Apply transform"));
         {
             mPaintEngine.Commit(FOdysseyBlendParameters());
@@ -798,7 +799,11 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
                     }
                 );
             }
-            GetEditor()->RasterSelection()->OnChanged().Broadcast();
+            else
+            {
+                // EditMask() notifies the change of a selection; an empty one is notified here.
+                GetEditor()->RasterSelection()->OnChanged().Broadcast();
+            }
         }
     }
     ClearTransform();
@@ -1213,6 +1218,10 @@ void
 UOdysseyPainterEditorRasterTransformTool::OnRasterSelectionChanged()
 {
     UpdateRasterSelection();
+    // The commit clears the transform once done; beginning a new one would read the content for nothing.
+    if (mIsCommittingTransform)
+        return;
+
     ClearTransform();
     UpdateTransformHUD();
 }
