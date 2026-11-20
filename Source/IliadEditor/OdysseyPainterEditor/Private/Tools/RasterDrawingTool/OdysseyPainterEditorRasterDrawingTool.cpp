@@ -146,6 +146,16 @@ UOdysseyPainterEditorRasterDrawingTool::Inactivate()
 }
 
 void
+UOdysseyPainterEditorRasterDrawingTool::Unload()
+{
+    //The edited layer or frame changes: the shape and its edit belong to the previous one
+    Shapes.GetActiveShape()->Abort();
+    mPaintEngine.Abort();
+
+    Super::Unload();
+}
+
+void
 UOdysseyPainterEditorRasterDrawingTool::Reset()
 {
     Super::Reset();

@@ -39,8 +39,8 @@ FOdysseyPaintEngine::Edit(TSharedPtr<FOdysseyRasterBlockEdit> iEdit)
     if (mEdit == iEdit)
         return;
 
-    //Automatically commit the previous edit
-    Commit(mPreviousBlendParameters);
+    //Tools commit their edits explicitly: a previous edit still running, e.g. on another layer, is discarded
+    Abort();
 
     if (!iEdit)
     {

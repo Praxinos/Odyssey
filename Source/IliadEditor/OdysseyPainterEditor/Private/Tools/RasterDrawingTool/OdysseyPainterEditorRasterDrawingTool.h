@@ -53,6 +53,8 @@ public:
     //OdysseyPainterEditorTool overrides
     virtual void Activate() override;
     virtual void Inactivate() override;
+    /** Aborts the shape being drawn: the edited layer or frame changes, or the tool is inactivated. */
+    virtual void Unload() override;
     virtual bool IsActivable() const override;
 
     virtual void Reset() override;

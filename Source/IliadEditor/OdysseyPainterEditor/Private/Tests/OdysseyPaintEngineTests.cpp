@@ -193,6 +193,22 @@ bool FOdysseyPaintEngineTest::RunTest(const FString& Parameters)
     }
     TestFalse(TEXT("No edit remains"), IsShown(Layer));
     TestTrue(TEXT("The tiles are unchanged"), ReadCommitted(Layer, Inside).Equals(Background, Tolerance));
+
+    // Painting into the edit of another layer, e.g. after the current layer changed mid-shape, discards the pending stroke.
+    UOdysseyTextureLayerImageRaster* OtherLayer = CastChecked<UOdysseyTextureLayerImageRaster>(Layer->GetLayerStack()->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
+    Engine.Edit(Layer->BeginRasterEdit());
+    PaintStroke(Engine);
+    Engine.Update(Blend);
+    {
+        // A commit would be recorded by this transaction.
+        FScopedTransaction Transaction(NSLOCTEXT("OdysseyPaintEngineTests", "SwitchLayer", "Switch layer"));
+        Engine.Edit(OtherLayer->BeginRasterEdit());
+    }
+    TestTrue(TEXT("The paint engine paints into the edit of the other layer"), Engine.GetEdit().IsValid() && IsShown(OtherLayer));
+    TestFalse(TEXT("The edit of the previous layer ended"), IsShown(Layer));
+    TestTrue(TEXT("The pending stroke is not committed into the previous layer"), ReadCommitted(Layer, Inside).Equals(Background, Tolerance));
+    Engine.Abort();
+    TestFalse(TEXT("No edit remains after switching layers"), IsShown(Layer) || IsShown(OtherLayer));
     return true;
 }
 

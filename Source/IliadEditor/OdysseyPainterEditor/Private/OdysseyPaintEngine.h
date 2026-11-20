@@ -29,7 +29,7 @@ public:
 
 public:
     /**
-     * Sets the edit to paint into; the previous edit, if any, is committed first.
+     * Sets the edit to paint into; the previous edit, if any, is aborted: tools commit their edits explicitly.
      * The paint block is cleared, and sized and formatted as the edited block.
      * @param iEdit The edit, or null to stop painting.
      */
