@@ -133,17 +133,13 @@ void
 UOdysseyAnimationCellImageRaster::MigrateLegacyContent()
 {
     UTexture2D* LegacyTexture = Texture;
-    if (HasAnyFlags(RF_ClassDefaultObject) || (!mLegacyRasterBlock && !LegacyTexture) || !FApp::CanEverRender())
+    if (HasAnyFlags(RF_ClassDefaultObject) || (!mLegacyPixels && !LegacyTexture) || !FApp::CanEverRender())
     {
         return;
     }
 
-    TSharedPtr<::ULIS::FBlock> Pixels;
-    if (mLegacyRasterBlock)
-    {
-        Pixels = mLegacyRasterBlock->GetBlock();
-    }
-    else if (LegacyTexture->Source.IsValid())
+    TSharedPtr<::ULIS::FBlock> Pixels = mLegacyPixels;
+    if (!Pixels && LegacyTexture->Source.IsValid())
     {
         Pixels = MakeShareable(NewBlockFromUTextureData(LegacyTexture, GetRasterFormat()));
     }
@@ -153,7 +149,7 @@ UOdysseyAnimationCellImageRaster::MigrateLegacyContent()
     {
         return;
     }
-    mLegacyRasterBlock.Reset();
+    mLegacyPixels.Reset();
     Texture = nullptr;
 }
 
@@ -210,10 +206,9 @@ UOdysseyAnimationCellImageRaster::OldSerialize(FArchive& Ar)
         if (!FOdysseyAnimationCellImageRasterImport::Read( this, Ar ))
         {
             //Old Style No Chunk Loading
-            mLegacyRasterBlock = MakeShared<FOdysseyRasterBlock>(this);
-            Ar << *mLegacyRasterBlock;
+            mLegacyPixels = Odyssey::ReadLegacyRasterBlock(Ar, *this);
         }
-        // PostLoad is not called after OldSerialize: the legacy block is migrated on first use.
+        // PostLoad is not called after OldSerialize: the legacy pixels are migrated on first use.
     }
 }
 

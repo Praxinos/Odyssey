@@ -15,7 +15,6 @@
 
 class UOdysseyTiledImage;
 #if WITH_EDITOR
-class FOdysseyRasterBlock;
 #endif
 
 UCLASS(BlueprintType)
@@ -72,7 +71,7 @@ private:
 
 private:
     /** Pixels read from assets saved before the tiled image storage. Moved into the tiled image after loading. */
-    TSharedPtr<FOdysseyRasterBlock> mLegacyRasterBlock;
+    TSharedPtr<::ULIS::FBlock> mLegacyPixels;
     mutable TSharedPtr<FOdysseyRasterContent> mRasterContent;
 #endif
 

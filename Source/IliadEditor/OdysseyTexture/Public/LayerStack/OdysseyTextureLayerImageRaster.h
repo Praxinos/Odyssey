@@ -8,7 +8,6 @@
 #include "Misc/TransactionObjectEvent.h"
 #include "Misc/ITransaction.h"
 #include "Misc/ITransactionObjectAnnotation.h"
-#include "OdysseyRasterBlock.h"
 #include "OdysseyRasterContent.h"
 
 #include <ULIS>
@@ -97,7 +96,7 @@ private:
 
 private:
     /** Pixels read from assets saved before the tiled image storage. Moved into the tiled image after loading. */
-    TSharedPtr<FOdysseyRasterBlock> LegacyRasterBlock;
+    TSharedPtr<::ULIS::FBlock> LegacyPixels;
 
     /**
      * The render texture of assets saved before the tiled image storage, which held the pixels of the layer.

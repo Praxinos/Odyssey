@@ -4,57 +4,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Serialization/EditorBulkData.h"
 
 #include <ULIS>
 
-/**
- * The pixels of a raster layer or cell saved before the tiled image storage.
- *
- * Only loaded: the owner moves these pixels into its tiled image after loading, then drops this object.
- * Assets are no longer saved with it.
- */
-class ODYSSEYIMAGING_API FOdysseyRasterBlock
+namespace Odyssey
 {
-public:
-    ~FOdysseyRasterBlock();
-
-    /** @param iOwner The object whose archive holds the pixels. */
-    explicit FOdysseyRasterBlock(UObject* iOwner);
-
-    FOdysseyRasterBlock(const FOdysseyRasterBlock&) = delete;
-    FOdysseyRasterBlock& operator=(const FOdysseyRasterBlock&) = delete;
-
-public:
-    int GetWidth() const;
-    int GetHeight() const;
-    ::ULIS::eFormat GetFormat() const;
-
-    /**
-     * Returns the loaded pixels, read from the bulk data on first call.
-     * @return Null when no pixels were loaded, or they do not match the loaded size and format.
-     */
-    TSharedPtr<::ULIS::FBlock> GetBlock();
-
-    /** Loads the block from an archive; saving writes nothing. */
-    void Serialize(FArchive& Ar);
-
-private:
-    friend class FOdysseyRasterBlockImport;
-
-private:
-    UObject* mOwner;
-    int mWidth = -1;
-    int mHeight = -1;
-    ::ULIS::eFormat mFormat = ::ULIS::Format_RGBA8;
-
-    /** The id of the block in the former disk cache, read to stay in step with the archive. */
-    FGuid mId;
-
-    /** The saved pixels. */
-    UE::Serialization::FEditorBulkData mBulkData;
-
-    TSharedPtr<::ULIS::FBlock> mBlock;
-};
-
-ODYSSEYIMAGING_API FArchive& operator<<(FArchive& Ar, FOdysseyRasterBlock& iRasterBlock);
+/**
+ * Reads the pixels of a raster layer or cell saved before the tiled image storage, then removes their former disk cache entry.
+ * Assets are no longer saved with these pixels: their owner moves them into its tiled image after loading.
+ *
+ * @param Ar The archive of the owner, positioned at the raster block. Only a persistent loading archive is read.
+ * @param Owner The object whose package holds the bulk data of the pixels.
+ * @return The pixels, or null when the archive holds none or they cannot be read.
+ */
+ODYSSEYIMAGING_API TSharedPtr<::ULIS::FBlock> ReadLegacyRasterBlock(FArchive& Ar, UObject& Owner);
+}

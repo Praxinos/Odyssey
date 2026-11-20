@@ -3,6 +3,7 @@
 
 #include "OdysseyTextureLayerImageRasterImport.h"
 #include "OdysseyTextureLayerImageRaster.h"
+#include "OdysseyRasterBlock.h"
 #include "OdysseyFile.h"
 
 bool
@@ -69,8 +70,7 @@ FOdysseyTextureLayerImageRasterImport::Read( UOdysseyTextureLayerImageRaster* iT
             {
                 case FOdysseyFile::Texture::CHUNK_TEXTURELAYERIMAGERASTER_RASTERBLOCK :
                 {
-                    iTextureLayerImageRaster->LegacyRasterBlock = MakeShared<FOdysseyRasterBlock>(iTextureLayerImageRaster);
-                    Ar << *iTextureLayerImageRaster->LegacyRasterBlock;
+                    iTextureLayerImageRaster->LegacyPixels = Odyssey::ReadLegacyRasterBlock(Ar, *iTextureLayerImageRaster);
                 }
                 break;
 

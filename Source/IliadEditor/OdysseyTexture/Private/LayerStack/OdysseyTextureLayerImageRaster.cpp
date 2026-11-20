@@ -64,17 +64,13 @@ void
 UOdysseyTextureLayerImageRaster::MigrateLegacyContent()
 {
     UTexture2D* LegacyTexture = Texture;
-    if (HasAnyFlags(RF_ClassDefaultObject) || (!LegacyRasterBlock && !LegacyTexture) || !FApp::CanEverRender())
+    if (HasAnyFlags(RF_ClassDefaultObject) || (!LegacyPixels && !LegacyTexture) || !FApp::CanEverRender())
     {
         return;
     }
 
-    TSharedPtr<::ULIS::FBlock> Pixels;
-    if (LegacyRasterBlock)
-    {
-        Pixels = LegacyRasterBlock->GetBlock();
-    }
-    else if (LegacyTexture->Source.IsValid())
+    TSharedPtr<::ULIS::FBlock> Pixels = LegacyPixels;
+    if (!Pixels && LegacyTexture->Source.IsValid())
     {
         Pixels = MakeShareable(NewBlockFromUTextureData(LegacyTexture, GetRasterFormat()));
     }
@@ -84,7 +80,7 @@ UOdysseyTextureLayerImageRaster::MigrateLegacyContent()
     {
         return;
     }
-    LegacyRasterBlock.Reset();
+    LegacyPixels.Reset();
     Texture = nullptr;
 }
 
@@ -287,8 +283,7 @@ UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
                 bool canRead = id.IsValid() && width > 0 && width <= 8192 && height > 0 && height <= 8192;
                 if (canRead)
                 {
-                    LegacyRasterBlock = MakeShared<FOdysseyRasterBlock>(this);
-                    Ar << *LegacyRasterBlock;
+                    LegacyPixels = Odyssey::ReadLegacyRasterBlock(Ar, *this);
                 }
             }
         }
