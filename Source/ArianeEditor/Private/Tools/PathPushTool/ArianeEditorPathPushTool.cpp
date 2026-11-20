@@ -342,6 +342,7 @@ UArianeEditorPathPushTool::OnMouseDown( FEditorViewportClient* ViewportClient
             {
                 FPlane DrawingPlane = GetDrawingPlane( ViewportClient, nullptr );
 
+                GetToolManager()->BeginUndoTransaction(LOCTEXT("ariane-path-push-tool.push","Push"));
                 VectorLayer->GetDrawing()->Modify();
 
                 SegmentQuadTree->PickSegments( ViewportClient, View, MouseScreenPositionAtDown, PickingRadius, PickedSegments );
@@ -571,6 +572,8 @@ UArianeEditorPathPushTool::OnMouseUp( FEditorViewportClient* ViewportClient
 
         InfluencedVertexDisplacements.Empty();
         InfluencedHandleDisplacements.Empty();
+
+        GetToolManager()->EndUndoTransaction();
     }
 
     return false;

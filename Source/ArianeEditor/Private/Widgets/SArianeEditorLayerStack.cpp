@@ -248,7 +248,7 @@ SArianeEditorLayerStack::DeleteSelectedItem()
 
         for( UArianeLayer* Layer : SelectedTrees )
         {
-            Layer->GetParentFolder()->RemoveChildLayer( Layer,true );
+            Layer->GetParentFolder()->RemoveChild( Layer,true );
         }
 
         LayerStack->Modify();

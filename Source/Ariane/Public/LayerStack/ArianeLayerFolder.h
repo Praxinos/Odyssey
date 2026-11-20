@@ -36,16 +36,10 @@ public:
     const TArray<UArianeLayer*>& GetChildLayers() const;
 
     /**
-     * @brief Add a child layer to this folder
-     * @param Orphan the child layer
-     */
-    void AddChildLayer( UArianeLayer* Orphan );
-
-    /**
      * @brief Remove a child layer from this folder
      * @param Child the child layer
      */
-    void RemoveChildLayer( UArianeLayer* Child, bool bDestroy );
+    void RemoveChild( UArianeLayer* Child, bool bDestroy );
 
     virtual void OnChildDetached( USceneComponent* ChildComponent ) override;
 
@@ -65,6 +59,12 @@ public:
     virtual void OnRegister() override;
 
     virtual bool IsNavigationRelevant() const override;
+
+    void AppendChild( UArianeLayer* Child, FAttachmentTransformRules TransformRules );
+    void PrependChild( UArianeLayer* Child, FAttachmentTransformRules TransformRules );
+    void InsertChild( UArianeLayer* Child, UArianeLayer* InsertAfter, FAttachmentTransformRules TransformRules );
+    UArianeLayer* GetNextChild( UArianeLayer* Child );
+    UArianeLayer* GetPreviousChild( UArianeLayer* Child );
 
 protected:
     static ETraversalReturnValue Traverse_Private( UArianeLayerFolder* FolderLayer, TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );

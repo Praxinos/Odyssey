@@ -70,38 +70,92 @@ UArianeLayerFolder::GetChildLayers() const
     return ChildLayers;
 }
 
+UArianeLayer*
+UArianeLayerFolder::GetNextChild( UArianeLayer* Child )
+{
+    UArianeLayer* NextChild = nullptr;
+    int IndexOfChild = ChildLayers.IndexOfByKey( Child );
+    int IndexOfNext = IndexOfChild + 1;
+
+    if( IndexOfNext < ChildLayers.Num() )
+    {
+        return ChildLayers[IndexOfNext];
+    }
+
+    return nullptr;
+}
+
+UArianeLayer*
+UArianeLayerFolder::GetPreviousChild( UArianeLayer* Child )
+{
+    UArianeLayer* PreviousChild = nullptr;
+
+    for( UArianeLayer* ChildLayer : ChildLayers )
+    {
+        if( ChildLayer == Child )
+        {
+            return PreviousChild;
+        }
+
+        PreviousChild = ChildLayer;
+    }
+
+    return PreviousChild;
+}
+
 void
-UArianeLayerFolder::AddChildLayer( UArianeLayer* Orphan )
+UArianeLayerFolder::AppendChild( UArianeLayer* Child, FAttachmentTransformRules TransformRules )
+{
+    InsertChild( Child, ChildLayers.Num() ? ChildLayers.Last() : nullptr, TransformRules );
+}
+
+void
+UArianeLayerFolder::PrependChild( UArianeLayer* Child, FAttachmentTransformRules TransformRules )
+{
+    InsertChild( Child, nullptr, TransformRules );
+}
+
+void
+UArianeLayerFolder::InsertChild( UArianeLayer* Child, UArianeLayer* InsertAfter, FAttachmentTransformRules TransformRules )
 {
     AArianePainting3DActor* Painting3DActor = Cast<AArianePainting3DActor>(GetOwner());
+    int FoundObjectIndex = ChildLayers.IndexOfByPredicate( [InsertAfter]( const UArianeLayer* Child ) -> bool
+                                                           {
+                                                               return ( Child == InsertAfter );
+                                                           } );
 
-    //Orphan->SetParentFolder( this );
-
-    ChildLayers.Add( Orphan );
+    if( FoundObjectIndex != INDEX_NONE )
+    {
+        ChildLayers.Insert( Child, FoundObjectIndex + 1 );
+    }
+    else
+    {
+        ChildLayers.Add( Child );
+    }
 
     Invalidate();
 
-    if ( Orphan->IsRegistered() )
+    if ( Child->IsRegistered() )
     {
-        Orphan->AttachToComponent( this,  FAttachmentTransformRules::KeepWorldTransform );
+        Child->AttachToComponent( this,  TransformRules );
     }
     else
     {
         // Typically called when AddChildLayer is run in a constructor
-        Orphan->SetupAttachment(this);
-        Orphan->RegisterComponent();
+        Child->SetupAttachment(this);
+        Child->RegisterComponent();
     }
 
     // commented-out: this would make the layer appear in the outliner details view. We don't want that
     // because it would display the FName and not the displayName among other inconvient things.
-    //Painting3DActor->AddInstanceComponent(Orphan);
+    //Painting3DActor->AddInstanceComponent(Child);
 
     // Force Update transforms (will update the transform of the rootGroup of drawing layers)
-    Orphan->OnUpdateTransform( EUpdateTransformFlags::None, ETeleportType::None );
+    Child->OnUpdateTransform( EUpdateTransformFlags::None, ETeleportType::None );
 }
 
 void
-UArianeLayerFolder::RemoveChildLayer( UArianeLayer* Child, bool bDestroy )
+UArianeLayerFolder::RemoveChild( UArianeLayer* Child, bool bDestroy )
 {
     if( bDestroy )
     {

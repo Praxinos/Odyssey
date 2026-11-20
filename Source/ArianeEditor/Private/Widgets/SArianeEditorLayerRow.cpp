@@ -399,23 +399,32 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
     const TSharedPtr< SArianeEditorLayerStack > TreeView = StaticCastSharedPtr<SArianeEditorLayerStack>(OwnerTablePtr.Pin());
     TSharedPtr<FDragDropOperation> Operation = iDragDropEvent.GetOperation();
 
-    const TArray<UArianeLayer*>& SelectedLayers = TreeView->GetEditor()->GetCurrentPainting3DComponent()->GetLayerStack()->GetSelectedLayers();
+    // work on a copy because the removal will later the selection status
+    const TArray<UArianeLayer*> SelectedLayers = TreeView->GetEditor()->GetCurrentPainting3DComponent()->GetLayerStack()->GetSelectedLayers();
+    UArianePainting3DComponent* Painting3DComponent = TreeView->GetEditor()->GetCurrentPainting3DComponent();
+    TArray<UArianeLayer*> SelectedTrees;
 
-    for( UArianeLayer* SelectedLayer : SelectedLayers )
+    // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
+    // rebuilt while it's processing stuff
+    //TreeView->UnbindComponentDelegates();
+
+    Painting3DComponent->GetLayerStack()->GetSelectedTrees( SelectedTrees );
+
+    for( UArianeLayer* SelectedTree : SelectedTrees )
     {
         switch( DropZone )
         {
-            //case DROPZONE_ABOVE:
-            // reverse order in order to get the most forward objet on top of the hierarchy
             case DROPZONE_BELOW:
             {
                 UArianeLayerFolder* ParentFolder = Layer->GetParentFolder();
 
                 // don't drop onto the same object or else expect some infinite loop
-                if( ParentFolder != SelectedLayer )
+                if( ParentFolder != SelectedTree )
                 {
-                    SelectedLayer->GetParentFolder()->RemoveChildLayer(SelectedLayer, true );
-                    ParentFolder->AddChildLayer( SelectedLayer );
+                    SelectedTree->GetParentFolder()->RemoveChild( SelectedTree, false );
+                    ParentFolder->InsertChild( SelectedTree
+                                             , ParentFolder->GetNextChild( Layer )
+                                             , FAttachmentTransformRules::KeepWorldTransform );
                 }
             }
             break;
@@ -423,13 +432,12 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
             case DROPZONE_ONTO:
                 if( Layer->GetClass() == UArianeLayerFolder::StaticClass() )
                 {
-                    UArianeLayerFolder* LayerFolder = Cast<UArianeLayerFolder>(Layer);
+                    UArianeLayerFolder* FolderLayer = Cast<UArianeLayerFolder>(Layer);
 
                     // don't drop onto the same object or else expect some infinite loop
-                    if( LayerFolder != SelectedLayer )
+                    if( ( FolderLayer != SelectedTree ) && ( SelectedTree->GetParentFolder() != FolderLayer ) )
                     {
-                        SelectedLayer->GetParentFolder()->RemoveChildLayer(SelectedLayer, true);
-                        LayerFolder->AddChildLayer(SelectedLayer);
+                        FolderLayer->AppendChild( SelectedTree, FAttachmentTransformRules::KeepWorldTransform );
                     }
                 }
             break;
@@ -440,10 +448,12 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
             {
                 UArianeLayerFolder* ParentFolder = Layer->GetParentFolder();
 
-                if( ParentFolder != SelectedLayer )
+                if( ParentFolder != SelectedTree )
                 {
-                    SelectedLayer->GetParentFolder()->RemoveChildLayer(SelectedLayer,true);
-                    ParentFolder->AddChildLayer(SelectedLayer);
+                    SelectedTree->GetParentFolder()->RemoveChild( SelectedTree, false );
+                    ParentFolder->InsertChild( SelectedTree
+                                             , ParentFolder->GetPreviousChild( Layer )
+                                             , FAttachmentTransformRules::KeepWorldTransform );
                 }
             }
             break;

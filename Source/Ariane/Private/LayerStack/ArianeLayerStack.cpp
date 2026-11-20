@@ -163,7 +163,7 @@ UArianeLayerStack::RemoveSelectedLayers()
         Layer->GetParentFolder()->Modify();
         Layer->Modify();
 
-        Layer->GetParentFolder()->RemoveChildLayer( Layer, true );
+        Layer->GetParentFolder()->RemoveChild( Layer, true );
     }
 
     ClearLayerSelection( true );
@@ -201,7 +201,7 @@ UArianeLayerStack::RemoveLayers( TArray<UArianeLayer*> LayersToRemove, bool bDes
         Layer->GetParentFolder()->Modify();
         Layer->Modify();
 
-        Layer->GetParentFolder()->RemoveChildLayer( Layer, bDestroy );
+        Layer->GetParentFolder()->RemoveChild( Layer, bDestroy );
     }
 
     if( bTriggerEvent )
@@ -264,7 +264,7 @@ UArianeLayerStack::AddLayers( UArianeLayerFolder* FosterFolder, TArray<UArianeLa
 
     for( UArianeLayer* OrphanLayer : OrphanLayers )
     {
-        FosterFolder->AddChildLayer( OrphanLayer );
+        FosterFolder->AppendChild( OrphanLayer, FAttachmentTransformRules::KeepWorldTransform );
 
         Layers.Add( OrphanLayer );
     }
