@@ -261,26 +261,25 @@ FOdysseyRasterContent::Write(UTextureRenderTarget2D& Source, const TArray<FIntRe
     }
 
     // Copies the source pixels, converted into linear colors, at the same positions.
-    IOdysseyTextureRenderingAbility::FRenderFunction Copy = [SourceResource = Source.GameThread_GetRenderTargetResource()](
-        FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type FeatureLevel, FRDGTextureRef Destination,
-        const FIntRect& SourceRect, const FIntRect& DestinationRect, const FMatrix& Transform)
-    {
-        FRDGTextureRef SourceTexture = GraphBuilder.RegisterExternalTexture(
-            ::CreateRenderTarget(SourceResource->GetRenderTargetTexture(), TEXT("Odyssey.RasterContent.WriteSource")));
-        AddDrawTexturePass(GraphBuilder, FScreenPassViewInfo(), SourceTexture, Destination,
-            SourceRect.Min, SourceRect.Size(), DestinationRect.Min, DestinationRect.Size());
-    };
-    Copy = FOdysseyColorSpaceShader::WrapRenderFunction(MoveTemp(Copy), Conversion);
-
     ENQUEUE_RENDER_COMMAND(OdysseyRasterContentWrite)(
-        [TargetResource = Session->GetTarget()->GameThread_GetRenderTargetResource(), Copy = MoveTemp(Copy), Clipped](FRHICommandListImmediate& RHICmdList)
+        [SourceResource = Source.GameThread_GetRenderTargetResource(), TargetResource = Session->GetTarget()->GameThread_GetRenderTargetResource(),
+         Pass = FOdysseyColorSpaceShader::Prepare(Conversion), Clipped](FRHICommandListImmediate& RHICmdList)
         {
             FRDGBuilder GraphBuilder(RHICmdList);
+            FRDGTextureRef SourceTexture = GraphBuilder.RegisterExternalTexture(
+                ::CreateRenderTarget(SourceResource->GetRenderTargetTexture(), TEXT("Odyssey.RasterContent.WriteSource")));
             FRDGTextureRef Target = GraphBuilder.RegisterExternalTexture(
                 ::CreateRenderTarget(TargetResource->GetRenderTargetTexture(), TEXT("Odyssey.RasterContent.WriteTarget")));
             for (const FIntRect& Rect : Clipped)
             {
-                Copy(GraphBuilder, GMaxRHIFeatureLevel, Target, Rect, Rect, FMatrix::Identity);
+                if (Pass.IsValid())
+                {
+                    Pass.Add(GraphBuilder, GMaxRHIFeatureLevel, SourceTexture, Rect, Target, Rect);
+                }
+                else
+                {
+                    AddDrawTexturePass(GraphBuilder, FScreenPassViewInfo(), SourceTexture, Target, Rect.Min, Rect.Size(), Rect.Min, Rect.Size());
+                }
             }
             GraphBuilder.Execute();
         });

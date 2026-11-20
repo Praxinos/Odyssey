@@ -72,6 +72,13 @@ public:
         const FOdysseyRenderContext* RenderContext = nullptr) const;
 
     /**
+     * Wraps a render function so that its output is converted: the function renders into an intermediate float texture,
+     * whose destination area is then converted into the destination. Call on the game thread.
+     * The function is returned unchanged with None, or when the conversion is unavailable.
+     */
+    static FRenderFunction BuildColorConvertRenderFunction(FRenderFunction RenderFunction, EOdysseyColorConversion Conversion);
+
+    /**
      * Returns the conversion applied to the content of this node, a content replacement included, e.g. the sRGB encoding
      * of the linear colors of a layer whose stack blends encoded colors, or the conversion of a stack to its output.
      * Not applied to composite content, whose children convert their own.

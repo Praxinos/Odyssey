@@ -16,7 +16,7 @@
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-#include "OdysseyColorSpaceShader.h"
+#include "OdysseyTextureRenderingAbility.h"
 #include "RenderGraphBuilder.h"
 #include "OdysseyBlendShader.h"
 #include "ScreenPass.h"
@@ -59,7 +59,7 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
 
     // Thumbnails show encoded colors, as the cells blended with encoded colors render them.
     if (cell->GetContentColorConversion(nullptr) == EOdysseyColorConversion::None)
-        childRenderFunction = FOdysseyColorSpaceShader::WrapRenderFunction(MoveTemp(childRenderFunction), EOdysseyColorConversion::Encode);
+        childRenderFunction = IOdysseyTextureRenderingAbility::BuildColorConvertRenderFunction(MoveTemp(childRenderFunction), EOdysseyColorConversion::Encode);
 
     FIntRect srcRect = cell->GetDefaultRenderRect();
     ENQUEUE_RENDER_COMMAND(UOdysseyAnimationCellThumbnailRenderer_Draw)(

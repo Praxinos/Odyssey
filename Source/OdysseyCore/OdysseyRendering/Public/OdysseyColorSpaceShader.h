@@ -4,9 +4,35 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "RenderGraphFwd.h"
+#include "RHIFeatureLevel.h"
 
 #include "OdysseyColorConversion.h"
-#include "OdysseyTextureRenderingAbility.h"
+
+struct FOpenColorIORenderPassResources;
+
+/**
+ * A color conversion ready to be added to render graphs, prepared on the game thread by FOdysseyColorSpaceShader::Prepare().
+ * Copyable, and usable on the render thread.
+ */
+class ODYSSEYRENDERING_API FOdysseyColorConversionPass
+{
+public:
+    /** Returns false for no conversion, or when the conversion is unavailable: Add() then does nothing. */
+    bool IsValid() const;
+
+    /**
+     * Converts the area of Input into the area of Output, alpha excepted; the other pixels of Output are kept.
+     * Input and Output must be different textures. Call on the render thread.
+     */
+    void Add(FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type FeatureLevel,
+        FRDGTextureRef Input, const FIntRect& InputRect, FRDGTextureRef Output, const FIntRect& OutputRect) const;
+
+private:
+    friend class FOdysseyColorSpaceShader;
+
+    TSharedPtr<const FOpenColorIORenderPassResources, ESPMode::ThreadSafe> Resources;
+};
 
 /**
  * Converts colors between linear values and sRGB encoded values with OpenColorIO, alpha excepted.
@@ -18,12 +44,10 @@ class ODYSSEYRENDERING_API FOdysseyColorSpaceShader
 {
 public:
     /**
-     * Wraps a render function so that its output is converted: the function renders into an intermediate float texture,
-     * whose destination area is then converted into the destination. Call on the game thread.
-     * The function is returned unchanged with None, or when the conversion is unavailable, which is logged.
+     * Prepares a conversion for render graphs. Call on the game thread.
+     * The pass is invalid with None, or when the conversion is unavailable, which is logged.
      */
-    static IOdysseyTextureRenderingAbility::FRenderFunction WrapRenderFunction(
-        IOdysseyTextureRenderingAbility::FRenderFunction RenderFunction, EOdysseyColorConversion Conversion);
+    static FOdysseyColorConversionPass Prepare(EOdysseyColorConversion Conversion);
 
     /** Returns true when the conversions are available, compiling them on first call. Call on the game thread. */
     static bool IsAvailable();

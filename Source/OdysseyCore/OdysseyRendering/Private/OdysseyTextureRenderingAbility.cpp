@@ -254,11 +254,37 @@ bool IOdysseyTextureRenderingAbility::BuildRenderPipeline(FRenderFunction& OutRe
     }
     if (!BuildsCompositeContent() && !(Override && Override->RenderReplacement))
     {
-        OutRenderFunction = FOdysseyColorSpaceShader::WrapRenderFunction(MoveTemp(OutRenderFunction), GetContentColorConversion(RenderContext));
+        OutRenderFunction = BuildColorConvertRenderFunction(MoveTemp(OutRenderFunction), GetContentColorConversion(RenderContext));
     }
     if (Override && Override->RenderDecorator)
     {
         OutRenderFunction = Override->RenderDecorator(MoveTemp(OutRenderFunction));
     }
     return bool(OutRenderFunction);
+}
+
+IOdysseyTextureRenderingAbility::FRenderFunction
+IOdysseyTextureRenderingAbility::BuildColorConvertRenderFunction(FRenderFunction RenderFunction, EOdysseyColorConversion Conversion)
+{
+    if (!RenderFunction)
+    {
+        return RenderFunction;
+    }
+    FOdysseyColorConversionPass Pass = FOdysseyColorSpaceShader::Prepare(Conversion);
+    if (!Pass.IsValid())
+    {
+        return RenderFunction;
+    }
+
+    return [RenderFunction = MoveTemp(RenderFunction), Pass = MoveTemp(Pass)](FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type FeatureLevel,
+        FRDGTextureRef Destination, const FIntRect& SourceRect, const FIntRect& DestinationRect, const FMatrix& Transform)
+    {
+        // Full float precision, so that the conversion is not altered by an intermediate quantization.
+        FRDGTextureRef Intermediate = GraphBuilder.CreateTexture(FRDGTextureDesc::Create2D(Destination->Desc.Extent,
+            PF_A32B32G32R32F, FClearValueBinding::Transparent, TexCreate_ShaderResource | TexCreate_RenderTargetable),
+            TEXT("Odyssey.ColorSpace.Intermediate"));
+        AddClearRenderTargetPass(GraphBuilder, Intermediate, FLinearColor::Transparent, DestinationRect);
+        RenderFunction(GraphBuilder, FeatureLevel, Intermediate, SourceRect, DestinationRect, Transform);
+        Pass.Add(GraphBuilder, FeatureLevel, Intermediate, DestinationRect, Destination, DestinationRect);
+    };
 }

@@ -150,41 +150,47 @@ private:
 };
 }
 
-IOdysseyTextureRenderingAbility::FRenderFunction
-FOdysseyColorSpaceShader::WrapRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction RenderFunction, EOdysseyColorConversion Conversion)
+bool
+FOdysseyColorConversionPass::IsValid() const
 {
-    if (!RenderFunction || Conversion == EOdysseyColorConversion::None)
+    return Resources.IsValid();
+}
+
+void
+FOdysseyColorConversionPass::Add(FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type FeatureLevel,
+    FRDGTextureRef Input, const FIntRect& InputRect, FRDGTextureRef Output, const FIntRect& OutputRect) const
+{
+    check(Input != Output);
+    if (!Resources)
     {
-        return RenderFunction;
+        return;
     }
 
+    FIntRect InputViewport = InputRect;
+    InputViewport.Clip(FIntRect(FIntPoint::ZeroValue, Input->Desc.Extent));
+    FIntRect OutputViewport = OutputRect;
+    OutputViewport.Clip(FIntRect(FIntPoint::ZeroValue, Output->Desc.Extent));
+    if (InputViewport.Width() <= 0 || InputViewport.Height() <= 0 || OutputViewport.Width() <= 0 || OutputViewport.Height() <= 0)
+    {
+        return;
+    }
+    // A gamma of 1 applies the transform only.
+    FOpenColorIORendering::AddPass_RenderThread(GraphBuilder, FScreenPassViewInfo(FeatureLevel), FeatureLevel,
+        FScreenPassTexture(Input, InputViewport), FScreenPassRenderTarget(Output, OutputViewport, ERenderTargetLoadAction::ELoad),
+        *Resources, 1.0f, EOpenColorIOTransformAlpha::None);
+}
+
+FOdysseyColorConversionPass
+FOdysseyColorSpaceShader::Prepare(EOdysseyColorConversion Conversion)
+{
+    check(IsInGameThread());
+    FOdysseyColorConversionPass Pass;
     FOpenColorIORenderPassResources PassResources = FOdysseyColorManagement::Get().GetPassResources(Conversion);
-    if (!PassResources.IsValid())
+    if (PassResources.IsValid())
     {
-        return RenderFunction;
+        Pass.Resources = MakeShared<const FOpenColorIORenderPassResources, ESPMode::ThreadSafe>(MoveTemp(PassResources));
     }
-
-    return [RenderFunction = MoveTemp(RenderFunction), PassResources = MoveTemp(PassResources)](FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type FeatureLevel,
-        FRDGTextureRef Destination, const FIntRect& SourceRect, const FIntRect& DestinationRect, const FMatrix& Transform)
-    {
-        // Full float precision, so that the conversion is not altered by an intermediate quantization.
-        FRDGTextureRef Intermediate = GraphBuilder.CreateTexture(FRDGTextureDesc::Create2D(Destination->Desc.Extent,
-            PF_A32B32G32R32F, FClearValueBinding::Transparent, TexCreate_ShaderResource | TexCreate_RenderTargetable),
-            TEXT("Odyssey.ColorSpace.Intermediate"));
-        AddClearRenderTargetPass(GraphBuilder, Intermediate, FLinearColor::Transparent, DestinationRect);
-        RenderFunction(GraphBuilder, FeatureLevel, Intermediate, SourceRect, DestinationRect, Transform);
-
-        FIntRect Viewport = DestinationRect;
-        Viewport.Clip(FIntRect(FIntPoint::ZeroValue, Destination->Desc.Extent));
-        if (Viewport.Width() <= 0 || Viewport.Height() <= 0)
-        {
-            return;
-        }
-        // A gamma of 1 applies the transform only.
-        FOpenColorIORendering::AddPass_RenderThread(GraphBuilder, FScreenPassViewInfo(FeatureLevel), FeatureLevel,
-            FScreenPassTexture(Intermediate, Viewport), FScreenPassRenderTarget(Destination, Viewport, ERenderTargetLoadAction::ELoad),
-            PassResources, 1.0f, EOpenColorIOTransformAlpha::None);
-    };
+    return Pass;
 }
 
 bool
