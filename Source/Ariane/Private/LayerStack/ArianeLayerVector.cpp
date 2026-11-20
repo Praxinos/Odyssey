@@ -17,11 +17,33 @@
 // Unreal headers
 #include "EditorModes.h"
 #include "UObject/ObjectSaveContext.h"
+#include "Materials/Material.h"
 
 // for debugging purpose
 static TAutoConsoleVariable<bool> CVarShowArianeNormals( TEXT("r.Ariane.ShowNormals")
                                                        , 0
                                                        , TEXT("Show Ariane mesh normals") );
+
+// Same check as FStaticMeshSceneProxy: a material that can't be used on a static mesh (e.g. Post Process domain)
+// is replaced by the default surface material.
+// This way Ariane displays what the static mesh export will display.
+static UMaterialInterface*
+GetMeshCompatibleMaterial( UMaterialInterface* MaterialInterface )
+{
+    if( MaterialInterface == nullptr )
+    {
+        return nullptr;
+    }
+
+    // Only Surface, Deferred Decal and Volume domains pass. In the editor, a missing usage flag
+    // is set automatically (as the engine does when the static mesh is rendered)
+    if( MaterialInterface->CheckMaterialUsage_Concurrent( MATUSAGE_StaticMesh ) == false )
+    {
+        return UMaterial::GetDefaultMaterial( MD_Surface );
+    }
+
+    return MaterialInterface;
+}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -41,9 +63,15 @@ FArianeGeometryProxy::FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLeve
     VectorLayer->GetDrawing()->GetUsedMaterials( MaterialInterfaces );
 
     // MaterialRelevance is used by GetViewRelevance and is necessary to render all kinds of materials
-    for( UMaterialInterface* MaterialInterface : MaterialInterfaces )
+    for( int32 Index = 0; Index < MaterialInterfaces.Num(); Index++ )
     {
-        MaterialRelevance |=  MaterialInterface->GetRelevance_Concurrent( ShaderPlatform );
+        // replaced in the array too, so that SetUsedMaterialForVerification knows the default material
+        MaterialInterfaces[Index] = GetMeshCompatibleMaterial( MaterialInterfaces[Index] );
+
+        if( MaterialInterfaces[Index] )
+        {
+            MaterialRelevance |=  MaterialInterfaces[Index]->GetRelevance_Concurrent( ShaderPlatform );
+        }
     }
 
     SetUsedMaterialForVerification( MaterialInterfaces );
@@ -168,6 +196,8 @@ FArianeGeometryProxy::GetDrawingDynamicMeshElements( const FSceneViewFamily& Vie
             MaterialInterface = Cycle->GetMaterial();
             ObjectColor = Cycle->GetColor();
         }
+
+        MaterialInterface = GetMeshCompatibleMaterial( MaterialInterface );
 
         if( bWireframe )
         {

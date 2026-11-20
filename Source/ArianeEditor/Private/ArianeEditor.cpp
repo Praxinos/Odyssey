@@ -435,7 +435,7 @@ FArianeEditor::CreateDrawingDistanceToPlaneSpinBox( const FText& InLabel )
     }
 
     Box->AddSlot()
-        .AutoWidth()
+        //.AutoWidth()
         .VAlign( VAlign_Center )
         [
             SNew(SSpinBox<float>)
