@@ -145,7 +145,15 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPoi
         return false;
 
     TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
-    TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? Odyssey::RasterContentBlocks::BeginBlockEdit(*content) : nullptr;
+    if (!content)
+        return false;
+
+    //Check the click before reading the content: a click outside it changes nothing
+    const FIntPoint contentSize = content->Describe().Size;
+    if (iPointInTexture.x < 0 || iPointInTexture.y < 0 || iPointInTexture.x >= contentSize.X || iPointInTexture.y >= contentSize.Y)
+        return false;
+
+    TSharedPtr<FOdysseyRasterBlockEdit> edit = Odyssey::RasterContentBlocks::BeginBlockEdit(*content);
     if (!edit)
         return false;
 
@@ -158,12 +166,6 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPoi
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
     if (!paintBlock)
-        return false;
-
-    if (iPointInTexture.x < 0 || iPointInTexture.y < 0)
-        return false;
-
-    if (iPointInTexture.x >= paintBlock->Width() || iPointInTexture.y >= paintBlock->Height())
         return false;
 
     TSharedPtr<::ULIS::FBlock> sourceBlock = GetSourceBlock();

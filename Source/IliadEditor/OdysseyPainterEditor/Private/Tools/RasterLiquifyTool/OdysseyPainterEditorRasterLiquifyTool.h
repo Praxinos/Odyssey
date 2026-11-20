@@ -249,8 +249,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         void Reset();
 
     private:
-        /** Reads the pixels of the current layer or cell into a new block; null when there is no raster content. */
-        TSharedPtr<::ULIS::FBlock> ReadBlockFromEditor(bool iCreate) const;
+        /** Returns the size of the raster content of the current layer or cell, without reading it; zero when there is none. */
+        FIntPoint GetContentSizeFromEditor() const;
 
         void OnRasterSelectionChanged();
         uint32 GetThreadCount();

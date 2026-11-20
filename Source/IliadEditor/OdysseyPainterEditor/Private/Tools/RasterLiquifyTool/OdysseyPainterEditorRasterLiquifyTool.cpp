@@ -161,12 +161,12 @@ UOdysseyPainterEditorRasterLiquifyTool::IsActivable() const
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
 }
 
-TSharedPtr<::ULIS::FBlock>
-UOdysseyPainterEditorRasterLiquifyTool::ReadBlockFromEditor(bool iCreate) const
+FIntPoint
+UOdysseyPainterEditorRasterLiquifyTool::GetContentSizeFromEditor() const
 {
-    TSharedPtr<FOdysseyMediaRaster> mediaRaster = GetMediaRasterFromEditor(iCreate);
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = GetMediaRasterFromEditor(false);
     TSharedPtr<FOdysseyRasterContent> content = mediaRaster ? mediaRaster->GetContent() : nullptr;
-    return content ? Odyssey::RasterContentBlocks::ReadBlock(*content) : nullptr;
+    return content ? content->Describe().Size : FIntPoint::ZeroValue;
 }
 
 void
@@ -256,23 +256,23 @@ UOdysseyPainterEditorRasterLiquifyTool::FetchSourceImages()
 void
 UOdysseyPainterEditorRasterLiquifyTool::MakeFlowMap()
 {
-    TSharedPtr<::ULIS::FBlock> srcBlock = ReadBlockFromEditor(false);
-    if (!srcBlock)
+    const FIntPoint size = GetContentSizeFromEditor();
+    if (size.X <= 0 || size.Y <= 0)
         return;
 
     mFlowMap.Empty();
-    mFlowMap.SetSize( srcBlock->Width(), srcBlock->Height() );
+    mFlowMap.SetSize( size.X, size.Y );
 }
 
 void
 UOdysseyPainterEditorRasterLiquifyTool::MakeDistortionMap()
 {
-    TSharedPtr<::ULIS::FBlock> srcBlock = ReadBlockFromEditor(false);
-    if (!srcBlock)
+    const FIntPoint size = GetContentSizeFromEditor();
+    if (size.X <= 0 || size.Y <= 0)
         return;
 
     mDistortionMap.Empty();
-    mDistortionMap.SetSize( srcBlock->Width(), srcBlock->Height() );
+    mDistortionMap.SetSize( size.X, size.Y );
 }
 
 void

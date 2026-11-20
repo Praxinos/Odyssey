@@ -192,14 +192,7 @@ FOdysseyPainterEditorTextureSource::Clear()
             if (!content)
                 continue;
 
-            Odyssey::RasterContentBlocks::EditBlock(*content,
-                [&](::ULIS::FBlock& iBlock)
-                {
-                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock.Format());
-                    ctx.Clear(iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, nullptr);
-                    ctx.Finish();
-                }
-            );
+            content->Clear();
         }
     }
     else if (mediaProvider.HasMedia<FOdysseyMediaVector>())
