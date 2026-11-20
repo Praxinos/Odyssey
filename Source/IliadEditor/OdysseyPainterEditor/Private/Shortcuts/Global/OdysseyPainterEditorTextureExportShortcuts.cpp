@@ -9,6 +9,7 @@
 #include "SOdysseyTextureExportAsImageDialog.h"
 #include "SOdysseyTextureExportAsTextureDialog.h"
 #include "SOdysseyImportTexturesDialog.h"
+#include "Misc/ScopeExit.h"
 
 //Action_ImportTextures()
 #include "ScopedTransaction.h"
@@ -120,6 +121,8 @@ FOdysseyPainterEditorTextureExportShortcuts::Action_ImportImages()
 
     FOdysseyImportTexturesParameters importParameters;
     importParameters.Init(filenames, texture->GetSurfaceWidth(), texture->GetSurfaceHeight());
+    // Release the transient textures created from the files, even if the dialog is cancelled
+    ON_SCOPE_EXIT { importParameters.ReleaseOwnedSourceTextures(); };
     if(!SOdysseyImportTexturesDialog::Open(LOCTEXT("import-images-dialog.title", "Import Images" ), importParameters))
         return;
 
