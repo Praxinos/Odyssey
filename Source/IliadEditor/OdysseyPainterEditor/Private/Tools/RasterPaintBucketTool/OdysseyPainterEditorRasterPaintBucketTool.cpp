@@ -27,7 +27,6 @@
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPixelFormat.h"
-#include "OdysseyRasterBlock.h"
 #include "OdysseyRenderContext.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
@@ -87,19 +86,6 @@ UOdysseyPainterEditorRasterPaintBucketTool::Load()
     rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterPaintBucketTool::OnRasterSelectionChanged);
     if (!rasterSelection->IsEmpty())
         mPaintEngine.SetMaskBlock(rasterSelection->GetBlock());
-
-    bool hasRaster = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
-    if( hasRaster )
-    {
-        /* It would be better if this is done in OnMouseDown()
-
-        TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaRaster>();
-        if( mediaRasters.Num() > 0 )
-        {
-            mPaintEngine.Edit(mediaRasters[0]->BeginEdit());
-        }
-        */
-    }
 }
 
 void
@@ -157,7 +143,8 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPoi
     if( mediaRasters.IsEmpty() )
         return false;
 
-    TSharedPtr<FOdysseyRasterBlockEdit> edit = mediaRasters[0]->BeginEdit();
+    TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
+    TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? content->BeginEdit() : nullptr;
     if (!edit)
         return false;
 

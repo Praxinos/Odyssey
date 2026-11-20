@@ -21,7 +21,6 @@
 #include "OdysseyPainterEditorRasterDrawingTool.h"
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "OdysseyPainterEditorSource.h"
-#include "OdysseyRasterBlock.h"
 #include "OdysseyRasterBlockEdit.h"
 
 #include "ULISEventBuilder.h"
@@ -384,7 +383,8 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
         return;
 
     //The transform is shown through an edit, committed by CommitTransform() or ended by ClearTransform()
-    TSharedPtr<FOdysseyRasterBlockEdit> edit = mediaRasters[0]->BeginEdit();
+    TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
+    TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? content->BeginEdit() : nullptr;
     if (!edit)
         return;
 

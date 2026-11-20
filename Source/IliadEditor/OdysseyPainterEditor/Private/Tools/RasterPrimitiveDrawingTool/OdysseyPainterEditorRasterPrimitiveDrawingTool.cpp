@@ -14,6 +14,7 @@
 
 #include "OdysseyMediaRaster.h"
 #include "OdysseyRasterBlockEdit.h"
+#include "OdysseyRasterContent.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDHandle.h"
 #include "OdysseyPainterEditorSource.h"
@@ -82,7 +83,8 @@ bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDown(const FOdyssey
     //Keep the edit of a shape drawn with several clicks, begin an edit otherwise
     if (!IsEditing(mPaintEngine.GetEdit(), mediaRaster))
     {
-        TSharedPtr<FOdysseyRasterBlockEdit> edit = mediaRaster->BeginEdit();
+        TSharedPtr<FOdysseyRasterContent> content = mediaRaster->GetContent();
+        TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? content->BeginEdit() : nullptr;
         if (!edit)
             return false;
 
@@ -362,7 +364,6 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
     formatCtx.Finish();
 
     mPaintEngine.PaintBlock()->Dirty();
-    mPaintEngine.Update(BlendParameters);
 
     Flush();
     Commit();

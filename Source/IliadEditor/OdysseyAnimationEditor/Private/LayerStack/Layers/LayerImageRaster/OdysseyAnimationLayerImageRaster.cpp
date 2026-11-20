@@ -24,7 +24,6 @@
 #include "OdysseyLighttable.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPixelFormat.h"
-#include "OdysseyRasterBlock.h"
 #include "OdysseyStyle.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -255,7 +254,7 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
         }
 
         // The layers were blended in compositing space: their colors are converted back into the linear colors the cell holds.
-        cell->GetRasterContent().Write(*destinationRenderTarget, { rect }, InverseColorConversion(cell->GetRenderedContentColorConversion()));
+        cell->GetRasterContent().Write(*destinationRenderTarget, { rect }, InverseColorConversion(cell->GetContentColorConversion(nullptr)));
     }
 }
 

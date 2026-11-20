@@ -6,6 +6,7 @@
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyRasterBlockEdit.h"
+#include "OdysseyRasterContent.h"
 #include "OdysseyBlendParametersOverrides.h"
 #include "OdysseyBrushOptionsOverrides.h"
 
@@ -213,7 +214,8 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointI
     //Keep the edit of a shape drawn with several clicks, begin an edit otherwise
     if (!IsEditing(mPaintEngine.GetEdit(), mediaRaster))
     {
-        TSharedPtr<FOdysseyRasterBlockEdit> edit = mediaRaster->BeginEdit();
+        TSharedPtr<FOdysseyRasterContent> content = mediaRaster->GetContent();
+        TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? content->BeginEdit() : nullptr;
         if (!edit)
             return false;
 
@@ -989,8 +991,6 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapeAbort()
     mIsFirstPoint = true;
     //Reset the PaintEngine as if didn't draw on it
     mPaintEngine.Abort();
-    //Update immediately the changes
-    mPaintEngine.Update(BlendParameters);
 
     if(mTransaction)
         mTransaction->Cancel();

@@ -106,7 +106,7 @@ public:
      * Creates the image when missing, and converts it when the owner expects another format, tiles outside the canvas included.
      * Between 8-bit linear and 8-bit sRGB encoded content, the conversion follows bKeepBytesOnEncodingChange;
      * otherwise it keeps the colors.
-     * @return False when the owner cannot hold content.
+     * @return False when the owner cannot hold content or the rendering is unavailable.
      */
     bool EnsureImage();
 

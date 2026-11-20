@@ -72,13 +72,12 @@ public:
         const FOdysseyRenderContext* RenderContext = nullptr) const;
 
     /**
-     * Returns the conversion applied to the content of this node when it is rendered, see GetContentColorConversion(),
-     * e.g. to write a render of the node back into its content with the inverse conversion.
+     * Returns the conversion applied to the content of this node, a content replacement included, e.g. the sRGB encoding
+     * of the linear colors of a layer whose stack blends encoded colors, or the conversion of a stack to its output.
+     * Not applied to composite content, whose children convert their own.
+     * A render of the node is written back into its content with the inverse conversion.
      */
-    EOdysseyColorConversion GetRenderedContentColorConversion(const FOdysseyRenderContext* RenderContext = nullptr) const
-    {
-        return GetContentColorConversion(RenderContext);
-    }
+    virtual EOdysseyColorConversion GetContentColorConversion(const FOdysseyRenderContext* RenderContext) const { return EOdysseyColorConversion::None; }
 
 public:
     virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() const = 0;
@@ -95,13 +94,6 @@ protected:
      * so that a replacement is given in content space.
      */
     virtual FMatrix GetContentTransform(const FOdysseyRenderContext* RenderContext) const { return FMatrix::Identity; }
-
-    /**
-     * Returns the conversion applied to the content of this node, a content replacement included, e.g. the sRGB encoding
-     * of the linear colors of a layer whose stack blends encoded colors, or the conversion of a stack to its output.
-     * Not applied to composite content, whose children convert their own.
-     */
-    virtual EOdysseyColorConversion GetContentColorConversion(const FOdysseyRenderContext* RenderContext) const { return EOdysseyColorConversion::None; }
     virtual bool BuildRenderPipelineInternal(
         FRenderFunction& oRenderFunction,
         const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext

@@ -30,9 +30,6 @@ public:
 
 public:
 #if WITH_EDITOR
-    /* UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    UTexture2D* ExportAsTexture(FString iAssetName, FString iPath ); */
-
     FSimpleMulticastDelegate& OnThumbnailChanged();
     FSimpleMulticastDelegate& OnThumbnailDirtied();
 #endif

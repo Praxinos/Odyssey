@@ -83,6 +83,10 @@ public:
     /** Ends the edit: its pixels are discarded and the views show the content again. */
     void End();
 
+public:
+    /** The size of the tiles an edit tracks and commits, in pixels: editors compose whole tiles. */
+    static constexpr int32 TileSize = 64;
+
 private:
     TSharedRef<FOdysseyRasterEditSession> Session;
     TSharedRef<::ULIS::FBlock> Original;

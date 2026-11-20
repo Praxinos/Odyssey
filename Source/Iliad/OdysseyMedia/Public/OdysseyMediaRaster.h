@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "OdysseyMedia.h"
 
-class FOdysseyRasterBlockEdit;
 class FOdysseyRasterContent;
 
 /**
@@ -20,7 +19,6 @@ public:
     DECLARE_ODYSSEY_MEDIA()
 
     using FGetContent = TFunction<TSharedPtr<FOdysseyRasterContent>()>;
-    using FBeginEdit = TFunction<TSharedPtr<FOdysseyRasterBlockEdit>()>;
 
 public:
     //Destructor
@@ -29,10 +27,9 @@ public:
 
     /**
      * @param iContentId Identifies the content: the rendering id of its owner, which its edit sessions replace in the views.
-     * @param iGetContent Returns the content, to read or write it.
-     * @param iBeginEdit Begins an edit of the content, see FOdysseyRasterContent::BeginEdit().
+     * @param iGetContent Returns the content, to read, write or edit it.
      */
-    FOdysseyMediaRaster(const FGuid& iContentId, FGetContent iGetContent, FBeginEdit iBeginEdit);
+    FOdysseyMediaRaster(const FGuid& iContentId, FGetContent iGetContent);
 
 public:
     //IOdysseyMedia API
@@ -40,14 +37,10 @@ public:
     /** Returns the id of the content, the same for every media of the same layer or cell. */
     const FGuid& GetContentId() const;
 
-    /** Returns the content, to read or write it; see FOdysseyRasterContent. Null when the owner was destroyed. */
+    /** Returns the content, to read, write or edit it; see FOdysseyRasterContent. Null when the owner was destroyed. */
     TSharedPtr<FOdysseyRasterContent> GetContent() const;
-
-    /** Begins an edit of the content, shown by the views until the tool commits or ends it. Null when the content cannot be edited. */
-    TSharedPtr<FOdysseyRasterBlockEdit> BeginEdit() const;
 
 private:
     FGuid mContentId;
     FGetContent mGetContent;
-    FBeginEdit mBeginEdit;
 };

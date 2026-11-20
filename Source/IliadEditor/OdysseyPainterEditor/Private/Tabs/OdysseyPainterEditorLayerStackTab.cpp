@@ -17,7 +17,6 @@
 #include "UObject/SavePackage.h"
 #include "Factories/Texture2dFactoryNew.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyRasterBlock.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTextureLayerStack.h"
 #include "OdysseyTextureLayerImageRaster.h"

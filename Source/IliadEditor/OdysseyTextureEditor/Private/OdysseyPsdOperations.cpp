@@ -10,7 +10,6 @@
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerFolder.h"
 #include "OdysseyTextureLayerStackUserData.h"
-#include "OdysseyRasterBlock.h"
 #include "ULISLoaderModule.h"
 
 #include <ULIS>

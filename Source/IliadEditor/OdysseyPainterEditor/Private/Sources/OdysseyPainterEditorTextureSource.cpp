@@ -195,8 +195,7 @@ FOdysseyPainterEditorTextureSource::Clear()
                 [&](::ULIS::FBlock& iBlock)
                 {
                     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock.Format());
-                    ::ULIS::FEvent eventClear;
-                    ctx.Clear(iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+                    ctx.Clear(iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, nullptr);
                     ctx.Finish();
                 }
             );
@@ -265,8 +264,6 @@ FOdysseyPainterEditorTextureSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock
                 [&](::ULIS::FBlock& iBlock)
                 {
                     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock.Format());
-                    ::ULIS::FEvent eventCut;
-
                     ctx.Blend(
                         *iCopyBlock,
                         iBlock,
@@ -278,7 +275,7 @@ FOdysseyPainterEditorTextureSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock
                         ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
                         0,
                         nullptr,
-                        &eventCut
+                        nullptr
                     );
 
                     ctx.Finish();
@@ -344,8 +341,6 @@ void FOdysseyPainterEditorTextureSource::PasteBlockToCurrentLayer(TSharedPtr<::U
             content->EditBlock(
                 [&](::ULIS::FBlock& iBlock)
                 {
-                    ::ULIS::FEvent eventPaste;
-
                     ctx.Blend(
                         *copyBlock,
                         iBlock,
@@ -357,7 +352,7 @@ void FOdysseyPainterEditorTextureSource::PasteBlockToCurrentLayer(TSharedPtr<::U
                         ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
                         0,
                         nullptr,
-                        &eventPaste);
+                        nullptr);
 
                     ctx.Finish();
 

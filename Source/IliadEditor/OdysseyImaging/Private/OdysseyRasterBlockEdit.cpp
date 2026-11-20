@@ -10,8 +10,6 @@
 
 namespace
 {
-constexpr int32 EditedTileSize = 64;
-
 TSharedRef<::ULIS::FBlock> CopyBlock(const ::ULIS::FBlock& Source)
 {
     TSharedRef<::ULIS::FBlock> Copy = MakeShared<::ULIS::FBlock>(Source.Width(), Source.Height(), Source.Format());
@@ -32,7 +30,7 @@ FOdysseyRasterBlockEdit::FOdysseyRasterBlockEdit(TSharedRef<FOdysseyRasterEditSe
     , Block(CopyBlock(*InOriginal))
     , TileFormat(InTileFormat)
     , bSRGB(bInSRGB)
-    , EditedTiles(EditedTileSize, InOriginal->Width(), InOriginal->Height())
+    , EditedTiles(TileSize, InOriginal->Width(), InOriginal->Height())
     , OnCommitted(MoveTemp(InOnCommitted))
 {
 }

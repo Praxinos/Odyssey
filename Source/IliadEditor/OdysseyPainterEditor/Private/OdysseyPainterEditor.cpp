@@ -50,7 +50,6 @@
 #include "OdysseyPainterEditorToolMenuContext.h"
 #include "OdysseyPalette.h"
 #include "OdysseyPaletteEntryColor.h"
-#include "OdysseyRasterBlock.h"
 #include "OdysseyTextureLayerImageVector.h"
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyToolCollection.h"

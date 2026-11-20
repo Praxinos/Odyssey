@@ -18,7 +18,6 @@
 #include "OdysseyPainterEditorSettings.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyMediaProvider.h"
-#include "OdysseyRasterBlock.h"
 #include "OdysseyRasterBlockEdit.h"
 #include "OdysseyPainterEditorCommands.h"
 #include "ScopedTransaction.h"
@@ -944,15 +943,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flush()
 void
 UOdysseyPainterEditorRasterLiquifyTool::Commit()
 {
-/*
-    FScopedTransaction transaction(LOCTEXT("raster-liquify-tool.transaction.liquify-area", "Liquify Area"));
-    mPaintEngine.Commit(BlendParameters);
-
-    FOdysseyPainterEditor* editor = GetEditor();
-    TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
-    if (source)
-        source->RecordCurrentFrameUndo();
-*/
+    // Each stroke is committed on mouse up.
 }
 
 void UOdysseyPainterEditorRasterLiquifyTool::BindShortcuts(TSharedPtr<FUICommandList> iCommandList)
@@ -998,7 +989,8 @@ UOdysseyPainterEditorRasterLiquifyTool::UpdateAlteredImage( FAlteredImage& iAlte
     // Each stroke edits the content from its first update to its commit
     if( !IsEditing( iAlteredImage.edit, iAlteredImage.mediaRaster ) )
     {
-        iAlteredImage.edit = iAlteredImage.mediaRaster->BeginEdit();
+        TSharedPtr<FOdysseyRasterContent> content = iAlteredImage.mediaRaster->GetContent();
+        iAlteredImage.edit = content ? content->BeginEdit() : nullptr;
         if( !iAlteredImage.edit )
             return;
     }
@@ -1121,21 +1113,5 @@ UOdysseyPainterEditorRasterLiquifyTool::GetTooltip() const
 {
     return LOCTEXT("raster-liquify-tool.tooltip", "Liquify Tool");
 }
-
-/*
-void
-UOdysseyPainterEditorRasterLiquifyTool::OnRasterSelectionChanged()
-{
-    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
-    if (rasterSelection->IsEmpty())
-    {
-        mPaintEngine.SetMaskBlock(nullptr);
-    }
-    else
-    {
-        mPaintEngine.SetMaskBlock(rasterSelection->GetBlock());
-    }
-}
-*/
 
 #undef LOCTEXT_NAMESPACE

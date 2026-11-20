@@ -24,7 +24,6 @@
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationFlipSystem.h"
-#include "OdysseyRasterBlock.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorEngine.h"
@@ -329,8 +328,6 @@ void FOdysseyPainterEditorAnimationSource::ClearFromCopyBlock(TSharedPtr<::ULIS:
                 [&](::ULIS::FBlock& iBlock)
                 {
                     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock.Format());
-                    ::ULIS::FEvent eventCut;
-
                     ctx.Blend(
                         *iCopyBlock,
                         iBlock,
@@ -342,7 +339,7 @@ void FOdysseyPainterEditorAnimationSource::ClearFromCopyBlock(TSharedPtr<::ULIS:
                         ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
                         0,
                         nullptr,
-                        &eventCut
+                        nullptr
                     );
 
                     ctx.Finish();
@@ -422,8 +419,6 @@ void FOdysseyPainterEditorAnimationSource::PasteBlockToCurrentLayer(TSharedPtr<:
             content->EditBlock(
                 [&](::ULIS::FBlock& iBlock)
                 {
-                    ::ULIS::FEvent eventPaste;
-
                     ctx.Blend(
                         *copyBlock,
                         iBlock,
@@ -435,7 +430,7 @@ void FOdysseyPainterEditorAnimationSource::PasteBlockToCurrentLayer(TSharedPtr<:
                         ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
                         0,
                         nullptr,
-                        &eventPaste);
+                        nullptr);
 
                     ctx.Finish();
 
@@ -517,8 +512,6 @@ FOdysseyPainterEditorAnimationSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::F
             content->EditBlock(
                 [&](::ULIS::FBlock& iBlock)
                 {
-                    ::ULIS::FEvent eventPaste;
-
                     ctx.Blend(
                         *copyBlock,
                         iBlock,
@@ -530,7 +523,7 @@ FOdysseyPainterEditorAnimationSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::F
                         ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
                         0,
                         nullptr,
-                        &eventPaste);
+                        nullptr);
 
                     ctx.Finish();
 

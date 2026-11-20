@@ -13,10 +13,9 @@ FOdysseyMediaRaster::FOdysseyMediaRaster()
 {
 }
 
-FOdysseyMediaRaster::FOdysseyMediaRaster(const FGuid& iContentId, FGetContent iGetContent, FBeginEdit iBeginEdit)
+FOdysseyMediaRaster::FOdysseyMediaRaster(const FGuid& iContentId, FGetContent iGetContent)
     : mContentId(iContentId)
     , mGetContent(MoveTemp(iGetContent))
-    , mBeginEdit(MoveTemp(iBeginEdit))
 {
 }
 
@@ -30,10 +29,4 @@ TSharedPtr<FOdysseyRasterContent>
 FOdysseyMediaRaster::GetContent() const
 {
     return mGetContent ? mGetContent() : nullptr;
-}
-
-TSharedPtr<FOdysseyRasterBlockEdit>
-FOdysseyMediaRaster::BeginEdit() const
-{
-    return mBeginEdit ? mBeginEdit() : nullptr;
 }

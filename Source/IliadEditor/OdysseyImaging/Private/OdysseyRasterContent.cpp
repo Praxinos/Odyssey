@@ -61,6 +61,11 @@ bool
 FOdysseyRasterContent::EnsureImage()
 {
     check(IsInGameThread());
+    // The tiles are created, read and written on the GPU.
+    if (!FApp::CanEverRender())
+    {
+        return false;
+    }
     const FDescription Description = GetDescription();
     if (!Description.IsValid())
     {
@@ -75,7 +80,7 @@ FOdysseyRasterContent::EnsureImage()
         NewImage->Initialize(TileSize, Format);
         Image = NewImage;
     }
-    else if (Image->GetFormat() != Format && FApp::CanEverRender())
+    else if (Image->GetFormat() != Format)
     {
         // e.g. a cell duplicated into an animation of another format, or the sRGB setting of a texture changed.
         // Tiles outside the canvas are converted too: a canvas shrunk then enlarged shows them again.
@@ -130,7 +135,7 @@ FOdysseyRasterContent::EnsureImage()
 bool
 FOdysseyRasterContent::SetContent(const ::ULIS::FBlock& Block)
 {
-    if (!FApp::CanEverRender() || !EnsureImage())
+    if (!EnsureImage())
     {
         return false;
     }
@@ -147,7 +152,7 @@ TSharedPtr<FOdysseyRasterBlockEdit>
 FOdysseyRasterContent::BeginEdit()
 {
     check(IsInGameThread());
-    if (!FApp::CanEverRender() || !EnsureImage())
+    if (!EnsureImage())
     {
         return nullptr;
     }
@@ -183,7 +188,7 @@ FOdysseyRasterContent::BeginEdit()
 UTextureRenderTarget2D*
 FOdysseyRasterContent::CreateRenderTarget()
 {
-    if (!FApp::CanEverRender() || !EnsureImage())
+    if (!EnsureImage())
     {
         return nullptr;
     }
@@ -193,7 +198,7 @@ FOdysseyRasterContent::CreateRenderTarget()
 bool
 FOdysseyRasterContent::Read(UTextureRenderTarget2D& Destination, const FIntRect& Rect, FIntPoint Position)
 {
-    if (!FApp::CanEverRender() || !EnsureImage())
+    if (!EnsureImage())
     {
         return false;
     }
@@ -204,11 +209,6 @@ FOdysseyRasterContent::Read(UTextureRenderTarget2D& Destination, const FIntRect&
 bool
 FOdysseyRasterContent::Write(UTextureRenderTarget2D& Source, const TArray<FIntRect>& Rects, EOdysseyColorConversion Conversion)
 {
-    if (!FApp::CanEverRender())
-    {
-        return false;
-    }
-
     // Copies the source pixels, converted into linear colors, at the same positions.
     IOdysseyTextureRenderingAbility::FRenderFunction Copy = [SourceResource = Source.GameThread_GetRenderTargetResource()](
         FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type FeatureLevel, FRDGTextureRef Destination,
@@ -241,7 +241,7 @@ FOdysseyRasterContent::Write(UTextureRenderTarget2D& Source, const TArray<FIntRe
 TSharedPtr<::ULIS::FBlock>
 FOdysseyRasterContent::ReadBlock()
 {
-    if (!FApp::CanEverRender() || !EnsureImage())
+    if (!EnsureImage())
     {
         return nullptr;
     }
@@ -252,7 +252,7 @@ FOdysseyRasterContent::ReadBlock()
 bool
 FOdysseyRasterContent::WriteBlock(const ::ULIS::FBlock& Block, const TArray<FIntRect>& Rects)
 {
-    if (!FApp::CanEverRender() || !EnsureImage())
+    if (!EnsureImage())
     {
         return false;
     }
@@ -349,7 +349,7 @@ FOdysseyRasterContent::WriteThroughSession(const TArray<FIntRect>& Rects,
     TFunctionRef<void(FOdysseyRasterEditSession& Session, const TArray<FIntRect>& Rects)> Fill)
 {
     check(IsInGameThread());
-    if (!FApp::CanEverRender() || !EnsureImage())
+    if (!EnsureImage())
     {
         return false;
     }

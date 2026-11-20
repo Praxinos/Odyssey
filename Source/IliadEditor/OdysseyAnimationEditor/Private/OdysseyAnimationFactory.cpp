@@ -9,7 +9,6 @@
 #include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyAnimationCellImageRaster.h"
 #include "Widgets/SOdysseyAnimationConfigureWindow.h"
-#include "OdysseyRasterBlock.h"
 #include "ULISLoaderModule.h"
 
 #include "Editor.h"

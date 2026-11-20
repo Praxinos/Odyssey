@@ -193,7 +193,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
                 );
 
                 // The cells were rendered in compositing space: their colors are converted back into the linear colors the cell holds.
-                rasterCell->GetRasterContent().Write(*destinationRenderTarget, { rect }, InverseColorConversion(rasterCell->GetRenderedContentColorConversion()));
+                rasterCell->GetRasterContent().Write(*destinationRenderTarget, { rect }, InverseColorConversion(rasterCell->GetContentColorConversion(nullptr)));
             }
 
             for (UOdysseyAnimationCell* cell : rasterCells)
@@ -244,7 +244,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
                 );
 
                 // The cells were rendered in compositing space: their colors are converted back into the linear colors the cell holds.
-                rasterCell->GetRasterContent().Write(*destinationRenderTarget, { rect }, InverseColorConversion(rasterCell->GetRenderedContentColorConversion()));
+                rasterCell->GetRasterContent().Write(*destinationRenderTarget, { rect }, InverseColorConversion(rasterCell->GetContentColorConversion(nullptr)));
             }
 
             for (UOdysseyAnimationCell* cell : rasterCells)

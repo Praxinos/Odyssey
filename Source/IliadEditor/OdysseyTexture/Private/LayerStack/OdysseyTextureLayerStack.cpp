@@ -10,7 +10,6 @@
 #include "UObject/Package.h"
 
 #include "OdysseyPixelFormat.h"
-#include "OdysseyRasterBlock.h"
 #include "OdysseyRenderContext.h"
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyTextureLayer.h"

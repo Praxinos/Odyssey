@@ -68,39 +68,4 @@ UOdysseyTextureLayer::OnThumbnailDirtied()
     return mOnThumbnailDirtied;
 }
 
-/* UTexture2D*
-UOdysseyTextureLayer::ExportAsTexture(FString iAssetName, FString iPath )
-{
-    UTexture2D* texture = GetTexture();
-    if ( !texture )
-        return nullptr;
-
-    UTexture2D* renderTexture = GetRenderTexture();
-    if ( !renderTexture )
-        return nullptr;
-
-    FString AssetName;
-    FString PackageName;
-
-    IAssetTools& AssetTools = FModuleManager::Get().LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-    AssetTools.CreateUniqueAssetName(iPath, iAssetName, PackageName, AssetName);
-
-    FObjectDuplicationParameters params( texture, CreatePackage(*PackageName) );
-    params.DestName = FName(*AssetName);
-    params.FlagMask = RF_Public | RF_Standalone | RF_Transactional;
-    params.DuplicateMode = EDuplicateMode::Normal;
-
-    UTexture2D* createdTexture = Cast<UTexture2D>(StaticDuplicateObjectEx(params));
-
-
-    FImage srcImage;
-    renderTexture->Source.GetMipImage(srcImage, 0);
-
-    createdTexture->PreEditChange(nullptr);
-    createdTexture->Source.Init(srcImage);
-    createdTexture->PostEditChange();
-
-    return createdTexture;
-} */
-
 #endif

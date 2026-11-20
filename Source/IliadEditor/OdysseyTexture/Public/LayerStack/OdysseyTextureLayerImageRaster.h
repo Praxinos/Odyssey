@@ -40,12 +40,6 @@ public:
      */
     FOdysseyRasterContent& GetRasterContent() const;
 
-    /**
-     * Begins an edit of the pixels, shown by the views until it is committed or ended; see FOdysseyRasterContent::BeginEdit().
-     * The edit keeps the alpha of the pixels while the alpha of the layer is locked.
-     * @return Null when the layer is not in a layer stack or the rendering is unavailable.
-     */
-    TSharedPtr<FOdysseyRasterBlockEdit> BeginRasterEdit();
 
     /** Returns the tiled image holding the pixels, without creating it. */
     const UOdysseyTiledImage* GetTiledImage() const;

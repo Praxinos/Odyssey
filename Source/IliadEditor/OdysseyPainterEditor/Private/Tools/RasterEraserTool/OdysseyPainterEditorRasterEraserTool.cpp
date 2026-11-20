@@ -4,6 +4,7 @@
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyRasterBlockEdit.h"
+#include "OdysseyRasterContent.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyHUDElement.h"
@@ -173,7 +174,8 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseDown(const FOdysseyPoint& iPointIn
     //Keep the edit of a shape drawn with several clicks, begin an edit otherwise
     if (!IsEditing(mPaintEngine.GetEdit(), mediaRaster))
     {
-        TSharedPtr<FOdysseyRasterBlockEdit> edit = mediaRaster->BeginEdit();
+        TSharedPtr<FOdysseyRasterContent> content = mediaRaster->GetContent();
+        TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? content->BeginEdit() : nullptr;
         if (!edit)
             return false;
 
@@ -599,8 +601,6 @@ UOdysseyPainterEditorRasterEraserTool::OnShapeCommit(const TArray<FOdysseyPoint>
         }
     }
 
-    mPaintEngine.Update(mBlendParameters);
-
     Flush();
     mWorker.Finish();
     Commit();
@@ -614,7 +614,6 @@ UOdysseyPainterEditorRasterEraserTool::OnShapeAbort()
 {
     ResetInterpolation();
     mPaintEngine.Abort();
-    mPaintEngine.Update(mBlendParameters);
     if(mTransaction)
         mTransaction->Cancel();
     mTransaction = nullptr; //Finish the undo transaction

@@ -18,7 +18,6 @@
 #include "OdysseyTiledImage.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyMediaRaster.h"
-#include "OdysseyRasterBlockEdit.h"
 #include "OdysseyAnimationCellImageRasterImport.h"
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyRasterBlock.h"
@@ -27,7 +26,6 @@
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
 #include "OdysseyPixelFormat.h"
-#include "TextureCompiler.h"
 #include "TextureResource.h"
 #include "UObject/ObjectSaveContext.h"
 #include "ScopedTransaction.h"
@@ -159,13 +157,6 @@ UOdysseyAnimationCellImageRaster::MigrateLegacyContent()
     Texture = nullptr;
 }
 
-TSharedPtr<FOdysseyRasterBlockEdit>
-UOdysseyAnimationCellImageRaster::BeginRasterEdit()
-{
-    MigrateLegacyContent();
-    return FindOrCreateRasterContent().BeginEdit();
-}
-
 void
 UOdysseyAnimationCellImageRaster::PostLoad()
 {
@@ -183,9 +174,6 @@ UOdysseyAnimationCellImageRaster::BeginDestroy()
 FOdysseyMediaProvider
 UOdysseyAnimationCellImageRaster::GetMediaProvider() const
 {
-    //Don't create a mediaRaster if there is an image render in use
-    FScopeLock lock(&mImageRenderingMutex);
-
     // The pixels are read or edited only when a tool needs them.
     TWeakObjectPtr<UOdysseyAnimationCellImageRaster> weakThis = const_cast<UOdysseyAnimationCellImageRaster*>(this);
     TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(GetRenderingId(),
@@ -193,22 +181,10 @@ UOdysseyAnimationCellImageRaster::GetMediaProvider() const
         {
             UOdysseyAnimationCellImageRaster* cell = weakThis.Get();
             return cell ? TSharedPtr<FOdysseyRasterContent>(cell->GetRasterContent().AsShared()) : nullptr;
-        },
-        [weakThis]() -> TSharedPtr<FOdysseyRasterBlockEdit>
-        {
-            UOdysseyAnimationCellImageRaster* cell = weakThis.Get();
-            return cell ? cell->BeginRasterEdit() : nullptr;
         });
-    mMediaRaster = mediaRaster;
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.Add(mediaRaster);
     return mediaProvider;
-}
-
-FCriticalSection*
-UOdysseyAnimationCellImageRaster::GetImageRenderingMutex() const
-{
-    return &mImageRenderingMutex;
 }
 
 void

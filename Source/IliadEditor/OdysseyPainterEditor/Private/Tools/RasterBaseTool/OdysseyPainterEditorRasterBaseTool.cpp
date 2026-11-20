@@ -15,7 +15,6 @@
 #include "OdysseyMediaRaster.h"
 #include "OdysseyRasterContent.h"
 #include "OdysseyPainterEditorRasterSelection.h"
-#include "OdysseyRasterBlock.h"
 #include "OdysseyRasterBlockEdit.h"
 #include "OdysseyRasterEditSession.h"
 #include "ScopedTransaction.h"

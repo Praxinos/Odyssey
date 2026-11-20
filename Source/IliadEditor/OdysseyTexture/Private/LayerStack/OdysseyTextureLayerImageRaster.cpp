@@ -8,7 +8,6 @@
 #include "ImageUtils.h"
 #include "RenderGraphUtils.h"
 #include "ScreenPass.h"
-#include "TextureCompiler.h"
 #include "TextureResource.h"
 #include "UObject/ObjectSaveContext.h"
 
@@ -16,15 +15,14 @@
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPixelFormat.h"
 #include "OdysseyRasterBlock.h"
-#include "OdysseyRasterBlockEdit.h"
 #include "OdysseyRenderContext.h"
 #include "OdysseyStyle.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTextureLayerImageRasterImport.h"
 #include "OdysseyTextureLayerStack.h"
+#include "OdysseyTiledImage.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
-#include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 
@@ -152,12 +150,6 @@ UOdysseyTextureLayerImageRaster::GetTiledImage() const
     return TiledImage;
 }
 
-TSharedPtr<FOdysseyRasterBlockEdit>
-UOdysseyTextureLayerImageRaster::BeginRasterEdit()
-{
-    return GetRasterContent().BeginEdit();
-}
-
 void
 UOdysseyTextureLayerImageRaster::ColorSettingsChanged()
 {
@@ -234,7 +226,7 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     }
 
     // The layers were blended in compositing space: their colors are converted back into the linear colors the layer holds.
-    GetRasterContent().Write(*destinationRenderTarget, { rect }, InverseColorConversion(GetRenderedContentColorConversion()));
+    GetRasterContent().Write(*destinationRenderTarget, { rect }, InverseColorConversion(GetContentColorConversion(nullptr)));
 }
 
 FOdysseyMediaProvider
@@ -253,40 +245,10 @@ UOdysseyTextureLayerImageRaster::GetMediaProvider(uint32 iFrameIndex) const
         {
             UOdysseyTextureLayerImageRaster* layer = weakThis.Get();
             return layer ? TSharedPtr<FOdysseyRasterContent>(layer->GetRasterContent().AsShared()) : nullptr;
-        },
-        [weakThis]() -> TSharedPtr<FOdysseyRasterBlockEdit>
-        {
-            UOdysseyTextureLayerImageRaster* layer = weakThis.Get();
-            return layer ? layer->BeginRasterEdit() : nullptr;
         });
     mediaProvider.Add(mediaRaster);
     return mediaProvider;
 }
-
-/* struct FOdysseyTextureLayerImageRasterObjectVersion
-{
-    enum Type
-    {
-        // Before any version changes were made
-        BeforeCustomVersionWasAdded,
-
-        // Stopped relying on Raster Block and use UTexture2D instead
-        NoRasterBlockSaving,
-
-        // -----<new versions can be added above this line>-------------------------------------------------
-        VersionPlusOne,
-        LatestVersion = VersionPlusOne - 1
-    };
-
-    // The GUID for this custom version number
-    const static FGuid GUID;
-
-private:
-    FOdysseyTextureLayerImageRasterObjectVersion() {}
-};
-
-const FGuid FOdysseyTextureLayerImageRasterObjectVersion::GUID(0xD5CF1CCA, 0xEAC04893, 0x9F032A90, 0x2D3E968F);
-FDevVersionRegistration GRegisterOdysseyTextureLayerImageRasterObjectVersion(FOdysseyTextureLayerImageRasterObjectVersion::GUID, FOdysseyTextureLayerImageRasterObjectVersion::LatestVersion, TEXT("OdysseyTextureLayerImageRaster")); */
 
 void
 UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)

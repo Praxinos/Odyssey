@@ -13,12 +13,6 @@
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 
-namespace
-{
-/** Edits are composed by whole tiles, as the edit session commits them. */
-constexpr int32 PaintTileSize = 64;
-}
-
 FOdysseyPaintEngine::~FOdysseyPaintEngine()
 {
     UnbindBeforeRedoUndo();
@@ -191,7 +185,7 @@ FOdysseyPaintEngine::UpdateEditedBlock(const FOdysseyBlendParameters& iBlendPara
     BindBeforeRedoUndo();
 
     //Compose whole tiles, as the edit session commits them
-    FOdysseyInvalidTileMap tileMap(PaintTileSize, editedBlock->Width(), editedBlock->Height());
+    FOdysseyInvalidTileMap tileMap(FOdysseyRasterBlockEdit::TileSize, editedBlock->Width(), editedBlock->Height());
     tileMap.Invalidate(::ULISUtils::ToIntRects(mInvalidRects));
     mInvalidRects.Empty();
     const TArray<FIntRect> invalidRects = tileMap.InvalidRects();

@@ -27,7 +27,6 @@
 #include "OdysseyAnimationRenderContext.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyLighttable.h"
-#include "OdysseyRasterBlock.h"
 #include "OdysseyRasterBlockEdit.h"
 #include "OdysseyRasterContent.h"
 #include "OdysseyRasterEditSession.h"
@@ -155,7 +154,7 @@ bool Compare(FAutomationTestBase& Test, UOdysseyAnimation* Animation, int32 Fram
     TArray<TSharedPtr<FOdysseyRasterBlockEdit>> Edits;
     for (UOdysseyAnimationCellImageRaster* RasterCell : RasterCells(Animation))
     {
-        TSharedPtr<FOdysseyRasterBlockEdit> Edit = RasterCell->BeginRasterEdit();
+        TSharedPtr<FOdysseyRasterBlockEdit> Edit = RasterCell->GetRasterContent().BeginEdit();
         if (Test.TestTrue(TEXT("Begin an edit"), Edit.IsValid()))
         {
             Edit->Update({ FIntRect(0, 0, Width, Height) });
@@ -248,7 +247,7 @@ bool FOdysseyAnimationTiledPartialTest::RunTest(const FString& Parameters)
     UOdysseyAnimationCellImageRaster* First = Cell(Animation.Get(), 0);
     const TMap<FIntPoint, FOdysseyTileId> Before = TileIds(First->GetTiledImage());
     const TArray<FLinearColor> BeforePixels = Render(Animation.Get(), 0, EOdysseyRenderingType::Render);
-    TSharedPtr<FOdysseyRasterBlockEdit> Edit = First->BeginRasterEdit();
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = First->GetRasterContent().BeginEdit();
     if (!TestTrue(TEXT("Begin an edit"), Edit.IsValid()))
     {
         return false;

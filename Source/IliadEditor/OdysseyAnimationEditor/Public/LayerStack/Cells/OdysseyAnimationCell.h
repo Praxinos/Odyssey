@@ -177,6 +177,7 @@ protected:
     /** The out of pegs transform, when the render context asks for it. */
     virtual FMatrix GetContentTransform(const FOdysseyRenderContext* RenderContext) const override;
 
+public:
     /** Encodes the linear colors of the cell when its animation blends sRGB encoded colors. */
     virtual EOdysseyColorConversion GetContentColorConversion(const FOdysseyRenderContext* RenderContext) const override;
 

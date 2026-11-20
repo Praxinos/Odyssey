@@ -58,7 +58,7 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
         return;
 
     // Thumbnails show encoded colors, as the cells blended with encoded colors render them.
-    if (cell->GetRenderedContentColorConversion() == EOdysseyColorConversion::None)
+    if (cell->GetContentColorConversion(nullptr) == EOdysseyColorConversion::None)
         childRenderFunction = FOdysseyColorSpaceShader::WrapRenderFunction(MoveTemp(childRenderFunction), EOdysseyColorConversion::Encode);
 
     FIntRect srcRect = cell->GetDefaultRenderRect();

@@ -16,7 +16,6 @@
 class UOdysseyTiledImage;
 #if WITH_EDITOR
 class FOdysseyRasterBlock;
-class FOdysseyMediaRaster;
 #endif
 
 UCLASS(BlueprintType)
@@ -50,13 +49,6 @@ public:
      * Its functions fail while the cell is not in an animation.
      */
     FOdysseyRasterContent& GetRasterContent() const;
-
-    /**
-     * Begins an edit of the pixels, shown by the views until it is committed or ended; see FOdysseyRasterContent::BeginEdit().
-     * The edit keeps the alpha of the pixels while the alpha of the layer is locked.
-     * @return Null when the cell is not in an animation or the rendering is unavailable.
-     */
-    TSharedPtr<FOdysseyRasterBlockEdit> BeginRasterEdit();
     /** Returns the tiled image holding the pixels, without creating it. */
     const UOdysseyTiledImage* GetTiledImage() const;
     virtual FOdysseyMediaProvider GetMediaProvider() const override;
@@ -66,7 +58,6 @@ public:
     virtual void PostLoad() override;
     virtual void PreSave(FObjectPreSaveContext SaveContext) override;
     virtual void BeginDestroy() override;
-    FCriticalSection* GetImageRenderingMutex() const;
 
 private:
     /** Returns the content, creating it when needed, without migrating legacy content. */
@@ -83,8 +74,6 @@ private:
     /** Pixels read from assets saved before the tiled image storage. Moved into the tiled image after loading. */
     TSharedPtr<FOdysseyRasterBlock> mLegacyRasterBlock;
     mutable TSharedPtr<FOdysseyRasterContent> mRasterContent;
-    mutable FCriticalSection mImageRenderingMutex;
-    mutable TWeakPtr<FOdysseyMediaRaster> mMediaRaster;
 #endif
 
 #if WITH_EDITORONLY_DATA
