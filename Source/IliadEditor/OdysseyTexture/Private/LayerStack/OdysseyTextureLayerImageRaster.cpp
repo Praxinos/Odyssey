@@ -4,7 +4,6 @@
 #include "OdysseyTextureLayerImageRaster.h"
 
 #include "Engine/TextureRenderTarget2D.h"
-#include "Misc/App.h"
 #include "ImageUtils.h"
 #include "RenderGraphUtils.h"
 #include "ScreenPass.h"
@@ -17,7 +16,6 @@
 #include "OdysseyRasterBlock.h"
 #include "OdysseyRenderContext.h"
 #include "OdysseyStyle.h"
-#include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTextureLayerImageRasterImport.h"
 #include "OdysseyTextureLayerStack.h"
 #include "OdysseyTiledImage.h"
@@ -42,7 +40,7 @@ void
 UOdysseyTextureLayerImageRaster::PostLoad()
 {
     Super::PostLoad();
-    MigrateLegacyContent();
+    GetRasterContent().MigrateLegacy(Texture, LegacyPixels);
 }
 
 void
@@ -50,7 +48,7 @@ UOdysseyTextureLayerImageRaster::PreSave(FObjectPreSaveContext SaveContext)
 {
     Super::PreSave(SaveContext);
     // Content still held by a legacy render texture must reach the tiled image before saving.
-    MigrateLegacyContent();
+    GetRasterContent().MigrateLegacy(Texture, LegacyPixels);
 }
 
 void
@@ -58,30 +56,6 @@ UOdysseyTextureLayerImageRaster::BeginDestroy()
 {
     RasterContent.Reset();
     Super::BeginDestroy();
-}
-
-void
-UOdysseyTextureLayerImageRaster::MigrateLegacyContent()
-{
-    UTexture2D* LegacyTexture = Texture;
-    if (HasAnyFlags(RF_ClassDefaultObject) || (!LegacyPixels && !LegacyTexture) || !FApp::CanEverRender())
-    {
-        return;
-    }
-
-    TSharedPtr<::ULIS::FBlock> Pixels = LegacyPixels;
-    if (!Pixels && LegacyTexture->Source.IsValid())
-    {
-        Pixels = MakeShareable(NewBlockFromUTextureData(LegacyTexture, GetRasterFormat()));
-    }
-
-    // Keep the legacy data when it cannot be migrated, e.g. while the layer is not yet in a layer stack.
-    if (Pixels && !GetRasterContent().SetContent(*Pixels))
-    {
-        return;
-    }
-    LegacyPixels.Reset();
-    Texture = nullptr;
 }
 
 FOdysseyRasterContent&
@@ -106,7 +80,7 @@ UOdysseyTextureLayerImageRaster::GetRasterContent() const
             },
             [MutableThis](const TArray<FIntRect>& Rects, bool bInteractive)
             {
-                MutableThis->OnContentChanged(Rects, bInteractive);
+                MutableThis->RenderingChanged(Rects, bInteractive);
             },
             [MutableThis]()
             {
@@ -127,17 +101,6 @@ UOdysseyTextureLayerImageRaster::GetRasterFormat() const
     ::ULIS::eFormat Format = ULISFormatForTextureSourceFormat(GetLayerTextureFormat(OwnerTexture->Source.GetFormat()));
     // Raster layers always hold an alpha channel.
     return static_cast<::ULIS::eFormat>(Format | ULIS_W_ALPHA(1));
-}
-
-void
-UOdysseyTextureLayerImageRaster::OnContentChanged(const TArray<FIntRect>& Rects, bool bInteractive)
-{
-    if (Rects.IsEmpty())
-    {
-        RenderingChanged({ GetDefaultRenderRect() }, bInteractive);
-        return;
-    }
-    RenderingChanged(Rects, bInteractive);
 }
 
 const UOdysseyTiledImage*
@@ -234,14 +197,7 @@ UOdysseyTextureLayerImageRaster::GetMediaProvider(uint32 iFrameIndex) const
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.IsLocked(!isActive || isLocked);
 
-    // The pixels are read or edited only when a tool needs them.
-    TWeakObjectPtr<UOdysseyTextureLayerImageRaster> weakThis = const_cast<UOdysseyTextureLayerImageRaster*>(this);
-    TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(GetRenderingId(),
-        [weakThis]() -> TSharedPtr<FOdysseyRasterContent>
-        {
-            UOdysseyTextureLayerImageRaster* layer = weakThis.Get();
-            return layer ? TSharedPtr<FOdysseyRasterContent>(layer->GetRasterContent().AsShared()) : nullptr;
-        });
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(GetRenderingId(), GetRasterContent().AsWeak());
     mediaProvider.Add(mediaRaster);
     return mediaProvider;
 }

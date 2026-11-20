@@ -13,7 +13,6 @@
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "UObject/StrongObjectPtr.h"
-#include "Misc/App.h"
 #include "OdysseyBlendShader.h"
 #include "OdysseyTiledImage.h"
 #include "ULISLoaderModule.h"
@@ -22,7 +21,6 @@
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyRasterBlock.h"
 #include "ULISUtils.h"
-#include "OdysseySurfaceTexture2DEditable.h"
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
 #include "OdysseyPixelFormat.h"
@@ -57,8 +55,7 @@ UOdysseyAnimationCellImageRaster::BuildRenderPipelineInternal(
 ) const
 {
 #if WITH_EDITOR
-    const_cast<UOdysseyAnimationCellImageRaster*>(this)->MigrateLegacyContent();
-    return FindOrCreateRasterContent().BuildRenderFunction(oRenderFunction, GetContentTransform(RenderContext));
+    return GetRasterContent().BuildRenderFunction(oRenderFunction, GetContentTransform(RenderContext));
 #else
     return Super::BuildRenderPipelineInternal(oRenderFunction, iParents, RenderContext);
 #endif
@@ -74,17 +71,9 @@ UOdysseyAnimationCellImageRaster::GetTiledImage() const
 FOdysseyRasterContent&
 UOdysseyAnimationCellImageRaster::GetRasterContent() const
 {
-    // Content still held by a legacy render texture or raster block reaches the tiled image first.
-    const_cast<UOdysseyAnimationCellImageRaster*>(this)->MigrateLegacyContent();
-    return FindOrCreateRasterContent();
-}
-
-FOdysseyRasterContent&
-UOdysseyAnimationCellImageRaster::FindOrCreateRasterContent() const
-{
+    UOdysseyAnimationCellImageRaster* MutableThis = const_cast<UOdysseyAnimationCellImageRaster*>(this);
     if (!mRasterContent)
     {
-        UOdysseyAnimationCellImageRaster* MutableThis = const_cast<UOdysseyAnimationCellImageRaster*>(this);
         // As the former render texture, 8-bit raster blocks of cells hold sRGB encoded colors; the tiles hold them decoded.
         mRasterContent = MakeShared<FOdysseyRasterContent>(*MutableThis, MutableThis->GetRenderingId(), MutableThis->TiledImage,
             [MutableThis]()
@@ -100,7 +89,7 @@ UOdysseyAnimationCellImageRaster::FindOrCreateRasterContent() const
             },
             [MutableThis](const TArray<FIntRect>& Rects, bool bInteractive)
             {
-                MutableThis->OnContentChanged(Rects, bInteractive);
+                MutableThis->RenderingChanged(Rects, bInteractive);
             },
             [MutableThis]()
             {
@@ -108,6 +97,8 @@ UOdysseyAnimationCellImageRaster::FindOrCreateRasterContent() const
                 return Layer && Layer->IsAlphaLocked();
             });
     }
+    // Legacy assets loaded by OldSerialize() get no PostLoad(): their pixels are moved on first use.
+    mRasterContent->MigrateLegacy(MutableThis->Texture, MutableThis->mLegacyPixels);
     return *mRasterContent;
 }
 
@@ -119,45 +110,10 @@ UOdysseyAnimationCellImageRaster::GetRasterFormat() const
 }
 
 void
-UOdysseyAnimationCellImageRaster::OnContentChanged(const TArray<FIntRect>& Rects, bool bInteractive)
-{
-    if (Rects.IsEmpty())
-    {
-        RenderingChanged({ GetDefaultRenderRect() }, bInteractive);
-        return;
-    }
-    RenderingChanged(Rects, bInteractive);
-}
-
-void
-UOdysseyAnimationCellImageRaster::MigrateLegacyContent()
-{
-    UTexture2D* LegacyTexture = Texture;
-    if (HasAnyFlags(RF_ClassDefaultObject) || (!mLegacyPixels && !LegacyTexture) || !FApp::CanEverRender())
-    {
-        return;
-    }
-
-    TSharedPtr<::ULIS::FBlock> Pixels = mLegacyPixels;
-    if (!Pixels && LegacyTexture->Source.IsValid())
-    {
-        Pixels = MakeShareable(NewBlockFromUTextureData(LegacyTexture, GetRasterFormat()));
-    }
-
-    // Keep the legacy data when it cannot be migrated, e.g. while the cell is not yet in an animation.
-    if (Pixels && !FindOrCreateRasterContent().SetContent(*Pixels))
-    {
-        return;
-    }
-    mLegacyPixels.Reset();
-    Texture = nullptr;
-}
-
-void
 UOdysseyAnimationCellImageRaster::PostLoad()
 {
     Super::PostLoad();
-    MigrateLegacyContent();
+    GetRasterContent();
 }
 
 void
@@ -170,14 +126,7 @@ UOdysseyAnimationCellImageRaster::BeginDestroy()
 FOdysseyMediaProvider
 UOdysseyAnimationCellImageRaster::GetMediaProvider() const
 {
-    // The pixels are read or edited only when a tool needs them.
-    TWeakObjectPtr<UOdysseyAnimationCellImageRaster> weakThis = const_cast<UOdysseyAnimationCellImageRaster*>(this);
-    TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(GetRenderingId(),
-        [weakThis]() -> TSharedPtr<FOdysseyRasterContent>
-        {
-            UOdysseyAnimationCellImageRaster* cell = weakThis.Get();
-            return cell ? TSharedPtr<FOdysseyRasterContent>(cell->GetRasterContent().AsShared()) : nullptr;
-        });
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(GetRenderingId(), GetRasterContent().AsWeak());
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.Add(mediaRaster);
     return mediaProvider;
@@ -218,7 +167,7 @@ UOdysseyAnimationCellImageRaster::PreSave(FObjectPreSaveContext SaveContext)
     Super::PreSave(SaveContext);
 
     // Content still held by a legacy render texture must reach the tiled image before saving.
-    MigrateLegacyContent();
+    GetRasterContent();
 }
 
 void

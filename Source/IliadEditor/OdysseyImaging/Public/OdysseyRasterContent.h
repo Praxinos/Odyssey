@@ -15,6 +15,7 @@
 class FOdysseyRasterBlockEdit;
 class FOdysseyRasterEditSession;
 class UOdysseyTiledImage;
+class UTexture2D;
 class UTextureRenderTarget2D;
 
 /**
@@ -70,7 +71,7 @@ public:
 
     /**
      * Called when pixels changed.
-     * @param Rects The changed areas, in content pixels; empty when everything changed.
+     * @param Rects The changed areas, in content pixels; the whole canvas when everything changed.
      * @param bInteractive True for uncommitted edits.
      */
     using FOnChanged = TFunction<void(const TArray<FIntRect>& Rects, bool bInteractive)>;
@@ -115,6 +116,14 @@ public:
      * @return False when the owner cannot hold content or the rendering is unavailable.
      */
     bool SetContent(const ::ULIS::FBlock& Block);
+
+    /**
+     * Moves the pixels of an asset saved before the tiled image storage into the content, without undo.
+     * The legacy data is reset once moved, and kept when it cannot be, e.g. while the owner is not yet attached.
+     * @param LegacyTexture The former render texture of the owner, holding its pixels; read when there are no legacy pixels.
+     * @param LegacyPixels The pixels of a former raster block, in the format the owner expects.
+     */
+    void MigrateLegacy(TObjectPtr<UTexture2D>& LegacyTexture, TSharedPtr<::ULIS::FBlock>& LegacyPixels);
 
     /**
      * Begins an edit of the content, shown by the views until it is committed or ended.
@@ -188,6 +197,9 @@ private:
     void EndEdit();
     void OnEditCommitted(const TArray<FIntRect>& Rects);
     void OnImageUndone();
+
+    /** Notifies the owner that pixels changed; empty rects stand for the whole canvas. */
+    void NotifyChanged(const TArray<FIntRect>& Rects, bool bInteractive);
 
     /**
      * Writes areas through an edit session, which keeps the alpha when it is locked, then notifies the owner.

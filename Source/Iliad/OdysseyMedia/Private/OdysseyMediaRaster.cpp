@@ -13,9 +13,9 @@ FOdysseyMediaRaster::FOdysseyMediaRaster()
 {
 }
 
-FOdysseyMediaRaster::FOdysseyMediaRaster(const FGuid& iContentId, FGetContent iGetContent)
+FOdysseyMediaRaster::FOdysseyMediaRaster(const FGuid& iContentId, TWeakPtr<FOdysseyRasterContent> iContent)
     : mContentId(iContentId)
-    , mGetContent(MoveTemp(iGetContent))
+    , mContent(MoveTemp(iContent))
 {
 }
 
@@ -28,5 +28,5 @@ FOdysseyMediaRaster::GetContentId() const
 TSharedPtr<FOdysseyRasterContent>
 FOdysseyMediaRaster::GetContent() const
 {
-    return mGetContent ? mGetContent() : nullptr;
+    return mContent.Pin();
 }

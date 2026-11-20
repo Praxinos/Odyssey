@@ -3,6 +3,7 @@
 
 #include "OdysseyRasterContent.h"
 
+#include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Math/TranslationMatrix.h"
 #include "Misc/App.h"
@@ -16,6 +17,7 @@
 #include "OdysseyColorSpaceShader.h"
 #include "OdysseyRasterBlockEdit.h"
 #include "OdysseyRasterEditSession.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTiledImage.h"
 #include "OdysseyTiledImageBlock.h"
 #include "ULISLoaderModule.h"
@@ -144,8 +146,33 @@ FOdysseyRasterContent::SetContent(const ::ULIS::FBlock& Block)
     Odyssey::TiledImage::CopyFromBlock(*Image, Block, FIntRect(0, 0, Block.Width(), Block.Height()), FIntPoint::ZeroValue, GetDescription().bSRGB);
     // The edit is derived from the previous content.
     EndEdit();
-    OnChanged({}, false);
+    NotifyChanged({}, false);
     return true;
+}
+
+void
+FOdysseyRasterContent::MigrateLegacy(TObjectPtr<UTexture2D>& LegacyTexture, TSharedPtr<::ULIS::FBlock>& LegacyPixels)
+{
+    if (!LegacyTexture && !LegacyPixels)
+    {
+        return;
+    }
+
+    TSharedPtr<::ULIS::FBlock> Pixels = LegacyPixels;
+    if (!Pixels && LegacyTexture->Source.IsValid())
+    {
+        if (!EnsureImage())
+        {
+            return;
+        }
+        Pixels = MakeShareable(NewBlockFromUTextureData(LegacyTexture, GetDescription().Format));
+    }
+    if (Pixels && !SetContent(*Pixels))
+    {
+        return;
+    }
+    LegacyPixels.Reset();
+    LegacyTexture = nullptr;
 }
 
 TSharedPtr<FOdysseyRasterBlockEdit>
@@ -333,7 +360,7 @@ void
 FOdysseyRasterContent::OnEditCommitted(const TArray<FIntRect>& Rects)
 {
     ActiveEdit.Reset();
-    OnChanged(Rects, false);
+    NotifyChanged(Rects, false);
 }
 
 void
@@ -341,7 +368,18 @@ FOdysseyRasterContent::OnImageUndone()
 {
     // The edit started from pixels the undo replaced.
     EndEdit();
-    OnChanged({}, false);
+    NotifyChanged({}, false);
+}
+
+void
+FOdysseyRasterContent::NotifyChanged(const TArray<FIntRect>& Rects, bool bInteractive)
+{
+    if (Rects.IsEmpty())
+    {
+        OnChanged({ FIntRect(FIntPoint::ZeroValue, GetDescription().Size) }, bInteractive);
+        return;
+    }
+    OnChanged(Rects, bInteractive);
 }
 
 bool
@@ -384,7 +422,7 @@ FOdysseyRasterContent::WriteThroughSession(const TArray<FIntRect>& Rects,
     {
         return false;
     }
-    OnChanged(Clipped, false);
+    NotifyChanged(Clipped, false);
     return true;
 }
 

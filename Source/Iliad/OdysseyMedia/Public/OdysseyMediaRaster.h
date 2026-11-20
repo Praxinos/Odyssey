@@ -18,8 +18,6 @@ class ODYSSEYMEDIA_API FOdysseyMediaRaster
 public:
     DECLARE_ODYSSEY_MEDIA()
 
-    using FGetContent = TFunction<TSharedPtr<FOdysseyRasterContent>()>;
-
 public:
     //Destructor
     virtual ~FOdysseyMediaRaster();
@@ -27,9 +25,9 @@ public:
 
     /**
      * @param iContentId Identifies the content: the rendering id of its owner, which its edit sessions replace in the views.
-     * @param iGetContent Returns the content, to read, write or edit it.
+     * @param iContent The content, owned by the layer or cell.
      */
-    FOdysseyMediaRaster(const FGuid& iContentId, FGetContent iGetContent);
+    FOdysseyMediaRaster(const FGuid& iContentId, TWeakPtr<FOdysseyRasterContent> iContent);
 
 public:
     //IOdysseyMedia API
@@ -42,5 +40,5 @@ public:
 
 private:
     FGuid mContentId;
-    FGetContent mGetContent;
+    TWeakPtr<FOdysseyRasterContent> mContent;
 };

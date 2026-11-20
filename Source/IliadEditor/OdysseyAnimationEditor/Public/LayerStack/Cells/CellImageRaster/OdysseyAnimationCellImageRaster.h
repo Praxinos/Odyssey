@@ -45,6 +45,7 @@ public:
 public:
     /**
      * Returns the pixels of the cell, to read or write them; see FOdysseyRasterContent.
+     * Pixels of an asset saved before the tiled image storage are moved into it first.
      * Its functions fail while the cell is not in an animation.
      */
     FOdysseyRasterContent& GetRasterContent() const;
@@ -59,11 +60,7 @@ public:
     virtual void BeginDestroy() override;
 
 private:
-    /** Returns the content, creating it when needed, without migrating legacy content. */
-    FOdysseyRasterContent& FindOrCreateRasterContent() const;
     ::ULIS::eFormat GetRasterFormat() const;
-    void OnContentChanged(const TArray<FIntRect>& Rects, bool bInteractive);
-    void MigrateLegacyContent();
 
 private:
     //Import

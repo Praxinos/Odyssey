@@ -87,8 +87,6 @@ public:
 
 private:
     ::ULIS::eFormat GetRasterFormat() const;
-    void OnContentChanged(const TArray<FIntRect>& Rects, bool bInteractive);
-    void MigrateLegacyContent();
 
 private:
     //Import
