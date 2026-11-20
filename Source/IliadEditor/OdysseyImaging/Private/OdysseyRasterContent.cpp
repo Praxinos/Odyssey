@@ -329,9 +329,10 @@ FOdysseyRasterContent::EditBlock(TFunctionRef<void(::ULIS::FBlock& Block)> Edit)
 }
 
 bool
-FOdysseyRasterContent::BuildRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform)
+FOdysseyRasterContent::BuildRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform) const
 {
-    if (!EnsureImage())
+    // The owner creates and converts the image at explicit points, e.g. after loading: rendering changes nothing.
+    if (!Image || !FApp::CanEverRender())
     {
         return false;
     }

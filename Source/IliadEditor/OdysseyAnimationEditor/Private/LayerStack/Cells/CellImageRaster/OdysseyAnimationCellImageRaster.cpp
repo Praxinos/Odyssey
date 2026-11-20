@@ -68,6 +68,14 @@ UOdysseyAnimationCellImageRaster::GetTiledImage() const
     return TiledImage;
 }
 
+void
+UOdysseyAnimationCellImageRaster::UpdateContent()
+{
+    FOdysseyRasterContent& Content = GetRasterContent();
+    Content.MigrateLegacy(Texture, mLegacyPixels);
+    Content.EnsureImage();
+}
+
 FOdysseyRasterContent&
 UOdysseyAnimationCellImageRaster::GetRasterContent() const
 {
@@ -97,8 +105,6 @@ UOdysseyAnimationCellImageRaster::GetRasterContent() const
                 return Layer && Layer->IsAlphaLocked();
             });
     }
-    // Legacy assets loaded by OldSerialize() get no PostLoad(): their pixels are moved on first use.
-    mRasterContent->MigrateLegacy(MutableThis->Texture, MutableThis->mLegacyPixels);
     return *mRasterContent;
 }
 
@@ -113,7 +119,15 @@ void
 UOdysseyAnimationCellImageRaster::PostLoad()
 {
     Super::PostLoad();
-    GetRasterContent();
+    UpdateContent();
+}
+
+void
+UOdysseyAnimationCellImageRaster::PostDuplicate(EDuplicateMode::Type DuplicateMode)
+{
+    Super::PostDuplicate(DuplicateMode);
+    // The animation of the duplicate may have another format.
+    UpdateContent();
 }
 
 void
@@ -157,7 +171,8 @@ UOdysseyAnimationCellImageRaster::OldSerialize(FArchive& Ar)
             //Old Style No Chunk Loading
             mLegacyPixels = Odyssey::ReadLegacyRasterBlock(Ar, *this);
         }
-        // PostLoad is not called after OldSerialize: the legacy pixels are migrated on first use.
+        // PostLoad is not called after OldSerialize: the cell moves its legacy pixels now.
+        UpdateContent();
     }
 }
 
@@ -167,7 +182,7 @@ UOdysseyAnimationCellImageRaster::PreSave(FObjectPreSaveContext SaveContext)
     Super::PreSave(SaveContext);
 
     // Content still held by a legacy render texture must reach the tiled image before saving.
-    GetRasterContent();
+    UpdateContent();
 }
 
 void

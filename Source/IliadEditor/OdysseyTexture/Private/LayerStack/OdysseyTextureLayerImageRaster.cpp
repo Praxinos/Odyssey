@@ -40,7 +40,16 @@ void
 UOdysseyTextureLayerImageRaster::PostLoad()
 {
     Super::PostLoad();
-    GetRasterContent().MigrateLegacy(Texture, LegacyPixels);
+    FOdysseyRasterContent& Content = GetRasterContent();
+    Content.MigrateLegacy(Texture, LegacyPixels);
+    Content.EnsureImage();
+}
+
+void
+UOdysseyTextureLayerImageRaster::PostDuplicate(EDuplicateMode::Type DuplicateMode)
+{
+    Super::PostDuplicate(DuplicateMode);
+    GetRasterContent().EnsureImage();
 }
 
 void

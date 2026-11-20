@@ -62,7 +62,10 @@ public:
 
 public:
     // UObject overrides
+    /** Moves the pixels of a legacy asset into the tiled image, and converts it to the format of the texture. */
     virtual void PostLoad() override;
+    /** Converts the tiled image to the format of the texture, which may differ from the one of the original layer. */
+    virtual void PostDuplicate(EDuplicateMode::Type DuplicateMode) override;
     virtual void PreSave(FObjectPreSaveContext SaveContext) override;
     virtual void BeginDestroy() override;
 

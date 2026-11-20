@@ -304,6 +304,31 @@ bool FOdysseyTextureColorMergeTest::RunTest(const FString& Parameters)
     return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureColorRenderSideEffectTest, "Odyssey.Texture.Color.RenderDoesNotConvert", Odyssey::TextureColorTests::Flags)
+
+/**
+ * Rendering a raster layer has no side effect: a change of the sRGB setting not yet applied leaves the tiled image as it is
+ * until the layer applies it, at an explicit point such as ColorSettingsChanged().
+ */
+bool FOdysseyTextureColorRenderSideEffectTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::TextureColorTests;
+    TStrongObjectPtr<UTexture2D> Texture(MakeTexture(true));
+    UOdysseyTextureLayerStackUserData* UserData = MakeUserData(Texture.Get());
+    UOdysseyTextureLayerImageRaster* Layer = CastChecked<UOdysseyTextureLayerImageRaster>(UserData->LayerStack->GetCurrentLayer());
+    TestEqual(TEXT("An 8-bit sRGB layer holds decoded colors"), Layer->GetTiledImage()->GetFormat(), EOdysseyTiledImageFormat::RGBA16F);
+
+    // Change the setting without notifying the layer stack.
+    Texture->SRGB = false;
+    IOdysseyTextureRenderingAbility::FRenderFunction RenderFunction;
+    TestTrue(TEXT("The layer renders its tiles"), Layer->BuildRenderPipeline(RenderFunction));
+    TestEqual(TEXT("Rendering does not convert the tiles"), Layer->GetTiledImage()->GetFormat(), EOdysseyTiledImageFormat::RGBA16F);
+
+    Layer->ColorSettingsChanged();
+    TestEqual(TEXT("Applying the setting converts the tiles"), Layer->GetTiledImage()->GetFormat(), EOdysseyTiledImageFormat::RGBA8);
+    return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureColorVectorLayerLoadTest, "Odyssey.Texture.Color.VectorLayerSRGBAfterLoad", Odyssey::TextureColorTests::Flags)
 
 /**

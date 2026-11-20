@@ -184,11 +184,12 @@ public:
 
     /**
      * Builds the function rendering the image. The uncommitted edits are shown by the views through the edit session.
+     * Rendering has no side effect: the image is neither created nor converted, see EnsureImage().
      * @param OutRenderFunction The render function.
      * @param ContentTransform Applied to the content before the transform given to the render function.
-     * @return False when there is nothing to render.
+     * @return False when there is nothing to render, e.g. the image does not exist yet.
      */
-    bool BuildRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform);
+    bool BuildRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform) const;
 
     /** Returns true while an edit begun by BeginEdit() is neither committed nor ended. */
     bool HasUncommittedEdits() const;

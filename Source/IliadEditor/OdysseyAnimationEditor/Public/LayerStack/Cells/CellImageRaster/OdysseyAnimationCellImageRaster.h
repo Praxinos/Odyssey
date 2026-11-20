@@ -45,10 +45,10 @@ public:
 public:
     /**
      * Returns the pixels of the cell, to read or write them; see FOdysseyRasterContent.
-     * Pixels of an asset saved before the tiled image storage are moved into it first.
      * Its functions fail while the cell is not in an animation.
      */
     FOdysseyRasterContent& GetRasterContent() const;
+
     /** Returns the tiled image holding the pixels, without creating it. */
     const UOdysseyTiledImage* GetTiledImage() const;
     virtual FOdysseyMediaProvider GetMediaProvider() const override;
@@ -56,10 +56,16 @@ public:
 
 public:
     virtual void PostLoad() override;
+    virtual void PostDuplicate(EDuplicateMode::Type DuplicateMode) override;
     virtual void PreSave(FObjectPreSaveContext SaveContext) override;
     virtual void BeginDestroy() override;
 
 private:
+    /**
+     * Moves the pixels of a legacy asset into the tiled image, and converts it to the format of the animation.
+     * Called after loading, including by OldSerialize(), after duplication and before saving.
+     */
+    void UpdateContent();
     ::ULIS::eFormat GetRasterFormat() const;
 
 private:
