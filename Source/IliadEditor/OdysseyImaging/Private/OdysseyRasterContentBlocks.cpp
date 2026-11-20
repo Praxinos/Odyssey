@@ -25,7 +25,23 @@ TSharedPtr<::ULIS::FBlock> ReadBlock(FOdysseyRasterContent& Content)
     return Odyssey::TiledImage::CopyToBlock(*Content.GetImage(), FIntRect(FIntPoint::ZeroValue, Description.Size), Description.Format, Description.bSRGB);
 }
 
-bool WriteBlock(FOdysseyRasterContent& Content, const ::ULIS::FBlock& Block, const TArray<FIntRect>& Rects)
+TSharedPtr<::ULIS::FBlock> ReadBlock(FOdysseyRasterContent& Content, const FIntRect& Rect, FIntRect& OutRect)
+{
+    if (!Content.EnsureImage())
+    {
+        return nullptr;
+    }
+    const FOdysseyRasterContent::FDescription Description = Content.Describe();
+    OutRect = Rect;
+    OutRect.Clip(FIntRect(FIntPoint::ZeroValue, Description.Size));
+    if (OutRect.Width() <= 0 || OutRect.Height() <= 0)
+    {
+        return nullptr;
+    }
+    return Odyssey::TiledImage::CopyToBlock(*Content.GetImage(), OutRect, Description.Format, Description.bSRGB);
+}
+
+bool WriteBlock(FOdysseyRasterContent& Content, const ::ULIS::FBlock& Block, const TArray<FIntRect>& Rects, FIntPoint Position)
 {
     TStrongObjectPtr<UTextureRenderTarget2D> Target(Content.CreateRenderTarget());
     if (!Target)
@@ -46,15 +62,20 @@ bool WriteBlock(FOdysseyRasterContent& Content, const ::ULIS::FBlock& Block, con
         Pixels = Converted.Get();
     }
 
+    // The areas, in block pixels.
     const FIntRect BlockBounds(0, 0, Pixels->Width(), Pixels->Height());
     TArray<FIntRect> InBlock;
+    TArray<FIntRect> InContent;
     InBlock.Reserve(Rects.Num());
+    InContent.Reserve(Rects.Num());
     for (FIntRect Rect : Rects)
     {
+        Rect -= Position;
         Rect.Clip(BlockBounds);
         if (Rect.Width() > 0 && Rect.Height() > 0)
         {
             InBlock.Add(Rect);
+            InContent.Add(Rect + Position);
         }
     }
     if (InBlock.IsEmpty())
@@ -63,11 +84,11 @@ bool WriteBlock(FOdysseyRasterContent& Content, const ::ULIS::FBlock& Block, con
     }
 
     // The render target is in the tile format: the write copies its pixels as they are.
-    if (!Odyssey::TiledImage::CopyBlockToRenderTarget(*Target, Content.GetImage()->GetFormat(), *Pixels, InBlock, Description.bSRGB))
+    if (!Odyssey::TiledImage::CopyBlockToRenderTarget(*Target, Content.GetImage()->GetFormat(), *Pixels, InBlock, Description.bSRGB, Position))
     {
         return false;
     }
-    return Content.Write(*Target, InBlock);
+    return Content.Write(*Target, InContent);
 }
 
 bool EditBlock(FOdysseyRasterContent& Content, TFunctionRef<void(::ULIS::FBlock& Block)> Edit)
@@ -79,6 +100,31 @@ bool EditBlock(FOdysseyRasterContent& Content, TFunctionRef<void(::ULIS::FBlock&
     }
     Edit(*Block);
     return WriteBlock(Content, *Block, { FIntRect(0, 0, Block->Width(), Block->Height()) });
+}
+
+bool EditBlock(FOdysseyRasterContent& Content, const FIntRect& Rect, TFunctionRef<void(::ULIS::FBlock& Block, const FIntRect& Area)> Edit)
+{
+    FIntRect Area;
+    TSharedPtr<::ULIS::FBlock> Block = ReadBlock(Content, Rect, Area);
+    if (!Block)
+    {
+        return false;
+    }
+    Edit(*Block, Area);
+    return WriteBlock(Content, *Block, { Area }, Area.Min);
+}
+
+FIntRect FindVisibleRect(const ::ULIS::FBlock& Block)
+{
+    ::ULIS::FRectI Visible = ::ULIS::FRectI::FromXYWH(0, 0, 0, 0);
+    ::ULIS::FContext& Context = IULISLoaderModule::StaticFindOrAddContext(Block.Format());
+    Context.AnalyzeSmallestVisibleRect(Block, &Visible);
+    Context.Finish();
+    if (Visible.w <= 0 || Visible.h <= 0)
+    {
+        return FIntRect();
+    }
+    return FIntRect(Visible.x, Visible.y, Visible.x + Visible.w, Visible.y + Visible.h);
 }
 
 TSharedPtr<FOdysseyRasterBlockEdit> BeginBlockEdit(FOdysseyRasterContent& Content)

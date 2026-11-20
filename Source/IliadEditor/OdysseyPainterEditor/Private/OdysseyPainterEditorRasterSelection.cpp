@@ -7,6 +7,8 @@
 #include "ULISUtils.h"
 #include "OdysseyHUDLine.h"
 #include "OdysseyHUDPolygon.h"
+#include "OdysseyRasterContent.h"
+#include "OdysseyRasterContentBlocks.h"
 #include "OdysseyTiledImage.h"
 #include "OdysseyTiledImageBlock.h"
 
@@ -94,6 +96,56 @@ UOdysseyPainterEditorRasterSelection::Clear()
             ctx.Finish();
         }
     );
+}
+
+TSharedPtr<::ULIS::FBlock>
+UOdysseyPainterEditorRasterSelection::CopySelectedPixels(FOdysseyRasterContent& iContent)
+{
+    if (!iContent.EnsureImage())
+        return nullptr;
+
+    const FOdysseyRasterContent::FDescription description = iContent.Describe();
+    TSharedPtr<::ULIS::FBlock> copyBlock = MakeShared<::ULIS::FBlock>(description.Size.X, description.Size.Y, description.Format);
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(description.Format);
+    ctx.Clear(*copyBlock);
+    ctx.Finish();
+
+    if (!mBlock || IsEmpty())
+        return copyBlock;
+
+    FIntRect area(mBoundingRect.x, mBoundingRect.y, mBoundingRect.x + mBoundingRect.w, mBoundingRect.y + mBoundingRect.h);
+    area.Clip(FIntRect(FIntPoint::ZeroValue, description.Size));
+    if (area.Width() <= 0 || area.Height() <= 0)
+        return copyBlock;
+
+    TSharedPtr<::ULIS::FBlock> pixels = Odyssey::RasterContentBlocks::ReadBlock(iContent, area, area);
+    if (!pixels)
+        return nullptr;
+
+    const ::ULIS::FRectI copyRect = ::ULIS::FRectI::FromXYWH(area.Min.X, area.Min.Y, area.Width(), area.Height());
+    ctx.Copy(*pixels, *copyBlock, pixels->Rect(), ::ULIS::FVec2I(copyRect.x, copyRect.y), ::ULIS::FSchedulePolicy::MultiScanlines, 0, nullptr, nullptr);
+    ctx.Finish();
+
+    ctx.FilterInto(
+        [](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
+        {
+            for (uint64 i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+            {
+                iDstPixel.SetAlphaF(iDstPixel.AlphaF() * iSrcPixel.GreyF());
+            }
+        }
+        , *mBlock
+        , *copyBlock
+        , copyRect
+        , ::ULIS::FVec2I(copyRect.x, copyRect.y)
+        , ::ULIS::FSchedulePolicy::MultiScanlines
+        , 0
+        , nullptr
+        , nullptr
+    );
+    ctx.Finish();
+
+    return copyBlock;
 }
 
 void

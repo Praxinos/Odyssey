@@ -466,54 +466,10 @@ void UOdysseyPainterEditorRasterBaseTool::CopyCurrentSelection()
     FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
 
     TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
-    TSharedPtr<::ULIS::FBlock> block = content ? Odyssey::RasterContentBlocks::ReadBlock(*content) : nullptr;
-    if (!block)
+    // Only the area of the selection is read.
+    TSharedPtr<::ULIS::FBlock> copyBlock = content ? mEditor->RasterSelection()->CopySelectedPixels(*content) : nullptr;
+    if (!copyBlock)
         return;
-
-    ::ULIS::FRectI boundingBox = block->Rect();
-
-    TSharedPtr<::ULIS::FBlock> copyBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, block->Format());
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
-    ::ULIS::FEvent clearEvent, copyEvent;
-    ctx.Clear(*copyBlock);
-    ctx.Finish();
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = mEditor->RasterSelection()->GetBlock();
-
-    if (maskBlock)
-    {
-        ctx.Copy(
-            *block,
-            *copyBlock,
-            boundingBox,
-            ::ULIS::FVec2I(0, 0),
-            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-            0,
-            nullptr,
-            &copyEvent
-        );
-
-        ctx.FilterInto(
-            [](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
-            {
-                for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
-                {
-                    iDstPixel.SetAlphaF(iDstPixel.AlphaF() * iSrcPixel.GreyF());
-                }
-            }
-            , *maskBlock
-            , *copyBlock
-            , boundingBox
-            , ::ULIS::FVec2I(0, 0)
-            , ::ULIS::FSchedulePolicy::MultiScanlines
-            , 1
-            , &copyEvent
-            , nullptr
-        );
-
-        ctx.Finish();
-    }
 
     TSharedPtr<FOdysseyBlockClipboardData> clipboardData = MakeShared<FOdysseyBlockClipboardData>(copyBlock);
     odysseyCoreEditorModule.GetClipboard()->SetData(clipboardData);
@@ -532,54 +488,10 @@ void UOdysseyPainterEditorRasterBaseTool::CutCurrentSelection()
     FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
 
     TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
-    TSharedPtr<::ULIS::FBlock> block = content ? Odyssey::RasterContentBlocks::ReadBlock(*content) : nullptr;
-    if (!block)
+    // Only the area of the selection is read.
+    TSharedPtr<::ULIS::FBlock> copyBlock = content ? mEditor->RasterSelection()->CopySelectedPixels(*content) : nullptr;
+    if (!copyBlock)
         return;
-
-    ::ULIS::FRectI boundingBox = block->Rect();
-
-    TSharedPtr<::ULIS::FBlock> copyBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, block->Format());
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
-    ::ULIS::FEvent clearEvent, copyEvent;
-    ctx.Clear(*copyBlock);
-    ctx.Finish();
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = mEditor->RasterSelection()->GetBlock();
-
-    if (maskBlock)
-    {
-        ctx.Copy(
-            *block,
-            *copyBlock,
-            boundingBox,
-            ::ULIS::FVec2I(0, 0),
-            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-            0,
-            nullptr,
-            &copyEvent
-        );
-
-        ctx.FilterInto(
-            [](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
-            {
-                for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
-                {
-                    iDstPixel.SetAlphaF(iDstPixel.AlphaF() * iSrcPixel.GreyF());
-                }
-            }
-            , *maskBlock
-            , *copyBlock
-            , boundingBox
-            , ::ULIS::FVec2I(0, 0)
-            , ::ULIS::FSchedulePolicy::MultiScanlines
-            , 1
-            , &copyEvent
-            , nullptr
-        );
-
-        ctx.Finish();
-    }
 
     mEditor->GetSource()->ClearFromCopyBlock(copyBlock);
 

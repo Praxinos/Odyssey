@@ -73,7 +73,11 @@ private:
     void ConstrainToParallelogram(FVector2D iPosition);
 
     void TransformBlockPerspective(TSharedPtr<::ULIS::FBlock> iBaseBlock, TSharedPtr<::ULIS::FBlock> iDestBlock); //Transforms a block depending on the handles positions of the transform HUD
-    void UpdateTransformHUD(); // Update the HUD of the transform based on current selection
+    /**
+     * Begins the transform of the current selection, or of the visible pixels when there is no selection:
+     * reads the content once, through the edit showing the transform, and builds its HUD.
+     */
+    void UpdateTransformHUD();
     void UpdateTransformBlock(); // Update the pixel block of the transform based on current selection
     ::ULIS::FRectI GetTransformAreaBoundingRect();
 
@@ -98,7 +102,11 @@ private:
 
     void OnRasterSelectionChanged();
 
-    void UpdateRasterSelection( bool iCreateNewIfEmpty = false );
+    /**
+     * Copies the pixels to transform: those of the selection, or the visible ones when there is no selection.
+     * @param iPixels The pixels of the content, in the format the owner expects.
+     */
+    void UpdateRasterSelection( const ::ULIS::FBlock& iPixels );
 
 public:
     /** Use a perspective transform. */

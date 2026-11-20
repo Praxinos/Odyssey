@@ -329,8 +329,6 @@ void UOdysseyPainterEditorRasterTransformTool::Load()
     rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnRasterSelectionChanged);
     rasterSelection->HideSelectionHUD();
 
-    UpdateRasterSelection( true ); //Create new selection if empty
-
     UpdateTransformHUD();
     UOdysseyPainterEditorTool::Load();
 }
@@ -372,9 +370,6 @@ UOdysseyPainterEditorRasterTransformTool::GetRotationAngleFromLastReference( FVe
 
 void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
 {
-    if( !mSelectionBlock )
-        return;
-
     FOdysseyMediaProvider mediaProvider = mEditor->GetCurrentMediaProvider();
     if (mediaProvider.IsLocked())
         return;
@@ -384,12 +379,16 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
         return;
 
     //The transform is shown through an edit, committed by CommitTransform() or ended by ClearTransform()
+    //The pixels of the edit are the only read of the content: the transformed pixels are taken from them
     TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
     TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? Odyssey::RasterContentBlocks::BeginBlockEdit(*content) : nullptr;
     if (!edit)
         return;
 
     const TSharedRef<::ULIS::FBlock>& originalBlock = edit->GetOriginalBlock();
+    //Before the moved pixels are removed from the original ones below
+    UpdateRasterSelection(*originalBlock);
+
     if (mSelectionBoundingBox.Area() <= 0)
         mSelectionBoundingBox = ::ULIS::FRectI::FromMinMax(0, 0, originalBlock->Width(), originalBlock->Height());
 
@@ -1103,32 +1102,14 @@ UOdysseyPainterEditorRasterTransformTool::OnPivotHandleDragged()
 }
 
 void
-UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection( bool iCreateNewIfEmpty )
+UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection( const ::ULIS::FBlock& iPixels )
 {
-    FOdysseyMediaProvider mediaProvider = mEditor->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
-    if (mediaRasters.Num() <= 0)
-        return;
-
+    const ::ULIS::FBlock* block = &iPixels;
     TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     if (rasterSelection->IsEmpty())
     {
-        if( !iCreateNewIfEmpty )
+        //If we have no selection, by default, transform tool will select the smallest block that contains all pixels in the layer/frame
         {
-            mSelectionBlock = nullptr;
-            mTransformedBlock = nullptr;
-            return;
-        }
-        else //If we have no selection, by default, transform tool will select the smallest block that contains all pixels in the layer/frame
-        {
-            TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
-            TSharedPtr<::ULIS::FBlock> block = content ? Odyssey::RasterContentBlocks::ReadBlock(*content) : nullptr;
-            if (!block)
-                return;
-
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
 
             ctx.AnalyzeSmallestVisibleRect( *block, &mSelectionBoundingBox);
@@ -1147,11 +1128,6 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection( bool iCreateNew
     {
         mSelectionBoundingBox = rasterSelection->GetMaskBoundingRect();
     }
-
-    TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
-    TSharedPtr<::ULIS::FBlock> block = content ? Odyssey::RasterContentBlocks::ReadBlock(*content) : nullptr;
-    if (!block)
-        return;
 
     mSelectionBlock = MakeShared<::ULIS::FBlock>(mSelectionBoundingBox.w, mSelectionBoundingBox.h, block->Format());
 
@@ -1218,13 +1194,12 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection( bool iCreateNew
 void
 UOdysseyPainterEditorRasterTransformTool::OnRasterSelectionChanged()
 {
-    UpdateRasterSelection();
-    // The commit clears the transform once done; beginning a new one would read the content for nothing.
+    // The commit clears the transform once done.
     if (mIsCommittingTransform)
         return;
 
+    // A changed selection discards the transform; none is begun until the tool is loaded again.
     ClearTransform();
-    UpdateTransformHUD();
 }
 
 void

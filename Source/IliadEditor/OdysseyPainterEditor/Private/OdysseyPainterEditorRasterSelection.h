@@ -29,6 +29,7 @@ FORCEINLINE uint32 GetTypeHash(const FIntEdge& Edge)
     return HashCombine(GetTypeHash(Edge.Start), GetTypeHash(Edge.End));
 }
 
+class FOdysseyRasterContent;
 class UOdysseyTiledImage;
 
 /**
@@ -67,6 +68,14 @@ public:
      * @param Edit Changes the mask. Pending ULIS operations must be finished when it returns.
      */
     void EditMask(TFunctionRef<void(::ULIS::FBlock& Mask)> Edit);
+
+    /**
+     * Copies the selected pixels of a content into a new block covering its canvas, in the format the owner expects:
+     * their alpha is multiplied by the mask, the other pixels are transparent. Only the area of the selection is read.
+     * @param iContent The content to copy from.
+     * @return Null when the content cannot be read.
+     */
+    TSharedPtr<::ULIS::FBlock> CopySelectedPixels(FOdysseyRasterContent& iContent);
 
     TSharedPtr<FOdysseyHUDElement> GetHUD();
 

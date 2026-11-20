@@ -207,12 +207,14 @@ bool CopyFromBlock(UOdysseyTiledImage& Image, const ::ULIS::FBlock& Block, const
     return true;
 }
 
-bool CopyBlockToRenderTarget(UTextureRenderTarget2D& Target, EOdysseyTiledImageFormat Format, const ::ULIS::FBlock& Block, const TArray<FIntRect>& Rects, bool bSRGB)
+bool CopyBlockToRenderTarget(UTextureRenderTarget2D& Target, EOdysseyTiledImageFormat Format, const ::ULIS::FBlock& Block, const TArray<FIntRect>& Rects, bool bSRGB, FIntPoint Position)
 {
     check(IsInGameThread());
     TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::TiledImage::CopyBlockToRenderTarget);
     const EPixelFormat PixelFormat = Target.GetFormat();
-    const FIntRect BlockRect(0, 0, FMath::Min<int32>(Block.Width(), Target.SizeX), FMath::Min<int32>(Block.Height(), Target.SizeY));
+    // The parts of the block landing within the target.
+    FIntRect BlockRect(0, 0, Block.Width(), Block.Height());
+    BlockRect.Clip(FIntRect(FIntPoint::ZeroValue - Position, FIntPoint(Target.SizeX, Target.SizeY) - Position));
     TArray<FIntRect> Clipped;
     Clipped.Reserve(Rects.Num());
     FIntRect Bounds;
@@ -238,14 +240,14 @@ bool CopyBlockToRenderTarget(UTextureRenderTarget2D& Target, EOdysseyTiledImageF
         return false;
     }
     ENQUEUE_RENDER_COMMAND(OdysseyCopyBlockToRenderTarget)(
-        [Source = Texture->GetResource(), Destination = Target.GameThread_GetRenderTargetResource(), Clipped = MoveTemp(Clipped), Bounds](FRHICommandListImmediate& RHICmdList)
+        [Source = Texture->GetResource(), Destination = Target.GameThread_GetRenderTargetResource(), Clipped = MoveTemp(Clipped), Bounds, Position](FRHICommandListImmediate& RHICmdList)
         {
             FRDGBuilder GraphBuilder(RHICmdList);
             FRDGTextureRef SourceTexture = GraphBuilder.RegisterExternalTexture(::CreateRenderTarget(Source->TextureRHI, TEXT("Odyssey.TiledImage.BlockUpload")));
             FRDGTextureRef DestinationTexture = Destination->GetRenderTargetTexture(GraphBuilder);
             for (const FIntRect& Rect : Clipped)
             {
-                AddCopyTexturePass(GraphBuilder, SourceTexture, DestinationTexture, Rect.Min - Bounds.Min, Rect.Min, Rect.Size());
+                AddCopyTexturePass(GraphBuilder, SourceTexture, DestinationTexture, Rect.Min - Bounds.Min, Rect.Min + Position, Rect.Size());
             }
             GraphBuilder.Execute();
         });

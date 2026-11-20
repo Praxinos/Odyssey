@@ -299,6 +299,13 @@ FOdysseyPainterEditorAnimationSource::Clear()
 
 void FOdysseyPainterEditorAnimationSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock> iCopyBlock)
 {
+    if (!iCopyBlock)
+        return;
+
+    const FIntRect visibleRect = Odyssey::RasterContentBlocks::FindVisibleRect(*iCopyBlock);
+    if (visibleRect.Area() <= 0)
+        return;
+
     FText transactionName = LOCTEXT("actions.cut", "Cut");
 
     UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(GetLayerStack()->GetCurrentLayer());
@@ -325,14 +332,15 @@ void FOdysseyPainterEditorAnimationSource::ClearFromCopyBlock(TSharedPtr<::ULIS:
             if (!content)
                 continue;
 
-            Odyssey::RasterContentBlocks::EditBlock(*content,
-                [&](::ULIS::FBlock& iBlock)
+            // Only the area of the copied pixels is read and written.
+            Odyssey::RasterContentBlocks::EditBlock(*content, visibleRect,
+                [&](::ULIS::FBlock& iBlock, const FIntRect& iArea)
                 {
                     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock.Format());
                     ctx.Blend(
                         *iCopyBlock,
                         iBlock,
-                        iCopyBlock->Rect(),
+                        ::ULIS::FRectI::FromXYWH(iArea.Min.X, iArea.Min.Y, iArea.Width(), iArea.Height()),
                         ::ULIS::FVec2I(0, 0),
                         ::ULIS::Blend_Normal,
                         ::ULIS::Alpha_Sub,
@@ -410,6 +418,10 @@ void FOdysseyPainterEditorAnimationSource::PasteBlockToCurrentLayer(TSharedPtr<:
 
         ctx.Finish();
 
+        const FIntRect visibleRect = Odyssey::RasterContentBlocks::FindVisibleRect(*copyBlock);
+        if (visibleRect.Area() <= 0)
+            return;
+
         TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
         for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
         {
@@ -417,13 +429,14 @@ void FOdysseyPainterEditorAnimationSource::PasteBlockToCurrentLayer(TSharedPtr<:
             if (!content)
                 continue;
 
-            Odyssey::RasterContentBlocks::EditBlock(*content,
-                [&](::ULIS::FBlock& iBlock)
+            // Only the area of the pasted pixels is read and written.
+            Odyssey::RasterContentBlocks::EditBlock(*content, visibleRect,
+                [&](::ULIS::FBlock& iBlock, const FIntRect& iArea)
                 {
                     ctx.Blend(
                         *copyBlock,
                         iBlock,
-                        copyBlock->Rect(),
+                        ::ULIS::FRectI::FromXYWH(iArea.Min.X, iArea.Min.Y, iArea.Width(), iArea.Height()),
                         ::ULIS::FVec2I(0, 0),
                         ::ULIS::Blend_Normal,
                         ::ULIS::Alpha_Normal,
@@ -475,34 +488,8 @@ FOdysseyPainterEditorAnimationSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::F
 
     if (mediaProvider.HasMedia<FOdysseyMediaRaster>())
     {
-        int width = GetLayerStack()->GetAnimation()->GetWidth();
-        int height = GetLayerStack()->GetAnimation()->GetHeight();
-
-        ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
-        switch (GetLayerStack()->GetAnimation()->GetFormat())
-        {
-        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8; break;
-        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF; break;
-        }
-
-        TSharedPtr<::ULIS::FBlock> copyBlock = MakeShared<::ULIS::FBlock>(width, height, format);
-
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-        ctx.Clear(*copyBlock);
-        ctx.Finish();
-
-        ctx.ConvertFormat(
-            *iBlock,
-            *copyBlock,
-            iBlock->Rect(),
-            ::ULIS::FVec2I(0, 0),
-            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-            0,
-            nullptr,
-            nullptr);
-
-        ctx.Finish();
-
+        // The new cell is empty: only the area of the pasted pixels is written.
+        const FIntRect visibleRect = Odyssey::RasterContentBlocks::FindVisibleRect(*iBlock);
         TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
         for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
         {
@@ -510,26 +497,7 @@ FOdysseyPainterEditorAnimationSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::F
             if (!content)
                 continue;
 
-            Odyssey::RasterContentBlocks::EditBlock(*content,
-                [&](::ULIS::FBlock& iBlock)
-                {
-                    ctx.Blend(
-                        *copyBlock,
-                        iBlock,
-                        copyBlock->Rect(),
-                        ::ULIS::FVec2I(0, 0),
-                        ::ULIS::Blend_Normal,
-                        ::ULIS::Alpha_Normal,
-                        1.f,
-                        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                        0,
-                        nullptr,
-                        nullptr);
-
-                    ctx.Finish();
-
-                }
-            );
+            Odyssey::RasterContentBlocks::WriteBlock(*content, *iBlock, { visibleRect });
         }
     }
 
