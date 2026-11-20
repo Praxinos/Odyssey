@@ -4,12 +4,14 @@
 #include "OdysseyRasterEditSession.h"
 
 #include "Engine/TextureRenderTarget2D.h"
+#include "Math/TranslationMatrix.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
 #include "RenderingThread.h"
 #include "TextureResource.h"
 
 #include "OdysseyBlendShader.h"
+#include "OdysseyRasterSampling.h"
 #include "OdysseyRenderContext.h"
 #include "OdysseyTiledImage.h"
 
@@ -28,15 +30,12 @@ FOdysseyRasterEditSession::~FOdysseyRasterEditSession()
 }
 
 FOdysseyRasterEditSession::FOdysseyRasterEditSession(const FGuid& InRenderingId, UOdysseyTiledImage& InImage, UTextureRenderTarget2D& InTarget,
-    UTextureRenderTarget2D* InOriginal, UTextureRenderTarget2D* InResult)
+    UTextureRenderTarget2D* InOriginal)
     : RenderingId(InRenderingId)
     , Image(&InImage)
     , Target(&InTarget)
     , Original(InOriginal)
-    , Result(InResult)
 {
-    check(!InOriginal == !InResult);
-    ShownRHI = GetShownTarget()->GameThread_GetRenderTargetResource()->GetRenderTargetTexture();
 }
 
 TSharedPtr<FOdysseyRasterEditSession>
@@ -48,35 +47,41 @@ FOdysseyRasterEditSession::Begin(const FGuid& RenderingId, UOdysseyTiledImage& I
         return nullptr;
     }
 
-    TArray<TWeakPtr<FOdysseyRasterEditSession>>& Sessions = ActiveSessions();
-    for (const TWeakPtr<FOdysseyRasterEditSession>& Weak : TArray<TWeakPtr<FOdysseyRasterEditSession>>(Sessions))
+    if (TSharedPtr<FOdysseyRasterEditSession> Existing = Find(RenderingId))
     {
-        TSharedPtr<FOdysseyRasterEditSession> Existing = Weak.Pin();
-        if (Existing && Existing->RenderingId == RenderingId)
-        {
-            Existing->End();
-        }
+        Existing->End();
     }
 
     const FIntRect Bounds(FIntPoint::ZeroValue, Size);
     UTextureRenderTarget2D* Target = Image.CreateRenderTarget(Size);
     Image.Render(Target, Bounds, FIntPoint::ZeroValue);
     UTextureRenderTarget2D* Original = nullptr;
-    UTextureRenderTarget2D* Result = nullptr;
     if (bPreserveAlpha)
     {
         Original = Image.CreateRenderTarget(Size);
         Image.Render(Original, Bounds, FIntPoint::ZeroValue);
-        Result = Image.CreateRenderTarget(Size);
-        Image.Render(Result, Bounds, FIntPoint::ZeroValue);
     }
     // The target RHI textures are created and filled on the render thread.
     FlushRenderingCommands();
 
-    TSharedPtr<FOdysseyRasterEditSession> Session = MakeShared<FOdysseyRasterEditSession>(RenderingId, Image, *Target, Original, Result);
-    Sessions.Add(Session);
+    TSharedPtr<FOdysseyRasterEditSession> Session = MakeShared<FOdysseyRasterEditSession>(RenderingId, Image, *Target, Original);
+    ActiveSessions().Add(Session);
     OnActiveSessionsChanged().Broadcast();
     return Session;
+}
+
+TSharedPtr<FOdysseyRasterEditSession>
+FOdysseyRasterEditSession::Find(const FGuid& RenderingId)
+{
+    for (const TWeakPtr<FOdysseyRasterEditSession>& Weak : ActiveSessions())
+    {
+        TSharedPtr<FOdysseyRasterEditSession> Session = Weak.Pin();
+        if (Session && Session->RenderingId == RenderingId)
+        {
+            return Session;
+        }
+    }
+    return nullptr;
 }
 
 void
@@ -120,7 +125,7 @@ FOdysseyRasterEditSession::GetTarget() const
 bool
 FOdysseyRasterEditSession::PreservesAlpha() const
 {
-    return Result.IsValid();
+    return Original.IsValid();
 }
 
 bool
@@ -137,7 +142,6 @@ FOdysseyRasterEditSession::Invalidate(const TArray<FIntRect>& Rects)
     {
         return;
     }
-    ComposeResult(Rects);
     InvalidRects.Append(Rects);
     OnInvalidated().Broadcast(RenderingId, Rects);
 }
@@ -153,8 +157,8 @@ FOdysseyRasterEditSession::Commit(const TArray<FIntRect>& Rects)
         return false;
     }
 
-    ComposeResult(Rects);
-    UTextureRenderTarget2D* Source = GetShownTarget();
+    ApplyOriginalAlpha(Rects);
+    UTextureRenderTarget2D* Source = Target.Get();
     const FIntRect Bounds(0, 0, Source->SizeX, Source->SizeY);
     for (FIntRect Rect : Rects)
     {
@@ -189,7 +193,6 @@ FOdysseyRasterEditSession::End()
     }
     Target.Reset();
     Original.Reset();
-    Result.Reset();
     ActiveSessions().RemoveAll([this](const TWeakPtr<FOdysseyRasterEditSession>& Weak)
     {
         return !Weak.IsValid() || Weak.Pin().Get() == this;
@@ -203,21 +206,15 @@ FOdysseyRasterEditSession::End()
     }
 }
 
-UTextureRenderTarget2D*
-FOdysseyRasterEditSession::GetShownTarget() const
-{
-    return Result.IsValid() ? Result.Get() : Target.Get();
-}
-
 void
-FOdysseyRasterEditSession::ComposeResult(const TArray<FIntRect>& Rects) const
+FOdysseyRasterEditSession::ApplyOriginalAlpha(const TArray<FIntRect>& Rects) const
 {
-    if (!Result.IsValid())
+    if (!Original.IsValid())
     {
         return;
     }
 
-    const FIntRect Bounds(0, 0, Result->SizeX, Result->SizeY);
+    const FIntRect Bounds(0, 0, Target->SizeX, Target->SizeY);
     TArray<FIntRect> Clipped;
     Clipped.Reserve(Rects.Num());
     for (FIntRect Rect : Rects)
@@ -233,10 +230,9 @@ FOdysseyRasterEditSession::ComposeResult(const TArray<FIntRect>& Rects) const
         return;
     }
 
-    ENQUEUE_RENDER_COMMAND(OdysseyRasterEditSessionComposeResult)(
+    ENQUEUE_RENDER_COMMAND(OdysseyRasterEditSessionApplyOriginalAlpha)(
         [EditedRHI = FTextureRHIRef(Target->GameThread_GetRenderTargetResource()->GetRenderTargetTexture()),
             OriginalRHI = FTextureRHIRef(Original->GameThread_GetRenderTargetResource()->GetRenderTargetTexture()),
-            ResultRHI = FTextureRHIRef(Result->GameThread_GetRenderTargetResource()->GetRenderTargetTexture()),
             Clipped = MoveTemp(Clipped)](FRHICommandListImmediate& RHICmdList)
         {
             FRDGBuilder GraphBuilder(RHICmdList);
@@ -245,11 +241,10 @@ FOdysseyRasterEditSession::ComposeResult(const TArray<FIntRect>& Rects) const
                 RDG_EVENT_SCOPE(GraphBuilder, "Odyssey.RasterEditSession.PreserveAlpha");
                 FRDGTextureRef Edited = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(EditedRHI, TEXT("Odyssey.RasterEditSession.Target")));
                 FRDGTextureRef OriginalTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(OriginalRHI, TEXT("Odyssey.RasterEditSession.Original")));
-                FRDGTextureRef ResultTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(ResultRHI, TEXT("Odyssey.RasterEditSession.Result")));
                 for (const FIntRect& Rect : Clipped)
                 {
                     // The colors of the edited pixels (background, Back color mode) with the alpha of the original ones (foreground, Top alpha mode).
-                    FOdysseyBlendShader::BlendRect(GraphBuilder, GMaxRHIFeatureLevel, Edited, OriginalTexture, ResultTexture,
+                    FOdysseyBlendShader::BlendRect(GraphBuilder, GMaxRHIFeatureLevel, Edited, OriginalTexture, Edited,
                         Rect, Rect, FMatrix::Identity, EOdysseyColorBlendMode::Back, EOdysseyAlphaBlendMode::Top, 1.0f,
                         EOdysseyAntiAliasing::NearestNeighbor);
                 }
@@ -261,18 +256,47 @@ FOdysseyRasterEditSession::ComposeResult(const TArray<FIntRect>& Rects) const
 IOdysseyTextureRenderingAbility::FRenderFunction
 FOdysseyRasterEditSession::BuildRenderFunction() const
 {
-    return [SourceRHI = ShownRHI](FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type FeatureLevel, FRDGTextureRef Destination,
-        const FIntRect& SourceRect, const FIntRect& DestinationRect, const FMatrix& Transform)
+    // The captured textures stay alive for renders already built, even after the session ended.
+    FTextureRHIRef TargetRHI = Target.IsValid() ? Target->GameThread_GetRenderTargetResource()->GetRenderTargetTexture() : nullptr;
+    FTextureRHIRef OriginalRHI = Original.IsValid() ? Original->GameThread_GetRenderTargetResource()->GetRenderTargetTexture() : nullptr;
+    const FIntPoint Size = Target.IsValid() ? FIntPoint(Target->SizeX, Target->SizeY) : FIntPoint::ZeroValue;
+    return [TargetRHI = MoveTemp(TargetRHI), OriginalRHI = MoveTemp(OriginalRHI), Size](FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type FeatureLevel,
+        FRDGTextureRef Destination, const FIntRect& SourceRect, const FIntRect& DestinationRect, const FMatrix& Transform)
     {
         RDG_EVENT_SCOPE(GraphBuilder, "Odyssey.RasterEditSession");
         AddClearRenderTargetPass(GraphBuilder, Destination, FLinearColor::Transparent, DestinationRect);
-        if (!SourceRHI)
+        if (!TargetRHI)
         {
             return;
         }
-        FRDGTextureRef Source = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(SourceRHI, TEXT("Odyssey.RasterEditSession.Target")));
-        FOdysseyBlendShader::BlendRect(GraphBuilder, FeatureLevel, Destination, Source, Destination,
-            SourceRect, DestinationRect, Transform, EOdysseyColorBlendMode::Normal,
+        FRDGTextureRef TargetTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(TargetRHI, TEXT("Odyssey.RasterEditSession.Target")));
+        if (!OriginalRHI)
+        {
+            FOdysseyBlendShader::BlendRect(GraphBuilder, FeatureLevel, Destination, TargetTexture, Destination,
+                SourceRect, DestinationRect, Transform, EOdysseyColorBlendMode::Normal,
+                EOdysseyAlphaBlendMode::Normal, 1.0f, EOdysseyAntiAliasing::Anisotropic);
+            return;
+        }
+
+        // Preserving alpha: compose the colors of the target with the alpha of the original, over the sampled area only.
+        const FIntRect Area = Odyssey::RasterSampling::GetSampledArea(SourceRect, DestinationRect, Transform, Size);
+        if (Area.Width() <= 0 || Area.Height() <= 0)
+        {
+            return;
+        }
+        FRDGTextureRef Composed = GraphBuilder.CreateTexture(FRDGTextureDesc::Create2D(Area.Size(), TargetTexture->Desc.Format,
+            FClearValueBinding::Transparent, TexCreate_ShaderResource | TexCreate_RenderTargetable),
+            TEXT("Odyssey.RasterEditSession.Composed"));
+        AddCopyTexturePass(GraphBuilder, TargetTexture, Composed, Area.Min, FIntPoint::ZeroValue, Area.Size());
+        FRDGTextureRef OriginalTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(OriginalRHI, TEXT("Odyssey.RasterEditSession.Original")));
+        // The colors of the edited pixels (background, Back color mode) with the alpha of the original ones (foreground, Top alpha mode).
+        FOdysseyBlendShader::BlendRect(GraphBuilder, FeatureLevel, Composed, OriginalTexture, Composed,
+            Area, FIntRect(FIntPoint::ZeroValue, Area.Size()), FMatrix::Identity, EOdysseyColorBlendMode::Back,
+            EOdysseyAlphaBlendMode::Top, 1.0f, EOdysseyAntiAliasing::NearestNeighbor);
+        // The composed texture starts at the area origin in content space.
+        const FMatrix FromArea = FTranslationMatrix(FVector(Area.Min.X, Area.Min.Y, 0.0)) * Transform;
+        FOdysseyBlendShader::BlendRect(GraphBuilder, FeatureLevel, Destination, Composed, Destination,
+            SourceRect, DestinationRect, FromArea, EOdysseyColorBlendMode::Normal,
             EOdysseyAlphaBlendMode::Normal, 1.0f, EOdysseyAntiAliasing::Anisotropic);
     };
 }

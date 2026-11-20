@@ -7,6 +7,7 @@
 
 #include "Editor.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Math/TranslationMatrix.h"
 #include "Misc/AutomationTest.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
@@ -60,6 +61,24 @@ TArray<FLinearColor> ReadImage(const UOdysseyTiledImage& Image)
 {
     TStrongObjectPtr<UTextureRenderTarget2D> Target(Image.CreateRenderTarget(FIntPoint(TestSize, TestSize)));
     Image.Render(Target.Get(), FIntRect(0, 0, TestSize, TestSize), FIntPoint::ZeroValue);
+    return ReadTarget(Target.Get());
+}
+
+/** Renders an area of a content replacement into a new float target of its destination size. */
+TArray<FLinearColor> ReadReplacement(const IOdysseyTextureRenderingAbility::FRenderFunction& Draw, const FIntRect& SourceRect,
+    const FIntRect& DestinationRect, const FMatrix& Transform)
+{
+    TStrongObjectPtr<UTextureRenderTarget2D> Target(NewObject<UTextureRenderTarget2D>());
+    Target->InitCustomFormat(DestinationRect.Max.X, DestinationRect.Max.Y, PF_A32B32G32R32F, true);
+    Target->UpdateResourceImmediate(true);
+    ENQUEUE_RENDER_COMMAND(OdysseyRasterEditSessionTestRenderArea)(
+        [Target = Target.Get(), Draw, SourceRect, DestinationRect, Transform](FRHICommandListImmediate& RHICmdList)
+        {
+            FRDGBuilder Graph(RHICmdList);
+            FRDGTextureRef Destination = Target->GetRenderTargetResource()->GetRenderTargetTexture(Graph);
+            Draw(Graph, GMaxRHIFeatureLevel, Destination, SourceRect, DestinationRect, Transform);
+            Graph.Execute();
+        });
     return ReadTarget(Target.Get());
 }
 
@@ -274,6 +293,67 @@ bool FOdysseyRasterEditSessionPreserveAlphaTest::RunTest(const FString& Paramete
         TestTrue(TEXT("Commit the session"), Session->Commit({ Erased, TransparentRect }));
     }
     ComparePixels(*this, TEXT("The tiles hold the colors with the original alpha"), Expected, ReadImage(*Image));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyRasterEditSessionPreserveAlphaAreaTest, "Odyssey.Imaging.RasterEditSession.PreserveAlphaPartialRender", Odyssey::RasterEditSessionTests::TestFlags)
+/**
+ * A session preserving alpha composes the colors of its target with the original alpha over the area a render samples only.
+ * Renders of a part of the content, and through a transform, e.g. a cell out of pegs, show the composed pixels at their place.
+ */
+bool FOdysseyRasterEditSessionPreserveAlphaAreaTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::RasterEditSessionTests;
+    TStrongObjectPtr<UOdysseyTiledImage> Image = MakeImage();
+    const TArray<FLinearColor> Original = ReadImage(*Image);
+    const FGuid Id = FGuid::NewGuid();
+    TSharedPtr<FOdysseyRasterEditSession> Session = FOdysseyRasterEditSession::Begin(Id, *Image, FIntPoint(TestSize, TestSize), true);
+    if (!TestTrue(TEXT("Begin a session preserving alpha"), Session.IsValid() && Session->PreservesAlpha()))
+    {
+        return false;
+    }
+    // Erased pixels keep the opaque alpha of the tiles: they are shown black.
+    const FIntRect Erased(10, 10, 20, 20);
+    ClearTarget(*Session, Erased);
+    FOdysseyRenderContext Context;
+    FOdysseyRasterEditSession::AddOverrides(Context);
+    const FOdysseyRenderOverride* Override = Context.Overrides.Find(Id);
+    if (!TestTrue(TEXT("The session replaces the content"), Override && Override->ContentReplacement))
+    {
+        return false;
+    }
+
+    struct FCase
+    {
+        const TCHAR* Name;
+        FIntRect SourceRect;
+        FMatrix Transform;
+        /** The content pixel shown at a destination pixel. */
+        FIntPoint Offset;
+    };
+    const FIntRect DestinationRect(0, 0, 40, 40);
+    const FCase Cases[] = {
+        { TEXT("part of the content"), FIntRect(5, 5, 45, 45), FMatrix::Identity, FIntPoint(5, 5) },
+        { TEXT("translated content"), FIntRect(0, 0, 40, 40), FTranslationMatrix(FVector(-3.0, -4.0, 0.0)), FIntPoint(3, 4) },
+    };
+    for (const FCase& Case : Cases)
+    {
+        const TArray<FLinearColor> Shown = ReadReplacement(Override->ContentReplacement, Case.SourceRect, DestinationRect, Case.Transform);
+        if (!TestEqual(FString::Printf(TEXT("Render of a %s: pixel count"), Case.Name), Shown.Num(), 40 * 40))
+        {
+            continue;
+        }
+        for (const FIntPoint& Pixel : { FIntPoint(1, 1), FIntPoint(10, 10), FIntPoint(30, 30), FIntPoint(38, 38) })
+        {
+            const FIntPoint ContentPixel = Pixel + Case.Offset;
+            const FLinearColor Expected = Erased.Contains(ContentPixel) ? FLinearColor(0.0f, 0.0f, 0.0f, 1.0f)
+                : Original[ContentPixel.Y * TestSize + ContentPixel.X];
+            const FLinearColor& Actual = Shown[Pixel.Y * 40 + Pixel.X];
+            TestTrue(FString::Printf(TEXT("Render of a %s shows content pixel (%d, %d): expected %s, got %s"), Case.Name,
+                ContentPixel.X, ContentPixel.Y, *Expected.ToString(), *Actual.ToString()), Actual.Equals(Expected, 0.0001f));
+        }
+    }
+    Session->End();
     return true;
 }
 

@@ -17,6 +17,7 @@
 #include "OdysseyBlendShader.h"
 #include "OdysseyColorSpaceShader.h"
 #include "OdysseyRasterEditSession.h"
+#include "OdysseyRasterSampling.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTiledImage.h"
 #include "OdysseyTiledImageBlock.h"
@@ -184,7 +185,7 @@ FOdysseyRasterContent::BeginEdit()
         return nullptr;
     }
 
-    EndEdit();
+    // Beginning a session ends the active session of the content.
     const bool bPreserveAlpha = IsAlphaLocked && IsAlphaLocked();
     TSharedPtr<FOdysseyRasterEditSession> Session = FOdysseyRasterEditSession::Begin(RenderingId, *Image, GetDescription().Size, bPreserveAlpha);
     if (!Session)
@@ -200,7 +201,6 @@ FOdysseyRasterContent::BeginEdit()
             Content->OnEditCommitted(Rects);
         }
     });
-    ActiveEdit = Session;
     return Session;
 }
 
@@ -293,24 +293,21 @@ FOdysseyRasterContent::BuildRenderFunction(IOdysseyTextureRenderingAbility::FRen
 bool
 FOdysseyRasterContent::HasUncommittedEdits() const
 {
-    const TSharedPtr<FOdysseyRasterEditSession> Edit = ActiveEdit.Pin();
-    return Edit.IsValid() && Edit->IsActive();
+    return FOdysseyRasterEditSession::Find(RenderingId).IsValid();
 }
 
 void
 FOdysseyRasterContent::EndEdit()
 {
-    if (TSharedPtr<FOdysseyRasterEditSession> Edit = ActiveEdit.Pin())
+    if (TSharedPtr<FOdysseyRasterEditSession> Session = FOdysseyRasterEditSession::Find(RenderingId))
     {
-        Edit->End();
+        Session->End();
     }
-    ActiveEdit.Reset();
 }
 
 void
 FOdysseyRasterContent::OnEditCommitted(const TArray<FIntRect>& Rects)
 {
-    ActiveEdit.Reset();
     NotifyChanged(Rects, false);
 }
 
@@ -360,8 +357,7 @@ FOdysseyRasterContent::WriteThroughSession(const TArray<FIntRect>& Rects,
         return false;
     }
 
-    // The edit started from the previous pixels: committing it would discard this change.
-    EndEdit();
+    // Beginning a session ends the active edit, which started from the previous pixels: committing it would discard this change.
     const bool bPreserveAlpha = IsAlphaLocked && IsAlphaLocked();
     TSharedPtr<FOdysseyRasterEditSession> Session = FOdysseyRasterEditSession::Begin(RenderingId, *Image, Description.Size, bPreserveAlpha);
     if (!Session)
@@ -395,24 +391,9 @@ FOdysseyRasterContent::BuildImageRenderFunction(IOdysseyTextureRenderingAbility:
         RDG_EVENT_SCOPE(GraphBuilder, "Odyssey.RasterContent.Tiles");
         AddClearRenderTargetPass(GraphBuilder, Destination, FLinearColor::Transparent, DestinationRect);
 
-        // The area of the content the blend samples: the source rect, brought back into content space, within the canvas.
+        // The area of the content the blend samples.
         const FMatrix ToSource = ContentTransform * Transform;
-        const FMatrix ToContent = ToSource.Inverse();
-        FBox2D Sampled(ForceInit);
-        for (const FIntPoint& Corner : { SourceRect.Min, FIntPoint(SourceRect.Max.X, SourceRect.Min.Y), SourceRect.Max, FIntPoint(SourceRect.Min.X, SourceRect.Max.Y) })
-        {
-            const FVector Position = ToContent.TransformPosition(FVector(Corner.X, Corner.Y, 0.0));
-            Sampled += FVector2D(Position.X, Position.Y);
-        }
-        // A margin keeps the filtering of the border pixels: anisotropic filtering samples along the footprint
-        // of a destination pixel, up to its maximum anisotropy, so the margin grows with the texels per pixel.
-        constexpr float MaxAnisotropy = 16.0f;
-        const float TexelsPerPixel = FMath::Max(Sampled.GetSize().X / FMath::Max(DestinationRect.Width(), 1),
-            Sampled.GetSize().Y / FMath::Max(DestinationRect.Height(), 1));
-        const int32 FilterMargin = FMath::CeilToInt(TexelsPerPixel * MaxAnisotropy) + 2;
-        FIntRect Area(FMath::FloorToInt(Sampled.Min.X) - FilterMargin, FMath::FloorToInt(Sampled.Min.Y) - FilterMargin,
-            FMath::CeilToInt(Sampled.Max.X) + FilterMargin, FMath::CeilToInt(Sampled.Max.Y) + FilterMargin);
-        Area.Clip(FIntRect(FIntPoint::ZeroValue, Size));
+        const FIntRect Area = Odyssey::RasterSampling::GetSampledArea(SourceRect, DestinationRect, ToSource, Size);
         if (Area.Width() <= 0 || Area.Height() <= 0)
         {
             return;

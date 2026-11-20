@@ -25,7 +25,7 @@ struct FOdysseyRenderContext;
  * Other renders, e.g. thumbnails or exports, show the tiles.
  *
  * A session preserving alpha, e.g. for a layer whose alpha is locked, shows and commits the colors of its target with the alpha
- * of the tiles at its beginning: the views and the commit read a result composed from both, updated by Invalidate() and Commit().
+ * of the tiles at its beginning: the views compose both over the area they sample, and the commit composes them once into the target.
  */
 class ODYSSEYIMAGING_API FOdysseyRasterEditSession
     : public TSharedFromThis<FOdysseyRasterEditSession>
@@ -43,10 +43,9 @@ public:
     /**
      * Use Begin().
      * @param InOriginal When preserving alpha, the tiles at the beginning of the session; null otherwise.
-     * @param InResult When preserving alpha, the composed pixels shown and committed; null otherwise.
      */
     FOdysseyRasterEditSession(const FGuid& InRenderingId, UOdysseyTiledImage& InImage, UTextureRenderTarget2D& InTarget,
-        UTextureRenderTarget2D* InOriginal = nullptr, UTextureRenderTarget2D* InResult = nullptr);
+        UTextureRenderTarget2D* InOriginal = nullptr);
 
 public:
     /**
@@ -59,6 +58,9 @@ public:
      * @return The session, or null when Size is empty.
      */
     static TSharedPtr<FOdysseyRasterEditSession> Begin(const FGuid& RenderingId, UOdysseyTiledImage& Image, FIntPoint Size, bool bPreserveAlpha = false);
+
+    /** Returns the active session of a content, if any. */
+    static TSharedPtr<FOdysseyRasterEditSession> Find(const FGuid& RenderingId);
 
     /** Adds to the context the content replacements showing every active session. */
     static void AddOverrides(FOdysseyRenderContext& Context);
@@ -77,12 +79,12 @@ public:
 
     bool IsActive() const;
 
-    /** Tells the views that areas of the target changed. When preserving alpha, composes them with the original alpha first. */
+    /** Tells the views that areas of the target changed. */
     void Invalidate(const TArray<FIntRect>& Rects);
 
     /**
      * Writes areas of the target into the tiled image, undoable within a transaction, then ends the session.
-     * When preserving alpha, the areas are composed with the original alpha first.
+     * When preserving alpha, the areas of the target are first given the alpha of the original.
      * @return False when the session already ended or its image was destroyed.
      */
     bool Commit(const TArray<FIntRect>& Rects);
@@ -97,11 +99,8 @@ public:
     void SetOnCommitted(FOnCommitted InOnCommitted);
 
 private:
-    /** Returns the pixels shown and committed: the target, or the result when preserving alpha. */
-    UTextureRenderTarget2D* GetShownTarget() const;
-
-    /** When preserving alpha, composes areas of the result from the colors of the target and the alpha of the original. */
-    void ComposeResult(const TArray<FIntRect>& Rects) const;
+    /** When preserving alpha, gives areas of the target the alpha of the original, keeping their colors. */
+    void ApplyOriginalAlpha(const TArray<FIntRect>& Rects) const;
 
     IOdysseyTextureRenderingAbility::FRenderFunction BuildRenderFunction() const;
 
@@ -111,10 +110,6 @@ private:
     TStrongObjectPtr<UTextureRenderTarget2D> Target;
     /** When preserving alpha: the tiles at the beginning of the session. */
     TStrongObjectPtr<UTextureRenderTarget2D> Original;
-    /** When preserving alpha: the colors of the target with the alpha of the original. */
-    TStrongObjectPtr<UTextureRenderTarget2D> Result;
-    /** Keeps the shown texture alive for renders already built, even after the session ended. */
-    FTextureRHIRef ShownRHI;
     TArray<FIntRect> InvalidRects;
     FOnCommitted OnCommitted;
 };

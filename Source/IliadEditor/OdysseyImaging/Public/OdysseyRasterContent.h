@@ -208,7 +208,4 @@ private:
 
     /** The image whose undo notification is bound. */
     TWeakObjectPtr<UOdysseyTiledImage> BoundImage;
-
-    /** The edit begun by BeginEdit(), owned by the tool. */
-    TWeakPtr<FOdysseyRasterEditSession> ActiveEdit;
 };
