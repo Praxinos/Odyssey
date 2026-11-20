@@ -12,6 +12,7 @@
 #include "RenderingThread.h"
 #include "ScreenPass.h"
 #include "TextureResource.h"
+#include "UObject/StrongObjectPtr.h"
 
 #include "OdysseyBlendShader.h"
 #include "OdysseyColorSpaceShader.h"
@@ -263,6 +264,27 @@ FOdysseyRasterContent::Write(UTextureRenderTarget2D& Source, const TArray<FIntRe
                 GraphBuilder.Execute();
             });
     });
+}
+
+bool
+FOdysseyRasterContent::Clear()
+{
+    check(IsInGameThread());
+    if (!EnsureImage())
+    {
+        return false;
+    }
+    if (IsAlphaLocked && IsAlphaLocked())
+    {
+        // Transparent pixels keep the alpha of the content: only its colors are cleared.
+        TStrongObjectPtr<UTextureRenderTarget2D> Transparent(CreateRenderTarget());
+        return Transparent && Write(*Transparent, { FIntRect(FIntPoint::ZeroValue, GetDescription().Size) });
+    }
+    // The edit started from the previous pixels: committing it would discard this change.
+    EndEdit();
+    Image->RemoveAllTiles();
+    NotifyChanged({}, false);
+    return true;
 }
 
 TSharedPtr<::ULIS::FBlock>

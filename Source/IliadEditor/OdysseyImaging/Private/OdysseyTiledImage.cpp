@@ -40,6 +40,13 @@ UOdysseyTiledImage::Initialize(int InTileSize, EOdysseyTiledImageFormat InFormat
     Tiles.Empty();
 }
 
+void
+UOdysseyTiledImage::RemoveAllTiles()
+{
+    Modify();
+    Tiles.Empty();
+}
+
 EOdysseyTiledImageFormat
 UOdysseyTiledImage::GetFormat() const
 {

@@ -715,4 +715,54 @@ bool FOdysseyTextureLayerContentReadWriteTest::RunTest(const FString& Parameters
     return true;
 }
 
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureLayerContentClearTest, "Odyssey.Texture.TiledImage.ContentClear",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+/**
+ * Without a locked alpha, a clear removes the tiles without an edit session, which would read the tiles first.
+ * It is undoable and ends the active edit. With a locked alpha, a clear keeps the alpha.
+ */
+bool FOdysseyTextureLayerContentClearTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::TextureLayerTiledImageTests;
+    TStrongObjectPtr<UTexture2D> Texture(MakeTexture(GetTransientPackage(), TSF_BGRA8));
+    UOdysseyTextureLayerImageRaster* Layer = MakeLayer(Texture.Get());
+    FOdysseyRasterContent& Content = Layer->GetRasterContent();
+    const float Tolerance = 0.5f / 255.0f + 0.0001f;
+    const TArray<FLinearColor> Original = ReadImage(Layer->GetTiledImage());
+
+    int32 SessionChanges = 0;
+    const FDelegateHandle SessionsHandle = FOdysseyRasterEditSession::OnActiveSessionsChanged().AddLambda([&SessionChanges]() { ++SessionChanges; });
+    ON_SCOPE_EXIT { FOdysseyRasterEditSession::OnActiveSessionsChanged().Remove(SessionsHandle); };
+
+    // A clear removes the tiles.
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Content.BeginEdit();
+    SessionChanges = 0;
+    {
+        FScopedTransaction Transaction(NSLOCTEXT("OdysseyTextureLayerTiledImageTests", "Clear", "Clear content"));
+        TestTrue(TEXT("Clear the content"), Content.Clear());
+    }
+    TestFalse(TEXT("A clear ends the active edit"), Edit.IsValid() && Edit->IsActive());
+    TestEqual(TEXT("Ending the edit is the only session change: the clear begins none"), SessionChanges, 1);
+    TestEqual(TEXT("A clear removes the tiles"), Layer->GetTiledImage()->GetTileBounds().Area(), 0);
+    TArray<FLinearColor> Transparent;
+    Transparent.Init(FLinearColor::Transparent, Width * Height);
+    ComparePixels(*this, TEXT("Cleared content"), Transparent, ReadImage(Layer->GetTiledImage()), 0.0001f);
+    TestTrue(TEXT("Undo the clear"), GEditor->UndoTransaction());
+    ComparePixels(*this, TEXT("Undone clear"), Original, ReadImage(Layer->GetTiledImage()), 0.0001f);
+
+    // With a locked alpha, a clear only clears colors.
+    Layer->SetIsAlphaLocked(true);
+    TestTrue(TEXT("Clear the content with a locked alpha"), Content.Clear());
+    const TArray<FLinearColor> Tiles = ReadImage(Layer->GetTiledImage());
+    if (TestEqual(TEXT("Pixel count"), Tiles.Num(), Width * Height))
+    {
+        TestEqual(TEXT("A locked alpha is kept"), Tiles[10 * Width + 10].A, Original[10 * Width + 10].A, Tolerance);
+        TestTrue(TEXT("Colors are cleared"), Tiles[10 * Width + 10].R < Tolerance && Tiles[10 * Width + 10].G < Tolerance);
+    }
+    Layer->SetIsAlphaLocked(false);
+    return true;
+}
+
 #endif

@@ -189,14 +189,7 @@ void
 UOdysseyAnimationCellImageRaster::Clear()
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("animation-cell-raster.clear", "Clear"));
-
-    // A new render target holds transparent pixels.
-    FOdysseyRasterContent& Content = GetRasterContent();
-    TStrongObjectPtr<UTextureRenderTarget2D> Transparent(Content.CreateRenderTarget());
-    if (Transparent)
-    {
-        Content.Write(*Transparent, { FIntRect(FIntPoint::ZeroValue, GetDefaultRenderRect().Size()) });
-    }
+    GetRasterContent().Clear();
 }
 
 #endif

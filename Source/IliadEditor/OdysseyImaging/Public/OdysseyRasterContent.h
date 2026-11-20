@@ -161,6 +161,13 @@ public:
     bool Write(UTextureRenderTarget2D& Source, const TArray<FIntRect>& Rects, EOdysseyColorConversion Conversion = EOdysseyColorConversion::None);
 
     /**
+     * Makes the whole content transparent, undoable within a transaction: the tiles are removed, those outside the canvas included.
+     * When the alpha is locked, the alpha is kept as Write() keeps it. The active edit ends, and the owner is notified.
+     * @return False when the owner cannot hold content or the rendering is unavailable.
+     */
+    bool Clear();
+
+    /**
      * Transitional: reads the whole content into a new block in the format the owner expects. Waits for the GPU.
      * @return Null when the owner cannot hold content or the rendering is unavailable.
      */

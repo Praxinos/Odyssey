@@ -57,6 +57,9 @@ public:
      */
     void CopyFromTexture(UTexture* Texture, FIntRect Rect, FIntPoint Position);
 
+    /** Removes every tile, keeping the tile size and format. Calls Modify(), so the removal is undoable within a transaction. */
+    void RemoveAllTiles();
+
     /**
      * Renders an area of the image into a render target. Pixels without a tile are transparent.
      * @param Destination The render target.
