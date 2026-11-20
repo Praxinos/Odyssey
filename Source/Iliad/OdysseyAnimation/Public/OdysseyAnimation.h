@@ -9,6 +9,7 @@
 #include "OdysseyTextureRenderingAbility.h"
 #include "UObject/SoftObjectPath.h"
 #include "OdysseyPaletteReferencer.h"
+#include "OdysseyPainterEditorGuideCollection.h"
 
 #include "OdysseyAnimation.generated.h"
 
@@ -145,6 +146,11 @@ public:
     virtual FIntRect GetDefaultRenderRect() const override;
     virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() const override;
 
+    /** Returns this animation's visual guide collection, if one exists. */
+    UOdysseyPainterEditorGuideCollection* GetGuideCollection() const;
+    /** Assigns this animation's visual guide collection. */
+    void SetGuideCollection(UOdysseyPainterEditorGuideCollection* InCollection);
+
 #if WITH_EDITOR
     virtual UTexture2D* CreateExportTexture(const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory) override;
 #endif
@@ -176,6 +182,9 @@ protected:
 
     UPROPERTY(BlueprintReadOnly, Category = "Odyssey|Animation", meta = (DisplayName = "Layer Stack", LoadBehavior = "LazyOnDemand"))
     TObjectPtr<UOdysseyLayerStack> mLayerStack;
+
+    UPROPERTY(Instanced)
+    TObjectPtr<UOdysseyPainterEditorGuideCollection> GuideCollection;
 
     UPROPERTY(EditAnywhere, Category="Odyssey|Animation")
     EOdysseyAnimationBoundMode LeftBoundMode = EOdysseyAnimationBoundMode::Automatic;

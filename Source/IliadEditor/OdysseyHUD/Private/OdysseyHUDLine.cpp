@@ -27,7 +27,9 @@ FOdysseyHUDLine::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
     if (customization.mSegmentLength <= 0.f || customization.mGapLength < 0.f)
         return;
 
-    InitDrawCustomizedLine(iParams.mCanvas, customization, FLinearColor::Black);
+    FLinearColor RenderColor = mColor;
+    RenderColor.A *= mOpacity;
+    InitDrawCustomizedLine(iParams.mCanvas, customization, RenderColor, mThickness);
 
     DrawCustomizedLine(
         iParams,
@@ -60,4 +62,34 @@ const FVector2D&
 FOdysseyHUDLine::GetEndPoint() const
 {
     return mEndPoint;
+}
+
+void FOdysseyHUDLine::SetColor(const FLinearColor& iColor)
+{
+    mColor = iColor;
+}
+
+const FLinearColor& FOdysseyHUDLine::GetColor() const
+{
+    return mColor;
+}
+
+void FOdysseyHUDLine::SetOpacity(float iOpacity)
+{
+    mOpacity = FMath::Clamp(iOpacity, 0.f, 1.f);
+}
+
+float FOdysseyHUDLine::GetOpacity() const
+{
+    return mOpacity;
+}
+
+void FOdysseyHUDLine::SetThickness(float iThickness)
+{
+    mThickness = FMath::Max(0.f, iThickness);
+}
+
+float FOdysseyHUDLine::GetThickness() const
+{
+    return mThickness;
 }

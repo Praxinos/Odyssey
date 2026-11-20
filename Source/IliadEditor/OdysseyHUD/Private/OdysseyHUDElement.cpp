@@ -82,7 +82,7 @@ FOdysseyHUDElement::GetReference() const
 }
 
 void
-FOdysseyHUDElement::InitDrawCustomizedLine(FCanvas* iCanvas, const FHUDCustomization& iCustomization, const FLinearColor& iDefaultColor)
+FOdysseyHUDElement::InitDrawCustomizedLine(FCanvas* iCanvas, const FHUDCustomization& iCustomization, const FLinearColor& iDefaultColor, float iThickness)
 {
     mCustomizedLinesParams.mCanvas = iCanvas;
     mCustomizedLinesParams.mBatchedElements = iCanvas->GetBatchedElements(FCanvas::ET_Line);
@@ -94,6 +94,7 @@ FOdysseyHUDElement::InitDrawCustomizedLine(FCanvas* iCanvas, const FHUDCustomiza
         mCustomizedLinesParams.mColors.Add(iDefaultColor);
 
     mCustomizedLinesParams.mColorIndex = 0;
+    mCustomizedLinesParams.mThickness = FMath::Max(0.f, iThickness);
 
     // Total pattern length (Segment + Gap)
     float patternLength = mCustomizedLinesParams.mSegmentLength * mCustomizedLinesParams.mColors.Num() + mCustomizedLinesParams.mGapLength;
@@ -159,7 +160,7 @@ FOdysseyHUDElement::DrawCustomizedLine(const FOdysseyHUDElement::FDrawHUDParams&
                 FVector(segmentEnd, 0.f),
                 mCustomizedLinesParams.mColors[mCustomizedLinesParams.mColorIndex],
                 mCustomizedLinesParams.mCanvas->GetHitProxyId(),
-                1.f,   // thickness
+                mCustomizedLinesParams.mThickness,
                 0.f,   // depth bias
                 true   // antialiasing
             );

@@ -117,6 +117,9 @@
 #include "OdysseyPainterEditorAnimationDetailsTab.h"
 #include "OdysseyPainterEditorColorSelectorTab.h"
 #include "OdysseyPainterEditorFlipbookTimelineTab.h"
+#include "OdysseyPainterEditorGuideOverlay.h"
+#include "OdysseyPainterEditorGuideEditTool.h"
+#include "OdysseyPainterEditorGuidesTab.h"
 #include "OdysseyPainterEditorLayerStackTab.h"
 #include "OdysseyPainterEditorMeshSelectorTab.h"
 #include "OdysseyPainterEditorTextureDetailsTab.h"
@@ -217,6 +220,7 @@ FOdysseyPainterEditor::InitHUD()
     mToolsHUD->SetIsVisible(MakeAttributeSP(this, &FOdysseyPainterEditor::IsToolsHUDVisible));
     mRasterSelectionHUD->SetIsVisible(MakeAttributeSP(this, &FOdysseyPainterEditor::IsRasterSelectionHUDVisible));
     mHUDSystem->AddElement(mRasterSelectionHUD);
+    mHUDSystem->AddElement(MakeShared<FOdysseyPainterEditorGuideOverlay>(this));
     mHUDSystem->AddElement(mToolsHUD);
 }
 
@@ -251,6 +255,7 @@ FOdysseyPainterEditor::InitTools()
     mOutOfPegsTool = AddTemporaryTool<UOdysseyPainterEditorAnimationOutOfPegsTool>();
     mTemporaryColorPickerTool = AddTemporaryTool<UOdysseyPainterEditorColorPickerTool>();
     mTemporaryColorPickerTool->mIsTemporaryTool = true;
+    mGuideEditTool = AddTemporaryTool<UOdysseyPainterEditorGuideEditTool>();
 
     mRasterDrawingTool->SetBrushContexts(&mBrushContexts);
 }
@@ -270,6 +275,7 @@ FOdysseyPainterEditor::InitTabs()
     TSharedRef<FOdysseyPainterEditorAnimationTimelineTab> animationTimelineTab = MakeShared<FOdysseyPainterEditorAnimationTimelineTab>(this);
     TSharedRef<FOdysseyPainterEditorAnimationLighttableTab> animationLighttableTab = MakeShared<FOdysseyPainterEditorAnimationLighttableTab>(this);
     TSharedRef<FOdysseyPainterEditorAnimationDetailsTab> animationDetailsTab = MakeShared<FOdysseyPainterEditorAnimationDetailsTab>(this);
+    TSharedRef<FOdysseyPainterEditorGuidesTab> guidesTab = MakeShared<FOdysseyPainterEditorGuidesTab>(this);
 
     AddTab(toolsTab);
     AddTab(toolCollectionTab);
@@ -283,6 +289,7 @@ FOdysseyPainterEditor::InitTabs()
     AddTab(animationTimelineTab);
     AddTab(animationLighttableTab);
     AddTab(animationDetailsTab);
+    AddTab(guidesTab);
 
     for (const TSharedPtr<FOdysseyEditorTab> tab : mTabs)
     {
@@ -911,6 +918,12 @@ UOdysseyPainterEditorRasterLiquifyTool*
 FOdysseyPainterEditor::GetRasterLiquifyTool() const
 {
     return mRasterLiquifyTool;
+}
+
+UOdysseyPainterEditorGuideEditTool*
+FOdysseyPainterEditor::GetGuideEditTool() const
+{
+    return mGuideEditTool;
 }
 
 UOdysseyPainterEditorRasterPaintBucketTool*

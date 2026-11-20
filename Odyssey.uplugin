@@ -276,6 +276,11 @@
             "LoadingPhase": "Default"
         },
         {
+            "Name": "OdysseyGuides",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        },
+        {
             "Name": "OdysseyAnimationEditor",
             "Type": "Editor",
             "LoadingPhase": "Default"

@@ -33,27 +33,33 @@ FOdysseyHUDEllipse::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
     if (points.Size() < 2)
         return;
 
-    InitDrawCustomizedLine(iParams.mCanvas, customization, FLinearColor::Black);
+    FLinearColor RenderColor = mColor;
+    RenderColor.A *= mOpacity;
+    InitDrawCustomizedLine(iParams.mCanvas, customization, RenderColor, mThickness);
 
     for (int i = 1; i < points.Size(); i++)
     {
-        FVector2D startPoint = FVector2D(points[i - 1].x, points[i - 1].y);
-        FVector2D endPoint = FVector2D(points[i].x, points[i].y);
+        const FVector2D StartOffset = FVector2D(points[i - 1].x, points[i - 1].y) - mCenter;
+        const FVector2D EndOffset = FVector2D(points[i].x, points[i].y) - mCenter;
+        const FVector2D StartPoint = mCenter + StartOffset.GetRotated(mRotationDegrees);
+        const FVector2D EndPoint = mCenter + EndOffset.GetRotated(mRotationDegrees);
 
         DrawCustomizedLine(
             iParams,
-            startPoint,
-            endPoint
+            StartPoint,
+            EndPoint
         );
     }
 
-    FVector2D startPoint = FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y);
-    FVector2D endPoint = FVector2D(points[0].x, points[0].y);
+    const FVector2D StartOffset = FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y) - mCenter;
+    const FVector2D EndOffset = FVector2D(points[0].x, points[0].y) - mCenter;
+    const FVector2D StartPoint = mCenter + StartOffset.GetRotated(mRotationDegrees);
+    const FVector2D EndPoint = mCenter + EndOffset.GetRotated(mRotationDegrees);
 
     DrawCustomizedLine(
         iParams,
-        startPoint,
-        endPoint
+        StartPoint,
+        EndPoint
     );
 
     FOdysseyHUDElement::DrawHUD(iParams);
@@ -93,4 +99,44 @@ int
 FOdysseyHUDEllipse::GetYRadius() const
 {
     return mYRadius;
+}
+
+void FOdysseyHUDEllipse::SetRotation(float iRotationDegrees)
+{
+    mRotationDegrees = iRotationDegrees;
+}
+
+float FOdysseyHUDEllipse::GetRotation() const
+{
+    return mRotationDegrees;
+}
+
+void FOdysseyHUDEllipse::SetColor(const FLinearColor& iColor)
+{
+    mColor = iColor;
+}
+
+const FLinearColor& FOdysseyHUDEllipse::GetColor() const
+{
+    return mColor;
+}
+
+void FOdysseyHUDEllipse::SetOpacity(float iOpacity)
+{
+    mOpacity = FMath::Clamp(iOpacity, 0.f, 1.f);
+}
+
+float FOdysseyHUDEllipse::GetOpacity() const
+{
+    return mOpacity;
+}
+
+void FOdysseyHUDEllipse::SetThickness(float iThickness)
+{
+    mThickness = FMath::Max(0.f, iThickness);
+}
+
+float FOdysseyHUDEllipse::GetThickness() const
+{
+    return mThickness;
 }

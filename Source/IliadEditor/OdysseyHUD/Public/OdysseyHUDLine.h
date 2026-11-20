@@ -26,8 +26,17 @@ public:
     void SetEndPoint(const FVector2D& iPoint);
     const FVector2D& GetStartPoint() const;
     const FVector2D& GetEndPoint() const;
+    void SetColor(const FLinearColor& iColor);
+    const FLinearColor& GetColor() const;
+    void SetOpacity(float iOpacity);
+    float GetOpacity() const;
+    void SetThickness(float iThickness);
+    float GetThickness() const;
 
 private:
     FVector2D mStartPoint;
     FVector2D mEndPoint;
+    FLinearColor mColor = FLinearColor::Black;
+    float mOpacity = 1.f;
+    float mThickness = 1.f;
 };

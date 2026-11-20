@@ -62,6 +62,7 @@ namespace UnrealBuildTool.Rules
                     "MediaAssets",
                     "OdysseyRendering",
                     "OdysseyPalette",
+                    "OdysseyGuides",
                     // ... add other public dependencies that you statically link with here ...
                 }
             );

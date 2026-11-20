@@ -12,6 +12,7 @@
 #include "OdysseyPainterEditorToolsTab.h"
 #include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
+#include "OdysseyPainterEditorGuidesTab.h"
 #include "Framework/Docking/LayoutExtender.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -30,6 +31,7 @@ FOdysseyPainterEditorLevelEditorLayout::ExtendLevelEditorLayout(FLayoutExtender&
     Extender.ExtendLayout(FTabId(TEXT("LevelEditorSelectionDetails")), ELayoutExtensionPosition::After, FTabManager::FTab(FOdysseyPainterEditorAnimationDetailsTab::StaticId(), ETabState::ClosedTab));
     Extender.ExtendLayout(FTabId(TEXT("Sequencer")), ELayoutExtensionPosition::After, FTabManager::FTab(FOdysseyPainterEditorAnimationTimelineTab::StaticId(), ETabState::ClosedTab));
     Extender.ExtendLayout(FTabId(TEXT("LevelEditorViewport")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorViewportTab::StaticId(), ETabState::ClosedTab));
+    Extender.ExtendLayout(FTabId(TEXT("LevelEditorSelectionDetails")), ELayoutExtensionPosition::After, FTabManager::FTab(FOdysseyPainterEditorGuidesTab::StaticId(), ETabState::ClosedTab));
 }
 
 #undef LOCTEXT_NAMESPACE

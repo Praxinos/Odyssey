@@ -9,9 +9,6 @@
 #include "OdysseyHUDElement.h"
 #include "TextureResource.h"
 
-#define HANDLE_SMALL_SIZE 10
-#define HANDLE_BIG_SIZE 15
-
 struct HOdysseyHUDHandleHitProxy : public HOdysseyHUDElementHitProxy
 {
     DECLARE_HIT_PROXY();
@@ -39,12 +36,10 @@ FOdysseyHUDHandle::FOdysseyHUDHandle(const FVector2D& iPosition)
 void
 FOdysseyHUDHandle::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 {
-    const FLinearColor color(1.f, 0.f, 0.f);
-
     if (iParams.mCanvas->IsHitTesting() && mIsInteractable)
         iParams.mCanvas->SetHitProxy(new HOdysseyHUDHandleHitProxy(SharedThis(this)));
 
-    int handleSize = mIsHovered && mIsInteractable ? HANDLE_BIG_SIZE : HANDLE_SMALL_SIZE;
+    const float HandleSize = mIsHovered && mIsInteractable ? mHoveredSize : mSize;
 
     FVector2D position(mPosition);
     switch(GetReference())
@@ -62,9 +57,10 @@ FOdysseyHUDHandle::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
         break;
     }
 
-    FVector2D origin = position - FVector2D(handleSize / 2.f, handleSize / 2.f);
+    FVector2D origin = position - FVector2D(HandleSize / 2.f, HandleSize / 2.f);
 
-    iParams.mCanvas->DrawTile(origin.X, origin.Y, handleSize, handleSize, 0, 0, 1.f, 1.f, color, mHandleTexture->GetResource(), true);
+    if (mHandleTexture)
+        iParams.mCanvas->DrawTile(origin.X, origin.Y, HandleSize, HandleSize, 0, 0, 1.f, 1.f, mColor, mHandleTexture->GetResource(), true);
 
     if (iParams.mCanvas->IsHitTesting() && mIsInteractable)
         iParams.mCanvas->SetHitProxy(nullptr);
@@ -110,6 +106,46 @@ const FVector2D&
 FOdysseyHUDHandle::GetPosition() const
 {
     return mPosition;
+}
+
+void FOdysseyHUDHandle::SetColor(const FLinearColor& iColor)
+{
+    mColor = iColor;
+}
+
+const FLinearColor& FOdysseyHUDHandle::GetColor() const
+{
+    return mColor;
+}
+
+void FOdysseyHUDHandle::SetSize(float iSize)
+{
+    mSize = FMath::Max(0.f, iSize);
+}
+
+float FOdysseyHUDHandle::GetSize() const
+{
+    return mSize;
+}
+
+void FOdysseyHUDHandle::SetHoveredSize(float iSize)
+{
+    mHoveredSize = FMath::Max(0.f, iSize);
+}
+
+float FOdysseyHUDHandle::GetHoveredSize() const
+{
+    return mHoveredSize;
+}
+
+void FOdysseyHUDHandle::SetHandleTexture(UTexture* iTexture)
+{
+    mHandleTexture = iTexture;
+}
+
+UTexture* FOdysseyHUDHandle::GetHandleTexture() const
+{
+    return mHandleTexture;
 }
 
 //HitProxy version

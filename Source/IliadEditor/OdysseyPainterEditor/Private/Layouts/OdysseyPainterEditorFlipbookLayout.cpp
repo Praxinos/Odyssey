@@ -10,6 +10,7 @@
 #include "OdysseyPainterEditorToolsTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
+#include "OdysseyPainterEditorGuidesTab.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -98,6 +99,15 @@ FOdysseyPainterEditorFlipbookLayout::Create()
                             ->AddTab(
                                 FOdysseyPainterEditorTextureDetailsTab::StaticId(),
                                 ETabState::OpenedTab
+                            )
+                        )
+                        ->Split(
+                            //Guides Stack
+                            FTabManager::NewStack()
+                            ->SetSizeCoefficient(0.5f)
+                            ->AddTab(
+                                FOdysseyPainterEditorGuidesTab::StaticId(),
+                                ETabState::ClosedTab
                             )
                         )
                     )

@@ -98,7 +98,7 @@ public:
 
 protected:
     virtual void DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams);
-    void InitDrawCustomizedLine(FCanvas* iCanvas, const FHUDCustomization& iCustomization, const FLinearColor& iDefaultColor);
+    void InitDrawCustomizedLine(FCanvas* iCanvas, const FHUDCustomization& iCustomization, const FLinearColor& iDefaultColor, float iThickness = 1.f);
     void DrawCustomizedLine(const FOdysseyHUDElement::FDrawHUDParams& iParams, const FVector2D& iStart, const FVector2D& iEnd);
 
 protected:
@@ -135,6 +135,7 @@ private:
         FBatchedElements* mBatchedElements;
         float mSegmentLength;
         float mGapLength;
+        float mThickness;
     } mCustomizedLinesParams;
 };
 

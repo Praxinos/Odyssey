@@ -334,6 +334,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.TopBar.Save32", new IMAGE_BRUSH_SVG( "PainterEditor/save", mIcon32x32 ) );
     Set( "PainterEditor.TopBar.Eraser32", new IMAGE_BRUSH_SVG( "PainterEditor/eraser", mIcon32x32 ) );
     Set( "PainterEditor.TopBar.Clear32", new IMAGE_BRUSH_SVG( "PainterEditor/trash", mIcon32x32 ) );
+    Set( "PainterEditor.Clear16", new IMAGE_BRUSH_SVG("PainterEditor/trash", mIcon16x16));
     Set( "PainterEditor.TopBar.VectorModeVertex32",new IMAGE_BRUSH_SVG("PainterEditor/vector_mode_vertex",mIcon32x32));
     Set( "PainterEditor.TopBar.VectorModeObject32",new IMAGE_BRUSH_SVG("PainterEditor/vector_mode_object",mIcon32x32));
     Set( "PainterEditor.TopBar.VectorModeInbetween32",new IMAGE_BRUSH_SVG("PainterEditor/vector_mode_inbetween",mIcon32x32));
@@ -395,7 +396,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyLayerStack.LayerBitmap16", new IMAGE_BRUSH( "OdysseyLayerStack/layer_bitmap_16", mIcon16x16 ) );
     Set( "OdysseyLayerStack.LayerVector16", new IMAGE_BRUSH( "OdysseyLayerStack/layer_vector_16", mIcon16x16 ) );
     Set( "OdysseyLayerStack.Visible16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/visible", mIcon16x16 ) );
+    Set( "OdysseyLayerStack.NotVisible16", new IMAGE_BRUSH_SVG("OdysseyLayerStack/not_visible", mIcon16x16));
     Set( "OdysseyLayerStack.Locked16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/locked", mIcon16x16 ) );
+    Set( "OdysseyLayerStack.Unlocked16", new IMAGE_BRUSH_SVG("OdysseyLayerStack/unlocked", mIcon16x16));
     Set( "OdysseyLayerStack.OptionsHeader16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/options_header", mIcon16x16 ) );
     Set( "OdysseyLayerStack.ColumnHeader.InheritsAlpha", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/inherits_alpha_header", mIcon16x16 ) );
 

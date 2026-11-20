@@ -23,6 +23,14 @@ public:
     void SetCenter(const FVector2D& iCenter);
     void SetXRadius(int iRadius);
     void SetYRadius(int iRadius);
+    void SetRotation(float iRotationDegrees);
+    float GetRotation() const;
+    void SetColor(const FLinearColor& iColor);
+    const FLinearColor& GetColor() const;
+    void SetOpacity(float iOpacity);
+    float GetOpacity() const;
+    void SetThickness(float iThickness);
+    float GetThickness() const;
 
     const FVector2D& GetCenter() const;
     int GetXRadius() const;
@@ -32,4 +40,8 @@ private:
     FVector2D mCenter;
     int mXRadius;
     int mYRadius;
+    float mRotationDegrees = 0.f;
+    FLinearColor mColor = FLinearColor::Black;
+    float mOpacity = 1.f;
+    float mThickness = 1.f;
 };

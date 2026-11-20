@@ -21,6 +21,7 @@
 
 class IOdysseySurfaceEditable;
 class UOdysseyPainterEditorTool;
+class UOdysseyPainterEditorGuideEditTool;
 class FOdysseyBrushContext;
 class FOdysseyPainterEditorExtension;
 class UOdysseyLayerStack;
@@ -203,6 +204,7 @@ public:
     virtual UOdysseyPainterEditorRasterTransformTool*                GetRasterTransformTool() const;
     virtual UOdysseyPainterEditorRasterPrimitiveDrawingTool*         GetRasterPrimitiveDrawingTool() const;
     virtual UOdysseyPainterEditorRasterLiquifyTool*                  GetRasterLiquifyTool() const;
+    virtual UOdysseyPainterEditorGuideEditTool*                      GetGuideEditTool() const;
     virtual UOdysseyPainterEditorRasterPaintBucketTool*              GetRasterPaintBucketTool() const;
     virtual UOdysseyPainterEditorVectorPrimitiveDrawingTool*         GetVectorPrimitiveDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPathDrawingTool*              GetVectorPathDrawingTool() const;
@@ -455,6 +457,7 @@ protected:
 
     TObjectPtr<UOdysseyPainterEditorAnimationOutOfPegsTool> mOutOfPegsTool;
     TObjectPtr<UOdysseyPainterEditorColorPickerTool> mTemporaryColorPickerTool;
+    TObjectPtr<UOdysseyPainterEditorGuideEditTool> mGuideEditTool;
 
     TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentMainToolPerLayerClass;
 

@@ -42,6 +42,14 @@ public:
 
     void SetPosition(const FVector2D& iPosition);
     const FVector2D& GetPosition() const;
+    void SetColor(const FLinearColor& iColor);
+    const FLinearColor& GetColor() const;
+    void SetSize(float iSize);
+    float GetSize() const;
+    void SetHoveredSize(float iSize);
+    float GetHoveredSize() const;
+    void SetHandleTexture(UTexture* iTexture);
+    UTexture* GetHandleTexture() const;
 
     FSimpleMulticastDelegate& OnDragged();
     FSimpleMulticastDelegate& OnDragBegin();
@@ -53,6 +61,9 @@ protected:
 
 private:
     FVector2D mPosition;
+    FLinearColor mColor = FLinearColor::Red;
+    float mSize = 10.f;
+    float mHoveredSize = 15.f;
 
     TObjectPtr<UTexture> mHandleTexture;
     FSimpleMulticastDelegate mOnDragged;
