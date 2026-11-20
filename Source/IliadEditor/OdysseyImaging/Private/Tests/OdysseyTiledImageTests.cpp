@@ -223,6 +223,46 @@ bool FOdysseyTiledImageClippingTest::RunTest(const FString& Parameters)
     return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTiledImageBandTest, "Odyssey.Imaging.TiledImage.RenderBandOfTiles", TestFlags)
+/**
+ * A render function built for the whole image draws into a destination holding a band of it only, as raster layers do
+ * for the sampled area of a view. Tiles above, below or beside the band are clipped to a zero height or width: they must
+ * be skipped, not copied, which the RHI rejects as out of the destination bounds.
+ *
+ * The targets keep the pixel format of the RGBA8 tiles: drawing a tile is then a texture copy, the path that failed.
+ */
+bool FOdysseyTiledImageBandTest::RunTest(const FString& Parameters)
+{
+    TStrongObjectPtr<UTexture2D> Source = MakeSource(96, 80, 23);
+    TStrongObjectPtr<UOdysseyTiledImage> Image(NewObject<UOdysseyTiledImage>());
+    Image->Initialize(32, EOdysseyTiledImageFormat::RGBA8);
+    Image->CopyFromTexture(Source.Get(), FIntRect(0, 0, 96, 80), FIntPoint::ZeroValue);
+    FOdysseyTileManager::Get().WaitUntilAllTilesAreCached();
+
+    UOdysseyTiledImage::FRenderFunction DrawTiles = Image->BuildRenderFunction(FIntRect(0, 0, 96, 80));
+    if (!TestTrue(TEXT("Build the render function of the whole image"), bool(DrawTiles)))
+    {
+        return false;
+    }
+    // Rows at the top and in the middle, with tiles below and above them; columns at the left and in the middle, with tiles beside them.
+    const FIntRect Bands[] = { FIntRect(0, 0, 96, 20), FIntRect(0, 50, 96, 70), FIntRect(0, 0, 20, 80), FIntRect(50, 0, 70, 80) };
+    for (const FIntRect& Band : Bands)
+    {
+        TStrongObjectPtr<UTextureRenderTarget2D> Target = MakeTarget(Band.Width(), Band.Height());
+        ENQUEUE_RENDER_COMMAND(OdysseyTiledImageBandTest)(
+            [Target = Target.Get(), DrawTiles, Band](FRHICommandListImmediate& RHICmdList)
+            {
+                FRDGBuilder GraphBuilder(RHICmdList);
+                FRDGTextureRef Destination = GraphBuilder.RegisterExternalTexture(
+                    CreateRenderTarget(Target->GetRenderTargetResource()->GetRenderTargetTexture(), TEXT("Odyssey.TiledImageTests.Band")));
+                DrawTiles(GraphBuilder, Destination, FIntPoint::ZeroValue - Band.Min);
+                GraphBuilder.Execute();
+            });
+        CheckPixels(*this, Target.Get(), Band.Min.X, Band.Min.Y, 23);
+    }
+    return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTiledImageValidationTest, "Odyssey.Imaging.TiledImage.Validation", TestFlags)
 bool FOdysseyTiledImageValidationTest::RunTest(const FString& Parameters)
 {

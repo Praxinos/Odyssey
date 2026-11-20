@@ -133,7 +133,7 @@ UOdysseyTiledImage::GetTileBounds() const
 UOdysseyTiledImage::FRenderFunction UOdysseyTiledImage::BuildRenderFunction(FIntRect SourceRect) const
 {
     check(IsInGameThread());
-    if (!Odyssey::TileUtils::IsValidTileSize(TileSize) || SourceRect.IsEmpty())
+    if (!Odyssey::TileUtils::IsValidTileSize(TileSize) || SourceRect.Area() == 0)
     {
         return {};
     }
@@ -153,7 +153,7 @@ UOdysseyTiledImage::FRenderFunction UOdysseyTiledImage::BuildRenderFunction(FInt
         RDG_EVENT_SCOPE(GraphBuilder, "Odyssey.TiledImage.Render");
         FIntRect DestinationRect(Position, Position + SourceRect.Size());
         DestinationRect.Clip(FIntRect(FIntPoint::ZeroValue, Destination->Desc.Extent));
-        if (DestinationRect.IsEmpty())
+        if (DestinationRect.Area() == 0)
         {
             return;
         }
@@ -162,7 +162,7 @@ UOdysseyTiledImage::FRenderFunction UOdysseyTiledImage::BuildRenderFunction(FInt
             const FIntPoint TileOrigin = TilePositions[Index] * TileSize - SourceRect.Min + Position;
             FIntRect TileDestination(TileOrigin, TileOrigin + FIntPoint(TileSize, TileSize));
             TileDestination.Clip(DestinationRect);
-            if (TileDestination.IsEmpty())
+            if (TileDestination.Area() == 0)
             {
                 continue;
             }
@@ -205,7 +205,7 @@ void UOdysseyTiledImage::Render(UTextureRenderTarget2D* Destination, FIntRect Re
     // Clip before preparing handles, so offscreen tiles are not loaded.
     FIntRect DestinationRect(Position, Position + Rect.Size());
     DestinationRect.Clip(FIntRect(0, 0, Destination->GetSurfaceWidth(), Destination->GetSurfaceHeight()));
-    if (DestinationRect.IsEmpty())
+    if (DestinationRect.Area() == 0)
     {
         return;
     }
