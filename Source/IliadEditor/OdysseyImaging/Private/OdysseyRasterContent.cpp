@@ -228,6 +228,38 @@ FOdysseyRasterContent::Read(UTextureRenderTarget2D& Destination, const FIntRect&
 bool
 FOdysseyRasterContent::Write(UTextureRenderTarget2D& Source, const TArray<FIntRect>& Rects, EOdysseyColorConversion Conversion)
 {
+    check(IsInGameThread());
+    if (!EnsureImage())
+    {
+        return false;
+    }
+
+    const FDescription Description = GetDescription();
+    const FIntRect Bounds(FIntPoint::ZeroValue, Description.Size);
+    TArray<FIntRect> Clipped;
+    Clipped.Reserve(Rects.Num());
+    for (FIntRect Rect : Rects)
+    {
+        Rect.Clip(Bounds);
+        if (Rect.Width() > 0 && Rect.Height() > 0)
+        {
+            Clipped.Add(Rect);
+        }
+    }
+    if (Clipped.IsEmpty())
+    {
+        return false;
+    }
+
+    // Beginning a session ends the active edit, which started from the previous pixels: committing it would discard this change.
+    // The session keeps the alpha of the content when it is locked.
+    const bool bPreserveAlpha = IsAlphaLocked && IsAlphaLocked();
+    TSharedPtr<FOdysseyRasterEditSession> Session = FOdysseyRasterEditSession::Begin(RenderingId, *Image, Description.Size, bPreserveAlpha);
+    if (!Session)
+    {
+        return false;
+    }
+
     // Copies the source pixels, converted into linear colors, at the same positions.
     IOdysseyTextureRenderingAbility::FRenderFunction Copy = [SourceResource = Source.GameThread_GetRenderTargetResource()](
         FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type FeatureLevel, FRDGTextureRef Destination,
@@ -240,21 +272,25 @@ FOdysseyRasterContent::Write(UTextureRenderTarget2D& Source, const TArray<FIntRe
     };
     Copy = FOdysseyColorSpaceShader::WrapRenderFunction(MoveTemp(Copy), Conversion);
 
-    return WriteThroughSession(Rects, [&Copy](FOdysseyRasterEditSession& Session, const TArray<FIntRect>& Clipped)
-    {
-        ENQUEUE_RENDER_COMMAND(OdysseyRasterContentWrite)(
-            [TargetResource = Session.GetTarget()->GameThread_GetRenderTargetResource(), Copy, Clipped](FRHICommandListImmediate& RHICmdList)
+    ENQUEUE_RENDER_COMMAND(OdysseyRasterContentWrite)(
+        [TargetResource = Session->GetTarget()->GameThread_GetRenderTargetResource(), Copy = MoveTemp(Copy), Clipped](FRHICommandListImmediate& RHICmdList)
+        {
+            FRDGBuilder GraphBuilder(RHICmdList);
+            FRDGTextureRef Target = GraphBuilder.RegisterExternalTexture(
+                ::CreateRenderTarget(TargetResource->GetRenderTargetTexture(), TEXT("Odyssey.RasterContent.WriteTarget")));
+            for (const FIntRect& Rect : Clipped)
             {
-                FRDGBuilder GraphBuilder(RHICmdList);
-                FRDGTextureRef Target = GraphBuilder.RegisterExternalTexture(
-                    ::CreateRenderTarget(TargetResource->GetRenderTargetTexture(), TEXT("Odyssey.RasterContent.WriteTarget")));
-                for (const FIntRect& Rect : Clipped)
-                {
-                    Copy(GraphBuilder, GMaxRHIFeatureLevel, Target, Rect, Rect, FMatrix::Identity);
-                }
-                GraphBuilder.Execute();
-            });
-    });
+                Copy(GraphBuilder, GMaxRHIFeatureLevel, Target, Rect, Rect, FMatrix::Identity);
+            }
+            GraphBuilder.Execute();
+        });
+
+    if (!Session->Commit(Clipped))
+    {
+        return false;
+    }
+    NotifyChanged(Clipped, false);
+    return true;
 }
 
 bool
@@ -328,49 +364,6 @@ FOdysseyRasterContent::NotifyChanged(const TArray<FIntRect>& Rects, bool bIntera
         return;
     }
     OnChanged(Rects, bInteractive);
-}
-
-bool
-FOdysseyRasterContent::WriteThroughSession(const TArray<FIntRect>& Rects,
-    TFunctionRef<void(FOdysseyRasterEditSession& Session, const TArray<FIntRect>& Rects)> Fill)
-{
-    check(IsInGameThread());
-    if (!EnsureImage())
-    {
-        return false;
-    }
-
-    const FDescription Description = GetDescription();
-    const FIntRect Bounds(FIntPoint::ZeroValue, Description.Size);
-    TArray<FIntRect> Clipped;
-    Clipped.Reserve(Rects.Num());
-    for (FIntRect Rect : Rects)
-    {
-        Rect.Clip(Bounds);
-        if (Rect.Width() > 0 && Rect.Height() > 0)
-        {
-            Clipped.Add(Rect);
-        }
-    }
-    if (Clipped.IsEmpty())
-    {
-        return false;
-    }
-
-    // Beginning a session ends the active edit, which started from the previous pixels: committing it would discard this change.
-    const bool bPreserveAlpha = IsAlphaLocked && IsAlphaLocked();
-    TSharedPtr<FOdysseyRasterEditSession> Session = FOdysseyRasterEditSession::Begin(RenderingId, *Image, Description.Size, bPreserveAlpha);
-    if (!Session)
-    {
-        return false;
-    }
-    Fill(*Session, Clipped);
-    if (!Session->Commit(Clipped))
-    {
-        return false;
-    }
-    NotifyChanged(Clipped, false);
-    return true;
 }
 
 bool

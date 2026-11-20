@@ -189,13 +189,6 @@ private:
     /** Notifies the owner that pixels changed; empty rects stand for the whole canvas. */
     void NotifyChanged(const TArray<FIntRect>& Rects, bool bInteractive);
 
-    /**
-     * Writes areas through an edit session, which keeps the alpha when it is locked, then notifies the owner.
-     * @param Rects The areas to write; clipped to the content bounds.
-     * @param Fill Writes the new pixels of the clipped areas into the session target.
-     */
-    bool WriteThroughSession(const TArray<FIntRect>& Rects, TFunctionRef<void(FOdysseyRasterEditSession& Session, const TArray<FIntRect>& Rects)> Fill);
-
     bool BuildImageRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform, FIntPoint Size) const;
 
 private:
