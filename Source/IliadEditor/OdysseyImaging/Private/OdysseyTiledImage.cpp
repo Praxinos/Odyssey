@@ -35,8 +35,6 @@ UOdysseyTiledImage::Initialize(int InTileSize, EOdysseyTiledImageFormat InFormat
 
     TileSize = InTileSize;
     Format = InFormat;
-    // The tiles are undoable through Modify().
-    SetFlags(RF_Transactional);
     Tiles.Empty();
 }
 

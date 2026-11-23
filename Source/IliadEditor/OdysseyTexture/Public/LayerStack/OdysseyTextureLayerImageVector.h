@@ -17,7 +17,6 @@
 
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorEngine;
-class UOdysseyTiledImage;
 
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
@@ -46,10 +45,6 @@ private:
     TSharedPtr<FOdysseyVectorCell> mVectorCell;
     TSharedPtr<FOdysseyVectorLayer> mVectorLayer;
 
-    /** The render of the scene, blended by the layer stack. Rebuilt from the scene: never saved. */
-    UPROPERTY(Transient, NonTransactional)
-    TObjectPtr<UOdysseyTiledImage> TiledImage;
-
     mutable TSharedPtr<FOdysseyVectorContent> VectorContent;
 
 public:
@@ -77,9 +72,6 @@ public:
      * Created when needed, following the current vector cell.
      */
     FOdysseyVectorContent& GetVectorContent() const;
-
-    /** Returns the tiled image holding the render of the scene, without creating it. */
-    const UOdysseyTiledImage* GetTiledImage() const;
 
 public:
     //IOdysseyRenderingAbility overrides

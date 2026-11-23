@@ -11,6 +11,7 @@
 #include "RenderingThread.h"
 #include "ScopedTransaction.h"
 #include "TextureResource.h"
+#include "UObject/Package.h"
 #include "UObject/StrongObjectPtr.h"
 
 namespace Odyssey::TiledImageBlockTests
@@ -232,8 +233,11 @@ bool FOdysseyTiledImageBlockUndoTest::RunTest(const FString& Parameters)
     }
     TSharedPtr<::ULIS::FBlock> Before = MakeBlock(80, 48, ::ULIS::Format_RGBA8, 5);
     TSharedPtr<::ULIS::FBlock> After = MakeBlock(80, 48, ::ULIS::Format_RGBA8, 77);
-    TStrongObjectPtr<UOdysseyTiledImage> Image = MakeImage(EOdysseyTiledImageFormat::RGBA8);
-    TestTrue(TEXT("Initialized image is transactional"), Image->HasAnyFlags(RF_Transactional));
+    TestFalse(TEXT("Initialize leaves the flags of the image"), MakeImage(EOdysseyTiledImageFormat::RGBA8)->HasAnyFlags(RF_Transactional));
+    // The creator of the image makes its tiles undoable.
+    TStrongObjectPtr<UOdysseyTiledImage> Image(NewObject<UOdysseyTiledImage>(GetTransientPackage(), NAME_None, RF_Transactional));
+    Image->Initialize(32, EOdysseyTiledImageFormat::RGBA8);
+    TestTrue(TEXT("Initialize keeps the image transactional"), Image->HasAnyFlags(RF_Transactional));
     CopyFromBlock(*Image, *Before, FIntRect(0, 0, 80, 48), FIntPoint::ZeroValue);
     {
         FScopedTransaction Transaction(NSLOCTEXT("OdysseyTiledImageBlockTests", "Edit", "Tiled image block edit"));

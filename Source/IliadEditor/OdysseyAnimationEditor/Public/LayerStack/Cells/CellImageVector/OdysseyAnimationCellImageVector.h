@@ -11,7 +11,6 @@
 
 #include "OdysseyAnimationCellImageVector.generated.h"
 
-class UOdysseyTiledImage;
 class FOdysseyMediaVector;
 class FOdysseyVectorEngine;
 class FOdysseyVectorGroupPaint;
@@ -63,9 +62,6 @@ public:
      */
     FOdysseyVectorContent& GetVectorContent() const;
 
-    /** Returns the tiled image holding the render of the scene, without creating it. */
-    const UOdysseyTiledImage* GetTiledImage() const;
-
 public:
     // Event Listeners
     void OnIsColoredChanged(UOdysseyAnimationLayerImageVector* iLayer);
@@ -93,9 +89,4 @@ private:
     mutable FCriticalSection mImageRenderingMutex;
     mutable TWeakPtr<FOdysseyMediaVector> mMediaVector;
     FOdysseyVectorImportV2 mImporterV2;
-
-private:
-    /** The render of the scene, blended by the animation. Rebuilt from the scene: never saved. */
-    UPROPERTY(Transient, NonTransactional)
-    TObjectPtr<UOdysseyTiledImage> TiledImage;
 };

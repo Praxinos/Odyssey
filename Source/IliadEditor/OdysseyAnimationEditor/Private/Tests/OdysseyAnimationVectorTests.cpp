@@ -3,6 +3,7 @@
 
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Editor.h"
+#include "Editor/Transactor.h"
 #include "EditorValidatorSubsystem.h"
 #include "Engine/Texture2D.h"
 #include "HAL/FileManager.h"
@@ -28,6 +29,7 @@
 #include "OdysseyRenderingType.h"
 #include "OdysseyTiledImage.h"
 #include "OdysseyVectorCell.h"
+#include "OdysseyVectorContent.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorLayer.h"
 
@@ -133,18 +135,19 @@ bool FOdysseyAnimationVectorRenderTest::RunTest(const FString& Parameters)
             UOdysseyAnimationLayerImageVector::StaticClass(), UOdysseyAnimationCellImageVector::StaticClass()));
         UOdysseyAnimationCellImageVector* Cell = FirstVectorCell(Animation.Get());
         SetSceneColor(Cell, Fill);
-        TestNull(Name + TEXT(": the scene is not rendered before it is displayed"), Cell->GetTiledImage());
+        TestNull(Name + TEXT(": the scene is not rendered before it is displayed"), Cell->GetVectorContent().GetImage());
 
         const TArray<FLinearColor> Plain = Render(Animation.Get(), 0, EOdysseyRenderingType::Render);
         CheckUniform(*this, Name + TEXT(": the animation shows the scene of its vector cell"), Plain, Linear(Fill, Format), Precision);
         CheckUniform(*this, Name + TEXT(": the cell is shown on its second frame"), Render(Animation.Get(), 1, EOdysseyRenderingType::Render), Linear(Fill, Format), Precision);
-        const UOdysseyTiledImage* Image = Cell->GetTiledImage();
+        const UOdysseyTiledImage* Image = Cell->GetVectorContent().GetImage();
         if (!TestNotNull(Name + TEXT(": the render is held by a tiled image"), Image))
         {
             return false;
         }
-        TestEqual(Name + TEXT(": the image belongs to the cell"), Image->GetOuter(), static_cast<UObject*>(Cell));
-        TestTrue(Name + TEXT(": the image is never saved and its tiles are undoable"), Image->HasAllFlags(RF_Transient | RF_Transactional));
+        TestEqual(Name + TEXT(": the image is not a subobject of the cell"), Image->GetOuter(), static_cast<UObject*>(GetTransientPackage()));
+        TestTrue(Name + TEXT(": the image is never saved"), Image->HasAnyFlags(RF_Transient));
+        TestFalse(Name + TEXT(": the tiles are not undoable, an undo redraws the scene"), Image->HasAnyFlags(RF_Transactional));
         TestEqual(Name + TEXT(": the tiles hold the colors the animation renders"), Image->GetFormat(),
             Format == EOdysseyAnimationFormat::BGRA8 ? EOdysseyTiledImageFormat::RGBA16F : EOdysseyTiledImageFormat::RGBA8);
 
@@ -176,10 +179,10 @@ bool FOdysseyAnimationVectorRenderTest::RunTest(const FString& Parameters)
 
         TStrongObjectPtr<UOdysseyAnimation> Duplicate(DuplicateObject<UOdysseyAnimation>(Animation.Get(), GetTransientPackage()));
         UOdysseyAnimationCellImageVector* DuplicateCell = FirstVectorCell(Duplicate.Get());
-        TestNull(Name + TEXT(": the render is not duplicated"), DuplicateCell->GetTiledImage());
+        TestNull(Name + TEXT(": the render is not duplicated"), DuplicateCell->GetVectorContent().GetImage());
         TestTrue(Name + TEXT(": the duplicate has its own scene"), DuplicateCell->GetVectorCell() != Cell->GetVectorCell());
         CheckUniform(*this, Name + TEXT(": the duplicate shows the duplicated scene"), Render(Duplicate.Get(), 0, EOdysseyRenderingType::Render), Linear(Fill, Format), Precision);
-        TestTrue(Name + TEXT(": the duplicate renders into its own image"), DuplicateCell->GetTiledImage() && DuplicateCell->GetTiledImage() != Image);
+        TestTrue(Name + TEXT(": the duplicate renders into its own image"), DuplicateCell->GetVectorContent().GetImage() && DuplicateCell->GetVectorContent().GetImage() != Image);
         SetSceneColor(DuplicateCell, OtherFill);
         CheckUniform(*this, Name + TEXT(": the duplicate shows the edits of its scene"), Render(Duplicate.Get(), 0, EOdysseyRenderingType::Render), Linear(OtherFill, Format), Precision);
         CheckUniform(*this, Name + TEXT(": the original is not changed by the edits of the duplicate"), Render(Animation.Get(), 0, EOdysseyRenderingType::Render), Linear(Fill, Format), Precision);
@@ -191,7 +194,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationVectorUndoTest, "Odyssey.Anima
 
 /**
  * Undoing the clear of a vector cell shows the previous render, whether the clear was displayed after its transaction,
- * or within it, which records the tiles in the transaction.
+ * or within it. The tiles are not recorded in the transaction: the undo redraws the scene.
  */
 bool FOdysseyAnimationVectorUndoTest::RunTest(const FString& Parameters)
 {
@@ -223,6 +226,8 @@ bool FOdysseyAnimationVectorUndoTest::RunTest(const FString& Parameters)
         Cell->Clear();
         CheckUniform(*this, TEXT("The clear displayed within its transaction renders nothing"), Render(Animation.Get(), 0, EOdysseyRenderingType::Render), FLinearColor::Transparent, Precision);
     }
+    const FTransaction* Displayed = GEditor->Trans->GetTransaction(GEditor->Trans->GetQueueLength() - 1);
+    TestFalse(TEXT("The transaction does not record the tiles"), Displayed && Displayed->ContainsObject(Cell->GetVectorContent().GetImage()));
     TestTrue(TEXT("Undo the displayed clear"), GEditor->UndoTransaction());
     CheckUniform(*this, TEXT("The undone displayed clear shows the previous render"), Render(Animation.Get(), 0, EOdysseyRenderingType::Render), Linear(Fill, Format), Precision);
     return true;
@@ -287,13 +292,13 @@ bool FOdysseyAnimationVectorPersistenceTest::RunTest(const FString& Parameters)
     UOdysseyAnimationCellImageVector* LoadedCell = FirstVectorCell(Loaded);
     UTexture2D* LoadedLegacyTexture = FindObject<UTexture2D>(LoadedCell, TEXT("Texture"));
     TestNotNull(TEXT("The former render texture is loaded with the cell"), LoadedLegacyTexture);
-    TestNull(TEXT("The render is not saved"), LoadedCell->GetTiledImage());
+    TestNull(TEXT("The render is not saved"), LoadedCell->GetVectorContent().GetImage());
     // Loading the cell requests a redraw, which tells the layer stack: it must not dirty the package while loading.
     TestFalse(TEXT("Loading does not dirty the package"), LoadedPackage->IsDirty());
     LoadedPackage->SetDirtyFlag(false);
 
     CheckUniform(*this, TEXT("The loaded cell renders its saved scene"), Render(Loaded, 0, EOdysseyRenderingType::Render), Linear(Fill, Format), Precision);
-    TestNotNull(TEXT("The loaded cell renders into a tiled image"), LoadedCell->GetTiledImage());
+    TestNotNull(TEXT("The loaded cell renders into a tiled image"), LoadedCell->GetVectorContent().GetImage());
     TestFalse(TEXT("Displaying the loaded vector cell does not dirty its package"), LoadedPackage->IsDirty());
     // Check that this package can be dirtied, so that the check above is meaningful.
     LoadedCell->Modify();

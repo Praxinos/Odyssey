@@ -8,6 +8,7 @@
 #include "HAL/PlatformMisc.h"
 #include "Misc/App.h"
 #include "Misc/ScopeLock.h"
+#include "UObject/Package.h"
 
 #include "OdysseyRasterEditSession.h"
 #include "OdysseyRasterSampling.h"
@@ -95,21 +96,15 @@ FOdysseyVectorContent::~FOdysseyVectorContent()
     {
         Cell->OnRequestRedrawDelegate().RemoveAll(this);
     }
-    if (UOdysseyTiledImage* Bound = BoundImage.Get())
-    {
-        Bound->OnUndone().RemoveAll(this);
-    }
     if (Session)
     {
         Session->End();
     }
 }
 
-FOdysseyVectorContent::FOdysseyVectorContent(UObject& InOwner, const FGuid& InRenderingId, TObjectPtr<UOdysseyTiledImage>& InImage,
-    TSharedPtr<FOdysseyVectorCell> InCell, FGetDescription InGetDescription, FGetDrawingFlags InGetDrawingFlags, FOnChanged InOnChanged)
-    : Owner(InOwner)
-    , RenderingId(InRenderingId)
-    , Image(InImage)
+FOdysseyVectorContent::FOdysseyVectorContent(const FGuid& InRenderingId, TSharedPtr<FOdysseyVectorCell> InCell,
+    FGetDescription InGetDescription, FGetDrawingFlags InGetDrawingFlags, FOnChanged InOnChanged)
+    : RenderingId(InRenderingId)
     , Cell(MoveTemp(InCell))
     , GetDescription(MoveTemp(InGetDescription))
     , GetDrawingFlags(MoveTemp(InGetDrawingFlags))
@@ -158,17 +153,15 @@ FOdysseyVectorContent::EnsureRendered()
     const uint64 DrawingFlags = GetDrawingFlags ? GetDrawingFlags() : 0;
     if (!Image)
     {
-        // The render is rebuilt from the scene: the image is never saved, and writing its tiles never dirties the package of the owner.
-        UOdysseyTiledImage* NewImage = NewObject<UOdysseyTiledImage>(&Owner, NAME_None, RF_Transient | RF_Transactional);
-        NewImage->Initialize(TileSize, Format);
-        Image = NewImage;
+        // The render is rebuilt from the scene: the image is never saved, and writing its tiles never dirties a package.
+        // Not transactional: the undo of a vector edit redraws the scene.
+        Image = NewObject<UOdysseyTiledImage>(GetTransientPackage(), NAME_None, RF_Transient);
+        Image->Initialize(TileSize, Format);
         RenderedDescription.Reset();
     }
-    BindImage();
 
     const FIntRect Canvas(FIntPoint::ZeroValue, Description.Size);
     TOptional<FIntRect> Rect;
-    // The format is checked too: an undo restores the format of the image with its tiles.
     if (!RenderedDescription.IsSet() || !(RenderedDescription.GetValue() == Description) || Image->GetFormat() != Format)
     {
         // The session holds a render of the previous description.
@@ -247,20 +240,6 @@ FOdysseyVectorContent::OnRequestRedraw(FOdysseyVectorGroupPaint* Scene, uint64 R
     if (!Rects.IsEmpty())
     {
         OnChanged(Rects, false);
-    }
-}
-
-void
-FOdysseyVectorContent::OnImageUndone()
-{
-    // The undo restored tiles which may not match the scene: render everything again.
-    EndSession();
-    RenderedDescription.Reset();
-    PendingRect.Reset();
-    const FDescription Description = GetDescription();
-    if (Description.IsValid())
-    {
-        OnChanged({ FIntRect(FIntPoint::ZeroValue, Description.Size) }, false);
     }
 }
 
@@ -389,16 +368,13 @@ FOdysseyVectorContent::AddPending(const FIntRect& Rect)
 }
 
 void
-FOdysseyVectorContent::BindImage()
+FOdysseyVectorContent::AddReferencedObjects(FReferenceCollector& Collector)
 {
-    if (BoundImage.Get() == Image)
-    {
-        return;
-    }
-    if (UOdysseyTiledImage* Bound = BoundImage.Get())
-    {
-        Bound->OnUndone().RemoveAll(this);
-    }
-    Image->OnUndone().AddRaw(this, &FOdysseyVectorContent::OnImageUndone);
-    BoundImage = Image.Get();
+    Collector.AddReferencedObject(Image);
+}
+
+FString
+FOdysseyVectorContent::GetReferencerName() const
+{
+    return TEXT("FOdysseyVectorContent");
 }

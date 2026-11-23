@@ -5,8 +5,8 @@
 
 #include "CoreMinimal.h"
 #include "Templates/Function.h"
+#include "UObject/GCObject.h"
 #include "UObject/ObjectPtr.h"
-#include "UObject/WeakObjectPtrTemplates.h"
 
 #include "OdysseyTextureRenderingAbility.h"
 
@@ -16,14 +16,15 @@ class FOdysseyRasterEditSession;
 class FOdysseyVectorCell;
 class FOdysseyVectorGroupPaint;
 class UOdysseyTiledImage;
+enum class EOdysseyTiledImageFormat : uint8;
 struct FOdysseyVectorContentRasterizer;
 
 /**
  * Vector content shared by vector texture layers and vector animation cells: the render of their vector scene.
  *
  * The scene is the persisted data; its render is a cache, held as linear colors by a tiled image that is never saved.
- * The owner holds the image in a transient UPROPERTY so that it is garbage collected with the owner; this class creates it
- * in that property and keeps it up to date with the scene.
+ * This class creates the image, keeps it up to date with the scene and keeps it from being garbage collected.
+ * The image is in the transient package: as its outer, the owner would be kept alive by this reference.
  *
  * - Interactive redraws of the scene are rendered into an edit session, which the views show in place of the tiles.
  * - Other redraws only mark the area to render: the tiles are rendered when the content is displayed, see EnsureRendered().
@@ -31,6 +32,7 @@ struct FOdysseyVectorContentRasterizer;
  */
 class ODYSSEYIMAGING_API FOdysseyVectorContent
     : public TSharedFromThis<FOdysseyVectorContent>
+    , public FGCObject
 {
 public:
     /** The content the owner expects. */
@@ -61,19 +63,16 @@ public:
     using FOnChanged = TFunction<void(const TArray<FIntRect>& Rects, bool bInteractive)>;
 
 public:
-    ~FOdysseyVectorContent();
+    virtual ~FOdysseyVectorContent() override;
 
     /**
-     * @param InOwner The object owning the image property; the outer of the image.
      * @param InRenderingId The rendering id of the owner, which the edit sessions replace in the views.
-     * @param InImage The owner's transient property holding the tiled image. It must outlive this object.
      * @param InCell The vector cell holding the scene; its redraw requests are followed.
      * @param InGetDescription Returns the content the owner expects.
      * @param InGetDrawingFlags Returns the flags the scene is drawn with.
      * @param InOnChanged Called when the render changed.
      */
-    FOdysseyVectorContent(UObject& InOwner, const FGuid& InRenderingId, TObjectPtr<UOdysseyTiledImage>& InImage,
-        TSharedPtr<FOdysseyVectorCell> InCell, FGetDescription InGetDescription, FGetDrawingFlags InGetDrawingFlags, FOnChanged InOnChanged);
+    FOdysseyVectorContent(const FGuid& InRenderingId, TSharedPtr<FOdysseyVectorCell> InCell, FGetDescription InGetDescription, FGetDrawingFlags InGetDrawingFlags, FOnChanged InOnChanged);
 
     FOdysseyVectorContent(const FOdysseyVectorContent&) = delete;
     FOdysseyVectorContent& operator=(const FOdysseyVectorContent&) = delete;
@@ -103,9 +102,13 @@ public:
      */
     bool BuildRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform);
 
+public:
+    // FGCObject
+    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+    virtual FString GetReferencerName() const override;
+
 private:
     void OnRequestRedraw(FOdysseyVectorGroupPaint* Scene, uint64 RedrawFlags);
-    void OnImageUndone();
 
     /** Renders an area of the scene into the edit session, begun when needed. */
     void RenderInteractive(const FIntRect& Rect, const FDescription& Description);
@@ -124,19 +127,15 @@ private:
     FIntRect GetRedrawRect(FIntPoint Size) const;
 
     void AddPending(const FIntRect& Rect);
-    void BindImage();
 
 private:
-    UObject& Owner;
     FGuid RenderingId;
-    TObjectPtr<UOdysseyTiledImage>& Image;
+    /** The render of the scene; created when first rendered. */
+    TObjectPtr<UOdysseyTiledImage> Image;
     TSharedPtr<FOdysseyVectorCell> Cell;
     FGetDescription GetDescription;
     FGetDrawingFlags GetDrawingFlags;
     FOnChanged OnChanged;
-
-    /** The image whose undo notification is bound. */
-    TWeakObjectPtr<UOdysseyTiledImage> BoundImage;
 
     /** The description of the last render; unset when the tiles were never rendered. */
     TOptional<FDescription> RenderedDescription;

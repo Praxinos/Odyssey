@@ -14,6 +14,7 @@
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerImageVector.h"
 #include "OdysseyTextureLayerStack.h"
+#include "OdysseyVectorContent.h"
 
 namespace Odyssey::TextureLayerTiledImageTests
 {
@@ -68,7 +69,7 @@ bool FOdysseyTextureLayerVectorRenderTest::RunTest(const FString& Parameters)
     const TArray<FLinearColor> Pixels = ReadPixels(Target.Get());
     if (!TestEqual(TEXT("Render reads all pixels"), Pixels.Num(), 73 * 67))
         return false;
-    TestNotNull(TEXT("The layer holds the render of its scene in a tiled image"), Layer->GetTiledImage());
+    TestNotNull(TEXT("The layer holds the render of its scene in a tiled image"), Layer->GetVectorContent().GetImage());
 
     const FLinearColor Gray = Pixels[0];
     TestTrue(FString::Printf(TEXT("The layer renders an opaque gray, got %s"), *Gray.ToString()),

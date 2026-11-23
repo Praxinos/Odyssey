@@ -14,7 +14,6 @@
 #include "OdysseyMediaVector.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
-#include "OdysseyTiledImage.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorGroupPaint.h"
@@ -85,7 +84,7 @@ UOdysseyAnimationCellImageVector::GetVectorContent() const
     if (!mVectorContent || mVectorContent->GetCell() != mVectorCell)
     {
         UOdysseyAnimationCellImageVector* MutableThis = const_cast<UOdysseyAnimationCellImageVector*>(this);
-        mVectorContent = MakeShared<FOdysseyVectorContent>(*MutableThis, MutableThis->GetRenderingId(), MutableThis->TiledImage, mVectorCell,
+        mVectorContent = MakeShared<FOdysseyVectorContent>(MutableThis->GetRenderingId(), mVectorCell,
             [MutableThis]()
             {
                 FOdysseyVectorContent::FDescription Description;
@@ -107,12 +106,6 @@ UOdysseyAnimationCellImageVector::GetVectorContent() const
             });
     }
     return *mVectorContent;
-}
-
-const UOdysseyTiledImage*
-UOdysseyAnimationCellImageVector::GetTiledImage() const
-{
-    return TiledImage;
 }
 
 void

@@ -42,7 +42,10 @@ public:
     virtual void PostEditUndo() override;
 
 public:
-    /** Sets the tile size and format, and removes every tile. */
+    /**
+     * Sets the tile size and format, and removes every tile. The flags are left as they are: the creator of the image sets them,
+     * e.g. RF_Transactional when its tiles are undoable through Modify().
+     */
     void Initialize(int TileSize, EOdysseyTiledImageFormat Format);
 
     EOdysseyTiledImageFormat GetFormat() const;

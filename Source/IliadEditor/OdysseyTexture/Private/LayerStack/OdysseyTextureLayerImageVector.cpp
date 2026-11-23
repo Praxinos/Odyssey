@@ -19,7 +19,6 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "OdysseyTextureLayerStackUserData.h"
-#include "OdysseyTiledImage.h"
 
 #define LOCTEXT_NAMESPACE "Texture"
 
@@ -95,7 +94,7 @@ UOdysseyTextureLayerImageVector::GetVectorContent() const
     if (!VectorContent || VectorContent->GetCell() != mVectorCell)
     {
         UOdysseyTextureLayerImageVector* MutableThis = const_cast<UOdysseyTextureLayerImageVector*>(this);
-        VectorContent = MakeShared<FOdysseyVectorContent>(*MutableThis, MutableThis->GetRenderingId(), MutableThis->TiledImage, mVectorCell,
+        VectorContent = MakeShared<FOdysseyVectorContent>(MutableThis->GetRenderingId(), mVectorCell,
             [MutableThis]()
             {
                 FOdysseyVectorContent::FDescription Description;
@@ -118,12 +117,6 @@ UOdysseyTextureLayerImageVector::GetVectorContent() const
             });
     }
     return *VectorContent;
-}
-
-const UOdysseyTiledImage*
-UOdysseyTextureLayerImageVector::GetTiledImage() const
-{
-    return TiledImage;
 }
 
 void
