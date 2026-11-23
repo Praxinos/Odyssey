@@ -23,8 +23,8 @@ FOdysseyUndoDelegates::FOdysseyUndoDelegates()
         {
             Transactor->OnTransactionStateChanged().AddRaw(this, &FOdysseyUndoDelegates::HandleTransactionStateChanged);
             Transactor->OnBeforeRedoUndo().AddRaw(this, &FOdysseyUndoDelegates::HandleBeforeUndoRedo);
-            Transactor->OnRedo().AddRaw(this, &FOdysseyUndoDelegates::HandleAfterUndo);
-            Transactor->OnUndo().AddRaw(this, &FOdysseyUndoDelegates::HandleAfterRedo);
+            Transactor->OnUndo().AddRaw(this, &FOdysseyUndoDelegates::HandleAfterUndo);
+            Transactor->OnRedo().AddRaw(this, &FOdysseyUndoDelegates::HandleAfterRedo);
         }
     }
 
