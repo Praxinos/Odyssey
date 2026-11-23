@@ -29,6 +29,41 @@
 
 #define LOCTEXT_NAMESPACE "FOdysseyPainterEditorAnimationImport"
 
+namespace
+{
+//PATCH: Needed to avoid double sRGB application in GetRenderTargetImage()
+// The render target is shared between imports (FOdysseyImportTexturesSharedRT),
+// so its original settings must always be restored, including on early returns
+struct FScopedSRGBReadbackPatch
+{
+    FScopedSRGBReadbackPatch( UTextureRenderTarget2D* iRenderTarget, bool iEnabled )
+        : mRenderTarget( iEnabled ? iRenderTarget : nullptr )
+    {
+        if( !mRenderTarget )
+            return;
+
+        mPreviousFormat = mRenderTarget->RenderTargetFormat;
+        mPreviousForceLinearGamma = mRenderTarget->bForceLinearGamma;
+        mRenderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
+        mRenderTarget->bForceLinearGamma = false;
+    }
+
+    ~FScopedSRGBReadbackPatch()
+    {
+        if( !mRenderTarget )
+            return;
+
+        mRenderTarget->RenderTargetFormat = mPreviousFormat;
+        mRenderTarget->bForceLinearGamma = mPreviousForceLinearGamma;
+    }
+
+    UTextureRenderTarget2D* mRenderTarget;
+    TEnumAsByte<ETextureRenderTargetFormat> mPreviousFormat = RTF_RGBA8;
+    uint8 mPreviousForceLinearGamma = true;
+};
+//PATCH: End
+}
+
 FOdysseyPainterEditorAnimationImportResult
 FOdysseyPainterEditorAnimationImport::ImportTextureSequence(UOdysseyAnimation* Animation, const FOdysseyImportTexturesParameters& iImportData)
 {
@@ -89,7 +124,8 @@ FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence(UOdysseyAnimati
     TArray<UOdysseyLayerCell*> cells = Layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), iCellIndex, iImportData.GetSourceTextures().Num());
     TArray<UOdysseyAnimationCellImageRaster*> rasterCells;
 
-    UTextureRenderTarget2D* renderTarget = iImportData.CreateRT();
+    UTextureRenderTarget2D* renderTarget = FOdysseyImportTexturesSharedRT::Get(iImportData);
+    const bool patchSRGB = animation->GetFormat() == EOdysseyAnimationFormat::BGRA8;
     for( int i = 0; i < cells.Num(); i++ )
     {
         progressBar.EnterProgressFrame();
@@ -97,25 +133,12 @@ FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence(UOdysseyAnimati
         UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(cells[i]);
         iImportData.Render(renderTarget, i);
 
-        //PATCH: Needed to avoid double sRGB application in GetRenderTargetImage()
-        if (animation->GetFormat() == EOdysseyAnimationFormat::BGRA8)
-        {
-            renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
-            renderTarget->bForceLinearGamma = false;
-        }
-        //PATCH: End
-
         FImage OutImage;
-        if (!FImageUtils::GetRenderTargetImage(renderTarget, OutImage))
-            continue;
-
-        //PATCH: Needed to avoid double sRGB application in GetRenderTargetImage()
-        if (animation->GetFormat() == EOdysseyAnimationFormat::BGRA8)
         {
-            renderTarget->RenderTargetFormat = RTF_RGBA8;
-            renderTarget->bForceLinearGamma = true;
+            FScopedSRGBReadbackPatch srgbPatch(renderTarget, patchSRGB);
+            if (!FImageUtils::GetRenderTargetImage(renderTarget, OutImage))
+                continue;
         }
-        //PATCH: End
 
         ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
@@ -130,6 +153,49 @@ FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence(UOdysseyAnimati
         rasterBlockMutator.Copy(block, { invalidRect });
         rasterBlockMutator.Commit();
     }
+
+    return result;
+}
+
+FOdysseyPainterEditorAnimationImportResult
+FOdysseyPainterEditorAnimationCellImport::ImportTextureSequence( UOdysseyAnimationCellImageRaster* iCell, const FOdysseyImportTexturesParameters& iImportData)
+{
+    FOdysseyPainterEditorAnimationImportResult result;
+
+    if ( iImportData.GetSourceTextures().Num() <= 0 || !iCell )
+        return result;
+
+    UOdysseyAnimation* animation = iCell->GetAnimation();
+    if( !animation )
+        return result;
+
+    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures Sequence"));
+
+    UTextureRenderTarget2D* renderTarget = FOdysseyImportTexturesSharedRT::Get(iImportData);
+
+    iImportData.Render(renderTarget, 0); // For cell, always get only the first texture
+
+    FImage OutImage;
+    {
+        FScopedSRGBReadbackPatch srgbPatch(renderTarget, animation->GetFormat() == EOdysseyAnimationFormat::BGRA8);
+        if (!FImageUtils::GetRenderTargetImage(renderTarget, OutImage))
+            return result;
+    }
+
+    ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+    TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( renderTarget->GetSurfaceWidth(), renderTarget->GetSurfaceHeight(), format ));
+    CopyImageToBlock(OutImage, block.Get());
+
+    UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>( iCell );
+
+    result.mImportedCells.Add(cell);
+
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
+    FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
+    ::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
+    rasterBlockMutator.Copy( block, { invalidRect } );
+    rasterBlockMutator.Commit();
 
     return result;
 }

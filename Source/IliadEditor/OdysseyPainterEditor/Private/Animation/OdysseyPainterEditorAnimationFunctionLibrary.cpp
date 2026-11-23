@@ -40,7 +40,10 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ImportImageSequence(UOdysseyAnima
 {
     FOdysseyImportTexturesParameters params = Parameters;
     params.Init(Paths, Animation->GetWidth(), Animation->GetHeight());
-    return FOdysseyPainterEditorAnimationImport::ImportTextureSequence( Animation, params );
+    FOdysseyPainterEditorAnimationImportResult result = FOdysseyPainterEditorAnimationImport::ImportTextureSequence( Animation, params );
+    params.ReleaseOwnedSourceTextures();
+
+    return result;
 }
 
 TArray<FString>
@@ -137,7 +140,10 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ImportImageSequence(UOdyssey
 
     FOdysseyImportTexturesParameters params = Parameters;
     params.Init(Paths, animation->GetWidth(), animation->GetHeight());
-    return FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence( Layer, params, CellIndex );
+    FOdysseyPainterEditorAnimationImportResult result = FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence( Layer, params, CellIndex );
+    params.ReleaseOwnedSourceTextures();
+
+    return result;
 }
 
 TArray<FString>
@@ -215,6 +221,37 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportAsFlipbook(UOdysseyAni
         AssetName,
         Path
     );
+}
+
+//---
+
+//static
+FOdysseyPainterEditorAnimationImportResult
+UOdysseyPainterEditorAnimationCellFunctionLibrary::ImportTextureSequence( UOdysseyAnimationCellImageRaster* iCellRaster, UTexture2D* iTexture, FOdysseyImportTexturesParameters iParameters )
+{
+    UOdysseyAnimation* animation = iCellRaster->GetAnimation();
+    if( !animation )
+        return FOdysseyPainterEditorAnimationImportResult();
+
+    FOdysseyImportTexturesParameters params = iParameters;
+    params.Init( { iTexture }, animation->GetWidth(), animation->GetHeight() );
+    return FOdysseyPainterEditorAnimationCellImport::ImportTextureSequence( iCellRaster, params );
+}
+
+//static
+FOdysseyPainterEditorAnimationImportResult
+UOdysseyPainterEditorAnimationCellFunctionLibrary::ImportImageSequence( UOdysseyAnimationCellImageRaster* iCellRaster, FString iPath, FOdysseyImportTexturesParameters iParameters )
+{
+    UOdysseyAnimation* animation = iCellRaster->GetAnimation();
+    if( !animation )
+        return FOdysseyPainterEditorAnimationImportResult();
+
+    FOdysseyImportTexturesParameters params = iParameters;
+    params.Init( { iPath }, animation->GetWidth(), animation->GetHeight() );
+    FOdysseyPainterEditorAnimationImportResult result = FOdysseyPainterEditorAnimationCellImport::ImportTextureSequence( iCellRaster, params );
+    params.ReleaseOwnedSourceTextures();
+
+    return result;
 }
 
 #undef LOCTEXT_NAMESPACE

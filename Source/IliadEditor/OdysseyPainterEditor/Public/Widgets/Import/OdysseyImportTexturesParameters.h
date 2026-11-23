@@ -72,12 +72,21 @@ public:
     ~FOdysseyImportTexturesParameters();
     FOdysseyImportTexturesParameters();
 
+    FOdysseyImportTexturesParameters( const FOdysseyImportTexturesParameters& iOther );
+    FOdysseyImportTexturesParameters& operator=( const FOdysseyImportTexturesParameters& iOther );
+
 public:
     UTextureRenderTarget2D* CreateRT() const;
     void Render(UTextureRenderTarget2D* oRenderTarget, int iSourceTextureIndex) const;
 
     void Init(const TArray< UTexture2D* >& iTextures, uint32 iDestinationWidth, uint32 iDestinationHeight);
     void Init(const TArray<FString>& iFilenames, uint32 iDestinationWidth, uint32 iDestinationHeight);
+
+    // If the source textures were created by Init(iFilenames), release their render resources (GPU memory)
+    // immediately and mark them as garbage, without waiting for the next garbage collection.
+    // Textures given by the caller with Init(iTextures) are never touched.
+    // Must be called once the import is finished (the source textures are only used during the import).
+    void ReleaseOwnedSourceTextures();
 
     uint32 GetDestinationWidth() const;
     uint32 GetDestinationHeight() const;
@@ -119,6 +128,8 @@ private:
 
     TArray< TObjectPtr<UTexture2D> > mSourceTextures;
     TArray< FString > mSourceTextureNames;
+    // true when mSourceTextures were created by Init(iFilenames) (transient textures), false when given by the caller
+    bool mOwnsSourceTextures = false;
     uint32 mDestinationWidth;
     uint32 mDestinationHeight;
 
@@ -157,4 +168,30 @@ protected:
     float mScanCleanerColorSaturation = 1.f;
     float mScanCleanerColorValue = 1.f;
 
+};
+
+/**
+ * Render target shared by all texture imports, to avoid creating a new UObject at each import.
+ * Created through FOdysseyImportTexturesParameters::CreateRT() and recreated when the destination size changes.
+ * Kept alive by FGCObject, owned by the OdysseyPainterEditor module (Startup/Shutdown).
+ */
+class ODYSSEYPAINTEREDITOR_API FOdysseyImportTexturesSharedRT
+    : public FGCObject
+{
+public:
+    static void Startup();
+    static void Shutdown();
+
+    // Returns the shared render target, (re)created with iParameters.CreateRT() if needed
+    static UTextureRenderTarget2D* Get( const FOdysseyImportTexturesParameters& iParameters );
+
+private:
+    // FGCObject API
+    virtual void AddReferencedObjects( FReferenceCollector& ioCollector ) override;
+    virtual FString GetReferencerName() const override;
+
+private:
+    TObjectPtr<UTextureRenderTarget2D> mRenderTarget;
+
+    static TUniquePtr<FOdysseyImportTexturesSharedRT> sInstance;
 };

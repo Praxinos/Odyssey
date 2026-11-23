@@ -85,6 +85,15 @@ public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool ShouldDisplayCellNames() const;
 
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Layer" )
+    void SetDisplayChildren( bool Value );
+
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Layer" )
+    void SetDisplayOptions( bool Value );
+
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Layer" )
+    void SetDisplayCellNames( bool Value );
+
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     FOdysseyLighttable GetLighttable() const;
 
@@ -296,9 +305,6 @@ public:
     void SetLighttableInteractive(FOdysseyLighttable Value);
     const FSlateIcon& GetIcon() const;
     const FSlateIcon& GetIconExpanded() const;
-    void SetDisplayChildren(bool Value);
-    void SetDisplayOptions(bool Value);
-    void SetDisplayCellNames(bool Value);
     void AddCellInteractive(int Index = -1 );
     void AddCellsInteractive(int Index = -1, int Count = 1 );
     void SetOpacityInteractive(float Value);

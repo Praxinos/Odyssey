@@ -26,8 +26,11 @@ struct FOdysseyLayerCellOutOfPegs
     UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
     float Rotation = 0.f;
 
+    UPROPERTY(meta=(DeprecatedProperty, DeprecationMessage = "Use the new Scale property instead." ))
+    float Zoom_DEPRECATED = 100.f;
+
     UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
-    float Zoom = 100.f;
+    FVector2D Scale = FVector2D( 100.f, 100.f );
 };
 
 UENUM(BlueprintType)

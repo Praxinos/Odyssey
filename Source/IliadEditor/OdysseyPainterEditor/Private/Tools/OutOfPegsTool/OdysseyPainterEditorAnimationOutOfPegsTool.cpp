@@ -35,11 +35,11 @@ FOdysseyPainterEditorAnimationOutOfPegsToolDetails::CustomizeDetails(IDetailLayo
 
     TSharedRef<IPropertyHandle> panHandle = DetailLayout.GetProperty( GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Pan));
     TSharedRef<IPropertyHandle> rotationHandle = DetailLayout.GetProperty( GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Rotation));
-    TSharedRef<IPropertyHandle> zoomHandle = DetailLayout.GetProperty( GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Zoom));
+    TSharedRef<IPropertyHandle> scaleHandle = DetailLayout.GetProperty( GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale));
 
     IDetailPropertyRow* panRow = DetailLayout.EditDefaultProperty(panHandle);
     IDetailPropertyRow* rotationRow = DetailLayout.EditDefaultProperty(rotationHandle);
-    IDetailPropertyRow* zoomRow = DetailLayout.EditDefaultProperty(zoomHandle);
+    IDetailPropertyRow* scaleRow = DetailLayout.EditDefaultProperty(scaleHandle);
 
     FIsResetToDefaultVisible panIsResetToDefaultVisible = FIsResetToDefaultVisible::CreateLambda(
         [tool](TSharedPtr<IPropertyHandle> iHandle)
@@ -55,10 +55,10 @@ FOdysseyPainterEditorAnimationOutOfPegsToolDetails::CustomizeDetails(IDetailLayo
         }
     );
 
-    FIsResetToDefaultVisible zoomIsResetToDefaultVisible = FIsResetToDefaultVisible::CreateLambda(
+    FIsResetToDefaultVisible scaleIsResetToDefaultVisible = FIsResetToDefaultVisible::CreateLambda(
         [tool](TSharedPtr<IPropertyHandle> iHandle)
         {
-            return tool->GetCell() && tool->GetCell()->GetOutOfPegs().Zoom != 100.f;
+            return tool->GetCell() && tool->GetCell()->GetOutOfPegs().Scale != FVector2D( 100.f, 100.f );
         }
     );
 
@@ -71,11 +71,11 @@ FOdysseyPainterEditorAnimationOutOfPegsToolDetails::CustomizeDetails(IDetailLayo
 
     FResetToDefaultOverride panResetToDefault = FResetToDefaultOverride::Create(panIsResetToDefaultVisible, onResetToDefaultClicked);
     FResetToDefaultOverride rotationResetToDefault = FResetToDefaultOverride::Create(rotationIsResetToDefaultVisible, onResetToDefaultClicked);
-    FResetToDefaultOverride zoomResetToDefault = FResetToDefaultOverride::Create(zoomIsResetToDefaultVisible, onResetToDefaultClicked);
+    FResetToDefaultOverride scaleResetToDefault = FResetToDefaultOverride::Create(scaleIsResetToDefaultVisible, onResetToDefaultClicked);
 
     panRow->OverrideResetToDefault(panResetToDefault);
     rotationRow->OverrideResetToDefault(rotationResetToDefault);
-    zoomRow->OverrideResetToDefault(zoomResetToDefault);
+    scaleRow->OverrideResetToDefault(scaleResetToDefault);
 }
 
 UOdysseyPainterEditorAnimationOutOfPegsTool::~UOdysseyPainterEditorAnimationOutOfPegsTool()
@@ -181,10 +181,10 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::PostEditChangeProperty( FPropertyCh
             mCell->SetOutOfPegs(outOfPegs);
         }
     }
-    if ( propertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Zoom) )
+    if ( memberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale) )
     {
         FOdysseyLayerCellOutOfPegs outOfPegs = mCell->GetOutOfPegs();
-        outOfPegs.Zoom = Zoom;
+        outOfPegs.Scale = Scale;
         if (isInteractive)
         {
             mCell->SetOutOfPegsInteractive(outOfPegs);
@@ -223,7 +223,7 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::SetCell(UOdysseyLayerCell* iCell)
 
         Pan = mCell->GetOutOfPegs().Pan;
         Rotation = mCell->GetOutOfPegs().Rotation;
-        Zoom = mCell->GetOutOfPegs().Zoom;
+        Scale = mCell->GetOutOfPegs().Scale;
 
         mCell->OnOutOfPegsChanged().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnCellOutOfPegsChanged);
     }
@@ -236,7 +236,7 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::OnCellOutOfPegsChanged(bool iIsInte
 {
     Pan = mCell->GetOutOfPegs().Pan;
     Rotation = mCell->GetOutOfPegs().Rotation;
-    Zoom = mCell->GetOutOfPegs().Zoom;
+    Scale = mCell->GetOutOfPegs().Scale;
 
     RefreshHUD();
 }
@@ -256,9 +256,13 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::RebuildHUD()
     mHUD->EmptyElements();
     mTransformHUD = nullptr;
     mTransformTopLeftHandleHUD = nullptr;
+    mTransformTopHandleHUD = nullptr;
     mTransformTopRightHandleHUD = nullptr;
+    mTransformRightHandleHUD = nullptr;
     mTransformBottomRightHandleHUD = nullptr;
+    mTransformBottomHandleHUD = nullptr;
     mTransformBottomLeftHandleHUD = nullptr;
+    mTransformLeftHandleHUD = nullptr;
     mTransformRotationHandleHUD = nullptr;
     /* mLeftPegHUD = nullptr;
     mRightPegHUD = nullptr;
@@ -276,35 +280,55 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::RebuildHUD()
     points.Add(FVector2D(0, 0));
 
     mTransformTopLeftHandleHUD = MakeShared<FOdysseyHUDHandle>(FVector2D(0, 0));
+    mTransformTopHandleHUD = MakeShared<FOdysseyHUDHandle>(FVector2D(0, 0));
     mTransformTopRightHandleHUD = MakeShared<FOdysseyHUDHandle>(FVector2D(0, 0));
+    mTransformRightHandleHUD = MakeShared<FOdysseyHUDHandle>(FVector2D(0, 0));
     mTransformBottomRightHandleHUD = MakeShared<FOdysseyHUDHandle>(FVector2D(0, 0));
+    mTransformBottomHandleHUD = MakeShared<FOdysseyHUDHandle>(FVector2D(0, 0));
     mTransformBottomLeftHandleHUD = MakeShared<FOdysseyHUDHandle>(FVector2D(0, 0));
+    mTransformLeftHandleHUD = MakeShared<FOdysseyHUDHandle>(FVector2D(0, 0));
     mTransformRotationHandleHUD = MakeShared<FOdysseyHUDHandle>(FVector2D(0, 0));
     mTransformRotationLineHUD = MakeShared<FOdysseyHUDLine>(FVector2D(0, 0), FVector2D(0, 0));
 
     mTransformTopLeftHandleHUD->OnDragBegin().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopLeftHandleDragBegin);
+    mTransformTopHandleHUD->OnDragBegin().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopHandleDragBegin);
     mTransformTopRightHandleHUD->OnDragBegin().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopRightHandleDragBegin);
+    mTransformRightHandleHUD->OnDragBegin().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnRightHandleDragBegin);
     mTransformBottomRightHandleHUD->OnDragBegin().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomRightHandleDragBegin);
+    mTransformBottomHandleHUD->OnDragBegin().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomHandleDragBegin);
     mTransformBottomLeftHandleHUD->OnDragBegin().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomLeftHandleDragBegin);
+    mTransformLeftHandleHUD->OnDragBegin().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnLeftHandleDragBegin);
     mTransformRotationHandleHUD->OnDragBegin().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnRotationHandleDragBegin);
 
     mTransformTopLeftHandleHUD->OnDragged().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopLeftHandleDragged);
+    mTransformTopHandleHUD->OnDragged().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopHandleDragged);
     mTransformTopRightHandleHUD->OnDragged().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopRightHandleDragged);
+    mTransformRightHandleHUD->OnDragged().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnRightHandleDragged);
     mTransformBottomRightHandleHUD->OnDragged().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomRightHandleDragged);
+    mTransformBottomHandleHUD->OnDragged().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomHandleDragged);
     mTransformBottomLeftHandleHUD->OnDragged().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomLeftHandleDragged);
+    mTransformLeftHandleHUD->OnDragged().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnLeftHandleDragged);
     mTransformRotationHandleHUD->OnDragged().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnRotationHandleDragged);
 
     mTransformTopLeftHandleHUD->OnDragEnd().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopLeftHandleDragEnd);
+    mTransformTopHandleHUD->OnDragEnd().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopHandleDragEnd);
     mTransformTopRightHandleHUD->OnDragEnd().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopRightHandleDragEnd);
+    mTransformRightHandleHUD->OnDragEnd().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnRightHandleDragEnd);
     mTransformBottomRightHandleHUD->OnDragEnd().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomRightHandleDragEnd);
+    mTransformBottomHandleHUD->OnDragEnd().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomHandleDragEnd);
     mTransformBottomLeftHandleHUD->OnDragEnd().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomLeftHandleDragEnd);
+    mTransformLeftHandleHUD->OnDragEnd().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnLeftHandleDragEnd);
     mTransformRotationHandleHUD->OnDragEnd().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnRotationHandleDragEnd);
 
     mHUD->AddElement(mTransformHUD);
     mHUD->AddElement(mTransformTopLeftHandleHUD);
+    mHUD->AddElement(mTransformTopHandleHUD);
     mHUD->AddElement(mTransformTopRightHandleHUD);
+    mHUD->AddElement(mTransformRightHandleHUD);
     mHUD->AddElement(mTransformBottomRightHandleHUD);
+    mHUD->AddElement(mTransformBottomHandleHUD);
     mHUD->AddElement(mTransformBottomLeftHandleHUD);
+    mHUD->AddElement(mTransformLeftHandleHUD);
     mHUD->AddElement(mTransformRotationHandleHUD);
     mHUD->AddElement(mTransformRotationLineHUD);
 
@@ -344,9 +368,13 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::RefreshHUD()
         TArray<FVector2D>& points = mTransformHUD->GetPoints();
 
         FVector topLeft = oopTransform.TransformPosition(FVector(0.f, 0.f, 1.f));
+        FVector top = oopTransform.TransformPosition(FVector( width / 2.f, 0.f, 1.f));
         FVector topRight = oopTransform.TransformPosition(FVector(width, 0.f, 1.f));
+        FVector Right = oopTransform.TransformPosition(FVector(width, height / 2.f, 1.f));
         FVector bottomRight = oopTransform.TransformPosition(FVector(width, height, 1.f));
+        FVector bottom = oopTransform.TransformPosition(FVector( width / 2.f, height, 1.f));
         FVector bottomLeft = oopTransform.TransformPosition(FVector(0.f, height, 1.f));
+        FVector Left = oopTransform.TransformPosition(FVector(0.f, height / 2.f, 1.f));
 
         points[0] = FVector2D(topLeft.X, topLeft.Y); //top left
         points[1] = FVector2D(topRight.X, topRight.Y); //top right
@@ -354,15 +382,19 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::RefreshHUD()
         points[3] = FVector2D(bottomLeft.X, bottomLeft.Y); //bottom left
 
         FVector rotationLineStartPoint = oopTransform.TransformPosition(FVector(width / 2.f, height / 2.f, 1.f));
-        FVector rotationLineEndPoint = oopTransform.TransformPosition(FVector(width, height / 2.f, 1.f));
+        FVector rotationLineEndPoint = oopTransform.TransformPosition(FVector(width + 200 /* offset */, height / 2.f, 1.f));
 
         mTransformRotationLineHUD->SetStartPoint(FVector2D(rotationLineStartPoint.X, rotationLineStartPoint.Y));
         mTransformRotationLineHUD->SetEndPoint(FVector2D(rotationLineEndPoint.X, rotationLineEndPoint.Y));
 
         mTransformTopLeftHandleHUD->SetPosition(points[0]);
+        mTransformTopHandleHUD->SetPosition(FVector2D(top.X, top.Y));
         mTransformTopRightHandleHUD->SetPosition(points[1]);
+        mTransformRightHandleHUD->SetPosition( FVector2D( Right.X, Right.Y ) );
         mTransformBottomRightHandleHUD->SetPosition(points[2]);
+        mTransformBottomHandleHUD->SetPosition( FVector2D( bottom.X, bottom.Y ) );
         mTransformBottomLeftHandleHUD->SetPosition(points[3]);
+        mTransformLeftHandleHUD->SetPosition( FVector2D( Left.X, Left.Y ) );
         mTransformRotationHandleHUD->SetPosition(FVector2D(rotationLineEndPoint.X, rotationLineEndPoint.Y));
     }
 
@@ -371,33 +403,65 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::RefreshHUD()
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopLeftHandleDragBegin()
 {
-    mZoomReference = mCell->GetOutOfPegs().Zoom;
-    mZoomCenter = GetCenter();
-    mZoomDistanceReference = FVector2D::Distance( mZoomCenter, mTransformTopLeftHandleHUD->GetPosition() );
+    mScaleReference = mCell->GetOutOfPegs().Scale;
+    mScaleCenter = GetCenter();
+    mScaleDistanceReference = FVector2D::Distance( mScaleCenter, mTransformTopLeftHandleHUD->GetPosition() );
+}
+
+void
+UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopHandleDragBegin()
+{
+    mScaleReference = mCell->GetOutOfPegs().Scale;
+    mScaleCenter = GetCenter();
+    mScaleDistanceReference = FVector2D::Distance( mScaleCenter, mTransformTopHandleHUD->GetPosition() );
 }
 
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopRightHandleDragBegin()
 {
-    mZoomReference = mCell->GetOutOfPegs().Zoom;
-    mZoomCenter = GetCenter();
-    mZoomDistanceReference = FVector2D::Distance( mZoomCenter, mTransformTopRightHandleHUD->GetPosition() );
+    mScaleReference = mCell->GetOutOfPegs().Scale;
+    mScaleCenter = GetCenter();
+    mScaleDistanceReference = FVector2D::Distance( mScaleCenter, mTransformTopRightHandleHUD->GetPosition() );
+}
+
+void
+UOdysseyPainterEditorAnimationOutOfPegsTool::OnRightHandleDragBegin()
+{
+    mScaleReference = mCell->GetOutOfPegs().Scale;
+    mScaleCenter = GetCenter();
+    mScaleDistanceReference = FVector2D::Distance( mScaleCenter, mTransformRightHandleHUD->GetPosition() );
 }
 
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomRightHandleDragBegin()
 {
-    mZoomReference = mCell->GetOutOfPegs().Zoom;
-    mZoomCenter = GetCenter();
-    mZoomDistanceReference = FVector2D::Distance( mZoomCenter, mTransformBottomRightHandleHUD->GetPosition() );
+    mScaleReference = mCell->GetOutOfPegs().Scale;
+    mScaleCenter = GetCenter();
+    mScaleDistanceReference = FVector2D::Distance( mScaleCenter, mTransformBottomRightHandleHUD->GetPosition() );
+}
+
+void
+UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomHandleDragBegin()
+{
+    mScaleReference = mCell->GetOutOfPegs().Scale;
+    mScaleCenter = GetCenter();
+    mScaleDistanceReference = FVector2D::Distance( mScaleCenter, mTransformBottomHandleHUD->GetPosition() );
 }
 
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomLeftHandleDragBegin()
 {
-    mZoomReference = mCell->GetOutOfPegs().Zoom;
-    mZoomCenter = GetCenter();
-    mZoomDistanceReference = FVector2D::Distance( mZoomCenter, mTransformBottomLeftHandleHUD->GetPosition() );
+    mScaleReference = mCell->GetOutOfPegs().Scale;
+    mScaleCenter = GetCenter();
+    mScaleDistanceReference = FVector2D::Distance( mScaleCenter, mTransformBottomLeftHandleHUD->GetPosition() );
+}
+
+void
+UOdysseyPainterEditorAnimationOutOfPegsTool::OnLeftHandleDragBegin()
+{
+    mScaleReference = mCell->GetOutOfPegs().Scale;
+    mScaleCenter = GetCenter();
+    mScaleDistanceReference = FVector2D::Distance( mScaleCenter, mTransformLeftHandleHUD->GetPosition() );
 }
 
 void
@@ -409,37 +473,73 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::OnRotationHandleDragBegin()
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopLeftHandleDragged()
 {
-    float distance = FVector2D::Distance( mZoomCenter, mTransformTopLeftHandleHUD->GetPosition() );
-    float zoomRatio = distance / mZoomDistanceReference;
-    float zoom = mZoomReference * zoomRatio;
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Zoom), zoom, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
+    float distance = FVector2D::Distance( mScaleCenter, mTransformTopLeftHandleHUD->GetPosition() );
+    float scaleRatio = distance / mScaleDistanceReference;
+    FVector2D scale = mScaleReference * scaleRatio;
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale), scale, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
+}
+
+void
+UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopHandleDragged()
+{
+    float distance = FVector2D::Distance( mScaleCenter, mTransformTopHandleHUD->GetPosition() );
+    float scaleRatio = distance / mScaleDistanceReference;
+    FVector2D scale( mScaleReference.X, mScaleReference.Y * scaleRatio );
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale), scale, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
 }
 
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopRightHandleDragged()
 {
-    float distance = FVector2D::Distance( mZoomCenter, mTransformTopRightHandleHUD->GetPosition() );
-    float zoomRatio = distance / mZoomDistanceReference;
-    float zoom = mZoomReference * zoomRatio;
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Zoom), zoom, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
+    float distance = FVector2D::Distance( mScaleCenter, mTransformTopRightHandleHUD->GetPosition() );
+    float scaleRatio = distance / mScaleDistanceReference;
+    FVector2D scale = mScaleReference * scaleRatio;
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale), scale, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
+}
+
+void
+UOdysseyPainterEditorAnimationOutOfPegsTool::OnRightHandleDragged()
+{
+    float distance = FVector2D::Distance( mScaleCenter, mTransformRightHandleHUD->GetPosition() );
+    float scaleRatio = distance / mScaleDistanceReference;
+    FVector2D scale( mScaleReference.X * scaleRatio, mScaleReference.Y );
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale), scale, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
 }
 
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomRightHandleDragged()
 {
-    float distance = FVector2D::Distance( mZoomCenter, mTransformBottomRightHandleHUD->GetPosition() );
-    float zoomRatio = distance / mZoomDistanceReference;
-    float zoom = mZoomReference * zoomRatio;
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Zoom), zoom, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
+    float distance = FVector2D::Distance( mScaleCenter, mTransformBottomRightHandleHUD->GetPosition() );
+    float scaleRatio = distance / mScaleDistanceReference;
+    FVector2D scale = mScaleReference * scaleRatio;
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale), scale, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
+}
+
+void
+UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomHandleDragged()
+{
+    float distance = FVector2D::Distance( mScaleCenter, mTransformBottomHandleHUD->GetPosition() );
+    float scaleRatio = distance / mScaleDistanceReference;
+    FVector2D scale( mScaleReference.X, mScaleReference.Y * scaleRatio );
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale), scale, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
 }
 
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomLeftHandleDragged()
 {
-    float distance = FVector2D::Distance( mZoomCenter, mTransformBottomLeftHandleHUD->GetPosition() );
-    float zoomRatio = distance / mZoomDistanceReference;
-    float zoom = mZoomReference * zoomRatio;
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Zoom), zoom, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
+    float distance = FVector2D::Distance( mScaleCenter, mTransformBottomLeftHandleHUD->GetPosition() );
+    float scaleRatio = distance / mScaleDistanceReference;
+    FVector2D scale = mScaleReference * scaleRatio;
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale), scale, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
+}
+
+void
+UOdysseyPainterEditorAnimationOutOfPegsTool::OnLeftHandleDragged()
+{
+    float distance = FVector2D::Distance( mScaleCenter, mTransformLeftHandleHUD->GetPosition() );
+    float scaleRatio = distance / mScaleDistanceReference;
+    FVector2D scale( mScaleReference.X * scaleRatio, mScaleReference.Y );
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale), scale, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
 }
 
 void
@@ -453,25 +553,49 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::OnRotationHandleDragged()
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopLeftHandleDragEnd()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Zoom), mCell->GetOutOfPegs().Zoom, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale), mCell->GetOutOfPegs().Scale, EPropertyChangeType::ValueSet);
+}
+
+void
+UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopHandleDragEnd()
+{
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale), mCell->GetOutOfPegs().Scale, EPropertyChangeType::ValueSet);
 }
 
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::OnTopRightHandleDragEnd()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Zoom), mCell->GetOutOfPegs().Zoom, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale), mCell->GetOutOfPegs().Scale, EPropertyChangeType::ValueSet);
+}
+
+void
+UOdysseyPainterEditorAnimationOutOfPegsTool::OnRightHandleDragEnd()
+{
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale), mCell->GetOutOfPegs().Scale, EPropertyChangeType::ValueSet);
 }
 
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomRightHandleDragEnd()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Zoom), mCell->GetOutOfPegs().Zoom, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale), mCell->GetOutOfPegs().Scale, EPropertyChangeType::ValueSet);
+}
+
+void
+UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomHandleDragEnd()
+{
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale), mCell->GetOutOfPegs().Scale, EPropertyChangeType::ValueSet);
 }
 
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::OnBottomLeftHandleDragEnd()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Zoom), mCell->GetOutOfPegs().Zoom, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale), mCell->GetOutOfPegs().Scale, EPropertyChangeType::ValueSet);
+}
+
+void
+UOdysseyPainterEditorAnimationOutOfPegsTool::OnLeftHandleDragEnd()
+{
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Scale), mCell->GetOutOfPegs().Scale, EPropertyChangeType::ValueSet);
 }
 
 void

@@ -36,3 +36,9 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorAnimationLayerImport
 public:
     static FOdysseyPainterEditorAnimationImportResult ImportTextureSequence(UOdysseyAnimationLayerImageRaster* Layer, const FOdysseyImportTexturesParameters& iImportData, int iCellIndex = -1);
 };
+
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorAnimationCellImport
+{
+public:
+    static FOdysseyPainterEditorAnimationImportResult ImportTextureSequence( UOdysseyAnimationCellImageRaster* Cell, const FOdysseyImportTexturesParameters& iImportData );
+};

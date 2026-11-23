@@ -20,6 +20,7 @@
 #include "SOdysseyAnimationExportImageSequenceDialog.h"
 #include "SOdysseyAnimationExportTextureSequenceDialog.h"
 #include "SOdysseyImportTexturesDialog.h"
+#include "Misc/ScopeExit.h"
 
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -153,6 +154,8 @@ FOdysseyPainterEditorAnimationExportShortcuts::Action_ImportImageSequence()
 
     FOdysseyImportTexturesParameters importParameters;
     importParameters.Init(filenames, animation->GetWidth(), animation->GetHeight());
+    // Release the transient textures created from the files, even if the dialog is cancelled
+    ON_SCOPE_EXIT { importParameters.ReleaseOwnedSourceTextures(); };
     if(!SOdysseyImportTexturesDialog::Open(LOCTEXT("animation-editor.import-textures-dialog.title", "Import Images" ), importParameters))
         return;
 
