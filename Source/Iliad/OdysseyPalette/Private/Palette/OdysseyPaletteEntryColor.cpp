@@ -3,7 +3,6 @@
 
 #include "Palette/OdysseyPaletteEntryColor.h"
 #include "OdysseyPalette.h"
-#include "Misc/TransactionObjectEvent.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 
@@ -64,34 +63,6 @@ void UOdysseyPaletteEntryColor::RemoveSet(FGuid iIndex)
     EntryColorsIDs.Remove( iIndex );
 }
 
-#if WITH_EDITOR
-void UOdysseyPaletteEntryColor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-    Super::PostEditChangeProperty(PropertyChangedEvent);
-
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
-
-    PropertyChanged(PropertyChangedEvent.GetPropertyName());
-    PostPropertyChanged(PropertyChangedEvent.GetPropertyName());
-}
-
-void UOdysseyPaletteEntryColor::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
-{
-    Super::PostTransacted(iTransactionEvent);
-
-    if (iTransactionEvent.GetEventType() != ETransactionObjectEventType::UndoRedo)
-        return;
-
-    const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
-    for (const FName& propertyName : changedPropertyNames)
-    {
-        PropertyChanged(propertyName);
-        PostPropertyChanged(propertyName);
-    }
-}
-#endif //WITH_EDITOR
-
 void UOdysseyPaletteEntryColor::PostLoad()
 {
     Super::PostLoad();
@@ -130,12 +101,16 @@ void UOdysseyPaletteEntryColor::EntryColorChanged()
 
 void UOdysseyPaletteEntryColor::PropertyChanged(const FName& iPropertyName)
 {
+    Super::PropertyChanged(iPropertyName);
+
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntryColor, EntryColors))
         EntryColorChanged();
 }
 
 void UOdysseyPaletteEntryColor::PostPropertyChanged(const FName& iPropertyName)
 {
+    Super::PostPropertyChanged(iPropertyName);
+
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntryColor, EntryColors))
         OnEntryColorChanged().Broadcast(this);
 }

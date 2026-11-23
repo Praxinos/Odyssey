@@ -42,17 +42,14 @@ public:
     // UObject overrides
     virtual void PostInitProperties() override;
     virtual void PostLoad() override;
-#if WITH_EDITOR
-    virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-    virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
-#endif //WITH_EDITOR
 
 protected:
     //Property changed methods
     virtual void EntryColorChanged();
 
-    virtual void PropertyChanged(const FName& iPropertyName);
-    virtual void PostPropertyChanged(const FName& iPropertyName);
+    // The edits and the undo of the properties are notified by UOdysseyPaletteEntry, which calls these.
+    virtual void PropertyChanged(const FName& iPropertyName) override;
+    virtual void PostPropertyChanged(const FName& iPropertyName) override;
 
 public:
     // Legacy, to delete next version
