@@ -233,6 +233,44 @@ bool FOdysseyAnimationVectorUndoTest::RunTest(const FString& Parameters)
     return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationVectorUndoCellsTest, "Odyssey.Animation.Vector.UndoCells", Odyssey::AnimationVectorTests::Flags)
+
+/**
+ * Undoing a change of the cells of a vector layer, e.g. in the timeline, gives its vector layer the restored cells,
+ * from which the inbetweens of the cells are drawn.
+ */
+bool FOdysseyAnimationVectorUndoCellsTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::AnimationVectorTests;
+    TStrongObjectPtr<UOdysseyAnimation> Animation(MakeAnimation(GetTransientPackage(), EOdysseyAnimationFormat::BGRA8,
+        UOdysseyAnimationLayerImageVector::StaticClass(), UOdysseyAnimationCellImageVector::StaticClass()));
+    UOdysseyAnimationCellImageVector* First = FirstVectorCell(Animation.Get());
+    UOdysseyAnimationLayerImageVector* Layer = CastChecked<UOdysseyAnimationLayerImageVector>(First->GetLayer());
+    TSharedPtr<FOdysseyVectorLayer> VectorLayer = Layer->GetVectorLayer();
+
+    UOdysseyAnimationCellImageVector* Added = nullptr;
+    {
+        FScopedTransaction Transaction(NSLOCTEXT("OdysseyAnimationVectorTests", "AddCell", "Add a cell"));
+        Layer->Modify();
+        Added = Cast<UOdysseyAnimationCellImageVector>(Layer->AddCell(UOdysseyAnimationCellImageVector::StaticClass()));
+    }
+    if (!TestNotNull(TEXT("A vector cell is added"), Added))
+    {
+        return false;
+    }
+    TestTrue(TEXT("The vector layer holds the added cell"), VectorLayer->Contains(Added->GetVectorCell()));
+
+    TestTrue(TEXT("Undo the added cell"), GEditor->UndoTransaction());
+    TestEqual(TEXT("The layer holds its cell again"), Layer->GetCells().Num(), 1);
+    TestFalse(TEXT("The vector layer no longer holds the removed cell"), VectorLayer->Contains(Added->GetVectorCell()));
+    TestTrue(TEXT("The vector layer still holds the remaining cell"), VectorLayer->Contains(First->GetVectorCell()));
+
+    TestTrue(TEXT("Redo the added cell"), GEditor->RedoTransaction());
+    TestEqual(TEXT("The layer holds both cells"), Layer->GetCells().Num(), 2);
+    TestTrue(TEXT("The vector layer holds the restored cell"), VectorLayer->Contains(Added->GetVectorCell()));
+    return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyAnimationVectorPersistenceTest, "Odyssey.Animation.Vector.Persistence", Odyssey::AnimationVectorTests::Flags)
 
 /**
