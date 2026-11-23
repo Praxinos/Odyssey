@@ -3,7 +3,6 @@
 
 #include "OdysseyAnimationCellImageVectorImport.h"
 
-#if WITH_EDITOR
 #include "OdysseyAnimationCellImageVector.h"
 #include "Import/v2/OdysseyVectorImport.h"
 #include "OdysseyFile.h"
@@ -79,17 +78,16 @@ FOdysseyAnimationCellImageVectorImport::Read( UOdysseyAnimationCellImageVector* 
                 }
                 break;
 
-                // container
+                // container, written by former versions
                 case FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR_BLOCK:
                 break;
 
+                // The id of the former disk cache of the render, written by former versions: read and ignored.
                 case FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR_BLOCK_ID:
                 {
                     FGuid vectorBlockID;
 
                     Ar << vectorBlockID;
-
-                    iAnimationCellImageVector->SetVectorBlockId( vectorBlockID );
                 }
                 break;
 
@@ -111,4 +109,3 @@ FOdysseyAnimationCellImageVectorImport::Read( UOdysseyAnimationCellImageVector* 
             }
         } );
 }
-#endif

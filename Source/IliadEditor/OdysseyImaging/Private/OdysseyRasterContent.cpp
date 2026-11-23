@@ -5,7 +5,6 @@
 
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
-#include "Math/TranslationMatrix.h"
 #include "Misc/App.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
@@ -14,7 +13,6 @@
 #include "TextureResource.h"
 #include "UObject/StrongObjectPtr.h"
 
-#include "OdysseyBlendShader.h"
 #include "OdysseyColorSpaceShader.h"
 #include "OdysseyRasterEditSession.h"
 #include "OdysseyRasterSampling.h"
@@ -322,7 +320,7 @@ FOdysseyRasterContent::BuildRenderFunction(IOdysseyTextureRenderingAbility::FRen
         return false;
     }
     // Uncommitted edits are shown by the views, through the content replacement of the edit session.
-    return BuildImageRenderFunction(OutRenderFunction, ContentTransform, GetDescription().Size);
+    return Odyssey::RasterSampling::BuildTiledImageRenderFunction(*Image, GetDescription().Size, ContentTransform, OutRenderFunction);
 }
 
 bool
@@ -363,45 +361,4 @@ FOdysseyRasterContent::NotifyChanged(const TArray<FIntRect>& Rects, bool bIntera
         return;
     }
     OnChanged(Rects, bInteractive);
-}
-
-bool
-FOdysseyRasterContent::BuildImageRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform, FIntPoint Size) const
-{
-    // The tiles hold linear colors, sampled as they are.
-    const EPixelFormat Format = Image->GetPixelFormat();
-    UOdysseyTiledImage::FRenderFunction DrawTiles = Image->BuildRenderFunction(FIntRect(FIntPoint::ZeroValue, Size));
-    if (!DrawTiles)
-    {
-        return false;
-    }
-
-    OutRenderFunction = [DrawTiles = MoveTemp(DrawTiles), Size, Format, ContentTransform](FRDGBuilder& GraphBuilder,
-        ERHIFeatureLevel::Type FeatureLevel, FRDGTextureRef Destination,
-        const FIntRect& SourceRect, const FIntRect& DestinationRect, const FMatrix& Transform)
-    {
-        RDG_EVENT_SCOPE(GraphBuilder, "Odyssey.RasterContent.Tiles");
-        AddClearRenderTargetPass(GraphBuilder, Destination, FLinearColor::Transparent, DestinationRect);
-
-        // The area of the content the blend samples.
-        const FMatrix ToSource = ContentTransform * Transform;
-        const FIntRect Area = Odyssey::RasterSampling::GetSampledArea(SourceRect, DestinationRect, ToSource, Size);
-        if (Area.Width() <= 0 || Area.Height() <= 0)
-        {
-            return;
-        }
-
-        // Assemble a continuous source of the sampled tiles only before filtering: atlas borders must not create seams
-        // under zoom, rotation or anisotropic sampling. No persistent texture is added.
-        FRDGTextureRef Source = GraphBuilder.CreateTexture(FRDGTextureDesc::Create2D(Area.Size(), Format,
-            FClearValueBinding::Transparent, TexCreate_ShaderResource | TexCreate_RenderTargetable),
-            TEXT("Odyssey.RasterContent.Source"));
-        DrawTiles(GraphBuilder, Source, FIntPoint::ZeroValue - Area.Min);
-        // The source starts at the area origin in content space.
-        const FMatrix FromArea = FTranslationMatrix(FVector(Area.Min.X, Area.Min.Y, 0.0)) * ToSource;
-        FOdysseyBlendShader::BlendRect(GraphBuilder, FeatureLevel, Destination, Source, Destination,
-            SourceRect, DestinationRect, FromArea, EOdysseyColorBlendMode::Normal,
-            EOdysseyAlphaBlendMode::Normal, 1.0f, EOdysseyAntiAliasing::Anisotropic);
-    };
-    return true;
 }

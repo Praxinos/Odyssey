@@ -26,8 +26,8 @@ enum class EOdysseyTiledImageFormat : uint8
 /**
  * Raster data split in tiles, positioned in space to provide a technically unbounded image.
  *
- * Meant to store the pixels of raster texture layers and raster animation cells, through FOdysseyRasterContent;
- * it is not exposed to Blueprints nor created as an asset. Its tiles are transactional: Modify() makes changes undoable.
+ * Meant to store the pixels of raster texture layers and raster animation cells, through FOdysseyRasterContent,
+ * and the render of vector ones, through FOdysseyVectorContent; it is not exposed to Blueprints nor created as an asset. Its tiles are transactional: Modify() makes changes undoable.
  */
 UCLASS()
 class ODYSSEYIMAGING_API UOdysseyTiledImage

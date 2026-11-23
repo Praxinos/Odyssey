@@ -227,7 +227,7 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
                                             , sanitizedRect.y - 1
                                             , sanitizedRect.w + 2
                                             , sanitizedRect.h + 2 ) );
-            // Note: we enlarge the block 1 pixel because when FOdysseyVectorBlock renders,
+            // Note: we enlarge the block 1 pixel because when the vector content renders,
             // the rect seems to be 1 pixel larger. If we don't do this, then the block
             // isn't filled fully and this creates an artefact on the screen.
             iBLContext->fill_rect( BLRect( sanitizedRect.x - 1

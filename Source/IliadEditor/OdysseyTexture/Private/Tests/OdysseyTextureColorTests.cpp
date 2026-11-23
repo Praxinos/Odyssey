@@ -333,27 +333,36 @@ bool FOdysseyTextureColorRenderSideEffectTest::RunTest(const FString& Parameters
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureColorVectorLayerLoadTest, "Odyssey.Texture.Color.VectorLayerSRGBAfterLoad", Odyssey::TextureColorTests::Flags)
 
 /**
- * The render texture of a vector layer holds the bytes of the texture: it decodes them when sampled if they are sRGB encoded colors,
- * after loading as after creation, so that a reloaded vector layer is not shown brighter.
+ * The render of a vector layer holds the bytes of the texture: they are decoded into its tiles if they are sRGB encoded colors,
+ * after loading as after creation, so that the texture gets the bytes of the render back and a reloaded vector layer is not shown brighter.
  */
 bool FOdysseyTextureColorVectorLayerLoadTest::RunTest(const FString& Parameters)
 {
     using namespace Odyssey::TextureColorTests;
+    // Without colors, the scene is drawn as an opaque fill of its monochrome color.
+    static const FColor Monochrome(160, 160, 160, 255);
     for (const bool bSRGB : { true, false })
     {
         TStrongObjectPtr<UTexture2D> Texture(MakeTexture(bSRGB));
         UOdysseyTextureLayerStackUserData* UserData = MakeUserData(Texture.Get());
-        UOdysseyTextureLayerImageVector* Layer = CastChecked<UOdysseyTextureLayerImageVector>(UserData->LayerStack->AddLayer(UOdysseyTextureLayerImageVector::StaticClass()));
+        UOdysseyTextureLayerStack* Stack = UserData->LayerStack;
+        UOdysseyTextureLayerImageVector* Layer = CastChecked<UOdysseyTextureLayerImageVector>(Stack->AddLayer(UOdysseyTextureLayerImageVector::StaticClass()));
+        Layer->SetIsColored(false);
         const TCHAR* Encoding = bSRGB ? TEXT("sRGB texture") : TEXT("linear texture");
-        UTexture2D* LayerTexture = Layer->GetRenderTexture();
-        if (!TestNotNull(FString::Printf(TEXT("Render texture of the vector layer of a %s"), Encoding), LayerTexture))
+        const EOdysseyTiledImageFormat ExpectedFormat = bSRGB ? EOdysseyTiledImageFormat::RGBA16F : EOdysseyTiledImageFormat::RGBA8;
+
+        CompareBytes(*this, *FString::Printf(TEXT("A new vector layer of a %s writes the bytes of its render"), Encoding),
+            [](int32 X, int32 Y) { return Monochrome; }, ReadTextureBytes(Texture.Get(), Stack), 1);
+        if (!TestNotNull(FString::Printf(TEXT("The vector layer of a %s holds its render in a tiled image"), Encoding), Layer->GetTiledImage()))
         {
             return false;
         }
-        TestEqual(FString::Printf(TEXT("A new vector layer of a %s samples its bytes as the texture does"), Encoding), bool(LayerTexture->SRGB), bSRGB);
+        TestEqual(FString::Printf(TEXT("The render of a new vector layer of a %s is decoded as the texture bytes are"), Encoding), Layer->GetTiledImage()->GetFormat(), ExpectedFormat);
 
         Layer->PostLoad();
-        TestEqual(FString::Printf(TEXT("A loaded vector layer of a %s samples its bytes as the texture does"), Encoding), bool(Layer->GetRenderTexture()->SRGB), bSRGB);
+        CompareBytes(*this, *FString::Printf(TEXT("A loaded vector layer of a %s writes the bytes of its render"), Encoding),
+            [](int32 X, int32 Y) { return Monochrome; }, ReadTextureBytes(Texture.Get(), Stack), 1);
+        TestEqual(FString::Printf(TEXT("The render of a loaded vector layer of a %s is decoded as the texture bytes are"), Encoding), Layer->GetTiledImage()->GetFormat(), ExpectedFormat);
     }
     return true;
 }

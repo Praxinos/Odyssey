@@ -315,13 +315,6 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
     if( mWorkingCell )
     {
         UnloadVector( mWorkingCell->GetScene() );
-
-        /**
-            * ERIC PATCH
-            * See LoadVector() comment for explanations
-            */
-        mVectorBlock = nullptr;
-        //END PATCH
     }
 
     if( mWorkingLayer )
@@ -382,15 +375,6 @@ UOdysseyPainterEditorVectorBaseTool::Load()
                 mWorkingCell->GetLayer()->AddHUD( mBaseHUD.Get() );
                 mWorkingCell->GetLayer()->ResetHUD( mWorkingCell->GetScene() );
             }
-
-            /**
-             * ERIC PATCH
-             *
-             * Keeps the vectorBlock in memory to avoid reloading it each time we need to redraw
-             * This fixes a huge performance issue when using the vector tool.
-             */
-            mVectorBlock = mWorkingCell->GetScene()->GetCell()->GetCellInterface()->GetBlock();
-            //END PATCH
 
             LoadVector( mWorkingCell->GetScene() );
         }

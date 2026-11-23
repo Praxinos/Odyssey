@@ -11,7 +11,6 @@
 
 #include "OdysseyBlendShader.h"
 #include "OdysseyTextureLayerStack.h"
-#include "OdysseyTexture2DUtils.h"
 
 UTexture2D*
 UOdysseyTextureLayer::GetTexture() const
@@ -55,7 +54,6 @@ UOdysseyTextureLayer::GetLayerTextureFormat(ETextureSourceFormat TextureFormat)
     }
 }
 
-#if WITH_EDITOR
 FSimpleMulticastDelegate&
 UOdysseyTextureLayer::OnThumbnailChanged()
 {
@@ -67,5 +65,3 @@ UOdysseyTextureLayer::OnThumbnailDirtied()
 {
     return mOnThumbnailDirtied;
 }
-
-#endif

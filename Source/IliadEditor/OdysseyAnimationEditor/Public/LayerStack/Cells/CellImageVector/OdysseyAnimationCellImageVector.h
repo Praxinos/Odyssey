@@ -5,26 +5,19 @@
 
 #include "OdysseyAnimationCell.h"
 
-#if WITH_EDITOR
 #include "OdysseyVectorCell.h"
+#include "OdysseyVectorContent.h"
 #include "Import/v2/OdysseyVectorImport.h"
-#endif
 
 #include "OdysseyAnimationCellImageVector.generated.h"
 
-#if WITH_EDITOR
-class FOdysseyVectorBlock;
+class UOdysseyTiledImage;
 class FOdysseyMediaVector;
 class FOdysseyVectorEngine;
 class FOdysseyVectorGroupPaint;
 class UOdysseyAnimationLayerImageVector;
 class FOdysseyVectorCell;
 class UOdysseyPalette;
-#endif
-
-#if !WITH_EDITOR
-class IOdysseyVectorCell {};
-#endif
 
 UCLASS(BlueprintType)
 class ODYSSEYANIMATIONEDITOR_API UOdysseyAnimationCellImageVector
@@ -46,25 +39,10 @@ public:
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const override;
     virtual FIntRect GetDefaultRenderRect() const override;
 
-    /** Returns the texture holding the render of the vector content, created when needed. */
-    UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
-    UTexture2D* GetRenderTexture() const;
-
-private:
-    /** Resizes the render texture to the size of the animation. */
-    void UpdateTextureSize();
-
-    /** The render of the vector content, blended by the animation. */
-    UPROPERTY(NonTransactional)
-    mutable TObjectPtr<UTexture2D> Texture; //mutable is temporary, will be removed when layers will be 100% GPU based and there's no more dependency on ULIS
-
 public:
-#if WITH_EDITORONLY_DATA
     virtual void Serialize(FArchive& Ar) override;
     virtual void OldSerialize(FArchive& Ar) override; //DEPRECATED: Keep that for compatibility with early versions of Odyssey
-#endif
 
-#if WITH_EDITOR
 public:
     virtual FOdysseyMediaProvider GetMediaProvider() const override;
     virtual void Clear() override;
@@ -74,14 +52,19 @@ public:
     virtual void PostInitProperties() override;
     virtual void PostLoad() override;
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
-    virtual void PreSave(FObjectPreSaveContext SaveContext) override;
-    virtual TSharedPtr<::ULIS::FBlock> GetBlock() const override;
+    virtual void BeginDestroy() override;
 
     FOdysseyVectorCell* GetVectorCell() const;
     FOdysseyVectorImportV2* GetImporterV2();
-    TSharedPtr<FOdysseyVectorBlock> GetVectorBlock() const;
-    FGuid GetVectorBlockId();
-    void SetVectorBlockId( FGuid iVectorBlockID );
+
+    /**
+     * Returns the render of the scene, see FOdysseyVectorContent.
+     * Created when needed, following the current vector cell.
+     */
+    FOdysseyVectorContent& GetVectorContent() const;
+
+    /** Returns the tiled image holding the render of the scene, without creating it. */
+    const UOdysseyTiledImage* GetTiledImage() const;
 
 public:
     // Event Listeners
@@ -96,10 +79,8 @@ public:
     virtual uint32 GetFrame() override;
 
 private:
-    void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
-    bool UpdateDrawingFlags() const;
-    /** Creates the render texture when missing, then fills it with the render of the vector content. */
-    void InitTexture();
+    /** Returns the flags the scene is drawn with, set by the layer. */
+    uint64 GetDrawingFlags() const;
 
 private:
     //Import/Export
@@ -108,12 +89,13 @@ private:
 
 private:
     TSharedPtr<FOdysseyVectorCell> mVectorCell = nullptr;
-    FGuid mVectorBlockId;
-    TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
+    mutable TSharedPtr<FOdysseyVectorContent> mVectorContent;
     mutable FCriticalSection mImageRenderingMutex;
     mutable TWeakPtr<FOdysseyMediaVector> mMediaVector;
     FOdysseyVectorImportV2 mImporterV2;
 
-    mutable uint64 mDrawingFlags = 0;
-#endif
+private:
+    /** The render of the scene, blended by the animation. Rebuilt from the scene: never saved. */
+    UPROPERTY(Transient, NonTransactional)
+    TObjectPtr<UOdysseyTiledImage> TiledImage;
 };

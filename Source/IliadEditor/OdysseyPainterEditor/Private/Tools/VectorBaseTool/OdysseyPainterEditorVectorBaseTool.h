@@ -244,8 +244,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         // UOdysseyPainterEditorVectorBaseTool::Unload() is not called in the same context as Load()
         FOdysseyVectorLayer* mWorkingLayer;
 
-        TSharedPtr<::ULIS::FBlock> mVectorBlock;
-
     public:
         //UPROPERTY( EditAnywhere, Category=Behavior )
         //bool RestrictToSelectedObjects;

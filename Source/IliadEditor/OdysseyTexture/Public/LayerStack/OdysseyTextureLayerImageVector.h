@@ -11,12 +11,13 @@
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorCell.h"
 #include "Import/v2/OdysseyVectorImport.h"
+#include "OdysseyVectorContent.h"
 
 #include "OdysseyTextureLayerImageVector.generated.h"
 
-class FOdysseyVectorBlock;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorEngine;
+class UOdysseyTiledImage;
 
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
@@ -44,14 +45,12 @@ private:
     // handle to a callback to refresh the layer when a property of an object's details view is changed
     TSharedPtr<FOdysseyVectorCell> mVectorCell;
     TSharedPtr<FOdysseyVectorLayer> mVectorLayer;
-    TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
 
-    UPROPERTY()
-    FGuid mVectorBlockId;
+    /** The render of the scene, blended by the layer stack. Rebuilt from the scene: never saved. */
+    UPROPERTY(Transient, NonTransactional)
+    TObjectPtr<UOdysseyTiledImage> TiledImage;
 
-    /** The render of the vector content, blended by the layer stack. */
-    UPROPERTY(NonTransactional)
-    mutable TObjectPtr<UTexture2D> Texture; //mutable is temporary, will be removed when layers will be 100% GPU based and there's no more dependency on ULIS
+    mutable TSharedPtr<FOdysseyVectorContent> VectorContent;
 
 public:
     //UOdysseyLayer overrides
@@ -59,7 +58,7 @@ public:
     virtual void PostLoad() override;
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
-    virtual void PreSave(FObjectPreSaveContext SaveContext) override;
+    virtual void BeginDestroy() override;
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
     TSharedPtr<FOdysseyVectorCell> GetVectorCell();
@@ -70,12 +69,17 @@ public:
 
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
-    /** Updates the sRGB setting of the render texture. */
+    /** Renders the scene again when the sRGB setting of the texture changed. */
     virtual void ColorSettingsChanged() override;
 
-    /** Returns the texture holding the render of the vector content, created when needed. */
-    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
-    UTexture2D* GetRenderTexture() const;
+    /**
+     * Returns the render of the scene, see FOdysseyVectorContent.
+     * Created when needed, following the current vector cell.
+     */
+    FOdysseyVectorContent& GetVectorContent() const;
+
+    /** Returns the tiled image holding the render of the scene, without creating it. */
+    const UOdysseyTiledImage* GetTiledImage() const;
 
 public:
     //IOdysseyRenderingAbility overrides
@@ -83,12 +87,8 @@ public:
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame = 0) const override;
 
 private:
-    bool UpdateDrawingFlags() const;
-    /** Creates the render texture, in the format and size of the texture of the layer stack. */
-    void InitTexture();
-    /** Resizes the render texture to the size of the layer. */
-    void UpdateTextureSize();
-    void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+    /** Returns the flags the scene is drawn with. */
+    uint64 GetDrawingFlags() const;
 
 public:
     // Implements Interface IOdysseyVectorLayer
@@ -109,15 +109,8 @@ public:
     virtual uint32 GetLength() override;
     virtual uint32 GetFrame() override;
 
-    virtual TSharedPtr<::ULIS::FBlock> GetBlock() const override;
-
 public:
-#if WITH_EDITOR
     void OnRefreshReferencedPalette(UOdysseyPalette* iPalette);
-    void CopyVectorBlockInRenderTextureSource(FIntRect iRect) const;
-    void CopyVectorBlockInRenderTextureGPU(FIntRect iRect) const;
-    TSharedPtr<::ULIS::FBlock> GetVectorBlockToCopyInRenderTexture(FIntRect iRect, uint64 iDrawingFlags) const;
-#endif
 
 private:
     //Import/Export
@@ -145,6 +138,5 @@ protected:
     bool bIsColored = true;
 
 private:
-    mutable uint64 mDrawingFlags = 0;
     FOdysseyVectorImportV2 mImporterV2;
 };

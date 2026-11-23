@@ -14,7 +14,6 @@
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationCellImport.h"
 #include "OdysseyRenderContext.h"
-#include "OdysseyTexture2DUtils.h"
 
 void
 UOdysseyAnimationCell::PostInitProperties() //override
@@ -27,13 +26,11 @@ UOdysseyAnimationCell::PostLoad() //override
 {
     Super::PostLoad();
 
-#if WITH_EDITOR
     if( Mark_DEPRECATED != -1 )
     {
         Marks.Add( 0, FCellMark{ Mark_DEPRECATED } );
         Mark_DEPRECATED = -1;
     }
-#endif
 }
 
 void
@@ -50,7 +47,6 @@ UOdysseyAnimationCell::GetLayer() const
     return Cast<UOdysseyAnimationLayer>(GetOuter());
 }
 
-#if WITH_EDITOR
 void
 UOdysseyAnimationCell::OldSerialize(FArchive& Ar)
 {
@@ -63,7 +59,6 @@ UOdysseyAnimationCell::OldSerialize(FArchive& Ar)
         Ar << Exposure;
     }
 }
-#endif
 
 int32
 UOdysseyAnimationCell::FrameInLayerToIndexInCell( FFrameNumber iFrame )
@@ -89,13 +84,11 @@ UOdysseyAnimationCell::GetLayerStack() const
     return GetLayer() ? GetLayer()->GetLayerStack() : nullptr;
 }
 
-#if WITH_EDITOR
 FOdysseyMediaProvider
 UOdysseyAnimationCell::GetMediaProvider() const
 {
     return FOdysseyMediaProvider();
 }
-#endif
 
 FInt32Range
 UOdysseyAnimationCell::GetFrameRange() const
@@ -121,8 +114,6 @@ UOdysseyAnimationCell::GetExposure() const
 {
     return Exposure;
 }
-
-#if WITH_EDITOR
 
 FString
 UOdysseyAnimationCell::GetName( ECellNameIfEmpty iCellNameIfEmpty ) const
@@ -156,8 +147,6 @@ UOdysseyAnimationCell::GetMarks() const
     return Marks;
 }
 
-#endif
-
 void
 UOdysseyAnimationCell::SetExposure(int Value)
 {
@@ -171,7 +160,6 @@ UOdysseyAnimationCell::ExposureChanged(bool iIsInteractive)
 {
     if( !iIsInteractive )
     {
-#if WITH_EDITOR
         TArray<int> indexes;
         Marks.GetKeys( indexes );
         for( int index : indexes )
@@ -179,7 +167,6 @@ UOdysseyAnimationCell::ExposureChanged(bool iIsInteractive)
             if( index >= Exposure )
                 Marks.Remove( index );
         }
-#endif
     }
 
     if (GetLayer())
@@ -188,7 +175,6 @@ UOdysseyAnimationCell::ExposureChanged(bool iIsInteractive)
     RenderingCompositionChanged(iIsInteractive);
 }
 
-#if WITH_EDITOR
 void
 UOdysseyAnimationCell::SetExposureInteractive(int Value)
 {
@@ -329,30 +315,24 @@ UOdysseyAnimationCell::OnOutOfPegsChanged()
     return mOnOutOfPegsChanged;
 }
 
-#endif
-
 FMatrix
 UOdysseyAnimationCell::GetContentTransform(const FOdysseyRenderContext* RenderContext) const
 {
-#if WITH_EDITOR
     if (RenderContext && (RenderContext->Type & EOdysseyRenderingType::OutOfPegs))
     {
         return OutOfPegsTransform();
     }
-#endif
     return FMatrix::Identity;
 }
 
 EOdysseyColorConversion
 UOdysseyAnimationCell::GetContentColorConversion(const FOdysseyRenderContext* RenderContext) const
 {
-#if WITH_EDITOR
     const UOdysseyAnimation* Animation = GetAnimation();
     if (Animation && !Animation->UsesLinearCompositing())
     {
         return EOdysseyColorConversion::Encode;
     }
-#endif
     return EOdysseyColorConversion::None;
 }
 
@@ -372,21 +352,15 @@ UOdysseyAnimationCell::CreateRenderingRenderTarget() const
     return GetLayer()->CreateRenderingRenderTarget();
 }
 
-#if WITH_EDITOR
-
 UTexture2D*
 UOdysseyAnimationCell::CreateExportTexture( const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory )
 {
     return GetLayer()->CreateExportTexture(iAssetName, iPackagePath, iAssetClass, iFactory);
 }
 
-#endif
-
-#if WITH_EDITOR
 namespace OdysseyAnimationCellsSelection {
     TFunction<bool(const UObject*)> GIsCellSelectedInEditor;
 }
-#endif
 
 UOdysseyAnimation*
 UOdysseyAnimationCell::GetAnimation() const

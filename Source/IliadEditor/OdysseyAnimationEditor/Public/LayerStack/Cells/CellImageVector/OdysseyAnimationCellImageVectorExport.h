@@ -15,6 +15,4 @@ public:
 private:
     ////////////////////////////////////
     static void WriteResolution( UOdysseyAnimationCellImageVector* iAnimationCellImageVector, FArchive &Ar );
-    static void WriteVectorBlock( UOdysseyAnimationCellImageVector* iAnimationCellImageVector, FArchive &Ar );
-    static void WriteVectorBlockID( UOdysseyAnimationCellImageVector* iAnimationCellImageVector, FArchive &Ar );
 };

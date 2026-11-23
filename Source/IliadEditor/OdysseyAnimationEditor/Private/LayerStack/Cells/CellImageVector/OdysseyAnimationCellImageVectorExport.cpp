@@ -3,7 +3,6 @@
 
 #include "OdysseyAnimationCellImageVectorExport.h"
 
-#if WITH_EDITOR
 #include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyAnimationLayerImageVector.h"
 #include "OdysseyAnimation.h"
@@ -32,32 +31,6 @@ FOdysseyAnimationCellImageVectorExport::WriteResolution( UOdysseyAnimationCellIm
 }
 
 void
-FOdysseyAnimationCellImageVectorExport::WriteVectorBlockID( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
-                                                          , FArchive &Ar )
-{
-    FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR_BLOCK_ID
-                            , Ar
-                            , [iAnimationCellImageVector](FArchive &Ar) -> void
-    {
-        FGuid vectorBlockID = iAnimationCellImageVector->GetVectorBlockId();
-
-        Ar << vectorBlockID;
-    } );
-}
-
-void
-FOdysseyAnimationCellImageVectorExport::WriteVectorBlock( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
-                                                        , FArchive &Ar )
-{
-    FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR_BLOCK
-                            , Ar
-                            , [iAnimationCellImageVector](FArchive &Ar) -> void
-    {
-        WriteVectorBlockID( iAnimationCellImageVector, Ar );
-    } );
-}
-
-void
 FOdysseyAnimationCellImageVectorExport::Write( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                              , FArchive &Ar )
 {
@@ -68,7 +41,6 @@ FOdysseyAnimationCellImageVectorExport::Write( UOdysseyAnimationCellImageVector*
         FOdysseyVectorCell* vectorCell = iAnimationCellImageVector->GetVectorCell();
 
         WriteResolution( iAnimationCellImageVector, Ar );
-        WriteVectorBlock( iAnimationCellImageVector, Ar );
         // engine might be NULL because this function is sometimes called even before loading anything
         // so we have to check the validity of the pointer
         if( vectorCell )
@@ -77,4 +49,3 @@ FOdysseyAnimationCellImageVectorExport::Write( UOdysseyAnimationCellImageVector*
         }
     } );
 }
-#endif

@@ -1,0 +1,155 @@
+// IDDN.FR.001.060015.014.S.X.2019.000.00000
+// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2026
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Templates/Function.h"
+#include "UObject/ObjectPtr.h"
+#include "UObject/WeakObjectPtrTemplates.h"
+
+#include "OdysseyTextureRenderingAbility.h"
+
+#include <ULIS>
+
+class FOdysseyRasterEditSession;
+class FOdysseyVectorCell;
+class FOdysseyVectorGroupPaint;
+class UOdysseyTiledImage;
+struct FOdysseyVectorContentRasterizer;
+
+/**
+ * Vector content shared by vector texture layers and vector animation cells: the render of their vector scene.
+ *
+ * The scene is the persisted data; its render is a cache, held as linear colors by a tiled image that is never saved.
+ * The owner holds the image in a transient UPROPERTY so that it is garbage collected with the owner; this class creates it
+ * in that property and keeps it up to date with the scene.
+ *
+ * - Interactive redraws of the scene are rendered into an edit session, which the views show in place of the tiles.
+ * - Other redraws only mark the area to render: the tiles are rendered when the content is displayed, see EnsureRendered().
+ * - The scene is rendered by blend2d in 8-bit, by a rasterizer shared by every content of the same size.
+ */
+class ODYSSEYIMAGING_API FOdysseyVectorContent
+    : public TSharedFromThis<FOdysseyVectorContent>
+{
+public:
+    /** The content the owner expects. */
+    struct FDescription
+    {
+        /** Returns true when the owner can hold content, e.g. it is attached to a texture or an animation. */
+        bool IsValid() const { return Size.X > 0 && Size.Y > 0; }
+
+        bool operator==(const FDescription& Other) const { return Size == Other.Size && bSRGB == Other.bSRGB; }
+
+        /** The canvas: the scene is rendered within it. */
+        FIntPoint Size = FIntPoint::ZeroValue;
+
+        /** True when the 8-bit render holds sRGB encoded colors: they are decoded, as the tiles hold linear colors. */
+        bool bSRGB = false;
+    };
+
+    using FGetDescription = TFunction<FDescription()>;
+
+    /** Returns the flags the scene is drawn with, e.g. FOdysseyVectorEngine::DRAWING_WIREFRAME. */
+    using FGetDrawingFlags = TFunction<uint64()>;
+
+    /**
+     * Called when the render changed.
+     * @param Rects The changed areas, in content pixels.
+     * @param bInteractive True for renders of uncommitted edits.
+     */
+    using FOnChanged = TFunction<void(const TArray<FIntRect>& Rects, bool bInteractive)>;
+
+public:
+    ~FOdysseyVectorContent();
+
+    /**
+     * @param InOwner The object owning the image property; the outer of the image.
+     * @param InRenderingId The rendering id of the owner, which the edit sessions replace in the views.
+     * @param InImage The owner's transient property holding the tiled image. It must outlive this object.
+     * @param InCell The vector cell holding the scene; its redraw requests are followed.
+     * @param InGetDescription Returns the content the owner expects.
+     * @param InGetDrawingFlags Returns the flags the scene is drawn with.
+     * @param InOnChanged Called when the render changed.
+     */
+    FOdysseyVectorContent(UObject& InOwner, const FGuid& InRenderingId, TObjectPtr<UOdysseyTiledImage>& InImage,
+        TSharedPtr<FOdysseyVectorCell> InCell, FGetDescription InGetDescription, FGetDrawingFlags InGetDrawingFlags, FOnChanged InOnChanged);
+
+    FOdysseyVectorContent(const FOdysseyVectorContent&) = delete;
+    FOdysseyVectorContent& operator=(const FOdysseyVectorContent&) = delete;
+
+public:
+    /** Returns the vector cell whose scene is rendered. */
+    const TSharedPtr<FOdysseyVectorCell>& GetCell() const;
+
+    /** Returns the existing image without creating it. */
+    UOdysseyTiledImage* GetImage() const;
+
+    /** Returns the content the owner expects. */
+    FDescription Describe() const;
+
+    /**
+     * Brings the tiles up to date with the scene: creates the image when missing and renders the areas changed since the last render,
+     * or the whole canvas when the description or the drawing flags changed. Never notifies the owner.
+     * @return False when the owner cannot hold content or the rendering is unavailable.
+     */
+    bool EnsureRendered();
+
+    /**
+     * Builds the function rendering the tiles, once brought up to date. Uncommitted edits are shown by the views through the edit session.
+     * @param OutRenderFunction The render function.
+     * @param ContentTransform Applied to the content before the transform given to the render function.
+     * @return False when there is nothing to render.
+     */
+    bool BuildRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform);
+
+private:
+    void OnRequestRedraw(FOdysseyVectorGroupPaint* Scene, uint64 RedrawFlags);
+    void OnImageUndone();
+
+    /** Renders an area of the scene into the edit session, begun when needed. */
+    void RenderInteractive(const FIntRect& Rect, const FDescription& Description);
+
+    /** Ends the edit session, if any: the areas it showed are rendered into the tiles later. Returns their bounds, if any. */
+    TOptional<FIntRect> EndSession();
+
+    /**
+     * Renders an area of the scene and passes the render, as an unpremultiplied 8-bit block of the canvas size, to Consume.
+     * Only the area of the block is meaningful.
+     * @return False when nothing was rendered.
+     */
+    bool RenderScene(const FIntRect& Rect, FIntPoint Size, uint64 DrawingFlags, TFunctionRef<void(const ::ULIS::FBlock&)> Consume);
+
+    /** Returns the area of the canvas the cell asks to redraw; the whole canvas when it does not tell. */
+    FIntRect GetRedrawRect(FIntPoint Size) const;
+
+    void AddPending(const FIntRect& Rect);
+    void BindImage();
+
+private:
+    UObject& Owner;
+    FGuid RenderingId;
+    TObjectPtr<UOdysseyTiledImage>& Image;
+    TSharedPtr<FOdysseyVectorCell> Cell;
+    FGetDescription GetDescription;
+    FGetDrawingFlags GetDrawingFlags;
+    FOnChanged OnChanged;
+
+    /** The image whose undo notification is bound. */
+    TWeakObjectPtr<UOdysseyTiledImage> BoundImage;
+
+    /** The description of the last render; unset when the tiles were never rendered. */
+    TOptional<FDescription> RenderedDescription;
+    /** The drawing flags of the last render. */
+    uint64 RenderedDrawingFlags = 0;
+    /** The bounds of the areas to render into the tiles; unset when the tiles are up to date. */
+    TOptional<FIntRect> PendingRect;
+
+    /** The edit session showing interactive redraws, while they are not rendered into the tiles. */
+    TSharedPtr<FOdysseyRasterEditSession> Session;
+    /** The bounds of the areas rendered into the session. */
+    TOptional<FIntRect> SessionBounds;
+
+    /** Renders the scene into its image; shared with the contents of the same size. */
+    TSharedPtr<FOdysseyVectorContentRasterizer> Rasterizer;
+};

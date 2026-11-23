@@ -4,12 +4,8 @@
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
-#include "HAL/Event.h"
-#include "HAL/PlatformProcess.h"
 #include "Misc/AutomationTest.h"
-#include "Misc/ScopeExit.h"
 #include "RenderingThread.h"
-#include "TextureCompiler.h"
 #include "TextureResource.h"
 #include "UObject/Package.h"
 #include "UObject/StrongObjectPtr.h"
@@ -49,62 +45,46 @@ namespace Odyssey::TextureLayerRenderTests
     }
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureLayerRenderPendingResourceTest, "Odyssey.Texture.Layer.RenderWhileResourceIsPending",
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureLayerVectorRenderTest, "Odyssey.Texture.Layer.VectorRender",
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 /**
- * Renders a texture layer whose texture resource was just recreated, while the render thread has not created its RHI texture yet.
- * The layer must read the RHI texture when its render function runs on the render thread, not when it is built on the game thread.
+ * Renders a vector layer, whose scene is drawn as an opaque monochrome fill: the layer renders the scene through the tiles holding its render,
+ * and renders the same pixels again from these tiles.
  */
-bool FOdysseyTextureLayerRenderPendingResourceTest::RunTest(const FString& Parameters)
+bool FOdysseyTextureLayerVectorRenderTest::RunTest(const FString& Parameters)
 {
     using namespace Odyssey::TextureLayerTiledImageTests;
     using namespace Odyssey::TextureLayerRenderTests;
 
     TStrongObjectPtr<UTexture2D> Texture(MakeTexture(GetTransientPackage(), TSF_BGRA8));
     UOdysseyLayerStack* Stack = MakeLayer(Texture.Get())->GetLayerStack();
-    // Raster layers hold their pixels in tiles: the render texture path is the one of vector layers.
     UOdysseyTextureLayerImageVector* Layer = CastChecked<UOdysseyTextureLayerImageVector>(Stack->AddLayer(UOdysseyTextureLayerImageVector::StaticClass()));
+    // Without colors, the whole canvas is filled with the opaque monochrome color of the scene.
+    Layer->SetIsColored(false);
+
     TStrongObjectPtr<UTextureRenderTarget2D> Target(MakeTarget());
-
-    Stack->Render_GameThread(Target.Get(), EOdysseyRenderingType::Render);
-    const TArray<FLinearColor> Expected = ReadPixels(Target.Get());
-    UTexture2D* LayerTexture = Layer->GetRenderTexture();
-    if (!TestEqual(TEXT("Reference render reads all pixels"), Expected.Num(), 73 * 67) || !TestNotNull(TEXT("Layer render texture"), LayerTexture))
+    Layer->Render_GameThread(Target.Get(), EOdysseyRenderingType::Render);
+    const TArray<FLinearColor> Pixels = ReadPixels(Target.Get());
+    if (!TestEqual(TEXT("Render reads all pixels"), Pixels.Num(), 73 * 67))
         return false;
+    TestNotNull(TEXT("The layer holds the render of its scene in a tiled image"), Layer->GetTiledImage());
 
-    // Nothing may compile or flush the render thread while it is held below
-    FTextureCompilingManager::Get().FinishCompilation({ LayerTexture });
-    LayerTexture->BlockOnAnyAsyncBuild();
-    FlushRenderingCommands();
+    const FLinearColor Gray = Pixels[0];
+    TestTrue(FString::Printf(TEXT("The layer renders an opaque gray, got %s"), *Gray.ToString()),
+        FMath::IsNearlyEqual(Gray.A, 1.0f, 0.001f) && FMath::IsNearlyEqual(Gray.R, Gray.G, 0.001f) && FMath::IsNearlyEqual(Gray.R, Gray.B, 0.001f)
+        && Gray.R > 0.2f && Gray.R < 0.8f);
+    for (const int32 PixelIndex : { 36 + 33 * 73, 72 + 66 * 73 })
+        TestTrue(FString::Printf(TEXT("Pixel %d is rendered as the others"), PixelIndex), Pixels[PixelIndex].Equals(Gray, 0.001f));
 
-    // Hold the render thread so that the recreated resource stays without RHI texture while the pipeline is built
-    FEvent* RenderThreadGate = FPlatformProcess::GetSynchEventFromPool(true);
-    ON_SCOPE_EXIT { FPlatformProcess::ReturnSynchEventToPool(RenderThreadGate); };
-    ENQUEUE_RENDER_COMMAND(OdysseyHoldRenderThread)([RenderThreadGate](FRHICommandListImmediate&)
-    {
-        // The timeout only avoids a dead lock if something flushes the render thread meanwhile
-        RenderThreadGate->Wait(FTimespan::FromSeconds(10));
-    });
-
-    // A new target, so that a render writing nothing cannot pass for the reference one
-    TStrongObjectPtr<UTextureRenderTarget2D> PendingTarget(MakeTarget());
-
-    LayerTexture->UpdateResource();
-    const bool bRHIIsPending = !LayerTexture->GetResource() || !LayerTexture->GetResource()->TextureRHI;
-    IOdysseyTextureRenderingAbility::FRenderFunction LayerRenderFunction;
-    const bool bLayerPipelineBuilt = Layer->BuildRenderPipeline(LayerRenderFunction);
-    Stack->Render_GameThread(PendingTarget.Get(), EOdysseyRenderingType::Render);
-    RenderThreadGate->Trigger();
-
-    TestTrue(TEXT("The pipeline is built before the render thread creates the RHI texture"), bRHIIsPending);
-    TestTrue(TEXT("The layer builds its render function while its RHI texture is pending"), bLayerPipelineBuilt && LayerRenderFunction);
-    const TArray<FLinearColor> Pixels = ReadPixels(PendingTarget.Get());
-    if (!TestEqual(TEXT("Render reads all pixels"), Pixels.Num(), Expected.Num()))
+    // A new target, so that a render writing nothing cannot pass for the first one.
+    TStrongObjectPtr<UTextureRenderTarget2D> SecondTarget(MakeTarget());
+    Layer->Render_GameThread(SecondTarget.Get(), EOdysseyRenderingType::Render);
+    const TArray<FLinearColor> SecondPixels = ReadPixels(SecondTarget.Get());
+    if (!TestEqual(TEXT("Second render reads all pixels"), SecondPixels.Num(), Pixels.Num()))
         return false;
-
     for (const int32 PixelIndex : { 0, 36 + 33 * 73, 72 + 66 * 73 })
-        TestTrue(FString::Printf(TEXT("Pixel %d matches the reference render"), PixelIndex), Pixels[PixelIndex].Equals(Expected[PixelIndex], 0.001f));
+        TestTrue(FString::Printf(TEXT("Pixel %d is rendered again from the tiles"), PixelIndex), SecondPixels[PixelIndex].Equals(Pixels[PixelIndex], 0.001f));
 
     return true;
 }

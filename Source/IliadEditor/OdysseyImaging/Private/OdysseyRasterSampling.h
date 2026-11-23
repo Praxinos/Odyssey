@@ -5,6 +5,10 @@
 
 #include "CoreMinimal.h"
 
+#include "OdysseyTextureRenderingAbility.h"
+
+class UOdysseyTiledImage;
+
 namespace Odyssey::RasterSampling
 {
 /**
@@ -17,4 +21,16 @@ namespace Odyssey::RasterSampling
  * @return The sampled area, in content pixels; without area when the render samples nothing of the content.
  */
 FIntRect GetSampledArea(const FIntRect& SourceRect, const FIntRect& DestinationRect, const FMatrix& ToSource, FIntPoint Size);
+
+/**
+ * Builds the function rendering the tiles of an image as the content of a node, e.g. a raster or vector layer or cell.
+ * The tiles hold linear colors, sampled as they are; pixels without a tile are transparent.
+ * @param Image The image holding the content.
+ * @param Size The size of the content: rendering assembles the tiles it samples within it.
+ * @param ContentTransform Applied to the content before the transform given to the render function.
+ * @param OutRenderFunction The render function.
+ * @return False when there is nothing to render.
+ */
+bool BuildTiledImageRenderFunction(const UOdysseyTiledImage& Image, FIntPoint Size, const FMatrix& ContentTransform,
+    IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction);
 }

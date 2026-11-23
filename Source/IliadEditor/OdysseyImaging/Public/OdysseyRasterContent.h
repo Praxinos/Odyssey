@@ -189,8 +189,6 @@ private:
     /** Notifies the owner that pixels changed; empty rects stand for the whole canvas. */
     void NotifyChanged(const TArray<FIntRect>& Rects, bool bInteractive);
 
-    bool BuildImageRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform, FIntPoint Size) const;
-
 private:
     UObject& Owner;
     FGuid RenderingId;
