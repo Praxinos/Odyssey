@@ -241,24 +241,12 @@ UOdysseyAnimationLayerImageVector::IsColored() const
 void
 UOdysseyAnimationLayerImageVector::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 {
-    const bool bIsUndoRedo = iTransactionEvent.GetEventType() == ETransactionObjectEventType::UndoRedo;
-    const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
-
     // As CellsChanged(): the vector layer follows the restored cells before Super refreshes the composition.
-    if (bIsUndoRedo && changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, Cells)))
+    // The order of the cells changes only their inbetweens, which the undo of the inbetween tags redraws.
+    if (iTransactionEvent.GetEventType() == ETransactionObjectEventType::UndoRedo
+        && iTransactionEvent.GetChangedProperties().Contains(GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, Cells)))
     {
         UpdateSharedEnv();
-
-        // The inbetweens of a cell are drawn from the other cells of the layer: every cell may render differently.
-        for (UOdysseyAnimationCell* cell : Cells)
-        {
-            UOdysseyAnimationCellImageVector* cellVector = Cast<UOdysseyAnimationCellImageVector>(cell);
-            if (cellVector && cellVector->GetVectorCell())
-            {
-                mVectorLayer->InvalidateCell(cellVector->GetVectorCell());
-            }
-        }
-        mVectorLayer->RequestRedraw(nullptr, 0);
     }
 
     Super::PostTransacted(iTransactionEvent);
