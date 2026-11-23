@@ -87,6 +87,14 @@ public:
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportImageSequence, AdvancedDisplay, meta=(ShowOnlyInnerProperties) )
     FExportImageSequenceNumberFormat PanelIndexFormat { 4 };
 
+    /**
+     * Marks to use as image panels.
+     *
+     * Choose what should be considered as panels to export:
+     * - animation cuts
+     * - Sequencer marks
+     * - the first frame of each shot
+     */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportImageSequence )
     FExportMarkSettings MarkSettings;
 };
@@ -101,6 +109,7 @@ class UExportImageSequenceSettings
     GENERATED_BODY()
 
 public:
+    /** Options used to export the storyboard as an image sequence. */
     UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category=ExportImageSequence )
     FExportImageSequenceOptions Options;
 };

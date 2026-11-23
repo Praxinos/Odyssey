@@ -17,12 +17,15 @@ class UOdysseyAnimationBlueprintLibrary : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 
+    /** Return the Animation 2D that owns the given layer stack. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|LayerStack", meta=(DisplayName="Get Animation", HidePin="Layerstack", DefaultToSelf="Layerstack"))
     static UOdysseyAnimation* GetLayerStackAnimation(UOdysseyLayerStack* Layerstack);
 
+    /** Return the Animation 2D that owns the given layer. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|Layer", meta=(DisplayName="Get Animation", HidePin="Layer", DefaultToSelf="Layer"))
     static UOdysseyAnimation* GetLayerAnimation(UOdysseyLayer* Layer);
 
+    /** Return the Animation 2D that owns the given cell. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|Cell", meta=(DisplayName="Get Animation", HidePin="Cell", DefaultToSelf="Cell"))
     static UOdysseyAnimation* GetCellAnimation(UOdysseyLayerCell* Cell);
 

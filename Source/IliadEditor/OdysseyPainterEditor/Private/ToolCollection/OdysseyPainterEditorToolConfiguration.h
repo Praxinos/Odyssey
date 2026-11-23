@@ -27,6 +27,11 @@ public:
     const FSlateBrush* MakeIconBrush() const;
 
 public:
+    /**
+     * Source of the tool icon.
+     *
+     * None, an icon from the Odyssey style (Style) or a Texture.
+     */
     UPROPERTY(EditAnywhere, Category = "IconTool")
     EToolIconSource mIconSource = EToolIconSource::None;
 
@@ -54,16 +59,20 @@ class UOdysseyPainterEditorToolConfiguration : public UObject
     GENERATED_BODY()
 
 public:
+    /** Class of the tool stored in this configuration. */
     UPROPERTY(EditAnywhere, Category = "Tool")
     TSubclassOf<UObject> mToolClass;
 
+    /** Tool instance holding the saved configuration (size, blending...). */
     UPROPERTY(EditAnywhere, Category = "Tool")
     TObjectPtr<UOdysseyPainterEditorTool> mTool;
 
+    /** Name of the tool configuration displayed in the Tool Collection. */
     UPROPERTY( EditAnywhere, Category = "Tool" )
     FString mName;
 
 public:
+    /** Icon displayed for this tool in the Tool Collection. */
     UPROPERTY(EditAnywhere, Category = "Tool")
     FIconToolConfiguration mIconToolConfiguration;
 };

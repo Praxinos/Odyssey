@@ -16,9 +16,11 @@ class ODYSSEYTEXTURE_API UOdysseyTextureFunctionLibrary : public UBlueprintFunct
     GENERATED_BODY()
 
 public:
+    /** Return whether the texture has an Odyssey Layer Stack. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Texture", meta = (HideSelfPin="Texture", DefaultToSelf="Texture"))
     static bool HasLayerStack(UTexture2D* Texture);
 
+    /** Return the Odyssey Layer Stack of the texture, if any. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Texture", meta = (HideSelfPin="Texture", DefaultToSelf="Texture"))
     static UOdysseyTextureLayerStack* GetLayerStack(UTexture2D* Texture);
 };

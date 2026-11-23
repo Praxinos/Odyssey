@@ -48,6 +48,7 @@ public:
     FBrushDefaults();
 
 public:
+    /** Default Brush used each time an Odyssey Editor is opened on a Raster Layer. */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Brush, meta = (AllowPrivateAccess = "true", DisplayThumbnail = "true", DisplayName = "Default Brush", AllowedClasses="/Script/OdysseyBrush.OdysseyBrush"))
     TSoftObjectPtr<UOdysseyBrush> DefaultBrush;
 };

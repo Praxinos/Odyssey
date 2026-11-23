@@ -50,24 +50,58 @@ public:
     UTexture2D* CreateTexture(UObject* iParent, FName iName, EObjectFlags iFlags) const;
 
 public:
+    /**
+     * Name of the Texture.
+     *
+     * By naming convention, it should be like "T_TextureAssetName".
+     */
     UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration")
     FName                   Name = "T_Drawing";
 
+    /**
+     * Width of the texture in pixels.
+     *
+     * Cannot be changed afterward. For textures used with a Material,
+     * prefer a power of 2 (128, 256, 512, 1024...).
+     */
     UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration", meta = (ClampMin = "16", ClampMax = "8192", UIMin = "16", UIMax = "8192", Multiple = "4", DisplayName = "Width (px)"))
     uint32                  Width = 1024;
 
+    /**
+     * Height of the texture in pixels.
+     *
+     * Cannot be changed afterward. For textures used with a Material,
+     * prefer a power of 2 (128, 256, 512, 1024...).
+     */
     UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration", meta = (ClampMin = "16", ClampMax = "8192", UIMin = "16", UIMax = "8192", Multiple = "4", DisplayName = "Height (px)"))
     uint32                  Height = 1024;
 
+    /**
+     * Image format of the texture.
+     *
+     * - Grey 8
+     * - BGRA 8
+     * - BGRE 8
+     * - RGBA 16
+     * - RGBA 16 F
+     *
+     * If you don't know which Format to use, keep the default value.
+     */
     UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration")
     EOdysseyTextureSourceFormat Format = EOdysseyTextureSourceFormat::kBGRA8;
 
     UPROPERTY()
     TEnumAsByte<ETextureSourceFormat> CustomFormat = ETextureSourceFormat::TSF_BGRA8;
 
+    /**
+     * Color of the background.
+     *
+     * Transparent, white or purple (useful to paint Normal Maps).
+     */
     UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration")
     EOdysseyTextureBackgroundColor BackgroundColor = EOdysseyTextureBackgroundColor::kTransparent;
 
+    /** Default layer type: Raster Layer or Vector Layer. */
     UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration")
     EOdysseyTextureDefaultLayerType LayerType = EOdysseyTextureDefaultLayerType::kRaster;
 };

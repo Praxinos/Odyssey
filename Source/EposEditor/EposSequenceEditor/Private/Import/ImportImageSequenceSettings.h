@@ -65,6 +65,7 @@ class UImportImageSequenceSettings
     GENERATED_BODY()
 
 public:
+    /** Options used to import an image sequence as a storyboard. */
     UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category=ImportImageSequence )
     FImportImageSequenceOptions Options;
 };

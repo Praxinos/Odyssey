@@ -20,15 +20,18 @@ struct FOdysseyLayerCellOutOfPegs
 {
     GENERATED_BODY()
 
+    /** Out-of-Pegs pan of the Cell display on the X and Y axes. */
     UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
     FVector2D Pan = FVector2D(0, 0);
 
+    /** Out-of-Pegs rotation of the Cell display. */
     UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
     float Rotation = 0.f;
 
     UPROPERTY(meta=(DeprecatedProperty, DeprecationMessage = "Use the new Scale property instead." ))
     float Zoom_DEPRECATED = 100.f;
 
+    /** Out-of-Pegs scale (Zoom) of the Cell display, in percent. */
     UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
     FVector2D Scale = FVector2D( 100.f, 100.f );
 };
@@ -71,60 +74,121 @@ public:
     virtual void PostDuplicate( EDuplicateMode::Type iDuplicateMode ) override;
 
 public:
+    /** Return the layer that contains this Cell. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     UOdysseyLayer* GetLayer() const;
 
+    /** Return the layer stack that contains this Cell. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     UOdysseyLayerStack* GetLayerStack() const;
 
+    /** Return the range of frames covered by this Cell in its layer. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     virtual FInt32Range GetFrameRange() const override;
 
+    /** Return the index of this Cell in its layer. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     int GetIndexInLayer() const;
 
+    /**
+     * Return the exposure of this Cell.
+     *
+     * The exposure is the duration of the Cell, in frames.
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     int GetExposure() const;
 
+    /**
+     * Set the exposure of this Cell.
+     *
+     * The exposure is the duration of the Cell, in frames. The next
+     * Cells are moved accordingly.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     void SetExposure(int Value);
 
+    /** Return the texture holding the rendered content of this Cell. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     UTexture2D* GetRenderTexture() const;
 
 #if WITH_EDITOR
+    /**
+     * Return the name of this Cell.
+     *
+     * If the Cell has no name, CellNameIfEmpty selects what to return:
+     * - an empty string
+     * - the index of the Cell in its layer
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     FString GetName( ECellNameIfEmpty iCellNameIfEmpty ) const;
 
+    /** Set the name of this Cell. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     void SetName(FString Value);
 
+    /** Return true if no name has been given to this Cell. */
     UFUNCTION( BlueprintPure, Category = "Odyssey|Cell" )
     bool HasNoName() const;
 
     UE_DEPRECATED( 5.7, "Use GetMarks() to return all marks" )
+    /**
+     * Return the Mark set on the first frame of this Cell.
+     *
+     * Return -1 if there is none. Deprecated: use GetMarks instead.
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     int GetMark() const;
 
     UE_DEPRECATED( 5.7, "Use SetMarks() to set all marks" )
+    /**
+     * Set the Mark on the first frame of this Cell.
+     *
+     * Use -1 to remove it. Deprecated: use SetMarks instead.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     void SetMark(int Value);
 
+    /**
+     * Return all the Marks of this Cell.
+     *
+     * Marks are tags on frames to tell them apart (Keys, Breakdowns,
+     * Retakes, etc). The key is the frame index inside the Cell.
+     */
     UFUNCTION( BlueprintPure, Category = "Odyssey|Cell" )
     TMap<int, FCellMark> GetMarks() const;
 
+    /**
+     * Set all the Marks of this Cell.
+     *
+     * Marks are tags on frames to tell them apart (Keys, Breakdowns,
+     * Retakes, etc). The key is the frame index inside the Cell.
+     */
     UFUNCTION( BlueprintCallable, Category = "Odyssey|Cell" )
     void SetMarks( const TMap<int, FCellMark>& iMarks );
 
+    /**
+     * Cut this Cell into two Cells at the given frame.
+     *
+     * Like the Cutting tool: if Clear is true the new Cell is empty,
+     * otherwise it keeps the content. Return the new Cell.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     virtual UOdysseyLayerCell* Break(int Frame, bool bClear);
 
+    /** Return true if an Out-of-Pegs transform is applied to this Cell. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     bool IsOutOfPegs() const;
 
+    /** Return the Out-of-Pegs transform (pan, rotation, scale). */
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     FOdysseyLayerCellOutOfPegs GetOutOfPegs() const;
 
+    /**
+     * Set the Out-of-Pegs transform (pan, rotation, scale) of this Cell.
+     *
+     * Out-of-Pegs moves the display of the Cell out of the peg bar,
+     * also known as "Shift and Trace".
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     void SetOutOfPegs(FOdysseyLayerCellOutOfPegs Value);
 

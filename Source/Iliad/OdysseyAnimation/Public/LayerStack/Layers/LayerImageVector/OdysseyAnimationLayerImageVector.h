@@ -88,15 +88,32 @@ private:
     void AutoCreateCell(int iFrameIndex);
 
 public:
+    /**
+     * Enable or disable the wireframe mode of this Vector Layer.
+     *
+     * Wireframe mode helps to identify gaps in the vector object.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetIsWireframe(bool Value);
 
+    /**
+     * Show or hide the vector Paint Buckets of this Vector Layer.
+     *
+     * Passing false enables the monochrome mode, which hides all
+     * vector Paint Buckets.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetIsColored(bool Value);
 
+    /** Return true if the wireframe mode of this Vector Layer is enabled. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     bool IsWireframe() const;
 
+    /**
+     * Return true if vector Paint Buckets are displayed.
+     *
+     * Return false when the Vector Layer is in monochrome mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     bool IsColored() const;
 

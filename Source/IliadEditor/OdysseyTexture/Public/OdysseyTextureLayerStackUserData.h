@@ -47,6 +47,7 @@ private:
 #endif
 
 public:
+    /** Layer Stack holding the layers of the texture. */
     UPROPERTY(BlueprintReadOnly, Category="Odyssey|LayerStack")
     TObjectPtr<UOdysseyTextureLayerStack> LayerStack;
 

@@ -25,54 +25,135 @@ class UOdysseyViewportDrawingEditorBlueprintLibrary :
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static void ActivateViewportEditorMode(const FName& EditorMode);
 
+    /**
+     * Return the name of the Odyssey Editor Mode.
+     *
+     * Deprecated: use Get Odyssey Viewport Drawing Editor Mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor", meta = (DeprecatedFunction, DeprecationMessage = "Use GetOdysseyViewportDrawingEditorMode"))
     static FName GetIliadViewportDrawingEditorMode();
 
+    /**
+     * Return the name of the Odyssey Editor Mode.
+     *
+     * Use it with Activate Viewport Editor Mode to switch to this mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetOdysseyViewportDrawingEditorMode();
 
+    /**
+     * Return the name of the Modeling editor mode.
+     *
+     * Use it with Activate Viewport Editor Mode to switch to this mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetModelingEditorMode();
 
+    /** Return the name of the None editor mode (no mode). */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetNoneEditorMode();
 
+    /**
+     * Return the name of the Default editor mode.
+     *
+     * Use it with Activate Viewport Editor Mode to switch to this mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetDefaultEditorMode();
 
+    /**
+     * Return the name of the Placement editor mode.
+     *
+     * Use it with Activate Viewport Editor Mode to switch to this mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetPlacementEditorMode();
 
+    /**
+     * Return the name of the Mesh Paint editor mode.
+     *
+     * Use it with Activate Viewport Editor Mode to switch to this mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetMeshPaintEditorMode();
 
+    /**
+     * Return the name of the Landscape editor mode.
+     *
+     * Use it with Activate Viewport Editor Mode to switch to this mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetLandscapeEditorMode();
 
+    /**
+     * Return the name of the Foliage editor mode.
+     *
+     * Use it with Activate Viewport Editor Mode to switch to this mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetFoliageEditorMode();
 
+    /**
+     * Return the name of the Level editor mode.
+     *
+     * Use it with Activate Viewport Editor Mode to switch to this mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetLevelEditorMode();
 
+    /**
+     * Return the name of the Streaming Level editor mode.
+     *
+     * Use it with Activate Viewport Editor Mode to switch to this mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetStreamingLevelEditorMode();
 
+    /**
+     * Return the name of the Physics editor mode.
+     *
+     * Use it with Activate Viewport Editor Mode to switch to this mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetPhysicsEditorMode();
 
+    /**
+     * Return the name of the Actor Picker editor mode.
+     *
+     * Use it with Activate Viewport Editor Mode to switch to this mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetActorPickerEditorMode();
 
+    /**
+     * Return the name of the Scene Depth Picker editor mode.
+     *
+     * Use it with Activate Viewport Editor Mode to switch to this mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetSceneDepthPickerEditorMode();
 
+    /**
+     * Return the name of the Animation (Control Rig) editor mode.
+     *
+     * Use it with Activate Viewport Editor Mode to switch to this mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetAnimationEditorMode();
 
+    /**
+     * Return the name of the Brush Editing (Geometry) editor mode.
+     *
+     * Use it with Activate Viewport Editor Mode to switch to this mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetBrushEditingEditorMode();
 
+    /**
+     * Return the name of the Fracture editor mode.
+     *
+     * Use it with Activate Viewport Editor Mode to switch to this mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetFractureEditorMode();
 

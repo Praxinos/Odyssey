@@ -67,6 +67,20 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
         double GetLineRotationAngle( FOdysseyVectorLine* iLine, const FOdysseyPoint& iPointInTexture );
 
     public:
+        /**
+         * Shape used by the tool.
+         *
+         * Select a drawing shape:
+         * - Freehand
+         * - Line
+         * - Rectangle
+         * - Polygon
+         * - Ellipse
+         * - Bezier
+         *
+         * Each shape has its own options, such as Smoothing
+         * and Uniform / Snap Angle.
+         */
         UPROPERTY( EditAnywhere
                  , Category = "Shape" )
         FOdysseyShapes Shapes;

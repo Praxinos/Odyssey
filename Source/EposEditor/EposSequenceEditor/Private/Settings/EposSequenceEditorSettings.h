@@ -21,9 +21,11 @@ struct FBoardSettings
     GENERATED_BODY()
 
 public:
+    /** Default tick frame rate of new Board Sequences. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Board)
     FFrameRate DefaultTickFrameRate { 24000, 1 };
 
+    /** Default display frame rate of new Board Sequences. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Board)
     FFrameRate DefaultDisplayFrameRate { 24, 1 };
 
@@ -37,9 +39,11 @@ struct FShotSettings
     GENERATED_BODY()
 
 public:
+    /** Default tick frame rate of new Shot Sequences. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Shot)
     FFrameRate DefaultTickFrameRate { 24000, 1 };
 
+    /** Default display frame rate of new Shot Sequences. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Shot)
     FFrameRate DefaultDisplayFrameRate { 24, 1 };
 };
@@ -52,9 +56,20 @@ struct FNoteSettings
     GENERATED_BODY()
 
 public:
+    /**
+     * Display notes in viewport.
+     *
+     * Display the Notes between the camera view and the playback
+     * controls of the Storyboard Viewport.
+     */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Note)
     bool DisplayNoteInViewport { false };
 
+    /**
+     * Display notes as overlay.
+     *
+     * Display the Notes as subtitles in the camera view.
+     */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Note)
     bool DisplayNoteAsOverlay { false };
 };
@@ -67,24 +82,59 @@ struct FStoryboardViewportSettings
     GENERATED_BODY()
 
 public:
+    /**
+     * Display playback track.
+     *
+     * Display a tiny track that shows what is before the current frame
+     * (in white) and what is after it (in grey).
+     */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
     bool DisplayPlaybackTrack { true };
 
+    /**
+     * Display playback controls.
+     *
+     * Display the remote control to play the sequence.
+     */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
     bool DisplayPlaybackControls { true };
 
+    /**
+     * Display sequence info.
+     *
+     * Display the name of the Sequence on the left and the current
+     * frame on the right.
+     */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
     bool DisplaySequenceInfos { true };
 
+    /**
+     * Display actor controls.
+     *
+     * Display the Planes and Camera controls (Plane Distance and
+     * Camera Focal Length).
+     */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
     bool DisplayActorControls { true };
 
+    /**
+     * Display camera bounds.
+     *
+     * Apply a watermark color on the viewport beyond the camera view.
+     */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
     bool bDisplayCameraBounds { true };
 
+    /** Color and opacity of the watermark applied beyond the camera view. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
     FLinearColor CameraBoundsShadeColor = FLinearColor(0.f, 0.f, 0.f, 0.8f);
 
+    /**
+     * Display camera piloting indication.
+     *
+     * Show a visual indication in the viewport while a camera is
+     * being piloted.
+     */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
     bool bDisplayPilotingCameraHUD { true };
 };
@@ -140,11 +190,18 @@ public:
     FInfoBarSettings();
 
 public:
+    /**
+     * Pattern of the name displayed at the top of the Sequencer.
+     *
+     * The displayed information depends on the cursor position.
+     * Each line of the pattern is joined with the separator.
+     */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=InfoBar, meta=(MultiLine="true"))
     FString Pattern;
 
     FPatternKeywordLists mPatternKeywordLists;
 
+    /** Separator inserted between the lines of the info bar pattern. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=InfoBar)
     FString Separator { TEXT( " - " ) };
 };

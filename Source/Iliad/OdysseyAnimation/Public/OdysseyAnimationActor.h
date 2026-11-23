@@ -32,6 +32,7 @@ public:
     const UOdysseyAnimationComponent*   GetAnimationComponent() const;
 
 protected:
+    /** The component displaying the Animation 2D in the level. */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Animation")
     TObjectPtr<UOdysseyAnimationComponent> AnimationComponent;
 

@@ -84,6 +84,12 @@ public:
     UPROPERTY()
     TMap< FGuid, FLevelSequenceBindingReference > ActorsBindingIdToReferences_DEPRECATED;
 
+    /**
+     * Naming convention elements of this board.
+     *
+     * Values (global, user and index information) used to build the
+     * board name from the Board Naming Convention pattern.
+     */
     UPROPERTY(EditAnywhere, Category=NamingConvention)
     FBoardNameElements NameElements;
 

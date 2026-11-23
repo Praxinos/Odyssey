@@ -16,9 +16,11 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayer
     GENERATED_BODY()
 
 public:
+    /** Return the Texture 2D owning this layer's Layer Stack. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     UTexture2D* GetTexture() const;
 
+    /** Return the texture containing the render of this layer only. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     UTexture2D* GetRenderTexture() const;
 

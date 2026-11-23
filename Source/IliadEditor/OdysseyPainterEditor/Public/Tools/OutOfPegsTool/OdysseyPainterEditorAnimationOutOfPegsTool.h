@@ -83,9 +83,11 @@ private:
     void OnRotationHandleDragEnd();
 
 public:
+    /** Reset the parameters of the Out-of-pegs on the current Cell. */
     UFUNCTION(BlueprintCallable, Category="Actions", CallInEditor)
     void Reset();
 
+    /** Cancel the Out-of-pegs on all the Cells of the current Layer. */
     UFUNCTION(BlueprintCallable, Category="Actions", CallInEditor)
     void ResetAll();
 

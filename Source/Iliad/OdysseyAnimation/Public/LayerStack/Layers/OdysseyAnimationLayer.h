@@ -19,6 +19,7 @@ public:
     virtual UOdysseyAnimationLayerStack* GetLayerStack() const;
 
 public:
+    /** Return the Animation 2D asset that owns this layer. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     UOdysseyAnimation* GetAnimation() const;
 

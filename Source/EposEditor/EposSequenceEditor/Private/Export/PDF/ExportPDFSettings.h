@@ -29,9 +29,22 @@ public:
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportPDF )
     FString ExportFile;
 
+    /**
+     * Widget Blueprint used as a layout to export the PDF.
+     *
+     * For example portrait, landscape or thumbnails layouts.
+     */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportPDF )
     TSoftClassPtr<UPDFDocExportWidget> PDFDocWidgetSoftClass { FSoftObjectPath( TEXT( "/Odyssey/PDF/Thumbnails/WBP_PDFDoc_Thumbnails_Landscape.WBP_PDFDoc_Thumbnails_Landscape_C" ) ) };
 
+    /**
+     * Marks to use as panels in the PDF.
+     *
+     * Choose what should be considered as panels to export:
+     * - animation cuts
+     * - Sequencer marks
+     * - the first frame of each shot
+     */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportPDF )
     FExportMarkSettings MarkSettings;
 };
@@ -46,6 +59,7 @@ class UExportPDFSettings
     GENERATED_BODY()
 
 public:
+    /** Options used to export the storyboard as a PDF file. */
     UPROPERTY( config, EditAnywhere, BlueprintReadWrite, Category=ExportPDF, meta=(ShowOnlyInnerProperties) )
     FExportPDFOptions Options;
 };

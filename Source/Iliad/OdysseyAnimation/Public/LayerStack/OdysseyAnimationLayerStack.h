@@ -21,6 +21,7 @@ public:
     virtual void PostInitProperties() override;
 
 public:
+    /** Return the Animation 2D asset that owns this layer stack. */
     UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
     UOdysseyAnimation* GetAnimation() const;
 

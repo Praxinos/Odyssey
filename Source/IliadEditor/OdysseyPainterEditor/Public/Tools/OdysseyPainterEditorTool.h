@@ -103,18 +103,27 @@ public:
      */
     bool IsInInteractiveMode() const;
 
+    /** Return whether the tool uses a radius that can be resized. */
     UFUNCTION(BlueprintPure, Category="Tools")
     virtual bool HasRadius() const;
 
+    /** Set the radius of the tool, if it has one. */
     UFUNCTION(BlueprintCallable, Category="Tools")
     virtual void SetRadius(float Radius);
 
+    /** Return the radius of the tool, or 0 if it has none. */
     UFUNCTION(BlueprintPure, Category="Tools")
     virtual float GetRadius() const;
 
+    /** Return whether the radius is expressed in texture or HUD space. */
     UFUNCTION(BlueprintPure, Category="Tools")
     virtual EPainterEditorToolRadiusReference GetRadiusReference() const;
 
+    /**
+     * Start resizing the tool radius interactively with the mouse.
+     *
+     * Same as the Z shortcut, used to resize any tool using a radius.
+     */
     UFUNCTION(BlueprintCallable, Category="Tools")
     void StartRadiusInteractiveModifier();
 
@@ -238,6 +247,7 @@ protected:
     FMouseCursor                        mMouseCursor;
 
 public:
+    /** Name of the style icon representing the tool. */
     UPROPERTY(EditDefaultsOnly, Category = "Tool")
     FName mIconStyleSet;
     bool mIsActivated;

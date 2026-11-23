@@ -62,21 +62,27 @@ struct FOdysseyFontCharacter
 {
     GENERATED_BODY()
 
+    /** Horizontal position of the character in its font texture, in pixels. */
     UPROPERTY( BlueprintReadWrite, Category="Odyssey|Block")
     int32 StartU;
 
+    /** Vertical position of the character in its font texture, in pixels. */
     UPROPERTY( BlueprintReadWrite, Category="Odyssey|Block")
     int32 StartV;
 
+    /** Width of the character in its font texture, in pixels. */
     UPROPERTY( BlueprintReadWrite, Category="Odyssey|Block")
     int32 USize;
 
+    /** Height of the character in its font texture, in pixels. */
     UPROPERTY( BlueprintReadWrite, Category="Odyssey|Block")
     int32 VSize;
 
+    /** Index of the font texture page containing the character. */
     UPROPERTY( BlueprintReadWrite, Category="Odyssey|Block")
     uint8 TextureIndex;
 
+    /** Vertical offset applied to the character when it is drawn. */
     UPROPERTY( BlueprintReadWrite, Category="Odyssey|Block")
     int32 VerticalOffset;
 

@@ -92,6 +92,7 @@ public:
     UPROPERTY(EditAnywhere, Category="Parameters" )
     bool Filled = true;
 
+    /** Blending options, working exactly like the Drawing Tool's ones. */
     UPROPERTY(EditInstanceOnly, Category="Blending", meta = (ShowOnlyInnerProperties ) )
     FOdysseyBlendParameters BlendParameters;
 };

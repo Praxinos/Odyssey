@@ -15,12 +15,15 @@ struct FImportImageSequencePanel
     GENERATED_BODY()
 
 public:
+    /** Identifier of the panel, read from the {panel} pattern. */
     UPROPERTY( EditAnywhere, Category=ImportImageSequenceStruct, DisplayName="Panel Id" )
     FString Id;
 
+    /** Image file of the panel. */
     UPROPERTY( EditAnywhere, Category=ImportImageSequenceStruct )
     FFilePath Pathfile;
 
+    /** Duration of the panel, in frames. */
     UPROPERTY( EditAnywhere, Category=ImportImageSequenceStruct )
     int32 Duration { 48 };
 };
@@ -33,9 +36,11 @@ struct FImportImageSequenceShot
     GENERATED_BODY()
 
 public:
+    /** Identifier of the shot, read from the {shot} pattern. */
     UPROPERTY( EditAnywhere, Category=ImportImageSequenceStruct, DisplayName="Shot Id" )
     FString Id;
 
+    /** Panels of the shot, each one becoming a Cell. */
     UPROPERTY( EditAnywhere, Category=ImportImageSequenceStruct )
     TArray<FImportImageSequencePanel> Panels;
 };
@@ -48,9 +53,11 @@ struct FImportImageSequenceBoard
     GENERATED_BODY()
 
 public:
+    /** Identifier of the board, read from the {board} pattern. */
     UPROPERTY( EditAnywhere, Category=ImportImageSequenceStruct, DisplayName="Board Id" )
     FString Id;
 
+    /** Shots of the board, each one becoming a Shot Sequence. */
     UPROPERTY( EditAnywhere, Category=ImportImageSequenceStruct )
     TArray<FImportImageSequenceShot> Shots;
 };
@@ -63,6 +70,11 @@ struct FImportImageSequenceStruct
     GENERATED_BODY()
 
 public:
+    /**
+     * Boards found in the image sequence.
+     *
+     * Each one becomes a sub-Board Sequence in the root Board Sequence.
+     */
     UPROPERTY( EditAnywhere, Category=ImportImageSequenceStruct )
     TArray<FImportImageSequenceBoard> Boards;
 };

@@ -48,6 +48,7 @@ public:
     virtual void PostLoad() override;
 
 public:
+    /** Return the Texture 2D owning this Layer Stack. */
     UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
     UTexture2D* GetTexture() const;
 

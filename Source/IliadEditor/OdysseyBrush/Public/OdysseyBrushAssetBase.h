@@ -385,6 +385,12 @@ public:
     UFUNCTION(BlueprintNativeEvent)
     void OnSelected(); //OnInit
 
+    /**
+     * Event triggered on Tick.
+     *
+     * This event comes from Unreal Engine; at the moment it cannot
+     * really be used with Odyssey Brushes.
+     */
     UFUNCTION(BlueprintNativeEvent)
     void OnTick();
 
@@ -429,6 +435,13 @@ public:
     UOdysseyBrushOptions*                   BrushOptions;
 
 #if WITH_EDITORONLY_DATA
+    /**
+     * Overrides of the brush.
+     *
+     * Default parameters and values (size, flow, step, blend, alpha...)
+     * automatically activated when the brush is loaded, overriding the
+     * previous brush configuration. Edited from the Class Defaults.
+     */
     UPROPERTY(VisibleDefaultsOnly, Category="Overrides", Instanced, meta=(ShowDisplayNames, ShowInnerProperties))
     TMap<TObjectPtr<UClass>, TObjectPtr<UObject>> EditorOverrides;
 #endif

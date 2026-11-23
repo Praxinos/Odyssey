@@ -108,86 +108,131 @@ protected:
     void LODGroupChanged();
 
 public:
+    /** Start playing the animation, backward if requested. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|AnimationPlayer")
     void Play(bool iBackward = false);
 
+    /** Pause the playback on the displayed frame. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void Pause();
 
+    /**
+     * Stop the playback.
+     *
+     * The frame shown after stopping depends on the Stop Behaviour.
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void Stop();
 
+    /** Move the player cursor to the given frame. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void SeekToFrame(FFrameTime iFrame);
 
+    /** Return the render target in which the animation is rendered. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     UTextureRenderTarget2D* GetRenderTarget();
 
+    /** Return the player status: Playing, Paused, Stopped or Scrubbing. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     EOdysseyAnimationPlayerStatus GetStatus() const;
 
+    /**
+     * Return the frame on which the player cursor is.
+     *
+     * It may be outside the animation bounds,
+     * in the Pre/Post Behaviour range.
+     */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     FFrameTime GetCursorFrame() const;
 
+    /** Return the current frame of the player when it is stopped. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     FFrameTime GetCurrentFrame() const;
 
+    /**
+     * Return the animation frame currently displayed.
+     *
+     * It is always within the animation bounds.
+     */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     FFrameTime GetDisplayedFrame() const;
 
+    /** Set the Animation 2D to play. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void SetAnimation(UOdysseyAnimation* iAnimation);
 
+    /** Return the Animation 2D played by this player. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     UOdysseyAnimation* GetAnimation() const;
 
+    /**
+     * Convert a frame to the animation frame to display.
+     *
+     * Apply the Pre Behaviour or Post Behaviour when the given frame is
+     * before or after the animation bounds.
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     FFrameTime ApplyPrePostBehaviour(FFrameTime iFrame) const;
 
+    /** Set the behaviour used when playing before the animation start. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void SetPreBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue);
 
+    /** Set the behaviour used when playing after the animation end. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void SetPostBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue);
 
+    /** Return whether the animation is played backward. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     bool IsBackward() const;
 
+    /** Start scrubbing: the status becomes Scrubbing until End Scrub. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void BeginScrub();
 
+    /** End scrubbing and stop the player on the cursor frame. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void EndScrub();
 
+    /** Set whether the playback loops within the play range. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer", meta = (DisplayName = "Set IsLooping"))
     void SetIsLoopingInPlayRange(bool IsLooping);
 
+    /** Return whether the playback loops within the play range. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer", meta = (DisplayName = "Get IsLooping"))
     bool GetIsLoopingInPlayRange() const;
 
+    /** Set the frame range to play: animation bounds, infinite, custom. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void SetPlayRange(EOdysseyAnimationPlayerPlayRange PlayRange);
 
+    /** Return the frame range to play: animation bounds, infinite, custom. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     EOdysseyAnimationPlayerPlayRange GetPlayRange() const;
 
+    /** Set the start and end frames used when Play Range is Custom. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void SetCustomPlayRange(FFrameNumber StartFrame, FFrameNumber EndFrame);
 
+    /** Return the start and end frames used when Play Range is Custom. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     void GetCustomPlayRange(FFrameNumber& StartFrame, FFrameNumber& EndFrame);
 
     UE_DEPRECATED( 5.8, "Function has been deprecated, Please use SetStopBehaviour" )
+    /** Deprecated: use SetStopBehaviour instead. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer", meta=(DeprecatedFunction, DeprecationMessage="Function has been deprecated, Please use SetStopBehaviour"))
     void SetRewindOnStop(bool Rewind);
 
     UE_DEPRECATED( 5.8, "Function has been deprecated, Please use GetStopBehaviour" )
+    /** Deprecated: use GetStopBehaviour instead. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer", meta=(DeprecatedFunction, DeprecationMessage="Function has been deprecated, Please use GetStopBehaviour"))
     bool GetRewindOnStop() const;
 
+    /** Set which frame the player seeks to when the playback stops. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void SetStopBehaviour(EOdysseyAnimationPlayerStopBehaviour Value);
 
+    /** Return which frame the player seeks to when the playback stops. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     EOdysseyAnimationPlayerStopBehaviour GetStopBehaviour() const;
 

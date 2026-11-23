@@ -21,15 +21,25 @@ public:
     UStoryNote( const FObjectInitializer& ObjectInitializer );
 
 public:
+    /**
+     * Text of the note.
+     *
+     * Can be used for dialogues, actions, notes for the staff,
+     * explanations, questions, etc.
+     */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "StoryNote", meta=(MultiLine="true") )
     FString Text;
 
+    /** Font used to display the note text. */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "StoryNote" )
     FSlateFontInfo Font;
+    /** Color and opacity of the note text. */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "StoryNote" )
     FLinearColor ColorAndOpacity { FLinearColor::White };
+    /** Offset of the shadow drawn behind the note text. */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "StoryNote" )
     FVector2D ShadowOffset { FVector2D::UnitVector };
+    /** Color and opacity of the shadow drawn behind the note text. */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "StoryNote" )
     FLinearColor ShadowColorAndOpacity { FLinearColor::Black };
 };

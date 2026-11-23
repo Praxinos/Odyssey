@@ -30,6 +30,7 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
 {
     GENERATED_BODY()
 
+    /** Texture 2D applied as a style on the path. */
     UPROPERTY( EditAnywhere, Category="Default" )
     UTexture2D* Texture;
 

@@ -47,6 +47,11 @@ public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Matrix")
     static FOdysseyMatrix MakeIdentityMatrix();
 
+    /**
+     * Create a translation matrix.
+     *
+     * Requires DeltaX and DeltaY offsets to generate a translation.
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Matrix")
     static FOdysseyMatrix MakeTranslationMatrix( float DeltaX, float DeltaY );
 

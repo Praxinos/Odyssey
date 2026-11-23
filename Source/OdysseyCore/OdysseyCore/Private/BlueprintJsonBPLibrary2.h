@@ -17,6 +17,7 @@ struct FJsonFloatArray
 {
     GENERATED_BODY()
 
+    /** Array of float values (one row of an array of array of float). */
     UPROPERTY( BlueprintReadWrite, EditAnywhere, Category = "Odyssey|Json" )
     TArray<float> Values;
 };

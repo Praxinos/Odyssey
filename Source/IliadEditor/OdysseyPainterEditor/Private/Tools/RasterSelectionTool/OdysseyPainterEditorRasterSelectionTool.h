@@ -57,6 +57,7 @@ public:
     virtual FText GetTooltip() const override;
 
 public:
+    /** Deselect the selected area. */
     UFUNCTION(BlueprintCallable, Category="Actions", CallInEditor)
     void Deselect();
 

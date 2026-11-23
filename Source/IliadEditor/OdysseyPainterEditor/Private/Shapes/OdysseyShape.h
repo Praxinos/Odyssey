@@ -47,6 +47,17 @@ public:
     void RemoveShapeType(EOdysseyShapeType iType);
 
 public:
+    /**
+     * Selected Shape.
+     *
+     * The drawing shape used by the tool:
+     * - Freehand
+     * - Line
+     * - Rectangle
+     * - Polygon
+     * - Ellipse
+     * - Bezier
+     */
     UPROPERTY(EditAnywhere, Category="Shapes")
     EOdysseyShapeType ActiveShapeType;
 

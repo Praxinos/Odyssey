@@ -72,6 +72,7 @@ public:
     virtual void OnCreated_Implementation();
 
 public:
+    /** Return the Palette that contains this entry. */
     UFUNCTION(BlueprintPure, Category="Palette")
     UOdysseyPalette* GetPalette() const;
 
@@ -148,18 +149,23 @@ public:
 #endif
 
 public:
+    /** Name of the entry, displayed in the Palette. */
     UPROPERTY(EditAnywhere, Category="PaletteEntry")
     FText EntryName;
 
+    /** Name of this type of entry (for instance Color or Folder). */
     UPROPERTY(EditDefaultsOnly, Category="PaletteEntry")
     FText EntryTypeName = FText::FromString(TEXT("Unnamed Entry Type"));
 
+    /** Base name given to new entries of this type in the Palette. */
     UPROPERTY(EditDefaultsOnly, Category="PaletteEntry")
     FText DefaultName = FText::FromString(TEXT("Entry"));
 
+    /** Description of this type of entry. */
     UPROPERTY(EditDefaultsOnly, Category="PaletteEntry")
     FText Description = FText::FromString(TEXT(""));
 
+    /** Whether the entry is activated. */
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="PaletteEntry")
     bool IsActivated = true;
 
@@ -167,6 +173,7 @@ public:
     UPROPERTY(EditDefaultsOnly, Category="PaletteEntry")
     bool CanHaveChildren = false;
 
+    /** Whether the entry is expanded in the Palette editor. */
     UPROPERTY(config, BlueprintReadWrite, Category="PaletteEntry", NonTransactional)
     bool IsExpanded = true;
 

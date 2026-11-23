@@ -16,6 +16,13 @@ class UOdysseyShadersBlueprintLibrary : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 
+    /**
+     * Blend a foreground texture over a background texture.
+     *
+     * Write the result into the destination render target, using the
+     * given rects, transform, color and alpha blend modes, opacity and
+     * anti-aliasing. Does nothing if a texture is missing.
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey | Shaders")
     static void Blend(
         const UObject* WorldContextObject,

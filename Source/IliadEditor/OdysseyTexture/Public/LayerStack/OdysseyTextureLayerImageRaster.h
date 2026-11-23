@@ -33,9 +33,16 @@ public:
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
 
 public:
+    /**
+     * Lock or unlock the Alpha Mask of the layer.
+     *
+     * When locked, transparency is blocked and painting only affects
+     * existing pixels.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetIsAlphaLocked(bool Value);
 
+    /** Return whether the Alpha Mask of the layer is locked. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool IsAlphaLocked() const;
 

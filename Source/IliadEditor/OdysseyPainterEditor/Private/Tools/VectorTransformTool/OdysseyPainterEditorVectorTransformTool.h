@@ -159,6 +159,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
                  , meta = ( ToolTip = "World" ) )
         bool World;
 
+        /**
+         * True when the tool is used in the Inbetweener mode.
+         *
+         * Enable Inbetweener-only options such as Show Inbetweens.
+         */
         UPROPERTY( EditDefaultsOnly
                  , Category = TransformTool )
         bool bInbetweenMode;

@@ -59,6 +59,13 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack", meta=(DeterminesOutputType="LayerType"))
     UOdysseyLayer* AddLayer(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLayer* ParentLayer = nullptr, int IndexInParent = 0);
 
+    /**
+     * Add Count layers of LayerType to the stack.
+     *
+     * The layers are added as children of ParentLayer (or of the root
+     * if null) at IndexInParent.
+     * Return the new layers.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack", meta=(DeterminesOutputType="LayerType"))
     TArray<UOdysseyLayer*> AddLayers(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLayer* ParentLayer = nullptr, int IndexInParent = 0, int Count = 1);
 
@@ -231,6 +238,7 @@ public:
     virtual void PostLoad() override;
 
 public:
+    /** Return the range of frames covered by all the layers of the stack. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     virtual FInt32Range GetFrameRange() const override;
 
@@ -263,30 +271,52 @@ protected:
 
 public:
 #if WITH_EDITOR
+    /** Set the current layer of the stack. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     void SetCurrentLayer(UOdysseyLayer* Layer);
 
+    /** Return the current layer of the stack. */
     UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
     UOdysseyLayer* GetCurrentLayer() const;
 
+    /** Return true if "Display only current layer" is enabled. */
     UFUNCTION( BlueprintPure, Category="Odyssey|LayerStack")
     bool GetDisplayOnlyCurrentLayer() const;
 
+    /**
+     * Enable or disable "Display only current layer".
+     *
+     * When enabled, only the current layer is displayed; the other
+     * layers use the Other Layers Opacity.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     void SetDisplayOnlyCurrentLayer(bool iDisplayOnlyCurrentLayer);
 
+    /** Toggle "Display only current layer". */
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     void ToggleDisplayOnlyCurrentLayer();
 
+    /**
+     * Return the opacity of the other layers, from 0 to 100.
+     *
+     * Used when "Display only current layer" is enabled.
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
     float GetOtherLayersOpacity() const;
 
     float GetOtherLayersOpacityNormalized() const;
 
+    /**
+     * Set the opacity of the other layers, from 0 to 100.
+     *
+     * Used when "Display only current layer" is enabled, to add an
+     * opacity nuance on the other layers of the stack.
+     */
     UFUNCTION( BlueprintCallable, Category="Odyssey|LayerStack")
     void SetOtherLayersOpacity(float iOtherLayersOpacity);
 #endif
 
+    /** Return the layer types that can be added to this stack. */
     UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
     TArray<TSubclassOf<UOdysseyLayer>> GetSupportedLayerClasses() const;
 

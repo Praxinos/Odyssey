@@ -111,15 +111,27 @@ private:
     friend class FOdysseyTextureLayerImageVectorImport;
 
 public:
+    /**
+     * Enable or disable the wireframe mode of the Vector Layer.
+     *
+     * Wireframe mode helps identify gaps in the vector objects.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetIsWireframe(bool Value);
 
+    /**
+     * Show or hide the vector Paint Buckets of the layer.
+     *
+     * When disabled, the layer is displayed in monochrome mode.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetIsColored(bool Value);
 
+    /** Return whether the wireframe mode of the Vector Layer is on. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     bool IsWireframe() const;
 
+    /** Return whether the vector Paint Buckets of the layer are shown. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     bool IsColored() const;
 

@@ -37,18 +37,23 @@ public:
     UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_Opacity;
 
+    /** Enable Modifier Advanced Blend Modes Override. */
     UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_IsComposite;
 
+    /** Enable Modifier Eraser Mode Override. */
     UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_EraserMode;
 
+    /** Enable Modifier Blending Mode Override. */
     UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_BlendMode;
 
+    /** Enable Modifier Color Blend Mode Override. */
     UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_CompositeColorBlendMode;
 
+    /** Enable Modifier Alpha Blend Mode Override. */
     UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_CompositeAlphaBlendMode;
 
@@ -58,12 +63,24 @@ public:
     UPROPERTY()
     float  Opacity;
 
+    /**
+     * Modifier Eraser Mode Override Value.
+     *
+     * If checked, the brush is applied as an eraser when it is loaded.
+     */
     UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_EraserMode" ) )
     bool       bEraserMode;
 
+    /**
+     * Modifier Advanced Blend Modes Override Value.
+     *
+     * If checked, Color and Alpha Blend Modes are set separately
+     * when the brush is loaded.
+     */
     UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_IsComposite", DisplayName="Advanced Blend Modes" ) )
     bool       bIsComposite;
 
+    /** Modifier Blending Mode Override Value. */
     UPROPERTY( EditAnywhere, Category="Modifiers",
         meta = (
             editcondition = "bOverride_BlendMode",
@@ -72,6 +89,7 @@ public:
     )
     EOdysseyBlendMode       BlendMode;
 
+    /** Modifier Color Blend Mode Override Value. */
     UPROPERTY( EditAnywhere, Category="Modifiers",
         meta = (
             DisplayName="Color Blend Mode",
@@ -81,6 +99,7 @@ public:
     )
     EOdysseyColorBlendMode       CompositeColorBlendMode;
 
+    /** Modifier Alpha Blend Mode Override Value. */
     UPROPERTY( EditAnywhere, Category="Modifiers",
         meta = (
             DisplayName="Alpha Blend Mode",

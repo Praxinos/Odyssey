@@ -18,9 +18,20 @@ public:
 
 #if WITH_EDITOR
 public:
+    /**
+     * Lock or unlock the Alpha Mask of this Raster Layer.
+     *
+     * When locked, transparency is blocked and you can only paint
+     * on existing pixels (useful to recolor an outline, for example).
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     void SetIsAlphaLocked(bool Value);
 
+    /**
+     * Return true if the Alpha Mask of this Raster Layer is locked.
+     *
+     * When locked, you can only paint on existing pixels.
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     bool IsAlphaLocked() const;
 

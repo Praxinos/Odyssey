@@ -48,6 +48,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UO
                  , meta = ( ToolTip  = "Color Mode" ) )
         eBucketColorMode ColorMode;
 
+        /** Palette color of the Paint Bucket, used in Palette Color Mode. */
         UPROPERTY( EditAnywhere,
                    Category = "Bucket",
                    meta = ( EditCondition = "(ColorMode == eBucketColorMode::Palette )"

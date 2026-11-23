@@ -24,6 +24,7 @@ public:
     UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_Shape;
 
+    /** Enable Modifier SubPixel Override. */
     UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_SubPixel;
 

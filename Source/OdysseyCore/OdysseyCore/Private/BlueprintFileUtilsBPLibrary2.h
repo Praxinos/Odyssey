@@ -15,10 +15,14 @@ class UBlueprintFileUtilsBPLibrary2
 {
     GENERATED_UCLASS_BODY()
 
+    UE_DEPRECATED( 5.7, "Use ToTextFile() instead" )
     /**
      * Create a file from the content.
+     *
+     * Return true on success.
+     *
+     * Deprecated: use To Text File instead.
      */
-    UE_DEPRECATED( 5.7, "Use ToTextFile() instead" )
     UFUNCTION(BlueprintCallable, Category = "FileUtils")
     static bool ToFile( const FString& Content, const FFilePath& PathFile );
 

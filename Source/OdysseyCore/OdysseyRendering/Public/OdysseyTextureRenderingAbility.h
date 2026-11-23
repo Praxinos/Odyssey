@@ -38,22 +38,45 @@ public:
         const FMatrix& /*iSrcTransform*/) > FRenderFunction;
 
 public:
+    /** Create a render target suitable to render this object. */
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Odyssey|Rendering", meta=(DisplayName="CreateRenderTarget"))
     UTextureRenderTarget2D* CreateRenderTarget_Blueprint();
     UTextureRenderTarget2D* CreateRenderTarget_Blueprint_Implementation();
 
+    /**
+     * Render this object at the given frame into the render target.
+     *
+     * Use the default render rect as source and destination.
+     */
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Odyssey|Rendering")
     void Render(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame) const;
     void Render_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame) const;
 
+    /**
+     * Render a rect of this object at the given frame.
+     *
+     * The source rect is rendered at the same place in the render target.
+     */
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Odyssey|Rendering")
     void RenderRect(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iSrcRect) const;
     void RenderRect_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iRect) const;
 
+    /**
+     * Render a rect of this object at a position.
+     *
+     * The source rect is rendered at the given frame, with its top-left
+     * corner placed at the given position in the render target.
+     */
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Odyssey|Rendering")
     void RenderRectAtPosition(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iRect, const FIntPoint& iPos) const;
     void RenderRectAtPosition_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntPoint& iPos) const;
 
+    /**
+     * Render a rect of this object into a destination rect.
+     *
+     * The source rect is rendered at the given frame into the given
+     * destination rect of the render target.
+     */
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Odyssey|Rendering")
     void RenderRectAtRect(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iRect, const FIntRect& iDstRect) const;
     void RenderRectAtRect_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const;

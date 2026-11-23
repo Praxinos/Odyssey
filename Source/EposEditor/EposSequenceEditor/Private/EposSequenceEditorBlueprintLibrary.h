@@ -330,6 +330,12 @@ class EPOSSEQUENCEEDITOR_API UEposSequenceEditorBlueprintLibrary
 public:
     //PATCH: used for UEposSequenceEditorBlueprintLibrary::LocateBoundObjects_PATCHBefore543() until the UMovieSceneSequenceExtensions::LocateBoundObjects() is patch in >=5.4.3, then remove it and also update the .cs file
     UE_DEPRECATED( 5.4, "Use UMovieSceneSequenceExtensions::LocateBoundObjects once fixed in 5.4.3" )
+    /**
+     * Find the objects bound to a binding in a sequence.
+     *
+     * Temporary replacement for LocateBoundObjects, to be removed once
+     * the engine version is fixed.
+     */
     UFUNCTION(BlueprintCallable, Category="Sequencer|Sequence", meta=(ScriptMethod))
     //UFUNCTION(BlueprintCallable, Category="Sequencer|Sequence", meta=(ScriptMethod, DeprecatedFunction, DeprecationMessage="Use UMovieSceneSequenceExtensions::LocateBoundObjects once fixed in 5.4.3"))
     static TArray<UObject*> LocateBoundObjects_PATCHBefore543(UMovieSceneSequence* Sequence, const FMovieSceneBindingProxy& InBinding, UObject* Context);
@@ -443,18 +449,38 @@ public:
 public:
 
     UE_DEPRECATED( 5.4, "Use SetCurrentTime that takes a FMovieSceneSequencePlaybackParams" )
+    /**
+     * Set the playhead to a frame of the current sequence.
+     *
+     * Deprecated: use Set Current Time with playback parameters.
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor", meta = ( DeprecatedFunction, DeprecationMessage = "Use SetCurrentTime that takes a FMovieSceneSequencePlaybackParams" ) )
     static void SetCurrentTime(int32 NewFrame);
 
     UE_DEPRECATED( 5.4, "Use GetCurrentTime that returns a FMovieSceneSequencePlaybackParams" )
+    /**
+     * Get the playhead frame of the current sequence.
+     *
+     * Deprecated: use Get Current Time with playback parameters.
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor", meta = ( DeprecatedFunction, DeprecationMessage = "Use GetCurrentTime that returns a FMovieSceneSequencePlaybackParams" ) )
     static int32 GetCurrentTime();
 
     UE_DEPRECATED( 5.4, "Use SetCurrentLocalTime that takes a FMovieSceneSequencePlaybackParams" )
+    /**
+     * Set the playhead to a local frame of the current sequence.
+     *
+     * Deprecated: use Set Current Local Time with playback parameters.
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor", meta = ( DeprecatedFunction, DeprecationMessage = "Use SetCurrentLocalTime that takes a FMovieSceneSequencePlaybackParams" ) )
     static void SetCurrentLocalTime(int32 NewFrame);
 
     UE_DEPRECATED( 5.4, "Use GetCurrentLocalTime that takes a FMovieSceneSequencePlaybackParams" )
+    /**
+     * Get the playhead local frame of the current sequence.
+     *
+     * Deprecated: use Get Current Local Time with playback parameters.
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor", meta = ( DeprecatedFunction, DeprecationMessage = "Use GetCurrentLocalTime that returns a FMovieSceneSequencePlaybackParams" ) )
     static int32 GetCurrentLocalTime();
 
@@ -646,8 +672,12 @@ public:
 
 public:
 
-    /** Gets whether the specified track filter is on/off */
     UE_DEPRECATED( 5.5, "Use IsTrackFilterActive" )
+    /**
+     * Get whether the specified track filter is on or off.
+     *
+     * Deprecated: use Is Track Filter Active.
+     */
     UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static bool IsTrackFilterEnabled(const FText& TrackFilterName);
 
@@ -655,8 +685,12 @@ public:
     UFUNCTION( BlueprintPure, Category = "Odyssey|Storyboard Editor" )
     static bool IsTrackFilterActive( const FText& TrackFilterName );
 
-    /** Sets the specified track filter to be on or off */
     UE_DEPRECATED( 5.5, "Use SetTrackFilterActive" )
+    /**
+     * Set the specified track filter on or off.
+     *
+     * Deprecated: use Set Track Filter Active.
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SetTrackFilterEnabled(const FText& TrackFilterName, bool bEnabled);
 
@@ -669,38 +703,78 @@ public:
     static TArray<FText> GetTrackFilterNames();
 
 public:
-    /** Get if a custom color for specified channel idendified by it's class and identifier exists */
     UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::HasCustomColorForChannel" )
+    /**
+     * Check if a channel has a custom color.
+     *
+     * The channel is identified by its class and identifier.
+     *
+     * Deprecated: use the Sequencer Curve Editor equivalent.
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor",
     meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::HasCustomColorForChannel"))
     static bool HasCustomColorForChannel(UClass* Class, const FString& Identifier);
 
-    /** Get custom color for specified channel idendified by it's class and identifier,if none exists will return white*/
     UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::GetCustomColorForChannel" )
+    /**
+     * Get the custom color of a channel.
+     *
+     * The channel is identified by its class and identifier. Return
+     * white if none exists.
+     *
+     * Deprecated: use the Sequencer Curve Editor equivalent.
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor",
     meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::HasCustomColorForChannel"))
     static FLinearColor GetCustomColorForChannel(UClass* Class, const FString& Identifier);
 
-    /** Set Custom Color for specified channel idendified by it's class and identifier. This will be stored in editor user preferences.*/
     UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::SetCustomColorForChannel" )
+    /**
+     * Set a custom color for a channel.
+     *
+     * The channel is identified by its class and identifier. The color
+     * is stored in the editor user preferences.
+     *
+     * Deprecated: use the Sequencer Curve Editor equivalent.
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor",
     meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::SetCustomColorForChannel"))
     static void SetCustomColorForChannel(UClass* Class, const FString& Identifier, const FLinearColor& NewColor);
 
-    /** Set Custom Color for specified channels idendified by it's class and identifiers. This will be stored in editor user preferences.*/
     UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::DeleteColorForChannels" )
+    /**
+     * Set custom colors for several channels.
+     *
+     * The channels are identified by their class and identifiers. The
+     * colors are stored in the editor user preferences.
+     *
+     * Deprecated: use the Sequencer Curve Editor equivalent.
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor",
     meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::DeleteColorForChannels"))
     static void SetCustomColorForChannels(UClass* Class, const TArray<FString>& Identifiers, const TArray<FLinearColor>& NewColors);
 
-    /** Set Random Colors for specified channels idendified by it's class and identifiers. This will be stored in editor user preferences.*/
     UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::SetRandomColorForChannels" )
+    /**
+     * Set random colors for several channels.
+     *
+     * The channels are identified by their class and identifiers. The
+     * colors are stored in the editor user preferences.
+     *
+     * Deprecated: use the Sequencer Curve Editor equivalent.
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor",
     meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::SetRandomColorForChannels"))
     static void SetRandomColorForChannels(UClass* Class, const TArray<FString>& Identifiers);
 
-    /** Delete for specified channel idendified by it's class and identifier.*/
     UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::DeleteColorForChannels" )
+    /**
+     * Delete the custom color of a channel.
+     *
+     * The channel is identified by its class and identifier.
+     *
+     * Deprecated: use the Sequencer Curve Editor equivalent.
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor",
     meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::DeleteColorForChannels"))
     static void DeleteColorForChannels(UClass* Class, FString& Identifier);

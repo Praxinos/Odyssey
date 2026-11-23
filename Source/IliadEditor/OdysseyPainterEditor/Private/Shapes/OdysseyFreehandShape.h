@@ -78,6 +78,13 @@ private:
         ))
     bool    SmoothingEnabled = false;
 
+    /**
+     * Smoothing options of the stroke.
+     *
+     * - Method: "Average" averages the steps to smooth the line,
+     *   "Pull" makes edges sharper
+     * - Strength: the higher, the stronger the Method
+     */
     UPROPERTY( EditInstanceOnly, Category="Shape", meta=(DisplayName="Smoothing", editcondition = "SmoothingEnabled") )
     FOdysseySmoothingOptions SmoothingOptions;
 

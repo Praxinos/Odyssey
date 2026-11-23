@@ -36,9 +36,16 @@ public:
     static const UOdysseyPainterEditorAnimationUserSettings* Get();
 
 public:
+    /**
+     * The 10 Flip configurations.
+     *
+     * Each configuration is used by the matching Flip keyboard shortcut
+     * (Flip #01 to Flip #10) to scrub in the Timeline.
+     */
     UPROPERTY(config, EditAnywhere, EditFixedSize, Category="Animation Flip Settings", meta=(NoElementDuplicate, EditFixedOrder, ArraySizeEnum="/Script/OdysseyPainterEditor.EOdysseyPainterEditorAnimationFlipConfigurations"))
     FOdysseyAnimationFlipConfiguration FlipConfigurations[10];
 
+    /** Number displayed for the first frame in the Timeline header. */
     UPROPERTY(config, EditAnywhere, Category="Animation Timeline", meta = (LinearDeltaSensitivity="1"))
     int StartFrame = 1;
 

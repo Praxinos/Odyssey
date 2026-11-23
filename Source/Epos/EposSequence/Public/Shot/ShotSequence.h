@@ -97,6 +97,12 @@ public:
     UPROPERTY()
     TMap< FGuid, FLevelSequenceBindingReference > ActorsBindingIdToReferences_DEPRECATED;
 
+    /**
+     * Naming convention elements of this shot.
+     *
+     * Values (global, user, index and take information) used to build
+     * the shot name from the Shot Naming Convention pattern.
+     */
     UPROPERTY(EditAnywhere, Category=NamingConvention)
     FShotNameElements NameElements;
 

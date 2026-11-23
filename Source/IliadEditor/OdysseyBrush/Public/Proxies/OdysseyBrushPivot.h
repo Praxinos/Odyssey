@@ -47,12 +47,31 @@ struct ODYSSEYBRUSH_API FOdysseyPivot
         , Offset(       FVector2D(0,0) )
     {}
 
+    /**
+     * Reference of the pivot.
+     *
+     * Define the reference point of the pivot on the Odyssey Block
+     * (Center, Bottom Middle, Top Left, etc).
+     */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="OdysseyHandlePositionReference" )
     EPivotReference     Reference;
 
+    /**
+     * How the Offset is interpreted.
+     *
+     * "Relative fraction" is relative to the Odyssey Block Proxy
+     * dimensions; "Absolute pixel" uses X and Y positions in pixels.
+     */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="OdysseyHandlePositionReference" )
     EPivotOffsetMode    OffsetMode;
 
+    /**
+     * Offset of the pivot from its Reference.
+     *
+     * With "Relative fraction", X and Y are normalized fractions of the
+     * Odyssey Block Proxy's size (0 = 0%, 0.5 = 50%, 1 = 100%).
+     * With "Absolute pixel", X and Y are expressed in pixels.
+     */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="OdysseyHandlePositionReference" )
     FVector2D           Offset;
 };

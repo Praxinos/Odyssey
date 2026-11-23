@@ -60,6 +60,7 @@ public:
     TArray<FColor> EntryColors;
     //--
 
+    /** Color of the entry for each Set of the Palette. */
     UPROPERTY(EditAnywhere, Category = Palette)
     TMap<FGuid, FColor> EntryColorsIDs;
 };

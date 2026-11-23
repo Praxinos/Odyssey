@@ -14,9 +14,20 @@ class ODYSSEYLAYERSTACK_API UOdysseyLayerStackFunctionLibrary : public UBlueprin
     GENERATED_BODY()
 
 public:
+    /**
+     * Keep only the topmost layers of the given list.
+     *
+     * Layers whose parent is also in the list are removed.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     static TArray<UOdysseyLayer*> FilterTopmostLayers(TArray<UOdysseyLayer*> Layers);
 
+    /**
+     * Sort the given layers by their position in the stack.
+     *
+     * Parents come before children, then layers are sorted by index
+     * in parent. Reverse inverts the order. All must share a stack.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     static TArray<UOdysseyLayer*> SortLayers(TArray<UOdysseyLayer*> Layers, bool Reverse);
 };

@@ -28,12 +28,22 @@ struct FAnimationCellMarkSettings
 {
     GENERATED_BODY()
 
+    /** Name of the Cell Mark displayed in the contextual menu. */
     UPROPERTY(EditAnywhere, Category="Cell Marks")
     FName Name;
 
+    /** Color of the Cell Mark symbol. */
     UPROPERTY(EditAnywhere, Category="Cell Marks", meta=(HideAlphaChannel))
     FLinearColor Color = FLinearColor::White;
 
+    /**
+     * Type of symbol displayed for the Cell Mark.
+     *
+     * - Triangle, Circle, Diamond, Star (filled or outlined)
+     * - Cross
+     * - Checkmark
+     * - Fill: simply fills the entire Cell
+     */
     UPROPERTY(EditAnywhere, Category="Cell Marks")
     EOdysseyAnimationCellMarkSymbol Symbol = EOdysseyAnimationCellMarkSymbol::Fill;
 };
@@ -57,6 +67,7 @@ public:
     UPROPERTY(config, EditAnywhere, EditFixedSize, Category="Animation Cell Marks Settings", meta=(ForceInlineRow, EditFixedOrder))
     TArray<FAnimationCellMarkSettings> AnimationCellsMarks;
 
+    /** Opacity of Cell Marks that use the Fill symbol, in percent. */
     UPROPERTY(config, EditAnywhere, Category="Animation Cell Marks Settings", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple="1", Units="Percent") )
     float AnimationCellsMarksFillOpacity = 75.f;
 };

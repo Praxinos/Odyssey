@@ -30,9 +30,15 @@ struct FOdysseyAnimationComponentForceRatio
 {
     GENERATED_BODY()
 
+    /**
+     * Size of the reference side of the animation, in scale units.
+     *
+     * The other side is scaled to keep the animation ratio.
+     */
     UPROPERTY(EditAnywhere, Category="Transform")
     float BaseSize = 100.f;
 
+    /** Side of the animation (height or width) that Base Size applies to. */
     UPROPERTY(EditAnywhere, Category="Transform")
     EOdysseyAnimationComponentMeasurement BaseMeasurement = EOdysseyAnimationComponentMeasurement::Height;
 };
@@ -46,45 +52,74 @@ class ODYSSEYANIMATION_API UOdysseyAnimationComponent : public UStaticMeshCompon
     GENERATED_UCLASS_BODY()
 
 public:
+    /**
+     * Initialize the component from an Animation 2D.
+     *
+     * The component displays the given Animation 2D using its own player,
+     * and the Player property is cleared.
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
     void InitializeFromAnimation(UOdysseyAnimation* Animation);
 
+    /**
+     * Initialize the component from an Animation Player.
+     *
+     * The component displays the given Animation Player,
+     * and the Animation property is cleared.
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
     void InitializeFromPlayer(UOdysseyAnimationPlayer* Player);
 
+    /** Return the Animation 2D displayed by the component. */
     UFUNCTION(BlueprintPure, Category="Odyssey|AnimationComponent")
     UOdysseyAnimation* GetAnimation() const;
 
+    /** Return the Animation Player used by the component, in Player mode. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationComponent")
     UOdysseyAnimationPlayer* GetPlayer() const;
 
+    /** Return whether the component uses an Animation or a Player. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationComponent")
     EOdysseyAnimationComponentMode GetMode() const;
 
+    /** Return the Material used to display the animation. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationComponent")
     UMaterialInterface* GetAnimationMaterial() const;
 
+    /** Return whether the animation ratio is forced on the component. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationComponent")
     bool GetForceAnimationRatio() const;
 
+    /** Return the settings used when forcing the animation ratio. */
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationComponent")
     FOdysseyAnimationComponentForceRatio GetForceAnimationRatioParameters() const;
 
+    /** Set the Animation 2D displayed by the component, in Animation mode. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
     void SetAnimation(UOdysseyAnimation* Animation);
 
+    /** Set the Animation Player used by the component, in Player mode. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
     void SetPlayer(UOdysseyAnimationPlayer* Player);
 
+    /** Set whether the component uses an Animation or a Player. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
     void SetMode(EOdysseyAnimationComponentMode Mode);
 
+    /**
+     * Set the Material used to display the animation.
+     *
+     * The Material should contain a Texture Sample Parameter
+     * named "AnimationTexture".
+     */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
     void SetAnimationMaterial(UMaterialInterface* Material);
 
+    /** Enable or disable forcing the animation ratio on the component. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
     void SetForceAnimationRatio(bool ForceRatio);
 
+    /** Set the settings used when forcing the animation ratio. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
     void SetForceAnimationRatioParameters(FOdysseyAnimationComponentForceRatio Parameters);
 
@@ -117,27 +152,54 @@ private:
     void UpdateMaterialInstance( bool iForceRecreate = false );
 
 protected:
+    /**
+     * Material used to display the animation.
+     *
+     * Make sure it contains at least one Texture Sample Parameter
+     * named "AnimationTexture".
+     */
     UPROPERTY( EditAnywhere, Category="Animation")
     TObjectPtr<UMaterialInterface> Material;
 
+    /**
+     * Source of the displayed animation.
+     *
+     * Animation: displays an Animation 2D asset directly.
+     * Player: displays the output of an Animation Player.
+     */
     UPROPERTY(EditAnywhere, Category="Animation")
     EOdysseyAnimationComponentMode Mode = EOdysseyAnimationComponentMode::Animation;
 
+    /** The Animation 2D asset displayed by the component. */
     UPROPERTY( EditAnywhere, Category="Animation", meta=(EditCondition = "Mode==EOdysseyAnimationComponentMode::Animation", EditConditionHides))
     TObjectPtr<UOdysseyAnimation> Animation;
 
     UPROPERTY()
     TObjectPtr<UOdysseyAnimationPlayer> PreviousPlayer; //Only used to remove delegates from Player property when it changes
 
+    /** The Animation Player whose output is displayed by the component. */
     UPROPERTY( EditAnywhere, Category="Animation", meta=(EditCondition = "Mode==EOdysseyAnimationComponentMode::Player", EditConditionHides))
     TObjectPtr<UOdysseyAnimationPlayer> Player;
 
+    /**
+     * Texture Group used to render the animation.
+     *
+     * Choose whether the pixels of the animation blend with the World
+     * or are shown unfiltered (2D pixels), for instance for pixel art.
+     */
     UPROPERTY( EditAnywhere, Category="Animation", meta=(DisplayName="Texture Group"), AssetRegistrySearchable )
     TEnumAsByte<enum TextureGroup> LODGroup = TEXTUREGROUP_Pixels2D;
 
+    /** Enable Force Animation Ratio. */
     UPROPERTY(EditAnywhere, Category="Animation", meta=(InlineEditConditionToggle))
     bool bForceAnimationRatio = true;
 
+    /**
+     * Force the animation ratio.
+     *
+     * Resize the component to match the animation ratio, making it bigger
+     * or smaller without changing the scale parameters in Transform.
+     */
     UPROPERTY(EditAnywhere, Category="Animation", meta=(EditCondition = "bForceAnimationRatio"))
     FOdysseyAnimationComponentForceRatio ForceAnimationRatio;
 

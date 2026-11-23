@@ -63,43 +63,82 @@ public:
     static FOnCellsChanged& OnCellsChanged();
 
 public:
+    /**
+     * Return true if this layer can be edited.
+     *
+     * A layer is editable when neither it nor any of its parents is
+     * locked, and when it and all of its parents are visible.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     bool IsEditable() const;
 
+    /**
+     * Lock or unlock this layer.
+     *
+     * Once locked, the layer can not be edited.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetIsLocked(bool Value);
 
+    /** Return true if this layer itself is locked. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool IsLocked() const;
 
+    /** Return true if this layer or any of its parents is locked. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool IsLockedRecursively() const;
 
 #if WITH_EDITOR
+    /** Return true if the children of this layer are expanded. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool ShouldDisplayChildren() const;
 
+    /**
+     * Return true if more details about this layer are shown.
+     *
+     * This is the state of the + / - icon of the layer.
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool ShouldDisplayOptions() const;
 
+    /** Return true if the Cells' names and exposure count are displayed. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool ShouldDisplayCellNames() const;
 
+    /** Expand or collapse the children of this layer in the Layer Stack. */
     UFUNCTION( BlueprintCallable, Category = "Odyssey|Layer" )
     void SetDisplayChildren( bool Value );
 
+    /**
+     * Show more or less details about this layer in the Layer Stack.
+     *
+     * This is the same as clicking the + / - icon of the layer.
+     */
     UFUNCTION( BlueprintCallable, Category = "Odyssey|Layer" )
     void SetDisplayOptions( bool Value );
 
+    /** Show or hide the Cells' names and exposure count. */
     UFUNCTION( BlueprintCallable, Category = "Odyssey|Layer" )
     void SetDisplayCellNames( bool Value );
 
+    /**
+     * Return the Light Table settings of this layer.
+     *
+     * The Light Table displays by transparency the content of
+     * previous and next Cells (also called onion skin).
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     FOdysseyLighttable GetLighttable() const;
 
+    /** Return true if this layer supports the Light Table. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool HasLighttable() const;
 
+    /**
+     * Set the Light Table settings of this layer.
+     *
+     * Has no effect if the layer does not support the Light Table.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetLighttable(FOdysseyLighttable Value);
 #endif
@@ -109,42 +148,105 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void AddChild(UOdysseyLayer* Layer, int IndexInParent = -1);
 
+    /**
+     * Add the given layers as children of this layer.
+     *
+     * Layers are inserted at IndexInParent, or at the end if it is -1.
+     * Layers that already have a parent are ignored.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void AddChildren(TArray<UOdysseyLayer*> Layers, int IndexInParent = -1);
 
+    /** Remove the given child layer from this layer. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void RemoveChild(UOdysseyLayer* Layer);
 
+    /** Remove the given child layers from this layer. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void RemoveChildren(TArray<UOdysseyLayer*> Layers);
 
+    /** Set the name of this layer. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetLayerName(FText Value);
 
+    /**
+     * Show or hide this layer.
+     *
+     * This is the same as clicking the eye icon of the layer.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetIsActivated(bool Value);
 
+    /**
+     * Return true if the given Blending mode can be applied to this layer.
+     *
+     * Stencil and Erase modes can not be set while Alpha inheritance
+     * is enabled. Always false if the layer is not editable.
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool CanSetBlendMode(EOdysseyBlendMode Value) const;
 
+    /**
+     * Set the Blending mode of this layer.
+     *
+     * Blending modes alter the way colors, tones and pixels of this layer
+     * interact with those of the layers beneath.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetBlendMode(EOdysseyBlendMode Value);
 
+    /** Set the opacity of this layer. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetOpacity(float Value);
 
+    /**
+     * Set the frame at which the first Cell of this layer starts.
+     *
+     * Move the whole animation of the layer, so it starts sooner or
+     * later, like the Moving tool of the Timeline.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetCellsOffset(int Value);
 
+    /**
+     * Set the Pre Behavior of this layer.
+     *
+     * Force a specific behavior before the animation starts:
+     * - None
+     * - Hold
+     * - Loop
+     * - Ping-pong
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetPreBehaviour(EOdysseyLayerImagePostBehaviour Value);
 
+    /**
+     * Set the Post Behavior of this layer.
+     *
+     * Force a specific behavior after the animation finishes:
+     * - None
+     * - Hold
+     * - Loop
+     * - Ping-pong
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetPostBehaviour(EOdysseyLayerImagePostBehaviour Value);
 
+    /**
+     * Return true if Alpha inheritance can be changed on this layer.
+     *
+     * Not possible while the layer uses the Stencil or Erase Blending
+     * mode, or when the layer is not editable.
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool CanSetInheritsAlpha() const;
 
+    /**
+     * Enable or disable Alpha inheritance on this layer.
+     *
+     * When enabled, the content of the layer is affected by the alpha
+     * channel of the layers underneath (clipping mask).
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetInheritsAlpha(bool InheritsAlpha = true);
 
@@ -153,120 +255,233 @@ public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     virtual UOdysseyLayerStack* GetLayerStack() const;
 
+    /** Return the type of Cell created by default in this layer. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     TSubclassOf<UOdysseyLayerCell> GetDefaultCellClass() const;
 
+    /** Return the display name of this layer type. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     FText GetLayerTypeName() const;
 
+    /** Return the description of this layer type. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     FText GetDescription() const;
 
+    /** Return the default name given to new layers of this type. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     FText GetDefaultName() const;
 
+    /** Return the parent layer of this layer, if any. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     UOdysseyLayer* GetParent() const;
 
+    /**
+     * Return all the ancestors of this layer.
+     *
+     * The direct parent comes first, followed by its own parents
+     * up to the root of the stack.
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     TArray<UOdysseyLayer*> GetParents() const;
 
+    /** Return true if this layer can contain child layers (e.g. Folder). */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool CanHaveChildren() const;
 
+    /** Return the direct children of this layer. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     const TArray<UOdysseyLayer*>& GetChildren() const;
 
+    /**
+     * Return all the descendants of this layer.
+     *
+     * Method selects whether the hierarchy is traversed depth first
+     * or breadth first.
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     TArray<UOdysseyLayer*> GetChildrenRecursively(EGetLayerChildrenMethod Method = EGetLayerChildrenMethod::DepthFirst) const;
 
+    /** Return the index of this layer among the children of its parent. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     int GetIndexInParent() const;
 
+    /**
+     * Return true if the given layer is a parent of this layer.
+     *
+     * Check all ancestors, not only the direct parent.
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool IsChildOf(UOdysseyLayer* Layer) const;
 
+    /**
+     * Return the range of frames covered by this layer.
+     *
+     * Include the Cells of the layer and of all its children.
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     virtual FInt32Range GetFrameRange() const override;
 
+    /** Return the name of this layer. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     FText GetLayerName() const;
 
+    /** Return true if this layer itself is visible. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool IsActivated() const;
 
+    /** Return true if this layer and all of its parents are visible. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool IsActivatedRecursively() const;
 
+    /** Return the Blending mode of this layer. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     EOdysseyBlendMode GetBlendMode() const;
 
+    /** Return the opacity of this layer. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     float GetOpacity() const;
 
+    /** Return the frame at which the first Cell of this layer starts. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     int GetCellsOffset() const;
 
+    /**
+     * Return the Pre Behavior of this layer.
+     *
+     * The behavior applied before the animation starts:
+     * - None
+     * - Hold
+     * - Loop
+     * - Ping-pong
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     EOdysseyLayerImagePostBehaviour GetPreBehaviour() const;
 
+    /**
+     * Return the Post Behavior of this layer.
+     *
+     * The behavior applied after the animation finishes:
+     * - None
+     * - Hold
+     * - Loop
+     * - Ping-pong
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     EOdysseyLayerImagePostBehaviour GetPostBehaviour() const;
 
+    /** Return the types of Cells that can be added to this layer. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     const TArray<TSubclassOf<UOdysseyLayerCell>>& GetSupportedCellTypes() const;
 
+    /** Return the Cells of this layer, in timeline order. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     const TArray<UOdysseyLayerCell*>& GetCells() const;
 
+    /**
+     * Return true if Alpha inheritance is enabled on this layer.
+     *
+     * When enabled, the layer is clipped by the alpha channel of the
+     * layers underneath.
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool GetInheritsAlpha() const;
 
 public:
     // Advanced Getters
 
+    /**
+     * Return the frame displayed at Frame by the given Pre Behavior.
+     *
+     * Use it for frames located before the start of the layer.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     int GetPreBehaviourFrame(EOdysseyLayerImagePostBehaviour Behaviour, int Frame) const;
 
+    /**
+     * Return the frame displayed at Frame by the given Post Behavior.
+     *
+     * Use it for frames located after the end of the layer.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     int GetPostBehaviourFrame(EOdysseyLayerImagePostBehaviour Behaviour, int Frame) const;
 
+    /** Return the Cell displayed at the given frame, if any. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     UOdysseyLayerCell* GetCellAtFrame(int Frame) const;
 
+    /**
+     * Return the index of the Cell displayed at the given frame.
+     *
+     * Return -1 if there is no Cell at this frame.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     int GetCellIndexAtFrame(int Frame) const;
 
+    /** Return true if a Cell is displayed at the given frame. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     bool HasCellAtFrame(int Frame) const;
 
 public:
     //Advanced Setters
 
+    /**
+     * Add a new Cell of the given type to this layer.
+     *
+     * The Cell is inserted at Index, or at the end if Index is -1.
+     * Return the new Cell.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer", meta=(DeterminesOutputType = "CellType"))
     UOdysseyLayerCell* AddCell(TSubclassOf<UOdysseyLayerCell> CellType, int Index = -1 );
 
+    /**
+     * Add Count new Cells of the given type to this layer.
+     *
+     * The Cells are inserted at Index, or at the end if Index is -1.
+     * Return the new Cells.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer", meta=(DeterminesOutputType = "CellType"))
     TArray<UOdysseyLayerCell*> AddCells(TSubclassOf<UOdysseyLayerCell> CellType, int Index = -1, int Count = 1 );
 
+    /** Remove the given Cell from this layer. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void RemoveCell(UOdysseyLayerCell* Cell); //Prevent Empty Layer ?
 
+    /** Remove the given Cells from this layer. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void RemoveCells(const TArray<UOdysseyLayerCell*>& Cells); //Prevent Empty Layer ?
 
+    /** Remove the Cell at the given index from this layer. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void RemoveCellAtIndex(int Index);
 
+    /** Remove all the Cells of this layer. */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void RemoveAllCells();
 
+    /**
+     * Duplicate the given Cell into this layer.
+     *
+     * The copy is inserted at Index, or at the end if Index is -1.
+     * Return the new Cell.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     UOdysseyLayerCell* CopyCell(UOdysseyLayerCell* Cell, int Index = -1);
 
+    /**
+     * Duplicate the given Cell into another layer.
+     *
+     * The copy is inserted in ToLayer at Index, or at the end if
+     * Index is -1. Return the new Cell.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     UOdysseyLayerCell* CopyCellToLayer(UOdysseyLayerCell* Cell, UOdysseyLayer* ToLayer, int Index = -1) const;
 
+    /**
+     * Duplicate the given Cells into this layer.
+     *
+     * The copies are inserted at Index, or at the end if Index is -1.
+     * Return the new Cells.
+     */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     TArray<UOdysseyLayerCell*> CopyCells(TArray<UOdysseyLayerCell*> Cells, int Index = -1);
 

@@ -47,14 +47,34 @@ struct FOdysseyAnimationFlipConfiguration
 {
     GENERATED_BODY()
 
+    /**
+     * Range within which the Flip can move.
+     *
+     * None: no limit, unless limited by the Keys type.
+     * Animation: the overall duration of the Animation 2D.
+     * Layer: the duration of the current Layer.
+     * Cell Marks: between 2 Cell Marks.
+     * Custom: a number of frames before and after the scrubbing cursor.
+     */
     UPROPERTY(  EditAnywhere, Category="Flip Configuration" )
     EOdysseyAnimationFlipLimits Limits = EOdysseyAnimationFlipLimits::None;
 
+    /**
+     * Cell Mark used as Flip limits.
+     *
+     * Choose between all Cell Marks or a specific Cell Mark.
+     * Only used when Limits is set to Cell Marks.
+     */
     UPROPERTY(  EditAnywhere, Category="Flip Configuration"
                 , meta = (EditCondition = "Limits == EOdysseyAnimationFlipLimits::CellMarks"
                 , EditConditionHides) )
     int LimitsCellMark = -2;
 
+    /**
+     * Number of frames before the scrubbing cursor the Flip can reach.
+     *
+     * Only used when Limits is set to Custom.
+     */
     UPROPERTY(  EditAnywhere, Category="Flip Configuration"
                 , meta = ( EditCondition = "Limits == EOdysseyAnimationFlipLimits::Custom"
                 , EditConditionHides
@@ -65,6 +85,11 @@ struct FOdysseyAnimationFlipConfiguration
                 ) )
     int LeftLimit = 0;
 
+    /**
+     * Number of frames after the scrubbing cursor the Flip can reach.
+     *
+     * Only used when Limits is set to Custom.
+     */
     UPROPERTY(  EditAnywhere, Category="Flip Configuration"
                 , meta = (EditCondition = "Limits == EOdysseyAnimationFlipLimits::Custom"
                 , EditConditionHides
@@ -75,26 +100,71 @@ struct FOdysseyAnimationFlipConfiguration
                 ) )
     int RightLimit = 0;
 
+    /**
+     * Type of keys the Flip steps through.
+     *
+     * All Frames: the Flip occurs on all the Frames.
+     * Cells: the Flip moves from Cell to Cell, ignoring their exposure.
+     * Cell Marks: the Flip moves between frames carrying the chosen Cell Mark.
+     */
     UPROPERTY(  EditAnywhere, Category="Flip Configuration" )
     EOdysseyAnimationFlipKeys Keys = EOdysseyAnimationFlipKeys::Cells;
 
+    /**
+     * Cell Mark the Flip steps through.
+     *
+     * Choose between all Cell Marks or a specific Cell Mark.
+     * Only used when Keys is set to Cell Marks.
+     */
     UPROPERTY(  EditAnywhere, Category="Flip Configuration"
                 , meta = (EditCondition = "Keys == EOdysseyAnimationFlipKeys::CellMarks"
                 , EditConditionHides) )
     int KeysCellMark = -2;
 
+    /**
+     * Loop the Flip when reaching the end of the Limits.
+     *
+     * When off, the Flip stops at the end of the chosen Limits.
+     * When on, it starts all over again within the same gesture.
+     */
     UPROPERTY(  EditAnywhere, Category="Flip Configuration" )
     bool Loop = false;
 
+    /**
+     * Return the scrubbing cursor to its original position.
+     *
+     * When on, the cursor rolls back to its original position once the
+     * keyboard shortcut is no longer held. When off, it stays on its
+     * current position in the Timeline.
+     */
     UPROPERTY(  EditAnywhere, Category="Flip Configuration" )
     bool Rollback = true;
 
+    /**
+     * Take the Out-of-Pegs into consideration during the Flip.
+     *
+     * When off, Cells that got out-of-pegged are displayed in their
+     * original position while flipping.
+     */
     UPROPERTY(  EditAnywhere, Category="Flip Configuration" )
     bool OutOfPegs = true;
 
+    /**
+     * Direction of the gesture that moves the scrubbing cursor.
+     *
+     * Horizontal: right steps forward, left steps backward.
+     * Vertical: up steps backward, down steps forward.
+     * Inverted variants do the opposite.
+     */
     UPROPERTY(  EditAnywhere, Category="Flip Configuration" )
     EOdysseyAnimationFlipDirection Direction = EOdysseyAnimationFlipDirection::Horizontal;
 
+    /**
+     * Sensitivity of the gesture.
+     *
+     * The higher the percentage, the more sensitive (and faster)
+     * the Flip.
+     */
     UPROPERTY(  EditAnywhere, Category="Flip Configuration"
                 , meta = ( ClampMin = "0"
                 , UIMin    = "0"

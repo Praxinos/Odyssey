@@ -46,6 +46,7 @@ struct FOdysseyAnimationCutValue //TODO: really necessary ?!
 {
     GENERATED_BODY()
 
+    /** The animation cut stored in this key. */
     UPROPERTY( EditAnywhere, Category = "Value" )
     FAnimationCut Value;
 };

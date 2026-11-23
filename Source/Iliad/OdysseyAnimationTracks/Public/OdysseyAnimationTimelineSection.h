@@ -73,15 +73,27 @@ protected:
     virtual void OnAnimationChanged( const FOdysseyRenderingChangedEvent& iEvent );
 
 protected:
+    /** The Animation 2D played by this section. */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation")
     TObjectPtr<UOdysseyAnimation> Animation;
 
+    /**
+     * Behaviour before the animation starts (Pre Behavior).
+     *
+     * Hold keeps the first frame; Loop repeats the whole animation.
+     */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation")
     EOdysseyAnimationPlayerPostBehaviour PreBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
 
+    /**
+     * Behaviour after the animation finishes (Post Behavior).
+     *
+     * Hold keeps the last frame; Loop repeats the whole animation.
+     */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation")
     EOdysseyAnimationPlayerPostBehaviour PostBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
 
+    /** Offset, in frames, applied to the start of the animation. */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
     FFrameNumber StartFrameOffset = 0;
 

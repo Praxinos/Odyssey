@@ -116,6 +116,13 @@ protected:
     //~
 
 private:
+    /**
+     * Validate and update the camera settings.
+     *
+     * Clamp the focal length and aperture to the lens limits and update
+     * the derived values (sensor aspect ratio, horizontal field of view).
+     * Must be called after modifying the camera settings.
+     */
     UFUNCTION( BlueprintCallable, Category=Settings )
     void UpdateValues();
 

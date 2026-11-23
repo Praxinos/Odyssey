@@ -16,6 +16,7 @@ class ODYSSEYANIMATION_API UOdysseyAnimationCell
     GENERATED_BODY()
 
 public:
+    /** Return the Animation 2D asset that owns this cell. */
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     UOdysseyAnimation* GetAnimation() const;
 };

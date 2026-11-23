@@ -60,12 +60,30 @@ private:
     EOdysseyAlphaMode AlphaMode_DEPRECATED = EOdysseyAlphaMode::kNormal;
 
 protected:
+    /**
+     * Eraser Mode.
+     *
+     * Keep all the specifications of the current brush and apply it
+     * as an eraser.
+     */
     UPROPERTY(EditAnywhere, Category="Blending")
     bool bEraserMode = false;
 
+    /**
+     * Use Advanced Blend Modes.
+     *
+     * If checked, the Color Blend Mode and Alpha Blend Mode are set
+     * separately instead of using a single Blending Mode.
+     */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending", meta=(DisplayName="Advanced Blend Modes"))
     bool bIsComposite = false;
 
+    /**
+     * Blending Mode.
+     *
+     * Used to blend pixels on the canvas with pixels applied with
+     * the brush (Normal, Multiply, Add, etc).
+     */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending",
         meta=(
             EditCondition="!bIsComposite && !bEraserMode",
@@ -75,6 +93,12 @@ protected:
     )
     EOdysseyBlendMode BlendMode;
 
+    /**
+     * Color Blend Mode used with Advanced Blend Modes.
+     *
+     * Define how the color of the brush is blended with the pixels
+     * already on the canvas.
+     */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending",
         meta=(
             DisplayName="Color Blend Mode",
@@ -85,6 +109,12 @@ protected:
     )
     EOdysseyColorBlendMode CompositeColorBlendMode;
 
+    /**
+     * Alpha Blend Mode used with Advanced Blend Modes.
+     *
+     * Affect the Alpha channel of the brush (the opacity /
+     * transparency of the stamp) and gives it a specific property.
+     */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Blending",
         meta=(
             DisplayName="Alpha Blend Mode",

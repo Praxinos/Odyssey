@@ -114,27 +114,66 @@ protected:
     )
     bool SubPixel = true;
 
+    /** Size of the Eraser Tool, in pixels. */
     UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", DisplayPriority="1" ) )
     float   Size = 20.f;
 
+    /**
+     * Flow of the eraser.
+     *
+     * Give the max value of each stamp used by the Eraser.
+     */
     UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Units="Percent" ) )
     float   Flow = 100.f;
 
+    /**
+     * Opacity of the eraser.
+     *
+     * Give the max value of a whole stroke made with the Eraser.
+     */
     UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Units = "Percent" ) )
     float   Opacity = 100.f;
 
+    /**
+     * Hardness of the eraser.
+     *
+     * The lower the value, the smoother the shape of the stamp.
+     */
     UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Units = "Percent" ) )
     float   Hardness = 100.f;
 
+    /**
+     * Antialiasing.
+     *
+     * Enable for a smoother outline when erasing. Disable it to erase
+     * strokes made with grainy brushes or pixel-art drawings.
+     */
     UPROPERTY( EditAnywhere, Category="Parameters" )
     bool    Antialiasing = true;
 
+    /**
+     * Interpolation Type.
+     *
+     * Calculate the best way to display a stroke from the mouse /
+     * tablet input. Use Catmull-Rom in most cases, Line for pixel art.
+     */
     UPROPERTY( EditInstanceOnly, Category="Interpolation" )
     EOdysseyInterpolationType InterpolationType = EOdysseyInterpolationType::kCatmullRom;
 
+    /**
+     * Size Adaptative Step.
+     *
+     * If checked, Step is a % of the size (Size * Step %).
+     * If unchecked, Step keeps the same value in pixels.
+     */
     UPROPERTY( EditAnywhere, Category="Interpolation" )
     bool    AdaptativeStep = false;
 
+    /**
+     * Step.
+     *
+     * Distance between two stamps of the stroke.
+     */
     UPROPERTY( EditAnywhere, Category="Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", DisplayPriority = "0" ) )
     float   Step = 1.0;
 
