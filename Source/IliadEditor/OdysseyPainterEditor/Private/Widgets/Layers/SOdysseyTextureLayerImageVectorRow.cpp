@@ -4,7 +4,6 @@
 #include "SOdysseyTextureLayerImageVectorRow.h"
 
 #include "Math/UnitConversion.h"
-#include "ScopedTransaction.h"
 #include "SEnumCombo.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
@@ -69,14 +68,12 @@ SOdysseyTextureLayerImageVectorRow::GenerateMainRowHeaderOptionWidgets()
 void
 SOdysseyTextureLayerImageVectorRow::OnIsWireframeCheckStateChanged( ECheckBoxState iState )
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-wireframe", "Change Layer Wireframe status"));
     mTextureLayerImageVector->SetIsWireframe(iState == ECheckBoxState::Checked);
 }
 
 void
 SOdysseyTextureLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxState iState )
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-coloring", "Change Layer Coloring"));
     mTextureLayerImageVector->SetIsColored(iState == ECheckBoxState::Checked);
 }
 

@@ -19,7 +19,6 @@
 #include "SOdysseyAnimationTimelineInbetweeningHeader.h"
 #include "OdysseyPainterEditor.h"
 #include "HUD/OdysseyVectorHUD.h"
-#include "ScopedTransaction.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -121,14 +120,12 @@ SOdysseyAnimationLayerImageVectorRow::GetInbetweeningHeader()
 void
 SOdysseyAnimationLayerImageVectorRow::OnIsWireframeCheckStateChanged( ECheckBoxState iState )
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-wireframe", "Change Layer Wireframe status"));
     mAnimationLayerImageVector->SetIsWireframe(iState == ECheckBoxState::Checked);
 }
 
 void
 SOdysseyAnimationLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxState iState )
 {
-    FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-coloring", "Change Layer Coloring"));
     mAnimationLayerImageVector->SetIsColored(iState == ECheckBoxState::Checked);
 }
 

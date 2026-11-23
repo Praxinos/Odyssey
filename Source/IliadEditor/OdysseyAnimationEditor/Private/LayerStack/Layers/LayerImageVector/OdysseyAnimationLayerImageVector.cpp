@@ -200,13 +200,13 @@ UOdysseyAnimationLayerImageVector::SetIsWireframe(bool Value)
     if( !IsEditable() )
         return;
 
-    Modify();
-
     bIsWireframe = Value;
 
     RequestRedrawAllVectorCells();
 
     RenderingChanged();
+
+    MarkPackageDirty();
 }
 
 void
@@ -215,13 +215,13 @@ UOdysseyAnimationLayerImageVector::SetIsColored(bool Value)
     if( !IsEditable() )
         return;
 
-    Modify();
-
     bIsColored = Value;
 
     RequestRedrawAllVectorCells();
 
     RenderingChanged();
+
+    MarkPackageDirty();
 }
 
 bool
@@ -262,19 +262,6 @@ UOdysseyAnimationLayerImageVector::PostTransacted(const FTransactionObjectEvent&
     }
 
     Super::PostTransacted(iTransactionEvent);
-
-    if (!bIsUndoRedo)
-        return;
-
-    if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, bIsColored)))
-    {
-        RenderingChanged();
-    }
-
-    if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, bIsWireframe)))
-    {
-        RenderingChanged();
-    }
 }
 
 TSharedPtr<IOdysseyMedia>

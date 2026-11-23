@@ -445,6 +445,17 @@ bool FOdysseyTextureVectorDrawingFlagsTest::RunTest(const FString& Parameters)
     SetSceneColor(Layer, OtherFill, false);
     Layer->SetIsWireframe(false);
     CheckUniform(*this, TEXT("Turning the wireframe off renders the whole canvas again"), ReadNode(Layer), Linear(OtherFill, false), Precision);
+
+    // The flags are display options: toggling them within a transaction records nothing to undo.
+    const int32 QueueLength = GEditor->Trans->GetQueueLength();
+    {
+        FScopedTransaction Transaction(NSLOCTEXT("OdysseyTextureLayerVectorTests", "Flags", "Toggle the display options"));
+        Layer->SetIsWireframe(true);
+        Layer->SetIsColored(false);
+    }
+    TestEqual(TEXT("Toggling the display options adds nothing to the undo history"), GEditor->Trans->GetQueueLength(), QueueLength);
+    TestTrue(TEXT("The wireframe is kept"), Layer->IsWireframe());
+    TestFalse(TEXT("The colors are kept off"), Layer->IsColored());
     return true;
 }
 

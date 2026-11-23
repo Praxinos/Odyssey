@@ -52,7 +52,6 @@ public:
     virtual void PostInitProperties() override;
     virtual void PostLoad() override;
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
-    virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
     virtual void BeginDestroy() override;
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
@@ -123,6 +122,7 @@ public:
     bool IsColored() const;
 
 protected:
+    // Display options: saved with the layer, outside the undo history.
     UPROPERTY(NonTransactional)
     bool bIsWireframe = false;
 

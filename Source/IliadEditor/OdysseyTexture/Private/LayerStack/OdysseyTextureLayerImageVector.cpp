@@ -282,11 +282,11 @@ UOdysseyTextureLayerImageVector::SetIsWireframe(bool Value)
     if( !IsEditable() )
         return;
 
-    Modify();
-
     bIsWireframe = Value;
     mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
     //RenderingChanged();
+
+    MarkPackageDirty();
 }
 
 void
@@ -295,11 +295,11 @@ UOdysseyTextureLayerImageVector::SetIsColored(bool Value)
     if( !IsEditable() )
         return;
 
-    Modify();
-
     bIsColored = Value;
     mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
     //RenderingChanged();
+
+    MarkPackageDirty();
 }
 
 bool
@@ -315,29 +315,6 @@ UOdysseyTextureLayerImageVector::IsColored() const
 }
 
 
-
-void
-UOdysseyTextureLayerImageVector::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
-{
-    Super::PostTransacted(iTransactionEvent);
-
-    if ( iTransactionEvent.GetEventType() != ETransactionObjectEventType::UndoRedo )
-        return;
-
-    const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
-
-    if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, bIsColored)))
-    {
-        mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
-        RenderingChanged();
-    }
-
-    if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, bIsWireframe)))
-    {
-        mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
-        RenderingChanged();
-    }
-}
 
 TArray<FGuid>
 UOdysseyTextureLayerImageVector::GetRenderingComposition(uint64 iRenderType, int iFrame) const
