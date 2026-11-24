@@ -198,7 +198,12 @@ void SOdysseyPainterEditorGuidesPanel::AddGuide(UClass* GuideClass)
 TSharedRef<ITableRow> SOdysseyPainterEditorGuidesPanel::MakeGuideRow(TWeakObjectPtr<UOdysseyPainterEditorGuide> GuideReference, const TSharedRef<STableViewBase>& OwnerTable)
 {
     UOdysseyPainterEditorGuide* Guide = GuideReference.Get();
-    check(Guide);
+    if (!Guide)
+    {
+        // Refresh() skips null guides, so this is not expected; show an empty row rather than crashing the editor.
+        return SNew(STableRow<TWeakObjectPtr<UOdysseyPainterEditorGuide>>, OwnerTable);
+    }
+
     return SNew(STableRow<TWeakObjectPtr<UOdysseyPainterEditorGuide>>, OwnerTable)
     .OnCanAcceptDrop(this, &SOdysseyPainterEditorGuidesPanel::CanDropGuide)
     .OnAcceptDrop(this, &SOdysseyPainterEditorGuidesPanel::DropGuide)
