@@ -22,7 +22,7 @@ public:
 
     BEGIN_SHADER_PARAMETER_STRUCT(FParameters, )
         SHADER_PARAMETER_RDG_TEXTURE_SRV(Texture2D, InputTexture)
-        SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int2>, TilePositions) //Top-left corners of the tiles, in pixels
+        SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int2>, TileOriginsInPixels) //Top-left corners of the tiles, in pixels
         SHADER_PARAMETER(uint32, TileSize) //In pixels
         SHADER_PARAMETER(uint32, NumTiles)
         SHADER_PARAMETER_RDG_BUFFER_UAV(RWBuffer<uint>, IsTileEmpty)
@@ -42,14 +42,14 @@ IMPLEMENT_GLOBAL_SHADER(FOdysseyAreTextureTilesEmptyShader, "/OdysseyShaders/Pri
 namespace Odyssey::Shaders {
 
 void
-AddAreTextureTilesEmptyPass(FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type InFeatureLevel, FRDGTextureRef InTexture, const TArray<FIntPoint>& InTilePositions, uint32 InTileSize, TSharedPtr<FRHIGPUBufferReadback> InReadBack)
+AddAreTextureTilesEmptyPass(FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type InFeatureLevel, FRDGTextureRef InTexture, const TArray<FIntPoint>& InTileOriginsInPixels, uint32 InTileSize, TSharedPtr<FRHIGPUBufferReadback> InReadBack)
 {
     SCOPE_CYCLE_COUNTER(STAT_OdysseyAreTextureTilesEmptyShader_Execute);
     DECLARE_GPU_STAT(OdysseyAreTextureTilesEmptyShader);
     RDG_EVENT_SCOPE(GraphBuilder, "OdysseyAreTextureTilesEmptyShader");
     RDG_EVENT_SCOPE_STAT(GraphBuilder, OdysseyAreTextureTilesEmptyShader, "OdysseyAreTextureTilesEmptyShader");
 
-    if (InTilePositions.IsEmpty() || !InReadBack.IsValid())
+    if (InTileOriginsInPixels.IsEmpty() || !InReadBack.IsValid())
         return;
 
     TShaderMapRef<FOdysseyAreTextureTilesEmptyShader> ComputeShader(GetGlobalShaderMap(InFeatureLevel));
@@ -59,26 +59,26 @@ AddAreTextureTilesEmptyPass(FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type In
     //
     // Upload rectangle data.
     //
-    TArray<FIntVector2> TilePositionsData;
+    TArray<FIntVector2> TileOriginsData;
 
-    TilePositionsData.Reserve(InTilePositions.Num());
+    TileOriginsData.Reserve(InTileOriginsInPixels.Num());
 
-    for (const FIntPoint& TilePosition : InTilePositions)
+    for (const FIntPoint& TileOrigin : InTileOriginsInPixels)
     {
-        TilePositionsData.Emplace(TilePosition.X, TilePosition.Y);
+        TileOriginsData.Emplace(TileOrigin.X, TileOrigin.Y);
     }
 
-    FRDGBufferRef TilePositionBuffer = CreateStructuredBuffer(
+    FRDGBufferRef TileOriginsBuffer = CreateStructuredBuffer(
         GraphBuilder,
-        TEXT("OdysseyTextureEmptyTilePositions"),
+        TEXT("OdysseyTextureEmptyTileOrigins"),
         sizeof(FIntVector2),
-        TilePositionsData.Num(),
-        TilePositionsData.GetData(),
+        TileOriginsData.Num(),
+        TileOriginsData.GetData(),
         sizeof(FIntVector2) *
-        TilePositionsData.Num()
+        TileOriginsData.Num()
     );
 
-    FRDGBufferSRVRef TilePositionSRV = GraphBuilder.CreateSRV(TilePositionBuffer);
+    FRDGBufferSRVRef TileOriginsSRV = GraphBuilder.CreateSRV(TileOriginsBuffer);
 
     //
     // One uint per rectangle.
@@ -86,7 +86,7 @@ AddAreTextureTilesEmptyPass(FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type In
     FRDGBufferRef ResultBuffer = GraphBuilder.CreateBuffer(
         FRDGBufferDesc::CreateBufferDesc(
             sizeof(uint32),
-            InTilePositions.Num()
+            InTileOriginsInPixels.Num()
         ),
         TEXT("OdysseyTextureRectsEmptyResult")
     );
@@ -102,8 +102,8 @@ AddAreTextureTilesEmptyPass(FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type In
 
     FOdysseyAreTextureTilesEmptyShader::FParameters* PassParameters = GraphBuilder.AllocParameters<FOdysseyAreTextureTilesEmptyShader::FParameters>();
     PassParameters->InputTexture = GraphBuilder.CreateSRV(SRVDesc);
-    PassParameters->TilePositions = TilePositionSRV;
-    PassParameters->NumTiles = InTilePositions.Num();
+    PassParameters->TileOriginsInPixels = TileOriginsSRV;
+    PassParameters->NumTiles = InTileOriginsInPixels.Num();
     PassParameters->TileSize = InTileSize;
     PassParameters->IsTileEmpty = ResultUAV;
 
@@ -115,7 +115,7 @@ AddAreTextureTilesEmptyPass(FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type In
         PassParameters,
         //One thread group per tile
         FIntVector(
-            InTilePositions.Num(),
+            InTileOriginsInPixels.Num(),
             1,
             1
         )
@@ -125,7 +125,7 @@ AddAreTextureTilesEmptyPass(FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type In
         GraphBuilder,
         InReadBack.Get(),
         ResultBuffer,
-        sizeof(uint32) * InTilePositions.Num()
+        sizeof(uint32) * InTileOriginsInPixels.Num()
     );
 }
 

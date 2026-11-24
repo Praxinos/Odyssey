@@ -2,7 +2,7 @@
 
 Texture2D InputTexture;
 
-StructuredBuffer<int2> TilePositions;
+StructuredBuffer<int2> TileOriginsInPixels;
 uint TileSize;
 uint NumTiles;
 RWBuffer<uint> IsTileEmpty;
@@ -10,7 +10,7 @@ RWBuffer<uint> IsTileEmpty;
 // Tells, for each tile, whether all its pixels are transparent.
 //
 // One thread group processes one tile, and a single thread of the group scans its pixels.
-// TilePositions are the top-left corners of the tiles, in pixels; pixels outside the texture are ignored.
+// TileOriginsInPixels are the top-left corners of the tiles, in pixels; pixels outside the texture are ignored.
 // Only the alpha is tested: a transparent pixel with a color is empty.
 //
 // Result convention, one uint per tile in IsTileEmpty:
@@ -27,7 +27,7 @@ void MainCS(
         return;
     }
 
-    const int2 TilePosition = TilePositions[TileIndex];
+    const int2 TileOrigin = TileOriginsInPixels[TileIndex];
 
     uint TextureWidth;
     uint TextureHeight;
@@ -42,7 +42,7 @@ void MainCS(
     for (uint LocalY = 0; LocalY < TileSize; ++LocalY)
     {
         const int PixelY =
-            TilePosition.y + int(LocalY);
+            TileOrigin.y + int(LocalY);
 
         if (PixelY < 0 || PixelY >= int(TextureHeight))
         {
@@ -52,7 +52,7 @@ void MainCS(
         for (uint LocalX = 0; LocalX < TileSize; ++LocalX)
         {
             const int PixelX =
-                TilePosition.x + int(LocalX);
+                TileOrigin.x + int(LocalX);
 
             if (PixelX < 0 || PixelX >= int(TextureWidth))
             {
