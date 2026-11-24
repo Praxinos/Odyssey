@@ -181,8 +181,20 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     TArray<UOdysseyAnimationCell*> cells = AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), 0, cellRanges.Num());
 
     FIntRect rect = GetDefaultRenderRect();
-    TStrongObjectPtr<UTextureRenderTarget2D> layerRenderTarget(CreateRenderingRenderTarget());
-    TStrongObjectPtr<UTextureRenderTarget2D> destinationRenderTarget(CreateRenderingRenderTarget());
+    if (rect.Width() <= 0 || rect.Height() <= 0)
+        return;
+
+    // The layers are blended in compositing space, then written back once into the cells: the targets are linear floats,
+    // so that the blended values are neither encoded by an sRGB target nor rounded to 8 bits before the write.
+    auto makeMergeTarget = [&rect]()
+    {
+        UTextureRenderTarget2D* target = NewObject<UTextureRenderTarget2D>();
+        target->InitCustomFormat(rect.Max.X, rect.Max.Y, PF_A32B32G32R32F, true);
+        target->UpdateResourceImmediate(true);
+        return target;
+    };
+    TStrongObjectPtr<UTextureRenderTarget2D> layerRenderTarget(makeMergeTarget());
+    TStrongObjectPtr<UTextureRenderTarget2D> destinationRenderTarget(makeMergeTarget());
 
     for (int i = 0; i < cellRanges.Num(); i++)
     {
