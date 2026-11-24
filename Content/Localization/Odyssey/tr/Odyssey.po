@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Odyssey\n"
-"POT-Creation-Date: 2026-11-24 14:40\n"
-"PO-Revision-Date: 2026-11-24 14:40\n"
+"POT-Creation-Date: 2026-11-24 15:36\n"
+"PO-Revision-Date: 2026-11-24 15:36\n"
 "Language-Team: \n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
@@ -3699,8 +3699,8 @@ msgstr "Not Parçası"
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(87)
 #: Plugins/Odyssey/Source/EposEditor/EposTracksEditor/Private/NoteTrack/NoteTrackEditor.cpp(87)
 msgctxt "FNoteTrackEditor,AddTooltip"
-msgid "Adds a new master note track that can play sounds."
-msgstr "Ses çalabilen yeni bir ana not parçası ekler."
+msgid "Adds a new master note track."
+msgstr "Yeni bir ana not parçası ekler."
 
 #. Key:	SetNewNoteText
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposTracksEditor/Private/NoteTrack/SNoteSectionContent.cpp(162)
@@ -4539,7 +4539,7 @@ msgstr "Tüm Katmanları Kilitle"
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(588)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(588)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.unlock-all-layers"
-msgid "Unock All Layers"
+msgid "Unlock All Layers"
 msgstr "Tüm Katmanların Kilidini Aç"
 
 #. Key:	global-layers-shortcuts.transaction.activate-all-layers
@@ -6786,14 +6786,14 @@ msgstr "Geçerli Breakdown"
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1742)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1742)
 msgctxt "PainterEditor,vector-tool.inbetween-context-menu.reset-spacing-all-breakdowns.name"
-msgid "All Breakdonws"
+msgid "All Breakdowns"
 msgstr "Tüm Breakdown'lar"
 
 #. Key:	vector-tool.inbetween-context-menu.reset-spacing-all-breakdowns.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1743)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1743)
 msgctxt "PainterEditor,vector-tool.inbetween-context-menu.reset-spacing-all-breakdowns.tooltip"
-msgid "All Breakdonws"
+msgid "All Breakdowns"
 msgstr "Tüm Breakdown'lar"
 
 #. Key:	vector-tool.inbetween-context-menu.copy-spacing-current-breakdown.name
@@ -6814,14 +6814,14 @@ msgstr "Geçerli Breakdown"
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1761)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1761)
 msgctxt "PainterEditor,vector-tool.inbetween-context-menu.copy-spacing-all-breakdowns.name"
-msgid "All Breakdonws"
+msgid "All Breakdowns"
 msgstr "Tüm Breakdown'lar"
 
 #. Key:	vector-tool.inbetween-context-menu.copy-spacing-all-breakdowns.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1762)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1762)
 msgctxt "PainterEditor,vector-tool.inbetween-context-menu.copy-spacing-all-breakdowns.tooltip"
-msgid "All Breakdonws"
+msgid "All Breakdowns"
 msgstr "Tüm Breakdown'lar"
 
 #. Key:	vector-tool.inbetween-context-menu.paste-spacing-current-breakdown.name
@@ -6842,14 +6842,14 @@ msgstr "Geçerli Breakdown"
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1780)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1780)
 msgctxt "PainterEditor,vector-tool.inbetween-context-menu.paste-spacing-all-breakdowns.name"
-msgid "All Breakdonws"
+msgid "All Breakdowns"
 msgstr "Tüm Breakdown'lar"
 
 #. Key:	vector-tool.inbetween-context-menu.paste-spacing-all-breakdowns.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1781)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1781)
 msgctxt "PainterEditor,vector-tool.inbetween-context-menu.paste-spacing-all-breakdowns.tooltip"
-msgid "All Breakdonws"
+msgid "All Breakdowns"
 msgstr "Tüm Breakdown'lar"
 
 #. Key:	vector-base-tool.edit-menu.tool-options
@@ -10972,6 +10972,6 @@ msgstr "Odyssey Belgeleri ..."
 #. SourceLocation:	Plugins/Odyssey/Source/OdysseyCoreEditor/OdysseyCoreEditor/Private/OdysseyCoreEditorModule.cpp(84)
 #: Plugins/Odyssey/Source/OdysseyCoreEditor/OdysseyCoreEditor/Private/OdysseyCoreEditorModule.cpp(84)
 msgctxt "OdysseyCoreEditor,main-menu.help.odyssey-documentation.tooltip"
-msgid "To access Odyssey's Documentationget."
+msgid "To access Odyssey's Documentation."
 msgstr "Odyssey Belgelerine erişmek için."
 
