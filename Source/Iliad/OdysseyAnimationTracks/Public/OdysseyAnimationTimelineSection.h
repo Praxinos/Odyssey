@@ -45,8 +45,12 @@ public:
     FFrameNumber ConvertFrameFromSequenceToTimeline( FFrameNumber iFrameInSequence );
 
 #if WITH_EDITORONLY_DATA
-    UObject* GetEditorData() const;
-    void SetEditorData(UObject* Data);
+    /**
+     * The editor data of the section, a UOdysseyAnimationTimelineSectionEditorData holding the animation cut channel.
+     * Created by the editor module (see UOdysseyAnimationTimelineSectionEditorData::GetOrCreate), never saved nor duplicated.
+     */
+    UObject* GetCutChannelEditorData() const;
+    void SetCutChannelEditorData(UObject* Data);
 #endif
 
 protected:
@@ -69,6 +73,6 @@ protected:
 
 #if WITH_EDITORONLY_DATA
     UPROPERTY(Transient, DuplicateTransient)
-    TObjectPtr<UObject> EditorData;
+    TObjectPtr<UObject> CutChannelEditorData;
 #endif
 };

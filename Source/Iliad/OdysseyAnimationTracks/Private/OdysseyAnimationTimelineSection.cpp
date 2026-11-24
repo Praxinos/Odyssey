@@ -180,13 +180,13 @@ UOdysseyAnimationTimelineSection::ConvertFrameFromSequenceToTimeline( FFrameNumb
 #undef LOCTEXT_NAMESPACE
 
 #if WITH_EDITORONLY_DATA
-UObject* UOdysseyAnimationTimelineSection::GetEditorData() const
+UObject* UOdysseyAnimationTimelineSection::GetCutChannelEditorData() const
 {
-    return EditorData;
+    return CutChannelEditorData;
 }
 
-void UOdysseyAnimationTimelineSection::SetEditorData(UObject* Data)
+void UOdysseyAnimationTimelineSection::SetCutChannelEditorData(UObject* Data)
 {
-    EditorData = Data;
+    CutChannelEditorData = Data;
 }
 #endif

@@ -46,10 +46,10 @@ bool FOdysseyAnimationEditorDataTest::RunTest(const FString& Parameters)
     TStrongObjectPtr<UOdysseyAnimationTimelineSection> Section(NewObject<UOdysseyAnimationTimelineSection>(Sequence->GetMovieScene()));
     Section->SetRange(TRange<FFrameNumber>(0, 20));
     Section->SetAnimation(Animation.Get());
-    TestNull(TEXT("Section starts without editor data"), Section->GetEditorData());
+    TestNull(TEXT("Section starts without editor data"), Section->GetCutChannelEditorData());
     UOdysseyAnimationTimelineSectionEditorData* Data = UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*Section);
     TestEqual(TEXT("GetOrCreate reuses the same object"), UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*Section), Data);
-    TestEqual(TEXT("Section retains the editor object"), Section->GetEditorData(), static_cast<UObject*>(Data));
+    TestEqual(TEXT("Section retains the editor object"), Section->GetCutChannelEditorData(), static_cast<UObject*>(Data));
     TestEqual(TEXT("Editor object is outered to its section"), Data->GetOuter(), static_cast<UObject*>(Section.Get()));
     TestTrue(TEXT("Editor object is transient"), Data->HasAnyFlags(RF_Transient));
     TestTrue(TEXT("Editor object is editor only"), Data->IsEditorOnly());
@@ -85,7 +85,7 @@ bool FOdysseyAnimationEditorDataTest::RunTest(const FString& Parameters)
     TestEqual(TEXT("Undo restores exposure"), First->GetExposure(), 5);
     TestEqual(TEXT("Undo rebuilds cuts"), Channel.GetTimes()[1], FFrameNumber(5));
     TStrongObjectPtr<UOdysseyAnimationTimelineSection> Copy(DuplicateObject<UOdysseyAnimationTimelineSection>(Section.Get(), Sequence->GetMovieScene()));
-    TestNull(TEXT("Duplication resets the generic editor data reference"), Copy->GetEditorData());
+    TestNull(TEXT("Duplication resets the generic editor data reference"), Copy->GetCutChannelEditorData());
     UOdysseyAnimationTimelineSectionEditorData* CopyData = UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*Copy);
     TestNotEqual(TEXT("Duplicated section owns separate editor data"), CopyData, Data);
     TestEqual(TEXT("Duplicated editor data has the new owner"), CopyData->GetOuter(), static_cast<UObject*>(Copy.Get()));
@@ -96,7 +96,7 @@ bool FOdysseyAnimationEditorDataTest::RunTest(const FString& Parameters)
     First->SetExposure(6);
     TestEqual(TEXT("Detached animation does not repopulate cuts"), Channel.GetNumKeys(), 0);
     Data->UpdateAnimationCutChannel({}, EPropertyChangeType::ValueSet);
-    const FProperty* Property = FindFProperty<FProperty>(Section->GetClass(), TEXT("EditorData"));
+    const FProperty* Property = FindFProperty<FProperty>(Section->GetClass(), TEXT("CutChannelEditorData"));
     if (TestNotNull(TEXT("Generic editor data property"), Property))
     {
         TestTrue(TEXT("Property is excluded from cooked data"), Property->HasAnyPropertyFlags(CPF_EditorOnly));
@@ -148,7 +148,7 @@ bool FOdysseyAnimationEditorDataPersistenceTest::RunTest(const FString& Paramete
     const TArray<UMovieSceneTrack*>& Tracks = LoadedSequence->GetMovieScene()->GetTracks();
     if (!TestEqual(TEXT("Sequence track persists"), Tracks.Num(), 1)) { return false; }
     UOdysseyAnimationTimelineSection* LoadedSection = CastChecked<UOdysseyAnimationTimelineSection>(Tracks[0]->GetAllSections()[0]);
-    TestNull(TEXT("Editor data is not persisted in the asset"), LoadedSection->GetEditorData());
+    TestNull(TEXT("Editor data is not persisted in the asset"), LoadedSection->GetCutChannelEditorData());
     UOdysseyAnimationTimelineSectionEditorData* LoadedData = UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*LoadedSection);
     TestNotNull(TEXT("Editor data is recreated after loading"), LoadedData);
     TestEqual(TEXT("Recreated data belongs to the loaded section"), LoadedData->GetOuter(), static_cast<UObject*>(LoadedSection));

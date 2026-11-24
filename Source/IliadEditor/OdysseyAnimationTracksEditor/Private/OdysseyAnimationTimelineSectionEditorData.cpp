@@ -17,11 +17,11 @@
 
 UOdysseyAnimationTimelineSectionEditorData* UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(UOdysseyAnimationTimelineSection& Section)
 {
-    UOdysseyAnimationTimelineSectionEditorData* Data = Cast<UOdysseyAnimationTimelineSectionEditorData>(Section.GetEditorData());
+    UOdysseyAnimationTimelineSectionEditorData* Data = Cast<UOdysseyAnimationTimelineSectionEditorData>(Section.GetCutChannelEditorData());
     if (!IsValid(Data) || Data->GetOuter() != &Section)
     {
         Data = NewObject<UOdysseyAnimationTimelineSectionEditorData>(&Section, NAME_None, RF_Transient);
-        Section.SetEditorData(Data);
+        Section.SetCutChannelEditorData(Data);
         Data->Initialize();
     }
     return Data;
