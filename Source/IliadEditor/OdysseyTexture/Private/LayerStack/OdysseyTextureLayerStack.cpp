@@ -154,10 +154,10 @@ UOdysseyTextureLayerStack::UsesLinearCompositing() const
 }
 
 bool
-UOdysseyTextureLayerStack::KeepsColorsOnSRGBChange() const
+UOdysseyTextureLayerStack::KeepsBytesOnSRGBChange() const
 {
     const UOdysseyTextureLayerStackUserData* userData = Cast<UOdysseyTextureLayerStackUserData>(GetOuter());
-    return userData && userData->SRGBChangePolicy == EOdysseyTextureSRGBChangePolicy::KeepColors;
+    return !userData || userData->SRGBChangePolicy == EOdysseyTextureSRGBChangePolicy::KeepBytes;
 }
 
 EOdysseyColorConversion

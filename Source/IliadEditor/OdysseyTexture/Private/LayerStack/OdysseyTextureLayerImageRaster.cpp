@@ -83,7 +83,7 @@ UOdysseyTextureLayerImageRaster::GetRasterContent() const
                     Description.Size = MutableThis->GetDefaultRenderRect().Size();
                     Description.Format = MutableThis->GetRasterFormat();
                     Description.bSRGB = LayerStack->IsSRGB();
-                    Description.bKeepBytesOnEncodingChange = !LayerStack->KeepsColorsOnSRGBChange();
+                    Description.bKeepBytesOnSRGBChange = LayerStack->KeepsBytesOnSRGBChange();
                 }
                 return Description;
             },

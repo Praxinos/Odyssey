@@ -96,7 +96,7 @@ FOdysseyRasterContent::EnsureImage()
         TSharedPtr<::ULIS::FBlock> Pixels;
         // Recorded before Initialize() clears the tiles and changes the format: undoing the change gives them back.
         Image->Modify();
-        if (bEncodingChanged && Description.bKeepBytesOnEncodingChange)
+        if (bEncodingChanged && Description.bKeepBytesOnSRGBChange)
         {
             // Read the bytes as they were interpreted, write them as they are now interpreted.
             Pixels = Odyssey::TiledImage::CopyToBlock(*Image, Bounds, Description.Format, !Description.bSRGB);

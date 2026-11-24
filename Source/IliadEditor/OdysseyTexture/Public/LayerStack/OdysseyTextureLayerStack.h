@@ -60,8 +60,8 @@ public:
     /** Returns true when the layers of an sRGB texture are blended with linear colors rather than encoded colors. */
     bool UsesLinearCompositing() const;
 
-    /** Returns true when the sRGB setting of the texture changes its colors rather than its bytes. */
-    bool KeepsColorsOnSRGBChange() const;
+    /** Returns true when the sRGB setting of the texture keeps the bytes of its raster layers (the default), false when it keeps their colors. */
+    bool KeepsBytesOnSRGBChange() const;
 
     /** Returns the conversion of the linear colors of a layer into the colors this stack blends. */
     EOdysseyColorConversion GetLayerColorConversion() const;

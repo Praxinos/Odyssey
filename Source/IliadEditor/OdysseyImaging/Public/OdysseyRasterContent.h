@@ -65,7 +65,7 @@ public:
          * When bSRGB changes, e.g. with the sRGB setting of a texture: true to keep the encoded bytes, so that the
          * displayed colors change; false to keep the colors, so that the bytes change.
          */
-        bool bKeepBytesOnEncodingChange = true;
+        bool bKeepBytesOnSRGBChange = true;
     };
 
     using FGetDescription = TFunction<FDescription()>;
@@ -105,7 +105,7 @@ public:
 
     /**
      * Creates the image when missing, and converts it when the owner expects another format, tiles outside the canvas included.
-     * Between 8-bit linear and 8-bit sRGB encoded content, the conversion follows bKeepBytesOnEncodingChange;
+     * Between 8-bit linear and 8-bit sRGB encoded content, the conversion follows bKeepBytesOnSRGBChange;
      * otherwise it keeps the colors.
      * @return False when the owner cannot hold content or the rendering is unavailable.
      */
