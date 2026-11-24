@@ -39,18 +39,16 @@
 
 namespace
 {
-/** Converts a color value with the sRGB transfer functions, as the views do. */
-float ConvertDisplayedValue(float iValue, EOdysseyColorConversion iConversion)
+/** Returns a render context for a frame of the animation, without the excluded layers. */
+FOdysseyRenderContext MakeRenderContext(FFrameNumber iFrame, const TArray<IOdysseyRenderingAbility*>& iExcludedLayers)
 {
-    switch (iConversion)
+    FOdysseyRenderContext renderContext = FOdysseyAnimationRenderContext::MakeForFrame(iFrame);
+    renderContext.Filter = [iExcludedLayers](const IOdysseyTextureRenderingAbility& Ability,
+        const TArray<const IOdysseyTextureRenderingAbility*>& Parents)
     {
-        case EOdysseyColorConversion::Encode:
-            return iValue <= 0.0031308f ? iValue * 12.92f : 1.055f * FMath::Pow(iValue, 1.0f / 2.4f) - 0.055f;
-        case EOdysseyColorConversion::Decode:
-            return iValue <= 0.04045f ? iValue / 12.92f : FMath::Pow((iValue + 0.055f) / 1.055f, 2.4f);
-        default:
-            return iValue;
-    }
+        return !iExcludedLayers.Contains(&Ability);
+    };
+    return renderContext;
 }
 }
 
@@ -672,9 +670,9 @@ UOdysseyPainterEditorRasterPaintBucketTool::RenderDisplayedColors(const UOdyssey
     {
         for (FLinearColor& pixel : image.AsRGBA32F())
         {
-            pixel.R = ConvertDisplayedValue(pixel.R, conversion);
-            pixel.G = ConvertDisplayedValue(pixel.G, conversion);
-            pixel.B = ConvertDisplayedValue(pixel.B, conversion);
+            pixel.R = ApplyColorConversion(pixel.R, conversion);
+            pixel.G = ApplyColorConversion(pixel.G, conversion);
+            pixel.B = ApplyColorConversion(pixel.B, conversion);
         }
     }
 
@@ -721,13 +719,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetForegroundLayersBlock() const
 
     TArray<IOdysseyRenderingAbility*> layersToExclude = GetForegroundLayersToExclude(layer);
 
-    FOdysseyRenderContext RenderContext;
-    RenderContext.Filter = [layersToExclude](const IOdysseyTextureRenderingAbility& Ability,
-        const TArray<const IOdysseyTextureRenderingAbility*>& Parents)
-    {
-        return !layersToExclude.Contains(&Ability);
-    };
-    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = currentFrame;
+    FOdysseyRenderContext RenderContext = MakeRenderContext(currentFrame, layersToExclude);
     return RenderDisplayedColors(*layerStack, nullptr, RenderContext);
 }
 
@@ -749,13 +741,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetBackgroundLayersBlock() const
 
     TArray<IOdysseyRenderingAbility*> layersToExclude = GetBackgroundLayersToExclude(layer);
 
-    FOdysseyRenderContext RenderContext;
-    RenderContext.Filter = [layersToExclude](const IOdysseyTextureRenderingAbility& Ability,
-        const TArray<const IOdysseyTextureRenderingAbility*>& Parents)
-    {
-        return !layersToExclude.Contains(&Ability);
-    };
-    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = currentFrame;
+    FOdysseyRenderContext RenderContext = MakeRenderContext(currentFrame, layersToExclude);
     return RenderDisplayedColors(*layerStack, nullptr, RenderContext);
 }
 

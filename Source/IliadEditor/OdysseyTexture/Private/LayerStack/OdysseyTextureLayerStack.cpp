@@ -100,6 +100,23 @@ void RoundFloatImageForBlock(FImage& Image, ::ULIS::eFormat BlockFormat)
     Image.CopyTo(RoundedImage, ERawImageFormat::BGRA8, EGammaSpace::Linear);
     Image = MoveTemp(RoundedImage);
 }
+
+/** Reads an area of the render target back into the same area of a block, converted to its format. Waits for the GPU. */
+void ReadBackRect(UTextureRenderTarget2D* RenderTarget, const FIntRect& Rect, ::ULIS::FBlock& Destination)
+{
+    FImage OutImage;
+    if (!FImageUtils::GetRenderTargetImage(RenderTarget, OutImage, Rect))
+        return;
+
+    RoundFloatImageForBlock(OutImage, Destination.Format());
+    const ::ULIS::eFormat srcFormat = ULISFormatForRawImageFormat(OutImage.Format);
+    ::ULIS::FBlock src(OutImage.GetWidth(), OutImage.GetHeight(), srcFormat);
+    CopyImageToBlock(OutImage, &src);
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Destination.Format());
+    ctx.ConvertFormat(src, Destination, src.Rect(), ::ULIS::FVec2I(Rect.Min.X, Rect.Min.Y));
+    ctx.Finish();
+}
 }
 
 UOdysseyTextureLayerStack::~UOdysseyTextureLayerStack()
@@ -473,21 +490,11 @@ UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<FIntRect>& iRects, boo
     fence.BeginFence();
     fence.Wait();
 
+    // TODO(GPU-tools): the edited texture is read back to the CPU at each update; keep the texture source on the GPU while editing.
     TSharedPtr<::ULIS::FBlock> dst = mTextureFastUpdateSurface->Block();
     for (const FIntRect& rect : iRects)
     {
-        FImage OutImage;
-        if (!FImageUtils::GetRenderTargetImage(RenderTarget, OutImage, rect))
-            continue;
-
-        RoundFloatImageForBlock(OutImage, dst->Format());
-        ::ULIS::eFormat srcFormat = ULISFormatForRawImageFormat( OutImage.Format );
-        ::ULIS::FBlock src(OutImage.GetWidth(), OutImage.GetHeight(), srcFormat);
-        CopyImageToBlock(OutImage, &src);
-
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(dst->Format());
-        ctx.ConvertFormat(src, *dst, src.Rect(), ::ULIS::FVec2I(rect.Min.X, rect.Min.Y));
-        ctx.Finish();
+        ReadBackRect(RenderTarget, rect, *dst);
     }
 
     mTextureFastUpdateSurface->Invalidate(::ULISUtils::ToULISRectIs(iRects));
@@ -603,18 +610,7 @@ UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
         //Fence ?
         for (const FIntRect& rect : invalidRects)
         {
-            FImage OutImage;
-            if (!FImageUtils::GetRenderTargetImage(RenderTarget, OutImage, rect))
-                continue;
-
-            RoundFloatImageForBlock(OutImage, dst->Format());
-        ::ULIS::eFormat srcFormat = ULISFormatForRawImageFormat( OutImage.Format );
-            ::ULIS::FBlock src(OutImage.GetWidth(), OutImage.GetHeight(), srcFormat);
-            CopyImageToBlock(OutImage, &src);
-
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(dst->Format());
-            ctx.ConvertFormat(src, *dst, src.Rect(), ::ULIS::FVec2I(rect.Min.X, rect.Min.Y));
-            ctx.Finish();
+            ReadBackRect(RenderTarget, rect, *dst);
         }
 
         CopyBlockDataIntoUTexture(dst.Get(), texture);
