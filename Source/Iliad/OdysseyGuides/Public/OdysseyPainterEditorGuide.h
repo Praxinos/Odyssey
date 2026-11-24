@@ -25,6 +25,9 @@ class ODYSSEYGUIDES_API UOdysseyPainterEditorGuide : public UObject
     GENERATED_BODY()
 
 public:
+    /** Guides are editor-only and never cooked. */
+    virtual bool IsEditorOnly() const override { return true; }
+
     /** Returns the shape type represented by this guide. */
     virtual EOdysseyPainterEditorGuideType GetGuideType() const;
 

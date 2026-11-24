@@ -146,12 +146,12 @@ public:
     virtual FIntRect GetDefaultRenderRect() const override;
     virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() const override;
 
+#if WITH_EDITOR
     /** Returns this animation's visual guide collection, if one exists. */
     UOdysseyPainterEditorGuideCollection* GetGuideCollection() const;
     /** Assigns this animation's visual guide collection. */
     void SetGuideCollection(UOdysseyPainterEditorGuideCollection* InCollection);
 
-#if WITH_EDITOR
     virtual UTexture2D* CreateExportTexture(const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory) override;
 #endif
 
@@ -183,8 +183,11 @@ protected:
     UPROPERTY(BlueprintReadOnly, Category = "Odyssey|Animation", meta = (DisplayName = "Layer Stack", LoadBehavior = "LazyOnDemand"))
     TObjectPtr<UOdysseyLayerStack> mLayerStack;
 
+#if WITH_EDITORONLY_DATA
+    /** Visual guides drawn over the animation in the painter editor. Editor-only, stripped from cooked builds. */
     UPROPERTY(Instanced)
     TObjectPtr<UOdysseyPainterEditorGuideCollection> GuideCollection;
+#endif
 
     UPROPERTY(EditAnywhere, Category="Odyssey|Animation")
     EOdysseyAnimationBoundMode LeftBoundMode = EOdysseyAnimationBoundMode::Automatic;

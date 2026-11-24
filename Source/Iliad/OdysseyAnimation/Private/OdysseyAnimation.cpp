@@ -271,6 +271,7 @@ UOdysseyAnimation::CreateRenderingRenderTarget() const
     return renderTarget;
 }
 
+#if WITH_EDITOR
 UOdysseyPainterEditorGuideCollection* UOdysseyAnimation::GetGuideCollection() const
 {
     return GuideCollection;
@@ -280,6 +281,7 @@ void UOdysseyAnimation::SetGuideCollection(UOdysseyPainterEditorGuideCollection*
 {
     GuideCollection = InCollection;
 }
+#endif
 
 EOdysseyAnimationBoundMode
 UOdysseyAnimation::GetLeftBoundMode() const

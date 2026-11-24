@@ -15,6 +15,9 @@ class ODYSSEYGUIDES_API UOdysseyPainterEditorGuideCollection : public UAssetUser
     GENERATED_BODY()
 
 public:
+    /** Guides are editor-only and never cooked. */
+    virtual bool IsEditorOnly() const override { return true; }
+
     /** Guides in display order. Each guide is instanced beneath this collection. */
     UPROPERTY(EditAnywhere, Instanced, Category="Guides")
     TArray<TObjectPtr<UOdysseyPainterEditorGuide>> Guides;
