@@ -214,14 +214,14 @@ msgstr "情報バーをダブルクリックするとパターンの設定が開
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(1430)
 msgctxt "BoardSequenceCustomization,ConvertBindingLabel"
 msgid "Convert Selected Binding(s) To..."
-msgstr ""
+msgstr "選択したバインディングを変換..."
 
 #. Key:	ConvertBindingLabelTooltip
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(1431)
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(1431)
 msgctxt "BoardSequenceCustomization,ConvertBindingLabelTooltip"
 msgid "Convert selected bindings into another binding type"
-msgstr ""
+msgstr "選択したバインディングを別のバインディングタイプに変換する"
 
 #. Key:	ImportExportMenuSectionName
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(1475)
@@ -263,7 +263,7 @@ msgstr "このオブジェクトから FBX アニメーションをエクスポ�
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(1940)
 msgctxt "BoardSequenceCustomization,invalid-actor-type-to-drop-in-board-sequence"
 msgid "Can't drop this type of actor in board sequence"
-msgstr ""
+msgstr "このタイプのアクタはボードシーケンスにドロップできません"
 
 #. Key:	multiple-animations
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(422)
@@ -774,14 +774,14 @@ msgstr "Odyssey"
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/EposSequenceEditorModule.cpp(204)
 msgctxt "FEposEditorModule,EposSequencerEditorSettingsName"
 msgid "Odyssey - Storyboard Sequencer Editor"
-msgstr ""
+msgstr "Odyssey - ストーリーボード シーケンサー エディタ"
 
 #. Key:	EposSequencerEditorSettingsDescription
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/EposSequenceEditorModule.cpp(205)
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/EposSequenceEditorModule.cpp(205)
 msgctxt "FEposEditorModule,EposSequencerEditorSettingsDescription"
 msgid "Configure the look and feel of the Odyssey Storyboard Sequencer Editor."
-msgstr ""
+msgstr "Odyssey ストーリーボード シーケンサー エディタの外観と操作性を設定する"
 
 #. Key:	AppLabel
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/EposSequenceEditorToolkit.cpp(348)
@@ -1383,14 +1383,14 @@ msgstr "Odyssey"
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(1104)
 msgctxt "ShotSequenceCustomization,ConvertBindingLabel"
 msgid "Convert Selected Binding(s) To..."
-msgstr ""
+msgstr "選択したバインディングを変換..."
 
 #. Key:	ConvertBindingLabelTooltip
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(1105)
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(1105)
 msgctxt "ShotSequenceCustomization,ConvertBindingLabelTooltip"
 msgid "Convert selected bindings into another binding type"
-msgstr ""
+msgstr "選択したバインディングを別のバインディングタイプに変換する"
 
 #. Key:	ImportExportMenuSectionName
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(1149)
@@ -1432,7 +1432,7 @@ msgstr "このオブジェクトから FBX アニメーションをエクスポ�
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(1487)
 msgctxt "ShotSequenceCustomization,invalid-actor-type-to-drop-in-shot-sequence"
 msgid "Can't drop this type of actor in shot sequence"
-msgstr ""
+msgstr "このタイプのアクタはショットシーケンスにドロップできません"
 
 #. Key:	CameraOptions
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/Shot/ShotSequenceCustomization.cpp(598)
@@ -1607,7 +1607,7 @@ msgstr "エラー：パターンが正しくありません"
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(744)
 msgctxt "NewStoryboardDialog,ImageSequenceEmptyList"
 msgid "Error: Nothing to load (check your input path or your pattern)"
-msgstr ""
+msgstr "エラー：読み込むものがありません（入力パスまたはパターンを確認してください）"
 
 #. Key:	SequenceTickFramerateTooLow
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardCreationDialog/NewStoryboardDialog.cpp(758)
@@ -1873,7 +1873,7 @@ msgstr "3D シーンの上に、現在のフレームのノートを表示する
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(182)
 msgctxt "SStoryboardLevelViewport,StoryboardViewportSettingsLabel"
 msgid "Viewport Display Settings"
-msgstr ""
+msgstr "ビューポートの表示設定"
 
 #. Key:	note-settings.display-as-overlay-label
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1824)
@@ -1894,7 +1894,7 @@ msgstr "3D シーンの下に、現在のフレームのノートを表示する
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(183)
 msgctxt "SStoryboardLevelViewport,StoryboardViewportSettingsTooltip"
 msgid "Display Viewport Settings, such as notes, camera bounds, etc."
-msgstr ""
+msgstr "ノート、カメラの境界などのビューポートの設定を表示する"
 
 #. Key:	storyboard-viewport-add-rotation-section
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(2003)
@@ -1929,7 +1929,7 @@ msgstr "ビューポートのズームを設定する"
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(2190)
 msgctxt "SStoryboardLevelViewport,transaction.move-and-scale-actor-distance"
 msgid "Move and Scale Actor Distance"
-msgstr ""
+msgstr "アクタの距離に応じて移動とスケールを行う"
 
 #. Key:	storyboard-viewport-actor-picker-list-section
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(2438)
@@ -1943,7 +1943,7 @@ msgstr "アクタを選択する"
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(2594)
 msgctxt "SStoryboardLevelViewport,transaction.set-camera-focal-length-and-scale-actor"
 msgid "Set Camera Focal Length and Scale Actor"
-msgstr ""
+msgstr "カメラの焦点距離を設定してアクタをスケールする"
 
 #. Key:	StoryboardViewportResetTransform
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(265)
@@ -1957,14 +1957,14 @@ msgstr "回転＆ズームをリセットする"
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(2694)
 msgctxt "SStoryboardLevelViewport,CameraView.Unlock"
 msgid "Unlock Viewport from Camera View"
-msgstr ""
+msgstr "ビューポートをカメラビューからアンロックする"
 
 #. Key:	CameraView.Lock
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(2695)
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(2695)
 msgctxt "SStoryboardLevelViewport,CameraView.Lock"
 msgid "Lock Viewport to Camera View"
-msgstr ""
+msgstr "ビューポートをカメラビューにロックする"
 
 #. Key:	TimeFormat
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(2972)
@@ -1978,14 +1978,14 @@ msgstr "{0}"
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewportCameraBounds.cpp(452)
 msgctxt "StoryboardLevelViewportCameraBounds,storyboard-viewport.camera-bounds.piloting.label"
 msgid "Piloting"
-msgstr ""
+msgstr "パイロット中"
 
 #. Key:	storyboard-viewport-settings.display-playback-track-label
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(117)
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(117)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-playback-track-label"
 msgid "Playback Track"
-msgstr ""
+msgstr "プレイバック トラック"
 
 #. Key:	storyboard-viewport-settings.display-playback-track-tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(118)
@@ -1999,7 +1999,7 @@ msgstr "3D シーンの下に、プレイバック トラックを表示する�
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(139)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-playback-controls-label"
 msgid "Playback Controls"
-msgstr ""
+msgstr "再生のコントロール"
 
 #. Key:	storyboard-viewport-settings.display-playback-controls-tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(140)
@@ -2013,7 +2013,7 @@ msgstr "3D シーンの下に、再生のコントロールを表示する"
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(159)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-in-viewport-label"
 msgid "Notes in Viewport"
-msgstr ""
+msgstr "ビューポート内のノート"
 
 #. Key:	storyboard-viewport-settings.display-in-viewport-tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(160)
@@ -2027,7 +2027,7 @@ msgstr "3D シーンの下に、現在のフレームのノートを表示する
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(181)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-as-overlay-label"
 msgid "Notes as Overlay"
-msgstr ""
+msgstr "オーバーレイとしてのノート"
 
 #. Key:	storyboard-viewport-settings.display-as-overlay-tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(182)
@@ -2041,14 +2041,14 @@ msgstr "3D シーンの上に、現在のフレームのノートを表示する
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(194)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.section.camera-bounds.label"
 msgid "Camera"
-msgstr ""
+msgstr "カメラ"
 
 #. Key:	storyboard-viewport-settings.display-camera-bounds-label
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(209)
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(209)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-camera-bounds-label"
 msgid "Camera Bounds"
-msgstr ""
+msgstr "カメラの境界"
 
 #. Key:	storyboard-viewport-settings.display-camera-bounds-tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(210)
@@ -2062,28 +2062,28 @@ msgstr "3D シーンの現在のカメラのバウンズを表示する"
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(240)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.camera-bounds-color-label"
 msgid "Camera Bounds"
-msgstr ""
+msgstr "カメラの境界"
 
 #. Key:	storyboard-viewport-settings.camera-bounds-color-tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(243)
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(243)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.camera-bounds-color-tooltip"
 msgid "Modify the color of the current camera bounds on the 3D scene."
-msgstr ""
+msgstr "3D シーン上の現在のカメラの境界の色を変更する"
 
 #. Key:	storyboard-viewport-settings.display-camera-piloting-label
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(259)
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(259)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-camera-piloting-label"
 msgid "Camera Piloting"
-msgstr ""
+msgstr "カメラのパイロット"
 
 #. Key:	storyboard-viewport-settings.display-camera-piloting-tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(260)
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(260)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-camera-piloting-tooltip"
 msgid "Display camera piloting indication."
-msgstr ""
+msgstr "カメラのパイロット表示を表示する"
 
 #. Key:	storyboard-viewport-settings-tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(37)
@@ -2097,14 +2097,14 @@ msgstr "ストーリーボードのビューポートの設定。"
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(58)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.section.display.label"
 msgid "Display"
-msgstr ""
+msgstr "表示"
 
 #. Key:	storyboard-viewport-settings.display-sequence-infos-label
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(73)
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(73)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-sequence-infos-label"
 msgid "Sequence Infos"
-msgstr ""
+msgstr "シーケンス情報"
 
 #. Key:	storyboard-viewport-settings.display-sequence-infos-tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(74)
@@ -2118,7 +2118,7 @@ msgstr "3D シーンの下に、シーケンス情報を表示する"
 #: Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(95)
 msgctxt "EposSequenceEditorNoteSettings,storyboard-viewport-settings.display-actor-controls-label"
 msgid "Actor Controls"
-msgstr ""
+msgstr "アクタのコントロール"
 
 #. Key:	storyboard-viewport-settings.display-actor-controls-tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(96)
@@ -2622,7 +2622,7 @@ msgstr "セクションをアレンジする。"
 #: Plugins/Odyssey/Source/EposEditor/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(730)
 msgctxt "FCinematicBoardTrackEditor,InvalidAssetType"
 msgid "Can't drop this asset type in board track"
-msgstr ""
+msgstr "このアセットタイプはボードトラックにドロップできません"
 
 #. Key:	UnlockBoards
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardTrackEditor.cpp(900)
@@ -3868,7 +3868,7 @@ msgstr "シングルカメラのカット トラックへのビューポート�
 #: Plugins/Odyssey/Source/EposEditor/EposTracksEditor/Private/Tools/EposSequenceTools.cpp(1018)
 msgctxt "EposSequenceTools,transaction.fit-actor-to-camera-view"
 msgid "Fit Actor to Camera View"
-msgstr ""
+msgstr "アクタをカメラビューにフィットする"
 
 #. Key:	SetTrackName
 #. SourceLocation:	Plugins/Odyssey/Source/EposEditor/EposTracksEditor/Private/Tools/EposSequenceTools.cpp(173)
@@ -4064,14 +4064,14 @@ msgstr "フォルダ"
 #: Plugins/Odyssey/Source/Iliad/OdysseyAnimation/Private/LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.cpp(40)
 msgctxt "Animation,layer-image-raster.type"
 msgid "Raster Layer"
-msgstr ""
+msgstr "ラスターレイヤー"
 
 #. Key:	layer-image-vector.type
 #. SourceLocation:	Plugins/Odyssey/Source/Iliad/OdysseyAnimation/Private/LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.cpp(49)
 #: Plugins/Odyssey/Source/Iliad/OdysseyAnimation/Private/LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.cpp(49)
 msgctxt "Animation,layer-image-vector.type"
 msgid "Vector Layer"
-msgstr ""
+msgstr "ベクターレイヤー"
 
 #. Key:	media-player-factory.errors.no-url-scheme-found
 #. SourceLocation:	Plugins/Odyssey/Source/Iliad/OdysseyAnimation/Private/Media/OdysseyAnimationMediaPlayerFactory.cpp(33)
@@ -4106,35 +4106,35 @@ msgstr "ビデオトラック"
 #: Plugins/Odyssey/Source/Iliad/OdysseyAnimation/Private/OdysseyAnimationNamingTokens.cpp(106)
 msgctxt "OdysseyAnimationNamingTokens,FrameRateToken"
 msgid "FrameRate"
-msgstr ""
+msgstr "フレームレート"
 
 #. Key:	namespace.label
 #. SourceLocation:	Plugins/Odyssey/Source/Iliad/OdysseyAnimation/Private/OdysseyAnimationNamingTokens.cpp(44)
 #: Plugins/Odyssey/Source/Iliad/OdysseyAnimation/Private/OdysseyAnimationNamingTokens.cpp(44)
 msgctxt "OdysseyAnimationNamingTokens,namespace.label"
 msgid "Odyssey Animation"
-msgstr ""
+msgstr "Odyssey アニメーション"
 
 #. Key:	NameToken
 #. SourceLocation:	Plugins/Odyssey/Source/Iliad/OdysseyAnimation/Private/OdysseyAnimationNamingTokens.cpp(58)
 #: Plugins/Odyssey/Source/Iliad/OdysseyAnimation/Private/OdysseyAnimationNamingTokens.cpp(58)
 msgctxt "OdysseyAnimationNamingTokens,NameToken"
 msgid "Name"
-msgstr ""
+msgstr "名称"
 
 #. Key:	WidthToken
 #. SourceLocation:	Plugins/Odyssey/Source/Iliad/OdysseyAnimation/Private/OdysseyAnimationNamingTokens.cpp(74)
 #: Plugins/Odyssey/Source/Iliad/OdysseyAnimation/Private/OdysseyAnimationNamingTokens.cpp(74)
 msgctxt "OdysseyAnimationNamingTokens,WidthToken"
 msgid "Width"
-msgstr ""
+msgstr "幅"
 
 #. Key:	HeightToken
 #. SourceLocation:	Plugins/Odyssey/Source/Iliad/OdysseyAnimation/Private/OdysseyAnimationNamingTokens.cpp(90)
 #: Plugins/Odyssey/Source/Iliad/OdysseyAnimation/Private/OdysseyAnimationNamingTokens.cpp(90)
 msgctxt "OdysseyAnimationNamingTokens,HeightToken"
 msgid "Height"
-msgstr ""
+msgstr "高さ"
 
 #. Key:	entry-color.type
 #. SourceLocation:	Plugins/Odyssey/Source/Iliad/OdysseyPalette/Private/Palette/OdysseyPaletteEntryColor.cpp(12)
@@ -4400,7 +4400,7 @@ msgstr "Odyssey"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyFlipbookEditor/Private/OdysseyFlipbookEditorModule.cpp(90)
 msgctxt "FlipbookEditor,settings.name"
 msgid "Odyssey - Flipbook Editor"
-msgstr ""
+msgstr "Odyssey - フリップブックエディタ"
 
 #. Key:	settings.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyFlipbookEditor/Private/OdysseyFlipbookEditorModule.cpp(91)
@@ -4442,7 +4442,7 @@ msgstr "レイヤースタックのショートカット"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Commands/OdysseyLayerStackEditorCommands.cpp(21)
 msgctxt "LayerStackEditor,editor-commands.category.layer-blend-mode-shortcuts-category"
 msgid "Layer Blend Mode Shortcuts"
-msgstr ""
+msgstr "レイヤーのブレンドモードのショートカット"
 
 #. Key:	commands.set-current-layer-blend-mode.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Commands/OdysseyLayerStackEditorCommands.cpp(77)
@@ -4470,147 +4470,147 @@ msgstr "{0} 枚のレイヤー"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(446)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.activate-layer"
 msgid "Activate Selected Layers"
-msgstr ""
+msgstr "選択したレイヤーをアクティブにする"
 
 #. Key:	global-layers-shortcuts.transaction.inactivate-layer
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(453)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(453)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.inactivate-layer"
 msgid "Inactivate Selected Layers"
-msgstr ""
+msgstr "選択したレイヤーを非アクティブにする"
 
 #. Key:	global-layers-shortcuts.transaction.toggle-layer-activated
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(465)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(465)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.toggle-layer-activated"
 msgid "Activate/Inactivate Selected Layers"
-msgstr ""
+msgstr "選択したレイヤーをアクティブ／非アクティブにする"
 
 #. Key:	global-layers-shortcuts.transaction.lock-layers
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(472)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(472)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.lock-layers"
 msgid "Lock Selected Layers"
-msgstr ""
+msgstr "選択したレイヤーをロックする"
 
 #. Key:	global-layers-shortcuts.transaction.unlock-layer
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(479)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(479)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.unlock-layer"
 msgid "Unlock Selected Layers"
-msgstr ""
+msgstr "選択したレイヤーをアンロックする"
 
 #. Key:	global-layers-shortcuts.transaction.toggle-layer-locked
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(491)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(491)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.toggle-layer-locked"
 msgid "Lock/Unlock Selected Layers"
-msgstr ""
+msgstr "選択したレイヤーをロック／アンロックする"
 
 #. Key:	global-layers-shortcuts.transaction.activate-layer-inherits-alpha
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(498)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(498)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.activate-layer-inherits-alpha"
 msgid "Activate Selected Layers' Alpha Inheritance"
-msgstr ""
+msgstr "選択したレイヤーのアルファ継承をアクティブにする"
 
 #. Key:	global-layers-shortcuts.transaction.inactivate-layer-inherits-alpha
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(505)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(505)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.inactivate-layer-inherits-alpha"
 msgid "Inactivate Selected Layers' Alpha Inheritance"
-msgstr ""
+msgstr "選択したレイヤーのアルファ継承を非アクティブにする"
 
 #. Key:	global-layers-shortcuts.transaction.toggle-layer-inherits-alpha
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(517)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(517)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.toggle-layer-inherits-alpha"
 msgid "Toggle Selected Layers' Alpha Inheritance"
-msgstr ""
+msgstr "選択したレイヤーのアルファ継承を切り替える"
 
 #. Key:	global-layers-shortcuts.transaction.lock-all-layers
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(574)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(574)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.lock-all-layers"
 msgid "Lock All Layers"
-msgstr ""
+msgstr "全てのレイヤーをロックする"
 
 #. Key:	global-layers-shortcuts.transaction.unlock-all-layers
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(588)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(588)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.unlock-all-layers"
 msgid "Unock All Layers"
-msgstr ""
+msgstr "全てのレイヤーをアンロックする"
 
 #. Key:	global-layers-shortcuts.transaction.activate-all-layers
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(602)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(602)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.activate-all-layers"
 msgid "Activate All Layers"
-msgstr ""
+msgstr "全てのレイヤーをアクティブにする"
 
 #. Key:	global-layers-shortcuts.transaction.inactivate-all-layers
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(616)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(616)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.inactivate-all-layers"
 msgid "Inactivate All Layers"
-msgstr ""
+msgstr "全てのレイヤーを非アクティブにする"
 
 #. Key:	global-layers-shortcuts.transaction.diaply-only-current-layer
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(630)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(630)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.diaply-only-current-layer"
 msgid "Display Only Current layer"
-msgstr ""
+msgstr "現在のレイヤーのみを表示する"
 
 #. Key:	global-layers-shortcuts.transaction.collapse-all-layers
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(659)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(659)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.collapse-all-layers"
 msgid "Collapse All Layers"
-msgstr ""
+msgstr "全てのレイヤーを畳む"
 
 #. Key:	global-layers-shortcuts.transaction.uncollapse-all-layers
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(673)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(673)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.uncollapse-all-layers"
 msgid "Uncollapse All Layers"
-msgstr ""
+msgstr "全てのレイヤーを広げる"
 
 #. Key:	global-layers-shortcuts.transaction.open-all-folder-layers
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(687)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(687)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.open-all-folder-layers"
 msgid "Open All Folder Layers"
-msgstr ""
+msgstr "全てのフォルダ レイヤーを開く"
 
 #. Key:	global-layers-shortcuts.transaction.close-all-folder-layers
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(701)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(701)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.close-all-folder-layers"
 msgid "Close All Folder Layers"
-msgstr ""
+msgstr "全てのフォルダ レイヤーを閉じる"
 
 #. Key:	global-layers-shortcuts.transaction.set-current-layer-blend-mode-to-next-blend-mode
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(722)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(722)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.set-current-layer-blend-mode-to-next-blend-mode"
 msgid "Set Current Layer Blend Mode To Next Blend Mode"
-msgstr ""
+msgstr "現在のレイヤーのブレンドモードを次のブレンドモードに設定する"
 
 #. Key:	global-layers-shortcuts.transaction.set-current-layer-blend-mode-to-previous-blend-mode
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(757)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(757)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.set-current-layer-blend-mode-to-previous-blend-mode"
 msgid "Set Current Layer Blend Mode To Previous Blend Mode"
-msgstr ""
+msgstr "現在のレイヤーのブレンドモードを前のブレンドモードに設定する"
 
 #. Key:	global-layers-shortcuts.transaction.set-current-layer-blend-mode
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(792)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Shortcuts/OdysseyLayerStackGlobalShortcuts.cpp(792)
 msgctxt "LayerStackEditor,global-layers-shortcuts.transaction.set-current-layer-blend-mode"
 msgid "Set Current Layer Blend Mode"
-msgstr ""
+msgstr "現在のレイヤーのブレンドモードを設定する"
 
 #. Key:	layer-image-raster.transaction.set-opacity
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerRow.cpp(30)
@@ -4624,7 +4624,7 @@ msgstr "レイヤーの不透明度を変更する"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerRow.cpp(311)
 msgctxt "LayerStackEditor,layer.inherits-alpha.tooltip."
 msgid "Inherit Alpha (Clipping Mask)\nWhen activated the layer inherits Alpha from the layers underneath.\nNot compatible with some Blend Modes (ex: Erase, Stencil)."
-msgstr ""
+msgstr "アルファを継承（クリッピングマスク）\n有効にすると、レイヤーは下にあるレイヤーからアルファを継承します。\n一部のブレンドモード（例：消去、ステンシル）とは互換性がありません。"
 
 #. Key:	layer.transaction.set-name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerRow.cpp(420)
@@ -4666,7 +4666,7 @@ msgstr "追加する"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(134)
 msgctxt "LayerStackEditor,header-row-entry.other-layers-opacity.label"
 msgid "Other layers opacity"
-msgstr ""
+msgstr "他のレイヤーの不透明度"
 
 #. Key:	header-row.is-layer-locked.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(160)
@@ -4729,7 +4729,7 @@ msgstr "フレーム #{0} にセルマークを設定する"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Animation/OdysseyPainterEditorAnimationCommands.cpp(108)
 msgctxt "AnimationEditor,commands.set-cell-mark-at-frame.tooltip"
 msgid "Set the Cell Mark #{0} on the current frame"
-msgstr ""
+msgstr "現在のフレームにセルマーク #{0} を設定する"
 
 #. Key:	commands.flip.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Animation/OdysseyPainterEditorAnimationCommands.cpp(126)
@@ -4792,7 +4792,7 @@ msgstr "セルマーク #{0} を設定する"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Animation/OdysseyPainterEditorAnimationCommands.cpp(89)
 msgctxt "AnimationEditor,commands.set-cell-mark.tooltip"
 msgid "Set the Cell Mark #{0} on the first frame in selected cells"
-msgstr ""
+msgstr "選択されたセルの最初のフレームにセルマーク #{0} を設定する"
 
 #. Key:	flip-detail-customization.keys-cell-mark.custum-row.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Animation/OdysseyPainterEditorAnimationFlipSystem.cpp(105)
@@ -5107,14 +5107,14 @@ msgstr "キャンバス全体をクリアする"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(110)
 msgctxt "PainterEditor,commands.set-tool-alpha-blend-mode.label"
 msgid "Set Tool's Alpha Blend Mode to {0}%"
-msgstr ""
+msgstr "ツールのアルファ ブレンドモードを {0}% に設定する"
 
 #. Key:	commands.set-tool-alpha-blend-mode.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(111)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(111)
 msgctxt "PainterEditor,commands.set-tool-alpha-blend-mode.tooltip"
 msgid "Set Tool's Alpha Blend Mode to {0}% (forces the blend mode to be composite)"
-msgstr ""
+msgstr "ツールのアルファ ブレンドモードを {0}% に設定する（ブレンドモードを強制的にコンポジットにします）"
 
 #. Key:	commands.change-layer-opacity.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(166)
@@ -5142,21 +5142,21 @@ msgstr "Odyssey のペインターエディタ"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(26)
 msgctxt "PainterEditor,editor-commands.category.tool-blend-mode-shortcuts"
 msgid "Tool Blend Mode Shortcuts"
-msgstr ""
+msgstr "ツールのブレンドモードのショートカット"
 
 #. Key:	editor-commands.category.tool-color-blend-mode-shortcuts
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(27)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(27)
 msgctxt "PainterEditor,editor-commands.category.tool-color-blend-mode-shortcuts"
 msgid "Tool Color Blend Mode Shortcuts"
-msgstr ""
+msgstr "ツールのカラー ブレンドモードのショートカット"
 
 #. Key:	editor-commands.category.tool-alpha-blend-mode-shortcuts
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(28)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(28)
 msgctxt "PainterEditor,editor-commands.category.tool-alpha-blend-mode-shortcuts"
 msgid "Tool Alpha Blend Mode Shortcuts"
-msgstr ""
+msgstr "ツールのアルファ ブレンドモードのショートカット"
 
 #. Key:	editor-commands.category.brushes-ans-strokes-shortcuts
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(29)
@@ -5205,28 +5205,28 @@ msgstr "インポートとエクスポートのショートカット"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(65)
 msgctxt "PainterEditor,commands.set-tool-blend-mode.label"
 msgid "Set Tool's Blend Mode to {0}%"
-msgstr ""
+msgstr "ツールのブレンドモードを {0}% に設定する"
 
 #. Key:	commands.set-tool-blend-mode.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(66)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(66)
 msgctxt "PainterEditor,commands.set-tool-blend-mode.tooltip"
 msgid "Set Tool's Blend Mode to {0}%"
-msgstr ""
+msgstr "ツールのブレンドモードを {0}% に設定する"
 
 #. Key:	commands.set-tool-color-blend-mode.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(87)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(87)
 msgctxt "PainterEditor,commands.set-tool-color-blend-mode.label"
 msgid "Set Tool's Color Blend Mode to {0}%"
-msgstr ""
+msgstr "ツールのカラー ブレンドモードを {0}% に設定する"
 
 #. Key:	commands.set-tool-color-blend-mode.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(88)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorCommands.cpp(88)
 msgctxt "PainterEditor,commands.set-tool-color-blend-mode.tooltip"
 msgid "Set Tool's Color Blend Mode to {0}% (forces the blend mode to be composite)"
-msgstr ""
+msgstr "ツールのカラー ブレンドモードを {0}% に設定する（ブレンドモードを強制的にコンポジットにします）"
 
 #. Key:	editor-mode.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(138)
@@ -5240,7 +5240,7 @@ msgstr "Odyssey"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(178)
 msgctxt "PainterEditor,user-settings.painter-editor.name"
 msgid "Odyssey - Painter Editor"
-msgstr ""
+msgstr "Odyssey - ペインターエディタ"
 
 #. Key:	user-settings.painter-editor.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(179)
@@ -5254,7 +5254,7 @@ msgstr "Odyssey エディタの外観と操作性を設定する"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(183)
 msgctxt "PainterEditor,project-settings.2d-animation-editor.name"
 msgid "Odyssey - 2D Animation"
-msgstr ""
+msgstr "Odyssey - 2D アニメーション"
 
 #. Key:	project-settings.2d-animation-editor.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(184)
@@ -5268,7 +5268,7 @@ msgstr "2D アニメーション エディタの外観と操作性を構成す�
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(188)
 msgctxt "PainterEditor,user-settings.2d-animation-editor.name"
 msgid "Odyssey - 2D Animation Editor"
-msgstr ""
+msgstr "Odyssey - 2D アニメーション エディタ"
 
 #. Key:	user-settings.2d-animation-editor.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(189)
@@ -5303,28 +5303,28 @@ msgstr "参照セルに変換中"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellsShortcuts.cpp(489)
 msgctxt "AnimationEditor,timeline-cells.transaction.add-cells-before"
 msgid "Add new cell(s) before current cell"
-msgstr ""
+msgstr "現在のセルの前に新しいセルを追加する"
 
 #. Key:	timeline-cells.transaction.add-cells-after
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellsShortcuts.cpp(490)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellsShortcuts.cpp(490)
 msgctxt "AnimationEditor,timeline-cells.transaction.add-cells-after"
 msgid "Add new cell(s) after current cell"
-msgstr ""
+msgstr "現在のセルの後に新しいセルを追加する"
 
 #. Key:	timeline-cells.transaction.decrease-selected-cells-exposure
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellsShortcuts.cpp(578)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellsShortcuts.cpp(578)
 msgctxt "AnimationEditor,timeline-cells.transaction.decrease-selected-cells-exposure"
 msgid "Decrease Selected Cells Exposure"
-msgstr ""
+msgstr "選択されたセルのエクスポージャーを減らす"
 
 #. Key:	timeline-cells.transaction.increase-selected-cells-exposure
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellsShortcuts.cpp(579)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellsShortcuts.cpp(579)
 msgctxt "AnimationEditor,timeline-cells.transaction.increase-selected-cells-exposure"
 msgid "Increase Selected Cells Exposure"
-msgstr ""
+msgstr "選択されたセルのエクスポージャーを増やす"
 
 #. Key:	timeline-cells.dialog.set-selected-cells-exposure.title
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellsShortcuts.cpp(620)
@@ -5345,28 +5345,28 @@ msgstr "エクスポージャー"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyAnimationGlobalCellsShortcuts.cpp(112)
 msgctxt "AnimationEditor,global-cells-shortcuts.transaction.break-cell"
 msgid "Break Cell"
-msgstr ""
+msgstr "セルを分割する"
 
 #. Key:	global-cells-shortcuts.transaction.remove-all-cell-marks
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyAnimationGlobalCellsShortcuts.cpp(184)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyAnimationGlobalCellsShortcuts.cpp(184)
 msgctxt "AnimationEditor,global-cells-shortcuts.transaction.remove-all-cell-marks"
 msgid "Remove All Cell Marks"
-msgstr ""
+msgstr "全てのセルマークを削除する"
 
 #. Key:	global-cells-shortcuts.transaction.remove-cell-mark
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyAnimationGlobalCellsShortcuts.cpp(222)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyAnimationGlobalCellsShortcuts.cpp(222)
 msgctxt "AnimationEditor,global-cells-shortcuts.transaction.remove-cell-mark"
 msgid "Remove Cell Mark"
-msgstr ""
+msgstr "セルマークを削除する"
 
 #. Key:	global-cells-shortcuts.transaction.set-cell-mark
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyAnimationGlobalCellsShortcuts.cpp(260)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyAnimationGlobalCellsShortcuts.cpp(260)
 msgctxt "AnimationEditor,global-cells-shortcuts.transaction.set-cell-mark"
 msgid "Set Cell Mark"
-msgstr ""
+msgstr "セルマークを設定する"
 
 #. Key:	global-cells-shortcuts.transaction.remove-cell-mark-at-frame
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyAnimationGlobalCellsShortcuts.cpp(335)
@@ -5380,7 +5380,7 @@ msgstr "フレームのセルマークを削除する"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyAnimationGlobalCellsShortcuts.cpp(365)
 msgctxt "AnimationEditor,global-cells-shortcuts.transaction.set-cell-mark-at-frame"
 msgid "Set Cell Mark at Frame"
-msgstr ""
+msgstr "フレームにセルマークを設定する"
 
 #. Key:	timeline.shortcuts.set-animation-left-bound-manual
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyAnimationGlobalTimelineHeaderShortcuts.cpp(33)
@@ -5415,63 +5415,63 @@ msgstr "アニメーションの右の境界を手動に設定する"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorAnimationExportShortcuts.cpp(137)
 msgctxt "PainterEditor,animation.import-images.dialog.title"
 msgid "Select Images to import"
-msgstr ""
+msgstr "インポートする画像を選択する"
 
 #. Key:	animation-editor.import-textures-dialog.title
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorAnimationExportShortcuts.cpp(159)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorAnimationExportShortcuts.cpp(159)
 msgctxt "PainterEditor,animation-editor.import-textures-dialog.title"
 msgid "Import Images"
-msgstr ""
+msgstr "画像をインポートする"
 
 #. Key:	animation-editor.import-texture-sequence.open-asset-dialog.title
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorAnimationExportShortcuts.cpp(187)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorAnimationExportShortcuts.cpp(187)
 msgctxt "PainterEditor,animation-editor.import-texture-sequence.open-asset-dialog.title"
 msgid "Import Texture Sequence"
-msgstr ""
+msgstr "テクスチャシーケンスをインポートする"
 
 #. Key:	animation-editor.import-texture-sequence-dialog.title
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorAnimationExportShortcuts.cpp(207)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorAnimationExportShortcuts.cpp(207)
 msgctxt "PainterEditor,animation-editor.import-texture-sequence-dialog.title"
 msgid "Import Texture Sequence"
-msgstr ""
+msgstr "テクスチャシーケンスをインポートする"
 
 #. Key:	export-as-flipbook.save-asset-dialog.title
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorAnimationExportShortcuts.cpp(75)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorAnimationExportShortcuts.cpp(75)
 msgctxt "PainterEditor,export-as-flipbook.save-asset-dialog.title"
 msgid "Export As Flipbook"
-msgstr ""
+msgstr "フリップブックとしてエクスポートする"
 
 #. Key:	global-layers-shortcuts.transaction.set-layer-opacity
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorGlobalLayersShortcuts.cpp(127)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorGlobalLayersShortcuts.cpp(127)
 msgctxt "PainterEditor,global-layers-shortcuts.transaction.set-layer-opacity"
 msgid "Change Layer Opacity"
-msgstr ""
+msgstr "レイヤーの不透明度を変更する"
 
 #. Key:	global-layers-shortcuts.transaction.create-new-layer
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorGlobalLayersShortcuts.cpp(62)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorGlobalLayersShortcuts.cpp(62)
 msgctxt "PainterEditor,global-layers-shortcuts.transaction.create-new-layer"
 msgid "Add Layer"
-msgstr ""
+msgstr "レイヤーを追加する"
 
 #. Key:	texture.import-images.dialog.title
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorTextureExportShortcuts.cpp(104)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorTextureExportShortcuts.cpp(104)
 msgctxt "TextureEditor,texture.import-images.dialog.title"
 msgid "Select Images to import"
-msgstr ""
+msgstr "インポートする画像を選択する"
 
 #. Key:	import-images-dialog.title
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorTextureExportShortcuts.cpp(126)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorTextureExportShortcuts.cpp(126)
 msgctxt "TextureEditor,import-images-dialog.title"
 msgid "Import Images"
-msgstr ""
+msgstr "画像をインポートする"
 
 #. Key:	import-textures-as-layers.open-asset-dialog.title
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorTextureExportShortcuts.cpp(154)
@@ -5485,7 +5485,7 @@ msgstr "テクスチャをレイヤーとしてインポート"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Shortcuts/Global/OdysseyPainterEditorTextureExportShortcuts.cpp(174)
 msgctxt "TextureEditor,import-textures-dialog.title"
 msgid "Import Textures"
-msgstr ""
+msgstr "テクスチャをインポートする"
 
 #. Key:	actions.clear
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Sources/OdysseyPainterEditorAnimationSource.cpp(248)
@@ -5723,56 +5723,56 @@ msgstr "テクスチャのインポート／エクスポート"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorLayerStackTab.cpp(129)
 msgctxt "TextureEditor,layerstack-tab.file-menu.import-submenu.name"
 msgid "Import"
-msgstr ""
+msgstr "インポート"
 
 #. Key:	layerstack-tab.file-menu.import-submenu.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorLayerStackTab.cpp(130)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorLayerStackTab.cpp(130)
 msgctxt "TextureEditor,layerstack-tab.file-menu.import-submenu.tooltip"
 msgid "Contains Import actions"
-msgstr ""
+msgstr "インポートアクションが含まれています"
 
 #. Key:	layerstack-tab.file-menu.export-submenu.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorLayerStackTab.cpp(137)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorLayerStackTab.cpp(137)
 msgctxt "TextureEditor,layerstack-tab.file-menu.export-submenu.name"
 msgid "Export"
-msgstr ""
+msgstr "エクスポート"
 
 #. Key:	layerstack-tab.file-menu.export-submenu.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorLayerStackTab.cpp(138)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorLayerStackTab.cpp(138)
 msgctxt "TextureEditor,layerstack-tab.file-menu.export-submenu.tooltip"
 msgid "Contains Export actions"
-msgstr ""
+msgstr "エクスポートアクションが含まれています"
 
 #. Key:	layerstack-tab.file-menu.import-image.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorLayerStackTab.cpp(156)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorLayerStackTab.cpp(156)
 msgctxt "TextureEditor,layerstack-tab.file-menu.import-image.name"
 msgid "Images..."
-msgstr ""
+msgstr "画像..."
 
 #. Key:	layerstack-tab.file-menu.import-texture.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorLayerStackTab.cpp(162)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorLayerStackTab.cpp(162)
 msgctxt "TextureEditor,layerstack-tab.file-menu.import-texture.name"
 msgid "Textures..."
-msgstr ""
+msgstr "テクスチャ..."
 
 #. Key:	layerstack-tab.file-menu.export-image.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorLayerStackTab.cpp(172)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorLayerStackTab.cpp(172)
 msgctxt "TextureEditor,layerstack-tab.file-menu.export-image.name"
 msgid "As Images..."
-msgstr ""
+msgstr "画像として..."
 
 #. Key:	layerstack-tab.file-menu.export-texture.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorLayerStackTab.cpp(178)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorLayerStackTab.cpp(178)
 msgctxt "TextureEditor,layerstack-tab.file-menu.export-texture.name"
 msgid "As Textures..."
-msgstr ""
+msgstr "テクスチャとして..."
 
 #. Key:	layerstack-tab.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorLayerStackTab.cpp(54)
@@ -5800,35 +5800,35 @@ msgstr "テクスチャの詳細"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorToolCollectionTab.cpp(325)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.section-settings.name"
 msgid "Settings"
-msgstr ""
+msgstr "設定"
 
 #. Key:	tool-collection.tool-tile.context-menu.settings.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorToolCollectionTab.cpp(328)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorToolCollectionTab.cpp(328)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.settings.name"
 msgid "Settings"
-msgstr ""
+msgstr "設定"
 
 #. Key:	tool-collection.tool-tile.context-menu.settings.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorToolCollectionTab.cpp(329)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorToolCollectionTab.cpp(329)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.settings.tooltip"
 msgid "Modify some settings."
-msgstr ""
+msgstr "一部の設定を変更する"
 
 #. Key:	tool-collection-tab.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorToolCollectionTab.cpp(49)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorToolCollectionTab.cpp(49)
 msgctxt "PainterEditor,tool-collection-tab.name"
 msgid "ToolCollection"
-msgstr ""
+msgstr "ツールコレクション"
 
 #. Key:	ToolCollection.add-tool-collection
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorToolCollectionTab.cpp(87)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorToolCollectionTab.cpp(87)
 msgctxt "PainterEditor,ToolCollection.add-tool-collection"
 msgid "Add Tool Collection"
-msgstr ""
+msgstr "ツールコレクションを追加する"
 
 #. Key:	tools-tab.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorToolsTab.cpp(36)
@@ -5856,112 +5856,112 @@ msgstr "このタブは、ベクターシーンを編集しているときのみ
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(136)
 msgctxt "PainterEditor,viewport.background.menu.name"
 msgid "Background"
-msgstr ""
+msgstr "背景"
 
 #. Key:	viewport.background.menu.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(137)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(137)
 msgctxt "PainterEditor,viewport.background.menu.tooltip"
 msgid "Manage the background of the viewport and canvas"
-msgstr ""
+msgstr "ビューポートとキャンバスの背景を管理する"
 
 #. Key:	viewport.background-color.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(212)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(212)
 msgctxt "PainterEditor,viewport.background-color.label"
 msgid "Color"
-msgstr ""
+msgstr "色"
 
 #. Key:	viewport.background-color.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(215)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(215)
 msgctxt "PainterEditor,viewport.background-color.tooltip"
 msgid "Modify the background color of the viewport."
-msgstr ""
+msgstr "ビューポートの背景色を変更する"
 
 #. Key:	viewport.checker-color-one.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(262)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(262)
 msgctxt "PainterEditor,viewport.checker-color-one.label"
 msgid "Color One"
-msgstr ""
+msgstr "色 1"
 
 #. Key:	viewport.checker-color-one.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(265)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(265)
 msgctxt "PainterEditor,viewport.checker-color-one.tooltip"
 msgid "Modify the checker color one of the canvas."
-msgstr ""
+msgstr "キャンバスのチェッカーの 1 つ目の色を変更する"
 
 #. Key:	viewport.checker-color-two.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(312)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(312)
 msgctxt "PainterEditor,viewport.checker-color-two.label"
 msgid "Color Two"
-msgstr ""
+msgstr "色 2"
 
 #. Key:	viewport.checker-color-two.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(315)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(315)
 msgctxt "PainterEditor,viewport.checker-color-two.tooltip"
 msgid "Modify the checker color two of the canvas."
-msgstr ""
+msgstr "キャンバスのチェッカーの 2 つ目の色を変更する"
 
 #. Key:	viewport.checker-size.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(373)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(373)
 msgctxt "PainterEditor,viewport.checker-size.label"
 msgid "Size"
-msgstr ""
+msgstr "サイズ"
 
 #. Key:	viewport.checker-size.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(376)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(376)
 msgctxt "PainterEditor,viewport.checker-size.tooltip"
 msgid "Modify the checker size of the canvas."
-msgstr ""
+msgstr "キャンバスのチェッカーのサイズを変更する"
 
 #. Key:	viewport.checker-preset.entry.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(435)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(435)
 msgctxt "PainterEditor,viewport.checker-preset.entry.tooltip"
 msgid "Preset \"{3}\":\n- Color 1: {0}\n- Color 2: {1}\n- Size: {2}px"
-msgstr ""
+msgstr "プリセット「{3}」：\n- 色 1：{0}\n- 色 2：{1}\n- サイズ：{2}px"
 
 #. Key:	viewport.checker-preset-open-settings.entry.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(458)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(458)
 msgctxt "PainterEditor,viewport.checker-preset-open-settings.entry.label"
 msgid "Open Preset Settings..."
-msgstr ""
+msgstr "プリセットの設定を開く..."
 
 #. Key:	viewport.checker-preset-open-settings.entry.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(459)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(459)
 msgctxt "PainterEditor,viewport.checker-preset-open-settings.entry.tooltip"
 msgid "Open the preset settings panel"
-msgstr ""
+msgstr "プリセットの設定パネルを開く"
 
 #. Key:	section.viewport.background.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(476)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(476)
 msgctxt "PainterEditor,section.viewport.background.label"
 msgid "Viewport"
-msgstr ""
+msgstr "ビューポート"
 
 #. Key:	section.canvas.background-checker.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(484)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(484)
 msgctxt "PainterEditor,section.canvas.background-checker.label"
 msgid "Canvas Checkboard"
-msgstr ""
+msgstr "キャンバスのチェッカーボード"
 
 #. Key:	section.canvas.background-checker-presets.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(494)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(494)
 msgctxt "PainterEditor,section.canvas.background-checker-presets.label"
 msgid "Presets"
-msgstr ""
+msgstr "プリセット"
 
 #. Key:	viewport-tab.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tabs/OdysseyPainterEditorViewportTab.cpp(53)
@@ -6003,35 +6003,35 @@ msgstr "プロパティが変更されました"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Texture/OdysseyPainterEditorTextureCommands.cpp(16)
 msgctxt "TextureEditor,editor-commands.name"
 msgid "Odyssey Texture Editor"
-msgstr ""
+msgstr "Odyssey のテクスチャエディタ"
 
 #. Key:	editor-commands.category.import-export-shortcuts
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Texture/OdysseyPainterEditorTextureCommands.cpp(18)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Texture/OdysseyPainterEditorTextureCommands.cpp(18)
 msgctxt "TextureEditor,editor-commands.category.import-export-shortcuts"
 msgid "Import & Export Shortcuts"
-msgstr ""
+msgstr "インポートとエクスポートのショートカット"
 
 #. Key:	LayerStack
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Texture/OdysseyPainterEditorTextureImport.cpp(39)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Texture/OdysseyPainterEditorTextureImport.cpp(39)
 msgctxt "FOdysseyPainterEditorTextureImport,LayerStack"
 msgid "Import Textures"
-msgstr ""
+msgstr "テクスチャをインポートする"
 
 #. Key:	texture-editor.import-texture-dialog.progress-bar.title
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Texture/OdysseyPainterEditorTextureImport.cpp(43)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Texture/OdysseyPainterEditorTextureImport.cpp(43)
 msgctxt "FOdysseyPainterEditorTextureImport,texture-editor.import-texture-dialog.progress-bar.title"
 msgid "Importing Textures"
-msgstr ""
+msgstr "テクスチャのインポート中"
 
 #. Key:	asset-type-actions.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/ToolCollection/OdysseyToolCollectionAssetTypeActions.cpp(30)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/ToolCollection/OdysseyToolCollectionAssetTypeActions.cpp(30)
 msgctxt "OdysseyPainterEditor,asset-type-actions.name"
 msgid "2D Paint Tool Collection"
-msgstr ""
+msgstr "2D ペイント ツールコレクション"
 
 #. Key:	color-picker-tool.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.cpp(123)
@@ -6157,14 +6157,14 @@ msgstr "ツールオプション"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.cpp(588)
 msgctxt "PainterEditor,actions.raster.selection.clear"
 msgid "Clear Raster Selection"
-msgstr ""
+msgstr "ラスター選択をクリアする"
 
 #. Key:	actions.raster.selection.invert
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.cpp(595)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.cpp(595)
 msgctxt "PainterEditor,actions.raster.selection.invert"
 msgid "Invert Raster Selection"
-msgstr ""
+msgstr "ラスター選択を反転する"
 
 #. Key:	raster-drawing-tool.transaction.paint-stroke
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.cpp(366)
@@ -6206,21 +6206,21 @@ msgstr "ストロークを消す"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyTool.cpp(1105)
 msgctxt "PainterEditor,raster-liquify-tool.tooltip"
 msgid "Liquify Tool"
-msgstr ""
+msgstr "ゆがみツール"
 
 #. Key:	raster-liquify-tool.transaction.reset
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyTool.cpp(764)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyTool.cpp(764)
 msgctxt "PainterEditor,raster-liquify-tool.transaction.reset"
 msgid "Reset Liquify"
-msgstr ""
+msgstr "ゆがみをリセットする"
 
 #. Key:	raster-liquify-tool.transaction.liquify
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyTool.cpp(891)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyTool.cpp(891)
 msgctxt "PainterEditor,raster-liquify-tool.transaction.liquify"
 msgid "Raster Liquify Tool"
-msgstr ""
+msgstr "ラスター ゆがみツール"
 
 #. Key:	raster-paint-bucket-tool.transaction.paint-stroke
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(213)
@@ -6276,28 +6276,28 @@ msgstr "プリミティブ描画ツール"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(220)
 msgctxt "OdysseyPainterEditorRasterSelectionTool,actions.raster.selection.add"
 msgid "Add Raster Selection"
-msgstr ""
+msgstr "ラスター選択に追加する"
 
 #. Key:	actions.raster.selection.substract
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(225)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(225)
 msgctxt "OdysseyPainterEditorRasterSelectionTool,actions.raster.selection.substract"
 msgid "Substract Raster Selection"
-msgstr ""
+msgstr "ラスター選択から削除する"
 
 #. Key:	actions.raster.selection
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(230)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(230)
 msgctxt "OdysseyPainterEditorRasterSelectionTool,actions.raster.selection"
 msgid "Raster Selection"
-msgstr ""
+msgstr "ラスター選択"
 
 #. Key:	raster-selection-tool.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(80)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(80)
 msgctxt "OdysseyPainterEditorRasterSelectionTool,raster-selection-tool.tooltip"
 msgid "Selection Tool"
-msgstr ""
+msgstr "選択ツール"
 
 #. Key:	raster-transform-tool.top-tab.flip_vertical
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(107)
@@ -6311,7 +6311,7 @@ msgstr "選択範囲を垂直に反転する"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(725)
 msgctxt "PainterEditor,actions.raster.transform.apply"
 msgid "Apply transform"
-msgstr ""
+msgstr "トランスフォームを適用する"
 
 #. Key:	raster-transform-tool.top-tab.flip_horizontal
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(89)
@@ -7613,35 +7613,35 @@ msgstr "ベクトル変換ツール"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.cpp(1367)
 msgctxt "PainterEditor,vector-transform-tool.scaling-center.default.name"
 msgid "Scaling center: opposite corner (Default)"
-msgstr ""
+msgstr "スケールの中心：反対側の角（デフォルト）"
 
 #. Key:	vector-transform-tool.scaling-center.ctrl.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.cpp(1380)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.cpp(1380)
 msgctxt "PainterEditor,vector-transform-tool.scaling-center.ctrl.name"
 msgid "Scaling center: selection center (CTRL)"
-msgstr ""
+msgstr "スケールの中心：選択の中心（CTRL キー）"
 
 #. Key:	vector-transform-tool.scaling-center.cmd.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.cpp(1383)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.cpp(1383)
 msgctxt "PainterEditor,vector-transform-tool.scaling-center.cmd.name"
 msgid "Scaling center: selection center (CMD)"
-msgstr ""
+msgstr "スケールの中心：選択の中心（CMD キー）"
 
 #. Key:	vector-transform-tool.scaling-center.shift.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.cpp(1397)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.cpp(1397)
 msgctxt "PainterEditor,vector-transform-tool.scaling-center.shift.name"
 msgid "Scaling center: gizmo (ALT)"
-msgstr ""
+msgstr "スケールの中心：ギズモ（ALT キー）"
 
 #. Key:	vector-transform-tool.scaling-center.option.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.cpp(1400)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.cpp(1400)
 msgctxt "PainterEditor,vector-transform-tool.scaling-center.option.name"
 msgid "Scaling center: gizmo (OPTION)"
-msgstr ""
+msgstr "スケールの中心：ギズモ（OPTION キー）"
 
 #. Key:	vector-transform-tool.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.cpp(1446)
@@ -7753,63 +7753,63 @@ msgstr "ユニークなフレームのみ"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(126)
 msgctxt "AnimationEditor,export-texture-sequence-dialog.unique-frames-only.tooltip"
 msgid "Export only unique frames instead of every single frames"
-msgstr ""
+msgstr "すべてのフレームではなく、一意のフレームのみをエクスポートする"
 
 #. Key:	animation.export-texture-sequence-dialog.title
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(26)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(26)
 msgctxt "AnimationEditor,animation.export-texture-sequence-dialog.title"
 msgid "Export Texture Sequence"
-msgstr ""
+msgstr "テクスチャシーケンスをエクスポートする"
 
 #. Key:	animation.export-texture-sequence.save-asset-dialog.title
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(266)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(266)
 msgctxt "AnimationEditor,animation.export-texture-sequence.save-asset-dialog.title"
 msgid "Select Export Path & Name"
-msgstr ""
+msgstr "エクスポート先のパスと名前を選択する"
 
 #. Key:	animation.export-texture-sequence-dialog.export
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(27)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(27)
 msgctxt "AnimationEditor,animation.export-texture-sequence-dialog.export"
 msgid "Export"
-msgstr ""
+msgstr "エクスポート"
 
 #. Key:	animation.export-texture-sequence-dialog.cancel
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(28)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(28)
 msgctxt "AnimationEditor,animation.export-texture-sequence-dialog.cancel"
 msgid "Cancel"
-msgstr ""
+msgstr "キャンセルする"
 
 #. Key:	timeline-tab.export-texture-sequence.progress-bar.title
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(286)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(286)
 msgctxt "AnimationEditor,timeline-tab.export-texture-sequence.progress-bar.title"
 msgid "Exporting Texture Sequence"
-msgstr ""
+msgstr "テクスチャシーケンスのエクスポート中"
 
 #. Key:	export-texture-sequence-dialog.source.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(59)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(59)
 msgctxt "AnimationEditor,export-texture-sequence-dialog.source.name"
 msgid "Source"
-msgstr ""
+msgstr "ソース"
 
 #. Key:	export-texture-sequence-dialog.range.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(64)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(64)
 msgctxt "AnimationEditor,export-texture-sequence-dialog.range.name"
 msgid "Range"
-msgstr ""
+msgstr "レンジ"
 
 #. Key:	export-texture-sequence-dialog.unique-frames-only.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(69)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/SOdysseyAnimationExportTextureSequenceDialog.cpp(69)
 msgctxt "AnimationEditor,export-texture-sequence-dialog.unique-frames-only.name"
 msgid "Unique Frames Only"
-msgstr ""
+msgstr "ユニークなフレームのみ"
 
 #. Key:	animation.timeline.cell.exposure.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Cells/SOdysseyAnimationCell.cpp(110)
@@ -8019,133 +8019,133 @@ msgstr "テクスチャをオリジナルのサイズで表示する。"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/OdysseyImportTexturesParameters.cpp(137)
 msgctxt "PainterEditor,texture-editor.import-images.progress-bar.title"
 msgid "Importing Images"
-msgstr ""
+msgstr "画像のインポート中"
 
 #. Key:	import-texture-dialog.scaling.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturePositioning.cpp(217)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturePositioning.cpp(217)
 msgctxt "PainterEditor,import-texture-dialog.scaling.name"
 msgid "Scaling"
-msgstr ""
+msgstr "スケーリング"
 
 #. Key:	import-texture-dialog.scaling-options.fit.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturePositioning.cpp(246)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturePositioning.cpp(246)
 msgctxt "PainterEditor,import-texture-dialog.scaling-options.fit.name"
 msgid "Fit"
-msgstr ""
+msgstr "フィット"
 
 #. Key:	import-texture-dialog.scaling-options.custom-scale.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturePositioning.cpp(264)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturePositioning.cpp(264)
 msgctxt "PainterEditor,import-texture-dialog.scaling-options.custom-scale.name"
 msgid "Scale"
-msgstr ""
+msgstr "スケール"
 
 #. Key:	import-texture-dialog.scaling-options.custom-scale-x.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturePositioning.cpp(300)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturePositioning.cpp(300)
 msgctxt "PainterEditor,import-texture-dialog.scaling-options.custom-scale-x.name"
 msgid "X"
-msgstr ""
+msgstr "X"
 
 #. Key:	import-texture-dialog.scaling-options.custom-scale-y.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturePositioning.cpp(325)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturePositioning.cpp(325)
 msgctxt "PainterEditor,import-texture-dialog.scaling-options.custom-scale-y.name"
 msgid "Y"
-msgstr ""
+msgstr "Y"
 
 #. Key:	import-texture-dialog.resampling-method.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturePositioning.cpp(361)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturePositioning.cpp(361)
 msgctxt "PainterEditor,import-texture-dialog.resampling-method.name"
 msgid "Resampling Method"
-msgstr ""
+msgstr "リサンプリング方法"
 
 #. Key:	import-texture-dialog.alignment.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturePositioning.cpp(48)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturePositioning.cpp(48)
 msgctxt "PainterEditor,import-texture-dialog.alignment.name"
 msgid "Alignment"
-msgstr ""
+msgstr "配置"
 
 #. Key:	import-texture-dialog.scan-cleaner.color-value
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTextureScanCleaner.cpp(114)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTextureScanCleaner.cpp(114)
 msgctxt "PainterEditor,import-texture-dialog.scan-cleaner.color-value"
 msgid "Color Value"
-msgstr ""
+msgstr "色の値"
 
 #. Key:	import-texture-dialog.scan-cleaner.reset.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTextureScanCleaner.cpp(190)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTextureScanCleaner.cpp(190)
 msgctxt "PainterEditor,import-texture-dialog.scan-cleaner.reset.label"
 msgid "Reset"
-msgstr ""
+msgstr "リセットする"
 
 #. Key:	import-texture-dialog.scan-cleaner.activate
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTextureScanCleaner.cpp(52)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTextureScanCleaner.cpp(52)
 msgctxt "PainterEditor,import-texture-dialog.scan-cleaner.activate"
 msgid "Activate Scan Cleaner"
-msgstr ""
+msgstr "スキャンクリーナーをアクティブにする"
 
 #. Key:	import-texture-dialog.scan-cleaner.color-saturation
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTextureScanCleaner.cpp(73)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTextureScanCleaner.cpp(73)
 msgctxt "PainterEditor,import-texture-dialog.scan-cleaner.color-saturation"
 msgid "Color Saturation"
-msgstr ""
+msgstr "色の彩度"
 
 #. Key:	import-texture-dialog.viewport.zoom
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturesDialog.cpp(163)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturesDialog.cpp(163)
 msgctxt "PainterEditor,import-texture-dialog.viewport.zoom"
 msgid "Zoom"
-msgstr ""
+msgstr "ズーム"
 
 #. Key:	import-textures-dialog.export
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturesDialog.cpp(36)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturesDialog.cpp(36)
 msgctxt "PainterEditor,import-textures-dialog.export"
 msgid "Import"
-msgstr ""
+msgstr "インポート"
 
 #. Key:	import-textures-dialog.cancel
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturesDialog.cpp(37)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturesDialog.cpp(37)
 msgctxt "PainterEditor,import-textures-dialog.cancel"
 msgid "Cancel"
-msgstr ""
+msgstr "キャンセルする"
 
 #. Key:	import-textures-dialog.tab.positioning.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturesDialog.cpp(93)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturesDialog.cpp(93)
 msgctxt "PainterEditor,import-textures-dialog.tab.positioning.name"
 msgid "Positioning"
-msgstr ""
+msgstr "配置"
 
 #. Key:	import-textures-dialog.tab.positioning.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturesDialog.cpp(94)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturesDialog.cpp(94)
 msgctxt "PainterEditor,import-textures-dialog.tab.positioning.tooltip"
 msgid "Positioning"
-msgstr ""
+msgstr "配置"
 
 #. Key:	import-textures-dialog.tab.scan-cleaner.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturesDialog.cpp(97)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturesDialog.cpp(97)
 msgctxt "PainterEditor,import-textures-dialog.tab.scan-cleaner.name"
 msgid "Scan Cleaner"
-msgstr ""
+msgstr "スキャンクリーナー"
 
 #. Key:	import-textures-dialog.tab.scan-cleaner.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturesDialog.cpp(98)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Import/SOdysseyImportTexturesDialog.cpp(98)
 msgctxt "PainterEditor,import-textures-dialog.tab.scan-cleaner.tooltip"
 msgid "Scan Cleaner"
-msgstr ""
+msgstr "スキャンクリーナー"
 
 #. Key:	timeline-cells.context-menu.cross-fade.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageRasterTimeline.cpp(86)
@@ -8159,42 +8159,42 @@ msgstr "クロスフェード"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(1037)
 msgctxt "AnimationEditor,timeline-cells.transaction.set-selected-cells-exposure"
 msgid "Set Selected Cells Exposure"
-msgstr ""
+msgstr "選択されたセルのエクスポージャーを設定する"
 
 #. Key:	timeline-cells.context-menu.cell-mark.mark-single-frame.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(1125)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(1125)
 msgctxt "AnimationEditor,timeline-cells.context-menu.cell-mark.mark-single-frame.label"
 msgid "Mark Single Frame"
-msgstr ""
+msgstr "単一フレームをマークする"
 
 #. Key:	timeline-cells.context-menu.cell-mark.mark-single-frame.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(1126)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(1126)
 msgctxt "AnimationEditor,timeline-cells.context-menu.cell-mark.mark-single-frame.tooltip"
 msgid "Each frame in a cell can be marked but only one frame can be marked at a time"
-msgstr ""
+msgstr "セル内の各フレームをマークできますが、一度にマークできるのは 1 フレームのみです"
 
 #. Key:	timeline-cells.context-menu.cell-mark.mark-cells.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(1147)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(1147)
 msgctxt "AnimationEditor,timeline-cells.context-menu.cell-mark.mark-cells.label"
 msgid "Mark Cells"
-msgstr ""
+msgstr "セルをマークする"
 
 #. Key:	timeline-cells.context-menu.cell-mark.mark-cells.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(1148)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(1148)
 msgctxt "AnimationEditor,timeline-cells.context-menu.cell-mark.mark-cells.tooltip"
 msgid "Mark only the first frame of cells, then multiple cells can be marked at a time"
-msgstr ""
+msgstr "セルの最初のフレームのみをマークします。これにより、一度に複数のセルをマークできます"
 
 #. Key:	timeline-cells.context-menu.cell-mark.section-clicked.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(1154)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(1154)
 msgctxt "AnimationEditor,timeline-cells.context-menu.cell-mark.section-clicked.label"
 msgid "Current Marks"
-msgstr ""
+msgstr "現在のマーク"
 
 #. Key:	timeline-cells.context-menu.cell-mark.section-selected.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(1225)
@@ -8250,7 +8250,7 @@ msgstr "{0}"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(1501)
 msgctxt "AnimationEditor,timeline-cells.context-menu.cell-mark.set-cell-first-frame.label-frame"
 msgid "{0}"
-msgstr ""
+msgstr "{0}"
 
 #. Key:	timeline-cells.transaction.dnd-copy
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(699)
@@ -8264,7 +8264,7 @@ msgstr "セルをコピーする"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(704)
 msgctxt "AnimationEditor,timeline-cells.transaction.dnd-move"
 msgid "Move Cells"
-msgstr ""
+msgstr "セルを移動する"
 
 #. Key:	timeline-cells.context-menu.selection-section.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(738)
@@ -8320,35 +8320,35 @@ msgstr "選択されたセルにマークを設定する"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(837)
 msgctxt "AnimationEditor,timeline-cells.context-menu.create-stagger-cell.name"
 msgid "Stagger"
-msgstr ""
+msgstr "スタッガー"
 
 #. Key:	timeline-cells.context-menu.create-stagger-cell.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(838)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(838)
 msgctxt "AnimationEditor,timeline-cells.context-menu.create-stagger-cell.tooltip"
 msgid "Create stagger cell from selected cells"
-msgstr ""
+msgstr "選択されたセルからスタッガーセルを作成する"
 
 #. Key:	timeline-cells.context-menu.stagger-cell-loop.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(841)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(841)
 msgctxt "AnimationEditor,timeline-cells.context-menu.stagger-cell-loop.name"
 msgid "Loop"
-msgstr ""
+msgstr "ループ"
 
 #. Key:	timeline-cells.context-menu.stagger-cell-pingpong.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(842)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(842)
 msgctxt "AnimationEditor,timeline-cells.context-menu.stagger-cell-pingpong.name"
 msgid "Ping-Pong"
-msgstr ""
+msgstr "ピンポン"
 
 #. Key:	timeline-cells.context-menu.stagger-cell-random.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(843)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(843)
 msgctxt "AnimationEditor,timeline-cells.context-menu.stagger-cell-random.name"
 msgid "Random"
-msgstr ""
+msgstr "ランダム"
 
 #. Key:	timeline-cells.context-menu.reverse-selected-cells.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(855)
@@ -8369,35 +8369,35 @@ msgstr "選択されたセルの順番を反転する"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(881)
 msgctxt "AnimationEditor,timeline-cells.context-menu.add-cells-section.name"
 msgid "Add Cells"
-msgstr ""
+msgstr "セルを追加する"
 
 #. Key:	timeline-cells.context-menu.add-exposure-section.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(936)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(936)
 msgctxt "AnimationEditor,timeline-cells.context-menu.add-exposure-section.name"
 msgid "Add/Remove Exposure"
-msgstr ""
+msgstr "エクスポージャーを追加／削除する"
 
 #. Key:	timeline-cells.context-menu.set-exposure-section.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(975)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(975)
 msgctxt "AnimationEditor,timeline-cells.context-menu.set-exposure-section.name"
 msgid "Set Exposure"
-msgstr ""
+msgstr "エクスポージャーを設定する"
 
 #. Key:	timeline-cells.context-menu.set-exposure.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(979)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(979)
 msgctxt "AnimationEditor,timeline-cells.context-menu.set-exposure.tooltip"
 msgid "Set the exposure of the current or selected cells."
-msgstr ""
+msgstr "現在のセルまたは選択されたセルのエクスポージャーを設定する。"
 
 #. Key:	timeline-cells.context-menu.set-exposure.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(991)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageTimeline.cpp(991)
 msgctxt "AnimationEditor,timeline-cells.context-menu.set-exposure.label"
 msgid "Set Exposure"
-msgstr ""
+msgstr "エクスポージャーを設定する"
 
 #. Key:	layer-image-vector.transaction.set-wireframe
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Layers/SOdysseyAnimationLayerImageVectorRow.cpp(124)
@@ -8670,14 +8670,14 @@ msgstr "無効"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(60)
 msgctxt "ViewportDrawingEditor,master-tab.mode.drawing-configuration.tooltip"
 msgid "Drawing Configuration"
-msgstr ""
+msgstr "描画の構成"
 
 #. Key:	master-tab.mode.drawing-tools.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(64)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(64)
 msgctxt "ViewportDrawingEditor,master-tab.mode.drawing-tools.tooltip"
 msgid "Drawing Tools"
-msgstr ""
+msgstr "描画ツール"
 
 #. Key:	vector-object.transaction.property-changed
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Tab/SOdysseyPainterEditorVectorMassModifierView.cpp(352)
@@ -8824,21 +8824,21 @@ msgstr "選択を削除する"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.cpp(175)
 msgctxt "PainterEditor,vector-scene-tree-view.object-icon.paint-group.tooltip"
 msgid "Paint Group"
-msgstr ""
+msgstr "ペイントグループ"
 
 #. Key:	vector-scene-tree-view.object-icon.group.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.cpp(181)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.cpp(181)
 msgctxt "PainterEditor,vector-scene-tree-view.object-icon.group.tooltip"
 msgid "Group"
-msgstr ""
+msgstr "グループ"
 
 #. Key:	vector-scene-tree-view.object-icon.path.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.cpp(187)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.cpp(187)
 msgctxt "PainterEditor,vector-scene-tree-view.object-icon.path.tooltip"
 msgid "Path"
-msgstr ""
+msgstr "パス"
 
 #. Key:	vector-scene-tree-view.transaction.drag-drop-object
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.cpp(437)
@@ -8985,112 +8985,112 @@ msgstr "MIP 数：{0}"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(204)
 msgctxt "TextureEditor,texture.export-image.save-dialog.title"
 msgid "Select Export Path & Name"
-msgstr ""
+msgstr "エクスポート先のパスと名前を選択する"
 
 #. Key:	texture.export-image.progress-bar.title
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(223)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(223)
 msgctxt "TextureEditor,texture.export-image.progress-bar.title"
 msgid "Exporting"
-msgstr ""
+msgstr "エクスポート中"
 
 #. Key:	export-image-dialog.title
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(27)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(27)
 msgctxt "TextureEditor,export-image-dialog.title"
 msgid "Export As Image"
-msgstr ""
+msgstr "画像としてエクスポートする"
 
 #. Key:	export-image-dialog.export
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(28)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(28)
 msgctxt "TextureEditor,export-image-dialog.export"
 msgid "Export"
-msgstr ""
+msgstr "エクスポート"
 
 #. Key:	export-image-dialog.cancel
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(29)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(29)
 msgctxt "TextureEditor,export-image-dialog.cancel"
 msgid "Cancel"
-msgstr ""
+msgstr "キャンセルする"
 
 #. Key:	export-image-dialog.format.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(59)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(59)
 msgctxt "TextureEditor,export-image-dialog.format.name"
 msgid "Format"
-msgstr ""
+msgstr "フォーマット"
 
 #. Key:	export-image-dialog.source.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(64)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(64)
 msgctxt "TextureEditor,export-image-dialog.source.name"
 msgid "Source"
-msgstr ""
+msgstr "ソース"
 
 #. Key:	export-image-dialog.format-extension.png
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(88)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(88)
 msgctxt "TextureEditor,export-image-dialog.format-extension.png"
 msgid "PNG Image"
-msgstr ""
+msgstr "PNG 画像"
 
 #. Key:	export-image-dialog.format-extension.bmp
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(89)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(89)
 msgctxt "TextureEditor,export-image-dialog.format-extension.bmp"
 msgid "BMP Image"
-msgstr ""
+msgstr "BMP 画像"
 
 #. Key:	export-image-dialog.format-extension.tga
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(90)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(90)
 msgctxt "TextureEditor,export-image-dialog.format-extension.tga"
 msgid "TGA Image"
-msgstr ""
+msgstr "TGA 画像"
 
 #. Key:	export-image-dialog.format-extension.jpeg
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(91)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsImageDialog.cpp(91)
 msgctxt "TextureEditor,export-image-dialog.format-extension.jpeg"
 msgid "Jpeg Image"
-msgstr ""
+msgstr "Jpeg 画像"
 
 #. Key:	export-layers-as-textures.save-asset-dialog.title
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsTextureDialog.cpp(176)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsTextureDialog.cpp(176)
 msgctxt "TextureEditor,export-layers-as-textures.save-asset-dialog.title"
 msgid "Select Export Path & Name"
-msgstr ""
+msgstr "エクスポート先のパスと名前を選択する"
 
 #. Key:	export-texture-dialog.title
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsTextureDialog.cpp(26)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsTextureDialog.cpp(26)
 msgctxt "TextureEditor,export-texture-dialog.title"
 msgid "Export As Texture"
-msgstr ""
+msgstr "テクスチャとしてエクスポートする"
 
 #. Key:	export-texture-dialog.export
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsTextureDialog.cpp(27)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsTextureDialog.cpp(27)
 msgctxt "TextureEditor,export-texture-dialog.export"
 msgid "Export"
-msgstr ""
+msgstr "エクスポート"
 
 #. Key:	export-texture-dialog.cancel
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsTextureDialog.cpp(28)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsTextureDialog.cpp(28)
 msgctxt "TextureEditor,export-texture-dialog.cancel"
 msgid "Cancel"
-msgstr ""
+msgstr "キャンセルする"
 
 #. Key:	export-texture-dialog.source.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsTextureDialog.cpp(60)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Texture/SOdysseyTextureExportAsTextureDialog.cpp(60)
 msgctxt "TextureEditor,export-texture-dialog.source.name"
 msgid "Source"
-msgstr ""
+msgstr "ソース"
 
 #. Key:	animation.layerstack.context-menu.convertions-section
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Timeline/SOdysseyAnimationLayerStackTreeView.cpp(127)
@@ -9244,7 +9244,7 @@ msgstr "フレーム"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Timeline/SOdysseyAnimationTimelineInbetweeningHeader.cpp(167)
 msgctxt "AnimationEditor,vector-timeline-inbetweening.transaction.selection-changed"
 msgid "Selection Changed"
-msgstr ""
+msgstr "選択が変更されました"
 
 #. Key:	vector-tool.inbetweening-context-menu.remove-tag.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Timeline/SOdysseyAnimationTimelineInbetweeningHeader.cpp(234)
@@ -9384,126 +9384,126 @@ msgstr "カット ツール"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(339)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.section-common.name"
 msgid "Common"
-msgstr ""
+msgstr "共通"
 
 #. Key:	tool-collection.tool-tile.context-menu.replace-with-current-tool.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(342)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(342)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.replace-with-current-tool.name"
 msgid "Replace with Current Tool"
-msgstr ""
+msgstr "現在のツールで置き換える"
 
 #. Key:	tool-collection.tool-tile.context-menu.replace-with-current-tool.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(343)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(343)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.replace-with-current-tool.tooltip"
 msgid "Replaces this Tool with the Current Tool."
-msgstr ""
+msgstr "このツールを現在のツールで置き換える。"
 
 #. Key:	tool-collection.tool-tile.context-menu.replace-with-current-tool-keep-icon.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(352)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(352)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.replace-with-current-tool-keep-icon.name"
 msgid "Replace with Current Tool (Keep Icon)"
-msgstr ""
+msgstr "現在のツールで置き換える（アイコンを維持）"
 
 #. Key:	tool-collection.tool-tile.context-menu.replace-with-current-tool-keep-icon.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(353)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(353)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.replace-with-current-tool-keep-icon.tooltip"
 msgid "Replaces this Tool with the Current Tool but keep the existing icon."
-msgstr ""
+msgstr "このツールを現在のツールで置き換えるが、既存のアイコンは維持する。"
 
 #. Key:	tool-collection.tool-tile.context-menu.duplicate-tool.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(362)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(362)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.duplicate-tool.name"
 msgid "Duplicate"
-msgstr ""
+msgstr "複製する"
 
 #. Key:	tool-collection.tool-tile.context-menu.duplicate-tool.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(363)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(363)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.duplicate-tool.tooltip"
 msgid "Create a duplicate of this tool."
-msgstr ""
+msgstr "このツールの複製を作成する。"
 
 #. Key:	tool-collection.tool-tile.context-menu.delete-tool.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(372)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(372)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.delete-tool.name"
 msgid "Delete"
-msgstr ""
+msgstr "削除する"
 
 #. Key:	tool-collection.tool-tile.context-menu.delete-tool.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(373)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(373)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.delete-tool.tooltip"
 msgid "Remove this tool from the collection."
-msgstr ""
+msgstr "このツールをコレクションから削除する。"
 
 #. Key:	tool-collection.tool-tile.context-menu.section-appearance.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(385)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(385)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.section-appearance.name"
 msgid "Appearance"
-msgstr ""
+msgstr "外観"
 
 #. Key:	tool-collection.tool-tile.context-menu.change-icon.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(388)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(388)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.change-icon.name"
 msgid "Set Icon..."
-msgstr ""
+msgstr "アイコンを設定する..."
 
 #. Key:	tool-collection.tool-tile.context-menu.change-icon.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(389)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(389)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.change-icon.tooltip"
 msgid "Set a new icon for this tool"
-msgstr ""
+msgstr "このツールに新しいアイコンを設定する"
 
 #. Key:	tool-collection.tool-tile.context-menu.set-tint.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(421)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(421)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.set-tint.name"
 msgid "Color"
-msgstr ""
+msgstr "色"
 
 #. Key:	tool-collection.tool-tile.context-menu.set-tint.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(424)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(424)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.set-tint.tooltip"
 msgid "Modify the color of the tool icon in tile."
-msgstr ""
+msgstr "タイル内のツールアイコンの色を変更する。"
 
 #. Key:	tool-collection.tool-tile.context-menu.change-name.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(432)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/ToolCollection/SOdysseyPainterEditorToolTile.cpp(432)
 msgctxt "PainterEditor,tool-collection.tool-tile.context-menu.change-name.tooltip"
 msgid "Set the name of this tool"
-msgstr ""
+msgstr "このツールの名称を設定する"
 
 #. Key:	tool-options.options-menu.tool-section.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Tools/SOdysseyPainterEditorToolOptions.cpp(80)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Tools/SOdysseyPainterEditorToolOptions.cpp(80)
 msgctxt "PainterEditor,tool-options.options-menu.tool-section.name"
 msgid "Tool"
-msgstr ""
+msgstr "ツール"
 
 #. Key:	tool-options.options-menu.reset-all-parameters.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Tools/SOdysseyPainterEditorToolOptions.cpp(83)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Tools/SOdysseyPainterEditorToolOptions.cpp(83)
 msgctxt "PainterEditor,tool-options.options-menu.reset-all-parameters.name"
 msgid "Reset all Parameters"
-msgstr ""
+msgstr "全てのパラメータをリセットする"
 
 #. Key:	tool-options.options-menu.reset-all-parameters.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Tools/SOdysseyPainterEditorToolOptions.cpp(84)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Tools/SOdysseyPainterEditorToolOptions.cpp(84)
 msgctxt "PainterEditor,tool-options.options-menu.reset-all-parameters.tooltip"
 msgid "Resets all the current tools parameters to match their default value."
-msgstr ""
+msgstr "現在のツールの全てのパラメータをデフォルト値にリセットする。"
 
 #. Key:	editor-commands.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/WorldCentricEditor/OdysseyViewportDrawingEditorCommands.cpp(9)
@@ -9860,14 +9860,14 @@ msgstr "フォルダ"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerImageRaster.cpp(39)
 msgctxt "Texture,layer-image-raster.type"
 msgid "Raster Layer"
-msgstr ""
+msgstr "ラスターレイヤー"
 
 #. Key:	layer-image-vector.type
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerImageVector.cpp(50)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerImageVector.cpp(50)
 msgctxt "Texture,layer-image-vector.type"
 msgid "Vector Layer"
-msgstr ""
+msgstr "ベクターレイヤー"
 
 #. Key:	asset-type-actions.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyTextureEditor/Private/OdysseyTextureAssetTypeActions.cpp(41)
@@ -9979,7 +9979,7 @@ msgstr "Odyssey"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyTextureEditor/Private/OdysseyTextureEditorModule.cpp(84)
 msgctxt "TextureEditor,settings.name"
 msgid "Odyssey - Texture2D Editor"
-msgstr ""
+msgstr "Odyssey - Texture2D エディタ"
 
 #. Key:	settings.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyTextureEditor/Private/OdysseyTextureEditorModule.cpp(85)
@@ -10238,14 +10238,14 @@ msgstr "メッシュ UV チャンネル"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/OdysseyViewportCommands.cpp(16)
 msgctxt "OdysseyWidgets,viewport-commands.name"
 msgid "Odyssey Viewport"
-msgstr ""
+msgstr "Odyssey のビューポート"
 
 #. Key:	editor-commands.category.viewport-shortcuts
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/OdysseyViewportCommands.cpp(18)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/OdysseyViewportCommands.cpp(18)
 msgctxt "OdysseyWidgets,editor-commands.category.viewport-shortcuts"
 msgid "Viewport Shortcuts"
-msgstr ""
+msgstr "ビューポートのショートカット"
 
 #. Key:	tablet-api-switcher.select-tablet-api
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyTabletAPISwitcher.cpp(24)
@@ -10273,329 +10273,329 @@ msgstr "キャンセルする"
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(1054)
 msgctxt "Widgets,viewport.status-bar.no-texture-provided"
 msgid "No Texture Provided"
-msgstr ""
+msgstr "テクスチャが指定されていません"
 
 #. Key:	viewport.status-bar.texture-size
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(1056)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(1056)
 msgctxt "Widgets,viewport.status-bar.texture-size"
 msgid "{0}x{1} px"
-msgstr ""
+msgstr "{0}x{1} px"
 
 #. Key:	viewport.status-bar.cursor
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(1065)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(1065)
 msgctxt "Widgets,viewport.status-bar.cursor"
 msgid "XY: {0}, {1} px"
-msgstr ""
+msgstr "XY：{0}, {1} px"
 
 #. Key:	viewport.status-bar.pixel-color.no-pixel
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(1071)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(1071)
 msgctxt "Widgets,viewport.status-bar.pixel-color.no-pixel"
 msgid "RGBA: No pixel"
-msgstr ""
+msgstr "RGBA：ピクセルなし"
 
 #. Key:	viewport.status-bar.pixel-color.outside-texture
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(1078)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(1078)
 msgctxt "Widgets,viewport.status-bar.pixel-color.outside-texture"
 msgid "RGBA: Outside"
-msgstr ""
+msgstr "RGBA：範囲外"
 
 #. Key:	viewport.status-bar.pixel-color
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(1089)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(1089)
 msgctxt "Widgets,viewport.status-bar.pixel-color"
 msgid "RGBA: {0}, {1}, {2}, {3}"
-msgstr ""
+msgstr "RGBA：{0}, {1}, {2}, {3}"
 
 #. Key:	viewport.status-bar.text
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(1093)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(1093)
 msgctxt "Widgets,viewport.status-bar.text"
 msgid "{0} | {1} | {2}"
-msgstr ""
+msgstr "{0} | {1} | {2}"
 
 #. Key:	CursorXInCanvasToken
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(124)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(124)
 msgctxt "Widgets,CursorXInCanvasToken"
 msgid "Cursor X position in canvas"
-msgstr ""
+msgstr "キャンバス内のカーソルの X 位置"
 
 #. Key:	CursorYInCanvasToken
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(144)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(144)
 msgctxt "Widgets,CursorYInCanvasToken"
 msgid "Cursor Y position in canvas"
-msgstr ""
+msgstr "キャンバス内のカーソルの Y 位置"
 
 #. Key:	CanvasRedToken
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(162)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(162)
 msgctxt "Widgets,CanvasRedToken"
 msgid "Canvas RED component at cursor position"
-msgstr ""
+msgstr "カーソル位置におけるキャンバスの赤（RED）成分"
 
 #. Key:	CanvasGreenToken
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(180)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(180)
 msgctxt "Widgets,CanvasGreenToken"
 msgid "Canvas GREEN component at cursor position"
-msgstr ""
+msgstr "カーソル位置におけるキャンバスの緑（GREEN）成分"
 
 #. Key:	CanvasBlueToken
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(196)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(196)
 msgctxt "Widgets,CanvasBlueToken"
 msgid "Canvas BLUE component at cursor position"
-msgstr ""
+msgstr "カーソル位置におけるキャンバスの青（BLUE）成分"
 
 #. Key:	CanvasAlphaToken
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(212)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(212)
 msgctxt "Widgets,CanvasAlphaToken"
 msgid "Canvas ALPHA component at cursor position"
-msgstr ""
+msgstr "カーソル位置におけるキャンバスのアルファ（ALPHA）成分"
 
 #. Key:	viewport.rotation.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(347)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(347)
 msgctxt "Widgets,viewport.rotation.label"
 msgid "Rotation"
-msgstr ""
+msgstr "回転"
 
 #. Key:	viewport.rotation.reset.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(365)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(365)
 msgctxt "Widgets,viewport.rotation.reset.label"
 msgid "Reset"
-msgstr ""
+msgstr "リセットする"
 
 #. Key:	viewport.rotation.preset-Minus135.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(369)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(369)
 msgctxt "Widgets,viewport.rotation.preset-Minus135.label"
 msgid "-135°"
-msgstr ""
+msgstr "-135°"
 
 #. Key:	viewport.rotation.preset-Minus90.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(370)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(370)
 msgctxt "Widgets,viewport.rotation.preset-Minus90.label"
 msgid "-90°"
-msgstr ""
+msgstr "-90°"
 
 #. Key:	viewport.rotation.preset-Minus45.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(371)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(371)
 msgctxt "Widgets,viewport.rotation.preset-Minus45.label"
 msgid "-45°"
-msgstr ""
+msgstr "-45°"
 
 #. Key:	viewport.rotation.preset-0.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(372)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(372)
 msgctxt "Widgets,viewport.rotation.preset-0.label"
 msgid "0°"
-msgstr ""
+msgstr "0°"
 
 #. Key:	viewport.rotation.preset-45.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(373)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(373)
 msgctxt "Widgets,viewport.rotation.preset-45.label"
 msgid "45°"
-msgstr ""
+msgstr "45°"
 
 #. Key:	viewport.rotation.preset-90.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(374)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(374)
 msgctxt "Widgets,viewport.rotation.preset-90.label"
 msgid "90°"
-msgstr ""
+msgstr "90°"
 
 #. Key:	viewport.rotation.preset-135.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(375)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(375)
 msgctxt "Widgets,viewport.rotation.preset-135.label"
 msgid "135°"
-msgstr ""
+msgstr "135°"
 
 #. Key:	viewport.rotation.preset-180.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(376)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(376)
 msgctxt "Widgets,viewport.rotation.preset-180.label"
 msgid "180°"
-msgstr ""
+msgstr "180°"
 
 #. Key:	viewport.rotate.options.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(382)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(382)
 msgctxt "Widgets,viewport.rotate.options.label"
 msgid "Rotation Options"
-msgstr ""
+msgstr "回転のオプション"
 
 #. Key:	viewport.rotate.options.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(383)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(383)
 msgctxt "Widgets,viewport.rotate.options.tooltip"
 msgid "Rotation options"
-msgstr ""
+msgstr "回転のオプション"
 
 #. Key:	viewport.zoom.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(409)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(409)
 msgctxt "Widgets,viewport.zoom.label"
 msgid "Zoom"
-msgstr ""
+msgstr "ズーム"
 
 #. Key:	viewport.zoom.fit.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(440)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(440)
 msgctxt "Widgets,viewport.zoom.fit.label"
 msgid "Scale To Fit"
-msgstr ""
+msgstr "フィットするようにスケール"
 
 #. Key:	viewport.zoom.reset.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(441)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(441)
 msgctxt "Widgets,viewport.zoom.reset.label"
 msgid "Reset"
-msgstr ""
+msgstr "リセットする"
 
 #. Key:	viewport.zoom.preset-10.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(445)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(445)
 msgctxt "Widgets,viewport.zoom.preset-10.label"
 msgid "10%"
-msgstr ""
+msgstr "10%"
 
 #. Key:	viewport.zoom.preset-25.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(446)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(446)
 msgctxt "Widgets,viewport.zoom.preset-25.label"
 msgid "25%"
-msgstr ""
+msgstr "25%"
 
 #. Key:	viewport.zoom.preset-50.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(447)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(447)
 msgctxt "Widgets,viewport.zoom.preset-50.label"
 msgid "50%"
-msgstr ""
+msgstr "50%"
 
 #. Key:	viewport.zoom.preset-75.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(448)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(448)
 msgctxt "Widgets,viewport.zoom.preset-75.label"
 msgid "75%"
-msgstr ""
+msgstr "75%"
 
 #. Key:	viewport.zoom.preset-100.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(449)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(449)
 msgctxt "Widgets,viewport.zoom.preset-100.label"
 msgid "100%"
-msgstr ""
+msgstr "100%"
 
 #. Key:	viewport.zoom.preset-200.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(450)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(450)
 msgctxt "Widgets,viewport.zoom.preset-200.label"
 msgid "200%"
-msgstr ""
+msgstr "200%"
 
 #. Key:	viewport.zoom.preset-400.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(451)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(451)
 msgctxt "Widgets,viewport.zoom.preset-400.label"
 msgid "400%"
-msgstr ""
+msgstr "400%"
 
 #. Key:	viewport.zoom.preset-800.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(452)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(452)
 msgctxt "Widgets,viewport.zoom.preset-800.label"
 msgid "800%"
-msgstr ""
+msgstr "800%"
 
 #. Key:	viewport.zoom.options.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(458)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(458)
 msgctxt "Widgets,viewport.zoom.options.label"
 msgid "Zoom Options"
-msgstr ""
+msgstr "ズームのオプション"
 
 #. Key:	viewport.zoom.options.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(459)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(459)
 msgctxt "Widgets,viewport.zoom.options.tooltip"
 msgid "Zoom options"
-msgstr ""
+msgstr "ズームのオプション"
 
 #. Key:	viewport.settings-section.misc.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(496)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(496)
 msgctxt "Widgets,viewport.settings-section.misc.label"
 msgid "Misc"
-msgstr ""
+msgstr "その他"
 
 #. Key:	viewport.settings.entry.preserve-canvas-when-flipping.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(500)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(500)
 msgctxt "Widgets,viewport.settings.entry.preserve-canvas-when-flipping.label"
 msgid "Flip on viewport center"
-msgstr ""
+msgstr "ビューポートの中心で反転する"
 
 #. Key:	viewport.settings.entry.preserve-canvas-when-flipping.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(501)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(501)
 msgctxt "Widgets,viewport.settings.entry.preserve-canvas-when-flipping.tooltip"
 msgid "Keep the center of the viewport at the same position when flipping it when on"
-msgstr ""
+msgstr "有効にすると、ビューポートを反転するときにビューポートの中心を同じ位置に保つ"
 
 #. Key:	viewport.settings-section.advanced.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(515)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(515)
 msgctxt "Widgets,viewport.settings-section.advanced.label"
 msgid "Advanced Settings"
-msgstr ""
+msgstr "アドバンス設定"
 
 #. Key:	viewport.settings.entry.settings.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(519)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(519)
 msgctxt "Widgets,viewport.settings.entry.settings.label"
 msgid "Open Viewport Settings..."
-msgstr ""
+msgstr "ビューポートの設定を開く..."
 
 #. Key:	viewport.settings.entry.settings.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(520)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(520)
 msgctxt "Widgets,viewport.settings.entry.settings.tooltip"
 msgid "Open the viewport settings panel"
-msgstr ""
+msgstr "ビューポートの設定パネルを開く"
 
 #. Key:	viewport.settings.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(536)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(536)
 msgctxt "Widgets,viewport.settings.label"
 msgid "Settings"
-msgstr ""
+msgstr "設定"
 
 #. Key:	viewport.settings.tooltip
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(537)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(537)
 msgctxt "Widgets,viewport.settings.tooltip"
 msgid "Settings"
-msgstr ""
+msgstr "設定"
 
 #. Key:	namespace.label
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(55)
 #: Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/SOdysseyViewport.cpp(55)
 msgctxt "Widgets,namespace.label"
 msgid "Odyssey Viewport 2D"
-msgstr ""
+msgstr "Odyssey 2D ビューポート"
 
 #. Key:	texture.default-background-layer.name
 #. SourceLocation:	Plugins/Odyssey/Source/IliadEditor/OdysseyWidgets/Private/Texture/SOdysseyTextureConfigureWindow.cpp(115)
@@ -10644,7 +10644,7 @@ msgstr "Odyssey は、著作権©法の対象であり、Praxinos,Inc の法的�
 #: Plugins/Odyssey/Source/OdysseyCoreEditor/OdysseyCommonWidgets/Private/SAboutWindow.cpp(151)
 msgctxt "AboutWindowOdyssey,copyright.iddn"
 msgid "IDDN.FR.001.060015.015.S.X.2019.000.00000"
-msgstr ""
+msgstr "IDDN.FR.001.060015.015.S.X.2019.000.00000"
 
 #. Key:	copyright.team-label
 #. SourceLocation:	Plugins/Odyssey/Source/OdysseyCoreEditor/OdysseyCommonWidgets/Private/SAboutWindow.cpp(159)
@@ -10686,14 +10686,14 @@ msgstr "クレマン・ベルト、アントワーヌ・アンタン、クレア
 #: Plugins/Odyssey/Source/OdysseyCoreEditor/OdysseyCommonWidgets/Private/SAboutWindow.cpp(205)
 msgctxt "AboutWindowOdyssey,copyright.special-thanks-label"
 msgid "Special Thanks: "
-msgstr ""
+msgstr "スペシャルサンクス： "
 
 #. Key:	copyright.special-tranks.inria-bordeaux-manoa-team
 #. SourceLocation:	Plugins/Odyssey/Source/OdysseyCoreEditor/OdysseyCommonWidgets/Private/SAboutWindow.cpp(214)
 #: Plugins/Odyssey/Source/OdysseyCoreEditor/OdysseyCommonWidgets/Private/SAboutWindow.cpp(214)
 msgctxt "AboutWindowOdyssey,copyright.special-tranks.inria-bordeaux-manoa-team"
 msgid "Inria Bordeaux - Manao Team"
-msgstr ""
+msgstr "Inria Bordeaux - Manao チーム"
 
 #. Key:	copyright.don-perro-tribute
 #. SourceLocation:	Plugins/Odyssey/Source/OdysseyCoreEditor/OdysseyCommonWidgets/Private/SAboutWindow.cpp(224)
