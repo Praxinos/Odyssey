@@ -99,33 +99,18 @@ public:
     virtual void Serialize(FArchive& Ar) override;
 
 private:
+    /** The size of the square tiles, in pixels. */
     UPROPERTY()
     uint32 TileSize = 64;
 
-    /**
-     *
-     */
+    /** The pixel format of the tiles; their colors are linear (see EOdysseyTiledImageFormat). */
     UPROPERTY()
     EOdysseyTiledImageFormat Format = EOdysseyTiledImageFormat::RGBA8;
 
-    /** TODO:
-     * Replace this map with a structure
-     * optimized for binary searching
-     *
-     * struct FTileRegistryRedirector
-     * {
-     *      int Value; //can be X or Y
-     *      uint32 index;
-     * };
-     *
-     * struct FTileRegistry
-     * {
-     *      TArray<FTileRegistryRedirector> YRedirector; //Redirects Y positions to an index in XRedirector
-     *      TArray<TArray<FTileRegistryRedirector>> XRedirector; //Redirects (Y*, X) positions to an index in Tiles;
-     *      TArray<FTile> Tiles;
-     * }
-    */
-
+    /**
+     * The tiles holding pixels, by tile coordinate (pixel position / TileSize). A missing tile is transparent.
+     * Transient: Serialize() saves the tile data; the transaction buffer records the ids, the tile data being immutable.
+     */
     UPROPERTY(Transient)
     TMap<FIntPoint, FOdysseyTileId> Tiles;
 

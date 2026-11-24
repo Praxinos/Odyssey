@@ -8,7 +8,6 @@
 #include "DerivedDataValue.h"
 #include "DerivedDataRequestTypes.h"
 #include "DerivedDataRequestOwner.h"
-#include "HAL/PlatformTime.h"
 
 FOdysseyDiskCache::~FOdysseyDiskCache()
 {
@@ -20,47 +19,8 @@ FOdysseyDiskCache::FOdysseyDiskCache(const FString& iCacheName, const FString& i
 {
 }
 
-bool
-FOdysseyDiskCache::ProbablyExists(const FString& iId) const
-{
-    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyDiskCache::Load);
-
-    bool success = false;
-
-    // put code you want to time here.
-
-    //Load Block from DDC
-    FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
-        *mCacheName,
-        *mCacheVersion, //a GUID identifying the version of the key
-        iId
-    );
-
-    UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Blocking);
-    UE::DerivedData::GetCache().GetValue(
-        {
-            UE::DerivedData::FCacheGetValueRequest
-            {
-                UE::FSharedString(TEXT("FOdysseyDiskCache")),
-                UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
-                UE::DerivedData::ECachePolicy::Local | UE::DerivedData::ECachePolicy::SkipData | UE::DerivedData::ECachePolicy::SkipMeta
-            }
-        },
-        getOwner,
-        [&](UE::DerivedData::FCacheGetValueResponse&& iResponse)
-        {
-            if (iResponse.Status != UE::DerivedData::EStatus::Ok)
-                return;
-
-            success = true;
-        }
-    );
-    getOwner.Wait();
-    return success;
-}
-
 void
-FOdysseyDiskCache::Save(const FString& iId, const FSharedBuffer& iBuffer) const
+FOdysseyDiskCache::Save(const FString& iId, const FSharedBuffer& iBuffer)
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyDiskCache::Save);
     FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
@@ -90,12 +50,9 @@ FOdysseyDiskCache::Save(const FString& iId, const FSharedBuffer& iBuffer) const
 }
 
 bool
-FOdysseyDiskCache::Load(const FString& iId, FUniqueBuffer& oBuffer) const
+FOdysseyDiskCache::Load(const FString& iId, FUniqueBuffer& oBuffer)
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyDiskCache::Load);
-
-    double start = FPlatformTime::Seconds() * 1000.f;
-    double end = FPlatformTime::Seconds() * 1000.f;
 
     bool success = false;
 
@@ -107,10 +64,6 @@ FOdysseyDiskCache::Load(const FString& iId, FUniqueBuffer& oBuffer) const
         *mCacheVersion, //a GUID identifying the version of the key
         iId
     );
-
-    end = FPlatformTime::Seconds() * 1000.f;
-    UE_LOG(LogTemp, Warning, TEXT("#1 FOdysseyDiskCache::Load() in %f ms."), end-start);
-    start = FPlatformTime::Seconds() * 1000.f;
 
     UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Blocking);
     UE::DerivedData::GetCache().GetValue(
@@ -125,79 +78,15 @@ FOdysseyDiskCache::Load(const FString& iId, FUniqueBuffer& oBuffer) const
         getOwner,
         [&, this](UE::DerivedData::FCacheGetValueResponse&& iResponse)
         {
-            end = FPlatformTime::Seconds() * 1000.f;
-            UE_LOG(LogTemp, Warning, TEXT("#2 FOdysseyDiskCache::Load() in %f ms."), end-start);
-            start = FPlatformTime::Seconds() * 1000.f;
-
             if (iResponse.Status != UE::DerivedData::EStatus::Ok)
                 return;
 
             if ( !iResponse.Value.HasData() || iResponse.Value.GetRawSize() == 1) //assume the block is empty, see RemoveValueFromCache()
                 return;
 
-            end = FPlatformTime::Seconds() * 1000.f;
-            UE_LOG(LogTemp, Warning, TEXT("#3 FOdysseyDiskCache::Load() in %f ms."), end-start);
-            start = FPlatformTime::Seconds() * 1000.f;
+            //FUniqueBuffer uniqueBuffer = FUniqueBuffer::MakeView(oBlock->Bits(), oBlock->BytesTotal());
 
             oBuffer = FUniqueBuffer::Alloc(iResponse.Value.GetRawSize());
-
-            end = FPlatformTime::Seconds() * 1000.f;
-            UE_LOG(LogTemp, Warning, TEXT("#4 FOdysseyDiskCache::Load() in %f ms."), end-start);
-            start = FPlatformTime::Seconds() * 1000.f;
-
-            if ( !iResponse.Value.GetData().TryDecompressTo(oBuffer) )
-                return;
-
-            end = FPlatformTime::Seconds() * 1000.f;
-            UE_LOG(LogTemp, Warning, TEXT("#5 FOdysseyDiskCache::Load() in %f ms."), end-start);
-            start = FPlatformTime::Seconds() * 1000.f;
-
-            //oBuffer = uniqueBuffer.MoveToShared();
-            success = true;
-        }
-    );
-    getOwner.Wait();
-    return success;
-}
-
-bool
-FOdysseyDiskCache::LoadInto(const FString& iId, FUniqueBuffer& oBuffer) const
-{
-    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyDiskCache::Load);
-
-    bool success = false;
-
-    // put code you want to time here.
-
-    //Load Block from DDC
-    FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
-        *mCacheName,
-        *mCacheVersion, //a GUID identifying the version of the key
-        iId
-    );
-
-    UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Blocking);
-    UE::DerivedData::GetCache().GetValue(
-        {
-            UE::DerivedData::FCacheGetValueRequest
-            {
-                UE::FSharedString(TEXT("FOdysseyDiskCache")),
-                UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
-                UE::DerivedData::ECachePolicy::Local
-            }
-        },
-        getOwner,
-        [&](UE::DerivedData::FCacheGetValueResponse&& iResponse)
-        {
-            if (iResponse.Status != UE::DerivedData::EStatus::Ok)
-                return;
-
-            if ( !iResponse.Value.HasData() || iResponse.Value.GetRawSize() == 1) //assume the block is empty, see RemoveValueFromCache()
-                return;
-
-            if (iResponse.Value.GetRawSize() != oBuffer.GetSize())
-                return;
-
             if ( !iResponse.Value.GetData().TryDecompressTo(oBuffer) )
                 return;
 
@@ -210,7 +99,7 @@ FOdysseyDiskCache::LoadInto(const FString& iId, FUniqueBuffer& oBuffer) const
 }
 
 void
-FOdysseyDiskCache::Remove(const FString& iId) const
+FOdysseyDiskCache::Remove(const FString& iId)
 {
     FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
         *mCacheName,

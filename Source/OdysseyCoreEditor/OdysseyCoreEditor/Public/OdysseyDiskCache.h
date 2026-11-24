@@ -15,18 +15,14 @@ public:
 
 public:
     //--- Block Caching / Loading
-    bool ProbablyExists(const FString& iId) const;
 
-    //Loads a memory from cache and creates a new buffer
-    bool Load(const FString& iId, FUniqueBuffer& oBuffer) const;
-
-    //Loads a memory from cache into an existing buffer
-    bool LoadInto(const FString& iId, FUniqueBuffer& oBuffer) const;
+    //Loads a memory from cache
+    bool Load(const FString& iId, FUniqueBuffer& oBuffer);
 
     //Saves the given Memory to cache
-    void Save(const FString& iId, const FSharedBuffer& iBuffer) const;
+    void Save(const FString& iId, const FSharedBuffer& iBuffer);
 
-    void Remove(const FString& iId) const;
+    void Remove(const FString& iId);
 
 private:
     FString mCacheName;

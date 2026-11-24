@@ -54,7 +54,6 @@ public class OdysseyRendering : ModuleRules
                 "Core",
                 "CoreUObject",
                 "Engine",
-                "ImageCore",
                 "OpenColorIO",
                 "OpenColorIOWrapper",
                 "InputCore",

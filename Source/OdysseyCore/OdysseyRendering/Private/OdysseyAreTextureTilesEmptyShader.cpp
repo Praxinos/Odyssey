@@ -1,4 +1,4 @@
-// IDDN.FR.001.060015.014.S.X.2019.000.00000
+// IDDN.FR.001.060015.015.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyAreTextureTilesEmptyShader.h"
@@ -22,8 +22,8 @@ public:
 
     BEGIN_SHADER_PARAMETER_STRUCT(FParameters, )
         SHADER_PARAMETER_RDG_TEXTURE_SRV(Texture2D, InputTexture)
-        SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int2>, TilePositions) //TilePositions are defined in pixels
-        SHADER_PARAMETER(uint32, TileSize) //TileSize is defines in pixels
+        SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int2>, TilePositions) //Top-left corners of the tiles, in pixels
+        SHADER_PARAMETER(uint32, TileSize) //In pixels
         SHADER_PARAMETER(uint32, NumTiles)
         SHADER_PARAMETER_RDG_BUFFER_UAV(RWBuffer<uint>, IsTileEmpty)
     END_SHADER_PARAMETER_STRUCT()
@@ -33,13 +33,6 @@ public:
     {
         return IsFeatureLevelSupported(Parameters.Platform, ERHIFeatureLevel::SM5) && !IsConsolePlatform(Parameters.Platform);
     }
-
-    static void ModifyCompilationEnvironment(const FGlobalShaderPermutationParameters& Parameters, FShaderCompilerEnvironment& OutEnvironment)
-    {
-        FGlobalShader::ModifyCompilationEnvironment(Parameters, OutEnvironment);
-    }
-
-private:
 };
 
 // This will tell the engine to create the shader and where the shader entry point is.
@@ -120,16 +113,12 @@ AddAreTextureTilesEmptyPass(FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type In
         GSupportsEfficientAsyncCompute ? ERDGPassFlags::AsyncCompute : ERDGPassFlags::Compute,
         ComputeShader,
         PassParameters,
+        //One thread group per tile
         FIntVector(
             InTilePositions.Num(),
             1,
             1
         )
-        /*FIntVector(
-            FMath::DivideAndRoundUp(InTileSize,(uint32)8),
-            FMath::DivideAndRoundUp(InTileSize,(uint32)8),
-            InTilePositions.Num()
-        )*/
     );
 
     AddEnqueueCopyPass(

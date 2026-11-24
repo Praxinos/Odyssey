@@ -28,7 +28,6 @@ public:
 
     void RemoveUncompressed(const FSharedBuffer& InBuffer);
     void RemoveCompressed(const FCompressedBuffer& InBuffer);
-    void RemoveCachedOnDisk(int64 InSizeOnDisk);
 
     int64 GetNumTilesUncompressed() const;
     int64 GetSizeUncompressed() const;
@@ -79,9 +78,6 @@ public:
         FTileTextureHandle(TSharedPtr<FTileAtlas> InAtlas, uint32 InTileIndexInAtlas);
 
     public:
-        bool IsValid() const;
-
-    public:
         FTextureRHIRef GetTextureRHI() const;
         FIntRect GetRectInTexture() const;
         FIntPoint GetPositionInTexture() const;
@@ -106,8 +102,6 @@ private:
 
     public:
         FTextureRHIRef GetTexture() const { return Texture; };
-        uint32 GetWidthInTiles() const { return WidthInTiles; };
-        uint32 GetHeightInTiles() const { return HeightInTiles; };
 
         FIntRect GetTileRect(uint32 InTileIndexInAtlas) const;
         FIntPoint GetTilePosition(uint32 InTileIndexInAtlas) const;
@@ -123,7 +117,6 @@ private:
         uint32 TileSize;
         uint64 SizeInBytes = 0;
         bool bCacheAtlas = false;
-        //EPixelFormat TileFormat;
     };
 
     /**
@@ -148,7 +141,6 @@ private:
             bool GetCompressedBuffer(FCompressedBuffer& OutBuffer) const;
             const FIoHash& GetHash() const;
 
-            void WaitUntilCachedCompressed();
             void WaitUntilCachedOnDisk();
 
         private:

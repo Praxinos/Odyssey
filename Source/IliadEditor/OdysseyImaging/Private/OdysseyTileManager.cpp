@@ -83,13 +83,6 @@ FOdysseyTileManagerStats::RemoveCompressed(const FCompressedBuffer& InBuffer)
     SizeCompressed -= InBuffer.GetCompressedSize();
 }
 
-void
-FOdysseyTileManagerStats::RemoveCachedOnDisk(int64 InSizeOnDisk)
-{
-    NumTilesOnDisk--;
-    SizeOnDisk -= InSizeOnDisk;
-}
-
 int64
 FOdysseyTileManagerStats::GetNumTilesUncompressed() const
 {
@@ -589,7 +582,7 @@ FOdysseyTileManager::CreateOrUpdateTiles(
             TilesToCreate = MoveTemp(TilesToCreate)
         ](FRHICommandListImmediate& RHICmdList) mutable
         {
-            TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::CreateOrUpdateTiles_0);
+            TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::CreateOrUpdateTiles_RenderThread);
             //Step1 :
             // - Create the Tile Textures
             // - Draw in the Tile Textures
@@ -869,7 +862,7 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
             InTile
         ](FRHICommandListImmediate& RHICmdList) mutable
         {
-            TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::LoadTileFromReadBack_0);
+            TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::LoadTileFromReadBack_RenderThread);
 
             const FRHIGPUMask GPUMask = RHICmdList.GetGPUMask();
 
@@ -1129,7 +1122,7 @@ FOdysseyTileManager::GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, ui
                 Promises = MoveTemp(RenderThreadPromises)
             ](FRHICommandListImmediate& RHICmdList) mutable
             {
-                TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::GetTileTextures_0);
+                TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::GetTileTextures_UploadRenderThread);
 
                 const uint32 MaxTilesPerAtlas = self->GetMaxTilesPerGPUAtlas(TileSize, PixelFormat);
                 uint32 NumAtlases = (Buffers.Num() + MaxTilesPerAtlas - 1) / MaxTilesPerAtlas;
@@ -1767,13 +1760,6 @@ FOdysseyTileManager::FTileData::EvictTiles(uint64 InMaxUncompressedSize, uint64 
 }
 
 void
-FOdysseyTileManager::FTileData::WaitUntilCachedCompressed()
-{
-    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::WaitUntilCachedCompressed);
-    CacheCompressedCompletionEvent.Wait();
-}
-
-void
 FOdysseyTileManager::FTileData::WaitUntilCachedOnDisk()
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::WaitUntilCachedOnDisk);
@@ -1798,7 +1784,6 @@ FRHITextureCreateDesc FOdysseyTileManager::FTileAtlas::GetTextureDesc(uint32 InT
 FOdysseyTileManager::FTileAtlas::FTileAtlas(FRHICommandList& InRHICmdList, uint32 InTileSize, EPixelFormat InTileFormat, uint32 InNumTiles, bool bInCacheAtlas)
     : TileSize(InTileSize)
     , bCacheAtlas(bInCacheAtlas)
-    //, TileFormat(InTileFormat)
 {
     HeightInTiles = FMath::RoundUpToPowerOfTwo((InNumTiles - 1) / TILE_ATLAS_MAX_WIDTH_IN_TILES + 1);
     WidthInTiles = (InNumTiles - 1) / HeightInTiles + 1;
@@ -1878,10 +1863,4 @@ FOdysseyTileManager::FTileTextureHandle::GetPositionInTexture() const
         return FIntPoint();
 
     return Atlas->GetTilePosition(TileIndexInAtlas);
-}
-
-bool
-FOdysseyTileManager::FTileTextureHandle::IsValid() const
-{
-    return TileIndexInAtlas != INDEX_NONE;
 }
