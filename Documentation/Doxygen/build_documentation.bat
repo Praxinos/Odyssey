@@ -6,7 +6,7 @@ setlocal
 :: Ensure current dir
 pushd %~dp0
 
-:: CD to root
-cd ..
+:: CD to the plugin root: the paths of the Doxyfile are relative to it
+cd ..\..
 
 doxygen %~dp0Doxyfile
