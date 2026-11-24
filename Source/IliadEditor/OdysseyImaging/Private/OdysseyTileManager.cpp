@@ -144,7 +144,7 @@ FOdysseyTileManager::Initialize()
 
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::Initialize);
 
-    CacheSession = MakeUnique<FOdysseyTileCacheSession>(
+    CacheSession = MakeUnique<FOdysseyTileDiskCacheDirectory>(
         FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("Temp"), TEXT("OdysseyTileManager")));
     CacheSession->Initialize();
     SetGPUCacheBudget(FMath::Min<uint64>(UOdysseyTileManagerSettings::Get()->MaxGPUSize, MAX_int64 / 1000000) * 1000000);

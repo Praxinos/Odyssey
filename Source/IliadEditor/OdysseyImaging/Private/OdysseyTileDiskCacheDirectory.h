@@ -9,14 +9,14 @@
 #include "Templates/UniquePtr.h"
 
 /** Owns one disk-cache directory and reclaims abandoned sessions through an interprocess lock. */
-class FOdysseyTileCacheSession
+class FOdysseyTileDiskCacheDirectory
 {
 public:
-    explicit FOdysseyTileCacheSession(const FString& InRootDirectory);
-    ~FOdysseyTileCacheSession();
+    explicit FOdysseyTileDiskCacheDirectory(const FString& InRootDirectory);
+    ~FOdysseyTileDiskCacheDirectory();
 
-    FOdysseyTileCacheSession(const FOdysseyTileCacheSession&) = delete;
-    FOdysseyTileCacheSession& operator=(const FOdysseyTileCacheSession&) = delete;
+    FOdysseyTileDiskCacheDirectory(const FOdysseyTileDiskCacheDirectory&) = delete;
+    FOdysseyTileDiskCacheDirectory& operator=(const FOdysseyTileDiskCacheDirectory&) = delete;
 
     /** Acquire ownership before publishing the directory. Failed locking disables abandoned-session cleanup. */
     void Initialize();

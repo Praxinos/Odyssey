@@ -11,7 +11,7 @@
 #include "RenderGraphBuilder.h"
 #include "RHIGPUReadback.h"
 #include "TickableEditorObject.h"
-#include "OdysseyTileCacheSession.h"
+#include "OdysseyTileDiskCacheDirectory.h"
 #include "OdysseyTileId.h"
 
 class UTexture;
@@ -399,5 +399,5 @@ private:
     TArray<TSharedPtr<FTile>> PendingTilesToReadBack;
 
     FOdysseyTileManagerStats Stats;
-    TUniquePtr<FOdysseyTileCacheSession> CacheSession;
+    TUniquePtr<FOdysseyTileDiskCacheDirectory> CacheSession;
 };

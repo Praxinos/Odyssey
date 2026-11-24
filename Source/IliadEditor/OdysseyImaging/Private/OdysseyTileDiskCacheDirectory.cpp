@@ -1,7 +1,7 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2026
 
-#include "OdysseyTileCacheSession.h"
+#include "OdysseyTileDiskCacheDirectory.h"
 
 #include "GenericPlatform/GenericPlatformFile.h"
 #include "GenericPlatform/GenericPlatformMutex.h"
@@ -22,19 +22,19 @@ namespace
 constexpr TCHAR ManagedSessionPrefix[] = TEXT("Session-v1-");
 }
 
-FOdysseyTileCacheSession::FOdysseyTileCacheSession(const FString& InRootDirectory)
+FOdysseyTileDiskCacheDirectory::FOdysseyTileDiskCacheDirectory(const FString& InRootDirectory)
     : RootDirectory(FPaths::ConvertRelativePathToFull(InRootDirectory))
-    , AcquireLock(&FOdysseyTileCacheSession::AcquirePlatformLock)
+    , AcquireLock(&FOdysseyTileDiskCacheDirectory::AcquirePlatformLock)
 {
     FPaths::NormalizeDirectoryName(RootDirectory);
 }
 
-FOdysseyTileCacheSession::~FOdysseyTileCacheSession()
+FOdysseyTileDiskCacheDirectory::~FOdysseyTileDiskCacheDirectory()
 {
     Finalize();
 }
 
-TUniquePtr<UE::FPlatformSystemWideMutex> FOdysseyTileCacheSession::AcquirePlatformLock(const FString& SessionName)
+TUniquePtr<UE::FPlatformSystemWideMutex> FOdysseyTileDiskCacheDirectory::AcquirePlatformLock(const FString& SessionName)
 {
     if constexpr (!std::is_same_v<UE::FPlatformSystemWideMutex, UE::FPlatformSystemWideMutexNotImplemented>)
     {
@@ -48,7 +48,7 @@ TUniquePtr<UE::FPlatformSystemWideMutex> FOdysseyTileCacheSession::AcquirePlatfo
     return nullptr;
 }
 
-bool FOdysseyTileCacheSession::IsManagedSessionName(const FString& SessionName)
+bool FOdysseyTileDiskCacheDirectory::IsManagedSessionName(const FString& SessionName)
 {
     if (!SessionName.StartsWith(ManagedSessionPrefix, ESearchCase::CaseSensitive))
     {
@@ -63,7 +63,7 @@ bool FOdysseyTileCacheSession::IsManagedSessionName(const FString& SessionName)
         && FGuid::ParseExact(GuidString, EGuidFormats::Digits, Guid);
 }
 
-void FOdysseyTileCacheSession::Initialize()
+void FOdysseyTileDiskCacheDirectory::Initialize()
 {
     if (bInitialized)
     {
@@ -93,7 +93,7 @@ void FOdysseyTileCacheSession::Initialize()
     }
 }
 
-void FOdysseyTileCacheSession::CleanupAbandonedSessions()
+void FOdysseyTileDiskCacheDirectory::CleanupAbandonedSessions()
 {
     TArray<FString> SessionNames;
     IFileManager::Get().FindFiles(SessionNames, *FPaths::Combine(RootDirectory, TEXT("Session-v1-*")), false, true);
@@ -112,7 +112,7 @@ void FOdysseyTileCacheSession::CleanupAbandonedSessions()
     }
 }
 
-void FOdysseyTileCacheSession::DeleteSessionDirectory(const FString& Directory) const
+void FOdysseyTileDiskCacheDirectory::DeleteSessionDirectory(const FString& Directory) const
 {
     const FString AbsoluteDirectory = FPaths::ConvertRelativePathToFull(Directory);
     if (!FPaths::IsSamePath(FPaths::GetPath(AbsoluteDirectory), RootDirectory)
@@ -126,7 +126,7 @@ void FOdysseyTileCacheSession::DeleteSessionDirectory(const FString& Directory) 
     }
 }
 
-void FOdysseyTileCacheSession::Finalize()
+void FOdysseyTileDiskCacheDirectory::Finalize()
 {
     if (!bInitialized)
     {

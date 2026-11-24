@@ -1,7 +1,7 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2026
 
-#include "OdysseyTileCacheSession.h"
+#include "OdysseyTileDiskCacheDirectory.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 
@@ -18,7 +18,7 @@
 
 struct FOdysseyTileCacheSessionTestAccess
 {
-    static void DisableLocking(FOdysseyTileCacheSession& Session)
+    static void DisableLocking(FOdysseyTileDiskCacheDirectory& Session)
     {
         Session.AcquireLock = [](const FString&) -> TUniquePtr<UE::FPlatformSystemWideMutex>
         {
@@ -40,7 +40,7 @@ bool RunWorkerIfRequested()
         return false;
     }
 
-    FOdysseyTileCacheSession Session(Root);
+    FOdysseyTileDiskCacheDirectory Session(Root);
     Session.Initialize();
     if (!Session.HasSessionLock())
     {
@@ -147,7 +147,7 @@ bool FOdysseyTileCacheCrashTest::RunTest(const FString& Parameters)
         return false;
     }
 
-    FOdysseyTileCacheSession FirstCleaner(Fixture.Root);
+    FOdysseyTileDiskCacheDirectory FirstCleaner(Fixture.Root);
     FirstCleaner.Initialize();
     if (!TestTrue(TEXT("Parent acquired a session lock"), FirstCleaner.HasSessionLock()))
     {
@@ -158,7 +158,7 @@ bool FOdysseyTileCacheCrashTest::RunTest(const FString& Parameters)
 
     Fixture.StopWorker(); // No Finalize, destructors or crash callbacks execute in the child.
     TestTrue(TEXT("Crash leaves a cache to reclaim"), IFileManager::Get().FileExists(*Fixture.WorkerCachePath));
-    FOdysseyTileCacheSession NextSession(Fixture.Root);
+    FOdysseyTileDiskCacheDirectory NextSession(Fixture.Root);
     NextSession.Initialize();
     TestFalse(TEXT("Next launch removes the crashed process's directory"), IFileManager::Get().DirectoryExists(*FPaths::GetPath(Fixture.WorkerCachePath)));
     TestTrue(TEXT("Cleanup preserves another live session"), IFileManager::Get().FileExists(*FirstCleaner.GetCacheFilePath()));
@@ -196,7 +196,7 @@ bool FOdysseyTileCacheLockFailureTest::RunTest(const FString& Parameters)
     IFileManager::Get().MakeDirectory(*AbandonedDirectory, true);
     IFileManager::Get().MakeDirectory(*LegacyDirectory, true);
 
-    FOdysseyTileCacheSession Unmanaged(Fixture.Root);
+    FOdysseyTileDiskCacheDirectory Unmanaged(Fixture.Root);
     FOdysseyTileCacheSessionTestAccess::DisableLocking(Unmanaged);
     AddExpectedMessage(TEXT("Interprocess locking unavailable"), ELogVerbosity::Warning);
     Unmanaged.Initialize();
@@ -204,7 +204,7 @@ bool FOdysseyTileCacheLockFailureTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Failed locking preserves abandoned directories"), IFileManager::Get().DirectoryExists(*AbandonedDirectory));
     TestTrue(TEXT("Unmanaged session is explicitly marked"), FPaths::GetCleanFilename(FPaths::GetPath(Unmanaged.GetCacheFilePath())).StartsWith(TEXT("Unmanaged-v1-")));
 
-    FOdysseyTileCacheSession Cleaner(Fixture.Root);
+    FOdysseyTileDiskCacheDirectory Cleaner(Fixture.Root);
     Cleaner.Initialize();
     if (!TestTrue(TEXT("Platform supports interprocess locking"), Cleaner.HasSessionLock()))
     {
