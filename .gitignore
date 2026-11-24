@@ -329,3 +329,7 @@ Intermediate/
 
 #VScode
 .vscode/
+
+#Claude Shared settings
+.claude/*
+!.claude/settings.json

@@ -1,0 +1,14 @@
+{
+  "extraKnownMarketplaces": {
+    "praxinos": {
+      "source": {
+        "source": "github",
+        "repo": "Praxinos/claude-praxinos-dev-plugin"
+      },
+      "autoUpdate": true
+    }
+  },
+  "enabledPlugins": {
+    "praxinos-dev@praxinos": true
+  }
+}
