@@ -71,11 +71,10 @@ public:
     using FGetDescription = TFunction<FDescription()>;
 
     /**
-     * Called when pixels changed.
+     * Called when committed pixels changed; uncommitted edits are reported by FOdysseyRasterEditSession::OnInvalidated().
      * @param Rects The changed areas, in content pixels; the whole canvas when everything changed.
-     * @param bInteractive True for uncommitted edits.
      */
-    using FOnChanged = TFunction<void(const TArray<FIntRect>& Rects, bool bInteractive)>;
+    using FOnChanged = TFunction<void(const TArray<FIntRect>& Rects)>;
 
     /** Returns true when edits must keep the alpha of the content, e.g. the alpha of the layer is locked. */
     using FIsAlphaLocked = TFunction<bool()>;
@@ -111,12 +110,6 @@ public:
      * @return False when the owner cannot hold content or the rendering is unavailable.
      */
     bool EnsureImage();
-
-    /**
-     * Replaces the whole content with the block, without undo. Used to create or migrate content.
-     * @return False when the owner cannot hold content or the rendering is unavailable.
-     */
-    bool SetContent(const ::ULIS::FBlock& Block);
 
     /**
      * Moves the pixels of an asset saved before the tiled image storage into the content, without undo.
@@ -178,16 +171,19 @@ public:
      */
     bool BuildRenderFunction(IOdysseyTextureRenderingAbility::FRenderFunction& OutRenderFunction, const FMatrix& ContentTransform) const;
 
-    /** Returns true while an edit begun by BeginEdit() is neither committed nor ended. */
-    bool HasUncommittedEdits() const;
-
 private:
+    /**
+     * Replaces the whole content with the block, without undo. Used to create or migrate content.
+     * @return False when the owner cannot hold content or the rendering is unavailable.
+     */
+    bool SetContent(const ::ULIS::FBlock& Block);
+
     void EndEdit();
     void OnEditCommitted(const TArray<FIntRect>& Rects);
     void OnImageUndone();
 
     /** Notifies the owner that pixels changed; empty rects stand for the whole canvas. */
-    void NotifyChanged(const TArray<FIntRect>& Rects, bool bInteractive);
+    void NotifyChanged(const TArray<FIntRect>& Rects);
 
 private:
     UObject& Owner;

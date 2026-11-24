@@ -20,7 +20,6 @@ enum class EOdysseyExportImageFormat : uint8
     Jpeg
 };
 
-class UPaperFlipbook;
 class UTexture2D;
 
 namespace Odyssey

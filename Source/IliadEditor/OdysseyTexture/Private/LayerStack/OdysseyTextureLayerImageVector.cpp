@@ -111,9 +111,9 @@ UOdysseyTextureLayerImageVector::GetVectorContent() const
             {
                 return MutableThis->GetDrawingFlags();
             },
-            [MutableThis](const TArray<FIntRect>& Rects, bool bInteractive)
+            [MutableThis](const TArray<FIntRect>& Rects)
             {
-                MutableThis->RenderingChanged(Rects, bInteractive);
+                MutableThis->RenderingChanged(Rects, false);
             });
     }
     return *VectorContent;
@@ -315,12 +315,6 @@ UOdysseyTextureLayerImageVector::IsColored() const
 }
 
 
-
-TArray<FGuid>
-UOdysseyTextureLayerImageVector::GetRenderingComposition(uint64 iRenderType, int iFrame) const
-{
-    return { GetRenderingId() };
-}
 
 void
 UOdysseyTextureLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)

@@ -128,12 +128,6 @@ FOdysseyVectorContent::GetImage() const
     return Image;
 }
 
-FOdysseyVectorContent::FDescription
-FOdysseyVectorContent::Describe() const
-{
-    return GetDescription();
-}
-
 bool
 FOdysseyVectorContent::EnsureRendered()
 {
@@ -239,7 +233,7 @@ FOdysseyVectorContent::OnRequestRedraw(FOdysseyVectorGroupPaint* Scene, uint64 R
     }
     if (!Rects.IsEmpty())
     {
-        OnChanged(Rects, false);
+        OnChanged(Rects);
     }
 }
 

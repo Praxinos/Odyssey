@@ -31,8 +31,7 @@ struct FOdysseyVectorContentRasterizer;
  * - The scene is rendered by blend2d in 8-bit, by a rasterizer shared by every content of the same size.
  */
 class ODYSSEYIMAGING_API FOdysseyVectorContent
-    : public TSharedFromThis<FOdysseyVectorContent>
-    , public FGCObject
+    : public FGCObject
 {
 public:
     /** The content the owner expects. */
@@ -56,11 +55,11 @@ public:
     using FGetDrawingFlags = TFunction<uint64()>;
 
     /**
-     * Called when the render changed.
+     * Called when the scene changed outside an interactive redraw; interactive redraws are reported by
+     * FOdysseyRasterEditSession::OnInvalidated().
      * @param Rects The changed areas, in content pixels.
-     * @param bInteractive True for renders of uncommitted edits.
      */
-    using FOnChanged = TFunction<void(const TArray<FIntRect>& Rects, bool bInteractive)>;
+    using FOnChanged = TFunction<void(const TArray<FIntRect>& Rects)>;
 
 public:
     virtual ~FOdysseyVectorContent() override;
@@ -84,16 +83,6 @@ public:
     /** Returns the existing image without creating it. */
     UOdysseyTiledImage* GetImage() const;
 
-    /** Returns the content the owner expects. */
-    FDescription Describe() const;
-
-    /**
-     * Brings the tiles up to date with the scene: creates the image when missing and renders the areas changed since the last render,
-     * or the whole canvas when the description or the drawing flags changed. Never notifies the owner.
-     * @return False when the owner cannot hold content or the rendering is unavailable.
-     */
-    bool EnsureRendered();
-
     /**
      * Builds the function rendering the tiles, once brought up to date. Uncommitted edits are shown by the views through the edit session.
      * @param OutRenderFunction The render function.
@@ -108,6 +97,13 @@ public:
     virtual FString GetReferencerName() const override;
 
 private:
+    /**
+     * Brings the tiles up to date with the scene: creates the image when missing and renders the areas changed since the last render,
+     * or the whole canvas when the description or the drawing flags changed. Never notifies the owner.
+     * @return False when the owner cannot hold content or the rendering is unavailable.
+     */
+    bool EnsureRendered();
+
     void OnRequestRedraw(FOdysseyVectorGroupPaint* Scene, uint64 RedrawFlags);
 
     /** Renders an area of the scene into the edit session, begun when needed. */

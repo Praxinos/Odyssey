@@ -43,8 +43,6 @@ public class OdysseyImaging : ModuleRules
                 "CoreUObject",
                 "DerivedDataCache",
                 "ImageCore",
-                "Paper2D",
-                "Paper2DEditor",
                 "RenderCore",
                 "Renderer",
                 "RHI",

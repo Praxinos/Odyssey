@@ -100,9 +100,9 @@ UOdysseyAnimationCellImageVector::GetVectorContent() const
             {
                 return MutableThis->GetDrawingFlags();
             },
-            [MutableThis](const TArray<FIntRect>& Rects, bool bInteractive)
+            [MutableThis](const TArray<FIntRect>& Rects)
             {
-                MutableThis->RenderingChanged(Rects, bInteractive);
+                MutableThis->RenderingChanged(Rects, false);
             });
     }
     return *mVectorContent;
@@ -242,41 +242,13 @@ UOdysseyAnimationCellImageVector::PostLoad()
     mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
 }
 
-void
-UOdysseyAnimationCellImageVector::OnIsColoredChanged(UOdysseyAnimationLayerImageVector* iLayer)
-{
-    if (iLayer != GetLayer())
-        return;
-
-    mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
-}
-
-void
-UOdysseyAnimationCellImageVector::OnIsWireframeChanged(UOdysseyAnimationLayerImageVector* iLayer)
-{
-    if (iLayer != GetLayer())
-        return;
-
-    mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
-}
-
 FOdysseyMediaProvider
 UOdysseyAnimationCellImageVector::GetMediaProvider() const
 {
-    //Don't create a mediaRaster if there is an image render in use
-    FScopeLock lock(&mImageRenderingMutex);
-
     TSharedPtr<FOdysseyMediaVector> mediaVector = MakeShared<FOdysseyMediaVector>(mVectorCell->GetScene());
-    mMediaVector = mediaVector;
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.Add(mediaVector);
     return mediaProvider;
-}
-
-FCriticalSection*
-UOdysseyAnimationCellImageVector::GetImageRenderingMutex() const
-{
-    return &mImageRenderingMutex;
 }
 
 // Implements Interface IOdysseyVectorCell::GetIndex

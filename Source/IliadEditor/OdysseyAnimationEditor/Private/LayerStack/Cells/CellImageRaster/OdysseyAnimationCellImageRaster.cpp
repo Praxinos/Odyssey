@@ -13,18 +13,12 @@
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "UObject/StrongObjectPtr.h"
-#include "OdysseyBlendShader.h"
 #include "OdysseyTiledImage.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyAnimationCellImageRasterImport.h"
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyRasterBlock.h"
-#include "ULISUtils.h"
-#include "CanvasTypes.h"
-#include "CanvasItem.h"
-#include "OdysseyPixelFormat.h"
-#include "TextureResource.h"
 #include "UObject/ObjectSaveContext.h"
 #include "ScopedTransaction.h"
 
@@ -32,9 +26,7 @@
 
 #define LOCTEXT_NAMESPACE "Animation"
 
-UOdysseyAnimationCellImageRaster::UOdysseyAnimationCellImageRaster()
-{
-}
+UOdysseyAnimationCellImageRaster::UOdysseyAnimationCellImageRaster() = default;
 
 TArray<FGuid>
 UOdysseyAnimationCellImageRaster::GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const
@@ -95,9 +87,9 @@ UOdysseyAnimationCellImageRaster::GetRasterContent() const
                 }
                 return Description;
             },
-            [MutableThis](const TArray<FIntRect>& Rects, bool bInteractive)
+            [MutableThis](const TArray<FIntRect>& Rects)
             {
-                MutableThis->RenderingChanged(Rects, bInteractive);
+                MutableThis->RenderingChanged(Rects, false);
             },
             [MutableThis]()
             {
@@ -153,9 +145,7 @@ UOdysseyAnimationCellImageRaster::Serialize(FArchive& Ar)
 
     if( Ar.IsLoading() && !Ar.IsTransacting() )
     {
-        if (!FOdysseyAnimationCellImageRasterImport::Read( this, Ar ))
-        {
-        }
+        FOdysseyAnimationCellImageRasterImport::Read( this, Ar );
     }
 }
 

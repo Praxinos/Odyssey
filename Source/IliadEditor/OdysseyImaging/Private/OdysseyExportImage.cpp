@@ -3,20 +3,14 @@
 
 #include "OdysseyExportImage.h"
 
+#include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Factories/Texture2dFactoryNew.h"
 #include "HAL/PlatformFileManager.h"
 #include "ImageUtils.h"
 #include "Misc/Paths.h"
 
-#include "OdysseyPixelFormat.h"
 #include "OdysseyRenderContext.h"
-#include "OdysseySurfaceTexture2DEditable.h"
-
-#include "ULISLoaderModule.h"
-#include "ULISUtils.h"
-
-#define LOCTEXT_NAMESPACE "Imaging"
 
 namespace Odyssey
 {
@@ -109,5 +103,3 @@ ExportAsImage(UObject* iObject, const FOdysseyRenderContext* RenderContext, EOdy
 
 
 }
-
-#undef LOCTEXT_NAMESPACE

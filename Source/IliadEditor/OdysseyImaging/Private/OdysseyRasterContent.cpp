@@ -147,7 +147,7 @@ FOdysseyRasterContent::SetContent(const ::ULIS::FBlock& Block)
     Odyssey::TiledImage::CopyFromBlock(*Image, Block, FIntRect(0, 0, Block.Width(), Block.Height()), FIntPoint::ZeroValue, GetDescription().bSRGB);
     // The edit is derived from the previous content.
     EndEdit();
-    NotifyChanged({}, false);
+    NotifyChanged({});
     return true;
 }
 
@@ -288,7 +288,7 @@ FOdysseyRasterContent::Write(UTextureRenderTarget2D& Source, const TArray<FIntRe
     {
         return false;
     }
-    NotifyChanged(Clipped, false);
+    NotifyChanged(Clipped);
     return true;
 }
 
@@ -309,7 +309,7 @@ FOdysseyRasterContent::Clear()
     // The edit started from the previous pixels: committing it would discard this change.
     EndEdit();
     Image->RemoveAllTiles();
-    NotifyChanged({}, false);
+    NotifyChanged({});
     return true;
 }
 
@@ -325,12 +325,6 @@ FOdysseyRasterContent::BuildRenderFunction(IOdysseyTextureRenderingAbility::FRen
     return Odyssey::RasterSampling::BuildTiledImageRenderFunction(*Image, GetDescription().Size, ContentTransform, OutRenderFunction);
 }
 
-bool
-FOdysseyRasterContent::HasUncommittedEdits() const
-{
-    return FOdysseyRasterEditSession::Find(RenderingId).IsValid();
-}
-
 void
 FOdysseyRasterContent::EndEdit()
 {
@@ -343,7 +337,7 @@ FOdysseyRasterContent::EndEdit()
 void
 FOdysseyRasterContent::OnEditCommitted(const TArray<FIntRect>& Rects)
 {
-    NotifyChanged(Rects, false);
+    NotifyChanged(Rects);
 }
 
 void
@@ -351,16 +345,16 @@ FOdysseyRasterContent::OnImageUndone()
 {
     // The edit started from pixels the undo replaced.
     EndEdit();
-    NotifyChanged({}, false);
+    NotifyChanged({});
 }
 
 void
-FOdysseyRasterContent::NotifyChanged(const TArray<FIntRect>& Rects, bool bInteractive)
+FOdysseyRasterContent::NotifyChanged(const TArray<FIntRect>& Rects)
 {
     if (Rects.IsEmpty())
     {
-        OnChanged({ FIntRect(FIntPoint::ZeroValue, GetDescription().Size) }, bInteractive);
+        OnChanged({ FIntRect(FIntPoint::ZeroValue, GetDescription().Size) });
         return;
     }
-    OnChanged(Rects, bInteractive);
+    OnChanged(Rects);
 }

@@ -87,9 +87,9 @@ UOdysseyTextureLayerImageRaster::GetRasterContent() const
                 }
                 return Description;
             },
-            [MutableThis](const TArray<FIntRect>& Rects, bool bInteractive)
+            [MutableThis](const TArray<FIntRect>& Rects)
             {
-                MutableThis->RenderingChanged(Rects, bInteractive);
+                MutableThis->RenderingChanged(Rects, false);
             },
             [MutableThis]()
             {
@@ -253,12 +253,6 @@ UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
             }
         }
     }
-}
-
-TArray<FGuid>
-UOdysseyTextureLayerImageRaster::GetRenderingComposition(uint64 iRenderType, int iFrame) const
-{
-    return { GetRenderingId() };
 }
 
 void
