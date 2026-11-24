@@ -165,7 +165,8 @@ private:
             };
 
             //Static members
-            static FCriticalSection Mutex;
+            /** Guards the static LRU lists of tile data. */
+            static FCriticalSection LRUMutex;
             static FCriticalSection CacheOnDiskMutex;
 
             static TDoubleLinkedList<TSharedPtr<FTileData>> UncompressedLRU;

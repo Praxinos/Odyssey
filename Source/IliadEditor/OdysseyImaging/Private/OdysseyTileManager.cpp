@@ -28,7 +28,7 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogOdysseyTileManager, Log, All);
 
-/*static*/ FCriticalSection FOdysseyTileManager::FTileData::Mutex;
+/*static*/ FCriticalSection FOdysseyTileManager::FTileData::LRUMutex;
 /*static*/ FCriticalSection FOdysseyTileManager::FTileData::CacheOnDiskMutex;
 
 /*static*/ TDoubleLinkedList<TSharedPtr<FOdysseyTileManager::FTileData>> FOdysseyTileManager::FTileData::UncompressedLRU;
@@ -1383,7 +1383,7 @@ FOdysseyTileManager::FTileData::FromUncompressedBuffer(const FIoHash& InHash, co
     );
 
     {
-        FScopeLock Lock(&Mutex);
+        FScopeLock Lock(&LRUMutex);
         Touch(TileData);
     }
 
@@ -1418,7 +1418,7 @@ FOdysseyTileManager::FTileData::FromCompressedBuffer(const FIoHash& InHash, cons
     );
 
     {
-        FScopeLock Lock(&Mutex);
+        FScopeLock Lock(&LRUMutex);
         Touch(TileData);
     }
 
@@ -1455,7 +1455,7 @@ FOdysseyTileManager::FTileData::FromBuffers(const FIoHash& InHash, const FShared
     );
 
     {
-        FScopeLock Lock(&Mutex);
+        FScopeLock Lock(&LRUMutex);
         Touch(TileData);
     }
 
@@ -1467,7 +1467,7 @@ FOdysseyTileManager::FTileData::GetUncompressedBuffer(FSharedBuffer& OutBuffer) 
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::GetUncompressedBuffer);
 
-    FScopeLock Lock(&Mutex);
+    FScopeLock Lock(&LRUMutex);
     if (!LoadUncompressedBuffer())
         return false;
     OutBuffer = UncompressedBuffer;
@@ -1482,7 +1482,7 @@ FOdysseyTileManager::FTileData::GetCompressedBuffer(FCompressedBuffer& OutBuffer
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::GetCompressedBuffer);
 
-    FScopeLock Lock(&Mutex);
+    FScopeLock Lock(&LRUMutex);
     if (!LoadCompressedBuffer())
         return false;
     OutBuffer = CompressedBuffer.Get();
@@ -1718,7 +1718,7 @@ FOdysseyTileManager::FTileData::EvictTiles(uint64 InMaxUncompressedSize, uint64 
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTileData::EvictTiles);
 
-    FScopeLock Lock(&Mutex);
+    FScopeLock Lock(&LRUMutex);
 
     FOdysseyTileManagerStats& TileStats = FOdysseyTileManager::Get().GetStats();
 
