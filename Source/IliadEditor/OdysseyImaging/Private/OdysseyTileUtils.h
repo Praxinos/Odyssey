@@ -7,7 +7,11 @@
 
 namespace Odyssey::TileUtils {
 
+    /** The largest atlas is a square of this many tiles per side. */
     inline constexpr uint32 MaxAtlasDimensionInTiles = 64;
+
+    /** The number of tiles of the largest atlas. */
+    inline constexpr uint32 MaxAtlasTiles = MaxAtlasDimensionInTiles * MaxAtlasDimensionInTiles;
 
     /**
      * The size of the atlases the GPU cache repacks its tiles into, in bytes: large enough to batch many tiles,

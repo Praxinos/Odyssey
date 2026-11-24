@@ -25,9 +25,6 @@
  * A 64x64 Tiles Atlas of 64x64 RGBA8 pixels tiles
  * Is ~64MB on GPU
  */
-#define TILE_ATLAS_MAX_WIDTH_IN_TILES Odyssey::TileUtils::MaxAtlasDimensionInTiles
-#define TILE_ATLAS_MAX_HEIGHT_IN_TILES Odyssey::TileUtils::MaxAtlasDimensionInTiles
-#define TILE_ATLAS_MAX_TILES (TILE_ATLAS_MAX_WIDTH_IN_TILES * TILE_ATLAS_MAX_HEIGHT_IN_TILES)
 
 DEFINE_LOG_CATEGORY_STATIC(LogOdysseyTileManager, Log, All);
 
@@ -308,7 +305,7 @@ void FOdysseyTileManager::MaintainGPUCache(FRHICommandListImmediate& RHICmdList)
         {
             const uint64 TileBytes = uint64(Item.Key.TileSize) * Item.Key.TileSize * GPixelFormats[Item.Key.Format].BlockBytes;
             const uint32 MaxTiles = uint32(FMath::RoundDownToPowerOfTwo64(
-                FMath::Clamp<uint64>(Odyssey::TileUtils::GPUCachePageBytes / TileBytes, 1, TILE_ATLAS_MAX_TILES)));
+                FMath::Clamp<uint64>(Odyssey::TileUtils::GPUCachePageBytes / TileBytes, 1, Odyssey::TileUtils::MaxAtlasTiles)));
             Groups.Add(Id, {Item.Key.TileSize, Item.Key.Format, MaxTiles, {}, {}});
         }
     }
@@ -462,8 +459,8 @@ uint32 FOdysseyTileManager::GetMaxTilesPerGPUAtlas(uint32 TileSize, EPixelFormat
 {
     FScopeLock Lock(&GPUCacheMutex);
     const uint64 BytesPerTile = uint64(TileSize) * TileSize * GPixelFormats[Format].BlockBytes;
-    const uint32 MaxTiles = GPUCacheBudget == 0 ? uint32(TILE_ATLAS_MAX_TILES)
-        : uint32(FMath::Clamp<uint64>(GPUCacheBudget / BytesPerTile, 1, TILE_ATLAS_MAX_TILES));
+    const uint32 MaxTiles = GPUCacheBudget == 0 ? uint32(Odyssey::TileUtils::MaxAtlasTiles)
+        : uint32(FMath::Clamp<uint64>(GPUCacheBudget / BytesPerTile, 1, Odyssey::TileUtils::MaxAtlasTiles));
     // Power-of-two batches avoid padding beyond the configured budget.
     return static_cast<uint32>(FMath::RoundDownToPowerOfTwo64(MaxTiles));
 }
@@ -1765,7 +1762,7 @@ FOdysseyTileManager::FTileData::WaitUntilCachedOnDisk()
 
 FRHITextureCreateDesc FOdysseyTileManager::FTileAtlas::GetTextureDesc(uint32 InTileSize, EPixelFormat InTileFormat, uint32 InNumTiles, bool bInCacheAtlas)
 {
-    const uint32 Height = FMath::RoundUpToPowerOfTwo((InNumTiles - 1) / TILE_ATLAS_MAX_WIDTH_IN_TILES + 1);
+    const uint32 Height = FMath::RoundUpToPowerOfTwo((InNumTiles - 1) / Odyssey::TileUtils::MaxAtlasDimensionInTiles + 1);
     const uint32 Width = (InNumTiles - 1) / Height + 1;
     return FRHITextureCreateDesc::Create2D(TEXT("FOdysseyTileManager::FTileAtlas::Texture"))
         .SetExtent(Width * InTileSize, Height * InTileSize)
@@ -1778,7 +1775,7 @@ FOdysseyTileManager::FTileAtlas::FTileAtlas(FRHICommandList& InRHICmdList, uint3
     : TileSize(InTileSize)
     , bCacheAtlas(bInCacheAtlas)
 {
-    HeightInTiles = FMath::RoundUpToPowerOfTwo((InNumTiles - 1) / TILE_ATLAS_MAX_WIDTH_IN_TILES + 1);
+    HeightInTiles = FMath::RoundUpToPowerOfTwo((InNumTiles - 1) / Odyssey::TileUtils::MaxAtlasDimensionInTiles + 1);
     WidthInTiles = (InNumTiles - 1) / HeightInTiles + 1;
     FIntPoint AtlasSize(WidthInTiles * InTileSize, HeightInTiles * InTileSize);
 
