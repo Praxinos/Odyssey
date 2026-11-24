@@ -375,6 +375,7 @@ void UOdysseyPainterEditorRasterBaseTool::SelectAll()
         polyPoints.Add(FVector2D(mEditor->RasterSelection()->GetBlock()->Width(), mEditor->RasterSelection()->GetBlock()->Height()));
         polyPoints.Add(FVector2D(0, mEditor->RasterSelection()->GetBlock()->Height()));
 
+        FScopedTransaction scopedTransaction(LOCTEXT("actions.raster.selection.all", "Select All Raster"));
         mEditor->RasterSelection()->Add(polyPoints);
     }
 }

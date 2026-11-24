@@ -162,6 +162,7 @@ void
 UOdysseyPainterEditorRasterSelectionTool::Deselect()
 {
     TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    FScopedTransaction scopedTransaction(LOCTEXT("actions.raster.selection.deselect", "Deselect Raster"));
     rasterSelection->Clear();
 }
 
