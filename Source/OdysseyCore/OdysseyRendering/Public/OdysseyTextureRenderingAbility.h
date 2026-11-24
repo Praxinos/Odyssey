@@ -72,8 +72,8 @@ public:
         const FOdysseyRenderContext* RenderContext = nullptr) const;
 
     /**
-     * Wraps a render function so that its output is converted: the function renders into an intermediate float texture,
-     * whose destination area is then converted into the destination. Call on the game thread.
+     * Wraps a render function so that its output is converted: the function renders into an intermediate float texture
+     * of the size of the destination area, at (0, 0), which is then converted into the destination area. Call on the game thread.
      * The function is returned unchanged with None, or when the conversion is unavailable.
      */
     static FRenderFunction BuildColorConvertRenderFunction(FRenderFunction RenderFunction, EOdysseyColorConversion Conversion);

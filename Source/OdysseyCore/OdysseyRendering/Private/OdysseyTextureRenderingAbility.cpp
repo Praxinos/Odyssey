@@ -279,12 +279,23 @@ IOdysseyTextureRenderingAbility::BuildColorConvertRenderFunction(FRenderFunction
     return [RenderFunction = MoveTemp(RenderFunction), Pass = MoveTemp(Pass)](FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type FeatureLevel,
         FRDGTextureRef Destination, const FIntRect& SourceRect, const FIntRect& DestinationRect, const FMatrix& Transform)
     {
+        // Only the visible part of the destination area is converted.
+        FIntRect Visible = DestinationRect;
+        Visible.Clip(FIntRect(FIntPoint::ZeroValue, Destination->Desc.Extent));
+        if (Visible.Width() <= 0 || Visible.Height() <= 0)
+        {
+            return;
+        }
+
+        // The intermediate covers the destination area only, not the whole destination: a node rendered into a small
+        // area of a large canvas does not allocate a canvas-sized texture. The function renders into it at (0, 0).
         // Full float precision, so that the conversion is not altered by an intermediate quantization.
-        FRDGTextureRef Intermediate = GraphBuilder.CreateTexture(FRDGTextureDesc::Create2D(Destination->Desc.Extent,
+        const FIntRect IntermediateRect(FIntPoint::ZeroValue, DestinationRect.Size());
+        FRDGTextureRef Intermediate = GraphBuilder.CreateTexture(FRDGTextureDesc::Create2D(DestinationRect.Size(),
             PF_A32B32G32R32F, FClearValueBinding::Transparent, TexCreate_ShaderResource | TexCreate_RenderTargetable),
             TEXT("Odyssey.ColorSpace.Intermediate"));
-        AddClearRenderTargetPass(GraphBuilder, Intermediate, FLinearColor::Transparent, DestinationRect);
-        RenderFunction(GraphBuilder, FeatureLevel, Intermediate, SourceRect, DestinationRect, Transform);
-        Pass.Add(GraphBuilder, FeatureLevel, Intermediate, DestinationRect, Destination, DestinationRect);
+        AddClearRenderTargetPass(GraphBuilder, Intermediate, FLinearColor::Transparent);
+        RenderFunction(GraphBuilder, FeatureLevel, Intermediate, SourceRect, IntermediateRect, Transform);
+        Pass.Add(GraphBuilder, FeatureLevel, Intermediate, Visible - DestinationRect.Min, Destination, Visible);
     };
 }
