@@ -24,16 +24,29 @@ enum class EOdysseyTiledImageFormat : uint8
 };
 
 /**
- * Raster data split in tiles, positioned in space to provide a technically unbounded image.
+ * Raster data split in square tiles, positioned in space to provide a technically unbounded image.
  *
- * Meant to store the pixels of raster texture layers and raster animation cells, through FOdysseyRasterContent,
- * and the render of vector ones, through FOdysseyVectorContent; it is not exposed to Blueprints nor created as an asset. Its tiles are transactional: Modify() makes changes undoable.
+ * Stores the pixels of raster texture layers and raster animation cells, through FOdysseyRasterContent,
+ * and the render of vector ones, through FOdysseyVectorContent. It is neither exposed to Blueprints nor created as an asset.
+ *
+ * Colors and coordinates:
+ * - tiles hold linear colors (see EOdysseyTiledImageFormat);
+ * - a tile whose alpha is 0 everywhere is empty and is not kept, whatever its RGB values;
+ * - pixel positions are not bounded: pixels outside the canvas of the owner are kept.
+ *
+ * Undo: Modify() records the tile ids; the tile data is immutable in FOdysseyTileManager. Every change goes through
+ * CopyFromTexture() or RemoveAllTiles(), which call Modify(). See Documentation/Doxygen/manual/Architecture/TiledImage.md.
+ * Game thread only.
  */
 UCLASS()
 class ODYSSEYIMAGING_API UOdysseyTiledImage
     : public UObject
 {
     GENERATED_BODY()
+
+public:
+    /** The tile size of the images of raster and vector contents, and of the raster selection mask, in pixels. */
+    static constexpr int32 DefaultTileSize = 64;
 
 public:
     virtual ~UOdysseyTiledImage();
@@ -101,7 +114,7 @@ public:
 private:
     /** The size of the square tiles, in pixels. */
     UPROPERTY()
-    uint32 TileSize = 64;
+    uint32 TileSize = DefaultTileSize;
 
     /** The pixel format of the tiles; their colors are linear (see EOdysseyTiledImageFormat). */
     UPROPERTY()

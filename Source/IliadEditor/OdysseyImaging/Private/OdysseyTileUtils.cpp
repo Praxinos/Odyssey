@@ -15,6 +15,37 @@ bool IsValidTileSize(int64 InTileSize)
     return InTileSize > 0 && InTileSize <= MaxTextureDimension / MaxAtlasDimensionInTiles;
 }
 
+TArray<FIntRect>
+ClipRects(const TArray<FIntRect>& InRects, const FIntRect& InBounds)
+{
+    TArray<FIntRect> Clipped;
+    Clipped.Reserve(InRects.Num());
+    for (FIntRect Rect : InRects)
+    {
+        Rect.Clip(InBounds);
+        if (Rect.Width() > 0 && Rect.Height() > 0)
+        {
+            Clipped.Add(Rect);
+        }
+    }
+    return Clipped;
+}
+
+FIntRect
+UnionRects(const TArray<FIntRect>& InRects)
+{
+    if (InRects.IsEmpty())
+    {
+        return FIntRect();
+    }
+    FIntRect Bounds = InRects[0];
+    for (const FIntRect& Rect : InRects)
+    {
+        Bounds.Union(Rect);
+    }
+    return Bounds;
+}
+
 static int32 FloorDiv(int32 Value, int32 Divisor)
 {
     return Value >= 0

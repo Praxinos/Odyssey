@@ -13,6 +13,7 @@
 #include "OdysseyBlendShader.h"
 #include "OdysseyRasterSampling.h"
 #include "OdysseyRenderContext.h"
+#include "OdysseyTileUtils.h"
 #include "OdysseyTiledImage.h"
 
 namespace
@@ -172,23 +173,19 @@ FOdysseyRasterEditSession::Commit(const TArray<FIntRect>& Rects)
         return false;
     }
 
-    ApplyOriginalAlpha(Rects);
     UTextureRenderTarget2D* Source = Target.Get();
-    const FIntRect Bounds(0, 0, Source->SizeX, Source->SizeY);
-    for (FIntRect Rect : Rects)
+    const TArray<FIntRect> Clipped = Odyssey::TileUtils::ClipRects(Rects, FIntRect(0, 0, Source->SizeX, Source->SizeY));
+    ApplyOriginalAlpha(Clipped);
+    for (const FIntRect& Rect : Clipped)
     {
-        Rect.Clip(Bounds);
-        if (Rect.Width() > 0 && Rect.Height() > 0)
-        {
-            TiledImage->CopyFromTexture(Source, Rect, Rect.Min);
-        }
+        TiledImage->CopyFromTexture(Source, Rect, Rect.Min);
     }
     // The tiles are written on the render thread, which reads the target.
     FlushRenderingCommands();
     End();
     if (OnCommitted)
     {
-        OnCommitted(Rects);
+        OnCommitted(Clipped);
     }
     return true;
 }
@@ -231,16 +228,7 @@ FOdysseyRasterEditSession::ApplyOriginalAlpha(const TArray<FIntRect>& Rects) con
     }
 
     const FIntRect Bounds(0, 0, Target->SizeX, Target->SizeY);
-    TArray<FIntRect> Clipped;
-    Clipped.Reserve(Rects.Num());
-    for (FIntRect Rect : Rects)
-    {
-        Rect.Clip(Bounds);
-        if (Rect.Width() > 0 && Rect.Height() > 0)
-        {
-            Clipped.Add(Rect);
-        }
-    }
+    TArray<FIntRect> Clipped = Odyssey::TileUtils::ClipRects(Rects, Bounds);
     if (Clipped.IsEmpty())
     {
         return;

@@ -17,14 +17,10 @@
 #include "OdysseyRasterEditSession.h"
 #include "OdysseyRasterSampling.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "OdysseyTileUtils.h"
 #include "OdysseyTiledImage.h"
 #include "OdysseyTiledImageBlock.h"
 #include "ULISLoaderModule.h"
-
-namespace
-{
-constexpr int32 TileSize = 64;
-}
 
 FOdysseyRasterContent::~FOdysseyRasterContent()
 {
@@ -78,7 +74,7 @@ FOdysseyRasterContent::EnsureImage()
     {
         // The image identity never changes, so creating it is not part of any transaction.
         UOdysseyTiledImage* NewImage = NewObject<UOdysseyTiledImage>(&Owner, NAME_None, RF_Transactional);
-        NewImage->Initialize(TileSize, Format);
+        NewImage->Initialize(UOdysseyTiledImage::DefaultTileSize, Format);
         Image = NewImage;
     }
     else if (Image->GetFormat() != Format)
@@ -104,7 +100,7 @@ FOdysseyRasterContent::EnsureImage()
         {
             // Read the bytes as they were interpreted, write them as they are now interpreted.
             Pixels = Odyssey::TiledImage::CopyToBlock(*Image, Bounds, Description.Format, !Description.bSRGB);
-            Image->Initialize(TileSize, Format);
+            Image->Initialize(UOdysseyTiledImage::DefaultTileSize, Format);
             if (Pixels)
             {
                 Odyssey::TiledImage::CopyFromBlock(*Image, *Pixels, PixelsRect, Bounds.Min, Description.bSRGB);
@@ -114,7 +110,7 @@ FOdysseyRasterContent::EnsureImage()
         {
             // Keep the linear colors, in the precision of the new format.
             Pixels = Odyssey::TiledImage::CopyToBlock(*Image, Bounds, ::ULIS::Format_RGBAF);
-            Image->Initialize(TileSize, Format);
+            Image->Initialize(UOdysseyTiledImage::DefaultTileSize, Format);
             if (Pixels)
             {
                 Odyssey::TiledImage::CopyFromBlock(*Image, *Pixels, PixelsRect, Bounds.Min);
@@ -143,7 +139,7 @@ FOdysseyRasterContent::SetContent(const ::ULIS::FBlock& Block)
         return false;
     }
 
-    Image->Initialize(TileSize, Image->GetFormat());
+    Image->Initialize(UOdysseyTiledImage::DefaultTileSize, Image->GetFormat());
     Odyssey::TiledImage::CopyFromBlock(*Image, Block, FIntRect(0, 0, Block.Width(), Block.Height()), FIntPoint::ZeroValue, GetDescription().bSRGB);
     // The edit is derived from the previous content.
     EndEdit();
@@ -236,16 +232,7 @@ FOdysseyRasterContent::Write(UTextureRenderTarget2D& Source, const TArray<FIntRe
 
     const FDescription Description = GetDescription();
     const FIntRect Bounds(FIntPoint::ZeroValue, Description.Size);
-    TArray<FIntRect> Clipped;
-    Clipped.Reserve(Rects.Num());
-    for (FIntRect Rect : Rects)
-    {
-        Rect.Clip(Bounds);
-        if (Rect.Width() > 0 && Rect.Height() > 0)
-        {
-            Clipped.Add(Rect);
-        }
-    }
+    const TArray<FIntRect> Clipped = Odyssey::TileUtils::ClipRects(Rects, Bounds);
     if (Clipped.IsEmpty())
     {
         return false;

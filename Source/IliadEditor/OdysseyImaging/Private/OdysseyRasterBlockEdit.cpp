@@ -6,6 +6,7 @@
 #include "Engine/TextureRenderTarget2D.h"
 
 #include "OdysseyRasterEditSession.h"
+#include "OdysseyTileUtils.h"
 #include "OdysseyTiledImageBlock.h"
 
 namespace
@@ -73,16 +74,7 @@ FOdysseyRasterBlockEdit::Update(const TArray<FIntRect>& Rects)
     }
 
     const FIntRect Bounds(0, 0, Block->Width(), Block->Height());
-    TArray<FIntRect> Clipped;
-    Clipped.Reserve(Rects.Num());
-    for (FIntRect Rect : Rects)
-    {
-        Rect.Clip(Bounds);
-        if (Rect.Width() > 0 && Rect.Height() > 0)
-        {
-            Clipped.Add(Rect);
-        }
-    }
+    const TArray<FIntRect> Clipped = Odyssey::TileUtils::ClipRects(Rects, Bounds);
     if (Clipped.IsEmpty())
     {
         return;

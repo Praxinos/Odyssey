@@ -13,6 +13,8 @@
 #include "TextureResource.h"
 #include "UObject/StrongObjectPtr.h"
 
+#include "OdysseyTileUtils.h"
+
 #include "ULISLoaderModule.h"
 
 namespace
@@ -195,25 +197,8 @@ bool CopyFromBlock(UOdysseyTiledImage& Image, const ::ULIS::FBlock& Block, const
     check(IsInGameThread());
     TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::TiledImage::CopyFromBlockRects);
     const FIntRect BlockRect(0, 0, Block.Width(), Block.Height());
-    TArray<FIntRect> Clipped;
-    Clipped.Reserve(Rects.Num());
-    FIntRect Bounds;
-    for (FIntRect Rect : Rects)
-    {
-        Rect.Clip(BlockRect);
-        if (Rect.Width() > 0 && Rect.Height() > 0)
-        {
-            if (Clipped.IsEmpty())
-            {
-                Bounds = Rect;
-            }
-            else
-            {
-                Bounds.Union(Rect);
-            }
-            Clipped.Add(Rect);
-        }
-    }
+    TArray<FIntRect> Clipped = Odyssey::TileUtils::ClipRects(Rects, BlockRect);
+    const FIntRect Bounds = Odyssey::TileUtils::UnionRects(Clipped);
     // Upload the bounds once, then only replace the tiles touched by each rect.
     TStrongObjectPtr<UTexture2D> Texture(CreateTileTexture(Image.GetFormat(), Image.GetPixelFormat(), Block, Bounds, bSRGB));
     if (!Texture)
@@ -237,25 +222,8 @@ bool CopyBlockToRenderTarget(UTextureRenderTarget2D& Target, EOdysseyTiledImageF
     // The parts of the block landing within the target.
     FIntRect BlockRect(0, 0, Block.Width(), Block.Height());
     BlockRect.Clip(FIntRect(FIntPoint::ZeroValue - Position, FIntPoint(Target.SizeX, Target.SizeY) - Position));
-    TArray<FIntRect> Clipped;
-    Clipped.Reserve(Rects.Num());
-    FIntRect Bounds;
-    for (FIntRect Rect : Rects)
-    {
-        Rect.Clip(BlockRect);
-        if (Rect.Width() > 0 && Rect.Height() > 0)
-        {
-            if (Clipped.IsEmpty())
-            {
-                Bounds = Rect;
-            }
-            else
-            {
-                Bounds.Union(Rect);
-            }
-            Clipped.Add(Rect);
-        }
-    }
+    TArray<FIntRect> Clipped = Odyssey::TileUtils::ClipRects(Rects, BlockRect);
+    const FIntRect Bounds = Odyssey::TileUtils::UnionRects(Clipped);
     // Tools upload their edits on every tick: the pixels are written into the target directly, without creating a texture.
     const FSharedBuffer Memory = ToTileMemory(Format, PixelFormat, Block, Bounds, bSRGB);
     if (Memory.IsNull())

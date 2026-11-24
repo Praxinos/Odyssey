@@ -308,7 +308,7 @@ void FOdysseyTileManager::MaintainGPUCache(FRHICommandListImmediate& RHICmdList)
         {
             const uint64 TileBytes = uint64(Item.Key.TileSize) * Item.Key.TileSize * GPixelFormats[Item.Key.Format].BlockBytes;
             const uint32 MaxTiles = uint32(FMath::RoundDownToPowerOfTwo64(
-                FMath::Clamp<uint64>((4 * 1024 * 1024) / TileBytes, 1, TILE_ATLAS_MAX_TILES)));
+                FMath::Clamp<uint64>(Odyssey::TileUtils::GPUCachePageBytes / TileBytes, 1, TILE_ATLAS_MAX_TILES)));
             Groups.Add(Id, {Item.Key.TileSize, Item.Key.Format, MaxTiles, {}, {}});
         }
     }
@@ -885,14 +885,7 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
                     FScopeLock Lock(&FreeTilesMutex);
                     FScopeLock TileLock(&InTile->Mutex);
 
-                    InTile->TempTexture = {};
-                    InTile->TempTexturePromise.Reset();
-                    InTile->TileDataPromise.SetValue(nullptr);
-                    InTile->GPUIsEmptyReadBack.Reset();
-                    InTile->GPUIsEmptyReadBackPromise.Reset();
-                    InTile->GPUReadBack.Reset();
-                    InTile->GPUReadBackPromise.Reset();
-                    InTile->GPUReadBackState = FTile::EGPUReadBackState::Done;
+                    CompleteReadBack(*InTile, nullptr);
 
                     FOdysseyTileId TileId = InTile->Id;
                     TileId.Generation++;
@@ -951,14 +944,7 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
                             FScopeLock TileLock(&InTile->Mutex);
                             CacheGPUTexture({TileData.Get(), PixelsReadBack.TileSize,
                                 InTile->TempTexture.Get()->GetTextureRHI()->GetFormat()}, InTile->TempTexture.Get());
-                            InTile->TempTexture = {};
-                            InTile->TempTexturePromise.Reset();
-                            InTile->TileDataPromise.SetValue(TileData);
-                            InTile->GPUIsEmptyReadBack.Reset();
-                            InTile->GPUIsEmptyReadBackPromise.Reset();
-                            InTile->GPUReadBack.Reset();
-                            InTile->GPUReadBackPromise.Reset();
-                            InTile->GPUReadBackState = FTile::EGPUReadBackState::Done;
+                            CompleteReadBack(*InTile, TileData);
                             return;
                         }
                     }
@@ -971,19 +957,26 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
                         FScopeLock TileLock(&InTile->Mutex);
                         CacheGPUTexture({TileData.Get(), PixelsReadBack.TileSize,
                             InTile->TempTexture.Get()->GetTextureRHI()->GetFormat()}, InTile->TempTexture.Get());
-                        InTile->TempTexture = {};
-                        InTile->TempTexturePromise.Reset();
-                        InTile->TileDataPromise.SetValue(TileData);
-                        InTile->GPUIsEmptyReadBack.Reset();
-                        InTile->GPUIsEmptyReadBackPromise.Reset();
-                        InTile->GPUReadBack.Reset();
-                        InTile->GPUReadBackPromise.Reset();
-                        InTile->GPUReadBackState = FTile::EGPUReadBackState::Done;
+                        CompleteReadBack(*InTile, TileData);
                     }
                 }
             }
         }
     );
+}
+
+//static
+void
+FOdysseyTileManager::CompleteReadBack(FTile& InTile, const TSharedPtr<FTileData>& InTileData)
+{
+    InTile.TempTexture = {};
+    InTile.TempTexturePromise.Reset();
+    InTile.TileDataPromise.SetValue(InTileData);
+    InTile.GPUIsEmptyReadBack.Reset();
+    InTile.GPUIsEmptyReadBackPromise.Reset();
+    InTile.GPUReadBack.Reset();
+    InTile.GPUReadBackPromise.Reset();
+    InTile.GPUReadBackState = FTile::EGPUReadBackState::Done;
 }
 
 TArray<TSharedFuture<TSharedPtr<FOdysseyTileManager::FTileTextureHandle>>>

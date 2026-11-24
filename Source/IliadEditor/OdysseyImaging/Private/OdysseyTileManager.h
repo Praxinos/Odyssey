@@ -318,6 +318,12 @@ private:
     void TryLoadTileFromReadBack(TSharedPtr<FTile> InTile);
     void LoadTileFromReadBack(TSharedPtr<FTile> InTile);
 
+    /**
+     * Ends the readback of a tile: releases its creation texture and readbacks and gives its data, null for an empty tile.
+     * The caller holds the mutex of the tile.
+     */
+    static void CompleteReadBack(FTile& InTile, const TSharedPtr<FTileData>& InTileData);
+
     void CompressTile(TSharedPtr<FTileData> InTileData);
     void CacheTileOnDisk(TSharedPtr<FTileData> InTileData);
 

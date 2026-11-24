@@ -79,8 +79,8 @@ public:
     void End();
 
 public:
-    /** The size of the tiles an edit tracks and commits, in pixels: editors compose whole tiles. */
-    static constexpr int32 TileSize = 64;
+    /** The size of the tiles an edit tracks and commits, in pixels: the tiles of the content image. Editors compose whole tiles. */
+    static constexpr int32 TileSize = UOdysseyTiledImage::DefaultTileSize;
 
 private:
     TSharedRef<FOdysseyRasterEditSession> Session;

@@ -15,15 +15,11 @@ UOdysseyTileManagerSettings::Get()
 void
 UOdysseyTileManagerSettings::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
-    if( PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED( UOdysseyTileManagerSettings, MaxUncompressedSize ) )
-    {
-        FOdysseyTileManager::Get().EvictTiles();
-    }
-    else if( PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED( UOdysseyTileManagerSettings, MaxCompressedSize ) )
-    {
-        FOdysseyTileManager::Get().EvictTiles();
-    }
-    else if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(UOdysseyTileManagerSettings, MaxGPUSize))
+    // Every budget applies at once.
+    const FName Property = PropertyChangedEvent.GetMemberPropertyName();
+    if (Property == GET_MEMBER_NAME_CHECKED(UOdysseyTileManagerSettings, MaxUncompressedSize)
+        || Property == GET_MEMBER_NAME_CHECKED(UOdysseyTileManagerSettings, MaxCompressedSize)
+        || Property == GET_MEMBER_NAME_CHECKED(UOdysseyTileManagerSettings, MaxGPUSize))
     {
         FOdysseyTileManager::Get().EvictTiles();
     }

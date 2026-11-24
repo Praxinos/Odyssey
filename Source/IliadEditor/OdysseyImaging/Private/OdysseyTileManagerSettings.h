@@ -7,6 +7,10 @@
 
 #include "OdysseyTileManagerSettings.generated.h"
 
+/**
+ * The memory budgets of FOdysseyTileManager: per-user editor settings, in Editor Preferences > Plugins > Odyssey - Tile Manager.
+ * Sizes are in MB of 1,000,000 bytes. Changing a budget applies it at once.
+ */
 UCLASS(config=EditorPerProjectUserSettings)
 class UOdysseyTileManagerSettings
     : public UObject
@@ -20,15 +24,11 @@ public:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
 public:
-    /**
-     * Maximum Size of Uncompressed Tile to keep in RAM memory (in MB)
-    */
+    /** Maximum size of the uncompressed tile data kept in RAM, in MB; beyond it, the uncompressed buffers of the least recently used tiles are released and decompressed again when needed. */
     UPROPERTY(config, EditAnywhere, Category="Tile Manager", meta=(ClampMin = "1", UIMin = "1"))
     uint64 MaxUncompressedSize = 512;
 
-    /**
-     * Maximum Size of Compressed Tile to keep in RAM memory (in MB)
-    */
+    /** Maximum size of the compressed tile data kept in RAM, in MB; beyond it, the compressed buffers of the least recently used tiles already on disk are released and read again when needed. */
     UPROPERTY(config, EditAnywhere, Category="Tile Manager", meta=(ClampMin = "1", UIMin = "1"))
     uint64 MaxCompressedSize = 512;
 

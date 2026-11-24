@@ -42,7 +42,6 @@ struct FOdysseyVectorContentRasterizer
 
 namespace
 {
-constexpr int32 TileSize = 64;
 
 /** Returns the rasterizer of the given size, shared with every content of that size. */
 TSharedRef<FOdysseyVectorContentRasterizer> FindOrCreateRasterizer(FIntPoint Size)
@@ -150,7 +149,7 @@ FOdysseyVectorContent::EnsureRendered()
         // The render is rebuilt from the scene: the image is never saved, and writing its tiles never dirties a package.
         // Not transactional: the undo of a vector edit redraws the scene.
         Image = NewObject<UOdysseyTiledImage>(GetTransientPackage(), NAME_None, RF_Transient);
-        Image->Initialize(TileSize, Format);
+        Image->Initialize(UOdysseyTiledImage::DefaultTileSize, Format);
         RenderedDescription.Reset();
     }
 
@@ -160,7 +159,7 @@ FOdysseyVectorContent::EnsureRendered()
     {
         // The session holds a render of the previous description.
         EndSession();
-        Image->Initialize(TileSize, Format);
+        Image->Initialize(UOdysseyTiledImage::DefaultTileSize, Format);
         Rect = Canvas;
     }
     else if (DrawingFlags != RenderedDrawingFlags)

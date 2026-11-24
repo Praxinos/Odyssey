@@ -14,7 +14,6 @@
 
 namespace
 {
-constexpr int32 MaskTileSize = 64;
 
 /**
  * Copies an area of the mask into the alpha of a block of the tile format, so that unselected tiles are empty.
@@ -68,7 +67,7 @@ UOdysseyPainterEditorRasterSelection::Init(int iWidth, int iHeight)
         Mask->OnUndone().AddUObject(this, &UOdysseyPainterEditorRasterSelection::OnMaskUndone);
     }
     // A new mask is not undoable: it starts empty.
-    Mask->Initialize(MaskTileSize, EOdysseyTiledImageFormat::RGBA8);
+    Mask->Initialize(UOdysseyTiledImage::DefaultTileSize, EOdysseyTiledImageFormat::RGBA8);
 
     mBlock = MakeShared<::ULIS::FBlock>(iWidth, iHeight, ::ULIS::Format_GF);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
