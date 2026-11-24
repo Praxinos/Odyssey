@@ -163,10 +163,10 @@ UOdysseyPainterEditorGuideCollection* SOdysseyPainterEditorGuidesPanel::GetColle
     UOdysseyPainterEditorGuideCollection* Collection = Cast<UOdysseyPainterEditorGuideCollection>(Texture->GetAssetUserDataOfClass(UOdysseyPainterEditorGuideCollection::StaticClass()));
     if (!Collection && bCreateIfMissing)
     {
-        Collection = NewObject<UOdysseyPainterEditorGuideCollection>(Texture, NAME_None, RF_Public | RF_Transactional);
         Texture->Modify();
+        Collection = NewObject<UOdysseyPainterEditorGuideCollection>(Texture, NAME_None, RF_Public | RF_Transactional);
         Texture->AddAssetUserData(Collection);
-        Texture->PostEditChange();
+        Texture->MarkPackageDirty();
     }
     return Collection;
 }
