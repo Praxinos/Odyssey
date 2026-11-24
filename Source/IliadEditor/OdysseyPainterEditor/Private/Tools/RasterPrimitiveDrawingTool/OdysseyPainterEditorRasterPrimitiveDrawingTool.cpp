@@ -82,15 +82,8 @@ bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDown(const FOdyssey
         return false;
 
     //Keep the edit of a shape drawn with several clicks, begin an edit otherwise
-    if (!IsEditing(mPaintEngine.GetEdit(), mediaRaster))
-    {
-        TSharedPtr<FOdysseyRasterContent> content = mediaRaster->GetContent();
-        TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? Odyssey::RasterContentBlocks::BeginBlockEdit(*content) : nullptr;
-        if (!edit)
-            return false;
-
-        mPaintEngine.BeginEdit(edit.ToSharedRef());
-    }
+    if (!BeginOrKeepEdit(mPaintEngine, mediaRaster))
+        return false;
 
     FOdysseyPoint point = iPointInTexture;
     if (!SubPixel)

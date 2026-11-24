@@ -15,7 +15,9 @@
 #include "OdysseyMediaRaster.h"
 #include "OdysseyRasterContent.h"
 #include "OdysseyPainterEditorRasterSelection.h"
+#include "OdysseyPaintEngine.h"
 #include "OdysseyRasterBlockEdit.h"
+#include "OdysseyRasterContentBlocks.h"
 #include "OdysseyRasterEditSession.h"
 #include "ScopedTransaction.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
@@ -42,6 +44,23 @@ bool
 UOdysseyPainterEditorRasterBaseTool::IsEditing(const TSharedPtr<FOdysseyRasterBlockEdit>& iEdit, const TSharedPtr<FOdysseyMediaRaster>& iMediaRaster)
 {
     return iEdit && iEdit->IsActive() && iMediaRaster && iEdit->GetSession().GetRenderingId() == iMediaRaster->GetContentId();
+}
+
+//static
+bool
+UOdysseyPainterEditorRasterBaseTool::BeginOrKeepEdit(FOdysseyPaintEngine& ioPaintEngine, const TSharedPtr<FOdysseyMediaRaster>& iMediaRaster)
+{
+    if (IsEditing(ioPaintEngine.GetEdit(), iMediaRaster))
+        return true;
+
+    // TODO(GPU-tools): CPU block edit, replace with an edit of the session render target (FOdysseyRasterContent::BeginEditSession).
+    TSharedPtr<FOdysseyRasterContent> content = iMediaRaster ? iMediaRaster->GetContent() : nullptr;
+    TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? Odyssey::RasterContentBlocks::BeginBlockEdit(*content) : nullptr;
+    if (!edit)
+        return false;
+
+    ioPaintEngine.BeginEdit(edit.ToSharedRef());
+    return true;
 }
 
 TSharedPtr<FOdysseyMediaRaster>
@@ -459,13 +478,13 @@ void UOdysseyPainterEditorRasterBaseTool::CopyCurrentSelection()
     if (!mEditor)
         return;
 
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mEditor->GetCurrentMediaProvider().GetMedias<FOdysseyMediaRaster>();
-    if (mediaRasters.Num() <= 0)
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = GetMediaRasterFromEditor(false);
+    if (!mediaRaster)
         return;
 
     FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
 
-    TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
+    TSharedPtr<FOdysseyRasterContent> content = mediaRaster->GetContent();
     // Only the area of the selection is read.
     TSharedPtr<::ULIS::FBlock> copyBlock = content ? mEditor->RasterSelection()->CopySelectedPixels(*content) : nullptr;
     if (!copyBlock)
@@ -481,13 +500,13 @@ void UOdysseyPainterEditorRasterBaseTool::CutCurrentSelection()
     if (!mEditor)
         return;
 
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mEditor->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
-    if (mediaRasters.Num() <= 0)
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = GetMediaRasterFromEditor(false);
+    if (!mediaRaster)
         return;
 
     FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
 
-    TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
+    TSharedPtr<FOdysseyRasterContent> content = mediaRaster->GetContent();
     // Only the area of the selection is read.
     TSharedPtr<::ULIS::FBlock> copyBlock = content ? mEditor->RasterSelection()->CopySelectedPixels(*content) : nullptr;
     if (!copyBlock)

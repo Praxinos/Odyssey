@@ -7,6 +7,8 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyPainterEditorRasterBaseTool.generated.h"
 
+class FOdysseyPaintEngine;
+
 class FOdysseyMediaRaster;
 class FOdysseyRasterBlockEdit;
 class ISinglePropertyView;
@@ -48,6 +50,13 @@ protected:
      * e.g. false once the current layer changed or the edit ended by itself.
      */
     static bool IsEditing(const TSharedPtr<FOdysseyRasterBlockEdit>& iEdit, const TSharedPtr<FOdysseyMediaRaster>& iMediaRaster);
+
+    /**
+     * Keeps the edit of the paint engine when it edits the content of the media, e.g. for a shape drawn with several clicks;
+     * otherwise begins an edit of that content and paints into it.
+     * @return False when no edit could begin, e.g. the content is unavailable.
+     */
+    static bool BeginOrKeepEdit(FOdysseyPaintEngine& ioPaintEngine, const TSharedPtr<FOdysseyMediaRaster>& iMediaRaster);
 
     /**
      * Returns the raster content of the current layer or cell.

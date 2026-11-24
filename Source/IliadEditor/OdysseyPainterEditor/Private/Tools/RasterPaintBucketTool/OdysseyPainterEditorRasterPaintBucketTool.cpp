@@ -132,19 +132,11 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPoi
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = GetMediaRasterFromEditor(true);
+    if (!mediaRaster)
         return false;
 
-    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
-    if( !hasRaster )
-        return false;
-
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
-    if( mediaRasters.IsEmpty() )
-        return false;
-
-    TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
+    TSharedPtr<FOdysseyRasterContent> content = mediaRaster->GetContent();
     if (!content)
         return false;
 
@@ -707,8 +699,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetCurrentLayerBlock() const
     if (player)
         currentFrame = player->GetCurrentFrame().FrameNumber;
 
-    FOdysseyRenderContext RenderContext;
-    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = currentFrame;
+    FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(currentFrame);
     return RenderDisplayedColors(*layerStack, layer, RenderContext);
 }
 
@@ -780,8 +771,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetAllLayersBlock() const
     if (player)
         currentFrame = player->GetCurrentFrame().FrameNumber;
 
-    FOdysseyRenderContext RenderContext;
-    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = currentFrame;
+    FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(currentFrame);
     return RenderDisplayedColors(*layerStack, nullptr, RenderContext);
 }
 

@@ -370,17 +370,14 @@ UOdysseyPainterEditorRasterTransformTool::GetRotationAngleFromLastReference( FVe
 
 void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
 {
-    FOdysseyMediaProvider mediaProvider = mEditor->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
-    if (mediaRasters.Num() <= 0)
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = GetMediaRasterFromEditor(true);
+    if (!mediaRaster)
         return;
 
     //The transform is shown through an edit, committed by CommitTransform() or ended by ClearTransform()
     //The pixels of the edit are the only read of the content: the transformed pixels are taken from them
-    TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
+    TSharedPtr<FOdysseyRasterContent> content = mediaRaster->GetContent();
+    // TODO(GPU-tools): CPU block edit, replace with an edit of the session render target.
     TSharedPtr<FOdysseyRasterBlockEdit> edit = content ? Odyssey::RasterContentBlocks::BeginBlockEdit(*content) : nullptr;
     if (!edit)
         return;
