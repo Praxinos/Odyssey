@@ -533,7 +533,9 @@ bool FOdysseyAnimationMergeTest::RunTest(const FString& Parameters)
             // 0.009 in linear values near white.
             const float MergeTolerance = Format == EOdysseyAnimationFormat::BGRA8 ? 0.01f : 2.0f / 255.0f;
             // Known issue, to investigate: in an 8-bit animation blended with encoded colors, the merge shifts bright values
-            // by about 2 encoded steps, even where both layers hold the same value. Reported as a warning until it is fixed.
+            // by about 2 encoded steps, even where both layers hold the same value. Probable cause: the merge blends encoded values
+            // in the RTF_RGBA8_SRGB target of UOdysseyAnimation::CreateRenderingRenderTarget(), which encodes them a second time.
+            // Reported as a warning until it is fixed.
             const bool bKnownMergeDrift = Format == EOdysseyAnimationFormat::BGRA8 && !bLinearCompositing;
 
             UOdysseyLayer* Merged = nullptr;
