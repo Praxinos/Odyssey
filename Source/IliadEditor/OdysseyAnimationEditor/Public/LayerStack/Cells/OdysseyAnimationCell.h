@@ -135,7 +135,6 @@ public:
 
 public:
     int32 FrameInLayerToIndexInCell( FFrameNumber iFrame );
-    FFrameNumber IndexInCellToFrameInLayer( int32 iIndex );
 
 public:
     virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() const override;

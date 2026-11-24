@@ -63,12 +63,6 @@ public:
     FOdysseyVectorContent& GetVectorContent() const;
 
 public:
-    // Event Listeners
-    void OnIsColoredChanged(UOdysseyAnimationLayerImageVector* iLayer);
-    void OnIsWireframeChanged(UOdysseyAnimationLayerImageVector* iLayer);
-    FCriticalSection* GetImageRenderingMutex() const;
-
-public:
     // Implements Interface IOdysseyVectorCell
     virtual int32 GetIndex() override;
     virtual uint32 GetLength() override;
@@ -86,7 +80,5 @@ private:
 private:
     TSharedPtr<FOdysseyVectorCell> mVectorCell = nullptr;
     mutable TSharedPtr<FOdysseyVectorContent> mVectorContent;
-    mutable FCriticalSection mImageRenderingMutex;
-    mutable TWeakPtr<FOdysseyMediaVector> mMediaVector;
     FOdysseyVectorImportV2 mImporterV2;
 };

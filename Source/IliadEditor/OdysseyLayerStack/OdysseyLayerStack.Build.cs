@@ -89,7 +89,6 @@ public class OdysseyLayerStack : ModuleRules
             new string[] {
                 "Core",
                 "CoreUObject",
-                "ImageCore",
                 "EditorStyle",
                 "EditorWidgets",
                 "Engine",
@@ -106,16 +105,10 @@ public class OdysseyLayerStack : ModuleRules
 
                 "OdysseyCore",
                 "OdysseyCoreEditor",
-                "OdysseyFile",
-                "OdysseyImaging",
                 "OdysseyMedia",
                 "OdysseyRendering",
                 "OdysseyStyle",
-                "OdysseyVector",
 
-                "blend2d",
-                "ULIS",
-                "ULISLoader",
             }
         );
     }

@@ -69,15 +69,6 @@ UOdysseyAnimationCell::FrameInLayerToIndexInCell( FFrameNumber iFrame )
     return index_in_cell;
 }
 
-FFrameNumber
-UOdysseyAnimationCell::IndexInCellToFrameInLayer( int32 iIndex )
-{
-    FFrameNumber start_in_layer = GetFrameRange().GetLowerBoundValue();
-    int32 frame_in_layer = ( iIndex + start_in_layer ).Value;
-
-    return frame_in_layer;
-}
-
 UOdysseyLayerStack*
 UOdysseyAnimationCell::GetLayerStack() const
 {

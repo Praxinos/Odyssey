@@ -75,7 +75,6 @@ public:
 public:
     //IOdysseyRenderingAbility overrides
     virtual bool BuildRenderPipelineInternal(IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext) const override;
-    virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame = 0) const override;
 
 private:
     /** Returns the flags the scene is drawn with. */

@@ -42,7 +42,6 @@ private:
     TSharedPtr<IOdysseyMedia> CreateMediaRaster(int iFrameIndex);
     TSharedPtr<IOdysseyMedia> GetCellMediaRaster(uint32 iFrameIndex) const;
     void AutoCreateCell(int iFrameIndex);
-    void CreateCell( const FName& iCellType);
 
 private:
     friend class FOdysseyAnimationLayerImageRasterImport;

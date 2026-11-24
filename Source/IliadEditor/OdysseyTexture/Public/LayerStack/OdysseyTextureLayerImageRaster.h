@@ -4,10 +4,6 @@
 #pragma once
 
 #include "OdysseyTextureLayer.h"
-#include "OdysseyBlendingMode.h"
-#include "Misc/TransactionObjectEvent.h"
-#include "Misc/ITransaction.h"
-#include "Misc/ITransactionObjectAnnotation.h"
 #include "OdysseyRasterContent.h"
 
 #include <ULIS>
@@ -80,9 +76,6 @@ public:
     virtual void Serialize(FArchive& Ar) override;
 
 public:
-    //IOdysseyRenderingAbility overrides
-    virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame = 0) const override;
-
     /** Converts the tiled image when the sRGB setting of the texture changed. */
     virtual void ColorSettingsChanged() override;
     virtual bool BuildRenderPipelineInternal(FRenderFunction& OutRenderFunction,
