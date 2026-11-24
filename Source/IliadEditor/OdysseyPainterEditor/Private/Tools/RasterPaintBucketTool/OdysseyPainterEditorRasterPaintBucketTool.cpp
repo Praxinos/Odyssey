@@ -148,11 +148,14 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPoi
     if (!edit)
         return false;
 
-    //The fill is committed at once: the edit ends on any other return
+    //The fill is committed at once: Commit() ends the edit and keeps the paint block for the next fill;
+    //on any other return, the edit ends and the paint block is freed
     mPaintEngine.BeginEdit(edit.ToSharedRef());
+    bool bCommitted = false;
     ON_SCOPE_EXIT
     {
-        mPaintEngine.EndEdit();
+        if (!bCommitted)
+            mPaintEngine.EndEdit();
     };
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
@@ -241,6 +244,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPoi
 
     paintBlock->Dirty();
     Commit();
+    bCommitted = true;
 
     FOdysseyPainterEditor* editor = GetEditor();
     TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();

@@ -983,6 +983,8 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapeAbort()
     mIsFirstPoint = true;
     //Reset the PaintEngine as if didn't draw on it
     mPaintEngine.EndEdit();
+    //The brush must not keep the freed paint block alive; the next stroke gives it a new one
+    BrushInstance->SetBlock(nullptr);
 
     if(mTransaction)
         mTransaction->Cancel();
