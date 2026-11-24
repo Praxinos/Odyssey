@@ -173,7 +173,6 @@ SOdysseyLayerRowBase::ComputeItemDropZoneForLeaf(FVector2D iLocalPointerPos, FVe
         }
     }
 
-
 }
 
 TOptional<EItemDropZone>
@@ -273,16 +272,12 @@ SOdysseyLayerRowBase::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZon
             //do nothing
             if ( operationLayerStack == layerStack ) //droped from same layerstack, do a move of topmost dropped layers
             {
-#if WITH_EDITOR
                 FScopedTransaction ScopedTransaction( moveLayersTransactionName );
-#endif
                 layerStack->MoveLayers(layers, parent, index);
             }
             else
             {
-#if WITH_EDITOR
                 FScopedTransaction ScopedTransaction( copyLayersTransactionName );
-#endif
                 layerStack->CopyLayers(layers, parent, index);
             }
         }
@@ -292,9 +287,7 @@ SOdysseyLayerRowBase::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZon
         {
             if ( operationLayerStack == layerStack ) //droped from same layerstack, do a move of topmost dropped layers
             {
-#if WITH_EDITOR
                 FScopedTransaction ScopedTransaction( moveLayersTransactionName );
-#endif
                 if ( mLayer->CanHaveChildren() )
                 {
 
@@ -307,9 +300,7 @@ SOdysseyLayerRowBase::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZon
             }
             else
             {
-#if WITH_EDITOR
                 FScopedTransaction ScopedTransaction( copyLayersTransactionName );
-#endif
                 if ( mLayer->CanHaveChildren() )
                 {
                     layerStack->CopyLayers(layers, mLayer, 0);
@@ -326,16 +317,12 @@ SOdysseyLayerRowBase::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZon
         {
             if ( operationLayerStack == layerStack ) //droped from same layerstack, do a move of topmost dropped layers
             {
-#if WITH_EDITOR
                 FScopedTransaction ScopedTransaction( moveLayersTransactionName );
-#endif
                 layerStack->MoveLayers(layers, parent, index + 1);
             }
             else
             {
-#if WITH_EDITOR
                 FScopedTransaction ScopedTransaction( copyLayersTransactionName );
-#endif
                 layerStack->CopyLayers(layers, parent, index + 1);
             }
         }

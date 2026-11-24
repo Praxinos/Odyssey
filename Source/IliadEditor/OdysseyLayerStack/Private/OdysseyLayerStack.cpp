@@ -29,7 +29,6 @@ UOdysseyLayerStack::PostLoad()
 {
     Super::PostLoad();
 
-#if WITH_EDITOR
     const TArray<UOdysseyLayer*>& rootLayers = GetRootLayers();
     bool hasLayers = !rootLayers.IsEmpty();
     bool currentLayerIsInvalid = !CurrentLayer || !GetLayers().Contains(CurrentLayer);
@@ -37,7 +36,6 @@ UOdysseyLayerStack::PostLoad()
     {
         CurrentLayer = rootLayers[0];
     }
-#endif
 }
 
 //--- Delegates
@@ -49,15 +47,12 @@ UOdysseyLayerStack::OnHierarchyChanged()
     return onHierarchyChanged;
 }
 
-
-#if WITH_EDITOR
 UOdysseyLayerStack::FOnCurrentLayerChanged&
 UOdysseyLayerStack::OnCurrentLayerChanged()
 {
     static FOnCurrentLayerChanged onCurrentLayerChanged;
     return onCurrentLayerChanged;
 }
-#endif
 
 bool
 UOdysseyLayerStack::SupportsLayerClass(UClass* iClass) const
@@ -206,7 +201,6 @@ UOdysseyLayerStack::DuplicateLayers(TArray<UOdysseyLayer*> Layers)
         }
     );
 
-
     for (UOdysseyLayer* layer : Layers)
     {
         //Duplicate the layer
@@ -214,10 +208,8 @@ UOdysseyLayerStack::DuplicateLayers(TArray<UOdysseyLayer*> Layers)
         layersDuplicates.Add(layerCopy);
     }
 
-#if WITH_EDITOR
     if (layersDuplicates.Num() != 0)
         SetCurrentLayer(layersDuplicates[0]);
-#endif
 
     return layersDuplicates;
 }
@@ -623,7 +615,6 @@ UOdysseyLayerStack::CopyLayerInternal(UOdysseyLayer* iLayer, UOdysseyLayer* iPar
 void
 UOdysseyLayerStack::HierarchyChanged()
 {
-#if WITH_EDITOR
     if (!CurrentLayer || !CurrentLayer->IsChildOf(LayerRoot))
     {
         if (GetRootLayers().IsEmpty())
@@ -635,11 +626,9 @@ UOdysseyLayerStack::HierarchyChanged()
             SetCurrentLayer(GetRootLayers()[0]);
         }
     }
-#endif
     OnHierarchyChanged().Broadcast(this);
 }
 
-#if WITH_EDITOR
 void
 UOdysseyLayerStack::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 {
@@ -726,7 +715,6 @@ UOdysseyLayerStack::GetTimelineSplitterPosition() const
 {
     return TimelineSplitterPosition;
 }
-#endif
 
 TArray<TSubclassOf<UOdysseyLayer>>
 UOdysseyLayerStack::GetSupportedLayerClasses() const
@@ -775,13 +763,9 @@ UOdysseyLayerStack::CreateRenderingRenderTarget() const
     return nullptr;
 }
 
-#if WITH_EDITOR
-
 UTexture2D*
 UOdysseyLayerStack::CreateExportTexture( const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory )
 {
     checkf(false, TEXT("Must be implemented by child class"));
     return nullptr;
 }
-
-#endif

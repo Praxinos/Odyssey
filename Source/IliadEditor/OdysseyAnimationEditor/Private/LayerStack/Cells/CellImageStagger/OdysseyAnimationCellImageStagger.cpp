@@ -8,8 +8,6 @@
 #include "OdysseyAnimationCellImageStaggerImport.h"
 #include "OdysseyRenderContext.h"
 
-#if WITH_EDITOR
-
 void
 UOdysseyAnimationCellImageStagger::OldSerialize(FArchive& Ar)
 {
@@ -22,7 +20,6 @@ UOdysseyAnimationCellImageStagger::OldSerialize(FArchive& Ar)
         }
     }
 }
-#endif
 
 UOdysseyAnimationCell*
 UOdysseyAnimationCellImageStagger::GetReferenceCellAtFrame(int Frame, bool Recursive) const
@@ -216,7 +213,6 @@ UOdysseyAnimationCellImageStagger::UpdateRandomIntegers( int iLimitValue ) const
     }
 }
 
-#if WITH_EDITOR
 UOdysseyAnimationCell*
 UOdysseyAnimationCellImageStagger::Break(int Frame, bool bClear)
 {
@@ -242,7 +238,6 @@ UOdysseyAnimationCellImageStagger::Break(int Frame, bool bClear)
 
     return newCell;
 }
-#endif
 
 bool
 UOdysseyAnimationCellImageStagger::BuildRenderPipelineInternal(

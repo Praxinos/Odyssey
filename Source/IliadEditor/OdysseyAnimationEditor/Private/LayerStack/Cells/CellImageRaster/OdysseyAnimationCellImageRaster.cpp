@@ -9,7 +9,6 @@
 #include "ScreenPass.h"
 #include "OdysseyAnimation.h"
 
-#if WITH_EDITOR
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "UObject/StrongObjectPtr.h"
@@ -21,8 +20,6 @@
 #include "OdysseyRasterBlock.h"
 #include "UObject/ObjectSaveContext.h"
 #include "ScopedTransaction.h"
-
-#endif
 
 #define LOCTEXT_NAMESPACE "Animation"
 
@@ -46,14 +43,9 @@ UOdysseyAnimationCellImageRaster::BuildRenderPipelineInternal(
     const TArray<const IOdysseyTextureRenderingAbility*>& iParents, const FOdysseyRenderContext* RenderContext
 ) const
 {
-#if WITH_EDITOR
     return GetRasterContent().BuildRenderFunction(oRenderFunction, GetContentTransform(RenderContext));
-#else
-    return Super::BuildRenderPipelineInternal(oRenderFunction, iParents, RenderContext);
-#endif
 }
 
-#if WITH_EDITOR
 const UOdysseyTiledImage*
 UOdysseyAnimationCellImageRaster::GetTiledImage() const
 {
@@ -181,7 +173,5 @@ UOdysseyAnimationCellImageRaster::Clear()
     FScopedTransaction ScopedTransaction(LOCTEXT("animation-cell-raster.clear", "Clear"));
     GetRasterContent().Clear();
 }
-
-#endif
 
 #undef LOCTEXT_NAMESPACE

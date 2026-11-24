@@ -4,9 +4,7 @@
 #include "LayerFolder/OdysseyAnimationLayerFolder.h"
 #include "OdysseyLayerStack.h"
 
-#if WITH_EDITOR
 #include "EditorStyleSet.h"
-#endif
 
 #define LOCTEXT_NAMESPACE "Animation"
 
@@ -16,14 +14,11 @@ UOdysseyAnimationLayerFolder::UOdysseyAnimationLayerFolder()
     DefaultName = LOCTEXT("layer-folder.default-name", "Folder");
     bCanHaveChildren = true;
 
-#if WITH_EDITOR
     Icon = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetTreeFolderClosed");
     IconExpanded = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetTreeFolderOpen");
     bHasLighttable = false;
-#endif
 }
 
-#if WITH_EDITOR
 TSet<UClass*>
 UOdysseyAnimationLayerFolder::GetMergeDefaultLayerTypes() const
 {
@@ -51,6 +46,5 @@ UOdysseyAnimationLayerFolder::GetMergeLayerTypesFromTypes(TSet<UClass*> iLayerTy
 
     return types;
 }
-#endif
 
 #undef LOCTEXT_NAMESPACE

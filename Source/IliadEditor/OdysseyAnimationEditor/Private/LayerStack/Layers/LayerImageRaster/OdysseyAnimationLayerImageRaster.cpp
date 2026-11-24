@@ -3,20 +3,17 @@
 
 #include "OdysseyAnimationLayerImageRaster.h"
 
-#if WITH_EDITOR
 #include "Engine/TextureRenderTarget2D.h"
 #include "ImageUtils.h"
 #include "ScopedTransaction.h"
 #include "ScreenPass.h"
 #include "TextureResource.h"
 #include "UObject/DevObjectVersion.h"
-#endif
 
 #include "OdysseyAnimationCellImageRaster.h"
 #include "OdysseyAnimationRenderContext.h"
 #include "OdysseyAnimationCellImageStagger.h"
 
-#if WITH_EDITOR
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCellsContainerImport.h"
 #include "OdysseyAnimationLayerImageRasterImport.h"
@@ -31,7 +28,6 @@
 #include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-#endif
 
 #define LOCTEXT_NAMESPACE "Animation"
 
@@ -41,16 +37,13 @@ UOdysseyAnimationLayerImageRaster::PostInitProperties()
     Super::PostInitProperties();
 
     LayerTypeName = LOCTEXT("layer-image-raster.type", "Raster Layer");
-#if WITH_EDITOR
     Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerBitmap16");
-#endif
     DefaultCellClass = UOdysseyAnimationCellImageRaster::StaticClass();
 
     SupportedCellTypes.Add(UOdysseyAnimationCellImageRaster::StaticClass());
     SupportedCellTypes.Add(UOdysseyAnimationCellImageStagger::StaticClass());
 }
 
-#if WITH_EDITOR
 struct FOdysseyAnimationLayerImageRasterObjectVersion
 {
     enum Type
@@ -372,5 +365,4 @@ UOdysseyAnimationLayerImageRaster::IsAlphaLocked() const
     return bIsAlphaLocked;
 }
 
-#endif
 #undef LOCTEXT_NAMESPACE

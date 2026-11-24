@@ -3,7 +3,6 @@
 
 #include "OdysseyAnimationLayerImageVectorImport.h"
 
-#if WITH_EDITOR
 #include "OdysseyAnimationLayerImageVector.h"
 #include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyAnimationCellsContainerImport.h"
@@ -11,7 +10,6 @@
 #include "OdysseyLighttable.h"
 #include "OdysseyLighttableImport.h"
 #include "OdysseyFile.h"
-
 
 bool
 FOdysseyAnimationLayerImageVectorImport::Read( UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector
@@ -123,4 +121,3 @@ FOdysseyAnimationLayerImageVectorImport::Read( UOdysseyAnimationLayerImageVector
             }
         } );
 }
-#endif

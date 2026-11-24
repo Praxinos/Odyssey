@@ -60,7 +60,6 @@ UOdysseyTextureLayerStackUserData::InitWithDuplicateLayerStack(UOdysseyTextureLa
     LayerStack->CopyLayers(iLayerStack->GetRootLayers(), LayerStack->GetLayerRoot());
 }
 
-#if WITH_EDITOR
 void
 UOdysseyTextureLayerStackUserData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
@@ -69,7 +68,6 @@ UOdysseyTextureLayerStackUserData::PostEditChangeProperty(FPropertyChangedEvent&
     if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerStackUserData, bLinearCompositing) && LayerStack)
         LayerStack->ColorSettingsChanged();
 }
-#endif
 
 UOdysseyTextureLayerStack*
 UOdysseyTextureLayerStackUserData::GetLayerStack()
@@ -85,7 +83,6 @@ UOdysseyTextureLayerStackUserData::GetTexture()
     return Cast<UTexture2D>(GetOuter());
 }
 
-#if WITH_EDITOR
 void
 UOdysseyTextureLayerStackUserData::OnRefreshReferencedPalette(UOdysseyPalette* iPalette)
 {
@@ -113,4 +110,3 @@ UOdysseyTextureLayerStackUserData::OnRefreshReferencedPalette(UOdysseyPalette* i
         vectorLayer->OnRefreshReferencedPalette(iPalette);
     }
 }
-#endif

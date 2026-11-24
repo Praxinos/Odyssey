@@ -15,10 +15,8 @@
 #include "OdysseyLayerStackRenderContext.h"
 #include "OdysseyRenderContext.h"
 
-#if WITH_EDITOR
 #include "OdysseyLighttable.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#endif
 
 UOdysseyAnimation*
 UOdysseyAnimationLayer::GetAnimation() const
@@ -87,7 +85,6 @@ UOdysseyAnimationLayer::BuildRenderPipelineInternal(
         renderFunction = ContentOverride->ContentDecorator(MoveTemp(renderFunction));
     }
     if (!renderFunction) return false;
-#if WITH_EDITOR
     const FOdysseyLayerStackRenderContext* LayerContext = RenderContext ? RenderContext->GetExtension<FOdysseyLayerStackRenderContext>() : nullptr;
     const FOdysseyLayerStackRenderOverride* LayerOverride = LayerContext ? LayerContext->Find(GetRenderingId()) : nullptr;
     const FOdysseyLighttable EffectiveLighttable = LayerOverride && LayerOverride->Lighttable ? *LayerOverride->Lighttable : Lighttable;
@@ -201,10 +198,6 @@ UOdysseyAnimationLayer::BuildRenderPipelineInternal(
             }
         };
     return true;
-#else
-    oRenderFunction = renderFunction;
-    return true;
-#endif
 }
 
 TArray<FGuid>
@@ -212,11 +205,9 @@ UOdysseyAnimationLayer::GetRenderingComposition(uint64 iRenderType, int iFrame) 
 {
     TArray<FGuid> idComposition = { GetRenderingId() };
 
-#if WITH_EDITOR
     bool showLighttable = iRenderType & EOdysseyRenderingType::Editor && Lighttable.bIsActivated;
     if ( showLighttable && Lighttable.DisplayPosition == EOdysseyLighttableDisplayPosition::UnderLayer )
         idComposition.Append(GetLighttableImageRenderingComposition(iFrame));
-#endif
 
     if (bCanHaveChildren)
     {
@@ -250,15 +241,12 @@ UOdysseyAnimationLayer::GetRenderingComposition(uint64 iRenderType, int iFrame) 
         }
     }
 
-#if WITH_EDITOR
     if ( showLighttable && Lighttable.DisplayPosition == EOdysseyLighttableDisplayPosition::AboveLayer )
         idComposition.Append(GetLighttableImageRenderingComposition(iFrame));
-#endif
 
     return idComposition;
 }
 
-#if WITH_EDITOR
 bool
 UOdysseyAnimationLayer::BuildLighttableRenderPipeline(
     IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
@@ -471,18 +459,13 @@ UOdysseyAnimationLayer::GetLighttableImageRenderingComposition(int iFrameIndex) 
 
     return idComposition;
 }
-#endif
 
-
-#if WITH_EDITOR
 UOdysseyAnimationLayer::FOnDisplayCellNamesChanged&
 UOdysseyAnimationLayer::OnDisplayCellNamesChanged()
 {
     static FOnDisplayCellNamesChanged onDisplayCellNamesChanged;
     return onDisplayCellNamesChanged;
 }
-#endif
-
 
 UOdysseyAnimationLayer::FOnCellsChanged&
 UOdysseyAnimationLayer::OnCellsChanged()
@@ -496,7 +479,6 @@ UOdysseyAnimationLayer::PostInitProperties()
 {
     Super::PostInitProperties();
 
-#if WITH_EDITOR
     //Activate first previous and first next keys in the lighttable by default
     Lighttable.PreviousKeys[0].bIsActivated = true;
     Lighttable.NextKeys[0].bIsActivated = true;
@@ -506,7 +488,6 @@ UOdysseyAnimationLayer::PostInitProperties()
         Lighttable.PreviousKeys[i].Opacity = (5 - i) * 10.f;
         Lighttable.NextKeys[i].Opacity = (5 - i) * 10.f;
     }
-#endif
 }
 
 void
@@ -549,7 +530,6 @@ UOdysseyAnimationLayer::CellsChanged()
     RenderingCompositionChanged();
 }
 
-#if WITH_EDITOR
 void
 UOdysseyAnimationLayer::CellsChangedInteractive()
 {
@@ -558,8 +538,6 @@ UOdysseyAnimationLayer::CellsChangedInteractive()
     OnCellsChanged().Broadcast(this, true);
     RenderingCompositionChanged(true);
 }
-#endif
-
 
 int
 UOdysseyAnimationLayer::GetPreBehaviourFrame(EOdysseyLayerImagePostBehaviour iBehaviour, int iFrame) const
@@ -730,16 +708,12 @@ UOdysseyAnimationLayer::GetCellsFrameRanges() const
     return mCellsFrameRanges;
 }
 
-#if WITH_EDITOR
 void
 UOdysseyAnimationLayer::AddCellInteractive(int Index)
 {
     AddCellsInteractive(Index);
 }
-#endif
 
-
-#if WITH_EDITOR
 void
 UOdysseyAnimationLayer::AddCellsInteractive(int Index, int Count)
 {
@@ -762,8 +736,6 @@ UOdysseyAnimationLayer::AddCellsInteractive(int Index, int Count)
     Cells.Insert(cells, Index);
     CellsChangedInteractive();
 }
-#endif
-
 
 UOdysseyAnimationCell*
 UOdysseyAnimationLayer::AddCell(TSubclassOf<UOdysseyAnimationCell> CellType, int Index)
@@ -1127,14 +1099,11 @@ UOdysseyAnimationLayer::CopyCells(TArray<UOdysseyAnimationCell*> iCells, int Ind
     return cellCopies;
 }
 
-#if WITH_EDITOR
 bool
 UOdysseyAnimationLayer::ShouldDisplayCellNames() const
 {
     return bDisplayCellNames;
 }
-#endif
-
 
 int
 UOdysseyAnimationLayer::GetCellsOffset() const
@@ -1197,17 +1166,13 @@ UOdysseyAnimationLayer::SetPostBehaviour(EOdysseyLayerImagePostBehaviour Value)
     RenderingCompositionChanged();
 }
 
-#if WITH_EDITOR
 void
 UOdysseyAnimationLayer::SetDisplayCellNames(bool Value)
 {
     bDisplayCellNames = Value;
     OnDisplayCellNamesChanged().Broadcast(this);
 }
-#endif
 
-
-#if WITH_EDITOR
 void
 UOdysseyAnimationLayer::SetCellsOffsetInteractive(float Value)
 {
@@ -1220,10 +1185,7 @@ UOdysseyAnimationLayer::SetCellsOffsetInteractive(float Value)
     InvalidateCellsFrameRanges();
     RenderingCompositionChanged(true);
 }
-#endif
 
-
-#if WITH_EDITOR
 TArray<FName>
 UOdysseyAnimationLayer::GetRows() const
 {
@@ -1235,10 +1197,7 @@ UOdysseyAnimationLayer::GetRows() const
         "OutOfPegs",
     };
 }
-#endif
 
-
-#if WITH_EDITOR
 int
 UOdysseyAnimationLayer::GetRowHeight(FName iSubRowName) const
 {
@@ -1259,10 +1218,7 @@ UOdysseyAnimationLayer::GetRowHeight(FName iSubRowName) const
 
     return 0;
 }
-#endif
 
-
-#if WITH_EDITOR
 bool
 UOdysseyAnimationLayer::IsRowVisible(FName iSubRowName) const
 {
@@ -1283,28 +1239,19 @@ UOdysseyAnimationLayer::IsRowVisible(FName iSubRowName) const
 
     return 0;
 }
-#endif
 
-
-#if WITH_EDITOR
 FOdysseyLighttable
 UOdysseyAnimationLayer::GetLighttable() const
 {
     return Lighttable;
 }
-#endif
 
-
-#if WITH_EDITOR
 bool
 UOdysseyAnimationLayer::HasLighttable() const
 {
     return bHasLighttable;
 }
-#endif
 
-
-#if WITH_EDITOR
 void
 UOdysseyAnimationLayer::SetLighttable(FOdysseyLighttable Value)
 {
@@ -1316,10 +1263,7 @@ UOdysseyAnimationLayer::SetLighttable(FOdysseyLighttable Value)
     RenderingChanged(); //ImageRendering changes without a composition change when any other param is changed
     mOnLighttableChanged.Broadcast();
 }
-#endif
 
-
-#if WITH_EDITOR
 void
 UOdysseyAnimationLayer::SetLighttableInteractive(FOdysseyLighttable Value)
 {
@@ -1331,19 +1275,13 @@ UOdysseyAnimationLayer::SetLighttableInteractive(FOdysseyLighttable Value)
     RenderingChanged(true); //ImageRendering changes without a composition change when any other param is changed
     mOnLighttableChanged.Broadcast();
 }
-#endif
 
-
-#if WITH_EDITOR
 FSimpleMulticastDelegate&
 UOdysseyAnimationLayer::OnLighttableChanged()
 {
     return mOnLighttableChanged;
 }
-#endif
 
-
-#if WITH_EDITOR
 void
 UOdysseyAnimationLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 {
@@ -1372,4 +1310,3 @@ UOdysseyAnimationLayer::PostTransacted(const FTransactionObjectEvent& iTransacti
         mOnLighttableChanged.Broadcast();
     }
 }
-#endif

@@ -3,8 +3,6 @@
 
 #include "OdysseyAnimationCellImport.h"
 
-#if WITH_EDITOR
-
 #include "Serialization/Archive.h"
 #include "OdysseyAnimationCell.h"
 #include <functional>
@@ -102,12 +100,10 @@ FOdysseyAnimationCellImport::Read( UOdysseyAnimationCell* iCell
 
                 case CHUNK_CELL_MARKID :
                 {
-#if WITH_EDITOR
                     int32 mark;
                     Ar << mark;
                     if( mark >= 0 )
                         iCell->Marks.Add( 0, FCellMark{ mark } );
-#endif
                 }
                 break;
 
@@ -118,5 +114,3 @@ FOdysseyAnimationCellImport::Read( UOdysseyAnimationCell* iCell
             }
         } );
 }
-
-#endif

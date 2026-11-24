@@ -77,14 +77,12 @@ FAnimationCutEntry::SetFrame( FFrameNumber iNewFrame, EPropertyChangeType::Type 
     {
         if( !mCellBefore && mCellAfter )
         {
-#if WITH_EDITOR
             if( iChangeType == EPropertyChangeType::Interactive )
             {
                 mCellAfter->SetExposureInteractive( mCellAfter->GetExposure() + offset );
                 mCellAfter->GetLayer()->SetCellsOffsetInteractive( mCellAfter->GetLayer()->GetCellsOffset() - offset );
             }
             else
-#endif
             {
                 mCellAfter->SetExposure( mCellAfter->GetExposure() + offset );
                 mCellAfter->GetLayer()->SetCellsOffset( mCellAfter->GetLayer()->GetCellsOffset() - offset );
@@ -93,14 +91,12 @@ FAnimationCutEntry::SetFrame( FFrameNumber iNewFrame, EPropertyChangeType::Type 
 
         if( mCellBefore && mCellAfter )
         {
-#if WITH_EDITOR
             if( iChangeType == EPropertyChangeType::Interactive )
             {
                 mCellBefore->SetExposureInteractive( mCellBefore->GetExposure() - offset );
                 mCellAfter->SetExposureInteractive( mCellAfter->GetExposure() + offset );
             }
             else
-#endif
             {
                 mCellBefore->SetExposure( mCellBefore->GetExposure() - offset );
                 mCellAfter->SetExposure( mCellAfter->GetExposure() + offset );
@@ -109,13 +105,11 @@ FAnimationCutEntry::SetFrame( FFrameNumber iNewFrame, EPropertyChangeType::Type 
 
         if( mCellBefore && !mCellAfter )
         {
-#if WITH_EDITOR
             if( iChangeType == EPropertyChangeType::Interactive )
             {
                 mCellBefore->SetExposureInteractive( mCellBefore->GetExposure() - offset );
             }
             else
-#endif
             {
                 mCellBefore->SetExposure( mCellBefore->GetExposure() - offset );
             }
@@ -125,14 +119,12 @@ FAnimationCutEntry::SetFrame( FFrameNumber iNewFrame, EPropertyChangeType::Type 
     {
         if( !mCellBefore && mCellAfter )
         {
-#if WITH_EDITOR
             if( iChangeType == EPropertyChangeType::Interactive )
             {
                 mCellAfter->SetExposureInteractive( mCellAfter->GetExposure() - offset );
                 mCellAfter->GetLayer()->SetCellsOffsetInteractive( mCellAfter->GetLayer()->GetCellsOffset() + offset );
             }
             else
-#endif
             {
                 mCellAfter->SetExposure( mCellAfter->GetExposure() - offset );
                 mCellAfter->GetLayer()->SetCellsOffset( mCellAfter->GetLayer()->GetCellsOffset() + offset );
@@ -141,14 +133,12 @@ FAnimationCutEntry::SetFrame( FFrameNumber iNewFrame, EPropertyChangeType::Type 
 
         if( mCellBefore && mCellAfter )
         {
-#if WITH_EDITOR
             if( iChangeType == EPropertyChangeType::Interactive )
             {
                 mCellBefore->SetExposureInteractive( mCellBefore->GetExposure() + offset );
                 mCellAfter->SetExposureInteractive( mCellAfter->GetExposure() - offset );
             }
             else
-#endif
             {
                 mCellBefore->SetExposure( mCellBefore->GetExposure() + offset );
                 mCellAfter->SetExposure( mCellAfter->GetExposure() - offset );
@@ -157,13 +147,11 @@ FAnimationCutEntry::SetFrame( FFrameNumber iNewFrame, EPropertyChangeType::Type 
 
         if( mCellBefore && !mCellAfter )
         {
-#if WITH_EDITOR
             if( iChangeType == EPropertyChangeType::Interactive )
             {
                 mCellBefore->SetExposureInteractive( mCellBefore->GetExposure() + offset );
             }
             else
-#endif
             {
                 mCellBefore->SetExposure( mCellBefore->GetExposure() + offset );
             }
@@ -173,13 +161,11 @@ FAnimationCutEntry::SetFrame( FFrameNumber iNewFrame, EPropertyChangeType::Type 
     {
         if( mCellAfter )
         {
-#if WITH_EDITOR
             if( iChangeType == EPropertyChangeType::Interactive )
             {
                 mCellAfter->SetExposureInteractive( mCellAfter->GetExposure() );
             }
             else
-#endif
             {
                 mCellAfter->SetExposure( mCellAfter->GetExposure() );
             }
@@ -187,13 +173,11 @@ FAnimationCutEntry::SetFrame( FFrameNumber iNewFrame, EPropertyChangeType::Type 
 
         if( mCellBefore )
         {
-#if WITH_EDITOR
             if( iChangeType == EPropertyChangeType::Interactive )
             {
                 mCellBefore->SetExposureInteractive( mCellBefore->GetExposure() );
             }
             else
-#endif
             {
                 mCellBefore->SetExposure( mCellBefore->GetExposure() );
             }

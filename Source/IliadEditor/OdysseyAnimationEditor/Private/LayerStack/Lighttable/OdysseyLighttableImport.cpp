@@ -3,7 +3,6 @@
 
 #include "OdysseyLighttableImport.h"
 
-#if WITH_EDITOR
 #include "OdysseyLighttable.h"
 #include "OdysseyLighttableKeyImport.h"
 #include <functional>
@@ -13,7 +12,6 @@ static const uint32 CHUNK_LIGHTTABLE_DISPLAY_POSITION = 0x472555c; //EOdysseyLig
 static const uint32 CHUNK_LIGHTTABLE_COLORS = 0x854e88aa; //EOdysseyLighttableDisplayPosition
 static const uint32 CHUNK_LIGHTTABLE_CONTRAST = 0x4e98233c; //FLinearColor(PreviousKeysColor) + FLinearColor(NextKeysColor)
 static const uint32 CHUNK_LIGHTTABLE_KEYS = 0x825ce6e5; //20x FOdysseyLighttableKey
-
 
 void
 ReadLighttableChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback )
@@ -142,4 +140,3 @@ FOdysseyLighttableImport::Read( FOdysseyLighttable* iLighttable
             }
         } );
 }
-#endif

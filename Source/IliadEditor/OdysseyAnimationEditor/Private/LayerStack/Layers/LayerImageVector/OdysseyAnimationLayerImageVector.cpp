@@ -6,7 +6,6 @@
 #include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyAnimationCellImageStagger.h"
 
-#if WITH_EDITOR
 #include "OdysseyPixelFormat.h"
 #include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
@@ -32,14 +31,11 @@
 #include "Editor.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "OdysseyAnimationEditorData.h"
-#endif
 
 #define LOCTEXT_NAMESPACE "Animation"
 
 UOdysseyAnimationLayerImageVector::UOdysseyAnimationLayerImageVector()
-#if WITH_EDITOR
     : mVectorLayer( MakeShared<FOdysseyVectorLayer>(this) )
-#endif
 {}
 
 void
@@ -48,16 +44,13 @@ UOdysseyAnimationLayerImageVector::PostInitProperties()
     Super::PostInitProperties();
 
     LayerTypeName = LOCTEXT("layer-image-vector.type", "Vector Layer");
-#if WITH_EDITOR
     Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerVector16");
-#endif
     DefaultCellClass = UOdysseyAnimationCellImageVector::StaticClass();
 
     SupportedCellTypes.Add(UOdysseyAnimationCellImageVector::StaticClass());
     SupportedCellTypes.Add(UOdysseyAnimationCellImageStagger::StaticClass());
 }
 
-#if WITH_EDITOR
 UOdysseyAnimationLayerImageVector::~UOdysseyAnimationLayerImageVector()
 {
     mVectorLayer->RemoveAllChildren();
@@ -235,8 +228,6 @@ UOdysseyAnimationLayerImageVector::IsColored() const
 {
     return bIsColored;
 }
-
-
 
 void
 UOdysseyAnimationLayerImageVector::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
@@ -512,7 +503,6 @@ UOdysseyAnimationLayerImageVector::Contains( FOdysseyVectorCell* iCandidateCell 
                                            {
                                                UOdysseyAnimationCellImageVector* vectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
 
-
                                                return ( vectorCell && ( vectorCell->GetVectorCell() == iCandidateCell ) ) ? true : false;
                                            } );
 }
@@ -639,8 +629,6 @@ UOdysseyAnimationLayerImageVector::GetPaletteSets() const
     return paletteSets;
 }
 
-#if WITH_EDITOR
-
 TArray<FName>
 UOdysseyAnimationLayerImageVector::GetRows() const
 {
@@ -676,8 +664,6 @@ UOdysseyAnimationLayerImageVector::IsRowVisible(FName iSubRowName) const
 
     return Super::IsRowVisible(iSubRowName);
 }
-
-#endif //WITH_EDITOR
 
 void
 UOdysseyAnimationLayerImageVector::MakeBreakdownTargetMap( std::list<FOdysseyVectorTagInbetweener*>& oInbetweenerTagList )
@@ -809,9 +795,7 @@ UOdysseyAnimationLayerImageVector::CellsChanged()
     // When reloading the current tool and it needs the vector object hierarchy to be correctly set.
     UpdateSharedEnv();
 
-
     Super::CellsChanged();
 }
-#endif
 
 #undef LOCTEXT_NAMESPACE

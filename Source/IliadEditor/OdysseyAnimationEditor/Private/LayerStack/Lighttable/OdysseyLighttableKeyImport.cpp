@@ -3,14 +3,12 @@
 
 #include "OdysseyLighttableKeyImport.h"
 
-#if WITH_EDITOR
 #include "OdysseyLighttable.h"
 #include <functional>
 
 static const uint32 CHUNK_LIGHTTABLE_KEY = 0x5b785423; //FOdysseyLighttableKey
 static const uint32 CHUNK_LIGHTTABLE_KEY_ISACTIVATED = 0xea8a5d86; //bool
 static const uint32 CHUNK_LIGHTTABLE_KEY_OPACITY = 0x21ab66; //float
-
 
 void
 ReadLighttableKeyChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback )
@@ -112,4 +110,3 @@ FOdysseyLighttableKeyImport::Read( FOdysseyLighttableKey* iKey
             }
         } );
 }
-#endif

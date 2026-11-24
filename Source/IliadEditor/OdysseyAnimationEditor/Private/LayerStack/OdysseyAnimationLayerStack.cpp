@@ -82,7 +82,6 @@ UOdysseyAnimationLayerStack::CreateRenderingRenderTarget() const
     return GetAnimation()->CreateRenderingRenderTarget();
 }
 
-#if WITH_EDITOR
 UTexture2D*
 UOdysseyAnimationLayerStack::CreateExportTexture( const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory )
 {
@@ -90,31 +89,26 @@ UOdysseyAnimationLayerStack::CreateExportTexture( const FString& iAssetName, con
 
     return GetAnimation()->CreateExportTexture( iAssetName, iPackagePath, iAssetClass, iFactory );
 }
-#endif
 
 EOdysseyColorConversion
 UOdysseyAnimationLayerStack::GetDisplayColorConversion(const UOdysseyLayer* RenderedLayer) const
 {
-#if WITH_EDITOR
     // A layer renders encoded colors when its cells encode their colors, i.e. when the animation blends encoded colors.
     const UOdysseyAnimation* Animation = GetAnimation();
     if (RenderedLayer && Animation && !Animation->UsesLinearCompositing())
     {
         return EOdysseyColorConversion::None;
     }
-#endif
     return EOdysseyColorConversion::Encode;
 }
 
 EOdysseyColorConversion
 UOdysseyAnimationLayerStack::GetContentColorConversion(const FOdysseyRenderContext* RenderContext) const
 {
-#if WITH_EDITOR
     const UOdysseyAnimation* Animation = GetAnimation();
     if (Animation && !Animation->UsesLinearCompositing())
     {
         return EOdysseyColorConversion::Decode;
     }
-#endif
     return EOdysseyColorConversion::None;
 }

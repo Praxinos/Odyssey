@@ -3,7 +3,6 @@
 
 #include "OdysseyAnimationCellImageRasterImport.h"
 
-#if WITH_EDITOR
 #include "OdysseyAnimationCellImageRaster.h"
 #include "OdysseyFile.h"
 #include "OdysseyRasterBlock.h"
@@ -82,4 +81,3 @@ FOdysseyAnimationCellImageRasterImport::Read( UOdysseyAnimationCellImageRaster* 
             }
         } );
 }
-#endif

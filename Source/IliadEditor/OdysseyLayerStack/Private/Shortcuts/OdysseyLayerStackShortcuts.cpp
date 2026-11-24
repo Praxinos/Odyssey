@@ -134,9 +134,7 @@ FOdysseyLayerStackShortcuts::Action_Cut()
     TSharedPtr<FOdysseyLayerStackClipboardData> clipboardData = MakeShared<FOdysseyLayerStackClipboardData>(layersToCopy);
     odysseyCoreEditorModule.GetClipboard()->SetData(clipboardData);
 
-#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.cut-layers", "Cut Layers"));
-#endif
     Action_Delete();
 }
 
@@ -152,9 +150,7 @@ FOdysseyLayerStackShortcuts::Action_Paste()
     if (!treeView)
         return;
 
-#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.paste-layers", "Paste Layers"));
-#endif
 
     TArray<UOdysseyLayer*> pastedLayers = clipboardData->Paste(mLayerStack);
     treeView->SetItemSelection(pastedLayers, true);
@@ -185,9 +181,7 @@ FOdysseyLayerStackShortcuts::Action_Delete()
     if (!treeView)
         return;
 
-#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.remove-layers", "Remove Layers"));
-#endif
 
     TArray<UOdysseyLayer*> selectedLayers = treeView->GetSelectedItems();
     mLayerStack->RemoveLayers(selectedLayers);
@@ -207,14 +201,11 @@ FOdysseyLayerStackShortcuts::Action_Duplicate()
     if (selectedLayers.Num() <= 0)
         return;
 
-#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.duplicate-layers", "Duplicate Layers"));
-#endif
 
     //manage current layer seperately
     TArray<UOdysseyLayer*> duplicatedLayers = mLayerStack->DuplicateLayers(selectedLayers);
 }
-
 
 bool
 FOdysseyLayerStackShortcuts::CanAction_Rename()
@@ -302,7 +293,6 @@ FOdysseyLayerStackShortcuts::CanAction_Duplicate()
     return true;
 }
 
-
 //Layers Specific Shortcuts
 void
 FOdysseyLayerStackShortcuts::Action_MergeSelectedLayers()
@@ -318,13 +308,10 @@ FOdysseyLayerStackShortcuts::Action_MergeSelectedLayers()
     if (selectedLayers.Num() <= 0)
         return;
 
-#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.merge-layers", "Merge Layers"));
-#endif
 
     mLayerStack->MergeLayers(selectedLayers);
 }
-
 
 bool
 FOdysseyLayerStackShortcuts::CanAction_MergeSelectedLayers()

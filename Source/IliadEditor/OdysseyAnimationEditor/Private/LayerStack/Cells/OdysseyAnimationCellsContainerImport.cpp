@@ -3,7 +3,6 @@
 
 #include "OdysseyAnimationCellsContainerImport.h"
 
-#if WITH_EDITOR
 #include "OdysseyAnimationCellImageStagger.h"
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationCellImageRaster.h"
@@ -115,4 +114,3 @@ FOdysseyAnimationCellsContainerImport::Read( UOdysseyAnimationLayer* iAnimationL
             }
         } );
 }
-#endif

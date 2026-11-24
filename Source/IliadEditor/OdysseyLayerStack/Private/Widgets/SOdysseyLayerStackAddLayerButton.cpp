@@ -22,7 +22,6 @@ SOdysseyLayerStackAddLayerButton::~SOdysseyLayerStackAddLayerButton()
 {
 }
 
-
 void SOdysseyLayerStackAddLayerButton::Construct(const FArguments& InArgs)
 {
     mLayerStack = InArgs._LayerStack;
@@ -110,10 +109,8 @@ SOdysseyLayerStackAddLayerButton::AddLayerFromClass(FAssetData iAssetData)
     if ( !layerClass )
         return;
 
-#if WITH_EDITOR
     //Allows to have a single undo if there is side effects (auto adding frames in animation layer) in mOnAdded callback
     FScopedTransaction ScopedTransaction(LOCTEXT("add-layer-button.transaction.add-layer", "Add Layer"));
-#endif
 
     UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
     if (currentLayer)

@@ -3,7 +3,6 @@
 
 #include "OdysseyAnimationCellImageStaggerImport.h"
 
-#if WITH_EDITOR
 #include "Serialization/Archive.h"
 
 #include "OdysseyAnimationCellImageStagger.h"
@@ -118,5 +117,3 @@ FOdysseyAnimationCellImageStaggerImport::Read( UOdysseyAnimationCellImageStagger
             }
         } );
 }
-
-#endif
