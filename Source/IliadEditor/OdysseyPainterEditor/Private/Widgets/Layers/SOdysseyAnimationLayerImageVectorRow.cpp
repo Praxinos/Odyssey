@@ -20,8 +20,6 @@
 #include "OdysseyPainterEditor.h"
 #include "HUD/OdysseyVectorHUD.h"
 
-#define LOCTEXT_NAMESPACE "AnimationEditor"
-
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
 
 void SOdysseyAnimationLayerImageVectorRow::Construct(
@@ -140,5 +138,3 @@ SOdysseyAnimationLayerImageVectorRow::GetIsColoredIsChecked() const
 {
     return mAnimationLayerImageVector->IsColored() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
-
-#undef LOCTEXT_NAMESPACE

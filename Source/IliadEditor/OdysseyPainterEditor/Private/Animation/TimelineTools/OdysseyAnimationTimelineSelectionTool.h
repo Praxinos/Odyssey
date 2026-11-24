@@ -6,7 +6,6 @@
 #include "TimelineTools/OdysseyAnimationTimelineTool.h"
 #include "Input/Reply.h"
 
-class FOdysseyAnimationCellSelection;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 class UOdysseyAnimationCell;
 

@@ -27,7 +27,6 @@
 #include "OdysseyLayer.h"
 #include "OdysseyAnimationCell.h"
 #include "OdysseyLayerStack.h"
-#include "OdysseyLayerStackGlobalShortcuts.h"
 #include "OdysseyAnimationLayerStackGlobalShortcuts.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyRasterContent.h"
@@ -129,7 +128,6 @@
 //Tablet Includes
 #include "SOdysseyTabletAPISwitcher.h"
 #include "OdysseyAnimationEditorData.h"
-#include "OdysseyRasterContentBlocks.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -565,8 +563,6 @@ FOdysseyPainterEditor::ClearCurrentLayerOrSelection()
         TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
         if (mediaRasters.Num() <= 0)
             return;
-
-        FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
 
         TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
         // Only the area of the selection is read.

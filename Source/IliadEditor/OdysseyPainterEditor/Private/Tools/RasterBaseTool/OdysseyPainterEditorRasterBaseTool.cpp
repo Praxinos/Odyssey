@@ -17,7 +17,6 @@
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "OdysseyRasterBlockEdit.h"
 #include "OdysseyRasterEditSession.h"
-#include "OdysseyRasterContentBlocks.h"
 #include "ScopedTransaction.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
 #include "PropertyHandle.h"

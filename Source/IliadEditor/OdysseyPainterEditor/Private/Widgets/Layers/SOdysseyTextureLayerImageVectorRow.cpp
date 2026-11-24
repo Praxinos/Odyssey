@@ -13,8 +13,6 @@
 #include "OdysseyStyle.h"
 #include "OdysseyTextureLayerImageVector.h"
 
-#define LOCTEXT_NAMESPACE "TextureEditor"
-
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
 
 void SOdysseyTextureLayerImageVectorRow::Construct( const FArguments& InArgs
@@ -88,5 +86,3 @@ SOdysseyTextureLayerImageVectorRow::GetIsColoredIsChecked() const
 {
     return mTextureLayerImageVector->IsColored() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
-
-#undef LOCTEXT_NAMESPACE

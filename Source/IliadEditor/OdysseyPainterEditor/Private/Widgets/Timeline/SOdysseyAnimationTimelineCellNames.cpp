@@ -70,8 +70,6 @@ SOdysseyAnimationTimelineCellNames::RebuildRow()
     TArray<UOdysseyAnimationCell*> cells = mCells.Get();
     for( UOdysseyAnimationCell* cell : cells )
     {
-        //UOdysseyAnimationCell* animation_cell = Cast<UOdysseyAnimationCell>( cell );
-
         if( !IsValid( cell ) )
             continue;
 

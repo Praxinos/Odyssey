@@ -17,7 +17,6 @@ class FOdysseyAnimationTimelineMoveTool;
 class FOdysseyAnimationTimelineCutTool;
 class FOdysseyAnimationTimelineTool;
 class FOdysseyPainterEditorAnimationTimelinePosition;
-class FOdysseyAnimationCellSelection;
 
 class FOdysseyAnimationTimelineTools
 {
