@@ -11,6 +11,8 @@
 #include "OdysseyLayerRoot.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyLayerStackRenderContext.h"
+#include "OdysseyLayerStackSelection.h"
+#include "Selection.h"
 #include "OdysseyRenderContext.h"
 
 #if WITH_EDITOR
@@ -716,7 +718,8 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 bool
 UOdysseyLayer::IsSelectedInEditor() const
 {
-    return IsValidChecked(this) && OdysseyLayerStackSelection::GIsLayerSelectedInEditor && OdysseyLayerStackSelection::GIsLayerSelectedInEditor(this);
+    const USelection* Selection = OdysseyLayerStackSelection::Get();
+    return IsValidChecked(this) && Selection && Selection->IsSelected(this);
 }
 #endif
 
@@ -726,12 +729,6 @@ UOdysseyLayer::CreateExportTexture( const FString& iAssetName, const FString& iP
     return GetLayerStack()->CreateExportTexture(iAssetName, iPackagePath, iAssetClass, iFactory);
 }
 
-#endif
-
-#if WITH_EDITOR
-namespace OdysseyLayerStackSelection {
-    TFunction<bool(const UObject*)> GIsLayerSelectedInEditor;
-}
 #endif
 
 /** Builds the static layer content without interpreting animation settings. */

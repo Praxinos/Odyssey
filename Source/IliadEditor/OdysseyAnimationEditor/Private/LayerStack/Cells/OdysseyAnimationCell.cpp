@@ -13,6 +13,8 @@
 #include "OdysseyBlendShader.h"
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationCellImport.h"
+#include "OdysseyLayerStackSelection.h"
+#include "Selection.h"
 #include "OdysseyRenderContext.h"
 
 void
@@ -224,7 +226,8 @@ UOdysseyAnimationCell::PostTransacted(const FTransactionObjectEvent& iTransactio
 bool
 UOdysseyAnimationCell::IsSelectedInEditor() const
 {
-    return IsValidChecked(this) && OdysseyAnimationCellsSelection::GIsCellSelectedInEditor && OdysseyAnimationCellsSelection::GIsCellSelectedInEditor(this);
+    const USelection* Selection = OdysseyLayerStackSelection::Get();
+    return IsValidChecked(this) && Selection && Selection->IsSelected(this);
 }
 
 UOdysseyAnimationCell*
@@ -347,10 +350,6 @@ UTexture2D*
 UOdysseyAnimationCell::CreateExportTexture( const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory )
 {
     return GetLayer()->CreateExportTexture(iAssetName, iPackagePath, iAssetClass, iFactory);
-}
-
-namespace OdysseyAnimationCellsSelection {
-    TFunction<bool(const UObject*)> GIsCellSelectedInEditor;
 }
 
 UOdysseyAnimation*

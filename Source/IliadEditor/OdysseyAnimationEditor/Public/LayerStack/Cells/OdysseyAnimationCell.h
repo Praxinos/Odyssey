@@ -212,10 +212,3 @@ private:
     FOnOutOfPegsChanged mOnOutOfPegsChanged;
 #endif
 };
-
-#if WITH_EDITOR
-namespace OdysseyAnimationCellsSelection {
-    /** Callback used by UOdysseyAnimationCell::IsSelectedInEditor without depending on an editor module. */
-    extern ODYSSEYANIMATIONEDITOR_API TFunction<bool(const UObject*)> GIsCellSelectedInEditor;
-}
-#endif

@@ -22,6 +22,7 @@ namespace
 {
 /** Handle of the garbage objects deselection run before each garbage collection */
 FDelegateHandle GPreGarbageCollectHandle;
+FDelegateHandle GCurrentLayerChangedHandle;
 }
 
 namespace OdysseyLayerStackSelection {
@@ -102,14 +103,8 @@ Initialize()
     GOdysseyLayerStackSelection->AddToRoot();
     GOdysseyLayerStackSelection->SetElementSelectionSet(NewObject<UTypedElementSelectionSet>(GOdysseyLayerStackSelection, NAME_None/*, RF_Transactional*/));
 
-    UOdysseyLayerStack::OnCurrentLayerChanged().AddStatic(&OnCurrentLayerChanged);
+    GCurrentLayerChangedHandle = UOdysseyLayerStack::OnCurrentLayerChanged().AddStatic(&OnCurrentLayerChanged);
     GPreGarbageCollectHandle = FCoreUObjectDelegates::GetPreGarbageCollectDelegate().AddStatic(&DeselectGarbageObjects);
-
-    GIsLayerSelectedInEditor = [](const UObject* InObject)
-    {
-        return GOdysseyLayerStackSelection->IsSelected(InObject);
-    };
-
 }
 
 void
@@ -117,6 +112,14 @@ Shutdown()
 {
     FCoreUObjectDelegates::GetPreGarbageCollectDelegate().Remove(GPreGarbageCollectHandle);
     GPreGarbageCollectHandle.Reset();
+    UOdysseyLayerStack::OnCurrentLayerChanged().Remove(GCurrentLayerChangedHandle);
+    GCurrentLayerChangedHandle.Reset();
+
+    if (GOdysseyLayerStackSelection)
+    {
+        GOdysseyLayerStackSelection->RemoveFromRoot();
+        GOdysseyLayerStackSelection = nullptr;
+    }
 }
 
 void
@@ -174,11 +177,7 @@ Get()
 void
 RegisterUndo(const TArray<UOdysseyLayer*>& InOldLayers, const TArray<UOdysseyLayer*>& InNewLayers)
 {
-    if( GEditor && GUndo && GEditor->IsTransactionActive())
-    {
-        TUniquePtr<FSelectedObjectsUndo<UOdysseyLayer>> Undo = MakeUnique<FSelectedObjectsUndo<UOdysseyLayer>>(InOldLayers, InNewLayers);
-        GUndo->StoreUndo( GOdysseyLayerStackSelection, MoveTemp(Undo) );
-    }
+    RegisterObjectsUndo(TArray<UObject*>(InOldLayers), TArray<UObject*>(InNewLayers));
 }
 
 void

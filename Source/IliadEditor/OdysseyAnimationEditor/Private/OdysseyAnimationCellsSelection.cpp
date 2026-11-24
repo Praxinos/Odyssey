@@ -95,10 +95,6 @@ Initialize()
     check(OdysseyLayerStackSelection::Get());
     SelectionChangedHandle = USelection::SelectionChangedEvent.AddStatic(&OnSelectionChanged);
     CellsChangedHandle = UOdysseyAnimationLayer::OnCellsChanged().AddStatic(&OnLayerCellsChanged);
-    GIsCellSelectedInEditor = [](const UObject* InObject)
-    {
-        return OdysseyLayerStackSelection::Get()->IsSelected(InObject);
-    };
 }
 
 void
@@ -109,7 +105,6 @@ Shutdown()
     SelectionChangedHandle.Reset();
     CellsChangedHandle.Reset();
     GCellSelectionCursor = nullptr;
-    GIsCellSelectedInEditor = nullptr;
 }
 
 void
