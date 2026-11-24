@@ -76,7 +76,7 @@ public:
      */
     FIntRect GetTileRect(const FIntPoint& iTileIndex) const;
 
-    // Returns tile indexes affected by iRect
+    /** Returns the indexes of the tiles iRect touches; Max is exclusive, an empty rect touches no tile. */
     TArray<FIntPoint> GetTileIndexesForRect(const FIntRect& iRect) const;
 
     /** Wether the given tile index is valid

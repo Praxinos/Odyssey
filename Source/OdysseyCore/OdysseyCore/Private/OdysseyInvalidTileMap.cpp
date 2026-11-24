@@ -141,15 +141,16 @@ FOdysseyInvalidTileMap::GetTileRect(const FIntPoint& iTileIndex) const
 TArray<FIntPoint>
 FOdysseyInvalidTileMap::GetTileIndexesForRect(const FIntRect& iRect) const
 {
-    if (iRect.Min.X >= mWidth || iRect.Max.X < 0 || iRect.Min.Y >= mHeight || iRect.Max.Y < 0)
+    //Max is exclusive: a rect ending on a tile boundary does not touch the next tile
+    if (iRect.Width() <= 0 || iRect.Height() <= 0 || iRect.Min.X >= mWidth || iRect.Max.X <= 0 || iRect.Min.Y >= mHeight || iRect.Max.Y <= 0)
         return {};
 
     FIntPoint tileCount = mTileMap.Size();
 
     int x1 = FMath::Clamp(iRect.Min.X / mTileSize, 0, tileCount.X - 1);
     int y1 = FMath::Clamp(iRect.Min.Y / mTileSize, 0, tileCount.Y - 1);
-    int x2 = FMath::Clamp(iRect.Max.X / mTileSize, 0, tileCount.X - 1);
-    int y2 = FMath::Clamp(iRect.Max.Y / mTileSize, 0, tileCount.Y - 1);
+    int x2 = FMath::Clamp((iRect.Max.X - 1) / mTileSize, 0, tileCount.X - 1);
+    int y2 = FMath::Clamp((iRect.Max.Y - 1) / mTileSize, 0, tileCount.Y - 1);
 
     int w = x2 - x1 + 1;
     int h = y2 - y1 + 1;
