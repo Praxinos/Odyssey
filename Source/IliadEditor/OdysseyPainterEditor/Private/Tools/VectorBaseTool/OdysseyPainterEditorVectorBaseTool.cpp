@@ -1739,8 +1739,8 @@ UOdysseyPainterEditorVectorBaseTool::ResetSpacingMenu( FMenuBuilder& menu
                    , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 
     menu.AddMenuEntry(
-          LOCTEXT("vector-tool.inbetween-context-menu.reset-spacing-all-breakdowns.name", "All Breakdonws")
-        , LOCTEXT("vector-tool.inbetween-context-menu.reset-spacing-all-breakdowns.tooltip", "All Breakdonws")
+          LOCTEXT("vector-tool.inbetween-context-menu.reset-spacing-all-breakdowns.name", "All Breakdowns")
+        , LOCTEXT("vector-tool.inbetween-context-menu.reset-spacing-all-breakdowns.tooltip", "All Breakdowns")
         , FSlateIcon()
         , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetSpacingChart, GetEditor(), iScene, false, false )
                    , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
@@ -1758,8 +1758,8 @@ UOdysseyPainterEditorVectorBaseTool::CopySpacingMenu( FMenuBuilder& menu
                    , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 
     menu.AddMenuEntry(
-          LOCTEXT("vector-tool.inbetween-context-menu.copy-spacing-all-breakdowns.name", "All Breakdonws")
-        , LOCTEXT("vector-tool.inbetween-context-menu.copy-spacing-all-breakdowns.tooltip", "All Breakdonws")
+          LOCTEXT("vector-tool.inbetween-context-menu.copy-spacing-all-breakdowns.name", "All Breakdowns")
+        , LOCTEXT("vector-tool.inbetween-context-menu.copy-spacing-all-breakdowns.tooltip", "All Breakdowns")
         , FSlateIcon()
         , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CopySpacingChart, GetEditor(), iScene, false )
                    , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
@@ -1777,8 +1777,8 @@ UOdysseyPainterEditorVectorBaseTool::PasteSpacingMenu( FMenuBuilder& menu
                    , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 
     menu.AddMenuEntry(
-          LOCTEXT("vector-tool.inbetween-context-menu.paste-spacing-all-breakdowns.name", "All Breakdonws")
-        , LOCTEXT("vector-tool.inbetween-context-menu.paste-spacing-all-breakdowns.tooltip", "All Breakdonws")
+          LOCTEXT("vector-tool.inbetween-context-menu.paste-spacing-all-breakdowns.name", "All Breakdowns")
+        , LOCTEXT("vector-tool.inbetween-context-menu.paste-spacing-all-breakdowns.tooltip", "All Breakdowns")
         , FSlateIcon()
         , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::PasteSpacingChart, GetEditor(), iScene, false )
                    , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));

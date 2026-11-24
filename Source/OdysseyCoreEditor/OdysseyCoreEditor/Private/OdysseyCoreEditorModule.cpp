@@ -81,7 +81,7 @@ FOdysseyCoreEditorModule::ExtendHelpMenu()
     section.AddMenuEntry(
         FOdysseyCommands::Get().OpenOdysseyDocumentation
         , LOCTEXT("main-menu.help.odyssey-documentation.name", "Odyssey Documentation ...")
-        , LOCTEXT("main-menu.help.odyssey-documentation.tooltip", "To access Odyssey's Documentationget.")
+        , LOCTEXT("main-menu.help.odyssey-documentation.tooltip", "To access Odyssey's Documentation.")
         /*, FSlateIcon(FAppStyle::Get().GetStyleSetName(), "About.Manual16")
         , NAME_None*/ );
 }
