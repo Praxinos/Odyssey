@@ -135,7 +135,7 @@ TSharedPtr<FOdysseyRasterBlockEdit> BeginBlockEdit(FOdysseyRasterContent& Conten
     {
         return nullptr;
     }
-    TSharedPtr<FOdysseyRasterEditSession> Session = Content.BeginEdit();
+    TSharedPtr<FOdysseyRasterEditSession> Session = Content.BeginEditSession();
     if (!Session)
     {
         return nullptr;

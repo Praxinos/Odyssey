@@ -27,7 +27,7 @@ class UTextureRenderTarget2D;
  * It is the only access to the pixels of its owner, and sets the rules of every access: the format the owner expects,
  * the locked alpha, a single active edit, undo through the tiled image, and the notification of the owner.
  *
- * - Tools edit the content through BeginEdit(): they write into the render target of the edit session, which the views show
+ * - Tools edit the content through BeginEditSession(): they write into the render target of the edit session, which the views show
  *   in place of the content until the tool commits it into the tiled image or ends it.
  * - Other users read and write render targets in the tile format with Read(), Write() and Clear(). Each write is undoable
  *   within a transaction, keeps the alpha of the content when it is locked, and ends the active edit.
@@ -126,7 +126,7 @@ public:
      * and notifies the owner that pixels changed.
      * @return Null when the owner cannot hold content or the rendering is unavailable.
      */
-    TSharedPtr<FOdysseyRasterEditSession> BeginEdit();
+    TSharedPtr<FOdysseyRasterEditSession> BeginEditSession();
 
     /**
      * Creates a render target holding pixels in the tile format, as large as the content, to read or write the content.

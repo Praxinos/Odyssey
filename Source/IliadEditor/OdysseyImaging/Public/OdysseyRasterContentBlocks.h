@@ -67,7 +67,7 @@ ODYSSEYIMAGING_API bool EditBlock(FOdysseyRasterContent& Content, const FIntRect
 ODYSSEYIMAGING_API FIntRect FindVisibleRect(const ::ULIS::FBlock& Block);
 
 /**
- * Begins an edit of the content through blocks, on top of FOdysseyRasterContent::BeginEdit(): the working block of the edit
+ * Begins an edit of the content through blocks, on top of FOdysseyRasterContent::BeginEditSession(): the working block of the edit
  * starts with the pixels of the content, and its updates are uploaded into the edit session.
  * @return Null when the owner cannot hold content or the rendering is unavailable.
  */

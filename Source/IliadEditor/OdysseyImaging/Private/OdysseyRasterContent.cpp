@@ -173,7 +173,7 @@ FOdysseyRasterContent::MigrateLegacy(TObjectPtr<UTexture2D>& LegacyTexture, TSha
 }
 
 TSharedPtr<FOdysseyRasterEditSession>
-FOdysseyRasterContent::BeginEdit()
+FOdysseyRasterContent::BeginEditSession()
 {
     check(IsInGameThread());
     if (!EnsureImage())
