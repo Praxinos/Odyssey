@@ -52,7 +52,7 @@ FText UOdysseyPainterEditorGuideEditTool::GetTooltip() const
 
 void UOdysseyPainterEditorGuideEditTool::BeginHandleDrag(int32 HandleIndex)
 {
-    if (!Guide || !Guide->bVisible || Guide->bLocked || HandleIndex < 0 || HandleIndex > 1)
+    if (!Guide || !Guide->bVisible || Guide->bLocked || HandleIndex < 0 || HandleIndex >= FOdysseyPainterEditorGuideEditHUD::MaxHandles)
         return;
 
     ActiveHandle = HandleIndex;
@@ -110,14 +110,19 @@ void UOdysseyPainterEditorGuideEditTool::ApplyHandlePosition(const FVector2D& Po
         }
         else
         {
-            const double CosAngle = FMath::Cos(FMath::DegreesToRadians(Ellipse->Angle));
-            const double SinAngle = FMath::Sin(FMath::DegreesToRadians(Ellipse->Angle));
+            // Each radius handle only changes its own radius, measured along its rotated axis (in pixels, so
+            // the rotation stays correct on non-square textures).
+            const double AngleRadians = FMath::DegreesToRadians(Ellipse->Angle);
+            const FVector2D AxisX(FMath::Cos(AngleRadians), FMath::Sin(AngleRadians));
+            const FVector2D AxisY(-AxisX.Y, AxisX.X);
             const FVector2D Delta = Position - Ellipse->Center;
             const int32 Width = GetEditor()->GetSource()->Width();
             const int32 Height = GetEditor()->GetSource()->Height();
             const FVector2D DeltaPixels(Delta.X * Width, Delta.Y * Height);
-            Ellipse->Radius.X = FMath::Clamp(FMath::Abs(DeltaPixels.X * CosAngle + DeltaPixels.Y * SinAngle) / Width, 0.0, 1.0);
-            Ellipse->Radius.Y = FMath::Clamp(FMath::Abs(-DeltaPixels.X * SinAngle + DeltaPixels.Y * CosAngle) / Height, 0.0, 1.0);
+            if (ActiveHandle == 1)
+                Ellipse->Radius.X = FMath::Clamp(FMath::Abs(FVector2D::DotProduct(DeltaPixels, AxisX)) / Width, 0.0, 1.0);
+            else
+                Ellipse->Radius.Y = FMath::Clamp(FMath::Abs(FVector2D::DotProduct(DeltaPixels, AxisY)) / Height, 0.0, 1.0);
         }
     }
 }

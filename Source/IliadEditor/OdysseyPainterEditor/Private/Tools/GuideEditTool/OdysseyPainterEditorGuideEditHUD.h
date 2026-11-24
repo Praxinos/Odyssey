@@ -12,6 +12,9 @@ class UOdysseyPainterEditorGuideEditTool;
 class FOdysseyPainterEditorGuideEditHUD : public FOdysseyHUDElement
 {
 public:
+    /** Maximum number of handles a guide can expose (ellipse: center, X radius, Y radius). */
+    static constexpr int32 MaxHandles = 3;
+
     explicit FOdysseyPainterEditorGuideEditHUD(UOdysseyPainterEditorGuideEditTool* InTool);
     void BindToolCallbacks();
 
@@ -22,6 +25,5 @@ private:
     void BindHandleCallbacks(const TSharedPtr<FOdysseyHUDHandle>& Handle, int32 HandleIndex);
 
     TWeakObjectPtr<UOdysseyPainterEditorGuideEditTool> Tool;
-    TSharedPtr<FOdysseyHUDHandle> FirstHandle;
-    TSharedPtr<FOdysseyHUDHandle> SecondHandle;
+    TArray<TSharedPtr<FOdysseyHUDHandle>> Handles;
 };

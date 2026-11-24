@@ -9,17 +9,19 @@
 
 FOdysseyPainterEditorGuideEditHUD::FOdysseyPainterEditorGuideEditHUD(UOdysseyPainterEditorGuideEditTool* InTool)
     : Tool(InTool)
-    , FirstHandle(MakeShared<FOdysseyHUDHandle>(FVector2D::ZeroVector))
-    , SecondHandle(MakeShared<FOdysseyHUDHandle>(FVector2D::ZeroVector))
 {
-    AddElement(FirstHandle);
-    AddElement(SecondHandle);
+    for (int32 HandleIndex = 0; HandleIndex < MaxHandles; ++HandleIndex)
+    {
+        TSharedPtr<FOdysseyHUDHandle> Handle = MakeShared<FOdysseyHUDHandle>(FVector2D::ZeroVector);
+        Handles.Add(Handle);
+        AddElement(Handle);
+    }
 }
 
 void FOdysseyPainterEditorGuideEditHUD::BindToolCallbacks()
 {
-    BindHandleCallbacks(FirstHandle, 0);
-    BindHandleCallbacks(SecondHandle, 1);
+    for (int32 HandleIndex = 0; HandleIndex < Handles.Num(); ++HandleIndex)
+        BindHandleCallbacks(Handles[HandleIndex], HandleIndex);
 }
 
 void FOdysseyPainterEditorGuideEditHUD::BindHandleCallbacks(const TSharedPtr<FOdysseyHUDHandle>& Handle, int32 HandleIndex)
@@ -58,29 +60,45 @@ void FOdysseyPainterEditorGuideEditHUD::DrawHUD(const FOdysseyHUDElement::FDrawH
     UOdysseyPainterEditorGuideEditTool* ToolObject = Tool.Get();
     UOdysseyPainterEditorGuide* Guide = ToolObject ? ToolObject->GetGuide() : nullptr;
     const bool bCanDrawHandles = Guide && Guide->bVisible && Params.mCanvas && Params.mTextureWidth > 0 && Params.mTextureHeight > 0;
-    FirstHandle->SetIsVisible(TAttribute<bool>(bCanDrawHandles));
-    SecondHandle->SetIsVisible(TAttribute<bool>(bCanDrawHandles));
-    FirstHandle->IsInteractable(bCanDrawHandles && !Guide->bLocked);
-    SecondHandle->IsInteractable(bCanDrawHandles && !Guide->bLocked);
-    if (!bCanDrawHandles)
-        return;
 
-    FLinearColor HandleColor = Guide->Color;
-    HandleColor.A *= Guide->Opacity;
-    FirstHandle->SetColor(HandleColor);
-    SecondHandle->SetColor(HandleColor);
-
-    if (UOdysseyPainterEditorLineGuide* Line = Cast<UOdysseyPainterEditorLineGuide>(Guide))
+    // Handle positions in texture pixels; only the first HandleCount handles are used by the current guide.
+    FVector2D HandlePositions[MaxHandles];
+    int32 HandleCount = 0;
+    if (bCanDrawHandles)
     {
-        FirstHandle->SetPosition(FVector2D(Line->Start.X * Params.mTextureWidth, Line->Start.Y * Params.mTextureHeight));
-        SecondHandle->SetPosition(FVector2D(Line->End.X * Params.mTextureWidth, Line->End.Y * Params.mTextureHeight));
+        const double Width = Params.mTextureWidth;
+        const double Height = Params.mTextureHeight;
+        if (UOdysseyPainterEditorLineGuide* Line = Cast<UOdysseyPainterEditorLineGuide>(Guide))
+        {
+            HandlePositions[HandleCount++] = FVector2D(Line->Start.X * Width, Line->Start.Y * Height);
+            HandlePositions[HandleCount++] = FVector2D(Line->End.X * Width, Line->End.Y * Height);
+        }
+        else if (UOdysseyPainterEditorEllipseGuide* Ellipse = Cast<UOdysseyPainterEditorEllipseGuide>(Guide))
+        {
+            const FVector2D Center(Ellipse->Center.X * Width, Ellipse->Center.Y * Height);
+            const double AngleRadians = FMath::DegreesToRadians(Ellipse->Angle);
+            const FVector2D AxisX(FMath::Cos(AngleRadians), FMath::Sin(AngleRadians));
+            const FVector2D AxisY(-AxisX.Y, AxisX.X);
+            HandlePositions[HandleCount++] = Center;
+            HandlePositions[HandleCount++] = Center + AxisX * (Ellipse->Radius.X * Width);
+            HandlePositions[HandleCount++] = Center + AxisY * (Ellipse->Radius.Y * Height);
+        }
     }
-    else if (UOdysseyPainterEditorEllipseGuide* Ellipse = Cast<UOdysseyPainterEditorEllipseGuide>(Guide))
+
+    FLinearColor HandleColor = Guide ? Guide->Color : FLinearColor::White;
+    if (Guide)
+        HandleColor.A *= Guide->Opacity;
+
+    for (int32 HandleIndex = 0; HandleIndex < Handles.Num(); ++HandleIndex)
     {
-        FirstHandle->SetPosition(FVector2D(Ellipse->Center.X * Params.mTextureWidth, Ellipse->Center.Y * Params.mTextureHeight));
-        const double CosAngle = FMath::Cos(FMath::DegreesToRadians(Ellipse->Angle));
-        const double SinAngle = FMath::Sin(FMath::DegreesToRadians(Ellipse->Angle));
-        SecondHandle->SetPosition(FVector2D(Ellipse->Center.X * Params.mTextureWidth + Ellipse->Radius.X * Params.mTextureWidth * CosAngle,
-            Ellipse->Center.Y * Params.mTextureHeight + Ellipse->Radius.X * Params.mTextureWidth * SinAngle));
+        const TSharedPtr<FOdysseyHUDHandle>& Handle = Handles[HandleIndex];
+        const bool bUsed = HandleIndex < HandleCount;
+        Handle->SetIsVisible(TAttribute<bool>(bUsed));
+        Handle->IsInteractable(bUsed && !Guide->bLocked);
+        if (!bUsed)
+            continue;
+
+        Handle->SetColor(HandleColor);
+        Handle->SetPosition(HandlePositions[HandleIndex]);
     }
 }
