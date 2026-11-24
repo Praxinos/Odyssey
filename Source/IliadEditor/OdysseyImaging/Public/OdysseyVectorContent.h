@@ -81,7 +81,7 @@ public:
     const TSharedPtr<FOdysseyVectorCell>& GetCell() const;
 
     /** Returns the existing image without creating it. */
-    UOdysseyTiledImage* GetImage() const;
+    UOdysseyTiledImage* GetTiledImage() const;
 
     /**
      * Builds the function rendering the tiles, once brought up to date. Uncommitted edits are shown by the views through the edit session.

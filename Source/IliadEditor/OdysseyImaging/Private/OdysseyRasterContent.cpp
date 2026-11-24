@@ -43,7 +43,7 @@ FOdysseyRasterContent::FOdysseyRasterContent(UObject& InOwner, const FGuid& InRe
 }
 
 UOdysseyTiledImage*
-FOdysseyRasterContent::GetImage() const
+FOdysseyRasterContent::GetTiledImage() const
 {
     return Image;
 }

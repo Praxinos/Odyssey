@@ -122,7 +122,7 @@ FOdysseyVectorContent::GetCell() const
 }
 
 UOdysseyTiledImage*
-FOdysseyVectorContent::GetImage() const
+FOdysseyVectorContent::GetTiledImage() const
 {
     return Image;
 }

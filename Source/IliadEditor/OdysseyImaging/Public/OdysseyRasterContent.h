@@ -98,7 +98,7 @@ public:
 
 public:
     /** Returns the existing image without creating it. */
-    UOdysseyTiledImage* GetImage() const;
+    UOdysseyTiledImage* GetTiledImage() const;
 
     /** Returns the content the owner expects. */
     FDescription Describe() const;

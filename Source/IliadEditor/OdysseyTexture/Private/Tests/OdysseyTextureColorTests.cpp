@@ -398,16 +398,16 @@ bool FOdysseyTextureColorVectorLayerLoadTest::RunTest(const FString& Parameters)
 
         CompareBytes(*this, *FString::Printf(TEXT("A new vector layer of a %s writes the bytes of its render"), Encoding),
             [](int32 X, int32 Y) { return Monochrome; }, ReadTextureBytes(Texture.Get(), Stack), 1);
-        if (!TestNotNull(FString::Printf(TEXT("The vector layer of a %s holds its render in a tiled image"), Encoding), Layer->GetVectorContent().GetImage()))
+        if (!TestNotNull(FString::Printf(TEXT("The vector layer of a %s holds its render in a tiled image"), Encoding), Layer->GetVectorContent().GetTiledImage()))
         {
             return false;
         }
-        TestEqual(FString::Printf(TEXT("The render of a new vector layer of a %s is decoded as the texture bytes are"), Encoding), Layer->GetVectorContent().GetImage()->GetFormat(), ExpectedFormat);
+        TestEqual(FString::Printf(TEXT("The render of a new vector layer of a %s is decoded as the texture bytes are"), Encoding), Layer->GetVectorContent().GetTiledImage()->GetFormat(), ExpectedFormat);
 
         Layer->PostLoad();
         CompareBytes(*this, *FString::Printf(TEXT("A loaded vector layer of a %s writes the bytes of its render"), Encoding),
             [](int32 X, int32 Y) { return Monochrome; }, ReadTextureBytes(Texture.Get(), Stack), 1);
-        TestEqual(FString::Printf(TEXT("The render of a loaded vector layer of a %s is decoded as the texture bytes are"), Encoding), Layer->GetVectorContent().GetImage()->GetFormat(), ExpectedFormat);
+        TestEqual(FString::Printf(TEXT("The render of a loaded vector layer of a %s is decoded as the texture bytes are"), Encoding), Layer->GetVectorContent().GetTiledImage()->GetFormat(), ExpectedFormat);
     }
     return true;
 }

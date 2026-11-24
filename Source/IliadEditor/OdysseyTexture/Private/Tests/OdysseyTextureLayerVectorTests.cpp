@@ -372,10 +372,10 @@ bool FOdysseyTextureVectorStackRenderTest::RunTest(const FString& Parameters)
         UOdysseyTextureLayerStack* Stack = GetStack(Texture.Get());
         UOdysseyTextureLayerImageVector* Layer = AddVectorLayer(Stack);
         SetSceneColor(Layer, Fill);
-        TestNull(Encoding + TEXT(": the scene is not rendered before it is displayed"), Layer->GetVectorContent().GetImage());
+        TestNull(Encoding + TEXT(": the scene is not rendered before it is displayed"), Layer->GetVectorContent().GetTiledImage());
 
         CheckUniform(*this, Encoding + TEXT(": the stack shows the scene of its vector layer"), ReadNode(Stack->GetLayerRoot()), Stacked(Fill), StackTolerance(bSRGB));
-        const UOdysseyTiledImage* Image = Layer->GetVectorContent().GetImage();
+        const UOdysseyTiledImage* Image = Layer->GetVectorContent().GetTiledImage();
         if (!TestNotNull(Encoding + TEXT(": the render is held by a tiled image"), Image))
         {
             return false;
@@ -393,10 +393,10 @@ bool FOdysseyTextureVectorStackRenderTest::RunTest(const FString& Parameters)
         {
             return false;
         }
-        TestNull(Encoding + TEXT(": the render is not duplicated"), DuplicateLayer->GetVectorContent().GetImage());
+        TestNull(Encoding + TEXT(": the render is not duplicated"), DuplicateLayer->GetVectorContent().GetTiledImage());
         TestTrue(Encoding + TEXT(": the duplicate has its own scene"), DuplicateLayer->GetVectorCell() != Layer->GetVectorCell());
         CheckUniform(*this, Encoding + TEXT(": the duplicate shows the duplicated scene"), ReadNode(DuplicateStack->GetLayerRoot()), Stacked(Fill), StackTolerance(bSRGB));
-        TestTrue(Encoding + TEXT(": the duplicate renders into its own image"), DuplicateLayer->GetVectorContent().GetImage() && DuplicateLayer->GetVectorContent().GetImage() != Image);
+        TestTrue(Encoding + TEXT(": the duplicate renders into its own image"), DuplicateLayer->GetVectorContent().GetTiledImage() && DuplicateLayer->GetVectorContent().GetTiledImage() != Image);
 
         // The content of the duplicate follows the scene of the duplicate.
         SetSceneColor(DuplicateLayer, OtherFill);
@@ -420,7 +420,7 @@ bool FOdysseyTextureVectorDrawingFlagsTest::RunTest(const FString& Parameters)
     UOdysseyTextureLayerImageVector* Layer = AddVectorLayer(GetStack(Texture.Get()));
     SetSceneColor(Layer, Fill);
     CheckUniform(*this, TEXT("The colored scene is rendered"), ReadNode(Layer), Linear(Fill, false), Precision);
-    const UOdysseyTiledImage* Image = Layer->GetVectorContent().GetImage();
+    const UOdysseyTiledImage* Image = Layer->GetVectorContent().GetTiledImage();
     if (!TestNotNull(TEXT("The render is held by a tiled image"), Image))
     {
         return false;
@@ -470,7 +470,7 @@ bool FOdysseyTextureVectorCanvasResizeTest::RunTest(const FString& Parameters)
     UOdysseyTextureLayerImageVector* Layer = AddVectorLayer(GetStack(Texture.Get()));
     SetSceneColor(Layer, Fill);
     CheckUniform(*this, TEXT("The scene is rendered on the canvas"), ReadNode(Layer), Linear(Fill, false), Precision);
-    const UOdysseyTiledImage* Image = Layer->GetVectorContent().GetImage();
+    const UOdysseyTiledImage* Image = Layer->GetVectorContent().GetTiledImage();
     if (!TestNotNull(TEXT("The render is held by a tiled image"), Image))
     {
         return false;
@@ -496,19 +496,19 @@ bool FOdysseyTextureVectorSRGBChangeTest::RunTest(const FString& Parameters)
     UOdysseyTextureLayerImageVector* Layer = AddVectorLayer(GetStack(Texture.Get()));
     SetSceneColor(Layer, Fill);
     CheckUniformBytes(*this, TEXT("An sRGB texture gets the bytes of the render"), ReadTextureBytes(Texture.Get()), Fill);
-    if (!TestNotNull(TEXT("The render is held by a tiled image"), Layer->GetVectorContent().GetImage()))
+    if (!TestNotNull(TEXT("The render is held by a tiled image"), Layer->GetVectorContent().GetTiledImage()))
     {
         return false;
     }
-    TestEqual(TEXT("The render of an sRGB texture is decoded"), Layer->GetVectorContent().GetImage()->GetFormat(), EOdysseyTiledImageFormat::RGBA16F);
+    TestEqual(TEXT("The render of an sRGB texture is decoded"), Layer->GetVectorContent().GetTiledImage()->GetFormat(), EOdysseyTiledImageFormat::RGBA16F);
 
     SetSRGB(Texture.Get(), false);
     CheckUniformBytes(*this, TEXT("Bytes are kept when sRGB is turned off"), ReadTextureBytes(Texture.Get()), Fill);
-    TestEqual(TEXT("The render of a linear texture holds its bytes"), Layer->GetVectorContent().GetImage()->GetFormat(), EOdysseyTiledImageFormat::RGBA8);
+    TestEqual(TEXT("The render of a linear texture holds its bytes"), Layer->GetVectorContent().GetTiledImage()->GetFormat(), EOdysseyTiledImageFormat::RGBA8);
 
     SetSRGB(Texture.Get(), true);
     CheckUniformBytes(*this, TEXT("Bytes are kept when sRGB is turned on"), ReadTextureBytes(Texture.Get()), Fill);
-    TestEqual(TEXT("The render is decoded again"), Layer->GetVectorContent().GetImage()->GetFormat(), EOdysseyTiledImageFormat::RGBA16F);
+    TestEqual(TEXT("The render is decoded again"), Layer->GetVectorContent().GetTiledImage()->GetFormat(), EOdysseyTiledImageFormat::RGBA16F);
     return true;
 }
 
@@ -526,7 +526,7 @@ bool FOdysseyTextureVectorInteractiveTest::RunTest(const FString& Parameters)
     UOdysseyTextureLayerImageVector* Layer = AddVectorLayer(GetStack(Texture.Get()));
     SetSceneColor(Layer, Fill);
     CheckUniform(*this, TEXT("The scene is rendered"), ReadNode(Layer), Linear(Fill, false), Precision);
-    const UOdysseyTiledImage* Image = Layer->GetVectorContent().GetImage();
+    const UOdysseyTiledImage* Image = Layer->GetVectorContent().GetTiledImage();
     if (!TestNotNull(TEXT("The render is held by a tiled image"), Image))
     {
         return false;
@@ -625,7 +625,7 @@ bool FOdysseyTextureVectorUndoTest::RunTest(const FString& Parameters)
         CheckUniform(*this, TEXT("The clear displayed within its transaction renders nothing"), ReadNode(Layer), FLinearColor::Transparent, Precision);
     }
     const FTransaction* Displayed = GEditor->Trans->GetTransaction(GEditor->Trans->GetQueueLength() - 1);
-    TestFalse(TEXT("The transaction does not record the tiles"), Displayed && Displayed->ContainsObject(Layer->GetVectorContent().GetImage()));
+    TestFalse(TEXT("The transaction does not record the tiles"), Displayed && Displayed->ContainsObject(Layer->GetVectorContent().GetTiledImage()));
     TestTrue(TEXT("Undo the displayed clear"), GEditor->UndoTransaction());
     CheckUniform(*this, TEXT("The undone displayed clear shows the previous render"), ReadNode(Layer), Linear(Fill, false), Precision);
     return true;
@@ -644,12 +644,12 @@ bool FOdysseyTextureVectorGarbageCollectionTest::RunTest(const FString& Paramete
     UOdysseyTextureLayerImageVector* Layer = AddVectorLayer(GetStack(Texture.Get()));
     SetSceneColor(Layer, Fill);
     CheckUniform(*this, TEXT("The scene is rendered"), ReadNode(Layer), Linear(Fill, false), Precision);
-    TWeakObjectPtr<const UOdysseyTiledImage> Image(Layer->GetVectorContent().GetImage());
+    TWeakObjectPtr<const UOdysseyTiledImage> Image(Layer->GetVectorContent().GetTiledImage());
     TWeakObjectPtr<UOdysseyTextureLayerImageVector> WeakLayer(Layer);
     TestTrue(TEXT("The render is held by a tiled image"), Image.IsValid());
 
     CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
-    TestTrue(TEXT("The image survives a collection while the layer lives"), Image.IsValid() && Image.Get() == Layer->GetVectorContent().GetImage());
+    TestTrue(TEXT("The image survives a collection while the layer lives"), Image.IsValid() && Image.Get() == Layer->GetVectorContent().GetTiledImage());
     CheckUniform(*this, TEXT("The collected scene still shows its render"), ReadNode(Layer), Linear(Fill, false), Precision);
 
     Texture.Reset();
@@ -717,11 +717,11 @@ bool FOdysseyTextureVectorPersistenceTest::RunTest(const FString& Parameters)
     }
     UTexture2D* LoadedLegacyTexture = FindObject<UTexture2D>(LoadedLayer, TEXT("Texture"));
     TestNotNull(TEXT("The former render texture is loaded with the layer"), LoadedLegacyTexture);
-    TestNull(TEXT("The render is not saved"), LoadedLayer->GetVectorContent().GetImage());
+    TestNull(TEXT("The render is not saved"), LoadedLayer->GetVectorContent().GetTiledImage());
     TestFalse(TEXT("Loading does not dirty the package"), LoadedPackage->IsDirty());
 
     CheckUniform(*this, TEXT("The loaded layer renders its scene"), ReadNode(LoadedStack->GetLayerRoot()), Stacked(Fill), Precision);
-    TestNotNull(TEXT("The loaded layer renders into a tiled image"), LoadedLayer->GetVectorContent().GetImage());
+    TestNotNull(TEXT("The loaded layer renders into a tiled image"), LoadedLayer->GetVectorContent().GetTiledImage());
     TestFalse(TEXT("Displaying the loaded vector layer does not dirty its package"), LoadedPackage->IsDirty());
     // Check that this package can be dirtied, so that the check above is meaningful.
     LoadedLayer->Modify();
@@ -783,7 +783,7 @@ bool FOdysseyTextureVectorLegacyAssetTest::RunTest(const FString& Parameters)
     {
         return false;
     }
-    TestNotNull(TEXT("The vector layer renders into a tiled image"), Layer->GetVectorContent().GetImage());
+    TestNotNull(TEXT("The vector layer renders into a tiled image"), Layer->GetVectorContent().GetTiledImage());
     int32 Drawn = 0;
     for (const FLinearColor& Pixel : Pixels)
     {

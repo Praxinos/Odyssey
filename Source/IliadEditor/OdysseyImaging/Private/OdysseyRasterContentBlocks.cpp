@@ -22,7 +22,7 @@ TSharedPtr<::ULIS::FBlock> ReadBlock(FOdysseyRasterContent& Content)
         return nullptr;
     }
     const FOdysseyRasterContent::FDescription Description = Content.Describe();
-    return Odyssey::TiledImage::CopyToBlock(*Content.GetImage(), FIntRect(FIntPoint::ZeroValue, Description.Size), Description.Format, Description.bSRGB);
+    return Odyssey::TiledImage::CopyToBlock(*Content.GetTiledImage(), FIntRect(FIntPoint::ZeroValue, Description.Size), Description.Format, Description.bSRGB);
 }
 
 TSharedPtr<::ULIS::FBlock> ReadBlock(FOdysseyRasterContent& Content, const FIntRect& Rect, FIntRect& OutRect)
@@ -38,7 +38,7 @@ TSharedPtr<::ULIS::FBlock> ReadBlock(FOdysseyRasterContent& Content, const FIntR
     {
         return nullptr;
     }
-    return Odyssey::TiledImage::CopyToBlock(*Content.GetImage(), OutRect, Description.Format, Description.bSRGB);
+    return Odyssey::TiledImage::CopyToBlock(*Content.GetTiledImage(), OutRect, Description.Format, Description.bSRGB);
 }
 
 bool WriteBlock(FOdysseyRasterContent& Content, const ::ULIS::FBlock& Block, const TArray<FIntRect>& Rects, FIntPoint Position)
@@ -84,7 +84,7 @@ bool WriteBlock(FOdysseyRasterContent& Content, const ::ULIS::FBlock& Block, con
     }
 
     // The render target is in the tile format: the write copies its pixels as they are.
-    if (!Odyssey::TiledImage::CopyBlockToRenderTarget(*Target, Content.GetImage()->GetFormat(), *Pixels, InBlock, Description.bSRGB, Position))
+    if (!Odyssey::TiledImage::CopyBlockToRenderTarget(*Target, Content.GetTiledImage()->GetFormat(), *Pixels, InBlock, Description.bSRGB, Position))
     {
         return false;
     }
@@ -140,6 +140,6 @@ TSharedPtr<FOdysseyRasterBlockEdit> BeginBlockEdit(FOdysseyRasterContent& Conten
     {
         return nullptr;
     }
-    return MakeShared<FOdysseyRasterBlockEdit>(Session.ToSharedRef(), Pixels.ToSharedRef(), Content.GetImage()->GetFormat(), Content.Describe().bSRGB);
+    return MakeShared<FOdysseyRasterBlockEdit>(Session.ToSharedRef(), Pixels.ToSharedRef(), Content.GetTiledImage()->GetFormat(), Content.Describe().bSRGB);
 }
 }
