@@ -11,7 +11,7 @@
 #include "TextureResource.h"
 
 #include "OdysseyBlendShader.h"
-#include "OdysseyRasterSampling.h"
+#include "OdysseyTiledImageRendering.h"
 #include "OdysseyRenderContext.h"
 #include "OdysseyTileUtils.h"
 #include "OdysseyTiledImage.h"
@@ -283,7 +283,7 @@ FOdysseyRasterEditSession::BuildRenderFunction() const
         }
 
         // Preserving alpha: compose the colors of the target with the alpha of the original, over the sampled area only.
-        const FIntRect Area = Odyssey::RasterSampling::GetSampledArea(SourceRect, DestinationRect, Transform, Size);
+        const FIntRect Area = Odyssey::TiledImageRendering::GetSampledArea(SourceRect, DestinationRect, Transform, Size);
         if (Area.Width() <= 0 || Area.Height() <= 0)
         {
             return;

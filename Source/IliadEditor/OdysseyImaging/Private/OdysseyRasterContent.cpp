@@ -15,7 +15,7 @@
 
 #include "OdysseyColorConversionPass.h"
 #include "OdysseyRasterEditSession.h"
-#include "OdysseyRasterSampling.h"
+#include "OdysseyTiledImageRendering.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTileUtils.h"
 #include "OdysseyTiledImage.h"
@@ -309,7 +309,7 @@ FOdysseyRasterContent::BuildRenderFunction(IOdysseyTextureRenderingAbility::FRen
         return false;
     }
     // Uncommitted edits are shown by the views, through the content replacement of the edit session.
-    return Odyssey::RasterSampling::BuildTiledImageRenderFunction(*Image, GetDescription().Size, ContentTransform, OutRenderFunction);
+    return Odyssey::TiledImageRendering::BuildTiledImageRenderFunction(*Image, GetDescription().Size, ContentTransform, OutRenderFunction);
 }
 
 void

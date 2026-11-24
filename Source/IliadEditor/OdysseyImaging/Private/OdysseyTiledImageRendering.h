@@ -9,7 +9,7 @@
 
 class UOdysseyTiledImage;
 
-namespace Odyssey::RasterSampling
+namespace Odyssey::TiledImageRendering
 {
 /**
  * Returns the area of a content a render samples: the source rect, brought back into content space, with a margin

@@ -11,7 +11,7 @@
 #include "UObject/Package.h"
 
 #include "OdysseyRasterEditSession.h"
-#include "OdysseyRasterSampling.h"
+#include "OdysseyTiledImageRendering.h"
 #include "OdysseyTiledImage.h"
 #include "OdysseyTiledImageBlock.h"
 #include "OdysseyVectorCell.h"
@@ -203,7 +203,7 @@ FOdysseyVectorContent::BuildRenderFunction(IOdysseyTextureRenderingAbility::FRen
         return false;
     }
     // Uncommitted edits are shown by the views, through the content replacement of the edit session.
-    return Odyssey::RasterSampling::BuildTiledImageRenderFunction(*Image, GetDescription().Size, ContentTransform, OutRenderFunction);
+    return Odyssey::TiledImageRendering::BuildTiledImageRenderFunction(*Image, GetDescription().Size, ContentTransform, OutRenderFunction);
 }
 
 void
