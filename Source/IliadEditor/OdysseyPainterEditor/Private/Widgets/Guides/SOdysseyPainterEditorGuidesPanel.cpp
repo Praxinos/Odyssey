@@ -416,7 +416,9 @@ void SOdysseyPainterEditorGuidesPanel::RenameGuide(const FText& NewName, ETextCo
     if (Guide && Guide->Name.ToString() != NewName.ToString())
     {
         FScopedTransaction Transaction(LOCTEXT("rename-guide-transaction", "Rename Guide"));
-        Guide->Modify(); Guide->Name = NewName; Guide->MarkPackageDirty();
+        Guide->Modify();
+        Guide->Name = NewName;
+        Guide->MarkPackageDirty();
         if (mListView.IsValid()) mListView->RequestListRefresh();
     }
 }
