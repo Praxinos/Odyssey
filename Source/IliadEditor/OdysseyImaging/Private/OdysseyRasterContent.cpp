@@ -27,7 +27,7 @@ FOdysseyRasterContent::~FOdysseyRasterContent()
     EndEdit();
     if (UOdysseyTiledImage* Bound = BoundImage.Get())
     {
-        Bound->OnUndone().RemoveAll(this);
+        Bound->OnTilesRestored().RemoveAll(this);
     }
 }
 
@@ -123,9 +123,9 @@ FOdysseyRasterContent::EnsureImage()
     {
         if (UOdysseyTiledImage* Bound = BoundImage.Get())
         {
-            Bound->OnUndone().RemoveAll(this);
+            Bound->OnTilesRestored().RemoveAll(this);
         }
-        Image->OnUndone().AddRaw(this, &FOdysseyRasterContent::OnImageUndone);
+        Image->OnTilesRestored().AddRaw(this, &FOdysseyRasterContent::OnImageUndone);
         BoundImage = Image.Get();
     }
     return true;

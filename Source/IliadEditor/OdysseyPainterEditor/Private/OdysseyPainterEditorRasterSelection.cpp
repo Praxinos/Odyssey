@@ -64,7 +64,7 @@ UOdysseyPainterEditorRasterSelection::Init(int iWidth, int iHeight)
     if (!Mask)
     {
         Mask = NewObject<UOdysseyTiledImage>(this, NAME_None, RF_Transactional);
-        Mask->OnUndone().AddUObject(this, &UOdysseyPainterEditorRasterSelection::OnMaskUndone);
+        Mask->OnTilesRestored().AddUObject(this, &UOdysseyPainterEditorRasterSelection::OnMaskUndone);
     }
     // A new mask is not undoable: it starts empty.
     Mask->Initialize(UOdysseyTiledImage::DefaultTileSize, EOdysseyTiledImageFormat::RGBA8);

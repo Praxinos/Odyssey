@@ -67,13 +67,13 @@ void
 UOdysseyTiledImage::PostEditUndo()
 {
     Super::PostEditUndo();
-    OnUndoneDelegate.Broadcast();
+    OnTilesRestoredDelegate.Broadcast();
 }
 
-UOdysseyTiledImage::FOnUndone&
-UOdysseyTiledImage::OnUndone()
+UOdysseyTiledImage::FOnTilesRestored&
+UOdysseyTiledImage::OnTilesRestored()
 {
-    return OnUndoneDelegate;
+    return OnTilesRestoredDelegate;
 }
 
 void

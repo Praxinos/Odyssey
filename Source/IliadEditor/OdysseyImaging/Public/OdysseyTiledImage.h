@@ -105,8 +105,8 @@ public:
     UTextureRenderTarget2D* CreateRenderTarget(FIntPoint Size, UObject* Outer = nullptr) const;
 
     /** Native notification broadcast after an undo or a redo restored the tiles. */
-    DECLARE_MULTICAST_DELEGATE(FOnUndone);
-    FOnUndone& OnUndone();
+    DECLARE_MULTICAST_DELEGATE(FOnTilesRestored);
+    FOnTilesRestored& OnTilesRestored();
 
 public:
     virtual void Serialize(FArchive& Ar) override;
@@ -127,5 +127,5 @@ private:
     UPROPERTY(Transient)
     TMap<FIntPoint, FOdysseyTileId> Tiles;
 
-    FOnUndone OnUndoneDelegate;
+    FOnTilesRestored OnTilesRestoredDelegate;
 };
