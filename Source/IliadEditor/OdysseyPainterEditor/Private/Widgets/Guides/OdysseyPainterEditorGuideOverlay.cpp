@@ -77,10 +77,9 @@ void FOdysseyPainterEditorGuideOverlay::DrawHUD(const FOdysseyHUDElement::FDrawH
         else if (UOdysseyPainterEditorEllipseGuide* Ellipse = Cast<UOdysseyPainterEditorEllipseGuide>(Guide))
         {
             if (!Shape->Ellipse)
-                Shape->Ellipse = MakeShared<FOdysseyHUDEllipse>(FVector2D::ZeroVector, 0, 0);
+                Shape->Ellipse = MakeShared<FOdysseyHUDEllipse>(FVector2D::ZeroVector, FVector2D::ZeroVector);
             Shape->Ellipse->SetCenter(FVector2D(Ellipse->Center.X * Params.mTextureWidth, Ellipse->Center.Y * Params.mTextureHeight));
-            Shape->Ellipse->SetXRadius(FMath::RoundToInt(Ellipse->Radius.X * Params.mTextureWidth));
-            Shape->Ellipse->SetYRadius(FMath::RoundToInt(Ellipse->Radius.Y * Params.mTextureHeight));
+            Shape->Ellipse->SetRadius(FVector2D(Ellipse->Radius.X * Params.mTextureWidth, Ellipse->Radius.Y * Params.mTextureHeight));
             Shape->Ellipse->SetRotation(Ellipse->Angle);
             Shape->Ellipse->SetColor(Guide->Color);
             Shape->Ellipse->SetOpacity(Guide->Opacity);

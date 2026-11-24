@@ -7,6 +7,8 @@
 
 /////////////////////////////////////////////////////
 // FOdysseyHUDEllipse
+// The outline is sampled in floating point, with a segment count adapted to its on-screen size,
+// so it stays smooth at any zoom level.
 class ODYSSEYHUD_API FOdysseyHUDEllipse : public FOdysseyHUDElement
 {
 public:
@@ -14,15 +16,14 @@ public:
     virtual ~FOdysseyHUDEllipse();
 
     //Constructor
-    FOdysseyHUDEllipse( const FVector2D& iCenter, int iXRadius, int iYRadius);
+    FOdysseyHUDEllipse(const FVector2D& iCenter, const FVector2D& iRadius);
 
 public:
     virtual void DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams) override;
 
 public:
     void SetCenter(const FVector2D& iCenter);
-    void SetXRadius(int iRadius);
-    void SetYRadius(int iRadius);
+    void SetRadius(const FVector2D& iRadius);
     void SetRotation(float iRotationDegrees);
     float GetRotation() const;
     void SetColor(const FLinearColor& iColor);
@@ -33,13 +34,11 @@ public:
     float GetThickness() const;
 
     const FVector2D& GetCenter() const;
-    int GetXRadius() const;
-    int GetYRadius() const;
+    const FVector2D& GetRadius() const;
 
 private:
     FVector2D mCenter;
-    int mXRadius;
-    int mYRadius;
+    FVector2D mRadius;
     float mRotationDegrees = 0.f;
     FLinearColor mColor = FLinearColor::Black;
     float mOpacity = 1.f;

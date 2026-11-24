@@ -4,17 +4,14 @@
 #include "OdysseyHUDEllipse.h"
 #include "CanvasTypes.h"
 
-#include "ULISLoaderModule.h"
-
 FOdysseyHUDEllipse::~FOdysseyHUDEllipse()
 {
 
 }
 
-FOdysseyHUDEllipse::FOdysseyHUDEllipse(const FVector2D& iCenter, int iXRadius, int iYRadius)
+FOdysseyHUDEllipse::FOdysseyHUDEllipse(const FVector2D& iCenter, const FVector2D& iRadius)
     : mCenter(iCenter)
-    , mXRadius(iXRadius)
-    , mYRadius(iYRadius)
+    , mRadius(iRadius)
 {
 }
 
@@ -27,40 +24,36 @@ FOdysseyHUDEllipse::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
     if (customization.mSegmentLength <= 0.f || customization.mGapLength < 0.f)
         return;
 
-    ::ULIS::TArray<::ULIS::FVec2I> points;
-    ::ULIS::GenerateEllipsePoints(::ULIS::FVec2I(mCenter.X, mCenter.Y), mXRadius, mYRadius, points);
-
-    if (points.Size() < 2)
+    if (mRadius.X <= 0.0 && mRadius.Y <= 0.0)
         return;
 
     FLinearColor RenderColor = mColor;
     RenderColor.A *= mOpacity;
     InitDrawCustomizedLine(iParams.mCanvas, customization, RenderColor, mThickness);
 
-    for (int i = 1; i < points.Size(); i++)
+    // Estimate the on-screen radius to pick a segment count: about one segment every 4 screen pixels.
+    double screenRadius = FMath::Max(mRadius.X, mRadius.Y);
+    if (GetReference() == EOdysseyHUDReference::Texture && iParams.mTextureToHUD.IsBound())
     {
-        const FVector2D StartOffset = FVector2D(points[i - 1].x, points[i - 1].y) - mCenter;
-        const FVector2D EndOffset = FVector2D(points[i].x, points[i].y) - mCenter;
-        const FVector2D StartPoint = mCenter + StartOffset.GetRotated(mRotationDegrees);
-        const FVector2D EndPoint = mCenter + EndOffset.GetRotated(mRotationDegrees);
-
-        DrawCustomizedLine(
-            iParams,
-            StartPoint,
-            EndPoint
-        );
+        const FVector2D screenCenter = iParams.mTextureToHUD.Execute(mCenter);
+        const FVector2D screenEdge = iParams.mTextureToHUD.Execute(mCenter + FVector2D(screenRadius, 0.0));
+        screenRadius = FVector2D::Distance(screenCenter, screenEdge);
     }
+    const int32 segmentCount = FMath::Clamp(FMath::CeilToInt32(UE_TWO_PI * screenRadius / 4.0), 16, 2048);
 
-    const FVector2D StartOffset = FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y) - mCenter;
-    const FVector2D EndOffset = FVector2D(points[0].x, points[0].y) - mCenter;
-    const FVector2D StartPoint = mCenter + StartOffset.GetRotated(mRotationDegrees);
-    const FVector2D EndPoint = mCenter + EndOffset.GetRotated(mRotationDegrees);
+    const double rotationRadians = FMath::DegreesToRadians(mRotationDegrees);
+    const FVector2D axisX(FMath::Cos(rotationRadians), FMath::Sin(rotationRadians));
+    const FVector2D axisY(-axisX.Y, axisX.X);
 
-    DrawCustomizedLine(
-        iParams,
-        StartPoint,
-        EndPoint
-    );
+    // Point at angle t on the ellipse: center + axisX * radiusX * cos(t) + axisY * radiusY * sin(t). At t = 0 it is center + axisX * radiusX.
+    FVector2D previous = mCenter + axisX * mRadius.X;
+    for (int32 i = 1; i <= segmentCount; i++)
+    {
+        const double t = UE_TWO_PI * i / segmentCount;
+        const FVector2D current = mCenter + axisX * (mRadius.X * FMath::Cos(t)) + axisY * (mRadius.Y * FMath::Sin(t));
+        DrawCustomizedLine(iParams, previous, current);
+        previous = current;
+    }
 
     FOdysseyHUDElement::DrawHUD(iParams);
 }
@@ -72,33 +65,21 @@ FOdysseyHUDEllipse::SetCenter(const FVector2D& iCenter)
 }
 
 void
-FOdysseyHUDEllipse::SetXRadius(int iRadius)
+FOdysseyHUDEllipse::SetRadius(const FVector2D& iRadius)
 {
-    mXRadius = iRadius;
+    mRadius = iRadius;
 }
 
-void
-FOdysseyHUDEllipse::SetYRadius(int iRadius)
+const FVector2D&
+FOdysseyHUDEllipse::GetRadius() const
 {
-    mYRadius = iRadius;
+    return mRadius;
 }
 
 const FVector2D&
 FOdysseyHUDEllipse::GetCenter() const
 {
     return mCenter;
-}
-
-int
-FOdysseyHUDEllipse::GetXRadius() const
-{
-    return mXRadius;
-}
-
-int
-FOdysseyHUDEllipse::GetYRadius() const
-{
-    return mYRadius;
 }
 
 void FOdysseyHUDEllipse::SetRotation(float iRotationDegrees)

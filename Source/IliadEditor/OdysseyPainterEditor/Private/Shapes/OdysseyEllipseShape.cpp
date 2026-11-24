@@ -136,21 +136,17 @@ UOdysseyEllipseShape::GeneratePoints() const
 void
 UOdysseyEllipseShape::CreateHUD()
 {
-    int xRadius = FMath::Abs((int)(mCenterPoint.x - mBorderPoint.x));
-    int yRadius = FMath::Abs((int)(mCenterPoint.y - mBorderPoint.y));
+    // Same radii as GeneratePoints, so the preview follows the stroke that will be painted.
+    const FVector2D radius(FMath::Abs(mCenterPoint.x - mBorderPoint.x), FMath::Abs(mCenterPoint.y - mBorderPoint.y));
 
-    mEllipseHUD = MakeShared<FOdysseyHUDEllipse>(mCenterPoint, xRadius, yRadius);
+    mEllipseHUD = MakeShared<FOdysseyHUDEllipse>(mCenterPoint, radius);
     mHUD->AddElement(mEllipseHUD);
 }
 
 void
 UOdysseyEllipseShape::RefreshHUD()
 {
-    int xRadius = FMath::Abs((int)(mCenterPoint.x - mBorderPoint.x));
-    int yRadius = FMath::Abs((int)(mCenterPoint.y - mBorderPoint.y));
-
-    mEllipseHUD->SetXRadius(xRadius);
-    mEllipseHUD->SetYRadius(yRadius);
+    mEllipseHUD->SetRadius(FVector2D(FMath::Abs(mCenterPoint.x - mBorderPoint.x), FMath::Abs(mCenterPoint.y - mBorderPoint.y)));
 }
 
 void
