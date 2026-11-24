@@ -766,4 +766,43 @@ bool FOdysseyTextureLayerContentClearTest::RunTest(const FString& Parameters)
     return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureLayerUndoEndsEditTest, "Odyssey.Texture.TiledImage.UndoEndsEdit",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+/**
+ * An undo during an edit, e.g. Ctrl+Z in the middle of a stroke, ends the edit: it started from pixels the undo replaced.
+ * The views show the restored tiles, and the ended edit can no longer be committed.
+ */
+bool FOdysseyTextureLayerUndoEndsEditTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::TextureLayerTiledImageTests;
+    TStrongObjectPtr<UTexture2D> Texture(MakeTexture(GetTransientPackage(), TSF_BGRA8));
+    UOdysseyTextureLayerImageRaster* Layer = MakeLayer(Texture.Get());
+    FOdysseyRasterContent& Content = Layer->GetRasterContent();
+    const float Tolerance = 0.5f / 255.0f + 0.0001f;
+    const TArray<FLinearColor> Original = ReadImage(Layer->GetTiledImage());
+
+    {
+        FScopedTransaction Transaction(NSLOCTEXT("OdysseyTextureLayerTiledImageTests", "ClearBeforeEdit", "Clear content"));
+        TestTrue(TEXT("Clear the content"), Content.Clear());
+    }
+
+    TSharedPtr<FOdysseyRasterBlockEdit> Edit = Odyssey::RasterContentBlocks::BeginBlockEdit(Content);
+    if (!TestTrue(TEXT("Begin an edit of the cleared content"), Edit.IsValid() && Edit->IsActive()))
+    {
+        return false;
+    }
+    Edit->Update({ FIntRect(0, 0, 16, 16) });
+    TestTrue(TEXT("The edit is shown"), FOdysseyRasterEditSession::Find(Layer->GetRenderingId()).IsValid());
+
+    TestTrue(TEXT("Undo the clear during the edit"), GEditor->UndoTransaction());
+    TestFalse(TEXT("The undo ends the edit"), Edit->IsActive());
+    TestFalse(TEXT("No edit session remains"), FOdysseyRasterEditSession::Find(Layer->GetRenderingId()).IsValid());
+    ComparePixels(*this, TEXT("The tiles are restored"), Original, ReadImage(Layer->GetTiledImage()), Tolerance);
+    ComparePixels(*this, TEXT("The views show the restored tiles"), Original, ReadPipeline(Layer), Tolerance);
+    TestFalse(TEXT("An ended edit commits nothing"), Edit->Commit());
+    ComparePixels(*this, TEXT("The tiles are unchanged by the ended edit"), Original, ReadImage(Layer->GetTiledImage()), Tolerance);
+    return true;
+}
+
 #endif
