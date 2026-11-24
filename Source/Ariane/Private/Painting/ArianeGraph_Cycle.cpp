@@ -115,6 +115,16 @@ FArianeGraph::FCycle::HasNode( FNode* Node )
 bool
 FArianeGraph::FCycle::FitsIn( FArianeGraph::FCycle* ParentCandidate )
 {
+    const FBox2D& ParentBBox = ParentCandidate->BBox;
+
+    // Cheap exact rejection before the hit tests: a cycle inside another one has its bbox inside the other's bbox.
+    // Bounds included (not FBox2D::IsInside, which is strict): a child may touch its parent at a vertex
+    if( ( ParentBBox.IsInsideOrOn( BBox.Min ) == false )
+     || ( ParentBBox.IsInsideOrOn( BBox.Max ) == false ) )
+    {
+        return false;
+    }
+
     // First test : get sure they don't share a common section
     // which would in that case mean that we do not fit in the parent cycle
     for( int i = 0; i < ContourSections.Num(); i++ )

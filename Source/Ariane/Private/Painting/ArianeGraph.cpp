@@ -564,6 +564,8 @@ FArianeGraph::FNodeIntersection::FNodeIntersection( const FVector2D& InPosition
     , Edges { InEdge0,  InEdge1 }
 {
     Position = InPosition;
+    // found between two projected edges
+    bProjected = true;
 
     // attach to edges (ordered, depends on T value)
     Edges[0]->AddIntersection( &Intersections[0] );
@@ -588,18 +590,17 @@ FArianeGraph::FNodeIntersection::XRecord::XRecord( const FVector2D& InPosition
                                                  , FPath* InPath1
                                                  , FEdge* InEdge1
                                                  , double InEdge1T )
-    : Edge0 ( InEdge0 )
+    : Path0 ( InPath0 )
+    , Path1 ( InPath1 )
+    , Edge0 ( InEdge0 )
     , Edge1 ( InEdge1 )
     , Edge0T ( InEdge0T )
     , Edge1T ( InEdge1T )
     , Position ( InPosition )
     , AverageWorldPosition ( InAverageWorldPosition )
 {
-    Edge0->IntersectionSlotCount++;
-    Edge1->IntersectionSlotCount++;
-
-    InPath0->bHasIntersections = true;
-    InPath1->bHasIntersections = true;
+    // records are created concurrently by several cores, which may share edges and paths:
+    // the edge and path counters are updated afterwards, on a single thread (see Intersect)
 }
 
 FArianeGraph::FFraction::~FFraction()
@@ -620,6 +621,8 @@ FArianeGraph::FFraction::MakeBBox()
     BBox.Min.Y = FMath::Min( Points[0]->Position.Y, Points[1]->Position.Y );
     BBox.Max.X = FMath::Max( Points[0]->Position.X, Points[1]->Position.X );
     BBox.Max.Y = FMath::Max( Points[0]->Position.Y, Points[1]->Position.Y );
+    // invalid when a point could not be projected (behind the camera): the box is meaningless
+    BBox.bIsValid = ( Points[0]->bProjected && Points[1]->bProjected );
 }
 
 FArianeGraph::FEdge::~FEdge()
@@ -697,6 +700,8 @@ FArianeGraph::FEdgeLinear::MakeBBoxAndLength()
     BBox.Min.Y = FMath::Min( Nodes[0]->Position.Y, Nodes[1]->Position.Y );
     BBox.Max.X = FMath::Max( Nodes[0]->Position.X, Nodes[1]->Position.X );
     BBox.Max.Y = FMath::Max( Nodes[0]->Position.Y, Nodes[1]->Position.Y );
+    // invalid when a node could not be projected (behind the camera): read by IsProjected()
+    BBox.bIsValid = ( Nodes[0]->bProjected && Nodes[1]->bProjected );
 }
 
 FVector
@@ -746,6 +751,8 @@ FArianeGraph::FEdgeCubic::MakeBBoxAndLength()
     BBox.Min.Y = FMath::Min( Bezier[0].Y, FMath::Min3 ( Bezier[1].Y, Bezier[2].Y, Bezier[3].Y ) );
     BBox.Max.X = FMath::Max( Bezier[0].X, FMath::Max3 ( Bezier[1].X, Bezier[2].X, Bezier[3].X ) );
     BBox.Max.Y = FMath::Max( Bezier[0].Y, FMath::Max3 ( Bezier[1].Y, Bezier[2].Y, Bezier[3].Y ) );
+    // invalid when a node could not be projected (behind the camera): read by IsProjected()
+    BBox.bIsValid = ( Nodes[0]->bProjected && Nodes[1]->bProjected );
 }
 
 FVector
@@ -769,6 +776,7 @@ FArianeGraph::FPath::FPath( FArianePath* InOriginalPath
                           , uint32 InCubicEdgeCount
                           , FEdge** InEdges )
     : bHasIntersections ( false )
+    , bProjected ( false )
     , OriginalPath( InOriginalPath )
     , NodeCount( InNodeCount )
     , Nodes( InNodes )
@@ -842,7 +850,7 @@ FArianeGraph::IntersectEdges( FPath* Path0
                             , FEdge* Edge0
                             , FPath* Path1
                             , FEdge* Edge1
-                            , TArray<FNodeIntersection::XRecord>& OutIntersectionRecordArray )
+                            , TArray<FNodeIntersection::XRecord>& OutXIntersectionRecordArray )
 {
     FNode* Edge0Node0 = Edge0->Nodes[0];
     FNode* Edge0Node1 = Edge0->Nodes[1];
@@ -983,8 +991,8 @@ FArianeGraph::IntersectEdges( FPath* Path0
                                         }
 
                                         // save in temporary struct array will allow to alloc vertices in one go.
-                                        Mutex.Lock();
-                                        OutIntersectionRecordArray.Emplace( Edge0ISXCoords
+                                        // no lock: each core has its own array
+                                        OutXIntersectionRecordArray.Emplace( Edge0ISXCoords
                                                                           , ( WorldISXEdge0 + WorldISXEdge1 ) * 0.5f
                                                                           , Path0
                                                                           , Edge0
@@ -992,7 +1000,6 @@ FArianeGraph::IntersectEdges( FPath* Path0
                                                                           , Path1
                                                                           , Edge1
                                                                           , Edge1T );
-                                        Mutex.Unlock();
                                     }
                                 }
                             }
@@ -1005,7 +1012,10 @@ FArianeGraph::IntersectEdges( FPath* Path0
 }
 
 void
-FArianeGraph::IntersectEdgeWithPath( FPath* Path, FEdge* Edge, FPath* IntersectedPath )
+FArianeGraph::IntersectEdgeWithPath( FPath* Path
+                                   , FEdge* Edge
+                                   , FPath* IntersectedPath
+                                   , TArray<FNodeIntersection::XRecord>& OutXIntersectionRecordArray )
 {
     const FBox2D& EdgeBBox = Edge->BBox;
 
@@ -1014,16 +1024,17 @@ FArianeGraph::IntersectEdgeWithPath( FPath* Path, FEdge* Edge, FPath* Intersecte
         FEdge* IntersectedEdge = IntersectedPath->Edges[i];
         const FBox2D& IntersectedEdgeBBox = IntersectedEdge->BBox;
 
-        if( ( EdgeBBox.Min.X <= IntersectedEdgeBBox.Max.X )
-         && ( EdgeBBox.Max.X >= IntersectedEdgeBBox.Min.X )
-         && ( EdgeBBox.Min.Y <= IntersectedEdgeBBox.Max.Y )
-         && ( EdgeBBox.Max.Y >= IntersectedEdgeBBox.Min.Y ) )
+        // an edge going behind the camera has no meaningful 2D image
+        if( IntersectedEdge->IsProjected() )
         {
-            IntersectEdges( Path
-                          , Edge
-                          , IntersectedPath
-                          , IntersectedEdge
-                          , XIntersectionRecordArray );
+            if( EdgeBBox.Intersect( IntersectedEdgeBBox ) )
+            {
+                IntersectEdges( Path
+                              , Edge
+                              , IntersectedPath
+                              , IntersectedEdge
+                              , OutXIntersectionRecordArray );
+            }
         }
     }
 
@@ -1126,7 +1137,7 @@ FArianeGraph::Reset( EArianeGraphResetPolicy ResetPolicy )
         LinearSectionBuffer.Empty();
         CubicSectionBuffer.Empty();
         Sections.Empty();
-        XIntersectionRecordArray.Empty();
+        XIntersectionRecordArrays.Empty();
         IntersectionNodeBuffer.Empty();
 
         PointBuffer.Empty();
@@ -1146,7 +1157,11 @@ FArianeGraph::Reset( EArianeGraphResetPolicy ResetPolicy )
     LinearSectionBuffer.Reset();
     CubicSectionBuffer.Reset();
     Sections.Reset();
-    XIntersectionRecordArray.Reset();
+    // per core: keeps each core's allocation for the next solve
+    for( TArray<FNodeIntersection::XRecord>& CoreXIntersectionRecords : XIntersectionRecordArrays )
+    {
+        CoreXIntersectionRecords.Reset();
+    }
     IntersectionNodeBuffer.Reset();
 
     // what BuildArrangement and SolveArrangement wrote into the imported geometry
@@ -1198,12 +1213,41 @@ FArianeGraph::ProjectGeometry( const FVector& InViewOrigin, const FPlane& InProj
             Node->bProjected = bProjected;
         }
 
+        FBox2D& PathBBox = Path.BBox;
+
+        // stays invalid for a path without edges, and clears the previous projection
+        PathBBox = FBox2D( ForceInit );
+        // cleared by the first edge that cannot be projected
+        Path.bProjected = true;
+
         // Build bounding boxes (and lengths) of the edges and their fractions, now that nodes are projected
         for( uint32 i = 0; i < Path.GetEdgeCount(); i++ )
         {
             FEdge* Edge = Path.Edges[i];
 
             Edge->MakeBBoxAndLength();
+
+            // path bbox = union of its projected edge bboxes, gap extensions included.
+            // A mirrored (unprojected) box could be huge and would defeat the path test
+            if( Edge->IsProjected() )
+            {
+                if( PathBBox.bIsValid == false )
+                {
+                    // first projected edge, copies bIsValid = true
+                    PathBBox = Edge->BBox;
+                }
+                else
+                {
+                    PathBBox.Min.X = FMath::Min( PathBBox.Min.X, Edge->BBox.Min.X );
+                    PathBBox.Min.Y = FMath::Min( PathBBox.Min.Y, Edge->BBox.Min.Y );
+                    PathBBox.Max.X = FMath::Max( PathBBox.Max.X, Edge->BBox.Max.X );
+                    PathBBox.Max.Y = FMath::Max( PathBBox.Max.Y, Edge->BBox.Max.Y );
+                }
+            }
+            else
+            {
+                Path.bProjected = false;
+            }
 
             for( uint32 j = 0; j < Edge->FractionCount; j++ )
             {
@@ -1372,33 +1416,57 @@ FArianeGraph::ImportGeometry( const TArray<FArianeObject*>& Objects
 }
 
 void
-FArianeGraph::IntersectPath( FPath* Path )
+FArianeGraph::IntersectPath( FPath* Path, TArray<FNodeIntersection::XRecord>& OutXIntersectionRecordArray )
 {
-    for( uint32 j = 0; j < Path->GetEdgeCount(); j++ )
+    const FBox2D& PathBBox = Path->BBox;
+    // edges are allocated path after path: a pair of edges from two paths passes IntersectEdges'
+    // "Edge0 >= Edge1" test only from the path with the higher index. So this path is only tested
+    // against itself and the paths before it, the pairs with later paths being tested from those paths
+    const int32 PathIndex = (int32)( Path - PathBuffer.GetData() );
+
+    for( int k = 0; k <= PathIndex; k++ )
     {
-        FEdge* Edge = Path->Edges[j];
+        FPath& IntersectedPath = PathBuffer[k];
+        const FBox2D& IntersectedPathBBox = IntersectedPath.BBox;
 
-        for( int k = 0; k < PathBuffer.Num(); k++ )
+        // paths that do not overlap cannot intersect: all their edge pairs are skipped (bounds included)
+        if( PathBBox.Intersect( IntersectedPathBBox ) )
         {
-            FPath& IntersectedPath = PathBuffer[k];
+            for( uint32 j = 0; j < Path->GetEdgeCount(); j++ )
+            {
+                FEdge* Edge = Path->Edges[j];
+                const FBox2D& EdgeBBox = Edge->BBox;
 
-            // populate mXIntersectionRecordArray
-            IntersectEdgeWithPath ( Path, Edge, &IntersectedPath );
+                // an edge going behind the camera has no meaningful 2D image
+                if( Edge->IsProjected() )
+                {
+                    // same test for this edge alone, before walking all the edges of the intersected path
+                    if( EdgeBBox.Intersect( IntersectedPathBBox ) )
+                    {
+                        // populate the X-intersection records of this core
+                        IntersectEdgeWithPath ( Path, Edge, &IntersectedPath, OutXIntersectionRecordArray );
+                    }
+                }
+            }
         }
     }
 }
 
-void
+uint32
 FArianeGraph::Intersect( TArray<FPath*>& OutSectionnablePaths
                        , uint32& OutTotalLinearSectionCount
                        , uint32& OutTotalCubicSectionCount )
 {
     uint32 TotalSectionCount = 0;
+    uint32 TotalXIntersectionRecordCount = 0;
 
     // find intersections
     if( bMultithreaded )
     {
         uint32 CoreCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+
+        // one record array per core: no lock, and the same order on every solve
+        XIntersectionRecordArrays.SetNum( CoreCount );
 
 #if !PLATFORM_MAC
         ParallelFor( CoreCount
@@ -1408,11 +1476,13 @@ FArianeGraph::Intersect( TArray<FPath*>& OutSectionnablePaths
                      , &OutTotalCubicSectionCount
                      , CoreCount ]( int32 CpuID )
             {
+                TArray<FNodeIntersection::XRecord>& CoreXIntersectionRecords = XIntersectionRecordArrays[CpuID];
+
                 for( int i = CpuID; i < PathBuffer.Num(); i += CoreCount )
                 {
                     FPath& Path = PathBuffer[i];
 
-                    IntersectPath( &Path );
+                    IntersectPath( &Path, CoreXIntersectionRecords );
                 }
             }
             , EParallelForFlags::None );
@@ -1420,11 +1490,28 @@ FArianeGraph::Intersect( TArray<FPath*>& OutSectionnablePaths
     }
     else
     {
+        XIntersectionRecordArrays.SetNum( 1 );
+
         for( int i = 0; i < PathBuffer.Num(); i++ )
         {
             FPath& Path = PathBuffer[i];
 
-            IntersectPath( &Path );
+            IntersectPath( &Path, XIntersectionRecordArrays[0] );
+        }
+    }
+
+    // single thread: edges and paths may be shared between cores
+    for( TArray<FNodeIntersection::XRecord>& CoreXIntersectionRecords : XIntersectionRecordArrays )
+    {
+        TotalXIntersectionRecordCount += CoreXIntersectionRecords.Num();
+
+        for( FNodeIntersection::XRecord& XIntersectionRecord : CoreXIntersectionRecords )
+        {
+            XIntersectionRecord.Edge0->IntersectionSlotCount++;
+            XIntersectionRecord.Edge1->IntersectionSlotCount++;
+
+            XIntersectionRecord.Path0->bHasIntersections = true;
+            XIntersectionRecord.Path1->bHasIntersections = true;
         }
     }
 
@@ -1439,6 +1526,8 @@ FArianeGraph::Intersect( TArray<FPath*>& OutSectionnablePaths
             OutTotalCubicSectionCount += Path.CubicEdgeCount;
         }
     }
+
+    return TotalXIntersectionRecordCount;
 }
 
 void
@@ -1528,7 +1617,12 @@ FArianeGraph::CreatePathSections( FPath* Path, TArray<FSection*>& ShortSections 
         //FNode* Node0 = Edge->Nodes( 0 );
         //FNode* Node1 = Edge->Nodes( 1 );
 
-        CreateEdgeSections( Edge, ShortSections );
+        // an edge going behind the camera is left out of the arrangement: the path is cut there,
+        // and the pendant parts are removed by SimplifyGraph
+        if( Edge->IsProjected() )
+        {
+            CreateEdgeSections( Edge, ShortSections );
+        }
 
         //TODO::Possible optimization: call only if nearestVertex exists
         //CreateVertexGapSegment( vertex0 );
@@ -1547,41 +1641,44 @@ FArianeGraph::BuildArrangement()
 
     SectionnablePaths.Reserve( PathBuffer.Num() );
     // Step2: find intersections
-    Intersect( SectionnablePaths, TotalLinearSectionCount, TotalCubicSectionCount );
+    uint32 TotalXIntersectionRecordCount = Intersect( SectionnablePaths, TotalLinearSectionCount, TotalCubicSectionCount );
 
     Progress.store( 0.5f, std::memory_order_relaxed );
 
     // reserve memory to vertices in one go.
-    IntersectionNodeBuffer.Reserve( XIntersectionRecordArray.Num() );
+    IntersectionNodeBuffer.Reserve( TotalXIntersectionRecordCount );
 
-    // then init X-Junction intersection vertices.
-    for( FNodeIntersection::XRecord& XintersectionRecord : XIntersectionRecordArray )
+    // then init X-Junction intersection vertices, in core order (same order on every solve)
+    for( TArray<FNodeIntersection::XRecord>& CoreXIntersectionRecords : XIntersectionRecordArrays )
     {
-        IntersectionNodeBuffer.Emplace( XintersectionRecord.Position
-                                      , XintersectionRecord.AverageWorldPosition
-                                      , XintersectionRecord.Edge0
-                                      , XintersectionRecord.Edge0T
-                                      , XintersectionRecord.Edge1
-                                      , XintersectionRecord.Edge1T );
-
-        if( XintersectionRecord.Edge0->GetClass() == FEdgeLinear::StaticClass() )
+        for( FNodeIntersection::XRecord& XintersectionRecord : CoreXIntersectionRecords )
         {
-            TotalLinearSectionCount++;
-        }
+            IntersectionNodeBuffer.Emplace( XintersectionRecord.Position
+                                          , XintersectionRecord.AverageWorldPosition
+                                          , XintersectionRecord.Edge0
+                                          , XintersectionRecord.Edge0T
+                                          , XintersectionRecord.Edge1
+                                          , XintersectionRecord.Edge1T );
 
-        if( XintersectionRecord.Edge0->GetClass() == FEdgeCubic::StaticClass() )
-        {
-            TotalCubicSectionCount++;
-        }
+            if( XintersectionRecord.Edge0->GetClass() == FEdgeLinear::StaticClass() )
+            {
+                TotalLinearSectionCount++;
+            }
 
-        if( XintersectionRecord.Edge1->GetClass() == FEdgeLinear::StaticClass() )
-        {
-            TotalLinearSectionCount++;
-        }
+            if( XintersectionRecord.Edge0->GetClass() == FEdgeCubic::StaticClass() )
+            {
+                TotalCubicSectionCount++;
+            }
 
-        if( XintersectionRecord.Edge1->GetClass() == FEdgeCubic::StaticClass() )
-        {
-            TotalCubicSectionCount++;
+            if( XintersectionRecord.Edge1->GetClass() == FEdgeLinear::StaticClass() )
+            {
+                TotalLinearSectionCount++;
+            }
+
+            if( XintersectionRecord.Edge1->GetClass() == FEdgeCubic::StaticClass() )
+            {
+                TotalCubicSectionCount++;
+            }
         }
     }
 
@@ -1596,7 +1693,8 @@ FArianeGraph::BuildArrangement()
         CreatePathSections( Path, ShortSections );
 
         // create a cycle right now for untouched looped-paths
-        if( ( Path->IsLoop() == true ) && ( Path->bHasIntersections == false ) )
+        // a loop going behind the camera encloses no finite area on the plane, and some of its edges have no section
+        if( ( Path->IsLoop() == true ) && ( Path->bHasIntersections == false ) && ( Path->bProjected == true ) )
         {
             TArray<uint32> PathNodeIndices;
             TArray<FSection*> PathSections;
@@ -1872,12 +1970,17 @@ FArianeGraph::PickCycle( const FVector& RayOrigin, const FVector& RayDirection )
     if( FArianeCore::IntersectPlane( ProjectionPlane, RayOrigin, RayDirection, IntersectAt ) )
     {
         FVector PositionInPlaneSpace = WorldToLocalRotationQuat * ( IntersectAt - ProjectionPlaneOrigin );
+        FVector2D Position2D = FVector2D( PositionInPlaneSpace );
 
         for( FCycle* Cycle : Cycles )
         {
-            if( Cycle->HitTest( PositionInPlaneSpace.X, PositionInPlaneSpace.Y ) )
+            // cheap exact rejection before the Blend2D hit test. Bounds included, like FitsIn
+            if( Cycle->BBox.IsInsideOrOn( Position2D ) )
             {
-                return Cycle;
+                if( Cycle->HitTest( PositionInPlaneSpace.X, PositionInPlaneSpace.Y ) )
+                {
+                    return Cycle;
+                }
             }
         }
     }

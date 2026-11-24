@@ -137,6 +137,8 @@ public:
         // for X-Junction
         struct XRecord
         {
+            FPath* Path0;
+            FPath* Path1;
             FEdge* Edge0;
             FEdge* Edge1;
             double Edge0T;
@@ -197,6 +199,12 @@ public:
 
         // computes BBox and Length from the projected (2D) node positions
         virtual void MakeBBoxAndLength() = 0;
+
+        // BBox.bIsValid is set by MakeBBoxAndLength: true only if both nodes are projected
+        FORCEINLINE bool IsProjected() const
+        {
+            return BBox.bIsValid;
+        }
         virtual FVector GetOriginalWorldPosition( float T ) = 0;
         void CreateSections( TArray<FSection>& SectionBuffer
                            , bool bStitchShortSections
@@ -429,12 +437,16 @@ public:
         uint32 GetEdgeCount();
 
         bool bHasIntersections;
+        // all edges projected. Computed by ProjectGeometry
+        bool bProjected;
         FArianePath* OriginalPath;
         uint32 NodeCount;
         FNode* Nodes; // we dont use TArray, for performance reasons (all FNodes are in one single array for all paths)
         uint32 LinearEdgeCount;
         uint32 CubicEdgeCount;
         FEdge** Edges; // we dont use TArray, for performance reasons
+        // projected (2D) bbox, union of the edge bboxes. Computed by ProjectGeometry
+        FBox2D BBox;
     };
 
     struct ARIANE_API FCycle
@@ -598,16 +610,20 @@ protected:
                    , TArray<FSection*>& OutSectionArray
                    , double Orientation
                    , uint32 Depth );
-    void Intersect( TArray<FPath*>& SectionnablePaths
-                  , uint32& OutTotalLinearSectionCount
-                  , uint32& OutTotalCubicSectionCount );
-    void IntersectEdgeWithPath( FPath* Path, FEdge* Edge, FPath* IntersectedPath );
+    /** Returns the total number of X-intersection records, all cores included. */
+    uint32 Intersect( TArray<FPath*>& SectionnablePaths
+                    , uint32& OutTotalLinearSectionCount
+                    , uint32& OutTotalCubicSectionCount );
+    void IntersectEdgeWithPath( FPath* Path
+                              , FEdge* Edge
+                              , FPath* IntersectedPath
+                              , TArray<FNodeIntersection::XRecord>& OutXIntersectionRecordArray );
     void IntersectEdges( FPath* Path0
                        , FEdge* Edge0
                        , FPath* Path1
                        , FEdge* Edge1
-                       , TArray<FNodeIntersection::XRecord>& OutIntersectionRecordArray );
-    void IntersectPath( FPath* Path );
+                       , TArray<FNodeIntersection::XRecord>& OutXIntersectionRecordArray );
+    void IntersectPath( FPath* Path, TArray<FNodeIntersection::XRecord>& OutXIntersectionRecordArray );
     void CreatePathSections( FPath* Path, TArray<FSection*>& ShortSections );
     void CreateEdgeSections( FEdge* Edge, TArray<FSection*>& ShortSections );
     void CreateEdgeSection( FEdge* Edge
@@ -634,7 +650,6 @@ protected:
     FQuat WorldToLocalRotationQuat;
     FVector ViewOrigin;
     EArianeGraphSegmentExtensionScheme SegmentExtensionScheme;
-    FCriticalSection Mutex;
     // we store everything in one buffer per type, for performance
     TArray<FPoint> PointBuffer;
     TArray<FNode> NodeBuffer;
@@ -648,7 +663,8 @@ protected:
     TArray<FSection*> Sections;
     TArray<FNodeIntersection> IntersectionNodeBuffer;
     TArray<FPath> PathBuffer;
-    TArray<FNodeIntersection::XRecord> XIntersectionRecordArray;
+    // one array per core, filled without lock by Intersect
+    TArray<TArray<FNodeIntersection::XRecord>> XIntersectionRecordArrays;
     //TArray<FEdgeCubic> CubicSegmentBuffer;
     TArray<FCycle*> Cycles;
     bool bMultithreaded;

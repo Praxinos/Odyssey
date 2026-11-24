@@ -218,10 +218,12 @@ UArianeEditorPaintBucketTool::RequestSolve()
     }
 
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
-    IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
-    FViewCameraState CameraState;
-
-    QueriesAPI->GetCurrentViewState( CameraState );
+    // the tools context camera state is stale until the user interacts with the viewport, the scene view is not
+    FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
+                                                                            , ViewportClient->GetScene()
+                                                                            , ViewportClient->EngineShowFlags ) );
+    // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
+    FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
 
     // game thread, worker idle: the only step that reads the drawing
     if( bGeometryNeedsImport )
@@ -239,7 +241,7 @@ UArianeEditorPaintBucketTool::RequestSolve()
     PickedCycle = nullptr;
     SolvedGeneration = Generation;
 
-    Worker.Launch( CameraState.Position, GetDrawingPlane( ViewportClient, nullptr ) );
+    Worker.Launch( View->ViewMatrices.GetViewOrigin(), GetDrawingPlane( ViewportClient, nullptr ) );
 
     StartSolveTicker();
 }
@@ -583,34 +585,39 @@ UArianeEditorPaintBucketTool::DrawSectionsHUD ( FCanvas* HUDCanvas
 
     for( FArianeGraph::FSection* ContourSection : Sections )
     {
-        if( ContourSection->GetClass() == FArianeGraph::FSectionLinear::StaticClass() )
+        // a section of an edge going behind the camera has no meaningful 2D image.
+        // The edge is tested, not the section's nodes: after stitching they may differ from the edge's
+        if( ContourSection->GetEdge()->IsProjected() )
         {
-            FArianeGraph::FSectionLinear* LinearSection = static_cast<FArianeGraph::FSectionLinear*>(ContourSection);
-            FVector P0Local = FVector( LinearSection->Nodes[0]->Position.X, LinearSection->Nodes[0]->Position.Y, 0.0f );
-            FVector P1Local = FVector( LinearSection->Nodes[1]->Position.X, LinearSection->Nodes[1]->Position.Y, 0.0f );
-            FVector P0World = ( RotationQuat * P0Local ) + ProjectionPlaneOrigin;
-            FVector P1World = ( RotationQuat * P1Local ) + ProjectionPlaneOrigin;
-            FVector2D P0HUD;
-            FVector2D P1HUD;
+            if( ContourSection->GetClass() == FArianeGraph::FSectionLinear::StaticClass() )
+            {
+                FArianeGraph::FSectionLinear* LinearSection = static_cast<FArianeGraph::FSectionLinear*>(ContourSection);
+                FVector P0Local = FVector( LinearSection->Nodes[0]->Position.X, LinearSection->Nodes[0]->Position.Y, 0.0f );
+                FVector P1Local = FVector( LinearSection->Nodes[1]->Position.X, LinearSection->Nodes[1]->Position.Y, 0.0f );
+                FVector P0World = ( RotationQuat * P0Local ) + ProjectionPlaneOrigin;
+                FVector P1World = ( RotationQuat * P1Local ) + ProjectionPlaneOrigin;
+                FVector2D P0HUD;
+                FVector2D P1HUD;
 
-            WorldToHUD( ViewportClient, View, P0World, P0HUD );
-            WorldToHUD( ViewportClient, View, P1World, P1HUD );
+                WorldToHUD( ViewportClient, View, P0World, P0HUD );
+                WorldToHUD( ViewportClient, View, P1World, P1HUD );
 
-            DrawLineHUD( HUDCanvas
-                       , ViewportClient
-                       , View
-                       , P0HUD
-                       , P1HUD
-                       , HcColor
-                       , 2.0f );
-        }
+                DrawLineHUD( HUDCanvas
+                           , ViewportClient
+                           , View
+                           , P0HUD
+                           , P1HUD
+                           , HcColor
+                           , 2.0f );
+            }
 
-        //if( ContourSection->GetCycle(0) == this )
-        if( ContourSection->GetClass() == FArianeGraph::FSectionCubic::StaticClass() )
-        {
-            FArianeGraph::FSectionCubic* CubicSection = static_cast<FArianeGraph::FSectionCubic*>(ContourSection);
+            //if( ContourSection->GetCycle(0) == this )
+            if( ContourSection->GetClass() == FArianeGraph::FSectionCubic::StaticClass() )
+            {
+                FArianeGraph::FSectionCubic* CubicSection = static_cast<FArianeGraph::FSectionCubic*>(ContourSection);
 
-            FVector2D* SectionBezier = CubicSection->GetBezier();
+                FVector2D* SectionBezier = CubicSection->GetBezier();
+            }
         }
     }
 }
@@ -649,25 +656,30 @@ UArianeEditorPaintBucketTool::DrawExtensionHUD ( FCanvas* HUDCanvas
             for( FArianeGraph::FNode* ExtendedNode : Graph->GetExtendedNodes() )
             {
                 FArianeGraph::FEdge* ExtendedEdge = ExtendedNode->Edges[0];
-                FArianeGraph::FNode* OtherNode = ( ExtendedEdge->Nodes[0] == ExtendedNode ) ? ExtendedEdge->Nodes[1]
-                                                                                            : ExtendedEdge->Nodes[0];
-                FVector P0Local = FVector( ExtendedNode->Position.X, ExtendedNode->Position.Y, 0.0f );
-                FVector P1Local = FVector( OtherNode->Position.X   , OtherNode->Position.Y   , 0.0f );
-                FVector P0World = ( RotationQuat * P0Local ) + ProjectionPlaneOrigin;
-                FVector P1World = ( RotationQuat * P1Local ) + ProjectionPlaneOrigin;
-                FVector2D P0HUD;
-                FVector2D P1HUD;
 
-                WorldToHUD( ViewportClient, View, P0World, P0HUD );
-                WorldToHUD( ViewportClient, View, P1World, P1HUD );
+                // an extension going behind the camera has no meaningful 2D image
+                if( ExtendedEdge->IsProjected() )
+                {
+                    FArianeGraph::FNode* OtherNode = ( ExtendedEdge->Nodes[0] == ExtendedNode ) ? ExtendedEdge->Nodes[1]
+                                                                                                : ExtendedEdge->Nodes[0];
+                    FVector P0Local = FVector( ExtendedNode->Position.X, ExtendedNode->Position.Y, 0.0f );
+                    FVector P1Local = FVector( OtherNode->Position.X   , OtherNode->Position.Y   , 0.0f );
+                    FVector P0World = ( RotationQuat * P0Local ) + ProjectionPlaneOrigin;
+                    FVector P1World = ( RotationQuat * P1Local ) + ProjectionPlaneOrigin;
+                    FVector2D P0HUD;
+                    FVector2D P1HUD;
 
-                DrawLineHUD( HUDCanvas
-                           , ViewportClient
-                           , View
-                           , P0HUD
-                           , P1HUD
-                           , VectorLayer->GetDrawing()->GetRootGroup()->GetHUDForegroundColor() //FgColor
-                           , 2.0f );
+                    WorldToHUD( ViewportClient, View, P0World, P0HUD );
+                    WorldToHUD( ViewportClient, View, P1World, P1HUD );
+
+                    DrawLineHUD( HUDCanvas
+                               , ViewportClient
+                               , View
+                               , P0HUD
+                               , P1HUD
+                               , VectorLayer->GetDrawing()->GetRootGroup()->GetHUDForegroundColor() //FgColor
+                               , 2.0f );
+                }
             }
         }
     }
@@ -683,7 +695,7 @@ UArianeEditorPaintBucketTool::DrawProgressBarHUD( FCanvas* HUDCanvas
     const float DPIScale = HUDCanvas->GetDPIScale();
     const float Width = ViewportSize.X / DPIScale;
     const float Height = ViewportSize.Y / DPIScale;
-    const float BarHeight = 5.0f;
+    const float BarHeight = 3.0f;
     // written by the worker between the pipeline steps
     const float Progress = Graph->GetProgress();
 

@@ -956,16 +956,19 @@ UArianeEditorTool::GetDrawingPlane( FEditorViewportClient* ViewportClient
 
     if( VectorLayer )
     {
-        IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
         FTransform CoordSystemTransform;
         FVector LayerWorldPosition = VectorLayer->GetComponentLocation();
-        FViewCameraState CameraState;
         float DrawingDistanceToPlane = Editor->GetDrawingDistanceToPlane();
+        // the tools context camera state (GetCurrentViewState) is stale until the user interacts with the viewport,
+        // the scene view is always up to date
+        FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport
+                                                                                , ViewportClient->GetScene()
+                                                                                , ViewportClient->EngineShowFlags ) );
+        // Note: View is not allocated, it will be destroyed by Unreal at the end of the scope
+        FSceneView* View = ViewportClient->CalcSceneView( &ViewFamily );
 
-        QueriesAPI->GetCurrentViewState( CameraState );
-
-        FVector CameraLocation = CameraState.Position;
-        FVector CameraDirection = CameraState.Orientation.GetForwardVector();
+        FVector CameraLocation = View->ViewMatrices.GetViewOrigin();
+        FVector CameraDirection = View->GetViewDirection();
         FVector PlaneWorldDirection = FVector( 0.0f, 0.0f, 0.0f );
         FVector PlaneWorldPosition = FVector( 0.0f, 0.0f, 0.0f );
 
