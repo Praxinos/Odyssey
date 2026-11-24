@@ -12,7 +12,7 @@
 struct FOpenColorIORenderPassResources;
 
 /**
- * A color conversion ready to be added to render graphs, prepared on the game thread by FOdysseyColorSpaceShader::Prepare().
+ * A color conversion ready to be added to render graphs, prepared on the game thread by FOdysseyColorConversions::Prepare().
  * Copyable, and usable on the render thread.
  */
 class ODYSSEYRENDERING_API FOdysseyColorConversionPass
@@ -29,7 +29,7 @@ public:
         FRDGTextureRef Input, const FIntRect& InputRect, FRDGTextureRef Output, const FIntRect& OutputRect) const;
 
 private:
-    friend class FOdysseyColorSpaceShader;
+    friend class FOdysseyColorConversions;
 
     TSharedPtr<const FOpenColorIORenderPassResources, ESPMode::ThreadSafe> Resources;
 };
@@ -38,9 +38,10 @@ private:
  * Converts colors between linear values and sRGB encoded values with OpenColorIO, alpha excepted.
  *
  * The conversions are the transforms between the "Linear Rec.709 (sRGB)" and "sRGB Encoded Rec.709 (sRGB)" color spaces
- * of the OpenColorIO built-in CG configuration. Their shaders are compiled the first time a conversion is requested.
+ * of the OpenColorIO built-in CG configuration. Their shaders are compiled the first time a conversion is requested:
+ * this call waits for the compilation on the game thread (up to two minutes without a shader cache).
  */
-class ODYSSEYRENDERING_API FOdysseyColorSpaceShader
+class ODYSSEYRENDERING_API FOdysseyColorConversions
 {
 public:
     /**

@@ -27,7 +27,7 @@
 #include "UObject/UObjectHash.h"
 #include "UObject/UnrealType.h"
 
-#include "OdysseyColorSpaceShader.h"
+#include "OdysseyColorConversionPass.h"
 #include "OdysseyRasterBlockEdit.h"
 #include "OdysseyRasterContent.h"
 #include "OdysseyRasterEditSession.h"
@@ -632,7 +632,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureLayerContentReadWriteTest, "Odys
 bool FOdysseyTextureLayerContentReadWriteTest::RunTest(const FString& Parameters)
 {
     using namespace Odyssey::TextureLayerTiledImageTests;
-    if (!TestTrue(TEXT("OpenColorIO converts between linear and sRGB encoded colors"), FOdysseyColorSpaceShader::IsAvailable()))
+    if (!TestTrue(TEXT("OpenColorIO converts between linear and sRGB encoded colors"), FOdysseyColorConversions::IsAvailable()))
     {
         return false;
     }

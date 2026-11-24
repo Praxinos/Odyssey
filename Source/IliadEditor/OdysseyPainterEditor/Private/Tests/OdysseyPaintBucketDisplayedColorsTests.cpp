@@ -11,7 +11,7 @@
 #include "UObject/Package.h"
 #include "UObject/StrongObjectPtr.h"
 
-#include "OdysseyColorSpaceShader.h"
+#include "OdysseyColorConversionPass.h"
 #include "OdysseyRenderContext.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerStack.h"
@@ -91,7 +91,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyPaintBucketDisplayedColorsTest, "Odysse
 bool FOdysseyPaintBucketDisplayedColorsTest::RunTest(const FString& Parameters)
 {
     using namespace Odyssey::PaintBucketDisplayedColorsTests;
-    if (!TestTrue(TEXT("OpenColorIO converts between linear and sRGB encoded colors"), FOdysseyColorSpaceShader::IsAvailable()))
+    if (!TestTrue(TEXT("OpenColorIO converts between linear and sRGB encoded colors"), FOdysseyColorConversions::IsAvailable()))
     {
         return false;
     }

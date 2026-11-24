@@ -12,7 +12,7 @@
 #include "UObject/StrongObjectPtr.h"
 #include "UObject/UnrealType.h"
 
-#include "OdysseyColorSpaceShader.h"
+#include "OdysseyColorConversionPass.h"
 #include "OdysseyRasterContent.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerImageVector.h"
@@ -150,7 +150,7 @@ bool FOdysseyTextureColorCompositingTest::RunTest(const FString& Parameters)
 {
     using namespace Odyssey::TextureColorTests;
     // The conversions are OpenColorIO transforms, compiled on first use.
-    if (!TestTrue(TEXT("OpenColorIO converts between linear and sRGB encoded colors"), FOdysseyColorSpaceShader::IsAvailable()))
+    if (!TestTrue(TEXT("OpenColorIO converts between linear and sRGB encoded colors"), FOdysseyColorConversions::IsAvailable()))
     {
         return false;
     }
@@ -313,7 +313,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureColorMergeTest, "Odyssey.Texture
 bool FOdysseyTextureColorMergeTest::RunTest(const FString& Parameters)
 {
     using namespace Odyssey::TextureColorTests;
-    if (!TestTrue(TEXT("OpenColorIO converts between linear and sRGB encoded colors"), FOdysseyColorSpaceShader::IsAvailable()))
+    if (!TestTrue(TEXT("OpenColorIO converts between linear and sRGB encoded colors"), FOdysseyColorConversions::IsAvailable()))
     {
         return false;
     }

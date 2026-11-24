@@ -11,7 +11,7 @@
 #include "TextureResource.h"
 
 #include "OdysseyBlendShader.h"
-#include "OdysseyColorSpaceShader.h"
+#include "OdysseyColorConversionPass.h"
 #include "OdysseyRenderContext.h"
 
 #define LOCTEXT_NAMESPACE "Imaging"
@@ -270,7 +270,7 @@ IOdysseyTextureRenderingAbility::BuildColorConvertRenderFunction(FRenderFunction
     {
         return RenderFunction;
     }
-    FOdysseyColorConversionPass Pass = FOdysseyColorSpaceShader::Prepare(Conversion);
+    FOdysseyColorConversionPass Pass = FOdysseyColorConversions::Prepare(Conversion);
     if (!Pass.IsValid())
     {
         return RenderFunction;

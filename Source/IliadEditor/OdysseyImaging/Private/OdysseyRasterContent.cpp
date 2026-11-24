@@ -13,7 +13,7 @@
 #include "TextureResource.h"
 #include "UObject/StrongObjectPtr.h"
 
-#include "OdysseyColorSpaceShader.h"
+#include "OdysseyColorConversionPass.h"
 #include "OdysseyRasterEditSession.h"
 #include "OdysseyRasterSampling.h"
 #include "OdysseySurfaceTexture2DEditable.h"
@@ -250,7 +250,7 @@ FOdysseyRasterContent::Write(UTextureRenderTarget2D& Source, const TArray<FIntRe
     // Copies the source pixels, converted into linear colors, at the same positions.
     ENQUEUE_RENDER_COMMAND(OdysseyRasterContentWrite)(
         [SourceResource = Source.GameThread_GetRenderTargetResource(), TargetResource = Session->GetTarget()->GameThread_GetRenderTargetResource(),
-         Pass = FOdysseyColorSpaceShader::Prepare(Conversion), Clipped](FRHICommandListImmediate& RHICmdList)
+         Pass = FOdysseyColorConversions::Prepare(Conversion), Clipped](FRHICommandListImmediate& RHICmdList)
         {
             FRDGBuilder GraphBuilder(RHICmdList);
             FRDGTextureRef SourceTexture = GraphBuilder.RegisterExternalTexture(

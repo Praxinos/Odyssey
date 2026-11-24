@@ -1,7 +1,7 @@
 // IDDN.FR.001.060015.015.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2026
 
-#include "OdysseyColorSpaceShader.h"
+#include "OdysseyColorConversionPass.h"
 
 #include "OpenColorIOColorSpace.h"
 #include "OpenColorIOConfiguration.h"
@@ -15,7 +15,7 @@
 #include "ShaderCompiler.h"
 #include "UObject/Package.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogOdysseyColorSpace, Log, All);
+DEFINE_LOG_CATEGORY_STATIC(LogOdysseyColorConversion, Log, All);
 
 namespace
 {
@@ -104,7 +104,7 @@ private:
         FOpenColorIOWrapperConfig* Wrapper = Configuration->GetOrCreateConfigWrapper();
         if (!Wrapper)
         {
-            UE_LOG(LogOdysseyColorSpace, Error, TEXT("OpenColorIO configuration %s cannot be loaded: colors are not converted."), ConfigurationPath);
+            UE_LOG(LogOdysseyColorConversion, Error, TEXT("OpenColorIO configuration %s cannot be loaded: colors are not converted."), ConfigurationPath);
             return;
         }
 
@@ -112,7 +112,7 @@ private:
         const FString EncodedName = FindColorSpace(*Wrapper, EncodedColorSpaceNames);
         if (LinearName.IsEmpty() || EncodedName.IsEmpty())
         {
-            UE_LOG(LogOdysseyColorSpace, Error, TEXT("OpenColorIO configuration %s has no linear or sRGB encoded Rec.709 color space: colors are not converted."), ConfigurationPath);
+            UE_LOG(LogOdysseyColorConversion, Error, TEXT("OpenColorIO configuration %s has no linear or sRGB encoded Rec.709 color space: colors are not converted."), ConfigurationPath);
             return;
         }
 
@@ -134,7 +134,7 @@ private:
         {
             if (!WaitUntilReady(Settings))
             {
-                UE_LOG(LogOdysseyColorSpace, Error, TEXT("OpenColorIO transform %s is unavailable: colors are not converted."), *Settings.ToString());
+                UE_LOG(LogOdysseyColorConversion, Error, TEXT("OpenColorIO transform %s is unavailable: colors are not converted."), *Settings.ToString());
                 return;
             }
         }
@@ -181,7 +181,7 @@ FOdysseyColorConversionPass::Add(FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Ty
 }
 
 FOdysseyColorConversionPass
-FOdysseyColorSpaceShader::Prepare(EOdysseyColorConversion Conversion)
+FOdysseyColorConversions::Prepare(EOdysseyColorConversion Conversion)
 {
     check(IsInGameThread());
     FOdysseyColorConversionPass Pass;
@@ -194,7 +194,7 @@ FOdysseyColorSpaceShader::Prepare(EOdysseyColorConversion Conversion)
 }
 
 bool
-FOdysseyColorSpaceShader::IsAvailable()
+FOdysseyColorConversions::IsAvailable()
 {
     return FOdysseyColorManagement::Get().IsAvailable();
 }
