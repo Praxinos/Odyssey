@@ -54,7 +54,7 @@ static int32 FloorDiv(int32 Value, int32 Divisor)
 }
 
 TArray<FIntPoint>
-GetTilePositionsFromRect(int32 InTileSize, const FIntRect& InRect)
+GetTileCoordsInRect(int32 InTileSize, const FIntRect& InRect)
 {
     if (InTileSize <= 0 || InRect.Min.X >= InRect.Max.X || InRect.Min.Y >= InRect.Max.Y)
         return {};

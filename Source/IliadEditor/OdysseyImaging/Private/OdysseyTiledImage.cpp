@@ -108,7 +108,7 @@ UOdysseyTiledImage::CopyFromTexture(UTexture* InTexture, FIntRect InRect, FIntPo
 
     for (const FOdysseyTileManager::FCreatedTile& CreatedTile : CreatedTiles)
     {
-        FOdysseyTileId& TileId = Tiles.FindOrAdd(CreatedTile.Pos);
+        FOdysseyTileId& TileId = Tiles.FindOrAdd(CreatedTile.TileCoord);
         TileId = CreatedTile.Id;
     }
 
@@ -143,7 +143,7 @@ UOdysseyTiledImage::FRenderFunction UOdysseyTiledImage::BuildRenderFunction(FInt
         return {};
     }
 
-    TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTilePositionsFromRect(TileSize, SourceRect);
+    TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTileCoordsInRect(TileSize, SourceRect);
     TArray<FOdysseyTileId> TileIds;
     TileIds.Reserve(TilePositions.Num());
     for (const FIntPoint& TilePosition : TilePositions)

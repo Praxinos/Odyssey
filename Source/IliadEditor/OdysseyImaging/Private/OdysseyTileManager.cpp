@@ -531,7 +531,7 @@ FOdysseyTileManager::CreateOrUpdateTiles(
         TSharedFuture<TSharedPtr<FTileTextureHandle>> OldTextureHandle;
     };
 
-    TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTilePositionsFromRect(InTileSize, DestinationRect);
+    TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTileCoordsInRect(InTileSize, DestinationRect);
     TArray<FTileToCreate> TilesToCreate;
 
     TilesToCreate.Reserve(TilePositions.Num());
@@ -567,7 +567,7 @@ FOdysseyTileManager::CreateOrUpdateTiles(
 
         FCreatedTile CreatedTile;
         CreatedTile.Id = Tile->Id;
-        CreatedTile.Pos = TilePosition;
+        CreatedTile.TileCoord = TilePosition;
         CreatedTiles.Add(CreatedTile);
     }
 

@@ -65,7 +65,8 @@ public:
     struct FCreatedTile
     {
         FOdysseyTileId Id;
-        FIntPoint Pos;
+        /** The tile coordinate: the pixel position of the tile divided by the tile size. */
+        FIntPoint TileCoord;
     };
 
     class FTileTextureHandle

@@ -274,7 +274,7 @@ bool FOdysseyTiledImageValidationTest::RunTest(const FString& Parameters)
     Image->Initialize(MAX_int32, EOdysseyTiledImageFormat::RGBA8);
     Image->Initialize(32, static_cast<EOdysseyTiledImageFormat>(255));
     TestEqual(TEXT("Invalid initialization preserves valid format"), Image->GetFormat(), EOdysseyTiledImageFormat::RGBA16F);
-    TestTrue(TEXT("Zero tile size is rejected by the tile helper"), Odyssey::TileUtils::GetTilePositionsFromRect(0, FIntRect(0, 0, 64, 64)).IsEmpty());
+    TestTrue(TEXT("Zero tile size is rejected by the tile helper"), Odyssey::TileUtils::GetTileCoordsInRect(0, FIntRect(0, 0, 64, 64)).IsEmpty());
     TStrongObjectPtr<UTexture2D> Source = MakeSource(32, 32, 73);
     TestTrue(TEXT("Manager rejects invalid tile size"), FOdysseyTileManager::Get().CreateOrUpdateTiles(Source.Get(), FIntRect(0, 0, 32, 32), FIntPoint::ZeroValue, 0, PF_R8G8B8A8).IsEmpty());
     Image->CopyFromTexture(Source.Get(), FIntRect(0, 0, 32, 32), FIntPoint::ZeroValue);

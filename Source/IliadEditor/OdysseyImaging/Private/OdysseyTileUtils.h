@@ -18,7 +18,7 @@ namespace Odyssey::TileUtils {
     /** Every supported tile size must fit a full atlas within the RHI texture dimension limit. */
     bool IsValidTileSize(int64 InTileSize);
 
-    TArray<FIntPoint> GetTilePositionsFromRect(int32 InTileSize, const FIntRect& InRect);
+    TArray<FIntPoint> GetTileCoordsInRect(int32 InTileSize, const FIntRect& InRect);
 
     /** Returns the rects clipped to Bounds, without those left empty. */
     TArray<FIntRect> ClipRects(const TArray<FIntRect>& InRects, const FIntRect& InBounds);
