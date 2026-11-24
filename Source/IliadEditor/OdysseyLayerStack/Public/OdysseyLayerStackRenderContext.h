@@ -7,18 +7,29 @@
 
 struct FOdysseyLighttable;
 
-/** Per-node layer settings. Unset values preserve the document settings. */
+/**
+ * Overrides of the properties of one layer for one render request, without changing the layer.
+ * Unset values keep the properties of the layer. Part of the render override API: a request may set them, e.g. to render
+ * a layer hidden or with another opacity.
+ */
 struct ODYSSEYLAYERSTACK_API FOdysseyLayerStackRenderOverride
 {
     TOptional<bool> bVisible;
     TOptional<float> Opacity;
     TOptional<EOdysseyBlendMode> BlendMode;
     TOptional<bool> bInheritsAlpha;
+
+    /** Replaces the lighttable of an animation layer. */
     TSharedPtr<const FOdysseyLighttable> Lighttable;
+
+    /** When false, the override is ignored while the lighttable keys of the layer are rendered (see bLighttablePass). */
     bool bApplyToLighttable = false;
 };
 
-/** Settings interpreted by OdysseyLayerStack while rendering a request. */
+/**
+ * The layer stack part of a render request (an extension of FOdysseyRenderContext), read on the game thread when the
+ * render pipeline is built, and copied with the request.
+ */
 struct ODYSSEYLAYERSTACK_API FOdysseyLayerStackRenderContext : IOdysseyRenderContextExtension
 {
     FOdysseyLayerStackRenderContext();
@@ -27,9 +38,16 @@ struct ODYSSEYLAYERSTACK_API FOdysseyLayerStackRenderContext : IOdysseyRenderCon
     static FName TypeName();
 
     virtual TUniquePtr<IOdysseyRenderContextExtension> Clone() const override;
+
+    /** Returns the override of a layer, by its rendering id; null when none applies, e.g. during a lighttable pass. */
     const FOdysseyLayerStackRenderOverride* Find(const FGuid& Id) const;
 
+    /** The overrides, by rendering id of the layer. */
     TMap<FGuid, FOdysseyLayerStackRenderOverride> Overrides;
+
+    /** True while the lighttable keys are rendered: only overrides with bApplyToLighttable apply. */
     bool bLighttablePass = false;
+
+    /** False to ignore the "display only the current layer" option of the stack, e.g. to render every layer at full opacity. */
     bool bUseDisplayOnlyCurrentLayer = true;
 };

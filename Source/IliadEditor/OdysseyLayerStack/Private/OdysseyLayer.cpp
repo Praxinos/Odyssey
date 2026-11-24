@@ -15,8 +15,6 @@
 #include "Selection.h"
 #include "OdysseyRenderContext.h"
 
-#if WITH_EDITOR
-
 UOdysseyLayer::FOnDisplayChildrenChanged&
 UOdysseyLayer::OnDisplayChildrenChanged()
 {
@@ -30,8 +28,6 @@ UOdysseyLayer::OnDisplayOptionsChanged()
     static FOnDisplayOptionsChanged onDisplayOptionsChanged;
     return onDisplayOptionsChanged;
 }
-
-#endif
 
 void
 UOdysseyLayer::PostLoad()
@@ -57,11 +53,9 @@ UOdysseyLayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
     // See comment (REALLY) in ...\Plugins\Odyssey\Source\Iliad\OdysseyLayerStack\Private\OdysseyLayerStack.cpp#590: CopyLayerInternal()
 
     //PATCH---------------------------
-#if WITH_EDITOR
     FText old_current_layer;
     if( IsA<UOdysseyLayerRoot>() )
         old_current_layer = GetLayerStack()->GetCurrentLayer()->GetLayerName();
-#endif
     //--------------------------------
 
     TArray<UOdysseyLayer*> children = GetChildren();
@@ -83,7 +77,6 @@ UOdysseyLayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
         child->Parent = this;
 
     //PATCH---------------------------
-#if WITH_EDITOR
     if( IsA<UOdysseyLayerRoot>() )
     {
         TArray<UOdysseyLayer*> layers = GetLayerStack()->GetLayers();
@@ -93,7 +86,6 @@ UOdysseyLayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
                 GetLayerStack()->SetCurrentLayer( layer ); // Call delegate ?! or make a new function ?
         }
     }
-#endif
     //--------------------------------
 }
 
@@ -215,14 +207,11 @@ UOdysseyLayer::Merge(const TArray<UOdysseyLayer*>& Layers)
 {
 }
 
-#if WITH_EDITOR
-
 FOdysseyMediaProvider
 UOdysseyLayer::GetMediaProvider(uint32 iFrameIndex) const
 {
     return FOdysseyMediaProvider();
 }
-#endif
 
 bool
 UOdysseyLayer::GetInheritsAlpha() const
@@ -281,8 +270,6 @@ UOdysseyLayer::IsLockedRecursively() const
     return false;
 }
 
-#if WITH_EDITOR
-
 bool
 UOdysseyLayer::ShouldDisplayChildren() const
 {
@@ -294,8 +281,6 @@ UOdysseyLayer::ShouldDisplayOptions() const
 {
     return bDisplayOptions;
 }
-
-#endif
 
 EOdysseyBlendMode
 UOdysseyLayer::GetBlendMode() const
@@ -451,8 +436,6 @@ UOdysseyLayer::SetIsLocked(bool Value)
     bIsLocked = Value;
 }
 
-#if WITH_EDITOR
-
 const FSlateIcon&
 UOdysseyLayer::GetIcon() const
 {
@@ -478,8 +461,6 @@ UOdysseyLayer::SetDisplayOptions(bool Value)
     bDisplayOptions = Value;
     OnDisplayOptionsChanged().Broadcast(this);
 }
-
-#endif
 
 bool
 UOdysseyLayer::CanSetBlendMode(EOdysseyBlendMode Value) const
@@ -526,7 +507,6 @@ UOdysseyLayer::SetOpacity(float iValue)
     RenderingChanged();
 }
 
-#if WITH_EDITOR
 void
 UOdysseyLayer::SetOpacityInteractive(float iValue)
 {
@@ -539,12 +519,36 @@ UOdysseyLayer::SetOpacityInteractive(float iValue)
     RenderingChanged(true);
 }
 
-#endif
-
 UTextureRenderTarget2D*
 UOdysseyLayer::CreateRenderingRenderTarget() const
 {
     return GetLayerStack()->CreateRenderingRenderTarget();
+}
+
+namespace
+{
+/** The settings a child layer is rendered with: its own, or those a render request overrides. */
+struct FResolvedLayerSettings
+{
+    bool bVisible;
+    float Opacity;
+    EOdysseyBlendMode BlendMode;
+    bool bInheritsAlpha;
+};
+
+FResolvedLayerSettings
+ResolveLayerSettings(const UOdysseyLayer& Layer, const FOdysseyLayerStackRenderOverride* Override)
+{
+    FResolvedLayerSettings Settings{ Layer.IsActivated(), Layer.GetOpacity(), Layer.GetBlendMode(), Layer.GetInheritsAlpha() };
+    if (Override)
+    {
+        Settings.bVisible = Override->bVisible.Get(Settings.bVisible);
+        Settings.Opacity = Override->Opacity.Get(Settings.Opacity);
+        Settings.BlendMode = Override->BlendMode.Get(Settings.BlendMode);
+        Settings.bInheritsAlpha = Override->bInheritsAlpha.Get(Settings.bInheritsAlpha);
+    }
+    return Settings;
+}
 }
 
 bool
@@ -561,44 +565,33 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
         float Opacity;
     };
 
-#if WITH_EDITOR
     UOdysseyLayerStack* layerStack = GetLayerStack();
     UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
     TArray<UOdysseyLayer*> parents = GetParents();
     bool bIsParentCurrentLayer = currentLayer == this || parents.Contains(currentLayer);
-#endif
 
+    const FOdysseyLayerStackRenderContext* LayerContext = RenderContext ? RenderContext->GetExtension<FOdysseyLayerStackRenderContext>() : nullptr;
     TArray<FChildRenderParams> childrenRenderParams;
     for ( int i = Children.Num() - 1; i >= 0; i-- )
     {
         UOdysseyLayer* child = Children[i];
-        const FOdysseyLayerStackRenderContext* LayerContext = RenderContext ? RenderContext->GetExtension<FOdysseyLayerStackRenderContext>() : nullptr;
-        const FOdysseyLayerStackRenderOverride* LayerOverride = LayerContext ? LayerContext->Find(child->GetRenderingId()) : nullptr;
-        if ( !(LayerOverride && LayerOverride->bVisible.IsSet() ? LayerOverride->bVisible.GetValue() : child->IsActivated()) )
+        const FResolvedLayerSettings settings = ResolveLayerSettings(*child, LayerContext ? LayerContext->Find(child->GetRenderingId()) : nullptr);
+        if ( !settings.bVisible )
             continue;
 
         IOdysseyTextureRenderingAbility::FRenderFunction childRenderFunction;
         if (child->BuildRenderPipeline(childRenderFunction, iParents, RenderContext))
         {
-            float opacity = LayerOverride && LayerOverride->Opacity.IsSet() ? LayerOverride->Opacity.GetValue() : child->GetOpacity();
+            float opacity = settings.Opacity;
 
-#if WITH_EDITOR
-            bool bIsChildCurrentLayer = child == layerStack->GetCurrentLayer();
+            bool bIsChildCurrentLayer = child == currentLayer;
             if( (!LayerContext || LayerContext->bUseDisplayOnlyCurrentLayer) && !bIsChildCurrentLayer && !bIsParentCurrentLayer && layerStack->GetDisplayOnlyCurrentLayer() && !child->CanHaveChildren() )
                 opacity = opacity * layerStack->GetOtherLayersOpacityNormalized();
-#endif
 
-            EOdysseyColorBlendMode ColorBlendMode = GetColorBlendModeFromBlendMode(LayerOverride && LayerOverride->BlendMode.IsSet() ? LayerOverride->BlendMode.GetValue() : child->GetBlendMode());
-            EOdysseyAlphaBlendMode AlphaBlendMode = GetAlphaBlendModeFromBlendMode(LayerOverride && LayerOverride->BlendMode.IsSet() ? LayerOverride->BlendMode.GetValue() : child->GetBlendMode());
+            const EOdysseyColorBlendMode ColorBlendMode = GetColorBlendModeFromBlendMode(settings.BlendMode);
+            const EOdysseyAlphaBlendMode AlphaBlendMode = settings.bInheritsAlpha ? EOdysseyAlphaBlendMode::Back : GetAlphaBlendModeFromBlendMode(settings.BlendMode);
 
-            childrenRenderParams.Add(
-                {
-                    childRenderFunction,
-                    ColorBlendMode,
-                    (LayerOverride && LayerOverride->bInheritsAlpha.IsSet() ? LayerOverride->bInheritsAlpha.GetValue() : child->GetInheritsAlpha()) ? EOdysseyAlphaBlendMode::Back : AlphaBlendMode,
-                    opacity
-                }
-            );
+            childrenRenderParams.Add({ childRenderFunction, ColorBlendMode, AlphaBlendMode, opacity });
         }
     }
 
@@ -648,8 +641,6 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
 
     return true;
 }
-
-#if WITH_EDITOR
 
 TArray<FName>
 UOdysseyLayer::GetRows() const
@@ -714,22 +705,18 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 
 }
 
-#if WITH_EDITOR
 bool
 UOdysseyLayer::IsSelectedInEditor() const
 {
     const USelection* Selection = OdysseyLayerStackSelection::Get();
     return IsValidChecked(this) && Selection && Selection->IsSelected(this);
 }
-#endif
 
 UTexture2D*
 UOdysseyLayer::CreateExportTexture( const FString& iAssetName, const FString& iPackagePath, UClass* iAssetClass, UFactory* iFactory )
 {
     return GetLayerStack()->CreateExportTexture(iAssetName, iPackagePath, iAssetClass, iFactory);
 }
-
-#endif
 
 /** Builds the static layer content without interpreting animation settings. */
 bool
