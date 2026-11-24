@@ -107,7 +107,7 @@ void
 UOdysseyPainterEditorRasterEraserTool::Unload()
 {
     Shapes.GetActiveShape()->Abort();
-
+    mWorker.Clear();
     mPaintEngine.EndEdit();
     mPaintEngine.SetMaskBlock(nullptr);
 
@@ -393,6 +393,8 @@ void
 UOdysseyPainterEditorRasterEraserTool::UpdateStampBlock()
 {
     TSharedPtr<::ULIS::FBlock> paintBlock = mPaintEngine.PaintBlock();
+    if (!paintBlock)
+        return;
 
     if (!mStampBlock || bNeedsStampBlockUpdate)
     {
@@ -410,9 +412,12 @@ UOdysseyPainterEditorRasterEraserTool::UpdateStampBlock()
 void
 UOdysseyPainterEditorRasterEraserTool::Stamp(const FOdysseyPoint& iPoint)
 {
-    UpdateStampBlock();
-
+    //No paint block once the edit ended, e.g. a stamp queued before an undo
     TSharedPtr<::ULIS::FBlock> paintBlock = mPaintEngine.PaintBlock();
+    if (!paintBlock)
+        return;
+
+    UpdateStampBlock();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(paintBlock->Format());
 
     if (Antialiasing)
@@ -607,6 +612,8 @@ void
 UOdysseyPainterEditorRasterEraserTool::OnShapeAbort()
 {
     ResetInterpolation();
+    //The stamps still queued belong to the aborted stroke, and EndEdit() frees the block they draw into
+    mWorker.Clear();
     mPaintEngine.EndEdit();
     if(mTransaction)
         mTransaction->Cancel();
