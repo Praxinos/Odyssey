@@ -21,10 +21,19 @@ Layers are blended with **encoded** colors by default, as painting applications 
 - animation: `UOdysseyAnimation::bLinearCompositing`. Animations saved before this option are loaded as linear,
   so that they keep their look.
 
-The tiles stay linear in both cases. Each node converts its content when it is rendered:
-`IOdysseyTextureRenderingAbility::GetContentColorConversion()` returns `Encode` for a layer blended with encoded colors,
-and the stack converts its output back. A render written back into a content uses the inverse conversion
-(`InverseColorConversion()`), e.g. a merge or a cross-fade.
+The tiles stay linear in both cases. Each node converts its content when it is rendered
+(`IOdysseyTextureRenderingAbility::GetContentColorConversion()`):
+
+| Asset | Compositing | Layers or cells | Stack output |
+|---|---|---|---|
+| Animation | encoded | cells `Encode` | `Decode` (back to linear colors) |
+| Animation | linear | `None` | `None` |
+| sRGB texture | encoded | layers `Encode` | `None`: the encoded result is written into the sRGB texture |
+| sRGB texture | linear | `None` | `Encode` |
+| Linear texture | either | `None` | `None` |
+
+A render written back into a content uses the inverse conversion of that content (`InverseColorConversion()`),
+e.g. a merge or a cross-fade.
 
 The colors displayed to the user, e.g. those the paint bucket compares, are the encoded ones
 (`UOdysseyLayerStack::GetDisplayColorConversion()`).

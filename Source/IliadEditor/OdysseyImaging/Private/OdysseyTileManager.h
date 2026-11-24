@@ -59,8 +59,9 @@ private:
  * Pipeline of a write (UOdysseyTiledImage::CopyFromTexture -> CreateOrUpdateTiles):
  *   1. render thread: the old tile and the source are drawn into a GPU atlas (the creation texture of each new FTile),
  *      the empty tiles are tested (AddAreTextureTilesEmptyPass) and a readback of the atlas is enqueued;
- *   2. Tick (game thread), once the readback is ready: an empty tile frees its slot (Generation + 1); otherwise its pixels
- *      are hashed and deduplicated against HashToTileData, or become a new FTileData; the creation texture moves to the GPU cache;
+ *   2. Tick (game thread) polls the readbacks; once one is ready, a render command processes it: an empty tile frees its slot
+ *      (Generation + 1); otherwise its pixels are hashed and deduplicated against HashToTileData, or become a new FTileData,
+ *      and the creation texture moves to the GPU cache;
  *   3. thread pool: the data is compressed, then appended to the disk file of the session (FOdysseyTileDiskCacheDirectory);
  *   4. Tick: EvictTiles() releases the uncompressed buffers beyond MaxUncompressedSize, then the compressed buffers already
  *      on disk beyond MaxCompressedSize (least recently used first); they are reloaded when needed.
@@ -73,7 +74,7 @@ private:
  * | Tiles, FreeTiles (slot table)            | game, render         | FreeTilesMutex       |
  * | one FTile (futures, readbacks)           | game, render         | FTile::Mutex         |
  * | HashToTileData                           | render, game         | HashToTileDataMutex  |
- * | FTileData LRU lists (static)             | game, thread pool    | FTileData::LRUMutex  |
+ * | FTileData LRU lists (static)             | game, render         | FTileData::LRUMutex  |
  * | GPU cache (GPUTextures)                  | game, render         | GPUCacheMutex        |
  *
  * Known limitation: tiles are never released during a session; only their buffers are evicted.

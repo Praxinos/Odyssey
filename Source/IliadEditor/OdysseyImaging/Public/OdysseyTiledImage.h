@@ -38,8 +38,9 @@ enum class EOdysseyTiledImageFormat : uint8
  * - a tile whose alpha is 0 everywhere is empty and is not kept, whatever its RGB values;
  * - pixel positions are not bounded: pixels outside the canvas of the owner are kept.
  *
- * Undo: Modify() records the tile ids; the tile data is immutable in FOdysseyTileManager. Every change goes through
- * CopyFromTexture() or RemoveAllTiles(), which call Modify(). See Documentation/Doxygen/manual/Architecture/TiledImage.md.
+ * Undo: Modify() records the tile ids; the tile data is immutable in FOdysseyTileManager. CopyFromTexture() and
+ * RemoveAllTiles() call Modify(); Initialize() does not (call Modify() first to make it undoable).
+ * See Documentation/Doxygen/manual/Architecture/TiledImage.md.
  * Game thread only.
  */
 UCLASS()

@@ -27,9 +27,9 @@ struct ODYSSEYRENDERING_API IOdysseyRenderContextExtension
  *   3. ContentReplacement replaces the content of a non-composite node, rendered with its content transform
  *      (e.g. the target of an edit session);
  *   4. ContentDecorator wraps the content render;
- *   5. the color conversion of the content of non-composite nodes (GetContentColorConversion());
+ *   5. the color conversion of the content of non-composite nodes, from the node itself (GetContentColorConversion());
  *   6. RenderDecorator wraps the whole render of the node.
- * Every callback is optional. Module-specific settings live in extensions.
+ * When RenderReplacement is set, steps 3 to 5 are skipped. Every callback is optional. Module-specific settings live in extensions.
  */
 struct ODYSSEYRENDERING_API FOdysseyRenderOverride
 {

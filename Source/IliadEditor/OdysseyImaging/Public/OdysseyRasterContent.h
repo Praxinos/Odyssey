@@ -41,7 +41,9 @@ class UTextureRenderTarget2D;
  * - preview: FOdysseyRasterEditPreview, which makes the views of a source show the active edit sessions;
  * - media: FOdysseyMediaRaster, the weak handle the layer or cell gives the tools.
  *
- * Threading: game thread only. Read(), Write(), Clear(), the conversions of EnsureImage() and BeginEditSession() wait for the GPU.
+ * Threading: game thread only. Write(), the conversions of EnsureImage(), BeginEditSession() and Clear() of a content whose
+ * alpha is locked wait for the GPU. Read() only enqueues the render: flush the rendering commands before reading the
+ * destination on the CPU.
  */
 class ODYSSEYIMAGING_API FOdysseyRasterContent
     : public TSharedFromThis<FOdysseyRasterContent>

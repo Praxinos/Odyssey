@@ -37,7 +37,8 @@ The singleton, created and destroyed by the `OdysseyImaging` module, holds every
  CopyFromTexture (game thread)
    -> CreateOrUpdateTiles (render graph): draw the source into a GPU atlas, test the empty tiles, enqueue a readback
  Tick (game thread)
-   -> readback ready: empty tile -> slot freed; otherwise hash -> deduplicate -> FTileData (uncompressed, in RAM)
+   -> readback ready, processed by a render command: empty tile -> slot freed;
+      otherwise hash -> deduplicate -> FTileData (uncompressed, in RAM)
    -> compress on the thread pool -> append to the session disk file
    -> eviction (LRU): uncompressed buffers above MaxUncompressedSize, then compressed buffers above MaxCompressedSize
       once they are on disk; a buffer is reloaded (decompressed, or read from disk) when needed

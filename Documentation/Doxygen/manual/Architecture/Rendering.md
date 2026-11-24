@@ -13,12 +13,14 @@ in a render graph on the render thread. For each node, in order:
  2. RenderReplacement       replaces the whole render of the node, or else BuildRenderPipelineInternal()
  3. ContentReplacement      replaces the content of a non-composite node (rendered with GetContentTransform())
  4. ContentDecorator        wraps the content render
- 5. color conversion        GetContentColorConversion(), non-composite nodes only (see @ref architecture-color-management)
+ 5. color conversion        GetContentColorConversion() of the node, non-composite nodes only (see @ref architecture-color-management)
  6. RenderDecorator         wraps the whole render of the node
 ```
 
-Steps 2 to 6 come from the `FOdysseyRenderOverride` registered in the context for the rendering id of the node.
-Composite nodes (stacks, folders) build the functions of their children and blend them.
+Steps 2, 3, 4 and 6 come from the `FOdysseyRenderOverride` registered in the context for the rendering id of the node;
+step 5 comes from the node itself. When RenderReplacement is set, steps 3 to 5 are skipped.
+A node is composite when `BuildsCompositeContent()` is true: every `UOdysseyLayer` (a texture layer only when it can have
+children), whose content is the blend of its children. A layer stack is not composite: its output is converted as a whole.
 
 ## FOdysseyRenderContext
 
