@@ -70,17 +70,17 @@ GetTileCoordsInRect(int32 InTileSize, const FIntRect& InRect)
     if (W <= 0 || H <= 0)
         return {};
 
-    TArray<FIntPoint> TilePositions;
-    TilePositions.Reserve(W * H);
+    TArray<FIntPoint> TileCoords;
+    TileCoords.Reserve(W * H);
     for( int Y = Y1; Y <= Y2; ++Y )
     {
         for( int X = X1; X <= X2; ++X )
         {
-            TilePositions.Add({X, Y});
+            TileCoords.Add({X, Y});
         }
     }
 
-    return TilePositions;
+    return TileCoords;
 }
 
 }

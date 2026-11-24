@@ -521,41 +521,41 @@ FOdysseyTileManager::CreateOrUpdateTiles(
 
     struct FTileToCreate
     {
-        FIntPoint Position;
+        FIntPoint TileCoord;
         TSharedPtr<FTile> Tile;
         FRDGTextureRef RDGTexture;
         TSharedPtr<FTileTextureHandle> TextureHandle;
         TSharedFuture<TSharedPtr<FTileTextureHandle>> OldTextureHandle;
     };
 
-    TArray<FIntPoint> TilePositions = Odyssey::TileUtils::GetTileCoordsInRect(InTileSize, DestinationRect);
+    TArray<FIntPoint> TileCoords = Odyssey::TileUtils::GetTileCoordsInRect(InTileSize, DestinationRect);
     TArray<FTileToCreate> TilesToCreate;
 
-    TilesToCreate.Reserve(TilePositions.Num());
+    TilesToCreate.Reserve(TileCoords.Num());
 
     TArray<FOdysseyTileManager::FCreatedTile> CreatedTiles;
 
     TArray<FOdysseyTileId> OldTileIds;
-    OldTileIds.Reserve(TilePositions.Num());
-    for (const FIntPoint& TilePosition : TilePositions)
+    OldTileIds.Reserve(TileCoords.Num());
+    for (const FIntPoint& TileCoord : TileCoords)
     {
         FOdysseyTileId OldTileId;
         if (InGetExistingTileId.IsBound())
-            OldTileId = InGetExistingTileId.Execute(TilePosition);
+            OldTileId = InGetExistingTileId.Execute(TileCoord);
         OldTileIds.Add(OldTileId);
     }
 
     TArray<TSharedFuture<TSharedPtr<FTileTextureHandle>>> OldTileTextureHandles = GetTileTextures(OldTileIds, InTileSize, InTileFormat);
 
-    for (int i = 0; i < TilePositions.Num(); i++)
+    for (int i = 0; i < TileCoords.Num(); i++)
     {
-        const FIntPoint& TilePosition = TilePositions[i];
+        const FIntPoint& TileCoord = TileCoords[i];
 
         //Create a new tile representing the new version of the updated tile
         TSharedPtr<FTile> Tile = CreateNewTile();
 
         FTileToCreate TileToCreate;
-        TileToCreate.Position = TilePosition;
+        TileToCreate.TileCoord = TileCoord;
         TileToCreate.Tile = Tile;
         TileToCreate.OldTextureHandle = MoveTemp(OldTileTextureHandles[i]);
         TilesToCreate.Add(MoveTemp(TileToCreate));
@@ -564,7 +564,7 @@ FOdysseyTileManager::CreateOrUpdateTiles(
 
         FCreatedTile CreatedTile;
         CreatedTile.Id = Tile->Id;
-        CreatedTile.TileCoord = TilePosition;
+        CreatedTile.TileCoord = TileCoord;
         CreatedTiles.Add(CreatedTile);
     }
 
@@ -616,7 +616,7 @@ FOdysseyTileManager::CreateOrUpdateTiles(
 
                     //Ensure the Rects are precisely the one we need
                     //to prevent bleeding on neighbour Tiles in the Tile's Texture Atlas
-                    FIntPoint TileDstPos = TileToCreate.Position * TileSize;
+                    FIntPoint TileDstPos = TileToCreate.TileCoord * TileSize;
                     FIntRect TileDstRect(TileDstPos, TileDstPos + FIntPoint(TileSize, TileSize));
                     TileDstRect.Clip(DestinationRect);
 

@@ -15,7 +15,7 @@
 
 #include <type_traits>
 
-DEFINE_LOG_CATEGORY_STATIC(LogOdysseyTileCacheSession, Log, All);
+DEFINE_LOG_CATEGORY_STATIC(LogOdysseyTileDiskCacheDirectory, Log, All);
 
 namespace
 {
@@ -81,7 +81,7 @@ void FOdysseyTileDiskCacheDirectory::Initialize()
     {
         // A directory without verified ownership must never be reclaimed by another session.
         SessionName = TEXT("Unmanaged-v1-") + SessionName.RightChop(UE_ARRAY_COUNT(ManagedSessionPrefix) - 1);
-        UE_LOG(LogOdysseyTileCacheSession, Warning, TEXT("Interprocess locking unavailable; abandoned tile caches will be preserved."));
+        UE_LOG(LogOdysseyTileDiskCacheDirectory, Warning, TEXT("Interprocess locking unavailable; abandoned tile caches will be preserved."));
     }
 
     SessionDirectory = FPaths::Combine(RootDirectory, SessionName);
@@ -89,7 +89,7 @@ void FOdysseyTileDiskCacheDirectory::Initialize()
     bInitialized = true;
     if (!IFileManager::Get().MakeDirectory(*SessionDirectory, true))
     {
-        UE_LOG(LogOdysseyTileCacheSession, Warning, TEXT("Could not create tile cache directory: %s"), *SessionDirectory);
+        UE_LOG(LogOdysseyTileDiskCacheDirectory, Warning, TEXT("Could not create tile cache directory: %s"), *SessionDirectory);
     }
 }
 
@@ -122,7 +122,7 @@ void FOdysseyTileDiskCacheDirectory::DeleteSessionDirectory(const FString& Direc
     }
     if (!IFileManager::Get().DeleteDirectory(*AbsoluteDirectory, false, true))
     {
-        UE_LOG(LogOdysseyTileCacheSession, Warning, TEXT("Could not remove tile cache directory: %s"), *AbsoluteDirectory);
+        UE_LOG(LogOdysseyTileDiskCacheDirectory, Warning, TEXT("Could not remove tile cache directory: %s"), *AbsoluteDirectory);
     }
 }
 
