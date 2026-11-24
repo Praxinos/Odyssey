@@ -92,7 +92,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::Load()
 void
 UOdysseyPainterEditorRasterPaintBucketTool::Unload()
 {
-    mPaintEngine.Abort();
+    mPaintEngine.EndEdit();
     mPaintEngine.SetMaskBlock(nullptr);
 
     TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
@@ -158,10 +158,10 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPoi
         return false;
 
     //The fill is committed at once: the edit ends on any other return
-    mPaintEngine.Edit(edit);
+    mPaintEngine.BeginEdit(edit.ToSharedRef());
     ON_SCOPE_EXIT
     {
-        mPaintEngine.Abort();
+        mPaintEngine.EndEdit();
     };
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();

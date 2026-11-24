@@ -133,17 +133,12 @@ UOdysseyPainterEditorRasterDrawingTool::Activate()
 void
 UOdysseyPainterEditorRasterDrawingTool::Inactivate()
 {
-    Shapes.GetActiveShape()->Abort();
-
-    mPaintEngine.Abort();
     mPaintEngine.SetMaskBlock(nullptr);
 
     TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->OnChanged().RemoveAll(this);
 
-    if ( BrushInstance )
-        BrushInstance->SetBlock(nullptr);
-
+    //Unload() ends the shape and the edit
     Super::Inactivate();
 }
 
@@ -152,7 +147,10 @@ UOdysseyPainterEditorRasterDrawingTool::Unload()
 {
     //The edited layer or frame changes: the shape and its edit belong to the previous one
     Shapes.GetActiveShape()->Abort();
-    mPaintEngine.Abort();
+    mPaintEngine.EndEdit();
+    //The brush must not keep the freed paint block alive
+    if ( BrushInstance )
+        BrushInstance->SetBlock(nullptr);
 
     Super::Unload();
 }
@@ -220,7 +218,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointI
         if (!edit)
             return false;
 
-        mPaintEngine.Edit(edit);
+        mPaintEngine.BeginEdit(edit.ToSharedRef());
     }
     if ( BrushInstance )
         BrushInstance->SetBlock(mPaintEngine.PaintBlock());
@@ -944,7 +942,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapeCommit(const TArray<FOdysseyPoint
         BrushInstance->StrokeAbort();
 
         //Discard the stroke, keep the edit to draw it again
-        mPaintEngine.Reset();
+        mPaintEngine.DiscardStroke();
 
         //Reset the interpolation process
         ResetInterpolation();
@@ -991,7 +989,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapeAbort()
     BrushInstance->StrokeAbort(); //Stop stroke process
     mIsFirstPoint = true;
     //Reset the PaintEngine as if didn't draw on it
-    mPaintEngine.Abort();
+    mPaintEngine.EndEdit();
 
     if(mTransaction)
         mTransaction->Cancel();

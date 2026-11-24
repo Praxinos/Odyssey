@@ -89,7 +89,7 @@ bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDown(const FOdyssey
         if (!edit)
             return false;
 
-        mPaintEngine.Edit(edit);
+        mPaintEngine.BeginEdit(edit.ToSharedRef());
     }
 
     FOdysseyPoint point = iPointInTexture;
@@ -199,7 +199,7 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Load()
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Unload()
 {
     Shapes.GetActiveShape()->Abort();
-    mPaintEngine.Abort();
+    mPaintEngine.EndEdit();
 
     UOdysseyPainterEditorTool::Unload();
     mPaintEngine.SetMaskBlock(nullptr);
@@ -383,7 +383,7 @@ void
 UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeAbort()
 {
     //End the edit: the views show the content again
-    mPaintEngine.Abort();
+    mPaintEngine.EndEdit();
     if(mTransaction)
         mTransaction->Cancel();
     mTransaction = nullptr; //Finish the undo transaction

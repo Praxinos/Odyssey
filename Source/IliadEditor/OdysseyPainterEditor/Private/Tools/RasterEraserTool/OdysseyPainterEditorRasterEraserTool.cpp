@@ -108,7 +108,7 @@ UOdysseyPainterEditorRasterEraserTool::Unload()
 {
     Shapes.GetActiveShape()->Abort();
 
-    mPaintEngine.Abort();
+    mPaintEngine.EndEdit();
     mPaintEngine.SetMaskBlock(nullptr);
 
     TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
@@ -180,7 +180,7 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseDown(const FOdysseyPoint& iPointIn
         if (!edit)
             return false;
 
-        mPaintEngine.Edit(edit);
+        mPaintEngine.BeginEdit(edit.ToSharedRef());
     }
 
     mSubPixelPoint = iPointInTexture;
@@ -590,7 +590,7 @@ UOdysseyPainterEditorRasterEraserTool::OnShapeCommit(const TArray<FOdysseyPoint>
     {
         ResetInterpolation();
         //Discard the stroke, keep the edit to draw it again
-        mPaintEngine.Reset();
+        mPaintEngine.DiscardStroke();
 
         for ( const FOdysseyPoint& point : iPoints )
         {
@@ -614,7 +614,7 @@ void
 UOdysseyPainterEditorRasterEraserTool::OnShapeAbort()
 {
     ResetInterpolation();
-    mPaintEngine.Abort();
+    mPaintEngine.EndEdit();
     if(mTransaction)
         mTransaction->Cancel();
     mTransaction = nullptr; //Finish the undo transaction

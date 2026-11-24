@@ -28,23 +28,13 @@ FOdysseyPaintEngine::FOdysseyPaintEngine()
 }
 
 void
-FOdysseyPaintEngine::Edit(TSharedPtr<FOdysseyRasterBlockEdit> iEdit)
+FOdysseyPaintEngine::BeginEdit(TSharedRef<FOdysseyRasterBlockEdit> iEdit)
 {
     if (mEdit == iEdit)
         return;
 
     //Tools commit their edits explicitly: a previous edit still running, e.g. on another layer, is discarded
-    Abort();
-
-    if (!iEdit)
-    {
-        if (mPaintBlock)
-            mPaintBlock->OnInvalid(::ULIS::FOnInvalidBlock());
-
-        mPaintBlock = nullptr;
-        mInvalidRects.Empty();
-        return;
-    }
+    ReleaseEdit();
 
     mEdit = iEdit;
     const ::ULIS::FBlock& editedBlock = mEdit->GetBlock().Get();
@@ -85,7 +75,7 @@ FOdysseyPaintEngine::Update(const FOdysseyBlendParameters& iBlendParameters)
     if (!mEdit->IsActive())
     {
         //The edit ended by itself, e.g. another edit of the content began or the content was undone
-        Abort();
+        ReleaseEdit();
         return;
     }
 
@@ -116,7 +106,7 @@ FOdysseyPaintEngine::Commit(const FOdysseyBlendParameters& iBlendParameters)
 }
 
 void
-FOdysseyPaintEngine::Reset()
+FOdysseyPaintEngine::DiscardStroke()
 {
     ClearPaintBlock();
     if (mEdit)
@@ -124,14 +114,15 @@ FOdysseyPaintEngine::Reset()
 }
 
 void
-FOdysseyPaintEngine::Abort()
+FOdysseyPaintEngine::EndEdit()
 {
-    if (!mEdit)
-        return;
-
-    UnbindBeforeRedoUndo();
-    ClearPaintBlock();
     ReleaseEdit();
+
+    if (mPaintBlock)
+        mPaintBlock->OnInvalid(::ULIS::FOnInvalidBlock());
+
+    mPaintBlock = nullptr;
+    mInvalidRects.Empty();
 }
 
 //static
@@ -164,9 +155,14 @@ FOdysseyPaintEngine::ClearPaintBlock()
 void
 FOdysseyPaintEngine::ReleaseEdit()
 {
+    if (!mEdit)
+        return;
+
+    UnbindBeforeRedoUndo();
+    ClearPaintBlock();
+
     TSharedPtr<FOdysseyRasterBlockEdit> edit = MoveTemp(mEdit);
-    if (edit)
-        edit->End();
+    edit->End();
 }
 
 bool
@@ -264,5 +260,6 @@ FOdysseyPaintEngine::UnbindBeforeRedoUndo()
 void
 FOdysseyPaintEngine::OnBeforeRedoUndo( const FTransactionContext& /*TransactionContext*/ )
 {
-    Abort();
+    //The paint block is kept: the tool may still hold it during a stroke
+    ReleaseEdit();
 }

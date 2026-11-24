@@ -146,7 +146,7 @@ bool FOdysseyPaintEngineTest::RunTest(const FString& Parameters)
 
     // Abort: the views show the layer again, the tiles are unchanged.
     FOdysseyPaintEngine Engine;
-    Engine.Edit(Odyssey::RasterContentBlocks::BeginBlockEdit(Layer->GetRasterContent()));
+    Engine.BeginEdit(Odyssey::RasterContentBlocks::BeginBlockEdit(Layer->GetRasterContent()).ToSharedRef());
     if (!TestTrue(TEXT("Paint into an edit of the layer"), Engine.GetEdit().IsValid() && Engine.PaintBlock().IsValid()))
     {
         return false;
@@ -156,18 +156,19 @@ bool FOdysseyPaintEngineTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("The views show the stroke"), ReadShown(Layer, Inside).Equals(Red, Tolerance));
     TestTrue(TEXT("The views show the pixels outside the stroke"), ReadShown(Layer, Outside).Equals(Background, Tolerance));
     TestTrue(TEXT("The tiles are not painted before the commit"), ReadCommitted(Layer, Inside).Equals(Background, Tolerance));
-    Engine.Abort();
-    TestFalse(TEXT("An aborted stroke ends its edit"), Engine.GetEdit().IsValid() || IsShown(Layer));
-    TestTrue(TEXT("An aborted stroke leaves the tiles"), ReadCommitted(Layer, Inside).Equals(Background, Tolerance));
+    Engine.EndEdit();
+    TestFalse(TEXT("Ending the edit ends it"), Engine.GetEdit().IsValid() || IsShown(Layer));
+    TestFalse(TEXT("Ending the edit frees the paint block"), Engine.PaintBlock().IsValid());
+    TestTrue(TEXT("An ended edit leaves the tiles"), ReadCommitted(Layer, Inside).Equals(Background, Tolerance));
 
     // Reset: the edit goes on from the original pixels.
-    Engine.Edit(Odyssey::RasterContentBlocks::BeginBlockEdit(Layer->GetRasterContent()));
+    Engine.BeginEdit(Odyssey::RasterContentBlocks::BeginBlockEdit(Layer->GetRasterContent()).ToSharedRef());
     PaintStroke(Engine);
     Engine.Update(Blend);
-    Engine.Reset();
+    Engine.DiscardStroke();
     Engine.Update(Blend);
-    TestTrue(TEXT("A reset keeps the edit"), Engine.GetEdit().IsValid() && IsShown(Layer));
-    TestTrue(TEXT("A reset shows the original pixels"), ReadShown(Layer, Inside).Equals(Background, Tolerance));
+    TestTrue(TEXT("Discarding the stroke keeps the edit"), Engine.GetEdit().IsValid() && IsShown(Layer));
+    TestTrue(TEXT("Discarding the stroke shows the original pixels"), ReadShown(Layer, Inside).Equals(Background, Tolerance));
 
     // Commit: one undoable change of the tiles.
     PaintStroke(Engine);
@@ -176,6 +177,7 @@ bool FOdysseyPaintEngineTest::RunTest(const FString& Parameters)
         TestTrue(TEXT("Commit the stroke"), Engine.Commit(Blend));
     }
     TestFalse(TEXT("A commit ends the edit"), Engine.GetEdit().IsValid() || IsShown(Layer));
+    TestTrue(TEXT("A commit keeps the paint block for the next stroke"), Engine.PaintBlock().IsValid());
     TestTrue(TEXT("The tiles hold the stroke"), ReadCommitted(Layer, Inside).Equals(Red, Tolerance));
     TestTrue(TEXT("The tiles keep the pixels outside the stroke"), ReadCommitted(Layer, Outside).Equals(Background, Tolerance));
     TestTrue(TEXT("The views show the committed stroke"), ReadShown(Layer, Inside).Equals(Red, Tolerance));
@@ -183,7 +185,7 @@ bool FOdysseyPaintEngineTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Undo restores the tiles"), ReadCommitted(Layer, Inside).Equals(Background, Tolerance));
 
     // An edit ended by another edit of the layer discards the stroke.
-    Engine.Edit(Odyssey::RasterContentBlocks::BeginBlockEdit(Layer->GetRasterContent()));
+    Engine.BeginEdit(Odyssey::RasterContentBlocks::BeginBlockEdit(Layer->GetRasterContent()).ToSharedRef());
     PaintStroke(Engine);
     TSharedPtr<FOdysseyRasterBlockEdit> Other = Odyssey::RasterContentBlocks::BeginBlockEdit(Layer->GetRasterContent());
     Engine.Update(Blend);
@@ -198,18 +200,18 @@ bool FOdysseyPaintEngineTest::RunTest(const FString& Parameters)
 
     // Painting into the edit of another layer, e.g. after the current layer changed mid-shape, discards the pending stroke.
     UOdysseyTextureLayerImageRaster* OtherLayer = CastChecked<UOdysseyTextureLayerImageRaster>(Layer->GetLayerStack()->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
-    Engine.Edit(Odyssey::RasterContentBlocks::BeginBlockEdit(Layer->GetRasterContent()));
+    Engine.BeginEdit(Odyssey::RasterContentBlocks::BeginBlockEdit(Layer->GetRasterContent()).ToSharedRef());
     PaintStroke(Engine);
     Engine.Update(Blend);
     {
         // A commit would be recorded by this transaction.
         FScopedTransaction Transaction(NSLOCTEXT("OdysseyPaintEngineTests", "SwitchLayer", "Switch layer"));
-        Engine.Edit(Odyssey::RasterContentBlocks::BeginBlockEdit(OtherLayer->GetRasterContent()));
+        Engine.BeginEdit(Odyssey::RasterContentBlocks::BeginBlockEdit(OtherLayer->GetRasterContent()).ToSharedRef());
     }
     TestTrue(TEXT("The paint engine paints into the edit of the other layer"), Engine.GetEdit().IsValid() && IsShown(OtherLayer));
     TestFalse(TEXT("The edit of the previous layer ended"), IsShown(Layer));
     TestTrue(TEXT("The pending stroke is not committed into the previous layer"), ReadCommitted(Layer, Inside).Equals(Background, Tolerance));
-    Engine.Abort();
+    Engine.EndEdit();
     TestFalse(TEXT("No edit remains after switching layers"), IsShown(Layer) || IsShown(OtherLayer));
     return true;
 }

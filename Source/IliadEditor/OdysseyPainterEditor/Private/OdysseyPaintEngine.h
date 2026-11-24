@@ -17,7 +17,14 @@ class FOdysseyRasterBlockEdit;
  *
  * Tools draw into the paint block, which holds the stroke only. Update() composes the original pixels of the edit with
  * the stroke into its working block, for the areas the stroke changed, and shows them through the edit session.
- * Commit() writes the edit into the content; Abort() discards it.
+ *
+ * Lifecycle:
+ * - BeginEdit(): starts painting into an edit of a content.
+ * - DiscardStroke(): cancels the uncommitted changes; the edit stays active.
+ * - Commit(): writes the stroke into the content (undoable) and ends the edit; the paint block is kept for the next stroke.
+ * - EndEdit(): stops editing completely: cancels the uncommitted changes, ends the edit and frees the paint block.
+ *   Tools call it when they are unloaded.
+ * An edit that ends by itself (another edit of the content began, undo or redo) is discarded at the next Update().
  */
 class ODYSSEYPAINTEREDITOR_API FOdysseyPaintEngine
 {
@@ -29,19 +36,18 @@ public:
 
 public:
     /**
-     * Sets the edit to paint into; the previous edit, if any, is aborted: tools commit their edits explicitly.
+     * Starts painting into an edit. A previous edit, if any, ends without writing anything: tools commit their edits explicitly.
      * The paint block is cleared, and sized and formatted as the edited block.
-     * @param iEdit The edit, or null to stop painting.
      */
-    void Edit(TSharedPtr<FOdysseyRasterBlockEdit> iEdit);
+    void BeginEdit(TSharedRef<FOdysseyRasterBlockEdit> iEdit);
 
     /** Sets the selection mask: only its selected pixels are painted. Null paints everywhere. */
     void SetMaskBlock(TSharedPtr<::ULIS::FBlock> iMaskBlock);
 
-    /** Returns the block tools draw the stroke into; null without an edit. */
+    /** Returns the block tools draw the stroke into; null before the first edit and after EndEdit(). */
     TSharedPtr<::ULIS::FBlock> PaintBlock();
 
-    /** Returns the edit painted into; null once committed or aborted. */
+    /** Returns the edit painted into; null once committed or ended. */
     TSharedPtr<FOdysseyRasterBlockEdit> GetEdit() const;
 
     /**
@@ -57,16 +63,18 @@ public:
      */
     bool Commit(const FOdysseyBlendParameters& iBlendParameters);
 
-    /** Discards the stroke and keeps the edit: the next update shows the original pixels again, e.g. to draw the stroke again. */
-    void Reset();
+    /** Cancels the uncommitted changes and keeps the edit: the next update shows the original pixels again, e.g. to draw the stroke again. */
+    void DiscardStroke();
 
-    /** Discards the edit and the stroke: the views show the content again. */
-    void Abort();
+    /** Stops editing completely: cancels the uncommitted changes, ends the edit (the views show the content again) and frees the paint block. */
+    void EndEdit();
 
 private:
     static void PaintBlockChanged( const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo );
 
     void ClearPaintBlock();
+
+    /** Ends the edit without writing it and keeps the paint block, which tools may still hold during a stroke. */
     void ReleaseEdit();
 
     /** Composes the original pixels with the stroke into the working block, for the invalid areas. */

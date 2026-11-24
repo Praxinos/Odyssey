@@ -432,7 +432,7 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
     mHandles.Add(pivot);
 
     //Creating the data
-    mPaintEngine.Edit(edit);
+    mPaintEngine.BeginEdit(edit.ToSharedRef());
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
 
     ::ULIS::eFormat format = originalBlock->Format();
@@ -812,7 +812,7 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
 void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
 {
     //Discard the transform: the views show the content again
-    mPaintEngine.Abort();
+    mPaintEngine.EndEdit();
 
     mIndexTransaction = 0;
     mTransformTransactions.Empty();
