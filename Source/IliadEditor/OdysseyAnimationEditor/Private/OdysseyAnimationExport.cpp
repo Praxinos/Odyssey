@@ -2,7 +2,6 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 #include "OdysseyAnimationExport.h"
 
-#if WITH_EDITOR
 #include "AssetToolsModule.h"
 #include "IAssetTools.h"
 #include "Materials/MaterialInterface.h"
@@ -206,4 +205,3 @@ ExportAsImageSequence(
 
 }
 #undef LOCTEXT_NAMESPACE
-#endif

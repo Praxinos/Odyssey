@@ -77,24 +77,15 @@ namespace UnrealBuildTool.Rules
                 );
 
             //--- Editor Only Dependencies
-            // Editor-only helpers (export to texture/flipbook) rely on editor modules
+            // Editor-only code (texture export of an animation) relies on editor modules
 
             if (Target.Type == TargetType.Editor)
             {
                 PrivateDependencyModuleNames.AddRange(
                     new string[] {
                         "AssetTools",
-                        "Paper2D",
-                        "Paper2DEditor",
-                        "EditorStyle",
                         "Renderer",
-                        "SlateCore",
                         "UnrealEd",
-
-                        "OdysseyCoreEditor",
-                        "OdysseyImaging",
-                        "OdysseyMedia",
-
                     }
                 );
             }
