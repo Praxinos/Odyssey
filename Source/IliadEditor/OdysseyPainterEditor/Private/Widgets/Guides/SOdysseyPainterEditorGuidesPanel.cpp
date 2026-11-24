@@ -432,7 +432,6 @@ FText SOdysseyPainterEditorGuidesPanel::GetEditButtonText() const
 void SOdysseyPainterEditorGuidesPanel::Refresh()
 {
     UOdysseyPainterEditorGuideCollection* Collection = GetCollection(false);
-    mCollection = Collection;
     mGuideItems.Reset();
     if (Collection)
     {

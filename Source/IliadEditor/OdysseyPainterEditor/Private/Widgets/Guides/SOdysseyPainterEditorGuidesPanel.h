@@ -68,7 +68,6 @@ private:
 
 private:
     FOdysseyPainterEditor* mEditor = nullptr;
-    TWeakObjectPtr<UOdysseyPainterEditorGuideCollection> mCollection;
     TArray<TWeakObjectPtr<UOdysseyPainterEditorGuide>> mGuideItems;
     TSharedPtr<SListView<TWeakObjectPtr<UOdysseyPainterEditorGuide>>> mListView;
     TSharedPtr<IDetailsView> mDetailsView;
