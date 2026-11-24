@@ -396,7 +396,8 @@ UArianeEditorPathDrawingTool::OnMouseUp( FEditorViewportClient* ViewportClient
 
     if( iKey == EKeys::LeftMouseButton )
     {
-        if( Painting3DComponent )
+        // EditedPath is only allocated at mouse down when the current layer is a vector layer
+        if( ( Painting3DComponent ) && ( EditedPath ) )
         {
             UArianeDrawing* Image = EditedPath->GetDrawing();
             FArianeVertex *Vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last()
@@ -410,11 +411,6 @@ UArianeEditorPathDrawingTool::OnMouseUp( FEditorViewportClient* ViewportClient
                     PathTracer.Flush( View
                                     , Vertex0
                                     , nullptr );
-
-                    if( EditedPath->GetSegments().Num() == 0 )
-                    {
-                        EditedPath->GetParent()->RemoveChild( EditedPath, true );
-                    }
                 }
                 break;
 
@@ -422,8 +418,16 @@ UArianeEditorPathDrawingTool::OnMouseUp( FEditorViewportClient* ViewportClient
                 break;
             }
 
+            if( EditedPath->GetSegments().Num() == 0 )
+            {
+                EditedPath->GetParent()->RemoveChild( EditedPath, true );
+            }
+
             Painting3DComponent->Update( false );
         }
+
+        // The stroke is over: don't keep a pointer an undo could invalidate
+        EditedPath = nullptr;
 
         GetToolManager()->EndUndoTransaction();
 

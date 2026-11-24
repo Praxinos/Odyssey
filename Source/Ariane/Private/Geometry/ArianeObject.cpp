@@ -928,6 +928,30 @@ FArianeObject::GetAncestorByClass( uint32 iClass, bool bHasBaseObjectClass, bool
     return nullptr;
 }
 
+bool
+FArianeObject::HasAncestor( FArianeObject* CandidateAncestor )
+{
+    bool bHasAncestor = false;
+
+    TraverseBackwards( this
+                     , [ this
+                       , CandidateAncestor
+                       , &bHasAncestor ]( FArianeObject* Ancestor ) -> ETraversalReturnValue
+        {
+            // TraverseBackwards starts on the object itself, which is not its own ancestor
+            if( ( Ancestor != this ) && ( Ancestor == CandidateAncestor ) )
+            {
+                bHasAncestor = true;
+
+                return ETraversalReturnValue::Stop;
+            }
+
+            return ETraversalReturnValue::Continue;
+        } );
+
+    return bHasAncestor;
+}
+
 FArianeTag*
 FArianeObject::GetTagByGuid( const FGuid& InGuid )
 {

@@ -271,6 +271,7 @@ public:
     virtual FColor GetHUDForegroundColor();
 #endif
     FArianeObject* GetAncestorByClass( uint32 iClass, bool iBaseClass, bool iSelf );
+    bool HasAncestor( FArianeObject* CandidateAncestor );
     TArray<FArianeObject*>& GetChildren();
     const TArray<FArianeObject*>& GetChildren() const;
 

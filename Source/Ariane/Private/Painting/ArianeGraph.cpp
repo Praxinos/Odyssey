@@ -1402,7 +1402,7 @@ FArianeGraph::ImportGeometry( const TArray<FArianeObject*>& Objects
                 }
             }
 
-            if( PathNodeCount )
+            if( PathLinearEdgeCount + PathCubicEdgeCount )
             {
                 PathBuffer.Emplace( OriginalPath
                                   , PathNodeCount

@@ -136,6 +136,9 @@ UArianeLayerStack::PostLoad()
         //fix after a change in the naming of th UArianeLayerVector class.
         //RootFolder->GetChildLayers().Empty();
 
+        // Levels saved before the root folder became unselectable may still have it flagged
+        RootFolder->SetSelected( false );
+
         // At that step layers are only marked "selected" but not in the list of selected layers
         UArianeLayerFolder::Traverse( RootFolder
                                     , [this]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
@@ -156,14 +159,26 @@ UArianeLayerStack::PostLoad()
 void
 UArianeLayerStack::RemoveSelectedLayers()
 {
+    TArray<UArianeLayer*> SelectedTrees;
+
+    // Iterate a copy: destroying a layer unselects it, which modifies SelectedLayers.
+    // Trees only: never touch a layer whose folder was just destroyed.
+    GetSelectedTrees( SelectedTrees );
+
     Modify();
 
-    for( UArianeLayer* Layer : SelectedLayers )
+    for( UArianeLayer* Layer : SelectedTrees )
     {
-        Layer->GetParentFolder()->Modify();
-        Layer->Modify();
+        UArianeLayerFolder* ParentFolder = Layer->GetParentFolder();
 
-        Layer->GetParentFolder()->RemoveChild( Layer, true );
+        // The root folder has no parent and cannot be removed
+        if( ParentFolder )
+        {
+            ParentFolder->Modify();
+            Layer->Modify();
+
+            ParentFolder->RemoveChild( Layer, true );
+        }
     }
 
     ClearLayerSelection( true );
@@ -293,11 +308,8 @@ UArianeLayerStack::AddLayer( UArianeLayerFolder* FosterFolder, UArianeLayer* Orp
 void
 UArianeLayerStack::SelectAllLayers()
 {
-    UArianeLayerFolder* RootFolder = GetRootFolder();
-
-    SelectedLayers.Empty();
-
-    SelectLayer( RootFolder, true );
+    // The root folder cannot be selected: select its children instead
+    SelectLayers( GetRootFolder()->GetChildLayers(), true, true );
 }
 
 void
@@ -336,7 +348,7 @@ void
 UArianeLayerStack::SelectLayer_Private( UArianeLayer* Layer )
 {
     // root folder cannot be selected
-    //if( Cast<UArianeLayer>(RootFolder) != Layer )
+    if( Layer != GetRootFolder() )
     {
         if( SelectedLayers.Find( Layer ) == INDEX_NONE )
         {

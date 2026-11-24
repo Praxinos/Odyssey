@@ -10,6 +10,7 @@
 #include "ArianeLayerVectorEnums.h"
 // Ariane Editor Headers
 #include "ArianeEditorHUD.h"
+#include "ArianeEditorSubsystem.h"
 // Odyssey Headers
 #include "OdysseyPainterEditorColorType.h"
 #include "InteractiveTool.h"
@@ -51,14 +52,6 @@ class ARIANEEDITOR_API FArianeEditor
     , public TSharedFromThis<FArianeEditor>
     , public IArianePainting3DComponentEditorInterface
 {
-public:
-    struct ARIANEEDITOR_API FClipboard
-    {
-    public :
-        TArray<FArianeObject*> CopiedObjects;
-        TArray<UArianeLayer*> CopiedLayers;
-    };
-
 public:
     DECLARE_MULTICAST_DELEGATE( FOnCurrentToolChanged );
     DECLARE_MULTICAST_DELEGATE( FOn3DPaintingComponentSelectionChanged );
@@ -239,7 +232,7 @@ public:
     float GetDrawingDistanceToPlane();
     bool GetShowGrid() const;
 
-    static FClipboard& GetClipboard();
+    static FArianeClipboard& GetClipboard();
 
     void GroupSelectedObjects( const FName& NewGroupName );
     void UngroupSelectedGroups();

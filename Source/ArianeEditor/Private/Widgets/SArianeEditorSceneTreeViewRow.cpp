@@ -434,51 +434,35 @@ SArianeEditorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
 
         RootGroup->GetDrawing()->GetVectorLayer()->Modify();
 
+        FArianeObject* ParentObject = ItemObject->GetParent() ? ItemObject->GetParent() : ItemObject;
+        FArianeObject* NewParent = ( DropZone == DROPZONE_ONTO ) ? ItemObject : ParentObject;
+
         for( FArianeObject* SelectedTree : SelectedTrees )
         {
-            switch( DropZone )
+            // Dropping a tree into itself or one of its descendants would create a parent-child cycle
+            if( ( NewParent != SelectedTree ) && ( NewParent->HasAncestor( SelectedTree ) == false ) )
             {
-                //case DROPZONE_ABOVE:
-                // reverse order in order to get the most forward objet on top of the hierarchy
-                case DROPZONE_BELOW:
+                switch( DropZone )
                 {
-                    FArianeObject* ParentObject = ItemObject->GetParent() ? ItemObject->GetParent() : ItemObject;
+                    //case DROPZONE_ABOVE:
+                    // reverse order in order to get the most forward objet on top of the hierarchy
+                    case DROPZONE_BELOW:
+                        ParentObject->TransferChild( SelectedTree, ParentObject->GetPreviousChild( ItemObject ) );
+                    break;
 
-                    // note: SharedEnv and Root are system objects
-                    //if( parentObject->IsSystem() == false )
-                    {
-                        // don't drop onto the same object or else expect some infinite loop
-                        if( ParentObject != SelectedTree )
-                        {
-                            ParentObject->TransferChild( SelectedTree, ParentObject->GetPreviousChild( ItemObject ) );
-                        }
-                    }
-                }
-                break;
-
-                case DROPZONE_ONTO:
-                    // don't drop onto the same object or else expect some infinite loop
-                    if( ItemObject != SelectedTree )
-                    {
+                    case DROPZONE_ONTO:
                         ItemObject->TransferChild( SelectedTree, nullptr );
-                    }
-                break;
+                    break;
 
-                // case DROPZONE_BELOW:
-                // reverse order in order to get the most forward objet on top of the hierarchy
-                case DROPZONE_ABOVE:
-                {
-                    FArianeObject* ParentObject = ItemObject->GetParent() ? ItemObject->GetParent() : ItemObject;
-
-                    if( ParentObject != SelectedTree )
-                    {
+                    // case DROPZONE_BELOW:
+                    // reverse order in order to get the most forward objet on top of the hierarchy
+                    case DROPZONE_ABOVE:
                         ParentObject->TransferChild( SelectedTree, ItemObject );
-                    }
-                }
-                break;
+                    break;
 
-                default :
-                break;
+                    default :
+                    break;
+                }
             }
         }
 

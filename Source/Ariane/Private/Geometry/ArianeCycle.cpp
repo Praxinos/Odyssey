@@ -361,7 +361,11 @@ FArianeCycle::CopySettings( FArianeObject* DestinationObject, const FCopyArgs& C
 FArianeObject*
 FArianeCycle::CopyShape( const FCopyArgs& CopyArgs )
 {
-    FArianeCycle* CycleCopy = nullptr;
+    FArianeCycle* CycleCopy = CopyArgs.Drawing->AllocCycle( Material, Name, CopyArgs.AllocationModel );
+
+    CycleCopy->EarcutIndices = EarcutIndices;
+    CycleCopy->Points = Points;
+    CycleCopy->UVs = UVs;
 
     return CycleCopy;
 }

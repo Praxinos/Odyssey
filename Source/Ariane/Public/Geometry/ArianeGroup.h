@@ -14,10 +14,11 @@
 
 class UArianeDrawing;
 
-struct ARIANE_API FArianeGroupInvalidationFlags : FArianeObjectInvalidationFlags
+// Must be a USTRUCT: FInstancedStruct::Make allocates from StaticStruct(), and a plain struct would inherit the smaller base one.
+USTRUCT(BlueprintType)
+struct ARIANE_API FArianeGroupInvalidationFlags : public FArianeObjectInvalidationFlags
 {
-    private:
-        typedef FArianeObjectInvalidationFlags Super;
+GENERATED_BODY()
 
     public:
         static const uint32 StaticClass() { return  0x1d1825c6; }; // value is crc32 FArianeGroupInvalidationFlags

@@ -50,12 +50,10 @@
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
 
-FArianeEditor::FClipboard&
+FArianeClipboard&
 FArianeEditor::GetClipboard()
 {
-    static FArianeEditor::FClipboard Clipboard;
-
-    return Clipboard;
+    return GEditor->GetEditorSubsystem<UArianeEditorSubsystem>()->Clipboard;
 }
 
 FArianeEditor::~FArianeEditor()
@@ -1322,7 +1320,7 @@ void
 FArianeEditor::CopySelectedObjects()
 {
     UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
-    FClipboard& Clipboard = GetClipboard();
+    FArianeClipboard& Clipboard = GetClipboard();
 
     if( Painting3DComponent )
     {
@@ -1365,7 +1363,7 @@ void
 FArianeEditor::PasteObjects()
 {
     UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
-    FClipboard& Clipboard = GetClipboard();
+    FArianeClipboard& Clipboard = GetClipboard();
 
     if( Painting3DComponent )
     {
@@ -1417,7 +1415,7 @@ void
 FArianeEditor::CopySelectedLayers()
 {
     UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
-    FClipboard& Clipboard = GetClipboard();
+    FArianeClipboard& Clipboard = GetClipboard();
 
     if( Painting3DComponent )
     {
@@ -1445,7 +1443,7 @@ void
 FArianeEditor::PasteLayers()
 {
     UArianePainting3DComponent* Painting3DComponent = GetCurrentPainting3DComponent();
-    FClipboard& Clipboard = GetClipboard();
+    FArianeClipboard& Clipboard = GetClipboard();
 
     if( Painting3DComponent )
     {

@@ -39,10 +39,11 @@ template <> struct nth<1, FVector2D> { static auto get(const FVector2D& p) { ret
 
 }} // namespace mapbox::util
 
-struct ARIANE_API FArianeCycleInvalidationFlags : FArianeObjectInvalidationFlags
+// Must be a USTRUCT: FInstancedStruct::Make allocates from StaticStruct(), and a plain struct would inherit the smaller base one.
+USTRUCT(BlueprintType)
+struct ARIANE_API FArianeCycleInvalidationFlags : public FArianeObjectInvalidationFlags
 {
-    private:
-        typedef FArianeObjectInvalidationFlags Super;
+GENERATED_BODY()
 
     public:
         static const uint32 StaticClass() { return  0xcb3b9b90; }; // value is crc32 FArianeCycleInvalidationFlags
@@ -161,9 +162,8 @@ protected:
     virtual void PostReset() override;
 
 protected:
-    UPROPERTY( EditAnywhere )
-    TArray<FVector> Vertices;
-
+    //UPROPERTY( EditAnywhere )
+    //TArray<FVector> Vertices;
     UPROPERTY( EditAnywhere )
     FColor Color;
 

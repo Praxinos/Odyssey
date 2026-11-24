@@ -38,6 +38,7 @@ public class ArianeEditor : ModuleRules
                 "Engine",
                 "EditorStyle",
                 "EditorFramework",
+                "EditorSubsystem",
                 "EditorWidgets",
                 "InputCore",
                 "Json",
