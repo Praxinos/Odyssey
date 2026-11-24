@@ -32,7 +32,16 @@
 
 UArianeEditorPaintBucketTool::~UArianeEditorPaintBucketTool()
 {
-    delete Graph;
+    // the solve ticker captures this. The graph itself is released by its last owner (tool or running task)
+    if( SolveTickerHandle.IsValid() )
+    {
+        FTSTicker::GetCoreTicker().RemoveTicker( SolveTickerHandle );
+    }
+
+    if( CameraMoveHandle.IsValid() )
+    {
+        FTSTicker::GetCoreTicker().RemoveTicker( CameraMoveHandle );
+    }
 }
 
 UArianeEditorPaintBucketTool::UArianeEditorPaintBucketTool()
@@ -41,9 +50,16 @@ UArianeEditorPaintBucketTool::UArianeEditorPaintBucketTool()
     , FittingRule ( EArianeCycleFittingRule::FitToPaths )
     , LayerPolicy ( EArianeEditorPaintBucketToolLayerPolicy::Selected )
     , MaterialInterface( nullptr )
-    , Graph( new FArianeGraph() )
+    , Graph( MakeShared<FArianeGraph>() )
+    , Worker( Graph )
     , PickedCycle( nullptr )
     , bGraphNeedsUpdate ( true )
+    , Generation( 0 )
+    , SolvedGeneration( 0 )
+    , bGeometryNeedsImport( true )
+    , bNeedsPick( false )
+    , bIsActive( false )
+    , LastCursorViewportPosition( FVector2D::ZeroVector )
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PaintBucket64");
 
@@ -63,19 +79,23 @@ UArianeEditorPaintBucketTool::Init( FArianeEditor* InEditor )
 void
 UArianeEditorPaintBucketTool::OnCameraMoved( const FVector& Location, const FRotator& Rotation, ELevelViewportType ViewportType, int32 ViewIndex )
 {
+    // the current graph, or the one being solved, no longer matches the view
+    Generation++;
     bGraphNeedsUpdate = true;
+    PickedCycle = nullptr;
 
     if (CameraMoveHandle.IsValid())
     {
         FTSTicker::GetCoreTicker().RemoveTicker(CameraMoveHandle);
     }
 
+    // solve only once the camera is idle (mousewheel has no begin/end events)
     CameraMoveHandle = FTSTicker::GetCoreTicker().AddTicker(
         FTickerDelegate::CreateLambda([this](float)
         {
             CameraMoveHandle.Reset();
 
-            Reset();
+            RequestSolve();
 
             return false;
         }),
@@ -94,7 +114,7 @@ UArianeEditorPaintBucketTool::OnPostUpdate( bool bInteractive )
 {
     if( bInteractive == false )
     {
-        Reset();
+        RequestImport();
     }
 }
 
@@ -103,14 +123,14 @@ UArianeEditorPaintBucketTool::BindDelegates()
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
-    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddUObject( this, &UArianeEditorPaintBucketTool::Reset );
+    Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddUObject( this, &UArianeEditorPaintBucketTool::RequestImport );
 
     if( Painting3DComponent )
     {
         //Painting3DComponent->OnPreUpdateDelegate().AddUObject( this, &UArianeEditorPaintBucketTool::OnPreUpdate );
         Painting3DComponent->OnPostUpdateDelegate().AddUObject( this, &UArianeEditorPaintBucketTool::OnPostUpdate );
-        Painting3DComponent->GetLayerStack()->OnPostSelectionChangedDelegate().AddUObject( this, &UArianeEditorPaintBucketTool::Reset );
-        Painting3DComponent->GetLayerStack()->OnPostHierarchyChangedDelegate().AddUObject( this, &UArianeEditorPaintBucketTool::Reset );
+        Painting3DComponent->GetLayerStack()->OnPostSelectionChangedDelegate().AddUObject( this, &UArianeEditorPaintBucketTool::RequestImport );
+        Painting3DComponent->GetLayerStack()->OnPostHierarchyChangedDelegate().AddUObject( this, &UArianeEditorPaintBucketTool::RequestImport );
     }
 
     FEditorDelegates::OnEditorCameraMoved.AddUObject( this, &UArianeEditorPaintBucketTool::OnCameraMoved );
@@ -139,7 +159,9 @@ UArianeEditorPaintBucketTool::Activate()
 {
     const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
 
-    Reset();
+    bIsActive = true;
+
+    RequestImport();
 
     if( MaterialInterface == nullptr )
     {
@@ -153,31 +175,148 @@ void
 UArianeEditorPaintBucketTool::Inactivate()
 {
     UnbindDelegates();
+
+    // any running solve becomes stale
+    Generation++;
+    bIsActive = false;
+    PickedCycle = nullptr;
+
+    // would call RequestSolve() after the tool is gone
+    if( CameraMoveHandle.IsValid() )
+    {
+        FTSTicker::GetCoreTicker().RemoveTicker( CameraMoveHandle );
+        CameraMoveHandle.Reset();
+    }
+
+    // free the graph now if possible, it is useless while another tool is active
+    if( Worker.IsBusy() == false )
+    {
+        Graph->Reset( EArianeGraphResetPolicy::All );
+    }
+    // otherwise the graph is in use: the solve ticker keeps running and frees it when the worker is done
 }
 
 void
-UArianeEditorPaintBucketTool::Reset()
+UArianeEditorPaintBucketTool::RequestImport()
 {
+    // the graph is only touched in RequestSolve, when the worker is idle
+    Generation++;
+    bGraphNeedsUpdate = true;
+    bGeometryNeedsImport = true;
+    PickedCycle = nullptr;
+
+    RequestSolve();
+}
+
+void
+UArianeEditorPaintBucketTool::RequestSolve()
+{
+    // a running solve comes back to OnSolveFinished, which relaunches if needed
+    if( Worker.IsBusy() )
+    {
+        return;
+    }
+
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
     IToolsContextQueriesAPI* QueriesAPI = GetToolManager()->GetContextQueriesAPI();
-    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
+    FViewCameraState CameraState;
 
+    QueriesAPI->GetCurrentViewState( CameraState );
+
+    // game thread, worker idle: the only step that reads the drawing
+    if( bGeometryNeedsImport )
+    {
+        TArray<FArianeObject*> GraphedObjects;
+
+        GatherGraphedObjects( GraphedObjects );
+
+        Graph->ImportGeometry( GraphedObjects, GapTolerance, SegmentExtensionScheme );
+
+        bGeometryNeedsImport = false;
+    }
+
+    // points into the cycles the worker is about to delete
     PickedCycle = nullptr;
+    SolvedGeneration = Generation;
+
+    Worker.Launch( CameraState.Position, GetDrawingPlane( ViewportClient, nullptr ) );
+
+    StartSolveTicker();
+}
+
+void
+UArianeEditorPaintBucketTool::StartSolveTicker()
+{
+    if( SolveTickerHandle.IsValid() )
+    {
+        return;
+    }
+
+    SolveTickerHandle = FTSTicker::GetCoreTicker().AddTicker(
+        FTickerDelegate::CreateLambda( [ this ]( float )
+        {
+            // still solving: keep polling every frame
+            if( Worker.IsBusy() )
+            {
+                // the viewport is not realtime, force a redraw so the progress bar animates
+                if( bIsActive )
+                {
+                    GetActiveViewportClient()->Invalidate();
+                }
+
+                return true;
+            }
+
+            // worker done: the graph can be read or modified again
+            SolveTickerHandle.Reset();
+
+            if( bIsActive )
+            {
+                // use the result, or relaunch if it is stale
+                OnSolveFinished();
+            }
+            else
+            {
+                // tool was left during the solve: nobody needs the result
+                Graph->Reset( EArianeGraphResetPolicy::All );
+            }
+
+            // stop ticking
+            return false;
+        } ) );
+}
+
+void
+UArianeEditorPaintBucketTool::OnSolveFinished()
+{
+    if( SolvedGeneration == Generation )
+    {
+        bGraphNeedsUpdate = false;
+        // the cursor may not move: pick at its last position on next DrawHUD
+        bNeedsPick = true;
+
+        GetActiveViewportClient()->Invalidate();
+    }
+    else if( CameraMoveHandle.IsValid() == false )
+    {
+        // stale and camera idle: relaunch, re-importing if the drawing changed meanwhile
+        RequestSolve();
+    }
+    // stale and camera moving: the camera ticker will call RequestSolve
+}
+
+void
+UArianeEditorPaintBucketTool::GatherGraphedObjects( TArray<FArianeObject*>& OutObjects )
+{
+    UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
     if( Painting3DComponent )
     {
         UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
         UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>( LayerStack->GetCurrentLayer() );
-        FViewCameraState CameraState;
-
-        QueriesAPI->GetCurrentViewState( CameraState );
 
         if( VectorLayer )
         {
-            FVector4 DrawingPlane = GetDrawingPlane( ViewportClient, nullptr  );
-            TArray<FArianeObject*> GraphedObjects;
-            FVector CameraLocation = CameraState.Position;
-            FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
             TArray<UArianeLayer*> PaintedLayers;
             uint32 MaxObjectCount = 0;
 
@@ -189,38 +328,27 @@ UArianeEditorPaintBucketTool::Reset()
 
                 if( PaintedVectorLayer )
                 {
-                    MaxObjectCount += VectorLayer->GetDrawing()->GetInstancedObjects().Num();
+                    MaxObjectCount += PaintedVectorLayer->GetDrawing()->GetInstancedObjects().Num();
                 }
             }
 
-            if( MaxObjectCount )
+            OutObjects.Reserve( MaxObjectCount );
+
+            for( UArianeLayer* PaintedLayer : PaintedLayers )
             {
-                GraphedObjects.Reserve( MaxObjectCount );
+                UArianeLayerVector* PaintedVectorLayer = Cast<UArianeLayerVector>(PaintedLayer);
 
-                for( UArianeLayer* PaintedLayer : PaintedLayers )
+                if( PaintedVectorLayer )
                 {
-                    UArianeLayerVector* PaintedVectorLayer = Cast<UArianeLayerVector>(PaintedLayer);
+                    FArianeObject::Traverse( PaintedVectorLayer->GetDrawing()->GetRootGroup()
+                                           , FArianeObject::ETraversalPolicy::AllChildren
+                                           , [ &OutObjects ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+                        {
+                            OutObjects.Add( Object );
 
-                    if( PaintedVectorLayer )
-                    {
-                        FArianeObject::Traverse( PaintedVectorLayer->GetDrawing()->GetRootGroup()
-                                               , FArianeObject::ETraversalPolicy::AllChildren
-                                               , [ &GraphedObjects ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
-                            {
-                                GraphedObjects.Add( Object );
-
-                                return FArianeObject::ETraversalReturnValue::Continue;
-                            } );
-                    }
+                            return FArianeObject::ETraversalReturnValue::Continue;
+                        } );
                 }
-
-                Graph->Solve( CameraLocation
-                            , DrawingPlane
-                            , GraphedObjects
-                            , GapTolerance
-                            , SegmentExtensionScheme );
-
-                bGraphNeedsUpdate = false;
             }
         }
     }
@@ -333,6 +461,9 @@ UArianeEditorPaintBucketTool::OnMouseHover( FEditorViewportClient* iViewportClie
     FVector RayOrigin;
     FVector RayDirection;
 
+    // used to pick when a solve finishes while the cursor does not move
+    LastCursorViewportPosition = FVector2D( PointerState.ViewportX, PointerState.ViewportY );
+
     if( bGraphNeedsUpdate == false )
     {
         View->DeprojectFVector2D( FVector2D( PointerState.ViewportX, PointerState.ViewportY )
@@ -372,6 +503,12 @@ UArianeEditorPaintBucketTool::OnMouseUp( FEditorViewportClient* ViewportClient
         ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
         FColor ueColor = FColor( rgba8.R8(), rgba8.G8(), rgba8.B8(), rgba8.A8() );
 
+        // no cycle under the cursor, or the graph is being solved
+        if( PickedCycle == nullptr )
+        {
+            return true;
+        }
+
         if( Painting3DComponent )
         {
             //painting3DComponent->PrintPointers();
@@ -397,7 +534,7 @@ UArianeEditorPaintBucketTool::OnMouseUp( FEditorViewportClient* ViewportClient
                 PaintedCycle->SetColor( ueColor );
                 PaintedCycle->UpdateTransform();
                 // ImportGraphCycle needs the transform matrix to be set, hence the call to UpdateTransform just before
-                PaintedCycle->ImportGraphCycle( Graph, PickedCycle, FittingRule );
+                PaintedCycle->ImportGraphCycle( Graph.Get(), PickedCycle, FittingRule );
 
                 GetToolManager()->EndUndoTransaction();
             }
@@ -537,6 +674,33 @@ UArianeEditorPaintBucketTool::DrawExtensionHUD ( FCanvas* HUDCanvas
 }
 
 void
+UArianeEditorPaintBucketTool::DrawProgressBarHUD( FCanvas* HUDCanvas
+                                                , FEditorViewportClient* ViewportClient
+                                                , const FLinearColor& BgColor
+                                                , const FLinearColor& HcColor )
+{
+    const FIntPoint ViewportSize = ViewportClient->Viewport->GetSizeXY();
+    const float DPIScale = HUDCanvas->GetDPIScale();
+    const float Width = ViewportSize.X / DPIScale;
+    const float Height = ViewportSize.Y / DPIScale;
+    const float BarHeight = 5.0f;
+    // written by the worker between the pipeline steps
+    const float Progress = Graph->GetProgress();
+
+    FCanvasTileItem Background( FVector2D( 0.0f, Height - BarHeight )
+                              , FVector2D( Width, BarHeight )
+                              , BgColor.CopyWithNewOpacity( 0.5f ) );
+    Background.BlendMode = SE_BLEND_Translucent;
+    HUDCanvas->DrawItem( Background );
+
+    FCanvasTileItem Filled( FVector2D( 0.0f, Height - BarHeight )
+                          , FVector2D( Width * Progress, BarHeight )
+                          , HcColor );
+    Filled.BlendMode = SE_BLEND_Translucent;
+    HUDCanvas->DrawItem( Filled );
+}
+
+void
 UArianeEditorPaintBucketTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderAPI* RenderAPI )
 {
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
@@ -548,6 +712,23 @@ UArianeEditorPaintBucketTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderA
     FLinearColor FgColor = GetForegroundColor();
     FLinearColor BgColor = GetBackgroundColor();
     FLinearColor HcColor = GetHighlightColor();
+
+    if( Worker.IsBusy() )
+    {
+        DrawProgressBarHUD( HUDCanvas, ViewportClient, BgColor, HcColor );
+    }
+
+    // a new graph arrived: pick with the current view at the last known cursor position
+    if( bNeedsPick && ( bGraphNeedsUpdate == false ) )
+    {
+        FVector RayOrigin;
+        FVector RayDirection;
+
+        View->DeprojectFVector2D( LastCursorViewportPosition, RayOrigin, RayDirection );
+
+        PickedCycle = Graph->PickCycle( RayOrigin, RayDirection );
+        bNeedsPick = false;
+    }
 
     if( CanDraw() && ( bGraphNeedsUpdate == false ) )
     {
@@ -574,19 +755,20 @@ UArianeEditorPaintBucketTool::PostEditChangeProperty( FPropertyChangedEvent& Pro
     FName PropertyName = PropertyChangedEvent.GetPropertyName();
     FName MemberPropertyName = PropertyChangedEvent.GetMemberPropertyName();
 
+    // import settings: the geometry must be imported again
     if( PropertyName == GET_MEMBER_NAME_CHECKED( UArianeEditorPaintBucketTool, GapTolerance ) )
     {
-        Reset();
+        RequestImport();
     }
 
     if( PropertyName == GET_MEMBER_NAME_CHECKED( UArianeEditorPaintBucketTool, SegmentExtensionScheme ) )
     {
-        Reset();
+        RequestImport();
     }
 
     if( PropertyName == GET_MEMBER_NAME_CHECKED( UArianeEditorPaintBucketTool, LayerPolicy ) )
     {
-        Reset();
+        RequestImport();
     }
 
     if( PropertyName == GET_MEMBER_NAME_CHECKED(UArianeEditorPaintBucketTool, MaterialInterface) )

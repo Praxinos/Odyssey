@@ -9,11 +9,14 @@
 // Ariane
 // Blend2D
 #include <blend2d.h>
+// std
+#include <atomic>
 
 struct FArianeObject;
 struct FArianePoint;
 struct FArianeSegment;
 struct FArianeVertex;
+struct FArianePath;
 
 UENUM(BlueprintType)
 enum class EArianeGraphSegmentExtensionScheme : uint8
@@ -21,6 +24,14 @@ enum class EArianeGraphSegmentExtensionScheme : uint8
     None   = 0 UMETA(Hidden),
     Single = 1,
     Triple = 3
+};
+
+// Geometry: the 3D data imported from the drawing, view independent.
+// Arrangement: everything computed in the projection plane (2D positions, intersections, sections, cycles), view dependent.
+enum class EArianeGraphResetPolicy : uint8
+{
+    Arrangement,   // keep the geometry, clear everything view dependent
+    All            // clear the geometry and the arrangement
 };
 
 class ARIANE_API FArianeGraph
@@ -75,7 +86,7 @@ public:
         virtual uint32 GetClass(){ return StaticClass(); };
 
         virtual ~FPoint();
-        FPoint( const FVector2D& InPosition, bool bProjected, const FVector& InOriginalWorldPosition );
+        FPoint(const FVector& InOriginalWorldPosition );
 
         FVector2D Position;
         bool bProjected;
@@ -89,7 +100,8 @@ public:
         virtual uint32 GetClass() override { return StaticClass(); };
 
         virtual ~FNode();
-        FNode( const FVector2D& InPosition, bool bProjected, const FVector& InOriginalWorlPosition );
+        FNode( const FVector& InOriginalWorlPosition );
+
         void AddSection( FSection* Section, uint32 SectionNodeIndex );
         void RemoveSection( FSection* Section, uint32 SectionNodeIndex );
         FSectionLinkInfo* GetSectionLinkInfo( FSection* Section, uint32 SectionNodeIndex );
@@ -161,6 +173,7 @@ public:
     {
         virtual ~FFraction();
         FFraction( double InFromT, double InToT, FPoint* InPoint0, FPoint* InPoint1 );
+        void MakeBBox();
 
         float FromT;
         float ToT;
@@ -182,6 +195,8 @@ public:
              , double InLength );
         FNode* GetOtherNode( FNode* Node );
 
+        // computes BBox and Length from the projected (2D) node positions
+        virtual void MakeBBoxAndLength() = 0;
         virtual FVector GetOriginalWorldPosition( float T ) = 0;
         void CreateSections( TArray<FSection>& SectionBuffer
                            , bool bStitchShortSections
@@ -210,6 +225,7 @@ public:
                    , FNode* InNode1
                    , FFraction* InFractions );
 
+        virtual void MakeBBoxAndLength() override;
         virtual FVector GetOriginalWorldPosition( float T ) override;
     };
 
@@ -228,6 +244,7 @@ public:
                   , uint32 InFractionCount
                   , FFraction* InFractions );
 
+        virtual void MakeBBoxAndLength() override;
         virtual FVector GetOriginalWorldPosition( float T ) override;
 
         FVector2D Bezier[4];
@@ -399,7 +416,8 @@ public:
     struct ARIANE_API FPath
     {
         virtual ~FPath();
-        FPath( uint32 InNodeCount
+        FPath( FArianePath* InOriginalPath
+             , uint32 InNodeCount
              , FNode* InNodes
              , uint32 InLinearEdgeCount
              , uint32 InCubicEdgeCount
@@ -411,8 +429,9 @@ public:
         uint32 GetEdgeCount();
 
         bool bHasIntersections;
+        FArianePath* OriginalPath;
         uint32 NodeCount;
-        FNode* Nodes; // we dont use TArray, for performance reasons
+        FNode* Nodes; // we dont use TArray, for performance reasons (all FNodes are in one single array for all paths)
         uint32 LinearEdgeCount;
         uint32 CubicEdgeCount;
         FEdge** Edges; // we dont use TArray, for performance reasons
@@ -541,11 +560,22 @@ public:
     virtual ~FArianeGraph();
     FArianeGraph();
 
-    void Solve( const FVector& InViewOrigin
-              , const FPlane& InProjectionPlane
-              , const TArray<FArianeObject*>& Objects
-              , double InGapTolerance
-              , EArianeGraphSegmentExtensionScheme InSegmentExtensionScheme );
+    // Pipeline:
+    // ImportGeometry (game thread, reads the drawing)
+    // -> Reset( Arrangement ) -> ProjectGeometry -> BuildArrangement -> SolveArrangement (any thread, graph only)
+
+    /** Game thread. Resets everything, then imports the objects in world space. */
+    void ImportGeometry( const TArray<FArianeObject*>& Objects
+                       , double InGapTolerance
+                       , EArianeGraphSegmentExtensionScheme InSegmentExtensionScheme );
+    void Reset( EArianeGraphResetPolicy ResetPolicy );
+    void ProjectGeometry( const FVector& InViewOrigin, const FPlane& InProjectionPlane );
+    void BuildArrangement();
+    void SolveArrangement();
+    /** Any thread. Progress of the arrangement pipeline, from 0 (Reset) to 1 (SolveArrangement done). */
+    float GetProgress() const;
+    void ResetProgress();
+
     //Build( TArray<FOdysseyVectorObject*> Objects ); // Later
     FCycle* PickCycle( const FVector& RayOrigin, const FVector& RayDirection );
     void HighlightCycle( FCycle* Cycle );
@@ -559,8 +589,6 @@ protected:
                                                     , double Orientation );
     static double GetCycleNormalVector( TArray<uint32>& NodeIndexArray, TArray<FSection*>& SectionArray );
 
-    void Import( const TArray<FArianeObject*>& Objects );
-    void Build();
     void SimplifyGraph();
     void Explore( FExplorationPair* ExplorationPair );
     uint32 FindPath( FSection* ReturnSection
@@ -578,8 +606,6 @@ protected:
                        , FEdge* Edge0
                        , FPath* Path1
                        , FEdge* Edge1
-                       , const FVector2D& Edge1MinWithTolerance
-                       , const FVector2D& Edge1MaxWithTolerance
                        , TArray<FNodeIntersection::XRecord>& OutIntersectionRecordArray );
     void IntersectPath( FPath* Path );
     void CreatePathSections( FPath* Path, TArray<FSection*>& ShortSections );
@@ -627,4 +653,6 @@ protected:
     TArray<FCycle*> Cycles;
     bool bMultithreaded;
     double GapTolerance;
+    // written by the worker between pipeline steps, read by the game thread for the progress bar
+    std::atomic<float> Progress;
 };

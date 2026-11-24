@@ -11,6 +11,7 @@
 #include "ArianeSegment.h"
 #include "ArianeVertex.h"
 #include "ArianeGraph.h"
+#include "ArianeGraphWorker.h"
 #include "ArianeCycle.h" // for enums
 
 #include "ArianeEditorPaintBucketTool.generated.h"
@@ -105,7 +106,17 @@ protected:
                           , FEditorViewportClient* ViewportClient
                           , FSceneView* View
                           , const FLinearColor& HcColor );
-    void Reset();
+    void DrawProgressBarHUD( FCanvas* HUDCanvas
+                           , FEditorViewportClient* ViewportClient
+                           , const FLinearColor& BgColor
+                           , const FLinearColor& HcColor );
+    /** The drawing or an import setting changed: re-import, then solve. Never touches the graph itself. */
+    void RequestImport();
+    /** Launches a solve if the worker is idle, importing first if needed. */
+    void RequestSolve();
+    void OnSolveFinished();
+    void StartSolveTicker();
+    void GatherGraphedObjects( TArray<FArianeObject*>& OutObjects );
     void OnCameraMoved( const FVector& Location, const FRotator& Rotation, ELevelViewportType ViewportType, int32 ViewIndex );
     virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
     void UnbindDelegates();
@@ -142,10 +153,22 @@ public:
     UMaterialInterface* MaterialInterface;
 
 protected:
-    FArianeGraph* Graph;
+    // shared with the worker task, so it outlives the tool if a solve is still running
+    TSharedPtr<FArianeGraph> Graph;
+    FArianeGraphWorker Worker;
     FArianeGraph::FCycle* PickedCycle;
+    // the graph is being solved or is stale: do not read it
     bool bGraphNeedsUpdate;
+    // incremented on each camera or drawing change, a solve with an older value is stale
+    uint32 Generation;
+    uint32 SolvedGeneration;
+    bool bGeometryNeedsImport;
+    // a new graph arrived: pick at the last cursor position on next DrawHUD
+    bool bNeedsPick;
+    bool bIsActive;
+    FVector2D LastCursorViewportPosition;
     FTSTicker::FDelegateHandle CameraMoveHandle;
+    FTSTicker::FDelegateHandle SolveTickerHandle;
 };
 
 // define bitwise op
