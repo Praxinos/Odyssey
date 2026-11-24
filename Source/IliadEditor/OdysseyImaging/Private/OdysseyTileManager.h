@@ -216,8 +216,8 @@ private:
         FCriticalSection Mutex;
 
         FOdysseyTileId Id;
-        TUniquePtr<TPromise<TSharedPtr<FTileTextureHandle>>> TempTexturePromise;
-        TSharedFuture<TSharedPtr<FTileTextureHandle>> TempTexture;
+        TUniquePtr<TPromise<TSharedPtr<FTileTextureHandle>>> CreationTexturePromise;
+        TSharedFuture<TSharedPtr<FTileTextureHandle>> CreationTexture;
 
         EGPUReadBackState GPUReadBackState;
 

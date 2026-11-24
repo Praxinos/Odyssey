@@ -728,7 +728,7 @@ FOdysseyTileManager::CreateOrUpdateTiles(
                 //We only validate the TileTexture once the GraphBuilder has been executed
                 //It ensures the TileTexture will be filled with the right pixels data
                 //even if the texture is immediately used
-                TileToCreate.Tile->TempTexturePromise->SetValue(TileToCreate.TextureHandle);
+                TileToCreate.Tile->CreationTexturePromise->SetValue(TileToCreate.TextureHandle);
             }
 
             //Needed for the readback buffers to be read properly
@@ -943,7 +943,7 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
                         {
                             FScopeLock TileLock(&InTile->Mutex);
                             CacheGPUTexture({TileData.Get(), PixelsReadBack.TileSize,
-                                InTile->TempTexture.Get()->GetTextureRHI()->GetFormat()}, InTile->TempTexture.Get());
+                                InTile->CreationTexture.Get()->GetTextureRHI()->GetFormat()}, InTile->CreationTexture.Get());
                             CompleteReadBack(*InTile, TileData);
                             return;
                         }
@@ -956,7 +956,7 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
                     {
                         FScopeLock TileLock(&InTile->Mutex);
                         CacheGPUTexture({TileData.Get(), PixelsReadBack.TileSize,
-                            InTile->TempTexture.Get()->GetTextureRHI()->GetFormat()}, InTile->TempTexture.Get());
+                            InTile->CreationTexture.Get()->GetTextureRHI()->GetFormat()}, InTile->CreationTexture.Get());
                         CompleteReadBack(*InTile, TileData);
                     }
                 }
@@ -969,8 +969,8 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
 void
 FOdysseyTileManager::CompleteReadBack(FTile& InTile, const TSharedPtr<FTileData>& InTileData)
 {
-    InTile.TempTexture = {};
-    InTile.TempTexturePromise.Reset();
+    InTile.CreationTexture = {};
+    InTile.CreationTexturePromise.Reset();
     InTile.TileDataPromise.SetValue(InTileData);
     InTile.GPUIsEmptyReadBack.Reset();
     InTile.GPUIsEmptyReadBackPromise.Reset();
@@ -1026,16 +1026,16 @@ FOdysseyTileManager::GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, ui
             continue;
         }
 
-        //Check if the Tile has a TempTexture
+        //Check if the Tile has a CreationTexture
         //Indicating the Tile's ReadBack has not yet finished
-        //Rely on TempTexture if it exists
-        if (Tile->TempTexture.IsValid())
+        //Rely on CreationTexture if it exists
+        if (Tile->CreationTexture.IsValid())
         {
-            if (!Tile->TempTexture.IsReady())
+            if (!Tile->CreationTexture.IsReady())
             {
                 // The producer is already queued. Keep its shared state alive independently of FTile,
                 // and resolve this request on the render thread without blocking or holding Tile->Mutex.
-                TSharedFuture<TSharedPtr<FTileTextureHandle>> PendingTexture = Tile->TempTexture;
+                TSharedFuture<TSharedPtr<FTileTextureHandle>> PendingTexture = Tile->CreationTexture;
                 TileLock.Unlock();
                 ENQUEUE_RENDER_COMMAND(FOdysseyTileManager_ResolvePendingTexture)(
                     [PendingTexture, Promise = MoveTemp(Promise)](FRHICommandListImmediate&) mutable
@@ -1044,7 +1044,7 @@ FOdysseyTileManager::GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, ui
                     });
                 continue;
             }
-            TSharedPtr<FTileTextureHandle> TileTextureHandle = Tile->TempTexture.Get();
+            TSharedPtr<FTileTextureHandle> TileTextureHandle = Tile->CreationTexture.Get();
             if (TileTextureHandle.IsValid())
             {
                 Promise.SetValue(TileTextureHandle);
@@ -1053,14 +1053,14 @@ FOdysseyTileManager::GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, ui
         }
 
         //We rely directly on FTileData which is guaranteed to be valid here
-        //Because TempTexture is Null or Invalid, indicating ReadBack has finished
+        //Because CreationTexture is Null or Invalid, indicating ReadBack has finished
         //
         //We don't rely on FTile anymore
         //So we can release the lock here
         TSharedPtr<FTileData> TileData = Tile->TileData.Get();
         TileLock.Unlock();
 
-        //TempTexture is Null indicating ReadBack has finished
+        //CreationTexture is Null indicating ReadBack has finished
         //The Tile's Buffer should be available
         //Rely on the Tile's Buffer to create a TextureRHIRef
         if (!TileData)
@@ -1336,8 +1336,8 @@ void
 FOdysseyTileManager::FTile::Initialize()
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::FTile::Initialize);
-    TempTexturePromise = MakeUnique<TPromise<TSharedPtr<FTileTextureHandle>>>();
-    TempTexture = TempTexturePromise->GetFuture().Share();
+    CreationTexturePromise = MakeUnique<TPromise<TSharedPtr<FTileTextureHandle>>>();
+    CreationTexture = CreationTexturePromise->GetFuture().Share();
     TileData = TileDataPromise.GetFuture();
 
     GPUReadBackPromise = MakeUnique<TPromise<FPartialTextureReadBack>>();
