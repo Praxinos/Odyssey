@@ -13,7 +13,7 @@
 #include "OdysseyBlendShader.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPixelFormat.h"
-#include "OdysseyRasterBlock.h"
+#include "OdysseyLegacyRasterBlock.h"
 #include "OdysseyRenderContext.h"
 #include "OdysseyStyle.h"
 #include "OdysseyTextureLayerImageRasterImport.h"

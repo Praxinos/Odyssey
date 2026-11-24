@@ -17,7 +17,7 @@
 #include "OdysseyMediaRaster.h"
 #include "OdysseyAnimationCellImageRasterImport.h"
 #include "OdysseyAnimationLayerImageRaster.h"
-#include "OdysseyRasterBlock.h"
+#include "OdysseyLegacyRasterBlock.h"
 #include "UObject/ObjectSaveContext.h"
 #include "ScopedTransaction.h"
 

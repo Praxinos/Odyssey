@@ -3,7 +3,7 @@
 
 #include "OdysseyTextureLayerImageRasterImport.h"
 #include "OdysseyTextureLayerImageRaster.h"
-#include "OdysseyRasterBlock.h"
+#include "OdysseyLegacyRasterBlock.h"
 #include "OdysseyFile.h"
 
 bool

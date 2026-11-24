@@ -1,18 +1,19 @@
 // IDDN.FR.001.060015.015.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-#include "OdysseyRasterBlock.h"
+#include "OdysseyLegacyRasterBlock.h"
 
 #include "Serialization/EditorBulkData.h"
 
 #include "OdysseyDiskCache.h"
 #include "OdysseyFile.h"
 
-#define FOdysseyRasterBlock_CACHE_NAME TEXT("OdysseyRasterBlock")
-#define FOdysseyRasterBlock_CACHE_VERSION TEXT("A6ED84107BAD11EDA1EB0242AC120002")
-
 namespace
 {
+/** The disk cache the former raster blocks kept a copy of their pixels in; its entries are removed when read. */
+constexpr const TCHAR* LegacyRasterBlockCacheName = TEXT("OdysseyRasterBlock");
+constexpr const TCHAR* LegacyRasterBlockCacheVersion = TEXT("A6ED84107BAD11EDA1EB0242AC120002");
+
 /** The fields of a saved raster block. */
 struct FLegacyRasterBlock
 {
@@ -112,7 +113,7 @@ Odyssey::ReadLegacyRasterBlock(FArchive& Ar, UObject& Owner)
     }
 
     // The former raster blocks kept a copy of their pixels in a disk cache, which is no longer read.
-    FOdysseyDiskCache Cache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION);
+    FOdysseyDiskCache Cache(LegacyRasterBlockCacheName, LegacyRasterBlockCacheVersion);
     Cache.Remove(Block.Id.ToString());
 
     if (Block.Width <= 0 || Block.Height <= 0 || !Block.BulkData.HasPayloadData())

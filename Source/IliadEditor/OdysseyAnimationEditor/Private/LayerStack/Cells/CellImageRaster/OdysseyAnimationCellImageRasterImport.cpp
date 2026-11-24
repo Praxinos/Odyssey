@@ -5,7 +5,7 @@
 
 #include "OdysseyAnimationCellImageRaster.h"
 #include "OdysseyFile.h"
-#include "OdysseyRasterBlock.h"
+#include "OdysseyLegacyRasterBlock.h"
 
 bool
 FOdysseyAnimationCellImageRasterImport::Read( UOdysseyAnimationCellImageRaster* iAnimationCellImageRaster
