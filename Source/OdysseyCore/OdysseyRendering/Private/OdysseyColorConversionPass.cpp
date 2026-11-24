@@ -88,7 +88,10 @@ private:
             {
                 GShaderCompilingManager->ProcessAsyncResults(false, true);
             }
+#if WITH_EDITOR
+            // In cooked builds the transform shaders are cooked: only the editor compiles them.
             GOpenColorIOShaderCompilationManager.ProcessAsyncResults();
+#endif
             FlushRenderingCommands();
             FPlatformProcess::Sleep(0.01f);
         }
