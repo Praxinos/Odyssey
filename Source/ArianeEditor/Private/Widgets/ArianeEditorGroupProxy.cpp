@@ -15,8 +15,7 @@ UArianeEditorGroupProxy::~UArianeEditorGroupProxy()
 }
 
 UArianeEditorGroupProxy::UArianeEditorGroupProxy()
-    : HUDForegroundColor ( GetDefault<UArianeEditorSettings>() ? GetDefault<UArianeEditorSettings>()->GetHUDForegroundColor()
-                                                               : FColor::Black )
+    : HUDForegroundColor ( GetDefault<UArianeEditorSettings>()->GetHUDForegroundColor() )
 {
     const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
 

@@ -30,6 +30,8 @@
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
+FColor UArianePainting3DComponent::HUDForegroundColor = FColor( 0, 169, 157, 255 ); // Odyssey's teal
+
 UArianePainting3DComponent::~UArianePainting3DComponent()
 {
 }
@@ -40,7 +42,6 @@ UArianePainting3DComponent::UArianePainting3DComponent(const FObjectInitializer&
     , DefaultMaterial ( nullptr )
     , bCastShadows ( true )
     , CurrentPaletteColorEntry ( nullptr )
-    , EditorInterface ( nullptr )
 {
     LayerStack = ObjectInitializer.CreateDefaultSubobject<UArianeLayerStack>(this, TEXT("LayerStack"));
     LayerStack->SetupAttachment( this );
@@ -77,14 +78,6 @@ UArianePainting3DComponent::GetStaticMeshComponent()
 {
     return StaticMeshComponent;
 }
-
-#if WITH_EDITOR
-void
-UArianePainting3DComponent::SetEditorInterface( IArianePainting3DComponentEditorInterface* InEditorInterface )
-{
-    EditorInterface = InEditorInterface;
-}
-#endif
 
 UMaterialInstanceDynamic*
 UArianePainting3DComponent::GetDefaultMaterial()
@@ -371,7 +364,14 @@ UArianePainting3DComponent::SetCurrentPaletteColorEntry( UOdysseyPaletteEntryCol
 FColor
 UArianePainting3DComponent::GetHUDForegroundColor()
 {
-    return EditorInterface ? EditorInterface->GetHUDForegroundColor() : FColor::Black;
+    return HUDForegroundColor;
+}
+
+// static
+void
+UArianePainting3DComponent::SetHUDForegroundColor( const FColor& InHUDForegroundColor )
+{
+    HUDForegroundColor = InHUDForegroundColor;
 }
 
 #if WITH_EDITOR

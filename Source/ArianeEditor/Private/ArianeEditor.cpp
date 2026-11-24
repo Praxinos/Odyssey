@@ -978,12 +978,6 @@ FArianeEditor::OnEditorSelectionChanged( UObject* NewSelection )
             }
         }
 
-        // allow the component to communicate with the Editor to retrieve Environnement Settings
-        if( CurrentPainting3DComponent.Get() )
-        {
-            CurrentPainting3DComponent->SetEditorInterface( this );
-        }
-
         OnPost3DPaintingComponentSelectionChanged.Broadcast();
     }
 }
@@ -996,14 +990,6 @@ FArianeEditor::SetCurrentPainting3DComponent( UArianePainting3DComponent* InPain
     CurrentPainting3DComponent = InPainting3DComponent;
 
     OnPost3DPaintingComponentSelectionChanged.Broadcast();
-}
-
-FColor
-FArianeEditor::GetHUDForegroundColor()
-{
-    const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
-
-    return Settings->GetHUDForegroundColor();
 }
 
 UArianePainting3DComponent*
@@ -1085,11 +1071,13 @@ FArianeEditor::UngroupSelectedGroups()
         {
             FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
             UArianeDrawing* Drawing = VectorLayer->GetDrawing();
+            // work on a copy because we may alter the  selection
+            TArray<FArianeObject*> SelectedObjects = Drawing->GetSelectedObjects();
 
             // for undos in case a transaction is opened by the caller
             Drawing->Modify();
 
-            for( FArianeObject* SelectedObject : Drawing->GetSelectedObjects() )
+            for( FArianeObject* SelectedObject : SelectedObjects )
             {
                 if( SelectedObject != RootGroup )
                 {

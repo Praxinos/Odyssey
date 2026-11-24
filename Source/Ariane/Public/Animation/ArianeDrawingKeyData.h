@@ -37,7 +37,8 @@ protected:
     UPROPERTY( EditAnywhere )
     TArray<FInstancedStruct> InstancedKeyedObjects;
 
-    TMap<FGuid, FArianeKeyedObject*> KeyedObjectLookup;
+    // Cache: Guid -> index in InstancedKeyedObjects. Not serialized, rebuilt on first use by GetKeyedObject()
+    TMap<FGuid, int32> KeyedObjectLookup;
 };
 
 #if WITH_EDITOR

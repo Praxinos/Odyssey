@@ -249,7 +249,7 @@ UArianeLayer::OnUpdateTransform(EUpdateTransformFlags UpdateTransformFlags, ETel
 }
 
 UArianeLayer::ETraversalReturnValue
-UArianeLayer::TraverseBackwards_Private( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback )
+UArianeLayer::TraverseBackwards_Private( TFunctionRef<ETraversalReturnValue(UArianeLayer*)> Callback )
 {
     UArianeLayerFolder* ParentFolder = GetParentFolder();
     ETraversalReturnValue Ret = Callback( this );
@@ -273,7 +273,7 @@ UArianeLayer::TraverseBackwards_Private( TFunction<ETraversalReturnValue(UAriane
 }
 
 void
-UArianeLayer::TraverseBackwards( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback )
+UArianeLayer::TraverseBackwards( TFunctionRef<ETraversalReturnValue(UArianeLayer*)> Callback )
 {
     TraverseBackwards_Private( Callback );
 }

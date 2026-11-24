@@ -56,6 +56,8 @@ public:
     void SetDistanceToNewActor( double InDistanceToNewActor );
     /** Gets the HUD foreground color. */
     FColor GetHUDForegroundColor() const;
+    /** Copies the settings read by the Ariane runtime module, which cannot depend on this one. */
+    void PushRuntimeSettings() const;
     /** Sets the default matezrial to use for the path drawing tool */
     void SetDefaultPathDrawingMaterial( UMaterial* InDefaultPathDrawingMaterial );
     /** Gets the default matezrial used by the path drawing tool */

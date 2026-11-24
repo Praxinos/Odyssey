@@ -380,7 +380,8 @@ SArianeEditorCurrentObjectDetailsView::PropertyValueChanged( const FPropertyChan
 
         if( VectorLayer && CurrentObjectProxy )
         {
-            TArray<FArianeObject*>& SelectedObjects = VectorLayer->GetDrawing()->GetSelectedObjects();
+            // work on a copy because we may add the root group in the array
+            TArray<FArianeObject*> SelectedObjects = VectorLayer->GetDrawing()->GetSelectedObjects();
             FArianeGroup* RootGroup = GetRootGroup();
 
             // for undos

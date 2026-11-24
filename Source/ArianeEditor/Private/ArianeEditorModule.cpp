@@ -152,6 +152,8 @@ FArianeEditorModule::StartupModule()
     });
 
     RegisterSettings();
+    // config is loaded at this point, PostEditChangeProperty() pushes the later changes
+    GetDefault<UArianeEditorSettings>()->PushRuntimeSettings();
 
 
     // for Ariane Image tracks in the sequencer

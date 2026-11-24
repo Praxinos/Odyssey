@@ -33,19 +33,21 @@ FArianeDrawingKeyData::RecordGeometry( UArianeDrawing* RecordedDrawing )
 FArianeKeyedObject*
 FArianeDrawingKeyData::GetKeyedObject( const FGuid& ObjectGuid )
 {
-    FArianeKeyedObject** FoundObject = nullptr;
+    // The cache is not serialized: it is empty after a load, a paste or an undo
+    if( KeyedObjectLookup.Num() != InstancedKeyedObjects.Num() )
+    {
+        BuildLookup();
+    }
 
-    FoundObject = KeyedObjectLookup.Find( ObjectGuid );
+    int32* FoundIndex = KeyedObjectLookup.Find( ObjectGuid );
 
-
-    return FoundObject ? *FoundObject : nullptr;
+    return FoundIndex ? InstancedKeyedObjects[*FoundIndex].GetMutablePtr<FArianeKeyedObject>()
+                      : nullptr;
 }
 
 void
 FArianeDrawingKeyData::PostLoad()
 {
-    BuildLookup();
-
     for( FInstancedStruct& InstancedKeyedObject : InstancedKeyedObjects )
     {
         FArianeKeyedObject* KeyedObject = InstancedKeyedObject.GetMutablePtr<FArianeKeyedObject>();
@@ -57,7 +59,8 @@ FArianeDrawingKeyData::PostLoad()
 void
 FArianeDrawingKeyData::PostEditUndo()
 {
-    BuildLookup();
+    // The undone array may have the same size but other objects: let GetKeyedObject() rebuild the cache
+    KeyedObjectLookup.Empty();
 
     for( FInstancedStruct& InstancedKeyedObject : InstancedKeyedObjects )
     {
@@ -73,10 +76,10 @@ FArianeDrawingKeyData::BuildLookup()
     KeyedObjectLookup.Empty();
     KeyedObjectLookup.Reserve( InstancedKeyedObjects.Num() );
 
-    for( FInstancedStruct& InstancedKeyedObject : InstancedKeyedObjects )
+    for( int32 i = 0; i < InstancedKeyedObjects.Num(); i++ )
     {
-        FArianeKeyedObject* KeyedObject = InstancedKeyedObject.GetMutablePtr<FArianeKeyedObject>();
+        const FArianeKeyedObject* KeyedObject = InstancedKeyedObjects[i].GetPtr<FArianeKeyedObject>();
 
-        KeyedObjectLookup.Add( KeyedObject->GetGuid(), KeyedObject );
+        KeyedObjectLookup.Add( KeyedObject->GetGuid(), i );
     }
 }

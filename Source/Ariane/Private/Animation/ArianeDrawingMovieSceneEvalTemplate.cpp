@@ -78,25 +78,29 @@ void FArianeDrawingExecutionToken::Execute( const FMovieSceneContext& Context
     if ( BoundObjects.Num() > 0 )
     {
         UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>( BoundObjects[0].Get() );
-        EMovieScenePlayerStatus::Type PlaybackStatus = Player.GetPlaybackStatus();
 
-        // LA CORRECTION : Enregistrer l'état actuel (l'image par défaut) avant de la modifier.
-        // On utilise le 'PreAnimatedState' du Player.
-        Player.SavePreAnimatedState( *VectorLayer
-                                   , GetArianeDrawingAnimTypeID()
-                                   , FArianeDrawingPreAnimatedTokenProducer () );
-
-        if ( KeyData->Drawing && VectorLayer )
+        if( VectorLayer )
         {
-            bool bInteractive =( ( PlaybackStatus == EMovieScenePlayerStatus::Type::Scrubbing )
-                              || ( PlaybackStatus == EMovieScenePlayerStatus::Type::Playing   ) ) ? true : false;
+            EMovieScenePlayerStatus::Type PlaybackStatus = Player.GetPlaybackStatus();
 
-            VectorLayer->SetDrawing( KeyData->Drawing, bInteractive ? false : true );
+            // LA CORRECTION : Enregistrer l'état actuel (l'image par défaut) avant de la modifier.
+            // On utilise le 'PreAnimatedState' du Player.
+            Player.SavePreAnimatedState( *VectorLayer
+                                       , GetArianeDrawingAnimTypeID()
+                                       , FArianeDrawingPreAnimatedTokenProducer () );
 
-            VectorLayer->GetDrawing()->Animate( KeyData, NextKeyData, T );
+            if ( KeyData->Drawing )
+            {
+                bool bInteractive =( ( PlaybackStatus == EMovieScenePlayerStatus::Type::Scrubbing )
+                                  || ( PlaybackStatus == EMovieScenePlayerStatus::Type::Playing   ) ) ? true : false;
 
-            VectorLayer->GetDrawing()->GetRootGroup()->UpdateTransform();
-            VectorLayer->Update( bInteractive );
+                VectorLayer->SetDrawing( KeyData->Drawing, bInteractive ? false : true );
+
+                VectorLayer->GetDrawing()->Animate( KeyData, NextKeyData, T );
+
+                VectorLayer->GetDrawing()->GetRootGroup()->UpdateTransform();
+                VectorLayer->Update( bInteractive );
+            }
         }
     }
 }

@@ -53,7 +53,7 @@ public:
      * @brief Recursively execute a function
      * @param Callback the function to run
      */
-    static void Traverse( UArianeLayerFolder* FolderLayer, TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
+    static void Traverse( UArianeLayerFolder* FolderLayer, TFunctionRef<ETraversalReturnValue(UArianeLayer*)> Callback );
 
     //virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
     virtual void OnRegister() override;
@@ -67,7 +67,7 @@ public:
     UArianeLayer* GetPreviousChild( UArianeLayer* Child );
 
 protected:
-    static ETraversalReturnValue Traverse_Private( UArianeLayerFolder* FolderLayer, TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
+    static ETraversalReturnValue Traverse_Private( UArianeLayerFolder* FolderLayer, TFunctionRef<ETraversalReturnValue(UArianeLayer*)> Callback );
 
 
 protected:

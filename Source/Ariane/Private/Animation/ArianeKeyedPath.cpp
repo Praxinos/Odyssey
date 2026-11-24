@@ -45,23 +45,37 @@ FArianeKeyedPath::FArianeKeyedPath( FArianePath* Path )
 FArianeKeyedVertex*
 FArianeKeyedPath::GetKeyedVertex( const FGuid& VertexGuid )
 {
-    FArianeKeyedVertex** FoundVertex = nullptr;
+    // The cache is not serialized: it is empty after a load, a paste or an undo
+    if( KeyedVertexLookup.Num() != KeyedVertices.Num() )
+    {
+        BuildVertexLookup();
+    }
 
-    FoundVertex = KeyedVertexLookup.Find( VertexGuid );
+    int32* FoundIndex = KeyedVertexLookup.Find( VertexGuid );
 
-
-    return FoundVertex ? *FoundVertex : nullptr;
+    return FoundIndex ? &KeyedVertices[*FoundIndex]
+                      : nullptr;
 }
 
 FArianeKeyedSegment*
 FArianeKeyedPath::GetKeyedSegment( const FGuid& SegmentGuid )
 {
-    FArianeKeyedSegment** FoundSegment = nullptr;
+    // The cache is not serialized: it is empty after a load, a paste or an undo
+    if( KeyedSegmentLookup.Num() != ( KeyedCubicSegments.Num() + KeyedLinearSegments.Num() ) )
+    {
+        BuildSegmentLookup();
+    }
 
-    FoundSegment = KeyedSegmentLookup.Find( SegmentGuid );
+    int32* FoundIndex = KeyedSegmentLookup.Find( SegmentGuid );
 
+    if( FoundIndex )
+    {
+        // Cubic segments come first in the index space
+        return ( *FoundIndex < KeyedCubicSegments.Num() ) ? static_cast<FArianeKeyedSegment*>( &KeyedCubicSegments[*FoundIndex] )
+                                                          : &KeyedLinearSegments[*FoundIndex - KeyedCubicSegments.Num()];
+    }
 
-    return FoundSegment ? *FoundSegment : nullptr;
+    return nullptr;
 }
 
 const FColor&
@@ -74,9 +88,6 @@ void
 FArianeKeyedPath::PostLoad()
 {
     Super::PostLoad();
-
-    BuildVertexLookup();
-    BuildSegmentLookup();
 }
 
 void
@@ -84,8 +95,9 @@ FArianeKeyedPath::PostEditUndo()
 {
     Super::PostEditUndo();
 
-    BuildVertexLookup();
-    BuildSegmentLookup();
+    // The undone arrays may have the same size but other elements: let the getters rebuild the caches
+    KeyedVertexLookup.Empty();
+    KeyedSegmentLookup.Empty();
 }
 
 void
@@ -94,9 +106,9 @@ FArianeKeyedPath::BuildVertexLookup()
     KeyedVertexLookup.Empty();
     KeyedVertexLookup.Reserve( KeyedVertices.Num() );
 
-    for( FArianeKeyedVertex& KeyedVertex : KeyedVertices )
+    for( int32 i = 0; i < KeyedVertices.Num(); i++ )
     {
-        KeyedVertexLookup.Add( KeyedVertex.GetGuid(), &KeyedVertex );
+        KeyedVertexLookup.Add( KeyedVertices[i].GetGuid(), i );
     }
 }
 
@@ -106,8 +118,13 @@ FArianeKeyedPath::BuildSegmentLookup()
     KeyedSegmentLookup.Empty();
     KeyedSegmentLookup.Reserve( KeyedCubicSegments.Num() + KeyedLinearSegments.Num() );
 
-    for( FArianeKeyedSegmentCubic& KeyedCubicSegment : KeyedCubicSegments )
+    for( int32 i = 0; i < KeyedCubicSegments.Num(); i++ )
     {
-        KeyedSegmentLookup.Add( KeyedCubicSegment.GetGuid(), &KeyedCubicSegment );
+        KeyedSegmentLookup.Add( KeyedCubicSegments[i].GetGuid(), i );
+    }
+
+    for( int32 i = 0; i < KeyedLinearSegments.Num(); i++ )
+    {
+        KeyedSegmentLookup.Add( KeyedLinearSegments[i].GetGuid(), KeyedCubicSegments.Num() + i );
     }
 }

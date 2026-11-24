@@ -221,7 +221,7 @@ public:
         * @brief Run a function to each object of the object tree
         * @param Callback the function to run
         */
-    static void Traverse( FArianeObject* Object, ETraversalPolicy TraversalPolicy, TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
+    static void Traverse( FArianeObject* Object, ETraversalPolicy TraversalPolicy, TFunctionRef<ETraversalReturnValue(FArianeObject*)> Callback );
 
     /** Get object's parent object */
     FArianeObject* GetParent();
@@ -288,11 +288,11 @@ public:
     void SetVisible( bool bInVisible );
     void SetName( const FName& InName );
     void SetSelected( bool bInSelected );
-    static void TraverseBackwards( FArianeObject* Object, TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
+    static void TraverseBackwards( FArianeObject* Object, TFunctionRef<ETraversalReturnValue(FArianeObject*)> Callback );
 
     FArianeObject* Copy( const FCopyArgs& CopyArgs
-                       , TFunction<void( FArianeObject*, const FCopyArgs& )> PreCallback
-                       , TFunction<void( FArianeObject*, FArianeObject*, const FCopyArgs& )> PostCallback );
+                       , TFunctionRef<void( FArianeObject*, const FCopyArgs& )> PreCallback
+                       , TFunctionRef<void( FArianeObject*, FArianeObject*, const FCopyArgs& )> PostCallback );
     FArianeObject* Copy( const FCopyArgs& CopyArgs );
     void AddTag( FArianeTag* Tag );
     EArianeAllocationModel GetAllocationModel();
@@ -336,8 +336,8 @@ protected:
 
     static ETraversalReturnValue Traverse_Private( FArianeObject* Object
                                                  , ETraversalPolicy TraversalPolicy
-                                                 , TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
-    static ETraversalReturnValue TraverseBackwards_Private( FArianeObject* Object, TFunction<ETraversalReturnValue(FArianeObject*)> Callback );
+                                                 , TFunctionRef<ETraversalReturnValue(FArianeObject*)> Callback );
+    static ETraversalReturnValue TraverseBackwards_Private( FArianeObject* Object, TFunctionRef<ETraversalReturnValue(FArianeObject*)> Callback );
 
     static uint32 CheckCommonClass( const TArray<FArianeObject*>& Objects, uint32 CommonClass );
 

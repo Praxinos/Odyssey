@@ -48,6 +48,8 @@ protected:
     UPROPERTY( EditAnywhere )
     FColor KeyedColor;
 
-    TMap<FGuid, FArianeKeyedVertex*> KeyedVertexLookup;
-    TMap<FGuid, FArianeKeyedSegment*> KeyedSegmentLookup;
+    // Caches: Guid -> index. Not serialized, rebuilt on first use by GetKeyedVertex() and GetKeyedSegment()
+    TMap<FGuid, int32> KeyedVertexLookup;
+    // Index in KeyedCubicSegments, then in KeyedLinearSegments past KeyedCubicSegments.Num()
+    TMap<FGuid, int32> KeyedSegmentLookup;
 };

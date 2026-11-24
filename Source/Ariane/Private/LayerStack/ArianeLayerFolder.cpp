@@ -204,7 +204,7 @@ void UArianeLayerFolder::OnChildDetached( USceneComponent* ChildComponent )
 
 // static
 UArianeLayerFolder::ETraversalReturnValue
-UArianeLayerFolder::Traverse_Private( UArianeLayerFolder* FolderLayer, TFunction<ETraversalReturnValue(UArianeLayer*)> Callback )
+UArianeLayerFolder::Traverse_Private( UArianeLayerFolder* FolderLayer, TFunctionRef<ETraversalReturnValue(UArianeLayer*)> Callback )
 {
     ETraversalReturnValue Ret = Callback( FolderLayer );
 
@@ -233,7 +233,7 @@ UArianeLayerFolder::Traverse_Private( UArianeLayerFolder* FolderLayer, TFunction
 
 // static
 void
-UArianeLayerFolder::Traverse( UArianeLayerFolder* FolderLayer, TFunction<ETraversalReturnValue(UArianeLayer*)> Callback )
+UArianeLayerFolder::Traverse( UArianeLayerFolder* FolderLayer, TFunctionRef<ETraversalReturnValue(UArianeLayer*)> Callback )
 {
     Traverse_Private( FolderLayer, Callback );
 }

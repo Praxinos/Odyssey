@@ -514,7 +514,7 @@ FArianeObject::GetInvalidatedChildren( TArray<FArianeObject*> OutInvalidatedObje
 FArianeObject::ETraversalReturnValue
 FArianeObject::Traverse_Private( FArianeObject* Object
                                , ETraversalPolicy TraversalPolicy
-                               , TFunction<ETraversalReturnValue(FArianeObject*)> Callback )
+                               , TFunctionRef<ETraversalReturnValue(FArianeObject*)> Callback )
 {
     UArianeDrawing* Drawing = Object->GetDrawing();
     ETraversalReturnValue Ret = Callback( Object );
@@ -526,25 +526,33 @@ FArianeObject::Traverse_Private( FArianeObject* Object
 
     if( ( Ret == ETraversalReturnValue::IgnoreChildren ) == 0 )
     {
-        TArray<FArianeObject*> ChildrenToTraverse;
+        // No copy: the callbacks must not modify the traversed children
+        TArray<FArianeObject*>* ChildrenToTraverse = nullptr;
 
-        if ( TraversalPolicy == ETraversalPolicy::AllChildren )
+        switch( TraversalPolicy )
         {
-            ChildrenToTraverse = Object->GetChildren();
+            case ETraversalPolicy::AllChildren :
+                ChildrenToTraverse = &Object->GetChildren();
+            break;
+
+            case ETraversalPolicy::InvalidatedChildren :
+                ChildrenToTraverse = &Object->GetInvalidatedChildren();
+            break;
+
+            default:
+            break;
         }
 
-        if ( TraversalPolicy == ETraversalPolicy::InvalidatedChildren )
+        if( ChildrenToTraverse )
         {
-            ChildrenToTraverse = Object->GetInvalidatedChildren();
-        }
-
-        for( FArianeObject* Child : ChildrenToTraverse )
-        {
-            ETraversalReturnValue ChildRet = Traverse_Private( Child, TraversalPolicy, Callback );
-
-            if( ChildRet == ETraversalReturnValue::Stop )
+            for( FArianeObject* Child : *ChildrenToTraverse )
             {
-                return ChildRet;
+                ETraversalReturnValue ChildRet = Traverse_Private( Child, TraversalPolicy, Callback );
+
+                if( ChildRet == ETraversalReturnValue::Stop )
+                {
+                    return ChildRet;
+                }
             }
         }
     }
@@ -553,14 +561,14 @@ FArianeObject::Traverse_Private( FArianeObject* Object
 }
 
 void
-FArianeObject::Traverse( FArianeObject* Object, ETraversalPolicy TraversalPolicy, TFunction<ETraversalReturnValue(FArianeObject*)> Callback )
+FArianeObject::Traverse( FArianeObject* Object, ETraversalPolicy TraversalPolicy, TFunctionRef<ETraversalReturnValue(FArianeObject*)> Callback )
 {
     Traverse_Private( Object, TraversalPolicy, Callback );
 }
 
 // static
 FArianeObject::ETraversalReturnValue
-FArianeObject::TraverseBackwards_Private( FArianeObject* Object, TFunction<ETraversalReturnValue(FArianeObject*)> Callback )
+FArianeObject::TraverseBackwards_Private( FArianeObject* Object, TFunctionRef<ETraversalReturnValue(FArianeObject*)> Callback )
 {
     ETraversalReturnValue Ret = Callback( Object );
     FArianeObject* Parent = Object->GetParent();
@@ -585,7 +593,7 @@ FArianeObject::TraverseBackwards_Private( FArianeObject* Object, TFunction<ETrav
 
 // static
 void
-FArianeObject::TraverseBackwards( FArianeObject* Object, TFunction<ETraversalReturnValue(FArianeObject*)> Callback )
+FArianeObject::TraverseBackwards( FArianeObject* Object, TFunctionRef<ETraversalReturnValue(FArianeObject*)> Callback )
 {
     TraverseBackwards_Private( Object, Callback );
 }
@@ -1158,8 +1166,8 @@ FArianeObject::CopyShape( const FCopyArgs& CopyArgs )
 
 FArianeObject*
 FArianeObject::Copy( const FCopyArgs& CopyArgs
-                   , TFunction<void( FArianeObject*, const FCopyArgs& )> PreCallback
-                   , TFunction<void( FArianeObject*, FArianeObject*, const FCopyArgs& )> PostCallback )
+                   , TFunctionRef<void( FArianeObject*, const FCopyArgs& )> PreCallback
+                   , TFunctionRef<void( FArianeObject*, FArianeObject*, const FCopyArgs& )> PostCallback )
 {
     PreCallback( this, CopyArgs );
 

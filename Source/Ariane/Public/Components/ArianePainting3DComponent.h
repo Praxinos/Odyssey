@@ -14,7 +14,6 @@
 #include "RawIndexBuffer.h"
 // Ariane Headers
 #include "ArianePath.h" // for EArianePathLineType
-#include "ArianePainting3DComponentEditorInterface.h"
 // Odyssey Headers
 #include "OdysseyPalette.h"
 
@@ -91,7 +90,8 @@ public:
     FOnUpdateDelegate& OnPostUpdateDelegate();
     void Update( bool bInteractive );
     FColor GetHUDForegroundColor();
-    void SetEditorInterface( IArianePainting3DComponentEditorInterface* InEditorInterface );
+    /** Pushed by the ArianeEditor module from its settings: the runtime module cannot read them. */
+    static void SetHUDForegroundColor( const FColor& InHUDForegroundColor );
 #if WITH_EDITOR
     void ConvertToStaticMesh( TArray<UMaterialInterface*>& OutMaterialInstanceConstants
                             , TArray<UMaterialInterface*>& OutDuplicatedPDOMaterials );
@@ -132,5 +132,6 @@ protected:
     //TArray<UMaterialInterface*> UsedMaterials;
     FOnUpdateDelegate OnPreUpdate;
     FOnUpdateDelegate OnPostUpdate;
-    IArianePainting3DComponentEditorInterface* EditorInterface;
+    // Shared by every component, it is an editor preference
+    static FColor HUDForegroundColor;
 };

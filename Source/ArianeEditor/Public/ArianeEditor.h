@@ -6,7 +6,6 @@
 // Unreal
 #include "CoreMinimal.h"
 // Ariane Headers
-#include "ArianePainting3DComponentEditorInterface.h"
 #include "ArianeLayerVectorEnums.h"
 // Ariane Editor Headers
 #include "ArianeEditorHUD.h"
@@ -50,7 +49,6 @@ enum class EArianeEditorDrawingCoordinateSystem : uint8
 class ARIANEEDITOR_API FArianeEditor
     : public FGCObject //Allows us to register External UObject in Garbage Collector
     , public TSharedFromThis<FArianeEditor>
-    , public IArianePainting3DComponentEditorInterface
 {
 public:
     DECLARE_MULTICAST_DELEGATE( FOnCurrentToolChanged );
@@ -222,8 +220,6 @@ public:
 
     const FArianeEditorHUD::FDrawingFlags& GetHUDDrawingFlags();
 
-    // immplements IArianePainting3DComponentEditorInterface::GetHUDForegroundColor
-    virtual FColor GetHUDForegroundColor() override;
     void SetCurrentPainting3DComponent( UArianePainting3DComponent* InPainting3DComponent );
     EArianeDrawingOrigin GetDrawingOrigin();
     EArianeDrawingOrientation GetDrawingOrientation();

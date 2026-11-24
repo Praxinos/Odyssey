@@ -111,7 +111,7 @@ public:
 
     bool IsInvalidated();
 
-    void TraverseBackwards( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
+    void TraverseBackwards( TFunctionRef<ETraversalReturnValue(UArianeLayer*)> Callback );
     void PreEditUndo();
     void PostEditUndo();
     void PostLoad();
@@ -122,7 +122,7 @@ public:
     const FString& GetDisplayName();
 
 protected:
-    ETraversalReturnValue TraverseBackwards_Private( TFunction<ETraversalReturnValue(UArianeLayer*)> Callback );
+    ETraversalReturnValue TraverseBackwards_Private( TFunctionRef<ETraversalReturnValue(UArianeLayer*)> Callback );
     virtual void PropertyChanged( const FName& iPropertyName
                                 , const FName& iMemberPropertyName
                                 , const FName& iCategory );

@@ -2,6 +2,8 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "ArianeEditorSettings.h"
+// Ariane headers
+#include "ArianePainting3DComponent.h"
 
 #include "Editor.h"
 #include "Editor/EditorEngine.h"
@@ -38,6 +40,8 @@ UArianeEditorSettings::PostEditChangeProperty( FPropertyChangedEvent& PropertyCh
     {
         //OnGridSizeChanged.Broadcast();
     }
+
+    PushRuntimeSettings();
 
     Super::PostEditChangeProperty( PropertyChangedEvent );
 }
@@ -139,6 +143,12 @@ FColor
 UArianeEditorSettings::GetHUDForegroundColor() const
 {
     return HUDForegroundColor;
+}
+
+void
+UArianeEditorSettings::PushRuntimeSettings() const
+{
+    UArianePainting3DComponent::SetHUDForegroundColor( HUDForegroundColor );
 }
 
 void
