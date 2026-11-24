@@ -19,8 +19,8 @@ TUniquePtr<IOdysseyRenderContextExtension> FOdysseyLayerStackRenderContext::Clon
     return Copy;
 }
 
-const FOdysseyLayerStackRenderOverride* FOdysseyLayerStackRenderContext::Find(const FGuid& Id) const
+const FOdysseyLayerPropertiesOverride* FOdysseyLayerStackRenderContext::Find(const FGuid& Id) const
 {
-    const FOdysseyLayerStackRenderOverride* LayerOverride = Overrides.Find(Id);
+    const FOdysseyLayerPropertiesOverride* LayerOverride = Overrides.Find(Id);
     return LayerOverride && (!bLighttablePass || LayerOverride->bApplyToLighttable) ? LayerOverride : nullptr;
 }

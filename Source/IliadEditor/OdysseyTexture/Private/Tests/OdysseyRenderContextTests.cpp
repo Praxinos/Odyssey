@@ -67,7 +67,7 @@ bool FOdysseyRenderContextTest::RunTest(const FString& Parameters)
     TestFalse(TEXT("Copied request retains independent layer settings"),
         Context.GetExtension<FOdysseyLayerStackRenderContext>()->bUseDisplayOnlyCurrentLayer);
     FOdysseyRenderOverride& Override = Context.Overrides.FindOrAdd(Layer->GetRenderingId());
-    FOdysseyLayerStackRenderOverride& LayerOverride = LayerContext.Overrides.FindOrAdd(Layer->GetRenderingId());
+    FOdysseyLayerPropertiesOverride& LayerOverride = LayerContext.Overrides.FindOrAdd(Layer->GetRenderingId());
     Override.RenderReplacement = Solid(FLinearColor::Red);
     LayerOverride.Opacity = 0.5f;
     TArray<FLinearColor> Pixels = Read(Stack, &Context);

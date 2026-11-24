@@ -86,7 +86,7 @@ UOdysseyAnimationLayer::BuildRenderPipelineInternal(
     }
     if (!renderFunction) return false;
     const FOdysseyLayerStackRenderContext* LayerContext = RenderContext ? RenderContext->GetExtension<FOdysseyLayerStackRenderContext>() : nullptr;
-    const FOdysseyLayerStackRenderOverride* LayerOverride = LayerContext ? LayerContext->Find(GetRenderingId()) : nullptr;
+    const FOdysseyLayerPropertiesOverride* LayerOverride = LayerContext ? LayerContext->Find(GetRenderingId()) : nullptr;
     const FOdysseyLighttable EffectiveLighttable = LayerOverride && LayerOverride->Lighttable ? *LayerOverride->Lighttable : Lighttable;
     bool showLighttable = Type & EOdysseyRenderingType::Editor && EffectiveLighttable.bIsActivated;
     EOdysseyLighttableDisplayPosition lighttablePosition = EffectiveLighttable.DisplayPosition;
@@ -256,7 +256,7 @@ UOdysseyAnimationLayer::BuildLighttableRenderPipeline(
     const FOdysseyAnimationRenderContext* AnimationContext = RenderContext ? RenderContext->GetExtension<FOdysseyAnimationRenderContext>() : nullptr;
     const FFrameNumber Frame = AnimationContext ? AnimationContext->Frame.Get(FFrameNumber(0)) : FFrameNumber(0);
     const FOdysseyLayerStackRenderContext* LayerContext = RenderContext ? RenderContext->GetExtension<FOdysseyLayerStackRenderContext>() : nullptr;
-    const FOdysseyLayerStackRenderOverride* LayerOverride = LayerContext ? LayerContext->Find(GetRenderingId()) : nullptr;
+    const FOdysseyLayerPropertiesOverride* LayerOverride = LayerContext ? LayerContext->Find(GetRenderingId()) : nullptr;
     const FOdysseyLighttable EffectiveLighttable = LayerOverride && LayerOverride->Lighttable ? *LayerOverride->Lighttable : Lighttable;
     FOdysseyRenderContext LighttableContext = RenderContext ? *RenderContext : FOdysseyRenderContext();
     LighttableContext.Type = EOdysseyRenderingType::Render;

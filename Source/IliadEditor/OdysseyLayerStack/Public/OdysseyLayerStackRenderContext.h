@@ -12,7 +12,7 @@ struct FOdysseyLighttable;
  * Unset values keep the properties of the layer. Part of the render override API: a request may set them, e.g. to render
  * a layer hidden or with another opacity.
  */
-struct ODYSSEYLAYERSTACK_API FOdysseyLayerStackRenderOverride
+struct ODYSSEYLAYERSTACK_API FOdysseyLayerPropertiesOverride
 {
     TOptional<bool> bVisible;
     TOptional<float> Opacity;
@@ -40,10 +40,10 @@ struct ODYSSEYLAYERSTACK_API FOdysseyLayerStackRenderContext : IOdysseyRenderCon
     virtual TUniquePtr<IOdysseyRenderContextExtension> Clone() const override;
 
     /** Returns the override of a layer, by its rendering id; null when none applies, e.g. during a lighttable pass. */
-    const FOdysseyLayerStackRenderOverride* Find(const FGuid& Id) const;
+    const FOdysseyLayerPropertiesOverride* Find(const FGuid& Id) const;
 
     /** The overrides, by rendering id of the layer. */
-    TMap<FGuid, FOdysseyLayerStackRenderOverride> Overrides;
+    TMap<FGuid, FOdysseyLayerPropertiesOverride> Overrides;
 
     /** True while the lighttable keys are rendered: only overrides with bApplyToLighttable apply. */
     bool bLighttablePass = false;

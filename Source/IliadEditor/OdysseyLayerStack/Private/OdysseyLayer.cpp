@@ -537,7 +537,7 @@ struct FResolvedLayerSettings
 };
 
 FResolvedLayerSettings
-ResolveLayerSettings(const UOdysseyLayer& Layer, const FOdysseyLayerStackRenderOverride* Override)
+ResolveLayerSettings(const UOdysseyLayer& Layer, const FOdysseyLayerPropertiesOverride* Override)
 {
     FResolvedLayerSettings Settings{ Layer.IsActivated(), Layer.GetOpacity(), Layer.GetBlendMode(), Layer.GetInheritsAlpha() };
     if (Override)
