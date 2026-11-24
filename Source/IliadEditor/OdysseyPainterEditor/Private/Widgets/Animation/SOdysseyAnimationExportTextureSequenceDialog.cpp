@@ -165,7 +165,7 @@ FOdysseyAnimationTextureSequenceExporter::GetSourceRange(const FSource& iSource)
 TArray<FOdysseyAnimationTextureSequenceExporter::FSource>
 FOdysseyAnimationTextureSequenceExporter::GetSources()
 {
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(mAnimation));
+    UOdysseyAnimationLayerStack* layerStack = OdysseyAnimationEditor::GetLayerStack(mAnimation);
     switch(mSource)
     {
         case EOdysseyAnimationExportTextureSequenceSource::Animation:
@@ -343,8 +343,7 @@ FOdysseyAnimationTextureSequenceExporter::ExportSource(const FSource& iSource, c
             imageName += TEXT("0");
         }
         imageName += FString::Printf(TEXT("%d"), i);
-        FOdysseyRenderContext RenderContext;
-        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(i);
+        FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(FFrameNumber(i));
         Odyssey::ExportAsTexture(iSource.mTextureRenderingAbility, &RenderContext, imageName, folder);
     }
 }

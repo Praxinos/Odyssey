@@ -216,8 +216,7 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
             if ( !layer )
                 continue;
 
-            FOdysseyRenderContext RenderContext;
-            RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(frame);
+            FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(FFrameNumber(frame));
             layer->Render_GameThread(layerRenderTarget.Get(), EOdysseyRenderingType::Render, &RenderContext);
 
             const ERHIFeatureLevel::Type featureLevel = GMaxRHIFeatureLevel;

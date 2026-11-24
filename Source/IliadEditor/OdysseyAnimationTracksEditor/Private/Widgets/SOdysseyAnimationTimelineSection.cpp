@@ -202,7 +202,7 @@ SOdysseyAnimationTimelineSection::RebuildWidgets()
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = OdysseyAnimationEditor::GetLayerStack(animation);
 
     TSharedRef<SEnumComboBox> preBehaviourComboBoxWidget = SNew(SEnumComboBox, StaticEnum<EOdysseyAnimationPlayerPostBehaviour>())
         .Clipping(EWidgetClipping::ClipToBounds)

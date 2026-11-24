@@ -182,7 +182,7 @@ SOdysseyAnimationPlaybackControls::GetNotLoopingButtonVisibility() const
 FReply
 SOdysseyAnimationPlaybackControls::OnPlayClicked()
 {
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(mAnimation));
+    UOdysseyAnimationLayerStack* layerStack = OdysseyAnimationEditor::GetLayerStack(mAnimation);
     if (!layerStack)
         return FReply::Unhandled();
 
@@ -218,7 +218,7 @@ SOdysseyAnimationPlaybackControls::OnPlayClicked()
 FReply
 SOdysseyAnimationPlaybackControls::OnPlayBackwardClicked()
 {
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(mAnimation));
+    UOdysseyAnimationLayerStack* layerStack = OdysseyAnimationEditor::GetLayerStack(mAnimation);
     if (!layerStack)
         return FReply::Unhandled();
 
@@ -291,7 +291,7 @@ SOdysseyAnimationPlaybackControls::OnPreviousKeyClicked()
     if (!animation)
         return FReply::Handled();
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = OdysseyAnimationEditor::GetLayerStack(animation);
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
 
     if (layer->GetCells().IsEmpty())
@@ -334,7 +334,7 @@ SOdysseyAnimationPlaybackControls::OnNextKeyClicked()
     if (!animation)
         return FReply::Handled();
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = OdysseyAnimationEditor::GetLayerStack(animation);
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
 
     if (layer->GetCells().IsEmpty())

@@ -802,8 +802,7 @@ FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimation
         }
 
         // Render the animation into the render target
-        FOdysseyRenderContext RenderContext;
-        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = frame_in_timeline;
+        FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(frame_in_timeline);
         animation->RenderAndResize_GameThread(mBuildRenderTargetTmp, EOdysseyRenderingType::Render, &RenderContext);
 
         // Let's see if a old no more used compatible texture is available

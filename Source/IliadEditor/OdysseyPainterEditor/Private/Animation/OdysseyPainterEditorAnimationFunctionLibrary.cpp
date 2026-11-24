@@ -71,8 +71,7 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ExportFrameAsImage(
     if (!Animation)
         return TEXT("");
 
-    FOdysseyRenderContext RenderContext;
-    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(Frame);
+    FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(FFrameNumber(Frame));
     return Odyssey::ExportAsImage(Animation, &RenderContext, Format, Filename, Path );
 }
 
@@ -87,8 +86,7 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ExportFrameAsTexture(
     if (!Animation)
         return nullptr;
 
-    FOdysseyRenderContext RenderContext;
-    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(Frame);
+    FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(FFrameNumber(Frame));
     return Odyssey::ExportAsTexture(Animation, &RenderContext, Filename, Path );
 }
 
@@ -172,8 +170,7 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportFrameAsImage(
     if (!Layer)
         return TEXT("");
 
-    FOdysseyRenderContext RenderContext;
-    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(Frame);
+    FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(FFrameNumber(Frame));
     return Odyssey::ExportAsImage(Layer, &RenderContext, Format, Filename, Path );
 }
 
@@ -188,8 +185,7 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportFrameAsTexture(
     if (!Layer)
         return nullptr;
 
-    FOdysseyRenderContext RenderContext;
-    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(Frame);
+    FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(FFrameNumber(Frame));
     return Odyssey::ExportAsTexture(Layer, &RenderContext, Filename, Path );
 }
 

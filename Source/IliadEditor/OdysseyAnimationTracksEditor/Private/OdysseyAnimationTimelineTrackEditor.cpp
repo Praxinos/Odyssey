@@ -456,7 +456,7 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
                                 if (!animation)
                                     return nullptr;
 
-                                return Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
+                                return OdysseyAnimationEditor::GetLayerStack(animation);
                             }
                         )
                 ]

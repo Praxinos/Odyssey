@@ -104,8 +104,7 @@ namespace
 
         TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(iLayer->CreateRenderingRenderTarget());
         renderTarget->InitAutoFormat(rect.w, rect.h);
-        FOdysseyRenderContext RenderContext;
-        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(frame);
+        FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(FFrameNumber(frame));
         iLayer->Render_GameThread(renderTarget.Get(), EOdysseyRenderingType::Render, ::ULISUtils::ToIntRect(rect), FIntPoint(0, 0), &RenderContext);
 
         FImage OutImage;

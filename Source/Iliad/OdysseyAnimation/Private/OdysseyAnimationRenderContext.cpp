@@ -10,6 +10,13 @@ FName FOdysseyAnimationRenderContext::TypeName()
     return TEXT("OdysseyAnimation");
 }
 
+FOdysseyRenderContext FOdysseyAnimationRenderContext::MakeForFrame(FFrameNumber InFrame)
+{
+    FOdysseyRenderContext RenderContext;
+    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = InFrame;
+    return RenderContext;
+}
+
 TUniquePtr<IOdysseyRenderContextExtension> FOdysseyAnimationRenderContext::Clone() const
 {
     TUniquePtr<FOdysseyAnimationRenderContext> Copy = MakeUnique<FOdysseyAnimationRenderContext>();

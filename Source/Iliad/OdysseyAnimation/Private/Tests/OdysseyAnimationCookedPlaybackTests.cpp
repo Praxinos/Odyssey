@@ -73,8 +73,7 @@ bool FOdysseyAnimationCookedPlaybackTest::RunTest(const FString& Parameters)
     TArray<FLinearColor> SecondPixels;
     for (int32 Frame = 0; Frame < 5; ++Frame)
     {
-        FOdysseyRenderContext RenderContext;
-        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(Frame);
+        FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(FFrameNumber(Frame));
         Animation->Render_GameThread(Target.Get(), EOdysseyRenderingType::Render, &RenderContext);
         FlushRenderingCommands();
         TArray<FLinearColor> Pixels;

@@ -539,8 +539,7 @@ UOdysseyAnimation::PreSave(FObjectPreSaveContext SaveContext)
 
         lastRenderingComposition = renderingComposition;
 
-        FOdysseyRenderContext RenderContext;
-        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(i);
+        FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(FFrameNumber(i));
         Render_GameThread(renderTarget.Get(), EOdysseyRenderingType::Render, &RenderContext);
 
 

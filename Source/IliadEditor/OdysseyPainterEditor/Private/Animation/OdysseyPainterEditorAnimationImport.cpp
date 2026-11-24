@@ -38,7 +38,7 @@ FOdysseyPainterEditorAnimationImport::ImportTextureSequence(UOdysseyAnimation* A
     if ( iImportData.GetSourceTextures().Num() <= 0 || !Animation )
         return result;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(Animation));
+    UOdysseyAnimationLayerStack* layerStack = OdysseyAnimationEditor::GetLayerStack(Animation);
     if ( !layerStack )
         return result;
 

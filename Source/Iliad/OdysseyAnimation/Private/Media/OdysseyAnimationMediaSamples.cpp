@@ -343,8 +343,7 @@ FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex, int
 
     mImageRenderingComposition = imageRenderingComposition;
 
-    FOdysseyRenderContext RenderContext;
-    RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(mCurrentFrameIndex);
+    FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(FFrameNumber(mCurrentFrameIndex));
     mAnimation->Render_GameThread(mRenderTarget.Get(), EOdysseyRenderingType::Render, &RenderContext);
 }
 
@@ -390,8 +389,7 @@ FOdysseyAnimationMediaSamples::Render()
 
     for (const FIntRect& rect : mInvalidTileMap.InvalidRects())
     {
-        FOdysseyRenderContext RenderContext;
-        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(mCurrentFrameIndex);
+        FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(FFrameNumber(mCurrentFrameIndex));
         mAnimation->Render_GameThread(mRenderTarget.Get(), EOdysseyRenderingType::Render, rect, &RenderContext);
     }
 

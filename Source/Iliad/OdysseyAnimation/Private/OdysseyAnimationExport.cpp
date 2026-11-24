@@ -89,8 +89,7 @@ ExportAsFlipbook(UObject* iObject, const FInt32Range& iRange, float iFramesPerSe
             spriteFactory
         ));
 
-        FOdysseyRenderContext RenderContext;
-        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(i);
+        FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(FFrameNumber(i));
         UTexture2D* texture = ExportAsTexture(iObject, &RenderContext, textureName, flipbookPackagePath);
         FOdysseyObjectEditorUtils::SetPropertyValue(sprite, "SourceTexture", TSoftObjectPtr<UTexture2D>(texture));
 
@@ -142,8 +141,7 @@ ExportAsTextureSequence(UObject* iObject, const FInt32Range& iRange, FString Ass
         FString numStr = FString::Format(TEXT("{0}"), {i});
         FString textureName = AssetName + TEXT("_") + numStr;
 
-        FOdysseyRenderContext RenderContext;
-        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(i);
+        FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(FFrameNumber(i));
         UTexture2D* texture = ExportAsTexture(iObject, &RenderContext, textureName, Path);
 
         textures.Add(texture);
@@ -197,8 +195,7 @@ ExportAsImageSequence(
         }
         filename += FString::Printf(TEXT("%d"), i);
 
-        FOdysseyRenderContext RenderContext;
-        RenderContext.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(i);
+        FOdysseyRenderContext RenderContext = FOdysseyAnimationRenderContext::MakeForFrame(FFrameNumber(i));
         FString fullpath = ExportAsImage(iObject, &RenderContext, Format, filename, Path );
 
         paths.Add(fullpath);

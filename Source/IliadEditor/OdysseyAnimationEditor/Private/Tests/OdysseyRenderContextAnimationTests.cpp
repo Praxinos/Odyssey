@@ -106,8 +106,7 @@ bool FOdysseyAnimationLayerRenderContextTest::RunTest(const FString& Parameters)
     using namespace Odyssey::AnimationTiledTests;
     TStrongObjectPtr<UOdysseyAnimation> Animation(MakeAnimation(GetTransientPackage(), EOdysseyAnimationFormat::BGRA8));
     UOdysseyAnimationLayer* Layer = CastChecked<UOdysseyAnimationLayer>(Cell(Animation.Get(), 0)->GetLayer());
-    FOdysseyRenderContext Context;
-    Context.FindOrAddExtension<FOdysseyAnimationRenderContext>().Frame = FFrameNumber(-1);
+    FOdysseyRenderContext Context = FOdysseyAnimationRenderContext::MakeForFrame(FFrameNumber(-1));
     const FLinearColor Colors[] = { FLinearColor::Red, FLinearColor::Green };
     for (int32 Index = 0; Index < 2; ++Index)
     {

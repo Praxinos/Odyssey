@@ -161,7 +161,7 @@ FOdysseyPainterEditorAnimationSource::GetLayerStack() const
     if (!mAnimation)
         return nullptr;
 
-    return Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(mAnimation));
+    return OdysseyAnimationEditor::GetLayerStack(mAnimation);
 }
 
 UOdysseyAnimationPlayer*

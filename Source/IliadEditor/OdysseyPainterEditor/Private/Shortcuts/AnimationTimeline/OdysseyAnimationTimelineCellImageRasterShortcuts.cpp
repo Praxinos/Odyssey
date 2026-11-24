@@ -265,7 +265,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_CrossFade()
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = OdysseyAnimationEditor::GetLayerStack(animation);
     if (!layerStack)
         return false;
 

@@ -42,7 +42,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = OdysseyAnimationEditor::GetLayerStack(animation);
     if (!layerStack)
         return;
 
@@ -167,7 +167,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::CanAction_ConvertToReference
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(OdysseyAnimationEditor::GetLayerStack(animation));
+    UOdysseyAnimationLayerStack* layerStack = OdysseyAnimationEditor::GetLayerStack(animation);
     if (!layerStack)
         return false;
 
