@@ -16,16 +16,19 @@ namespace
 {
 constexpr int32 MaskTileSize = 64;
 
-/** Copies an area of the mask into the alpha of a block of the tile format, so that unselected tiles are empty. */
+/**
+ * Copies an area of the mask into the alpha of a block of the tile format, so that unselected tiles are empty.
+ * oPixels is an RGBA8 block of the size of iArea.
+ */
 void CopyMaskToAlpha(const ::ULIS::FBlock& iMask, ::ULIS::FBlock& oPixels, const FIntRect& iArea)
 {
     for (int y = iArea.Min.Y; y < iArea.Max.Y; y++)
     {
         const float* maskLine = reinterpret_cast<const float*>(iMask.ScanlineBits(y));
-        uint8* pixelLine = oPixels.ScanlineBits(y);
+        uint8* pixelLine = oPixels.ScanlineBits(y - iArea.Min.Y);
         for (int x = iArea.Min.X; x < iArea.Max.X; x++)
         {
-            uint8* pixel = pixelLine + x * 4;
+            uint8* pixel = pixelLine + (x - iArea.Min.X) * 4;
             pixel[0] = pixel[1] = pixel[2] = 0;
             pixel[3] = static_cast<uint8>(FMath::RoundToInt(FMath::Clamp(maskLine[x], 0.f, 1.f) * 255.f));
         }
@@ -169,9 +172,10 @@ UOdysseyPainterEditorRasterSelection::EditMaskArea(TFunctionRef<void(::ULIS::FBl
     changed.Clip(FIntRect(0, 0, mBlock->Width(), mBlock->Height()));
     if (changed.Area() > 0)
     {
-        ::ULIS::FBlock pixels(mBlock->Width(), mBlock->Height(), ::ULIS::Format_RGBA8);
+        //Only the changed area is staged and uploaded
+        ::ULIS::FBlock pixels(changed.Width(), changed.Height(), ::ULIS::Format_RGBA8);
         CopyMaskToAlpha(*mBlock, pixels, changed);
-        Odyssey::TiledImage::CopyFromBlock(*Mask, pixels, { changed });
+        Odyssey::TiledImage::CopyFromBlock(*Mask, pixels, FIntRect(FIntPoint::ZeroValue, changed.Size()), changed.Min);
     }
 
     RefreshHUD();
