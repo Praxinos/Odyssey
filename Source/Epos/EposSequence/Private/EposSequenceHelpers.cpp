@@ -1026,10 +1026,6 @@ ShotSequenceHelpers::FindTimelineTrackAndSections( IMovieScenePlayer& iPlayer, U
 }
 
 
-
-
-
-
 bool
 FKeyOpacity::Exists()
 {
@@ -1640,9 +1636,6 @@ ShotSequenceHelpers::BuildAnimationsTransformChannelProxy( IMovieScenePlayer& iP
 
     return maps;
 }
-
-
-
 
 
 //static

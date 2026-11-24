@@ -67,28 +67,19 @@ FEposTracksEditorHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer
     {
         FChannelProxyBySectionMap map;
 
-        //---
-
         ShotSequenceHelpers::FFindOrCreateTimelineResult result = ShotSequenceHelpers::FindTimelineTrackAndSections( iPlayer, iSequence, iSequenceID, animation_binding );
 
         for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> animation_timeline_section : result.mSections )
         {
-            FMovieSceneChannelProxyData ChannelIndirection;
+            if( !animation_timeline_section.IsValid() )
+                continue;
 
-            //const FMovieSceneChannelEntry* ObjectPathChannelEntry = animation_timeline_section->GetChannelProxy().FindEntry( FMovieSceneObjectPathChannel::StaticStruct()->GetFName() );
-            //if( ObjectPathChannelEntry )
-            //{
-                ChannelIndirection.Add( UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*animation_timeline_section)->GetAnimationCutChannel(), FMovieSceneChannelMetaData() );
-            //}
+            FMovieSceneChannelProxyData ChannelIndirection;
+            ChannelIndirection.Add( UOdysseyAnimationTimelineSectionEditorData::GetOrCreate(*animation_timeline_section)->GetAnimationCutChannel(), FMovieSceneChannelMetaData() );
 
             TSharedPtr<FMovieSceneChannelProxy> ChannelProxy = MakeShared<FMovieSceneChannelProxy>( MoveTemp( ChannelIndirection ) );
 
             map.Add( animation_timeline_section, ChannelProxy );
-
-            // UDN: Hook into TransformSection::OnSignatureChangedEvent to invalidate this section's channel proxy if the transform is changed.
-            // Set the delegate to the whole subsequence, then every changes (even removing section) will call the it
-            //if( !camera_transform_section->OnSignatureChanged().IsBoundToObject( this ) )
-            //    camera_transform_section->OnSignatureChanged().AddUObject( this, &UMovieSceneCinematicBoardSection::HandleInvalidateChannelProxy );
         }
 
         maps.Add( animation_binding, map );

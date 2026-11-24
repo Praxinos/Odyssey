@@ -44,7 +44,6 @@ struct FMovieSceneChannelProxy;
 struct FMovieSceneFloatChannel;
 struct FMovieSceneObjectPathChannel;
 
-
 class UMoviePipeline;
 
 UCLASS()
@@ -58,8 +57,6 @@ public:
     UFUNCTION( BlueprintPure, Category = "Movie Render Pipeline Storyboard" )
     static TArray<UStoryNote*> GetNotes( const UMoviePipeline* MoviePipeline );
 };
-
-
 
 typedef TMap<TWeakObjectPtr<UMovieSceneSection>, TSharedPtr<FMovieSceneChannelProxy>> FChannelProxyBySectionMap;
 
@@ -144,8 +141,6 @@ public:
     static TArray<AOdysseyAnimationActor*>  GetAnimationSpawnedOrTemplate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iAnimationBinding );
 
 public:
-
-public:
     static FChannelProxyBySectionMap                BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
     static TMap<FGuid, FChannelProxyBySectionMap>   BuildAnimationsTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
     static TMap<FGuid, FChannelProxyBySectionMap>   BuildAnimationsOpacityChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
@@ -202,7 +197,6 @@ public:
         bool mSectionsCreated = false;
     };
     static FFindOrCreateTimelineResult                  FindTimelineTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
-
 
 public:
     struct FFindOrCreateMaterialParameterResult
