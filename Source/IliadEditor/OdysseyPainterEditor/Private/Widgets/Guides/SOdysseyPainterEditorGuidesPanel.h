@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Widgets/SCompoundWidget.h"
+#include "EditorUndoClient.h"
 #include "Input/DragAndDrop.h"
 #include "OdysseyPainterEditorGuideCollection.h"
 #include "Templates/SharedPointer.h"
@@ -26,7 +27,7 @@ public:
 };
 
 /** Slate panel for creating, ordering, selecting, and editing an asset's visual guides. */
-class SOdysseyPainterEditorGuidesPanel : public SCompoundWidget
+class SOdysseyPainterEditorGuidesPanel : public SCompoundWidget, public FSelfRegisteringEditorUndoClient
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyPainterEditorGuidesPanel) {}
@@ -39,7 +40,13 @@ public:
     /** Reloads the list from the current asset's guide collection. */
     void Refresh();
 
+    //FEditorUndoClient overrides
+    virtual void PostUndo(bool bSuccess) override;
+    virtual void PostRedo(bool bSuccess) override;
+
 private:
+    /** Called when the editor switches to another texture or animation. */
+    void OnSourceChanged();
     UOdysseyPainterEditorGuideCollection* GetCollection(bool bCreateIfMissing);
     TSharedRef<SWidget> MakeAddMenu();
     TSharedRef<ITableRow> MakeGuideRow(TWeakObjectPtr<UOdysseyPainterEditorGuide> Guide, const TSharedRef<STableViewBase>& OwnerTable);

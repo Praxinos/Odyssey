@@ -105,6 +105,36 @@ void SOdysseyPainterEditorGuidesPanel::Construct(const FArguments& Args)
         ]
     ];
 
+    if (mEditor)
+        mEditor->OnSourceChanged().AddSP(this, &SOdysseyPainterEditorGuidesPanel::OnSourceChanged);
+
+    Refresh();
+}
+
+void SOdysseyPainterEditorGuidesPanel::PostUndo(bool bSuccess)
+{
+    Refresh();
+    if (mDetailsView.IsValid())
+        mDetailsView->ForceRefresh();
+}
+
+void SOdysseyPainterEditorGuidesPanel::PostRedo(bool bSuccess)
+{
+    PostUndo(bSuccess);
+}
+
+void SOdysseyPainterEditorGuidesPanel::OnSourceChanged()
+{
+    FOdysseyPainterEditor* Editor = mEditor;
+    if (Editor && Editor->GetGuideEditTool() && Editor->GetCurrentTemporaryTool() == Editor->GetGuideEditTool())
+        Editor->InactivateTemporaryTool();
+
+    // Guides belong to the previous asset: drop the selection before rebuilding the list.
+    mSelectedGuide = nullptr;
+    if (mListView.IsValid())
+        mListView->ClearSelection();
+    if (mDetailsView.IsValid())
+        mDetailsView->SetObject(nullptr);
     Refresh();
 }
 
@@ -409,6 +439,21 @@ void SOdysseyPainterEditorGuidesPanel::Refresh()
             }
         }
     }
+
+    // The selected guide may have been removed by an undo/redo or a source change.
+    if (mSelectedGuide.IsValid() && !mGuideItems.Contains(mSelectedGuide))
+    {
+        FOdysseyPainterEditor* Editor = mEditor;
+        UOdysseyPainterEditorGuideEditTool* GuideEditTool = Editor ? Editor->GetGuideEditTool() : nullptr;
+        if (GuideEditTool && Editor->GetCurrentTemporaryTool() == GuideEditTool && GuideEditTool->GetGuide() == mSelectedGuide.Get())
+            Editor->InactivateTemporaryTool();
+        mSelectedGuide = nullptr;
+        if (mListView.IsValid())
+            mListView->ClearSelection();
+        if (mDetailsView.IsValid())
+            mDetailsView->SetObject(nullptr);
+    }
+
     if (mListView.IsValid())
         mListView->RequestListRefresh();
 }
