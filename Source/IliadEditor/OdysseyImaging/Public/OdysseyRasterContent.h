@@ -32,6 +32,16 @@ class UTextureRenderTarget2D;
  * - Other users read and write render targets in the tile format with Read(), Write() and Clear(). Each write is undoable
  *   within a transaction, keeps the alpha of the content when it is locked, and ends the active edit.
  * - Transitional: users still working on CPU blocks go through Odyssey::RasterContentBlocks, built on this API.
+ *
+ * Glossary of raster editing (see Documentation/Doxygen/manual/Architecture/RasterEditing.md):
+ * - content: this class, the only access to the pixels of a raster layer or cell;
+ * - tiled image: UOdysseyTiledImage, the storage of the pixels, undoable through Modify();
+ * - edit session: FOdysseyRasterEditSession, a render target shown in place of the content until it is committed;
+ * - block edit: FOdysseyRasterBlockEdit, the transitional CPU front of an edit session used by the current tools;
+ * - preview: FOdysseyRasterEditPreview, which makes the views of a source show the active edit sessions;
+ * - media: FOdysseyMediaRaster, the weak handle the layer or cell gives the tools.
+ *
+ * Threading: game thread only. Read(), Write(), Clear(), the conversions of EnsureImage() and BeginEditSession() wait for the GPU.
  */
 class ODYSSEYIMAGING_API FOdysseyRasterContent
     : public TSharedFromThis<FOdysseyRasterContent>
@@ -147,6 +157,8 @@ public:
     /**
      * Writes areas of a render target into the content, undoable within a transaction.
      * The alpha of the content is kept when it is locked. The active edit ends, and the owner is notified.
+     * Known cost: the write goes through a canvas-sized edit session, even for a small area
+     * (see Documentation/Doxygen/manual/Architecture/KnownLimitations.md).
      * @param Source The pixels to write, at the same positions as in the content.
      * @param Rects The areas to write, in content pixels; clipped to the content bounds.
      * @param Conversion Converts the source values into the linear colors of the content,

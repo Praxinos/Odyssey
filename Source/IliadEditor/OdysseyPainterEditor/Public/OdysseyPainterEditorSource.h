@@ -44,8 +44,17 @@ public:
 
     // Utility functions
     virtual void Clear() = 0;
-    virtual void ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock> iBlock) = 0; //Clears the current layer of all the pixels contained in iBlock: basically a blend with alpha = sub
+    /*
+     * The blocks of the clipboard functions are canvas-sized, in any format: they are converted to the format of the owner.
+     * Each function is undoable (it opens its own transaction).
+     * TODO(GPU-tools): CPU blocks, to replace with render targets once the selection mask is on the GPU.
+     */
+
+    /** Clears from the current layer the pixels the block holds: a blend whose alpha is subtracted. */
+    virtual void ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock> iBlock) = 0;
+    /** Blends the block over the current layer, or the cell of the current frame. */
     virtual void PasteBlockToCurrentLayer(TSharedPtr<::ULIS::FBlock> iBlock) = 0;
+    /** Adds a raster layer holding the block (UOdysseyLayerStack::AddLayer) and makes it current. */
     virtual void PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iCopyBlock ) = 0;
     virtual bool IsValid() const = 0;
 

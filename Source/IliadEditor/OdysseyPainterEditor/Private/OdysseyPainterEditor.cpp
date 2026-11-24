@@ -566,6 +566,7 @@ FOdysseyPainterEditor::ClearCurrentLayerOrSelection()
 
         TSharedPtr<FOdysseyRasterContent> content = mediaRasters[0]->GetContent();
         // Only the area of the selection is read.
+        // TODO(GPU-tools): CPU read and CPU blend of the selected pixels, replace with a masked write on the GPU.
         TSharedPtr<::ULIS::FBlock> copyBlock = content ? mRasterSelection->CopySelectedPixels(*content) : nullptr;
         if (!copyBlock)
             return;

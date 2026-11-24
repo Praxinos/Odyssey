@@ -28,6 +28,15 @@ enum class EOdysseyTextureLayerStackTextureUpdateMode
     Instantaneous
 };
 
+/**
+ * The layers of a texture, edited in the painter editor.
+ *
+ * Owned by the UOdysseyTextureLayerStackUserData of the texture (asset user data). The stack renders its layers on the GPU
+ * into its RenderTarget (transient, in the compositing format), then writes the render into the source of the texture:
+ * UpdateTexture() reads it back to the CPU (TODO(GPU-tools): FastUpdateTexture() while editing).
+ * Layers are blended with encoded colors unless UOdysseyTextureLayerStackUserData::bLinearCompositing is set; the raster
+ * layers store linear colors (see Documentation/Doxygen/manual/Architecture/ColorManagement.md).
+ */
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerStack
     : public UOdysseyLayerStack

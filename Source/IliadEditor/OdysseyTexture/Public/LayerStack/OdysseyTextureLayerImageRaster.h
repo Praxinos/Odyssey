@@ -12,6 +12,10 @@
 
 class UOdysseyTiledImage;
 
+/**
+ * A raster layer of a texture: its pixels are held by a UOdysseyTiledImage, reached through GetRasterContent().
+ * The tiled image is converted when the sRGB setting of the texture changes, following its SRGBChangePolicy.
+ */
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageRaster
     : public UOdysseyTextureLayer

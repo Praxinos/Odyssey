@@ -8,14 +8,29 @@
 
 struct FOdysseyRenderOverride;
 
-/** Module-owned render settings. Implementations are copied with the request. */
+/**
+ * Render settings owned by a module, added to a request with FOdysseyRenderContext::FindOrAddExtension<T>().
+ * T must define "static FName TypeName()", the key of the extension. Implementations are copied with the request (Clone()).
+ * E.g. FOdysseyAnimationRenderContext (the frame to render), FOdysseyLayerStackRenderContext (overrides of layer properties).
+ */
 struct ODYSSEYRENDERING_API IOdysseyRenderContextExtension
 {
     virtual ~IOdysseyRenderContextExtension() = default;
     virtual TUniquePtr<IOdysseyRenderContextExtension> Clone() const = 0;
 };
 
-/** Per-node render callbacks. Module-specific settings live in extensions. */
+/**
+ * Render callbacks of one node of a request, registered in FOdysseyRenderContext::Overrides by rendering id.
+ * IOdysseyTextureRenderingAbility::BuildRenderPipeline() applies them in this order:
+ *   1. FOdysseyRenderContext::Filter may skip the node;
+ *   2. RenderReplacement replaces the whole render of the node, or else the node builds its own;
+ *   3. ContentReplacement replaces the content of a non-composite node, rendered with its content transform
+ *      (e.g. the target of an edit session);
+ *   4. ContentDecorator wraps the content render;
+ *   5. the color conversion of the content of non-composite nodes (GetContentColorConversion());
+ *   6. RenderDecorator wraps the whole render of the node.
+ * Every callback is optional. Module-specific settings live in extensions.
+ */
 struct ODYSSEYRENDERING_API FOdysseyRenderOverride
 {
     using FRenderFunction = IOdysseyTextureRenderingAbility::FRenderFunction;
@@ -27,7 +42,7 @@ struct ODYSSEYRENDERING_API FOdysseyRenderOverride
     FDecorator ContentDecorator;
 };
 
-/** Per-request state, resolved on the game thread. Never store on an asset. */
+/** Per-request state, resolved on the game thread when the render pipeline is built. Never store on an asset. */
 struct ODYSSEYRENDERING_API FOdysseyRenderContext
 {
     using FFilter = TFunction<bool(const IOdysseyTextureRenderingAbility&, const TArray<const IOdysseyTextureRenderingAbility*>&)>;

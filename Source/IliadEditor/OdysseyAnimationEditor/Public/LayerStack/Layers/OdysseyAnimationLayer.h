@@ -20,6 +20,14 @@ enum class EOdysseyLayerImagePostBehaviour : uint8
     PingPong
 };
 
+/**
+ * A layer of an animation layer stack: a sequence of cells over the frames of the animation.
+ *
+ * The cells are owned by the layer, in frame order, each one exposed for some frames. Before its first cell and after its
+ * last one, the layer follows its pre and post behaviours (EOdysseyLayerImagePostBehaviour: none, hold, loop, ping-pong). The layer renders the cell of the frame
+ * requested by FOdysseyAnimationRenderContext, and in the editor its lighttable (previous and next keys).
+ * Editor only.
+ */
 UCLASS(Abstract, BlueprintType, HideDropdown)
 class ODYSSEYANIMATIONEDITOR_API UOdysseyAnimationLayer
     : public UOdysseyLayer

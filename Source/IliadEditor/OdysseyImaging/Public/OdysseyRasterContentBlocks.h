@@ -15,7 +15,8 @@ class FOdysseyRasterContent;
  *
  * These functions only rely on the public API of FOdysseyRasterContent. Their blocks are in the format the content owner
  * expects, see FOdysseyRasterContent::FDescription. Remove each use once its user works on render targets,
- * and this file with the last one.
+ * and this file with the last one. TODO(GPU-tools).
+ * Threading: game thread only; every function waits for the GPU.
  */
 namespace Odyssey::RasterContentBlocks
 {

@@ -9,8 +9,9 @@
 class FOdysseyRasterContent;
 
 /**
- * The raster content of a layer or a cell, as tools reach it.
- * The content is reached through functions given by its owner, called only when needed.
+ * A weak handle to the raster content of a layer or a cell, created by the layer or cell for the tools (GetMediaProvider()).
+ * It owns nothing: the content stays owned by the layer or cell, and GetContent() returns null once the owner is destroyed.
+ * The content id is the rendering id of the owner, the id FOdysseyRasterEditSession::GetRenderingId() returns. Game thread only.
  */
 class ODYSSEYMEDIA_API FOdysseyMediaRaster
     : public IOdysseyMedia
@@ -30,8 +31,6 @@ public:
     FOdysseyMediaRaster(const FGuid& iContentId, TWeakPtr<FOdysseyRasterContent> iContent);
 
 public:
-    //IOdysseyMedia API
-
     /** Returns the id of the content, the same for every media of the same layer or cell. */
     const FGuid& GetContentId() const;
 

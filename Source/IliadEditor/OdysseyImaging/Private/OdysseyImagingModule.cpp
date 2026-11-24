@@ -20,6 +20,8 @@ namespace Odyssey::TileCacheTests
 void FOdysseyImagingModule::StartupModule()
 {
 #if WITH_DEV_AUTOMATION_TESTS
+    // The Odyssey.Imaging.TileCacheSession tests start editor subprocesses with -OdysseyTileCacheWorkerRoot=: such a
+    // process only runs the worker (defined in Tests/OdysseyTileCacheSessionTests.cpp), then exits.
     if (Odyssey::TileCacheTests::RunWorkerIfRequested())
     {
         return;

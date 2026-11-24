@@ -16,7 +16,8 @@ class UOdysseyTiledImage;
 struct FOdysseyRenderContext;
 
 /**
- * An edit of the content of a raster layer or cell, shown by the views before it is committed into its tiled image.
+ * An edit of the pixels of a content, shown by the views before it is committed into its tiled image: the content of a
+ * raster layer or cell, or the interactive render of a vector one (never committed).
  *
  * The session holds a render target in the tile format, initialized from the tiles. Editors write into it and
  * invalidate the changed areas, then commit them into the tiles or end the session to discard them.
@@ -26,11 +27,16 @@ struct FOdysseyRenderContext;
  *
  * A session preserving alpha, e.g. for a layer whose alpha is locked, shows and commits the colors of its target with the alpha
  * of the tiles at its beginning: the views compose both over the area they sample, and the commit composes them once into the target.
+ *
+ * At most one session is active per content (rendering id); beginning another one ends it. The registry of active sessions
+ * and the delegates are game thread only; Begin() and Commit() wait for the render thread.
+ * Memory: one canvas-sized render target in the tile format, plus a copy of the original pixels when alpha is preserved.
  */
 class ODYSSEYIMAGING_API FOdysseyRasterEditSession
     : public TSharedFromThis<FOdysseyRasterEditSession>
 {
 public:
+    /** Broadcast when a session began or ended, e.g. so that a preview rebuilds its render context. */
     DECLARE_MULTICAST_DELEGATE(FOnActiveSessionsChanged);
 
     /** Broadcast when the target of a session changed, or when a session ended: the areas must be rendered again. */

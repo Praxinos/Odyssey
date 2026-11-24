@@ -15,11 +15,15 @@
 class UTexture;
 class UTextureRenderTarget2D;
 
+/** The pixel format of the tiles of a UOdysseyTiledImage. Tiles always hold linear colors. */
 UENUM()
 enum class EOdysseyTiledImageFormat : uint8
 {
+    /** 8-bit linear content, e.g. a texture without sRGB. */
     RGBA8,
+    /** 8-bit sRGB content, decoded: the round trip to the encoded bytes is exact. */
     RGBA16F,
+    /** 16-bit and float content. */
     RGBA32F,
 };
 

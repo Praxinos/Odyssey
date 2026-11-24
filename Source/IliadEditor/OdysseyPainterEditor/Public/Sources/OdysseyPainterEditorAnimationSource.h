@@ -14,7 +14,9 @@ class UOdysseyAnimationPlayer;
 class UTexture;
 
 /**
- * Base class for an Editor Source
+ * The source of the painter editor for an animation: the layer stack, the current frame and the players of its views.
+ * It owns an FOdysseyRasterEditPreview, created when a player is activated and given to every animation player it shows,
+ * so that the views show the active raster edit sessions.
  */
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorAnimationSource
     : public FOdysseyPainterEditorSource

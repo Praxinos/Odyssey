@@ -88,6 +88,7 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
         UOdysseyAnimationCellImageRaster* backgroundCell = Cast<UOdysseyAnimationCellImageRaster>(backgroundLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
         FLinearColor backgroundColor = *LayerBackgroundColor;
 
+        // TODO(GPU-tools): CPU fill of the background cell, replace with a GPU clear of a render target written with Write().
         Odyssey::RasterContentBlocks::EditBlock(backgroundCell->GetRasterContent(),
             [backgroundColor](::ULIS::FBlock& ioBlock)
             {

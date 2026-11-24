@@ -52,6 +52,15 @@ struct FCellMark
 };
 
 
+/**
+ * A drawing of an animation layer, shown during its exposure (in frames of the layer).
+ *
+ * Its outer is its UOdysseyAnimationLayer; GetFrameRange() gives the frames of the layer it covers. Subclasses hold the drawing:
+ * raster (UOdysseyAnimationCellImageRaster, a tiled image), vector (UOdysseyAnimationCellImageVector) or a reference to
+ * another cell (UOdysseyAnimationCellImageStagger). The out of pegs transform moves the drawing without changing its
+ * pixels: it is applied as the content transform of the cell when it is rendered (GetContentTransform()).
+ * Editor only: at runtime, an animation plays its baked frames.
+ */
 UCLASS(Abstract, BlueprintType, HideDropdown)
 class ODYSSEYANIMATIONEDITOR_API UOdysseyAnimationCell
     : public UObject

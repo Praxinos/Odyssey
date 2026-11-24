@@ -8,6 +8,14 @@
 
 #include "OdysseyAnimationLayerStack.generated.h"
 
+/**
+ * The layers of an animation, edited in the painter editor.
+ *
+ * Owned by the UOdysseyAnimationLayerStackUserData of the UOdysseyAnimation (asset user data, editor only), which renders
+ * the animation in the editor through IOdysseyAnimationRenderingOverride; reach it with OdysseyAnimationEditor::GetLayerStack().
+ * At runtime, the animation plays the frames baked from this stack.
+ * Layers are blended with encoded colors unless UOdysseyAnimation::bLinearCompositing is set (see GetContentColorConversion()).
+ */
 UCLASS(config=EditorPerProjectUserSettings, PerObjectConfig, BlueprintType)
 class ODYSSEYANIMATIONEDITOR_API UOdysseyAnimationLayerStack
     : public UOdysseyLayerStack

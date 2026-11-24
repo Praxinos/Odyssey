@@ -25,6 +25,11 @@ class FOdysseyRasterBlockEdit;
  * - EndEdit(): stops editing completely: cancels the uncommitted changes, ends the edit and frees the paint block.
  *   Tools call it when they are unloaded.
  * An edit that ends by itself (another edit of the content began, undo or redo) is discarded at the next Update().
+ *
+ * The paint block has the format of the edited block, the format of the owner: 8-bit values are sRGB encoded for sRGB
+ * textures and 8-bit animations, floats are linear. The selection mask (SetMaskBlock) is a canvas-sized grey float block,
+ * 1 for selected pixels. Commit() is undoable within the transaction of the caller. Game thread only.
+ * TODO(GPU-tools): the stroke is composed on the CPU, then uploaded into the render target of the edit session.
  */
 class ODYSSEYPAINTEREDITOR_API FOdysseyPaintEngine
 {

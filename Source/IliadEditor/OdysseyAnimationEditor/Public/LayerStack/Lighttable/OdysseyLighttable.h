@@ -9,6 +9,7 @@
 
 #include "OdysseyLighttable.generated.h"
 
+/** One key of a lighttable: how a previous or next cell, relative to the current cell, is shown. */
 USTRUCT(BlueprintType)
 struct FOdysseyLighttableKey
 {
@@ -34,6 +35,11 @@ enum class EOdysseyLighttableDisplayPosition : uint8
     UnderLayer
 };
 
+/**
+ * The onion skin of an animation layer: up to 10 previous and 10 next cells, relative to the current cell (not frames),
+ * shown with it in the editor with their opacity and color. Rendered by UOdysseyAnimationLayer, and overridable per render
+ * request through FOdysseyLayerPropertiesOverride::Lighttable.
+ */
 USTRUCT(BlueprintType)
 struct FOdysseyLighttable
 {

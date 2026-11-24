@@ -991,6 +991,7 @@ UOdysseyPainterEditorRasterLiquifyTool::UpdateAlteredImage( FAlteredImage& iAlte
     if( !IsEditing( iAlteredImage.edit, iAlteredImage.mediaRaster ) )
     {
         TSharedPtr<FOdysseyRasterContent> content = iAlteredImage.mediaRaster->GetContent();
+        // TODO(GPU-tools): CPU block edit, replace with an edit of the session render target.
         iAlteredImage.edit = content ? Odyssey::RasterContentBlocks::BeginBlockEdit(*content) : nullptr;
         if( !iAlteredImage.edit )
             return;

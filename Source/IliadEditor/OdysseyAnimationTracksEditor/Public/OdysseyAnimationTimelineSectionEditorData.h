@@ -10,7 +10,14 @@
 class UOdysseyAnimationTimelineSection;
 class FOdysseyRenderingChangedEvent;
 
-/** Transient cut data and subscriptions owned by one animation timeline section. */
+/**
+ * The editor data of one animation timeline section: the channel of its animation cuts (the frames where a cell changes),
+ * rebuilt when the animation changes.
+ *
+ * Created lazily by GetOrCreate() as a transient subobject of the section (UOdysseyAnimationTimelineSection::GetCutChannelEditorData()),
+ * never saved, and reset when the section is duplicated. GetOrCreate() also subscribes to the changes of the animation.
+ * Game thread only.
+ */
 UCLASS()
 class ODYSSEYANIMATIONTRACKSEDITOR_API UOdysseyAnimationTimelineSectionEditorData : public UObject
 {

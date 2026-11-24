@@ -11,7 +11,9 @@ class FOdysseyRasterEditPreview;
 class UOdysseyTextureLayerStackUserData;
 
 /**
- * Base class for an Editor Source
+ * The source of the painter editor for a texture: its layer stack.
+ * It owns an FOdysseyRasterEditPreview, created on Activate() and given to the layer stack (SetRenderPreview()),
+ * so that the edited texture shows the active raster edit sessions.
  */
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorTextureSource
     : public FOdysseyPainterEditorSource

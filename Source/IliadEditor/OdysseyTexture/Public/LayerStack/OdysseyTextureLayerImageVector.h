@@ -18,6 +18,10 @@
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorEngine;
 
+/**
+ * A vector layer of a texture: its scene is saved, its render is cached in a transient tiled image (FOdysseyVectorContent),
+ * rendered again from the scene when needed, e.g. after an undo.
+ */
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
     : public UOdysseyTextureLayer

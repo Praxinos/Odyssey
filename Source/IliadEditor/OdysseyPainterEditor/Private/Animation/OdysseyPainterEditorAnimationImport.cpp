@@ -125,6 +125,7 @@ FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence(UOdysseyAnimati
 
         result.mImportedCells.Add(cell);
 
+        // TODO(GPU-tools): CPU round trip, write the imported render target with FOdysseyRasterContent::Write() instead.
         Odyssey::RasterContentBlocks::WriteBlock(cell->GetRasterContent(), *block, { FIntRect(0, 0, animation->GetWidth(), animation->GetHeight()) });
     }
 

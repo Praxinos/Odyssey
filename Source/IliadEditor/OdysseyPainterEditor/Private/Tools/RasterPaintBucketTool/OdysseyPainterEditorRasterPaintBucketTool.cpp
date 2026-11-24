@@ -143,6 +143,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPoi
     if (iPointInTexture.x < 0 || iPointInTexture.y < 0 || iPointInTexture.x >= contentSize.X || iPointInTexture.y >= contentSize.Y)
         return false;
 
+    // TODO(GPU-tools): CPU block edit and CPU fill, replace with a GPU fill into the session render target.
     TSharedPtr<FOdysseyRasterBlockEdit> edit = Odyssey::RasterContentBlocks::BeginBlockEdit(*content);
     if (!edit)
         return false;

@@ -159,6 +159,7 @@ UOdysseyPainterEditorRasterSelection::EditMask(TFunctionRef<void(::ULIS::FBlock&
     EditMaskArea(Edit, ::ULIS::FRectI::FromXYWH(0, 0, mBlock->Width(), mBlock->Height()));
 }
 
+// TODO(GPU-tools): the mask is edited on the CPU and kept twice (CPU block and tiled image); move it to a GPU single-channel image.
 void
 UOdysseyPainterEditorRasterSelection::EditMaskArea(TFunctionRef<void(::ULIS::FBlock& Mask)> Edit, const ::ULIS::FRectI& Area)
 {

@@ -94,6 +94,7 @@ FOdysseyPainterEditorTextureImport::ImportTextures(UTexture2D* DestinationTextur
         rasterLayers.Add(layer);
 
         FOdysseyRasterContent& content = layer->GetRasterContent();
+        // TODO(GPU-tools): CPU round trip, write the imported render target with FOdysseyRasterContent::Write() instead.
         Odyssey::RasterContentBlocks::WriteBlock(content, *block, { FIntRect(FIntPoint::ZeroValue, content.Describe().Size) });
     }
 

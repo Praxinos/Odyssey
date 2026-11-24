@@ -90,7 +90,7 @@ namespace UnrealBuildTool.Rules
                     "Core",
                     "CoreUObject",
                     "DesktopPlatform",
-                    "DataValidation",
+                    "DataValidation", // Scoped isolation of package persistence automation tests.
                     "DeveloperSettings",
                     "EditorStyle",
                     "EditorWidgets",

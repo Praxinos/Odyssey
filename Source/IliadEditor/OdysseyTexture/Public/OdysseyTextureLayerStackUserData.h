@@ -27,6 +27,10 @@ enum class EOdysseyTextureSRGBChangePolicy : uint8
     KeepColors,
 };
 
+/**
+ * The editor data of a texture painted with Odyssey (asset user data): its layer stack and color settings
+ * (bLinearCompositing, SRGBChangePolicy).
+ */
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerStackUserData
     : public UAssetUserData

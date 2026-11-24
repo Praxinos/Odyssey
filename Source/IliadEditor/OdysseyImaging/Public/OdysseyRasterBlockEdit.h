@@ -14,6 +14,8 @@ class FOdysseyRasterEditSession;
 
 /**
  * Transitional: an edit of a raster content through CPU blocks, for tools that do not edit render targets yet.
+ * TODO(GPU-tools): remove once the tools write into FOdysseyRasterEditSession::GetTarget() (FOdysseyRasterContent::BeginEditSession()).
+ * Memory: two canvas-sized CPU blocks, on top of the render target of the session; the beginning reads the whole content.
  *
  * The edit holds the pixels of the content at its beginning and a working copy, both in the format the content owner expects.
  * The tool writes into the working block, then:

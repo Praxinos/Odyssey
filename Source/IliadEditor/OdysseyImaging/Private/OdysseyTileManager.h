@@ -50,6 +50,34 @@ private:
     TAtomic<int64> NumTilesOnGPU{0};
     TAtomic<int64> SizeOnGPU{0};
 };
+
+/**
+ * Holds every tile of the editor session: the pixels of all the UOdysseyTiledImage, deduplicated, compressed and cached
+ * on the GPU, in RAM and on disk within the budgets of UOdysseyTileManagerSettings.
+ * Created and destroyed by the OdysseyImaging module. See Documentation/Doxygen/manual/Architecture/TiledImage.md.
+ *
+ * Pipeline of a write (UOdysseyTiledImage::CopyFromTexture -> CreateOrUpdateTiles):
+ *   1. render thread: the old tile and the source are drawn into a GPU atlas (the creation texture of each new FTile),
+ *      the empty tiles are tested (AddAreTextureTilesEmptyPass) and a readback of the atlas is enqueued;
+ *   2. Tick (game thread), once the readback is ready: an empty tile frees its slot (Generation + 1); otherwise its pixels
+ *      are hashed and deduplicated against HashToTileData, or become a new FTileData; the creation texture moves to the GPU cache;
+ *   3. thread pool: the data is compressed, then appended to the disk file of the session (FOdysseyTileDiskCacheDirectory);
+ *   4. Tick: EvictTiles() releases the uncompressed buffers beyond MaxUncompressedSize, then the compressed buffers already
+ *      on disk beyond MaxCompressedSize (least recently used first); they are reloaded when needed.
+ * Reads (GetTileTextures): pending creation texture, GPU cache hit, or an upload batched into an atlas. MaintainGPUCache()
+ * keeps the most recently used tiles within MaxGPUSize, repacked into atlases of GPUCachePageBytes.
+ *
+ * Threads and locks:
+ * | Data                                     | Threads              | Lock                 |
+ * |------------------------------------------|----------------------|----------------------|
+ * | Tiles, FreeTiles (slot table)            | game, render         | FreeTilesMutex       |
+ * | one FTile (futures, readbacks)           | game, render         | FTile::Mutex         |
+ * | HashToTileData                           | render, game         | HashToTileDataMutex  |
+ * | FTileData LRU lists (static)             | game, thread pool    | FTileData::LRUMutex  |
+ * | GPU cache (GPUTextures)                  | game, render         | GPUCacheMutex        |
+ *
+ * Known limitation: tiles are never released during a session; only their buffers are evicted.
+ */
 class FOdysseyTileManager
     : public FTickableEditorObject
 {
@@ -274,7 +302,9 @@ public:
      * @param InPosition Position where to copy the texture in the tile space in pixels
      * @param InTileSize Width and height of the tile to create in pixels, tiles are always squares
      * @param InTileFormat The tile pixel format
-     * @param InTilesInfos Defines infos the created tiles should respect
+     * @param InGetExistingTileId Returns the id of the tile already at a tile coordinate, if any: the pixels of a tile that
+     *                            the rect covers partially are kept outside the rect.
+     * @return The new tile of each tile coordinate the rect touches. Game thread.
      */
     TArray<FCreatedTile> CreateOrUpdateTiles(
         UTexture* InTexture,
@@ -285,6 +315,10 @@ public:
         const FGetExistingTileId& InGetExistingTileId = FGetExistingTileId()
     );
 
+    /**
+     * Creates a tile from saved data (UOdysseyTiledImage::Serialize), deduplicated with the existing data of the same hash.
+     * The data is decompressed on first use. Game thread.
+     */
     FOdysseyTileId CreateTile(const FIoHash& InHash, const FCompressedBuffer& InCompressedBuffer);
 
     /**

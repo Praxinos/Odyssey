@@ -8,6 +8,10 @@
 
 #include "OdysseyTileManagerBlueprintLibrary.generated.h"
 
+/**
+ * Blueprint access to the statistics of FOdysseyTileManager, for diagnostics: tile counts and sizes in RAM (uncompressed and
+ * compressed), on disk and on the GPU, and EvictAllTiles() to release every evictable buffer and the GPU cache at once.
+ */
 UCLASS(BlueprintType)
 class UOdysseyTileManagerBlueprintLibrary : public UBlueprintFunctionLibrary
 {

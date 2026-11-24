@@ -50,7 +50,7 @@ UOdysseyLayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
 {
     Super::PostDuplicate(iDuplicateMode);
 
-    // See comment (REALLY) in ...\Plugins\Odyssey\Source\Iliad\OdysseyLayerStack\Private\OdysseyLayerStack.cpp#590: CopyLayerInternal()
+    // See the comment (REALLY) of UOdysseyLayerStack::CopyLayerInternal()
 
     //PATCH---------------------------
     FText old_current_layer;
