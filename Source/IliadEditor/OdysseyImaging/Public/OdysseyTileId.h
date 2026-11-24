@@ -6,19 +6,26 @@
 #include "CoreMinimal.h"
 #include "OdysseyTileId.generated.h"
 
-/** Opaque tile identity. Generation distinguishes empty slots that have been reused. */
+/**
+ * Opaque identity of a tile in FOdysseyTileManager: a slot index and the generation of that slot.
+ * Generation distinguishes empty slots that have been reused. Only valid during an editor session:
+ * UOdysseyTiledImage saves the tile data, not the ids.
+ */
 USTRUCT()
 struct ODYSSEYIMAGING_API FOdysseyTileId
 {
     GENERATED_BODY()
 
-    bool IsValid() const { return Index != INDEX_NONE && Generation != INDEX_NONE; }
+    /** The value of the fields of an invalid id. */
+    static constexpr uint64 InvalidValue = MAX_uint64;
+
+    bool IsValid() const { return Index != InvalidValue && Generation != InvalidValue; }
 
     UPROPERTY()
-    uint64 Index = INDEX_NONE;
+    uint64 Index = InvalidValue;
 
     UPROPERTY()
-    uint64 Generation = INDEX_NONE;
+    uint64 Generation = InvalidValue;
 
     bool operator==(const FOdysseyTileId&) const = default;
 };
