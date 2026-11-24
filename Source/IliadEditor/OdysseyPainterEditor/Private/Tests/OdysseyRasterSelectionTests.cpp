@@ -29,7 +29,7 @@ float MaskAt(UOdysseyPainterEditorRasterSelection& Selection, int32 X, int32 Y)
 /** Returns the tiled image holding the mask, through its property. */
 const UOdysseyTiledImage* MaskImage(UOdysseyPainterEditorRasterSelection& Selection)
 {
-    const FObjectProperty* Property = FindFProperty<FObjectProperty>(Selection.GetClass(), TEXT("Mask"));
+    const FObjectProperty* Property = FindFProperty<FObjectProperty>(Selection.GetClass(), TEXT("MaskImage"));
     return Property ? Cast<UOdysseyTiledImage>(Property->GetObjectPropertyValue_InContainer(&Selection)) : nullptr;
 }
 }

@@ -61,13 +61,13 @@ UOdysseyPainterEditorRasterSelection::OnChanged()
 void
 UOdysseyPainterEditorRasterSelection::Init(int iWidth, int iHeight)
 {
-    if (!Mask)
+    if (!MaskImage)
     {
-        Mask = NewObject<UOdysseyTiledImage>(this, NAME_None, RF_Transactional);
-        Mask->OnTilesRestored().AddUObject(this, &UOdysseyPainterEditorRasterSelection::OnMaskUndone);
+        MaskImage = NewObject<UOdysseyTiledImage>(this, NAME_None, RF_Transactional);
+        MaskImage->OnTilesRestored().AddUObject(this, &UOdysseyPainterEditorRasterSelection::OnMaskUndone);
     }
     // A new mask is not undoable: it starts empty.
-    Mask->Initialize(UOdysseyTiledImage::DefaultTileSize, EOdysseyTiledImageFormat::RGBA8);
+    MaskImage->Initialize(UOdysseyTiledImage::DefaultTileSize, EOdysseyTiledImageFormat::RGBA8);
 
     mBlock = MakeShared<::ULIS::FBlock>(iWidth, iHeight, ::ULIS::Format_GF);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
@@ -162,7 +162,7 @@ UOdysseyPainterEditorRasterSelection::EditMask(TFunctionRef<void(::ULIS::FBlock&
 void
 UOdysseyPainterEditorRasterSelection::EditMaskArea(TFunctionRef<void(::ULIS::FBlock& Mask)> Edit, const ::ULIS::FRectI& Area)
 {
-    if (!mBlock || !Mask)
+    if (!mBlock || !MaskImage)
         return;
 
     Edit(*mBlock);
@@ -174,7 +174,7 @@ UOdysseyPainterEditorRasterSelection::EditMaskArea(TFunctionRef<void(::ULIS::FBl
         //Only the changed area is staged and uploaded
         ::ULIS::FBlock pixels(changed.Width(), changed.Height(), ::ULIS::Format_RGBA8);
         CopyMaskToAlpha(*mBlock, pixels, changed);
-        Odyssey::TiledImage::CopyFromBlock(*Mask, pixels, FIntRect(FIntPoint::ZeroValue, changed.Size()), changed.Min);
+        Odyssey::TiledImage::CopyFromBlock(*MaskImage, pixels, FIntRect(FIntPoint::ZeroValue, changed.Size()), changed.Min);
     }
 
     RefreshHUD();
@@ -184,10 +184,10 @@ UOdysseyPainterEditorRasterSelection::EditMaskArea(TFunctionRef<void(::ULIS::FBl
 void
 UOdysseyPainterEditorRasterSelection::OnMaskUndone()
 {
-    if (!mBlock || !Mask)
+    if (!mBlock || !MaskImage)
         return;
 
-    TSharedPtr<::ULIS::FBlock> pixels = Odyssey::TiledImage::CopyToBlock(*Mask, FIntRect(0, 0, mBlock->Width(), mBlock->Height()), ::ULIS::Format_RGBA8);
+    TSharedPtr<::ULIS::FBlock> pixels = Odyssey::TiledImage::CopyToBlock(*MaskImage, FIntRect(0, 0, mBlock->Width(), mBlock->Height()), ::ULIS::Format_RGBA8);
     if (pixels)
     {
         // The block keeps its identity: tools hold it.

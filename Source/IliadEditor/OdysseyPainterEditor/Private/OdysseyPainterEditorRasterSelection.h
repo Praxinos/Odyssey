@@ -101,7 +101,7 @@ private:
 
     /** The mask, in the alpha of the tiles: the undoable storage of the selection. */
     UPROPERTY(Transient)
-    TObjectPtr<UOdysseyTiledImage> Mask;
+    TObjectPtr<UOdysseyTiledImage> MaskImage;
 
     TSharedPtr<FOdysseyHUDElement> mHUD;
     bool mShowHUD;
