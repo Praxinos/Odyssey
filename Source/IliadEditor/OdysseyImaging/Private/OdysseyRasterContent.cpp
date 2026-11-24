@@ -98,6 +98,8 @@ FOdysseyRasterContent::EnsureImage()
             && (PreviousFormat == EOdysseyTiledImageFormat::RGBA8) != (Format == EOdysseyTiledImageFormat::RGBA8)
             && (PreviousFormat == EOdysseyTiledImageFormat::RGBA16F || Format == EOdysseyTiledImageFormat::RGBA16F);
         TSharedPtr<::ULIS::FBlock> Pixels;
+        // Recorded before Initialize() clears the tiles and changes the format: undoing the change gives them back.
+        Image->Modify();
         if (bEncodingChanged && Description.bKeepBytesOnEncodingChange)
         {
             // Read the bytes as they were interpreted, write them as they are now interpreted.

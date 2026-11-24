@@ -217,6 +217,50 @@ bool FOdysseyTextureColorSRGBChangeTest::RunTest(const FString& Parameters)
     return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureColorSRGBToggleUndoTest, "Odyssey.Texture.Color.SRGBToggleUndo", Odyssey::TextureColorTests::Flags)
+
+/** Undoing and redoing a change of the sRGB setting of a texture gives back the pixels of its layers, with both policies. */
+bool FOdysseyTextureColorSRGBToggleUndoTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::TextureColorTests;
+    for (const EOdysseyTextureSRGBChangePolicy Policy : { EOdysseyTextureSRGBChangePolicy::KeepBytes, EOdysseyTextureSRGBChangePolicy::KeepColors })
+    {
+        const TCHAR* PolicyName = Policy == EOdysseyTextureSRGBChangePolicy::KeepBytes ? TEXT("keep bytes") : TEXT("keep colors");
+        TStrongObjectPtr<UTexture2D> Texture(MakeTexture(true));
+        UOdysseyTextureLayerStackUserData* UserData = MakeUserData(Texture.Get());
+        UserData->SRGBChangePolicy = Policy;
+        UOdysseyTextureLayerImageRaster* Layer = CastChecked<UOdysseyTextureLayerImageRaster>(UserData->LayerStack->GetCurrentLayer());
+        const TArray<FColor> Before = ReadTextureBytes(Texture.Get(), UserData->LayerStack);
+        TArray<FColor> AfterChange;
+        {
+            FScopedTransaction Transaction(NSLOCTEXT("OdysseyTextureColorTests", "ToggleSRGB", "Toggle sRGB"));
+            Texture->Modify();
+            SetSRGB(Texture.Get(), false);
+            AfterChange = ReadTextureBytes(Texture.Get(), UserData->LayerStack);
+        }
+
+        if (!TestTrue(FString::Printf(TEXT("Undo the sRGB change (%s)"), PolicyName), GEditor->UndoTransaction()))
+        {
+            continue;
+        }
+        FTextureCompilingManager::Get().FinishCompilation({ Texture.Get() });
+        TestTrue(FString::Printf(TEXT("Undo restores the sRGB setting (%s)"), PolicyName), Texture->SRGB != 0);
+        CompareBytes(*this, *FString::Printf(TEXT("Undo gives back the pixels (%s)"), PolicyName),
+            [&Before](int32 X, int32 Y) { return Before[Y * Width + X]; }, ReadTextureBytes(Texture.Get(), UserData->LayerStack), 0);
+        TestEqual(FString::Printf(TEXT("Undo gives back the format of the layer (%s)"), PolicyName), Layer->GetTiledImage()->GetFormat(), EOdysseyTiledImageFormat::RGBA16F);
+
+        if (!TestTrue(FString::Printf(TEXT("Redo the sRGB change (%s)"), PolicyName), GEditor->RedoTransaction()))
+        {
+            continue;
+        }
+        FTextureCompilingManager::Get().FinishCompilation({ Texture.Get() });
+        TestTrue(FString::Printf(TEXT("Redo changes the sRGB setting again (%s)"), PolicyName), Texture->SRGB == 0);
+        CompareBytes(*this, *FString::Printf(TEXT("Redo gives back the converted pixels (%s)"), PolicyName),
+            [&AfterChange](int32 X, int32 Y) { return AfterChange[Y * Width + X]; }, ReadTextureBytes(Texture.Get(), UserData->LayerStack), 0);
+    }
+    return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTextureColorOffCanvasTest, "Odyssey.Texture.Color.SRGBChangeKeepsOffCanvas", Odyssey::TextureColorTests::Flags)
 
 /** Pixels outside the canvas, e.g. left by a shrunk canvas, are kept and converted with the others when the format of the layer changes. */
