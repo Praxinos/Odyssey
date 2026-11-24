@@ -432,7 +432,7 @@ SArianeEditorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     {
         GEditor->BeginTransaction(LOCTEXT("ariane-tree-view.transaction.drag-drop-object", "Drop Objects"));
 
-        RootGroup->GetDrawing()->GetVectorLayer()->Modify();
+        RootGroup->GetDrawing()->Modify();
 
         FArianeObject* ParentObject = ItemObject->GetParent() ? ItemObject->GetParent() : ItemObject;
         FArianeObject* NewParent = ( DropZone == DROPZONE_ONTO ) ? ItemObject : ParentObject;

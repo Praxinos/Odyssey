@@ -152,6 +152,9 @@ UArianeLayerFolder::InsertChild( UArianeLayer* Child, UArianeLayer* InsertAfter,
 
     // Force Update transforms (will update the transform of the rootGroup of drawing layers)
     Child->OnUpdateTransform( EUpdateTransformFlags::None, ETeleportType::None );
+
+    // Register in the new parent so the layer is updated at its new place
+    Child->Invalidate();
 }
 
 void
@@ -198,6 +201,8 @@ void UArianeLayerFolder::OnChildDetached( USceneComponent* ChildComponent )
 
         ChildLayers.Remove(ChildLayer);
         InvalidatedChildLayers.Remove(ChildLayer);
+        // The layer is no longer in this folder's list: let it register in its next parent
+        ChildLayer->SetInvalidatedInParentFolder( false );
         Invalidate();
     }
 }
@@ -242,6 +247,10 @@ void
 UArianeLayerFolder::InvalidateChildLayer( UArianeLayer* Child )
 {
     InvalidatedChildLayers.Add( Child );
+
+    // Register this folder in its own parent, or else its Update() is never called.
+    // Stops at the first ancestor already registered (bInvalidatedInParentFolder)
+    Invalidate();
 }
 
 void

@@ -559,6 +559,9 @@ UArianeLayerVector::Update( bool bInteractive )
     Drawing->Update( bInteractive );
 
     Super::Update( bInteractive );
+
+    // The root group may stay invalidated on purpose: the layer must then remain in its parent's list
+    bInvalidated = Drawing->GetRootGroup()->IsInvalidated();
 }
 
 void

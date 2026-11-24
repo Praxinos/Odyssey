@@ -224,6 +224,9 @@ UArianeLayer::Update( bool Interactive )
     // will call CalcBounds (nb: calling UMeshComponent::UpdateBounds() does not work sometimes, especially when then
     // path starts empty but this works.
     UpdateComponentToWorld();
+
+    // The layer is up to date
+    bInvalidated = false;
 }
 
 UArianeLayer::FOnTransformChanged&

@@ -147,8 +147,9 @@ public:
         * @brief Add a child to this object at the end of the list of children.
         * @param Child the child to add
         * @param TransformPolicy
+        * @param bRenumber update the children's ChildIndex. false only while the hierarchy is rebuilt, see SortChildren()
         */
-    void AppendChild( FArianeObject* Child, FArianeObject::ETransformPolicy TransformPolicy );
+    void AppendChild( FArianeObject* Child, FArianeObject::ETransformPolicy TransformPolicy, bool bRenumber = true );
 
     /**
         * @brief Add a child to this object at the beginning of the list of children.
@@ -160,8 +161,9 @@ public:
         * @brief Insert a child to this object's list of children.
         * @param Child the child to add
         * @param InsertAfter insert the added child after this one.
+        * @param bRenumber update the children's ChildIndex. false only while the hierarchy is rebuilt, see SortChildren()
         */
-    void InsertChild( FArianeObject* Child, FArianeObject* InsertAfter, FArianeObject::ETransformPolicy TransformPolicy );
+    void InsertChild( FArianeObject* Child, FArianeObject* InsertAfter, FArianeObject::ETransformPolicy TransformPolicy, bool bRenumber = true );
 
     /**
         * @brief Mark the object as invalidated. It will also invalidate the whole chain of parents.
@@ -321,7 +323,11 @@ public:
     virtual void Animate( const FArianeKeyedObject* KeyedObject, const FArianeKeyedObject* NextKeyedObject, float T );
     const FGuid& GetAllocatorGuid();
     virtual void PostReset();
+    /** Called once every object of the drawing is PostReset: sorts the children back in their saved order. */
+    void SortChildren();
     bool IsInvalidatedInParent();
+    /** True if this object or one of its descendants is still invalidated after an update. */
+    bool IsInvalidated();
     void SetInvalidatedInParent( bool bInInvalidateInParent );
 
 protected:
@@ -340,6 +346,9 @@ protected:
     static ETraversalReturnValue TraverseBackwards_Private( FArianeObject* Object, TFunctionRef<ETraversalReturnValue(FArianeObject*)> Callback );
 
     static uint32 CheckCommonClass( const TArray<FArianeObject*>& Objects, uint32 CommonClass );
+
+    /** Stores in each child its position in Children. Call it after each change of Children. */
+    void RenumberChildren();
 
 
 protected:
@@ -370,6 +379,11 @@ protected:
 
     UPROPERTY( EditAnywhere )
     FTransform LocalTransform;
+
+    // Position among the parent's children. Children is not serialized: it is rebuilt in allocation order at load
+    // and sorted back with it. 0 everywhere in drawings saved before it existed, so their order is kept.
+    UPROPERTY()
+    int32 ChildIndex = 0;
 
 protected:
     // Declared UPROPERTY to prevent GC.

@@ -378,6 +378,7 @@ void
 FArianeObject::RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstancedObjects )
 {
     Children.Remove( ChildToRemove );
+    RenumberChildren();
 
     InvalidatedChildren.Remove( ChildToRemove );
 
@@ -396,14 +397,36 @@ FArianeObject::RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstan
 
     if( bRemoveFromInstancedObjects )
     {
-        Drawing->DeleteInstancedObject( ChildToRemove );
+        TArray<FArianeObject*> ObjectsToDelete;
+
+        // Free the whole subtree, or else the descendants stay in InstancedObjects as invisible orphans.
+        // Collect first: deleting an instanced struct frees the object, its children could not be read afterwards
+        Traverse( ChildToRemove
+                , ETraversalPolicy::AllChildren
+                , [&ObjectsToDelete]( FArianeObject* Object ) -> ETraversalReturnValue
+            {
+                ObjectsToDelete.Add( Object );
+
+                return ETraversalReturnValue::Continue;
+            } );
+
+        for( FArianeObject* ObjectToDelete : ObjectsToDelete )
+        {
+            // The callers don't always clear the selection first (eraser, edit tool)
+            if( ObjectToDelete->IsSelected() )
+            {
+                Drawing->UnselectObject( ObjectToDelete );
+            }
+
+            Drawing->DeleteInstancedObject( ObjectToDelete );
+        }
     }
 }
 
 void
-FArianeObject::AppendChild( FArianeObject* Child, FArianeObject::ETransformPolicy TransformPolicy )
+FArianeObject::AppendChild( FArianeObject* Child, FArianeObject::ETransformPolicy TransformPolicy, bool bRenumber )
 {
-    InsertChild( Child, Children.Num() ? Children.Last() : nullptr, TransformPolicy );
+    InsertChild( Child, Children.Num() ? Children.Last() : nullptr, TransformPolicy, bRenumber );
 }
 
 void
@@ -413,7 +436,7 @@ FArianeObject::PrependChild( FArianeObject* Child, FArianeObject::ETransformPoli
 }
 
 void
-FArianeObject::InsertChild( FArianeObject* Child, FArianeObject* InsertAfter, FArianeObject::ETransformPolicy TransformPolicy )
+FArianeObject::InsertChild( FArianeObject* Child, FArianeObject* InsertAfter, FArianeObject::ETransformPolicy TransformPolicy, bool bRenumber )
 {
     FTransform RelativeTransform = Child->GetTransform().GetRelativeTransform(WorldTransform);
 
@@ -423,6 +446,11 @@ FArianeObject::InsertChild( FArianeObject* Child, FArianeObject* InsertAfter, FA
                                                         } );
 
     Children.Insert( Child, FoundObjectIndex + 1 );
+
+    if( bRenumber )
+    {
+        RenumberChildren();
+    }
 
     Child->SetParent( this );
     Child->Added();
@@ -448,6 +476,13 @@ bool
 FArianeObject::IsInvalidatedInParent()
 {
     return bInvalidatedInParent;
+}
+
+bool
+FArianeObject::IsInvalidated()
+{
+    // InvalidatedChildren: a descendant may stay invalidated on purpose, while this object's own flags are clear
+    return ( GetInvalidationFlags().HasAny() || InvalidatedChildren.Num() );
 }
 
 void
@@ -1091,6 +1126,8 @@ FArianeObject::TransferChild( FArianeObject* FosterChild
                 Children.Add( FosterChild );
             }
 
+            RenumberChildren();
+
             FosterChild->SetParent( this );
             FosterChild->Added();
 
@@ -1310,6 +1347,30 @@ FArianeObject::PostReset()
 {
     if( GetParent() )
     {
-        GetParent()->AppendChild( this, FArianeObject::ETransformPolicy::KeepRelative );
+        // Don't renumber: the loaded ChildIndex is used by SortChildren() once every child is attached
+        GetParent()->AppendChild( this, FArianeObject::ETransformPolicy::KeepRelative, false );
+    }
+}
+
+void
+FArianeObject::SortChildren()
+{
+    // The children were appended in allocation order by PostReset(), without renumbering: sort by the loaded
+    // indices. Stable sort: drawings saved before ChildIndex existed have 0 everywhere and keep their order.
+    // Note: TArray sorts arrays of pointers through the pointed objects
+    Children.StableSort( []( const FArianeObject& A, const FArianeObject& B ) -> bool
+        {
+            return ( A.ChildIndex < B.ChildIndex );
+        } );
+
+    RenumberChildren();
+}
+
+void
+FArianeObject::RenumberChildren()
+{
+    for( int32 i = 0; i < Children.Num(); i++ )
+    {
+        Children[i]->ChildIndex = i;
     }
 }

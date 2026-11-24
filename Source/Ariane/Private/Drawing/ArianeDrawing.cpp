@@ -85,6 +85,14 @@ UArianeDrawing::Reset()
         Object->PostReset();
     }
 
+    // Every child is attached now, in allocation order
+    for (FInstancedStruct& InstancedStruct : InstancedObjects)
+    {
+        FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
+
+        Object->SortChildren();
+    }
+
     //if( bCallUpdate )
     {
         RootGroupID.GetObject( this )->UpdateTransform();
