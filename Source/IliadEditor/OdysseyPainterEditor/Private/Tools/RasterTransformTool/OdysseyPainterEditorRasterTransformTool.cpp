@@ -715,6 +715,13 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
     if( !mTransformAreaHUD )
         return;
 
+    //Nothing was moved or flipped: the content is unchanged, no undo entry is recorded
+    if( mTransformTransactions.IsEmpty() )
+    {
+        ClearTransform();
+        return;
+    }
+
     if( mPaintEngine.GetEdit() )
     {
         TGuardValue<bool> committingGuard(mIsCommittingTransform, true);
