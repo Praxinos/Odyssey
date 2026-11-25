@@ -244,8 +244,8 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
 {
     mPath = iPoints;
 
-    //The edit begins on mouse down, it may have failed or ended since
-    if (!mPaintEngine.GetEdit())
+    //The edit begins on mouse down, it may have failed or ended since; a path of fewer than 2 points draws nothing
+    if (!mPaintEngine.GetEdit() || mPath.Num() < 2)
     {
         OnShapeAbort();
         return;
@@ -272,9 +272,6 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
 
     bool isLine = Shapes.GetActiveShapeType() == EOdysseyShapeType::kLine;
     bool isBezier = Shapes.GetActiveShapeType() == EOdysseyShapeType::kBezier;
-
-    if (mPath.Num() < 2)
-        return;
 
     if ( isLine )
     {
