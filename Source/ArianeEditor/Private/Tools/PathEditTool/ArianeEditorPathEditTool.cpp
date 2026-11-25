@@ -106,6 +106,8 @@ UArianeEditorPathEditTool::UArianeEditorPathEditTool()
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PathEdit64");
 
+    bHideSelectionOutline = true;
+
     bHasContextMenu = true;
 }
 
@@ -183,6 +185,9 @@ UArianeEditorPathEditTool::OnPostLayerStackSelectionChanged( UArianeLayerStack* 
     {
         BindVectorLayerDelegates( VectorLayer );
     }
+
+    // The current layer may have changed: the HUD trees and the quad tree must follow it
+    Reset();
 }
 
 void
@@ -205,6 +210,9 @@ UArianeEditorPathEditTool::OnPostLayerStackHierarchyChanged( UArianeLayerStack* 
     {
         BindVectorLayerDelegates( VectorLayer );
     }
+
+    // A removed or moved layer may change the current layer or destroy the trees kept for the HUD
+    Reset();
 }
 
 void
@@ -251,7 +259,7 @@ UArianeEditorPathEditTool::UnbindLayerStackDelegates( UArianeLayerStack* LayerSt
 
     if( VectorLayer )
     {
-        BindVectorLayerDelegates ( VectorLayer );
+        UnbindVectorLayerDelegates ( VectorLayer );
     }
 }
 
@@ -300,18 +308,7 @@ UArianeEditorPathEditTool::UnbindEditorDelegates()
 void
 UArianeEditorPathEditTool::Activate()
 {
-    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
-
     Super::Activate();
-
-    // ViewportClient can be nullptr when closing the editor
-    if( ViewportClient )
-    {
-        ViewportClient->EngineShowFlags.SetSelectionOutline(false);
-        ViewportClient->Invalidate();
-
-        GEditor->RedrawAllViewports();
-    }
 
     Reset();
 
@@ -321,18 +318,7 @@ UArianeEditorPathEditTool::Activate()
 void
 UArianeEditorPathEditTool::Inactivate()
 {
-    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
-
     UnbindEditorDelegates();
-
-    // ViewportClient can be nullptr when closing the editor
-    if( ViewportClient )
-    {
-        ViewportClient->EngineShowFlags.SetSelectionOutline(true);
-        ViewportClient->Invalidate();
-
-        GEditor->RedrawAllViewports();
-    }
 
     Super::Inactivate();
 }

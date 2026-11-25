@@ -9,7 +9,7 @@
 
 #include "Evaluation/MovieScenePreAnimatedState.h"
 
-// 1. Le Token : Il stocke l'état d'origine et sait comment le restaurer
+// 1. The token: stores the original state and knows how to restore it
 struct FArianeDrawingPreAnimatedToken : IMovieScenePreAnimatedToken
 {
     // TStrongObjectPtr prevents Garbage collection, as the key is the only one to store the former Drawing
@@ -22,7 +22,7 @@ struct FArianeDrawingPreAnimatedToken : IMovieScenePreAnimatedToken
         UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(&Object);
         if (VectorLayer)
         {
-            // On restaure l'ancienne image sauvegardée avant l'animation
+            // Restore the image saved before the animation
             VectorLayer->SetDrawing(OldDrawing.Get());
 
             VectorLayer->GetDrawing()->GetRootGroup()->UpdateTransform();
@@ -31,7 +31,7 @@ struct FArianeDrawingPreAnimatedToken : IMovieScenePreAnimatedToken
     }
 };
 
-// 2. Le Producer : Il est appelé par Unreal pour fabriquer le Token ci-dessus
+// 2. The producer: called by Unreal to create the token above
 struct FArianeDrawingPreAnimatedTokenProducer : IMovieScenePreAnimatedTokenProducer
 {
     virtual IMovieScenePreAnimatedTokenPtr CacheExistingState(UObject& Object) const override
@@ -39,7 +39,7 @@ struct FArianeDrawingPreAnimatedTokenProducer : IMovieScenePreAnimatedTokenProdu
         UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(&Object);
         if (VectorLayer)
         {
-            // On capture l'image actuelle (l'image de base de la map)
+            // Capture the current image (the map's base image)
             return FArianeDrawingPreAnimatedToken(VectorLayer->GetDrawing());
         }
         return IMovieScenePreAnimatedTokenPtr();
@@ -47,7 +47,7 @@ struct FArianeDrawingPreAnimatedTokenProducer : IMovieScenePreAnimatedTokenProdu
 };
 
 
-// Déclarer l'identifiant unique pour la restauration de l'ArianeDrawing
+// Declare the unique identifier used to restore the ArianeDrawing
 static
 FMovieSceneAnimTypeID GetArianeDrawingAnimTypeID()
 {
@@ -72,7 +72,7 @@ void FArianeDrawingExecutionToken::Execute( const FMovieSceneContext& Context
                                         , FPersistentEvaluationData& PersistentData
                                         , IMovieScenePlayer& Player )
 {
-    // 1. Résoudre l'objet lié à la piste
+    // 1. Resolve the object bound to the track
     TArrayView<TWeakObjectPtr<UObject>> BoundObjects = Player.FindBoundObjects( StoredOperand.ObjectBindingID, StoredOperand.SequenceID );
 
     if ( BoundObjects.Num() > 0 )
@@ -83,8 +83,8 @@ void FArianeDrawingExecutionToken::Execute( const FMovieSceneContext& Context
         {
             EMovieScenePlayerStatus::Type PlaybackStatus = Player.GetPlaybackStatus();
 
-            // LA CORRECTION : Enregistrer l'état actuel (l'image par défaut) avant de la modifier.
-            // On utilise le 'PreAnimatedState' du Player.
+            // THE FIX: save the current state (the default image) before modifying it.
+            // Uses the Player's 'PreAnimatedState'.
             Player.SavePreAnimatedState( *VectorLayer
                                        , GetArianeDrawingAnimTypeID()
                                        , FArianeDrawingPreAnimatedTokenProducer () );
@@ -127,20 +127,20 @@ FArianeDrawingMovieSceneEvalTemplate::Evaluate( const FMovieSceneEvaluationOpera
                                             , const FPersistentEvaluationData& PersistentData
                                             , FMovieSceneExecutionTokens& ExecutionTokens ) const
 {
-    // On récupère la section source liée à ce template
+    // Get the source section bound to this template
     const UArianeDrawingMovieSceneSection* ArianeSection = Cast<UArianeDrawingMovieSceneSection>(GetSourceSection());
     if (!ArianeSection) return;
 
-    // 1. Obtenir le temps actuel du Sequencer
+    // 1. Get the Sequencer's current time
     const FFrameTime CurrentTime = Context.GetTime();
 
-    // 2. Récupérer l'accès aux données de votre canal
-    // Note : On assume ici que vous avez stocké votre canal 'MyChannel' dans le template lors de sa compilation
+    // 2. Get access to the channel's data
+    // Note: assumes the channel 'MyChannel' was stored in the template when it was compiled
     TMovieSceneChannelData<const FArianeDrawingKeyData> ChannelData = Section->DrawingChannel.GetData();
 
-    // Le tableau des temps géré par votre canal
+    // The array of times managed by the channel
     TArrayView<const FFrameNumber> Times = ChannelData.GetTimes();
-    // Le tableau de vos structures de données
+    // The array of data structures
     TArrayView<const FArianeDrawingKeyData> Values = ChannelData.GetValues();
 
     const FArianeDrawingKeyData* KeyDataA = nullptr;
@@ -149,32 +149,33 @@ FArianeDrawingMovieSceneEvalTemplate::Evaluate( const FMovieSceneEvaluationOpera
 
     if (Times.Num() > 0)
     {
-        // 3. Recherche binaire sur le tableau natif des FFrameNumber
+        // 3. Binary search on the native FFrameNumber array
         int32 Index = Algo::UpperBound(Times, CurrentTime.GetFrame()) - 1;
         Index = FMath::Clamp(Index, 0, Times.Num() - 1);
 
-        // Clé Actuelle (Borne inférieure)
+        // Current key (lower bound)
         KeyDataA = &Values[Index];
 
-        // 4. Clé Suivante (Borne supérieure) s'il y en a une, pour calculer le Lerp
+        // 4. Next key (upper bound), if any, to compute the Lerp
         if (Index + 1 < Times.Num())
         {
             KeyDataB = &Values[Index + 1];
 
-            // 5. Calcul de l'Alpha d'interpolation entre les deux frames
+            // 5. Compute the interpolation alpha between the two frames
             float FrameA = Times[Index].Value;
             float FrameB = Times[Index + 1].Value;
 
             if (FrameB > FrameA)
             {
-                Alpha = (CurrentTime.AsDecimal() - FrameA) / (FrameB - FrameA);
+                // Before the first key the raw alpha is negative: hold the first key's pose
+                Alpha = FMath::Clamp( float( ( CurrentTime.AsDecimal() - FrameA ) / ( FrameB - FrameA ) ), 0.0f, 1.0f );
             }
         }
     }
 
     if ( KeyDataA )
     {
-        // On encapsule la structure trouvée dans le jeton d'exécution et on l'envoie au moteur
+        // Wrap the found structure in the execution token and send it to the engine
         ExecutionTokens.Add( FArianeDrawingExecutionToken( KeyDataA, KeyDataB, Alpha, Operand ) );
     }
 };

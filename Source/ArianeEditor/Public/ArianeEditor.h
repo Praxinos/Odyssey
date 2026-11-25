@@ -31,6 +31,8 @@ class UInteractiveToolManager;
 class UArianeEditorToolBuilder;
 class UArianeLayerVector;
 class UArianeLayer;
+class UArianeLayerFolder;
+class UArianeLayerStack;
 struct FArianePrimitive;
 struct FArianeObject;
 
@@ -247,6 +249,12 @@ protected:
      * @param Tab the tab to add
      */
     void AddTab( TSharedPtr<FArianeEditorTab> Tab );
+
+    /** Duplicates a layer and, for a folder, all its children (DuplicateObject alone would share them) */
+    UArianeLayer* DuplicateLayerTree( UArianeLayer* SourceLayer, UObject* Outer );
+
+    /** Pastes a copy of a clipboard layer tree into FosterFolder, attaching and registering each level */
+    void PasteLayerTree( UArianeLayerStack* LayerStack, UArianeLayerFolder* FosterFolder, UArianeLayer* ClipboardLayer );
 
     /**
      * @brief Remove a tab

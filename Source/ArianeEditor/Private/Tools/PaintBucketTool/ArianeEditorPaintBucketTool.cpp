@@ -364,20 +364,23 @@ UArianeEditorPaintBucketTool::GetPaintedLayers( TArray<UArianeLayer*>& OutPainte
     if( Painting3DComponent )
     {
         UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
+        UArianeLayer* CurrentLayer = LayerStack->GetCurrentLayer();
         bool bDoSelect = false;
 
+        // Traverse goes in array order: back-most layer (bottom of the list) first
         if( LayerPolicy == EArianeEditorPaintBucketToolLayerPolicy::CurrentAndAbove )
-        {
-            bDoSelect = true;
-        }
-
-        if( LayerPolicy == EArianeEditorPaintBucketToolLayerPolicy::CurrentAndBelow )
         {
             bDoSelect = false;
         }
 
+        if( LayerPolicy == EArianeEditorPaintBucketToolLayerPolicy::CurrentAndBelow )
+        {
+            bDoSelect = true;
+        }
+
         UArianeLayerFolder::Traverse( LayerStack->GetRootFolder()
                                     , [ this
+                                      , CurrentLayer
                                       , &bDoSelect
                                       , &OutPaintedLayers ]( UArianeLayer* Layer ) -> UArianeLayerFolder::ETraversalReturnValue
             {
@@ -388,20 +391,28 @@ UArianeEditorPaintBucketTool::GetPaintedLayers( TArray<UArianeLayer*>& OutPainte
                     switch( LayerPolicy )
                     {
                         case EArianeEditorPaintBucketToolLayerPolicy::CurrentAndBelow :
-                            if( VectorLayer->IsSelected() || bDoSelect )
+                            if( bDoSelect )
                             {
                                 OutPaintedLayers.Add( VectorLayer );
+                            }
 
-                                bDoSelect = true;
+                            // the layers past the current one are above it
+                            if( VectorLayer == CurrentLayer )
+                            {
+                                bDoSelect = false;
                             }
                         break;
 
                         case EArianeEditorPaintBucketToolLayerPolicy::CurrentAndAbove :
-                            if( VectorLayer->IsSelected()  || bDoSelect )
+                            // the layers before the current one are below it
+                            if( VectorLayer == CurrentLayer )
+                            {
+                                bDoSelect = true;
+                            }
+
+                            if( bDoSelect )
                             {
                                 OutPaintedLayers.Add( VectorLayer );
-
-                                bDoSelect = false;
                             }
                         break;
 

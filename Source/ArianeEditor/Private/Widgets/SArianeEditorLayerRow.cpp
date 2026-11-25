@@ -397,7 +397,13 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
                              , const FDragDropEvent& iDragDropEvent )
 {
     const TSharedPtr< SArianeEditorLayerStack > TreeView = StaticCastSharedPtr<SArianeEditorLayerStack>(OwnerTablePtr.Pin());
-    TSharedPtr<FDragDropOperation> Operation = iDragDropEvent.GetOperation();
+
+    if( IsDropAllowed( iDragDropEvent ) == false )
+    {
+        DropZone = DROPZONE_NONE;
+
+        return FReply::Unhandled();
+    }
 
     // work on a copy because the removal will later the selection status
     const TArray<UArianeLayer*> SelectedLayers = TreeView->GetEditor()->GetCurrentPainting3DComponent()->GetLayerStack()->GetSelectedLayers();
@@ -410,6 +416,11 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
 
     Painting3DComponent->GetLayerStack()->GetSelectedTrees( SelectedTrees );
 
+    // ABOVE: each tree goes right after the previously moved one, so the selection keeps its order
+    UArianeLayer* InsertAfter = Layer;
+
+    GEditor->BeginTransaction(LOCTEXT("ariane-layer-stack.drag-drop-layers","Move Layers"));
+
     for( UArianeLayer* SelectedTree : SelectedTrees )
     {
         switch( DropZone )
@@ -418,14 +429,17 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
             {
                 UArianeLayerFolder* ParentFolder = Layer->GetParentFolder();
 
-                // don't drop onto the same object or else expect some infinite loop
-                if( ParentFolder != SelectedTree )
-                {
-                    SelectedTree->GetParentFolder()->RemoveChild( SelectedTree, false );
-                    ParentFolder->InsertChild( SelectedTree
-                                             , ParentFolder->GetNextChild( Layer )
-                                             , FAttachmentTransformRules::KeepWorldTransform );
-                }
+                // The moved layer and both folders change their attachment: all must be recorded for undo
+                SelectedTree->Modify();
+                SelectedTree->GetParentFolder()->Modify();
+                ParentFolder->Modify();
+
+                SelectedTree->GetParentFolder()->RemoveChild( SelectedTree, false );
+                // Display is reversed (last child on top): visually below Layer = right before Layer in the array.
+                // Computed after the removal: SelectedTree may have been Layer's previous sibling
+                ParentFolder->InsertChild( SelectedTree
+                                         , ParentFolder->GetPreviousChild( Layer )
+                                         , FAttachmentTransformRules::KeepWorldTransform );
             }
             break;
 
@@ -434,9 +448,14 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
                 {
                     UArianeLayerFolder* FolderLayer = Cast<UArianeLayerFolder>(Layer);
 
-                    // don't drop onto the same object or else expect some infinite loop
-                    if( ( FolderLayer != SelectedTree ) && ( SelectedTree->GetParentFolder() != FolderLayer ) )
+                    // Already in this folder: nothing to move
+                    if( SelectedTree->GetParentFolder() != FolderLayer )
                     {
+                        // The moved layer and both folders change their attachment: all must be recorded for undo
+                        SelectedTree->Modify();
+                        SelectedTree->GetParentFolder()->Modify();
+                        FolderLayer->Modify();
+
                         FolderLayer->AppendChild( SelectedTree, FAttachmentTransformRules::KeepWorldTransform );
                     }
                 }
@@ -448,13 +467,17 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
             {
                 UArianeLayerFolder* ParentFolder = Layer->GetParentFolder();
 
-                if( ParentFolder != SelectedTree )
-                {
-                    SelectedTree->GetParentFolder()->RemoveChild( SelectedTree, false );
-                    ParentFolder->InsertChild( SelectedTree
-                                             , ParentFolder->GetPreviousChild( Layer )
-                                             , FAttachmentTransformRules::KeepWorldTransform );
-                }
+                // The moved layer and both folders change their attachment: all must be recorded for undo
+                SelectedTree->Modify();
+                SelectedTree->GetParentFolder()->Modify();
+                ParentFolder->Modify();
+
+                SelectedTree->GetParentFolder()->RemoveChild( SelectedTree, false );
+                // Display is reversed (last child on top): visually above Layer = right after Layer in the array
+                ParentFolder->InsertChild( SelectedTree
+                                         , InsertAfter
+                                         , FAttachmentTransformRules::KeepWorldTransform );
+                InsertAfter = SelectedTree;
             }
             break;
 
@@ -462,6 +485,8 @@ SArianeEditorLayerRow::OnDrop( const FGeometry& iGeometry
             break;
         }
     }
+
+    GEditor->EndTransaction();
 
     DropZone = DROPZONE_NONE;
     TreeView->Update();
@@ -532,7 +557,29 @@ void
 SArianeEditorLayerRow::OnDragEnter( const FGeometry& MyGeometry
                                   , const FDragDropEvent& DragDropEvent )
 {
-    DropZone = DROPZONE_ONTO;
+    DropZone = IsDropAllowed( DragDropEvent ) ? DROPZONE_ONTO : DROPZONE_NONE;
+}
+
+bool
+SArianeEditorLayerRow::IsDropAllowed( const FDragDropEvent& DragDropEvent ) const
+{
+    // Only layer drags move layers (not assets from the Content Browser, etc.)
+    bool bDropAllowed = DragDropEvent.GetOperationAs<FArianeLayerDragDropOp>().IsValid();
+    TArray<UArianeLayer*> SelectedTrees;
+
+    Layer->GetLayerStack()->GetSelectedTrees( SelectedTrees );
+
+    // Dropping onto the moved selection, or inside it, has no meaningful destination
+    // (and could create a parent-child cycle): the whole drop is refused
+    for( UArianeLayer* SelectedTree : SelectedTrees )
+    {
+        if( ( Layer == SelectedTree ) || ( Layer->HasAncestor( SelectedTree ) ) )
+        {
+            bDropAllowed = false;
+        }
+    }
+
+    return bDropAllowed;
 }
 
 void
@@ -545,9 +592,15 @@ FReply
 SArianeEditorLayerRow::OnDragOver( const FGeometry& iGeometry
                                  , const FDragDropEvent& iDragDropEvent )
 {
-    TSharedPtr<FDragDropOperation> Operation = iDragDropEvent.GetOperation();
     const FVector2D localPointerPos = iGeometry.AbsoluteToLocal( iDragDropEvent.GetScreenSpacePosition() );
     const FVector2D& widgetSize = iGeometry.GetLocalSize();
+
+    if( IsDropAllowed( iDragDropEvent ) == false )
+    {
+        DropZone = DROPZONE_NONE;
+
+        return FReply::Unhandled();
+    }
 
     if( localPointerPos.Y < 5 )
     {
@@ -570,7 +623,7 @@ FReply
 SArianeEditorLayerRow::OnDragDetected ( const FGeometry& iGeometry
                                       , const FPointerEvent& iMouseEvent )
 {
-    TSharedRef<FDragDropOperation> Operation = MakeShared<FDragDropOperation>();
+    TSharedRef<FArianeLayerDragDropOp> Operation = MakeShared<FArianeLayerDragDropOp>();
 
     return FReply::Handled().BeginDragDrop( Operation );
 }

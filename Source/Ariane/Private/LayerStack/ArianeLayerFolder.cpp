@@ -124,14 +124,8 @@ UArianeLayerFolder::InsertChild( UArianeLayer* Child, UArianeLayer* InsertAfter,
                                                                return ( Child == InsertAfter );
                                                            } );
 
-    if( FoundObjectIndex != INDEX_NONE )
-    {
-        ChildLayers.Insert( Child, FoundObjectIndex + 1 );
-    }
-    else
-    {
-        ChildLayers.Add( Child );
-    }
+    // InsertAfter == nullptr means "insert first": INDEX_NONE + 1 == 0
+    ChildLayers.Insert( Child, FoundObjectIndex + 1 );
 
     Invalidate();
 

@@ -29,6 +29,7 @@
 #include "Framework/Application/SlateApplication.h"
 #include "InputBehavior.h"
 #include "InteractiveToolManager.h"
+#include "LevelEditorViewport.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "SEditorViewport.h"
 #include "Slate/SceneViewport.h"
@@ -125,6 +126,11 @@ UArianeEditorTool::Activate()
     // register IInputProcessor interface for handling global key press
     FSlateApplication::Get().RegisterInputPreProcessor(InputProcessor);
 
+    if( bHideSelectionOutline )
+    {
+        SetSelectionDisplayVisible( false );
+    }
+
 /* Gary
     mCommandList = MakeShared<FUICommandList>();
     BindShortcuts(mCommandList);
@@ -141,6 +147,11 @@ UArianeEditorTool::Inactivate()
 
     // unregister IInputProcessor interface
     FSlateApplication::Get().UnregisterInputPreProcessor(InputProcessor);
+
+    if( bHideSelectionOutline )
+    {
+        SetSelectionDisplayVisible( true );
+    }
 
 /* Gary
     //mToolContext->OnChanged().RemoveAll(this);
@@ -862,6 +873,22 @@ UArianeEditorTool::StylusPacketToArianePointerState(const UE::StylusInput::FStyl
 #endif
 
     return arianePointerState;
+}
+
+void
+UArianeEditorTool::SetSelectionDisplayVisible( bool bVisible )
+{
+    // All level viewports (the ones the Ariane mode is active in), so that Activate and Inactivate
+    // work on the same context whatever the focused viewport
+    for( FLevelEditorViewportClient* LevelViewportClient : GEditor->GetLevelViewportClients() )
+    {
+        // Selection too: without the outline, selected objects get tinted with the selection color
+        LevelViewportClient->EngineShowFlags.SetSelection( bVisible );
+        LevelViewportClient->EngineShowFlags.SetSelectionOutline( bVisible );
+        LevelViewportClient->Invalidate();
+    }
+
+    GEditor->RedrawAllViewports();
 }
 
 FEditorViewportClient*

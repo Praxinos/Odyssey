@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Input/Reply.h"
+#include "Input/DragAndDrop.h"
 #include "Widgets/Views/STableViewBase.h"
 #include "Widgets/Views/STableRow.h"
 #include "Widgets/Views/STreeView.h"
@@ -13,6 +14,13 @@
 #include "ArianeLayer.h"
 
 class UArianeEditorTool;
+
+// Dedicated type so that the layer rows only accept layer drags (not assets, actors...)
+class FArianeLayerDragDropOp : public FDragDropOperation
+{
+    public:
+        DRAG_DROP_OPERATOR_TYPE( FArianeLayerDragDropOp, FDragDropOperation )
+};
 
 class ARIANEEDITOR_API SArianeEditorLayerRow
     : public SMultiColumnTableRow<UArianeLayer*>
@@ -50,6 +58,7 @@ class ARIANEEDITOR_API SArianeEditorLayerRow
         virtual void OnDragLeave( const FDragDropEvent& DragDropEvent ) override;
         virtual FReply OnDrop( const FGeometry& iGeometry
                              , const FDragDropEvent& iDragDropEvent ) override;
+        bool IsDropAllowed( const FDragDropEvent& DragDropEvent ) const;
         virtual int32 OnPaint( const FPaintArgs& Args
                              , const FGeometry& AllottedGeometry
                              , const FSlateRect& MyCullingRect

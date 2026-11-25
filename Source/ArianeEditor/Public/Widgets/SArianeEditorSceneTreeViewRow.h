@@ -5,11 +5,19 @@
 
 #include "CoreMinimal.h"
 #include "Input/Reply.h"
+#include "Input/DragAndDrop.h"
 #include "Widgets/Views/STableViewBase.h"
 #include "Widgets/Views/STreeView.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 
 struct FArianeObject;
+
+// Dedicated type so that the scene tree rows only accept object drags (not layers, assets...)
+class FArianeObjectDragDropOp : public FDragDropOperation
+{
+    public:
+        DRAG_DROP_OPERATOR_TYPE( FArianeObjectDragDropOp, FDragDropOperation )
+};
 
 class FSceneTreeViewItem
 {
@@ -62,6 +70,7 @@ class ARIANEEDITOR_API SArianeEditorSceneTreeViewRow
         virtual void OnDragLeave( const FDragDropEvent& DragDropEvent ) override;
         virtual FReply OnDrop( const FGeometry& iGeometry
                              , const FDragDropEvent& iDragDropEvent ) override;
+        bool IsDropAllowed( const FDragDropEvent& DragDropEvent ) const;
         virtual int32 OnPaint( const FPaintArgs& Args
                              , const FGeometry& AllottedGeometry
                              , const FSlateRect& MyCullingRect

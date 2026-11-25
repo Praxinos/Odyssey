@@ -80,6 +80,8 @@ UArianeEditorPathPushTool::UArianeEditorPathPushTool()
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PathPush64");
 
+    bHideSelectionOutline = true;
+
     bHasContextMenu = true;
 }
 
@@ -157,6 +159,34 @@ UArianeEditorPathPushTool::OnPostLayerStackSelectionChanged( UArianeLayerStack* 
     {
         BindVectorLayerDelegates( VectorLayer );
     }
+
+    // The current layer may have changed: the HUD trees and the quad tree must follow it
+    Reset();
+}
+
+void
+UArianeEditorPathPushTool::OnPreLayerStackHierarchyChanged( UArianeLayerStack* LayerStack )
+{
+    UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(LayerStack->GetCurrentLayer());
+
+    if( VectorLayer )
+    {
+        UnbindVectorLayerDelegates( VectorLayer );
+    }
+}
+
+void
+UArianeEditorPathPushTool::OnPostLayerStackHierarchyChanged( UArianeLayerStack* LayerStack )
+{
+    UArianeLayerVector* VectorLayer = Cast<UArianeLayerVector>(LayerStack->GetCurrentLayer());
+
+    if( VectorLayer )
+    {
+        BindVectorLayerDelegates( VectorLayer );
+    }
+
+    // A removed or moved layer may change the current layer or destroy the trees kept for the HUD
+    Reset();
 }
 
 void
@@ -182,6 +212,8 @@ UArianeEditorPathPushTool::BindLayerStackDelegates( UArianeLayerStack* LayerStac
 
     LayerStack->OnPreSelectionChangedDelegate().AddUObject( this, &UArianeEditorPathPushTool::OnPreLayerStackSelectionChanged, LayerStack );
     LayerStack->OnPostSelectionChangedDelegate().AddUObject( this, &UArianeEditorPathPushTool::OnPostLayerStackSelectionChanged, LayerStack );
+    LayerStack->OnPreHierarchyChangedDelegate().AddUObject( this, &UArianeEditorPathPushTool::OnPreLayerStackHierarchyChanged, LayerStack );
+    LayerStack->OnPostHierarchyChangedDelegate().AddUObject( this, &UArianeEditorPathPushTool::OnPostLayerStackHierarchyChanged, LayerStack );
 
     if( VectorLayer )
     {
@@ -196,10 +228,12 @@ UArianeEditorPathPushTool::UnbindLayerStackDelegates( UArianeLayerStack* LayerSt
 
     LayerStack->OnPreSelectionChangedDelegate().RemoveAll( this );
     LayerStack->OnPostSelectionChangedDelegate().RemoveAll( this );
+    LayerStack->OnPreHierarchyChangedDelegate().RemoveAll( this );
+    LayerStack->OnPostHierarchyChangedDelegate().RemoveAll( this );
 
     if( VectorLayer )
     {
-        BindVectorLayerDelegates ( VectorLayer );
+        UnbindVectorLayerDelegates ( VectorLayer );
     }
 }
 
@@ -248,18 +282,7 @@ UArianeEditorPathPushTool::UnbindEditorDelegates()
 void
 UArianeEditorPathPushTool::Activate()
 {
-    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
-
     Super::Activate();
-
-    // ViewportClient can be nullptr when closing the editor
-    if( ViewportClient )
-    {
-        ViewportClient->EngineShowFlags.SetSelectionOutline(false);
-        ViewportClient->Invalidate();
-
-        GEditor->RedrawAllViewports();
-    }
 
     Reset();
 
@@ -269,18 +292,7 @@ UArianeEditorPathPushTool::Activate()
 void
 UArianeEditorPathPushTool::Inactivate()
 {
-    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
-
     UnbindEditorDelegates();
-
-    // ViewportClient can be nullptr when closing the editor
-    if( ViewportClient )
-    {
-        ViewportClient->EngineShowFlags.SetSelectionOutline(true);
-        ViewportClient->Invalidate();
-
-        GEditor->RedrawAllViewports();
-    }
 
     Super::Inactivate();
 }

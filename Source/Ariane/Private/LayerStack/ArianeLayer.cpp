@@ -281,6 +281,29 @@ UArianeLayer::TraverseBackwards( TFunctionRef<ETraversalReturnValue(UArianeLayer
     TraverseBackwards_Private( Callback );
 }
 
+bool
+UArianeLayer::HasAncestor( UArianeLayer* CandidateAncestor )
+{
+    bool bHasAncestor = false;
+
+    TraverseBackwards( [ this
+                       , CandidateAncestor
+                       , &bHasAncestor ]( UArianeLayer* Ancestor ) -> ETraversalReturnValue
+        {
+            // TraverseBackwards starts on the layer itself, which is not its own ancestor
+            if( ( Ancestor != this ) && ( Ancestor == CandidateAncestor ) )
+            {
+                bHasAncestor = true;
+
+                return ETraversalReturnValue::Stop;
+            }
+
+            return ETraversalReturnValue::Continue;
+        } );
+
+    return bHasAncestor;
+}
+
 void
 UArianeLayer::PostEditChangeProperty (FPropertyChangedEvent & PropertyChangedEvent)
 {

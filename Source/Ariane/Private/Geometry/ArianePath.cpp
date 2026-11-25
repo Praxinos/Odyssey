@@ -1023,7 +1023,7 @@ FArianePath::Animate( const FArianeKeyedObject* KeyedObject, const FArianeKeyedO
 
     Super::Animate( KeyedObject, NextKeyedObject, T );
 
-    if( NextKeyedPath && ( T > 0.0f ) )
+    if( NextKeyedPath && ( T >= 0.0f ) )
     {
         FColor KeyedColor = KeyedPath->GetKeyedColor();
         FColor NextKeyedColor = NextKeyedPath->GetKeyedColor();

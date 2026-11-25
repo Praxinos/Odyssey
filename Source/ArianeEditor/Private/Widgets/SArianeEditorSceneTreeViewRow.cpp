@@ -416,11 +416,17 @@ SArianeEditorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
                                      , const FDragDropEvent& iDragDropEvent )
 {
     const TSharedPtr< SArianeEditorSceneTreeView > TreeView = StaticCastSharedPtr<SArianeEditorSceneTreeView>(OwnerTablePtr.Pin());
-    TSharedPtr<FDragDropOperation> Operation = iDragDropEvent.GetOperation();
     //FVector2D position = iGeometry.GetAbsolutePosition();
     FArianeObject* ItemObject = Item.Get()->GetObject();
     FArianeGroup* RootGroup = ItemObject->GetRootGroup();
     TArray<FArianeObject*> SelectedTrees;
+
+    if( IsDropAllowed( iDragDropEvent ) == false )
+    {
+        DropZone = DROPZONE_NONE;
+
+        return FReply::Unhandled();
+    }
 
     // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
     // rebuilt while it's processing stuff
@@ -435,34 +441,33 @@ SArianeEditorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
         RootGroup->GetDrawing()->Modify();
 
         FArianeObject* ParentObject = ItemObject->GetParent() ? ItemObject->GetParent() : ItemObject;
-        FArianeObject* NewParent = ( DropZone == DROPZONE_ONTO ) ? ItemObject : ParentObject;
+        // ABOVE: each tree goes right after the previously moved one, so the selection keeps its order
+        FArianeObject* InsertAfter = ItemObject;
 
         for( FArianeObject* SelectedTree : SelectedTrees )
         {
-            // Dropping a tree into itself or one of its descendants would create a parent-child cycle
-            if( ( NewParent != SelectedTree ) && ( NewParent->HasAncestor( SelectedTree ) == false ) )
+            switch( DropZone )
             {
-                switch( DropZone )
-                {
-                    //case DROPZONE_ABOVE:
-                    // reverse order in order to get the most forward objet on top of the hierarchy
-                    case DROPZONE_BELOW:
-                        ParentObject->TransferChild( SelectedTree, ParentObject->GetPreviousChild( ItemObject ) );
-                    break;
+                //case DROPZONE_ABOVE:
+                // reverse order in order to get the most forward objet on top of the hierarchy
+                case DROPZONE_BELOW:
+                    ParentObject->TransferChild( SelectedTree, ParentObject->GetPreviousChild( ItemObject ) );
+                break;
 
-                    case DROPZONE_ONTO:
-                        ItemObject->TransferChild( SelectedTree, nullptr );
-                    break;
+                case DROPZONE_ONTO:
+                    // Last child = front-most, on top of the list (like AppendChild on layer folders)
+                    ItemObject->TransferChild( SelectedTree, ItemObject->GetChildren().Num() ? ItemObject->GetChildren().Last() : nullptr );
+                break;
 
-                    // case DROPZONE_BELOW:
-                    // reverse order in order to get the most forward objet on top of the hierarchy
-                    case DROPZONE_ABOVE:
-                        ParentObject->TransferChild( SelectedTree, ItemObject );
-                    break;
+                // case DROPZONE_BELOW:
+                // reverse order in order to get the most forward objet on top of the hierarchy
+                case DROPZONE_ABOVE:
+                    ParentObject->TransferChild( SelectedTree, InsertAfter );
+                    InsertAfter = SelectedTree;
+                break;
 
-                    default :
-                    break;
-                }
+                default :
+                break;
             }
         }
 
@@ -535,7 +540,30 @@ void
 SArianeEditorSceneTreeViewRow::OnDragEnter( const FGeometry& MyGeometry
                                           , const FDragDropEvent& DragDropEvent )
 {
-    DropZone = DROPZONE_ONTO;
+    DropZone = IsDropAllowed( DragDropEvent ) ? DROPZONE_ONTO : DROPZONE_NONE;
+}
+
+bool
+SArianeEditorSceneTreeViewRow::IsDropAllowed( const FDragDropEvent& DragDropEvent ) const
+{
+    // Only object drags move objects (not layers, assets from the Content Browser, etc.)
+    bool bDropAllowed = DragDropEvent.GetOperationAs<FArianeObjectDragDropOp>().IsValid();
+    FArianeObject* ItemObject = Item.Get()->GetObject();
+    TArray<FArianeObject*> SelectedTrees;
+
+    ItemObject->GetRootGroup()->GetDrawing()->GetSelectedTrees( SelectedTrees );
+
+    // Dropping onto the moved selection, or inside it, has no meaningful destination
+    // (and could create a parent-child cycle): the whole drop is refused
+    for( FArianeObject* SelectedTree : SelectedTrees )
+    {
+        if( ( ItemObject == SelectedTree ) || ( ItemObject->HasAncestor( SelectedTree ) ) )
+        {
+            bDropAllowed = false;
+        }
+    }
+
+    return bDropAllowed;
 }
 
 void
@@ -548,10 +576,16 @@ FReply
 SArianeEditorSceneTreeViewRow::OnDragOver( const FGeometry& iGeometry
                                          , const FDragDropEvent& iDragDropEvent )
 {
-    TSharedPtr<FDragDropOperation> Operation = iDragDropEvent.GetOperation();
     //FVector2D position = iGeometry.GetAbsolutePosition();
     const FVector2D localPointerPos = iGeometry.AbsoluteToLocal( iDragDropEvent.GetScreenSpacePosition() );
     const FVector2D& widgetSize = iGeometry.GetLocalSize();
+
+    if( IsDropAllowed( iDragDropEvent ) == false )
+    {
+        DropZone = DROPZONE_NONE;
+
+        return FReply::Unhandled();
+    }
 
     if( localPointerPos.Y < 5 )
     {
@@ -574,7 +608,7 @@ FReply
 SArianeEditorSceneTreeViewRow::OnDragDetected ( const FGeometry& iGeometry
                                               , const FPointerEvent& iMouseEvent )
 {
-    TSharedRef<FDragDropOperation> Operation = MakeShared<FDragDropOperation>();
+    TSharedRef<FArianeObjectDragDropOp> Operation = MakeShared<FArianeObjectDragDropOp>();
 
     return FReply::Handled().BeginDragDrop(Operation);
 }

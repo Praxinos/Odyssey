@@ -112,6 +112,7 @@ public:
     bool IsInvalidated();
 
     void TraverseBackwards( TFunctionRef<ETraversalReturnValue(UArianeLayer*)> Callback );
+    bool HasAncestor( UArianeLayer* CandidateAncestor );
     void PreEditUndo();
     void PostEditUndo();
     void PostLoad();

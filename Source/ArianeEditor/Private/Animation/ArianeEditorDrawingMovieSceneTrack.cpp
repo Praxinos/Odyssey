@@ -67,11 +67,11 @@ FArianeEditorDrawingMovieSceneTrack::AddArianeTrack(TArray<FGuid> ObjectBindings
 
                 if ( NewSection )
                 {
-                    // 2. LE LIEN CRUCIAL : On donne une dimension temporelle à la section !
-                    // "All()" force la section à être infinie et à s'étendre sur toute la timeline grise
+                    // 2. THE CRUCIAL LINK: give the section a time range!
+                    // "All()" makes the section infinite, spanning the whole grey timeline
                     NewSection->SetRange(TRange<FFrameNumber>::All());
 
-                    // 3. L'ENREGISTREMENT EFFECTIF : On l'ajoute physiquement dans le tableau de la piste
+                    // 3. THE ACTUAL REGISTRATION: physically add it to the track's array
                     NewTrack->AddSection(*NewSection);
                 }
 

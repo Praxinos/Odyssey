@@ -374,7 +374,8 @@ SArianeEditorLayerStack::Update()
         // We hide the root item by showing only its child items
         for( UArianeLayer* ChildItem : RootFolder->GetChildLayers() )
         {
-            ItemsSource.Add( ChildItem );
+            // Note: display in reverse order
+            ItemsSource.Insert( ChildItem, 0 );
 
             // Expand items if need
             ExpandTree( ChildItem );

@@ -513,12 +513,13 @@ FArianeObject::Invalidate( const FArianeObjectInvalidationFlags& InInvalidationF
 {
     FArianeObject* Parent = ParentID.GetObject( Drawing );
 
+    // Flags first: the propagation ends in UArianeDrawing::Invalidate(), which reads them (e.g. Color for UsedMaterials)
+    GetInvalidationFlags().OR( InInvalidationFlags );
+
     if ( Parent )
     {
         Parent->InvalidateChild( this );
     }
-
-    GetInvalidationFlags().OR( InInvalidationFlags );
 
     GetDrawing()->MarkPackageDirty();
 
@@ -1110,20 +1111,14 @@ FArianeObject::TransferChild( FArianeObject* FosterChild
 
                        return false;
                     } );
-                int InsertIndex = InsertAfterIndex + 1;
 
-                if( InsertIndex < Children.Num() )
-                {
-                    Children.Insert( FosterChild, InsertIndex );
-                }
-                else
-                {
-                    Children.Add( FosterChild );
-                }
+                // TArray::Insert accepts Num() as index: no need to special-case the end
+                Children.Insert( FosterChild, InsertAfterIndex + 1 );
             }
             else
             {
-                Children.Add( FosterChild );
+                // InsertAfter == nullptr means "insert first", like UArianeLayerFolder::InsertChild
+                Children.Insert( FosterChild, 0 );
             }
 
             RenumberChildren();

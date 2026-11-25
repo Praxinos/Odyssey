@@ -26,10 +26,10 @@ namespace Sequencer
         UArianeDrawingMovieSceneTrack* Track = Cast<UArianeDrawingMovieSceneTrack>(InSectionToKey->GetOuter());
         UArianeLayerVector* VectorLayer = Track->GetVectorLayer( InSequencer );
 
-        // 1. Accès direct aux tableaux de clés du Channel
+        // 1. Direct access to the channel's key arrays
         TMovieSceneChannelData<FArianeDrawingKeyData> ChannelData = InChannel->GetData();
 
-        // 2. Recherche : est-ce qu'une clé existe déjà à cette frame exacte ?
+        // 2. Search: does a key already exist at this exact frame?
         int32 ExistingIndex = Algo::BinarySearch(ChannelData.GetTimes(), InTime);
 
         // If the key already exists, we update it completely
@@ -73,28 +73,28 @@ namespace Sequencer
 UArianeDrawingMovieSceneSection::UArianeDrawingMovieSceneSection()
 {
 #if WITH_EDITOR
-    // 1. On prépare les métadonnées pour l'affichage du losange dans le Sequencer
+    // 1. Prepare the metadata used to display the key diamond in the Sequencer
     FMovieSceneChannelMetaData ChannelMetaData;
     ChannelMetaData.Name = TEXT("ArianeDrawingSpawnTrack");
     ChannelMetaData.DisplayText = NSLOCTEXT("Ariane", "ArianeDrawingSpawnTrack_Text", "Drawing Key");
 #endif
 
-    // Force la section à restaurer l'état d'origine à la fin de la lecture
-    // ou lors de la fermeture du Séquenceur.
+    // Forces the section to restore the original state at the end of playback
+    // or when the Sequencer is closed.
 SetCompletionMode(EMovieSceneCompletionMode::RestoreState);
 
-    // 2. Le mécanisme officiel d'Unreal : On crée le conteneur de préparation
+    // 2. Unreal's official mechanism: create the preparation container
     FMovieSceneChannelProxyData ProxyData;
 
-    // 3. LA VRAIE FONCTION : On enregistre le canal dans le builder
+    // 3. THE ACTUAL CALL: register the channel in the builder
 #if WITH_EDITOR
     ProxyData.Add(DrawingChannel, ChannelMetaData);
 #else
     ProxyData.AddChannel(&DrawingEventChannel);
 #endif
 
-    // 4. On écrase le proxy par défaut de la section en lui injectant notre structure
-    // (Cette ligne compile et initialise proprement le système de clés du Sequencer)
+    // 4. Override the section's default proxy by injecting our structure
+    // (This line compiles and properly initializes the Sequencer's key system)
     ChannelProxy = MakeShared<FMovieSceneChannelProxy>(MoveTemp(ProxyData));
 }
 

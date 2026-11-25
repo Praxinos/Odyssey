@@ -54,6 +54,8 @@ UArianeEditorPrimitiveDrawingTool::UArianeEditorPrimitiveDrawingTool()
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PrimitiveDrawing64");
 
+    bHideSelectionOutline = true;
+
     //Shapes.AddShapeType( EOdysseyShapeType::kLine, nullptr );
     //Shapes.AddShapeType( EOdysseyShapeType::kRectangle, nullptr );
     //Shapes.AddShapeType( EOdysseyShapeType::kEllipse, nullptr );
@@ -69,45 +71,6 @@ UArianeEditorPrimitiveDrawingTool::Init( FArianeEditor* InEditor )
     Super::Init( InEditor );
 
     MaterialInterface = Settings->GetDefaultPathDrawingMaterial();
-}
-
-void
-UArianeEditorPrimitiveDrawingTool::Activate()
-{
-    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
-
-    Super::Activate();
-
-    // ViewportClient can be nullptr when closing the editor
-    if( ViewportClient )
-    {
-        // Hide outlining
-        ViewportClient->EngineShowFlags.SetSelectionOutline(false);
-        ViewportClient->Invalidate();
-
-        GEditor->RedrawAllViewports();
-    }
-
-    //BindDelegates();
-}
-
-void
-UArianeEditorPrimitiveDrawingTool::Inactivate()
-{
-    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
-
-    //UnbindDelegates();
-
-    // ViewportClient can be nullptr when closing the editor
-    if( ViewportClient )
-    {
-        ViewportClient->EngineShowFlags.SetSelectionOutline(true);
-        ViewportClient->Invalidate();
-
-        GEditor->RedrawAllViewports();
-    }
-
-    Super::Inactivate();
 }
 
 bool

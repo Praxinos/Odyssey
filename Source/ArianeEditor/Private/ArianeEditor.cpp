@@ -1087,9 +1087,13 @@ FArianeEditor::UngroupSelectedGroups()
                         // we work on a copy of the array because the hierarchy will be modified
                         TArray<FArianeObject*> Children = SelectedGroup->GetChildren();
 
+                        // Children take the group's place, keeping their order
+                        FArianeObject* InsertAfter = SelectedGroup;
+
                         for( FArianeObject* Child : Children )
                         {
-                            SelectedGroup->GetParent()->TransferChild( Child, nullptr );
+                            SelectedGroup->GetParent()->TransferChild( Child, InsertAfter );
+                            InsertAfter = Child;
                         }
                     }
                 }
@@ -1145,9 +1149,13 @@ FArianeEditor::GroupSelectedObjects( const FName& NewGroupName )
                     // Final step
                     FosterParent->AppendChild( NewGroup, FArianeObject::ETransformPolicy::KeepRelative );
 
+                    // Keep the objects' order inside the new group
+                    FArianeObject* InsertAfter = nullptr;
+
                     for( FArianeObject* ObjectToRegroup : ObjectsToRegroup )
                     {
-                        NewGroup->TransferChild( ObjectToRegroup, nullptr );
+                        NewGroup->TransferChild( ObjectToRegroup, InsertAfter );
+                        InsertAfter = ObjectToRegroup;
                     }
 
                     Painting3DComponent->Update( false );
@@ -1399,6 +1407,56 @@ FArianeEditor::PasteObjects()
     }
 }
 
+// DuplicateObject only deep-copies subobjects: a folder's children (outer = layer stack) would be shared
+// with the source, so the tree is duplicated level by level
+UArianeLayer*
+FArianeEditor::DuplicateLayerTree( UArianeLayer* SourceLayer, UObject* Outer )
+{
+    UArianeLayer* LayerCopy = DuplicateObject<UArianeLayer>( SourceLayer, Outer );
+    UArianeLayerFolder* SourceFolder = Cast<UArianeLayerFolder>(SourceLayer);
+
+    if( SourceFolder )
+    {
+        UArianeLayerFolder* FolderCopy = Cast<UArianeLayerFolder>(LayerCopy);
+
+        // The duplicated array still points to the source's children
+        FolderCopy->GetChildLayers().Empty();
+
+        for( UArianeLayer* SourceChild : SourceFolder->GetChildLayers() )
+        {
+            FolderCopy->GetChildLayers().Add( DuplicateLayerTree( SourceChild, Outer ) );
+        }
+    }
+
+    return LayerCopy;
+}
+
+// Each level of the clipboard tree is duplicated, then attached and registered in the stack by AddLayer
+void
+FArianeEditor::PasteLayerTree( UArianeLayerStack* LayerStack, UArianeLayerFolder* FosterFolder, UArianeLayer* ClipboardLayer )
+{
+    // Same outer as the layers created by the layer stack.
+    // Note: was Painting3DComponent->GetOwner(), with the comment "The outer must be the AActor or else
+    // the TEDS system could crash". Restore it if TEDS crashes again
+    UArianeLayer* LayerCopy = DuplicateObject<UArianeLayer>( ClipboardLayer, LayerStack );
+    UArianeLayerFolder* FolderCopy = Cast<UArianeLayerFolder>(LayerCopy);
+
+    LayerCopy->RegisterComponent();
+
+    LayerStack->AddLayer( FosterFolder, LayerCopy, false );
+
+    if( FolderCopy )
+    {
+        // The duplicated array still points to the clipboard's children: they are pasted one by one instead
+        FolderCopy->GetChildLayers().Empty();
+
+        for( UArianeLayer* ClipboardChild : Cast<UArianeLayerFolder>(ClipboardLayer)->GetChildLayers() )
+        {
+            PasteLayerTree( LayerStack, FolderCopy, ClipboardChild );
+        }
+    }
+}
+
 void
 FArianeEditor::CopySelectedLayers()
 {
@@ -1416,7 +1474,7 @@ FArianeEditor::CopySelectedLayers()
 
         for( UArianeLayer* Layer : SelectedTrees )
         {
-            UArianeLayer* LayerCopy = DuplicateObject<UArianeLayer>(Layer, GetTransientPackage());
+            UArianeLayer* LayerCopy = DuplicateLayerTree( Layer, GetTransientPackage() );
 
             Clipboard.CopiedLayers.Add( LayerCopy );
         }
@@ -1437,7 +1495,6 @@ FArianeEditor::PasteLayers()
     {
         UArianeLayerStack* LayerStack = Painting3DComponent->GetLayerStack();
         TArray<UArianeLayer*> SelectedTrees;
-        TArray<UArianeLayer*> LayerCopies;
         UArianeLayerFolder* ReceiverFolder = LayerStack->GetRootFolder();
 
         LayerStack->GetSelectedTrees( SelectedTrees );
@@ -1453,17 +1510,15 @@ FArianeEditor::PasteLayers()
             }
         }
 
+        // A single hierarchy event for the whole paste (AddLayer is called with bTriggerEvent = false)
+        LayerStack->OnPreHierarchyChangedDelegate().Broadcast();
+
         for( UArianeLayer* Layer : Clipboard.CopiedLayers )
         {
-                                                                           // The outer must be the AActor or else the TEDS system could crash
-            UArianeLayer* LayerCopy = DuplicateObject<UArianeLayer>( Layer, Painting3DComponent->GetOwner() );
-
-            LayerCopy->RegisterComponent();
-
-            LayerCopies.Add( LayerCopy );
+            PasteLayerTree( LayerStack, ReceiverFolder, Layer );
         }
 
-        LayerStack->AddLayers( ReceiverFolder, LayerCopies, true );
+        LayerStack->OnPostHierarchyChangedDelegate().Broadcast();
 
         Painting3DComponent->Update( false );
     }

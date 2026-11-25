@@ -357,8 +357,8 @@ FArianeSegmentCubic::Extract( FArianeObject* NewSegmentOwner
                                        , T1 );
 
     NewSegmentVertex1->SetPosition( Bezier[3] );
-    NewSegmentVertex1->SetNormal( Vertex1->GetNormal() + DeltaNormal * T1 );
-    NewSegmentVertex1->SetRadius( Vertex1->GetRadius() + DeltaRadius * T1 );
+    NewSegmentVertex1->SetNormal( Vertex0->GetNormal() + DeltaNormal * T1 );
+    NewSegmentVertex1->SetRadius( Vertex0->GetRadius() + DeltaRadius * T1 );
 
     ::ULIS::CubicBezierInverseSplitAtParameter( &Bezier[0]
                                               , &Bezier[1]
@@ -367,8 +367,8 @@ FArianeSegmentCubic::Extract( FArianeObject* NewSegmentOwner
                                               , T1 ? ( T0 / T1 ) : 0.0f );
 
     NewSegmentVertex0->SetPosition( Bezier[0] );
-    NewSegmentVertex0->SetNormal( Vertex1->GetNormal() + DeltaNormal * T0 );
-    NewSegmentVertex0->SetRadius( Vertex1->GetRadius() + DeltaRadius * T0 );
+    NewSegmentVertex0->SetNormal( Vertex0->GetNormal() + DeltaNormal * T0 );
+    NewSegmentVertex0->SetRadius( Vertex0->GetRadius() + DeltaRadius * T0 );
 
     return static_cast<FArianePath*>(NewSegmentOwner)->AllocCubicSegment( NewSegmentVertex0
                                                                         , Bezier[1]

@@ -65,8 +65,6 @@ public:
     //virtual bool SupportsColorType( EOdysseyPainterEditorColorType ColorType ) override;
 
     virtual void Init( FArianeEditor* InEditor ) override;
-    void Activate();
-    void Inactivate();
     virtual bool GetCursor( EMouseCursor::Type& OutCursor ) override;
     virtual bool OnKeyDownGlobal( const FKeyEvent& InKeyEvent ) override;
     virtual bool OnKeyUpGlobal( const FKeyEvent& InKeyEvent ) override;

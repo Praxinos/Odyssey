@@ -43,6 +43,8 @@ UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PathDrawing64");
 
+    bHideSelectionOutline = true;
+
     PathTracer.SetTracingWidth( (double) TracingFidelity );
 
     bHasContextMenu = true;
@@ -56,41 +58,6 @@ UArianeEditorPathDrawingTool::Init( FArianeEditor* InEditor )
     Super::Init( InEditor );
 
     MaterialInterface = Settings->GetDefaultPathDrawingMaterial();
-}
-
-void
-UArianeEditorPathDrawingTool::Activate()
-{
-    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
-
-    Super::Activate();
-
-    // ViewportClient can be nullptr when closing the editor
-    if( ViewportClient )
-    {
-        ViewportClient->EngineShowFlags.SetSelectionOutline(false);
-        ViewportClient->Invalidate();
-
-        GEditor->RedrawAllViewports();
-    }
-}
-
-void
-UArianeEditorPathDrawingTool::Inactivate()
-{
-    FEditorViewportClient* ViewportClient = GetActiveViewportClient();
-
-    // ViewportClient can be nullptr when closing the editor
-    if( ViewportClient )
-    {
-        // Hide outlining
-        ViewportClient->EngineShowFlags.SetSelectionOutline(true);
-        ViewportClient->Invalidate();
-
-        GEditor->RedrawAllViewports();
-    }
-
-    Super::Inactivate();
 }
 
 FArianeGroup*

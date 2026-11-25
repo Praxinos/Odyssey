@@ -422,15 +422,12 @@ UArianeLayerStack::CreateVectorLayer( UArianeLayerFolder* InParentLayerFolder, b
     UArianeLayerFolder* RootFolder = GetRootFolder();
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
-                                                                           // The outer must be the AActor or else the TEDS system could crash
     FString LayerName = FString::Printf(TEXT("Drawing Layer %d"), GetVectorLayerCount() + 1 );
+    // The outer is the layer stack.
+    // Note: it used to be the actor, with the comment "The outer must be the AActor or else the TEDS system could crash"
     UArianeLayerVector* NewVectorLayer = NewObject<UArianeLayerVector>( this
                                                                       , NAME_None
                                                                       , RF_Transactional | RF_Public ); // for undos
-
-    // Below 2 lines are mandatory to register the component, otherwise undos won't work (RF_TRANSACTIONAL will be erased)
-    //NewVectorLayer->SetupAttachment( ParentLayerFolder );
-    //NewVectorLayer->RegisterComponent();
 
     NewVectorLayer->SetDisplayName( LayerName );
 
@@ -445,15 +442,12 @@ UArianeLayerStack::CreateFolderLayer( UArianeLayerFolder* InParentLayerFolder, b
     UArianeLayerFolder* RootFolder = GetRootFolder();
     UArianeLayerFolder* ParentLayerFolder = InParentLayerFolder ? InParentLayerFolder
                                                                 : RootFolder;
-                                                                        // The outer must be the AActor or else the TEDS system could crash
     FString LayerName = FString::Printf(TEXT("Folder Layer %d"), GetFolderLayerCount() + 1 );
+    // The outer is the layer stack.
+    // Note: it used to be the actor, with the comment "The outer must be the AActor or else the TEDS system could crash"
     UArianeLayerFolder* NewLayerFolder = NewObject<UArianeLayerFolder>( this
                                                                       , NAME_None
                                                                       , RF_Transactional | RF_Public  ); // for undos
-
-    // Below 2 lines are mandatory to register the component, otherwise undos won't work (RF_TRANSACTIONAL will be erased)
-    //NewLayerFolder->SetupAttachment( ParentLayerFolder );
-    //NewLayerFolder->RegisterComponent();
 
     NewLayerFolder->SetDisplayName( LayerName );
 

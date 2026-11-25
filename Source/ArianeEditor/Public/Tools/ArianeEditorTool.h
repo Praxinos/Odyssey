@@ -282,6 +282,15 @@ protected:
     FEditorViewportClient* GetActiveViewportClient();
 
     /**
+     * @brief Shows or hides the selection display in all level viewports (see bHideSelectionOutline)
+     * @param bVisible true to show it, false to hide it
+     */
+    void SetSelectionDisplayVisible( bool bVisible );
+
+    // Set by tools that need the selection display hidden while active (it gets in the way of drawing)
+    bool bHideSelectionOutline = false;
+
+    /**
      * @brief Draw the drawing grid
      * @param RenderAPI
      * @param VectorLayer
