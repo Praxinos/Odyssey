@@ -62,6 +62,8 @@ private:
     FText GetGuideName(UOdysseyPainterEditorGuide* Guide) const;
     const FSlateBrush* GetVisibilityBrush(UOdysseyPainterEditorGuide* Guide) const;
     const FSlateBrush* GetLockBrush(UOdysseyPainterEditorGuide* Guide) const;
+    FText GetVisibilityTooltip(UOdysseyPainterEditorGuide* Guide) const;
+    FText GetLockTooltip(UOdysseyPainterEditorGuide* Guide) const;
     const FSlateBrush* GetTypeBrush(UOdysseyPainterEditorGuide* Guide) const;
     void RenameGuide(const FText& NewName, ETextCommit::Type CommitType, UOdysseyPainterEditorGuide* Guide);
     FText GetEditButtonText() const;

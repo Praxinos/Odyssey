@@ -214,7 +214,7 @@ TSharedRef<ITableRow> SOdysseyPainterEditorGuidesPanel::MakeGuideRow(TWeakObject
         [
             SNew(SButton)
             .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("SimpleButton.NoPadding"))
-            .ToolTipText(Guide->bVisible ? LOCTEXT("hide-guide-tooltip", "Hide guide") : LOCTEXT("show-guide-tooltip", "Show guide"))
+            .ToolTipText(this, &SOdysseyPainterEditorGuidesPanel::GetVisibilityTooltip, Guide)
             .OnClicked(this, &SOdysseyPainterEditorGuidesPanel::ToggleVisibility, Guide)
             [
                 SNew(SImage)
@@ -226,7 +226,7 @@ TSharedRef<ITableRow> SOdysseyPainterEditorGuidesPanel::MakeGuideRow(TWeakObject
         [
             SNew(SButton)
             .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("SimpleButton.NoPadding"))
-            .ToolTipText(Guide->bLocked ? LOCTEXT("unlock-guide-tooltip", "Unlock guide") : LOCTEXT("lock-guide-tooltip", "Lock guide"))
+            .ToolTipText(this, &SOdysseyPainterEditorGuidesPanel::GetLockTooltip, Guide)
             .OnClicked(this, &SOdysseyPainterEditorGuidesPanel::ToggleLock, Guide)
             [
                 SNew(SImage)
@@ -396,6 +396,16 @@ const FSlateBrush* SOdysseyPainterEditorGuidesPanel::GetVisibilityBrush(UOdyssey
 const FSlateBrush* SOdysseyPainterEditorGuidesPanel::GetLockBrush(UOdysseyPainterEditorGuide* Guide) const
 {
     return FOdysseyStyle::GetBrush(Guide && Guide->bLocked ? "OdysseyLayerStack.Locked16" : "OdysseyLayerStack.Unlocked16");
+}
+
+FText SOdysseyPainterEditorGuidesPanel::GetVisibilityTooltip(UOdysseyPainterEditorGuide* Guide) const
+{
+    return Guide && Guide->bVisible ? LOCTEXT("hide-guide-tooltip", "Hide guide") : LOCTEXT("show-guide-tooltip", "Show guide");
+}
+
+FText SOdysseyPainterEditorGuidesPanel::GetLockTooltip(UOdysseyPainterEditorGuide* Guide) const
+{
+    return Guide && Guide->bLocked ? LOCTEXT("unlock-guide-tooltip", "Unlock guide") : LOCTEXT("lock-guide-tooltip", "Lock guide");
 }
 
 const FSlateBrush* SOdysseyPainterEditorGuidesPanel::GetTypeBrush(UOdysseyPainterEditorGuide* Guide) const
