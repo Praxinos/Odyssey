@@ -5,6 +5,7 @@
 
 #include "Editor.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "ScopedTransaction.h"
 #include "Widgets/Input/SComboButton.h"
 #include "Widgets/Input/SSpinBox.h"
@@ -69,6 +70,7 @@ SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAn
 int32
 SOdysseyAnimationCellImageStagger::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCellImageStagger::OnPaint);
     // Draw a current frame
 
     LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);

@@ -13,8 +13,17 @@
 #include "SOdysseyAnimationLayerImageVectorTimeline.h"
 #include "LayerFolder/OdysseyAnimationLayerFolder.h"
 #include "OdysseyCommandList.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
+
+int32
+SOdysseyAnimationTimelineTreeView::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+    // Profiles the paint of the whole timeline.
+    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationTimelineTreeView::OnPaint);
+    return SOdysseyLayerStackTreeView::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+}
 
 void
 SOdysseyAnimationTimelineTreeView::Construct(const FArguments& InArgs)

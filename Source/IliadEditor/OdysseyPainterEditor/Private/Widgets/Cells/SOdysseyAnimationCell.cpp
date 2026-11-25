@@ -3,6 +3,8 @@
 
 #include "SOdysseyAnimationCell.h"
 
+#include "ProfilingDebugging/CountersTrace.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Styling/StyleColors.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/SOverlay.h"
@@ -20,6 +22,13 @@
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
+TRACE_DECLARE_INT_COUNTER(OdysseyTimeline_CellWidgets, TEXT("Odyssey/Timeline/Cell widgets"));
+
+SOdysseyAnimationCell::~SOdysseyAnimationCell()
+{
+    TRACE_COUNTER_DECREMENT(OdysseyTimeline_CellWidgets);
+}
+
 void
 SOdysseyAnimationCell::Construct(
     const FArguments& InArgs,
@@ -27,6 +36,8 @@ SOdysseyAnimationCell::Construct(
     UOdysseyAnimationCell* iCell
 )
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCell::Construct);
+    TRACE_COUNTER_INCREMENT(OdysseyTimeline_CellWidgets);
     ensure(iAnimationLayer);
 
     mTimelinePosition = InArgs._TimelinePosition;
@@ -46,6 +57,7 @@ SOdysseyAnimationCell::Construct(
         .BorderBackgroundColor( FLinearColor( 1.f, 1.f, 1.f ) )
         .Visibility_Lambda( [this]() -> EVisibility
                             {
+                                TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCell::GetVisibility);
                                 return mCell->GetExposure() > 0 ? EVisibility::Visible : EVisibility::Collapsed;
                             } )
         [
@@ -84,6 +96,7 @@ SOdysseyAnimationCell::Construct(
 
 EVisibility SOdysseyAnimationCell::GetExposureVisibility() const
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCell::GetExposureVisibility);
     // Hide when layer does not display cell names
     // TODO: Maybe have its option in Editor Settings
     //       instead of relying on Cell Names visibility ?
@@ -103,6 +116,7 @@ EVisibility SOdysseyAnimationCell::GetExposureVisibility() const
 
 FText SOdysseyAnimationCell::GetExposureText() const
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCell::GetExposureText);
     return FText::AsNumber( mCell->GetExposure() );
 }
 
@@ -115,6 +129,7 @@ FText SOdysseyAnimationCell::GetExposureTooltip() const
 
 int32 SOdysseyAnimationCell::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCell::OnPaint);
     // Draw a current frame
     LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
     ++LayerId;

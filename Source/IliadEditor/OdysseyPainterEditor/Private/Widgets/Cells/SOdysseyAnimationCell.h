@@ -24,6 +24,7 @@ public:
 
 public:
     // Construction / Destruction
+    virtual ~SOdysseyAnimationCell();
     void Construct(
         const FArguments& iArgs,
         UOdysseyAnimationLayer* iAnimationLayer,

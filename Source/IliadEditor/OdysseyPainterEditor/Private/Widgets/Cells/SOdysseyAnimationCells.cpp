@@ -4,6 +4,7 @@
 #include "SOdysseyAnimationCells.h"
 
 #include "Editor.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
@@ -236,6 +237,7 @@ SOdysseyAnimationCells::OnCellsChanged()
 void
 SOdysseyAnimationCells::RefreshCellsHBox()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCells::RefreshCellsHBox);
     mCellsHBox->ClearChildren();
 
     TArray<UOdysseyAnimationCell*> cells = mCells.Get();
@@ -299,6 +301,7 @@ SOdysseyAnimationCells::GetCellsWidth() const
 float
 SOdysseyAnimationCells::GetCellExposure(UOdysseyAnimationCell* iCell) const
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCells::GetCellExposure);
     return iCell->GetExposure();
 }
 
@@ -564,6 +567,14 @@ bool
 SOdysseyAnimationCells::SupportsKeyboardFocus() const
 {
     return true;
+}
+
+int32
+SOdysseyAnimationCells::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+    // Profiles the paint of the whole row.
+    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCells::OnPaint);
+    return SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 }
 
 FReply

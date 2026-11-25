@@ -5,6 +5,7 @@
 
 #include "Algo/Accumulate.h"
 #include "Editor.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "Framework/Docking/TabManager.h"
@@ -238,6 +239,7 @@ SOdysseyAnimationLayerImageTimeline::GenerateMainRowTimelineWidget()
         .Cells_Lambda(
             [this]() -> TArray<UOdysseyAnimationCell*>
             {
+                TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationLayerImageTimeline::GetCells);
                 return mLayer->GetCells();
             }
         )
@@ -274,6 +276,7 @@ SOdysseyAnimationLayerImageTimeline::GenerateCellNamesRowTimelineWidget()
         .Cells_Lambda(
             [this]() -> TArray<UOdysseyAnimationCell*>
             {
+                TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationLayerImageTimeline::GetCellNamesCells);
                 return mLayer->GetCells();
             }
         )
@@ -491,6 +494,7 @@ SOdysseyAnimationLayerImageTimeline::OnCursorQuery( const FGeometry& MyGeometry,
 int32
 SOdysseyAnimationLayerImageTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationLayerImageTimeline::OnPaint);
     // Draw a current frame
     LayerId = SOdysseyAnimationLayerTimeline::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
     ++LayerId;

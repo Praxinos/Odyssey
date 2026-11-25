@@ -7,6 +7,7 @@
 #include "Engine/Texture2D.h"
 #include "ImageUtils.h"
 #include "ObjectTools.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/SBoxPanel.h"
@@ -37,6 +38,7 @@ SOdysseyAnimationCellImageVector::~SOdysseyAnimationCellImageVector()
 void
 SOdysseyAnimationCellImageVector::Construct(const FArguments& iArgs, UOdysseyAnimationCellImageVector* iCell)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCellImageVector::Construct);
     mShowContent = iArgs._ShowContent;
 
     if (!iCell)
@@ -97,6 +99,7 @@ SOdysseyAnimationCellImageVector::Construct(const FArguments& iArgs, UOdysseyAni
 void
 SOdysseyAnimationCellImageVector::RefreshCellRenderTarget()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCellImageVector::RefreshCellRenderTarget);
     FTextureRenderTargetResource* RTResource = RenderTarget->GameThread_GetRenderTargetResource();
     ThumbnailTools::RenderThumbnail( mCell, mCell->GetAnimation()->GetWidthFromHeightKeepingRatio( THUMBNAIL_SIZE_VECTOR ), THUMBNAIL_SIZE_VECTOR, ThumbnailTools::EThumbnailTextureFlushMode::NeverFlush, RTResource );
 }
@@ -126,6 +129,7 @@ SOdysseyAnimationCellImageVector::CreateCheckerboardTexture()
 void
 SOdysseyAnimationCellImageVector::OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCellImageVector::OnRenderingChanged);
     if (!mCell)
         return;
 
@@ -140,5 +144,6 @@ SOdysseyAnimationCellImageVector::OnRenderingChanged(const FOdysseyRenderingChan
 EVisibility
 SOdysseyAnimationCellImageVector::GetContentVisibility() const
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCellImageVector::GetContentVisibility);
     return mShowContent.Get() ? EVisibility::Visible : EVisibility::Collapsed;
 }
