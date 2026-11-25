@@ -5,13 +5,10 @@
 
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
-#include "OdysseyPaintEngine.h"
 
 #include "OdysseyVector.h"
 
 #include "OdysseyPainterEditorColorPickerTool.generated.h"
-
-class FOdysseyPaintEngine;
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorColorPickerTool : public UOdysseyPainterEditorTool
@@ -25,14 +22,11 @@ public:
     //Constructor
     UOdysseyPainterEditorColorPickerTool();
 
-    void Initialize(FOdysseyPaintEngine* iPaintEngine);
-
     //OdysseyPainterEditorTool overrides
     virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture);
     virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
 
-    virtual void Commit() override;
     virtual bool IsActivable() const override;
 
     virtual FText GetTooltip() const override;
@@ -42,8 +36,5 @@ public:
 
 protected:
     // protected Data Members
-
-    //Resources
-    FOdysseyPaintEngine mPaintEngine;
     bool mIsPicking = false;
 };

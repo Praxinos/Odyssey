@@ -111,12 +111,6 @@ UOdysseyPainterEditorColorPickerTool::PickColorUp( const FOdysseyPoint& iPointIn
         mEditor->InactivateTemporaryTool();
 }
 
-void
-UOdysseyPainterEditorColorPickerTool::Commit()
-{
-    mPaintEngine.Commit(FOdysseyBlendParameters());
-}
-
 FText
 UOdysseyPainterEditorColorPickerTool::GetTooltip() const
 {
