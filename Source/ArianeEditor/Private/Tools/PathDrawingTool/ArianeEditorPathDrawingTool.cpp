@@ -43,8 +43,6 @@ UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PathDrawing64");
 
-    bHideSelectionOutline = true;
-
     PathTracer.SetTracingWidth( (double) TracingFidelity );
 
     bHasContextMenu = true;

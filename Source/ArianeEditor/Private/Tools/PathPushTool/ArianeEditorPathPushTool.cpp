@@ -80,8 +80,6 @@ UArianeEditorPathPushTool::UArianeEditorPathPushTool()
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PathPush64");
 
-    bHideSelectionOutline = true;
-
     bHasContextMenu = true;
 }
 

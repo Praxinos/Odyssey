@@ -287,8 +287,8 @@ protected:
      */
     void SetSelectionDisplayVisible( bool bVisible );
 
-    // Set by tools that need the selection display hidden while active (it gets in the way of drawing)
-    bool bHideSelectionOutline = false;
+    // The selection display gets in the way of drawing: hidden while a tool is active, unless the tool sets this to false
+    bool bHideSelectionOutline = true;
 
     /**
      * @brief Draw the drawing grid

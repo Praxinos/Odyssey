@@ -106,8 +106,6 @@ UArianeEditorPathEditTool::UArianeEditorPathEditTool()
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PathEdit64");
 
-    bHideSelectionOutline = true;
-
     bHasContextMenu = true;
 }
 

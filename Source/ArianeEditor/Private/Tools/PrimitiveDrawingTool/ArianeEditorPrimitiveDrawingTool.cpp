@@ -54,8 +54,6 @@ UArianeEditorPrimitiveDrawingTool::UArianeEditorPrimitiveDrawingTool()
 {
     Icon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.ToolsTab.PrimitiveDrawing64");
 
-    bHideSelectionOutline = true;
-
     //Shapes.AddShapeType( EOdysseyShapeType::kLine, nullptr );
     //Shapes.AddShapeType( EOdysseyShapeType::kRectangle, nullptr );
     //Shapes.AddShapeType( EOdysseyShapeType::kEllipse, nullptr );
