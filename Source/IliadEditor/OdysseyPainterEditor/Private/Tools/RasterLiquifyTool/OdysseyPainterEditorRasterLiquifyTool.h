@@ -16,6 +16,8 @@ class FOdysseyPainterEditorRasterLiquifyToolHUD;
 class FOdysseyMediaRaster;
 class FOdysseyRasterBlockEdit;
 class FTransaction;
+struct FTransactionContext;
+class UOdysseyTiledImage;
 class UTransBuffer;
 
 UENUM()
@@ -254,6 +256,18 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
 
         void OnRasterSelectionChanged();
         uint32 GetThreadCount();
+
+        /** Watches Image for an undo or redo restoring its tiles, in place of the previously watched image; nullptr stops watching. */
+        void WatchSourceImage(UOdysseyTiledImage* Image);
+        /** Records that the undo or redo being applied restored the watched image. */
+        void OnSourceImageRestored();
+        /** Re-initializes the tool when the completed undo or redo restored the watched image: its copies of the pixels are stale. */
+        void OnUndoRedo(const FTransactionContext& TransactionContext, bool bSucceeded);
+
+        /** The source image whose restoration by an undo or redo the tool watches, see WatchSourceImage(). */
+        TWeakObjectPtr<UOdysseyTiledImage> WatchedImage;
+        /** True when the undo or redo being applied restored the watched image. */
+        bool bSourceImageRestored = false;
 
     protected:
         TSharedPtr<FOdysseyPainterEditorRasterLiquifyToolHUD> mLiquifyHUD;

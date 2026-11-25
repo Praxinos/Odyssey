@@ -4,9 +4,9 @@
 #include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyTool.h"
 #include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyToolCustomization.h"
 #include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyToolHUD.h"
-#include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyToolUndo.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyRasterContent.h"
+#include "OdysseyTiledImage.h"
 #include "Toolkits/BaseToolkit.h"
 #include "Async/ParallelFor.h"
 #include "Editor.h"
@@ -120,6 +120,11 @@ UOdysseyPainterEditorRasterLiquifyTool::Load()
     TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
 
     rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterLiquifyTool::OnRasterSelectionChanged);
+    if (UTransBuffer* Transactor = Cast<UTransBuffer>(GEditor->Trans))
+    {
+        Transactor->OnUndo().AddUObject(this, &UOdysseyPainterEditorRasterLiquifyTool::OnUndoRedo);
+        Transactor->OnRedo().AddUObject(this, &UOdysseyPainterEditorRasterLiquifyTool::OnUndoRedo);
+    }
 
     Init();
 }
@@ -149,6 +154,13 @@ UOdysseyPainterEditorRasterLiquifyTool::Unload()
     }
 
     mAlteredImageBuffer.Empty();
+    WatchSourceImage(nullptr);
+    bSourceImageRestored = false;
+    if (UTransBuffer* Transactor = Cast<UTransBuffer>(GEditor->Trans))
+    {
+        Transactor->OnUndo().RemoveAll(this);
+        Transactor->OnRedo().RemoveAll(this);
+    }
 
     rasterSelection->OnChanged().RemoveAll(this);
 
@@ -251,6 +263,47 @@ UOdysseyPainterEditorRasterLiquifyTool::FetchSourceImages()
 
     mAlteredImageBuffer.Empty();
     mAlteredImageBuffer.Emplace( mediaRaster, srcBlock, maskBlock );
+    UOdysseyTiledImage* SourceImage = content->GetTiledImage();
+    WatchSourceImage(SourceImage);
+}
+
+void
+UOdysseyPainterEditorRasterLiquifyTool::WatchSourceImage(UOdysseyTiledImage* Image)
+{
+    if (WatchedImage.Get() == Image)
+    {
+        return;
+    }
+
+    if (UOdysseyTiledImage* Previous = WatchedImage.Get())
+    {
+        Previous->OnTilesRestored().RemoveAll(this);
+    }
+
+    WatchedImage = Image;
+    if (Image)
+    {
+        Image->OnTilesRestored().AddUObject(this, &UOdysseyPainterEditorRasterLiquifyTool::OnSourceImageRestored);
+    }
+}
+
+void
+UOdysseyPainterEditorRasterLiquifyTool::OnSourceImageRestored()
+{
+    // The tiles are restored while the undo or redo is applied: they are re-read once it is complete, in OnUndoRedo()
+    bSourceImageRestored = true;
+}
+
+void
+UOdysseyPainterEditorRasterLiquifyTool::OnUndoRedo(const FTransactionContext& TransactionContext, bool bSucceeded)
+{
+    if (!bSourceImageRestored)
+    {
+        return;
+    }
+
+    bSourceImageRestored = false;
+    Init();
 }
 
 void
@@ -769,13 +822,8 @@ UOdysseyPainterEditorRasterLiquifyTool::Reset()
 
     Init();
 
-    // the tool's reference images must be reset after a call to undo or redo
     if( GUndo )
     {
-        FCommandChange* undo = new FOdysseyPainterEditorRasterLiquifyToolUndo( this );
-
-        GUndo->StoreUndo( this, TUniquePtr<FCommandChange>(undo) );
-
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if ( source )
             source->RecordCurrentFrameUndo();
@@ -900,10 +948,6 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseUp(const FOdysseyPoint& iPointInT
 
         if( GUndo )
         {
-            FCommandChange* undo = new FOdysseyPainterEditorRasterLiquifyToolUndo( this );
-
-            GUndo->StoreUndo( this, TUniquePtr<FCommandChange>(undo) );
-
             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
             if ( source )
                 source->RecordCurrentFrameUndo();
@@ -1040,13 +1084,8 @@ UOdysseyPainterEditorRasterLiquifyTool::PropertyChanged( const FName& iPropertyN
                               , true );
         }
 
-        // store an undo to reinit the tool on undo / redo
         if( GUndo )
         {
-            FCommandChange* undo = new FOdysseyPainterEditorRasterLiquifyToolUndo( this );
-
-            GUndo->StoreUndo( this, TUniquePtr<FCommandChange>(undo) );
-
             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
             if ( source )
                 source->RecordCurrentFrameUndo();
