@@ -422,17 +422,18 @@ SArianeEditorLayerStack::ModifyLayerStackAndSelectedLayers( UArianeLayerStack* L
                                                           , const TArray<UArianeLayer*>& OldSelectedLayers
                                                           , const TArray<UArianeLayer*>& NewSelectedLayers )
 {
+    // Modify( false ): recorded for undo, but a selection does not dirty the level
     for( UArianeLayer* Layer : OldSelectedLayers )
     {
-        Layer->Modify();
+        Layer->Modify( false );
     }
 
     for( UArianeLayer* Layer : NewSelectedLayers )
     {
-        Layer->Modify();
+        Layer->Modify( false );
     }
 
-    LayerStack->Modify();
+    LayerStack->Modify( false );
 }
 
 void

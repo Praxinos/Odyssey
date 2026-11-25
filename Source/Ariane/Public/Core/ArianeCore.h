@@ -26,10 +26,11 @@ namespace FArianeCore
                                                   , const FVector2D& iSegmentP1
                                                   , double&         oDistance );
 
-    float ARIANE_API IntersectPlane ( const FPlane& iPlane
-                                    , const FVector&  iOrigin
-                                    , const FVector&  iDirection
-                                    ,  FVector& oOut );
+    // True when the plane is in front of the ray. oOut is written whenever the ray is not parallel to the plane.
+    bool ARIANE_API IntersectPlane ( const FPlane& iPlane
+                                   , const FVector&  iOrigin
+                                   , const FVector&  iDirection
+                                   ,  FVector& oOut );
 
     bool ARIANE_API IntersectSegment( const FVector2D& Line0p0
                                     , const FVector2D& Line0p1

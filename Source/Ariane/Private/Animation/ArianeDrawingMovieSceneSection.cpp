@@ -10,6 +10,7 @@
 #include "ArianeLayerVector.h"
 #include "MovieScene.h"
 #include "MovieSceneTrack.h"
+#if WITH_EDITOR
 #include "ISequencer.h"
 
 namespace Sequencer
@@ -69,6 +70,7 @@ namespace Sequencer
         }
     }
 }
+#endif // WITH_EDITOR
 
 UArianeDrawingMovieSceneSection::UArianeDrawingMovieSceneSection()
 {
@@ -106,6 +108,7 @@ UArianeDrawingMovieSceneSection::PostLoad()
     DrawingChannel.PostLoad();
 }
 
+#if WITH_EDITOR
 void
 UArianeDrawingMovieSceneSection::PostEditUndo()
 {
@@ -113,3 +116,4 @@ UArianeDrawingMovieSceneSection::PostEditUndo()
 
     DrawingChannel.PostEditUndo();
 }
+#endif

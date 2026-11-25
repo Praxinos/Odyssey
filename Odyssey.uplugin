@@ -296,6 +296,11 @@
             "LoadingPhase": "Default"
         },
         {
+            "Name": "Ariane",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        },
+        {
             "Name": "ArianeEditor",
             "Type": "Editor",
             "LoadingPhase": "Default"

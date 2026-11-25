@@ -207,6 +207,7 @@ UArianePainting3DComponent::PostLoad()
     //Update( false );
 }
 
+#if WITH_EDITOR
 void
 UArianePainting3DComponent::PostEditUndo()
 {
@@ -214,6 +215,7 @@ UArianePainting3DComponent::PostEditUndo()
 
     Update( false );
 }
+#endif
 
 UArianeLayerStack*
 UArianePainting3DComponent::GetLayerStack()
@@ -281,6 +283,7 @@ UArianePainting3DComponent::Update( bool bInteractive )
 //MarkRenderTransformDirty();
 }
 
+#if WITH_EDITOR
 void
 UArianePainting3DComponent::PostEditChangeProperty( FPropertyChangedEvent& event )
 {
@@ -305,6 +308,7 @@ UArianePainting3DComponent::PostEditChangeProperty( FPropertyChangedEvent& event
 
     Super::PostEditChangeProperty( event );
 }
+#endif
 
 bool UArianePainting3DComponent::GetCastShadows() const
 {

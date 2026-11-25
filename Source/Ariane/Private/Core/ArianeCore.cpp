@@ -23,6 +23,15 @@ FArianeCore::DistanceToSegment( const FVector2D& iPt
     // It falls where t = [(p-v) . (w-v)] / |w-v|^2
     // We clamp t from [0,1] to handle points outside the segment vw.
     FVector2D p0pt = ( iPt - iSegmentP0 );
+
+    // Zero-length segment: it is a point, and t would be 0/0 (NaN)
+    if( sqLength == 0.0 )
+    {
+        oDistance = p0pt.Length();
+
+        return 0.0;
+    }
+
     double t = p0pt.Dot( p0p1 ) / sqLength;
 
     oDistance = DBL_MAX;
@@ -64,22 +73,22 @@ FArianeCore::DistanceToSegmentConstrained( const FVector2D& iPt
     return t;
 }
 
-float
+bool
 FArianeCore::IntersectPlane ( const FPlane& iPlane
                             , const FVector& iOrigin
                             , const FVector& iDirection
                             , FVector& oOut )
 {
-    if( FVector::DotProduct(iDirection, iPlane) )
+    if( FVector::DotProduct( iDirection, iPlane.GetNormal() ) != 0.0 )
     {
         double T = FMath::RayPlaneIntersectionParam( iOrigin, iDirection, iPlane );
 
         oOut = iOrigin + ( iDirection * T );
 
-        return T;
+        return ( T > 0.0 );
     }
 
-    return -1.0f;
+    return false;
 
 /* commented-out: Unreal uses Ax+By+Cz=W, hence W = -D. So we use unreal's plane API
     float vo = ( iPlane.X * iOrigin.X ) +

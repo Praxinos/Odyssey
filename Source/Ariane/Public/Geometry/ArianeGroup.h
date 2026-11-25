@@ -89,3 +89,14 @@ protected:
     bool bUseEditorHUDForegroundColor;
 #endif
 };
+
+template<>
+struct TStructOpsTypeTraits<FArianeGroup> : public TStructOpsTypeTraitsBase2<FArianeGroup>
+{
+    enum
+    {
+        // Reflection copies (templates, spawnables) go property by property: runtime pointers keep the
+        // default constructor values instead of being shared with the source.
+        WithCopy = false
+    };
+};

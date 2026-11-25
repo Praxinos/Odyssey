@@ -274,7 +274,7 @@ protected:
     TSharedRef<SWidget> CreateDrawingOriginComboBox( const FText& InLabel );
     TSharedRef<SWidget> CreateDrawingDistanceToPlaneSpinBox( const FText& InLabel );
     void OnDrawingOriginChanged( int32 EnumID, ESelectInfo::Type );
-    const FSlateBrush* GetDrawingOrientationBackgroundBrush( EArianeDrawingOrientation InDrawingOrientation ) const;
+    const FSlateBrush* GetDrawingOrientationBackgroundBrush( EArianeDrawingOrientation InDrawingOrientation );
     void ClearPainting3DComponents();
     void OnEditorSelectionChanged( UObject* NewSelection );
     void AddToolBuilder( UArianeEditorToolBuilder* ToolBuilder );

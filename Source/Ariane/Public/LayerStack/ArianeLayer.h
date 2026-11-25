@@ -31,9 +31,7 @@ public:
 
     //DECLARE_MULTICAST_DELEGATE_OneParam( FOnUpdateDelegate, bool );
 
-#if WITH_EDITOR
     DECLARE_MULTICAST_DELEGATE( FOnTransformChanged );
-#endif
 
     /**
      * @brief Set the layer as locked or unlocked
@@ -113,11 +111,13 @@ public:
 
     void TraverseBackwards( TFunctionRef<ETraversalReturnValue(UArianeLayer*)> Callback );
     bool HasAncestor( UArianeLayer* CandidateAncestor );
+#if WITH_EDITOR
     void PreEditUndo();
     void PostEditUndo();
+    virtual void PostEditChangeProperty (FPropertyChangedEvent & PropertyChangedEvent) override;
+#endif
     void PostLoad();
     uint32 GetWorldTransformVersion() const;
-    virtual void PostEditChangeProperty (FPropertyChangedEvent & PropertyChangedEvent) override;
 
     void SetDisplayName( const FString& DisplayName );
     const FString& GetDisplayName();

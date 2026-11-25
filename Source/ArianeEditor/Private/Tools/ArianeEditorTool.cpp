@@ -1450,17 +1450,16 @@ UArianeEditorTool::FSegmentQuadTree::PickSegments( FEditorViewportClient* Viewpo
                         {
                             double Distance;
 
-                            if( FArianeCore::DistanceToSegmentConstrained( ScreenMousePosition
-                                                                         , P0ScreenPosition
-                                                                         , P1ScreenPosition
-                                                                         , Distance ) )
-                            {
-                                if( Distance <= SelectionRadius )
-                                {
-                                    OutPickedSegments.AddUnique( SegmentQuadTreeEntries[i].Segment );
+                            FArianeCore::DistanceToSegmentConstrained( ScreenMousePosition
+                                                                     , P0ScreenPosition
+                                                                     , P1ScreenPosition
+                                                                     , Distance );
 
-                                    break; // break the for-loop
-                                }
+                            if( Distance <= SelectionRadius )
+                            {
+                                OutPickedSegments.AddUnique( SegmentQuadTreeEntries[i].Segment );
+
+                                break; // break the for-loop
                             }
                         }
                     }

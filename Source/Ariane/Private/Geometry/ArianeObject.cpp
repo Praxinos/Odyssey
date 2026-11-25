@@ -521,8 +521,6 @@ FArianeObject::Invalidate( const FArianeObjectInvalidationFlags& InInvalidationF
         Parent->InvalidateChild( this );
     }
 
-    GetDrawing()->MarkPackageDirty();
-
     //OnPostInvalidated.Broadcast();
 }
 
@@ -533,7 +531,7 @@ FArianeObject::GetInvalidatedChildren()
 }
 
 void
-FArianeObject::GetInvalidatedChildren( TArray<FArianeObject*> OutInvalidatedObjects, bool bRecurse )
+FArianeObject::GetInvalidatedChildren( TArray<FArianeObject*>& OutInvalidatedObjects, bool bRecurse )
 {
     for( FArianeObject* InvalidatedObject : InvalidatedChildren )
     {
@@ -1266,7 +1264,7 @@ FArianeObject::GetRootGroup()
     return Drawing ? Drawing->GetRootGroup() : nullptr;
 }
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
 FColor
 FArianeObject::GetHUDForegroundColor()
 {

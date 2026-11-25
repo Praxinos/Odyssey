@@ -178,7 +178,7 @@ FArianeEditor::SetDrawingDistanceToPlane( float InDrawingDistanceToPlane )
 {
     UArianeLayerVector* VectorLayer = GetCurrentVectorLayer();
 
-    if( VectorLayer && VectorLayer && VectorLayer->GetOverrideDrawingSettings() )
+    if( VectorLayer && VectorLayer->GetOverrideDrawingSettings() )
     {
         VectorLayer->SetDrawingDistanceToPlane( InDrawingDistanceToPlane );
     }
@@ -238,7 +238,7 @@ FArianeEditor::SetDrawingOrientation( EArianeDrawingOrientation InDrawingOrienta
 {
     UArianeLayerVector* VectorLayer = GetCurrentVectorLayer();
 
-    if( VectorLayer && VectorLayer && VectorLayer->GetOverrideDrawingSettings() )
+    if( VectorLayer && VectorLayer->GetOverrideDrawingSettings() )
     {
         VectorLayer->SetDrawingOrientation( InDrawingOrientation );
     }
@@ -264,11 +264,11 @@ FArianeEditor::GetDrawingOrientation()
 }
 
 const FSlateBrush*
-FArianeEditor::GetDrawingOrientationBackgroundBrush( EArianeDrawingOrientation InDrawingOrientation ) const
+FArianeEditor::GetDrawingOrientationBackgroundBrush( EArianeDrawingOrientation InDrawingOrientation )
 {
     static FSlateColorBrush Selected = FSlateColorBrush( FStyleColors::Select );
 
-    return ( DrawingOrientation == InDrawingOrientation ) ? &Selected : nullptr;
+    return ( GetDrawingOrientation() == InDrawingOrientation ) ? &Selected : nullptr;
 }
 
 TSharedRef<SWidget>
@@ -332,7 +332,7 @@ FArianeEditor::CreateDrawingOriginComboBox( const FText& InLabel )
             .OnEnumSelectionChanged(this, &FArianeEditor::OnDrawingOriginChanged)
             .CurrentValue_Lambda([this]()
                 {
-                    return (int32)DrawingOrigin;
+                    return (int32)GetDrawingOrigin();
                 } )
         ];
 
@@ -342,7 +342,7 @@ FArianeEditor::CreateDrawingOriginComboBox( const FText& InLabel )
 void
 FArianeEditor::OnDrawingOriginChanged( int32 EnumID, ESelectInfo::Type )
 {
-    DrawingOrigin = static_cast<EArianeDrawingOrigin>(EnumID);
+    SetDrawingOrigin( static_cast<EArianeDrawingOrigin>(EnumID) );
 }
 
 TSharedRef<SWidget>
@@ -366,7 +366,7 @@ FArianeEditor::CreateDrawingOrientationSegmentControl( const FText& InLabel )
         .VAlign( VAlign_Center )
         [
             SNew(SSegmentedControl<EArianeDrawingOrientation>)
-            .Value_Lambda( [this]{ return DrawingOrientation; } )
+            .Value_Lambda( [this]{ return GetDrawingOrientation(); } )
             .SupportsEmptySelection( false )
             .SupportsMultiSelection( false )
             .UniformPadding( FMargin( 2, 0, 2, 0 ) )
@@ -375,7 +375,7 @@ FArianeEditor::CreateDrawingOrientationSegmentControl( const FText& InLabel )
             .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.View.name", "Use Camera's view") )
             [
                 SNew(SBorder)
-                .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeDrawingOrientation::View  )
+                .BorderImage_Lambda( [this]{ return GetDrawingOrientationBackgroundBrush( EArianeDrawingOrientation::View ); } )
                 [
                     SNew(SImage)
                     .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.View20") )
@@ -385,7 +385,7 @@ FArianeEditor::CreateDrawingOrientationSegmentControl( const FText& InLabel )
             .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerXY.name", "Use XY Plane") )
             [
                 SNew(SBorder)
-                .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeDrawingOrientation::XY  )
+                .BorderImage_Lambda( [this]{ return GetDrawingOrientationBackgroundBrush( EArianeDrawingOrientation::XY ); } )
                 [
                     SNew(SImage)
                     .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerXY20") )
@@ -395,7 +395,7 @@ FArianeEditor::CreateDrawingOrientationSegmentControl( const FText& InLabel )
             .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerYZ.name", "Use YZ Plane") )
             [
                 SNew(SBorder)
-                .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeDrawingOrientation::YZ  )
+                .BorderImage_Lambda( [this]{ return GetDrawingOrientationBackgroundBrush( EArianeDrawingOrientation::YZ ); } )
                 [
                     SNew(SImage)
                     .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerYZ20") )
@@ -405,7 +405,7 @@ FArianeEditor::CreateDrawingOrientationSegmentControl( const FText& InLabel )
             .ToolTip( LOCTEXT("ariane-editor.drawing-orientation.LayerZX.name", "Use ZX Plane") )
             [
                 SNew(SBorder)
-                .BorderImage_Raw( this, &FArianeEditor::GetDrawingOrientationBackgroundBrush, EArianeDrawingOrientation::ZX  )
+                .BorderImage_Lambda( [this]{ return GetDrawingOrientationBackgroundBrush( EArianeDrawingOrientation::ZX ); } )
                 [
                     SNew(SImage)
                     .Image( FArianeEditorStyle::Get().GetBrush( "ArianeEditor.DrawingOrientation.LayerZX20") )
@@ -1095,6 +1095,9 @@ FArianeEditor::UngroupSelectedGroups()
                             SelectedGroup->GetParent()->TransferChild( Child, InsertAfter );
                             InsertAfter = Child;
                         }
+
+                        // The group is empty now: remove it and free it (RemoveChild also unselects it)
+                        SelectedGroup->GetParent()->RemoveChild( SelectedGroup, true );
                     }
                 }
             }
@@ -1178,8 +1181,8 @@ FArianeEditor::SelectAllObjects()
         {
             FArianeGroup* RootGroup = VectorLayer->GetDrawing()->GetRootGroup();
 
-            // for undos in case a transaction is opened by the caller
-            VectorLayer->GetDrawing()->Modify();
+            // for undos in case a transaction is opened by the caller. Modify( false ): a selection does not dirty the level
+            VectorLayer->GetDrawing()->Modify( false );
 
             FArianeObject::Traverse( RootGroup
                                    , FArianeObject::ETraversalPolicy::AllChildren
@@ -1391,10 +1394,8 @@ FArianeEditor::PasteObjects()
 
                 for( FArianeObject* CopiedObject : Clipboard.CopiedObjects )
                 {
+                    // Copy allocates the whole tree in CopyArgs.Drawing, the destination drawing: nothing to reset
                     FArianeObject* PasteObject = CopiedObject->Copy( CopyArgs );
-
-                    PasteObject->ResetDrawing(  VectorLayer->GetDrawing() );
-                    PasteObject->PostReset();
 
                     Destination->AppendChild( PasteObject, FArianeObject::ETransformPolicy::KeepAbsolute );
 

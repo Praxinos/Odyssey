@@ -8,7 +8,9 @@
 //Unreal headers
 #include "MovieScene.h"
 #include "LevelSequence.h"
+#if WITH_EDITOR
 #include "ISequencer.h"
+#endif
 
 UArianeDrawingMovieSceneTrack::UArianeDrawingMovieSceneTrack()
 {
@@ -28,6 +30,7 @@ UArianeDrawingMovieSceneTrack::CreateNewSection()
     return NewSection;
 }
 
+#if WITH_EDITOR
 UArianeLayerVector*
 UArianeDrawingMovieSceneTrack::GetVectorLayer( ISequencer& InSequencer )
 {
@@ -41,7 +44,7 @@ UArianeDrawingMovieSceneTrack::GetVectorLayer( ISequencer& InSequencer )
     }
     return nullptr;
 }
-
+#endif // WITH_EDITOR
 
 FMovieSceneEvalTemplatePtr
 UArianeDrawingMovieSceneTrack::CreateTemplateForSection(const UMovieSceneSection& InSection) const

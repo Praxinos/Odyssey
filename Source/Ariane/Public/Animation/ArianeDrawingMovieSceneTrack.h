@@ -27,5 +27,7 @@ public:
     // implements IMovieSceneTrackTemplateProducer::CreateTemplateForSection
     virtual FMovieSceneEvalTemplatePtr CreateTemplateForSection(const UMovieSceneSection& InSection) const override;
 
+#if WITH_EDITOR
     UArianeLayerVector* GetVectorLayer( ISequencer& InSequencer );
+#endif
 };

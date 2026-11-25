@@ -11,7 +11,6 @@
 #include "Channels/MovieSceneChannelData.h"
 #include "MovieScene.h"
 #include "MovieSceneTrack.h"
-#include "ISequencer.h"
 
 bool FArianeDrawingMovieSceneChannel::Evaluate(FFrameTime InTime, FArianeDrawingKeyData& OutValue) const
 {

@@ -87,6 +87,7 @@ FArianeCycleInvalidationFlags::HasAny()
 
 FArianeCycle::~FArianeCycle()
 {
+    delete Geometry3D;
 }
 
 FArianeCycle::FArianeCycle()
@@ -128,6 +129,7 @@ FArianeCycle::ResetDrawing( UArianeDrawing* InDrawing )
 {
     Super::ResetDrawing( InDrawing );
 
+    delete Geometry3D;
     Geometry3D = new FArianeCycleGeometry3D( this );
 }
 

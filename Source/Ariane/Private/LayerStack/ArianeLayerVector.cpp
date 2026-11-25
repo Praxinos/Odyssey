@@ -15,9 +15,9 @@
 #include "ArianeLine.h"
 #include "ArianePolygon.h"
 // Unreal headers
-#include "EditorModes.h"
 #include "UObject/ObjectSaveContext.h"
 #include "Materials/Material.h"
+#include "Materials/MaterialRenderProxy.h"
 
 // for debugging purpose
 static TAutoConsoleVariable<bool> CVarShowArianeNormals( TEXT("r.Ariane.ShowNormals")
@@ -203,7 +203,10 @@ FArianeGeometryProxy::GetDrawingDynamicMeshElements( const FSceneViewFamily& Vie
         {
             MaterialInterface = GEngine->WireframeMaterial;
 
+#if WITH_EDITOR
+            // The HUD colors are editor settings: a packaged game keeps the object color
             ObjectColor = Object->GetHUDForegroundColor();
+#endif
         }
 
         if( Geometry3D && MaterialInterface )
@@ -231,8 +234,9 @@ FArianeGeometryProxy::GetDrawingDynamicMeshElements( const FSceneViewFamily& Vie
 
                 BatchElement.IndexBuffer = &Geometry3D->GetIndexBuffer();
 
-                // Temporary proxy to store the color of the object (lighter than a UMaterialInstanceDynamic)
-                FDynamicColoredMaterialRenderProxy& MaterialProxy = Collector.AllocateOneFrameResource<FDynamicColoredMaterialRenderProxy>(
+                // Temporary proxy to store the color of the object (lighter than a UMaterialInstanceDynamic).
+                // Owned by the collector, released at the end of the frame
+                FColoredMaterialRenderProxy& MaterialProxy = Collector.AllocateOneFrameResource<FColoredMaterialRenderProxy>(
                     MaterialInterface->GetRenderProxy()
                   , FLinearColor(ObjectColor) );
 
@@ -427,8 +431,6 @@ UArianeLayerVector::UArianeLayerVector()
 {
     bWantsOnUpdateTransform = true;
 
-    FCoreUObjectDelegates::OnAssetLoaded.AddUObject( this, &UArianeLayerVector::OnAssetLoaded );
-
     //Drawing = CreateDefaultSubobject<UArianeDrawing>("Subobject Drawing");
 
     //Drawing->SetVectorLayer( this );
@@ -491,26 +493,6 @@ UArianeLayerVector::OnRegister()
     SetDrawing( DefaultDrawing, false );
 
     Drawing->OnRegisterLayer();
-}
-
-void
-UArianeLayerVector::BeginDestroy()
-{
-    FCoreUObjectDelegates::OnAssetLoaded.RemoveAll( this );
-
-    Super::BeginDestroy();
-}
-
-void
-UArianeLayerVector::OnAssetLoaded(UObject* LoadedObject)
-{
-    // Note: . Our FArianeObjects Transforms depend on the
-    // Layer (to compute the world Transform). but, when PostLoad is called, the Transforms are not set yet
-    // so we update the Transforms for our ArianeObjects after the Asset is loaded
-    if ( GetOutermost() == LoadedObject )
-    {
-        Drawing->GetRootGroup()->UpdateTransform();
-    }
 }
 
 void

@@ -638,7 +638,7 @@ UArianeEditorPathEditTool::DragVertexHandle( FArianeVertex* Vertex
 {
     FVector IntersectAt;
 
-    if( FArianeCore::IntersectPlane( PointDisplacment.WorldPlane, RayOrigin, RayDirection, IntersectAt ) > 0.0f )
+    if( FArianeCore::IntersectPlane( PointDisplacment.WorldPlane, RayOrigin, RayDirection, IntersectAt ) )
     {
         FVector WorldDelta = IntersectAt - PointDisplacment.WorldRayPositionAtDown;
         FVector LocalMouse = Transform.InverseTransformPosition( IntersectAt );
@@ -671,7 +671,7 @@ UArianeEditorPathEditTool::DisplacePoint( FArianePoint* Point
 {
     FVector IntersectAt;
 
-    if( FArianeCore::IntersectPlane( PointDisplacment.WorldPlane, RayOrigin, RayDirection, IntersectAt ) > 0.0f )
+    if( FArianeCore::IntersectPlane( PointDisplacment.WorldPlane, RayOrigin, RayDirection, IntersectAt ) )
     {
         FVector WorldDelta = IntersectAt - PointDisplacment.WorldRayPositionAtDown;
 
@@ -1163,8 +1163,12 @@ UArianeEditorPathEditTool::OnMouseUp( FEditorViewportClient* ViewportClient
             {
                 case EArianePathEditToolEditionMode::Vertex :
                 case EArianePathEditToolEditionMode::VertexHandle :
+                    GetToolManager()->EndUndoTransaction();
+                break;
+
                 case EArianePathEditToolEditionMode::SegmentHandle :
-                    // Link or Unlink segment handles
+                    // Link or Unlink segment handles. Only in this mode: in the others, the release ends
+                    // a vertex move or a width change
                     if( ( PickedVertices.Num() == 1 ) && ( PickedHandles.Num() == 0 ) )
                     {
                         FArianeVertex* Vertex = PickedVertices[0];

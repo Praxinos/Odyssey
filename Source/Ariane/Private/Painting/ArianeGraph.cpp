@@ -1201,11 +1201,10 @@ FArianeGraph::ProjectGeometry( const FVector& InViewOrigin, const FPlane& InProj
             FNode* Node = &Path.Nodes[i];
             FVector RayDirection = Node->OriginalWorldPosition - ViewOrigin;
             FVector IntersectAt;
-            bool bProjected = ( FArianeCore::IntersectPlane( ProjectionPlane
-                                                           , ViewOrigin
-                                                           , RayDirection.GetSafeNormal()
-                                                           , IntersectAt  ) > 0.0f ) ? true
-                                                                                     : false;
+            bool bProjected = FArianeCore::IntersectPlane( ProjectionPlane
+                                                         , ViewOrigin
+                                                         , RayDirection.GetSafeNormal()
+                                                         , IntersectAt );
 
             FVector PositionInPlaneSpace = WorldToLocalRotationQuat * ( IntersectAt - ProjectionPlaneOrigin );
 

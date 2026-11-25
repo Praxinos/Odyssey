@@ -483,7 +483,7 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
                                      , View
                                      , ErasureArea
                                      , VectorLayer
-                                     , Pixels
+                                     , &Pixels
                                      , Width
                                      , &AddedPaths
                                      , &RemovedPaths ] ( FArianeObject* TravesedObject ) -> FArianeObject::ETraversalReturnValue

@@ -61,5 +61,16 @@ protected:
     TArray<FArianeSegmentCubic*> GeneratedSegments;
 };
 
+template<>
+struct TStructOpsTypeTraits<FArianePrimitive> : public TStructOpsTypeTraitsBase2<FArianePrimitive>
+{
+    enum
+    {
+        // Reflection copies (templates, spawnables) go property by property: runtime pointers keep the
+        // default constructor values instead of being shared with the source.
+        WithCopy = false
+    };
+};
+
 // define bitwise op
 ENUM_CLASS_FLAGS(FArianePrimitive::EConversionFlags)

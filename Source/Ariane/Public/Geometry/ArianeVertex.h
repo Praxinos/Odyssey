@@ -177,3 +177,14 @@ protected:
 
     bool bChained : 1;
 };
+
+template<>
+struct TStructOpsTypeTraits<FArianeVertex> : public TStructOpsTypeTraitsBase2<FArianeVertex>
+{
+    enum
+    {
+        // Reflection copies (templates, spawnables) go property by property: runtime pointers keep the
+        // default constructor values instead of being shared with the source.
+        WithCopy = false
+    };
+};

@@ -67,13 +67,11 @@ public class Ariane : ModuleRules
                 "Core",
                 "SlateCore",
                 "Engine",
-                "MeshUtilities",
                 "MeshDescription", //  FMeshDescription
                 "StaticMeshDescription",  // FStaticMeshAttributes
                 "MeshConversion", //  FMeshDescriptionBuilder
                 "GeometryCore",
                 "GeometryFramework",
-                "Sequencer",
                 "LevelSequence",
                 "MovieScene",
                 "MovieSceneTracks",
@@ -91,13 +89,11 @@ public class Ariane : ModuleRules
                 "Renderer",
                 "RHI",
                 "TypedElementRuntime",
-                "MeshUtilities",
                 "MeshDescription", //  FMeshDescription
                 "StaticMeshDescription",  // FStaticMeshAttributes
                 "MeshConversion", //  FMeshDescriptionBuilder
                 "GeometryCore",
                 "GeometryFramework",
-                "Sequencer",
                 "LevelSequence",
                 "MovieScene",
                 "MovieSceneTracks",
@@ -106,5 +102,17 @@ public class Ariane : ModuleRules
                 //"OdysseyRendering",
             }
         );
+
+        // Editor-only modules: they do not exist in a packaged game.
+        // The code using them is under WITH_EDITOR.
+        if (Target.bBuildEditor)
+        {
+            PublicDependencyModuleNames.AddRange(
+                new string[] {
+                    "Sequencer", // ISequencer, SequencerChannelTraits.h (public headers)
+                    "MeshUtilities",
+                }
+            );
+        }
     }
 }

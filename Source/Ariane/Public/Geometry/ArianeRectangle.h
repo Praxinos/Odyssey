@@ -59,3 +59,14 @@ protected :
     UPROPERTY( EditAnywhere )
     double Height;
 };
+
+template<>
+struct TStructOpsTypeTraits<FArianeRectangle> : public TStructOpsTypeTraitsBase2<FArianeRectangle>
+{
+    enum
+    {
+        // Reflection copies (templates, spawnables) go property by property: runtime pointers keep the
+        // default constructor values instead of being shared with the source.
+        WithCopy = false
+    };
+};

@@ -182,3 +182,14 @@ protected:
 protected:
     FArianeCycleGeometry3D* Geometry3D;
 };
+
+template<>
+struct TStructOpsTypeTraits<FArianeCycle> : public TStructOpsTypeTraitsBase2<FArianeCycle>
+{
+    enum
+    {
+        // Reflection copies (templates, spawnables) go property by property: runtime pointers keep the
+        // default constructor values instead of being shared with the source.
+        WithCopy = false
+    };
+};

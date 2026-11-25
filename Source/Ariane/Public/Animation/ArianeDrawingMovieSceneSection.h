@@ -8,8 +8,9 @@
 #include "CoreMinimal.h"
 #include "MovieSceneSection.h"
 #include "Channels/MovieSceneEventChannel.h"
+#if WITH_EDITOR
 #include "SequencerChannelTraits.h"
-#include "ScopedTransaction.h"
+#endif
 #include "Channels/MovieSceneChannelData.h"
 // Ariane Headers
 #include "ArianeDrawingKeyData.h"
@@ -29,7 +30,9 @@ public:
     UArianeDrawingMovieSceneSection();
 
     virtual void PostLoad() override;
+#if WITH_EDITOR
     virtual void PostEditUndo() override;
+#endif
 
     UPROPERTY()
     FArianeDrawingMovieSceneChannel DrawingChannel;

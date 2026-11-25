@@ -242,3 +242,14 @@ struct ARIANE_API FArianeSegment
         bool bInvalidated : 1;
         bool bAutoFractioned : 1;
 };
+
+template<>
+struct TStructOpsTypeTraits<FArianeSegment> : public TStructOpsTypeTraitsBase2<FArianeSegment>
+{
+    enum
+    {
+        // Reflection copies (templates, spawnables) go property by property: runtime pointers keep the
+        // default constructor values instead of being shared with the source.
+        WithCopy = false
+    };
+};

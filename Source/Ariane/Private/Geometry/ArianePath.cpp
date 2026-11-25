@@ -172,6 +172,9 @@ FArianePath::Chain::IterateSegments( TFunction<bool( FArianeVertex*, FArianeSegm
 void FArianePathVertexBuffer::Resize(  uint32 InVertexCount, FRHICommandListBase& RHICmdList )
 {
     VertexBufferRHI.SafeRelease();
+
+    VertexCount = InVertexCount;
+
     FRHIBufferCreateDesc CreateBufferDesc = FRHIBufferCreateDesc( TEXT( "Dynamic Vertex Buffer" )
                                                                 , VertexCount * sizeof( FDynamicMeshVertex )
                                                                 , 0
@@ -179,7 +182,7 @@ void FArianePathVertexBuffer::Resize(  uint32 InVertexCount, FRHICommandListBase
                                                                 | EBufferUsageFlags::VertexBuffer
                                                                 | EBufferUsageFlags::ShaderResource );
 
-    VertexCount = InVertexCount;
+
 
     VertexBufferRHI = RHICmdList.CreateBuffer( CreateBufferDesc );
 
@@ -225,6 +228,8 @@ FArianePath::~FArianePath()
     }
 
     Vertices.Empty();
+
+    delete Geometry3D;
 }
 
 FArianePath::FArianePath()
@@ -258,6 +263,7 @@ FArianePath::ResetDrawing( UArianeDrawing* InDrawing )
     Segments.Empty();
     InvalidatedSegments.Empty();
     InvalidatedVertices.Empty();
+    delete Geometry3D;
     Geometry3D = new FArianePathGeometry3D( this );
     Chains.Empty();
     CubicSegmentCount = 0;
@@ -659,6 +665,12 @@ TArray<FArianeSegment*>&
 FArianePath::GetInvalidatedSegments()
 {
     return InvalidatedSegments;
+}
+
+TArray<FArianeVertex*>&
+FArianePath::GetInvalidatedVertices()
+{
+    return InvalidatedVertices;
 }
 
 TArray<FArianeVertex*>&
@@ -1589,7 +1601,8 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
 
     if( InOutPreviousPerpendicularVector.IsNearlyZero() )
     {
-        if (SegmentVector.GetSafeNormal().Dot(FVector::UpVector) <  1.0f)
+        // Up gives no usable perpendicular when the segment is (nearly) vertical, upward or downward
+        if( FMath::Abs( SegmentVector.GetSafeNormal().Dot( FVector::UpVector ) ) < 0.99f )
         {
             InOutPreviousPerpendicularVector = SegmentVector.Cross( FVector::UpVector );
             InOutPreviousPerpendicularVector.Normalize();

@@ -37,8 +37,11 @@ public:
     UArianeDrawing();
 
     virtual void Update( bool bInteractive );
+#if WITH_EDITOR
     virtual void PostEditUndo() override;
+#endif
     virtual void PostLoad() override;
+    virtual void PostInitProperties() override;
 
     /**
      * @brief Get the top-most vector object
@@ -151,7 +154,9 @@ public:
     FGuid GetAllocatorGuid();
     void Invalidate();
     void Reset();
+#if WITH_EDITOR
     virtual void PostEditImport();
+#endif
 
 
 protected:

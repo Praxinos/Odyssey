@@ -65,3 +65,14 @@ struct ARIANE_API FArianeHandleSegment : public FArianePoint
         FArianeSegment* OwnerSegment;
         TArray<uint32> AttachedVertexIDs;
 };
+
+template<>
+struct TStructOpsTypeTraits<FArianeHandleSegment> : public TStructOpsTypeTraitsBase2<FArianeHandleSegment>
+{
+    enum
+    {
+        // Reflection copies (templates, spawnables) go property by property: runtime pointers keep the
+        // default constructor values instead of being shared with the source.
+        WithCopy = false
+    };
+};

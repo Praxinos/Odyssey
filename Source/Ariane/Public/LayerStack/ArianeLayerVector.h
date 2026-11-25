@@ -94,7 +94,6 @@ public:
     UArianeDrawing* GetDrawing();
     void SetDrawing( UArianeDrawing* InDrawing, bool bTriggerEvent = true );
     virtual void OnRegister() override;
-    void OnAssetLoaded(UObject* LoadedObject);
 
     virtual void GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMaterials, bool bGetDebugMaterials = false ) const override;
     virtual void OnUpdateTransform( EUpdateTransformFlags UpdateTransformFlags, ETeleportType TeleportType ) override;
@@ -114,7 +113,6 @@ protected:
     void BindDelegates();
     void UnbindDelegates();
     void OnRootObjectInvalidated();
-    virtual void BeginDestroy() override;
     virtual void PropertyChanged( const FName& iPropertyName
                                 , const FName& iMemberPropertyName
                                 , const FName& iCategory ) override;

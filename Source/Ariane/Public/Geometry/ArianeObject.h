@@ -176,7 +176,7 @@ public:
         * @param OutInvalidatedObjects the array to fill with invalidated children.
         * @param bRecurse recurse inside sub-objects.
         */
-    void GetInvalidatedChildren( TArray<FArianeObject*> OutInvalidatedObjects, bool bRecurse );
+    void GetInvalidatedChildren( TArray<FArianeObject*>& OutInvalidatedObjects, bool bRecurse );
 
     TArray<FArianeObject*>& GetInvalidatedChildren();
 
@@ -269,7 +269,7 @@ public:
 
     const FTransform& GetTransform();
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     virtual FColor GetHUDForegroundColor();
 #endif
     FArianeObject* GetAncestorByClass( uint32 iClass, bool iBaseClass, bool iSelf );
@@ -387,8 +387,8 @@ protected:
 
 protected:
     // Declared UPROPERTY to prevent GC.
-    // Transient because it's revalidated on UArianeDrawing::Serialize due to the fact that the reflection system
-    // does not update the pointer on spawnable conversion, I don't know why.
+    // Transient because it's rebuilt by UArianeDrawing::Reset: a copy from a template (spawnable, blueprint) still
+    // points to the template drawing, see UArianeDrawing::PostInitProperties.
     UPROPERTY( Transient )
     UArianeDrawing* Drawing;
 
@@ -403,6 +403,17 @@ protected:
     bool bSelected;
     bool bInvalidatedInParent;
     //FSimpleMulticastDelegate  OnPostInvalidated;
+};
+
+template<>
+struct TStructOpsTypeTraits<FArianeObject> : public TStructOpsTypeTraitsBase2<FArianeObject>
+{
+    enum
+    {
+        // Reflection copies (templates, spawnables) go property by property: runtime pointers keep the
+        // default constructor values instead of being shared with the source.
+        WithCopy = false
+    };
 };
 
 // define bitwise op

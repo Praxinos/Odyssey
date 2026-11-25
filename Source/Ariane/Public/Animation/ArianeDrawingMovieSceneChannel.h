@@ -8,8 +8,9 @@
 #include "CoreMinimal.h"
 #include "MovieSceneSection.h"
 #include "Channels/MovieSceneEventChannel.h"
+#if WITH_EDITOR
 #include "SequencerChannelTraits.h"
-#include "ScopedTransaction.h"
+#endif
 #include "Channels/MovieSceneChannelData.h"
 // Ariane Headers
 #include "ArianeDrawingKeyData.h"

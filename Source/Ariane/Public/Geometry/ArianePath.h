@@ -198,7 +198,7 @@ public:
     TArray<FArianeVertex*>& GetVertices();
 
     /** Get all the invalidated vertices */
-    TArray<FArianeSegment*>& GetInvalidatedVertices();
+    TArray<FArianeVertex*>& GetInvalidatedVertices();
 
     /** Get all the segments added to this path */
     TArray<FArianeSegment*>& GetSegments();
@@ -329,4 +329,15 @@ protected:
     TArray<Chain> Chains;
     uint32 CubicSegmentCount;
     uint32 LinearSegmentCount;
+};
+
+template<>
+struct TStructOpsTypeTraits<FArianePath> : public TStructOpsTypeTraitsBase2<FArianePath>
+{
+    enum
+    {
+        // Reflection copies (templates, spawnables) go property by property: runtime pointers keep the
+        // default constructor values instead of being shared with the source.
+        WithCopy = false
+    };
 };

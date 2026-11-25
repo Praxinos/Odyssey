@@ -451,7 +451,7 @@ UArianeEditorPathPushTool::DisplacePoint( const FPointDisplacement& PointDisplac
 {
     FVector IntersectAt;
 
-    if( FArianeCore::IntersectPlane( PointDisplacment.WorldPlane, RayOrigin, RayDirection, IntersectAt ) > 0.0f )
+    if( FArianeCore::IntersectPlane( PointDisplacment.WorldPlane, RayOrigin, RayDirection, IntersectAt ) )
     {
         FVector WorldDelta = IntersectAt - PointDisplacment.WorldRayPositionAtDown;
 

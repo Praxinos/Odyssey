@@ -164,7 +164,7 @@ UArianeEditorPathDrawingTool::OnMouseHover( FEditorViewportClient* ViewportClien
             Cursor = ( FArianeCore::IntersectPlane( DrawingPlane
                                                   , RayOrigin
                                                   , RayDirection
-                                                  , IntersectAt ) > 0.0f ) ? EMouseCursor::Type::Crosshairs
+                                                  , IntersectAt ) ) ? EMouseCursor::Type::Crosshairs
                                                                            : EMouseCursor::Type::SlashedCircle;
         }
     }
@@ -224,7 +224,7 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* ViewportClient
                                     , RayOrigin
                                     , RayDirection );
 
-            if( FArianeCore::IntersectPlane( DrawingPlane, RayOrigin, RayDirection, IntersectAt  ) > 0.0f )
+            if( FArianeCore::IntersectPlane( DrawingPlane, RayOrigin, RayDirection, IntersectAt ) )
             {
                 FVector localCoords = PathTransform.Inverse().TransformFVector4( IntersectAt );
                 FVector localNormal = PathTransform.Inverse().TransformVector( FVector( DrawingPlane ) );

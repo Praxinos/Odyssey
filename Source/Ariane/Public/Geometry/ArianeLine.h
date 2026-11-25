@@ -75,3 +75,14 @@ protected :
     UPROPERTY( EditAnywhere )
     FVector EndPoint;
 };
+
+template<>
+struct TStructOpsTypeTraits<FArianeLine> : public TStructOpsTypeTraitsBase2<FArianeLine>
+{
+    enum
+    {
+        // Reflection copies (templates, spawnables) go property by property: runtime pointers keep the
+        // default constructor values instead of being shared with the source.
+        WithCopy = false
+    };
+};

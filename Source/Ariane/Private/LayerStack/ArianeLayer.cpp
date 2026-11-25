@@ -204,7 +204,6 @@ UArianeLayer::Invalidate()
     bInvalidated = true;
 
     //GetLayerStack()->GetPainting3DComponent()->MarkRenderStateDirty();
-    MarkPackageDirty();
 }
 
 bool
@@ -304,6 +303,7 @@ UArianeLayer::HasAncestor( UArianeLayer* CandidateAncestor )
     return bHasAncestor;
 }
 
+#if WITH_EDITOR
 void
 UArianeLayer::PostEditChangeProperty (FPropertyChangedEvent & PropertyChangedEvent)
 {
@@ -318,6 +318,7 @@ UArianeLayer::PostEditChangeProperty (FPropertyChangedEvent & PropertyChangedEve
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
     }
 }
+#endif
 
 void
 UArianeLayer::PropertyChanged( const FName& PropertyName

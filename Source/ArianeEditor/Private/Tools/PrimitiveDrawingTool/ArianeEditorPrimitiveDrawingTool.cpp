@@ -151,7 +151,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDown( FEditorViewportClient* ViewportC
                                         , RayOrigin
                                         , RayDirection );
 
-                if( FArianeCore::IntersectPlane( DrawingPlane, RayOrigin, RayDirection, IntersectAtDown  ) > 0.0f )
+                if( FArianeCore::IntersectPlane( DrawingPlane, RayOrigin, RayDirection, IntersectAtDown ) )
                 {
                     const FTransform& ParentGroupTransform = ParentGroup->GetTransform();
                     FVector LocalOrientation;
@@ -277,7 +277,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseHover( FEditorViewportClient* Viewport
             Cursor = ( FArianeCore::IntersectPlane( DrawingPlane
                                                   , RayOrigin
                                                   , RayDirection
-                                                  , IntersectAt ) > 0.0f ) ? EMouseCursor::Type::Crosshairs
+                                                  , IntersectAt ) ) ? EMouseCursor::Type::Crosshairs
                                                                            : EMouseCursor::Type::SlashedCircle;
         }
     }
@@ -342,7 +342,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseDrag( FEditorViewportClient* ViewportC
                                         , RayOrigin
                                         , RayDirection );
 
-                if( FArianeCore::IntersectPlane( DrawingPlane, RayOrigin, RayDirection, IntersectAtDrag  ) > 0.0f )
+                if( FArianeCore::IntersectPlane( DrawingPlane, RayOrigin, RayDirection, IntersectAtDrag ) )
                 {
                     const FTransform& PrimitiveTransform = Primitive->GetTransform();
                     //FVector2D PlaneCoordsAtDown = WorldToPlane( IntersectAtDown, DrawingPlane );

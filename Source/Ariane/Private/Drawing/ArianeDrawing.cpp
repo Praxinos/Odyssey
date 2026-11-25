@@ -136,6 +136,20 @@ UArianeDrawing::PrintPointers()
 }
 
 void
+UArianeDrawing::PostInitProperties()
+{
+    Super::PostInitProperties();
+
+    // Built from a template (spawnable, blueprint): InstancedObjects was copied by reflection, so each object
+    // still points to the template drawing and has no children yet. Reset rebuilds both.
+    if( GetArchetype()->HasAnyFlags( RF_ClassDefaultObject ) == false )
+    {
+        Reset();
+    }
+}
+
+#if WITH_EDITOR
+void
 UArianeDrawing::PostEditImport()
 {
     UArianeLayerVector* VectorLayerPtr = GetVectorLayer().Get();
@@ -175,6 +189,7 @@ UArianeDrawing::PostEditImport()
         }
     }
 }
+#endif
 
 void
 UArianeDrawing::PostLoad()
@@ -217,6 +232,7 @@ UArianeDrawing::PostLoad()
     }
 }
 
+#if WITH_EDITOR
 void
 UArianeDrawing::PostEditUndo()
 {
@@ -252,6 +268,7 @@ UArianeDrawing::PostEditUndo()
         }
     }
 }
+#endif
 
 FArianeObject*
 UArianeDrawing::GetObject( const FGuid& InGuid )
@@ -696,8 +713,6 @@ UArianeDrawing::Invalidate()
                 return FArianeObject::ETraversalReturnValue::Continue;
             } );
     }
-
-    MarkPackageDirty();
 }
 
 /*
