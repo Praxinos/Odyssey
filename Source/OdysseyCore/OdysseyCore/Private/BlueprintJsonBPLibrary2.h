@@ -8,7 +8,7 @@
 #include "UObject/ObjectMacros.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
-#include "BlueprintJSonBPLibrary2.generated.h"
+#include "BlueprintJsonBPLibrary2.generated.h"
 
 struct FJsonObjectWrapper;
 

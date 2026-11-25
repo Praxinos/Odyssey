@@ -63,11 +63,10 @@ UBlueprintFileUtilsBPLibrary2::ConvertRawRGBAToPNG( const FFilePath& iRawPathFil
     const int32 PaddingBytes = ( RawData.Num() - int64( iWidth ) * iHeight * BytesPerPixel ) / iHeight;
     const int32 StrideBytes = iWidth * BytesPerPixel + PaddingBytes;
 
-    FImage Image( iWidth, iHeight, ERawImageFormat::BGRA8, EGammaSpace::sRGB );
+    if( RawData.Num() < int64( iWidth ) * iHeight * BytesPerPixel )
+        return false;
 
-    // Swap R and B as ERawImageFormat::RGBA8 doesn't exist
-    for( int64 i = 0; i < RawData.Num(); i += 4 )
-        Swap( RawData[i], RawData[i + 2] );
+    FImage Image( iWidth, iHeight, ERawImageFormat::BGRA8, EGammaSpace::sRGB );
 
     // Fill image data manually as there is a padding/stride
     //Image.RawData = MoveTemp( RawData );
@@ -79,6 +78,10 @@ UBlueprintFileUtilsBPLibrary2::ConvertRawRGBAToPNG( const FFilePath& iRawPathFil
             RawData.GetData() + int64( y ) * StrideBytes,
             iWidth * BytesPerPixel );
     }
+
+    // Swap R and B as ERawImageFormat::RGBA8 doesn't exist
+    for( int64 i = 0; i < Image.RawData.Num(); i += 4 )
+        Swap( Image.RawData[i], Image.RawData[i + 2] );
 
     const FString TempDir = FPlatformProcess::UserTempDir();
     //IFileManager::Get().MakeDirectory( *TempDir, true );
