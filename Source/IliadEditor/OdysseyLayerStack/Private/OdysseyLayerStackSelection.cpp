@@ -12,6 +12,7 @@
 #include "Misc/ITransaction.h"
 #include "Selection.h"
 #include "UObject/GCObject.h"
+#include "UObject/UObjectBase.h"
 
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
@@ -115,11 +116,12 @@ Shutdown()
     UOdysseyLayerStack::OnCurrentLayerChanged().Remove(GCurrentLayerChangedHandle);
     GCurrentLayerChangedHandle.Reset();
 
-    if (GOdysseyLayerStackSelection)
+    // On editor exit, modules shut down after every UObject was destroyed, the selection included
+    if (GOdysseyLayerStackSelection && UObjectInitialized())
     {
         GOdysseyLayerStackSelection->RemoveFromRoot();
-        GOdysseyLayerStackSelection = nullptr;
     }
+    GOdysseyLayerStackSelection = nullptr;
 }
 
 void
