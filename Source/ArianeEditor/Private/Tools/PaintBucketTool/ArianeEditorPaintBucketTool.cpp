@@ -159,6 +159,8 @@ UArianeEditorPaintBucketTool::Activate()
 {
     const UArianeEditorSettings* Settings = GetDefault<UArianeEditorSettings>();
 
+    Super::Activate();
+
     bIsActive = true;
 
     RequestImport();
@@ -194,6 +196,8 @@ UArianeEditorPaintBucketTool::Inactivate()
         Graph->Reset( EArianeGraphResetPolicy::All );
     }
     // otherwise the graph is in use: the solve ticker keeps running and frees it when the worker is done
+
+    Super::Inactivate();
 }
 
 void

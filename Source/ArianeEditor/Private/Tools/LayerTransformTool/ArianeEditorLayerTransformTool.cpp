@@ -164,6 +164,8 @@ UArianeEditorLayerTransformTool::Activate()
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
     TSharedPtr<ILevelEditor> LevelEditor = LevelEditorModule.GetFirstLevelEditor();
 
+    Super::Activate();
+
     // this must not be put in BindComponentDelegates
     Editor->OnPre3DPaintingComponentSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::OnPre3DPaintingComponentSelection );
     Editor->OnPost3DPaintingComponentSelectionChangedDelegate().AddUObject( this, &UArianeEditorLayerTransformTool::OnPost3DPaintingComponentSelection );
@@ -202,6 +204,7 @@ UArianeEditorLayerTransformTool::Inactivate()
     Editor->OnPre3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
     Editor->OnPost3DPaintingComponentSelectionChangedDelegate().RemoveAll( this );
 
+    Super::Inactivate();
 }
 
 /*
