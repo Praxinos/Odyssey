@@ -348,7 +348,29 @@ public:
      */
     void WaitUntilAllTilesAreCached(bool InEvictTiles = true);
 
+    /** Writes the memory use, the tile counts and the budgets of the tile manager to the log. Game thread only. */
+    void LogStats();
+
 private:
+    /** Snapshot of the tile manager's slot, tile data and readback counts. */
+    struct FTileCounts
+    {
+        /** Tile slots allocated, live and free. */
+        int64 NumSlots = 0;
+        /** Tile slots holding a tile, that is, not on the free list. */
+        int64 NumLiveSlots = 0;
+        /** Distinct tile data entries after deduplication by content hash. */
+        int64 NumUniqueTileData = 0;
+        /** Tiles whose GPU readback has not completed yet. */
+        int64 NumPendingReadBacks = 0;
+    };
+
+    /** Returns a snapshot of the tile counts. Game thread only. */
+    [[nodiscard]] FTileCounts CreateTileCounts();
+
+    /** Publishes the stats as trace counters, shown by Unreal Insights when the counters channel is traced. */
+    void TraceStats();
+
     template<typename... ArgsType>
     TSharedPtr<FTile> CreateNewTile(ArgsType&&... Args);
 
@@ -423,9 +445,8 @@ private:
     uint64 GPUCacheRevision = 0;
     bool bGPUCacheDirty = false;
     TAtomic<bool> bGPUCacheMaintenanceQueued{false};
-#if WITH_DEV_AUTOMATION_TESTS
+    /** Number of tiles uploaded from RAM to the GPU since the session began; a fast growth means the GPU budget is too small. */
     TAtomic<uint64> GPUUploadCount{0};
-#endif
 
     TArray64<TSharedPtr<FTile>> Tiles;
     TArray64<FOdysseyTileId> FreeTiles;

@@ -8,7 +8,10 @@
 #include "Engine/Texture.h"
 #include "GlobalShader.h"
 #include "HAL/FileManager.h"
+#include "HAL/IConsoleManager.h"
 #include "HAL/PlatformProcess.h"
+#include "Logging/StructuredLog.h"
+#include "ProfilingDebugging/CountersTrace.h"
 #include "RenderingThread.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
@@ -27,6 +30,23 @@
  */
 
 DEFINE_LOG_CATEGORY_STATIC(LogOdysseyTileManager, Log, All);
+
+TRACE_DECLARE_MEMORY_COUNTER(OdysseyTileManager_RAMUncompressed, TEXT("Odyssey/TileManager/RAM uncompressed"));
+TRACE_DECLARE_MEMORY_COUNTER(OdysseyTileManager_RAMCompressed, TEXT("Odyssey/TileManager/RAM compressed"));
+TRACE_DECLARE_MEMORY_COUNTER(OdysseyTileManager_Disk, TEXT("Odyssey/TileManager/Disk"));
+TRACE_DECLARE_MEMORY_COUNTER(OdysseyTileManager_GPUCache, TEXT("Odyssey/TileManager/GPU cache"));
+TRACE_DECLARE_INT_COUNTER(OdysseyTileManager_LiveSlots, TEXT("Odyssey/TileManager/Live tile slots"));
+TRACE_DECLARE_INT_COUNTER(OdysseyTileManager_UniqueTileData, TEXT("Odyssey/TileManager/Unique tile data"));
+TRACE_DECLARE_INT_COUNTER(OdysseyTileManager_PendingReadBacks, TEXT("Odyssey/TileManager/Pending readbacks"));
+TRACE_DECLARE_INT_COUNTER(OdysseyTileManager_GPUUploads, TEXT("Odyssey/TileManager/GPU uploads"));
+
+static FAutoConsoleCommand GOdysseyTileManagerDumpStatsCommand(
+    TEXT("Odyssey.TileManager.DumpStats"),
+    TEXT("Writes the memory use, the tile counts and the budgets of the Odyssey tile manager to the log."),
+    FConsoleCommandDelegate::CreateLambda([]() -> void
+    {
+        FOdysseyTileManager::Get().LogStats();
+    }));
 
 /*static*/ FCriticalSection FOdysseyTileManager::FTileData::LRUMutex;
 /*static*/ FCriticalSection FOdysseyTileManager::FTileData::CacheOnDiskMutex;
@@ -1133,9 +1153,7 @@ FOdysseyTileManager::GetTileTextures(const TArray<FOdysseyTileId>& InTileIds, ui
 
                         TSharedPtr<FTileTextureHandle> TileTextureHandle = MakeShared<FTileTextureHandle>(Atlas, TileIndex);
                         Handles.Add(TileTextureHandle);
-#if WITH_DEV_AUTOMATION_TESTS
                         ++self->GPUUploadCount;
-#endif
 
                         AddWriteTilePass(
                             GraphBuilder,
@@ -1300,6 +1318,69 @@ FOdysseyTileManager::Tick(float DeltaTime)
     }
 
     EvictTiles();
+    TraceStats();
+}
+
+FOdysseyTileManager::FTileCounts
+FOdysseyTileManager::CreateTileCounts()
+{
+    // Slots and tile data are read under the mutex guarding each; PendingTilesToReadBack is owned by the game thread.
+    FTileCounts Counts;
+    {
+        FScopeLock Lock(&FreeTilesMutex);
+        Counts.NumSlots = Tiles.Num();
+        Counts.NumLiveSlots = Tiles.Num() - FreeTiles.Num();
+    }
+
+    {
+        FScopeLock Lock(&HashToTileDataMutex);
+        Counts.NumUniqueTileData = HashToTileData.Num();
+    }
+    Counts.NumPendingReadBacks = PendingTilesToReadBack.Num();
+    return Counts;
+}
+
+void
+FOdysseyTileManager::TraceStats()
+{
+#if COUNTERSTRACE_ENABLED
+    if (!UE_TRACE_CHANNELEXPR_IS_ENABLED(CountersChannel))
+    {
+        return;
+    }
+
+    const FTileCounts Counts = CreateTileCounts();
+    TRACE_COUNTER_SET(OdysseyTileManager_RAMUncompressed, Stats.GetSizeUncompressed());
+    TRACE_COUNTER_SET(OdysseyTileManager_RAMCompressed, Stats.GetSizeCompressed());
+    TRACE_COUNTER_SET(OdysseyTileManager_Disk, Stats.GetSizeOnDisk());
+    TRACE_COUNTER_SET(OdysseyTileManager_GPUCache, Stats.GetSizeOnGPU());
+    TRACE_COUNTER_SET(OdysseyTileManager_LiveSlots, Counts.NumLiveSlots);
+    TRACE_COUNTER_SET(OdysseyTileManager_UniqueTileData, Counts.NumUniqueTileData);
+    TRACE_COUNTER_SET(OdysseyTileManager_PendingReadBacks, Counts.NumPendingReadBacks);
+    TRACE_COUNTER_SET(OdysseyTileManager_GPUUploads, int64(GPUUploadCount.Load()));
+#endif
+}
+
+// Backs the console command Odyssey.TileManager.DumpStats.
+void
+FOdysseyTileManager::LogStats()
+{
+    check(IsInGameThread());
+    const FTileCounts Counts = CreateTileCounts();
+    const UOdysseyTileManagerSettings* Settings = UOdysseyTileManagerSettings::Get();
+    constexpr double BytesPerMB = 1000.0 * 1000.0;
+
+    UE_LOGFMT(LogOdysseyTileManager, Display, "Odyssey tile manager stats (sizes in MB, budgets of UOdysseyTileManagerSettings):");
+    UE_LOGF(LogOdysseyTileManager, Display, "  RAM uncompressed: %lld tiles, %.1f MB (budget %llu MB)",
+        Stats.GetNumTilesUncompressed(), Stats.GetSizeUncompressed() / BytesPerMB, Settings->MaxUncompressedSize);
+    UE_LOGF(LogOdysseyTileManager, Display, "  RAM compressed: %lld tiles, %.1f MB (budget %llu MB)",
+        Stats.GetNumTilesCompressed(), Stats.GetSizeCompressed() / BytesPerMB, Settings->MaxCompressedSize);
+    UE_LOGF(LogOdysseyTileManager, Display, "  GPU cache: %lld tiles, %.1f MB (budget %llu MB)",
+        Stats.GetNumTilesOnGPU(), Stats.GetSizeOnGPU() / BytesPerMB, Settings->MaxGPUSize);
+    UE_LOGF(LogOdysseyTileManager, Display, "  Disk: %lld tiles, %.1f MB",
+        Stats.GetNumTilesOnDisk(), Stats.GetSizeOnDisk() / BytesPerMB);
+    UE_LOGF(LogOdysseyTileManager, Display, "  Tile slots: %lld live of %lld; unique tile data: %lld; pending readbacks: %lld; GPU uploads: %llu",
+        Counts.NumLiveSlots, Counts.NumSlots, Counts.NumUniqueTileData, Counts.NumPendingReadBacks, GPUUploadCount.Load());
 }
 
 void
