@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyPaintEngine.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 #include "Editor/TransBuffer.h"
 #include "Editor/UnrealEdEngine.h"
@@ -30,6 +31,7 @@ FOdysseyPaintEngine::FOdysseyPaintEngine()
 void
 FOdysseyPaintEngine::BeginEdit(TSharedRef<FOdysseyRasterBlockEdit> iEdit)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyPaintEngine::BeginEdit);
     if (mEdit == iEdit)
         return;
 
@@ -69,6 +71,7 @@ FOdysseyPaintEngine::GetEdit() const
 void
 FOdysseyPaintEngine::Update(const FOdysseyBlendParameters& iBlendParameters)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyPaintEngine::Update);
     if (!mEdit)
         return;
 
@@ -91,6 +94,7 @@ FOdysseyPaintEngine::Update(const FOdysseyBlendParameters& iBlendParameters)
 bool
 FOdysseyPaintEngine::Commit(const FOdysseyBlendParameters& iBlendParameters)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyPaintEngine::Commit);
     if (!mEdit)
         return false;
 
@@ -108,6 +112,7 @@ FOdysseyPaintEngine::Commit(const FOdysseyBlendParameters& iBlendParameters)
 void
 FOdysseyPaintEngine::DiscardStroke()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyPaintEngine::DiscardStroke);
     ClearPaintBlock();
     if (mEdit)
         mInvalidRects.Append(::ULISUtils::ToULISRectIs(mEdit->GetEditedRects()));
@@ -116,6 +121,7 @@ FOdysseyPaintEngine::DiscardStroke()
 void
 FOdysseyPaintEngine::EndEdit()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyPaintEngine::EndEdit);
     ReleaseEdit();
 
     if (mPaintBlock)
@@ -139,6 +145,7 @@ FOdysseyPaintEngine::PaintBlockChanged( const ::ULIS::FBlock* iBlock, const ::UL
 void
 FOdysseyPaintEngine::ClearPaintBlock()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyPaintEngine::ClearPaintBlock);
     if (!mPaintBlock)
         return;
 
@@ -168,6 +175,7 @@ FOdysseyPaintEngine::ReleaseEdit()
 bool
 FOdysseyPaintEngine::UpdateEditedBlock(const FOdysseyBlendParameters& iBlendParameters)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyPaintEngine::UpdateEditedBlock);
     const TSharedRef<::ULIS::FBlock>& originalBlock = mEdit->GetOriginalBlock();
     const TSharedRef<::ULIS::FBlock>& editedBlock = mEdit->GetBlock();
 

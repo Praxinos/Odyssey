@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyPainterEditorViewportClient.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 #include "CanvasItem.h"
 #include "CanvasTypes.h"
@@ -325,6 +326,7 @@ FOdysseyPainterEditorViewportClient::GetMouseCaptureMode() const
 bool
 FOdysseyPainterEditorViewportClient::InputKey( const FInputKeyEventArgs& iEventArgs )
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyPainterEditorViewportClient::InputKey);
     TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
     UTexture* texture       = viewportWidget->GetTexture();
     if (!texture)
@@ -489,6 +491,7 @@ FOdysseyPainterEditorViewportClient::InputKey( const FInputKeyEventArgs& iEventA
 void
 FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY )
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyPainterEditorViewportClient::CapturedMouseMove);
     //HUD
     if (mCurrentHUDElement)
     {
@@ -545,6 +548,7 @@ FOdysseyPainterEditorViewportClient::MouseLeave( FViewport* iViewport )
 void
 FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyPainterEditorViewportClient::MouseMove);
     mIsFocused = true;
 
     //This is called when the mouse hovers the viewport (really not the best name for that function)
@@ -1335,6 +1339,7 @@ FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iView
 TSharedPtr<FOdysseyHUDElement>
 FOdysseyPainterEditorViewportClient::GetHUDElement(FViewport* iViewport, int32 iX, int32 iY)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyPainterEditorViewportClient::GetHUDElement);
     HOdysseyHUDElementHitProxy* hitproxy = HitProxyCast<HOdysseyHUDElementHitProxy>(iViewport->GetHitProxy(iX, iY));
     if (!hitproxy)
         return nullptr;

@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2026
 
 #include "OdysseyRasterContentBlocks.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 #include "Engine/TextureRenderTarget2D.h"
 #include "UObject/StrongObjectPtr.h"
@@ -17,6 +18,7 @@ namespace Odyssey::RasterContentBlocks
 {
 TSharedPtr<::ULIS::FBlock> ReadBlock(FOdysseyRasterContent& Content)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::RasterContentBlocks::ReadBlock);
     if (!Content.EnsureImage())
     {
         return nullptr;
@@ -27,6 +29,7 @@ TSharedPtr<::ULIS::FBlock> ReadBlock(FOdysseyRasterContent& Content)
 
 TSharedPtr<::ULIS::FBlock> ReadBlock(FOdysseyRasterContent& Content, const FIntRect& Rect, FIntRect& OutRect)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::RasterContentBlocks::ReadBlockArea);
     if (!Content.EnsureImage())
     {
         return nullptr;
@@ -43,6 +46,7 @@ TSharedPtr<::ULIS::FBlock> ReadBlock(FOdysseyRasterContent& Content, const FIntR
 
 bool WriteBlock(FOdysseyRasterContent& Content, const ::ULIS::FBlock& Block, const TArray<FIntRect>& Rects, FIntPoint Position)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::RasterContentBlocks::WriteBlock);
     TStrongObjectPtr<UTextureRenderTarget2D> Target(Content.CreateRenderTarget());
     if (!Target)
     {
@@ -93,6 +97,7 @@ bool WriteBlock(FOdysseyRasterContent& Content, const ::ULIS::FBlock& Block, con
 
 bool EditBlock(FOdysseyRasterContent& Content, TFunctionRef<void(::ULIS::FBlock& Block)> Edit)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::RasterContentBlocks::EditBlock);
     TSharedPtr<::ULIS::FBlock> Block = ReadBlock(Content);
     if (!Block)
     {
@@ -104,6 +109,7 @@ bool EditBlock(FOdysseyRasterContent& Content, TFunctionRef<void(::ULIS::FBlock&
 
 bool EditBlock(FOdysseyRasterContent& Content, const FIntRect& Rect, TFunctionRef<void(::ULIS::FBlock& Block, const FIntRect& Area)> Edit)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::RasterContentBlocks::EditBlockArea);
     FIntRect Area;
     TSharedPtr<::ULIS::FBlock> Block = ReadBlock(Content, Rect, Area);
     if (!Block)
@@ -129,6 +135,7 @@ FIntRect FindVisibleRect(const ::ULIS::FBlock& Block)
 
 TSharedPtr<FOdysseyRasterBlockEdit> BeginBlockEdit(FOdysseyRasterContent& Content)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::RasterContentBlocks::BeginBlockEdit);
     // Read first: beginning the edit shows its target, which starts with the pixels of the tiles.
     TSharedPtr<::ULIS::FBlock> Pixels = ReadBlock(Content);
     if (!Pixels)

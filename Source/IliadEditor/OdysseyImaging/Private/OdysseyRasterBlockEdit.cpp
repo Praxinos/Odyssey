@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2026
 
 #include "OdysseyRasterBlockEdit.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 #include "Engine/TextureRenderTarget2D.h"
 
@@ -33,6 +34,7 @@ FOdysseyRasterBlockEdit::FOdysseyRasterBlockEdit(TSharedRef<FOdysseyRasterEditSe
     , bSRGB(bInSRGB)
     , EditedTiles(TileSize, InOriginal->Width(), InOriginal->Height())
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRasterBlockEdit::FOdysseyRasterBlockEdit);
 }
 
 const TSharedRef<::ULIS::FBlock>&
@@ -68,6 +70,7 @@ FOdysseyRasterBlockEdit::GetEditedRects() const
 void
 FOdysseyRasterBlockEdit::Update(const TArray<FIntRect>& Rects)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRasterBlockEdit::Update);
     if (!IsActive())
     {
         return;
@@ -88,6 +91,7 @@ FOdysseyRasterBlockEdit::Update(const TArray<FIntRect>& Rects)
 bool
 FOdysseyRasterBlockEdit::Commit()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRasterBlockEdit::Commit);
     const TArray<FIntRect> Rects = GetEditedRects();
     if (!IsActive() || Rects.IsEmpty())
     {
@@ -102,5 +106,6 @@ FOdysseyRasterBlockEdit::Commit()
 void
 FOdysseyRasterBlockEdit::End()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRasterBlockEdit::End);
     Session->End();
 }

@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyToolCollection.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "OdysseyPainterEditorToolConfigurationUtils.h"
@@ -89,6 +90,7 @@ FString UOdysseyToolCollection::GetDefaultToolName( UOdysseyPainterEditorTool* i
 
 UOdysseyPainterEditorToolConfiguration* UOdysseyToolCollection::AddToolConfiguration(UClass* iToolClass, UOdysseyPainterEditorTool* iTool, const FString& iName, const FIconToolConfiguration& iIconToolConfiguration, int32 iIndex)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyToolCollection::AddToolConfiguration);
     if( !iToolClass || !iTool )
         return nullptr;
 
@@ -170,6 +172,7 @@ int32 UOdysseyToolCollection::GetIndexOfToolConfiguration(UOdysseyPainterEditorT
 
 bool UOdysseyToolCollection::ContainsSimilarToolConfiguration(UClass* iToolClass, UOdysseyPainterEditorTool* iTool)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyToolCollection::ContainsSimilarToolConfiguration);
     check( iToolClass );
 
     FToolPropertySnapshot toolToCheckSnapshot;
@@ -194,6 +197,7 @@ const TArray<UOdysseyPainterEditorToolConfiguration*> UOdysseyToolCollection::Ge
 
 void UOdysseyToolCollection::ConvertObjectToPropertySnapshot(UObject* iObject, FToolPropertySnapshot& oSnapshot, TSet<const UObject*> Visited)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyToolCollection::ConvertObjectToPropertySnapshot);
     if (Visited.Contains(iObject))
     {
         return;

@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2026
 
 #include "OdysseyRasterEditSession.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 #include "Engine/TextureRenderTarget2D.h"
 #include "Math/TranslationMatrix.h"
@@ -42,6 +43,7 @@ FOdysseyRasterEditSession::FOdysseyRasterEditSession(const FGuid& InRenderingId,
 TSharedPtr<FOdysseyRasterEditSession>
 FOdysseyRasterEditSession::Begin(const FGuid& RenderingId, UOdysseyTiledImage& Image, FIntPoint Size, bool bPreserveAlpha)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRasterEditSession::Begin);
     check(IsInGameThread());
     if (Size.X <= 0 || Size.Y <= 0)
     {
@@ -165,6 +167,7 @@ FOdysseyRasterEditSession::Invalidate(const TArray<FIntRect>& Rects)
 bool
 FOdysseyRasterEditSession::Commit(const TArray<FIntRect>& Rects)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRasterEditSession::Commit);
     check(IsInGameThread());
     UOdysseyTiledImage* TiledImage = Image.Get();
     if (!IsActive() || !TiledImage)
@@ -199,6 +202,7 @@ FOdysseyRasterEditSession::SetOnCommitted(FOnCommitted InOnCommitted)
 void
 FOdysseyRasterEditSession::End()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRasterEditSession::End);
     if (!IsActive())
     {
         return;
@@ -222,6 +226,7 @@ FOdysseyRasterEditSession::End()
 void
 FOdysseyRasterEditSession::ApplyOriginalAlpha(const TArray<FIntRect>& Rects) const
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRasterEditSession::ApplyOriginalAlpha);
     if (!Original.IsValid())
     {
         return;

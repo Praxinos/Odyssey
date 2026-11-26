@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyTool.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyToolCustomization.h"
 #include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyToolHUD.h"
 #include "OdysseyMediaRaster.h"
@@ -192,6 +193,7 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseHover(const FOdysseyPoint& iPoint
 bool
 UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown);
     UOdysseyPainterEditorTool::OnMouseDown(iPointInTexture, iKey);
 
     float radius = GetRadius();
@@ -252,6 +254,7 @@ UOdysseyPainterEditorRasterLiquifyTool::GetFlowMap()
 void
 UOdysseyPainterEditorRasterLiquifyTool::FetchSourceImages()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterLiquifyTool::FetchSourceImages);
     TObjectPtr<UOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     TSharedPtr<FOdysseyMediaRaster> mediaRaster = GetMediaRasterFromEditor(false);
     TSharedPtr<FOdysseyRasterContent> content = mediaRaster ? mediaRaster->GetContent() : nullptr;
@@ -334,6 +337,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                             , double iStrength
                                             , double iHardness )
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterLiquifyTool::Flow);
     if (mAlteredImageBuffer.IsEmpty())
         return;
 
@@ -592,6 +596,7 @@ UOdysseyPainterEditorRasterLiquifyTool::GetEditingArea()
 
 void UOdysseyPainterEditorRasterLiquifyTool::Tick(float iDeltaTime)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterLiquifyTool::Tick);
     if (mAlteredImageBuffer.IsEmpty())
         return;
 
@@ -651,6 +656,7 @@ UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow( FAlteredImage& iAlteredImage
                                                  , const ::ULIS::FRectI& iSanitizedRegionOfInterest
                                                  , bool iBilinearFiltered )
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow);
     if (mAlteredImageBuffer.IsEmpty())
         return;
 
@@ -795,6 +801,7 @@ UOdysseyPainterEditorRasterLiquifyTool::ApplyAdjustment()
 void
 UOdysseyPainterEditorRasterLiquifyTool::Init()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterLiquifyTool::Init);
     FetchSourceImages();
     MakeDistortionMap();
     MakeFlowMap();
@@ -835,6 +842,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Reset()
 void
 UOdysseyPainterEditorRasterLiquifyTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterLiquifyTool::OnMouseDrag);
     FVector2D deltaPoint = FVector2D( iPointInTexture.x - mPreviousPointInTexture.X
                                     , iPointInTexture.y - mPreviousPointInTexture.Y );
     double deltaPointDistance = deltaPoint.Length();
@@ -923,6 +931,7 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDrag(const FOdysseyPoint& iPointI
 bool
 UOdysseyPainterEditorRasterLiquifyTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterLiquifyTool::OnMouseUp);
     if ( iKey == EKeys::LeftMouseButton )
     {
         if (mAlteredImageBuffer.IsEmpty())
@@ -988,6 +997,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flush()
 void
 UOdysseyPainterEditorRasterLiquifyTool::Commit()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterLiquifyTool::Commit);
     // Each stroke is committed on mouse up.
 }
 
@@ -1031,6 +1041,7 @@ UOdysseyPainterEditorRasterLiquifyTool::UpdateAlteredImage( FAlteredImage& iAlte
                                                           , const ::ULIS::FRectI& iSanitizedRegionOfInterest
                                                           , bool iCommit )
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterLiquifyTool::UpdateAlteredImage);
     // Each stroke edits the content from its first update to its commit
     if( !IsEditing( iAlteredImage.edit, iAlteredImage.mediaRaster ) )
     {

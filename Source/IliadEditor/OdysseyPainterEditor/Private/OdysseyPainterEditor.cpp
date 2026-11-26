@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyPainterEditor.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 #include "FileHelpers.h"
 #include "Framework/Commands/GenericCommands.h"
@@ -3696,6 +3697,7 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
 
 void FOdysseyPainterEditor::SaveMainToolToRecentTools()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyPainterEditor::SaveMainToolToRecentTools);
     if (GetCurrentTool() != mCurrentMainTool)
         return;
 

@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyRasterBlockEdit.h"
 #include "OdysseyRasterContent.h"
@@ -155,6 +156,7 @@ UOdysseyPainterEditorRasterEraserTool::GetRadius() const
 void
 UOdysseyPainterEditorRasterEraserTool::Tick(float iDeltaTime)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterEraserTool::Tick);
     Shapes.GetActiveShape()->Tick(iDeltaTime);
     mWorker.ExecuteFor(1000 / 60); //60fps
     mPaintEngine.Update(mBlendParameters);
@@ -163,6 +165,7 @@ UOdysseyPainterEditorRasterEraserTool::Tick(float iDeltaTime)
 bool
 UOdysseyPainterEditorRasterEraserTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterEraserTool::OnMouseDown);
     UOdysseyPainterEditorTool::OnMouseDown(iPointInTexture, iKey);
 
     if (iKey != EKeys::LeftMouseButton)
@@ -189,6 +192,7 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseDown(const FOdysseyPoint& iPointIn
 bool
 UOdysseyPainterEditorRasterEraserTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterEraserTool::OnMouseUp);
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
@@ -227,6 +231,7 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseHover(const FOdysseyPoint& iPointI
 void
 UOdysseyPainterEditorRasterEraserTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterEraserTool::OnMouseDrag);
     if (!IsEditing(mPaintEngine.GetEdit(), GetMediaRasterFromEditor(false)))
     {
         Shapes.GetActiveShape()->Abort();
@@ -269,6 +274,7 @@ UOdysseyPainterEditorRasterEraserTool::OnKeyUp(const FKey& iKey)
 void
 UOdysseyPainterEditorRasterEraserTool::Commit()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterEraserTool::Commit);
     mPaintEngine.Commit(mBlendParameters);
 
     FOdysseyPainterEditor* editor = GetEditor();
@@ -563,6 +569,7 @@ UOdysseyPainterEditorRasterEraserTool::OnShapeBegin()
 void
 UOdysseyPainterEditorRasterEraserTool::OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterEraserTool::OnShapeInteractive);
     if ( !Shapes.GetActiveShape()->IsProgressive() )
         return;
 
@@ -584,6 +591,7 @@ UOdysseyPainterEditorRasterEraserTool::OnShapeInteractive(const TArray<FOdysseyP
 void
 UOdysseyPainterEditorRasterEraserTool::OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterEraserTool::OnShapeCommit);
     if ( iReset )
     {
         ResetInterpolation();

@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Widgets/Layout/SWrapBox.h"
@@ -50,6 +51,7 @@ UOdysseyPainterEditorRasterBaseTool::IsEditing(const TSharedPtr<FOdysseyRasterBl
 bool
 UOdysseyPainterEditorRasterBaseTool::BeginOrKeepEdit(FOdysseyPaintEngine& ioPaintEngine, const TSharedPtr<FOdysseyMediaRaster>& iMediaRaster)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterBaseTool::BeginOrKeepEdit);
     if (IsEditing(ioPaintEngine.GetEdit(), iMediaRaster))
         return true;
 

@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyPainterEditorRasterDrawingTool.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyMediaRaster.h"
@@ -201,6 +202,7 @@ UOdysseyPainterEditorRasterDrawingTool::IsActivable() const
 bool
 UOdysseyPainterEditorRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterDrawingTool::OnMouseDown);
     UOdysseyPainterEditorTool::OnMouseDown(iPointInTexture, iKey);
 
     if (iKey != EKeys::LeftMouseButton)
@@ -229,6 +231,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointI
 bool
 UOdysseyPainterEditorRasterDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterDrawingTool::OnMouseUp);
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
@@ -270,6 +273,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseHover(const FOdysseyPoint& iPoint
 void
 UOdysseyPainterEditorRasterDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterDrawingTool::OnMouseDrag);
     if (!IsEditing(mPaintEngine.GetEdit(), GetMediaRasterFromEditor(false)))
     {
         Shapes.GetActiveShape()->Abort();
@@ -312,6 +316,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnKeyUp(const FKey& iKey)
 void
 UOdysseyPainterEditorRasterDrawingTool::Tick(float iDeltaTime)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterDrawingTool::Tick);
     if (!GetMediaRasterFromEditor(false))
         return;
 
@@ -347,6 +352,7 @@ UOdysseyPainterEditorRasterDrawingTool::Flush()
 void
 UOdysseyPainterEditorRasterDrawingTool::Commit()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterDrawingTool::Commit);
     FScopedTransaction transaction(LOCTEXT("raster-drawing-tool.transaction.paint-stroke", "Paint Stroke"));
     mPaintEngine.Commit(BlendParameters);
 
@@ -539,6 +545,7 @@ UOdysseyPainterEditorRasterDrawingTool::ExtendToolbar( UToolMenu* iToolMenu )
 void
 UOdysseyPainterEditorRasterDrawingTool::BeginStroke()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterDrawingTool::BeginStroke);
     if (!BrushInstance)
     {
         UE_LOG(LogTemp, Warning, TEXT("Cannot draw whithout a brush instance") );
@@ -556,6 +563,7 @@ UOdysseyPainterEditorRasterDrawingTool::BeginStroke()
 void
 UOdysseyPainterEditorRasterDrawingTool::StrokeTo( const TArray<FOdysseyPoint>& iPoints )
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterDrawingTool::StrokeTo);
     if (!BrushInstance)
     {
         UE_LOG(LogTemp, Warning, TEXT("Cannot draw whithout a brush instance") );
@@ -578,6 +586,7 @@ UOdysseyPainterEditorRasterDrawingTool::StrokeTo( const TArray<FOdysseyPoint>& i
 void
 UOdysseyPainterEditorRasterDrawingTool::StrokeEnd()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterDrawingTool::StrokeEnd);
     if (!BrushInstance)
     {
         UE_LOG(LogTemp, Warning, TEXT("Cannot draw whithout a brush instance") );
@@ -899,6 +908,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapeBegin()
 void
 UOdysseyPainterEditorRasterDrawingTool::OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterDrawingTool::OnShapeInteractive);
     if ( !Shapes.GetActiveShape()->IsProgressive() )
         return;
 
@@ -925,6 +935,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapeInteractive(const TArray<FOdyssey
 void
 UOdysseyPainterEditorRasterDrawingTool::OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterDrawingTool::OnShapeCommit);
     if (iReset)
     {
         //Finish pending work
@@ -997,6 +1008,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnShapeAbort()
 TArray<FOdysseyPoint>
 UOdysseyPainterEditorRasterDrawingTool::InterpolateTo(const FOdysseyPoint& iPoint)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterDrawingTool::InterpolateTo);
     if (!mInterpolator)
     {
         if (Shapes.GetActiveShapeType() == EOdysseyShapeType::kFreehand )

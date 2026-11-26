@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/OdysseyPainterEditorTool.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 #include "Engine/Engine.h"
 #include "Framework/Application/SlateApplication.h"
@@ -237,6 +238,7 @@ UOdysseyPainterEditorTool::GetRadiusReference() const
 bool
 UOdysseyPainterEditorTool::ProcessMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorTool::ProcessMouseDown);
     if (mIsRIMActive)
         return true;
 
