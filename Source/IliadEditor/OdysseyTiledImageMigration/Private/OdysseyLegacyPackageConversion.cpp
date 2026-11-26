@@ -4,6 +4,7 @@
 #include "OdysseyLegacyPackageConversion.h"
 
 #include "AssetRegistry/AssetData.h"
+#include "AssetCompilingManager.h"
 #include "AssetRegistry/IAssetRegistry.h"
 #include "Editor.h"
 #include "FileHelpers.h"
@@ -16,6 +17,8 @@
 #include "SourceControlOperations.h"
 #include "Subsystems/AssetEditorSubsystem.h"
 #include "UObject/Package.h"
+#include "Interfaces/Interface_AsyncCompilation.h"
+#include "UObject/UObjectHash.h"
 #include "UObject/UObjectIterator.h"
 
 #include "OdysseyTiledImageMigrationLog.h"
@@ -268,10 +271,33 @@ ESaveResult SavePackage(TNotNull<UPackage*> Package)
     return ESaveResult::Saved;
 }
 
-/** Unloads the given packages that are still loaded and clean, keeping the undo history. */
+/** Returns true when an object of the package, e.g. a texture, still reports an asynchronous compilation. */
+bool IsCompilingObjects(TNotNull<const UPackage*> Package)
+{
+    bool bCompiling = false;
+    ForEachObjectWithPackage(Package, [&bCompiling](UObject* Object) -> bool
+    {
+        const IInterface_AsyncCompilation* Compilation = Cast<IInterface_AsyncCompilation>(Object);
+        if (Compilation && Compilation->IsCompiling())
+        {
+            bCompiling = true;
+            return false;
+        }
+        // Keeps iterating.
+        return true;
+    });
+    return bCompiling;
+}
+
+/** Unloads the given packages that are still loaded, clean and done compiling, keeping the undo history. */
 void UnloadPackages(const TSet<FName>& PackageNames)
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::TiledImageMigration::UnloadPackages);
+    // The frames an animation rebakes when saved may still compile.
+    FAssetCompilingManager& CompilingManager = FAssetCompilingManager::Get();
+    CompilingManager.FinishAllCompilation();
+    CompilingManager.ProcessAsyncTasks();
+
     TArray<UPackage*> PackagesToUnload;
     PackagesToUnload.Reserve(PackageNames.Num());
     FString LongPackageName;
@@ -280,10 +306,18 @@ void UnloadPackages(const TSet<FName>& PackageNames)
         PackageName.ToString(LongPackageName);
         UPackage* Package = FindPackage(nullptr, *LongPackageName);
         // UnloadPackages() refuses dirty packages.
-        if (Package && !Package->IsDirty())
+        if (!Package || Package->IsDirty())
         {
-            PackagesToUnload.Add(Package);
+            continue;
         }
+
+        // UnloadPackages() expects every compilation of the package to be known to the compiling managers, see FlushAsyncCompilation().
+        if (IsCompilingObjects(Package))
+        {
+            UE_LOGF(LogOdysseyTiledImageMigration, Warning, "%ls stays loaded: some of its objects still compile.", *LongPackageName);
+            continue;
+        }
+        PackagesToUnload.Add(Package);
     }
 
     if (PackagesToUnload.IsEmpty())
