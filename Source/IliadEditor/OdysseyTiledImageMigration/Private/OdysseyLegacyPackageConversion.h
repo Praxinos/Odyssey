@@ -22,7 +22,7 @@ enum class EOdysseyLegacyConversionOutcome : uint8
     LoadFailed,
     /** The package could not be saved. */
     SaveFailed,
-    /** The package was saved, but the asset registry still sees it as legacy, e.g. a raster owner without content. */
+    /** The package was saved, but IsLegacyPackage() still reports it. */
     StillLegacy,
     /** The conversion was canceled before the package. */
     NotProcessed,

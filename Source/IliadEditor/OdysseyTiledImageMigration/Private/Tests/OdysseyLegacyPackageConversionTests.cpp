@@ -13,6 +13,7 @@
 
 #include "OdysseyLegacyPackageConversion.h"
 #include "OdysseyLegacyPackageScanner.h"
+#include "OdysseyRasterStorageTag.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 
@@ -69,7 +70,7 @@ bool FOdysseyConvertLegacyPackagesTest::RunTest(const FString& Parameters)
     const TArray<FString> Filenames = { CopyFilename };
     Registry.ScanFilesSynchronous(Filenames, /*bForceRescan*/ true);
     const FName PackageName(CopyPackageName);
-    const TArray<FTopLevelAssetPath> OwnerClasses = GetRasterOwnerClasses();
+    const TArray<const UClass*> OwnerClasses = GetRasterOwnerClasses();
     const TArray<FOdysseyLegacyPackage> Candidates = FindLegacyPackages(OwnerClasses);
     const FOdysseyLegacyPackage* Candidate = Candidates.FindByPredicate([PackageName](const FOdysseyLegacyPackage& Package) -> bool
     {
@@ -87,10 +88,13 @@ bool FOdysseyConvertLegacyPackagesTest::RunTest(const FString& Parameters)
         TestFalse(TEXT("The conversion is not canceled"), Result.bCanceled);
         TestEqual(TEXT("The copy is saved"), Result.Count(EOdysseyLegacyConversionOutcome::Saved), 1);
 
+        TestFalse(TEXT("The saved copy is no longer legacy"), IsLegacyPackage(PackageName, OwnerClasses));
+        TArray<FAssetData> SavedAssets;
+        Registry.GetAssetsByPackageName(PackageName, SavedAssets, /*bIncludeOnlyOnDiskAssets*/ true);
+        TestTrue(TEXT("The saved copy has the raster storage tag"), HasRasterStorageTag(SavedAssets));
         const TOptional<FAssetPackageData> PackageData = Registry.GetAssetPackageDataCopy(PackageName);
         if (TestTrue(TEXT("The registry knows the saved copy"), PackageData.IsSet()))
         {
-            TestFalse(TEXT("The saved copy is no longer legacy"), IsLegacyPackage(*PackageData, OwnerClasses));
             const FName TiledImageClass(TEXT("/Script/OdysseyImaging.OdysseyTiledImage"));
             TestTrue(TEXT("The saved copy holds tiled images"), PackageData->ImportedClasses.Contains(TiledImageClass));
         }

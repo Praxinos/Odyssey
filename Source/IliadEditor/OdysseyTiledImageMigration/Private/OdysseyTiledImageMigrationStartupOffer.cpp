@@ -26,7 +26,7 @@ constexpr float CloseFadeOutDuration = 0.1f;
 /** Returns the number of legacy packages in the project content. */
 int32 CountProjectPackages()
 {
-    const TArray<FTopLevelAssetPath> OwnerClasses = Odyssey::TiledImageMigration::GetRasterOwnerClasses();
+    const TArray<const UClass*> OwnerClasses = Odyssey::TiledImageMigration::GetRasterOwnerClasses();
     const TArray<FOdysseyLegacyPackage> Packages = Odyssey::TiledImageMigration::FindLegacyPackages(OwnerClasses);
     const TArray<FOdysseyLegacyAssetGroup> Groups = Odyssey::TiledImageMigration::CreateLegacyAssetGroups(Packages);
     int32 Count = 0;

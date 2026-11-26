@@ -109,7 +109,7 @@ void Run()
         return;
     }
 
-    const TArray<FTopLevelAssetPath> OwnerClasses = GetRasterOwnerClasses();
+    const TArray<const UClass*> OwnerClasses = GetRasterOwnerClasses();
     const TArray<FOdysseyLegacyPackage> Packages = FindLegacyPackages(OwnerClasses);
     const TArray<FOdysseyLegacyAssetGroup> Groups = CreateLegacyAssetGroups(Packages);
     if (Groups.IsEmpty())

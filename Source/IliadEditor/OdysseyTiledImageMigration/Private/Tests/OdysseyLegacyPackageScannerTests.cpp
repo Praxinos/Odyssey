@@ -4,11 +4,10 @@
 #include "AssetRegistry/AssetData.h"
 #include "AssetRegistry/IAssetRegistry.h"
 #include "Misc/AutomationTest.h"
-#include "Serialization/CustomVersion.h"
 
 #include "OdysseyLegacyAssetGroup.h"
 #include "OdysseyLegacyPackageScanner.h"
-#include "OdysseyTiledImageObjectVersion.h"
+#include "OdysseyRasterStorageTag.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 
@@ -22,7 +21,7 @@ const FName LegacyStampB(TEXT("/Odyssey/Brushes/_Common/Stamps/RGBA16/Penbrush/T
 /** A plain texture of the same folder, without raster layers. */
 const FName PlainTexture(TEXT("/Odyssey/Brushes/_Common/Stamps/RGBA16/Penbrush/T_AAcircle_0001"));
 
-/** Returns package data importing the given classes, without custom versions. */
+/** Returns package data importing the given classes. */
 [[nodiscard]] FAssetPackageData CreatePackageData(TConstArrayView<const TCHAR*> ImportedClasses)
 {
     FAssetPackageData PackageData;
@@ -34,12 +33,14 @@ const FName PlainTexture(TEXT("/Odyssey/Brushes/_Common/Stamps/RGBA16/Penbrush/T
     return PackageData;
 }
 
-/** Sets FOdysseyTiledImageObjectVersion as the only custom version of PackageData. */
-void AddTiledImageVersion(FAssetPackageData& PackageData)
+/** Returns the data of a texture asset, with the given tags. */
+[[nodiscard]] FAssetData CreateAssetData(FAssetDataTagMap Tags)
 {
-    const FCustomVersion Version(FOdysseyTiledImageObjectVersion::GUID, FOdysseyTiledImageObjectVersion::LatestVersion, TEXT("OdysseyTiledImage"));
-    const FCustomVersion Versions[] = { Version };
-    PackageData.SetCustomVersions(Versions);
+    const FTopLevelAssetPath TextureClass(TEXT("/Script/Engine"), TEXT("Texture2D"));
+    const FName PackageName(TEXT("/Game/Test/T_Asset"));
+    const FName PackagePath(TEXT("/Game/Test"));
+    const FName AssetName(TEXT("T_Asset"));
+    return FAssetData(PackageName, PackagePath, AssetName, TextureClass, MoveTemp(Tags));
 }
 
 /** Returns true when the packages hold the given package name. */
@@ -52,31 +53,44 @@ bool ContainsPackage(TConstArrayView<FOdysseyLegacyPackage> Packages, FName Pack
 }
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyIsLegacyPackageTest, "Odyssey.TiledImageMigration.IsLegacyPackage", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyHoldsRasterOwnersTest, "Odyssey.TiledImageMigration.HoldsRasterOwners", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
-/**
- * A package is legacy when it imports a raster owner class, under its current or its redirected name, without the
- * tiled image version.
- */
-bool FOdysseyIsLegacyPackageTest::RunTest(const FString& Parameters)
+/** A package holds raster owners when it imports a raster layer or cell class, under its current or its redirected name. */
+bool FOdysseyHoldsRasterOwnersTest::RunTest(const FString& Parameters)
 {
     using namespace Odyssey::TiledImageMigration;
     using namespace UE::OdysseyTiledImageMigration::Tests;
-    const TArray<FTopLevelAssetPath> OwnerClasses = GetRasterOwnerClasses();
+    const TArray<const UClass*> OwnerClasses = GetRasterOwnerClasses();
 
     const FAssetPackageData Layer = CreatePackageData({ TEXT("/Script/Engine.Texture2D"), TEXT("/Script/OdysseyTexture.OdysseyTextureLayerImageRaster") });
-    TestTrue(TEXT("A raster layer without the version is legacy"), IsLegacyPackage(Layer, OwnerClasses));
+    TestTrue(TEXT("A package with a raster layer holds raster owners"), HoldsRasterOwners(Layer, OwnerClasses));
 
     // The cells moved from OdysseyAnimation to OdysseyAnimationEditor; BaseOdyssey.ini redirects the former name.
     const FAssetPackageData OldCell = CreatePackageData({ TEXT("/Script/OdysseyAnimation.OdysseyAnimationCellImageRaster") });
-    TestTrue(TEXT("A raster cell saved under its former class name is legacy"), IsLegacyPackage(OldCell, OwnerClasses));
-
-    FAssetPackageData Converted = CreatePackageData({ TEXT("/Script/OdysseyAnimationEditor.OdysseyAnimationCellImageRaster"), TEXT("/Script/OdysseyImaging.OdysseyTiledImage") });
-    AddTiledImageVersion(Converted);
-    TestFalse(TEXT("A raster cell saved with the version is not legacy"), IsLegacyPackage(Converted, OwnerClasses));
+    TestTrue(TEXT("A raster cell saved under its former class name is a raster owner"), HoldsRasterOwners(OldCell, OwnerClasses));
 
     const FAssetPackageData Plain = CreatePackageData({ TEXT("/Script/Engine.Texture2D"), TEXT("/Script/Engine.AssetImportData") });
-    TestFalse(TEXT("A package without raster owner is not legacy"), IsLegacyPackage(Plain, OwnerClasses));
+    TestFalse(TEXT("A package without raster layer or cell holds no raster owner"), HoldsRasterOwners(Plain, OwnerClasses));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyHasRasterStorageTagTest, "Odyssey.TiledImageMigration.HasRasterStorageTag", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+/** The raster storage tag of one asset marks its whole package. */
+bool FOdysseyHasRasterStorageTagTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::TiledImageMigration;
+    using namespace UE::OdysseyTiledImageMigration::Tests;
+    const FAssetData Untagged = CreateAssetData(FAssetDataTagMap());
+    FAssetDataTagMap Tags;
+    Tags.Add(RasterStorageTag, FString(RasterStorageTiledImage));
+    const FAssetData Tagged = CreateAssetData(MoveTemp(Tags));
+
+    const FAssetData UntaggedAssets[] = { Untagged };
+    TestFalse(TEXT("A package whose assets lack the tag is not marked"), HasRasterStorageTag(UntaggedAssets));
+    const FAssetData MixedAssets[] = { Untagged, Tagged };
+    TestTrue(TEXT("A package with one tagged asset is marked"), HasRasterStorageTag(MixedAssets));
+    TestFalse(TEXT("A package without asset is not marked"), HasRasterStorageTag({}));
     return true;
 }
 
@@ -91,17 +105,18 @@ bool FOdysseyFindLegacyPackagesTest::RunTest(const FString& Parameters)
     const TArray<FString> Paths = { FString(StampsPath) };
     Registry.ScanPathsSynchronous(Paths, /*bForceRescan*/ false);
 
-    const TArray<FTopLevelAssetPath> OwnerClasses = GetRasterOwnerClasses();
-    const TOptional<FAssetPackageData> FixtureDataA = Registry.GetAssetPackageDataCopy(LegacyStampA);
-    const TOptional<FAssetPackageData> FixtureDataB = Registry.GetAssetPackageDataCopy(LegacyStampB);
+    const TArray<const UClass*> OwnerClasses = GetRasterOwnerClasses();
     const TOptional<FAssetPackageData> PlainData = Registry.GetAssetPackageDataCopy(PlainTexture);
-    const bool bFixturesLegacy = FixtureDataA && FixtureDataB && IsLegacyPackage(*FixtureDataA, OwnerClasses) && IsLegacyPackage(*FixtureDataB, OwnerClasses);
+    const bool bStampALegacy = IsLegacyPackage(LegacyStampA, OwnerClasses);
+    const bool bStampBLegacy = IsLegacyPackage(LegacyStampB, OwnerClasses);
+    const bool bFixturesLegacy = bStampALegacy && bStampBLegacy;
     if (!bFixturesLegacy || !PlainData)
     {
         AddWarning(TEXT("Skipped: the fixture stamps of the Odyssey plugin are no longer legacy."));
         return true;
     }
 
+    TestFalse(TEXT("A plain texture is not legacy"), IsLegacyPackage(PlainTexture, OwnerClasses));
     const TArray<FOdysseyLegacyPackage> Packages = FindLegacyPackages(OwnerClasses);
     TestTrue(TEXT("The first legacy stamp is found"), ContainsPackage(Packages, LegacyStampA));
     TestTrue(TEXT("The second legacy stamp is found"), ContainsPackage(Packages, LegacyStampB));

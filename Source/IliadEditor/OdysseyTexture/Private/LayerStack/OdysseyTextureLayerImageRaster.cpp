@@ -20,7 +20,6 @@
 #include "OdysseyTextureLayerImageRasterImport.h"
 #include "OdysseyTextureLayerStack.h"
 #include "OdysseyTiledImage.h"
-#include "OdysseyTiledImageObjectVersion.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 #include "ULISLoaderModule.h"
@@ -222,11 +221,6 @@ void
 UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
-    // The package records the tiled image storage even when the owner has no tiled image yet, so that it is not seen as legacy.
-    if (Ar.IsPersistent() && !Ar.IsTransacting())
-    {
-        Ar.UsingCustomVersion(FOdysseyTiledImageObjectVersion::GUID);
-    }
 
     if (GetFlags() & RF_ClassDefaultObject)
         return;

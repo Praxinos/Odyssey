@@ -7,6 +7,7 @@
 #include "Modules/ModuleManager.h"
 #include "ToolMenus.h"
 
+#include "OdysseyRasterStorageTagWriter.h"
 #include "OdysseyTiledImageMigrationStartupOffer.h"
 #include "OdysseyTiledImageMigrationWorkflow.h"
 #include "OdysseyUserInteraction.h"
@@ -39,9 +40,9 @@ class FOdysseyTiledImageMigrationModule
 {
 public:
     // IModuleInterface interface
-    /** Starts the startup offer and registers the Tools menu entry. */
+    /** Starts the services of the conversion and registers its Tools menu entry. */
     virtual void StartupModule() override;
-    /** Unregisters the menu entry and stops the startup offer. */
+    /** Unregisters the Tools menu entry and stops the services of the conversion. */
     virtual void ShutdownModule() override;
     // End of IModuleInterface interface
 
@@ -50,6 +51,9 @@ private:
     void RegisterMenu();
 
 private:
+    /** Writes the raster storage tag on the saved assets while the module is loaded. */
+    FOdysseyRasterStorageTagWriter StorageTagWriter;
+
     /** Offers the conversion once the asset registry has scanned the project. */
     FOdysseyTiledImageMigrationStartupOffer StartupOffer;
 
@@ -63,6 +67,7 @@ private:
 void
 FOdysseyTiledImageMigrationModule::StartupModule()
 {
+    StorageTagWriter.Start();
     StartupOffer.Start();
     const FSimpleMulticastDelegate::FDelegate MenuCallback = FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FOdysseyTiledImageMigrationModule::RegisterMenu);
     UToolMenus::RegisterStartupCallback(MenuCallback);
@@ -74,6 +79,7 @@ FOdysseyTiledImageMigrationModule::ShutdownModule()
     UToolMenus::UnRegisterStartupCallback(this);
     UToolMenus::UnregisterOwner(this);
     StartupOffer.Stop();
+    StorageTagWriter.Stop();
 }
 
 void

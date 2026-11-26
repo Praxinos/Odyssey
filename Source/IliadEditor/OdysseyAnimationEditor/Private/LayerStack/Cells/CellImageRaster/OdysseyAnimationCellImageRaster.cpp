@@ -13,7 +13,6 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "UObject/StrongObjectPtr.h"
 #include "OdysseyTiledImage.h"
-#include "OdysseyTiledImageObjectVersion.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyAnimationCellImageRasterImport.h"
@@ -141,11 +140,6 @@ void
 UOdysseyAnimationCellImageRaster::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
-    // The package records the tiled image storage even when the owner has no tiled image yet, so that it is not seen as legacy.
-    if (Ar.IsPersistent() && !Ar.IsTransacting())
-    {
-        Ar.UsingCustomVersion(FOdysseyTiledImageObjectVersion::GUID);
-    }
 
     if( Ar.IsLoading() && !Ar.IsTransacting() )
     {

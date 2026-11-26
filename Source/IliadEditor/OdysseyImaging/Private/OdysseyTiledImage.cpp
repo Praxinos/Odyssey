@@ -10,7 +10,6 @@
 #include "TextureResource.h"
 #include "UObject/Package.h"
 
-#include "OdysseyTiledImageObjectVersion.h"
 #include "OdysseyTileUtils.h"
 #include "OdysseyTileManager.h"
 
@@ -261,6 +260,25 @@ void UOdysseyTiledImage::Render(UTextureRenderTarget2D* Destination, FIntRect Re
             GraphBuilder.Execute();
         });
 }
+
+struct FOdysseyTiledImageObjectVersion
+{
+    enum Type
+    {
+        // Before any version changes were made
+        SerializeTiles,
+
+        // -----<new versions can be added above this line>-------------------------------------------------
+        VersionPlusOne,
+        LatestVersion = VersionPlusOne - 1
+    };
+
+    // The GUID for this custom version number
+    const static FGuid GUID;
+
+private:
+    FOdysseyTiledImageObjectVersion() {}
+};
 
 const FGuid FOdysseyTiledImageObjectVersion::GUID(0x369704bc, 0xd2364b57, 0x8d73527e, 0x2fe77950);
 FDevVersionRegistration GRegisterOdysseyTiledImageObjectVersion(FOdysseyTiledImageObjectVersion::GUID, FOdysseyTiledImageObjectVersion::LatestVersion, TEXT("OdysseyTiledImage"));

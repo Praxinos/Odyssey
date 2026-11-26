@@ -326,7 +326,7 @@ void MarkStillLegacyPackages(TArrayView<FOdysseyLegacyPackageOutcome> InOutOutco
     // The registry updates the package data of a saved file only when it rescans it.
     IAssetRegistry& Registry = IAssetRegistry::GetChecked();
     Registry.ScanFilesSynchronous(Filenames, /*bForceRescan*/ true);
-    const TArray<FTopLevelAssetPath> OwnerClasses = Odyssey::TiledImageMigration::GetRasterOwnerClasses();
+    const TArray<const UClass*> OwnerClasses = Odyssey::TiledImageMigration::GetRasterOwnerClasses();
     for (FOdysseyLegacyPackageOutcome& Outcome : InOutOutcomes)
     {
         if (Outcome.Outcome != EOdysseyLegacyConversionOutcome::Saved)
@@ -334,14 +334,7 @@ void MarkStillLegacyPackages(TArrayView<FOdysseyLegacyPackageOutcome> InOutOutco
             continue;
         }
 
-        const TOptional<FAssetPackageData> PackageData = Registry.GetAssetPackageDataCopy(Outcome.PackageName);
-        if (!PackageData)
-        {
-            UE_LOGF(LogOdysseyTiledImageMigration, Warning, "%ls is unknown to the asset registry after its rescan.", *Outcome.PackageName.ToString());
-            continue;
-        }
-
-        if (Odyssey::TiledImageMigration::IsLegacyPackage(*PackageData, OwnerClasses))
+        if (Odyssey::TiledImageMigration::IsLegacyPackage(Outcome.PackageName, OwnerClasses))
         {
             UE_LOGF(LogOdysseyTiledImageMigration, Warning, "%ls was saved but still uses the legacy storage.", *Outcome.PackageName.ToString());
             Outcome.Outcome = EOdysseyLegacyConversionOutcome::StillLegacy;
