@@ -9,9 +9,11 @@
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "HAL/PlatformTime.h"
-#include "Misc/App.h"
+#include "UObject/ObjectSaveContext.h"
 #include "UObject/Package.h"
 #include "Widgets/Notifications/SNotificationList.h"
+
+#include "OdysseyUserInteraction.h"
 
 #define LOCTEXT_NAMESPACE "Imaging"
 
@@ -36,6 +38,32 @@ FTSTicker::FDelegateHandle GTickerHandle;
 
 /** The time from which no package has been loading, or a negative value while packages load. */
 double GQuietSince = -1.0;
+
+/** The subscription to package saves; registered while some packages are pending. */
+FDelegateHandle GPackageSavedHandle;
+
+/** Drops the report of a saved package: it no longer needs to be saved. */
+void OnPackageSaved(const FString& Filename, UPackage* Package, FObjectPostSaveContext SaveContext)
+{
+    GPendingPackages.Remove(Package);
+}
+
+/** Stops waiting for the end of loads: removes the ticker and the save subscription. */
+void StopWaiting()
+{
+    if (GTickerHandle.IsValid())
+    {
+        FTSTicker::RemoveTicker(GTickerHandle);
+        GTickerHandle.Reset();
+    }
+
+    if (GPackageSavedHandle.IsValid())
+    {
+        UPackage::PackageSavedWithContextEvent.Remove(GPackageSavedHandle);
+        GPackageSavedHandle.Reset();
+    }
+    GQuietSince = -1.0;
+}
 
 /** Returns the reported packages that still exist. */
 TArray<UPackage*> FindLivePackages(TConstArrayView<TWeakObjectPtr<UPackage>> WeakPackages)
@@ -194,14 +222,14 @@ bool Tick(float DeltaTime)
 
     const TArray<TWeakObjectPtr<UPackage>> WeakPackages = MoveTemp(GPendingPackages);
     GPendingPackages.Reset();
+    // The ticker is removed by returning false.
     GTickerHandle.Reset();
-    GQuietSince = -1.0;
+    StopWaiting();
     const TArray<UPackage*> Packages = FindLivePackages(WeakPackages);
     if (!Packages.IsEmpty())
     {
         NotifyPackages(Packages);
     }
-    // Removes the ticker.
     return false;
 }
 }
@@ -212,7 +240,7 @@ FOdysseyLegacyMigrationNotifier::Add(TNotNull<UPackage*> Package)
 {
     using namespace UE::OdysseyImaging::Private;
     check(IsInGameThread());
-    if (!GIsEditor || IsRunningCommandlet() || FApp::IsUnattended() || GIsAutomationTesting)
+    if (!Odyssey::CanInteractWithUser())
     {
         return;
     }
@@ -227,6 +255,7 @@ FOdysseyLegacyMigrationNotifier::Add(TNotNull<UPackage*> Package)
     FTSTicker& Ticker = FTSTicker::GetCoreTicker();
     const FTickerDelegate Delegate = FTickerDelegate::CreateStatic(&Tick);
     GTickerHandle = Ticker.AddTicker(Delegate);
+    GPackageSavedHandle = UPackage::PackageSavedWithContextEvent.AddStatic(&OnPackageSaved);
 }
 
 //static
@@ -234,13 +263,8 @@ void
 FOdysseyLegacyMigrationNotifier::Shutdown()
 {
     using namespace UE::OdysseyImaging::Private;
-    if (GTickerHandle.IsValid())
-    {
-        FTSTicker::RemoveTicker(GTickerHandle);
-        GTickerHandle.Reset();
-    }
+    StopWaiting();
     GPendingPackages.Empty();
-    GQuietSince = -1.0;
 }
 
 #undef LOCTEXT_NAMESPACE

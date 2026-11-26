@@ -13,7 +13,8 @@ class UPackage;
  *
  * Shortly after no package is loading anymore, each reported package is marked dirty, and one notification lists the
  * packages reported meanwhile. It stays in the active window until the user saves the packages from it or dismisses it.
- * Nothing is reported in commandlets, unattended sessions or automation tests.
+ * A package saved before the notification shows, e.g. by a batch conversion, is no longer reported.
+ * Nothing is reported when the editor cannot interact with the user, see Odyssey::CanInteractWithUser().
  * Game thread only.
  */
 class ODYSSEYIMAGING_API FOdysseyLegacyMigrationNotifier
