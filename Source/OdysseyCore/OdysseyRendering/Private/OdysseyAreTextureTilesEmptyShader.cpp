@@ -113,7 +113,7 @@ AddAreTextureTilesEmptyPass(FRDGBuilder& GraphBuilder, ERHIFeatureLevel::Type In
         GSupportsEfficientAsyncCompute ? ERDGPassFlags::AsyncCompute : ERDGPassFlags::Compute,
         ComputeShader,
         PassParameters,
-        //One thread group per tile
+        //One thread group per tile; the group size is set by the shader
         FIntVector(
             InTileOriginsInPixels.Num(),
             1,

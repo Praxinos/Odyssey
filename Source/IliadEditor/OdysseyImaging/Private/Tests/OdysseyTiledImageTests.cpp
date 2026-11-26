@@ -207,6 +207,76 @@ bool FOdysseyTiledImagePersistenceTest::RunTest(const FString& Parameters)
     return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTiledImageEmptyTileTest, "Odyssey.Imaging.TiledImage.EmptyTileDetection", TestFlags)
+/**
+ * A tile whose alpha is 0 everywhere is dropped whatever its colors; a single opaque pixel keeps a tile.
+ * The opaque pixels sit at positions scanned by different threads of the empty-tile shader.
+ */
+bool FOdysseyTiledImageEmptyTileTest::RunTest(const FString& Parameters)
+{
+    constexpr int32 TileSize = 32;
+    const FIntPoint OpaquePixels[] = { FIntPoint(0, 0), FIntPoint(13, 29), FIntPoint(31, 31) };
+    for (const FIntPoint& OpaquePixel : OpaquePixels)
+    {
+        // Two tiles: the left one transparent with colors, the right one transparent but for one opaque pixel.
+        TStrongObjectPtr<UTexture2D> Source(UTexture2D::CreateTransient(TileSize * 2, TileSize, PF_R8G8B8A8));
+        Source->SRGB = false;
+        FByteBulkData& BulkData = Source->GetPlatformData()->Mips[0].BulkData;
+        void* LockedData = BulkData.Lock(LOCK_READ_WRITE);
+        uint8* Bytes = static_cast<uint8*>(LockedData);
+        for (int32 PixelY = 0; PixelY < TileSize; ++PixelY)
+        {
+            for (int32 PixelX = 0; PixelX < TileSize * 2; ++PixelX)
+            {
+                const int32 Offset = (PixelY * TileSize * 2 + PixelX) * 4;
+                Bytes[Offset] = 200;
+                Bytes[Offset + 1] = 100;
+                Bytes[Offset + 2] = 50;
+                Bytes[Offset + 3] = 0;
+            }
+        }
+        Bytes[(OpaquePixel.Y * TileSize * 2 + TileSize + OpaquePixel.X) * 4 + 3] = 255;
+        BulkData.Unlock();
+        Source->UpdateResource();
+        FlushRenderingCommands();
+
+        TStrongObjectPtr<UOdysseyTiledImage> Image(NewObject<UOdysseyTiledImage>());
+        Image->Initialize(TileSize, EOdysseyTiledImageFormat::RGBA8);
+        Image->CopyFromTexture(Source.Get(), FIntRect(0, 0, TileSize * 2, TileSize), FIntPoint::ZeroValue);
+        FOdysseyTileManager& Manager = FOdysseyTileManager::Get();
+        Manager.WaitUntilAllTilesAreCached();
+
+        // A dropped tile renders transparent; the kept one renders its opaque pixel.
+        TStrongObjectPtr<UTextureRenderTarget2D> Target = MakeTarget(TileSize * 2, TileSize);
+        Image->Render(Target.Get(), FIntRect(0, 0, TileSize * 2, TileSize), FIntPoint::ZeroValue);
+        FlushRenderingCommands();
+        TArray<FColor> Pixels;
+        FReadSurfaceDataFlags Flags(RCM_UNorm);
+        Flags.SetLinearToGamma(false);
+        FTextureRenderTargetResource* TargetResource = Target->GameThread_GetRenderTargetResource();
+        const bool bRead = TargetResource->ReadPixels(Pixels, Flags);
+        if (!TestTrue(TEXT("Read rendered pixels"), bRead))
+        {
+            return false;
+        }
+        const FColor Opaque = Pixels[OpaquePixel.Y * TileSize * 2 + TileSize + OpaquePixel.X];
+        TestEqual(TEXT("The opaque pixel keeps its tile"), Opaque.A, uint8(255));
+        const FColor Dropped = Pixels[OpaquePixel.Y * TileSize * 2 + OpaquePixel.X];
+        TestEqual(TEXT("The transparent tile is dropped, its colors with it"), Dropped, FColor::Transparent);
+
+        TArray<uint8> Saved;
+        FCustomVersionContainer Versions;
+        const bool bSaved = SaveImage(Image.Get(), Saved, Versions);
+        TestTrue(TEXT("Save the image"), bSaved);
+        TStrongObjectPtr<UOdysseyTiledImage> Loaded(NewObject<UOdysseyTiledImage>());
+        const bool bLoaded = LoadImage(Loaded.Get(), Saved, Versions);
+        TestTrue(TEXT("Load the image"), bLoaded);
+        const FIntRect TileBounds = Loaded->GetTileBounds();
+        TestEqual(TEXT("Only the tile with an opaque pixel is kept"), TileBounds, FIntRect(TileSize, 0, TileSize * 2, TileSize));
+    }
+    return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTiledImageClippingTest, "Odyssey.Imaging.TiledImage.Clipping", TestFlags)
 bool FOdysseyTiledImageClippingTest::RunTest(const FString& Parameters)
 {

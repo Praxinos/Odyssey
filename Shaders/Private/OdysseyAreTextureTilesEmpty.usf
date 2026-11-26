@@ -7,77 +7,79 @@ uint TileSize;
 uint NumTiles;
 RWBuffer<uint> IsTileEmpty;
 
+#define THREADS_PER_AXIS 8
+
+// Set by the threads of the group that found an opaque pixel.
+groupshared uint GroupHasContent;
+
 // Tells, for each tile, whether all its pixels are transparent.
 //
-// One thread group processes one tile, and a single thread of the group scans its pixels.
+// One thread group processes one tile.
 // TileOriginsInPixels are the top-left corners of the tiles, in pixels; pixels outside the texture are ignored.
 // Only the alpha is tested: a transparent pixel with a color is empty.
 //
 // Result convention, one uint per tile in IsTileEmpty:
 //   1 = tile is empty (every alpha value is 0)
 //   0 = tile contains content (at least one alpha value is != 0)
-[numthreads(1, 1, 1)]
+[numthreads(THREADS_PER_AXIS, THREADS_PER_AXIS, 1)]
 void MainCS(
-    uint3 GroupId : SV_GroupID)
+    uint3 GroupId : SV_GroupID,
+    uint3 GroupThreadId : SV_GroupThreadID,
+    uint GroupIndex : SV_GroupIndex)
 {
     const uint TileIndex = GroupId.x;
 
+    // Uniform within the group: every thread of the group returns, or none does.
     if (TileIndex >= NumTiles)
     {
         return;
     }
 
+    if (GroupIndex == 0)
+    {
+        GroupHasContent = 0;
+    }
+    GroupMemoryBarrierWithGroupSync();
+
     const int2 TileOrigin = TileOriginsInPixels[TileIndex];
 
     uint TextureWidth;
     uint TextureHeight;
+    InputTexture.GetDimensions(TextureWidth, TextureHeight);
 
-    InputTexture.GetDimensions(
-        TextureWidth,
-        TextureHeight
-    );
-
-    bool bIsEmpty = true;
-
-    for (uint LocalY = 0; LocalY < TileSize; ++LocalY)
+    uint HasContent = 0;
+    // Each thread scans one pixel of every THREADS_PER_AXIS x THREADS_PER_AXIS block of the tile.
+    for (uint LocalY = GroupThreadId.y; LocalY < TileSize; LocalY += THREADS_PER_AXIS)
     {
-        const int PixelY =
-            TileOrigin.y + int(LocalY);
-
+        const int PixelY = TileOrigin.y + int(LocalY);
         if (PixelY < 0 || PixelY >= int(TextureHeight))
         {
             continue;
         }
 
-        for (uint LocalX = 0; LocalX < TileSize; ++LocalX)
+        for (uint LocalX = GroupThreadId.x; LocalX < TileSize; LocalX += THREADS_PER_AXIS)
         {
-            const int PixelX =
-                TileOrigin.x + int(LocalX);
-
+            const int PixelX = TileOrigin.x + int(LocalX);
             if (PixelX < 0 || PixelX >= int(TextureWidth))
             {
                 continue;
             }
 
-            const float Alpha =
-                InputTexture.Load(int3(
-                    PixelX,
-                    PixelY,
-                    0
-                )).a;
-
-            if (Alpha != 0.0f)
+            if (InputTexture.Load(int3(PixelX, PixelY, 0)).a != 0.0f)
             {
-                bIsEmpty = false;
-                break;
+                HasContent = 1;
             }
-        }
-
-        if (!bIsEmpty)
-        {
-            break;
         }
     }
 
-    IsTileEmpty[TileIndex] = bIsEmpty ? 1u : 0u;
+    if (HasContent != 0)
+    {
+        InterlockedOr(GroupHasContent, 1u);
+    }
+    GroupMemoryBarrierWithGroupSync();
+
+    if (GroupIndex == 0)
+    {
+        IsTileEmpty[TileIndex] = uint(GroupHasContent == 0);
+    }
 }
