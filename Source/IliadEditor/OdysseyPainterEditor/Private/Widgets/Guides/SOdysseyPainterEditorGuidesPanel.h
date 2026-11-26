@@ -47,7 +47,6 @@ public:
 private:
     /** Called when the editor switches to another texture or animation. */
     void OnSourceChanged();
-    UOdysseyPainterEditorGuideCollection* GetCollection(bool bCreateIfMissing);
     TSharedRef<SWidget> MakeAddMenu();
     TSharedRef<ITableRow> MakeGuideRow(TWeakObjectPtr<UOdysseyPainterEditorGuide> Guide, const TSharedRef<STableViewBase>& OwnerTable);
     TOptional<EItemDropZone> CanDropGuide(const FDragDropEvent& Event, EItemDropZone Zone, TWeakObjectPtr<UOdysseyPainterEditorGuide> TargetGuide);

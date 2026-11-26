@@ -27,6 +27,7 @@ class FOdysseyPainterEditorExtension;
 class UOdysseyLayerStack;
 class FOdysseyMeshSelector;
 class UOdysseyTextureLayerStackUserData;
+class UOdysseyPainterEditorGuideCollection;
 class UOdysseyPainterEditorRasterSelection;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorSegment;
@@ -245,6 +246,10 @@ public:
 
     UOdysseyAnimation*                                       GetAnimation() const;
     UOdysseyTextureLayerStackUserData*                       GetTextureUserData() const;
+    /** Guide collection of the edited asset: the animation's collection, or the texture's asset user data. Null if the asset has none yet. */
+    UOdysseyPainterEditorGuideCollection* GetGuideCollection() const;
+    /** Same as GetGuideCollection, but creates the collection on the asset when missing. The creation is undoable, and merges into the caller's transaction if any. */
+    UOdysseyPainterEditorGuideCollection* FindOrCreateGuideCollection();
     UOdysseyAnimationPlayer* GetAnimationPlayer() const;
     TSharedPtr<FOdysseyPainterEditorAnimationFlipSystem>            GetAnimationFlipSystem() const;
     TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition>      GetAnimationTimelinePosition();

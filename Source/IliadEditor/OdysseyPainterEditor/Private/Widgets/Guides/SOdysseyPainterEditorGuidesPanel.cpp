@@ -7,9 +7,6 @@
 #include "Shapes/OdysseyPainterEditorEllipseGuide.h"
 #include "Shapes/OdysseyPainterEditorLineGuide.h"
 #include "Tools/GuideEditTool/OdysseyPainterEditorGuideEditTool.h"
-#include "OdysseyAnimation.h"
-#include "Sources/OdysseyPainterEditorTextureSource.h"
-#include "Engine/Texture2D.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Input/DragAndDrop.h"
 #include "IDetailsView.h"
@@ -138,39 +135,6 @@ void SOdysseyPainterEditorGuidesPanel::OnSourceChanged()
     Refresh();
 }
 
-UOdysseyPainterEditorGuideCollection* SOdysseyPainterEditorGuidesPanel::GetCollection(bool bCreateIfMissing)
-{
-    FOdysseyPainterEditor* Editor = mEditor;
-    if (!Editor)
-        return nullptr;
-
-    if (UOdysseyAnimation* Animation = Editor->GetAnimation())
-    {
-        if (!Animation->GetGuideCollection() && bCreateIfMissing)
-        {
-            Animation->Modify();
-            Animation->SetGuideCollection(NewObject<UOdysseyPainterEditorGuideCollection>(Animation, NAME_None, RF_Transactional));
-            Animation->MarkPackageDirty();
-        }
-        return Animation->GetGuideCollection();
-    }
-
-    TSharedPtr<FOdysseyPainterEditorTextureSource> TextureSource = Editor->GetSourceTyped<FOdysseyPainterEditorTextureSource>();
-    UTexture2D* Texture = TextureSource.IsValid() ? TextureSource->GetTexture() : nullptr;
-    if (!Texture)
-        return nullptr;
-
-    UOdysseyPainterEditorGuideCollection* Collection = Cast<UOdysseyPainterEditorGuideCollection>(Texture->GetAssetUserDataOfClass(UOdysseyPainterEditorGuideCollection::StaticClass()));
-    if (!Collection && bCreateIfMissing)
-    {
-        Texture->Modify();
-        Collection = NewObject<UOdysseyPainterEditorGuideCollection>(Texture, NAME_None, RF_Public | RF_Transactional);
-        Texture->AddAssetUserData(Collection);
-        Texture->MarkPackageDirty();
-    }
-    return Collection;
-}
-
 TSharedRef<SWidget> SOdysseyPainterEditorGuidesPanel::MakeAddMenu()
 {
     FMenuBuilder MenuBuilder(true, nullptr);
@@ -182,7 +146,7 @@ TSharedRef<SWidget> SOdysseyPainterEditorGuidesPanel::MakeAddMenu()
 void SOdysseyPainterEditorGuidesPanel::AddGuide(UClass* GuideClass)
 {
     FScopedTransaction Transaction(LOCTEXT("add-guide-transaction", "Add Guide"));
-    UOdysseyPainterEditorGuideCollection* Collection = GetCollection(true);
+    UOdysseyPainterEditorGuideCollection* Collection = mEditor->FindOrCreateGuideCollection();
     if (!Collection || !GuideClass || !GuideClass->IsChildOf(UOdysseyPainterEditorGuide::StaticClass()))
         return;
 
@@ -272,7 +236,7 @@ TOptional<EItemDropZone> SOdysseyPainterEditorGuidesPanel::CanDropGuide(const FD
 FReply SOdysseyPainterEditorGuidesPanel::DropGuide(const FDragDropEvent& Event, EItemDropZone Zone, TWeakObjectPtr<UOdysseyPainterEditorGuide> TargetGuideReference)
 {
     const TSharedPtr<FGuideReorderDragDropOp> Operation = Event.GetOperationAs<FGuideReorderDragDropOp>();
-    UOdysseyPainterEditorGuideCollection* Collection = GetCollection(false);
+    UOdysseyPainterEditorGuideCollection* Collection = mEditor->GetGuideCollection();
     UOdysseyPainterEditorGuide* SourceGuide = Operation.IsValid() ? Operation->Guide.Get() : nullptr;
     UOdysseyPainterEditorGuide* TargetGuide = TargetGuideReference.Get();
     if (!SourceGuide || !TargetGuide || !Collection || SourceGuide == TargetGuide)
@@ -343,7 +307,7 @@ FReply SOdysseyPainterEditorGuidesPanel::ToggleLock(UOdysseyPainterEditorGuide* 
 FReply SOdysseyPainterEditorGuidesPanel::DeleteGuide(UOdysseyPainterEditorGuide* Guide)
 {
     FOdysseyPainterEditor* Editor = mEditor;
-    if (UOdysseyPainterEditorGuideCollection* Collection = GetCollection(false))
+    if (UOdysseyPainterEditorGuideCollection* Collection = mEditor->GetGuideCollection())
     {
         FScopedTransaction Transaction(LOCTEXT("delete-guide-transaction", "Delete Guide"));
         if (Editor && Editor->GetCurrentTemporaryTool() == Editor->GetGuideEditTool() && Editor->GetGuideEditTool()->GetGuide() == Guide)
@@ -443,7 +407,7 @@ FText SOdysseyPainterEditorGuidesPanel::GetEditButtonText() const
 
 void SOdysseyPainterEditorGuidesPanel::Refresh()
 {
-    UOdysseyPainterEditorGuideCollection* Collection = GetCollection(false);
+    UOdysseyPainterEditorGuideCollection* Collection = mEditor->GetGuideCollection();
     mGuideItems.Reset();
     if (Collection)
     {

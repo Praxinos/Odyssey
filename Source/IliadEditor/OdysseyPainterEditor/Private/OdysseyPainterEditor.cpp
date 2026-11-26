@@ -11,6 +11,7 @@
 #include "ToolMenus.h"
 #include "PaperFlipbook.h"
 #include "PaperSprite.h"
+#include "ScopedTransaction.h"
 
 #include "HUD/OdysseyVectorHUD.h"
 #include "Mesh/FOdysseyMeshSelector.h"
@@ -40,6 +41,7 @@
 #include "OdysseyPainterEditorFlipbookListener.h"
 #include "OdysseyPainterEditorFlipbookTimelineTab.h"
 #include "OdysseyPainterEditorGlobalShortcuts.h"
+#include "OdysseyPainterEditorGuideCollection.h"
 #include "OdysseyPainterEditorModule.h"
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "OdysseyPainterEditorSource.h"
@@ -1193,6 +1195,50 @@ FOdysseyPainterEditor::GetTextureUserData() const
 
     TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(mSource);
     return textureSource->TextureUserData();
+}
+
+UOdysseyPainterEditorGuideCollection*
+FOdysseyPainterEditor::GetGuideCollection() const
+{
+    if (UOdysseyAnimation* animation = GetAnimation())
+        return animation->GetGuideCollection();
+
+    TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = GetSourceTyped<FOdysseyPainterEditorTextureSource>();
+    UTexture2D* texture = textureSource.IsValid() ? textureSource->GetTexture() : nullptr;
+    if (!texture)
+        return nullptr;
+
+    return Cast<UOdysseyPainterEditorGuideCollection>(texture->GetAssetUserDataOfClass(UOdysseyPainterEditorGuideCollection::StaticClass()));
+}
+
+UOdysseyPainterEditorGuideCollection*
+FOdysseyPainterEditor::FindOrCreateGuideCollection()
+{
+    if (UOdysseyPainterEditorGuideCollection* collection = GetGuideCollection())
+        return collection;
+
+    // Nested in the caller's transaction when there is one, so the creation is undone with the caller's action.
+    FScopedTransaction transaction(LOCTEXT("create-guide-collection-transaction", "Create Guide Collection"));
+
+    if (UOdysseyAnimation* animation = GetAnimation())
+    {
+        UOdysseyPainterEditorGuideCollection* collection = NewObject<UOdysseyPainterEditorGuideCollection>(animation, NAME_None, RF_Transactional);
+        animation->Modify();
+        animation->SetGuideCollection(collection);
+        animation->MarkPackageDirty();
+        return collection;
+    }
+
+    TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = GetSourceTyped<FOdysseyPainterEditorTextureSource>();
+    UTexture2D* texture = textureSource.IsValid() ? textureSource->GetTexture() : nullptr;
+    if (!texture)
+        return nullptr;
+
+    UOdysseyPainterEditorGuideCollection* collection = NewObject<UOdysseyPainterEditorGuideCollection>(texture, NAME_None, RF_Transactional);
+    texture->Modify();
+    texture->AddAssetUserData(collection);
+    texture->MarkPackageDirty();
+    return collection;
 }
 
 UOdysseyAnimationPlayer*

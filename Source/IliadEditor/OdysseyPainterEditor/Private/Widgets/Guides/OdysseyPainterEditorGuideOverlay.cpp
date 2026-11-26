@@ -3,7 +3,6 @@
 
 #include "OdysseyPainterEditorGuideOverlay.h"
 
-#include "OdysseyAnimation.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDEllipse.h"
 #include "OdysseyHUDLine.h"
@@ -11,8 +10,6 @@
 #include "OdysseyPainterEditorGuideCollection.h"
 #include "Shapes/OdysseyPainterEditorEllipseGuide.h"
 #include "Shapes/OdysseyPainterEditorLineGuide.h"
-#include "Sources/OdysseyPainterEditorTextureSource.h"
-#include "Engine/Texture2D.h"
 
 FOdysseyPainterEditorGuideOverlay::FOdysseyPainterEditorGuideOverlay(FOdysseyPainterEditor* InEditor)
     : Editor(InEditor)
@@ -26,16 +23,7 @@ void FOdysseyPainterEditorGuideOverlay::DrawHUD(const FOdysseyHUDElement::FDrawH
     if (!EditorPtr || !Params.mCanvas || Params.mTextureWidth <= 0 || Params.mTextureHeight <= 0)
         return;
 
-    UOdysseyPainterEditorGuideCollection* Collection = nullptr;
-    if (UOdysseyAnimation* Animation = EditorPtr->GetAnimation())
-    {
-        Collection = Animation->GetGuideCollection();
-    }
-    else if (TSharedPtr<FOdysseyPainterEditorTextureSource> TextureSource = EditorPtr->GetSourceTyped<FOdysseyPainterEditorTextureSource>())
-    {
-        if (UTexture2D* Texture = TextureSource->GetTexture())
-            Collection = Cast<UOdysseyPainterEditorGuideCollection>(Texture->GetAssetUserDataOfClass(UOdysseyPainterEditorGuideCollection::StaticClass()));
-    }
+    UOdysseyPainterEditorGuideCollection* Collection = EditorPtr->GetGuideCollection();
     if (!Collection)
     {
         GuideShapes.Empty();
