@@ -43,3 +43,4 @@ Each page covers one subsystem and stays short: the details live in the comments
 | OdysseyAnimationEditor | Editor | Animation layers, cells, lighttables, the animation layer stack and its user data. |
 | OdysseyTexture | Editor | Texture layers and the texture layer stack. |
 | OdysseyPainterEditor | Editor | The painter editor: tools, paint engine, raster selection, sources, shortcuts. |
+| OdysseyTiledImageMigration | Editor | One-pass, project-wide conversion of legacy raster layers and cells to tiled images: startup offer, Tools menu entry and `Odyssey.MigrateToTiledImages`. Transitional. |

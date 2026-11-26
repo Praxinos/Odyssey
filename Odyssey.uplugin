@@ -297,6 +297,11 @@
             "Name": "OdysseyFlipbookEditor",
             "Type": "Editor",
             "LoadingPhase": "Default"
+        },
+        {
+            "Name": "OdysseyTiledImageMigration",
+            "Type": "Editor",
+            "LoadingPhase": "Default"
         }
     ],
     "PreBuildSteps": {
