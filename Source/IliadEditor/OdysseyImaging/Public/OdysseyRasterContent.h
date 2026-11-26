@@ -127,6 +127,7 @@ public:
      * Moves the pixels of an asset saved before the tiled image storage into the content, without undo.
      * The legacy data is reset once moved, and kept when it cannot be, e.g. while the owner is not yet attached.
      * @param LegacyTexture The former render texture of the owner, holding its pixels; read when there are no legacy pixels.
+     *                      Marked as garbage once its pixels are moved: the owner must hold its only reference.
      * @param LegacyPixels The pixels of a former raster block, in the format the owner expects.
      * @return True when legacy pixels were moved into the content.
      */

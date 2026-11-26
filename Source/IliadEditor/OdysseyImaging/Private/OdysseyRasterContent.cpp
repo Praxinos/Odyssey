@@ -3,6 +3,7 @@
 
 #include "OdysseyRasterContent.h"
 
+#include "AssetCompilingManager.h"
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Misc/App.h"
@@ -21,6 +22,23 @@
 #include "OdysseyTiledImage.h"
 #include "OdysseyTiledImageBlock.h"
 #include "ULISLoaderModule.h"
+
+namespace
+{
+/**
+ * Lets the garbage collector destroy a migrated legacy texture, whose pixels now live in the tiled image.
+ * The texture started compiling its platform data when loaded: the compilation is canceled so that it neither takes
+ * memory nor delays the load of the next cells. The garbage collector releases the render resource.
+ */
+void ReleaseLegacyTexture(UTexture2D& Texture)
+{
+    UObject* const Objects[] = { &Texture };
+    FAssetCompilingManager& CompilingManager = FAssetCompilingManager::Get();
+    CompilingManager.MarkCompilationAsCanceled(Objects);
+    Texture.ClearFlags(RF_Standalone);
+    Texture.MarkAsGarbage();
+}
+}
 
 FOdysseyRasterContent::~FOdysseyRasterContent()
 {
@@ -177,7 +195,12 @@ FOdysseyRasterContent::MigrateLegacy(TObjectPtr<UTexture2D>& LegacyTexture, TSha
     {
         return false;
     }
+
     LegacyPixels.Reset();
+    if (Pixels && LegacyTexture)
+    {
+        ReleaseLegacyTexture(*LegacyTexture);
+    }
     LegacyTexture = nullptr;
     return Pixels.IsValid();
 }
