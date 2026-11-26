@@ -14,6 +14,8 @@
 #include "UObject/Package.h"
 #include "UObject/StrongObjectPtr.h"
 
+#include "ULISLoaderModule.h"
+
 namespace Odyssey::TiledImageBlockTests
 {
 constexpr EAutomationTestFlags TestFlags = EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter;
@@ -315,6 +317,81 @@ bool FOdysseyTiledImageBlockSRGBTest::RunTest(const FString& Parameters)
 
     TSharedPtr<::ULIS::FBlock> Read = CopyToBlock(*Image, FIntRect(0, 0, Size, Size), ::ULIS::Format_BGRA8, true);
     CheckBlock(*this, TEXT("Encoded colors are read back exactly"), Read.Get(), FIntPoint::ZeroValue, Block.Get(), FIntPoint::ZeroValue, FIntPoint(Size, Size), 0.0);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOdysseyTiledImageSetFromBlockTest, "Odyssey.Imaging.TiledImage.Block.SetFromBlockMatchesCopyFromBlock", TestFlags)
+/**
+ * SetFromBlock() writes the tiles on the CPU, and must store the pixels CopyFromBlock() stores through the GPU,
+ * partial edge tiles and sRGB decoding included, while creating no tile for a transparent area.
+ */
+bool FOdysseyTiledImageSetFromBlockTest::RunTest(const FString& Parameters)
+{
+    using namespace Odyssey::TiledImage;
+    /** A case of the test. */
+    struct FEncodingCase
+    {
+        /** The format of the source block. */
+        ::ULIS::eFormat BlockFormat;
+        /** The tile format storing the block. */
+        EOdysseyTiledImageFormat TileFormat;
+        /** The encoding of the block colors. */
+        EOdysseyBlockEncoding Encoding;
+        /** The label prefixed to the test messages. */
+        const TCHAR* Name;
+    };
+    const FEncodingCase Cases[] = {
+        { ::ULIS::Format_BGRA8, EOdysseyTiledImageFormat::RGBA8, EOdysseyBlockEncoding::Linear, TEXT("BGRA8 in RGBA8") },
+        { ::ULIS::Format_BGRA8, EOdysseyTiledImageFormat::RGBA16F, EOdysseyBlockEncoding::SRGB, TEXT("sRGB BGRA8 in RGBA16F") },
+        { ::ULIS::Format_RGBAF, EOdysseyTiledImageFormat::RGBA16F, EOdysseyBlockEncoding::Linear, TEXT("RGBAF in RGBA16F") },
+        { ::ULIS::Format_RGBA16, EOdysseyTiledImageFormat::RGBA32F, EOdysseyBlockEncoding::Linear, TEXT("RGBA16 in RGBA32F") },
+    };
+    // Not a multiple of the 32-pixel tiles; the top band of tiles is made transparent.
+    constexpr int32 Width = 100;
+    constexpr int32 Height = 70;
+    const FIntRect Bounds(0, 0, Width, Height);
+    for (const FEncodingCase& Case : Cases)
+    {
+        TSharedPtr<::ULIS::FBlock> Block = MakeBlock(Width, Height, Case.BlockFormat, 29);
+        ::ULIS::FContext& Context = IULISLoaderModule::StaticFindOrAddContext(Block->Format());
+        Context.Clear(*Block, ::ULIS::FRectI(0, 0, Width, 32));
+        Context.Finish();
+
+        const bool bSRGB = Case.Encoding == EOdysseyBlockEncoding::SRGB;
+        TStrongObjectPtr<UOdysseyTiledImage> Expected = MakeImage(Case.TileFormat);
+        CopyFromBlock(*Expected, *Block, Bounds, FIntPoint::ZeroValue, bSRGB);
+        TStrongObjectPtr<UOdysseyTiledImage> Actual = MakeImage(Case.TileFormat);
+        const bool bSet = SetFromBlock(*Actual, *Block, Case.Encoding);
+        if (!TestTrue(FString::Printf(TEXT("%s: set"), Case.Name), bSet))
+        {
+            continue;
+        }
+
+        const FIntRect TileBounds = Actual->GetTileBounds();
+        TestEqual(FString::Printf(TEXT("%s: no tile for the transparent area"), Case.Name), TileBounds, FIntRect(0, 32, 128, 96));
+        TSharedPtr<::ULIS::FBlock> ExpectedPixels = CopyToBlock(*Expected, Bounds, Case.BlockFormat, bSRGB);
+        TSharedPtr<::ULIS::FBlock> ActualPixels = CopyToBlock(*Actual, Bounds, Case.BlockFormat, bSRGB);
+        CheckBlock(*this, Case.Name, ActualPixels.Get(), FIntPoint::ZeroValue, ExpectedPixels.Get(), FIntPoint::ZeroValue, Bounds.Size(), 0.0);
+    }
+
+    TSharedPtr<::ULIS::FBlock> Transparent = MakeShared<::ULIS::FBlock>(64, 64, ::ULIS::Format_RGBA8);
+    ::ULIS::FContext& Context = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
+    Context.Clear(*Transparent, ::ULIS::FRectI::Auto);
+    Context.Finish();
+    TStrongObjectPtr<UOdysseyTiledImage> Empty = MakeImage(EOdysseyTiledImageFormat::RGBA8);
+    SetFromBlock(*Empty, *Transparent, EOdysseyBlockEncoding::Linear);
+    const FIntRect EmptyBounds = Empty->GetTileBounds();
+    TestEqual(TEXT("A transparent block creates no tile"), EmptyBounds.Area(), 0);
+
+    TStrongObjectPtr<UOdysseyTiledImage> Linear8 = MakeImage(EOdysseyTiledImageFormat::RGBA8);
+    const TSharedPtr<::ULIS::FBlock> LinearBlock = MakeBlock(32, 32, ::ULIS::Format_BGRA8, 1);
+    SetFromBlock(*Linear8, *LinearBlock, EOdysseyBlockEncoding::Linear);
+    AddExpectedError(TEXT("8-bit tiles cannot hold decoded colors"), EAutomationExpectedErrorFlags::Contains, 1);
+    const TSharedPtr<::ULIS::FBlock> SRGBBlock = MakeBlock(32, 32, ::ULIS::Format_BGRA8, 2);
+    const bool bRejected = !SetFromBlock(*Linear8, *SRGBBlock, EOdysseyBlockEncoding::SRGB);
+    TestTrue(TEXT("8-bit tiles reject an sRGB block"), bRejected);
+    const FIntRect KeptBounds = Linear8->GetTileBounds();
+    TestEqual(TEXT("A rejected block leaves the image unchanged"), KeptBounds, FIntRect(0, 0, 32, 32));
     return true;
 }
 

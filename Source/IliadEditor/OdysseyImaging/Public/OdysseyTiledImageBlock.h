@@ -11,12 +11,16 @@
 
 class UTextureRenderTarget2D;
 
-/**
- * Transitional adapters between ::ULIS::FBlock and UOdysseyTiledImage.
- *
- * They exist while raster editing still works on CPU blocks. Both go through the GPU path
- * (CopyFromTexture() and Render()), so they can be removed once every caller uses render targets.
- */
+/** How the color channels of an 8-bit block are encoded. */
+enum class EOdysseyBlockEncoding : uint8
+{
+    /** The values are stored as they are. */
+    Linear,
+    /** sRGB encoded colors, decoded so that the image holds linear colors; the image needs a floating tile format. */
+    SRGB,
+};
+
+/** Adapters converting pixels between ::ULIS::FBlock and UOdysseyTiledImage. */
 namespace Odyssey::TiledImage
 {
 /**
@@ -59,6 +63,17 @@ ODYSSEYIMAGING_API bool CopyFromBlock(UOdysseyTiledImage& Image, const ::ULIS::F
  * @return False when nothing was copied.
  */
 ODYSSEYIMAGING_API bool CopyFromBlock(UOdysseyTiledImage& Image, const ::ULIS::FBlock& Block, const TArray<FIntRect>& Rects, bool bSRGB = false);
+
+/**
+ * Replaces every tile of the image with the block placed at the image origin, converted as CopyFromBlock() does.
+ * Does not call Modify(), as UOdysseyTiledImage::ReplaceTilesFromPixels().
+ *
+ * @param Image The destination image; its tile size and format are kept.
+ * @param Block The source block.
+ * @param Encoding The encoding of the block colors.
+ * @return False, with an error logged and the image unchanged, when the image tile size is invalid or its format cannot hold the block.
+ */
+ODYSSEYIMAGING_API bool SetFromBlock(UOdysseyTiledImage& Image, const ::ULIS::FBlock& Block, EOdysseyBlockEncoding Encoding);
 
 /**
  * Copies parts of a block into a render target holding pixels in the given tile format, e.g. the target of an edit session.

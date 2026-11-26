@@ -114,6 +114,38 @@ UOdysseyTiledImage::CopyFromTexture(UTexture* InTexture, FIntRect InRect, FIntPo
 
 }
 
+void
+UOdysseyTiledImage::ReplaceTilesFromPixels(FIntPoint InPosition, FIntPoint InSize, FMemoryView InPixels)
+{
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyTiledImage::ReplaceTilesFromPixels);
+    if (!Odyssey::TileUtils::IsValidTileSize(TileSize))
+    {
+        UE_LOGF(LogOdysseyTiledImage, Error, "ReplaceTilesFromPixels: %ls has an invalid tile size %u.", *GetName(), TileSize);
+        return;
+    }
+
+    const EPixelFormat PixelFormat = GetPixelFormat();
+    FOdysseyTileManager& TileManager = FOdysseyTileManager::Get();
+    const TArray<FOdysseyTileManager::FCreatedTile> CreatedTiles = TileManager.CreateTilesFromPixels(InPosition, InSize, InPixels, TileSize, PixelFormat);
+    for (const FOdysseyTileManager::FCreatedTile& CreatedTile : CreatedTiles)
+    {
+        if (CreatedTile.Id.IsValid())
+        {
+            Tiles.Add(CreatedTile.TileCoord, CreatedTile.Id);
+        }
+        else
+        {
+            Tiles.Remove(CreatedTile.TileCoord);
+        }
+    }
+}
+
+uint32
+UOdysseyTiledImage::GetTileSize() const
+{
+    return TileSize;
+}
+
 FIntRect
 UOdysseyTiledImage::GetTileBounds() const
 {

@@ -128,8 +128,9 @@ public:
      * The legacy data is reset once moved, and kept when it cannot be, e.g. while the owner is not yet attached.
      * @param LegacyTexture The former render texture of the owner, holding its pixels; read when there are no legacy pixels.
      * @param LegacyPixels The pixels of a former raster block, in the format the owner expects.
+     * @return True when legacy pixels were moved into the content.
      */
-    void MigrateLegacy(TObjectPtr<UTexture2D>& LegacyTexture, TSharedPtr<::ULIS::FBlock>& LegacyPixels);
+    bool MigrateLegacy(TObjectPtr<UTexture2D>& LegacyTexture, TSharedPtr<::ULIS::FBlock>& LegacyPixels);
 
     /**
      * Begins an edit of the content: the tool writes into the render target of the session, initialized with the pixels of the content,

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Memory/MemoryView.h"
 #include "PixelFormat.h"
 #include "RenderGraphFwd.h"
 #include "Serialization/EditorBulkData.h"
@@ -77,6 +78,18 @@ public:
      * @param Position The position, in image pixels, of the top-left corner of Rect.
      */
     void CopyFromTexture(UTexture* Texture, FIntRect Rect, FIntPoint Position);
+
+    /**
+     * Replaces the tiles touched by an area with CPU pixels, without going through the GPU. Does not call Modify(), as Initialize():
+     * meant to create or migrate content, not to edit it.
+     * @param Position The position of the top-left pixel of the area, in image pixels; a multiple of the tile size.
+     * @param Size The size of the area, in pixels. Pixels of the touched tiles outside the area become transparent.
+     * @param Pixels The pixels of the area in the tile pixel format, in rows of Size.X pixels.
+     */
+    void ReplaceTilesFromPixels(FIntPoint Position, FIntPoint Size, FMemoryView Pixels);
+
+    /** Returns the size of the square tiles, in pixels. */
+    uint32 GetTileSize() const;
 
     /** Removes every tile, keeping the tile size and format. Calls Modify(), so the removal is undoable within a transaction. */
     void RemoveAllTiles();

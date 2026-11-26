@@ -3,6 +3,7 @@
 
 #include "OdysseyTiledImageBlock.h"
 
+#include "Async/ParallelFor.h"
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Math/Float16.h"
@@ -13,12 +14,41 @@
 #include "TextureResource.h"
 #include "UObject/StrongObjectPtr.h"
 
+#include "OdysseyTileManager.h"
 #include "OdysseyTileUtils.h"
 
 #include "ULISLoaderModule.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogOdysseyTiledImageBlock, Log, All);
+
 namespace
 {
+/** The half float of each 8-bit value, decoded as an sRGB color channel or as a linear alpha, as FLinearColor::FromSRGBColor() does. */
+struct FSRGBToHalfTables
+{
+    FSRGBToHalfTables()
+    {
+        for (int32 Value = 0; Value < 256; ++Value)
+        {
+            const FColor Encoded(uint8(Value), 0, 0, uint8(Value));
+            const FLinearColor Decoded = FLinearColor::FromSRGBColor(Encoded);
+            Color[Value] = FFloat16(Decoded.R);
+            Alpha[Value] = FFloat16(Decoded.A);
+        }
+    }
+
+    /** The half float of each sRGB encoded 8-bit color value. */
+    FFloat16 Color[256];
+    /** The half float of each linear 8-bit alpha value. */
+    FFloat16 Alpha[256];
+};
+
+const FSRGBToHalfTables& GetSRGBToHalfTables()
+{
+    static const FSRGBToHalfTables Tables;
+    return Tables;
+}
+
 /** Returns the linear variant of an RGBA format when bLinear is true, so that a conversion only changes channel order and type. */
 ::ULIS::eFormat WithLinearity(::ULIS::eFormat Format, bool bLinear)
 {
@@ -92,6 +122,32 @@ FSharedBuffer ToTileMemory(EOdysseyTiledImageFormat TileFormat, EPixelFormat Pix
     const FIntPoint Size = SourceRect.Size();
     const bool bLinear = ULIS_R_LINEAR(Block.Format()) != 0;
     const ::ULIS::FRectI Rect(SourceRect.Min.X, SourceRect.Min.Y, Size.X, Size.Y);
+    const int64 DestinationPitch = int64(Size.X) * GPixelFormats[PixelFormat].BlockBytes;
+    FUniqueBuffer Memory = FUniqueBuffer::Alloc(uint64(DestinationPitch) * Size.Y);
+    uint8* Destination = static_cast<uint8*>(Memory.GetData());
+    const int32 NumValuesPerRow = Size.X * 4;
+
+    if (bDecode && TileFormat == EOdysseyTiledImageFormat::RGBA16F)
+    {
+        // Decode the 8-bit values to half floats through lookup tables.
+        ::ULIS::FBlock Encoded(Size.X, Size.Y, WithLinearity(::ULIS::Format_RGBA8, bLinear));
+        ConvertBlock(Block, Encoded, Rect);
+        const FSRGBToHalfTables& Tables = GetSRGBToHalfTables();
+        ParallelFor(Size.Y, [&](int32 Row) -> void
+        {
+            const uint8* SourceValues = Encoded.ScanlineBits(static_cast<uint16>(Row));
+            FFloat16* DestinationValues = reinterpret_cast<FFloat16*>(Destination + Row * DestinationPitch);
+            for (int32 Index = 0; Index < NumValuesPerRow; Index += 4)
+            {
+                DestinationValues[Index] = Tables.Color[SourceValues[Index]];
+                DestinationValues[Index + 1] = Tables.Color[SourceValues[Index + 1]];
+                DestinationValues[Index + 2] = Tables.Color[SourceValues[Index + 2]];
+                DestinationValues[Index + 3] = Tables.Alpha[SourceValues[Index + 3]];
+            }
+        });
+        return Memory.MoveToShared();
+    }
+
     ::ULIS::FBlock Staging(Size.X, Size.Y, WithLinearity(Odyssey::TiledImage::ULISFormatForTiledImageFormat(TileFormat), bLinear));
     if (bDecode)
     {
@@ -104,14 +160,10 @@ FSharedBuffer ToTileMemory(EOdysseyTiledImageFormat TileFormat, EPixelFormat Pix
         ConvertBlock(Block, Staging, Rect);
     }
 
-    const int64 DestinationPitch = int64(Size.X) * GPixelFormats[PixelFormat].BlockBytes;
-    FUniqueBuffer Memory = FUniqueBuffer::Alloc(uint64(DestinationPitch) * Size.Y);
-    uint8* Destination = static_cast<uint8*>(Memory.GetData());
-    const int32 NumValuesPerRow = Size.X * 4;
-    for (int32 Y = 0; Y < Size.Y; ++Y)
+    ParallelFor(Size.Y, [&](int32 Row) -> void
     {
-        const uint8* SourceRow = Staging.ScanlineBits(static_cast<uint16>(Y));
-        uint8* DestinationRow = Destination + Y * DestinationPitch;
+        const uint8* SourceRow = Staging.ScanlineBits(static_cast<uint16>(Row));
+        uint8* DestinationRow = Destination + Row * DestinationPitch;
         if (TileFormat == EOdysseyTiledImageFormat::RGBA16F)
         {
             const float* SourceValues = reinterpret_cast<const float*>(SourceRow);
@@ -125,7 +177,7 @@ FSharedBuffer ToTileMemory(EOdysseyTiledImageFormat TileFormat, EPixelFormat Pix
         {
             FMemory::Memcpy(DestinationRow, SourceRow, DestinationPitch);
         }
-    }
+    });
     return Memory.MoveToShared();
 }
 
@@ -211,6 +263,49 @@ bool CopyFromBlock(UOdysseyTiledImage& Image, const ::ULIS::FBlock& Block, const
     }
     // The tiles are written on the render thread, which reads the texture.
     FlushRenderingCommands();
+    return true;
+}
+
+bool SetFromBlock(UOdysseyTiledImage& Image, const ::ULIS::FBlock& Block, EOdysseyBlockEncoding Encoding)
+{
+    check(IsInGameThread());
+    TRACE_CPUPROFILER_EVENT_SCOPE(Odyssey::TiledImage::SetFromBlock);
+    const int32 TileSize = int32(Image.GetTileSize());
+    if (!Odyssey::TileUtils::IsValidTileSize(TileSize))
+    {
+        UE_LOGF(LogOdysseyTiledImageBlock, Error, "Cannot set the tiled image %ls from a block: invalid tile size %d.", *GetNameSafe(&Image), TileSize);
+        return false;
+    }
+
+    const bool bSRGB = Encoding == EOdysseyBlockEncoding::SRGB;
+    if (bSRGB && Is8Bit(Block.Format()) && Image.GetFormat() == EOdysseyTiledImageFormat::RGBA8)
+    {
+        UE_LOGF(LogOdysseyTiledImageBlock, Error, "Cannot set the tiled image %ls from an sRGB block: 8-bit tiles cannot hold decoded colors.", *GetNameSafe(&Image));
+        return false;
+    }
+
+    const EOdysseyTiledImageFormat TileFormat = Image.GetFormat();
+    const EPixelFormat PixelFormat = Image.GetPixelFormat();
+    const int32 BlockWidth = Block.Width();
+    const int32 BlockHeight = Block.Height();
+    Image.Initialize(TileSize, TileFormat);
+    // A band of tiles at a time, so that the converted pixels never take the memory of the whole block.
+    for (int32 BandY = 0; BandY < BlockHeight; BandY += TileSize)
+    {
+        const int32 BandEndY = FMath::Min(BandY + TileSize, BlockHeight);
+        const FIntRect Band(0, BandY, BlockWidth, BandEndY);
+        const FSharedBuffer Memory = ToTileMemory(TileFormat, PixelFormat, Block, Band, bSRGB);
+        if (Memory.IsNull())
+        {
+            continue;
+        }
+
+        const FIntPoint BandSize = Band.Size();
+        const FMemoryView BandPixels = Memory.GetView();
+        Image.ReplaceTilesFromPixels(Band.Min, BandSize, BandPixels);
+    }
+    // The tile manager tick, which releases them otherwise, does not run while a package loads.
+    FOdysseyTileManager::Get().EvictTiles();
     return true;
 }
 

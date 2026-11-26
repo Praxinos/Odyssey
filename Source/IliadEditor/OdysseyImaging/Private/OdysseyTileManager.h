@@ -323,6 +323,20 @@ public:
     FOdysseyTileId CreateTile(const FIoHash& InHash, const FCompressedBuffer& InCompressedBuffer);
 
     /**
+     * Creates the tiles of an area given as CPU pixels, deduplicated with the existing data, without going through the GPU.
+     * Game thread only. Pixels of the touched tiles outside the area are transparent. A tile whose alpha is 0 everywhere is empty: no tile is
+     * created for it, -0 counting as 0 and NaN as content, as for the tiles created from a texture.
+     * @param InPosition The position of the top-left pixel of the area, in pixels; a multiple of InTileSize.
+     * @param InSize The size of the area, in pixels.
+     * @param InPixels The pixels of the area in the tile pixel format, in rows of InSize.X pixels.
+     * @param InTileSize Width and height of the tiles in pixels.
+     * @param InTileFormat The tile pixel format: PF_R8G8B8A8, PF_FloatRGBA or PF_A32B32G32R32F.
+     * @return For each tile coordinate the area touches, its new tile; an invalid id for an empty tile.
+     *         Empty when InTileSize is invalid, InSize is not positive, InPixels is too short or InTileFormat is unsupported.
+     */
+    TArray<FCreatedTile> CreateTilesFromPixels(FIntPoint InPosition, FIntPoint InSize, FMemoryView InPixels, uint32 InTileSize, EPixelFormat InTileFormat);
+
+    /**
      * Returns, for each TileId, a FTextureRHIRef containing the Tile's Texture
      * The returned FTextureRHIRef can be invalid, indicating an empty texture
      * Please check FTextureRHIRef::IsValid() before using it
@@ -378,6 +392,12 @@ private:
     void LoadTileFromReadBack(TSharedPtr<FTile> InTile);
     /** Removes from PendingTilesToReadBack the tiles whose readback has started. Game thread only. */
     void RemoveStartedReadBacks();
+
+    /** Returns the data holding the same bytes as InBuffer under InHash, or null. HashToTileDataMutex must be held. */
+    TSharedPtr<FTileData> FindTileData(const FIoHash& InHash, FMemoryView InBuffer) const;
+
+    /** Returns true when the tile is empty, as CreateTilesFromPixels() defines it. */
+    static bool IsTileEmpty(FMemoryView InTile, EPixelFormat InTileFormat);
 
     /**
      * Ends the readback of a tile: releases its creation texture and readbacks and gives its data, null for an empty tile.

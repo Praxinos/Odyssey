@@ -139,20 +139,29 @@ FOdysseyRasterContent::SetContent(const ::ULIS::FBlock& Block)
         return false;
     }
 
-    Image->Initialize(UOdysseyTiledImage::DefaultTileSize, Image->GetFormat());
-    Odyssey::TiledImage::CopyFromBlock(*Image, Block, FIntRect(0, 0, Block.Width(), Block.Height()), FIntPoint::ZeroValue, GetDescription().bSRGB);
+    EOdysseyBlockEncoding Encoding = EOdysseyBlockEncoding::Linear;
+    if (GetDescription().bSRGB)
+    {
+        Encoding = EOdysseyBlockEncoding::SRGB;
+    }
+
+    if (!Odyssey::TiledImage::SetFromBlock(*Image, Block, Encoding))
+    {
+        return false;
+    }
     // The edit is derived from the previous content.
     EndEdit();
     NotifyChanged({});
     return true;
 }
 
-void
+bool
 FOdysseyRasterContent::MigrateLegacy(TObjectPtr<UTexture2D>& LegacyTexture, TSharedPtr<::ULIS::FBlock>& LegacyPixels)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRasterContent::MigrateLegacy);
     if (!LegacyTexture && !LegacyPixels)
     {
-        return;
+        return false;
     }
 
     TSharedPtr<::ULIS::FBlock> Pixels = LegacyPixels;
@@ -160,16 +169,17 @@ FOdysseyRasterContent::MigrateLegacy(TObjectPtr<UTexture2D>& LegacyTexture, TSha
     {
         if (!EnsureImage())
         {
-            return;
+            return false;
         }
         Pixels = MakeShareable(NewBlockFromUTextureData(LegacyTexture, GetDescription().Format));
     }
     if (Pixels && !SetContent(*Pixels))
     {
-        return;
+        return false;
     }
     LegacyPixels.Reset();
     LegacyTexture = nullptr;
+    return Pixels.IsValid();
 }
 
 TSharedPtr<FOdysseyRasterEditSession>

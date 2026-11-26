@@ -4,6 +4,7 @@
 #include "OdysseyTileManager.h"
 
 #include "Async/Async.h"
+#include "Async/ParallelFor.h"
 #include "DynamicRHI.h"
 #include "Engine/Texture.h"
 #include "GlobalShader.h"
@@ -777,24 +778,9 @@ FOdysseyTileManager::CreateTile(const FIoHash& InHash, const FCompressedBuffer& 
         }
         else
         {
-            bool bFound = false;
             FSharedBuffer Buffer = InCompressedBuffer.Decompress();
-            for (TSharedPtr<FTileData> ExistingTileData : TilesData)
-            {
-                FSharedBuffer TileDataBuffer;
-                if(!ExistingTileData->GetUncompressedBuffer(TileDataBuffer))
-                    continue;
-
-                if (TileDataBuffer.GetView().EqualBytes(Buffer.GetView()))
-                {
-                    bFound = true;
-                    TileData = ExistingTileData;
-                    break;
-                }
-            }
-
-            //Create a new TileData
-            if (!bFound)
+            TileData = FindTileData(InHash, Buffer.GetView());
+            if (!TileData)
             {
                 TileData = FTileData::FromBuffers(InHash, Buffer, InCompressedBuffer);
                 HashToTileData.Add(InHash, TileData);
@@ -804,6 +790,184 @@ FOdysseyTileManager::CreateTile(const FIoHash& InHash, const FCompressedBuffer& 
 
     TSharedPtr<FTile> Tile = CreateNewTile(TileData);
     return Tile->Id;
+}
+
+TArray<FOdysseyTileManager::FCreatedTile>
+FOdysseyTileManager::CreateTilesFromPixels(FIntPoint InPosition, FIntPoint InSize, FMemoryView InPixels, uint32 InTileSize, EPixelFormat InTileFormat)
+{
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::CreateTilesFromPixels);
+    check(IsInGameThread());
+
+    const uint64 BytesPerPixel = GPixelFormats[InTileFormat].BlockBytes;
+    const uint64 SourcePitch = uint64(FMath::Max(InSize.X, 0)) * BytesPerPixel;
+    if (!Odyssey::TileUtils::IsValidTileSize(InTileSize))
+    {
+        UE_LOGF(LogOdysseyTileManager, Error, "CreateTilesFromPixels: invalid tile size %u.", InTileSize);
+        return {};
+    }
+
+    if (InTileFormat != PF_R8G8B8A8 && InTileFormat != PF_FloatRGBA && InTileFormat != PF_A32B32G32R32F)
+    {
+        UE_LOGF(LogOdysseyTileManager, Error, "CreateTilesFromPixels: unsupported tile format %d.", int32(InTileFormat));
+        return {};
+    }
+
+    if (InSize.X <= 0 || InSize.Y <= 0)
+    {
+        UE_LOGF(LogOdysseyTileManager, Error, "CreateTilesFromPixels: invalid area size %dx%d.", InSize.X, InSize.Y);
+        return {};
+    }
+
+    const uint64 NeededBytes = SourcePitch * InSize.Y;
+    if (InPixels.GetSize() < NeededBytes)
+    {
+        UE_LOGF(LogOdysseyTileManager, Error, "CreateTilesFromPixels: %llu bytes of pixels for %llu needed.", InPixels.GetSize(), NeededBytes);
+        return {};
+    }
+    check(InPosition.X % int32(InTileSize) == 0 && InPosition.Y % int32(InTileSize) == 0);
+
+    const FIntRect Area(InPosition, InPosition + InSize);
+    const TArray<FIntPoint> TileCoords = Odyssey::TileUtils::GetTileCoordsInRect(InTileSize, Area);
+    const uint64 TileRowBytes = uint64(InTileSize) * BytesPerPixel;
+
+    // Each tile gets its own buffer.
+    struct FTileBuffer
+    {
+        /** The tile pixels; null for an empty tile. */
+        FSharedBuffer Buffer;
+        /** The hash of Buffer, used for deduplication. */
+        FIoHash Hash;
+    };
+    TArray<FTileBuffer> TileBuffers;
+    TileBuffers.SetNum(TileCoords.Num());
+    ParallelFor(TileCoords.Num(), [&](int32 Index) -> void
+    {
+        const FIntPoint TileOrigin = TileCoords[Index] * int32(InTileSize);
+        const int32 FirstX = FMath::Max(TileOrigin.X, Area.Min.X);
+        const int32 EndX = FMath::Min(TileOrigin.X + int32(InTileSize), Area.Max.X);
+        FUniqueBuffer Tile = FUniqueBuffer::Alloc(TileRowBytes * InTileSize);
+        FMemory::Memzero(Tile.GetData(), Tile.GetSize());
+        uint8* TileBytes = static_cast<uint8*>(Tile.GetData());
+        const uint8* SourceBytes = static_cast<const uint8*>(InPixels.GetData());
+        for (uint32 Row = 0; Row < InTileSize; ++Row)
+        {
+            const int32 PixelY = TileOrigin.Y + int32(Row);
+            if (PixelY < Area.Min.Y || PixelY >= Area.Max.Y || EndX <= FirstX)
+            {
+                continue;
+            }
+            const uint8* Source = SourceBytes + uint64(PixelY - Area.Min.Y) * SourcePitch + uint64(FirstX - Area.Min.X) * BytesPerPixel;
+            uint8* Destination = TileBytes + Row * TileRowBytes + uint64(FirstX - TileOrigin.X) * BytesPerPixel;
+            FMemory::Memcpy(Destination, Source, uint64(EndX - FirstX) * BytesPerPixel);
+        }
+
+        if (IsTileEmpty(Tile.GetView(), InTileFormat))
+        {
+            return;
+        }
+        TileBuffers[Index].Hash = FIoHashBuilder::HashBuffer(Tile.GetView());
+        TileBuffers[Index].Buffer = Tile.MoveToShared();
+    });
+
+    TArray<FCreatedTile> CreatedTiles;
+    CreatedTiles.Reserve(TileCoords.Num());
+    FScopeLock Lock(&HashToTileDataMutex);
+    for (int32 Index = 0; Index < TileCoords.Num(); ++Index)
+    {
+        FCreatedTile& CreatedTile = CreatedTiles.AddDefaulted_GetRef();
+        CreatedTile.TileCoord = TileCoords[Index];
+        const FTileBuffer& TileBuffer = TileBuffers[Index];
+        if (TileBuffer.Buffer.IsNull())
+        {
+            continue;
+        }
+        TSharedPtr<FTileData> TileData = FindTileData(TileBuffer.Hash, TileBuffer.Buffer.GetView());
+        if (!TileData)
+        {
+            TileData = FTileData::FromUncompressedBuffer(TileBuffer.Hash, TileBuffer.Buffer);
+            HashToTileData.Add(TileBuffer.Hash, TileData);
+        }
+        CreatedTile.Id = CreateNewTile(TileData)->Id;
+    }
+    return CreatedTiles;
+}
+
+TSharedPtr<FOdysseyTileManager::FTileData>
+FOdysseyTileManager::FindTileData(const FIoHash& InHash, FMemoryView InBuffer) const
+{
+    TArray<TSharedPtr<FTileData>> Candidates;
+    HashToTileData.MultiFind(InHash, Candidates, false);
+    for (const TSharedPtr<FTileData>& Candidate : Candidates)
+    {
+        FSharedBuffer CandidateBuffer;
+        if (!Candidate->GetUncompressedBuffer(CandidateBuffer))
+        {
+            UE_LOGF(LogOdysseyTileManager, Warning, "FindTileData: cannot read the buffer of tile data %ls.", *LexToString(InHash));
+            continue;
+        }
+
+        if (CandidateBuffer.GetView().EqualBytes(InBuffer))
+        {
+            return Candidate;
+        }
+    }
+    return nullptr;
+}
+
+//static
+bool
+FOdysseyTileManager::IsTileEmpty(FMemoryView InTile, EPixelFormat InTileFormat)
+{
+    const uint8* Bytes = static_cast<const uint8*>(InTile.GetData());
+    const uint64 BytesPerPixel = GPixelFormats[InTileFormat].BlockBytes;
+    const uint64 NumPixels = InTile.GetSize() / BytesPerPixel;
+    switch (InTileFormat)
+    {
+        case PF_R8G8B8A8:
+        {
+            for (uint64 Pixel = 0; Pixel < NumPixels; ++Pixel)
+            {
+                if (Bytes[Pixel * BytesPerPixel + 3] != 0)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        case PF_FloatRGBA:
+        {
+            for (uint64 Pixel = 0; Pixel < NumPixels; ++Pixel)
+            {
+                uint16 Alpha;
+                FMemory::Memcpy(&Alpha, Bytes + Pixel * BytesPerPixel + 6, sizeof(Alpha));
+                // The sign bit excepted, any bit set is a non-zero value or a NaN.
+                if ((Alpha & 0x7FFF) != 0)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        case PF_A32B32G32R32F:
+        {
+            for (uint64 Pixel = 0; Pixel < NumPixels; ++Pixel)
+            {
+                float Alpha;
+                FMemory::Memcpy(&Alpha, Bytes + Pixel * BytesPerPixel + 12, sizeof(Alpha));
+                // A NaN is not equal to 0, as in the empty-tile shader.
+                if (Alpha != 0.0f)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        default:
+        {
+            // Unsupported formats are rejected, with a log, by CreateTilesFromPixels().
+            return false;
+        }
+    }
 }
 
 template<typename... ArgsType>
@@ -943,31 +1107,15 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
 
                 //Compare Buffer to other buffers
                 FIoHash Hash = FIoHashBuilder::HashBuffer(TileBuffer.GetView());
-                TArray<TSharedPtr<FTileData>> TilesData;
 
                 {
                     FScopeLock HashToTileDataLock(&HashToTileDataMutex);
-                    HashToTileData.MultiFind(Hash, TilesData, false);
-
-                    for (TSharedPtr<FTileData> TileData : TilesData)
+                    TSharedPtr<FTileData> TileData = FindTileData(Hash, TileBuffer.GetView());
+                    if (!TileData)
                     {
-                        FSharedBuffer TileDataBuffer;
-                        if(!TileData->GetUncompressedBuffer(TileDataBuffer))
-                            continue;
-
-                        if (TileDataBuffer.GetView().EqualBytes(TileBuffer.GetView()))
-                        {
-                            FScopeLock TileLock(&InTile->Mutex);
-                            CacheGPUTexture({TileData.Get(), PixelsReadBack.TileSize,
-                                InTile->CreationTexture.Get()->GetTextureRHI()->GetFormat()}, InTile->CreationTexture.Get());
-                            CompleteReadBack(*InTile, TileData);
-                            return;
-                        }
+                        TileData = FTileData::FromUncompressedBuffer(Hash, TileBuffer);
+                        HashToTileData.Add(Hash, TileData);
                     }
-
-                    //Create a new TileData
-                    TSharedPtr<FTileData> TileData = FTileData::FromUncompressedBuffer(Hash, TileBuffer);
-                    HashToTileData.Add(Hash, TileData);
 
                     {
                         FScopeLock TileLock(&InTile->Mutex);
