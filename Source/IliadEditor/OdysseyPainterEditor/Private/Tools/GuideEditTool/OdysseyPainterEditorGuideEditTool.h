@@ -37,9 +37,6 @@ private:
     void DragHandle(const FVector2D& TexturePosition);
     void EndHandleDrag();
 
-    /** Updates the active line endpoint or ellipse center/radius from a texture position. */
-    void ApplyHandlePosition(const FVector2D& Position);
-
     /** Guide held while this temporary tool is active. */
     UPROPERTY(Transient)
     TObjectPtr<UOdysseyPainterEditorGuide> Guide;

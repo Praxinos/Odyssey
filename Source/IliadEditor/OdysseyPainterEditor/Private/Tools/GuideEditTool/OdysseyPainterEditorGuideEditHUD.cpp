@@ -3,9 +3,8 @@
 
 #include "OdysseyPainterEditorGuideEditHUD.h"
 
+#include "OdysseyPainterEditorGuideVisualizer.h"
 #include "OdysseyPainterEditorGuideEditTool.h"
-#include "Shapes/OdysseyPainterEditorEllipseGuide.h"
-#include "Shapes/OdysseyPainterEditorLineGuide.h"
 
 FOdysseyPainterEditorGuideEditHUD::FOdysseyPainterEditorGuideEditHUD(UOdysseyPainterEditorGuideEditTool* InTool)
     : Tool(InTool)
@@ -62,28 +61,13 @@ void FOdysseyPainterEditorGuideEditHUD::DrawHUD(const FOdysseyHUDElement::FDrawH
     const bool bCanDrawHandles = Guide && Guide->bVisible && Params.mCanvas && Params.mTextureWidth > 0 && Params.mTextureHeight > 0;
 
     // Handle positions in texture pixels; only the first HandleCount handles are used by the current guide.
-    FVector2D HandlePositions[MaxHandles];
-    int32 HandleCount = 0;
+    TArray<FVector2D> HandlePositions;
     if (bCanDrawHandles)
     {
-        const double Width = Params.mTextureWidth;
-        const double Height = Params.mTextureHeight;
-        if (UOdysseyPainterEditorLineGuide* Line = Cast<UOdysseyPainterEditorLineGuide>(Guide))
-        {
-            HandlePositions[HandleCount++] = FVector2D(Line->Start.X * Width, Line->Start.Y * Height);
-            HandlePositions[HandleCount++] = FVector2D(Line->End.X * Width, Line->End.Y * Height);
-        }
-        else if (UOdysseyPainterEditorEllipseGuide* Ellipse = Cast<UOdysseyPainterEditorEllipseGuide>(Guide))
-        {
-            const FVector2D Center(Ellipse->Center.X * Width, Ellipse->Center.Y * Height);
-            const double AngleRadians = FMath::DegreesToRadians(Ellipse->Angle);
-            const FVector2D AxisX(FMath::Cos(AngleRadians), FMath::Sin(AngleRadians));
-            const FVector2D AxisY(-AxisX.Y, AxisX.X);
-            HandlePositions[HandleCount++] = Center;
-            HandlePositions[HandleCount++] = Center + AxisX * (Ellipse->Radius.X * Width);
-            HandlePositions[HandleCount++] = Center + AxisY * (Ellipse->Radius.Y * Height);
-        }
+        if (const FOdysseyPainterEditorGuideVisualizer* Visualizer = FOdysseyPainterEditorGuideVisualizer::Find(Guide->GetGuideType()))
+            Visualizer->GetHandlePositions(*Guide, FVector2D(Params.mTextureWidth, Params.mTextureHeight), HandlePositions);
     }
+    const int32 HandleCount = FMath::Min(HandlePositions.Num(), Handles.Num());
 
     FLinearColor HandleColor = Guide ? Guide->Color : FLinearColor::White;
     if (Guide)

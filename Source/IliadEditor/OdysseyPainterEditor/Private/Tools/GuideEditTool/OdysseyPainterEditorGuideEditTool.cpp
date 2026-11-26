@@ -6,8 +6,7 @@
 #include "OdysseyPainterEditorGuideEditHUD.h"
 #include "InputCoreTypes.h"
 #include "OdysseyPainterEditor.h"
-#include "Shapes/OdysseyPainterEditorEllipseGuide.h"
-#include "Shapes/OdysseyPainterEditorLineGuide.h"
+#include "OdysseyPainterEditorGuideVisualizer.h"
 #include "OdysseyPainterEditorSource.h"
 #include "ScopedTransaction.h"
 
@@ -67,10 +66,10 @@ void UOdysseyPainterEditorGuideEditTool::DragHandle(const FVector2D& TexturePosi
     const TSharedPtr<FOdysseyPainterEditorSource> Source = GetEditor()->GetSource();
     if (!Source.IsValid() || Source->Width() <= 0 || Source->Height() <= 0)
         return;
-    const FVector2D Position(
-        FMath::Clamp(TexturePosition.X / Source->Width(), 0.0, 1.0),
-        FMath::Clamp(TexturePosition.Y / Source->Height(), 0.0, 1.0));
-    ApplyHandlePosition(Position);
+    const FOdysseyPainterEditorGuideVisualizer* Visualizer = FOdysseyPainterEditorGuideVisualizer::Find(Guide->GetGuideType());
+    if (!Visualizer)
+        return;
+    Visualizer->SetHandlePosition(*Guide, ActiveHandle, TexturePosition, FVector2D(Source->Width(), Source->Height()));
 }
 
 void UOdysseyPainterEditorGuideEditTool::EndHandleDrag()
@@ -93,38 +92,6 @@ bool UOdysseyPainterEditorGuideEditTool::OnKeyDown(const FKey& Key)
         return true;
     }
     return false;
-}
-
-void UOdysseyPainterEditorGuideEditTool::ApplyHandlePosition(const FVector2D& Position)
-{
-    if (UOdysseyPainterEditorLineGuide* Line = Cast<UOdysseyPainterEditorLineGuide>(Guide))
-    {
-        if (ActiveHandle == 0) Line->Start = Position;
-        else Line->End = Position;
-    }
-    else if (UOdysseyPainterEditorEllipseGuide* Ellipse = Cast<UOdysseyPainterEditorEllipseGuide>(Guide))
-    {
-        if (ActiveHandle == 0)
-        {
-            Ellipse->Center = Position;
-        }
-        else
-        {
-            // Each radius handle only changes its own radius, measured along its rotated axis (in pixels, so
-            // the rotation stays correct on non-square textures).
-            const double AngleRadians = FMath::DegreesToRadians(Ellipse->Angle);
-            const FVector2D AxisX(FMath::Cos(AngleRadians), FMath::Sin(AngleRadians));
-            const FVector2D AxisY(-AxisX.Y, AxisX.X);
-            const FVector2D Delta = Position - Ellipse->Center;
-            const int32 Width = GetEditor()->GetSource()->Width();
-            const int32 Height = GetEditor()->GetSource()->Height();
-            const FVector2D DeltaPixels(Delta.X * Width, Delta.Y * Height);
-            if (ActiveHandle == 1)
-                Ellipse->Radius.X = FMath::Clamp(FMath::Abs(FVector2D::DotProduct(DeltaPixels, AxisX)) / Width, 0.0, 1.0);
-            else
-                Ellipse->Radius.Y = FMath::Clamp(FMath::Abs(FVector2D::DotProduct(DeltaPixels, AxisY)) / Height, 0.0, 1.0);
-        }
-    }
 }
 
 #undef LOCTEXT_NAMESPACE

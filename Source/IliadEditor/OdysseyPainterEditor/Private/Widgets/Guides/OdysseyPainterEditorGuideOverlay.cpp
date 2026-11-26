@@ -4,12 +4,9 @@
 #include "OdysseyPainterEditorGuideOverlay.h"
 
 #include "OdysseyHUDElement.h"
-#include "OdysseyHUDEllipse.h"
-#include "OdysseyHUDLine.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorGuideVisualizer.h"
 #include "OdysseyPainterEditorGuideCollection.h"
-#include "Shapes/OdysseyPainterEditorEllipseGuide.h"
-#include "Shapes/OdysseyPainterEditorLineGuide.h"
 
 FOdysseyPainterEditorGuideOverlay::FOdysseyPainterEditorGuideOverlay(FOdysseyPainterEditor* InEditor)
     : Editor(InEditor)
@@ -31,7 +28,7 @@ void FOdysseyPainterEditorGuideOverlay::DrawHUD(const FOdysseyHUDElement::FDrawH
     }
 
     TArray<TWeakObjectPtr<UOdysseyPainterEditorGuide>> StaleGuideKeys;
-    for (const TPair<TWeakObjectPtr<UOdysseyPainterEditorGuide>, FGuideHUDShape>& ShapePair : GuideShapes)
+    for (const TPair<TWeakObjectPtr<UOdysseyPainterEditorGuide>, TSharedPtr<FOdysseyHUDElement>>& ShapePair : GuideShapes)
     {
         UOdysseyPainterEditorGuide* Guide = ShapePair.Key.Get();
         if (!Guide || !Collection->Guides.Contains(Guide))
@@ -40,40 +37,23 @@ void FOdysseyPainterEditorGuideOverlay::DrawHUD(const FOdysseyHUDElement::FDrawH
     for (const TWeakObjectPtr<UOdysseyPainterEditorGuide>& StaleGuideKey : StaleGuideKeys)
         GuideShapes.Remove(StaleGuideKey);
 
+    const FVector2D TextureSize(Params.mTextureWidth, Params.mTextureHeight);
     for (const TObjectPtr<UOdysseyPainterEditorGuide>& GuideObject : Collection->Guides)
     {
         UOdysseyPainterEditorGuide* Guide = GuideObject.Get();
         if (!Guide)
             continue;
 
-        FGuideHUDShape* Shape = GuideShapes.Find(TWeakObjectPtr<UOdysseyPainterEditorGuide>(Guide));
-        if (!Shape)
-            Shape = &GuideShapes.Add(TWeakObjectPtr<UOdysseyPainterEditorGuide>(Guide), FGuideHUDShape());
+        const FOdysseyPainterEditorGuideVisualizer* Visualizer = FOdysseyPainterEditorGuideVisualizer::Find(Guide->GetGuideType());
+        if (!Visualizer)
+            continue;
 
-        if (UOdysseyPainterEditorLineGuide* Line = Cast<UOdysseyPainterEditorLineGuide>(Guide))
-        {
-            if (!Shape->Line)
-                Shape->Line = MakeShared<FOdysseyHUDLine>(FVector2D::ZeroVector, FVector2D::ZeroVector);
-            Shape->Line->SetStartPoint(FVector2D(Line->Start.X * Params.mTextureWidth, Line->Start.Y * Params.mTextureHeight));
-            Shape->Line->SetEndPoint(FVector2D(Line->End.X * Params.mTextureWidth, Line->End.Y * Params.mTextureHeight));
-            Shape->Line->SetColor(Guide->Color);
-            Shape->Line->SetOpacity(Guide->Opacity);
-            Shape->Line->SetThickness(Guide->Thickness);
-            Shape->Line->SetIsVisible(TAttribute<bool>(Guide->bVisible));
-            AddElement(Shape->Line);
-        }
-        else if (UOdysseyPainterEditorEllipseGuide* Ellipse = Cast<UOdysseyPainterEditorEllipseGuide>(Guide))
-        {
-            if (!Shape->Ellipse)
-                Shape->Ellipse = MakeShared<FOdysseyHUDEllipse>(FVector2D::ZeroVector, FVector2D::ZeroVector);
-            Shape->Ellipse->SetCenter(FVector2D(Ellipse->Center.X * Params.mTextureWidth, Ellipse->Center.Y * Params.mTextureHeight));
-            Shape->Ellipse->SetRadius(FVector2D(Ellipse->Radius.X * Params.mTextureWidth, Ellipse->Radius.Y * Params.mTextureHeight));
-            Shape->Ellipse->SetRotation(Ellipse->Angle);
-            Shape->Ellipse->SetColor(Guide->Color);
-            Shape->Ellipse->SetOpacity(Guide->Opacity);
-            Shape->Ellipse->SetThickness(Guide->Thickness);
-            Shape->Ellipse->SetIsVisible(TAttribute<bool>(Guide->bVisible));
-            AddElement(Shape->Ellipse);
-        }
+        TSharedPtr<FOdysseyHUDElement>* Shape = GuideShapes.Find(TWeakObjectPtr<UOdysseyPainterEditorGuide>(Guide));
+        if (!Shape)
+            Shape = &GuideShapes.Add(TWeakObjectPtr<UOdysseyPainterEditorGuide>(Guide), Visualizer->CreateShape());
+
+        Visualizer->UpdateShape(**Shape, *Guide, TextureSize);
+        (*Shape)->SetIsVisible(TAttribute<bool>(Guide->bVisible));
+        AddElement(*Shape);
     }
 }
