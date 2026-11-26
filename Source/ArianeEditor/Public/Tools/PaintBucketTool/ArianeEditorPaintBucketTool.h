@@ -80,7 +80,7 @@ public:
                           , const FKey& iKey
                           , const FArianePointerState& State ) override;
 
-    virtual void DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
+    virtual void DrawToolHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void Init( FArianeEditor* InEditor ) override;
     virtual void Activate() override;
@@ -118,7 +118,7 @@ protected:
     void StartSolveTicker();
     void GatherGraphedObjects( TArray<FArianeObject*>& OutObjects );
     void OnCameraMoved( const FVector& Location, const FRotator& Rotation, ELevelViewportType ViewportType, int32 ViewIndex );
-    virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
+    virtual void RenderHUD(IToolsContextRenderAPI* RenderAPI) override;
     void UnbindDelegates();
     void BindDelegates();
     void OnPreUpdate( bool bInteractive );
@@ -163,7 +163,7 @@ protected:
     uint32 Generation;
     uint32 SolvedGeneration;
     bool bGeometryNeedsImport;
-    // a new graph arrived: pick at the last cursor position on next DrawHUD
+    // a new graph arrived: pick at the last cursor position on next DrawToolHUD
     bool bNeedsPick;
     bool bIsActive;
     FVector2D LastCursorViewportPosition;

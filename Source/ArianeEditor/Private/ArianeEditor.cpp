@@ -3,6 +3,7 @@
 
 // ArianeEditor headers
 #include "ArianeEditor.h"
+#include "ArianeEditorModule.h"
 #include "ArianeEditorStyle.h"
 #include "ArianeEditorTool.h"
 #include "ArianeEditorSettings.h"
@@ -80,6 +81,13 @@ const FArianeEditorHUD::FDrawingFlags&
 FArianeEditor::GetHUDDrawingFlags()
 {
     return HUDDrawingFlags;
+}
+
+bool
+FArianeEditor::IsSequencerPlaying() const
+{
+    // The module tracks the Sequencer: it may have been opened before this editor existed
+    return FModuleManager::GetModuleChecked<FArianeEditorModule>( "ArianeEditor" ).IsSequencerPlaying();
 }
 
 void

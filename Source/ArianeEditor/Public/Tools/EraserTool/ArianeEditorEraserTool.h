@@ -190,7 +190,7 @@ public:
                           , const FKey& iKey
                           , const FArianePointerState& State ) override;
 
-    virtual void DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
+    virtual void DrawToolHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void Init( FArianeEditor* InEditor ) override;
 

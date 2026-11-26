@@ -181,8 +181,10 @@ public:
     // Implements IHoverBehaviorTarget::OnEndHover
     virtual void OnEndHover() override;
 
-    // Implements UInteractiveTool::Render for rendering in 3D space
+    // Implements UInteractiveTool::Render for rendering in 3D space. The tools implement RenderHUD
     virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
+    // Draws the tool HUD (vertices, handles...). Not called while the Sequencer plays or scrubs
+    virtual void RenderHUD(IToolsContextRenderAPI* RenderAPI);
 
     //Mouse events
     virtual bool OnMouseDown( FEditorViewportClient* iViewportClient
@@ -214,8 +216,10 @@ public:
     virtual bool OnMouseLeave( FEditorViewportClient* ViewportClient,
                                FViewport* Viewport );
 
-    // Implements UInteractiveTool::DrawHUD for overlay drawing in 2D space
+    // Implements UInteractiveTool::DrawHUD for overlay drawing in 2D space. The tools implement DrawToolHUD
     virtual void DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
+    // Draws the tool 2D overlay. Not called while the Sequencer plays or scrubs
+    virtual void DrawToolHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI );
 
     /** Get the tool's tooltip */
     virtual FText GetTooltip() const;

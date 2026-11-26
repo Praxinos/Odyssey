@@ -590,7 +590,7 @@ UArianeEditorPathPushTool::OnMouseUp( FEditorViewportClient* ViewportClient
 }
 
 void
-UArianeEditorPathPushTool::Render(IToolsContextRenderAPI* RenderAPI)
+UArianeEditorPathPushTool::RenderHUD(IToolsContextRenderAPI* RenderAPI)
 {
     if  ( Editor->GetShowGrid() )
     {
@@ -599,7 +599,7 @@ UArianeEditorPathPushTool::Render(IToolsContextRenderAPI* RenderAPI)
 }
 
 void
-UArianeEditorPathPushTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI )
+UArianeEditorPathPushTool::DrawToolHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI )
 {
     //UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();

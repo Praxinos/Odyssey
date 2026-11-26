@@ -191,4 +191,7 @@ protected:
     // Temp
     TArray<FArianeObject*> SelectedObjects;
     bool bUpdateUsedMaterials;
+
+    // Set by PostInitProperties when built from a template: the Reset waits for the layer to be connected (OnRegisterLayer)
+    bool bResetOnRegister;
 };

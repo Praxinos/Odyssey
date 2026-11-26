@@ -604,10 +604,30 @@ UArianeEditorTool::RenderDrawingGrid( IToolsContextRenderAPI* RenderAPI )
 void
 UArianeEditorTool::Render(IToolsContextRenderAPI* RenderAPI)
 {
+    // The HUD would lag behind the animated drawing
+    if( Editor->IsSequencerPlaying() == false )
+    {
+        RenderHUD( RenderAPI );
+    }
+}
+
+void
+UArianeEditorTool::RenderHUD(IToolsContextRenderAPI* RenderAPI)
+{
 }
 
 void
 UArianeEditorTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI )
+{
+    // The HUD would lag behind the animated drawing
+    if( Editor->IsSequencerPlaying() == false )
+    {
+        DrawToolHUD( Canvas, RenderAPI );
+    }
+}
+
+void
+UArianeEditorTool::DrawToolHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI )
 {
 }
 

@@ -1324,7 +1324,7 @@ UArianeEditorPathEditTool::EditonModeToHUDDrawingFlags()
 }
 
 void
-UArianeEditorPathEditTool::Render(IToolsContextRenderAPI* RenderAPI)
+UArianeEditorPathEditTool::RenderHUD(IToolsContextRenderAPI* RenderAPI)
 {
     if  ( Editor->GetShowGrid() )
     {
@@ -1333,7 +1333,7 @@ UArianeEditorPathEditTool::Render(IToolsContextRenderAPI* RenderAPI)
 }
 
 void
-UArianeEditorPathEditTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI )
+UArianeEditorPathEditTool::DrawToolHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI )
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();

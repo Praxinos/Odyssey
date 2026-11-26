@@ -106,8 +106,8 @@ public:
 
     void Activate();
     void Inactivate();
-    virtual void DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
-    virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
+    virtual void DrawToolHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
+    virtual void RenderHUD(IToolsContextRenderAPI* RenderAPI) override;
     virtual bool OnKeyUpGlobal( const FKeyEvent& InKeyEvent ) override;
     virtual bool OnKeyDownGlobal( const FKeyEvent& InKeyEvent ) override;
 

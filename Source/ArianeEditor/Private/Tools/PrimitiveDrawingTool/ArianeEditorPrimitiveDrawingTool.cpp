@@ -469,7 +469,7 @@ UArianeEditorPrimitiveDrawingTool::OnMouseUp( FEditorViewportClient* ViewportCli
 
 void
 //UArianeEditorTool::OnTick(float DeltaTime)
-UArianeEditorPrimitiveDrawingTool::Render(IToolsContextRenderAPI* RenderAPI)
+UArianeEditorPrimitiveDrawingTool::RenderHUD(IToolsContextRenderAPI* RenderAPI)
 {
     if  ( 1 )
     {

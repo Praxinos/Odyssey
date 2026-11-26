@@ -180,7 +180,7 @@ UArianeEditorPathDrawingTool::GetCursor( EMouseCursor::Type& OutCursor )
 
 void
 //UArianeEditorTool::OnTick(float DeltaTime)
-UArianeEditorPathDrawingTool::Render(IToolsContextRenderAPI* RenderAPI)
+UArianeEditorPathDrawingTool::RenderHUD(IToolsContextRenderAPI* RenderAPI)
 {
     if  ( Editor->GetShowGrid() )
     {
@@ -409,7 +409,7 @@ UArianeEditorPathDrawingTool::OnMouseUp( FEditorViewportClient* ViewportClient
 }
 
 void
-UArianeEditorPathDrawingTool::DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI )
+UArianeEditorPathDrawingTool::DrawToolHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI )
 {
     UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();

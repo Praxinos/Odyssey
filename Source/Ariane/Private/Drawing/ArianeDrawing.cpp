@@ -34,12 +34,14 @@ UArianeDrawing::BeginDestroy()
 UArianeDrawing::UArianeDrawing(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
     , bUpdateUsedMaterials ( true )
+    , bResetOnRegister ( false )
 {
     ResetHierarchy();
 }
 
 UArianeDrawing::UArianeDrawing()
     : bUpdateUsedMaterials ( true )
+    , bResetOnRegister ( false )
 {
     ResetHierarchy();
 }
@@ -103,7 +105,16 @@ UArianeDrawing::Reset()
 void
 UArianeDrawing::OnRegisterLayer()
 {
-    RootGroupID.GetObject( this )->UpdateTransform();
+    if( bResetOnRegister )
+    {
+        // VectorLayer is now the right one: the invalidations reach its folder, so the next Update rebuilds the bounds
+        bResetOnRegister = false;
+        Reset();
+    }
+    else
+    {
+        RootGroupID.GetObject( this )->UpdateTransform();
+    }
 }
 
 void
@@ -140,11 +151,12 @@ UArianeDrawing::PostInitProperties()
 {
     Super::PostInitProperties();
 
-    // Built from a template (spawnable, blueprint): InstancedObjects was copied by reflection, so each object
-    // still points to the template drawing and has no children yet. Reset rebuilds both.
-    if( GetArchetype()->HasAnyFlags( RF_ClassDefaultObject ) == false )
+    // Copied from a template (spawnable, blueprint): the objects still point to the template drawing and have no
+    // children yet. Reset rebuilds both, but only once the layer is connected (OnRegisterLayer).
+    // Note: GetArchetype() can't tell, the template given to SpawnActor is not the archetype.
+    if( RootGroupID.GetObject( this )->GetDrawing() != this )
     {
-        Reset();
+        bResetOnRegister = true;
     }
 }
 

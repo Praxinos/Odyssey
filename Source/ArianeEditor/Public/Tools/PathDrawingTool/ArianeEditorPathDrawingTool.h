@@ -74,9 +74,9 @@ public:
                           , const FArianePointerState& State ) override;
     virtual bool SupportsColorType( EOdysseyPainterEditorColorType ColorType ) override;
 
-    virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
+    virtual void RenderHUD(IToolsContextRenderAPI* RenderAPI) override;
     virtual void Init( FArianeEditor* InEditor ) override;
-    virtual void DrawHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
+    virtual void DrawToolHUD ( FCanvas* Canvas, IToolsContextRenderAPI* RenderAPI ) override;
     virtual bool GetCursor( EMouseCursor::Type& OutCursor ) override;
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
 

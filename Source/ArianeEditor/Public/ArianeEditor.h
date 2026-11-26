@@ -101,6 +101,11 @@ public:
     const FName& GetId() const;
 
     /**
+     * @brief True while the open Sequencer plays or scrubs: the drawing changes every frame
+     */
+    bool IsSequencerPlaying() const;
+
+    /**
      * @brief Get the current paint color
      * @return the current paint color
      */

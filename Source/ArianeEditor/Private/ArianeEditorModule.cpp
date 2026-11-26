@@ -43,6 +43,7 @@
 #include "Selection.h"
 #include "MeshUtilities.h" // for conversion to static mesh
 #include "ISequencerModule.h"
+#include "ISequencer.h"
 #include "SequencerChannelInterface.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "AssetRegistry/AssetRegistryModule.h"
@@ -162,6 +163,9 @@ FArianeEditorModule::StartupModule()
 
     SequencerModule.RegisterChannelInterface<FArianeDrawingMovieSceneChannel>();
 
+    // The tools hide their HUD while the Sequencer plays or scrubs
+    SequencerCreatedHandle = SequencerModule.RegisterOnSequencerCreated( FOnSequencerCreated::FDelegate::CreateRaw( this, &FArianeEditorModule::OnSequencerCreated ) );
+
 /* Gary
     RegisterBrushOverrides(); //First thing to do, as it modifies the Brush CDO
     RegisterCommands();
@@ -173,6 +177,28 @@ FArianeEditorModule::StartupModule()
     FOdysseyVectorBrushCustomization::Register();
     FOdysseyVectorObjectViewPaletteCustomization::Register();
 */
+}
+
+void
+FArianeEditorModule::OnSequencerCreated( TSharedRef<ISequencer> InSequencer )
+{
+    Sequencer = InSequencer;
+}
+
+bool
+FArianeEditorModule::IsSequencerPlaying() const
+{
+    TSharedPtr<ISequencer> SequencerPtr = Sequencer.Pin();
+
+    // No Sequencer open, or closed since
+    if( SequencerPtr.IsValid() == false )
+    {
+        return false;
+    }
+
+    EMovieScenePlayerStatus::Type PlaybackStatus = SequencerPtr->GetPlaybackStatus();
+
+    return ( ( PlaybackStatus == EMovieScenePlayerStatus::Scrubbing ) || ( PlaybackStatus == EMovieScenePlayerStatus::Playing ) );
 }
 
 void
@@ -196,6 +222,7 @@ FArianeEditorModule::ShutdownModule()
     // for Ariane Image tracks in the sequencer
     ISequencerModule& SequencerModule = FModuleManager::GetModuleChecked<ISequencerModule>("Sequencer");
     SequencerModule.UnRegisterTrackEditor( ImageTrackHandle );
+    SequencerModule.UnregisterOnSequencerCreated( SequencerCreatedHandle );
 
 /* Gary
     UnregisterBrushOverrides();

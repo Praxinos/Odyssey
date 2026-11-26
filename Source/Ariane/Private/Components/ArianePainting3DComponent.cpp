@@ -64,6 +64,11 @@ UArianePainting3DComponent::UArianePainting3DComponent(const FObjectInitializer&
 
     StaticMeshComponent->SetupAttachment(this);
 
+#if WITH_EDITORONLY_DATA
+    // Hidden from Sequencer's "add track" menu. Also makes it editor-only: it only serves ConvertToStaticMesh
+    StaticMeshComponent->SetIsVisualizationComponent( true );
+#endif
+
 /*
     SelectionOverrideDelegate.BindLambda([](const UPrimitiveComponent*) {
         return false; // don't draw the outline

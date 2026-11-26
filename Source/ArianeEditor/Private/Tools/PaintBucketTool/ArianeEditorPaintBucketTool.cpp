@@ -298,7 +298,7 @@ UArianeEditorPaintBucketTool::OnSolveFinished()
     if( SolvedGeneration == Generation )
     {
         bGraphNeedsUpdate = false;
-        // the cursor may not move: pick at its last position on next DrawHUD
+        // the cursor may not move: pick at its last position on next DrawToolHUD
         bNeedsPick = true;
 
         GetActiveViewportClient()->Invalidate();
@@ -578,7 +578,7 @@ UArianeEditorPaintBucketTool::ExtendContextMenu( FMenuBuilder& menu )
 }
 
 void
-UArianeEditorPaintBucketTool::Render(IToolsContextRenderAPI* RenderAPI)
+UArianeEditorPaintBucketTool::RenderHUD(IToolsContextRenderAPI* RenderAPI)
 {
     if  ( Editor->GetShowGrid() )
     {
@@ -728,7 +728,7 @@ UArianeEditorPaintBucketTool::DrawProgressBarHUD( FCanvas* HUDCanvas
 }
 
 void
-UArianeEditorPaintBucketTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderAPI* RenderAPI )
+UArianeEditorPaintBucketTool::DrawToolHUD ( FCanvas* HUDCanvas, IToolsContextRenderAPI* RenderAPI )
 {
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
     FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport

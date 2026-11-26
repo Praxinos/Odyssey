@@ -69,7 +69,7 @@ public:
     virtual bool OnKeyDownGlobal( const FKeyEvent& InKeyEvent ) override;
     virtual bool OnKeyUpGlobal( const FKeyEvent& InKeyEvent ) override;
     virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
-    virtual void Render(IToolsContextRenderAPI* RenderAPI) override;
+    virtual void RenderHUD(IToolsContextRenderAPI* RenderAPI) override;
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
 
 protected:

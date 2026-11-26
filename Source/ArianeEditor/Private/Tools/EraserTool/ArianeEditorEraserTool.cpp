@@ -1146,7 +1146,7 @@ UArianeEditorEraserTool::ExtendContextMenu( FMenuBuilder& menu )
 }
 
 void
-UArianeEditorEraserTool::DrawHUD ( FCanvas* HUDCanvas, IToolsContextRenderAPI* RenderAPI )
+UArianeEditorEraserTool::DrawToolHUD ( FCanvas* HUDCanvas, IToolsContextRenderAPI* RenderAPI )
 {
     FEditorViewportClient* ViewportClient = GetActiveViewportClient();
     FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( ViewportClient->Viewport

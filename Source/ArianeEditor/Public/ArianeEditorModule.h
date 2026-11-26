@@ -7,6 +7,7 @@
 
 class AArianePainting3DActor;
 class FArianeEditorViewportEdMode;
+class ISequencer;
 
 /* Gary
 class FOdysseyPainterEditor;
@@ -22,6 +23,9 @@ public:
 
 public:
     virtual void OpenStandaloneEditorForAsset( UObject* iAsset );
+
+    // True while the open Sequencer plays or scrubs: the drawing changes every frame
+    bool IsSequencerPlaying() const;
 /* Gary
     void AddOpenedEditor(FOdysseyPainterEditor* iEdtor);
     void RemoveOpenedEditor(FOdysseyPainterEditor* iEdtor);
@@ -75,9 +79,15 @@ private:
 
     FArianeEditorViewportEdMode* GetArianeEditorViewportEdMode();
 
+    void OnSequencerCreated( TSharedRef<ISequencer> InSequencer );
+
 private:
     FDelegateHandle mExtendLevelEditorLayout;
     FDelegateHandle ImageTrackHandle;
+    FDelegateHandle SequencerCreatedHandle;
+
+    // Last opened Sequencer: the level sequence editor opens one at a time
+    TWeakPtr<ISequencer> Sequencer;
 /* Gary
     TArray<FOdysseyPainterEditor*> mOpenedEditors;
 */

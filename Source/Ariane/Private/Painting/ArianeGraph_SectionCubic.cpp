@@ -104,8 +104,8 @@ FArianeGraph::FSectionCubic::FSectionCubic( FEdgeCubic* InCubicEdge
         Vector[1] = ( Bezier[2] - Bezier[3] ).GetSafeNormal(); //GetVectorFromNode( 1, false, true );
 
         // check bezier validity. It can happen at very very small values
-        // of T that the bezier has the same values at all controllers. We get rid of those
-        // sections in FOdysseyVectorGroupPaint::SimplifyGraph()
+        // of T that the bezier has the same values at all controllers. Those sections
+        // get a length of 0 and are stitched by FSection::Stitch()
         if( /*( mVector[0] == zeroVector ) || ( mVector[1] == zeroVector )*/
             Length < 0.0000000001f
             /*( mBezier[0] == mBezier[1] )
