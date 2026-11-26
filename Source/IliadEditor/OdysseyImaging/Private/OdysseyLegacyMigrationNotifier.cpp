@@ -42,9 +42,14 @@ double GQuietSince = -1.0;
 /** The subscription to package saves; registered while some packages are pending. */
 FDelegateHandle GPackageSavedHandle;
 
-/** Drops the report of a saved package: it no longer needs to be saved. */
+/** Drops the report of a package saved to its file: it no longer needs to be saved. */
 void OnPackageSaved(const FString& Filename, UPackage* Package, FObjectPostSaveContext SaveContext)
 {
+    // Cooks, procedural saves and autosaves do not write the package file the user opens.
+    if (SaveContext.IsCooking() || SaveContext.IsProceduralSave() || SaveContext.IsFromAutoSave() || !SaveContext.IsUpdatingLoadedPath())
+    {
+        return;
+    }
     GPendingPackages.Remove(Package);
 }
 
