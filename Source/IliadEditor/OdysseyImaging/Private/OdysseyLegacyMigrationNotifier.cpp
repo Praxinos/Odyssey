@@ -25,6 +25,9 @@ namespace UE::OdysseyImaging::Private
  */
 constexpr double QuietDelay = 1.0;
 
+/** How long the notification fades out once the user clicked one of its buttons, in seconds. */
+constexpr float CloseFadeOutDuration = 0.1f;
+
 /** The reported packages not notified yet. */
 TArray<TWeakObjectPtr<UPackage>> GPendingPackages;
 
@@ -53,12 +56,14 @@ TArray<UPackage*> FindLivePackages(TConstArrayView<TWeakObjectPtr<UPackage>> Wea
     return Packages;
 }
 
-/** Closes the notification. */
+/** Closes the notification at once, so that the click visibly takes effect. */
 void CloseNotification(TWeakPtr<SNotificationItem> WeakItem)
 {
     if (const TSharedPtr<SNotificationItem> Item = WeakItem.Pin())
     {
-        Item->ExpireAndFadeout();
+        // ExpireAndFadeout() would wait 1 s, then fade out for 2 s.
+        Item->SetFadeOutDuration(CloseFadeOutDuration);
+        Item->Fadeout();
     }
     else
     {
