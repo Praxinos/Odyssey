@@ -28,10 +28,18 @@
 namespace UE::OdysseyTiledImageMigration::Private
 {
 /**
- * The size of the package files loaded since the last unload past which the loaded packages are unloaded, in bytes.
- * Each unload collects garbage twice: small packages are unloaded together, a large animation alone.
+ * How much the physical memory of the editor may grow since the last unload before the loaded packages are unloaded, in bytes.
+ * Each unload collects garbage twice: small packages are unloaded together, a large animation alone. The size of a package
+ * file does not tell: a legacy animation of 60 MB on disk takes gigabytes once loaded and migrated.
  */
-constexpr int64 UnloadThreshold = 64 * 1024 * 1024;
+constexpr uint64 UnloadThreshold = 1024ull * 1024 * 1024;
+
+/** Returns the physical memory the editor uses, in bytes. */
+uint64 FindUsedPhysicalMemory()
+{
+    const FPlatformMemoryStats Stats = FPlatformMemory::GetStats();
+    return Stats.UsedPhysical;
+}
 
 /** How saving a package went. */
 enum class ESaveResult : uint8
@@ -460,9 +468,9 @@ FOdysseyLegacyConversionResult ConvertLegacyPackages(TConstArrayView<FOdysseyLeg
     FScopedSlowTask SlowTask(Packages.Num(), LOCTEXT("conversion.progress", "Converting the legacy Odyssey assets..."));
     SlowTask.MakeDialog(/*bShowCancelButton*/ true);
     const FText ProgressFormat = LOCTEXT("conversion.progress-package", "Converting {0}");
-    // The packages the conversion loads, with their dependencies, to unload once UnloadThreshold is reached.
+    // The packages the conversion loads, with their dependencies, to unload once the editor has grown by UnloadThreshold.
     TSet<FName> PackagesToUnload;
-    int64 LoadedSize = 0;
+    uint64 PhysicalAtLastUnload = FindUsedPhysicalMemory();
     for (int32 Index = 0; Index < Packages.Num(); ++Index)
     {
         if (SlowTask.ShouldCancel())
@@ -481,22 +489,18 @@ FOdysseyLegacyConversionResult ConvertLegacyPackages(TConstArrayView<FOdysseyLeg
         const TSet<FName> PackagesAfter = FindLoadedContentPackages();
         const TSet<FName> NewPackages = PackagesAfter.Difference(PackagesBefore);
         PackagesToUnload.Append(NewPackages);
-        if (!NewPackages.IsEmpty())
-        {
-            LoadedSize += Package.DiskSize;
-        }
-
         if (Outcome == EOdysseyLegacyConversionOutcome::NotProcessed)
         {
             Result.bCanceled = true;
             break;
         }
 
-        if (LoadedSize >= UnloadThreshold)
+        const uint64 Physical = FindUsedPhysicalMemory();
+        if (Physical >= PhysicalAtLastUnload + UnloadThreshold)
         {
             UnloadPackages(PackagesToUnload);
             PackagesToUnload.Reset();
-            LoadedSize = 0;
+            PhysicalAtLastUnload = FindUsedPhysicalMemory();
         }
     }
 
