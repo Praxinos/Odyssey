@@ -13,6 +13,7 @@
 #include "OdysseyBlendShader.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPixelFormat.h"
+#include "OdysseyLegacyMigrationNotifier.h"
 #include "OdysseyLegacyRasterBlock.h"
 #include "OdysseyRenderContext.h"
 #include "OdysseyStyle.h"
@@ -41,8 +42,13 @@ UOdysseyTextureLayerImageRaster::PostLoad()
 {
     Super::PostLoad();
     FOdysseyRasterContent& Content = GetRasterContent();
-    Content.MigrateLegacy(Texture, LegacyPixels);
+    const bool bMigrated = Content.MigrateLegacy(Texture, LegacyPixels);
     Content.EnsureImage();
+    if (bMigrated)
+    {
+        UPackage* Package = GetPackage();
+        FOdysseyLegacyMigrationNotifier::Add(Package);
+    }
 }
 
 void

@@ -46,6 +46,8 @@ public class OdysseyImaging : ModuleRules
                 "RenderCore",
                 "Renderer",
                 "RHI",
+                "Slate",
+                "SlateCore",
                 "TargetPlatform",
                 "TextureCompressor",
                 "TextureBuildUtilities",

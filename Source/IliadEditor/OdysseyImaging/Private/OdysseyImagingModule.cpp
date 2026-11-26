@@ -4,6 +4,7 @@
 #include "OdysseyImagingModule.h"
 
 #include "Modules/ModuleManager.h"
+#include "OdysseyLegacyMigrationNotifier.h"
 #include "OdysseyTileManager.h"
 #include "OdysseyTileManagerSettings.h"
 #include "ISettingsModule.h"
@@ -33,6 +34,7 @@ void FOdysseyImagingModule::StartupModule()
 
 void FOdysseyImagingModule::ShutdownModule()
 {
+    FOdysseyLegacyMigrationNotifier::Shutdown();
     UnregisterSettings();
     FOdysseyTileManager::Get().Finalize();
 }

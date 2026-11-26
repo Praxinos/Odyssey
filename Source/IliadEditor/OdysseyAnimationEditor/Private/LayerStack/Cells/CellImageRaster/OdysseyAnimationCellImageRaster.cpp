@@ -17,6 +17,7 @@
 #include "OdysseyMediaRaster.h"
 #include "OdysseyAnimationCellImageRasterImport.h"
 #include "OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyLegacyMigrationNotifier.h"
 #include "OdysseyLegacyRasterBlock.h"
 #include "UObject/ObjectSaveContext.h"
 #include "ScopedTransaction.h"
@@ -52,12 +53,13 @@ UOdysseyAnimationCellImageRaster::GetTiledImage() const
     return TiledImage;
 }
 
-void
+bool
 UOdysseyAnimationCellImageRaster::UpdateContent()
 {
     FOdysseyRasterContent& Content = GetRasterContent();
-    Content.MigrateLegacy(Texture, mLegacyPixels);
+    const bool bMigrated = Content.MigrateLegacy(Texture, mLegacyPixels);
     Content.EnsureImage();
+    return bMigrated;
 }
 
 FOdysseyRasterContent&
@@ -103,7 +105,11 @@ void
 UOdysseyAnimationCellImageRaster::PostLoad()
 {
     Super::PostLoad();
-    UpdateContent();
+    if (UpdateContent())
+    {
+        UPackage* Package = GetPackage();
+        FOdysseyLegacyMigrationNotifier::Add(Package);
+    }
 }
 
 void

@@ -64,8 +64,9 @@ private:
     /**
      * Moves the pixels of a legacy asset into the tiled image, and converts it to the format of the animation.
      * Called after loading, including by OldSerialize(), after duplication and before saving.
+     * @return True when legacy pixels were moved into the tiled image.
      */
-    void UpdateContent();
+    bool UpdateContent();
     ::ULIS::eFormat GetRasterFormat() const;
 
 private:
