@@ -20,6 +20,7 @@
 #if WITH_EDITOR
 #include "AssetToolsModule.h"
 #include "IAssetTools.h"
+#include "TextureCompiler.h"
 #endif
 
 #include "OdysseyAnimationRenderingOverride.h"
@@ -547,7 +548,10 @@ UOdysseyAnimation::PreSave(FObjectPreSaveContext SaveContext)
 
         UTexture2D* texture = Cast<UTexture2D>(renderTarget->ConstructTexture(this, Name, RF_Public, CTF_Default));
         texture->PreSave(SaveContext);
-        texture->BlockOnAnyAsyncBuild();
+        // Through the compiling manager, which also replaces the stand-in resource of the build: BlockOnAnyAsyncBuild()
+        // only finishes the platform data, and leaves the texture reporting a compilation nothing can finish.
+        UTexture* const BuiltTexture = texture;
+        FTextureCompilingManager::Get().FinishCompilation({ BuiltTexture });
 
         FOdysseyAnimationFrame frame;
         frame.Texture = texture;
