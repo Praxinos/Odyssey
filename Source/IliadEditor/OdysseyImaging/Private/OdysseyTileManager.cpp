@@ -866,8 +866,7 @@ FOdysseyTileManager::LoadTileFromReadBack(TSharedPtr<FTile> InTile)
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::LoadTileFromReadBack);
 
-    PendingTilesToReadBack.RemoveSwap(InTile);
-
+    // Started tiles leave PendingTilesToReadBack in bulk, at the next RemoveStartedReadBacks().
     if (InTile->GPUReadBackState != FTile::EGPUReadBackState::Idle)
         return;
 
@@ -1281,11 +1280,11 @@ FOdysseyTileManager::WaitUntilAllTilesAreCached(bool InEvictTiles)
 
     check(IsInGameThread());
     // Tick cannot advance the pipeline while this thread waits. Queue every remaining readback first.
-    const TArray<TSharedPtr<FTile>> PendingTiles = PendingTilesToReadBack;
-    for (const TSharedPtr<FTile>& Tile : PendingTiles)
+    for (const TSharedPtr<FTile>& Tile : PendingTilesToReadBack)
     {
         LoadTileFromReadBack(Tile);
     }
+    RemoveStartedReadBacks();
 
     for (TSharedPtr<FTile>& Tile : Tiles)
     {
@@ -1309,16 +1308,25 @@ FOdysseyTileManager::Tick(float DeltaTime)
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::Tick);
 
-    //PendingTilesToReadBack is modified by LoadTileFromReadBack()
-    //So we copy into a local variable to avoid iterating over a changing Array
-    TArray<TSharedPtr<FTile>> LocalPendingTilesToReadBack = PendingTilesToReadBack;
-    for (TSharedPtr<FTile> Tile : LocalPendingTilesToReadBack)
+    for (const TSharedPtr<FTile>& Tile : PendingTilesToReadBack)
     {
         TryLoadTileFromReadBack(Tile);
     }
+    RemoveStartedReadBacks();
 
     EvictTiles();
     TraceStats();
+}
+
+void
+FOdysseyTileManager::RemoveStartedReadBacks()
+{
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyTileManager::RemoveStartedReadBacks);
+    // Only the game thread moves a tile out of Idle, in LoadTileFromReadBack(), so the state read here is stable.
+    PendingTilesToReadBack.RemoveAll([](const TSharedPtr<FTile>& Tile) -> bool
+    {
+        return Tile->GPUReadBackState != FTile::EGPUReadBackState::Idle;
+    });
 }
 
 FOdysseyTileManager::FTileCounts

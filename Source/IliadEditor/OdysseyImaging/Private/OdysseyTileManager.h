@@ -376,6 +376,8 @@ private:
 
     void TryLoadTileFromReadBack(TSharedPtr<FTile> InTile);
     void LoadTileFromReadBack(TSharedPtr<FTile> InTile);
+    /** Removes from PendingTilesToReadBack the tiles whose readback has started. Game thread only. */
+    void RemoveStartedReadBacks();
 
     /**
      * Ends the readback of a tile: releases its creation texture and readbacks and gives its data, null for an empty tile.
