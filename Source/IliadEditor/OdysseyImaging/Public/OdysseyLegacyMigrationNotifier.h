@@ -11,23 +11,17 @@ class UPackage;
 /**
  * Tells the user which packages were converted from a legacy Odyssey storage while loading, so that they save them.
  *
- * Once no package is loading anymore, each reported package is marked dirty and notified.
+ * Shortly after no package is loading anymore, each reported package is marked dirty, and one notification lists the
+ * packages reported meanwhile. It stays in the active window until the user saves the packages from it or dismisses it.
  * Nothing is reported in commandlets, unattended sessions or automation tests.
  * Game thread only.
  */
 class ODYSSEYIMAGING_API FOdysseyLegacyMigrationNotifier
 {
 public:
-    /** Reports a package whose content was converted while loading. A package reported several times is notified once. */
+    /** Reports a package whose content was converted while loading. A package reported several times is listed once. */
     static void Add(TNotNull<UPackage*> Package);
 
     /** Drops the reports not notified yet. */
     static void Shutdown();
-
-private:
-    /** Notifies the pending packages once no package is loading. Returns true to keep ticking until then. */
-    static bool Tick(float DeltaTime);
-
-    /** Marks Package dirty and shows the user one notification asking them to save it. */
-    static void Notify(TNotNull<UPackage*> Package);
 };
