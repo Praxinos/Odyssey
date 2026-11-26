@@ -43,22 +43,6 @@ public:
     struct FCycle;
     struct FPath;
 
-    struct FExplorationPair
-    {
-        FSection* ReturnSection;
-        FNode* DepartNode;
-        uint32 DepartNodeIndex;
-        FSection* DepartSection;
-        double SectionLength;
-
-        virtual ~FExplorationPair();
-        FExplorationPair();
-        FExplorationPair( FSection* ReturnSection
-                        , FNode* DepartVertex
-                        , uint32 DepartVertexIndex
-                        , FSection* DepartSection );
-    };
-
     struct ARIANE_API FSectionLinkInfo
     {
         FSection* Section;
@@ -102,15 +86,15 @@ public:
         virtual ~FNode();
         FNode( const FVector& InOriginalWorlPosition );
 
-        void AddSection( FSection* Section, uint32 SectionNodeIndex );
-        void RemoveSection( FSection* Section, uint32 SectionNodeIndex );
+        // virtual: FNodeIntersection keeps its Weight up to date when sections are linked/unlinked
+        virtual void AddSection( FSection* Section, uint32 SectionNodeIndex );
+        virtual void RemoveSection( FSection* Section, uint32 SectionNodeIndex );
         FSectionLinkInfo* GetSectionLinkInfo( FSection* Section, uint32 SectionNodeIndex );
         FSectionLinkInfo* GetCycleNextSection( FSectionLinkInfo* LastSectionLinkInfo, double Orientation );
         FSectionLinkInfo* GetOtherSectionLinkInfo( FSectionLinkInfo* LastSectionLinkInfo );
         FSection* GetSection( FEdge* Edge );
         FEdge *GetOtherEdge( FEdge* Edge );
         int32 GetIndex( FEdge* Edge );
-        void BuildExplorationPairs( TArray<FExplorationPair>& OutExplorationPairsArray );
         void UnlinkPendantSections();
 
         TArray<FSectionLinkInfo> SectionLinkInfos;
@@ -165,10 +149,14 @@ public:
                          , FEdge* InEdge1
                          , double InEdge1T );
 
+        virtual void AddSection( FSection* Section, uint32 SectionNodeIndex ) override;
+        virtual void RemoveSection( FSection* Section, uint32 SectionNodeIndex ) override;
         bool SelfIntersects();
 
         FIntersection Intersections[2];
         FEdge* Edges[2];
+        // sum of the linked section lengths. Sort key for a session independent exploration order
+        double Weight;
     };
 
     struct ARIANE_API FFraction
@@ -602,9 +590,8 @@ protected:
     static double GetCycleNormalVector( TArray<uint32>& NodeIndexArray, TArray<FSection*>& SectionArray );
 
     void SimplifyGraph();
-    void Explore( FExplorationPair* ExplorationPair );
-    uint32 FindPath( FSection* ReturnSection
-                   , uint32 SectionNodeIndex
+    void Explore( FNodeIntersection* IntersectionNode );
+    uint32 FindPath( uint32 SectionNodeIndex
                    , FSection* Section
                    , TArray<uint32>& OutNodeIndexArray
                    , TArray<FSection*>& OutSectionArray
@@ -638,6 +625,8 @@ protected:
     uint32 MakeExtendedSegments( FArianeVertex* Vertex
                                , FNode& VertexNode
                                , const FTransform& PathTransform );
+    void SortIntersectionNodes( TArray<FNodeIntersection*>& OutSortedIntersectionNodes );
+
 
 protected:
     static const uint32 NOCYCLE  = 0;

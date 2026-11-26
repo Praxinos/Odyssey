@@ -148,6 +148,18 @@
 //     FOdysseyVectorVertexIntersection::BuildExplorationPairs()
 //     FOdysseyVectorVertex::BuildExplorationPairs()
 //
+// Note: in theory, exploration pairs are not needed. At each vertex, the next section
+// is always picked by the same rule, so a section explored in a given direction always
+// leads to the same next section. Following them always brings the exploration back to
+// the depart section, in the same direction, and the face is closed exactly then.
+// Testing "next section == depart section" (same section, same direction) instead of
+// "next vertex == depart vertex" therefore detects the cycle without any return section.
+// The exploration would then start from each section linked to each intersection vertex
+// (and gap vertex). Exploration pairs also make the cycle detection order deterministic,
+// which the propagation needs; without them, the intersection vertices must be sorted
+// instead (e.g. by the sum of their section lengths).
+// See FArianeGraph::FindPath() and FArianeGraph::SolveArrangement() in Ariane.
+//
 // A cycle is detected only if the last section matches the allowed return section
 // OR, if the allowed return section was removed from the graph, then any return
 // section is allowed. Indeed, there are orphaned section (that leads to nowhere),
@@ -216,6 +228,21 @@
 // See functions:
 //     FOdysseyVectorGroupPaint::OrderCycles()
 //     FOdysseyVectorGroupPaint::MergeCycles()
+//
+// One last thing: sections of length 0. They appear when an intersection lies exactly on a
+// vertex, when two intersections share the same T, or with degenerate beziers at very small T.
+// They have no direction, so the next section cannot be picked at their vertices and the
+// exploration would break. Once all sections are built, each of them is stitched: it is
+// unlinked and its two vertices are merged, all the sections of one vertex being relinked
+// to the other one. Intersection vertices are kept in priority because the exploration
+// starts from them.
+//
+// See functions:
+//     FOdysseyVectorSection::Stitch()
+//     FOdysseyVectorGroupPaint::BuildGraph()
+//
+// Note: the eraser relinks all the sections without stitching, because merging vertices
+// disturbs the erasing process.
 //
 //  That's basically it !
 

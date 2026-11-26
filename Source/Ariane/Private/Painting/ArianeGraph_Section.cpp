@@ -32,8 +32,8 @@ FArianeGraph::FSection::Stitch()
     // unlink first or else it will be returned in the arrays
     Unlink( false );
 
-    // Intersection vertices have priority because exploration pairs are built from it
-    // so we wan't to keep them in the graph
+    // Intersection nodes have priority because the exploration starts from them
+    // so we want to keep them in the graph
     if( Nodes[1]->GetClass() == FNodeIntersection::StaticClass() )
     {
         SectionLinkInfosCopy = Nodes[0]->SectionLinkInfos;

@@ -64,17 +64,12 @@ const FEditorModeID FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId
 
 FArianeEditorViewportEdMode::~FArianeEditorViewportEdMode()
 {
-    if (GEditor)
-    {
-        GEditor->OnEditorClose().RemoveAll(this);
-    }
 }
 
 FArianeEditorViewportEdMode::FArianeEditorViewportEdMode()
     : FEdMode()
     , bStylusInUse( false )
 {
-    GEditor->OnEditorClose().AddRaw(this, &FArianeEditorViewportEdMode::OnEditorClose);
 }
 
 void FArianeEditorViewportEdMode::Initialize()
@@ -568,6 +563,9 @@ FArianeEditorViewportEdMode::Enter()
 
     GetArianeEditorViewportToolkit()->GetEditor().PostInit();
 
+    // only while the mode is active: OnEditorClose needs the Toolkit, which only lives between Enter and Exit
+    GEditor->OnEditorClose().AddRaw( this, &FArianeEditorViewportEdMode::OnEditorClose );
+
 /* Gary
     //checkf(mViewportDrawingEditorPainter != nullptr, TEXT("ViewportDrawingEditorPainter was not created"));
 
@@ -626,6 +624,8 @@ FArianeEditorViewportEdMode::Enter()
 void FArianeEditorViewportEdMode::Exit()
 {
     //IgnoreStylusInput();
+
+    GEditor->OnEditorClose().RemoveAll( this );
 
     GetArianeEditorViewportToolkit()->Exit();
 

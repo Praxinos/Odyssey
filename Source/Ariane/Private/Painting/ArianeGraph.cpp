@@ -117,12 +117,15 @@
 //          \____________/   \____________/
 //
 // What is the solution ? Detecting a loop only by comparing its
-// initial and final vertices is not enough, we also have to check if the
-// recursive exploration process has ended on a section that is allowed.
-// This is why we introduced the concept of exploration pairs. Exploration pairs
-// consists in a "depart section", a node, and an "return section". So, for each
-// intersection point, we first determine as many exploration pairs as sections connected
-// to this node. At intersection point o, we would have 4 exploration pairs :
+// initial and final vertices is not enough: the walk can come back to o
+// through another section without having closed the face.
+// At each node, the next section is always picked by the same rule
+// (FindNextSectionLinkInfo), so a section explored in a given direction always
+// leads to the same next section. Following them always brings the exploration
+// back to the depart section, in the same direction, and the face is closed
+// exactly then: when the next section is the depart section (same section,
+// same direction). At intersection point o,
+// a walk is started from each of the 4 sections connected to it :
 //
 //                        1.      2.        3.          4.
 //                      \                      /     \     /
@@ -131,12 +134,15 @@
 //                       /       /   \        \
 //
 // See functions:
-//     FArianeGraph::FNode::BuildExplorationPairs()
+//     FArianeGraph::Explore()
+//     FArianeGraph::FindPath()
 //
-// A cycle is detected only if the last section matches the allowed return section
-// OR, if the allowed return section was removed from the graph, then any return
-// section is allowed. Indeed, there are orphaned section (that leads to nowhere),
-// and we get rid of them because the would cause problems. E.g :
+// The intersection nodes are explored by decreasing Weight (sum of the connected
+// section lengths), so that the cycles are always found in the same order between
+// sessions, whatever the core count. This is needed by the propagation.
+//
+// There are also orphaned sections (that lead to nowhere),
+// and we get rid of them because they would cause problems. E.g :
 //              o
 //              |
 //              |
@@ -212,81 +218,43 @@ FArianeGraph::FindNextSectionLinkInfo( FSectionLinkInfo* LastSectionLinkInfo
 {
     FSectionLinkInfo* RightRet = nullptr;
     FSectionLinkInfo* WrongRet = nullptr;
+    FVector2D LastSectionVector = LastSectionLinkInfo->GetVector();
+    double MinDot =  DBL_MAX;
+    double MaxDot = -DBL_MAX;
 
-    if( CandidateSections.Num() )
+    // one pass: best candidate on each side, the right side wins at the end
+    for( FSectionLinkInfo& CandidateSectionInfo : CandidateSections )
     {
-        FVector2D LastSectionVector = LastSectionLinkInfo->GetVector();
-        double MinDot =  DBL_MAX;
-        double MaxDot = -DBL_MAX;
-        TArray<FSectionLinkInfo*> RightSideSections;
-        TArray<FSectionLinkInfo*> WrongSideSections;
-        uint32 SectionCount = CandidateSections.Num();
-
-        RightSideSections.Reserve( SectionCount );
-        WrongSideSections.Reserve( SectionCount );
-
-        for( FSectionLinkInfo& CandidateSectionInfo : CandidateSections )
+        if( &CandidateSectionInfo != LastSectionLinkInfo )
         {
-            if( &CandidateSectionInfo != LastSectionLinkInfo )
+            FVector2D SectionVector = CandidateSectionInfo.GetVector();
+
+            if( SectionVector.SquaredLength() )
             {
-                if( CandidateSectionInfo.GetVector().SquaredLength() )
+                double CrossProduct = FVector2D::CrossProduct( -LastSectionVector, SectionVector );
+                double Dot = LastSectionVector.Dot( SectionVector );
+
+                if( ( CrossProduct * Orientation >= 0.0f ) && ( Dot > MaxDot ) )
                 {
-                    double CrossProduct = FVector2D::CrossProduct( -LastSectionVector
-                                                                  , CandidateSectionInfo.GetVector() );
+                    RightRet = &CandidateSectionInfo;
+                    MaxDot = Dot;
+                }
 
-                    if( ( CrossProduct * Orientation >= 0.0f ) )
-                    {
-                        RightSideSections.Add( &CandidateSectionInfo );
-                    }
-
-                    if( ( CrossProduct * Orientation <= 0.0f ) )
-                    {
-                        WrongSideSections.Add( &CandidateSectionInfo );
-                    }
+                if( ( CrossProduct * Orientation <= 0.0f ) && ( Dot < MinDot ) )
+                {
+                    WrongRet = &CandidateSectionInfo;
+                    MinDot = Dot;
                 }
             }
         }
-
-        for( FSectionLinkInfo* RightSideSectionLinkInfo : RightSideSections )
-        {
-            FSection* Section = RightSideSectionLinkInfo->Section;
-            FVector2D SectionVector = RightSideSectionLinkInfo->GetVector();
-            double Dot = LastSectionVector.Dot( SectionVector );
-
-            if( Dot > MaxDot )
-            {
-                RightRet = RightSideSectionLinkInfo;
-
-                MaxDot = Dot;
-            }
-        }
-
-        if( RightRet )
-        {
-            return RightRet;
-        }
-
-        for( FSectionLinkInfo* WrongSideSectionLinkInfo : WrongSideSections )
-        {
-            FSection* Section = WrongSideSectionLinkInfo->Section;
-            FVector2D SectionVector = WrongSideSectionLinkInfo->GetVector();
-            double Dot = LastSectionVector.Dot( SectionVector );
-
-            if( Dot < MinDot )
-            {
-                WrongRet = WrongSideSectionLinkInfo;
-
-                MinDot = Dot;
-            }
-        }
-
-        if( WrongRet )
-        {
-            return WrongRet;
-        }
     }
 
-    return nullptr;
+    if( RightRet )
+    {
+        return RightRet;
+    }
+
+    return WrongRet;
 }
 
 // find the overall orientation of the future cycle
@@ -344,32 +312,6 @@ FArianeGraph::GetCycleNormalVector( TArray<uint32>& NodeIndexArray, TArray<FSect
     }
 
     return Z;
-}
-
-FArianeGraph::FExplorationPair::~FExplorationPair()
-{
-}
-
-FArianeGraph::FExplorationPair::FExplorationPair()
-    : ReturnSection ( nullptr )
-    , DepartNode ( nullptr )
-    , DepartNodeIndex ( 0 )
-    , DepartSection ( nullptr )
-    , SectionLength ( 0.0f )
-{
-}
-
-FArianeGraph::FExplorationPair::FExplorationPair( FSection* InReturnSection
-                                                , FNode* InDepartNode
-                                                , uint32 InDepartNodeIndex
-                                                , FSection* InDepartSection )
-    : ReturnSection ( InReturnSection )
-    , DepartNode ( InDepartNode )
-    , DepartNodeIndex ( InDepartNodeIndex )
-    , DepartSection ( InDepartSection )
-    // SectionLength is used for sorting exploration pairs
-    , SectionLength ( ReturnSection->GetLength() + DepartSection->GetLength() )
-{
 }
 
 FVector2D
@@ -503,27 +445,6 @@ FArianeGraph::FNode::GetIndex( FEdge* Edge )
 }
 
 void
-FArianeGraph::FNode::BuildExplorationPairs( TArray<FExplorationPair>& OutExplorationPairsArray )
-{
-    FSectionLinkInfo* DepartSectionLinkInfo = nullptr;
-
-    for( FSectionLinkInfo& ReturnSectionLinkInfo : SectionLinkInfos )
-    {
-        DepartSectionLinkInfo = FindNextSectionLinkInfo( &ReturnSectionLinkInfo
-                                                       , SectionLinkInfos
-                                                       , 1.0f );
-
-        if( DepartSectionLinkInfo )
-        {
-            OutExplorationPairsArray.Emplace(  ReturnSectionLinkInfo.Section
-                                             , this
-                                             , DepartSectionLinkInfo->SectionNodeIndex
-                                             , DepartSectionLinkInfo->Section );
-        }
-    }
-}
-
-void
 FArianeGraph::FNode::UnlinkPendantSections()
 {
     FNode* CurrentNode = this;
@@ -562,6 +483,7 @@ FArianeGraph::FNodeIntersection::FNodeIntersection( const FVector2D& InPosition
     , Intersections { FIntersection( this, InEdge0T )
                     , FIntersection( this, InEdge1T ) }
     , Edges { InEdge0,  InEdge1 }
+    , Weight ( 0.0 )
 {
     Position = InPosition;
     // found between two projected edges
@@ -570,6 +492,26 @@ FArianeGraph::FNodeIntersection::FNodeIntersection( const FVector2D& InPosition
     // attach to edges (ordered, depends on T value)
     Edges[0]->AddIntersection( &Intersections[0] );
     Edges[1]->AddIntersection( &Intersections[1] );
+}
+
+void
+FArianeGraph::FNodeIntersection::AddSection( FSection* Section, uint32 SectionNodeIndex )
+{
+    FNode::AddSection( Section, SectionNodeIndex );
+
+    Weight += Section->GetLength();
+}
+
+void
+FArianeGraph::FNodeIntersection::RemoveSection( FSection* Section, uint32 SectionNodeIndex )
+{
+    int32 RemovedCount = SectionLinkInfos.Num();
+
+    FNode::RemoveSection( Section, SectionNodeIndex );
+
+    // RemoveAll may remove nothing if the section was not linked here
+    RemovedCount -= SectionLinkInfos.Num();
+    Weight -= RemovedCount * Section->GetLength();
 }
 
 bool
@@ -1775,66 +1717,57 @@ FArianeGraph::SimplifyGraph()
 }
 
 uint32
-FArianeGraph::FindPath( FSection* ReturnSection
-                      , uint32 SectionNodeIndex
+FArianeGraph::FindPath( uint32 SectionNodeIndex
                       , FSection* Section
                       , TArray<uint32>& OutNodeIndexArray
                       , TArray<FSection*>& OutSectionArray
                       , double Orientation
                       , uint32 Depth ) // we could also use iVertexArray.size()
 {
-    FNode* SectionNode = Section->Nodes[SectionNodeIndex];
     uint32 SectionNextNodeIndex = ( SectionNodeIndex == 0 ) ? 1 : 0;
     FNode* SectionNextNode = Section->Nodes[SectionNextNodeIndex];
     uint32 Ret = FArianeGraph::NOCYCLE;
-    bool bIsLoop = false;
 
     OutNodeIndexArray.Push( SectionNodeIndex );
     OutSectionArray.Push( Section );
     Section->Block( SectionNodeIndex );
 
-    bIsLoop = ( OutSectionArray[0]->Nodes[OutNodeIndexArray[0]] == SectionNextNode );
+    FSectionLinkInfo* SectionLinkInfo = SectionNextNode->GetSectionLinkInfo( Section, SectionNextNodeIndex );
+    FSectionLinkInfo* NextSectionLinkInfo = SectionNextNode->GetCycleNextSection( SectionLinkInfo, 1.0f );
 
-    if( ( bIsLoop == true )// cycle detected
-    && ( ( ( ReturnSection->IsLinked() == true ) && ( ReturnSection == Section ) ) // 1 return path accepted
-        || ( ReturnSection->IsLinked() == false ) ) ) // any return path accepted
+    if( NextSectionLinkInfo )
     {
-        double NormalVector = GetCycleNormalVector( OutNodeIndexArray, OutSectionArray );
+        // the face is closed when the next section is the depart section, in the same direction.
+        // Tested before IsBlocked: the depart section is blocked in this direction since the first step
+        bool bIsLoop = ( NextSectionLinkInfo->Section          == OutSectionArray[0]   )
+                    && ( NextSectionLinkInfo->SectionNodeIndex == OutNodeIndexArray[0] );
 
-        if ( NormalVector > 0.0f )
+        if( bIsLoop == true )
         {
-            Cycles.Add( new FCycle( OutNodeIndexArray, OutSectionArray ) );
+            double NormalVector = GetCycleNormalVector( OutNodeIndexArray, OutSectionArray );
+
+            if( NormalVector > 0.0f )
+            {
+                Cycles.Add( new FCycle( OutNodeIndexArray, OutSectionArray ) );
+            }
+
+            Ret = FArianeGraph::HASCYCLE;
         }
-
-        Ret = FArianeGraph::HASCYCLE;
-    }
-    else
-    {
-        FSectionLinkInfo* SectionLinkInfo = SectionNextNode->GetSectionLinkInfo( Section, SectionNextNodeIndex );
-        FSectionLinkInfo* NextSectionLinkInfo = SectionNextNode->GetCycleNextSection( SectionLinkInfo, 1.0f );
-
-        if( NextSectionLinkInfo )
+        else if( NextSectionLinkInfo->Section->IsBlocked( NextSectionLinkInfo->SectionNodeIndex ) == false )
         {
-            FSection* NextSection = NextSectionLinkInfo->Section;
-
-            if( NextSection->IsBlocked( NextSectionLinkInfo->SectionNodeIndex ) == false )
-            {
-                Ret = FindPath( ReturnSection
-                              , NextSectionLinkInfo->SectionNodeIndex
-                              , NextSectionLinkInfo->Section
-                              , OutNodeIndexArray
-                              , OutSectionArray
-                              , Orientation
-                              , Depth + 1 );
-            }
-            else
-            {
-                Ret = FArianeGraph::BLOCKED;
-            }
+            Ret = FindPath( NextSectionLinkInfo->SectionNodeIndex
+                          , NextSectionLinkInfo->Section
+                          , OutNodeIndexArray
+                          , OutSectionArray
+                          , Orientation
+                          , Depth + 1 );
+        }
+        else
+        {
+            Ret = FArianeGraph::BLOCKED;
         }
     }
 
-    // propbably useless
     OutNodeIndexArray.Pop();
     OutSectionArray.Pop();
 
@@ -1842,28 +1775,26 @@ FArianeGraph::FindPath( FSection* ReturnSection
 }
 
 void
-FArianeGraph::Explore( FExplorationPair* ExplorationPair )
+FArianeGraph::Explore( FNodeIntersection* IntersectionNode )
 {
-    if( ExplorationPair->DepartSection )
+    TArray<uint32> NodeIndexArray;
+    TArray<FSection*> SectionArray;
+
+    NodeIndexArray.Reserve( 10 );
+    SectionArray.Reserve( 10 );
+
+    for( FSectionLinkInfo& DepartSectionLinkInfo : IntersectionNode->SectionLinkInfos )
     {
-        if( ExplorationPair->DepartSection->IsLinked() == true )
+        // a section blocked in this direction already belongs to a detected face
+        if( DepartSectionLinkInfo.Section->IsBlocked( DepartSectionLinkInfo.SectionNodeIndex ) == false )
         {
-            if( ExplorationPair->DepartSection->IsBlocked( ExplorationPair->DepartNodeIndex ) == false )
-            {
-                TArray<uint32> NodeIndexArray;
-                TArray<FSection*> SectionArray;
-
-                NodeIndexArray.Reserve( 10 );
-                SectionArray.Reserve( 10 );
-
-                uint32 ret = FindPath( ExplorationPair->ReturnSection
-                                     , ExplorationPair->DepartNodeIndex // lies on DepartSection
-                                     , ExplorationPair->DepartSection
-                                     , NodeIndexArray
-                                     , SectionArray
-                                     , 1.0f
-                                     , 0 );
-            }
+            // FindPath pops everything it pushed, the arrays are empty again for the next departure
+            FindPath( DepartSectionLinkInfo.SectionNodeIndex
+                    , DepartSectionLinkInfo.Section
+                    , NodeIndexArray
+                    , SectionArray
+                    , 1.0f
+                    , 0 );
         }
     }
 }
@@ -1920,36 +1851,54 @@ FArianeGraph::OrderCycles()
     }
 }
 
+void
+FArianeGraph::SortIntersectionNodes( TArray<FNodeIntersection*>& OutSortedIntersectionNodes )
+{
+    OutSortedIntersectionNodes.Reserve( IntersectionNodeBuffer.Num() );
+
+    for( FNodeIntersection& IntersectionNode : IntersectionNodeBuffer )
+    {
+        OutSortedIntersectionNodes.Add( &IntersectionNode );
+    }
+
+    OutSortedIntersectionNodes.Sort( []( const FNodeIntersection& NodeA, const FNodeIntersection& NodeB )
+        {
+            if( NodeA.Weight != NodeB.Weight )
+            {
+                return NodeA.Weight > NodeB.Weight;
+            }
+
+            if( NodeA.Position.X != NodeB.Position.X )
+            {
+                return NodeA.Position.X < NodeB.Position.X;
+            }
+
+            return NodeA.Position.Y < NodeB.Position.Y;
+        } );
+}
+
 // Note: For ariane objects, there is no need for cubic segments because a projected cubic segment is not a cubic segment itself
 // Expects BuildArrangement to have been called.
 void
 FArianeGraph::SolveArrangement()
 {
-    TArray<FExplorationPair> ExplorationPairsBuffer;
-
-    // Build exploration pair before simplification
-    for( FNodeIntersection& IntersectionNode : IntersectionNodeBuffer )
-    {
-        IntersectionNode.BuildExplorationPairs( ExplorationPairsBuffer );
-    }
-
-    // sort exploration pairs in order to always have a propagation that starts from
-    // the same vertex/section between sessions. This is needed in monothread and
-    // multihread modes because the exploration pairs won't be in the same order
-    // and we may switch from one to the other.
-    ExplorationPairsBuffer.Sort( []( const FExplorationPair& PairA, const FExplorationPair& PairB )
-        {
-            return PairA.SectionLength > PairB.SectionLength;
-        } );
+    // pointers only: sections point to the nodes, sorting IntersectionNodeBuffer itself would move them
+    TArray<FNodeIntersection*> SortedIntersectionNodes;
 
     SimplifyGraph();
 
     Progress.store( 0.7f, std::memory_order_relaxed );
 
+    // IntersectionNodeBuffer order depends on the core count (mono/multithread, machine).
+    // Sorting gives the same exploration order, hence the same cycle order for the future
+    // propagation, on every session. Position breaks ties between equal weights (symmetric drawings).
+    // Note: TArray<T*>::Sort passes the pointed objects to the predicate, not the pointers
+    SortIntersectionNodes( SortedIntersectionNodes );
+
     // explore the graph from intersections
-    for( FExplorationPair& ExplorationPair : ExplorationPairsBuffer )
+    for( FNodeIntersection* IntersectionNode : SortedIntersectionNodes )
     {
-        Explore( &ExplorationPair );
+        Explore( IntersectionNode );
     }
 
     Progress.store( 0.9f, std::memory_order_relaxed );

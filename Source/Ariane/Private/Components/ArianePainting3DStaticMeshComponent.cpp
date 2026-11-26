@@ -32,7 +32,10 @@ UArianePainting3DStaticMeshComponent::ConvertCycleToStaticMesh( FMeshDescription
                                                               , FArianeCycle* Cycle )
 {
     FUniqueMaterial* UniqueMaterial = GetUniqueMaterial( Cycle->GetMaterial(), Cycle->GetColor(), CYCLE_PDO );
-    const FTransform& CycleTransform = Cycle->GetTransform();
+    UArianePainting3DComponent* Painting3DComponent = Cycle->GetPainting3DComponent();
+    const FTransform& CycleWorlTransform = Cycle->GetTransform();
+    const FTransform& ActorWorlTransform = Painting3DComponent->GetOwner()->GetTransform();
+    FTransform RelativeTransform = CycleWorlTransform.GetRelativeTransform(ActorWorlTransform);
     TArray<int32> MeshVertexIDs;
     const TArray<FDynamicMeshVertex> CycleMeshVertices = Cycle->GetGeometry3D().GetMeshVertices();
     const TArray<uint32>& CycleMeshIndices = Cycle->GetGeometry3D().GetMeshIndices();
@@ -44,7 +47,7 @@ UArianePainting3DStaticMeshComponent::ConvertCycleToStaticMesh( FMeshDescription
 
     for ( const FDynamicMeshVertex& DynamicMeshVertex : CycleMeshVertices )
     {
-        FVector VertewWorldPosition = CycleTransform.TransformPosition( FVector( DynamicMeshVertex.Position ) );
+        FVector VertewWorldPosition = RelativeTransform.TransformPosition( FVector( DynamicMeshVertex.Position ) );
         int32 MeshVertexID = MeshDescriptionBuilder.AppendVertex( VertewWorldPosition );
 
         MeshVertexIDs.Add( MeshVertexID );
@@ -62,7 +65,7 @@ UArianePainting3DStaticMeshComponent::ConvertCycleToStaticMesh( FMeshDescription
             int32 CycleModelVertexID = CycleMeshIndices[i + j];
             const FDynamicMeshVertex& CycleModelVertex = CycleMeshVertices[CycleModelVertexID];
             int32 MeshVertexID = MeshVertexIDs[CycleModelVertexID];
-            FVector WorldNormal = CycleTransform.TransformVector( CycleModelVertex.TangentZ.ToFVector() );
+            FVector WorldNormal = RelativeTransform.TransformVector( CycleModelVertex.TangentZ.ToFVector() );
 
             MeshVertexInstanceID[j] = MeshDescriptionBuilder.AppendInstance( MeshVertexID );
 
@@ -85,7 +88,10 @@ UArianePainting3DStaticMeshComponent::ConvertPathToStaticMesh( FMeshDescriptionB
                                                              , FArianePath* Path )
 {
     FUniqueMaterial* UniqueMaterial = GetUniqueMaterial( Path->GetMaterial(), Path->GetColor(), 0.0f );
-    const FTransform& PathTransform = Path->GetTransform();
+    UArianePainting3DComponent* Painting3DComponent = Path->GetPainting3DComponent();
+    const FTransform& PathWorlTransform = Path->GetTransform();
+    const FTransform& ActorWorlTransform = Painting3DComponent->GetOwner()->GetTransform();
+    FTransform RelativeTransform = PathWorlTransform.GetRelativeTransform(ActorWorlTransform);
     TArray<int32> MeshVertexIDs;
     uint32 PathVertexCount = 0;
     uint32 PathIndexCount = 0;
@@ -104,7 +110,7 @@ UArianePainting3DStaticMeshComponent::ConvertPathToStaticMesh( FMeshDescriptionB
     {
         for( const FDynamicMeshVertex& DynamicMeshVertex : Segment->GetModelVertexCache() )
         {
-            FVector VertewWorldPosition = PathTransform.TransformPosition( FVector( DynamicMeshVertex.Position ) );
+            FVector VertewWorldPosition = RelativeTransform.TransformPosition( FVector( DynamicMeshVertex.Position ) );
             int32 MeshVertexID = MeshDescriptionBuilder.AppendVertex( VertewWorldPosition );
 
             MeshVertexIDs.Add( MeshVertexID );
@@ -130,7 +136,7 @@ UArianePainting3DStaticMeshComponent::ConvertPathToStaticMesh( FMeshDescriptionB
                 uint32 SegmentModelVertexID = SegmentIndexCache[i + j];
                 const FDynamicMeshVertex& SegmentModelVertex = SegmentModelVertexCache[SegmentModelVertexID];
                 int32 MeshVertexID = MeshVertexIDs[VertexIDOffset + SegmentModelVertexID];
-                FVector WorldNormal = PathTransform.TransformVector( SegmentModelVertex.TangentZ.ToFVector() );
+                FVector WorldNormal = RelativeTransform.TransformVector( SegmentModelVertex.TangentZ.ToFVector() );
 
                 MeshVertexInstanceID[j] = MeshDescriptionBuilder.AppendInstance( MeshVertexID );
 
