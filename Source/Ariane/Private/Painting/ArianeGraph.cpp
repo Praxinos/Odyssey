@@ -444,21 +444,6 @@ FArianeGraph::FNode::GetIndex( FEdge* Edge )
     return -1;
 }
 
-void
-FArianeGraph::FNode::UnlinkPendantSections()
-{
-    FNode* CurrentNode = this;
-
-    while( CurrentNode->SectionLinkInfos.Num() == 1 )
-    {
-        FSection* PendantSection = CurrentNode->SectionLinkInfos[0].Section;
-
-        PendantSection->Unlink( false );
-
-        CurrentNode = PendantSection->GetOtherNode( CurrentNode );
-    }
-}
-
 FArianeGraph::FIntersection::~FIntersection()
 {
 }
@@ -1677,15 +1662,14 @@ FArianeGraph::UnlinkPendantSectionsRecursively( FSection* Section, FNode* Node )
         Node = nullptr;
         Section = nullptr;
 
-        if( OtherNode->GetClass() != FNodeIntersection::StaticClass() )
+        // a node left with a single section is a pendant end, whatever its class. Stopping at
+        // intersection nodes would leave pendant sections behind, depending on the section order
+        if( OtherNode->SectionLinkInfos.Num() == 1 )
         {
-            if( OtherNode->SectionLinkInfos.Num() == 1 )
-            {
-                FSection* OtherSection = OtherNode->SectionLinkInfos[0].Section;
+            FSection* OtherSection = OtherNode->SectionLinkInfos[0].Section;
 
-                Node = OtherNode;
-                Section = OtherSection;
-            }
+            Node = OtherNode;
+            Section = OtherSection;
         }
     }
     while( Node );
@@ -1721,55 +1705,61 @@ FArianeGraph::FindPath( uint32 SectionNodeIndex
                       , FSection* Section
                       , TArray<uint32>& OutNodeIndexArray
                       , TArray<FSection*>& OutSectionArray
-                      , double Orientation
-                      , uint32 Depth ) // we could also use iVertexArray.size()
+                      , double Orientation )
 {
-    uint32 SectionNextNodeIndex = ( SectionNodeIndex == 0 ) ? 1 : 0;
-    FNode* SectionNextNode = Section->Nodes[SectionNextNodeIndex];
     uint32 Ret = FArianeGraph::NOCYCLE;
+    bool bExploring = true;
 
-    OutNodeIndexArray.Push( SectionNodeIndex );
-    OutSectionArray.Push( Section );
-    Section->Block( SectionNodeIndex );
-
-    FSectionLinkInfo* SectionLinkInfo = SectionNextNode->GetSectionLinkInfo( Section, SectionNextNodeIndex );
-    FSectionLinkInfo* NextSectionLinkInfo = SectionNextNode->GetCycleNextSection( SectionLinkInfo, 1.0f );
-
-    if( NextSectionLinkInfo )
+    while( bExploring == true )
     {
-        // the face is closed when the next section is the depart section, in the same direction.
-        // Tested before IsBlocked: the depart section is blocked in this direction since the first step
-        bool bIsLoop = ( NextSectionLinkInfo->Section          == OutSectionArray[0]   )
-                    && ( NextSectionLinkInfo->SectionNodeIndex == OutNodeIndexArray[0] );
+        uint32 SectionNextNodeIndex = ( SectionNodeIndex == 0 ) ? 1 : 0;
+        FNode* SectionNextNode = Section->Nodes[SectionNextNodeIndex];
 
-        if( bIsLoop == true )
+        OutNodeIndexArray.Push( SectionNodeIndex );
+        OutSectionArray.Push( Section );
+        Section->Block( SectionNodeIndex );
+
+        FSectionLinkInfo* SectionLinkInfo = SectionNextNode->GetSectionLinkInfo( Section, SectionNextNodeIndex );
+        FSectionLinkInfo* NextSectionLinkInfo = SectionNextNode->GetCycleNextSection( SectionLinkInfo, 1.0f );
+
+        // dead end: no next section
+        bExploring = false;
+
+        if( NextSectionLinkInfo )
         {
-            double NormalVector = GetCycleNormalVector( OutNodeIndexArray, OutSectionArray );
+            // the face is closed when the next section is the depart section, in the same direction.
+            // Tested before IsBlocked: the depart section is blocked in this direction since the first step
+            bool bIsLoop = ( NextSectionLinkInfo->Section          == OutSectionArray[0]   )
+                        && ( NextSectionLinkInfo->SectionNodeIndex == OutNodeIndexArray[0] );
 
-            if( NormalVector > 0.0f )
+            if( bIsLoop == true )
             {
-                Cycles.Add( new FCycle( OutNodeIndexArray, OutSectionArray ) );
-            }
+                double NormalVector = GetCycleNormalVector( OutNodeIndexArray, OutSectionArray );
 
-            Ret = FArianeGraph::HASCYCLE;
-        }
-        else if( NextSectionLinkInfo->Section->IsBlocked( NextSectionLinkInfo->SectionNodeIndex ) == false )
-        {
-            Ret = FindPath( NextSectionLinkInfo->SectionNodeIndex
-                          , NextSectionLinkInfo->Section
-                          , OutNodeIndexArray
-                          , OutSectionArray
-                          , Orientation
-                          , Depth + 1 );
-        }
-        else
-        {
-            Ret = FArianeGraph::BLOCKED;
+                if( NormalVector > 0.0f )
+                {
+                    Cycles.Add( new FCycle( OutNodeIndexArray, OutSectionArray ) );
+                }
+
+                Ret = FArianeGraph::HASCYCLE;
+            }
+            else if( NextSectionLinkInfo->Section->IsBlocked( NextSectionLinkInfo->SectionNodeIndex ) == false )
+            {
+                // go on with the next section
+                SectionNodeIndex = NextSectionLinkInfo->SectionNodeIndex;
+                Section = NextSectionLinkInfo->Section;
+                bExploring = true;
+            }
+            else
+            {
+                Ret = FArianeGraph::BLOCKED;
+            }
         }
     }
 
-    OutNodeIndexArray.Pop();
-    OutSectionArray.Pop();
+    // Reset keeps the allocation for the next departure
+    OutNodeIndexArray.Reset();
+    OutSectionArray.Reset();
 
     return Ret;
 }
@@ -1788,13 +1778,12 @@ FArianeGraph::Explore( FNodeIntersection* IntersectionNode )
         // a section blocked in this direction already belongs to a detected face
         if( DepartSectionLinkInfo.Section->IsBlocked( DepartSectionLinkInfo.SectionNodeIndex ) == false )
         {
-            // FindPath pops everything it pushed, the arrays are empty again for the next departure
+            // FindPath empties the arrays before returning
             FindPath( DepartSectionLinkInfo.SectionNodeIndex
                     , DepartSectionLinkInfo.Section
                     , NodeIndexArray
                     , SectionArray
-                    , 1.0f
-                    , 0 );
+                    , 1.0f );
         }
     }
 }

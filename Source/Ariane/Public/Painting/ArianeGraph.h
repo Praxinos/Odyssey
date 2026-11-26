@@ -95,7 +95,6 @@ public:
         FSection* GetSection( FEdge* Edge );
         FEdge *GetOtherEdge( FEdge* Edge );
         int32 GetIndex( FEdge* Edge );
-        void UnlinkPendantSections();
 
         TArray<FSectionLinkInfo> SectionLinkInfos;
         FEdge* Edges[4]; // 2 + 2 for triple segment extension
@@ -595,8 +594,7 @@ protected:
                    , FSection* Section
                    , TArray<uint32>& OutNodeIndexArray
                    , TArray<FSection*>& OutSectionArray
-                   , double Orientation
-                   , uint32 Depth );
+                   , double Orientation );
     /** Returns the total number of X-intersection records, all cores included. */
     uint32 Intersect( TArray<FPath*>& SectionnablePaths
                     , uint32& OutTotalLinearSectionCount
