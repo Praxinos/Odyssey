@@ -16,19 +16,72 @@
 #include "ArianePolygon.h"
 // Unreal headers
 #include "UObject/ObjectSaveContext.h"
+#include "UObject/UObjectIterator.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialRenderProxy.h"
 
+//--------------------------------------------------------------------------------------------------
+// Rendering of the vector layer: the render items
+//
+// The proxy (FArianeGeometryProxy) never reads the Ariane objects: the render thread would read them while
+// the game thread changes them. It draws a flat array of FArianeMeshRenderItem instead, one per path or cycle.
+//
+// Each thread owns its data, nothing is shared:
+// - the drawing owns the master items (UArianeDrawing::RenderItems), game thread only;
+// - the proxy owns a copy (FArianeGeometryProxy::MeshItems), render thread only. It's copied by CreateSceneProxy,
+//   then changed only by render commands (EnqueueRenderItem(s)), executed in the order they were enqueued.
+//
+// An item holds a copy of what the proxy needs (world matrix, inherited visibility, color, material...) and a
+// pointer to the mesh's GPU buffers (Geometry3D), only changed by render commands.
+//
+// Keeping the items up to date, on the game thread: each change writes the master item, then enqueues a copy.
+// - FArianeMesh::UpdateRenderItem fills an item from its mesh. It's called at the end of FArianeObject::Update
+//   (RefreshRenderItem, after UpdateBoundingBox, at the mesh's RenderIndex) and by RebuildRenderItems.
+// - FArianeObject::UpdateTransform writes the world matrix of the meshes whose matrix it computes.
+// - A change of a group that applies below it (visibility, HUD color) invalidates its tree (InvalidateTree):
+//   every mesh below updates its own item.
+// - A Hierarchy change (mesh added, removed, reordered) rebuilds the items at the end of UArianeDrawing::Update:
+//   the RenderIndex are reassigned and the whole array is enqueued.
+// - A mesh deleted or reset hides its item, then enqueues the deletion of its Geometry3D: the proxy skips it.
+// - Only the displayed drawing knows its layer (SetDrawing detaches the previous one): a detached drawing
+//   enqueues nothing and is rebuilt when attached again.
+// - The layer settings (visibility, cast shadows) recreate the proxy.
+// - r.Ariane.ShowNormals and the editor HUD color rebuild the items of the displayed drawings.
+//--------------------------------------------------------------------------------------------------
+
 // for debugging purpose
-static TAutoConsoleVariable<bool> CVarShowArianeNormals( TEXT("r.Ariane.ShowNormals")
-                                                       , 0
-                                                       , TEXT("Show Ariane mesh normals") );
+TAutoConsoleVariable<bool> CVarShowArianeNormals( TEXT("r.Ariane.ShowNormals")
+                                                , 0
+                                                , TEXT("Show Ariane mesh normals")
+                                                , FConsoleVariableDelegate::CreateLambda( []( IConsoleVariable* )
+    {
+        UArianeLayerVector::RebuildAllRenderItems();
+    } ) );
+
+//--------------------------------------------------------------------------------------------------
+
+FArianeMeshRenderItem::FArianeMeshRenderItem()
+    : MeshClass ( 0 )
+    , Geometry3D ( nullptr )
+    , Material ( nullptr )
+    , Color ( FLinearColor::Black )
+#if WITH_EDITOR
+    , HUDColor ( FLinearColor::Black )
+#endif
+    , WorldMatrix ( FMatrix::Identity )
+    , BoundingBox ( ForceInit )
+    , bVisible ( false )
+{
+}
+
+//--------------------------------------------------------------------------------------------------
 
 // Same check as FStaticMeshSceneProxy: a material that can't be used on a static mesh (e.g. Post Process domain)
 // is replaced by the default surface material.
 // This way Ariane displays what the static mesh export will display.
-static UMaterialInterface*
-GetMeshCompatibleMaterial( UMaterialInterface* MaterialInterface )
+// static
+UMaterialInterface*
+FArianeGeometryProxy::GetMeshCompatibleMaterial( UMaterialInterface* MaterialInterface )
 {
     if( MaterialInterface == nullptr )
     {
@@ -53,14 +106,18 @@ FArianeGeometryProxy::~FArianeGeometryProxy()
 
 // Note: The proxy is created via CreateSceneProxy, and will be recreated everytime MarkRenderStateDirty() is called
 FArianeGeometryProxy::FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLevel
-                                          , UArianeLayerVector* InVectorLayer )
+                                          , UArianeLayerVector* InVectorLayer
+                                          , const TArray<FArianeMeshRenderItem>& InMeshItems )
     : FPrimitiveSceneProxy ( InVectorLayer )
-    , VectorLayer ( InVectorLayer )
+    , MeshItems ( InMeshItems )
+    , bLayerVisible ( InVectorLayer->IsVisible() )
+    , bCastShadows ( InVectorLayer->GetLayerStack()->GetPainting3DComponent()->GetCastShadows() )
 {
     EShaderPlatform ShaderPlatform = GetFeatureLevelShaderPlatform_Checked( InFeatureLevel );
     TArray<UMaterialInterface*> MaterialInterfaces;
 
-    VectorLayer->GetDrawing()->GetUsedMaterials( MaterialInterfaces );
+    // On the game thread: the proxy is constructed by CreateSceneProxy
+    InVectorLayer->GetDrawing()->GetUsedMaterials( MaterialInterfaces );
 
     // MaterialRelevance is used by GetViewRelevance and is necessary to render all kinds of materials
     for( int32 Index = 0; Index < MaterialInterfaces.Num(); Index++ )
@@ -151,199 +208,143 @@ FArianeGeometryProxy::DrawStaticElements( FStaticPrimitiveDrawInterface * PDI )
 */
 }
 
-// static
 void
-FArianeGeometryProxy::GetDrawingDynamicMeshElements( const FSceneViewFamily& ViewFamily
-                                                   , FMeshElementCollector& Collector
-                                                   , int32 ViewIndex ) const
+FArianeGeometryProxy::SetMeshItem_RenderThread( int32 Index, const FArianeMeshRenderItem& Item )
 {
-    FPrimitiveDrawInterface* PDI = Collector.GetPDI(ViewIndex);
-    //UMaterialInterface* MaterialInterface = GEngine->VertexColorMaterial;
-    UArianeDrawing* Drawing = VectorLayer->GetDrawing();
-    FArianeGroup* RootGroup = Drawing->GetRootGroup();
+    MeshItems[Index] = Item;
+}
 
-    Drawing->InstancedObjectsAccessRW.Lock();
+void
+FArianeGeometryProxy::SetMeshItems_RenderThread( TArray<FArianeMeshRenderItem>&& InMeshItems )
+{
+    MeshItems = MoveTemp( InMeshItems );
+}
 
-    FArianeObject::Traverse( RootGroup
-                           , FArianeObject::ETraversalPolicy::AllChildren
-                           , [ this
-                             , PDI
-                             , &ViewFamily
-                             , ViewIndex
-                             , &Collector ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+void
+FArianeGeometryProxy::DrawMeshItem( const FArianeMeshRenderItem& Item
+                                  , const FSceneViewFamily& ViewFamily
+                                  , int32 ViewIndex
+                                  , FMeshElementCollector& Collector ) const
+{
+    const FSceneView* View = ViewFamily.Views[ViewIndex];
+    FPrimitiveDrawInterface* PDI = Collector.GetPDI( ViewIndex );
+    bool bWireframe = AllowDebugViewmodes() && ViewFamily.EngineShowFlags.Wireframe;
+    UMaterialInterface* MaterialInterface = Item.Material;
+    FLinearColor ItemColor = Item.Color;
+    // Null until the mesh's first build in a world (UArianeDrawing::InitVertexFactories): then never changed
+    FLocalVertexFactory* VertexFactory = Item.Geometry3D->GetVertexFactory();
+
+    if( bWireframe )
     {
-        UArianePainting3DComponent* Painting3DComponent = VectorLayer->GetLayerStack()->GetPainting3DComponent();
-        const FSceneView* View = ViewFamily.Views[ViewIndex];
-        FArianeMeshGeometry3D* Geometry3D = nullptr;
-        UMaterialInterface* MaterialInterface = nullptr;
-        FColor ObjectColor = FColor::Black;
-        bool bWireframe = AllowDebugViewmodes() && ViewFamily.EngineShowFlags.Wireframe;
-
-        if( Object->HasBaseClass( FArianePath::StaticClass() ) )
-        {
-            FArianePath* Path = static_cast<FArianePath*>(Object);
-
-            Geometry3D = &Path->GetGeometry3D();
-            MaterialInterface = Path->GetMaterial();
-            ObjectColor = Path->GetColor();
-        }
-
-        if( Object->HasBaseClass( FArianeCycle::StaticClass() ) )
-        {
-            FArianeCycle* Cycle = static_cast<FArianeCycle*>(Object);
-
-            Geometry3D = &Cycle->GetGeometry3D();
-            MaterialInterface = Cycle->GetMaterial();
-            ObjectColor = Cycle->GetColor();
-        }
-
-        MaterialInterface = GetMeshCompatibleMaterial( MaterialInterface );
-
-        if( bWireframe )
-        {
-            MaterialInterface = GEngine->WireframeMaterial;
+        MaterialInterface = GEngine->WireframeMaterial;
 
 #if WITH_EDITOR
-            // The HUD colors are editor settings: a packaged game keeps the object color
-            ObjectColor = Object->GetHUDForegroundColor();
+        // The HUD colors are editor settings: a packaged game keeps the object color
+        ItemColor = Item.HUDColor;
 #endif
-        }
+    }
 
-        if( Geometry3D && MaterialInterface )
+    if( MaterialInterface
+     && VertexFactory
+     && MaterialInterface->GetRenderProxy()
+     && Item.Geometry3D->GetIndexBuffer().GetNumIndices()
+     && Item.Geometry3D->GetIndexBuffer().IsInitialized() )
+    {
+        // Allocate a mesh batch and get a ref to the first element
+        FMeshBatch& MeshBatch = Collector.AllocateMesh();
+        FMeshBatchElement& BatchElement = MeshBatch.Elements[0];
+
+        BatchElement.IndexBuffer = &Item.Geometry3D->GetIndexBuffer();
+
+        // Temporary proxy to store the color of the object (lighter than a UMaterialInstanceDynamic).
+        // Owned by the collector, released at the end of the frame
+        FColoredMaterialRenderProxy& MaterialProxy = Collector.AllocateOneFrameResource<FColoredMaterialRenderProxy>(
+            MaterialInterface->GetRenderProxy()
+          , ItemColor );
+
+        MeshBatch.bWireframe = bWireframe;
+        MeshBatch.VertexFactory = VertexFactory;
+        MeshBatch.MaterialRenderProxy = &MaterialProxy;
+
+        //The LocalVertexFactory uses a uniform buffer to pass primitve data like the local to world transform for this frame and for the previous one
+        //Most of this data can be fetched using the helper function below
+        bool bHasPrecomputedVolumetricLightmap;
+        FMatrix PreviousLocalToWorld;
+        int32 SingleCaptureIndex;
+        bool bOutputVelocity;
+
+        FMatrix ItemWorldMatrix = Item.WorldMatrix;
+
+        // against Z-fighting. at each frame we move the cylce away from the screen
+        // always in the direction of the camera.
+        if( Item.MeshClass == FArianeCycle::StaticClass() )
         {
-            FVertexFactory* VertexFactory = Geometry3D->GetVertexFactory();
-
-            // VertexFactory can be null at start because our meshes are create before the world exists
-            // and the World is needed to get the Feature Level. So, if the vertex factory is null, we try to
-            // init it again
-            if( VertexFactory == nullptr )
+            if( View->IsPerspectiveProjection() )
             {
-                Geometry3D->InitVertexFactory();
+                const FVector C = View->ViewMatrices.GetViewOrigin();
+                const float DepthEpsilon = 1e-4;
+                const float s = 1.f + DepthEpsilon;
+                // note: the scaling is centered on the camera.
+                ItemWorldMatrix.SetAxis( 0, ItemWorldMatrix.GetScaledAxis( EAxis::X ) * s );
+                ItemWorldMatrix.SetAxis( 1, ItemWorldMatrix.GetScaledAxis( EAxis::Y ) * s );
+                ItemWorldMatrix.SetAxis( 2, ItemWorldMatrix.GetScaledAxis( EAxis::Z ) * s );
+                ItemWorldMatrix.SetOrigin( ItemWorldMatrix.GetOrigin() * s + C * ( 1.f - s ) );
             }
-
-            if( MaterialInterface->GetRenderProxy()
-             && Object->IsVisible( true )
-             //&& Path->GetSegments().Num()
-             && Geometry3D->GetIndexBuffer().GetNumIndices()
-             && Geometry3D->GetIndexBuffer().IsInitialized() )
+            else // orthographic
             {
-                // Allocate a mesh batch and get a ref to the first element
-                FMeshBatch& MeshBatch = Collector.AllocateMesh();
-                FMeshBatchElement& BatchElement = MeshBatch.Elements[0];
-                FLinearColor ElementColor = FLinearColor(ObjectColor);
-
-                BatchElement.IndexBuffer = &Geometry3D->GetIndexBuffer();
-
-                // Temporary proxy to store the color of the object (lighter than a UMaterialInstanceDynamic).
-                // Owned by the collector, released at the end of the frame
-                FColoredMaterialRenderProxy& MaterialProxy = Collector.AllocateOneFrameResource<FColoredMaterialRenderProxy>(
-                    MaterialInterface->GetRenderProxy()
-                  , FLinearColor(ObjectColor) );
-
-                MeshBatch.bWireframe = bWireframe;
-                MeshBatch.VertexFactory = VertexFactory;
-                MeshBatch.MaterialRenderProxy = &MaterialProxy;
-
-                //The LocalVertexFactory uses a uniform buffer to pass primitve data like the local to world transform for this frame and for the previous one
-                //Most of this data can be fetched using the helper function below
-                bool bHasPrecomputedVolumetricLightmap;
-                FMatrix PreviousLocalToWorld;
-                int32 SingleCaptureIndex;
-                bool bOutputVelocity;
-
-                FMatrix LocalToWorld = Object->GetTransform().ToMatrixWithScale();
-
-                // against Z-fighting. at each frame we move the cylce away from the screen
-                // always in the direction of the camera.
-                if( Object->GetClass() == FArianeCycle::StaticClass() )
-                {
-                    if( View->IsPerspectiveProjection() )
-                    {
-                        const FVector C = View->ViewMatrices.GetViewOrigin();
-                        const float DepthEpsilon = 1e-4;
-                        const float s = 1.f + DepthEpsilon;
-                        // note: the scaling is centered on the camera.
-                        LocalToWorld.SetAxis( 0, LocalToWorld.GetScaledAxis( EAxis::X ) * s );
-                        LocalToWorld.SetAxis( 1, LocalToWorld.GetScaledAxis( EAxis::Y ) * s );
-                        LocalToWorld.SetAxis( 2, LocalToWorld.GetScaledAxis( EAxis::Z ) * s );
-                        LocalToWorld.SetOrigin( LocalToWorld.GetOrigin() * s + C * ( 1.f - s ) );
-                    }
-                    else // orthographic
-                    {
-                        double OrthoOffset = 5.0f;
-                        // Note: no scaling required in orthographic projection
-                        LocalToWorld.SetOrigin( LocalToWorld.GetOrigin() + View->GetViewDirection() * OrthoOffset );
-                    }
-                }
-
-                GetScene().GetPrimitiveUniformShaderParameters_RenderThread( GetPrimitiveSceneInfo()
-                                                                           , bHasPrecomputedVolumetricLightmap
-                                                                           , PreviousLocalToWorld
-                                                                           , SingleCaptureIndex
-                                                                           , bOutputVelocity );
-
-                //Alloate a temporary primitive uniform buffer, fill it with the data and set it in the batch element
-                FDynamicPrimitiveUniformBuffer& DynamicPrimitiveUniformBuffer = Collector.AllocateOneFrameResource<FDynamicPrimitiveUniformBuffer>();
-
-                DynamicPrimitiveUniformBuffer.Set( Collector.GetRHICommandList()
-                                                 , LocalToWorld
-                                                 //, VectorLayer->GetComponentToWorld().ToMatrixWithScale() //GetLocalToWorld()
-                                                 , PreviousLocalToWorld
-                                                 , FBoxSphereBounds ( Object->GetBoundingBox().TransformBy( LocalToWorld ) )
-                                                 , FBoxSphereBounds ( Object->GetBoundingBox() )
-                                                 , true
-                                                 , bHasPrecomputedVolumetricLightmap
-                                                // , DrawsVelocity()
-                                                 , bOutputVelocity );
-
-                BatchElement.PrimitiveUniformBufferResource = &DynamicPrimitiveUniformBuffer.UniformBuffer;
-                BatchElement.PrimitiveIdMode = PrimID_DynamicPrimitiveShaderData;
-
-                //Additional data
-                BatchElement.FirstIndex = 0;
-                BatchElement.NumPrimitives = Geometry3D->GetIndexBuffer().GetNumIndices() / 3;
-                BatchElement.MinVertexIndex = 0;
-                BatchElement.MaxVertexIndex = Geometry3D->GetVertexCount() - 1;
-
-                MeshBatch.ReverseCulling = IsLocalToWorldDeterminantNegative();
-                MeshBatch.Type = PT_TriangleList;
-                MeshBatch.DepthPriorityGroup = SDPG_World;
-                MeshBatch.bCanApplyViewModeOverrides = false;
-                MeshBatch.bDisableBackfaceCulling = true; // draw both sides
-                MeshBatch.CastShadow = Painting3DComponent->GetCastShadows();
-
-                //Add the batch to the collector
-                Collector.AddMesh( ViewIndex, MeshBatch );
+                double OrthoOffset = 5.0f;
+                // Note: no scaling required in orthographic projection
+                ItemWorldMatrix.SetOrigin( ItemWorldMatrix.GetOrigin() + View->GetViewDirection() * OrthoOffset );
             }
         }
 
-        if( Object->HasBaseClass( FArianePath::StaticClass() ) )
-        {
-            FArianePath* Path = static_cast<FArianePath*>(Object);
+        GetScene().GetPrimitiveUniformShaderParameters_RenderThread( GetPrimitiveSceneInfo()
+                                                                   , bHasPrecomputedVolumetricLightmap
+                                                                   , PreviousLocalToWorld
+                                                                   , SingleCaptureIndex
+                                                                   , bOutputVelocity );
 
-            // for debugging purpose (flag "r.Ariane.ShowNormals")
-            if ( CVarShowArianeNormals.GetValueOnRenderThread() )
-            {
-                const FTransform& PathTransform = Path->GetTransform();
+        //Alloate a temporary primitive uniform buffer, fill it with the data and set it in the batch element
+        FDynamicPrimitiveUniformBuffer& DynamicPrimitiveUniformBuffer = Collector.AllocateOneFrameResource<FDynamicPrimitiveUniformBuffer>();
 
-                for ( FArianeVertex* Vertex : Path->GetVertices() )
-                {
-                    FVector VertexWorldPosition = PathTransform.TransformPosition( Vertex->GetPosition() );
-                    FVector VertexWorldNormal = PathTransform.TransformVector( Vertex->GetNormal() );
+        DynamicPrimitiveUniformBuffer.Set( Collector.GetRHICommandList()
+                                         , ItemWorldMatrix
+                                         , PreviousLocalToWorld
+                                         , FBoxSphereBounds ( Item.BoundingBox.TransformBy( ItemWorldMatrix ) )
+                                         , FBoxSphereBounds ( Item.BoundingBox )
+                                         , true
+                                         , bHasPrecomputedVolumetricLightmap
+                                         , bOutputVelocity );
 
-                    PDI->DrawLine( VertexWorldPosition
-                                 , VertexWorldPosition + ( VertexWorldNormal * 200.0f )
-                                 , FLinearColor::Green
-                                 , SDPG_World
-                                 , 1.0f );
-                }
-            }
-        }
+        BatchElement.PrimitiveUniformBufferResource = &DynamicPrimitiveUniformBuffer.UniformBuffer;
+        BatchElement.PrimitiveIdMode = PrimID_DynamicPrimitiveShaderData;
 
-        return FArianeObject::ETraversalReturnValue::Continue;
-    } );
+        //Additional data
+        BatchElement.FirstIndex = 0;
+        BatchElement.NumPrimitives = Item.Geometry3D->GetIndexBuffer().GetNumIndices() / 3;
+        BatchElement.MinVertexIndex = 0;
+        BatchElement.MaxVertexIndex = Item.Geometry3D->GetVertexCount() - 1;
 
-    Drawing->InstancedObjectsAccessRW.Unlock();
+        MeshBatch.ReverseCulling = IsLocalToWorldDeterminantNegative();
+        MeshBatch.Type = PT_TriangleList;
+        MeshBatch.DepthPriorityGroup = SDPG_World;
+        MeshBatch.bCanApplyViewModeOverrides = false;
+        MeshBatch.bDisableBackfaceCulling = true; // draw both sides
+        MeshBatch.CastShadow = bCastShadows;
+
+        //Add the batch to the collector
+        Collector.AddMesh( ViewIndex, MeshBatch );
+    }
+
+    // for debugging purpose (flag "r.Ariane.ShowNormals"): computed on the game thread
+    for( const FRay3f& NormalRay : Item.NormalRays )
+    {
+        PDI->DrawLine( Item.WorldMatrix.TransformPosition( FVector( NormalRay.Origin ) )
+                     , Item.WorldMatrix.TransformPosition( FVector( NormalRay.PointAt( 200.0f ) ) )
+                     , FLinearColor::Green
+                     , SDPG_World
+                     , 1.0f );
+    }
 }
 
 void
@@ -354,27 +355,23 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
 {
     for( int32 ViewIndex = 0; ViewIndex < Views.Num(); ViewIndex++ )
     {
-        const FSceneView* View = Views[ViewIndex];
-
-        if( VectorLayer )
+        if( bLayerVisible )
         {
-            if( VectorLayer->IsVisible() )
+            for( const FArianeMeshRenderItem& Item : MeshItems )
             {
-                GetDrawingDynamicMeshElements( ViewFamily
-                                             , Collector
-                                             , ViewIndex );
+                // Invisible: hidden, or a deleted mesh whose Geometry3D must not be read
+                if( Item.bVisible )
+                {
+                    DrawMeshItem( Item, ViewFamily, ViewIndex, Collector );
+                }
             }
+        }
 
-            // Render bounds manually because it's a bit complicated to render them when using custom proxies like this one.
-            if ( ViewFamily.EngineShowFlags.Bounds )
-            {
-                RenderBounds(
-                    Collector.GetPDI(ViewIndex),
-                    ViewFamily.EngineShowFlags,
-                    VectorLayer->GetBounds(),
-                    true
-                );
-            }
+        // Render bounds manually because it's a bit complicated to render them when using custom proxies like this one.
+        // The proxy's bounds: the layer is a game thread object
+        if( ViewFamily.EngineShowFlags.Bounds )
+        {
+            RenderBounds( Collector.GetPDI( ViewIndex ), ViewFamily.EngineShowFlags, GetBounds(), true );
         }
     }
 }
@@ -504,7 +501,58 @@ UArianeLayerVector::GetUsedMaterials( TArray<UMaterialInterface*>& OutUsedMateri
 FPrimitiveSceneProxy*
 UArianeLayerVector::CreateSceneProxy()
 {
-    return new FArianeGeometryProxy( GetScene()->GetFeatureLevel(), this );
+    // The world exists now: the meshes built before have no vertex factory
+    Drawing->InitVertexFactories();
+
+    return new FArianeGeometryProxy( GetScene()->GetFeatureLevel(), this, Drawing->GetRenderItems() );
+}
+
+void
+UArianeLayerVector::EnqueueRenderItem( int32 Index, const FArianeMeshRenderItem& Item )
+{
+    FArianeGeometryProxy* Proxy = static_cast<FArianeGeometryProxy*>( SceneProxy );
+
+    // The proxy is destroyed by a render command too: this one runs before
+    if( Proxy )
+    {
+        ENQUEUE_RENDER_COMMAND( ArianeEnqueueRenderItem )(
+            [ Proxy, Index, Item ]( FRHICommandListImmediate& RHICmdList )
+            {
+                Proxy->SetMeshItem_RenderThread( Index, Item );
+            } );
+    }
+}
+
+void
+UArianeLayerVector::EnqueueRenderItems( const TArray<FArianeMeshRenderItem>& Items )
+{
+    FArianeGeometryProxy* Proxy = static_cast<FArianeGeometryProxy*>( SceneProxy );
+
+    if( Proxy )
+    {
+        ENQUEUE_RENDER_COMMAND( ArianeEnqueueRenderItems )(
+            [ Proxy, ItemsCopy = CopyTemp( Items ) ]( FRHICommandListImmediate& RHICmdList ) mutable
+            {
+                Proxy->SetMeshItems_RenderThread( MoveTemp( ItemsCopy ) );
+            } );
+    }
+}
+
+// static
+void
+UArianeLayerVector::RebuildAllRenderItems()
+{
+    // The detached drawings are rebuilt when attached (SetDrawing)
+    for( TObjectIterator<UArianeLayerVector> It; It; ++It )
+    {
+        UArianeDrawing* LayerDrawing = It->GetDrawing();
+
+        // Null for the CDO and the layers never registered
+        if( LayerDrawing )
+        {
+            LayerDrawing->RebuildRenderItems();
+        }
+    }
 }
 
 FBoxSphereBounds
@@ -619,8 +667,16 @@ UArianeLayerVector::SetDrawing( UArianeDrawing* InDrawing, bool bTriggerEvent )
     if( bTriggerEvent )
         OnPreDrawingChanged.Broadcast();
 
+    // Only the displayed drawing knows its layer. Null on the first call (OnRegister creates the default drawing)
+    if( Drawing )
+    {
+        Drawing->SetVectorLayer( nullptr );
+    }
+
     Drawing = InDrawing;
     Drawing->SetVectorLayer( this );
+    // Changed while detached (Hierarchy, r.Ariane.ShowNormals, editor HUD color)
+    Drawing->RebuildRenderItems();
 
     MarkRenderStateDirty();
 

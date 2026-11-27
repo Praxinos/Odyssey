@@ -5,6 +5,7 @@
 #include "ArianeDrawing.h"
 #include "ArianeLayerVector.h"
 #include "ArianeLayerStack.h"
+#include "ArianeMesh.h"
 #include "ArianePainting3DActor.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianePath.h"
@@ -33,6 +34,7 @@ UArianeDrawing::BeginDestroy()
 
 UArianeDrawing::UArianeDrawing(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
+    , bRenderItemsNeedRebuild ( true )
     , bUpdateUsedMaterials ( true )
     , bResetOnRegister ( false )
 {
@@ -40,7 +42,8 @@ UArianeDrawing::UArianeDrawing(const FObjectInitializer& ObjectInitializer)
 }
 
 UArianeDrawing::UArianeDrawing()
-    : bUpdateUsedMaterials ( true )
+    : bRenderItemsNeedRebuild ( true )
+    , bUpdateUsedMaterials ( true )
     , bResetOnRegister ( false )
 {
     ResetHierarchy();
@@ -323,9 +326,7 @@ UArianeDrawing::Animate( const FArianeDrawingKeyData* KeyData, const FArianeDraw
 FArianeObject*
 UArianeDrawing::AllocObject( const FName& InName, EArianeAllocationModel AllocationModel )
 {
-    InstancedObjectsAccessRW.Lock();
     InstancedObjects.Add( FInstancedStruct::Make<FArianeObject>( this, InName, EArianeAllocationModel::InstancedStruct ) );
-    InstancedObjectsAccessRW.Unlock();
 
     FArianeObject* NewObject = InstancedObjects.Last().GetMutablePtr<FArianeObject>();
 
@@ -342,9 +343,7 @@ UArianeDrawing::AllocGroup( const FName& InName
 
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
-        InstancedObjectsAccessRW.Lock();
         InstancedObjects.Add( FInstancedStruct::Make<FArianeGroup>( this, InName, AllocationModel ) );
-        InstancedObjectsAccessRW.Unlock();
 
         NewGroup = InstancedObjects.Last().GetMutablePtr<FArianeGroup>();
     }
@@ -370,9 +369,7 @@ UArianeDrawing::AllocCycle( UMaterialInterface* InMaterialInterface
 
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
-        InstancedObjectsAccessRW.Lock();
         InstancedObjects.Add( FInstancedStruct::Make<FArianeCycle>( this, InName, AllocationModel ) );
-        InstancedObjectsAccessRW.Unlock();
 
         NewCycle = InstancedObjects.Last().GetMutablePtr<FArianeCycle>();
     }
@@ -406,14 +403,12 @@ UArianeDrawing::AllocEllipse( UMaterialInterface* InMaterialInterface
 
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
-        InstancedObjectsAccessRW.Lock();
         InstancedObjects.Add( FInstancedStruct::Make<FArianeEllipse>( this
                                                                     , InName
                                                                     , RadiusX
                                                                     , RadiusY
                                                                     , StrokeWidth
                                                                     , AllocationModel ) );
-        InstancedObjectsAccessRW.Unlock();
 
         Ellipse = InstancedObjects.Last().GetMutablePtr<FArianeEllipse>();
     }
@@ -452,14 +447,12 @@ UArianeDrawing::AllocLine( UMaterialInterface* InMaterialInterface
 
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
-        InstancedObjectsAccessRW.Lock();
         InstancedObjects.Add( FInstancedStruct::Make<FArianeLine>( this
                                                                  , InName
                                                                  , StartPoint
                                                                  , EndPoint
                                                                  , StrokeWidth
                                                                  , AllocationModel ) );
-        InstancedObjectsAccessRW.Unlock();
 
         Line = InstancedObjects.Last().GetMutablePtr<FArianeLine>();
     }
@@ -498,14 +491,12 @@ UArianeDrawing::AllocPolygon( UMaterialInterface* InMaterialInterface
 
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
-        InstancedObjectsAccessRW.Lock();
         InstancedObjects.Add( FInstancedStruct::Make<FArianePolygon>( this
                                                                     , InName
                                                                     , CornerCount
                                                                     , Radius
                                                                     , StrokeWidth
                                                                     , AllocationModel ) );
-        InstancedObjectsAccessRW.Unlock();
 
         Polygon = InstancedObjects.Last().GetMutablePtr<FArianePolygon>();
     }
@@ -544,14 +535,12 @@ UArianeDrawing::AllocRectangle( UMaterialInterface* InMaterialInterface
 
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
-        InstancedObjectsAccessRW.Lock();
         InstancedObjects.Add( FInstancedStruct::Make<FArianeRectangle>( this
                                                                       , InName
                                                                       , Width
                                                                       , Height
                                                                       , StrokeWidth
                                                                       , AllocationModel ) );
-        InstancedObjectsAccessRW.Unlock();
 
         Rectangle = InstancedObjects.Last().GetMutablePtr<FArianeRectangle>();
     }
@@ -587,9 +576,7 @@ UArianeDrawing::AllocPath( UMaterialInterface* InMaterialInterface
 
     if( AllocationModel == EArianeAllocationModel::InstancedStruct )
     {
-        InstancedObjectsAccessRW.Lock();
         InstancedObjects.Add( FInstancedStruct::Make<FArianePath>( this, InName, AllocationModel ) );
-        InstancedObjectsAccessRW.Unlock();
 
         NewPath = InstancedObjects.Last().GetMutablePtr<FArianePath>();
     }
@@ -666,6 +653,84 @@ UArianeDrawing::Update( bool bInteractive )
     }
 
     RootGroupID.GetObject( this )->Update( ObjectUpdateFlags, true );
+
+    // Detached: rebuilt when attached again (UArianeLayerVector::SetDrawing)
+    if( bRenderItemsNeedRebuild && VectorLayer.IsValid() )
+    {
+        RebuildRenderItems();
+    }
+}
+
+const TArray<FArianeMeshRenderItem>&
+UArianeDrawing::GetRenderItems() const
+{
+    return RenderItems;
+}
+
+FArianeMeshRenderItem&
+UArianeDrawing::GetRenderItem( int32 Index )
+{
+    return RenderItems[Index];
+}
+
+void
+UArianeDrawing::EnqueueRenderItem( int32 Index )
+{
+    // Detached drawing: nothing displays it
+    if( VectorLayer.IsValid() )
+    {
+        VectorLayer->EnqueueRenderItem( Index, RenderItems[Index] );
+    }
+}
+
+void
+UArianeDrawing::RebuildRenderItems()
+{
+    // Game thread only: filled in place
+    RenderItems.Reset();
+
+    FArianeObject::Traverse( RootGroupID.GetObject( this )
+                           , FArianeObject::ETraversalPolicy::AllChildren
+                           , [ this ]( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+        {
+            if( Object->HasBaseClass( FArianeMesh::StaticClass() ) )
+            {
+                FArianeMesh* Mesh = static_cast<FArianeMesh*>(Object);
+
+                Mesh->SetRenderIndex( RenderItems.Num() );
+                Mesh->UpdateRenderItem( RenderItems.AddDefaulted_GetRef() );
+            }
+
+            return FArianeObject::ETraversalReturnValue::Continue;
+        } );
+
+    if( VectorLayer.IsValid() )
+    {
+        VectorLayer->EnqueueRenderItems( RenderItems );
+    }
+
+    bRenderItemsNeedRebuild = false;
+}
+
+void
+UArianeDrawing::InitVertexFactories()
+{
+    FArianeObject::Traverse( RootGroupID.GetObject( this )
+                           , FArianeObject::ETraversalPolicy::AllChildren
+                           , []( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+        {
+            if( Object->HasBaseClass( FArianeMesh::StaticClass() ) )
+            {
+                FArianeMeshGeometry3D& Geometry3D = static_cast<FArianeMesh*>(Object)->GetGeometry3D();
+
+                if( Geometry3D.GetVertexFactory() == nullptr )
+                {
+                    Geometry3D.InitVertexFactory();
+                }
+            }
+
+            return FArianeObject::ETraversalReturnValue::Continue;
+        } );
 }
 
 void
@@ -710,21 +775,25 @@ UArianeDrawing::Invalidate()
         VectorLayer->Invalidate();
     }
 
-    // check for materials
-    if( bUpdateUsedMaterials == false )
-    {
-        FArianeObject::Traverse( RootGroupID.GetObject( this )
-                               , FArianeObject::ETraversalPolicy::InvalidatedChildren
-                               , [ this ] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+    // check for materials and render items.
+    // Not skipped when the materials are already to update: the Hierarchy flag is needed too
+    FArianeObject::Traverse( RootGroupID.GetObject( this )
+                           , FArianeObject::ETraversalPolicy::InvalidatedChildren
+                           , [ this ] ( FArianeObject* Object ) -> FArianeObject::ETraversalReturnValue
+        {
+            if( Object->GetInvalidationFlags().Color || Object->GetInvalidationFlags().Hierarchy )
             {
-                if( Object->GetInvalidationFlags().Color || Object->GetInvalidationFlags().Hierarchy )
-                {
-                    bUpdateUsedMaterials = true;
-                }
+                bUpdateUsedMaterials = true;
+            }
 
-                return FArianeObject::ETraversalReturnValue::Continue;
-            } );
-    }
+            if( Object->GetInvalidationFlags().Hierarchy )
+            {
+                // Meshes added, removed or reordered: the RenderIndex change
+                bRenderItemsNeedRebuild = true;
+            }
+
+            return FArianeObject::ETraversalReturnValue::Continue;
+        } );
 }
 
 /*
@@ -770,14 +839,10 @@ UArianeDrawing::ResetHierarchy()
 void
 UArianeDrawing::DeleteInstancedObject( FArianeObject* Object )
 {
-    InstancedObjectsAccessRW.Lock();
-
     InstancedObjects.RemoveAll( [Object]( FInstancedStruct& Struct ) -> bool
     {
         return ( Object == Struct.GetPtr<FArianeObject>() ) ? true : false;
     } );
-
-    InstancedObjectsAccessRW.Unlock();
 }
 
 void

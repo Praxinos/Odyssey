@@ -11,6 +11,7 @@
 #include "ArianeMesh.generated.h"
 
 class UMaterialInterface;
+struct FArianeMeshRenderItem;
 
 // The GPU buffers of a mesh (path, cycle). The buffers are only changed by render commands
 class ARIANE_API FArianeMeshGeometry3D
@@ -20,6 +21,9 @@ class ARIANE_API FArianeMeshGeometry3D
         FArianeMeshGeometry3D( FArianeObject* InObject );
 
         virtual void Build() = 0;
+
+        // After the commands already enqueued (hidden item, buffer updates): the destructor runs on the render thread
+        static void DeleteOnRenderThread( FArianeMeshGeometry3D* Geometry3D );
 
         const uint32 GetVertexCount() const;
         const FRawStaticIndexBuffer& GetIndexBuffer() const;
@@ -70,6 +74,20 @@ public:
     void SetMaterial( UMaterialInterface* InMaterialInterface );
     FArianeMeshGeometry3D& GetGeometry3D();
 
+public:
+    virtual void ResetDrawing( UArianeDrawing* InDrawing ) override;
+    // Fills RenderItem from this mesh (see the top of ArianeLayerVector.cpp)
+    virtual void UpdateRenderItem( FArianeMeshRenderItem& RenderItem );
+    // Rewrites this mesh's item in the drawing and enqueues it
+    virtual void RefreshRenderItem() override;
+    // FArianeObject::UpdateTransform computed a new world matrix
+    void RefreshRenderItemTransform();
+    void SetRenderIndex( int32 InRenderIndex );
+
+protected:
+    // Before the Geometry3D is deleted: the proxy skips invisible items
+    void HideRenderItem();
+
 protected:
     UPROPERTY( EditAnywhere )
     FColor Color;
@@ -79,6 +97,8 @@ protected:
 
 protected:
     FArianeMeshGeometry3D* Geometry3D;
+    // Index of this mesh's item in the drawing's render items, assigned by RebuildRenderItems. Runtime only
+    int32 RenderIndex;
 };
 
 template<>

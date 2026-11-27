@@ -6,6 +6,7 @@
 
 // Unreal headers
 #include "CoreMinimal.h"
+#include "HAL/IConsoleManager.h"
 #include "StructUtils/InstancedStruct.h"
 // Ariane Headers
 #include "ArianeID.h"
@@ -13,6 +14,7 @@
 #include "ArianeLayerVectorEnums.h"
 #include "ArianeCoreEnums.h"
 #include "ArianeGraph.h"
+#include "ArianeMeshRenderItem.h"
 #include "ArianeLayerVector.generated.h"
 
 struct FArianeObject;
@@ -28,11 +30,23 @@ struct FArianePolygon;
 
 class UArianeLayerVector;
 
+// See the comment at the top of ArianeLayerVector.cpp
+extern TAutoConsoleVariable<bool> CVarShowArianeNormals;
+
 class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
 {
     public:
         ~FArianeGeometryProxy();
-        FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLevel, UArianeLayerVector* VectorLayer );
+        FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLevel
+                            , UArianeLayerVector* VectorLayer
+                            , const TArray<FArianeMeshRenderItem>& InMeshItems );
+
+        // A material that can't be used on a static mesh is replaced by the default surface material
+        static UMaterialInterface* GetMeshCompatibleMaterial( UMaterialInterface* MaterialInterface );
+
+        // Enqueued by UArianeLayerVector::EnqueueRenderItem(s)
+        void SetMeshItem_RenderThread( int32 Index, const FArianeMeshRenderItem& Item );
+        void SetMeshItems_RenderThread( TArray<FArianeMeshRenderItem>&& InMeshItems );
 
         virtual SIZE_T GetTypeHash() const override;
         virtual uint32 GetMemoryFootprint( void ) const override;
@@ -42,13 +56,21 @@ class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
                                            , const FSceneViewFamily& ViewFamily
                                            , uint32 VisibilityMap
                                            , FMeshElementCollector& Collector) const override;
-        void GetDrawingDynamicMeshElements( const FSceneViewFamily& ViewFamily
-                                          , FMeshElementCollector& Collector
-                                          , int32 ViewIndex ) const;
         virtual void DrawStaticElements( FStaticPrimitiveDrawInterface * PDI ) override;
 
     protected:
-        UArianeLayerVector* VectorLayer;
+        void DrawMeshItem( const FArianeMeshRenderItem& Item
+                         , const FSceneViewFamily& ViewFamily
+                         , int32 ViewIndex
+                         , FMeshElementCollector& Collector ) const;
+
+    protected:
+        // Render thread only: copy of the drawing's items
+        TArray<FArianeMeshRenderItem> MeshItems;
+        // Layer settings captured here: a change recreates the proxy (MarkRenderStateDirty)
+        // UArianeLayer::IsVisible: includes the parent folders
+        bool bLayerVisible;
+        bool bCastShadows;
         FMaterialRelevance MaterialRelevance;
 };
 
@@ -108,6 +130,12 @@ public:
     void SetOverrideDrawingSettings(bool bInOverrideDrawingSettings);
     void SetDrawingDistanceToPlane( float InDrawingDistanceToPlane );
     float GetDrawingDistanceToPlane();
+
+    // Game thread. No proxy: nothing to do, the next CreateSceneProxy copies the whole array
+    void EnqueueRenderItem( int32 Index, const FArianeMeshRenderItem& Item );
+    void EnqueueRenderItems( const TArray<FArianeMeshRenderItem>& Items );
+    // The settings stored in every item changed (normals, editor HUD color): the displayed drawings rebuild their items
+    static void RebuildAllRenderItems();
 
 protected:
     void BindDelegates();

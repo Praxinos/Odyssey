@@ -102,6 +102,10 @@ public:
     bool GetCastShadows() const;
     void SetCastShadows(bool bValue);
 
+protected:
+    // The proxies capture bCastShadows
+    void MarkAllLayersRenderStateDirty();
+
 private:
     virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
 

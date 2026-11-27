@@ -167,14 +167,13 @@ FArianeEditorStyle::Init()
     Set( "ArianeEditor.DrawingOrientation.LayerDefined20", new IMAGE_BRUSH_SVG( "ArianeEditor/drawing_orientation_layer_defined", Icon20x20 ) );
 
     // Ariane Editor Scene Tree View
-    Set( "ArianeEditor.SceneTreeView.Paintgroup", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/paintgroup", Icon16x16 ) );
-    Set( "ArianeEditor.SceneTreeView.Path", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/path", Icon16x16 ) );
-    Set( "ArianeEditor.SceneTreeView.Ellipse", new IMAGE_BRUSH_SVG("OdysseyVectorSceneTreeView/primitive_ellipse", Icon16x16));
-    Set( "ArianeEditor.SceneTreeView.Line", new IMAGE_BRUSH_SVG("OdysseyVectorSceneTreeView/primitive_line", Icon16x16));
-    Set( "ArianeEditor.SceneTreeView.Polygon", new IMAGE_BRUSH_SVG("OdysseyVectorSceneTreeView/primitive_polygone", Icon16x16));
-    Set( "ArianeEditor.SceneTreeView.Rectangle", new IMAGE_BRUSH_SVG("OdysseyVectorSceneTreeView/primitive_rectangle", Icon16x16));
-    Set( "ArianeEditor.SceneTreeView.Group", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/group", Icon16x16 ) );
-    Set( "ArianeEditor.SceneTreeView.MenuIcon", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/MenuIcon", Icon16x16 ) );
+    Set( "ArianeEditor.SceneTreeView.Path", new IMAGE_BRUSH_SVG( "ArianeEditor/SceneTreeView/Path", Icon16x16 ) );
+    Set( "ArianeEditor.SceneTreeView.Ellipse", new IMAGE_BRUSH_SVG("ArianeEditor/SceneTreeView/Primitive_ellipse", Icon16x16));
+    Set( "ArianeEditor.SceneTreeView.Line", new IMAGE_BRUSH_SVG("ArianeEditor/SceneTreeView/Primitive_line", Icon16x16));
+    Set( "ArianeEditor.SceneTreeView.Polygon", new IMAGE_BRUSH_SVG("ArianeEditor/SceneTreeView/Primitive_polygone", Icon16x16));
+    Set( "ArianeEditor.SceneTreeView.Rectangle", new IMAGE_BRUSH_SVG("ArianeEditor/SceneTreeView/Primitive_rectangle", Icon16x16));
+    Set( "ArianeEditor.SceneTreeView.Cycle", new IMAGE_BRUSH_SVG( "ArianeEditor/SceneTreeView/Cycle", Icon16x16 ) );
+    Set( "ArianeEditor.SceneTreeView.Group", new IMAGE_BRUSH_SVG( "ArianeEditor/SceneTreeView/Group", Icon16x16 ) );
 
     Set("ArianeEditor.SceneTreeView.IsVisibleToggle", FCheckBoxStyle()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16

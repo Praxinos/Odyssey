@@ -68,6 +68,7 @@ public:
 
 protected:
     static ETraversalReturnValue Traverse_Private( UArianeLayerFolder* FolderLayer, TFunctionRef<ETraversalReturnValue(UArianeLayer*)> Callback );
+    virtual void OnVisibilityChanged() override;
 
 
 protected:

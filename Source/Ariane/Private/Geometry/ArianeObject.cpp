@@ -10,6 +10,7 @@
 #include "ArianeLayerVector.h"
 #include "ArianeLayerStack.h"
 #include "ArianeKeyedObject.h"
+#include "ArianeMesh.h"
 // Unreal headers
 #include "StructUtils/InstancedStruct.h"
 
@@ -36,6 +37,7 @@ FArianeObjectInvalidationFlags::AND( const FArianeObjectInvalidationFlags& RHS )
         Tags      &= ((FArianeObjectInvalidationFlags&)RHS).Tags;
         Name      &= ((FArianeObjectInvalidationFlags&)RHS).Name;
         Transform &= ((FArianeObjectInvalidationFlags&)RHS).Transform;
+        Visibility &= ((FArianeObjectInvalidationFlags&)RHS).Visibility;
     }
 
     return *this;
@@ -53,6 +55,7 @@ FArianeObjectInvalidationFlags::OR( const FArianeObjectInvalidationFlags& RHS )
         Tags      |= ((FArianeObjectInvalidationFlags&)RHS).Tags;
         Name      |= ((FArianeObjectInvalidationFlags&)RHS).Name;
         Transform |= ((FArianeObjectInvalidationFlags&)RHS).Transform;
+        Visibility |= ((FArianeObjectInvalidationFlags&)RHS).Visibility;
     }
 
     return *this;
@@ -68,6 +71,7 @@ FArianeObjectInvalidationFlags::SetAll()
     Tags      = 1;
     Name      = 1;
     Transform = 1;
+    Visibility = 1;
 
     return *this;
 }
@@ -82,6 +86,7 @@ FArianeObjectInvalidationFlags::Clear()
     Tags      = 0;
     Name      = 0;
     Transform = 0;
+    Visibility = 0;
 
     return *this;
 }
@@ -95,7 +100,8 @@ FArianeObjectInvalidationFlags::HasAny()
           || Color
           || Tags
           || Name
-          || Transform );
+          || Transform
+          || Visibility );
 }
 
 
@@ -556,6 +562,8 @@ FArianeObject::Update( EUpdateFlags UpdateFlags, bool Recurse )
 
     UpdateBoundingBox( UpdateFlags );
 
+    // After UpdateBoundingBox: the item copies the new bounding box
+    RefreshRenderItem();
 
     if( EnumHasAllFlags( UpdateFlags, EUpdateFlags::KeepInvalidated ) == false )
     {
@@ -702,9 +710,8 @@ FArianeObject::UpdateTransform()
             , FArianeObject::ETraversalPolicy::AllChildren
             , []( FArianeObject* Object  ) -> ETraversalReturnValue
         {
-            UArianeDrawing* Drawing = Object->GetDrawing();
             FArianeObject* Parent = Object->GetParent();
-            UArianeLayerVector* VectorLayer = Drawing->GetVectorLayer().Get();
+            UArianeLayerVector* VectorLayer = Object->GetVectorLayer();
 
             if( VectorLayer )
             {
@@ -718,6 +725,12 @@ FArianeObject::UpdateTransform()
                     Object->WorldTransform = Object->LocalTransform * ParentWorldTransform;
 
                     Object->WorldTransformVersion = ParentWorldTransformVersion;
+
+                    // The render items hold a copy of the world matrix
+                    if( Object->HasBaseClass( FArianeMesh::StaticClass() ) )
+                    {
+                        static_cast<FArianeMesh*>(Object)->RefreshRenderItemTransform();
+                    }
                 }
             }
 
@@ -730,7 +743,33 @@ FArianeObject::UpdateTransform()
 UArianePainting3DComponent*
 FArianeObject::GetPainting3DComponent()
 {
-    return Drawing ? Drawing->GetVectorLayer()->GetLayerStack()->GetPainting3DComponent() : nullptr;
+    UArianeLayerVector* VectorLayer = GetVectorLayer();
+
+    return VectorLayer ? VectorLayer->GetLayerStack()->GetPainting3DComponent() : nullptr;
+}
+
+UArianeLayerVector*
+FArianeObject::GetVectorLayer()
+{
+    return Drawing ? Drawing->GetVectorLayer().Get() : nullptr;
+}
+
+void
+FArianeObject::RefreshRenderItem()
+{
+}
+
+void
+FArianeObject::InvalidateTree( const FArianeObjectInvalidationFlags& InInvalidationFlags )
+{
+    Traverse( this
+            , ETraversalPolicy::AllChildren
+            , [ &InInvalidationFlags ]( FArianeObject* Object ) -> ETraversalReturnValue
+        {
+            Object->Invalidate( InInvalidationFlags );
+
+            return ETraversalReturnValue::Continue;
+        } );
 }
 
 void
@@ -1114,7 +1153,7 @@ FArianeObject::GetHUDForegroundColor()
                                              , true );
 
     return Group ? Group->GetHUDForegroundColor()
-                 : Drawing->GetVectorLayer()->GetLayerStack()->GetPainting3DComponent()->GetHUDForegroundColor();
+                 : GetVectorLayer()->GetLayerStack()->GetPainting3DComponent()->GetHUDForegroundColor();
 }
 #endif
 
@@ -1122,6 +1161,9 @@ void
 FArianeObject::SetVisible( bool bInVisible )
 {
     bVisible = bInVisible;
+
+    // The render items store the inherited visibility
+    InvalidateTree( FArianeObjectInvalidationFlags().SetVisibility() );
 }
 
 bool

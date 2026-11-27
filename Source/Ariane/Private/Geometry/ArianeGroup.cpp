@@ -228,18 +228,23 @@ FArianeGroup::SetHUDForegroundColor( const FColor& InHUDForegroundColor )
     HUDForegroundColor = InHUDForegroundColor;
 
     Invalidate( FArianeGroupInvalidationFlags().SetHUDForegroundColor() );
+    // The meshes below inherit it (FArianeObject::GetHUDForegroundColor)
+    InvalidateTree( FArianeObjectInvalidationFlags().SetColor() );
 }
 
 void
 FArianeGroup::UseEditorHUDForegroundColor( bool bInUseEditorHUDForegroundColor )
 {
     bUseEditorHUDForegroundColor = bInUseEditorHUDForegroundColor;
+
+    // The meshes below inherit it (FArianeObject::GetHUDForegroundColor)
+    InvalidateTree( FArianeObjectInvalidationFlags().SetColor() );
 }
 
 FColor
 FArianeGroup::GetHUDForegroundColor()
 {
-    return bUseEditorHUDForegroundColor ? Drawing->GetVectorLayer()->GetLayerStack()->GetPainting3DComponent()->GetHUDForegroundColor()
+    return bUseEditorHUDForegroundColor ? GetVectorLayer()->GetLayerStack()->GetPainting3DComponent()->GetHUDForegroundColor()
                                         : HUDForegroundColor;
 }
 

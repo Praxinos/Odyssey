@@ -12,6 +12,7 @@
 #include "ArianeLayerVector.h"
 #include "ArianeLayerStack.h"
 #include "ArianePainting3DComponent.h"
+#include "ArianeMeshRenderItem.h"
 // Unreal headers
 #include "Engine/EngineBaseTypes.h"
 #include "StaticMeshResources.h"
@@ -253,6 +254,24 @@ FArianePath::FArianePath( UArianeDrawing* InDrawing
 }
 
 void
+FArianePath::UpdateRenderItem( FArianeMeshRenderItem& RenderItem )
+{
+    Super::UpdateRenderItem( RenderItem );
+
+    // for debugging purpose
+    if( CVarShowArianeNormals.GetValueOnGameThread() )
+    {
+        RenderItem.NormalRays.Reserve( Vertices.Num() );
+
+        for( FArianeVertex* Vertex : Vertices )
+        {
+            // true: the normal is already normalized
+            RenderItem.NormalRays.Emplace( FVector3f( Vertex->GetPosition() ), FVector3f( Vertex->GetNormal() ), true );
+        }
+    }
+}
+
+void
 FArianePath::ResetDrawing( UArianeDrawing* InDrawing )
 {
     Super::ResetDrawing( InDrawing );
@@ -261,7 +280,7 @@ FArianePath::ResetDrawing( UArianeDrawing* InDrawing )
     Segments.Empty();
     InvalidatedSegments.Empty();
     InvalidatedVertices.Empty();
-    delete Geometry3D;
+    FArianeMeshGeometry3D::DeleteOnRenderThread( Geometry3D );
     Geometry3D = new FArianePathGeometry3D( this );
     Chains.Empty();
     CubicSegmentCount = 0;
@@ -1574,7 +1593,7 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
         }
         else
         {
-            FVector RightVector = Path->GetDrawing()->GetVectorLayer()->GetLayerStack()->GetPainting3DComponent()->GetRightVector();
+            FVector RightVector = Path->GetVectorLayer()->GetLayerStack()->GetPainting3DComponent()->GetRightVector();
 
             InOutPreviousPerpendicularVector = SegmentVector.Cross( RightVector );
             InOutPreviousPerpendicularVector.Normalize();
@@ -1829,10 +1848,4 @@ FArianePathGeometry3D::Build()
     }
 
     InitVertexFactory();
-
-    // VectorLayer can be null in animation keys
-    if( Path->GetDrawing()->GetVectorLayer().IsValid() )
-    {
-        Path->GetDrawing()->GetVectorLayer()->MarkRenderStateDirty();
-    }
 }

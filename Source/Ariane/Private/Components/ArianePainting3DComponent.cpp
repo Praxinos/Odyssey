@@ -311,6 +311,11 @@ UArianePainting3DComponent::PostEditChangeProperty( FPropertyChangedEvent& event
     }
     */
 
+    if( event.GetPropertyName() == GET_MEMBER_NAME_CHECKED( UArianePainting3DComponent, bCastShadows ) )
+    {
+        MarkAllLayersRenderStateDirty();
+    }
+
     Super::PostEditChangeProperty( event );
 }
 #endif
@@ -323,6 +328,19 @@ bool UArianePainting3DComponent::GetCastShadows() const
 void UArianePainting3DComponent::SetCastShadows(bool bInCastShadows)
 {
     bCastShadows = bInCastShadows;
+
+    MarkAllLayersRenderStateDirty();
+}
+
+void
+UArianePainting3DComponent::MarkAllLayersRenderStateDirty()
+{
+    UArianeLayerFolder::Traverse( LayerStack->GetRootFolder(), []( UArianeLayer* Layer ) -> UArianeLayer::ETraversalReturnValue
+        {
+            Layer->MarkRenderStateDirty();
+
+            return UArianeLayer::ETraversalReturnValue::Continue;
+        } );
 }
 
 
@@ -381,6 +399,9 @@ void
 UArianePainting3DComponent::SetHUDForegroundColor( const FColor& InHUDForegroundColor )
 {
     HUDForegroundColor = InHUDForegroundColor;
+
+    // Stored in every render item
+    UArianeLayerVector::RebuildAllRenderItems();
 }
 
 #if WITH_EDITOR

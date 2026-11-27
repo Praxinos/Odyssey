@@ -13,6 +13,7 @@
 #include "ArianeEllipse.h"
 #include "ArianeLine.h"
 #include "ArianePolygon.h"
+#include "ArianeCycle.h"
 #include "ArianeDrawing.h"
 #include "ArianeLayerVector.h"
 #include "ArianeLayerStack.h"
@@ -196,6 +197,12 @@ SArianeEditorSceneTreeViewRow::GenerateWidgetForColumn ( const FName& InColumnNa
         {
             ObjectIcon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.SceneTreeView.Path" );
             ObjectIconTooltip = LOCTEXT("ariane-scene-tree-view.object-icon.path.tooltip", "Path");
+        }
+        else
+        if ( Object->HasBaseClass( FArianeCycle::StaticClass() ) )
+        {
+            ObjectIcon = FArianeEditorStyle::Get().GetBrush( "ArianeEditor.SceneTreeView.Cycle" );
+            ObjectIconTooltip = LOCTEXT("ariane-scene-tree-view.object-icon.cycle.tooltip", "Cycle");
         }
         else
         {

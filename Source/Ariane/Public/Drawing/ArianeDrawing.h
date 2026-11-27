@@ -12,6 +12,7 @@
 #include "ArianeLayer.h"
 #include "ArianeCoreEnums.h"
 #include "ArianeGraph.h"
+#include "ArianeMeshRenderItem.h"
 #include "ArianeDrawing.generated.h"
 
 struct FArianeObject;
@@ -158,6 +159,15 @@ public:
     virtual void PostEditImport();
 #endif
 
+    // Game thread. The proxy holds a copy: see the top of ArianeLayerVector.cpp
+    const TArray<FArianeMeshRenderItem>& GetRenderItems() const;
+    FArianeMeshRenderItem& GetRenderItem( int32 Index );
+    // Enqueues one item to the proxy. Detached drawing: nothing
+    void EnqueueRenderItem( int32 Index );
+    // Reassigns the RenderIndex and enqueues the whole array
+    void RebuildRenderItems();
+    // Before the proxy is created: the meshes built before the world existed have no vertex factory
+    void InitVertexFactories();
 
 protected:
     void BindDelegates();
@@ -165,18 +175,23 @@ protected:
     void OnRootObjectInvalidated();
     void UpdateUsedMaterials();
 
+protected:
+    // Declared before InstancedObjects: still alive when the meshes are destroyed (HideRenderItem)
+    TArray<FArianeMeshRenderItem> RenderItems;
+    // Set by a Hierarchy invalidation, consumed at the end of Update
+    bool bRenderItemsNeedRebuild;
+
 public:
     UPROPERTY( EditAnywhere )
     TArray<FInstancedStruct> InstancedObjects;
-
-public:
-    mutable FCriticalSection InstancedObjectsAccessRW;
 
 protected:
     UPROPERTY( EditAnywhere )
     mutable FArianeObjectID RootGroupID;
 
-    UPROPERTY( EditAnywhere )
+    // Only the displayed drawing knows its layer (UArianeLayerVector::SetDrawing).
+    // NonTransactional: an undo would restore the layer of a drawing that isn't displayed anymore (previous sequencer key)
+    UPROPERTY( EditAnywhere, NonTransactional )
     TWeakObjectPtr<UArianeLayerVector> VectorLayer;
 
     // counter to determine how many times the material is used (i.e by how many objects)

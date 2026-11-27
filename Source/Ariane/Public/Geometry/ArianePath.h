@@ -28,6 +28,7 @@ class UMaterial;
 class UArianeDrawing;
 struct FArianePath;
 class UMaterialInterface;
+struct FArianeMeshRenderItem;
 
 UENUM(BlueprintType)
 enum class EArianePathLineType : uint8
@@ -279,6 +280,8 @@ public:
     virtual FArianePathInvalidationFlags& GetInvalidationFlags() override;
     virtual void ResetDrawing( UArianeDrawing* InDrawing ) override;
     virtual void PostReset() override;
+    // Adds the normals (r.Ariane.ShowNormals)
+    virtual void UpdateRenderItem( FArianeMeshRenderItem& RenderItem ) override;
 
 protected:
     void FindChains();

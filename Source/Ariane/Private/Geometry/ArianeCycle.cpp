@@ -127,7 +127,7 @@ FArianeCycle::ResetDrawing( UArianeDrawing* InDrawing )
 {
     Super::ResetDrawing( InDrawing );
 
-    delete Geometry3D;
+    FArianeMeshGeometry3D::DeleteOnRenderThread( Geometry3D );
     Geometry3D = new FArianeCycleGeometry3D( this );
 }
 
@@ -587,11 +587,4 @@ FArianeCycleGeometry3D::Build()
     }
 
     InitVertexFactory();
-
-    // VectorLayer can be null in animation keys
-    if( Cycle->GetDrawing()->GetVectorLayer().IsValid() )
-    {
-        // send the vertex data to the graphic card.
-        Cycle->GetDrawing()->GetVectorLayer()->MarkRenderStateDirty();
-    }
 }

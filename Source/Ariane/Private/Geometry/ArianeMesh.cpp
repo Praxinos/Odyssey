@@ -5,6 +5,7 @@
 #include "ArianeMesh.h"
 #include "ArianeDrawing.h"
 #include "ArianeLayerVector.h"
+#include "ArianeMeshRenderItem.h"
 // Unreal headers
 #include "Engine/World.h"
 
@@ -12,9 +13,7 @@
 
 FArianeMeshGeometry3D::~FArianeMeshGeometry3D()
 {
-    // Some rendering commands use the vertex factory, flush them first
-    FlushRenderingCommands();
-
+    // Render thread (DeleteOnRenderThread): the commands using the vertex factory ran before, no flush needed
     if( VertexFactory )
     {
         PositionBuffer.ReleaseResource();
@@ -25,6 +24,17 @@ FArianeMeshGeometry3D::~FArianeMeshGeometry3D()
 
         delete VertexFactory;
     }
+}
+
+// static
+void
+FArianeMeshGeometry3D::DeleteOnRenderThread( FArianeMeshGeometry3D* Geometry3D )
+{
+    ENQUEUE_RENDER_COMMAND( ArianeDeleteGeometry3D )(
+        [ Geometry3D ]( FRHICommandListImmediate& RHICmdList )
+        {
+            delete Geometry3D;
+        } );
 }
 
 FArianeMeshGeometry3D::FArianeMeshGeometry3D( FArianeObject* InObject )
@@ -72,9 +82,9 @@ const TArray<uint32>& FArianeMeshGeometry3D::GetMeshIndices()
 void
 FArianeMeshGeometry3D::InitVertexFactory()
 {
-    // VectorLayer can be null in orphan Drawings (animation keys)
-    UWorld* World = Object->GetDrawing()->GetVectorLayer().IsValid() ? Object->GetDrawing()->GetVectorLayer()->GetWorld()
-                                                                    : nullptr ;
+    // VectorLayer is null in detached drawings (sequencer keys)
+    UArianeLayerVector* VectorLayer = Object->GetVectorLayer();
+    UWorld* World = VectorLayer ? VectorLayer->GetWorld() : nullptr;
 
     if( World && MeshVertices.Num() && MeshIndices.Num() )
     {
@@ -173,7 +183,9 @@ FArianeMeshGeometry3D::InitVertexFactory()
 
 FArianeMesh::~FArianeMesh()
 {
-    delete Geometry3D;
+    HideRenderItem();
+
+    FArianeMeshGeometry3D::DeleteOnRenderThread( Geometry3D );
 }
 
 FArianeMesh::FArianeMesh()
@@ -194,6 +206,7 @@ FArianeMesh::FArianeMesh( UArianeDrawing* InDrawing
     , Color ( FColor::Black.WithAlpha(255) )
     , Material ( nullptr )
     , Geometry3D ( InGeometry3D )
+    , RenderIndex ( INDEX_NONE )
 {
 }
 
@@ -240,4 +253,75 @@ FArianeMeshGeometry3D&
 FArianeMesh::GetGeometry3D()
 {
     return *Geometry3D;
+}
+
+void
+FArianeMesh::ResetDrawing( UArianeDrawing* InDrawing )
+{
+    // The derived ResetDrawing deletes the Geometry3D: hidden first, in the current drawing
+    HideRenderItem();
+
+    Super::ResetDrawing( InDrawing );
+}
+
+void
+FArianeMesh::UpdateRenderItem( FArianeMeshRenderItem& RenderItem )
+{
+    RenderItem.MeshClass = GetClass();
+    RenderItem.Geometry3D = Geometry3D;
+    RenderItem.Material = FArianeGeometryProxy::GetMeshCompatibleMaterial( Material );
+    RenderItem.Color = FLinearColor( Color );
+#if WITH_EDITOR
+    RenderItem.HUDColor = FLinearColor( GetHUDForegroundColor() );
+#endif
+    RenderItem.WorldMatrix = GetTransform().ToMatrixWithScale();
+    RenderItem.BoundingBox = GetBoundingBox();
+    RenderItem.bVisible = IsVisible( true );
+    // Keeps the buffer: an update of the same path doesn't reallocate. Filled by FArianePath
+    RenderItem.NormalRays.Reset();
+}
+
+void
+FArianeMesh::RefreshRenderItem()
+{
+    // Detached drawing: rebuilt when attached again (UArianeLayerVector::SetDrawing).
+    // INDEX_NONE: added since the last rebuild, which is pending (Hierarchy).
+    // Note: when a rebuild is pending, this item is written twice in the frame (here, then by RebuildRenderItems).
+    // Correct (the commands run in order) and rare (Hierarchy changes only): not worth a test
+    if( GetVectorLayer() && ( RenderIndex != INDEX_NONE ) )
+    {
+        UpdateRenderItem( Drawing->GetRenderItem( RenderIndex ) );
+        Drawing->EnqueueRenderItem( RenderIndex );
+    }
+}
+
+void
+FArianeMesh::RefreshRenderItemTransform()
+{
+    // Called by UpdateTransform, only for an attached drawing
+    if( RenderIndex != INDEX_NONE )
+    {
+        Drawing->GetRenderItem( RenderIndex ).WorldMatrix = GetTransform().ToMatrixWithScale();
+        Drawing->EnqueueRenderItem( RenderIndex );
+    }
+}
+
+void
+FArianeMesh::HideRenderItem()
+{
+    // INDEX_NONE: never in the render items (drawing never displayed, copy from a template, default struct)
+    if( RenderIndex != INDEX_NONE )
+    {
+        // Enqueued before the deletion of the Geometry3D: the proxy never reads it again
+        Drawing->GetRenderItem( RenderIndex ).bVisible = false;
+        Drawing->EnqueueRenderItem( RenderIndex );
+
+        RenderIndex = INDEX_NONE;
+    }
+}
+
+void
+FArianeMesh::SetRenderIndex( int32 InRenderIndex )
+{
+    RenderIndex = InRenderIndex;
 }

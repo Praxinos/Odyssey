@@ -238,6 +238,20 @@ UArianeLayerFolder::Traverse( UArianeLayerFolder* FolderLayer, TFunctionRef<ETra
 }
 
 void
+UArianeLayerFolder::OnVisibilityChanged()
+{
+    Super::OnVisibilityChanged();
+
+    // The proxies capture UArianeLayer::IsVisible, which depends on the parent folders
+    Traverse( this, []( UArianeLayer* Layer ) -> ETraversalReturnValue
+        {
+            Layer->MarkRenderStateDirty();
+
+            return ETraversalReturnValue::Continue;
+        } );
+}
+
+void
 UArianeLayerFolder::InvalidateChildLayer( UArianeLayer* Child )
 {
     InvalidatedChildLayers.Add( Child );

@@ -47,6 +47,7 @@ public:
     FArianeObjectInvalidationFlags& SetTags()      { Tags      = 1; return *this; };
     FArianeObjectInvalidationFlags& SetName()      { Name      = 1; return *this; };
     FArianeObjectInvalidationFlags& SetTransform() { Transform = 1; return *this; };
+    FArianeObjectInvalidationFlags& SetVisibility() { Visibility = 1; return *this; };
 
 public:
     uint32 Selected  : 1 = 0;
@@ -56,6 +57,7 @@ public:
     uint32 Tags      : 1 = 0;
     uint32 Name      : 1 = 0;
     uint32 Transform : 1 = 0;
+    uint32 Visibility : 1 = 0;
 };
 
 USTRUCT(BlueprintType)
@@ -251,6 +253,12 @@ public:
     bool IsExpanded();
     bool IsSelected();
     UArianePainting3DComponent* GetPainting3DComponent();
+    // Null for a detached drawing (not displayed: sequencer key, orphan)
+    UArianeLayerVector* GetVectorLayer();
+    // Rewrites the render item of a mesh (see ArianeLayerVector.cpp). Nothing for the other objects
+    virtual void RefreshRenderItem();
+    // Invalidates this object and every object below it: a change that applies below (inherited visibility, HUD color)
+    void InvalidateTree( const FArianeObjectInvalidationFlags& InInvalidationFlags );
     FArianeTag* GetTagByGuid( const FGuid& InGuid );
     const TArray<FArianeTagID>& GetTags() const;
     TArray<FArianeTagID>& GetTags();
