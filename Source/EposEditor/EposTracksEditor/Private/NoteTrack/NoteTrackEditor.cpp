@@ -84,7 +84,7 @@ FNoteTrackEditor::BuildAddTrackMenu( FMenuBuilder& MenuBuilder ) //override
 {
     MenuBuilder.AddMenuEntry(
         LOCTEXT( "AddTrack", "Note Track" ),
-        LOCTEXT( "AddTooltip", "Adds a new master note track that can play sounds." ),
+        LOCTEXT( "AddTooltip", "Adds a new master note track." ),
         FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "Sequencer.Tracks.Note" ),
         FUIAction(
             FExecuteAction::CreateRaw( this, &FNoteTrackEditor::HandleAddNoteTrackMenuEntryExecute )

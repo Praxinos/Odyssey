@@ -493,7 +493,7 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
 
                                          //---
 
-                                         settingsMenu.BeginSection( "SettingsMiscSection", LOCTEXT( "viewport.settings-section.advanced.label", "Misc" ) );
+                                         settingsMenu.BeginSection( "SettingsMiscSection", LOCTEXT( "viewport.settings-section.misc.label", "Misc" ) );
 
                                          {
                                              FMenuEntryParams params;

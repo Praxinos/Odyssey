@@ -585,7 +585,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_UnlockAllLayers()
     if( !layerStack )
         return;
 
-    FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.unlock-all-layers", "Unock All Layers" ) );
+    FScopedTransaction ScopedTransaction( LOCTEXT( "global-layers-shortcuts.transaction.unlock-all-layers", "Unlock All Layers" ) );
 
     for( UOdysseyLayer* layer : layerStack->GetLayers() )
     {
