@@ -344,6 +344,12 @@ UOdysseyTextureLayerStack::InactivateTextureFastUpdate()
     CompressTexture();
     texture->UpdateResource();
     mTextureFastUpdateSurface = nullptr;
+    // The render target, as large as the texture, is created again when the layers are rendered next.
+    if (RenderTarget)
+    {
+        RenderTarget->ReleaseResource();
+        RenderTarget = nullptr;
+    }
 }
 
 void
@@ -520,9 +526,13 @@ UOdysseyTextureLayerStack::OnPreGlobalObjectPropertyChanged(UObject* iObject, co
     if ( texture != Cast<UTexture2D>(iObject) )
         return;
 
+    // The texture source holds the committed pixels only.
+    RenderWithoutPreview();
     UpdateTextureSource();
-    // Texture->UpdateResource();
-    //FTextureCompilingManager::Get().FinishCompilation({Texture});
+    if (HasPreviewOverrides())
+    {
+        OnRenderPreviewInvalidated({});
+    }
 }
 
 void

@@ -549,9 +549,20 @@ bool FOdysseyTextureLayerStackPreviewTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("An edit session shows the uncommitted edits"), Preview.GetPreview()->GetContext().Overrides.Contains(Layer->GetRenderingId()));
     TestEqual(TEXT("The displayed texture shows the uncommitted edits"), int32(ReadDisplayedAlpha()), 0);
 
+    // A property change of the texture writes its source too, which must not hold the uncommitted edits either.
+    // The Details panel notifies the change through a property chain, as here.
+    FProperty* SRGBProperty = FindFProperty<FProperty>(UTexture::StaticClass(), GET_MEMBER_NAME_CHECKED(UTexture, SRGB));
+    FEditPropertyChain PropertyChain;
+    PropertyChain.AddHead(SRGBProperty);
+    PropertyChain.SetActivePropertyNode(SRGBProperty);
+    Texture->PreEditChange(PropertyChain);
+    TestNotEqual(TEXT("A property change writes the committed pixels into the texture source"), int32(ReadSourceAlpha()), 0);
+    TestEqual(TEXT("The displayed texture still shows the uncommitted edits"), int32(ReadDisplayedAlpha()), 0);
+
     // Leaving the edition writes the texture source, which must not hold the uncommitted edits.
     Stack->InactivateTextureFastUpdate();
     TestNotEqual(TEXT("The texture source holds the committed pixels"), int32(ReadSourceAlpha()), 0);
+    TestNull(TEXT("Leaving the edition releases the render target of the layers"), Stack->RenderTarget.Get());
     Stack->ActivateTextureFastUpdate();
     Stack->SetRenderPreview(Preview.GetPreview());
 

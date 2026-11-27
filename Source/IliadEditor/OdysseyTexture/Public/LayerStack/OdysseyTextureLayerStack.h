@@ -96,6 +96,7 @@ public:
 
     /**
      * @brief Uncompresses the texture to disallow realtime editing
+     * Writes the committed pixels into the texture source, and releases the render target of the layers.
      */
     void InactivateTextureFastUpdate();
 
