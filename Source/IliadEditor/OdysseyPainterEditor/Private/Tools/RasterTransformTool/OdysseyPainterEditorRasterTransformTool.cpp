@@ -190,6 +190,9 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
 
         if (!Perspective)
             ConstrainToRectangle(FVector2D(point.x, point.y));
+
+        // A move keeps the transformed pixels, which the blend places at the new position of the transform area.
+        bBlendPending = true;
     }
     else if (mTransformCaptureMode == EOdysseyTransformCapture::Rotation)
     {
