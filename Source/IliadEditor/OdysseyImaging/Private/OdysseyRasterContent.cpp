@@ -28,13 +28,16 @@ namespace
 /**
  * Lets the garbage collector destroy a migrated legacy texture, whose pixels now live in the tiled image.
  * The texture started compiling its platform data when loaded: the compilation is canceled so that it neither takes
- * memory nor delays the load of the next cells. The garbage collector releases the render resource.
+ * memory nor delays the load of the next cells.
  */
 void ReleaseLegacyTexture(UTexture2D& Texture)
 {
     UObject* const Objects[] = { &Texture };
     FAssetCompilingManager& CompilingManager = FAssetCompilingManager::Get();
     CompilingManager.MarkCompilationAsCanceled(Objects);
+    // The stand-in resource of the canceled build would otherwise keep the texture reporting a compilation no compiling
+    // manager finishes, which prevents unloading its package until the garbage collector destroys it.
+    Texture.ReleaseResource();
     Texture.ClearFlags(RF_Standalone);
     Texture.MarkAsGarbage();
 }

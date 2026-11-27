@@ -279,22 +279,22 @@ ESaveResult SavePackage(TNotNull<UPackage*> Package)
     return ESaveResult::Saved;
 }
 
-/** Returns true when an object of the package, e.g. a texture, still reports an asynchronous compilation. */
-bool IsCompilingObjects(TNotNull<const UPackage*> Package)
+/** Returns an object of the package, e.g. a texture, that still reports an asynchronous compilation, or null. */
+const UObject* FindCompilingObject(TNotNull<const UPackage*> Package)
 {
-    bool bCompiling = false;
-    ForEachObjectWithPackage(Package, [&bCompiling](UObject* Object) -> bool
+    const UObject* CompilingObject = nullptr;
+    ForEachObjectWithPackage(Package, [&CompilingObject](UObject* Object) -> bool
     {
         const IInterface_AsyncCompilation* Compilation = Cast<IInterface_AsyncCompilation>(Object);
         if (Compilation && Compilation->IsCompiling())
         {
-            bCompiling = true;
+            CompilingObject = Object;
             return false;
         }
         // Keeps iterating.
         return true;
     });
-    return bCompiling;
+    return CompilingObject;
 }
 
 /** Unloads the given packages that are still loaded, clean and done compiling, keeping the undo history. */
@@ -320,9 +320,10 @@ void UnloadPackages(const TSet<FName>& PackageNames)
         }
 
         // UnloadPackages() expects every compilation of the package to be known to the compiling managers, see FlushAsyncCompilation().
-        if (IsCompilingObjects(Package))
+        if (const UObject* CompilingObject = FindCompilingObject(Package))
         {
-            UE_LOGF(LogOdysseyTiledImageMigration, Warning, "%ls stays loaded: some of its objects still compile.", *LongPackageName);
+            const FString ObjectName = CompilingObject->GetPathName();
+            UE_LOGF(LogOdysseyTiledImageMigration, Warning, "%ls stays loaded: %ls still compiles (garbage: %d).", *LongPackageName, *ObjectName, int32(!IsValid(CompilingObject)));
             continue;
         }
         PackagesToUnload.Add(Package);
