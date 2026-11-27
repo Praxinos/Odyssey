@@ -41,6 +41,19 @@ uint64 FindUsedPhysicalMemory()
     return Stats.UsedPhysical;
 }
 
+/** Returns the highest physical memory the editor has used since it started, in bytes. */
+uint64 FindPeakUsedPhysicalMemory()
+{
+    const FPlatformMemoryStats Stats = FPlatformMemory::GetStats();
+    return Stats.PeakUsedPhysical;
+}
+
+/** Returns a size in bytes as megabytes, for the log. */
+double ToMegabytes(uint64 Bytes)
+{
+    return static_cast<double>(Bytes) / (1024.0 * 1024.0);
+}
+
 /** How saving a package went. */
 enum class ESaveResult : uint8
 {
@@ -485,23 +498,32 @@ FOdysseyLegacyConversionResult ConvertLegacyPackages(TConstArrayView<FOdysseyLeg
         const FText Progress = FText::Format(ProgressFormat, PackageText);
         SlowTask.EnterProgressFrame(1.0f, Progress);
         const TSet<FName> PackagesBefore = FindLoadedContentPackages();
+        const uint64 PhysicalBefore = FindUsedPhysicalMemory();
         const EOdysseyLegacyConversionOutcome Outcome = ConvertPackage(Package.PackageName, LoadedPackages, UnwritablePackages);
         Result.Outcomes[Index].Outcome = Outcome;
         const TSet<FName> PackagesAfter = FindLoadedContentPackages();
         const TSet<FName> NewPackages = PackagesAfter.Difference(PackagesBefore);
         PackagesToUnload.Append(NewPackages);
+        const uint64 Physical = FindUsedPhysicalMemory();
+        const uint64 PeakPhysical = FindPeakUsedPhysicalMemory();
+        // Measures the conversion of large projects, whose memory the trace does not sample during the modal progress dialog.
+        UE_LOGF(LogOdysseyTiledImageMigration, Display, "%d/%d %ls: outcome %d, %d packages loaded, physical %.0f -> %.0f MB, peak %.0f MB",
+            Index + 1, Packages.Num(), *Package.PackageName.ToString(), static_cast<int32>(Outcome), NewPackages.Num(),
+            ToMegabytes(PhysicalBefore), ToMegabytes(Physical), ToMegabytes(PeakPhysical));
         if (Outcome == EOdysseyLegacyConversionOutcome::NotProcessed)
         {
             Result.bCanceled = true;
             break;
         }
 
-        const uint64 Physical = FindUsedPhysicalMemory();
         if (Physical >= PhysicalAtLastUnload + UnloadThreshold)
         {
+            const int32 UnloadCount = PackagesToUnload.Num();
             UnloadPackages(PackagesToUnload);
             PackagesToUnload.Reset();
             PhysicalAtLastUnload = FindUsedPhysicalMemory();
+            UE_LOGF(LogOdysseyTiledImageMigration, Display, "Unloaded %d packages: physical %.0f -> %.0f MB",
+                UnloadCount, ToMegabytes(Physical), ToMegabytes(PhysicalAtLastUnload));
         }
     }
 
