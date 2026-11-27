@@ -135,6 +135,9 @@ private:
     TSharedPtr<::ULIS::FBlock> mTransformedBlock; // The transformed block
     ::ULIS::FRectI mSelectionBoundingBox;
 
+    /** True when the transformed pixels changed since they were last blended into the edit, which the next tick does. */
+    bool bBlendPending = false;
+
     FInputChord mToolChord; //The current state of the keyboard keys that are pressed while using this tool
 
     /** True while CommitTransform() runs: the selection it changes must not begin a new transform, which the commit clears. */

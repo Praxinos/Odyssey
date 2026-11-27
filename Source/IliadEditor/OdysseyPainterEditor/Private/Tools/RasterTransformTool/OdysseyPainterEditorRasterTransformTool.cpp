@@ -319,7 +319,14 @@ bool UOdysseyPainterEditorRasterTransformTool::OnKeyUp(const FKey& iKey)
 
 void UOdysseyPainterEditorRasterTransformTool::Tick(float iDeltaTime)
 {
-    //Only blend on the tick to synchronize with the FPS of the Editor
+    // Only blend on the tick to synchronize with the FPS of the Editor, and only when the transformed pixels changed:
+    // each blend uploads the whole canvas.
+    if (!bBlendPending)
+    {
+        return;
+    }
+
+    bBlendPending = false;
     BlendTransformAreaToPaintBlock();
 }
 
@@ -640,6 +647,7 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformBlock()
     ClearBlock(mTransformedBlock);
 
     TransformBlockPerspective(mSelectionBlock, mTransformedBlock);
+    bBlendPending = true;
 }
 
 ::ULIS::FRectI UOdysseyPainterEditorRasterTransformTool::GetTransformAreaBoundingRect()
@@ -665,6 +673,7 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformBlock()
 
 void UOdysseyPainterEditorRasterTransformTool::BlendTransformAreaToPaintBlock()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorRasterTransformTool::BlendTransformAreaToPaintBlock);
     if( mTransformAreaHUD )
     {
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
@@ -822,6 +831,7 @@ void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
     mTransformTransactions.Empty();
     mSelectionBlock = nullptr;
     mTransformedBlock = nullptr;
+    bBlendPending = false;
     mLastReferenceRotation = 0;
     mHandles.Empty();
     mTransformToolHUD->EmptyElements();
