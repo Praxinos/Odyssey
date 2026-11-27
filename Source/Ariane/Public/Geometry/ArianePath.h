@@ -17,6 +17,7 @@
 // Ariane Headers
 #include "ArianeID.h"
 #include "ArianeObject.h"
+#include "ArianeMesh.h"
 
 #include "ArianePath.generated.h"
 
@@ -44,7 +45,7 @@ public:
     virtual void InitRHI(FRHICommandListBase& RHICmdList) override;
 };
 
-class ARIANE_API FArianePathGeometry3D : public FArianeObjectGeometry3D
+class ARIANE_API FArianePathGeometry3D : public FArianeMeshGeometry3D
 {
     public:
         ~FArianePathGeometry3D();
@@ -97,7 +98,7 @@ GENERATED_BODY()
 };
 
 USTRUCT(BlueprintType)
-struct ARIANE_API FArianePath : public FArianeObject
+struct ARIANE_API FArianePath : public FArianeMesh
 {
 GENERATED_BODY()
 
@@ -250,18 +251,6 @@ public:
     /** Get Line Type **/
     EArianePathLineType GetLineType();
 
-    /** Get Path Color **/
-    const FColor& GetColor();
-
-    /** Set Path Color **/
-    void  SetColor( const FColor& InColor );
-
-    /** Set Path Material **/
-    void SetMaterial( UMaterialInterface* InMaterialInterface );
-
-    /** Get Path Material **/
-    UMaterialInterface* GetMaterial();
-
     FArianeSegmentCubic* AllocCubicSegment( FArianeVertex* Vertex0
                                           , double Handle0X
                                           , double Handle0Y
@@ -314,18 +303,11 @@ protected:
     UPROPERTY( EditAnywhere )
     EArianePathLineType LineType;
 
-    UPROPERTY( EditAnywhere )
-    FColor Color;
-
-    UPROPERTY( EditAnywhere )
-    UMaterialInterface* Material;
-
 protected:
     TArray<FArianeVertex*> Vertices;
     TArray<FArianeSegment*> Segments;
     TArray<FArianeSegment*> InvalidatedSegments;
     TArray<FArianeVertex*> InvalidatedVertices;
-    FArianePathGeometry3D* Geometry3D;
     TArray<Chain> Chains;
     uint32 CubicSegmentCount;
     uint32 LinearSegmentCount;

@@ -174,7 +174,7 @@ FArianeGeometryProxy::GetDrawingDynamicMeshElements( const FSceneViewFamily& Vie
     {
         UArianePainting3DComponent* Painting3DComponent = VectorLayer->GetLayerStack()->GetPainting3DComponent();
         const FSceneView* View = ViewFamily.Views[ViewIndex];
-        FArianeObjectGeometry3D* Geometry3D = nullptr;
+        FArianeMeshGeometry3D* Geometry3D = nullptr;
         UMaterialInterface* MaterialInterface = nullptr;
         FColor ObjectColor = FColor::Black;
         bool bWireframe = AllowDebugViewmodes() && ViewFamily.EngineShowFlags.Wireframe;

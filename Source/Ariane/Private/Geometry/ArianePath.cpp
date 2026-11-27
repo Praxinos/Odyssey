@@ -229,7 +229,7 @@ FArianePath::~FArianePath()
 
     Vertices.Empty();
 
-    delete Geometry3D;
+    // Geometry3D is deleted by ~FArianeMesh
 }
 
 FArianePath::FArianePath()
@@ -242,13 +242,11 @@ FArianePath::FArianePath()
 FArianePath::FArianePath( UArianeDrawing* InDrawing
                         , const FName& InName
                         , EArianeAllocationModel InAllocationModel )
-    : FArianeObject ( InDrawing
-                    , InName
-                    , InAllocationModel )
+    : FArianeMesh ( InDrawing
+                  , InName
+                  , InAllocationModel
+                  , new FArianePathGeometry3D( this ) )
     , LineType ( EArianePathLineType::Tube )
-    , Color ( FColor::Black.WithAlpha(255) )
-    , Material ( nullptr )
-    , Geometry3D ( new FArianePathGeometry3D( this ) )
     , CubicSegmentCount( 0 )
     , LinearSegmentCount( 0 )
 {
@@ -384,20 +382,6 @@ FArianePath::Added()
 void
 FArianePath::Removed()
 {
-}
-
-UMaterialInterface*
-FArianePath::GetMaterial()
-{
-    return Material;
-}
-
-void
-FArianePath::SetMaterial( UMaterialInterface* InMaterialInterface )
-{
-    Material = InMaterialInterface;
-
-    Invalidate( FArianePathInvalidationFlags().SetColor() );
 }
 
 const TArray<FArianePath::Chain>&
@@ -912,26 +896,6 @@ FArianePath::PostLoad()
                                               .SetVertexAddedOrRemoved() );
 }
 
-const FColor&
-FArianePath::GetColor()
-{
-    return Color;
-}
-
-void
-FArianePath::SetColor( const FColor& InColor )
-{
-    Color = InColor;
-
-    // The Color parameter exists for the default Ariane Material
-    //DynamicMaterialInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor(Color));
-
-    // we need to reconstruct Model Vertices
-    //InvalidateAllSegments();
-
-    Invalidate( FArianePathInvalidationFlags().SetColor() );
-}
-
 void
 FArianePath::ExportProperties( FArianeObject* DestObject )
 {
@@ -1088,7 +1052,8 @@ FArianePath::Animate( const FArianeKeyedObject* KeyedObject, const FArianeKeyedO
 FArianePathGeometry3D&
 FArianePath::GetGeometry3D()
 {
-    return *Geometry3D;
+    // Created as a FArianePathGeometry3D (constructor and ResetDrawing)
+    return static_cast<FArianePathGeometry3D&>( *Geometry3D );
 }
 
 // static
@@ -1321,7 +1286,7 @@ FArianePathGeometry3D::~FArianePathGeometry3D()
 }
 
 FArianePathGeometry3D::FArianePathGeometry3D( FArianePath* InPath )
-    : FArianeObjectGeometry3D( InPath )
+    : FArianeMeshGeometry3D( InPath )
 {
 }
 

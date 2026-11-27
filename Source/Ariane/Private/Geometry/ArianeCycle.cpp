@@ -87,7 +87,7 @@ FArianeCycleInvalidationFlags::HasAny()
 
 FArianeCycle::~FArianeCycle()
 {
-    delete Geometry3D;
+    // Geometry3D is deleted by ~FArianeMesh
 }
 
 FArianeCycle::FArianeCycle()
@@ -100,12 +100,10 @@ FArianeCycle::FArianeCycle()
 FArianeCycle::FArianeCycle( UArianeDrawing* InDrawing
                           , const FName& InName
                           , EArianeAllocationModel InAllocationModel )
-    : FArianeObject ( InDrawing
-                    , InName
-                    , InAllocationModel )
-    , Color ( FColor::Black.WithAlpha(255) )
-    , Material( nullptr )
-    , Geometry3D ( new FArianeCycleGeometry3D( this ) )
+    : FArianeMesh ( InDrawing
+                  , InName
+                  , InAllocationModel
+                  , new FArianeCycleGeometry3D( this ) )
 {
 }
 
@@ -330,20 +328,6 @@ FArianeCycle::Removed()
 {
 }
 
-UMaterialInterface*
-FArianeCycle::GetMaterial()
-{
-    return Material;
-}
-
-void
-FArianeCycle::SetMaterial( UMaterialInterface* InMaterialInterface )
-{
-    Material = InMaterialInterface;
-
-    Invalidate( FArianeCycleInvalidationFlags().SetColor() );
-}
-
 void
 FArianeCycle::CopySettings( FArianeObject* DestinationObject, const FCopyArgs& CopyArgs, bool bInvalidate )
 {
@@ -435,21 +419,8 @@ FArianeCycle::PostLoad()
 FArianeCycleGeometry3D&
 FArianeCycle::GetGeometry3D()
 {
-    return *Geometry3D;
-}
-
-const FColor&
-FArianeCycle::GetColor()
-{
-    return Color;
-}
-
-void
-FArianeCycle::SetColor( const FColor& InColor )
-{
-    Color = InColor;
-
-    Invalidate( FArianeCycleInvalidationFlags().SetColor() );
+    // Created as a FArianeCycleGeometry3D (constructor and ResetDrawing)
+    return static_cast<FArianeCycleGeometry3D&>( *Geometry3D );
 }
 
 TArray<int32>&
@@ -501,7 +472,7 @@ FArianeCycleGeometry3D::~FArianeCycleGeometry3D()
 }
 
 FArianeCycleGeometry3D::FArianeCycleGeometry3D( FArianeCycle* InCycle )
-    : FArianeObjectGeometry3D( InCycle )
+    : FArianeMeshGeometry3D( InCycle )
 {
 }
 

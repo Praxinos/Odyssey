@@ -17,6 +17,7 @@
 // Ariane Headers
 #include "ArianeID.h"
 #include "ArianeObject.h"
+#include "ArianeMesh.h"
 #include "ArianePoint.h"
 #include "ArianeGraph.h"
 // Earcut headers
@@ -73,7 +74,7 @@ public:
     virtual void InitRHI(FRHICommandListBase& RHICmdList) override;
 };
 
-class ARIANE_API FArianeCycleGeometry3D : public FArianeObjectGeometry3D
+class ARIANE_API FArianeCycleGeometry3D : public FArianeMeshGeometry3D
 {
     public:
         ~FArianeCycleGeometry3D();
@@ -91,7 +92,7 @@ enum class EArianeCycleFittingRule : uint8
 };
 
 USTRUCT(BlueprintType)
-struct ARIANE_API FArianeCycle : public FArianeObject
+struct ARIANE_API FArianeCycle : public FArianeMesh
 {
 GENERATED_BODY()
 
@@ -120,17 +121,6 @@ public:
     virtual void Added() override;
     virtual void Removed() override;
 
-    /** Get Path Color **/
-    const FColor& GetColor();
-
-    /** Set Path Color **/
-    void  SetColor( const FColor& InColor );
-
-    /** Set Path Material **/
-    void SetMaterial( UMaterialInterface* InMaterialInterface );
-
-    /** Get Path Material **/
-    UMaterialInterface* GetMaterial();
     FArianeCycleGeometry3D& GetGeometry3D();
     TArray<int32>& GetEarcutIndices();
     void ImportGraphCycle( FArianeGraph* Graph, FArianeGraph::FCycle* GraphCycle, EArianeCycleFittingRule FittingRule );
@@ -165,12 +155,6 @@ protected:
     //UPROPERTY( EditAnywhere )
     //TArray<FVector> Vertices;
     UPROPERTY( EditAnywhere )
-    FColor Color;
-
-    UPROPERTY( EditAnywhere )
-    UMaterialInterface* Material;
-
-    UPROPERTY( EditAnywhere )
     TArray<int32> EarcutIndices;
 
     UPROPERTY( EditAnywhere )
@@ -178,9 +162,6 @@ protected:
 
     UPROPERTY( EditAnywhere )
     TArray<FVector2f> UVs;
-
-protected:
-    FArianeCycleGeometry3D* Geometry3D;
 };
 
 template<>
