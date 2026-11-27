@@ -10,6 +10,7 @@
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
 #include "RenderingThread.h"
+#include "UObject/Package.h"
 #include "ScreenPass.h"
 #include "TextureResource.h"
 #include "UObject/StrongObjectPtr.h"
@@ -32,13 +33,24 @@ namespace
  */
 void ReleaseLegacyTexture(UTexture2D& Texture)
 {
+    // The texture may not be post-loaded yet: its PostLoad() would then build it from the source freed below.
+    Texture.ConditionalPostLoad();
     UObject* const Objects[] = { &Texture };
     FAssetCompilingManager& CompilingManager = FAssetCompilingManager::Get();
     CompilingManager.MarkCompilationAsCanceled(Objects);
+    // A canceled build may still run and read the source freed below. Waiting for its task, rather than finishing it
+    // through the compiling manager, creates no resource from the empty data of the canceled build.
+    Texture.BlockOnAnyAsyncBuild();
+
     // The stand-in resource of the canceled build would otherwise keep the texture reporting a compilation no compiling
     // manager finishes, which prevents unloading its package until the garbage collector destroys it.
     Texture.ReleaseResource();
-    Texture.ClearFlags(RF_Standalone);
+    // Saving the package over its file first loads the source of every object it still holds, this garbage texture
+    // included: gigabytes for an animation of hundreds of cells.
+    Texture.Source.Reset();
+    // Out of the package, which saves and unloads every object it holds, garbage included, until the garbage collector runs.
+    Texture.Rename(nullptr, GetTransientPackage(), REN_DontCreateRedirectors | REN_NonTransactional | REN_DoNotDirty);
+    Texture.ClearFlags(RF_Standalone | RF_Public);
     Texture.MarkAsGarbage();
 }
 }
