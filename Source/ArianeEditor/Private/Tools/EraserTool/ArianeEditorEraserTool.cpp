@@ -347,20 +347,6 @@ UArianeEditorEraserTool::TraceLine( FArianePath* Path
 }
 
 FBox2D
-UArianeEditorEraserTool::GetErasureBoundingArea( FEditorViewportClient* ViewportClient, FSceneView* View )
-{
-    FVector2D HUDMouseAtDown = ScreenToHUD( ViewportClient, MouseAtDown );
-    FVector2D HUDMouseAtUp = ScreenToHUD( ViewportClient, MouseAtUp );
-    double EraserRadius = Size * 0.5f;
-    double XMin = FMath::Min( HUDMouseAtDown.X, HUDMouseAtUp.X ) - EraserRadius;
-    double YMin = FMath::Min( HUDMouseAtDown.Y, HUDMouseAtUp.Y ) - EraserRadius;
-    double XMax = FMath::Max( HUDMouseAtDown.X, HUDMouseAtUp.X ) + EraserRadius;
-    double YMax = FMath::Max( HUDMouseAtDown.Y, HUDMouseAtUp.Y ) + EraserRadius;
-
-    return ( XMin < XMax ) ? FBox2D( FVector2D( XMin, YMin ), FVector2D( XMax, YMax ) ) : FBox2D();
-}
-
-FBox2D
 UArianeEditorEraserTool::GetPathBoundingArea( FEditorViewportClient* ViewportClient, FSceneView* View, FArianePath* Path )
 {
     const FBox& PathBox = Path->GetBoundingBox();
@@ -373,19 +359,15 @@ UArianeEditorEraserTool::GetPathBoundingArea( FEditorViewportClient* ViewportCli
                    , FVector( PathBox.Max.X, PathBox.Max.Y, PathBox.Min.Z )
                    , PathBox.Max };
     FTransform PathTransform = Path->GetTransform();
-    double XMin = DBL_MAX, YMin = DBL_MAX, XMax = -DBL_MAX, YMax = -DBL_MAX;
+    // accumulating keeps zero-width boxes (vertical lines on screen) valid
+    FBox2D Result( ForceInit );
 
     for( uint32 i = 0; i < 8; i++ )
     {
-        FVector2D HUDPosition = ProjectWorldToHUD( ViewportClient, View, PathTransform.TransformPosition( P[i] ) );
-
-        if( HUDPosition.X < XMin ) XMin = HUDPosition.X;
-        if( HUDPosition.Y < YMin ) YMin = HUDPosition.Y;
-        if( HUDPosition.X > XMax ) XMax = HUDPosition.X;
-        if( HUDPosition.Y > YMax ) YMax = HUDPosition.Y;
+        Result += ProjectWorldToHUD( ViewportClient, View, PathTransform.TransformPosition( P[i] ) );
     }
 
-    return ( XMin < XMax ) ? FBox2D( FVector2D( XMin, YMin ), FVector2D( XMax, YMax ) ) : FBox2D();
+    return Result;
 }
 
 void
@@ -458,7 +440,7 @@ UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
     TArray<FColor> Pixels;
     uint32 Width = CanvasRenderTarget->SizeX;
     uint32 Height = CanvasRenderTarget->SizeY;
-    FBox2D ErasureArea = GetErasureBoundingArea( ViewportClient, View );
+    FBox2D ErasureArea = StrokeBounds;
 
     RTResource->ReadPixels( Pixels
                           , FReadSurfaceDataFlags(RCM_UNorm)
@@ -1060,7 +1042,7 @@ UArianeEditorEraserTool::OnMouseDown( FEditorViewportClient* iViewportClient
 
     if( iKey == EKeys::LeftMouseButton )
     {
-        MouseAtDown = FVector2D( PointerState.ViewportX, PointerState.ViewportY );
+        StrokeBounds = FBox2D( ForceInit );
         MouseRecords[0] = MouseRecords[1] = FIntVector2( PointerState.ViewportX, PointerState.ViewportY );
         // Will call UArianeEditorEraserTool::StampBrush()
         //CanvasRenderTarget->UpdateResource();
@@ -1112,7 +1094,6 @@ UArianeEditorEraserTool::OnMouseUp( FEditorViewportClient* ViewportClient
     {
         UArianePainting3DComponent* Painting3DComponent = Editor->GetCurrentPainting3DComponent();
 
-        MouseAtUp = FVector2D( PointerState.ViewportX, PointerState.ViewportY );
         MouseRecords[1] = FIntVector2( PointerState.ViewportX, PointerState.ViewportY );
         // Will call UArianeEditorEraserTool::StampBrush()
         //CanvasRenderTarget->UpdateResource();
@@ -1206,6 +1187,13 @@ UArianeEditorEraserTool::StampBrush( FEditorViewportClient* ViewportClient )
     FVector2D Step = Len ? FVector2D( ( double ) DeltaHUDMouse.X / Len
                                     , ( double ) DeltaHUDMouse.Y / Len )
                          : FVector2D( 0.0f, 0.0f );
+    const FVector2D Radius( Size * 0.5 );
+
+    // the whole stroke must be covered, not only its end points
+    StrokeBounds += HUDMouseRecord0 - Radius;
+    StrokeBounds += HUDMouseRecord0 + Radius;
+    StrokeBounds += HUDMouseRecord1 - Radius;
+    StrokeBounds += HUDMouseRecord1 + Radius;
 
     for( int32 i = 0; i <= Len; i++ )
     {

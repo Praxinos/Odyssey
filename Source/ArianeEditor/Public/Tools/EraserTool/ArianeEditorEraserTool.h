@@ -257,7 +257,6 @@ protected:
                                       , TArray<FArianeVertex*>& OutRemovedVertices
                                       , bool bSplit );
     FBox2D GetPathBoundingArea( FEditorViewportClient* ViewportClient, FSceneView* View, FArianePath* Path );
-    FBox2D GetErasureBoundingArea( FEditorViewportClient* ViewportClient, FSceneView* View );
     void ParseChainProcessors( UArianeLayerVector* VectorLayer
                              , FArianePath* ChainPath
                              , TArray<ChainProcessor>& ChainProcessors
@@ -288,8 +287,8 @@ protected:
     UTexture2D* Brush;
 
     FVector2D MousePosition;
-    FVector2D MouseAtDown;
-    FVector2D MouseAtUp;
+    // HUD-space bounds of everything stamped during the current stroke
+    FBox2D StrokeBounds;
     FIntVector2 MouseRecords[2];
 };
 
