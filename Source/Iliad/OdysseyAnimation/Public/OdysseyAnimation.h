@@ -141,6 +141,7 @@ public:
     void SetLinearCompositing(bool bValue);
 #endif
     virtual void PreSave(FObjectPreSaveContext SaveContext) override;
+    virtual void PostSaveRoot(FObjectPostSaveRootContext SaveContext) override;
     virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
     virtual void GetAssetRegistryTags( FAssetRegistryTagsContext ioContext ) const override;
 #endif

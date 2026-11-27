@@ -548,10 +548,7 @@ UOdysseyAnimation::PreSave(FObjectPreSaveContext SaveContext)
 
         UTexture2D* texture = Cast<UTexture2D>(renderTarget->ConstructTexture(this, Name, RF_Public, CTF_Default));
         texture->PreSave(SaveContext);
-        // Through the compiling manager, which also replaces the stand-in resource of the build: BlockOnAnyAsyncBuild()
-        // only finishes the platform data, and leaves the texture reporting a compilation nothing can finish.
-        UTexture* const BuiltTexture = texture;
-        FTextureCompilingManager::Get().FinishCompilation({ BuiltTexture });
+        texture->BlockOnAnyAsyncBuild();
 
         FOdysseyAnimationFrame frame;
         frame.Texture = texture;
@@ -559,6 +556,34 @@ UOdysseyAnimation::PreSave(FObjectPreSaveContext SaveContext)
         frame.RenderingComposition = renderingComposition;
         Frames.Add(frame);
     }
+}
+
+void
+UOdysseyAnimation::PostSaveRoot(FObjectPostSaveRootContext SaveContext)
+{
+    Super::PostSaveRoot(SaveContext);
+
+    // Once saved, the frame textures rebaked by PreSave() keep the stand-in resource of their build while no compiling
+    // manager tracks them anymore: they report a compilation nothing finishes, which prevents unloading the animation.
+    // Tracking them again lets the texture compiling manager finish them and install their resource.
+    FTextureCompilingManager& CompilingManager = FTextureCompilingManager::Get();
+    TArray<UTexture*> StrandedTextures;
+    for (const FOdysseyAnimationFrame& Frame : Frames)
+    {
+        UTexture* Texture = Frame.Texture;
+        if (Texture && Texture->IsCompiling() && !CompilingManager.IsCompilingTexture(Texture))
+        {
+            StrandedTextures.Add(Texture);
+        }
+    }
+
+    if (StrandedTextures.IsEmpty())
+    {
+        return;
+    }
+
+    CompilingManager.AddTextures(StrandedTextures);
+    CompilingManager.FinishCompilation(StrandedTextures);
 }
 
 UTexture2D*
