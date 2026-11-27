@@ -284,8 +284,6 @@ protected:
     void OnEditorSelectionChanged( UObject* NewSelection );
     void AddToolBuilder( UArianeEditorToolBuilder* ToolBuilder );
     void OnDrawingCoordinateSystemChanged( int32, ESelectInfo::Type );
-    void OnToolEnded( UInteractiveToolManager* Manager, UInteractiveTool *Tool );
-    void OnObjectPreSave( UObject* SavedObject, FObjectPreSaveContext Context );
     static void ConvertPrimitives( UArianePainting3DComponent* Painting3DComponent
                                  , TArray<FArianePrimitive*>& PrimitivesToConvert );
 
@@ -313,5 +311,4 @@ protected:
     EArianeDrawingOrientation DrawingOrientation;
     EArianeEditorDrawingCoordinateSystem DrawingCoordinateSystem;
     bool bShowGrid;
-    FString LastActiveToolIdentifier;
 };

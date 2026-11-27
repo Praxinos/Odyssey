@@ -69,6 +69,8 @@ FArianeEditorViewportEdMode::~FArianeEditorViewportEdMode()
 FArianeEditorViewportEdMode::FArianeEditorViewportEdMode()
     : FEdMode()
     , bStylusInUse( false )
+    , ToolsContext( nullptr )
+    , bPreviousDeactivateToolsOnSaveWorld( true )
 {
 }
 
@@ -81,6 +83,15 @@ void FArianeEditorViewportEdMode::AddReferencedObjects(FReferenceCollector& Coll
 {
     // Call parent implementation
     FEdMode::AddReferencedObjects(Collector);
+
+    // ToolsContext is a UObject in the transient package: we must keep it alive
+    Collector.AddReferencedObject( ToolsContext );
+}
+
+UEdModeInteractiveToolsContext*
+FArianeEditorViewportEdMode::GetToolsContext() const
+{
+    return ToolsContext;
 }
 
 void
@@ -551,6 +562,15 @@ FArianeEditorViewportEdMode::ComputeBoundingBoxForViewportFocus ( AActor* Actor
 void
 FArianeEditorViewportEdMode::Enter()
 {
+    // Before the toolkit: FArianeEditor's constructor already uses the ToolManager
+    UModeManagerInteractiveToolsContext* ModeManagerToolsContext = Owner->GetInteractiveToolsContext();
+    ToolsContext = ModeManagerToolsContext->CreateNewChildEdModeToolsContext();
+    ModeManagerToolsContext->OnChildEdModeActivated( ToolsContext );
+    // Only the ModeManager context handles PreSaveWorld, and it also deactivates its children's tools:
+    // Ariane tools must stay active when saving
+    bPreviousDeactivateToolsOnSaveWorld = ModeManagerToolsContext->GetDeactivateToolsOnSaveWorld();
+    ModeManagerToolsContext->SetDeactivateToolsOnSaveWorld( false );
+
     TSharedPtr<FArianeEditorViewportToolkit> arianeToolkit = MakeShared<FArianeEditorViewportToolkit>(this);
 
     FEdMode::Enter();
@@ -637,6 +657,13 @@ void FArianeEditorViewportEdMode::Exit()
         FToolkitManager::Get().CloseToolkit(Toolkit.ToSharedRef());
         Toolkit.Reset();
     }
+
+    // After the toolkit: UnregisterTools() still needs the ToolManager
+    UModeManagerInteractiveToolsContext* ModeManagerToolsContext = Owner->GetInteractiveToolsContext();
+    ModeManagerToolsContext->OnChildEdModeDeactivated( ToolsContext );
+    ModeManagerToolsContext->SetDeactivateToolsOnSaveWorld( bPreviousDeactivateToolsOnSaveWorld );
+    ToolsContext->ShutdownContext();
+    ToolsContext = nullptr;
 
 /* Gary
     // Restore selection color

@@ -143,13 +143,13 @@ FArianeEditorViewportToolkit::Init( const TSharedPtr<IToolkitHost>& iInitToolkit
     Editor->RegisterTabSpawners();
     Editor->RegisterTools();
 
-    UModeManagerInteractiveToolsContext* ToolsContext = GetEditorMode()->GetEditorModeTools()->GetInteractiveToolsContext();
-    ToolsContext->SetDeactivateToolsOnSaveWorld(false);
-
     // We create the Widgets now that we can can register to some delegates that they need to refresh themselves
     // just before Editor->Init() is called and will broadcast the delegates.
 
     //InlineContent = SNew(SArianeEditorMasterPanel, const_cast<FArianeEditor*>( Editor.Get()) );
+
+    // Owned by the toolkit: removed by UnregisterOwner( Toolkit.Get() ) in FArianeEditorViewportEdMode::Exit()
+    FToolMenuOwnerScoped OwnerScoped( this );
 
     UToolMenu* addMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolbar.AddQuickMenu");
     FToolMenuSection& ArianeSection = addMenu->FindOrAddSection("Ariane 3D Painting");

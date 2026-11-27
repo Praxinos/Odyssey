@@ -14,6 +14,7 @@ class FModeToolkit;
 class FArianeEditorViewportToolkit;
 class FEditorModeTools;
 class UArianePainting3DComponent;
+class UEdModeInteractiveToolsContext;
 
 /**
  * Odyssey paint on viewport editor mode
@@ -111,6 +112,7 @@ public:
 
     TSharedPtr<FArianeEditorViewportToolkit> GetArianeEditorViewportToolkit() const;
     FEditorModeTools* GetEditorModeTools();
+    UEdModeInteractiveToolsContext* GetToolsContext() const;
     //void Shutdown();
 
 private:
@@ -142,6 +144,13 @@ private:
 
 private:
     bool bStylusInUse;
+
+    // Our own child of the ModeManager ToolsContext: our tools are not broadcast to the other modes' toolkits.
+    // TObjectPtr: required by AddReferencedObject (incremental GC)
+    TObjectPtr<UEdModeInteractiveToolsContext> ToolsContext;
+
+    // ModeManager's value before we entered: restored in Exit() not to impact the other modes
+    bool bPreviousDeactivateToolsOnSaveWorld;
 /* Gary
     FArianeViewportDrawingEditorPainter* mViewportDrawingEditorPainter;
     TSharedPtr<FArianeViewportDrawingEditorExtension> mViewportDrawingEditorExtension;

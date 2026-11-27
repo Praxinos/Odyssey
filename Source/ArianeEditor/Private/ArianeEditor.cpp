@@ -60,7 +60,6 @@ FArianeEditor::GetClipboard()
 FArianeEditor::~FArianeEditor()
 {
     USelection::SelectionChangedEvent.RemoveAll( this );
-    FCoreUObjectDelegates::OnObjectPreSave.RemoveAll(this);
 }
 
 FArianeEditor::FArianeEditor( FArianeEditorViewportToolkit* iToolkit )
@@ -99,32 +98,6 @@ FArianeEditor::PostInit()
 
     // Component selection is managed by ArianeEditor in order to emulate a Pre/Post Selection event behavior
     USelection::SelectionChangedEvent.AddRaw( this, &FArianeEditor::OnEditorSelectionChanged );
-
-    // remeber the last tool used. this is needed because when we save the assets, all tools are deselected.
-    // We will then use the saved tool identifier to activate the last used tool after a save.
-    GetToolManager()->OnToolEnded.AddSP( this, &FArianeEditor::OnToolEnded );
-    FCoreUObjectDelegates::OnObjectPreSave.AddSP(this, &FArianeEditor::OnObjectPreSave);
-}
-
-void
-FArianeEditor::OnToolEnded( UInteractiveToolManager* Manager, UInteractiveTool *Tool )
-{
-    // Remember the last tool used
-     Tool->GetName( LastActiveToolIdentifier );
-}
-
-void
-FArianeEditor::OnObjectPreSave( UObject* SavedObject, FObjectPreSaveContext Context )
-{
-    // Restore the last tool used , as Unreal will unselect all tools before saving
-    if ( ( LastActiveToolIdentifier.IsEmpty() == false )
-      && ( GetToolManager()->HasActiveTool(EToolSide::Left) == false ) )
-    {
-        if( GetToolManager()->SelectActiveToolType(EToolSide::Left, LastActiveToolIdentifier) )
-        {
-            GetToolManager()->ActivateTool(EToolSide::Left);
-        }
-    }
 }
 
 FArianeEditorViewportToolkit*
@@ -709,7 +682,7 @@ FArianeEditor::SetCurrentTool( UArianeEditorTool* Tool
 UInteractiveToolManager*
 FArianeEditor::GetToolManager()
 {
-    return Toolkit->GetEditorMode()->GetEditorModeTools()->GetInteractiveToolsContext()->ToolManager.Get();
+    return Toolkit->GetEditorMode()->GetToolsContext()->ToolManager.Get();
 }
 
 const TArray<UArianeEditorTool*>&
